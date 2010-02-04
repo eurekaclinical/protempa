@@ -1,0 +1,86 @@
+package org.protempa;
+
+import org.protempa.proposition.Proposition;
+import org.protempa.proposition.TemporalParameter;
+import org.protempa.proposition.value.Value;
+
+/**
+ * @author Andrew Post
+ */
+public class TemporalExtendedParameterDefinition extends
+		TemporalExtendedPropositionDefinition {
+
+	private static final long serialVersionUID = 8383186480220450279L;
+
+	private Value value;
+
+	public TemporalExtendedParameterDefinition(String parameterId) {
+		super(parameterId);
+	}
+
+	public TemporalExtendedParameterDefinition(String parameterId, Value value) {
+		super(parameterId);
+		this.value = value;
+	}
+
+	public Value getValue() {
+		return value;
+	}
+
+	/**
+	 * Returns whether a parameter has the same id and value, and consistent
+	 * duration as specified by this extended parameter definition.
+	 * 
+	 * @param parameter
+	 *            a <code>Parameter</code>
+	 * @return <code>true</code> if <code>parameter</code> has the same id
+	 *         and value, and consistent duration as specified by this extended
+	 *         parameter definition, or <code>false</code> if not, or if
+	 *         <code>parameter</code> is <code>null</code>.
+	 */
+	@Override
+	public boolean getMatches(Proposition proposition) {
+		if (!super.getMatches(proposition)) {
+			return false;
+		}
+
+		if (!(proposition instanceof TemporalParameter)) {
+			return false;
+		}
+		TemporalParameter tp = (TemporalParameter) proposition;
+		if (this.value != null) {
+			Value pValue = tp.getValue();
+			if (this.value != pValue && !this.value.equals(pValue)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public void setValue(Value value) {
+		this.value = value;
+	}
+
+	@Override
+	public boolean hasEqualFields(ExtendedPropositionDefinition obj) {
+		if (!super.hasEqualFields(obj)) {
+			return false;
+		}
+
+		if (!(obj instanceof TemporalExtendedParameterDefinition)) {
+			return false;
+		}
+
+		TemporalExtendedParameterDefinition other = (TemporalExtendedParameterDefinition) obj;
+		return (value == other.value || value.equals(other.value));
+	}
+
+	@Override
+	public String toString() {
+		return "Extended parameter: " + this.getPropositionId() + "; "
+				+ this.getMinLength() + " " + this.getMinLengthUnit()
+				+ "; " + this.getMaxLength() + " "
+				+ this.getMaxLengthUnit() + "; " + this.value;
+	}
+}
