@@ -17,7 +17,7 @@ import org.protempa.KnowledgeSourceBackendInitializationException;
 import org.protempa.KnowledgeSourceReadException;
 
 /**
- * Implements a wrapper around a connection to a remote Protege knowledge base.
+ * Implements a wrapper around a connection to a remote Protege project.
  * Implements retry capability if something happens to the connection.
  * 
  * @author Andrew Post
@@ -30,7 +30,7 @@ abstract class ConnectionManager {
 	 */
 	private static final int TRIES = 3;
 
-	private final String knowledgeBaseName;
+	private final String projectIdentifier;
 
 	private Project project;
 
@@ -39,60 +39,60 @@ abstract class ConnectionManager {
 	private List<ProjectListener> projectListeners;
 
 	/**
-	 * Constructor with parameters needed for connecting to a remote Protege
-	 * knowledge base.
+	 * Constructor with an identifier for the Protege project.
 	 * 
-	 * @param host
-	 *            the hostname <code>String</code> of the Protege server.
-	 * @param username
-	 *            a valid username <code>String</code>.
-	 * @param password
-	 *            a valid password <code>String</code>.
-	 * @param knowledgeBaseName
-	 *            a valid knowledge base <code>String</code>, with semantics
-	 *            dependent on the concrete connection manager implementation.
+	 * @param projectIdentifier
+	 *            a name <code>String</code> for a knowledge base.
 	 */
-	protected ConnectionManager(String knowledgeBaseName) {
-		this.knowledgeBaseName = knowledgeBaseName;
+	protected ConnectionManager(String projectIdentifier) {
+		this.projectIdentifier = projectIdentifier;
 		this.projectListeners = new ArrayList<ProjectListener>();
 	}
 
 	/**
-	 * Returns
+	 * Returns the project identifier.
 	 * 
-	 * @return
+	 * @return a {@link String}.
 	 */
-	String getKnowledgeBaseName() {
-		return this.knowledgeBaseName;
+	String getProjectIdentifier() {
+		return this.projectIdentifier;
 	}
 
 	/**
-	 * Opens the knowledge base.
+	 * Opens the project.
 	 * 
 	 * @return <code>true</code> if opening was successful, <code>false</code>
 	 *         if not.
 	 */
 	void init() throws KnowledgeSourceBackendInitializationException {
 		if (this.project == null) {
-			Util.logger().fine("Opening Protege knowledge base");
+			Util.logger().fine("Opening Protege project");
 			this.project = initProject();
 			if (this.project == null) {
 				throw new KnowledgeSourceBackendInitializationException(
-                        "Could not load knowledge base");
+                        "Could not load project");
 			} else {
 				this.protegeKnowledgeBase = this.project.getKnowledgeBase();
 			}
 		}
 	}
 
+        /**
+	 * Opens and returns the project in a way that is specific to whether
+         * the project is local or remote.
+	 *
+	 * @return a Protege {@link Project}.
+	 * @throws IllegalArgumentException
+	 *             if an error occurs.
+	 */
 	protected abstract Project initProject();
 
 	/**
-	 * Closes the knowledge base.
+	 * Closes the project.
 	 */
 	void close() {
 		if (this.project != null) {
-			Util.logger().fine("Closing Protege knowledge base");
+			Util.logger().fine("Closing Protege project");
 			for (Iterator<ProjectListener> itr = this.projectListeners
 					.iterator(); itr.hasNext();) {
 				this.project.removeProjectListener(itr.next());
@@ -119,7 +119,7 @@ abstract class ConnectionManager {
 	}
 
 	/**
-	 * Adds a listener for changes in the knowledge base.
+	 * Adds a listener for changes in the project.
 	 * 
 	 * @param listener
 	 *            a <code>ProjectListener</code>.
@@ -131,7 +131,7 @@ abstract class ConnectionManager {
 	}
 
 	/**
-	 * Removes a listener for changes in the knowledge base.
+	 * Removes a listener for changes in the project.
 	 * 
 	 * @param listener
 	 *            a <code>ProjectListener</code>.
@@ -142,11 +142,11 @@ abstract class ConnectionManager {
 	}
 
 	/*
-	 * GETTERS FOR PROTEGE KNOWLEDGE BASE, WITH RETRY SUPPORT.
+	 * GETTERS FOR THE PROJECT'S KNOWLEDGE BASE, WITH RETRY SUPPORT.
 	 */
 
 	/**
-	 * Template for executing various commands upon the Protege knowledge base.
+	 * Template for executing various commands upon the project's knowledge base.
 	 * 
 	 * @author Andrew Post
 	 * 

@@ -17,7 +17,7 @@ final class RemoteConnectionManager extends ConnectionManager {
 	private String password;
 
 	/**
-	 * Creates a connection manager for a knowledge base on a Protege server on
+	 * Creates a connection manager for a project on a Protege server on
 	 * the specified host.
 	 * 
 	 * @param host
@@ -26,26 +26,29 @@ final class RemoteConnectionManager extends ConnectionManager {
 	 *            a valid username {@link String} on the host.
 	 * @param password
 	 *            a valid password {@link String}.
-	 * @param knowledgeBaseName
-	 *            a valid knowledge base name {@link String}.
+	 * @param projectName
+	 *            a valid project name {@link String} on the
+         *            given server, which can be retrieved using
+         *            {@link #getProjectIdentifier()}.
 	 */
 	RemoteConnectionManager(String host, String username, String password,
-			String knowledgeBaseName) {
-		super(knowledgeBaseName);
+			String projectName) {
+		super(projectName);
 		this.host = host;
 		this.username = username;
 		this.password = password;
 	}
 
 	/**
-	 * Connects to the knowledge base. Throws an undocumented runtime exception
+	 * Connects to the project specified in the constructor. Throws an
+         * undocumented runtime exception
 	 * from within Protege if something bad happens.
 	 * 
 	 * @return a Protege {@link Project}.
 	 */
 	protected Project initProject() {
 		return RemoteProjectManager.getInstance().getProject(host, username,
-				password, getKnowledgeBaseName(), false);
+				password, getProjectIdentifier(), false);
 	}
 
 }

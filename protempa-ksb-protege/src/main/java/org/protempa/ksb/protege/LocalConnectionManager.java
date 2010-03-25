@@ -18,39 +18,41 @@ final class LocalConnectionManager extends ConnectionManager {
 	 * Creates a connection manager for specified knowledge base. For accessing
 	 * knowledge bases on Protege servers, see {@link RemoteConnectionManager}.
 	 * 
-	 * @param projectString
-	 *            a Protege project {@link String}, which can be a filename
-	 *            or URI.
+	 * @param filePathOrURI
+	 *            a file path or URI to the Protege project. This is used as
+         *            the knowledge base name.
+         * @see #getProjectIdentifier()
 	 */
-	LocalConnectionManager(String projectString) {
-		super(projectString);
+	LocalConnectionManager(String filePathOrURI) {
+		super(filePathOrURI);
 	}
 
 	/**
-	 * Opens the knowledge base.
+	 * Opens the project specified by the file path or URI given in
+         * the constructor.
 	 * 
 	 * @return a Protege {@link Project}.
 	 * @throws IllegalArgumentException
 	 *             if an error occurs.
-	 * @see edu.virginia.pbhs.protempa.protege.ConnectionManager#initProject()
+	 * @see ConnectionManager#initProject()
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	protected Project initProject() {
 		Collection errors = new ArrayList();
-		String knowledgeBaseName = getKnowledgeBaseName();
-        if (knowledgeBaseName == null)
-            throw new IllegalStateException("No knowledge base specified");
-        Util.logger().fine("Trying to load Protege project "
-                + new File(knowledgeBaseName).getPath());
-		Project project = new Project(knowledgeBaseName, errors);
+		String projectFilePathOrURI = getProjectIdentifier();
+        if (projectFilePathOrURI == null)
+            throw new IllegalStateException("No project file path or URI specified");
+            Util.logger().fine("Trying to load Protege project "
+                + projectFilePathOrURI);
+		Project project = new Project(projectFilePathOrURI, errors);
 		if (errors.size() == 0) {
             Util.logger().fine("Protege project "
-                + new File(knowledgeBaseName).getPath() + " is opened.");
+                + projectFilePathOrURI + " is opened.");
 			return project;
 		} else {
 			throw new IllegalStateException("Error(s) loading knowledge base "
-					+ new File(knowledgeBaseName).getPath() + ": " + errors);
+					+ projectFilePathOrURI + ": " + errors);
 		}
 	}
 
