@@ -78,6 +78,7 @@
           <settingsKey>protempa-ksb-protege-test-db</settingsKey>
           <driver>com.mysql.jdbc.Driver</driver>
           <url>jdbc:mysql://localhost:3306/protempa_ksb_protege_test?createDatabaseIfNotExist=true</url>
+          <skip>${maven.test.skip}</skip>
         </configuration>
         <executions>
           <execution>
@@ -108,6 +109,7 @@
           <settingsKey>protempa-ksb-protege-test-db</settingsKey>
           <driver>com.mysql.jdbc.Driver</driver>
           <url>jdbc:mysql://localhost:3306/protempa_ksb_protege_test</url>
+          <skip>${maven.test.skip}</skip>
         </configuration>
         <executions>
           <execution>
