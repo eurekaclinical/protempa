@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PointInterval;
@@ -225,117 +227,118 @@ public final class RelationalDatabaseSchemaAdaptor
 	private static class PrimitiveParameterResultProcessorAllKeyIds implements
 			ResultProcessor {
 
-		private PropositionSpec primitiveParameterSpec;
+            private TableSpec tableSpec;
 
-		private Map<String, List<PrimitiveParameter>> results;
+            private Map<String, List<PrimitiveParameter>> results;
 
-		PropositionSpec getPrimitiveParameterSpec() {
-			return primitiveParameterSpec;
-		}
+            TableSpec getTableSpec() {
+                return tableSpec;
+            }
 
-		void setPrimitiveParameterSpec(PropositionSpec paramId) {
-			this.primitiveParameterSpec = paramId;
-		}
+            void setTableSpec(TableSpec tableSpec) {
+                this.tableSpec = tableSpec;
+            }
 
-		Map<String, List<PrimitiveParameter>> getResults() {
-			return results;
-		}
+            Map<String, List<PrimitiveParameter>> getResults() {
+                return results;
+            }
 
-		void setResults(Map<String, List<PrimitiveParameter>> results) {
-			this.results = results;
-		}
+            void setResults(Map<String, List<PrimitiveParameter>> results) {
+                this.results = results;
+            }
 
-		public void process(ResultSet resultSet) throws SQLException {
-			while (resultSet.next()) {
-				String keyId = resultSet.getString(1);
-				ValueFactory vf = this.primitiveParameterSpec.getTable()
-						.getValType();
-				PrimitiveParameter p = new PrimitiveParameter(
-						primitiveParameterSpec.getCode());
-				try {
-					p.setTimestamp(this.primitiveParameterSpec.getTable()
-                            .getPositionParser().toLong(resultSet, 2));
-				} catch (SQLException e) {
-					DSBUtil.logger().log(Level.WARNING,
-							"Could not parse timestamp. Ignoring data value.",
-							e);
-					continue;
-				}
-				p.setGranularity(primitiveParameterSpec.getTable().getGran());
-				p.setValue(vf.getInstance(resultSet.getString(3)));
-				if (results.containsKey(keyId)) {
-					List<PrimitiveParameter> l = results.get(keyId);
-					l.add(p);
-				} else {
-					List<PrimitiveParameter> l = new ArrayList<PrimitiveParameter>();
-					l.add(p);
-					results.put(keyId, l);
-				}
-			}
-		}
+            public void process(ResultSet resultSet) throws SQLException {
+                while (resultSet.next()) {
+                    String keyId = resultSet.getString(1);
+                    ValueFactory vf = this.tableSpec
+                                    .getValType();
+                    PrimitiveParameter p = new PrimitiveParameter(
+                                    resultSet.getString(4));
+                    try {
+                        p.setTimestamp(this.tableSpec
+                .getPositionParser().toLong(resultSet, 2));
+                    } catch (SQLException e) {
+                        DSBUtil.logger().log(Level.WARNING,
+                                        "Could not parse timestamp. Ignoring data value.",
+                                        e);
+                        continue;
+                    }
+                    p.setGranularity(tableSpec.getGran());
+                    p.setValue(vf.getInstance(resultSet.getString(3)));
+                    if (results.containsKey(keyId)) {
+                        List<PrimitiveParameter> l = results.get(keyId);
+                        l.add(p);
+                    } else {
+                        List<PrimitiveParameter> l = new ArrayList<PrimitiveParameter>();
+                        l.add(p);
+                        results.put(keyId, l);
+                    }
+                }
+            }
 
 	}
 
 	private static class EventResultProcessorAllKeyIds implements
 			ResultProcessor {
 
-		private PropositionSpec eventSpec;
+            private TableSpec tableSpec;
 
-		private Map<String, List<Event>> results;
+            private Map<String, List<Event>> results;
 
-		PropositionSpec getEventSpec() {
-			return eventSpec;
-		}
+            TableSpec getTableSpec() {
+                return tableSpec;
+            }
 
-		void setEventSpec(PropositionSpec paramId) {
-			this.eventSpec = paramId;
-		}
+            void setTableSpec(TableSpec tableSpec) {
+                this.tableSpec = tableSpec;
+            }
 
-		Map<String, List<Event>> getResults() {
-			return results;
-		}
+            Map<String, List<Event>> getResults() {
+                return results;
+            }
 
-		void setResults(Map<String, List<Event>> results) {
-			this.results = results;
-		}
+            void setResults(Map<String, List<Event>> results) {
+                this.results = results;
+            }
 
-		public void process(ResultSet resultSet) throws SQLException {
-			while (resultSet.next()) {
-				String keyId = resultSet.getString(1);
-				Event p = new Event(this.eventSpec.getCode());
-				Granularity gran = this.eventSpec.getTable().getGran();
-				try {
-					long d = this.eventSpec.getTable()
-                            .getPositionParser().toLong(resultSet, 2);
-					p.setInterval(new PointInterval(d, gran, d, gran));
-				} catch (SQLException e) {
-					DSBUtil.logger().log(Level.WARNING,
-							"Could not parse timestamp. Ignoring data value.",
-							e);
-					continue;
-				}
-				if (results.containsKey(keyId)) {
-					List<Event> l = results.get(keyId);
-					l.add(p);
-				} else {
-					List<Event> l = new ArrayList<Event>();
-					l.add(p);
-					results.put(keyId, l);
-				}
-			}
-		}
+            public void process(ResultSet resultSet) throws SQLException {
+                while (resultSet.next()) {
+                    String keyId = resultSet.getString(1);
+                    Event p = new Event(resultSet.getString(3));
+                    Granularity gran = this.tableSpec.getGran();
+                    try {
+                        long d = this.tableSpec.getPositionParser()
+                                .toLong(resultSet, 2);
+                        p.setInterval(new PointInterval(d, gran, d, gran));
+                    } catch (SQLException e) {
+                        DSBUtil.logger().log(Level.WARNING,
+                            "Could not parse timestamp. Ignoring data value.",
+                            e);
+                        continue;
+                    }
+                    if (results.containsKey(keyId)) {
+                        List<Event> l = results.get(keyId);
+                        l.add(p);
+                    } else {
+                        List<Event> l = new ArrayList<Event>();
+                        l.add(p);
+                        results.put(keyId, l);
+                    }
+                }
+            }
 
 	}
 
 	private static class MyStatementPreparer implements StatementPreparer {
-		private Set<String> keyIds;
-		private Set<String> paramIds;
+		private Collection<String> keyIds;
+		private Collection<String> paramIds;
 		private Long minValid;
 		private Long maxValid;
 		private int pos;
 		private Map<String, PropositionSpec> primitiveParameters;
 
-		MyStatementPreparer(Set<String> keyIds, Set<String> paramIds,
+		MyStatementPreparer(Collection<String> keyIds,
+                        Collection<String> paramIds,
 				Long minValid, Long maxValid, int pos,
 				Map<String, PropositionSpec> primitiveParameters) {
 			this.keyIds = keyIds;
@@ -372,94 +375,126 @@ public final class RelationalDatabaseSchemaAdaptor
 
 	}
 
+        private Map<TableSpec, List<String>> generateBatches(Set<String> propIds,
+                Map<String, PropositionSpec> props) {
+            Map<TableSpec, List<String>> result =
+                    new HashMap<TableSpec, List<String>>();
+            for (String propId : propIds) {
+                PropositionSpec propSpec = props.get(propId);
+                if (propSpec == null)
+                    continue;
+                TableSpec tableSpec = propSpec.getTable();
+                List<String> batch = result.get(tableSpec);
+                if (batch != null) {
+                    batch.add(propId);
+                } else {
+                    batch = new ArrayList<String>();
+                    batch.add(propId);
+                    result.put(tableSpec, batch);
+                }
+            }
+            return result;
+        }
+
 	private Map<String, List<PrimitiveParameter>> readPrimitiveParameters(
 			Set<String> keyIds, Set<String> paramIds, Long minValid,
-			Long maxValid, String order) throws DataSourceReadException {
-		Map<String, List<PrimitiveParameter>> results =
-                new HashMap<String, List<PrimitiveParameter>>();
+			Long maxValid, String order)
+                        throws DataSourceReadException {
+            Map<String, List<PrimitiveParameter>> results =
+                    new HashMap<String, List<PrimitiveParameter>>();
 
-		PrimitiveParameterResultProcessorAllKeyIds resultProcessor =
-                new PrimitiveParameterResultProcessorAllKeyIds();
-		resultProcessor.setResults(results);
+            PrimitiveParameterResultProcessorAllKeyIds resultProcessor =
+                    new PrimitiveParameterResultProcessorAllKeyIds();
+            resultProcessor.setResults(results);
 
-		for (Iterator<String> itr = paramIds.iterator(); itr.hasNext();) {
-			String paramId = itr.next();
-			StatementPreparer stmtPreparer = new MyStatementPreparer(keyIds,
-					Collections.singleton(paramId), minValid, maxValid, 1,
-					this.primitiveParameters);
-			PropositionSpec spec = this.primitiveParameters.get(paramId);
-			TableSpec t = spec.getTable();
-			String stmt = "SELECT " + t.getKey() + "," + t.getPosition() + ","
-					+ t.getVal() + " FROM " + t.getName();
-			StringBuilder stmtBuf = new StringBuilder(stmt);
-			addToStatement(keyIds, Collections.singleton(paramId), minValid,
-					maxValid, spec, stmtBuf);
-			stmtBuf.append(order);
-			resultProcessor.setPrimitiveParameterSpec(spec);
-            try {
-                SQLExecutor.executeSQL(creator, stmtBuf.toString(),
-                        stmtPreparer, resultProcessor);
-            } catch (SQLException ex) {
-                throw new DataSourceReadException(ex);
-            }
-		}
-		return results;
-	}
+            Map<TableSpec, List<String>> batches =
+                    generateBatches(paramIds, this.primitiveParameters);
 
-	private Map<String, List<Event>> readEvents(Set<String> keyIds,
-			Set<String> paramIds, Long minValid, Long maxValid, String order)
-            throws DataSourceReadException
-			{
-		Map<String, List<Event>> results = new HashMap<String, List<Event>>();
-
-		EventResultProcessorAllKeyIds resultProcessor
-                = new EventResultProcessorAllKeyIds();
-		resultProcessor.setResults(results);
-
-		Set<String> paramIdsS = new HashSet<String>(paramIds.size());
-		for (String paramId : paramIds) {
-			paramIdsS.add(paramId);
-		}
-
-		StatementPreparer stmtPreparer = new MyStatementPreparer(keyIds,
-				paramIdsS, minValid, maxValid, 1, this.events);
-
-		for (Iterator<String> itr = paramIdsS.iterator(); itr.hasNext();) {
-			String paramId = itr.next();
-			PropositionSpec spec = this.events.get(paramId);
-			if (spec != null) {
-				TableSpec t = spec.getTable();
-				String stmt = "SELECT " + t.getKey() + "," + t.getPosition()
-						+ " FROM " + t.getName();
-				StringBuilder stmtBuf = new StringBuilder(stmt);
-				addToStatement(keyIds, Collections.singleton(paramId),
-						minValid, maxValid, spec, stmtBuf);
-				stmtBuf.append(order);
-				resultProcessor.setEventSpec(spec);
+            for (Map.Entry<TableSpec, List<String>> me : batches.entrySet()) {
+                List<String> pIds = me.getValue();
+                StatementPreparer stmtPreparer = new MyStatementPreparer(keyIds,
+                        pIds, minValid, maxValid, 1, this.primitiveParameters);
+                TableSpec t = me.getKey();
+                String stmt = "SELECT " + t.getKey() + "," + t.getPosition() + ","
+                                + t.getVal() +  "," + t.getCode() +
+                                " FROM " + t.getName();
+                StringBuilder stmtBuf = new StringBuilder(stmt);
+                addToStatement(keyIds, pIds, minValid,
+                                maxValid, t, stmtBuf);
+                stmtBuf.append(order);
+                resultProcessor.setTableSpec(t);
                 try {
                     SQLExecutor.executeSQL(creator, stmtBuf.toString(),
                             stmtPreparer, resultProcessor);
                 } catch (SQLException ex) {
                     throw new DataSourceReadException(ex);
                 }
-			}
-		}
-		return results;
+            }
+
+            for (Map.Entry<String, List<PrimitiveParameter>> me :
+                results.entrySet()) {
+                if (me.getValue() == null)
+                    me.setValue(new ArrayList<PrimitiveParameter>(0));
+            }
+            return results;
 	}
 
-	private void addToStatement(Set<String> keyIds, Set<String> paramIds,
-			Long minValid, Long maxValid, PropositionSpec primParamSpec,
+	private Map<String, List<Event>> readEvents(Set<String> keyIds,
+		Set<String> eventIds, Long minValid, Long maxValid,
+                String order) throws DataSourceReadException
+			{
+            Map<String, List<Event>> results =
+                    new HashMap<String, List<Event>>();
+
+            EventResultProcessorAllKeyIds resultProcessor
+                = new EventResultProcessorAllKeyIds();
+            resultProcessor.setResults(results);
+            
+            Map<TableSpec, List<String>> batches =
+                    generateBatches(eventIds, this.events);
+
+            for (Map.Entry<TableSpec, List<String>> me : batches.entrySet()) {
+                List<String> pIds = me.getValue();
+                StatementPreparer stmtPreparer = new MyStatementPreparer(keyIds,
+                        pIds, minValid, maxValid, 1, this.events);
+                TableSpec t = me.getKey();
+                String stmt = "SELECT " + t.getKey() + "," + t.getPosition()
+                                +  "," + t.getCode() +
+                                " FROM " + t.getName();
+                StringBuilder stmtBuf = new StringBuilder(stmt);
+                addToStatement(keyIds, pIds, minValid, maxValid, t, stmtBuf);
+                stmtBuf.append(order);
+                resultProcessor.setTableSpec(t);
+                try {
+                    SQLExecutor.executeSQL(creator, stmtBuf.toString(),
+                            stmtPreparer, resultProcessor);
+                } catch (SQLException ex) {
+                    throw new DataSourceReadException(ex);
+                }
+            }
+
+            for (Map.Entry<String, List<Event>> me : results.entrySet()) {
+                if (me.getValue() == null)
+                    me.setValue(new ArrayList<Event>(0));
+            }
+
+            return results;
+	}
+
+	private void addToStatement(Collection<String> keyIds,
+                Collection<String> paramIds,
+			Long minValid, Long maxValid, TableSpec tableSpec,
 			StringBuilder stmtBuf) {
 		boolean where = false;
 		if (keyIds != null && !keyIds.isEmpty()) {
-			stmtBuf.append(" WHERE " + primParamSpec.getTable().getKey()
+			stmtBuf.append(" WHERE " + tableSpec.getKey()
 					+ " in (");
 			where = true;
 			stmtBuf.append(org.arp.javautil.collections.Collections.join(
 					Collections.nCopies(keyIds.size(), '?'), ","));
 			stmtBuf.append(')');
 		}
-		String code = primParamSpec.getTable().getCode();
+		String code = tableSpec.getCode();
 		if (code != null && paramIds != null && !paramIds.isEmpty()) {
 			if (where) {
 				stmtBuf.append(" AND ");
@@ -479,7 +514,7 @@ public final class RelationalDatabaseSchemaAdaptor
 				stmtBuf.append("WHERE ");
 				where = true;
 			}
-			stmtBuf.append(primParamSpec.getTable().getPosition());
+			stmtBuf.append(tableSpec.getPosition());
 			stmtBuf.append(" >= ?");
 		}
 		if (maxValid != null) {
@@ -489,65 +524,79 @@ public final class RelationalDatabaseSchemaAdaptor
 			} else {
 				stmtBuf.append(" AND ");
 			}
-			stmtBuf.append(primParamSpec.getTable().getPosition());
+			stmtBuf.append(tableSpec.getPosition());
 			stmtBuf.append(" <= ?");
 		}
 		stmtBuf.append(" ORDER BY ");
-		stmtBuf.append(primParamSpec.getTable().getPosition());
+		stmtBuf.append(tableSpec.getPosition());
 	}
 
 	public List<PrimitiveParameter> getPrimitiveParametersAsc(String keyId,
 			Set<String> paramIds, Long minValid,
 			Long maxValid) throws DataSourceReadException {
-		return readPrimitiveParameters(Collections.singleton(keyId), paramIds,
-				minValid, maxValid, " ASC").get(keyId);
+            List<PrimitiveParameter> result =
+                    readPrimitiveParameters(Collections.singleton(keyId),
+                    paramIds, minValid, maxValid, " ASC").get(keyId);
+            if (result == null)
+                result = new ArrayList<PrimitiveParameter>(0);
+            return result;
 	}
 
 	public List<PrimitiveParameter> getPrimitiveParametersDesc(String keyId,
 			Set<String> paramIds, Long minValid,
 			Long maxValid) throws DataSourceReadException {
-		return readPrimitiveParameters(Collections.singleton(keyId), paramIds,
-				minValid, maxValid, " DESC").get(keyId);
+            List<PrimitiveParameter> result =
+                    readPrimitiveParameters(Collections.singleton(keyId),
+                    paramIds, minValid, maxValid, " DESC").get(keyId);
+            if (result == null)
+                result = new ArrayList<PrimitiveParameter>(0);
+            return result;
 	}
 
 	public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
 			Set<String> paramIds, Long minValid,
 			Long maxValid) throws DataSourceReadException {
-		return readPrimitiveParameters(null, paramIds, minValid, maxValid,
-				" ASC");
+            return readPrimitiveParameters(null, paramIds, minValid, maxValid,
+                            " ASC");
 	}
 
 	public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
 			Set<String> keyIds, Set<String> paramIds,
 			Long minValid, Long maxValid) throws DataSourceReadException {
-		return readPrimitiveParameters(keyIds, paramIds, minValid, maxValid,
-				" ASC");
+            return readPrimitiveParameters(keyIds, paramIds, minValid, maxValid,
+                            " ASC");
 	}
 
 	public Map<String, List<Event>> getEventsAsc(
 			Set<String> eventIds, Long minValid, Long maxValid)
 			throws DataSourceReadException {
-		return readEvents(null, eventIds, minValid, maxValid, " ASC");
+            return readEvents(null, eventIds, minValid, maxValid, " ASC");
 	}
 
 	public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
 			Set<String> eventIds, Long minValid,
 			Long maxValid) throws DataSourceReadException {
-		return readEvents(keyIds, eventIds, minValid, maxValid, " ASC");
+            return readEvents(keyIds, eventIds, minValid, maxValid, " ASC");
 	}
 
 	public List<Event> getEventsAsc(String keyId,
 			Set<String> eventIds, Long minValid, Long maxValid)
 			throws DataSourceReadException {
-		return readEvents(Collections.singleton(keyId), eventIds, minValid,
-				maxValid, " ASC").get(keyId);
+            List<Event> result = readEvents(Collections.singleton(keyId),
+                    eventIds, minValid, maxValid, " ASC").get(keyId);
+            if (result == null)
+                result = new ArrayList<Event>(0);
+            return result;
 	}
 
 	public List<Event> getEventsDesc(String keyId,
 			Set<String> eventIds, Long minValid, Long maxValid) 
-            throws DataSourceReadException {
-		return readEvents(Collections.singleton(keyId), eventIds, minValid,
-				maxValid, " DESC").get(keyId);
+                throws DataSourceReadException {
+            List<Event> result = readEvents(Collections.singleton(keyId),
+                    eventIds, minValid, maxValid, " DESC").get(keyId);
+            if (result == null)
+                result = new ArrayList<Event>(0);
+            return result;
 	}
 
 	public String getKeyType() {
