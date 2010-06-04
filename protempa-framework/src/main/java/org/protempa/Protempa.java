@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.BackendProviderSpecLoaderException;
@@ -120,7 +122,7 @@ public final class Protempa {
             propIdsSet = null;
         }
         if (keyIds != null) {
-            for (String keyId : query.getKeyIds()) {
+            for (String keyId : keyIds) {
                 results.put(keyId,
                         this.abstractionFinder.doFind(keyId,
                         propIdsSet, query.getStart(), query.getFinish()));
@@ -134,13 +136,18 @@ public final class Protempa {
                             .getAllKeyIds(i, 1000);
                     if (kids.isEmpty())
                         break;
+                    Logger logger = ProtempaUtil.logger();
                     for (String keyId : kids) {
+                        if (logger.isLoggable(Level.FINER))
+                            logger.finer("Processing key " + keyId);
                         results.put(keyId,
                                 this.abstractionFinder.doFind(keyId,
                                 propIdsSet, query.getStart(),
                                 query.getFinish()));
                     }
-                    i += 1000;
+                    i += kids.size();
+                    if (logger.isLoggable(Level.FINE))
+                        logger.fine("Processed " + i + " keys");
                 }
             } catch (DataSourceReadException ex) {
                 throw new FinderException(ex);

@@ -205,7 +205,7 @@ public final class DataSource extends
 	 *             if the schema adaptor could not be initialized.
 	 * @throws DataSourceReadException
 	 */
-	public List<String> getAllKeyIds(int start, int count)
+    public List<String> getAllKeyIds(int start, int count)
 			throws DataSourceReadException {
         if (start < 0)
             throw new IllegalArgumentException("start must be >= 0");
@@ -215,14 +215,16 @@ public final class DataSource extends
         Set<String> result = new HashSet<String>();
         for (DataSourceBackend backend : this.backendManager.getBackends()) {
             List<String> keyIds = backend.getAllKeyIds(start, count);
+            if (keyIds == null)
+                assertOnNullReturnVal(backend, "getAllKeyIds");
             result.addAll(keyIds);
             if (result.size() == count)
                 break;
             else
                 count -= result.size();
         }
-		return new ArrayList(result);
-	}
+	return new ArrayList(result);
+    }
 
 	/**
 	 * Returns all elements of the timeseries identified by the given key and
@@ -370,48 +372,58 @@ public final class DataSource extends
 	public List<PrimitiveParameter> getPrimitiveParametersAsc(String keyId,
 			Set<String> paramIds, Long minValidDate,
 			Long maxValidDate) throws DataSourceReadException {
-        handleKeyIdArgument(keyId);
-        Set<String> needIds = handlePropIdSetArgument(paramIds);
-		List<PrimitiveParameter> result = new ArrayList<PrimitiveParameter>();
-
-		initializeIfNeeded();
-        List<DataSourceBackend> backends = this.backendManager.getBackends();
-        for (DataSourceBackend backend : backends) {
-			List<PrimitiveParameter> ss = backend.getPrimitiveParametersAsc(
-					keyId, needIds, minValidDate, maxValidDate);
-			result.addAll(ss);
-        }
-
-		if (ALWAYS_RESORT || backends.size() > 1) {
-			Collections.sort(result,
-					PropositionUtil.TEMPORAL_PROPOSITION_COMPARATOR);
-		}
-
-		return result;
+            handleKeyIdArgument(keyId);
+            Set<String> needIds = handlePropIdSetArgument(paramIds);
+            List<PrimitiveParameter> result =
+                    new ArrayList<PrimitiveParameter>();
+            initializeIfNeeded();
+            List<DataSourceBackend> backends =
+                    this.backendManager.getBackends();
+            for (DataSourceBackend backend : backends) {
+                List<PrimitiveParameter> ss = backend.getPrimitiveParametersAsc(
+                                keyId, needIds, minValidDate, maxValidDate);
+                if (ss == null)
+                    assertOnNullReturnVal(backend, "getPrimitiveParametersAsc");
+                result.addAll(ss);
+            }
+            if (ALWAYS_RESORT || backends.size() > 1) {
+                Collections.sort(result,
+                            PropositionUtil.TEMPORAL_PROPOSITION_COMPARATOR);
+            }
+            return result;
 	}
+
+    private static void assertOnNullReturnVal(Backend backend,
+            String methodName) {
+        String msg = "The " + backend.getClass().getName() + "'s " +
+                methodName + " method returned null -- this should not happen";
+        throw new AssertionError(msg);
+    }
 
     public List<PrimitiveParameter> getPrimitiveParametersDesc(String keyId,
 			Set<String> paramIds, Long minValidDate,
 			Long maxValidDate) throws DataSourceReadException {
         handleKeyIdArgument(keyId);
         Set<String> needIds = handlePropIdSetArgument(paramIds);
-		List<PrimitiveParameter> result = new ArrayList<PrimitiveParameter>();
+        List<PrimitiveParameter> result = new ArrayList<PrimitiveParameter>();
 
-		initializeIfNeeded();
+        initializeIfNeeded();
         List<DataSourceBackend> backends = this.backendManager.getBackends();
         for (DataSourceBackend backend : backends) {
-			List<PrimitiveParameter> ss = backend.getPrimitiveParametersDesc(
-					keyId, needIds, minValidDate, maxValidDate);
-			result.addAll(ss);
+            List<PrimitiveParameter> ss = backend.getPrimitiveParametersDesc(
+                            keyId, needIds, minValidDate, maxValidDate);
+            if (ss == null)
+                assertOnNullReturnVal(backend, "getPrimitiveParametersDesc");
+            result.addAll(ss);
         }
 
-		if (ALWAYS_RESORT || backends.size() > 1) {
-			Collections.sort(result,
-					PropositionUtil.REVERSE_TEMPORAL_PROPOSITION_COMPARATOR);
-		}
+        if (ALWAYS_RESORT || backends.size() > 1) {
+            Collections.sort(result,
+                    PropositionUtil.REVERSE_TEMPORAL_PROPOSITION_COMPARATOR);
+        }
 
-		return result;
-	}
+        return result;
+    }
 
 	public Map<String, List<PrimitiveParameter>>
             getPrimitiveParametersDescByParamId(
@@ -428,8 +440,10 @@ public final class DataSource extends
         for (DataSourceBackend backend : backends) {
             List<PrimitiveParameter> ss = backend.getPrimitiveParametersDesc(
                 keyId, needIds, minValidDate, maxValidDate);
-            Map<String, List<PrimitiveParameter>> primParamMap = PropositionUtil
-                    .createPropositionMap(ss);
+            if (ss == null)
+                assertOnNullReturnVal(backend, "getPrimitiveParametersDesc");
+            Map<String, List<PrimitiveParameter>> primParamMap =
+                    PropositionUtil.createPropositionMap(ss);
             for (Map.Entry<String,List<PrimitiveParameter>> me :
                 primParamMap.entrySet()) {
                 String meKey = me.getKey();
@@ -466,6 +480,8 @@ public final class DataSource extends
         for (DataSourceBackend backend : backends) {
             List<PrimitiveParameter> ss = backend.getPrimitiveParametersAsc(
                 keyId, needIds, minValidDate, maxValidDate);
+            if (ss == null)
+                assertOnNullReturnVal(backend, "getPrimitiveParametersAsc");
             Map<String, List<PrimitiveParameter>> primParamMap = PropositionUtil
                     .createPropositionMap(ss);
             for (Map.Entry<String,List<PrimitiveParameter>> me :
@@ -524,29 +540,33 @@ public final class DataSource extends
 	public List<ConstantParameter> getConstantParameters(String keyId,
             Set<String> paramIds)
 			throws DataSourceReadException {
-        handleKeyIdArgument(keyId);
-        paramIds = handlePropIdSetArgument(paramIds);
-        initializeIfNeeded();
-        List<ConstantParameter> result = new ArrayList<ConstantParameter>();
-        for (DataSourceBackend backend : this.backendManager.getBackends()) {
-            result.addAll(backend.getConstantParameters(keyId, paramIds));
+            handleKeyIdArgument(keyId);
+            paramIds = handlePropIdSetArgument(paramIds);
+            initializeIfNeeded();
+            List<ConstantParameter> result = new ArrayList<ConstantParameter>();
+            for (DataSourceBackend backend : this.backendManager.getBackends()) {
+                List<ConstantParameter> l = 
+                        backend.getConstantParameters(keyId, paramIds);
+                if (l == null)
+                    assertOnNullReturnVal(backend, "getConstantParameters");
+                result.addAll(l);
+            }
+            return result;
         }
-		return result;
-	}
 
-	public List getConstantParameters(String keyId, String propId)
-			throws DataSourceReadException {
-        Set<String> paramIds = handlePropIdArgument(propId);
-		return getConstantParameters(keyId, paramIds);
-	}
+        public List getConstantParameters(String keyId, String propId)
+                            throws DataSourceReadException {
+            Set<String> paramIds = handlePropIdArgument(propId);
+            return getConstantParameters(keyId, paramIds);
+        }
 
-	public List<Event> getEventsAsc(String keyId, String propId,
-			Long minValidDate, Long maxValidDate)
-			throws DataSourceReadException {
-        handleKeyIdArgument(keyId);
-        Set<String> propIds = handlePropIdArgument(propId);
-		return getEventsAsc(keyId, propIds,
-				minValidDate, maxValidDate);
+        public List<Event> getEventsAsc(String keyId, String propId,
+                            Long minValidDate, Long maxValidDate)
+                            throws DataSourceReadException {
+            handleKeyIdArgument(keyId);
+            Set<String> propIds = handlePropIdArgument(propId);
+            return getEventsAsc(keyId, propIds,
+                        minValidDate, maxValidDate);
 	}
 
 	/**
@@ -571,9 +591,13 @@ public final class DataSource extends
         initializeIfNeeded();
         List<DataSourceBackend> backends =
                 this.backendManager.getBackends();
-        for (DataSourceBackend backend : backends)
-            result.addAll(backend.getEventsAsc(keyId, needIds,
-                minValidDate, maxValidDate));
+        for (DataSourceBackend backend : backends) {
+            List<Event> e = backend.getEventsAsc(keyId, needIds,
+                minValidDate, maxValidDate);
+            if (e == null)
+                assertOnNullReturnVal(backend, "getEventsAsc");
+            result.addAll(e);
+        }
         if (ALWAYS_RESORT || backends.size() > 1)
             Collections.sort(result,
                     PropositionUtil.TEMPORAL_PROPOSITION_COMPARATOR);
@@ -591,30 +615,37 @@ public final class DataSource extends
         initializeIfNeeded();
         List<DataSourceBackend> backends =
                 this.backendManager.getBackends();
-        for (DataSourceBackend backend : backends)
-            result.addAll(backend.getEventsDesc(keyId, needIds,
-                minValidDate, maxValidDate));
+        for (DataSourceBackend backend : backends) {
+            List<Event> e = backend.getEventsDesc(keyId, needIds,
+                minValidDate, maxValidDate);
+            if (e == null)
+                assertOnNullReturnVal(backend, "getEventsDesc");
+            result.addAll(e);
+        }
         if (ALWAYS_RESORT || backends.size() > 1)
             Collections.sort(result,
                     PropositionUtil.REVERSE_TEMPORAL_PROPOSITION_COMPARATOR);
 
 		return result;
-	}
+    }
 
-	public Map<String, List<Event>> getEventsDescByEventId(String keyId,
-			Set<String> propIds, Long minValidDate, Long maxValidDate)
-			throws DataSourceReadException {
+    public Map<String, List<Event>> getEventsDescByEventId(String keyId,
+		Set<String> propIds, Long minValidDate, Long maxValidDate)
+		throws DataSourceReadException {
         handleKeyIdArgument(keyId);
         Set<String> needIds = handlePropIdSetArgument(propIds);
-		Map<String, List<Event>> result = new HashMap<String, List<Event>>();
+        Map<String, List<Event>> result = new HashMap<String, List<Event>>();
 
         initializeIfNeeded();
         List<Event> ss = new ArrayList<Event>();
-        List<DataSourceBackend> backends =
-                this.backendManager.getBackends();
-        for (DataSourceBackend backend : backends)
-                ss.addAll(backend.getEventsDesc(keyId, needIds,
-                minValidDate, maxValidDate));
+        List<DataSourceBackend> backends = this.backendManager.getBackends();
+        for (DataSourceBackend backend : backends) {
+            List<Event> l = backend.getEventsDesc(keyId, needIds,
+                    minValidDate, maxValidDate);
+            if (l == null)
+                assertOnNullReturnVal(backend, "getEventDesc");
+            ss.addAll(l);
+        }
         if (ALWAYS_RESORT || backends.size() > 1)
             Collections.sort(ss,
                 PropositionUtil.REVERSE_TEMPORAL_PROPOSITION_COMPARATOR);
@@ -622,24 +653,28 @@ public final class DataSource extends
                 .createPropositionMap(ss);
         result.putAll(primParamMap);
 
-		return result;
-	}
+        return result;
+    }
 
-	public Map<String, List<Event>> getEventsAscByEventId(String keyId,
-			Set<String> propIds, Long minValidDate, Long maxValidDate)
-			throws DataSourceReadException {
+    public Map<String, List<Event>> getEventsAscByEventId(String keyId,
+            Set<String> propIds, Long minValidDate, Long maxValidDate)
+            throws DataSourceReadException {
         handleKeyIdArgument(keyId);
         Set<String> needIds = handlePropIdSetArgument(propIds);
 
-		Map<String, List<Event>> result = new HashMap<String, List<Event>>();
+	Map<String, List<Event>> result = new HashMap<String, List<Event>>();
 
         initializeIfNeeded();
         List<Event> ss = new ArrayList<Event>();
         List<DataSourceBackend> backends =
                 this.backendManager.getBackends();
-        for (DataSourceBackend backend : backends)
-            ss.addAll(backend.getEventsAsc(keyId, needIds,
-                minValidDate, maxValidDate));
+        for (DataSourceBackend backend : backends) {
+            List<Event> l = backend.getEventsAsc(keyId, needIds,
+                minValidDate, maxValidDate);
+            if (l == null)
+                assertOnNullReturnVal(backend, "getEventsAsc");
+            ss.addAll(l);
+        }
         if (ALWAYS_RESORT || backends.size() > 1)
             Collections.sort(ss,
                 PropositionUtil.TEMPORAL_PROPOSITION_COMPARATOR);
@@ -647,8 +682,8 @@ public final class DataSource extends
                 .createPropositionMap(ss);
         result.putAll(primParamMap);
 
-		return result;
-	}
+	return result;
+    }
 
 	public Map<String, List<Event>> getEventsAscByEventId(String keyId,
 			String propId) throws DataSourceReadException {
