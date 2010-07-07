@@ -392,6 +392,33 @@ public final class DataSource extends
             }
             return result;
 	}
+	
+	public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
+			Set<String> keyIds, Set<String> paramIds, Long minValidDate,
+			Long maxValidDate) throws DataSourceReadException {
+		
+		if (keyIds == null) {
+			throw new IllegalArgumentException("keyIds cannot be null");
+		}
+		for (String keyId : keyIds) {
+			handleKeyIdArgument(keyId);
+		}
+		Set<String> needIds = handlePropIdSetArgument(paramIds);
+		Map<String, List<PrimitiveParameter>> result =
+			new HashMap<String, List<PrimitiveParameter>>();
+		initializeIfNeeded();
+		List<DataSourceBackend> backends =
+			this.backendManager.getBackends();
+		for (DataSourceBackend backend : backends) {
+			Map<String, List<PrimitiveParameter>> ss = 
+				backend.getPrimitiveParametersAsc(keyIds, paramIds, minValidDate, maxValidDate);
+			if (ss == null) {
+				assertOnNullReturnVal(backend, "getPrimitiveParametersAsc");
+			}
+			result.putAll(ss);
+		}
+		return result;
+	}
 
     private static void assertOnNullReturnVal(Backend backend,
             String methodName) {
@@ -604,6 +631,39 @@ public final class DataSource extends
 
 		return result;
 	}
+	
+	public Map<String, List<Event>> getEventsAsc(Set<String> keyIds, Set<String> eventIds,
+			Long minValidDate, Long maxValidDate)
+			throws DataSourceReadException {
+		handleKeyIdSetArgument(keyIds);
+		Set<String> needIds = handlePropIdSetArgument(eventIds);
+		Map<String, List<Event>> result = new HashMap<String, List<Event>>();
+		
+		initializeIfNeeded();
+		List<DataSourceBackend> backends =
+				this.backendManager.getBackends();
+		for (DataSourceBackend backend : backends) {
+			Map<String, List<Event>> e = backend.getEventsAsc(keyIds, eventIds, minValidDate, maxValidDate);
+			if (e == null) {
+				assertOnNullReturnVal(backend, "getEventsAsc");
+			}
+			for (Map.Entry<String, List<Event>> entry : e.entrySet()) {
+				if (result.containsKey(entry.getKey())) {
+					result.get(entry.getKey()).addAll(entry.getValue());
+				} else {
+					result.putAll(e);
+				}
+			}
+		}
+		if (ALWAYS_RESORT || backends.size() > 1) {
+			for (Map.Entry<String, List<Event>> entry : result.entrySet()) {
+				Collections.sort(entry.getValue(),
+						PropositionUtil.TEMPORAL_PROPOSITION_COMPARATOR);
+			}
+		}
+		
+		return result;
+	}
 
     public List<Event> getEventsDesc(String keyId, Set<String> eventIds,
 			Long minValidDate, Long maxValidDate)
@@ -761,6 +821,12 @@ public final class DataSource extends
             throw new IllegalArgumentException("propId cannot be null");
     }
 
+    private static void handleKeyIdSetArgument(Set<String> keyIds) {
+    	if (keyIds == null) {
+    		throw new IllegalArgumentException("keyIds cannot be null");
+    	}
+    }
+    
     private static void handleKeyIdArgument(String keyId) {
         if (keyId == null)
             throw new IllegalArgumentException("keyId cannot be null");

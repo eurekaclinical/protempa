@@ -131,20 +131,26 @@ public final class Protempa {
             int i = 0;
             try {
                 while (true) {
-                    List<String> kids =
-                            this.abstractionFinder.getDataSource()
-                            .getAllKeyIds(i, 1000);
-                    if (kids.isEmpty())
-                        break;
+                    Set<String> kids =
+                            new HashSet<String>(this.abstractionFinder.getDataSource()
+                            .getAllKeyIds(i, 10000));
+//                	List<String> kids = this.abstractionFinder.getDataSource().getAllKeyIds(i, 1000);
+                    if (kids.isEmpty()) 
+                    	break;
                     Logger logger = ProtempaUtil.logger();
-                    for (String keyId : kids) {
-                        if (logger.isLoggable(Level.FINER))
-                            logger.finer("Processing key " + keyId);
-                        results.put(keyId,
-                                this.abstractionFinder.doFind(keyId,
-                                propIdsSet, query.getStart(),
-                                query.getFinish()));
-                    }
+                    
+                    // BATCH QUERY
+                    results.putAll(this.abstractionFinder.doFind(kids, propIdsSet, query.getStart(), query.getFinish()));
+                    
+                    // ONE PATIENT AT A TIME QUERIES
+//                    for (String keyId : kids) {
+//                    	if (logger.isLoggable(Level.FINER))
+//                    		logger.finer("Processing key " + keyId);
+//                    	results.put(keyId,
+//                    			this.abstractionFinder.doFind(keyId,
+//                    					propIdsSet, query.getStart(),
+//                    					query.getFinish()));
+//                    }
                     i += kids.size();
                     if (logger.isLoggable(Level.FINE))
                         logger.fine("Processed " + i + " keys");

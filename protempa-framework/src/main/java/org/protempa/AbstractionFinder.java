@@ -113,6 +113,25 @@ final class AbstractionFinder implements Module {
             throw new FinderException(msg, e);
         }
     }
+    
+    Map<String, List<Proposition>> doFind(Set<String> keys, Set<String> propIds,
+    		Long minValidDate, Long maxValidDate) throws FinderException {
+    	if (this.closed) {
+    		throw new FinderException("Protempa already closed!");
+    	}
+    	try {
+    		if (workingMemoryCache != null) {
+    			return doFindStateful(keys, propIds, minValidDate,
+    					maxValidDate);
+    		} else {
+    			return doFindStateless(keys, propIds, minValidDate,
+    					maxValidDate);
+    		}
+    	} catch (ProtempaException e) {
+    		String msg = "An error occurred processing a set of cases";
+    		throw new FinderException(msg, e);
+    	}
+    }
 
     @SuppressWarnings("unchecked")
     @Deprecated
@@ -245,7 +264,24 @@ final class AbstractionFinder implements Module {
         clear();
         return result;
     }
-
+    
+    @SuppressWarnings("unchecked")
+    private Map<String, List<Proposition>> doFindStateless(Set<String> keys,
+    		Set<String> propositionIds,
+    		Long minValid, Long maxValid) throws ProtempaException {
+    	Map<String, List<Proposition>> result = new HashMap<String, List<Proposition>>();
+    	for (Map.Entry<String, List<Object>> entry : 
+    		objectsToAssert(keys, propositionIds, null, null, false).entrySet()) {
+    		List objects = new ArrayList(entry.getValue());
+    		List<Proposition> propositions =
+    			resultList(statelessWorkingMemory(
+    					propositionIds).executeWithResults(objects).iterateObjects(
+    							new ProtempaObjectFilter(propositionIds)), minValid, maxValid);
+    		result.put(entry.getKey(), propositions);
+    	}
+    	clear();
+    	return result;
+    }
     @SuppressWarnings("unchecked")
     private static List<Proposition> resultList(Iterator objects,
             Long minValid, Long maxValid) {
@@ -290,7 +326,38 @@ final class AbstractionFinder implements Module {
                 knowledgeSource.primitiveParameterIds(propositionIds),
                 minValidDate, maxValidDate), propositionIds,
                 stateful));
+
         return objects;
+    }
+    
+    private Map<String, List<Object>> objectsToAssert(Set<String> keyIds,
+    		Set<String> propositionIds, Long minValidDate, Long maxValidDate,
+    		boolean stateful) throws
+    		DataSourceReadException, KnowledgeSourceReadException {
+    	// Add events
+    	Set<String> eventIds = knowledgeSource.leafEventIds(propositionIds);
+    	Map<String, List<Object>> objects = new HashMap<String, List<Object>>();
+    	if (!eventIds.isEmpty() || propositionIds == null 
+    			|| propositionIds.isEmpty()) {
+    		Map<String, List<Event>> tempObjects = 
+    		createEvents(dataSource, keyIds, eventIds,
+    					minValidDate, maxValidDate);
+    		for (Map.Entry<String, List<Event>> entry : tempObjects.entrySet()) {
+    			objects.put(entry.getKey(), new ArrayList<Object>(entry.getValue()));
+    		}
+    	}
+    	
+    	// Add parameteres. Requires special handling, because Sequence objects
+    	// do not override equals. Can we eliminate sequence cache?
+    	for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> entry :
+    		createSequencesFromPrimitiveParameters(
+    				keyIds, dataSource.getPrimitiveParametersAsc(keyIds,
+    						knowledgeSource.primitiveParameterIds(propositionIds),
+    						minValidDate, maxValidDate), propositionIds,
+    						stateful).entrySet()) {
+    		objects.put(entry.getKey(), new ArrayList<Object>(entry.getValue()));
+    	}
+    	return objects;
     }
 
     @SuppressWarnings("unchecked")
@@ -318,12 +385,41 @@ final class AbstractionFinder implements Module {
         return new ArrayList(0);
     }
 
+    private Map<String, List<Proposition>> doFindStateful(Set<String> keyIds, Set<String> propositionIds,
+    		Long minValidDate, Long maxValidDate) throws ProtempaException {
+    	if (keyIds != null && !keyIds.isEmpty()) {
+    		Map<String, List<Proposition>> results = new HashMap<String, List<Proposition>>();
+    		Map<String, List<Object>> objects = objectsToAssert(keyIds, propositionIds, minValidDate, maxValidDate, true);
+    		for (Map.Entry<String, List<Object>> entry : objects.entrySet()) {
+    			try {
+    				StatefulSession workingMemory = statefulWorkingMemory(entry.getKey(), propositionIds);
+    				for (Object obj : entry.getValue()) {
+    					workingMemory.insert(obj);
+    				}
+    				workingMemory.fireAllRules();
+    				results.put(entry.getKey(), resultList(workingMemory.iterateObjects(
+    						new ProtempaObjectFilter(propositionIds)), 
+    						minValidDate, maxValidDate));
+    			} catch (FactException fe) {
+    				assert false;
+    			}
+    		}
+    	}
+    	return new HashMap<String, List<Proposition>>();
+    }
+    
     private List<Event> createEvents(DataSource dataSource,
             String keyId, Set<String> eventIds, Long minValidDate,
             Long maxValidDate) throws
             DataSourceReadException {
         return dataSource.getEventsAsc(keyId, eventIds, minValidDate,
                 maxValidDate);
+    }
+    
+    private Map<String, List<Event>> createEvents(DataSource dataSource,
+    		Set<String> keyIds, Set<String> eventIds, Long minValidDate,
+    		Long maxValidDate) throws DataSourceReadException {
+    	return dataSource.getEventsAsc(keyIds, eventIds, minValidDate, maxValidDate);
     }
 
     /*
@@ -369,6 +465,49 @@ final class AbstractionFinder implements Module {
             }
         }
         return result;
+    }
+    
+    private Map<String, List<Sequence<PrimitiveParameter>>>
+    		createSequencesFromPrimitiveParameters(
+    		Set<String> keyIds, Map<String, List<PrimitiveParameter>> primParams,
+    		Set<String> propositionIds, boolean stateful) {
+    	Map<String, List<Sequence<PrimitiveParameter>>> result =
+    		new HashMap<String, List<Sequence<PrimitiveParameter>>>();
+    	if (primParams != null && !primParams.isEmpty()) {
+    		for (String keyId : keyIds) {
+    			Map<Set<String>, Sequence<PrimitiveParameter>> seqKey =
+    				this.sequences.get(keyId);
+    			if (seqKey == null) {
+    				seqKey = new HashMap<Set<String>, Sequence<PrimitiveParameter>>();
+    			}
+    			for (Set<String> paramIds : extractSequenceParamIds(propositionIds)) {
+    				if (!seqKey.containsKey(paramIds)) {
+    					seqKey.put(paramIds, new Sequence<PrimitiveParameter>(paramIds));
+    				}
+    			}
+    			if (stateful) {
+    				this.sequences.put(keyId, seqKey);
+    			}
+    			
+    			List<Sequence<PrimitiveParameter>> paramSeqs =
+    				new ArrayList<Sequence<PrimitiveParameter>>();
+    			for (Map.Entry<Set<String>, Sequence<PrimitiveParameter>> entry :
+    				seqKey.entrySet()) {
+    				Set<String> key = entry.getKey();
+    				Sequence<PrimitiveParameter> seq = entry.getValue();
+    				if (seq.isEmpty()) {
+    					for (PrimitiveParameter parameter : primParams.get(keyId)) {
+    						if (key.contains(parameter.getId())) {
+    							seq.add(parameter);
+    						}
+    					}
+    				}
+    				paramSeqs.add(seq);
+    			}
+    			result.put(keyId, paramSeqs);
+    		}
+    	}
+    	return result;
     }
 
     private void extractSequenceParamIdsHelper(Set<String> propIds,
