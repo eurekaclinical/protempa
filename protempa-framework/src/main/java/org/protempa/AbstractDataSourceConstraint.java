@@ -1,51 +1,27 @@
 package org.protempa;
 
-import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueComparator;
-
 public abstract class AbstractDataSourceConstraint implements
 		DataSourceConstraint {
 
-	private String parameterId;
+    private final String propositionId;
 
-	private ValueComparator comparator;
+    private DataSourceConstraint and;
 
-	private Value value;
+    public AbstractDataSourceConstraint(String propositionId) {
+        if (propositionId == null)
+            throw new IllegalArgumentException("propositionId cannot be null");
+        this.propositionId = propositionId;
+    }
 
-	private DataSourceConstraint and;
+    public String getPropositionId() {
+        return propositionId;
+    }
 
-	public AbstractDataSourceConstraint() {
-	}
+    public void setAnd(DataSourceConstraint and) {
+        this.and = and;
+    }
 
-	public void setComparator(ValueComparator comparator) {
-		this.comparator = comparator;
-	}
-
-	public ValueComparator getComparator() {
-		return comparator;
-	}
-
-	public void setParameterId(String parameterId) {
-		this.parameterId = parameterId;
-	}
-
-	public String getParameterId() {
-		return parameterId;
-	}
-
-	public void setValue(Value value) {
-		this.value = value;
-	}
-
-	public Value getValue() {
-		return value;
-	}
-
-	public void setAnd(DataSourceConstraint and) {
-		this.and = and;
-	}
-
-	public DataSourceConstraint getAnd() {
-		return and;
-	}
+    public DataSourceConstraint getAnd() {
+        return and;
+    }
 }

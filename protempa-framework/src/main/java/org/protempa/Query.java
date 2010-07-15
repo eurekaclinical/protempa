@@ -1,5 +1,7 @@
 package org.protempa;
 
+import org.protempa.proposition.value.Granularity;
+
 /**
  *
  * @author Andrew Post
@@ -13,6 +15,18 @@ public interface Query {
 
     void setFinish(Long finish);
     Long getFinish();
+
+    void setStartGranularity(Granularity startGranularity);
+    Granularity getStartGranularity();
+
+    void setFinishGranularity(Granularity finishGranularity);
+    Granularity getFinishGranularity();
+
+
+    Long getMinimumStart();
+    Long getMaximumStart();
+    Long getMinimumFinish();
+    Long getMaximumFinish();
 
     /**
      *

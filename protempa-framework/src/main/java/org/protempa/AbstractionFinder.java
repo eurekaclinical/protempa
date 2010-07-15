@@ -87,73 +87,21 @@ final class AbstractionFinder implements Module {
             return Collections.emptySet();
         }
     }
-
-    /**
-     *
-     * @param key
-     * @param propIds
-     * @param minValidDate
-     * @param maxValidDate
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    List<Proposition> doFind(String key, Set<String> propIds,
-            Long minValidDate, Long maxValidDate) throws FinderException {
-        if (this.closed)
-            throw new FinderException("Protempa already closed!");
-        try {
-            if (workingMemoryCache != null)
-                return doFindStateful(key, propIds, minValidDate,
-                        maxValidDate);
-            else
-                return doFindStateless(key, propIds, minValidDate,
-                        maxValidDate);
-        } catch (ProtempaException e) {
-            String msg = "An error occurred processing case " + key;
-            throw new FinderException(msg, e);
-        }
-    }
     
     Map<String, List<Proposition>> doFind(Set<String> keys, Set<String> propIds,
-    		Long minValidDate, Long maxValidDate) throws FinderException {
-    	if (this.closed) {
-    		throw new FinderException("Protempa already closed!");
-    	}
+    		DataSourceConstraint dataSourceConstraints)
+                throws FinderException {
+    	if (this.closed)
+            throw new FinderException("Protempa already closed!");
     	try {
-    		if (workingMemoryCache != null) {
-    			return doFindStateful(keys, propIds, minValidDate,
-    					maxValidDate);
-    		} else {
-    			return doFindStateless(keys, propIds, minValidDate,
-    					maxValidDate);
-    		}
+            if (workingMemoryCache != null)
+                return doFindStateful(keys, propIds, dataSourceConstraints);
+            else
+                return doFindStateless(keys, propIds, dataSourceConstraints);
     	} catch (ProtempaException e) {
-    		String msg = "An error occurred processing a set of cases";
-    		throw new FinderException(msg, e);
+            String msg = "An error occurred processing a set of cases";
+            throw new FinderException(msg, e);
     	}
-    }
-
-    @SuppressWarnings("unchecked")
-    @Deprecated
-    List<Proposition> doFindIn(Set<String> propositionIds,
-            List<? extends Proposition> inPropositions) throws FinderException {
-        if (inPropositions != null) {
-            try {
-                List result = resultList(statelessWorkingMemory(
-                        propositionIds).executeWithResults(inPropositions)
-                        .iterateObjects(
-                        new ProtempaObjectFilter(propositionIds)), null, null);
-                if (result.size() > 1) {
-                    Collections.sort(result,
-                            PropositionUtil.TEMPORAL_PROPOSITION_COMPARATOR);
-                }
-                return result;
-            } catch (ProtempaException e) {
-                String msg = "An error occured in doFindIn";
-                throw new FinderException(msg, e);
-            }
-        }
-        return new ArrayList<Proposition>(0);
     }
 
     /**
@@ -248,178 +196,117 @@ final class AbstractionFinder implements Module {
             }
         }
     }
-
-    @SuppressWarnings("unchecked")
-    private List<Proposition> doFindStateless(String key,
-            Set<String> propositionIds,
-            Long minValid, Long maxValid) throws ProtempaException {
-        // Long minValidDate = ...
-        // Long maxValidDate = ... calculation of what raw data we need to
-        // process
-        List objects = objectsToAssert(key, propositionIds, null, null, false);
-        List<Proposition> result =
-                resultList(statelessWorkingMemory(
-                propositionIds).executeWithResults(objects).iterateObjects(
-                new ProtempaObjectFilter(propositionIds)), minValid, maxValid);
-        clear();
-        return result;
-    }
     
     @SuppressWarnings("unchecked")
     private Map<String, List<Proposition>> doFindStateless(Set<String> keys,
     		Set<String> propositionIds,
-    		Long minValid, Long maxValid) throws ProtempaException {
-    	Map<String, List<Proposition>> result = new HashMap<String, List<Proposition>>();
+    		DataSourceConstraint dataSourceConstraints)
+                throws ProtempaException {
+    	Map<String, List<Proposition>> result =
+                new HashMap<String, List<Proposition>>();
     	for (Map.Entry<String, List<Object>> entry : 
-    		objectsToAssert(keys, propositionIds, null, null, false).entrySet()) {
-    		List objects = new ArrayList(entry.getValue());
-    		List<Proposition> propositions =
-    			resultList(statelessWorkingMemory(
-    					propositionIds).executeWithResults(objects).iterateObjects(
-    							new ProtempaObjectFilter(propositionIds)), minValid, maxValid);
-    		result.put(entry.getKey(), propositions);
+            objectsToAssert(keys, propositionIds, dataSourceConstraints, false)
+                    .entrySet()) {
+            List objects = new ArrayList(entry.getValue());
+            List<Proposition> propositions =
+                resultList(statelessWorkingMemory(
+                    propositionIds).executeWithResults(objects).iterateObjects(
+                        new ProtempaObjectFilter(propositionIds)));
+            result.put(entry.getKey(), propositions);
     	}
     	clear();
     	return result;
     }
     @SuppressWarnings("unchecked")
-    private static List<Proposition> resultList(Iterator objects,
-            Long minValid, Long maxValid) {
-        List<TemporalProposition> temporalProps =
-                new ArrayList<TemporalProposition>();
+    private static List<Proposition> resultList(Iterator objects) {
         List<Proposition> result = new ArrayList<Proposition>();
         for (; objects.hasNext();) {
             Object obj = objects.next();
             if (obj instanceof Sequence) {
-                temporalProps.addAll((Sequence) obj);
-            } else if (obj instanceof TemporalProposition) {
-                temporalProps.add((TemporalProposition) obj);
+                result.addAll((Sequence) obj);
             } else {
                 result.add((Proposition) obj);
             }
         }
-        Collections.sort(temporalProps,
-                PropositionUtil.TEMPORAL_PROPOSITION_COMPARATOR);
-
-        result.addAll(
-                PropositionUtil.getView(temporalProps, minValid, maxValid));
+        
         return result;
-    }
-
-    private List<Object> objectsToAssert(String keyId,
-            Set<String> propositionIds, Long minValidDate, Long maxValidDate,
-            boolean stateful) throws
-            DataSourceReadException, KnowledgeSourceReadException {
-        // Add events.
-        Set<String> eventIds = knowledgeSource.leafEventIds(propositionIds);
-        List<Object> objects = new ArrayList<Object>();
-        if (!eventIds.isEmpty() || propositionIds == null
-                || propositionIds.isEmpty()) {
-            objects.addAll(createEvents(dataSource, keyId, eventIds,
-                    minValidDate, maxValidDate));
-        }
-        // Add parameters. Requires special handling, because Sequence objects
-        // do not override equals. Can we eliminate the sequence cache?
-        objects.addAll(
-            createSequencesFromPrimitiveParameters(
-                keyId, dataSource.getPrimitiveParametersAsc(keyId,
-                knowledgeSource.primitiveParameterIds(propositionIds),
-                minValidDate, maxValidDate), propositionIds,
-                stateful));
-
-        return objects;
     }
     
     private Map<String, List<Object>> objectsToAssert(Set<String> keyIds,
-    		Set<String> propositionIds, Long minValidDate, Long maxValidDate,
-    		boolean stateful) throws
+    		Set<String> propositionIds, 
+                DataSourceConstraint dataSourceConstraints,
+                boolean stateful) throws
     		DataSourceReadException, KnowledgeSourceReadException {
     	// Add events
     	Set<String> eventIds = knowledgeSource.leafEventIds(propositionIds);
     	Map<String, List<Object>> objects = new HashMap<String, List<Object>>();
     	if (!eventIds.isEmpty() || propositionIds == null 
     			|| propositionIds.isEmpty()) {
-    		Map<String, List<Event>> tempObjects = 
-    		createEvents(dataSource, keyIds, eventIds,
-    					minValidDate, maxValidDate);
-    		for (Map.Entry<String, List<Event>> entry : tempObjects.entrySet()) {
-    			objects.put(entry.getKey(), new ArrayList<Object>(entry.getValue()));
-    		}
+            Map<String, List<Event>> tempObjects =
+            createEvents(dataSource, keyIds, eventIds,
+                                    dataSourceConstraints);
+            for (Map.Entry<String, List<Event>> entry :
+                tempObjects.entrySet()) {
+                objects.put(entry.getKey(),
+                        new ArrayList<Object>(entry.getValue()));
+            }
     	}
     	
     	// Add parameteres. Requires special handling, because Sequence objects
     	// do not override equals. Can we eliminate sequence cache?
     	for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> entry :
-    		createSequencesFromPrimitiveParameters(
-    				keyIds, dataSource.getPrimitiveParametersAsc(keyIds,
-    						knowledgeSource.primitiveParameterIds(propositionIds),
-    						minValidDate, maxValidDate), propositionIds,
-    						stateful).entrySet()) {
-    		objects.put(entry.getKey(), new ArrayList<Object>(entry.getValue()));
+            createSequencesFromPrimitiveParameters(
+                keyIds, dataSource.getPrimitiveParametersAsc(keyIds,
+                        knowledgeSource.primitiveParameterIds(propositionIds),
+                        dataSourceConstraints), propositionIds,
+                        stateful).entrySet()) {
+            objects.put(entry.getKey(),
+                    new ArrayList<Object>(entry.getValue()));
     	}
     	return objects;
     }
 
-    @SuppressWarnings("unchecked")
-    private List doFindStateful(String keyId, Set<String> propositionIds,
-            Long minValidDate, Long maxValidDate) throws ProtempaException {
-        if (keyId != null) {
-            try {
-                StatefulSession workingMemory = statefulWorkingMemory(keyId,
-                        propositionIds);
-                // Long minValidDate = ...
-                // Long maxValidDate = ... calculation of what raw data we need to
-                // process
-                for (Object obj : objectsToAssert(keyId, propositionIds,
-                        null, null, true)) {
-                    workingMemory.insert(obj);
-                }
-                workingMemory.fireAllRules();
-                return resultList(workingMemory.iterateObjects(
-                        new ProtempaObjectFilter(propositionIds)),
-                        minValidDate, maxValidDate);
-            } catch (FactException fe) {
-                assert false;
-            }
-        }
-        return new ArrayList(0);
-    }
-
-    private Map<String, List<Proposition>> doFindStateful(Set<String> keyIds, Set<String> propositionIds,
-    		Long minValidDate, Long maxValidDate) throws ProtempaException {
+    private Map<String, List<Proposition>> doFindStateful(Set<String> keyIds,
+            Set<String> propositionIds,
+            DataSourceConstraint dataSourceConstraints)
+            throws ProtempaException {
     	if (keyIds != null && !keyIds.isEmpty()) {
-    		Map<String, List<Proposition>> results = new HashMap<String, List<Proposition>>();
-    		Map<String, List<Object>> objects = objectsToAssert(keyIds, propositionIds, minValidDate, maxValidDate, true);
-    		for (Map.Entry<String, List<Object>> entry : objects.entrySet()) {
-    			try {
-    				StatefulSession workingMemory = statefulWorkingMemory(entry.getKey(), propositionIds);
-    				for (Object obj : entry.getValue()) {
-    					workingMemory.insert(obj);
-    				}
-    				workingMemory.fireAllRules();
-    				results.put(entry.getKey(), resultList(workingMemory.iterateObjects(
-    						new ProtempaObjectFilter(propositionIds)), 
-    						minValidDate, maxValidDate));
-    			} catch (FactException fe) {
-    				assert false;
-    			}
-    		}
+            Map<String, List<Proposition>> results =
+                    new HashMap<String, List<Proposition>>();
+            Map<String, List<Object>> objects = objectsToAssert(keyIds,
+                    propositionIds, dataSourceConstraints, true);
+            for (Map.Entry<String, List<Object>> entry : objects.entrySet()) {
+                try {
+                    StatefulSession workingMemory = 
+                            statefulWorkingMemory(entry.getKey(),
+                            propositionIds);
+                    for (Object obj : entry.getValue()) {
+                            workingMemory.insert(obj);
+                    }
+                    workingMemory.fireAllRules();
+                    results.put(entry.getKey(),
+                            resultList(workingMemory.iterateObjects(
+                                    new ProtempaObjectFilter(propositionIds))));
+                } catch (FactException fe) {
+                    assert false;
+                }
+            }
     	}
     	return new HashMap<String, List<Proposition>>();
     }
     
     private List<Event> createEvents(DataSource dataSource,
-            String keyId, Set<String> eventIds, Long minValidDate,
-            Long maxValidDate) throws
+            String keyId, Set<String> eventIds,
+            DataSourceConstraint constraints) throws
             DataSourceReadException {
-        return dataSource.getEventsAsc(keyId, eventIds, minValidDate,
-                maxValidDate);
+        return dataSource.getEventsAsc(keyId, eventIds, constraints);
     }
     
     private Map<String, List<Event>> createEvents(DataSource dataSource,
-    		Set<String> keyIds, Set<String> eventIds, Long minValidDate,
-    		Long maxValidDate) throws DataSourceReadException {
-    	return dataSource.getEventsAsc(keyIds, eventIds, minValidDate, maxValidDate);
+    		Set<String> keyIds, Set<String> eventIds, 
+                DataSourceConstraint constraints)
+                throws DataSourceReadException {
+    	return dataSource.getEventsAsc(keyIds, eventIds, constraints);
     }
 
     /*

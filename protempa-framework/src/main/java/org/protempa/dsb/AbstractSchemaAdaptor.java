@@ -10,41 +10,41 @@ import java.util.List;
  * @author Andrew Post
  */
 public abstract class AbstractSchemaAdaptor implements SchemaAdaptor {
-	private final List<SchemaAdaptorListener> listenerList =
+    private final List<SchemaAdaptorListener> listenerList =
             new ArrayList<SchemaAdaptorListener>();
 
 
 
-	/**
-	 * Implemented as a no-op.
-	 * 
-	 * @see org.protempa.SchemaAdaptor#close()
-	 */
-	public void close() {
+    /**
+     * Implemented as a no-op.
+     *
+     * @see org.protempa.SchemaAdaptor#close()
+     */
+    public void close() {
 
-	}
+    }
 
-	public void addSchemaAdaptorListener(SchemaAdaptorListener listener) {
-		if (listener != null) {
-			this.listenerList.add(listener);
-		}
-	}
-    
-	public void removeSchemaAdaptorListener(SchemaAdaptorListener listener) {
-		this.listenerList.remove(listener);
-	}
+    public void addSchemaAdaptorListener(SchemaAdaptorListener listener) {
+        if (listener != null) {
+            this.listenerList.add(listener);
+        }
+    }
 
-	/**
-	 * Notifies registered listeners that the schema adaptor has been updated.
-	 * 
-	 * @see org.protempa.SchemaAdaptorUpdatedEvent
-	 * @see org.protempa.SchemaAdaptorListener
-	 */
-	protected void fireSchemaAdaptorUpdated() {
-		SchemaAdaptorUpdatedEvent e = new SchemaAdaptorUpdatedEvent(this);
-		for (int i = 0, n = this.listenerList.size(); i < n; i++) {
-			this.listenerList.get(i).schemaAdaptorUpdated(e);
-		}
-	}
+    public void removeSchemaAdaptorListener(SchemaAdaptorListener listener) {
+        this.listenerList.remove(listener);
+    }
+
+    /**
+     * Notifies registered listeners that the schema adaptor has been updated.
+     *
+     * @see org.protempa.SchemaAdaptorUpdatedEvent
+     * @see org.protempa.SchemaAdaptorListener
+     */
+    protected void fireSchemaAdaptorUpdated() {
+        SchemaAdaptorUpdatedEvent e = new SchemaAdaptorUpdatedEvent(this);
+        for (int i = 0, n = this.listenerList.size(); i < n; i++) {
+            this.listenerList.get(i).schemaAdaptorUpdated(e);
+        }
+    }
 
 }

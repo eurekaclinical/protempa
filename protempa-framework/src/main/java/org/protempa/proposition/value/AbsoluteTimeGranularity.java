@@ -1,10 +1,12 @@
 package org.protempa.proposition.value;
 
 import java.io.ObjectStreamException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.ResourceBundle;
 
 /**
@@ -210,6 +212,16 @@ public final class AbsoluteTimeGranularity implements Granularity {
 
 	private static int nextOrdinal = 0;
 
+        /**
+         * Convenience method to translate a timestamp into the format expected
+         * by SQL.
+         * @param position a date/time in milliseconds since the epoch.
+         * @return a {@link String} in JDBC timestamp escape format.
+         */
+        public static String toSQLString(Long position) {
+            return new Timestamp(position).toString();
+        }
+
 	public static AbsoluteTimeGranularity granularityStringToGranularity(
 			String string) {
 		int pos = validatePluralName(string);
@@ -361,7 +373,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
 	 * 
 	 * @see org.virginia.pbhs.parameters.Unit#getLongFormat()
 	 */
-	public Format getLongFormat() {
+	public DateFormat getLongFormat() {
 		return this.longDateFormat;
 	}
 
@@ -374,7 +386,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
 	 * 
 	 * @see org.virginia.pbhs.parameters.Unit#getMediumFormat()
 	 */
-	public Format getMediumFormat() {
+	public DateFormat getMediumFormat() {
 		return this.mediumDateFormat;
 	}
 
@@ -387,7 +399,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
 	 * 
 	 * @see org.virginia.pbhs.parameters.Unit#getShortFormat()
 	 */
-	public Format getShortFormat() {
+	public DateFormat getShortFormat() {
 		return this.shortDateFormat;
 	}
 

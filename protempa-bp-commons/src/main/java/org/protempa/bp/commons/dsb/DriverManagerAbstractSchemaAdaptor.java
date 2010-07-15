@@ -1,5 +1,6 @@
 package org.protempa.bp.commons.dsb;
 
+import java.util.logging.Level;
 import org.protempa.dsb.*;
 
 import org.arp.javautil.sql.ConnectionSpec;
@@ -18,18 +19,24 @@ import org.protempa.backend.BackendInstanceSpec;
  * we can exchange this for the {@link DataSource}, servlet, or JBoss mechanisms
  * easily
  * 
- * @author arpost
+ * @author Andrew Post
  */
 public abstract class DriverManagerAbstractSchemaAdaptor
         extends AbstractCommonsSchemaAdaptor {
 
-    protected ConnectionSpec creator;
+    private ConnectionSpec connectionSpec;
 
     protected abstract String getDbUrl();
 
     protected abstract String getUsername();
 
     protected abstract String getPassword();
+
+    protected abstract String getDriverClass();
+
+    protected ConnectionSpec getConnectionSpec() {
+        return this.connectionSpec;
+    }
 
     /**
      * This initializes the connection pool. Must call with <code>super</code>
@@ -44,10 +51,25 @@ public abstract class DriverManagerAbstractSchemaAdaptor
             throws SchemaAdaptorInitializationException {
         super.initialize(config);
 
-        creator = new DriverManagerConnectionSpec(getDbUrl(), getUsername(),
-                getPassword());
+        registerDriverIfDriverClassIsSpecified();
 
-        DSBUtil.logger().fine(getClass().getName() + " initialized");
+        this.connectionSpec = new DriverManagerConnectionSpec(getDbUrl(),
+                getUsername(), getPassword());
+
+        DSBUtil.logger().log(Level.FINE, "{0} initialized",
+                getClass().getName());
+    }
+
+    private void registerDriverIfDriverClassIsSpecified() {
+        String driverClass = getDriverClass();
+        if (driverClass != null) {
+            try {
+                Class.forName(driverClass);
+            } catch (ClassNotFoundException ex) {
+                DSBUtil.logger().log(Level.WARNING, 
+                    "Could not register database driver " + driverClass, ex);
+            }
+        }
     }
 
     @Override

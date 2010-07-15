@@ -23,6 +23,7 @@ import org.protempa.proposition.value.ValueFormat;
 import org.arp.javautil.sql.SQLExecutor;
 import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
 import org.arp.javautil.sql.SQLExecutor.StatementPreparer;
+import org.protempa.DataSourceConstraint;
 import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.SchemaAdaptorProperty;
 import org.protempa.bp.commons.dsb.DriverManagerAbstractSchemaAdaptor;
@@ -39,6 +40,8 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
     private String username;
     
     private String password;
+
+    private String driverClass;
 
     private final RelativeHourGranularityFactory granularityFactory;
 	
@@ -74,6 +77,16 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
         return this.password;
     }
 
+    @SchemaAdaptorProperty
+    public void setDriverClass(String driverClass) {
+        this.driverClass = driverClass;
+    }
+
+    @Override
+    public String getDriverClass() {
+        return this.driverClass;
+    }
+
 	/**
 	 * 
 	 */
@@ -106,7 +119,8 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 
 	public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
 			Set<String> keyIds, Set<String> paramIds,
-			Long minValid, Long maxValid) throws DataSourceReadException {
+			Long minValid, Long maxValid)
+                        throws DataSourceReadException {
         boolean where = false;
         final Set<String> keyIdsL = keyIds;
         final Set<String> paramIdsL = paramIds;
@@ -189,7 +203,8 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
                         List<PrimitiveParameter> l = result.get(keyId);
                         l.add(p);
                     } else {
-                        List<PrimitiveParameter> l = new ArrayList<PrimitiveParameter>();
+                        List<PrimitiveParameter> l =
+                                new ArrayList<PrimitiveParameter>();
                         PrimitiveParameter p = new PrimitiveParameter(
                                 resultSet.getString(2));
                         p.setValue(ValueFormat.parse(
@@ -207,8 +222,8 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 
         };
         try {
-            SQLExecutor.executeSQL(creator, primParamAscStmt.toString(),
-                    stmtPreparer, resultProcessor);
+            SQLExecutor.executeSQL(getConnectionSpec(), 
+                    primParamAscStmt.toString(), stmtPreparer, resultProcessor);
         } catch (SQLException ex) {
             throw new DataSourceReadException(ex);
         }
@@ -217,7 +232,8 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 
 	private Map<String, List<PrimitiveParameter>> getPrimitiveParameters(
 			Set<String> paramIds, Long minValid,
-			Long maxValid, String orderBy) throws DataSourceReadException {
+			Long maxValid, String orderBy)
+                        throws DataSourceReadException {
         final Set<String> paramIdsL = paramIds;
         final Long minValidL = minValid;
         final Long maxValidL = maxValid;
@@ -298,8 +314,8 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 
         };
         try {
-            SQLExecutor.executeSQL(creator, primParamAscStmt.toString(),
-                    stmtPreparer, resultProcessor);
+            SQLExecutor.executeSQL(getConnectionSpec(), 
+                    primParamAscStmt.toString(), stmtPreparer, resultProcessor);
         } catch (SQLException ex) {
             throw new DataSourceReadException(ex);
         }
@@ -322,7 +338,8 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 
 	private List<PrimitiveParameter> getPrimitiveParameters(String keyId,
 			Set<String> paramIds, Long minValid,
-			Long maxValid, String orderBy) throws DataSourceReadException {
+			Long maxValid, String orderBy)
+                        throws DataSourceReadException {
         final String keyIdL = keyId;
         final Set<String> paramIdsL = paramIds;
         final Long minValidL = minValid;
@@ -367,7 +384,8 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 
         };
 
-        final List<PrimitiveParameter> result = new ArrayList<PrimitiveParameter>();
+        final List<PrimitiveParameter> result =
+                new ArrayList<PrimitiveParameter>();
         ResultProcessor resultProcessor = new ResultProcessor() {
 
             public void process(ResultSet resultSet) throws SQLException {
@@ -385,8 +403,8 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 
         };
         try {
-            SQLExecutor.executeSQL(creator, primParamAscStmt.toString(),
-                    stmtPreparer, resultProcessor);
+            SQLExecutor.executeSQL(getConnectionSpec(),
+                    primParamAscStmt.toString(), stmtPreparer, resultProcessor);
         } catch (SQLException ex) {
             throw new DataSourceReadException(ex);
         }
@@ -396,12 +414,14 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 	private static final String allKeyIdsStmt =
             "SELECT DISTINCT keyId FROM data limit ";
 
-	public List<String> getAllKeyIds(int start, int finish) 
+	public List<String> getAllKeyIds(int start, int finish,
+                DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
 		final List<String> result = new ArrayList<String>();
 		ResultProcessor resultProcessor = new ResultProcessor() {
 
-			public void process(ResultSet resultSet) throws SQLException {
+			public void process(ResultSet resultSet)
+                                throws SQLException {
 				while (resultSet.next()) {
 					result.add(resultSet.getString(1));
 				}
@@ -410,7 +430,7 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 		};
         String stmt = allKeyIdsStmt + start + "," + finish;
         try {
-            SQLExecutor.executeSQL(creator, stmt, resultProcessor);
+            SQLExecutor.executeSQL(getConnectionSpec(), stmt, resultProcessor);
         } catch (SQLException ex) {
             throw new DataSourceReadException(ex);
         }
@@ -515,7 +535,7 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 
         };
         try {
-            SQLExecutor.executeSQL(creator, primParamAscStmt.toString(),
+            SQLExecutor.executeSQL(getConnectionSpec(), primParamAscStmt.toString(),
                     stmtPreparer, resultProcessor);
         } catch (SQLException ex) {
             throw new DataSourceReadException(ex);
@@ -636,7 +656,7 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 
         };
         try {
-            SQLExecutor.executeSQL(creator, primParamAscStmt.toString(),
+            SQLExecutor.executeSQL(getConnectionSpec(), primParamAscStmt.toString(),
                     stmtPreparer, resultProcessor);
         } catch (SQLException ex) {
             throw new DataSourceReadException(ex);
@@ -729,7 +749,7 @@ public class HELLPSchemaAdaptor extends DriverManagerAbstractSchemaAdaptor {
 
         };
         try {
-            SQLExecutor.executeSQL(creator, primParamAscStmt.toString(),
+            SQLExecutor.executeSQL(getConnectionSpec(), primParamAscStmt.toString(),
                     stmtPreparer, resultProcessor);
         } catch (SQLException ex) {
             throw new DataSourceReadException(ex);

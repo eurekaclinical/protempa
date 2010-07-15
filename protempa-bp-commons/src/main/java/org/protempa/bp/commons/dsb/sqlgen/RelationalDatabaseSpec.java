@@ -1,4 +1,4 @@
-package org.protempa.bp.commons.dsb;
+package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
 import org.protempa.proposition.value.GranularityFactory;
@@ -9,27 +9,24 @@ import org.protempa.proposition.value.UnitFactory;
  * @author Andrew Post
  */
 public class RelationalDatabaseSpec implements Serializable {
-    private PropositionSpec[] primitiveParameterSpecs;
-    private PropositionSpec[] eventSpecs;
-    private PropositionSpec[] constantParameterSpecs;
-    private TableSpec[] tableSpecs;
-    private TableSpec keysTable;
+    private PropertySpec[] primitiveParameterSpecs;
+    private PropertySpec[] eventSpecs;
+    private PropertySpec[] constantParameterSpecs;
     private UnitFactory units;
     private GranularityFactory granularities;
 
     public RelationalDatabaseSpec() {
     }
 
-    public RelationalDatabaseSpec(PropositionSpec[] primitiveParameterSpecs,
-            PropositionSpec[] eventSpecs,
-            PropositionSpec[] constantParameterSpecs, 
-            TableSpec[] tableSpecs, TableSpec keysTable, UnitFactory units,
+    public RelationalDatabaseSpec(
+            PropertySpec[] primitiveParameterSpecs,
+            PropertySpec[] eventSpecs,
+            PropertySpec[] constantParameterSpecs,
+            UnitFactory units,
             GranularityFactory granularities) {
         this.primitiveParameterSpecs = primitiveParameterSpecs;
         this.eventSpecs = eventSpecs;
         this.constantParameterSpecs = constantParameterSpecs;
-        this.tableSpecs = tableSpecs;
-        this.keysTable = keysTable;
         this.units = units;
         this.granularities = granularities;
     }
@@ -50,46 +47,30 @@ public class RelationalDatabaseSpec implements Serializable {
         this.units = units;
     }
 
-    public PropositionSpec[] getConstantParameterSpecs() {
+    public PropertySpec[] getConstantParameterSpecs() {
         return constantParameterSpecs;
     }
 
     public void setConstantParameterSpecs(
-            PropositionSpec[] constantParameterSpecs) {
+            PropertySpec[] constantParameterSpecs) {
         this.constantParameterSpecs = constantParameterSpecs;
     }
 
-    public PropositionSpec[] getEventSpecs() {
+    public PropertySpec[] getEventSpecs() {
         return eventSpecs;
     }
 
-    public void setEventSpecs(PropositionSpec[] eventSpecs) {
+    public void setEventSpecs(PropertySpec[] eventSpecs) {
         this.eventSpecs = eventSpecs;
     }
 
-    public TableSpec getKeysTable() {
-        return keysTable;
-    }
-
-    public void setKeysTable(TableSpec keysTable) {
-        this.keysTable = keysTable;
-    }
-
-    public PropositionSpec[] getPrimitiveParameterSpecs() {
+    public PropertySpec[] getPrimitiveParameterSpecs() {
         return primitiveParameterSpecs;
     }
 
     public void setPrimitiveParameterSpecs(
-            PropositionSpec[] primitiveParameterSpecs) {
+            PropertySpec[] primitiveParameterSpecs) {
         this.primitiveParameterSpecs = primitiveParameterSpecs;
-    }
-
-    public TableSpec[] getTableSpecs() {
-        return tableSpecs;
-    }
-
-    public void setTableSpecs(TableSpec[] tableSpecs) {
-        this.tableSpecs = tableSpecs;
     }
     
 }

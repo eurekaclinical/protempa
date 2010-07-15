@@ -1,14 +1,9 @@
 package org.protempa;
 
-import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueComparator;
-
 public interface DataSourceConstraint {
-	String getParameterId();
+    String getPropositionId();
 
-	ValueComparator getComparator();
-
-	Value getValue();
-
-	DataSourceConstraint getAnd();
+    DataSourceConstraint getAnd();
+    
+    void accept(AbstractDataSourceConstraintVisitor visitor);
 }

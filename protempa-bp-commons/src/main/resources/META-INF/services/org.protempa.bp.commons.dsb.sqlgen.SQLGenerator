@@ -1,0 +1,2 @@
+org.protempa.bp.commons.dsb.sqlgen.Ojdbc14Oracle10gSQLGenerator
+org.protempa.bp.commons.dsb.sqlgen.ConnectorJ5MySQL415Generator

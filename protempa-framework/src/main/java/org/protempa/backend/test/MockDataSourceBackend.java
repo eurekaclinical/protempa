@@ -19,7 +19,8 @@ import org.protempa.proposition.value.UnitFactory;
  */
 public final class MockDataSourceBackend implements DataSourceBackend {
 
-    public List<String> getAllKeyIds(int start, int finish)
+    public List<String> getAllKeyIds(int start, int finish,
+            DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -29,26 +30,32 @@ public final class MockDataSourceBackend implements DataSourceBackend {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    public Map<String, List<ConstantParameter>> getConstantParameters(
+            Set<String> keyIds,
+            Set<String> paramIds) throws DataSourceReadException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public Map<String, List<Event>> getEventsAsc(
-            Set<String> eventIds, Long minValidDate, Long maxValidDate)
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public Map<String, List<Event>> getEventsAsc(Set<String> keyIds, 
-            Set<String> eventIds, Long minValidDate,
-            Long maxValidDate) throws DataSourceReadException {
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
+            throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public List<Event> getEventsAsc(String keyId,
-            Set<String> eventIds, Long minValidDate, Long maxValidDate)
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public List<Event> getEventsDesc(String keyId,
-            Set<String> eventIds, Long minValidDate, Long maxValidDate)
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -59,27 +66,27 @@ public final class MockDataSourceBackend implements DataSourceBackend {
 
     public Map<String, List<PrimitiveParameter>>
             getPrimitiveParametersAsc(Set<String> paramIds,
-            Long minValidDate, Long maxValidDate)
+            DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
             Set<String> keyIds, Set<String> paramIds,
-            Long minValidDate, Long maxValidDate)
+            DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public List<PrimitiveParameter> getPrimitiveParametersAsc(String keyId, 
-            Set<String> paramIds, Long minValidDate,
-            Long maxValidDate) throws DataSourceReadException {
+            Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
+            throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public List<PrimitiveParameter> getPrimitiveParametersDesc(String keyId, 
-            Set<String> paramIds, Long minValidDate,
-            Long maxValidDate) throws DataSourceReadException {
+            Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
+            throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
