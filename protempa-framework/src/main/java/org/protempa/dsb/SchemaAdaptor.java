@@ -3,7 +3,7 @@ package org.protempa.dsb;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.protempa.DataSourceConstraint;
+import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 
 import org.protempa.DataSourceReadException;
 import org.protempa.backend.BackendInstanceSpec;

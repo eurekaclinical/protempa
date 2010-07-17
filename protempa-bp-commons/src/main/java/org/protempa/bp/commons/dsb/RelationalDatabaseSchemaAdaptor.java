@@ -6,8 +6,10 @@ import org.protempa.bp.commons.dsb.sqlgen.PropertySpec;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,12 +25,14 @@ import org.protempa.proposition.value.UnitFactory;
 import org.protempa.proposition.value.ValueFactory;
 import org.arp.javautil.sql.SQLExecutor;
 import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
-import org.protempa.DataSourceConstraint;
+import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 import org.protempa.DataSourceReadException;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.SchemaAdaptorProperty;
+import org.protempa.bp.commons.dsb.sqlgen.EntitySpec;
 import org.protempa.proposition.ConstantParameter;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.PropositionUtil;
 
 /**
  * Schema adaptor for the contrast reaction project.
@@ -105,11 +109,11 @@ public final class RelationalDatabaseSchemaAdaptor
     }
 
     private static void populatePropositionMap(Map<String, PropertySpec> map,
-            PropertySpec[] specs) {
-        if (specs != null) {
-            for (PropertySpec primParamSpec : specs) {
-                for (String code : primParamSpec.getCodes()) {
-                    map.put(code, primParamSpec);
+            PropertySpec[] propertySpecs) {
+        if (propertySpecs != null) {
+            for (PropertySpec propertySpec : propertySpecs) {
+                for (String code : propertySpec.getCodes()) {
+                    map.put(code, propertySpec);
                 }
             }
         }
@@ -181,40 +185,80 @@ public final class RelationalDatabaseSchemaAdaptor
         return result;
     }
 
+//    private Map<EntitySpec, Map<PropertySpec, List<String>>> generateBatches(
+//            Map<PropertySpec, List<String>> propertySpecToPropIdMap) {
+//        Map<EntitySpec, Map<PropertySpec, List<String>>> batchMap =
+//                new HashMap<EntitySpec, Map<PropertySpec, List<String>>>();
+//        for (Map.Entry<PropertySpec, List<String>> me :
+//                propertySpecToPropIdMap.entrySet()) {
+//            EntitySpec entitySpec = me.getKey().getEntitySpec();
+//            Map<PropertySpec, List<String>> m = batchMap.get(entitySpec);
+//            if (m == null) {
+//                m = new HashMap<PropertySpec, List<String>>();
+//                batchMap.put(entitySpec, m);
+//            }
+//            m.put(me.getKey(), me.getValue());
+//        }
+//        return batchMap;
+//    }
+
+        private Collection<Map<PropertySpec, List<String>>> generateBatches(
+            Map<PropertySpec, List<String>> propertySpecToPropIdMap) {
+        Map<EntitySpec, Map<PropertySpec, List<String>>> batchMap =
+                new HashMap<EntitySpec, Map<PropertySpec, List<String>>>();
+        for (Map.Entry<PropertySpec, List<String>> me :
+                propertySpecToPropIdMap.entrySet()) {
+            EntitySpec entitySpec = me.getKey().getEntitySpec();
+            Map<PropertySpec, List<String>> m = batchMap.get(entitySpec);
+            if (m == null) {
+                m = new HashMap<PropertySpec, List<String>>();
+                batchMap.put(entitySpec, m);
+            }
+            m.put(me.getKey(), me.getValue());
+        }
+        return batchMap.values();
+    }
+
     private Map<PropertySpec, List<String>> propSpecsForConstraints(
             DataSourceConstraint dataSourceConstraints) {
-        Map<PropertySpec, List<String>> colSpecs =
+        Map<PropertySpec, List<String>> propertySpecToPropIdMap =
                 new HashMap<PropertySpec, List<String>>();
         if (dataSourceConstraints != null) {
-            DataSourceConstraint dsc = dataSourceConstraints;
-            while (true) {
+            for (Iterator<DataSourceConstraint> itr =
+                    dataSourceConstraints.andIterator(); itr.hasNext();) {
+                DataSourceConstraint dsc = itr.next();
                 String propId = dsc.getPropositionId();
-                PropertySpec ps = null;
-                if (this.primitiveParameterSpecs.containsKey(propId)) {
-                    ps = this.primitiveParameterSpecs.get(propId);
-                } else if (this.eventSpecs.containsKey(propId)) {
-                    ps = this.eventSpecs.get(propId);
-                } else if (this.constantSpecs.containsKey(propId)) {
-                    ps = this.constantSpecs.get(propId);
-                } else {
-                    throw new AssertionError("Unknown propId: " + propId);
-                }
-                if (colSpecs.containsKey(ps)) {
-                    List<String> v = colSpecs.get(ps);
-                    v.add(propId);
-                } else {
-                    List<String> v = new ArrayList<String>();
-                    v.add(propId);
-                    colSpecs.put(ps, v);
-                }
-                if (dsc.getAnd() != null) {
-                    dsc = dsc.getAnd();
-                } else {
-                    break;
-                }
+                PropertySpec propertySpec = null;
+                populatePropertySpecToPropIdMap(propId,
+                    propertySpecToPropIdMap, propertySpec);
             }
         }
-        return colSpecs;
+        return propertySpecToPropIdMap;
+    }
+
+    private void populatePropertySpecToPropIdMap(String propId, 
+            Map<PropertySpec, List<String>> propertySpecToPropIdMap,
+            PropertySpec propertySpec) throws AssertionError {
+        if (this.primitiveParameterSpecs.containsKey(propId)) {
+            propertySpec = this.primitiveParameterSpecs.get(propId);
+        } else if (this.eventSpecs.containsKey(propId)) {
+            propertySpec = this.eventSpecs.get(propId);
+        } else if (this.constantSpecs.containsKey(propId)) {
+            propertySpec = this.constantSpecs.get(propId);
+        } else {
+            DSBUtil.logger().log(Level.INFO,
+                    "This data source does not know about proposition {0}",
+                     propId);
+            return;
+        }
+        if (propertySpecToPropIdMap.containsKey(propertySpec)) {
+            List<String> propIdList = propertySpecToPropIdMap.get(propertySpec);
+            propIdList.add(propId);
+        } else {
+            List<String> propIdList = new ArrayList<String>();
+            propIdList.add(propId);
+            propertySpecToPropIdMap.put(propertySpec, propIdList);
+        }
     }
 
     private static class ConstantParameterResultProcessor 
@@ -222,9 +266,9 @@ public final class RelationalDatabaseSchemaAdaptor
 
         public void process(ResultSet resultSet) throws SQLException {
             Map<PropertySpec, List<String>> propositionSpecs =
-                    getPropositionSpecs();
+                    getPropertySpecToPropIdMap();
             Map<String, PropertySpec> reversePropositionSpecs =
-                    getReversePropositionSpecs();
+                    getPropIdToPropertySpecMap();
             Map<String, List<ConstantParameter>> results = getResults();
             while (resultSet.next()) {
                 String propId;
@@ -268,7 +312,7 @@ public final class RelationalDatabaseSchemaAdaptor
         ConstantParameterResultProcessor resultProcessor =
                 new ConstantParameterResultProcessor();
         resultProcessor.setResults(results);
-        resultProcessor.setReversePropositionSpecs(this.constantSpecs);
+        resultProcessor.setPropIdToPropertySpecMap(this.constantSpecs);
 
         return readPropositions(Collections.singleton(keyId), paramIds, null,
                 null, resultProcessor).get(keyId);
@@ -283,7 +327,7 @@ public final class RelationalDatabaseSchemaAdaptor
         ConstantParameterResultProcessor resultProcessor =
                 new ConstantParameterResultProcessor();
         resultProcessor.setResults(results);
-        resultProcessor.setReversePropositionSpecs(this.constantSpecs);
+        resultProcessor.setPropIdToPropertySpecMap(this.constantSpecs);
 
         return readPropositions(keyIds, paramIds, null,
                 null, resultProcessor);
@@ -293,25 +337,34 @@ public final class RelationalDatabaseSchemaAdaptor
             <P extends Proposition> implements ResultProcessor {
 
         private Map<String, List<P>> results;
-        private Map<PropertySpec, List<String>> propositionSpecs;
-        private Map<String, PropertySpec> reversePropositionSpecs;
+        private Map<PropertySpec, List<String>> propertySpecToPropIdMap;
+        private Map<String, PropertySpec> propIdToPropertySpecMap;
+        private Set<String> propIds;
 
-        public Map<PropertySpec, List<String>> getPropositionSpecs() {
-            return this.propositionSpecs;
+        public void setPropIds(Set<String> propIds) {
+            this.propIds = propIds;
         }
 
-        public void setPropositionSpecs(
+        public Set<String> getPropIds() {
+            return this.propIds;
+        }
+
+        public Map<PropertySpec, List<String>> getPropertySpecToPropIdMap() {
+            return this.propertySpecToPropIdMap;
+        }
+
+        public void setPropertySpecToPropIdMap(
                 Map<PropertySpec, List<String>> propositionSpecs) {
-            this.propositionSpecs = propositionSpecs;
+            this.propertySpecToPropIdMap = propositionSpecs;
         }
 
-        public Map<String, PropertySpec> getReversePropositionSpecs() {
-            return this.reversePropositionSpecs;
+        public Map<String, PropertySpec> getPropIdToPropertySpecMap() {
+            return this.propIdToPropertySpecMap;
         }
 
-        public void setReversePropositionSpecs(
-                Map<String, PropertySpec> reversePropositionSpecs) {
-            this.reversePropositionSpecs = reversePropositionSpecs;
+        public void setPropIdToPropertySpecMap(
+                Map<String, PropertySpec> propIdToPropertySpecMap) {
+            this.propIdToPropertySpecMap = propIdToPropertySpecMap;
         }
 
         Map<String, List<P>> getResults() {
@@ -328,9 +381,9 @@ public final class RelationalDatabaseSchemaAdaptor
 
         public void process(ResultSet resultSet) throws SQLException {
             Map<PropertySpec, List<String>> propositionSpecs =
-                    getPropositionSpecs();
+                    getPropertySpecToPropIdMap();
             Map<String, PropertySpec> reversePropositionSpecs =
-                    getReversePropositionSpecs();
+                    getPropIdToPropertySpecMap();
             Map<String, List<PrimitiveParameter>> results = getResults();
             
             while (resultSet.next()) {
@@ -344,17 +397,17 @@ public final class RelationalDatabaseSchemaAdaptor
                     if (me.getValue().size() == 1) {
                         propId = me.getValue().get(0);
                     } else {
-                        propId = resultSet.getString(3);
+                        propId = resultSet.getString(2);
                     }
                 } else {
-                    propId = resultSet.getString(3);
+                    propId = resultSet.getString(4);
                     propositionSpec = reversePropositionSpecs.get(propId);
                 }
                 ValueFactory vf = propositionSpec.getValueType();
                 PrimitiveParameter p = new PrimitiveParameter(propId);
                 try {
                     p.setTimestamp(propositionSpec.getPositionParser()
-                            .toLong(resultSet, 2));
+                            .toLong(resultSet, 3));
                 } catch (SQLException e) {
                     DSBUtil.logger().log(Level.WARNING,
                             "Could not parse timestamp. Ignoring data value.",
@@ -380,36 +433,28 @@ public final class RelationalDatabaseSchemaAdaptor
             extends ResultProcessorAllKeyIds<Event> {
 
         public void process(ResultSet resultSet) throws SQLException {
-            Map<PropertySpec, List<String>> propositionSpecs =
-                    getPropositionSpecs();
-            Map<String, PropertySpec> reversePropositionSpecs =
-                    getReversePropositionSpecs();
+            Map<PropertySpec, List<String>> propertySpecToPropIdMap =
+                    getPropertySpecToPropIdMap();
             Map<String, List<Event>> results = getResults();
-            //String[] codes = propositionSpec.getCodes();
 
             while (resultSet.next()) {
                 String keyId = resultSet.getString(1);
                 String propId;
-                PropertySpec propositionSpec;
-                if (propositionSpecs.size() == 1) {
-                    Map.Entry<PropertySpec, List<String>> me =
-                            propositionSpecs.entrySet().iterator().next();
-                    propositionSpec = me.getKey();
-                    if (me.getValue().size() == 1) {
-                        propId = me.getValue().get(0);
-                    } else {
-                        propId = resultSet.getString(3);
-                    }
+                PropertySpec propertySpec;
+                Map.Entry<PropertySpec, List<String>> me =
+                    propertySpecToPropIdMap.entrySet().iterator().next();
+                propertySpec = me.getKey();
+                if (getPropIds().size() == 1) {
+                    propId = getPropIds().iterator().next();
                 } else {
-                    propId = resultSet.getString(3);
-                    propositionSpec = reversePropositionSpecs.get(propId);
+                    propId = resultSet.getString(2);
                 }
-                Event p = new Event(propId);
-                Granularity gran = propositionSpec.getGranularity();
+                Event event = new Event(propId);
+                Granularity gran = propertySpec.getGranularity();
                 try {
-                    long d = propositionSpec
-                            .getPositionParser().toLong(resultSet, 2);
-                    p.setInterval(new PointInterval(d, gran, d, gran));
+                    long d = propertySpec
+                            .getPositionParser().toLong(resultSet, 3);
+                    event.setInterval(new PointInterval(d, gran, d, gran));
                 } catch (SQLException e) {
                     DSBUtil.logger().log(Level.WARNING,
                             "Could not parse timestamp. Ignoring data value.",
@@ -418,10 +463,10 @@ public final class RelationalDatabaseSchemaAdaptor
                 }
                 if (results.containsKey(keyId)) {
                     List<Event> l = results.get(keyId);
-                    l.add(p);
+                    l.add(event);
                 } else {
                     List<Event> l = new ArrayList<Event>();
-                    l.add(p);
+                    l.add(event);
                     results.put(keyId, l);
                 }
             }
@@ -438,7 +483,7 @@ public final class RelationalDatabaseSchemaAdaptor
         PrimitiveParameterResultProcessorAllKeyIds resultProcessor =
                 new PrimitiveParameterResultProcessorAllKeyIds();
         resultProcessor.setResults(results);
-        resultProcessor.setReversePropositionSpecs(
+        resultProcessor.setPropIdToPropertySpecMap(
                 this.primitiveParameterSpecs);
 
         return readPropositions(keyIds, paramIds, dataSourceConstraints,
@@ -450,35 +495,66 @@ public final class RelationalDatabaseSchemaAdaptor
             DataSourceConstraint dataSourceConstraints, SQLOrderBy order,
             ResultProcessorAllKeyIds<P> resultProcessor)
             throws DataSourceReadException {
-        //This needs to incorporate propIds
-        Map<PropertySpec, List<String>> propSpecsForConstraints =
+        Map<PropertySpec, List<String>> propertySpecToPropIdMapFromConstraints =
                 propSpecsForConstraints(dataSourceConstraints);
-
-        resultProcessor.setPropositionSpecs(propSpecsForConstraints);
-
-        String query = this.sqlGenerator.generateReadPropositionsQuery(
-                dataSourceConstraints,
-                propSpecsForConstraints, keyIds, order);
-
-        DSBUtil.logger().log(Level.INFO,
-                "Executing the following query for readPropositions: {0}",
-                query);
-
-        try {
-            SQLExecutor.executeSQL(getConnectionSpec(), query, resultProcessor);
-        } catch (SQLException ex) {
-            throw new DataSourceReadException(ex);
+        Map<PropertySpec, List<String>> propertySpecToPropIdMapFromPropIds =
+                new HashMap<PropertySpec, List<String>>();
+        for (String propId : propIds) {
+            PropertySpec propertySpec =
+                    resultProcessor.getPropIdToPropertySpecMap().get(propId);
+            populatePropertySpecToPropIdMap(propId, 
+                    propertySpecToPropIdMapFromPropIds,
+                    propertySpec);
         }
 
+        Map<PropertySpec, List<String>> propertySpecToPropIdMap =
+                new HashMap<PropertySpec, List<String>>(
+                propertySpecToPropIdMapFromConstraints);
+        propertySpecToPropIdMap.putAll(propertySpecToPropIdMapFromPropIds);
 
-        Map<String, List<P>> resultsMap = resultProcessor.getResults();
-        for (Map.Entry<String, List<P>> me : resultsMap.entrySet()) {
-            if (me.getValue() == null) {
-                me.setValue(new ArrayList<P>(0));
+        resultProcessor.setPropIds(propIds);
+        resultProcessor.setPropertySpecToPropIdMap(propertySpecToPropIdMap);
+        //Collection<Map<PropertySpec, List<String>>> batchMap =
+        //        generateBatches(propertySpecToPropIdMapFromConstraints);
+
+        Map<String, List<P>> results = new HashMap<String, List<P>>();
+        //for (Map<PropertySpec, List<String>> m : batchMap) {
+        for (Map.Entry<PropertySpec, List<String>> me :
+            propertySpecToPropIdMapFromPropIds.entrySet()) {
+            Map<PropertySpec, List<String>> m =
+                    new HashMap<PropertySpec, List<String>>(
+                    propertySpecToPropIdMapFromConstraints);
+            m.put(me.getKey(), me.getValue());
+            String query = this.sqlGenerator.generateReadPropositionsQuery(
+                    dataSourceConstraints, m, keyIds, order);
+
+            DSBUtil.logger().log(Level.INFO,
+                    "Executing the following query for readPropositions: {0}",
+                    query);
+
+            try {
+                SQLExecutor.executeSQL(getConnectionSpec(), query,
+                        resultProcessor);
+            } catch (SQLException ex) {
+                throw new DataSourceReadException(ex);
             }
-        }
 
-        return resultsMap;
+            Map<String, List<P>> resultsMap = resultProcessor.getResults();
+            for (Map.Entry<String, List<P>> me2 : resultsMap.entrySet()) {
+                if (me2.getValue() == null) {
+                    me2.setValue(new ArrayList<P>(0));
+                }
+                List<P> rList = results.get(me2.getKey());
+                if (rList == null) {
+                    results.put(me2.getKey(), me2.getValue());
+                } else {
+                    throw new AssertionError("never reached");
+                }
+            }
+            results.putAll(resultsMap);
+        }
+        
+        return results;
     }
 
     private Map<String, List<Event>> readEvents(Set<String> keyIds,
@@ -489,7 +565,7 @@ public final class RelationalDatabaseSchemaAdaptor
         EventResultProcessorAllKeyIds resultProcessor =
                 new EventResultProcessorAllKeyIds();
         resultProcessor.setResults(results);
-        resultProcessor.setReversePropositionSpecs(this.eventSpecs);
+        resultProcessor.setPropIdToPropertySpecMap(this.eventSpecs);
 
         return readPropositions(keyIds, eventIds, dataSourceConstraints,
                 order, resultProcessor);

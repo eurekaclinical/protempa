@@ -1,4 +1,13 @@
-package org.protempa;
+package org.protempa.dsb.datasourceconstraint;
+
+import org.protempa.AbstractPropositionDefinitionVisitor;
+import org.protempa.EventDefinition;
+import org.protempa.ExtendedPropositionDefinition;
+import org.protempa.HighLevelAbstractionDefinition;
+import org.protempa.KnowledgeSource;
+import org.protempa.PrimitiveParameterDefinition;
+import org.protempa.PropositionDefinition;
+import org.protempa.TemporalExtendedPropositionDefinition;
 
 /**
  *

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  *
@@ -14,50 +13,63 @@ import java.util.Set;
 class ColumnSpecInfoFactory {
 
     ColumnSpecInfo newInstance(
-            Map<PropertySpec, List<String>> specs) {
-        if (specs == null)
-            throw new IllegalArgumentException("specs cannot be null");
-        if (specs.isEmpty())
+            Map<PropertySpec, List<String>> propertySpecToPropIdMap) {
+        if (propertySpecToPropIdMap == null)
             throw new IllegalArgumentException(
-                    "specs must have at least one entry");
+                    "propertySpecToPropIdMap cannot be null");
+        if (propertySpecToPropIdMap.isEmpty())
+            throw new IllegalArgumentException(
+                    "propertySpecToPropIdMap must have at least one entry");
         ColumnSpecInfo columnSpecInfo = new ColumnSpecInfo();
-        Set<PropertySpec> propSpecKeys = specs.keySet();
-        Iterator<PropertySpec> psItr = propSpecKeys.iterator();
-        PropertySpec propositionSpec = psItr.next();
         List<ColumnSpec> columnSpecs = new ArrayList<ColumnSpec>();
         int i = 0;
-        
-        while (true) {
-            i = processKeySpec(propositionSpec, columnSpecs, i);
-            i = processStartTimeOrTimestamp(propositionSpec, columnSpecs, i,
+        for (Iterator<PropertySpec> itr = 
+                propertySpecToPropIdMap.keySet().iterator();
+                itr.hasNext();) {
+            PropertySpec propertySpec = itr.next();
+            if (i == 0)
+                i = processKeySpec(propertySpec, columnSpecs, i);
+            i = processStartTimeOrTimestamp(propertySpec, columnSpecs, i,
                     columnSpecInfo);
-            i = processFinishTimeSpec(propositionSpec, columnSpecs, i,
+            i = processFinishTimeSpec(propertySpec, columnSpecs, i,
                     columnSpecInfo);
-            i = processPropertyValueSpecs(propositionSpec, columnSpecs, i, 
+            i = processPropertyValueSpecs(propertySpec, columnSpecs, i,
                     columnSpecInfo);
-            i = processConstraintSpecs(propositionSpec, columnSpecs, i);
-
-            if (psItr.hasNext()) {
-                propositionSpec = psItr.next();
-            } else {
-                break;
-            }
+            i = processCodeSpec(propertySpec, columnSpecs, i, columnSpecInfo);
+            i = processConstraintSpecs(propertySpec, columnSpecs, i,
+                    columnSpecInfo);
         }
         columnSpecInfo.setColumnSpecs(columnSpecs);
         return columnSpecInfo;
     }
 
-    private int processConstraintSpecs(PropertySpec propositionSpec,
-            List<ColumnSpec> columnSpecs, int i) {
-        ColumnSpec[] constraintSpecs = propositionSpec.getConstraintSpecs();
+    private int processCodeSpec(PropertySpec propertySpec,
+            List<ColumnSpec> columnSpecs, int i,
+            ColumnSpecInfo columnSpecInfo) {
+        ColumnSpec codeSpec = propertySpec.getCodeSpec();
+        i = processConstraintSpec(codeSpec, columnSpecs, i);
+        columnSpecInfo.setCodeIndex(i - 1);
+        return i;
+    }
+
+    private int processConstraintSpecs(PropertySpec propertySpec,
+            List<ColumnSpec> columnSpecs, int i, 
+            ColumnSpecInfo columnSpecInfo) {
+        ColumnSpec[] constraintSpecs = propertySpec.getConstraintSpecs();
         if (constraintSpecs != null) {
             for (ColumnSpec spec : constraintSpecs) {
-                if (spec != null) {
-                    List<ColumnSpec> specAsList = spec.asList();
-                    columnSpecs.addAll(specAsList);
-                    i += specAsList.size();
-                }
+                i = processConstraintSpec(spec, columnSpecs, i);
             }
+        }
+        return i;
+    }
+
+    private int processConstraintSpec(ColumnSpec spec,
+            List<ColumnSpec> columnSpecs, int i) {
+        if (spec != null) {
+            List<ColumnSpec> specAsList = spec.asList();
+            columnSpecs.addAll(specAsList);
+            i += specAsList.size();
         }
         return i;
     }

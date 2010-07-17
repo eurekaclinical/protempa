@@ -19,6 +19,8 @@ public final class PropertySpec implements Serializable {
     private final ColumnSpec startTimeOrTimestampSpec;
     private final ColumnSpec finishTimeSpec;
     private final Map<String, ColumnSpec> propertyValueSpecs;
+    private final Map<String, String> codeToPropIdMap;
+    private final ColumnSpec codeSpec;
     private final ColumnSpec[] constraintSpecs;
     private final ValueFactory valueType;
     private final Granularity granularity;
@@ -38,12 +40,15 @@ public final class PropertySpec implements Serializable {
             ColumnSpec startTimeOrTimestampSpec,
             ColumnSpec finishTimeSpec,
             Map<String, ColumnSpec> propertyValueSpecs,
+            Map<String, String> codeToPropIdMap,
+            ColumnSpec codeSpec,
             ColumnSpec[] constraintSpecs,
             ValueFactory valueType,
             Granularity granularity,
             PositionParser positionParser) {
         this(new String[] {code}, entitySpec, startTimeOrTimestampSpec,
-                finishTimeSpec, propertyValueSpecs, constraintSpecs,
+                finishTimeSpec, propertyValueSpecs, codeToPropIdMap,
+                codeSpec, constraintSpecs,
                 valueType, granularity, positionParser);
     }
 
@@ -61,6 +66,8 @@ public final class PropertySpec implements Serializable {
             ColumnSpec startTimeOrTimestampSpec,
             ColumnSpec finishTimeSpec,
             Map<String, ColumnSpec> propertyValueSpecs,
+            Map<String, String> codeToPropIdMap,
+            ColumnSpec codeSpec,
             ColumnSpec[] constraintSpecs,
             ValueFactory valueType,
             Granularity granularity,
@@ -76,6 +83,8 @@ public final class PropertySpec implements Serializable {
         this.startTimeOrTimestampSpec = startTimeOrTimestampSpec;
         this.finishTimeSpec = finishTimeSpec;
         this.propertyValueSpecs = propertyValueSpecs;
+        this.codeToPropIdMap = codeToPropIdMap;
+        this.codeSpec = codeSpec;
         this.constraintSpecs = constraintSpecs;
         this.valueType = valueType;
         this.granularity = granularity;
@@ -103,6 +112,14 @@ public final class PropertySpec implements Serializable {
 
     public Map<String, ColumnSpec> getPropertyValueSpecs() {
         return this.propertyValueSpecs;
+    }
+
+    public Map<String, String> getCodeToPropIdMap() {
+        return this.codeToPropIdMap;
+    }
+
+    public ColumnSpec getCodeSpec() {
+        return this.codeSpec;
     }
 
     public ColumnSpec[] getConstraintSpecs() {

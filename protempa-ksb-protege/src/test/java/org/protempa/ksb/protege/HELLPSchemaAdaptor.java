@@ -23,7 +23,7 @@ import org.protempa.proposition.value.ValueFormat;
 import org.arp.javautil.sql.SQLExecutor;
 import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
 import org.arp.javautil.sql.SQLExecutor.StatementPreparer;
-import org.protempa.DataSourceConstraint;
+import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.SchemaAdaptorProperty;
 import org.protempa.bp.commons.dsb.DriverManagerAbstractSchemaAdaptor;

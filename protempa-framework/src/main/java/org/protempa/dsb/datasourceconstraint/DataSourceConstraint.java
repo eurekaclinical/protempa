@@ -1,4 +1,6 @@
-package org.protempa;
+package org.protempa.dsb.datasourceconstraint;
+
+import java.util.Iterator;
 
 public interface DataSourceConstraint {
     String getPropositionId();
@@ -6,4 +8,6 @@ public interface DataSourceConstraint {
     DataSourceConstraint getAnd();
     
     void accept(AbstractDataSourceConstraintVisitor visitor);
+
+    Iterator<DataSourceConstraint> andIterator();
 }

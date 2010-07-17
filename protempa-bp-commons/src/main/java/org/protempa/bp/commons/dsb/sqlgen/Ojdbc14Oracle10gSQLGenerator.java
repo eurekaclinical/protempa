@@ -179,6 +179,7 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
                 wherePart.append(',');
             }
         }
+        wherePart.append(") ");
     }
 
 }

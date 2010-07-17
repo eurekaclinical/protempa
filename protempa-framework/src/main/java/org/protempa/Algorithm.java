@@ -1,5 +1,6 @@
 package org.protempa;
 
+import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.value.Value;

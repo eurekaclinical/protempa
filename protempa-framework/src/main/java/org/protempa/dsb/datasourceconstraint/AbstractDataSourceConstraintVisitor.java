@@ -1,4 +1,6 @@
-package org.protempa;
+package org.protempa.dsb.datasourceconstraint;
+
+import java.util.Iterator;
 
 /**
  *
@@ -7,9 +9,11 @@ package org.protempa;
 public abstract class AbstractDataSourceConstraintVisitor {
 
     public void visitAll(DataSourceConstraint constraints) {
-        while (constraints != null) {
-            constraints.accept(this);
-            constraints = constraints.getAnd();
+        if (constraints != null) {
+            for (Iterator<DataSourceConstraint> itr =
+                    constraints.andIterator(); itr.hasNext();) {
+                constraints.accept(this);
+            }
         }
     }
 

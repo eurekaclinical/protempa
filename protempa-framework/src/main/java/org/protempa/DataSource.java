@@ -1,5 +1,6 @@
 package org.protempa;
 
+import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

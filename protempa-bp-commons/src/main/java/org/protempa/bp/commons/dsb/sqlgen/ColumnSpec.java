@@ -10,7 +10,7 @@ import java.util.List;
  */
 public final class ColumnSpec implements Serializable {
     public static enum Constraint {
-        EQUAL_TO, LIKE, IN
+        EQUAL_TO, LIKE
     }
 
     public static class ConstraintValue {
@@ -124,5 +124,14 @@ public final class ColumnSpec implements Serializable {
         }
         return columnSpecs;
     }
+
+    @Override
+    public String toString() {
+        return "ColumnSpec{" + "schema=" +
+                schema + "; table=" + table + "; column=" + column + "}";
+    }
+
+
+
 
 }

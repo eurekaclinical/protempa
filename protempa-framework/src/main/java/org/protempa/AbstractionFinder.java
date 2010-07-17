@@ -1,5 +1,6 @@
 package org.protempa;
 
+import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

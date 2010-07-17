@@ -1,4 +1,4 @@
-package org.protempa;
+package org.protempa.dsb.datasourceconstraint;
 
 import org.protempa.proposition.value.ValueComparator;
 

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.protempa.DataSourceConstraint;
+import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 
 import org.protempa.proposition.ConstantParameter;
 import org.protempa.proposition.Event;

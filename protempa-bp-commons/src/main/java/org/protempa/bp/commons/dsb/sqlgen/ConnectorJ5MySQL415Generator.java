@@ -181,6 +181,7 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
                 wherePart.append(',');
             }
         }
+        wherePart.append(") ");
     }
 
 }
