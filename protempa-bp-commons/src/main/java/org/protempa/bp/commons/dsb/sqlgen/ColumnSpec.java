@@ -3,6 +3,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.arp.javautil.string.StringUtil;
 
 /**
  *
@@ -77,6 +78,8 @@ public final class ColumnSpec implements Serializable {
         this.table = table;
         this.column = column;
         this.joinSpec = joinSpec;
+        if (this.joinSpec != null)
+            this.joinSpec.setPrevColumnSpec(this);
     }
 
     public boolean isUnique() {
@@ -105,6 +108,11 @@ public final class ColumnSpec implements Serializable {
 
     public ConstraintValue[] getConstraintValues() {
         return this.constraintValues;
+    }
+
+    public boolean isSameSchemaAndTable(ColumnSpec columnSpec) {
+        return StringUtil.equals(columnSpec.getSchema(),this.getSchema())
+                   && StringUtil.equals(columnSpec.getTable(),this.getTable());
     }
 
     /**

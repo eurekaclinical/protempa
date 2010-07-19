@@ -5,6 +5,7 @@ import org.protempa.bp.commons.dsb.sqlgen.RelationalDatabaseSpec;
 import org.protempa.bp.commons.dsb.sqlgen.PropertySpec;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,7 +33,6 @@ import org.protempa.bp.commons.SchemaAdaptorProperty;
 import org.protempa.bp.commons.dsb.sqlgen.EntitySpec;
 import org.protempa.proposition.ConstantParameter;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.PropositionUtil;
 
 /**
  * Schema adaptor for the contrast reaction project.
@@ -134,7 +134,7 @@ public final class RelationalDatabaseSchemaAdaptor
                     .newInstance();
         } catch (Exception ex) {
             throw new SchemaAdaptorInitializationException(
-                    "Error getting a SQL generator driver", ex);
+                    "Could not load a SQL generator", ex);
         }
     }
 
@@ -220,7 +220,8 @@ public final class RelationalDatabaseSchemaAdaptor
     }
 
     private Map<PropertySpec, List<String>> propSpecsForConstraints(
-            DataSourceConstraint dataSourceConstraints) {
+            DataSourceConstraint dataSourceConstraints) 
+            throws DataSourceReadException {
         Map<PropertySpec, List<String>> propertySpecToPropIdMap =
                 new HashMap<PropertySpec, List<String>>();
         if (dataSourceConstraints != null) {
@@ -228,17 +229,29 @@ public final class RelationalDatabaseSchemaAdaptor
                     dataSourceConstraints.andIterator(); itr.hasNext();) {
                 DataSourceConstraint dsc = itr.next();
                 String propId = dsc.getPropositionId();
-                PropertySpec propertySpec = null;
-                populatePropertySpecToPropIdMap(propId,
-                    propertySpecToPropIdMap, propertySpec);
+                boolean inDataSource =
+                        populatePropertySpecToPropIdMap(propId,
+                        propertySpecToPropIdMap);
+                if (!inDataSource) {
+                    //FIXME this error message should refer to the data source
+                    //backend, but we have not reference to it.
+                    String msg = 
+                            "Data source constraint {0} on proposition {1} " +
+                            "cannot be applied to this data source backend " +
+                            "because the backend does not know about {1}";
+                    MessageFormat mf = new MessageFormat(msg);
+                    throw new DataSourceReadException(
+                            mf.format(new Object[] {dsc, propId}));
+                }
             }
         }
         return propertySpecToPropIdMap;
     }
 
-    private void populatePropertySpecToPropIdMap(String propId, 
-            Map<PropertySpec, List<String>> propertySpecToPropIdMap,
-            PropertySpec propertySpec) throws AssertionError {
+    private boolean populatePropertySpecToPropIdMap(String propId,
+            Map<PropertySpec, List<String>> propertySpecToPropIdMap) 
+            throws AssertionError {
+        PropertySpec propertySpec;
         if (this.primitiveParameterSpecs.containsKey(propId)) {
             propertySpec = this.primitiveParameterSpecs.get(propId);
         } else if (this.eventSpecs.containsKey(propId)) {
@@ -246,10 +259,7 @@ public final class RelationalDatabaseSchemaAdaptor
         } else if (this.constantSpecs.containsKey(propId)) {
             propertySpec = this.constantSpecs.get(propId);
         } else {
-            DSBUtil.logger().log(Level.INFO,
-                    "This data source does not know about proposition {0}",
-                     propId);
-            return;
+            return false;
         }
         if (propertySpecToPropIdMap.containsKey(propertySpec)) {
             List<String> propIdList = propertySpecToPropIdMap.get(propertySpec);
@@ -259,6 +269,7 @@ public final class RelationalDatabaseSchemaAdaptor
             propIdList.add(propId);
             propertySpecToPropIdMap.put(propertySpec, propIdList);
         }
+        return true;
     }
 
     private static class ConstantParameterResultProcessor 
@@ -500,11 +511,12 @@ public final class RelationalDatabaseSchemaAdaptor
         Map<PropertySpec, List<String>> propertySpecToPropIdMapFromPropIds =
                 new HashMap<PropertySpec, List<String>>();
         for (String propId : propIds) {
-            PropertySpec propertySpec =
-                    resultProcessor.getPropIdToPropertySpecMap().get(propId);
-            populatePropertySpecToPropIdMap(propId, 
-                    propertySpecToPropIdMapFromPropIds,
-                    propertySpec);
+            boolean inDataSource = populatePropertySpecToPropIdMap(propId,
+                    propertySpecToPropIdMapFromPropIds);
+            if (!inDataSource)
+                DSBUtil.logger().log(Level.INFO,
+                    "This data source does not know about {0}",
+                     propId);
         }
 
         Map<PropertySpec, List<String>> propertySpecToPropIdMap =
@@ -526,6 +538,7 @@ public final class RelationalDatabaseSchemaAdaptor
                     propertySpecToPropIdMapFromConstraints);
             m.put(me.getKey(), me.getValue());
             String query = this.sqlGenerator.generateReadPropositionsQuery(
+                    propIds,
                     dataSourceConstraints, m, keyIds, order);
 
             DSBUtil.logger().log(Level.INFO,

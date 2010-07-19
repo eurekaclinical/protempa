@@ -45,10 +45,11 @@ class ColumnSpecInfoFactory {
 
     private int processCodeSpec(PropertySpec propertySpec,
             List<ColumnSpec> columnSpecs, int i,
-            ColumnSpecInfo columnSpecInfo) {
+        ColumnSpecInfo columnSpecInfo) {
         ColumnSpec codeSpec = propertySpec.getCodeSpec();
         i = processConstraintSpec(codeSpec, columnSpecs, i);
-        columnSpecInfo.setCodeIndex(i - 1);
+        if (codeSpec != null)
+            columnSpecInfo.setCodeIndex(i - 1);
         return i;
     }
 

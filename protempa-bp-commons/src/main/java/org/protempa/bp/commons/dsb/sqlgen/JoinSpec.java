@@ -10,7 +10,9 @@ public final class JoinSpec implements Serializable {
     private final String fromKey;
     private final String toKey;
     private final ColumnSpec nextColumnSpec;
+    private ColumnSpec prevColumnSpec;
 
+    //needs ColumnSpec prevColumnSpec
     public JoinSpec(String fromKey, String toKey, ColumnSpec nextColumnSpec) {
         if (fromKey == null)
             throw new IllegalArgumentException("fromKey cannot be null");
@@ -21,6 +23,14 @@ public final class JoinSpec implements Serializable {
         this.fromKey = fromKey;
         this.toKey = toKey;
         this.nextColumnSpec = nextColumnSpec;
+    }
+
+    public ColumnSpec getPrevColumnSpec() {
+        return prevColumnSpec;
+    }
+
+    void setPrevColumnSpec(ColumnSpec prevColumnSpec) {
+        this.prevColumnSpec = prevColumnSpec;
     }
 
     public String getFromKey() {

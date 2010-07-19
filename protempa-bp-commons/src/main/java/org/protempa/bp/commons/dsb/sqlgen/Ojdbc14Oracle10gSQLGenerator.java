@@ -5,7 +5,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.protempa.bp.commons.dsb.SQLOrderBy;
+import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 
 /**
  *
@@ -168,15 +172,27 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
 
     @Override
     public void generateInClause(StringBuilder wherePart,
-            ColumnSpec columnSpec) {
+            int referenceIndex, String column,
+            ColumnSpec.ConstraintValue[] constraintValue) {
+        wherePart.append("a");
+        wherePart.append(referenceIndex);
+        wherePart.append(".");
+        wherePart.append(column);
         wherePart.append(" IN (");
-        ColumnSpec.ConstraintValue[] constraintValue =
-                columnSpec.getConstraintValues();
         for (int k = 0; k < constraintValue.length; k++) {
             Object val = constraintValue[k].getValue();
             appendValue(val, wherePart);
             if (k + 1 < constraintValue.length) {
-                wherePart.append(',');
+                if ((k + 1) % 1000 == 0) {
+                    wherePart.append(") OR ");
+                    wherePart.append("a");
+                    wherePart.append(referenceIndex);
+                    wherePart.append(".");
+                    wherePart.append(column);
+                    wherePart.append(" IN (");
+                } else {
+                    wherePart.append(',');
+                }
             }
         }
         wherePart.append(") ");

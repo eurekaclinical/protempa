@@ -170,10 +170,13 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
 
     @Override
     public void generateInClause(StringBuilder wherePart,
-            ColumnSpec columnSpec) {
+            int referenceIndex, String column,
+            ColumnSpec.ConstraintValue[] constraintValue) {
+        wherePart.append("a");
+        wherePart.append(referenceIndex);
+        wherePart.append(".");
+        wherePart.append(column);
         wherePart.append(" IN (");
-        ColumnSpec.ConstraintValue[] constraintValue =
-                columnSpec.getConstraintValues();
         for (int k = 0; k < constraintValue.length; k++) {
             Object val = constraintValue[k].getValue();
             appendValue(val, wherePart);

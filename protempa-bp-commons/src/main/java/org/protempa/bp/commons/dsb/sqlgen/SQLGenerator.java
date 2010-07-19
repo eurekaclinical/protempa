@@ -67,7 +67,7 @@ public interface SQLGenerator {
             int start, int count, DataSourceConstraint dataSourceConstraints,
             Map<PropertySpec, List<String>> specs);
 
-    String generateReadPropositionsQuery(
+    String generateReadPropositionsQuery(Set<String> propIds,
             DataSourceConstraint dataSourceConstraints,
             Map<PropertySpec, List<String>> specs, Set<String> keyIds,
             SQLOrderBy order);

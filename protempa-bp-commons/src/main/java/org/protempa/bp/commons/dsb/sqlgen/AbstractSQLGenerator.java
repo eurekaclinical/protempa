@@ -3,6 +3,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.arp.javautil.arrays.Arrays;
+import org.arp.javautil.string.StringUtil;
+import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.ConstraintValue;
 import org.protempa.dsb.datasourceconstraint.AbstractDataSourceConstraintVisitor;
 import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 import org.protempa.dsb.datasourceconstraint.PositionDataSourceConstraint;
@@ -26,13 +29,12 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Connection connection) throws SQLException;
 
     public abstract boolean isLimitingSupported();
-
     private static final String getPropIdsSQL =
-            "select {0} from {4} " +
-            "where {5}";
+            "select {0} from {4} "
+            + "where {5}";
 
     public final String generateGetAllKeyIdsQuery(int start, int count,
-            DataSourceConstraint dataSourceConstraints, 
+            DataSourceConstraint dataSourceConstraints,
             Map<PropertySpec, List<String>> specs) {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(specs);
         Map<ColumnSpec, Integer> referenceIndices =
@@ -42,8 +44,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         info2.setColumnSpecs(
                 Collections.singletonList(info.getColumnSpecs().get(0)));
         StringBuilder selectClause = generateSelectClause(info2, referenceIndices);
-        StringBuilder fromClause = generateFromClause(info.getColumnSpecs());
-        StringBuilder whereClause = generateWhereClause(info, specs,
+        StringBuilder fromClause = generateFromClause(info.getColumnSpecs(),
+                referenceIndices);
+        StringBuilder whereClause = generateWhereClause(null, info, specs,
                 dataSourceConstraints, selectClause, referenceIndices, null,
                 null);
         String result = assembleGetAllKeyIdsQuery(
@@ -52,19 +55,21 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     public final String generateReadPropositionsQuery(
+            Set<String> propIds,
             DataSourceConstraint dataSourceConstraints,
-            Map<PropertySpec, List<String>> propositionSpecsForConstraints,
+            Map<PropertySpec, List<String>> propertySpecs,
             Set<String> keyIds,
             SQLOrderBy order) {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(
-                propositionSpecsForConstraints);
+                propertySpecs);
         Map<ColumnSpec, Integer> referenceIndices =
                 computeReferenceIndices(info.getColumnSpecs());
         StringBuilder selectClause = generateSelectClause(info,
                 referenceIndices);
-        StringBuilder fromClause = generateFromClause(info.getColumnSpecs());
-        StringBuilder whereClause = generateWhereClause(info,
-                propositionSpecsForConstraints,
+        StringBuilder fromClause = generateFromClause(info.getColumnSpecs(),
+                referenceIndices);
+        StringBuilder whereClause = generateWhereClause(propIds, info,
+                propertySpecs,
                 dataSourceConstraints, selectClause, referenceIndices,
                 keyIds, order);
         String result = assembleReadPropositionsQuery(
@@ -79,6 +84,38 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     public abstract String assembleReadPropositionsQuery(
             StringBuilder selectClause, StringBuilder fromClause,
             StringBuilder whereClause);
+
+    private ConstraintValue[] filterConstraintValues(Set<String> propIds,
+            ConstraintValue[] constraintValues) {
+        ColumnSpec.ConstraintValue[] filteredConstraintValues;
+        if (propIds != null) {
+            List<ColumnSpec.ConstraintValue> lccv =
+                    new ArrayList<ColumnSpec.ConstraintValue>();
+            for (ColumnSpec.ConstraintValue ccv : constraintValues) {
+                if (propIds.contains(ccv.getCode())) {
+                    lccv.add(ccv);
+                }
+            }
+            filteredConstraintValues =
+                    lccv.toArray(new ColumnSpec.ConstraintValue[lccv.size()]);
+        } else {
+            filteredConstraintValues = constraintValues;
+        }
+        return filteredConstraintValues;
+    }
+
+    private ColumnSpec findColumnSpecWithMatchingSchemaAndTable(int j, List<ColumnSpec> columnSpecs, ColumnSpec columnSpec) {
+        ColumnSpec columnSpec2 = null;
+        for (int k = 0; k < j; k++) {
+            columnSpec2 = columnSpecs.get(k);
+            if (columnSpec.isSameSchemaAndTable(columnSpec2)) {
+                break;
+            } else {
+                columnSpec2 = null;
+            }
+        }
+        return columnSpec2;
+    }
 
     private StringBuilder generateSelectClause(ColumnSpecInfo info,
             Map<ColumnSpec, Integer> referenceIndices) {
@@ -121,20 +158,22 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 names[k++] = e.getKey() + "_value";
             }
         }
-        
+
         for (int j = 0; j < indices.length; j++) {
             ColumnSpec cs = info.getColumnSpecs().get(indices[j]);
             int index = referenceIndices.get(cs);
             String column = cs.getColumn();
             String name = names[j];
-            boolean distinctRequested = j == 0 && info.isDistinct() &&
-                    (indices.length > 1 || !cs.isUnique());
+            boolean distinctRequested = j == 0 && info.isDistinct()
+                    && (indices.length > 1 || !cs.isUnique());
             boolean hasNext = j < indices.length - 1;
-            if (column == null)
-                throw new AssertionError("column cannot be null: " +
-                    "index=" + index + "; name=" + name + "; " + cs);
-            if (name == null)
+            if (column == null) {
+                throw new AssertionError("column cannot be null: "
+                        + "index=" + index + "; name=" + name + "; " + cs);
+            }
+            if (name == null) {
                 throw new AssertionError("name cannot be null");
+            }
             generateSelectColumn(distinctRequested, selectPart, index, column,
                     name, hasNext);
         }
@@ -145,70 +184,64 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             StringBuilder selectPart, int index, String column, String name,
             boolean hasNext);
 
-    public abstract void generateFromTable( String schema, String table,
-        StringBuilder fromPart, int index);
+    public abstract void generateFromTable(String schema, String table,
+            StringBuilder fromPart, int index);
 
     public abstract void generateFromTableReference(
             int i, StringBuilder fromPart);
 
     public abstract void generateOn(StringBuilder fromPart, int fromIndex,
             int toIndex, String fromKey, String toKey);
-    
+
     public abstract void generateJoin(StringBuilder fromPart);
 
-    private StringBuilder generateFromClause(List<ColumnSpec> columnSpecs) {
+    private StringBuilder generateFromClause(List<ColumnSpec> columnSpecs,
+            Map<ColumnSpec, Integer> referenceIndices) {
         Map<Integer, ColumnSpec> columnSpecCache =
                 new HashMap<Integer, ColumnSpec>();
-        int i = 1;
         StringBuilder fromPart = new StringBuilder();
         JoinSpec currentJoin = null;
         boolean begin = true;
-        boolean firstJoin = false;
-        int mainJoinTableIndex = -1;
         for (int j = 0, n = columnSpecs.size(); j < n; j++) {
-            ColumnSpec cs = columnSpecs.get(j);
+            ColumnSpec columnSpec = columnSpecs.get(j);
             boolean shouldGenerateTable = begin || currentJoin != null;
             if (shouldGenerateTable) {
+                int i = referenceIndices.get(columnSpec);
                 ColumnSpec colSpecFromCache = columnSpecCache.get(i);
                 if (colSpecFromCache != null) {
                     generateFromTableReference(i, fromPart);
                 } else {
-                    String schema = cs.getSchema();
-                    String table = cs.getTable();
-                    generateFromTable(schema, table, fromPart,i);
-                    columnSpecCache.put(i, cs);
+                    String schema = columnSpec.getSchema();
+                    String table = columnSpec.getTable();
+                    generateFromTable(schema, table, fromPart, i);
+                    columnSpecCache.put(i, columnSpec);
                 }
                 begin = false;
             }
 
             if (currentJoin != null) {
-                int k;
-                if (firstJoin) {
-                    k = mainJoinTableIndex;
-                    firstJoin = false;
-                } else {
-                    k = i - 1;
-                }
-                generateOn(fromPart, k, i, currentJoin.getFromKey(),
+                int fromIndex = referenceIndices.get(
+                        currentJoin.getPrevColumnSpec());
+                int toIndex = referenceIndices.get(
+                        currentJoin.getNextColumnSpec());
+                generateOn(fromPart, fromIndex, toIndex,
+                        currentJoin.getFromKey(),
                         currentJoin.getToKey());
             }
 
-            if (cs.getJoin() != null) {
+            if (columnSpec.getJoin() != null) {
                 generateJoin(fromPart);
-                currentJoin = cs.getJoin();
-                i++;
+                currentJoin = columnSpec.getJoin();
             } else {
                 currentJoin = null;
-                if (mainJoinTableIndex < 1)
-                    mainJoinTableIndex = i;
-                firstJoin = true;
             }
         }
         return fromPart;
     }
 
-    private StringBuilder generateWhereClause(ColumnSpecInfo info,
-            Map<PropertySpec,List<String>> specs,
+    private StringBuilder generateWhereClause(Set<String> propIds,
+            ColumnSpecInfo info,
+            Map<PropertySpec, List<String>> specs,
             DataSourceConstraint dataSourceConstraints,
             StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
@@ -223,8 +256,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     dataSourceConstraints, wherePart);
             i = processPropertyValueSpecsForWhereClause(propositionSpec, i,
                     dataSourceConstraints, wherePart);
-            i = processConstraintSpecsForWhereClause(propositionSpec, i,
-                    wherePart, selectPart, referenceIndices);
+            i = processConstraintSpecsForWhereClause(propIds, propositionSpec,
+                    i, wherePart, selectPart, referenceIndices);
         }
         processKeyIdConstraintsForWhereClause(info, wherePart, keyIds);
 
@@ -247,8 +280,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
             int finish;
             if (info.getFinishTimeIndex() >= 0) {
-                 finish = referenceIndices.get(
-                         info.getColumnSpecs().get(info.getFinishTimeIndex()));
+                finish = referenceIndices.get(
+                        info.getColumnSpecs().get(info.getFinishTimeIndex()));
             } else {
                 finish = -1;
             }
@@ -269,7 +302,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Map<String, Integer> propertyValueIndices =
                     new HashMap<String, Integer>();
             for (Map.Entry<String, ColumnSpec> e :
-                propertyValueSpecs.entrySet()) {
+                    propertyValueSpecs.entrySet()) {
                 ColumnSpec spec = e.getValue();
                 if (spec != null) {
                     i += spec.asList().size();
@@ -281,21 +314,21 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     private int processConstraintSpecsForWhereClause(
+            Set<String> propIds,
             PropertySpec propositionSpec,
             int i, StringBuilder wherePart, StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices) {
-        //SECTION FOR NON-TIME DATA SOURCE CONSTRAINTS.
         boolean selectPartHasCaseStmt = false;
         ColumnSpec[] constraintSpecs = propositionSpec.getConstraintSpecs();
         if (constraintSpecs != null) {
             for (ColumnSpec cs3 : constraintSpecs) {
-                i = processConstraintSpecForWhereClause(cs3, i, wherePart,
+                i = processConstraintSpecForWhereClause(null, cs3, i, wherePart,
                         selectPart, referenceIndices, selectPartHasCaseStmt);
             }
         }
         ColumnSpec codeSpec = propositionSpec.getCodeSpec();
-        i = processConstraintSpecForWhereClause(codeSpec, i, wherePart,
-                        selectPart, referenceIndices, selectPartHasCaseStmt);
+        i = processConstraintSpecForWhereClause(propIds, codeSpec, i, wherePart,
+                selectPart, referenceIndices, selectPartHasCaseStmt);
         if (selectPartHasCaseStmt) {
             selectPart.append(" else 'OTHER' end ");
             selectPart.append("code ");
@@ -304,37 +337,45 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     private int processConstraintSpecForWhereClause(
-            ColumnSpec cs3,
+            Set<String> propIds,
+            ColumnSpec columnSpec,
             int i, StringBuilder wherePart, StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
             boolean selectPartHasCaseStmt) {
-        if (cs3 == null) {
+        if (columnSpec == null) {
             return i;
         }
         while (true) {
-            if (cs3.getJoin() != null) {
-                cs3 = cs3.getJoin().getNextColumnSpec();
+            if (columnSpec.getJoin() != null) {
+                columnSpec = columnSpec.getJoin().getNextColumnSpec();
                 i++;
             } else {
                 if (wherePart.length() > 0) {
                     wherePart.append(" and ");
                 }
                 wherePart.append('(');
-                ColumnSpec.Constraint csc = cs3.getConstraint();
+                ColumnSpec.Constraint csc = columnSpec.getConstraint();
                 if (csc != null) {
-                    ColumnSpec.ConstraintValue[] cvs =
-                            cs3.getConstraintValues();
+                    ColumnSpec.ConstraintValue[] constraintValues =
+                            columnSpec.getConstraintValues();
+                    ConstraintValue[] filteredConstraintValues =
+                            filterConstraintValues(propIds, constraintValues);
                     switch (csc) {
                         case EQUAL_TO:
-                            wherePart.append("a");
-                            wherePart.append(referenceIndices.get(cs3));
-                            wherePart.append(".");
-                            wherePart.append(cs3.getColumn());
-                            if (cvs.length > 1) {
-                                generateInClause(wherePart, cs3);
+                            if (filteredConstraintValues.length > 1) {
+                                generateInClause(wherePart,
+                                        referenceIndices.get(columnSpec),
+                                        columnSpec.getColumn(),
+                                        filteredConstraintValues);
                             } else {
+                                wherePart.append("a");
+                                wherePart.append(
+                                        referenceIndices.get(columnSpec));
+                                wherePart.append(".");
+                                wherePart.append(columnSpec.getColumn());
                                 wherePart.append("=");
-                                appendValue(cvs[0].getValue(),
+                                appendValue(
+                                        filteredConstraintValues[0].getValue(),
                                         wherePart);
                             }
                             break;
@@ -343,37 +384,37 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                                 selectPart.append(", case ");
                                 selectPartHasCaseStmt = true;
                             }
-                            if (cvs.length > 1) {
+                            if (filteredConstraintValues.length > 1) {
                                 wherePart.append('(');
                             }
-                            for (int k = 0; k < cvs.length; k++) {
+                            for (int k = 0; k < filteredConstraintValues.length; k++) {
                                 wherePart.append("a");
                                 wherePart.append(
-                                        referenceIndices.get(cs3));
+                                        referenceIndices.get(columnSpec));
                                 wherePart.append(".");
-                                wherePart.append(cs3.getColumn());
+                                wherePart.append(columnSpec.getColumn());
                                 wherePart.append(" LIKE ");
-                                appendValue(cvs[k].getValue(),
+                                appendValue(filteredConstraintValues[k].getValue(),
                                         wherePart);
-                                if (k + 1 < cvs.length) {
+                                if (k + 1 < filteredConstraintValues.length) {
                                     wherePart.append(" or ");
                                 }
                                 selectPart.append("when ");
                                 selectPart.append("a");
                                 selectPart.append(
-                                        referenceIndices.get(cs3));
+                                        referenceIndices.get(columnSpec));
                                 selectPart.append(".");
-                                selectPart.append(cs3.getColumn());
+                                selectPart.append(columnSpec.getColumn());
                                 selectPart.append(" like ");
-                                appendValue(cvs[k].getValue(),
+                                appendValue(filteredConstraintValues[k].getValue(),
                                         selectPart);
                                 selectPart.append(" then ");
                                 selectPart.append("'");
-                                appendValue(cvs[k].getCode(),
+                                appendValue(filteredConstraintValues[k].getCode(),
                                         selectPart);
                                 selectPart.append("'");
                             }
-                            if (cvs.length > 1) {
+                            if (filteredConstraintValues.length > 1) {
                                 wherePart.append(')');
                             }
                             break;
@@ -447,8 +488,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                                 itr.hasNext();) {
                             DataSourceConstraint dsc = itr.next();
                             if (!Arrays.contains(propertySpec.getCodes(),
-                                    dsc.getPropositionId()))
+                                    dsc.getPropositionId())) {
                                 continue;
+                            }
                             if (dsc instanceof PositionDataSourceConstraint) {
                                 PositionDataSourceConstraint pdsc2 =
                                         (PositionDataSourceConstraint) dsc;
@@ -471,7 +513,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                                     wherePart.append(" and ");
                                     wherePart.append('a');
                                     wherePart.append(
-                                        referenceIndices.get(startTimeSpec));
+                                            referenceIndices.get(startTimeSpec));
                                     wherePart.append('.');
                                     wherePart.append(startTimeSpec.getColumn());
                                     wherePart.append(" <= {ts '");
@@ -498,7 +540,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     public abstract void generateInClause(StringBuilder wherePart,
-            ColumnSpec columnSpec);
+            int referenceIndex, String column,
+            ColumnSpec.ConstraintValue[] constraintValue);
 
     public abstract void appendValue(Object val, StringBuilder wherePart);
 
@@ -507,20 +550,29 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private Map<ColumnSpec, Integer> computeReferenceIndices(
             List<ColumnSpec> columnSpecs) {
         Map<ColumnSpec, Integer> result = new HashMap<ColumnSpec, Integer>();
-        
+
         int i = 1;
         JoinSpec currentJoin = null;
         boolean begin = true;
         for (int j = 0, n = columnSpecs.size(); j < n; j++) {
-            ColumnSpec cs = columnSpecs.get(j);
+            ColumnSpec columnSpec = columnSpecs.get(j);
             boolean shouldGenerateTable = begin || currentJoin != null;
             if (shouldGenerateTable) {
-                result.put(cs, i);
+                ColumnSpec columnSpec2 = null;
+                if (currentJoin == null) {
+                    columnSpec2 = findColumnSpecWithMatchingSchemaAndTable(j,
+                            columnSpecs, columnSpec);
+                }
+                if (columnSpec2 != null) {
+                    result.put(columnSpec, result.get(columnSpec2));
+                } else {
+                    result.put(columnSpec, i);
+                }
                 begin = false;
             }
 
-            if (cs.getJoin() != null) {
-                currentJoin = cs.getJoin();
+            if (columnSpec.getJoin() != null) {
+                currentJoin = columnSpec.getJoin();
                 i++;
             } else {
                 currentJoin = null;
@@ -533,11 +585,11 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private void processKeyIdConstraintsForWhereClause(ColumnSpecInfo info,
             StringBuilder wherePart, Set<String> keyIds) {
         if (keyIds != null && !keyIds.isEmpty()) {
-            if (wherePart.length() > 0)
+            if (wherePart.length() > 0) {
                 wherePart.append(" and ");
+            }
             ColumnSpec keySpec = info.getColumnSpecs().get(0);
-            wherePart.append("a1.").append(keySpec.getColumn())
-                    .append(" in ('");
+            wherePart.append("a1.").append(keySpec.getColumn()).append(" in ('");
             wherePart.append(
                     org.arp.javautil.collections.Collections.join(
                     keyIds, "','"));
@@ -549,10 +601,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             String startColumn, int finishReferenceIndex, String finishColumn,
             StringBuilder wherePart, SQLOrderBy sQLOrderBy);
 
-
-
-    private class GetAllKeyIdsDataSourceConstraintVisitor extends
-            AbstractDataSourceConstraintVisitor {
+    private class GetAllKeyIdsDataSourceConstraintVisitor extends AbstractDataSourceConstraintVisitor {
 
         private Long minStart;
         private Long maxFinish;
@@ -583,5 +632,4 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             return this.propId;
         }
     }
-
 }
