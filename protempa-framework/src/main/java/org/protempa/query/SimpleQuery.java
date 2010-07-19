@@ -1,4 +1,4 @@
-package org.protempa;
+package org.protempa.query;
 
 /**
  *

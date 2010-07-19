@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.protempa.DataSourceReadException;
 import org.protempa.FinderException;
-import org.protempa.SimpleQuery;
+import org.protempa.query.SimpleQuery;
 import org.protempa.proposition.Proposition;
 
 /**

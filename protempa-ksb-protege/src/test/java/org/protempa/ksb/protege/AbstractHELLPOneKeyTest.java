@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import org.protempa.FinderException;
-import org.protempa.SimpleQuery;
+import org.protempa.query.SimpleQuery;
 import org.protempa.proposition.Proposition;
 
 /**

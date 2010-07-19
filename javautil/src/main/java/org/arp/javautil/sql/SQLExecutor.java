@@ -43,24 +43,22 @@ public final class SQLExecutor {
 
 	public static void executeSQL(Connection connection, String sql,
 			ResultProcessor resultProcessor) throws SQLException {
-		Statement stmt = connection.createStatement();
-		try {
-			ResultSet resultSet = null;
-			try {
-				stmt.execute(sql);
-				if (resultProcessor != null) {
-					resultProcessor.process(stmt.getResultSet());
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				if (resultSet != null) {
-					resultSet.close();
-				}
-			}
-		} finally {
-			stmt.close();
-		}
+            Statement stmt = connection.createStatement();
+            try {
+                ResultSet resultSet = null;
+                try {
+                    stmt.execute(sql);
+                    if (resultProcessor != null) {
+                            resultProcessor.process(stmt.getResultSet());
+                    }
+                } finally {
+                    if (resultSet != null) {
+                        resultSet.close();
+                    }
+                }
+            } finally {
+                stmt.close();
+            }
 	}
 
 	public static void executeSQL(Connection connection, String sql,

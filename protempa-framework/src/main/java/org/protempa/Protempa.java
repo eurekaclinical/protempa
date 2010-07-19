@@ -1,5 +1,6 @@
 package org.protempa;
 
+import org.protempa.query.Query;
 import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -119,8 +120,8 @@ public final class Protempa {
         Set<String> keyIdsSet = asSet(query.getKeyIds());
         Set<String> propIds = asSet(query.getPropIds());
         DataSourceConstraint dataSourceConstraints =
-                    deriveDataSourceConstraints(query);
-
+                    query.getDataSourceConstraints();
+        
         results.putAll(this.abstractionFinder.doFind(keyIdsSet,
                 propIds, dataSourceConstraints));
         
@@ -138,20 +139,6 @@ public final class Protempa {
             propIdsSet = null;
         }
         return propIdsSet;
-    }
-
-    private DataSourceConstraint deriveDataSourceConstraints(
-            Query query) throws FinderException {
-//        PositionDataSourceConstraint dataSourceConstraint;
-//        Set propIdsSet = new HashSet();
-//        for (String propId : query.getPropIds())
-//            propIdsSet.add(propId);
-//        dataSourceConstraint = new PositionDataSourceConstraint();
-//        dataSourceConstraint.setMinimumStart(query.getMinimumStart());
-//        dataSourceConstraint.setMaximumFinish(query.getMaximumFinish());
-//
-//        return dataSourceConstraint;
-        return null;
     }
 
     /**

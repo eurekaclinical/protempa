@@ -1,6 +1,7 @@
 package org.arp.javautil.sql;
 
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
@@ -18,6 +19,10 @@ public class DriverManagerConnectionSpec implements ConnectionSpec {
         this.url = url;
         this.user = user;
         this.password = password;
+    }
+
+    public Driver getDriver() throws SQLException {
+        return DriverManager.getDriver(this.url);
     }
 
     public Connection getOrCreate() throws SQLException {
