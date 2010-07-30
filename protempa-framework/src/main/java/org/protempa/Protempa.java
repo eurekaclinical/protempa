@@ -1,7 +1,5 @@
 package org.protempa;
 
-import org.protempa.query.Query;
-import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +10,10 @@ import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.InvalidConfigurationsException;
+import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 import org.protempa.proposition.Proposition;
+import org.protempa.query.Query;
+import org.protempa.query.handler.QueryResultsHandler;
 
 
 /**
@@ -110,22 +111,23 @@ public final class Protempa {
                 cacheFoundAbstractParameters);
     }
 
-    public QueryResults execute(Query query) throws FinderException {
+    public void execute(Query query, QueryResultsHandler resultHandler) throws FinderException {
         if (query == null)
             throw new IllegalArgumentException("query cannot be null");
 
-        Map<String, List<Proposition>> results =
-                new HashMap<String, List<Proposition>>();
+//        Map<String, List<Proposition>> results =
+//                new HashMap<String, List<Proposition>>();
 
         Set<String> keyIdsSet = asSet(query.getKeyIds());
         Set<String> propIds = asSet(query.getPropIds());
         DataSourceConstraint dataSourceConstraints =
                     query.getDataSourceConstraints();
         
-        results.putAll(this.abstractionFinder.doFind(keyIdsSet,
-                propIds, dataSourceConstraints));
+//        results.putAll()
+        		this.abstractionFinder.doFind(keyIdsSet,
+                propIds, dataSourceConstraints, resultHandler);
         
-        return new QueryResults(results);
+//        return new QueryResults(results);
     }
 
     private Set<String> asSet(String[] propIds) {

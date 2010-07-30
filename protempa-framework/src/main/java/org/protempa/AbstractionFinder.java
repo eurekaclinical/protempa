@@ -27,6 +27,7 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.PropositionUtil;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalProposition;
+import org.protempa.query.handler.QueryResultsHandler;
 
 /**
  * Class that actually does the abstraction finding.
@@ -89,16 +90,19 @@ final class AbstractionFinder implements Module {
         }
     }
     
-    Map<String, List<Proposition>> doFind(Set<String> keys, Set<String> propIds,
-    		DataSourceConstraint dataSourceConstraints)
+    void doFind(Set<String> keys, Set<String> propIds,
+    		DataSourceConstraint dataSourceConstraints,
+    		QueryResultsHandler resultHandler)
                 throws FinderException {
     	if (this.closed)
             throw new FinderException("Protempa already closed!");
     	try {
+    		resultHandler.init();
             if (workingMemoryCache != null)
-                return doFindStateful(keys, propIds, dataSourceConstraints);
+                doFindStateful(keys, propIds, dataSourceConstraints, resultHandler);
             else
-                return doFindStateless(keys, propIds, dataSourceConstraints);
+                doFindStateless(keys, propIds, dataSourceConstraints, resultHandler);
+            resultHandler.finish();
     	} catch (ProtempaException e) {
             String msg = "An error occurred processing a set of cases";
             throw new FinderException(msg, e);
@@ -199,9 +203,8 @@ final class AbstractionFinder implements Module {
     }
     
     @SuppressWarnings("unchecked")
-    private Map<String, List<Proposition>> doFindStateless(Set<String> keys,
-    		Set<String> propositionIds,
-    		DataSourceConstraint dataSourceConstraints)
+    private void doFindStateless(Set<String> keys, Set<String> propositionIds,
+    		DataSourceConstraint dataSourceConstraints, QueryResultsHandler resultHandler)
                 throws ProtempaException {
     	Map<String, List<Proposition>> result =
                 new HashMap<String, List<Proposition>>();
@@ -213,10 +216,11 @@ final class AbstractionFinder implements Module {
                 resultList(statelessWorkingMemory(
                     propositionIds).executeWithResults(objects).iterateObjects(
                         new ProtempaObjectFilter(propositionIds)));
-            result.put(entry.getKey(), propositions);
+//            result.put(entry.getKey(), propositions);
+            resultHandler.handleQueryResult(entry.getKey(), propositions);
     	}
     	clear();
-    	return result;
+//    	return result;
     }
     @SuppressWarnings("unchecked")
     private static List<Proposition> resultList(Iterator objects) {
@@ -267,13 +271,12 @@ final class AbstractionFinder implements Module {
     	return objects;
     }
 
-    private Map<String, List<Proposition>> doFindStateful(Set<String> keyIds,
-            Set<String> propositionIds,
-            DataSourceConstraint dataSourceConstraints)
+    private void doFindStateful(Set<String> keyIds, Set<String> propositionIds,
+            DataSourceConstraint dataSourceConstraints, QueryResultsHandler resultHandler)
             throws ProtempaException {
     	if (keyIds != null && !keyIds.isEmpty()) {
-            Map<String, List<Proposition>> results =
-                    new HashMap<String, List<Proposition>>();
+//            Map<String, List<Proposition>> results =
+//                    new HashMap<String, List<Proposition>>();
             Map<String, List<Object>> objects = objectsToAssert(keyIds,
                     propositionIds, dataSourceConstraints, true);
             for (Map.Entry<String, List<Object>> entry : objects.entrySet()) {
@@ -285,15 +288,15 @@ final class AbstractionFinder implements Module {
                             workingMemory.insert(obj);
                     }
                     workingMemory.fireAllRules();
-                    results.put(entry.getKey(),
-                            resultList(workingMemory.iterateObjects(
+//                    results.put(entry.getKey(),
+                            resultHandler.handleQueryResult(entry.getKey(), resultList(workingMemory.iterateObjects(
                                     new ProtempaObjectFilter(propositionIds))));
                 } catch (FactException fe) {
                     assert false;
                 }
             }
     	}
-    	return new HashMap<String, List<Proposition>>();
+//    	return new HashMap<String, List<Proposition>>();
     }
     
     private List<Event> createEvents(DataSource dataSource,
