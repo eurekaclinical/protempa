@@ -1,5 +1,8 @@
 package org.arp.javautil.arrays;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Utilities for arrays.
  * 
@@ -157,4 +160,21 @@ public final class Arrays {
 		}
 		return false;
 	}
+
+	/**
+	 * Returns a Set (specfically, a HashSet) with all the unique elements 
+	 * from the given array of String objects.
+	 * @param objs An array of String objects.
+	 * @return A Set object containing all the unique elements from the array. 
+	 */
+    public static Set<String> asSet(String[] objs) {
+        Set<String> objSet = null;
+        if (objs != null) {
+            objSet = new HashSet<String>();
+            for (String obj : objs) {
+                objSet.add(obj);
+            }
+        }
+        return objSet;
+    }
 }
