@@ -43,4 +43,6 @@ public abstract class AbstractQuery implements Query {
     public void setPropIds(String[] propIds) {
         this.propIds = propIds;
     }
+
+    public abstract Query clone();
 }
