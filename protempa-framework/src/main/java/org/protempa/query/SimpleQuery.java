@@ -36,4 +36,12 @@ public class SimpleQuery extends AbstractQuery {
     public static SimpleQuery newFindAllPropsForAllKeysInstance() {
         return new SimpleQuery();
     }
+
+    public Query clone() {
+        SimpleQuery copy = new SimpleQuery();
+        copy.setKeyIds(this.getKeyIds().clone());
+        copy.setPropIds(this.getPropIds().clone());
+        copy.setDataSourceConstraints(this.getDataSourceConstraints());
+        return copy;
+    }
 }
