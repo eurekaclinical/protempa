@@ -40,12 +40,14 @@ public class MappingQueryResultsHandler implements QueryResultsHandler {
 //		return queryResults;
 //	}
 
-	/* (non-Javadoc)
+	/**
+     * No-op.
+     * 
 	 * @see org.protempa.query.handler.QueryResultsHandler#finish()
 	 */
 	@Override
 	public void finish() throws FinderException {
-		this.resultMap.clear();
+		
 	}
 
 	/* (non-Javadoc)
