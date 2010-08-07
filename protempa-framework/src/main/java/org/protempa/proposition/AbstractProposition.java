@@ -28,6 +28,8 @@ public abstract class AbstractProposition implements Proposition {
 
     private final Map<String, Value> properties;
 
+    private String termId;
+
 	/**
 	 * Creates a proposition with an id.
 	 * 
@@ -67,7 +69,13 @@ public abstract class AbstractProposition implements Proposition {
         return this.properties.keySet();
     }
 
-    
+    public final void setTermId(String termId) {
+        this.termId = termId;
+    }
+
+    public final String getTermId() {
+        return this.termId;
+    }
 
 	/*
 	 * (non-Javadoc)

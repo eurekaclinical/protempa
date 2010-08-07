@@ -206,8 +206,8 @@ final class AbstractionFinder implements Module {
     private void doFindStateless(Set<String> keys, Set<String> propositionIds,
     		DataSourceConstraint dataSourceConstraints, QueryResultsHandler resultHandler)
                 throws ProtempaException {
-    	Map<String, List<Proposition>> result =
-                new HashMap<String, List<Proposition>>();
+//    	Map<String, List<Proposition>> result =
+//                new HashMap<String, List<Proposition>>();
     	for (Map.Entry<String, List<Object>> entry : 
             objectsToAssert(keys, propositionIds, dataSourceConstraints, false)
                     .entrySet()) {
@@ -268,6 +268,7 @@ final class AbstractionFinder implements Module {
             objects.put(entry.getKey(),
                     new ArrayList<Object>(entry.getValue()));
     	}
+        
     	return objects;
     }
 
@@ -297,13 +298,6 @@ final class AbstractionFinder implements Module {
             }
     	}
 //    	return new HashMap<String, List<Proposition>>();
-    }
-    
-    private List<Event> createEvents(DataSource dataSource,
-            String keyId, Set<String> eventIds,
-            DataSourceConstraint constraints) throws
-            DataSourceReadException {
-        return dataSource.getEventsAsc(keyId, eventIds, constraints);
     }
     
     private Map<String, List<Event>> createEvents(DataSource dataSource,

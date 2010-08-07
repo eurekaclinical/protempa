@@ -58,10 +58,10 @@ public interface Proposition extends PropositionVisitable, Serializable {
     void acceptChecked(PropositionCheckedVisitor propositionCheckedVisitor)
             throws ProtempaException;
 
-    void setProperty(String name, Value value);
-
     Value getProperty(String name);
 
     Set<String> propertyNames();
+
+    String getTermId();
 
 }

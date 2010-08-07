@@ -77,7 +77,7 @@ public final class BackendInstanceSpec<B extends Backend> {
         }
         throw new InvalidPropertyNameException(name);
     }
-    
+
     public Object getProperty(String name) 
             throws InvalidPropertyNameException {
         for (BackendPropertySpec spec : this.propertySpecs) {

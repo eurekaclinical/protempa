@@ -32,50 +32,33 @@ public interface DataSourceBackend extends
      * @throws DataSourceReadException if there was an error reading from
      * the database.
      */
+    @Deprecated
     List<String> getAllKeyIds(int start, int count,
             DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException;
 
-    List<ConstantParameter> getConstantParameters(String keyId,
-            Set<String> paramIds)
-            throws DataSourceReadException;
-
     Map<String, List<ConstantParameter>> getConstantParameters(
             Set<String> keyIds,
-            Set<String> paramIds) throws DataSourceReadException;
-
-    Map<String, List<Event>> getEventsAsc(
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException;
 
     Map<String, List<Event>> getEventsAsc(Set<String> keyIds, 
             Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException;
 
-    List<Event> getEventsAsc(String keyId, 
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
-            throws DataSourceReadException;
-
-    List<Event> getEventsDesc(String keyId, 
+    Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
             Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException;
 
     GranularityFactory getGranularityFactory();
 
     Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
-            Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
-            throws DataSourceReadException;
-
-    Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
             Set<String> keyIds, Set<String> paramIds,
             DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException;
 
-    List<PrimitiveParameter> getPrimitiveParametersAsc(String keyId, 
-            Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
-            throws DataSourceReadException;
-
-    List<PrimitiveParameter> getPrimitiveParametersDesc(String keyId, 
+    Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
+            Set<String> keyIds,
             Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException;
 

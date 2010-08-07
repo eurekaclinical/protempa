@@ -11,8 +11,8 @@ import java.util.List;
  * @param <E> the {@link BackendUpdatedEvent} that this backend fires.
  * @param <S> the backend's corresponding {@link Source}.
  */
-public abstract class AbstractBackend<E extends BackendUpdatedEvent, S extends Source<E>>
-        implements Backend<E, S> {
+public abstract class AbstractBackend<E extends BackendUpdatedEvent, 
+        S extends Source<E>> implements Backend<E, S> {
 
     private final List<BackendListener<E>> listenerList;
 
