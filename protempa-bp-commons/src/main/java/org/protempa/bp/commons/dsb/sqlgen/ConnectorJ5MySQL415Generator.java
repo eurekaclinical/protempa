@@ -2,7 +2,6 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.Driver;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import org.protempa.bp.commons.dsb.SQLOrderBy;
@@ -24,9 +23,11 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
     private static final String readPropositionsSQL =
             "select {0} from {1} where {2}";
 
-    public boolean checkCompatibility(Driver driver, Connection connection)
+    private static final String driverName = "com.mysql.jdbc.Driver";
+
+    public boolean checkCompatibility(Connection connection)
             throws SQLException {
-        if (checkDriverCompatibility(driver))
+        if (checkDriverCompatibility(connection))
             return false;
         if (checkDatabaseCompatibility(connection))
             return false;
@@ -38,11 +39,13 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
         return true;
     }
 
-    private boolean checkDriverCompatibility(Driver driver) {
-        String name = driver.getClass().getName();
-        if (!name.equals("com.mysql.jdbc.Driver"))
+    private boolean checkDriverCompatibility(Connection connection)
+            throws SQLException {
+        DatabaseMetaData metaData = connection.getMetaData();
+        String name = metaData.getDriverName();
+        if (!name.equals(driverName))
             return false;
-        if (driver.getMajorVersion() != 5)
+        if (metaData.getDriverMajorVersion() != 5)
             return false;
         return false;
     }
@@ -186,5 +189,12 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
         }
         wherePart.append(") ");
     }
+
+    @Override
+    protected String getDriverNameToLoad() {
+        return driverName;
+    }
+
+    
 
 }

@@ -1,7 +1,7 @@
 package org.protempa.bp.commons;
 
 import org.protempa.AbstractKnowledgeSourceBackend;
-import org.protempa.BackendInitializationException;
+import org.protempa.KnowledgeSourceBackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 
 /**
@@ -12,8 +12,8 @@ public abstract class AbstractCommonsKnowledgeSourceBackend
         extends AbstractKnowledgeSourceBackend {
 
     public void initialize(BackendInstanceSpec config)
-            throws BackendInitializationException {
-        CommonsUtil.initializeBackendProperties(this, config);
+            throws KnowledgeSourceBackendInitializationException {
+        BackendPropertyInitializer.initialize(this, config);
     }
 
 }

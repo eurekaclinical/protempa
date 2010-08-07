@@ -31,14 +31,12 @@ public interface SQLGenerator {
      * Checks whether this SQL generator is compatible with the specified
      * driver and a database to which the program is connected.
      * 
-     * @param driver a JDBC {@link Driver}.
      * @param connection a {@link Connection} to a database.
      * @return true if this SQL generator is compatible, false otherwise.
      * @throws SQLException if a connection to the database to determine
      * compatibility fails.
      */
-    boolean checkCompatibility(Driver driver, Connection connection)
-            throws SQLException;
+    boolean checkCompatibility(Connection connection) throws SQLException;
 
 
     /**
@@ -71,4 +69,6 @@ public interface SQLGenerator {
             DataSourceConstraint dataSourceConstraints,
             Map<PropertySpec, List<String>> specs, Set<String> keyIds,
             SQLOrderBy order);
+
+    void loadDriverIfNeeded();
 }

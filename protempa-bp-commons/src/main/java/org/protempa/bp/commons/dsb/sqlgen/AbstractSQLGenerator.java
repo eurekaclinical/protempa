@@ -1,7 +1,6 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,8 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import org.arp.javautil.arrays.Arrays;
-import org.arp.javautil.string.StringUtil;
 import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.ConstraintValue;
 import org.protempa.dsb.datasourceconstraint.AbstractDataSourceConstraintVisitor;
 import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
@@ -25,8 +24,8 @@ import org.protempa.proposition.value.AbsoluteTimeGranularity;
  */
 public abstract class AbstractSQLGenerator implements SQLGenerator {
 
-    public abstract boolean checkCompatibility(Driver driver,
-            Connection connection) throws SQLException;
+    public abstract boolean checkCompatibility(Connection connection)
+            throws SQLException;
 
     public abstract boolean isLimitingSupported();
     private static final String getPropIdsSQL =
@@ -631,5 +630,31 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         String getPropositionId() {
             return this.propId;
         }
+    }
+
+    public final void loadDriverIfNeeded() {
+        String className = getDriverNameToLoad();
+        try {
+            Class.forName(className);
+        } catch (ClassNotFoundException ex) {
+            SQLGenUtil.logger().log(Level.WARNING,
+                    "{0} when trying to load {1}.",
+                    new Object[] {ex.getClass().getName(), className});
+        }
+    }
+
+    /**
+     * Gets a the name of the driver to load for this SQL generator, or
+     * <code>null</code> if the driver is a JDBC 4 driver and does not need
+     * to be loaded explicitly. Returning not-<code>null</code> will do no
+     * harm if a JDBC 4 driver.
+     *
+     * This implementation returns <code>null</code>. Override it to return a
+     * driver's class name.
+     *
+     * @return a class name {@link String}.
+     */
+    protected String getDriverNameToLoad() {
+        return null;
     }
 }

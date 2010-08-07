@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BackendProperty {
+    String propertyName() default "";
     String displayName() default "";
     String description() default "";
     Class<? extends BackendPropertyValidator> validator()

@@ -2,14 +2,9 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.Driver;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.protempa.bp.commons.dsb.SQLOrderBy;
-import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 
 /**
  *
@@ -28,9 +23,9 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
     private static final String readPropositionsSQL =
             "select {0} from {1} where {2}";
 
-    public boolean checkCompatibility(Driver driver, Connection connection) 
+    public boolean checkCompatibility(Connection connection) 
             throws SQLException {
-        if (checkDriverCompatibility(driver))
+        if (checkDriverCompatibility(connection))
             return false;
         if (checkDatabaseCompatibility(connection))
             return false;
@@ -115,12 +110,14 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
         return false;
     }
 
-    private boolean checkDriverCompatibility(Driver driver) {
-        String name = driver.getClass().getName();
+    private boolean checkDriverCompatibility(Connection connection) 
+            throws SQLException {
+        DatabaseMetaData metaData = connection.getMetaData();
+        String name = metaData.getDriverName();
         if (!(name.equals("oracle.jdbc.driver.OracleDriver") ||
                 name.equals("oracle.jdbc.OracleDriver")))
             return false;
-        if (driver.getMajorVersion() != 10)
+        if (metaData.getDriverMajorVersion() != 10)
             return false;
         return false;
     }
@@ -196,6 +193,11 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
             }
         }
         wherePart.append(") ");
+    }
+
+    @Override
+    protected String getDriverNameToLoad() {
+        return "oracle.jdbc.driver.OracleDriver";
     }
 
 }

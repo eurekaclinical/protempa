@@ -1,5 +1,8 @@
 package org.protempa.bp.commons.dsb;
 
+import org.arp.javautil.sql.InvalidConnectionSpecArguments;
+import org.arp.javautil.sql.DatabaseAPI;
+import org.protempa.bp.commons.AbstractCommonsDataSourceBackend;
 import org.protempa.bp.commons.dsb.sqlgen.SQLGenerator;
 import org.protempa.bp.commons.dsb.sqlgen.RelationalDatabaseSpec;
 import org.protempa.bp.commons.dsb.sqlgen.PropertySpec;
@@ -7,15 +10,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import org.protempa.dsb.SchemaAdaptorInitializationException;
+import org.arp.javautil.sql.ConnectionSpec;
 
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PointInterval;
@@ -26,74 +27,35 @@ import org.protempa.proposition.value.UnitFactory;
 import org.protempa.proposition.value.ValueFactory;
 import org.arp.javautil.sql.SQLExecutor;
 import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
+import org.protempa.DataSourceBackendInitializationException;
 import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 import org.protempa.DataSourceReadException;
 import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.bp.commons.SchemaAdaptorProperty;
-import org.protempa.bp.commons.dsb.sqlgen.EntitySpec;
+import org.protempa.bp.commons.BackendProperty;
 import org.protempa.proposition.ConstantParameter;
 import org.protempa.proposition.Proposition;
 
 /**
- * Schema adaptor for the contrast reaction project.
+ * Implements access to relational databases.
  * 
  * @author Andrew Post
  */
-public final class RelationalDatabaseSchemaAdaptor
-        extends DriverManagerAbstractSchemaAdaptor {
+public abstract class RelationalDatabaseDataSourceBackend
+        extends AbstractCommonsDataSourceBackend {
 
-    private String dbUrl;
+    private DatabaseAPI databaseAPI;
+    private String databaseId;
     private String username;
     private String password;
-    private String driverClass;
     private GranularityFactory granularityFactory;
     private UnitFactory unitFactory;
     private SQLGenerator sqlGenerator;
-
-    @SchemaAdaptorProperty
-    public void setDbUrl(String dbUrl) {
-        this.dbUrl = dbUrl;
-    }
-
-    @SchemaAdaptorProperty
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @SchemaAdaptorProperty
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    @SchemaAdaptorProperty
-    public void setDriverClass(String driverClass) {
-        this.driverClass = driverClass;
-    }
-
-    @Override
-    public String getDbUrl() {
-        return this.dbUrl;
-    }
-
-    @Override
-    public String getUsername() {
-        return this.username;
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password;
-    }
-
-    @Override
-    public String getDriverClass() {
-        return this.driverClass;
-    }
+    private ConnectionSpec connectionSpecInstance;
     private final Map<String, PropertySpec> primitiveParameterSpecs;
     private final Map<String, PropertySpec> eventSpecs;
     private final Map<String, PropertySpec> constantSpecs;
 
-    public RelationalDatabaseSchemaAdaptor(
+    public RelationalDatabaseDataSourceBackend(
             RelationalDatabaseSpec relationalDatabaseSpec) {
         this();
         if (relationalDatabaseSpec != null) {
@@ -103,49 +65,154 @@ public final class RelationalDatabaseSchemaAdaptor
                     relationalDatabaseSpec.getEventSpecs());
             populatePropositionMap(this.constantSpecs,
                     relationalDatabaseSpec.getConstantParameterSpecs());
+        } else {
+            throw new IllegalArgumentException(
+                    "relationalDatabaseSpec cannot be null");
         }
         this.granularityFactory = relationalDatabaseSpec.getGranularities();
         this.unitFactory = relationalDatabaseSpec.getUnits();
     }
 
-    private static void populatePropositionMap(Map<String, PropertySpec> map,
-            PropertySpec[] propertySpecs) {
-        if (propertySpecs != null) {
-            for (PropertySpec propertySpec : propertySpecs) {
-                for (String code : propertySpec.getCodes()) {
-                    map.put(code, propertySpec);
-                }
-            }
-        }
-    }
-
-    public RelationalDatabaseSchemaAdaptor() {
+    private RelationalDatabaseDataSourceBackend() {
         this.primitiveParameterSpecs = new HashMap<String, PropertySpec>();
         this.eventSpecs = new HashMap<String, PropertySpec>();
         this.constantSpecs = new HashMap<String, PropertySpec>();
+        this.databaseAPI = DatabaseAPI.DRIVERMANAGER;
     }
 
     @Override
     public void initialize(BackendInstanceSpec config)
-            throws SchemaAdaptorInitializationException {
+            throws DataSourceBackendInitializationException {
         super.initialize(config);
+
+        if (this.databaseAPI == null) {
+            throw new DataSourceBackendInitializationException(
+                    "A Java database API (DriverManager or DataSource) must "
+                    + "be specified in this backend's configuration");
+        }
+
         try {
-            this.sqlGenerator = new SQLGeneratorFactory(getConnectionSpec())
+            this.connectionSpecInstance = 
+                    this.databaseAPI.newConnectionSpecInstance(
+                    this.databaseId, this.username, this.password);
+        } catch (InvalidConnectionSpecArguments ex) {
+            throw new DataSourceBackendInitializationException(
+                    "Could not initialize database connection information",
+                    ex);
+        }
+
+        try {
+            this.sqlGenerator =
+                    new SQLGeneratorFactory(this.connectionSpecInstance)
                     .newInstance();
         } catch (Exception ex) {
-            throw new SchemaAdaptorInitializationException(
+            throw new DataSourceBackendInitializationException(
                     "Could not load a SQL generator", ex);
         }
     }
 
+    /**
+     * Returns which Java database API this backend is configured to use.
+     * @return a {@link DatabaseAPI}. The default value is
+     * {@link DatabaseAPI.DRIVERMANAGER}.
+     */
+    public DatabaseAPI getDatabaseAPI() {
+        return this.databaseAPI;
+    }
+
+    /**
+     * Configures which Java database API to use
+     * ({@link java.sql.DriverManager} or {@link javax.sql.DataSource}. Must
+     * be set to something not <code>null</code> before any of the read
+     * methods are called.
+     *
+     * @param databaseAPI a {@link DatabaseAPI}.
+     */
+    public void setDatabaseAPI(DatabaseAPI databaseAPI) {
+        this.databaseAPI = databaseAPI;
+    }
+
+    /**
+     * Configures which Java database API to use
+     * ({@link java.sql.DriverManager} or {@link javax.sql.DataSource} by
+     * parsing a {@link DatabaseAPI}'s name. Cannot be null.
+     *
+     * @param databaseAPIString a {@link DatabaseAPI}'s name.
+     */
+    @BackendProperty(propertyName="databaseAPI")
+    public void parseDatabaseAPI(String databaseAPISTring) {
+        setDatabaseAPI(DatabaseAPI.valueOf(databaseAPISTring));
+    }
+
+    /**
+     * Gets the database id for a database.
+     *
+     * @return a database id {@link String}.
+     */
+    public String getDatabaseId() {
+        return this.databaseId;
+    }
+
+    /**
+     * Sets the database id for a database. This must be set to something
+     * not <code>null</code>.
+     *
+     * @param databaseId a a database id {@link String}.
+     */
+    @BackendProperty
+    public void setDatabaseId(String databaseId) {
+        this.databaseId = databaseId;
+    }
+
+    /**
+     * Gets a user for the database.
+     *
+     * @return a user {@link String}.
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * Sets a user for the database.
+     *
+     * @param user a user {@link String}.
+     */
+    @BackendProperty
+    public void setUsername(String user) {
+        this.username = user;
+    }
+
+    /**
+     * Gets the password for the specified user.
+     *
+     * @return a password {@link String}.
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Sets the password for the specified user.
+     *
+     * @param password a password {@link String}.
+     */
+    @BackendProperty
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
     public GranularityFactory getGranularityFactory() {
         return this.granularityFactory;
     }
 
+    @Override
     public UnitFactory getUnitFactory() {
         return this.unitFactory;
     }
 
+    @Override
     public List<String> getAllKeyIds(int start, int count,
             DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
@@ -162,8 +229,7 @@ public final class RelationalDatabaseSchemaAdaptor
 
             public void process(ResultSet resultSet) throws SQLException {
                 boolean limitingSupported =
-                        RelationalDatabaseSchemaAdaptor.this.sqlGenerator
-                        .isLimitingSupported();
+                        RelationalDatabaseDataSourceBackend.this.sqlGenerator.isLimitingSupported();
                 int rowNum = 1;
                 while (resultSet.next()) {
                     if (limitingSupported
@@ -176,7 +242,7 @@ public final class RelationalDatabaseSchemaAdaptor
         };
 
         try {
-            SQLExecutor.executeSQL(getConnectionSpec(), allKeyIdsStmt,
+            SQLExecutor.executeSQL(this.connectionSpecInstance, allKeyIdsStmt,
                     resultProcessor);
         } catch (SQLException ex) {
             throw new DataSourceReadException(ex);
@@ -201,26 +267,24 @@ public final class RelationalDatabaseSchemaAdaptor
 //        }
 //        return batchMap;
 //    }
-
-        private Collection<Map<PropertySpec, List<String>>> generateBatches(
-            Map<PropertySpec, List<String>> propertySpecToPropIdMap) {
-        Map<EntitySpec, Map<PropertySpec, List<String>>> batchMap =
-                new HashMap<EntitySpec, Map<PropertySpec, List<String>>>();
-        for (Map.Entry<PropertySpec, List<String>> me :
-                propertySpecToPropIdMap.entrySet()) {
-            EntitySpec entitySpec = me.getKey().getEntitySpec();
-            Map<PropertySpec, List<String>> m = batchMap.get(entitySpec);
-            if (m == null) {
-                m = new HashMap<PropertySpec, List<String>>();
-                batchMap.put(entitySpec, m);
-            }
-            m.put(me.getKey(), me.getValue());
-        }
-        return batchMap.values();
-    }
-
+//    private Collection<Map<PropertySpec, List<String>>> generateBatches(
+//            Map<PropertySpec, List<String>> propertySpecToPropIdMap) {
+//        Map<EntitySpec, Map<PropertySpec, List<String>>> batchMap =
+//                new HashMap<EntitySpec, Map<PropertySpec, List<String>>>();
+//        for (Map.Entry<PropertySpec, List<String>> me :
+//                propertySpecToPropIdMap.entrySet()) {
+//            EntitySpec entitySpec = me.getKey().getEntitySpec();
+//            Map<PropertySpec, List<String>> m = batchMap.get(entitySpec);
+//            if (m == null) {
+//                m = new HashMap<PropertySpec, List<String>>();
+//                batchMap.put(entitySpec, m);
+//            }
+//            m.put(me.getKey(), me.getValue());
+//        }
+//        return batchMap.values();
+//    }
     private Map<PropertySpec, List<String>> propSpecsForConstraints(
-            DataSourceConstraint dataSourceConstraints) 
+            DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
         Map<PropertySpec, List<String>> propertySpecToPropIdMap =
                 new HashMap<PropertySpec, List<String>>();
@@ -235,13 +299,13 @@ public final class RelationalDatabaseSchemaAdaptor
                 if (!inDataSource) {
                     //FIXME this error message should refer to the data source
                     //backend, but we have not reference to it.
-                    String msg = 
-                            "Data source constraint {0} on proposition {1} " +
-                            "cannot be applied to this data source backend " +
-                            "because the backend does not know about {1}";
+                    String msg =
+                            "Data source constraint {0} on proposition {1} "
+                            + "cannot be applied to this data source backend "
+                            + "because the backend does not know about {1}";
                     MessageFormat mf = new MessageFormat(msg);
                     throw new DataSourceReadException(
-                            mf.format(new Object[] {dsc, propId}));
+                            mf.format(new Object[]{dsc, propId}));
                 }
             }
         }
@@ -249,7 +313,7 @@ public final class RelationalDatabaseSchemaAdaptor
     }
 
     private boolean populatePropertySpecToPropIdMap(String propId,
-            Map<PropertySpec, List<String>> propertySpecToPropIdMap) 
+            Map<PropertySpec, List<String>> propertySpecToPropIdMap)
             throws AssertionError {
         PropertySpec propertySpec;
         if (this.primitiveParameterSpecs.containsKey(propId)) {
@@ -272,7 +336,7 @@ public final class RelationalDatabaseSchemaAdaptor
         return true;
     }
 
-    private static class ConstantParameterResultProcessor 
+    private static class ConstantParameterResultProcessor
             extends ResultProcessorAllKeyIds<ConstantParameter> {
 
         public void process(ResultSet resultSet) throws SQLException {
@@ -306,7 +370,7 @@ public final class RelationalDatabaseSchemaAdaptor
                     List<ConstantParameter> l = results.get(keyId);
                     l.add(cp);
                 } else {
-                    List<ConstantParameter> l = 
+                    List<ConstantParameter> l =
                             new ArrayList<ConstantParameter>();
                     l.add(cp);
                     results.put(keyId, l);
@@ -315,22 +379,10 @@ public final class RelationalDatabaseSchemaAdaptor
         }
     }
 
-    public List<ConstantParameter> getConstantParameters(String keyId,
-            Set<String> paramIds) throws DataSourceReadException {
-        Map<String, List<ConstantParameter>> results =
-                new HashMap<String, List<ConstantParameter>>();
-
-        ConstantParameterResultProcessor resultProcessor =
-                new ConstantParameterResultProcessor();
-        resultProcessor.setResults(results);
-        resultProcessor.setPropIdToPropertySpecMap(this.constantSpecs);
-
-        return readPropositions(Collections.singleton(keyId), paramIds, null,
-                null, resultProcessor).get(keyId);
-    }
-
+    @Override
     public Map<String, List<ConstantParameter>> getConstantParameters(
-            Set<String> keyIds, Set<String> paramIds)
+            Set<String> keyIds, Set<String> paramIds,
+            DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
         Map<String, List<ConstantParameter>> results =
                 new HashMap<String, List<ConstantParameter>>();
@@ -340,12 +392,11 @@ public final class RelationalDatabaseSchemaAdaptor
         resultProcessor.setResults(results);
         resultProcessor.setPropIdToPropertySpecMap(this.constantSpecs);
 
-        return readPropositions(keyIds, paramIds, null,
+        return readPropositions(keyIds, paramIds, dataSourceConstraints,
                 null, resultProcessor);
     }
 
-    private static abstract class ResultProcessorAllKeyIds
-            <P extends Proposition> implements ResultProcessor {
+    private static abstract class ResultProcessorAllKeyIds<P extends Proposition> implements ResultProcessor {
 
         private Map<String, List<P>> results;
         private Map<PropertySpec, List<String>> propertySpecToPropIdMap;
@@ -396,7 +447,7 @@ public final class RelationalDatabaseSchemaAdaptor
             Map<String, PropertySpec> reversePropositionSpecs =
                     getPropIdToPropertySpecMap();
             Map<String, List<PrimitiveParameter>> results = getResults();
-            
+
             while (resultSet.next()) {
                 String keyId = resultSet.getString(1);
                 String propId;
@@ -417,8 +468,7 @@ public final class RelationalDatabaseSchemaAdaptor
                 ValueFactory vf = propositionSpec.getValueType();
                 PrimitiveParameter p = new PrimitiveParameter(propId);
                 try {
-                    p.setTimestamp(propositionSpec.getPositionParser()
-                            .toLong(resultSet, 3));
+                    p.setTimestamp(propositionSpec.getPositionParser().toLong(resultSet, 3));
                 } catch (SQLException e) {
                     DSBUtil.logger().log(Level.WARNING,
                             "Could not parse timestamp. Ignoring data value.",
@@ -453,7 +503,7 @@ public final class RelationalDatabaseSchemaAdaptor
                 String propId;
                 PropertySpec propertySpec;
                 Map.Entry<PropertySpec, List<String>> me =
-                    propertySpecToPropIdMap.entrySet().iterator().next();
+                        propertySpecToPropIdMap.entrySet().iterator().next();
                 propertySpec = me.getKey();
                 if (getPropIds().size() == 1) {
                     propId = getPropIds().iterator().next();
@@ -463,8 +513,7 @@ public final class RelationalDatabaseSchemaAdaptor
                 Event event = new Event(propId);
                 Granularity gran = propertySpec.getGranularity();
                 try {
-                    long d = propertySpec
-                            .getPositionParser().toLong(resultSet, 3);
+                    long d = propertySpec.getPositionParser().toLong(resultSet, 3);
                     event.setInterval(new PointInterval(d, gran, d, gran));
                 } catch (SQLException e) {
                     DSBUtil.logger().log(Level.WARNING,
@@ -513,10 +562,11 @@ public final class RelationalDatabaseSchemaAdaptor
         for (String propId : propIds) {
             boolean inDataSource = populatePropertySpecToPropIdMap(propId,
                     propertySpecToPropIdMapFromPropIds);
-            if (!inDataSource)
+            if (!inDataSource) {
                 DSBUtil.logger().log(Level.INFO,
-                    "This data source does not know about {0}",
-                     propId);
+                        "This data source does not know about {0}",
+                        propId);
+            }
         }
 
         Map<PropertySpec, List<String>> propertySpecToPropIdMap =
@@ -532,7 +582,7 @@ public final class RelationalDatabaseSchemaAdaptor
         Map<String, List<P>> results = new HashMap<String, List<P>>();
         //for (Map<PropertySpec, List<String>> m : batchMap) {
         for (Map.Entry<PropertySpec, List<String>> me :
-            propertySpecToPropIdMapFromPropIds.entrySet()) {
+                propertySpecToPropIdMapFromPropIds.entrySet()) {
             Map<PropertySpec, List<String>> m =
                     new HashMap<PropertySpec, List<String>>(
                     propertySpecToPropIdMapFromConstraints);
@@ -546,7 +596,7 @@ public final class RelationalDatabaseSchemaAdaptor
                     query);
 
             try {
-                SQLExecutor.executeSQL(getConnectionSpec(), query,
+                SQLExecutor.executeSQL(this.connectionSpecInstance, query,
                         resultProcessor);
             } catch (SQLException ex) {
                 throw new DataSourceReadException(ex);
@@ -566,7 +616,6 @@ public final class RelationalDatabaseSchemaAdaptor
             }
             results.putAll(resultsMap);
         }
-        
         return results;
     }
 
@@ -584,39 +633,16 @@ public final class RelationalDatabaseSchemaAdaptor
                 order, resultProcessor);
     }
 
-    public List<PrimitiveParameter> getPrimitiveParametersAsc(String keyId,
+    @Override
+    public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
+            Set<String> keyIds,
             Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
-        List<PrimitiveParameter> result =
-                readPrimitiveParameters(Collections.singleton(keyId),
-                paramIds, dataSourceConstraints,
-                SQLOrderBy.ASCENDING).get(keyId);
-        if (result == null) {
-            result = new ArrayList<PrimitiveParameter>(0);
-        }
-        return result;
+        return readPrimitiveParameters(keyIds, paramIds, dataSourceConstraints,
+                SQLOrderBy.DESCENDING);
     }
 
-    public List<PrimitiveParameter> getPrimitiveParametersDesc(String keyId,
-            Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
-            throws DataSourceReadException {
-        List<PrimitiveParameter> result =
-                readPrimitiveParameters(Collections.singleton(keyId),
-                paramIds, dataSourceConstraints,
-                SQLOrderBy.DESCENDING).get(keyId);
-        if (result == null) {
-            result = new ArrayList<PrimitiveParameter>(0);
-        }
-        return result;
-    }
-
-    public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
-            Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
-            throws DataSourceReadException {
-        return readPrimitiveParameters(null, paramIds, dataSourceConstraints,
-                SQLOrderBy.ASCENDING);
-    }
-
+    @Override
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
             Set<String> keyIds, Set<String> paramIds,
             DataSourceConstraint dataSourceConstraints)
@@ -625,13 +651,7 @@ public final class RelationalDatabaseSchemaAdaptor
                 SQLOrderBy.ASCENDING);
     }
 
-    public Map<String, List<Event>> getEventsAsc(
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
-            throws DataSourceReadException {
-        return readEvents(null, eventIds, dataSourceConstraints,
-                SQLOrderBy.ASCENDING);
-    }
-
+    @Override
     public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
             Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
@@ -639,39 +659,22 @@ public final class RelationalDatabaseSchemaAdaptor
                 SQLOrderBy.ASCENDING);
     }
 
-    public List<Event> getEventsAsc(String keyId,
+    @Override
+    public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
             Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
             throws DataSourceReadException {
-        List<Event> result = readEvents(Collections.singleton(keyId),
-                eventIds, dataSourceConstraints,
-                SQLOrderBy.ASCENDING).get(keyId);
-        if (result == null) {
-            result = new ArrayList<Event>(0);
+        return readEvents(keyIds, eventIds, dataSourceConstraints,
+                SQLOrderBy.DESCENDING);
+    }
+
+    private static void populatePropositionMap(Map<String, PropertySpec> map,
+            PropertySpec[] propertySpecs) {
+        if (propertySpecs != null) {
+            for (PropertySpec propertySpec : propertySpecs) {
+                for (String code : propertySpec.getCodes()) {
+                    map.put(code, propertySpec);
+                }
+            }
         }
-        return result;
-    }
-
-    public List<Event> getEventsDesc(String keyId,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
-            throws DataSourceReadException {
-        List<Event> result = readEvents(Collections.singleton(keyId),
-                eventIds, dataSourceConstraints,
-                SQLOrderBy.DESCENDING).get(keyId);
-        if (result == null) {
-            result = new ArrayList<Event>(0);
-        }
-        return result;
-    }
-
-    public String getKeyType() {
-        return "PATIENT";
-    }
-
-    public String getKeyTypeDisplayName() {
-        return "patient";
-    }
-
-    public String getKeyTypePluralDisplayName() {
-        return "patients";
     }
 }

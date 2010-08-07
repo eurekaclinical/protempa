@@ -3,7 +3,6 @@ package org.protempa.bp.commons.dsb;
 import org.protempa.bp.commons.dsb.sqlgen.SQLGenerator;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.List;
 import org.arp.javautil.serviceloader.ServiceLoader;
@@ -48,19 +47,19 @@ class SQLGeneratorFactory {
     SQLGenerator newInstance() throws IOException, SQLException,
             ClassNotFoundException, InstantiationException,
             IllegalAccessException, SQLGeneratorNotFoundException {
-        Driver driver = this.connectionSpec.getDriver();
 
         List<Class<? extends SQLGenerator>> candidates =
                 ServiceLoader.load(SQLGenerator.class);
         for (Class<? extends SQLGenerator> candidate : candidates) {
             SQLGenerator candidateInstance = candidate.newInstance();
+            candidateInstance.loadDriverIfNeeded();
             /*
              * We get a new connection for each compatibility check so that
              * no state (or a closed connection!) is carried over.
              */
             Connection con = this.connectionSpec.getOrCreate();
             try {
-                if (candidateInstance.checkCompatibility(driver, con))
+                if (candidateInstance.checkCompatibility(con))
                     return candidateInstance;
             } finally {
                 con.close();

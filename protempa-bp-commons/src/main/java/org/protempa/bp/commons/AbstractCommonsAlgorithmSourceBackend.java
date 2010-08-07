@@ -1,7 +1,7 @@
 package org.protempa.bp.commons;
 
 import org.protempa.AbstractAlgorithmSourceBackend;
-import org.protempa.BackendInitializationException;
+import org.protempa.AlgorithmSourceBackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 
 /**
@@ -12,8 +12,8 @@ public abstract class AbstractCommonsAlgorithmSourceBackend
         extends AbstractAlgorithmSourceBackend {
 
     public void initialize(BackendInstanceSpec backendInstanceSpec)
-            throws BackendInitializationException {
-        CommonsUtil.initializeBackendProperties(this, backendInstanceSpec);
+            throws AlgorithmSourceBackendInitializationException {
+        BackendPropertyInitializer.initialize(this, backendInstanceSpec);
     }
 
 }

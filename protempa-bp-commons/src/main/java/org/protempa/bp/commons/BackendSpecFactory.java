@@ -57,8 +57,14 @@ final class BackendSpecFactory {
             if (backendPropertyAnnotation != null) {
                 Class<? extends BackendPropertyValidator> validatorCls =
                         backendPropertyAnnotation.validator();
-                String name = method.getName();
-                name = name.substring(3);
+                String name = null;
+                String propertyName = backendPropertyAnnotation.propertyName();
+                if (propertyName.isEmpty()) {
+                    name = method.getName();
+                    name = name.substring(3);
+                } else {
+                    name = propertyName;
+                }
                 char[] nameArr = name.toCharArray();
                 nameArr[0] = Character.toLowerCase(nameArr[0]);
                 name = String.valueOf(nameArr);
