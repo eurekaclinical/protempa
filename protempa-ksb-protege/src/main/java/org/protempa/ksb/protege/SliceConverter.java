@@ -18,7 +18,7 @@ final class SliceConverter implements
 
     public void convert(Instance protegeParameter,
             KnowledgeBase protempaKnowledgeBase,
-            KnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend) {
         assert protempaKnowledgeBase != null :
                 "protempaKnowledgeBase cannot be null";
 

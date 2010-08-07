@@ -31,7 +31,7 @@ class LowLevelAbstractionConverter implements PropositionConverter {
 
 	public void convert(Instance simpleAbstractionInstance,
 			org.protempa.KnowledgeBase protempaKnowledgeBase,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
         assert simpleAbstractionInstance != null :
             "simpleAbstractionInstance cannot be null";
         assert protempaKnowledgeBase != null :
@@ -71,7 +71,7 @@ class LowLevelAbstractionConverter implements PropositionConverter {
 	private static LowLevelAbstractionDefinition constructDetector(
 			Instance simpleAbstractionInstance,
 			org.protempa.KnowledgeBase protempaKnowledgeBase,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 		LowLevelAbstractionDefinition result = null;
 		if (!protempaKnowledgeBase
 						.hasAbstractionDefinition(simpleAbstractionInstance
@@ -102,7 +102,7 @@ class LowLevelAbstractionConverter implements PropositionConverter {
 	 */
 	private static void setDuration(Instance instance,
 			LowLevelAbstractionDefinition d,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 		d.setMinimumDuration(Util.parseTimeConstraint(instance,
 				"minDuration"));
 		d.setMinimumDurationUnits(Util.parseUnitsConstraint(instance,
@@ -121,7 +121,7 @@ class LowLevelAbstractionConverter implements PropositionConverter {
 	 */
 	private static void constructDetectorValue(
 			LowLevelAbstractionDefinition llad, Instance allowedValue,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 		if (llad != null && allowedValue != null) {
 			LowLevelAbstractionValueDefinition d = new LowLevelAbstractionValueDefinition(
 					llad, allowedValue.getName());
@@ -172,7 +172,7 @@ class LowLevelAbstractionConverter implements PropositionConverter {
 	 */
 	private static void setGapBetweenValues(Instance abstractParameter,
 			LowLevelAbstractionDefinition d,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 		d.setMinimumGapBetweenValues(Util.parseTimeConstraint(
 				abstractParameter, "minGapValues"));
 		d.setMinimumGapBetweenValuesUnits(Util.parseUnitsConstraint(

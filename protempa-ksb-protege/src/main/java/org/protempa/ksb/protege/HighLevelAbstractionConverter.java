@@ -32,7 +32,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
 
 	public void convert(Instance complexAbstractionInstance,
 			KnowledgeBase protempaKnowledgeBase,
-            KnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend) {
 
 		if (complexAbstractionInstance != null
 				&& protempaKnowledgeBase != null
@@ -61,7 +61,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
 
 	private static void setTemporalOffsets(Instance complexAbstractionInstance,
 			HighLevelAbstractionDefinition cad,
-            KnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend) {
 		Instance temporalOffsetInstance = (Instance) complexAbstractionInstance
 				.getOwnSlotValue(complexAbstractionInstance.getKnowledgeBase()
 						.getSlot("temporalOffsets"));
@@ -171,7 +171,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
 
 	private static TemporalExtendedPropositionDefinition newTemporalExtendedPropositionDefinition(
 			Instance extendedProposition, HighLevelAbstractionDefinition cad,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 		String ad = propositionId(extendedProposition);
 
 		String displayName = (String) extendedProposition
@@ -219,7 +219,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
 			Map<Instance, TemporalExtendedPropositionDefinition>
             extendedParameterCache,
 			Instance instance, HighLevelAbstractionDefinition cad,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 		for (Iterator<?> itr = instance.getOwnSlotValues(
 				instance.getKnowledgeBase().getSlot("withRelations"))
 				.iterator(); itr.hasNext();) {
@@ -314,7 +314,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
 			HighLevelAbstractionDefinition cad,
 			Map<Instance, TemporalExtendedPropositionDefinition>
             extendedParameterCache,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 		Set<Object> extendedParameters = new HashSet<Object>();
 
 		for (Iterator<?> itr = complexAbstractionInstance.getOwnSlotValues(

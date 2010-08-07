@@ -26,7 +26,7 @@ import org.protempa.bp.commons.BackendProperty;
 @BackendInfo(
     displayName="Local Protege knowledge base backend"
 )
-public final class LocalKnowledgeSourceBackend extends KnowledgeSourceBackend {
+public final class LocalKnowledgeSourceBackend extends ProtegeKnowledgeSourceBackend {
     
     private String projectString;
     

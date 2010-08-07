@@ -24,7 +24,7 @@ import org.protempa.bp.commons.BackendProperty;
     displayName="Remote Protege knowledge base backend"
 )
 public final class RemoteKnowledgeSourceBackend extends
-		KnowledgeSourceBackend {
+		ProtegeKnowledgeSourceBackend {
 
     
     private String hostname;

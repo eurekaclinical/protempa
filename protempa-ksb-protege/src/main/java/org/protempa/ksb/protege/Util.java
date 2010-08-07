@@ -106,7 +106,7 @@ class Util {
 	}
 
 	static Unit parseUnitsConstraint(Instance instance, String constraintUnits,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 		String constraintUnitsValue = null;
 		if (instance != null && constraintUnits != null) {
 			constraintUnitsValue = (String) instance.getOwnSlotValue(instance
@@ -125,7 +125,7 @@ class Util {
 	 * @param d
 	 */
 	static void setGap(Instance instance, AbstractAbstractionDefinition d,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 		Integer maxGap = (Integer) instance.getOwnSlotValue(instance
 				.getKnowledgeBase().getSlot("maxGap"));
 		Unit maxGapUnits = Util.parseUnitsConstraint(instance, "maxGapUnits",

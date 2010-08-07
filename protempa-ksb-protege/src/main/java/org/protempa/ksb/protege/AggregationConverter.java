@@ -31,7 +31,7 @@ public class AggregationConverter implements PropositionConverter {
 
 	public void convert(Instance protegeParameter,
 			KnowledgeBase protempaKnowledgeBase,
-            KnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend) {
 		if (protegeParameter != null && protempaKnowledgeBase != null) {
 			constructAggregation(protegeParameter, protempaKnowledgeBase,
 					backend);
@@ -40,7 +40,7 @@ public class AggregationConverter implements PropositionConverter {
 
 	private void constructAggregation(Instance protegeParameter,
 			KnowledgeBase protempaKnowledgeBase,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 		if (protegeParameter != null && protempaKnowledgeBase != null) {
 			AggregationDefinition ad = new AggregationDefinition(
 					protempaKnowledgeBase, protegeParameter.getName());
@@ -67,7 +67,7 @@ public class AggregationConverter implements PropositionConverter {
 	 * @param d
 	 */
 	private static void setDuration(Instance instance, AggregationDefinition d,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 		d.setMinimumDuration(Util.parseTimeConstraint(instance, "minDuration"));
 		d.setMinimumDurationUnits(Util.parseUnitsConstraint(instance,
 				"minDurationUnits", backend));

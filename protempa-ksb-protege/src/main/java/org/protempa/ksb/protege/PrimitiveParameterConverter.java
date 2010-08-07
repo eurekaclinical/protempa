@@ -20,7 +20,7 @@ class PrimitiveParameterConverter implements PropositionConverter {
 
 	public void convert(Instance instance,
 			org.protempa.KnowledgeBase protempaKnowledgeBase,
-			KnowledgeSourceBackend backend) {
+			ProtegeKnowledgeSourceBackend backend) {
 
 		if (instance != null
 				&& protempaKnowledgeBase != null

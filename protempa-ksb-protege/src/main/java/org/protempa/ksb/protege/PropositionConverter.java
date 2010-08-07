@@ -20,7 +20,7 @@ public interface PropositionConverter {
 	 *            the Protege {@link KnowledgeSourceBackend}.
 	 */
 	void convert(Instance protegeProposition,
-			KnowledgeBase protempaKnowledgeBase, KnowledgeSourceBackend backend);
+			KnowledgeBase protempaKnowledgeBase, ProtegeKnowledgeSourceBackend backend);
 
 	/**
 	 * Checks if the given Protege parameter instance is already in the given

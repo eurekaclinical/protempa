@@ -12,7 +12,7 @@ import org.arp.javautil.graph.Weight;
 class EventConverter implements PropositionConverter {
 
 	public void convert(Instance protegeProposition,
-			KnowledgeBase protempaKnowledgeBase, KnowledgeSourceBackend backend) {
+			KnowledgeBase protempaKnowledgeBase, ProtegeKnowledgeSourceBackend backend) {
 		if (protegeProposition != null
 				&& protempaKnowledgeBase != null
 				&& !protempaKnowledgeBase.hasEventDefinition(protegeProposition

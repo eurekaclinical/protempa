@@ -7,7 +7,6 @@ import edu.stanford.smi.protege.model.Instance;
 import java.util.HashMap;
 import java.util.Map;
 import org.protempa.AbstractionDefinition;
-import org.protempa.BackendInitializationException;
 import org.protempa.EventDefinition;
 import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSource;
@@ -26,7 +25,7 @@ import org.protempa.proposition.value.Unit;
  * 
  * @author Andrew Post
  */
-public abstract class KnowledgeSourceBackend extends
+public abstract class ProtegeKnowledgeSourceBackend extends
 		AbstractCommonsKnowledgeSourceBackend implements ProjectListener {
 
 	private ConnectionManager cm;
@@ -57,13 +56,13 @@ public abstract class KnowledgeSourceBackend extends
 		}
 	};
 
-    protected KnowledgeSourceBackend() {
+    protected ProtegeKnowledgeSourceBackend() {
         this.instanceCache = new HashMap<String, Instance>();
     }
 
 	@Override
 	public void initialize(BackendInstanceSpec config)
-            throws BackendInitializationException {
+            throws KnowledgeSourceBackendInitializationException {
 		super.initialize(config);
 		if (this.cm == null) {
 			ConnectionManager pcm = initConnectionManager(config);
