@@ -30,6 +30,8 @@ import org.protempa.backend.Configurations;
 import org.protempa.backend.ConfigurationsProviderManager;
 import org.protempa.backend.InvalidPropertyNameException;
 import org.protempa.backend.test.MockBackendProvider;
+import org.protempa.proposition.value.GranularityFactory;
+import org.protempa.proposition.value.UnitFactory;
 
 /**
  *
@@ -159,9 +161,24 @@ public class INICommonsConfigurationsTest {
     private static class MockDataSourceBackend
             extends AbstractDataSourceBackend {
 
-        MockDataSourceBackend() {
-            super(null);
+        public void initialize(BackendInstanceSpec config)
+                throws BackendInitializationException {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        public GranularityFactory getGranularityFactory() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public UnitFactory getUnitFactory() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public String getKeyType() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        
     }
 
     private static class MockAlgorithmSourceBackend
