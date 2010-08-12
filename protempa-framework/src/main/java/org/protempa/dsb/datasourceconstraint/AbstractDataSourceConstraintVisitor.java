@@ -6,7 +6,8 @@ import java.util.Iterator;
  *
  * @author Andrew Post
  */
-public abstract class AbstractDataSourceConstraintVisitor {
+public abstract class AbstractDataSourceConstraintVisitor
+        implements DataSourceConstraintVisitor {
 
     public void visitAll(DataSourceConstraint constraints) {
         if (constraints != null) {

@@ -98,7 +98,8 @@ public class PositionDataSourceConstraint extends AbstractDataSourceConstraint {
             return null;
     }
 
-    public void accept(AbstractDataSourceConstraintVisitor visitor) {
+    @Override
+    public void accept(DataSourceConstraintVisitor visitor) {
         visitor.visit(this);
     }
 

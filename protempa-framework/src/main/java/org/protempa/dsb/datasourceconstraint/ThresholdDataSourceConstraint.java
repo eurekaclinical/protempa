@@ -19,7 +19,8 @@ public final class ThresholdDataSourceConstraint
         return comparator;
     }
 
-    public void accept(AbstractDataSourceConstraintVisitor visitor) {
+    @Override
+    public void accept(DataSourceConstraintVisitor visitor) {
         visitor.visit(this);
     }
 }

@@ -7,7 +7,7 @@ public interface DataSourceConstraint {
 
     DataSourceConstraint getAnd();
     
-    void accept(AbstractDataSourceConstraintVisitor visitor);
+    void accept(DataSourceConstraintVisitor visitor);
 
     Iterator<DataSourceConstraint> andIterator();
 }
