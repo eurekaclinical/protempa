@@ -3,8 +3,10 @@ package org.protempa.bp.commons.dsb;
 import org.protempa.bp.commons.dsb.sqlgen.SQLGenerator;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
 import org.arp.javautil.serviceloader.ServiceLoader;
 import org.arp.javautil.sql.ConnectionSpec;
 
@@ -59,8 +61,20 @@ class SQLGeneratorFactory {
              */
             Connection con = this.connectionSpec.getOrCreate();
             try {
-                if (candidateInstance.checkCompatibility(con))
+                if (candidateInstance.checkCompatibility(con)) {
+                    DatabaseMetaData metaData = con.getMetaData();
+                    DSBUtil.logger().log(Level.FINE,
+                        "{0} is compatible with database {1} ({2})",
+                        new Object[] {candidateInstance.getClass().getName(),
+                        metaData.getDatabaseProductName(),
+                        metaData.getDatabaseProductVersion()});
+                    DSBUtil.logger().log(Level.FINE,
+                        "{0} is compatible with driver {1} ({2})",
+                        new Object[] {candidateInstance.getClass().getName(),
+                        metaData.getDriverName(),
+                        metaData.getDriverVersion()});
                     return candidateInstance;
+                }
             } finally {
                 con.close();
             }

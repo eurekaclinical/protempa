@@ -9,7 +9,7 @@ import org.protempa.backend.BackendInstanceSpec;
  * @author Andrew Post
  */
 public abstract class AbstractCommonsDataSourceBackend
-        extends AbstractDataSourceBackend implements CommonsDataSourceBackend {
+        extends AbstractDataSourceBackend  {
 
     public void initialize(BackendInstanceSpec config)
         throws DataSourceBackendInitializationException {

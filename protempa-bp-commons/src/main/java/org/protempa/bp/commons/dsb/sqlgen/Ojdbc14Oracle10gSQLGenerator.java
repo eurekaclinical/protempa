@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import org.protempa.bp.commons.dsb.SQLOrderBy;
+import java.util.logging.Level;
 
 /**
  *
@@ -25,9 +25,9 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
 
     public boolean checkCompatibility(Connection connection) 
             throws SQLException {
-        if (checkDriverCompatibility(connection))
+        if (!checkDriverCompatibility(connection))
             return false;
-        if (checkDatabaseCompatibility(connection))
+        if (!checkDatabaseCompatibility(connection))
             return false;
 
         return true;
@@ -102,24 +102,24 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
     private boolean checkDatabaseCompatibility(Connection connection)
             throws SQLException {
         DatabaseMetaData metaData = connection.getMetaData();
-        if (!metaData.getDatabaseProductName().toUpperCase()
-                .contains("ORACLE"))
+        if (!metaData.getDatabaseProductName().equals("Oracle"))
             return false;
         if (metaData.getDatabaseMajorVersion() != 10)
             return false;
-        return false;
+        
+        return true;
     }
 
     private boolean checkDriverCompatibility(Connection connection) 
             throws SQLException {
         DatabaseMetaData metaData = connection.getMetaData();
         String name = metaData.getDriverName();
-        if (!(name.equals("oracle.jdbc.driver.OracleDriver") ||
-                name.equals("oracle.jdbc.OracleDriver")))
+        if (!name.equals("Oracle JDBC driver"))
             return false;
         if (metaData.getDriverMajorVersion() != 10)
             return false;
-        return false;
+        
+        return true;
     }
 
     @Override
@@ -196,7 +196,7 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
     }
 
     @Override
-    protected String getDriverNameToLoad() {
+    protected String getDriverClassNameToLoad() {
         return "oracle.jdbc.driver.OracleDriver";
     }
 

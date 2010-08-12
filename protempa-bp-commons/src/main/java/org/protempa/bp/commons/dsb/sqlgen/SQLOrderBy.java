@@ -1,4 +1,4 @@
-package org.protempa.bp.commons.dsb;
+package org.protempa.bp.commons.dsb.sqlgen;
 
 /**
  *

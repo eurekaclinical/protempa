@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import org.protempa.bp.commons.dsb.SQLOrderBy;
 
 /**
  * A SQL generator that is compatible with Connector/J 5.x and MySQL 4.1 and
@@ -27,9 +26,9 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
 
     public boolean checkCompatibility(Connection connection)
             throws SQLException {
-        if (checkDriverCompatibility(connection))
+        if (!checkDriverCompatibility(connection))
             return false;
-        if (checkDatabaseCompatibility(connection))
+        if (!checkDatabaseCompatibility(connection))
             return false;
 
         return true;
@@ -43,11 +42,11 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
             throws SQLException {
         DatabaseMetaData metaData = connection.getMetaData();
         String name = metaData.getDriverName();
-        if (!name.equals(driverName))
+        if (!name.equals("MySQL-AB JDBC Driver"))
             return false;
         if (metaData.getDriverMajorVersion() != 5)
             return false;
-        return false;
+        return true;
     }
 
     private boolean checkDatabaseCompatibility(Connection connection)
@@ -59,7 +58,7 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
         int dbMajorVersion = metaData.getDatabaseMajorVersion();
         if (dbMajorVersion != 4 && dbMajorVersion != 5)
             return false;
-        return false;
+        return true;
     }
 
     @Override
@@ -191,7 +190,7 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
     }
 
     @Override
-    protected String getDriverNameToLoad() {
+    protected String getDriverClassNameToLoad() {
         return driverName;
     }
 

@@ -3,7 +3,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +15,6 @@ import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.ConstraintValue;
 import org.protempa.dsb.datasourceconstraint.AbstractDataSourceConstraintVisitor;
 import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 import org.protempa.dsb.datasourceconstraint.PositionDataSourceConstraint;
-import org.protempa.bp.commons.dsb.SQLOrderBy;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 
 /**
@@ -28,36 +27,10 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             throws SQLException;
 
     public abstract boolean isLimitingSupported();
-    private static final String getPropIdsSQL =
-            "select {0} from {4} "
-            + "where {5}";
-
-    public final String generateGetAllKeyIdsQuery(int start, int count,
+    
+    public final String generateSelect(Set<String> propIds,
             DataSourceConstraint dataSourceConstraints,
-            Map<PropertySpec, List<String>> specs) {
-        ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(specs);
-        Map<ColumnSpec, Integer> referenceIndices =
-                computeReferenceIndices(info.getColumnSpecs());
-        ColumnSpecInfo info2 = new ColumnSpecInfo();
-        info2.setDistinct(true);
-        info2.setColumnSpecs(
-                Collections.singletonList(info.getColumnSpecs().get(0)));
-        StringBuilder selectClause = generateSelectClause(info2, referenceIndices);
-        StringBuilder fromClause = generateFromClause(info.getColumnSpecs(),
-                referenceIndices);
-        StringBuilder whereClause = generateWhereClause(null, info, specs,
-                dataSourceConstraints, selectClause, referenceIndices, null,
-                null);
-        String result = assembleGetAllKeyIdsQuery(
-                selectClause, fromClause, whereClause, start, count);
-        return result;
-    }
-
-    public final String generateReadPropositionsQuery(
-            Set<String> propIds,
-            DataSourceConstraint dataSourceConstraints,
-            Map<PropertySpec, List<String>> propertySpecs,
-            Set<String> keyIds,
+            Set<PropertySpec> propertySpecs, Set<String> keyIds,
             SQLOrderBy order) {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(
                 propertySpecs);
@@ -68,9 +41,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         StringBuilder fromClause = generateFromClause(info.getColumnSpecs(),
                 referenceIndices);
         StringBuilder whereClause = generateWhereClause(propIds, info,
-                propertySpecs,
-                dataSourceConstraints, selectClause, referenceIndices,
-                keyIds, order);
+                propertySpecs, dataSourceConstraints, selectClause,
+                referenceIndices, keyIds, order);
         String result = assembleReadPropositionsQuery(
                 selectClause, fromClause, whereClause);
         return result;
@@ -240,14 +212,14 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     private StringBuilder generateWhereClause(Set<String> propIds,
             ColumnSpecInfo info,
-            Map<PropertySpec, List<String>> specs,
+            Collection<PropertySpec> propertySpecs,
             DataSourceConstraint dataSourceConstraints,
             StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
             Set<String> keyIds, SQLOrderBy order) {
         StringBuilder wherePart = new StringBuilder();
         int i = 1;
-        for (PropertySpec propositionSpec : specs.keySet()) {
+        for (PropertySpec propositionSpec : propertySpecs) {
             i = processKeySpecForWhereClause(propositionSpec, i);
             i = processStartTimeSpecForWhereClause(propositionSpec, i,
                     dataSourceConstraints, wherePart, referenceIndices);
@@ -633,7 +605,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     public final void loadDriverIfNeeded() {
-        String className = getDriverNameToLoad();
+        String className = getDriverClassNameToLoad();
         try {
             Class.forName(className);
         } catch (ClassNotFoundException ex) {
@@ -644,7 +616,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     /**
-     * Gets a the name of the driver to load for this SQL generator, or
+     * Gets a the class name of the driver to load for this SQL generator, or
      * <code>null</code> if the driver is a JDBC 4 driver and does not need
      * to be loaded explicitly. Returning not-<code>null</code> will do no
      * harm if a JDBC 4 driver.
@@ -654,7 +626,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
      *
      * @return a class name {@link String}.
      */
-    protected String getDriverNameToLoad() {
+    protected String getDriverClassNameToLoad() {
         return null;
     }
 }

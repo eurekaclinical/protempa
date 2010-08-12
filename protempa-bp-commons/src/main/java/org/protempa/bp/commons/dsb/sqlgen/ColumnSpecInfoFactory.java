@@ -1,6 +1,7 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -13,18 +14,16 @@ import java.util.Map;
 class ColumnSpecInfoFactory {
 
     ColumnSpecInfo newInstance(
-            Map<PropertySpec, List<String>> propertySpecToPropIdMap) {
-        if (propertySpecToPropIdMap == null)
+            Collection propertySpecs) {
+        if (propertySpecs == null)
+            throw new IllegalArgumentException("propertySpecs cannot be null");
+        if (propertySpecs.isEmpty())
             throw new IllegalArgumentException(
-                    "propertySpecToPropIdMap cannot be null");
-        if (propertySpecToPropIdMap.isEmpty())
-            throw new IllegalArgumentException(
-                    "propertySpecToPropIdMap must have at least one entry");
+                    "propertySpecs must have at least one entry");
         ColumnSpecInfo columnSpecInfo = new ColumnSpecInfo();
         List<ColumnSpec> columnSpecs = new ArrayList<ColumnSpec>();
         int i = 0;
-        for (Iterator<PropertySpec> itr = 
-                propertySpecToPropIdMap.keySet().iterator();
+        for (Iterator<PropertySpec> itr = propertySpecs.iterator();
                 itr.hasNext();) {
             PropertySpec propertySpec = itr.next();
             if (i == 0)

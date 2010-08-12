@@ -1,13 +1,11 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
-import org.protempa.bp.commons.dsb.SQLOrderBy;
 
 /**
  * An API for ServiceLoader-style services that generate database-specific SQL
@@ -40,34 +38,26 @@ public interface SQLGenerator {
 
 
     /**
-     * Returns whether the SQL generator generates row limiting clauses,
-     * e.g., MySQL's LIMIT, Oracle's rownum.
+     * Returns whether the SQL generator supports limiting the returned rows
+     * by row number.
      * 
-     * @return true if the SQL generator generates low limiting clauses,
-     * false if not.
+     * @return <code>true</code> if the SQL generator supports limiting the
+     * returned rows by number, <code>false</code> otherwise.
      */
     boolean isLimitingSupported();
 
     /**
-     * Returns a SQL statement for use by
-     * {@link RelationalDatabaseSchemaAdaptor.getAllKeyIds()}.
-     *
-     * @param keyColumn the column in which the key id exists.
-     * @param keyTable the table to use when retrieving the key ids.
-     * @param start return key ids starting with this row number.
-     * @param count return this many key ids.
-     * @param dataSourceConstraints a {@link DataSourceConstraint} with
-     * position and value constraints that reduce the number of key ids
-     * returned. If <code>null</code>, no constraints will be applied.
-     * @return a {@link String} containing a SQL statement.
+     * Generates a SQL select statement meeting the specified criteria.
+     * @param propIds
+     * @param dataSourceConstraints
+     * @param propertySpecs
+     * @param keyIds
+     * @param order
+     * @return a SQL select statement {@link String}.
      */
-    String generateGetAllKeyIdsQuery(
-            int start, int count, DataSourceConstraint dataSourceConstraints,
-            Map<PropertySpec, List<String>> specs);
-
-    String generateReadPropositionsQuery(Set<String> propIds,
+    String generateSelect(Set<String> propIds,
             DataSourceConstraint dataSourceConstraints,
-            Map<PropertySpec, List<String>> specs, Set<String> keyIds,
+            Set<PropertySpec> propertySpecs, Set<String> keyIds,
             SQLOrderBy order);
 
     void loadDriverIfNeeded();
