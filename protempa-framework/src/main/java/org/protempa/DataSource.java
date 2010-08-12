@@ -2,7 +2,6 @@ package org.protempa;
 
 import java.util.logging.Level;
 import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -191,44 +190,6 @@ public final class DataSource extends
         assert result != null : "no unit factory returned from " +
                 b.getClass() + "!";
         return result;
-    }
-
-    /**
-     * Returns a list of all key ids in this data set optionally that meet
-     * a set of specified constraints.
-     *
-     * @param start the first key id to retrieve, must be >= 0.
-     * @param count the number of key ids to retrieve,
-     * must be > 1.
-     * @param dataSourceConstraints a {@link DataSourceConstraint} with
-     * position and value constraints that reduce the number of key ids
-     * returned. If <code>null</code>, no constraints will be applied.
-     * @return a newly-created {@link List} of {@link String}s.
-     * @throws DataSourceReadException if there was an error reading from
-     * the database.
-     */
-    @Deprecated
-    public List<String> getAllKeyIds(int start, int count,
-            DataSourceConstraint dataSourceConstraints)
-                        throws DataSourceReadException {
-        if (start < 0)
-            throw new IllegalArgumentException("start must be >= 0");
-        if (count < 1)
-            throw new IllegalArgumentException("count must be >= 1");
-        initializeIfNeeded();
-        Set<String> result = new HashSet<String>();
-        for (DataSourceBackend backend : this.backendManager.getBackends()) {
-            List<String> keyIds = backend.getAllKeyIds(start, count,
-                    dataSourceConstraints);
-            if (keyIds == null)
-                assertOnNullReturnVal(backend, "getAllKeyIds");
-            result.addAll(keyIds);
-            if (result.size() == count)
-                break;
-            else
-                count -= result.size();
-        }
-        return new ArrayList(result);
     }
 
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(

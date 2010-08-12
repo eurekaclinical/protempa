@@ -17,26 +17,6 @@ import org.protempa.proposition.value.UnitFactory;
 public interface DataSourceBackend extends
 		Backend<DataSourceBackendUpdatedEvent, DataSource>{
 
-
-    /**
-     * Returns a list of all key ids in this data set optionally that meet
-     * a set of specified constraints.
-     *
-     * @param start the first key id to retrieve, must be >= 0.
-     * @param count the number of key ids to retrieve,
-     * must be > 1.
-     * @param dataSourceConstraints a {@link DataSourceConstraint} with
-     * position and value constraints that reduce the number of key ids
-     * returned. If <code>null</code>, no constraints will be applied.
-     * @return a newly-created {@link List} of {@link String}s.
-     * @throws DataSourceReadException if there was an error reading from
-     * the database.
-     */
-    @Deprecated
-    List<String> getAllKeyIds(int start, int count,
-            DataSourceConstraint dataSourceConstraints)
-            throws DataSourceReadException;
-
     Map<String, List<ConstantParameter>> getConstantParameters(
             Set<String> keyIds,
             Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
