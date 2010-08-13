@@ -16,6 +16,7 @@ import org.protempa.AbstractAlgorithmSourceBackend;
 import org.protempa.AbstractDataSourceBackend;
 import org.protempa.AbstractKnowledgeSourceBackend;
 import org.protempa.Algorithm;
+import org.protempa.AlgorithmSourceBackend;
 import org.protempa.AlgorithmSourceReadException;
 import org.protempa.Algorithms;
 import org.protempa.BackendInitializationException;
@@ -95,10 +96,10 @@ public class INICommonsConfigurationsTest {
         Configurations configurations =
                 ConfigurationsProviderManager.getConfigurationsProvider()
                 .getConfigurations();
-        BackendSpec backendSpec = BackendProviderManager.getBackendProvider()
+        BackendSpec<AlgorithmSourceBackend> backendSpec = BackendProviderManager.getBackendProvider()
                 .getAlgorithmSourceBackendSpecLoader()
                 .loadSpec("ASBackendSpec1");
-        List<BackendInstanceSpec> result =
+        List<BackendInstanceSpec<AlgorithmSourceBackend>> result =
                 configurations.load("test", backendSpec);
         assertEquals(1, result.size());
         BackendInstanceSpec bis = result.get(0);
