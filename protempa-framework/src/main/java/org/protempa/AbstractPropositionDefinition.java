@@ -155,7 +155,7 @@ public abstract class AbstractPropositionDefinition implements
     }
 
     @Override
-    public String getTermId() {
+    public final String getTermId() {
         return this.termId;
     }
 
@@ -163,7 +163,7 @@ public abstract class AbstractPropositionDefinition implements
      * Assigns this proposition with an associated {@link TermDefinition}.
      * @param termId a term id {@link String}.
      */
-    public void setTermId(String termId) {
+    public final void setTermId(String termId) {
         this.termId = termId;
     }
 
