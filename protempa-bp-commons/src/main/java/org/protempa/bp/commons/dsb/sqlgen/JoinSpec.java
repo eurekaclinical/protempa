@@ -3,6 +3,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.io.Serializable;
 
 /**
+ * Specifies a relational join between two tables.
  *
  * @author Andrew Post
  */
@@ -12,7 +13,7 @@ public final class JoinSpec implements Serializable {
     private final ColumnSpec nextColumnSpec;
     private ColumnSpec prevColumnSpec;
 
-    //needs ColumnSpec prevColumnSpec
+    
     public JoinSpec(String fromKey, String toKey, ColumnSpec nextColumnSpec) {
         if (fromKey == null)
             throw new IllegalArgumentException("fromKey cannot be null");

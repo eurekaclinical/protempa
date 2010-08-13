@@ -6,6 +6,7 @@ import java.util.List;
 import org.arp.javautil.string.StringUtil;
 
 /**
+ * Specifies a column in a relational database table.
  *
  * @author Andrew Post
  */
