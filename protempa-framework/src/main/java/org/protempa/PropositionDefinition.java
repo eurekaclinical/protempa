@@ -11,78 +11,87 @@ import java.io.Serializable;
  * @author Andrew Post
  */
 public interface PropositionDefinition extends Serializable {
-	/**
-	 * This proposition definition's display name.
-	 * 
-	 * @return a {@link String}.
-	 */
-	String getDisplayName();
 
-	/**
-	 * This proposition definition's abbreviated display name.
-	 * 
-	 * @return a {@link String}.
-	 */
-	String getAbbreviatedDisplayName();
+    /**
+     * This proposition definition's display name.
+     *
+     * @return a {@link String}.
+     */
+    String getDisplayName();
 
-	/**
-	 * This proposition definition's id.
-	 * 
-	 * @return a {@link String}, guaranteed not to be <code>null</code>.
-	 */
-	String getId();
+    /**
+     * This proposition definition's abbreviated display name.
+     *
+     * @return a {@link String}.
+     */
+    String getAbbreviatedDisplayName();
 
-	/**
-	 * Returns the ids of this proposition definition's children. These include
-	 * proposition definitions with abstracted-from, inverse-isa, and has-part
-	 * relations.
-	 * 
-	 * @return an array of {@link String}s, guaranteed not <code>null</code>.
-	 */
-	String[] getDirectChildren();
+    /**
+     * This proposition definition's id.
+     *
+     * @return a {@link String}, guaranteed not to be <code>null</code>.
+     */
+    String getId();
 
-	/**
-	 * Returns the ids of the proposition definitions that have an is-a
-	 * relationship with this proposition definition.
-	 * 
-	 * @return a {@link String[]} of proposition definition ids.
-	 */
-	String[] getInverseIsA();
+    /**
+     * Returns the ids of this proposition definition's children. These include
+     * proposition definitions with abstracted-from, inverse-isa, and has-part
+     * relations.
+     *
+     * @return an array of {@link String}s, guaranteed not <code>null</code>.
+     */
+    String[] getDirectChildren();
 
-	/**
-	 * Returns whether instances of this proposition definition are
-	 * concatenable. A proposition is concatenable if, whenever it holds over
-	 * two consecutive time intervals, it holds also over their union.
-	 * 
-	 * @return <code>true</code> if concatenable, <code>false</code> if not.
-	 */
-	boolean isConcatenable();
+    /**
+     * Returns the ids of the proposition definitions that have an is-a
+     * relationship with this proposition definition.
+     *
+     * @return a {@link String[]} of proposition definition ids.
+     */
+    String[] getInverseIsA();
 
-	/**
-	 * Returns whether instances of this proposition definition are solid, that
-	 * is, they cannot properly overlap.
-	 * 
-	 * @return <code>true</code> if solid, <code>false</code> if not.
-	 */
-	boolean isSolid();
+    /**
+     * Returns whether instances of this proposition definition are
+     * concatenable. A proposition is concatenable if, whenever it holds over
+     * two consecutive time intervals, it holds also over their union.
+     *
+     * @return <code>true</code> if concatenable, <code>false</code> if not.
+     */
+    boolean isConcatenable();
 
-	void addPropertyChangeListener(PropertyChangeListener listener);
+    /**
+     * Returns whether instances of this proposition definition are solid, that
+     * is, they cannot properly overlap.
+     *
+     * @return <code>true</code> if solid, <code>false</code> if not.
+     */
+    boolean isSolid();
 
-	void removePropertyChangeListener(PropertyChangeListener listener);
+    /**
+     * Gets the id of a {@link TermDefinition} associated with this
+     * proposition definition.
+     *
+     * @return a term id {@link String}.
+     */
+    String getTermId();
 
-	void addPropertyChangeListener(String propertyName,
-			PropertyChangeListener listener);
+    void addPropertyChangeListener(PropertyChangeListener listener);
 
-	void removePropertyChangeListener(String proeprtyName,
-			PropertyChangeListener listener);
+    void removePropertyChangeListener(PropertyChangeListener listener);
 
-	/**
-	 * Performs some processing on this proposition definition.
-	 * 
-	 * @param visitor a {@link PropositionDefinitionVisitor}, cannot be
+    void addPropertyChangeListener(String propertyName,
+            PropertyChangeListener listener);
+
+    void removePropertyChangeListener(String proeprtyName,
+            PropertyChangeListener listener);
+
+    /**
+     * Performs some processing on this proposition definition.
+     *
+     * @param visitor a {@link PropositionDefinitionVisitor}, cannot be
      * <code>null</code>.
-	 */
-	void accept(PropositionDefinitionVisitor visitor);
+     */
+    void accept(PropositionDefinitionVisitor visitor);
 
     /**
      * Performs some processing on this proposition definition that might
