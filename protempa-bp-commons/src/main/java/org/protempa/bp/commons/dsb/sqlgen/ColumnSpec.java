@@ -87,18 +87,30 @@ public final class ColumnSpec implements Serializable {
         return this.unique;
     }
 
+    /**
+     * Gets the schema name.
+     * @return a schema name {@link String}.
+     */
     public String getSchema() {
         return this.schema;
     }
 
+    /**
+     * Gets the table name.
+     * @return a table name {@link String}.
+     */
     public String getTable() {
         return this.table;
     }
 
+    /**
+     * Gets the column name.
+     * @return a column name {@link String}.
+     */
     public String getColumn() {
         return this.column;
     }
-
+    
     public JoinSpec getJoin() {
         return this.joinSpec;
     }
