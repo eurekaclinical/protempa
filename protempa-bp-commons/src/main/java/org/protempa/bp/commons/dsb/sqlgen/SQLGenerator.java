@@ -2,14 +2,12 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
 
 /**
- * An API for ServiceLoader-style services that generate database-specific SQL
- * for the {@link RelationalDatabaseSchemaAdaptor}.
+ * An API for ServiceLoader-style services that generate database- and driver-
+ * specific SQL for the {@link RelationalDatabaseSchemaAdaptor}.
  *
  * The following database-specific SQL generators are provided:
  * <ul>
@@ -60,5 +58,9 @@ public interface SQLGenerator {
             Set<PropertySpec> propertySpecs, Set<String> keyIds,
             SQLOrderBy order);
 
+    /**
+     * If the supported driver is JDBC 3 or earlier, load the driver here
+     * using {@link Class#forName}.
+     */
     void loadDriverIfNeeded();
 }
