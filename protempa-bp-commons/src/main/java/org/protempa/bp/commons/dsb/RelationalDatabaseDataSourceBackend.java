@@ -58,6 +58,13 @@ public abstract class RelationalDatabaseDataSourceBackend
     private final Map<String, PropertySpec> eventSpecs;
     private final Map<String, PropertySpec> constantSpecs;
 
+    /**
+     * Instantiates the backend with the specification of a mapping from
+     * propositions to where they are stored in the database.
+     *
+     * @param relationalDatabaseSpec a {@link RelationalDatabaseSpec}, the
+     * specification of where propositions are stored in the database.
+     */
     public RelationalDatabaseDataSourceBackend(
             RelationalDatabaseSpec relationalDatabaseSpec) {
         this();
@@ -83,6 +90,18 @@ public abstract class RelationalDatabaseDataSourceBackend
         this.databaseAPI = DatabaseAPI.DRIVERMANAGER;
     }
 
+    /**
+     * Collects the database connection information specified in this backend's
+     * configuration, and uses it to try and get a SQL generator with which to
+     * generate database queries.
+     *
+     * @param config the {@link BackendInstanceSpec} that specifies this
+     * backend's configuration parameters.
+     *
+     * @throws DataSourceBackendInitializationException if bad database
+     * connection information was provided or a SQL generator that is
+     * compatible with the database and available drivers is not available.
+     */
     @Override
     public void initialize(BackendInstanceSpec config)
             throws DataSourceBackendInitializationException {
