@@ -14,10 +14,6 @@ public class QuerySession {
         this.query = initialQuery.clone();
     }
 
-    private void setupTempTable() {
-        // TODO: implement me
-    }
-
     private String generateId() {
         // TODO: implement a proper key generation routine
         return "TempID";
@@ -25,6 +21,14 @@ public class QuerySession {
 
     public String getId() {
         return this.id;
+    }
+
+    public Query getQuery() {
+        return query;
+    }
+
+    public AbstractionFinder getFinder() {
+        return finder;
     }
 
     /**
