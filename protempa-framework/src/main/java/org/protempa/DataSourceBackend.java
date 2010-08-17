@@ -19,27 +19,32 @@ public interface DataSourceBackend extends
 
     Map<String, List<ConstantParameter>> getConstantParameters(
             Set<String> keyIds,
-            Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> paramIds, DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException;
 
     Map<String, List<Event>> getEventsAsc(Set<String> keyIds, 
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException;
 
     Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException;
 
     GranularityFactory getGranularityFactory();
 
     Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints)
+            DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException;
 
     Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
             Set<String> keyIds,
-            Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> paramIds, DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException;
 
     UnitFactory getUnitFactory();

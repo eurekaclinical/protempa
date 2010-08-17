@@ -145,8 +145,9 @@ public final class Protempa {
                 .getDataSourceConstraints();
 
         // results.putAll()
+        QuerySession qs = new QuerySession(query, this.abstractionFinder);
         this.abstractionFinder.doFind(keyIdsSet, propIds,
-                dataSourceConstraints, resultHandler);
+                dataSourceConstraints, resultHandler, qs);
 
         // return new QueryResults(results);
     }

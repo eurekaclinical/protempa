@@ -34,41 +34,51 @@ public abstract class AbstractDataSourceBackend extends
 		AbstractBackend<DataSourceBackendUpdatedEvent, DataSource> implements
 		DataSourceBackend {
 
+    @Override
     public Map<String, List<PrimitiveParameter>>
             getPrimitiveParametersAsc(Set<String> keyIds, Set<String> paramIds,
-			DataSourceConstraint dataSourceConstraints)
+			DataSourceConstraint dataSourceConstraints, QuerySession qs)
 			throws DataSourceReadException {
 		return null;
     }
 
+    @Override
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints)
-            throws DataSourceReadException {
-        return null;
-    }
-    
-    public List<String> getAllKeyIds(int start, int count,
-            DataSourceConstraint dataSourceConstraints)
+            DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException {
         return null;
     }
 
+    public List<String> getAllKeyIds(int start, int count,
+            DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
+            throws DataSourceReadException {
+        return null;
+    }
+
+    @Override
     public Map<String, List<ConstantParameter>> getConstantParameters(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints)
+            DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException {
         return null;
     }
 
+    @Override
     public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException {
         return null;
     }
 
+    @Override
     public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException {
         return null;
     }

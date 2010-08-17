@@ -194,18 +194,20 @@ public final class DataSource extends
 
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
                     Set<String> keyIds, Set<String> paramIds, 
-                    DataSourceConstraint dataSourceConstraints)
+                    DataSourceConstraint dataSourceConstraints,
+                    QuerySession qs)
                     throws DataSourceReadException {
         return PRIMPARAM_ASC_QUERY.execute(this, keyIds, paramIds,
-                dataSourceConstraints);
+                dataSourceConstraints,qs);
     }
 
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
             Set<String> keyIds, Set<String> paramIds,
-                        DataSourceConstraint dataSourceConstraints)
+                        DataSourceConstraint dataSourceConstraints,
+                        QuerySession qs)
                         throws DataSourceReadException {
         return PRIMPARAM_DESC_QUERY.execute(this, keyIds, paramIds,
-                dataSourceConstraints);
+                dataSourceConstraints,qs);
     }
 
     private static void assertOnNullReturnVal(Backend backend,
@@ -217,24 +219,27 @@ public final class DataSource extends
 
     public Map<String, List<ConstantParameter>> getConstantParameters(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints)
+            DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceException {
         return CONST_QUERY.execute(this, keyIds, paramIds,
-                dataSourceConstraints);
+                dataSourceConstraints, qs);
     }
 
     public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException {
         return EVENTS_ASC_QUERY.execute(this, keyIds, eventIds,
-                dataSourceConstraints);
+                dataSourceConstraints, qs);
     }
 
     public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
                         throws DataSourceReadException {
         return EVENTS_DESC_QUERY.execute(this, keyIds, eventIds,
-                dataSourceConstraints);
+                dataSourceConstraints, qs);
     }
 
     private static abstract class ProcessQuery<P> {
@@ -246,7 +251,8 @@ public final class DataSource extends
 
         Map<String, List<P>> execute(DataSource dataSource,
                 Set<String> keyIds, Set<String> propIds,
-                DataSourceConstraint dataSourceConstraints)
+                DataSourceConstraint dataSourceConstraints,
+                QuerySession qs)
                 throws DataSourceReadException {
             Set<String> notNullKeyIds = handleKeyIdSetArgument(keyIds);
             Set<String> notNullPropIds = handlePropIdSetArgument(propIds);
@@ -258,7 +264,7 @@ public final class DataSource extends
             for (DataSourceBackend backend : backends) {
                 Map<String, List<P>> events = executeBackend(backend,
                         notNullKeyIds,
-                        notNullPropIds, dataSourceConstraints);
+                        notNullPropIds, dataSourceConstraints, qs);
                 if (events == null) {
                     events = new HashMap<String, List<P>>();
                 }
@@ -284,7 +290,8 @@ public final class DataSource extends
         protected abstract Map<String, List<P>> executeBackend(
                 DataSourceBackend backend,
                 Set<String> keyIds, Set<String> propIds,
-                DataSourceConstraint dataSourceConstraints)
+                DataSourceConstraint dataSourceConstraints,
+                QuerySession qs)
                 throws DataSourceReadException;
     }
 
@@ -295,10 +302,11 @@ public final class DataSource extends
         @Override
         protected Map<String, List<Event>> executeBackend(
                 DataSourceBackend backend, Set<String> keyIds,
-                Set<String> propIds, DataSourceConstraint dataSourceConstraints)
+                Set<String> propIds, DataSourceConstraint dataSourceConstraints,
+                QuerySession qs)
                 throws DataSourceReadException {
             return backend.getEventsAsc(
-                        keyIds, propIds, dataSourceConstraints);
+                        keyIds, propIds, dataSourceConstraints,qs);
         }
     };
 
@@ -309,10 +317,11 @@ public final class DataSource extends
         @Override
         protected Map<String, List<Event>> executeBackend(
                 DataSourceBackend backend, Set<String> keyIds,
-                Set<String> propIds, DataSourceConstraint dataSourceConstraints)
+                Set<String> propIds, DataSourceConstraint dataSourceConstraints,
+                QuerySession qs)
                 throws DataSourceReadException {
             return backend.getEventsDesc(
-                        keyIds, propIds, dataSourceConstraints);
+                        keyIds, propIds, dataSourceConstraints,qs);
         }
     };
     
@@ -324,10 +333,11 @@ public final class DataSource extends
         protected Map<String, List<PrimitiveParameter>> executeBackend(
                 DataSourceBackend backend,
                 Set<String> keyIds, Set<String> propIds,
-                DataSourceConstraint dataSourceConstraints)
+                DataSourceConstraint dataSourceConstraints,
+                QuerySession qs)
                 throws DataSourceReadException {
             return backend.getPrimitiveParametersAsc(
-                        keyIds, propIds, dataSourceConstraints);
+                        keyIds, propIds, dataSourceConstraints, qs);
         }
     };
     
@@ -339,10 +349,11 @@ public final class DataSource extends
         protected Map<String, List<PrimitiveParameter>> executeBackend(
                 DataSourceBackend backend,
                 Set<String> keyIds, Set<String> propIds,
-                DataSourceConstraint dataSourceConstraints)
+                DataSourceConstraint dataSourceConstraints,
+                QuerySession qs)
                 throws DataSourceReadException {
             return backend.getPrimitiveParametersDesc(
-                        keyIds, propIds, dataSourceConstraints);
+                        keyIds, propIds, dataSourceConstraints, qs);
         }
     };
 
@@ -353,10 +364,11 @@ public final class DataSource extends
         protected Map<String, List<ConstantParameter>> executeBackend(
                 DataSourceBackend backend,
                 Set<String> keyIds, Set<String> propIds,
-                DataSourceConstraint dataSourceConstraints)
+                DataSourceConstraint dataSourceConstraints, 
+                QuerySession qs)
                 throws DataSourceReadException {
             return backend.getConstantParameters(
-                        keyIds, propIds, dataSourceConstraints);
+                        keyIds, propIds, dataSourceConstraints, qs);
         }
     };
 
