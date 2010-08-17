@@ -27,11 +27,7 @@ public class QuerySession {
         return query;
     }
 
-    public AbstractionFinder getFinder() {
-        return finder;
-    }
-
-    /**
+     /**
      * This method returns the results from this query session after applying
      * the restrictions and constraints held in the Query object passed in. The
      * result set will be passed to the QueryResultsHandler that is passed in.
