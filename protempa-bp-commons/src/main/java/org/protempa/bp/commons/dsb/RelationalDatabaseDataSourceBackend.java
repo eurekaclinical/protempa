@@ -1,12 +1,5 @@
 package org.protempa.bp.commons.dsb;
 
-import org.protempa.bp.commons.dsb.sqlgen.SQLOrderBy;
-import org.arp.javautil.sql.InvalidConnectionSpecArguments;
-import org.arp.javautil.sql.DatabaseAPI;
-import org.protempa.bp.commons.AbstractCommonsDataSourceBackend;
-import org.protempa.bp.commons.dsb.sqlgen.SQLGenerator;
-import org.protempa.bp.commons.dsb.sqlgen.RelationalDatabaseSpec;
-import org.protempa.bp.commons.dsb.sqlgen.PropertySpec;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -18,25 +11,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+
 import org.arp.javautil.collections.Collections;
 import org.arp.javautil.sql.ConnectionSpec;
-
+import org.arp.javautil.sql.DatabaseAPI;
+import org.arp.javautil.sql.InvalidConnectionSpecArguments;
+import org.arp.javautil.sql.SQLExecutor;
+import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
+import org.protempa.DataSourceBackendInitializationException;
+import org.protempa.DataSourceReadException;
+import org.protempa.QuerySession;
+import org.protempa.backend.BackendInstanceSpec;
+import org.protempa.bp.commons.AbstractCommonsDataSourceBackend;
+import org.protempa.bp.commons.BackendProperty;
+import org.protempa.bp.commons.dsb.sqlgen.PropertySpec;
+import org.protempa.bp.commons.dsb.sqlgen.RelationalDatabaseSpec;
+import org.protempa.bp.commons.dsb.sqlgen.SQLGenerator;
+import org.protempa.bp.commons.dsb.sqlgen.SQLOrderBy;
+import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
+import org.protempa.proposition.ConstantParameter;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PointInterval;
 import org.protempa.proposition.PrimitiveParameter;
+import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 import org.protempa.proposition.value.ValueFactory;
-import org.arp.javautil.sql.SQLExecutor;
-import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
-import org.protempa.DataSourceBackendInitializationException;
-import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
-import org.protempa.DataSourceReadException;
-import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.bp.commons.BackendProperty;
-import org.protempa.proposition.ConstantParameter;
-import org.protempa.proposition.Proposition;
 
 /**
  * Implements access to relational databases.
@@ -365,7 +366,8 @@ public abstract class RelationalDatabaseDataSourceBackend
     @Override
     public Map<String, List<ConstantParameter>> getConstantParameters(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints)
+            DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException {
         Map<String, List<ConstantParameter>> results =
                 new HashMap<String, List<ConstantParameter>>();
@@ -606,7 +608,8 @@ public abstract class RelationalDatabaseDataSourceBackend
     @Override
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
             Set<String> keyIds,
-            Set<String> paramIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> paramIds, DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException {
         return readPrimitiveParameters(keyIds, paramIds, dataSourceConstraints,
                 SQLOrderBy.DESCENDING);
@@ -615,7 +618,8 @@ public abstract class RelationalDatabaseDataSourceBackend
     @Override
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints)
+            DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException {
         return readPrimitiveParameters(keyIds, paramIds, dataSourceConstraints,
                 SQLOrderBy.ASCENDING);
@@ -623,7 +627,8 @@ public abstract class RelationalDatabaseDataSourceBackend
 
     @Override
     public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException {
         return readEvents(keyIds, eventIds, dataSourceConstraints,
                 SQLOrderBy.ASCENDING);
@@ -631,7 +636,8 @@ public abstract class RelationalDatabaseDataSourceBackend
 
     @Override
     public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints)
+            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            QuerySession qs)
             throws DataSourceReadException {
         return readEvents(keyIds, eventIds, dataSourceConstraints,
                 SQLOrderBy.DESCENDING);
