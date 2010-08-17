@@ -92,16 +92,16 @@ final class AbstractionFinder implements Module {
     
     void doFind(Set<String> keys, Set<String> propIds,
     		DataSourceConstraint dataSourceConstraints,
-    		QueryResultsHandler resultHandler)
+    		QueryResultsHandler resultHandler, QuerySession qs)
                 throws FinderException {
     	if (this.closed)
             throw new FinderException("Protempa already closed!");
     	try {
     		resultHandler.init();
             if (workingMemoryCache != null)
-                doFindStateful(keys, propIds, dataSourceConstraints, resultHandler);
+                doFindStateful(keys, propIds, dataSourceConstraints, resultHandler, qs);
             else
-                doFindStateless(keys, propIds, dataSourceConstraints, resultHandler);
+                doFindStateless(keys, propIds, dataSourceConstraints, resultHandler, qs);
             resultHandler.finish();
     	} catch (ProtempaException e) {
             String msg = "An error occurred processing a set of cases";
@@ -204,12 +204,13 @@ final class AbstractionFinder implements Module {
     
     @SuppressWarnings("unchecked")
     private void doFindStateless(Set<String> keys, Set<String> propositionIds,
-    		DataSourceConstraint dataSourceConstraints, QueryResultsHandler resultHandler)
+    		DataSourceConstraint dataSourceConstraints, QueryResultsHandler resultHandler, 
+    		QuerySession qs)
                 throws ProtempaException {
 //    	Map<String, List<Proposition>> result =
 //                new HashMap<String, List<Proposition>>();
     	for (Map.Entry<String, List<Object>> entry : 
-            objectsToAssert(keys, propositionIds, dataSourceConstraints, false)
+            objectsToAssert(keys, propositionIds, dataSourceConstraints, qs, false)
                     .entrySet()) {
             List objects = new ArrayList(entry.getValue());
             List<Proposition> propositions =
@@ -240,6 +241,7 @@ final class AbstractionFinder implements Module {
     private Map<String, List<Object>> objectsToAssert(Set<String> keyIds,
     		Set<String> propositionIds, 
                 DataSourceConstraint dataSourceConstraints,
+                QuerySession qs,
                 boolean stateful) throws
     		DataSourceReadException, KnowledgeSourceReadException {
     	// Add events
@@ -249,7 +251,7 @@ final class AbstractionFinder implements Module {
     			|| propositionIds.isEmpty()) {
             Map<String, List<Event>> tempObjects =
             createEvents(dataSource, keyIds, eventIds,
-                                    dataSourceConstraints);
+                                    dataSourceConstraints, qs);
             for (Map.Entry<String, List<Event>> entry :
                 tempObjects.entrySet()) {
                 objects.put(entry.getKey(),
@@ -263,7 +265,7 @@ final class AbstractionFinder implements Module {
             createSequencesFromPrimitiveParameters(
                 keyIds, dataSource.getPrimitiveParametersAsc(keyIds,
                         knowledgeSource.primitiveParameterIds(propositionIds),
-                        dataSourceConstraints), propositionIds,
+                        dataSourceConstraints,qs), propositionIds,
                         stateful).entrySet()) {
             objects.put(entry.getKey(),
                     new ArrayList<Object>(entry.getValue()));
@@ -273,13 +275,14 @@ final class AbstractionFinder implements Module {
     }
 
     private void doFindStateful(Set<String> keyIds, Set<String> propositionIds,
-            DataSourceConstraint dataSourceConstraints, QueryResultsHandler resultHandler)
+            DataSourceConstraint dataSourceConstraints, QueryResultsHandler resultHandler,
+            QuerySession qs)
             throws ProtempaException {
     	if (keyIds != null && !keyIds.isEmpty()) {
 //            Map<String, List<Proposition>> results =
 //                    new HashMap<String, List<Proposition>>();
             Map<String, List<Object>> objects = objectsToAssert(keyIds,
-                    propositionIds, dataSourceConstraints, true);
+                    propositionIds, dataSourceConstraints, qs, true);
             for (Map.Entry<String, List<Object>> entry : objects.entrySet()) {
                 try {
                     StatefulSession workingMemory = 
@@ -302,9 +305,9 @@ final class AbstractionFinder implements Module {
     
     private Map<String, List<Event>> createEvents(DataSource dataSource,
     		Set<String> keyIds, Set<String> eventIds, 
-                DataSourceConstraint constraints)
+                DataSourceConstraint constraints, QuerySession qs)
                 throws DataSourceReadException {
-    	return dataSource.getEventsAsc(keyIds, eventIds, constraints);
+    	return dataSource.getEventsAsc(keyIds, eventIds, constraints, qs);
     }
 
     /*
