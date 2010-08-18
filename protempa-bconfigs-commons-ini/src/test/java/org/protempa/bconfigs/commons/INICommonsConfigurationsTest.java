@@ -154,29 +154,44 @@ public class INICommonsConfigurationsTest {
     private static class MockKnowledgeSourceBackend
             extends AbstractKnowledgeSourceBackend {
 
+        @Override
         public void initialize(BackendInstanceSpec config)
                 throws BackendInitializationException {
+        }
+
+        @Override
+        public String getDisplayName() {
+            return "Mock Knowledge Source Backend";
         }
     }
 
     private static class MockDataSourceBackend
             extends AbstractDataSourceBackend {
 
+        @Override
         public void initialize(BackendInstanceSpec config)
                 throws BackendInitializationException {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+        @Override
         public GranularityFactory getGranularityFactory() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+        @Override
         public UnitFactory getUnitFactory() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+        @Override
         public String getKeyType() {
             throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public String getDisplayName() {
+            return "Mock Data Source Backend";
         }
 
         
@@ -185,18 +200,26 @@ public class INICommonsConfigurationsTest {
     private static class MockAlgorithmSourceBackend
             extends AbstractAlgorithmSourceBackend {
 
+        @Override
         public Algorithm readAlgorithm(String id, Algorithms algorithms)
                 throws AlgorithmSourceReadException {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+        @Override
         public void readAlgorithms(Algorithms algorithms)
                 throws AlgorithmSourceReadException {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+        @Override
         public void initialize(BackendInstanceSpec config)
                 throws BackendInitializationException {
+        }
+
+        @Override
+        public String getDisplayName() {
+            return "Mock Algorithm Source Backend";
         }
     }
 }
