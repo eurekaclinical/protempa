@@ -24,9 +24,7 @@ import org.drools.StatelessSession;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.PropositionUtil;
 import org.protempa.proposition.Sequence;
-import org.protempa.proposition.TemporalProposition;
 import org.protempa.query.handler.QueryResultsHandler;
 
 /**
@@ -104,7 +102,7 @@ final class AbstractionFinder implements Module {
                 doFindStateless(keys, propIds, dataSourceConstraints, resultHandler, qs);
             resultHandler.finish();
     	} catch (ProtempaException e) {
-            String msg = "An error occurred processing a set of cases";
+            String msg = "Query could not complete";
             throw new FinderException(msg, e);
     	}
     }
@@ -112,6 +110,7 @@ final class AbstractionFinder implements Module {
     /**
      * Clears the working memory cache. Only needs to be called in caching mode.
      */
+    @Override
     public void clear() {
         if (clearNeeded) {
             clearWorkingMemoryCache();
@@ -120,6 +119,7 @@ final class AbstractionFinder implements Module {
         }
     }
 
+    @Override
     public void close() {
         clear();
         this.closed = true;
@@ -185,6 +185,7 @@ final class AbstractionFinder implements Module {
             }
         }
 
+        @Override
         public boolean accept(Object workingMemoryObject) {
             if (paramIds.isEmpty()) {
                 return true;
@@ -244,11 +245,12 @@ final class AbstractionFinder implements Module {
                 QuerySession qs,
                 boolean stateful) throws
     		DataSourceReadException, KnowledgeSourceReadException {
-    	// Add events
-    	Set<String> eventIds = knowledgeSource.leafEventIds(propositionIds);
-    	Map<String, List<Object>> objects = new HashMap<String, List<Object>>();
-    	if (!eventIds.isEmpty() || propositionIds == null 
-    			|| propositionIds.isEmpty()) {
+
+        // Add events
+        Set<String> eventIds = knowledgeSource.leafEventIds(propositionIds);
+        Map<String, List<Object>> objects = new HashMap<String, List<Object>>();
+        if (!eventIds.isEmpty() || propositionIds == null
+                        || propositionIds.isEmpty()) {
             Map<String, List<Event>> tempObjects =
             createEvents(dataSource, keyIds, eventIds,
                                     dataSourceConstraints, qs);
@@ -257,11 +259,11 @@ final class AbstractionFinder implements Module {
                 objects.put(entry.getKey(),
                         new ArrayList<Object>(entry.getValue()));
             }
-    	}
-    	
-    	// Add parameteres. Requires special handling, because Sequence objects
-    	// do not override equals. Can we eliminate sequence cache?
-    	for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> entry :
+        }
+
+        // Add parameteres. Requires special handling, because Sequence objects
+        // do not override equals. Can we eliminate sequence cache?
+        for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> entry :
             createSequencesFromPrimitiveParameters(
                 keyIds, dataSource.getPrimitiveParametersAsc(keyIds,
                         knowledgeSource.primitiveParameterIds(propositionIds),
@@ -269,7 +271,7 @@ final class AbstractionFinder implements Module {
                         stateful).entrySet()) {
             objects.put(entry.getKey(),
                     new ArrayList<Object>(entry.getValue()));
-    	}
+        }
         
     	return objects;
     }
@@ -317,7 +319,7 @@ final class AbstractionFinder implements Module {
     private List<Sequence<PrimitiveParameter>>
             createSequencesFromPrimitiveParameters(
             String keyId, List<PrimitiveParameter> primParams,
-            Set<String> propositionIds, boolean stateful) {
+            Set<String> propositionIds, boolean stateful) throws KnowledgeSourceReadException {
         ArrayList<Sequence<PrimitiveParameter>> result =
                 new ArrayList<Sequence<PrimitiveParameter>>();
         if (primParams != null && !primParams.isEmpty()) {
@@ -358,7 +360,7 @@ final class AbstractionFinder implements Module {
     private Map<String, List<Sequence<PrimitiveParameter>>>
     		createSequencesFromPrimitiveParameters(
     		Set<String> keyIds, Map<String, List<PrimitiveParameter>> primParams,
-    		Set<String> propositionIds, boolean stateful) {
+    		Set<String> propositionIds, boolean stateful) throws KnowledgeSourceReadException {
     	Map<String, List<Sequence<PrimitiveParameter>>> result =
     		new HashMap<String, List<Sequence<PrimitiveParameter>>>();
     	if (primParams != null && !primParams.isEmpty()) {
@@ -399,7 +401,8 @@ final class AbstractionFinder implements Module {
     }
 
     private void extractSequenceParamIdsHelper(Set<String> propIds,
-            Set<Set<String>> sequenceParamIds) {
+            Set<Set<String>> sequenceParamIds) 
+            throws KnowledgeSourceReadException {
         for (String propId : propIds) {
             AbstractionDefinition def =
                     knowledgeSource.readAbstractionDefinition(propId);
@@ -418,7 +421,8 @@ final class AbstractionFinder implements Module {
         }
     }
 
-    private Set<Set<String>> extractSequenceParamIds(Set<String> propIds) {
+    private Set<Set<String>> extractSequenceParamIds(Set<String> propIds) 
+            throws KnowledgeSourceReadException {
         Set<Set<String>> result = new HashSet<Set<String>>();
         extractSequenceParamIdsHelper(propIds, result);
         return result;

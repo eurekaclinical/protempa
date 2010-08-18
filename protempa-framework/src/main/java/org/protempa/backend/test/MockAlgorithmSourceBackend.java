@@ -3,20 +3,21 @@ package org.protempa.backend.test;
 import org.protempa.*;
 import org.protempa.backend.BackendInstanceSpec;
 
-
 public final class MockAlgorithmSourceBackend
         extends AbstractAlgorithmSourceBackend {
 
-	public AbstractAlgorithm readAlgorithm(String id, Algorithms algorithms) {
-		return null;
-	}
+    @Override
+    public AbstractAlgorithm readAlgorithm(String id, Algorithms algorithms) {
+        return null;
+    }
 
-	public void readAlgorithms(Algorithms algorithms) {
-	}
+    @Override
+    public void readAlgorithms(Algorithms algorithms) {
+    }
 
+    @Override
     public void initialize(BackendInstanceSpec config)
             throws BackendInitializationException {
-
     }
 
     /**
@@ -28,6 +29,8 @@ public final class MockAlgorithmSourceBackend
         super.fireAlgorithmSourceBackendUpdated();
     }
 
-
-
+    @Override
+    public String getDisplayName() {
+        return "Mock Algorithm Source Backend";
+    }
 }

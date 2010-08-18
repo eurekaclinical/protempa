@@ -31,6 +31,12 @@ public interface Backend<E extends BackendUpdatedEvent, S extends Source<E>> {
             throws BackendInitializationException;
 
     /**
+     * Returns the name of this backend for display in user interfaces.
+     * @return a {@link String}.
+     */
+    String getDisplayName();
+
+    /**
      * Releases any resources allocated by this backend.
      */
     void close();

@@ -83,6 +83,7 @@ public abstract class AbstractDataSourceBackend extends
         return null;
     }
 
+    @Override
     public void close() {
     }
 
@@ -96,10 +97,12 @@ public abstract class AbstractDataSourceBackend extends
         fireBackendUpdated(new DataSourceBackendUpdatedEvent(this));
     }
 
+    @Override
     public String getKeyTypeDisplayName() {
         return null;
     }
 
+    @Override
     public String getKeyTypePluralDisplayName() {
         return null;
     }

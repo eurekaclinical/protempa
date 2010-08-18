@@ -31,7 +31,7 @@ import org.protempa.proposition.TemporalProposition;
  * @author Andrew Post
  * 
  */
-class JBossRuleCreator extends AbstractPropositionDefinitionVisitor {
+class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     private final Map<LowLevelAbstractionDefinition, Algorithm> algorithms;
     private final KnowledgeSource knowledgeSource;
@@ -70,16 +70,18 @@ class JBossRuleCreator extends AbstractPropositionDefinitionVisitor {
 
     @Override
     public void visit(
-            LowLevelAbstractionDefinition lowLevelAbstractionDefinition) {
+            LowLevelAbstractionDefinition lowLevelAbstractionDefinition) 
+            throws KnowledgeSourceReadException {
         ProtempaUtil.logger().fine("Creating rule for " +
                 lowLevelAbstractionDefinition);
         try {
             Rule rule = new Rule(lowLevelAbstractionDefinition.getId());
             Pattern p = new Pattern(0, SEQUENCE_OBJECT_TYPE);
+            
+            Set<String> propIds = this.knowledgeSource.primitiveParameterIds(
+                    lowLevelAbstractionDefinition.getId());
             Constraint c = new PredicateConstraint(
-                    new SequencePredicateExpression(
-                    this.knowledgeSource.primitiveParameterIds(
-                    lowLevelAbstractionDefinition.getId())));
+                    new SequencePredicateExpression(propIds));
             p.addConstraint(c);
             rule.addPattern(p);
             Algorithm algo = this.algorithms.get(lowLevelAbstractionDefinition);
@@ -94,7 +96,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionVisitor {
                     lowLevelAbstractionDefinition.getInverseIsA(),
                     SEQUENCE_OBJECT_TYPE);
         } catch (InvalidRuleException e) {
-            assert false : e.getMessage();
+            throw new AssertionError(e.getClass().getName() + ": " +
+                    e.getMessage());
         }
     }
 
@@ -148,7 +151,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionVisitor {
             AbstractionCombiner.toRules(knowledgeSource, def, rules);
             addInverseIsARule(def.getId(), def.getInverseIsA(), TEMP_PROP_OT);
         } catch (InvalidRuleException e) {
-            assert false : e.getMessage();
+            throw new AssertionError(e.getClass().getName() + ": " +
+                    e.getMessage());
         }
     }
 
@@ -174,7 +178,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionVisitor {
             rules.add(rule);
             addInverseIsARule(def.getId(), def.getInverseIsA(),TEMP_PROP_OT);
         } catch (InvalidRuleException e) {
-            assert false : e.getMessage();
+            throw new AssertionError(e.getClass().getName() + ": " +
+                    e.getMessage());
         }
     }
 
@@ -185,7 +190,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionVisitor {
             addInverseIsARule(def.getId(), def.getInverseIsA(),
                     EVENT_OBJECT_TYPE);
         } catch (InvalidRuleException e) {
-            assert false : e.getMessage();
+            throw new AssertionError(e.getClass().getName() + ": " +
+                    e.getMessage());
         }
 
     }

@@ -33,5 +33,10 @@ class MockDataSourceBackend extends AbstractDataSourceBackend {
     public String getKeyType() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public String getDisplayName() {
+        return "Mock Data Source Backend";
+    }
     
 }

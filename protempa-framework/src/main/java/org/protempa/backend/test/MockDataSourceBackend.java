@@ -20,10 +20,9 @@ import org.protempa.proposition.value.UnitFactory;
  */
 public final class MockDataSourceBackend implements DataSourceBackend {
 
-    public List<String> getAllKeyIds(int start, int finish,
-            DataSourceConstraint dataSourceConstraints, QuerySession qs)
-            throws DataSourceReadException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    @Override
+    public String getDisplayName() {
+        return "Mock Data Source Backend";
     }
 
     @Override

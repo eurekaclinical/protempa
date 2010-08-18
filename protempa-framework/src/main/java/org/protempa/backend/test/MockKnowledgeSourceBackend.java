@@ -6,6 +6,7 @@ import org.protempa.backend.BackendInstanceSpec;
 public final class MockKnowledgeSourceBackend
         extends AbstractKnowledgeSourceBackend {
 
+    @Override
     public void initialize(BackendInstanceSpec config)
             throws BackendInitializationException {
     }
@@ -19,6 +20,8 @@ public final class MockKnowledgeSourceBackend
         super.fireKnowledgeSourceBackendUpdated();
     }
 
-
-
+    @Override
+    public String getDisplayName() {
+        return "Mock Knowledge Source Backend";
+    }
 }
