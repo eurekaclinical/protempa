@@ -11,9 +11,19 @@ import org.protempa.backend.BackendInstanceSpec;
 public abstract class AbstractCommonsKnowledgeSourceBackend
         extends AbstractKnowledgeSourceBackend {
 
+    @Override
     public void initialize(BackendInstanceSpec config)
             throws KnowledgeSourceBackendInitializationException {
-        BackendPropertyInitializer.initialize(this, config);
+        CommonsBackend.initialize(this, config);
+    }
+
+    @Override
+    public final String getDisplayName() {
+        return CommonsBackend.backendInfo(this).displayName();
+    }
+
+    protected final String nameForErrors() {
+        return CommonsBackend.nameForErrors(this);
     }
 
 }

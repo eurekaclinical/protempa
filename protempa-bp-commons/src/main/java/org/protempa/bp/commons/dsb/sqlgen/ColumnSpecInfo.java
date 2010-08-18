@@ -3,25 +3,33 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.util.List;
 import java.util.Map;
 
-public final class ColumnSpecInfo {
-
+final class ColumnSpecInfo {
+    private boolean unique;
     private List<ColumnSpec> columnSpecs;
-    private boolean distinct;
     private int startTimeIndex = -1;
     private int finishTimeIndex = -1;
-    private Map<String, Integer> propertyValueIndices = null;
+    private Map<String, Integer> propertyIndices = null;
     private int codeIndex = -1;
+    private Map<String, List<ReferenceSpec>> references;
 
     ColumnSpecInfo() {
 
     }
 
-    public boolean isDistinct() {
-        return distinct;
+    public boolean isUnique() {
+        return unique;
     }
 
-    public void setDistinct(boolean distinct) {
-        this.distinct = distinct;
+    public void setUnique(boolean unique) {
+        this.unique = unique;
+    }
+
+    public Map<String, List<ReferenceSpec>> getReferences() {
+        return references;
+    }
+
+    public void setReferences(Map<String, List<ReferenceSpec>> references) {
+        this.references = references;
     }
 
     public int getCodeIndex() {
@@ -56,11 +64,11 @@ public final class ColumnSpecInfo {
         this.startTimeIndex = startTimeIndex;
     }
 
-    public Map<String, Integer> getPropertyValueIndices() {
-        return propertyValueIndices;
+    public Map<String, Integer> getPropertyIndices() {
+        return propertyIndices;
     }
 
-    public void setPropertyValueIndices(Map<String, Integer> valueIndex) {
-        this.propertyValueIndices = valueIndex;
+    public void setPropertyIndices(Map<String, Integer> index) {
+        this.propertyIndices = index;
     }
 }

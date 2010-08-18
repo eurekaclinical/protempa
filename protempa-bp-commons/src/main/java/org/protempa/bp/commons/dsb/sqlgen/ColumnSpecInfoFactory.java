@@ -3,7 +3,6 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -11,51 +10,51 @@ import java.util.Map;
  *
  * @author Andrew Post
  */
-class ColumnSpecInfoFactory {
+final class ColumnSpecInfoFactory {
 
     ColumnSpecInfo newInstance(
-            Collection propertySpecs) {
-        if (propertySpecs == null)
+            EntitySpec entitySpec,
+            Collection<EntitySpec> entitySpecs) {
+        if (entitySpecs == null)
             throw new IllegalArgumentException("propertySpecs cannot be null");
-        if (propertySpecs.isEmpty())
+        if (entitySpecs.isEmpty())
             throw new IllegalArgumentException(
                     "propertySpecs must have at least one entry");
         ColumnSpecInfo columnSpecInfo = new ColumnSpecInfo();
+        columnSpecInfo.setUnique(entitySpec.isUnique());
         List<ColumnSpec> columnSpecs = new ArrayList<ColumnSpec>();
         int i = 0;
-        for (Iterator<PropertySpec> itr = propertySpecs.iterator();
-                itr.hasNext();) {
-            PropertySpec propertySpec = itr.next();
+        for (EntitySpec entitySpec2 : entitySpecs) {
             if (i == 0)
-                i = processKeySpec(propertySpec, columnSpecs, i);
-            i = processStartTimeOrTimestamp(propertySpec, columnSpecs, i,
+                i = processBaseSpec(entitySpec2, columnSpecs, i,
+                        columnSpecInfo);
+            i = processStartTimeOrTimestamp(entitySpec2, columnSpecs, i,
                     columnSpecInfo);
-            i = processFinishTimeSpec(propertySpec, columnSpecs, i,
+            i = processFinishTimeSpec(entitySpec2, columnSpecs, i,
                     columnSpecInfo);
-            i = processPropertyValueSpecs(propertySpec, columnSpecs, i,
+            if (entitySpec2 == entitySpec)
+                i = processPropertySpecs(entitySpec2, columnSpecs, i,
                     columnSpecInfo);
-            i = processCodeSpec(propertySpec, columnSpecs, i, columnSpecInfo);
-            i = processConstraintSpecs(propertySpec, columnSpecs, i,
-                    columnSpecInfo);
+            i = processCodeSpec(entitySpec2, columnSpecs, i, columnSpecInfo);
+            i = processConstraintSpecs(entitySpec2, columnSpecs, i);
         }
         columnSpecInfo.setColumnSpecs(columnSpecs);
         return columnSpecInfo;
     }
 
-    private int processCodeSpec(PropertySpec propertySpec,
+    private int processCodeSpec(EntitySpec entitySpec,
             List<ColumnSpec> columnSpecs, int i,
         ColumnSpecInfo columnSpecInfo) {
-        ColumnSpec codeSpec = propertySpec.getCodeSpec();
+        ColumnSpec codeSpec = entitySpec.getCodeSpec();
         i = processConstraintSpec(codeSpec, columnSpecs, i);
         if (codeSpec != null)
             columnSpecInfo.setCodeIndex(i - 1);
         return i;
     }
 
-    private int processConstraintSpecs(PropertySpec propertySpec,
-            List<ColumnSpec> columnSpecs, int i, 
-            ColumnSpecInfo columnSpecInfo) {
-        ColumnSpec[] constraintSpecs = propertySpec.getConstraintSpecs();
+    private int processConstraintSpecs(EntitySpec entitySpec,
+            List<ColumnSpec> columnSpecs, int i) {
+        ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
         if (constraintSpecs != null) {
             for (ColumnSpec spec : constraintSpecs) {
                 i = processConstraintSpec(spec, columnSpecs, i);
@@ -74,33 +73,31 @@ class ColumnSpecInfoFactory {
         return i;
     }
 
-    private int processPropertyValueSpecs(PropertySpec propositionSpec,
+    private int processPropertySpecs(EntitySpec entitySpec,
             List<ColumnSpec> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo) {
-        Map<String, ColumnSpec> propertyValueSpecs =
-                propositionSpec.getPropertyValueSpecs();
-        if (propertyValueSpecs != null) {
-            Map<String, Integer> propertyValueIndices =
+        PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
+        if (propertySpecs != null) {
+            Map<String, Integer> propertyIndices =
                     new HashMap<String, Integer>();
-            for (Map.Entry<String, ColumnSpec> e :
-                propertyValueSpecs.entrySet()) {
-                ColumnSpec spec = e.getValue();
+            for (PropertySpec propertySpec : propertySpecs) {
+                ColumnSpec spec = propertySpec.getCodeSpec();
                 if (spec != null) {
                     List<ColumnSpec> specAsList = spec.asList();
                     columnSpecs.addAll(specAsList);
                     i += specAsList.size();
-                    propertyValueIndices.put(e.getKey(), i - 1);
+                    propertyIndices.put(propertySpec.getName(), i - 1);
                 }
             }
-            columnSpecInfo.setPropertyValueIndices(propertyValueIndices);
+            columnSpecInfo.setPropertyIndices(propertyIndices);
         }
         return i;
     }
 
-    private int processFinishTimeSpec(PropertySpec propositionSpec,
+    private int processFinishTimeSpec(EntitySpec entitySpec,
             List<ColumnSpec> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo) {
-        ColumnSpec spec = propositionSpec.getFinishTimeSpec();
+        ColumnSpec spec = entitySpec.getFinishTimeSpec();
         if (spec != null) {
             List<ColumnSpec> specAsList = spec.asList();
             columnSpecs.addAll(specAsList);
@@ -110,10 +107,10 @@ class ColumnSpecInfoFactory {
         return i;
     }
 
-    private int processStartTimeOrTimestamp(PropertySpec propositionSpec,
+    private int processStartTimeOrTimestamp(EntitySpec entitySpec,
             List<ColumnSpec> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo) {
-        ColumnSpec spec = propositionSpec.getStartTimeSpec();
+        ColumnSpec spec = entitySpec.getStartTimeSpec();
         if (spec != null) {
             List<ColumnSpec> specAsList = spec.asList();
             columnSpecs.addAll(specAsList);
@@ -123,9 +120,10 @@ class ColumnSpecInfoFactory {
         return i;
     }
 
-    private int processKeySpec(PropertySpec propositionSpec,
-            List<ColumnSpec> columnSpecs, int i) {
-        ColumnSpec spec = propositionSpec.getEntitySpec().getKeySpec();
+    private int processBaseSpec(EntitySpec entitySpec,
+            List<ColumnSpec> columnSpecs, int i,
+            ColumnSpecInfo columnSpecInfo) {
+        ColumnSpec spec = entitySpec.getBaseSpec();
         List<ColumnSpec> specAsList = spec.asList();
         columnSpecs.addAll(spec.asList());
         i += specAsList.size();

@@ -33,7 +33,6 @@ public final class ColumnSpec implements Serializable {
         }
     }
 
-    private final boolean unique;
     private final String schema;
     private final String table;
     private final String column;
@@ -42,49 +41,34 @@ public final class ColumnSpec implements Serializable {
     private ConstraintValue[] constraintValues;
 
     public ColumnSpec(String schema, String table, JoinSpec joinSpec) {
-        this(false, schema, table, null, joinSpec);
-    }
-
-    public ColumnSpec(String schema, String table, String column,
-            JoinSpec joinSpec) {
-        this(false, schema, table, column, joinSpec);
+        this(schema, table, null, joinSpec);
     }
 
     public ColumnSpec(String schema, String table) {
-        this(false, schema, table, null);
-    }
-
-    public ColumnSpec(String schema, String table, String column) {
-        this(false, schema, table, column);
+        this(schema, table, null, null);
     }
 
     public ColumnSpec(String schema, String table, String column,
             Constraint constraint, ConstraintValue... constraintValue) {
-        this(false, schema, table, column);
+        this(schema, table, column, null);
         this.constraint = constraint;
         this.constraintValues = constraintValue;
     }
 
-    public ColumnSpec(boolean unique, String schema, String table,
-            String column) {
-        this(unique, schema, table, column, null);
+    public ColumnSpec(String schema, String table, String column) {
+        this(schema, table, column, null);
     }
 
-    public ColumnSpec(boolean unique, String schema, String table,
+    public ColumnSpec(String schema, String table,
             String column, JoinSpec joinSpec) {
         if (table == null)
             throw new IllegalArgumentException("table cannot be null");
-        this.unique = unique;
         this.schema = schema;
         this.table = table;
         this.column = column;
         this.joinSpec = joinSpec;
         if (this.joinSpec != null)
             this.joinSpec.setPrevColumnSpec(this);
-    }
-
-    public boolean isUnique() {
-        return this.unique;
     }
 
     /**

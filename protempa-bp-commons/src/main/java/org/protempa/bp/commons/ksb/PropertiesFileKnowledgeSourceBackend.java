@@ -2,6 +2,7 @@ package org.protempa.bp.commons.ksb;
 
 import org.protempa.bp.commons.BackendInfo;
 import org.protempa.bp.commons.BackendProperty;
+import org.protempa.bp.commons.CommonsBackend;
 import org.protempa.ksb.AbstractPropertiesFileKnowledgeSourceBackend;
 
 /**
@@ -49,5 +50,10 @@ public class PropertiesFileKnowledgeSourceBackend
     @Override
     protected String getPrimitiveParameterDefinitionsPropertiesResourceName() {
         return this.primitiveParameterDefinitions;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return CommonsBackend.backendInfo(this).displayName();
     }
 }

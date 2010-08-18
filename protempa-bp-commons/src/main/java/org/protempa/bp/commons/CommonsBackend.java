@@ -2,6 +2,7 @@ package org.protempa.bp.commons;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import org.protempa.Backend;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.InvalidPropertyNameException;
 
@@ -9,7 +10,20 @@ import org.protempa.backend.InvalidPropertyNameException;
  *
  * @author Andrew Post
  */
-public class BackendPropertyInitializer {
+public class CommonsBackend {
+    
+    public static BackendInfo backendInfo(Backend backend) {
+        return backend.getClass().getAnnotation(BackendInfo.class);
+    }
+
+    public static String nameForErrors(Backend backend) {
+        BackendInfo backendInfo = backendInfo(backend);
+        if (backendInfo != null)
+            return backendInfo.displayName() + " (" + 
+                    backend.getClass().getName() + ")";
+        else
+            return backend.getClass().getName();
+    }
 
     /**
      * Sets the fields corresponding to the properties in the configuration.

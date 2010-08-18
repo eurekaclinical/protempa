@@ -11,9 +11,19 @@ import org.protempa.backend.BackendInstanceSpec;
 public abstract class AbstractCommonsAlgorithmSourceBackend
         extends AbstractAlgorithmSourceBackend {
 
+    @Override
     public void initialize(BackendInstanceSpec backendInstanceSpec)
             throws AlgorithmSourceBackendInitializationException {
-        BackendPropertyInitializer.initialize(this, backendInstanceSpec);
+        CommonsBackend.initialize(this, backendInstanceSpec);
+    }
+
+    @Override
+    public final String getDisplayName() {
+        return CommonsBackend.backendInfo(this).displayName();
+    }
+
+    protected final String nameForErrors() {
+        return CommonsBackend.nameForErrors(this);
     }
 
 }

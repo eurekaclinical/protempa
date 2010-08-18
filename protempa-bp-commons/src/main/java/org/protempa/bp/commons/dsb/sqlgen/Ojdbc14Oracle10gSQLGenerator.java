@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.logging.Level;
 
 /**
  *
@@ -12,17 +11,10 @@ import java.util.logging.Level;
  */
 public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
 
-    private static final String getAllKeyIdsSQL =
-        "select b.keyid from " +
-        "(select keyid, rownum rnum from " +
-        "(select {0} from {1} " +
-        "where {2}) a " +
-        "where rownum < {4,number,#}) b " +
-        "where rnum >= {3,number,#}";
-
     private static final String readPropositionsSQL =
-            "select {0} from {1} where {2}";
+            "select {0} from {1} {2}";
 
+    @Override
     public boolean checkCompatibility(Connection connection) 
             throws SQLException {
         if (!checkDriverCompatibility(connection))
@@ -33,6 +25,7 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
         return true;
     }
 
+    @Override
     public boolean isLimitingSupported() {
         return true;
     }
@@ -42,7 +35,7 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
             StringBuilder selectPart, int index, String column, String name,
             boolean hasNext) {
         if (distinctRequested) {
-            selectPart.append(" distinct ");
+            selectPart.append("distinct ");
         }
         selectPart.append("a").append(index).append('.').append(column);
         selectPart.append(" as ");
@@ -120,15 +113,6 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
             return false;
         
         return true;
-    }
-
-    @Override
-    public String assembleGetAllKeyIdsQuery(StringBuilder selectClause,
-            StringBuilder fromClause,
-            StringBuilder whereClause, int start, int count) {
-        return MessageFormat.format(getAllKeyIdsSQL,
-                selectClause, fromClause, whereClause, start,
-                start + count);
     }
 
     @Override

@@ -1,6 +1,6 @@
-package org.protempa.bp.commons.dsb;
+package org.protempa.bp.commons.dsb.sqlgen;
 
-import org.protempa.bp.commons.dsb.sqlgen.SQLGenerator;
+import org.protempa.bp.commons.dsb.SQLGenerator;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.logging.Level;
 import org.arp.javautil.serviceloader.ServiceLoader;
 import org.arp.javautil.sql.ConnectionSpec;
+import org.protempa.bp.commons.dsb.RelationalDatabaseDataSourceBackend;
 
 /**
  * Factory for obtaining a {@link SQLGenerator} given the database and
@@ -16,8 +17,10 @@ import org.arp.javautil.sql.ConnectionSpec;
  * 
  * @author Andrew Post
  */
-class SQLGeneratorFactory {
+public class SQLGeneratorFactory {
     private ConnectionSpec connectionSpec;
+    private RelationalDatabaseSpec relationalDatabaseSpec;
+    private RelationalDatabaseDataSourceBackend backend;
 
     /**
      * Creates a new instance with a connection spec.
@@ -25,9 +28,16 @@ class SQLGeneratorFactory {
      * @param connectionSpec a {@link ConnectionSpec}, cannot be
      * <code>null</code>.
      */
-    SQLGeneratorFactory(ConnectionSpec connectionSpec) {
+    public SQLGeneratorFactory(ConnectionSpec connectionSpec,
+            RelationalDatabaseSpec relationalDatabaseSpec,
+            RelationalDatabaseDataSourceBackend backend) {
         assert connectionSpec != null : "connectionSpec cannot be null!";
+        assert relationalDatabaseSpec != null :
+            "relationalDatabaseSpec cannot be null";
+        assert backend != null : "backend cannot be null!";
         this.connectionSpec = connectionSpec;
+        this.relationalDatabaseSpec = relationalDatabaseSpec;
+        this.backend = backend;
     }
 
     /**
@@ -37,23 +47,34 @@ class SQLGeneratorFactory {
      * @throws IOException if an error occurred loading SQL generator drivers.
      * @throws SQLException if an attempt to query the database for
      * compatibility information failed.
-     * @throws ClassNotFoundException if an error occurred loading SQL
-     * generator drivers.
+     * @throws ClassNotFoundException if a SQL generator could not be loaded.
      * @throws InstantiationException if an error occurred loading SQL
      * generator drivers.
      * @throws IllegalAccessException if an error occurred loading SQL
      * generator drivers.
      * @throws SQLGeneratorNotFoundException if no compatible SQL generator
-     * driver could be found.
+     * could be found.
      */
-    SQLGenerator newInstance() throws IOException, SQLException,
-            ClassNotFoundException, InstantiationException,
-            IllegalAccessException, SQLGeneratorNotFoundException {
+    public SQLGenerator newInstance() throws SQLException,
+            SQLGeneratorNotFoundException,
+            SQLGeneratorLoadException {
 
-        List<Class<? extends SQLGenerator>> candidates =
-                ServiceLoader.load(SQLGenerator.class);
-        for (Class<? extends SQLGenerator> candidate : candidates) {
-            SQLGenerator candidateInstance = candidate.newInstance();
+        List<Class<? extends ProtempaSQLGenerator>> candidates;
+        try {
+            candidates = ServiceLoader.load(ProtempaSQLGenerator.class);
+        } catch (Exception ex) {
+            throw new SQLGeneratorLoadException(
+                    "Could not load SQL generators", ex);
+        }
+        for (Class<? extends ProtempaSQLGenerator> candidate : candidates) {
+            ProtempaSQLGenerator candidateInstance;
+            try {
+                candidateInstance = candidate.newInstance();
+            } catch (Exception ex) {
+                throw new SQLGeneratorLoadException(
+                        "Could not create a new instance of SQL generator " +
+                        candidate.getName(), ex);
+            }
             candidateInstance.loadDriverIfNeeded();
             /*
              * We get a new connection for each compatibility check so that
@@ -63,16 +84,18 @@ class SQLGeneratorFactory {
             try {
                 if (candidateInstance.checkCompatibility(con)) {
                     DatabaseMetaData metaData = con.getMetaData();
-                    DSBUtil.logger().log(Level.FINE,
+                    SQLGenUtil.logger().log(Level.FINE,
                         "{0} is compatible with database {1} ({2})",
                         new Object[] {candidateInstance.getClass().getName(),
                         metaData.getDatabaseProductName(),
                         metaData.getDatabaseProductVersion()});
-                    DSBUtil.logger().log(Level.FINE,
+                    SQLGenUtil.logger().log(Level.FINE,
                         "{0} is compatible with driver {1} ({2})",
                         new Object[] {candidateInstance.getClass().getName(),
                         metaData.getDriverName(),
                         metaData.getDriverVersion()});
+                    candidateInstance.initialize(this.relationalDatabaseSpec,
+                            this.connectionSpec, this.backend);
                     return candidateInstance;
                 }
             } finally {

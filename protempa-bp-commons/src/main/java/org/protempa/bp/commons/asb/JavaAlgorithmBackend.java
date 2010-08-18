@@ -3,6 +3,7 @@ package org.protempa.bp.commons.asb;
 import org.protempa.asb.java.AbstractJavaAlgorithmBackend;
 import org.protempa.bp.commons.BackendInfo;
 import org.protempa.bp.commons.BackendProperty;
+import org.protempa.bp.commons.CommonsBackend;
 
 /**
  *
@@ -30,6 +31,11 @@ public class JavaAlgorithmBackend extends AbstractJavaAlgorithmBackend {
     protected String getAlgorithmsPropertiesResourceName() {
         return this.algorithms != null ? this.algorithms
                 : super.getAlgorithmsPropertiesResourceName();
+    }
+
+    @Override
+    public String getDisplayName() {
+        return CommonsBackend.backendInfo(this).displayName();
     }
 
 
