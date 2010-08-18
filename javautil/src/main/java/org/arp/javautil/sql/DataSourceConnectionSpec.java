@@ -94,4 +94,18 @@ public class DataSourceConnectionSpec implements ConnectionSpec {
             return this.dataSource.getConnection(this.user, this.password);
     }
 
+    /**
+     * Gets the specified data source.
+     *
+     * @return a {@link DataSource}.
+     */
+    public DataSource getDataSource() {
+        return this.dataSource;
+    }
+
+    @Override
+    public void accept(ConnectionSpecVisitor connectionSpecVisitor) {
+        connectionSpecVisitor.visit(this);
+    }
+
 }

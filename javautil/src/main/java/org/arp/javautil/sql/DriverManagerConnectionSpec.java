@@ -23,8 +23,8 @@ public class DriverManagerConnectionSpec implements ConnectionSpec {
      * @param user a username {@link String}.
      * @param password a password {@link String}.
      */
-    public DriverManagerConnectionSpec(String url, String user, String password)
-    {
+    public DriverManagerConnectionSpec(String url, String user, 
+            String password) {
         this.url = url;
         this.user = user;
         this.password = password;
@@ -43,6 +43,16 @@ public class DriverManagerConnectionSpec implements ConnectionSpec {
     @Override
     public Connection getOrCreate() throws SQLException {
         return DriverManager.getConnection(this.url, this.user, this.password);
+    }
+
+    /**
+     * Performs some processing on this connection spec.
+     *
+     * @param connectionSpecVisitor a {@link ConnectionSpecVisitor}.
+     */
+    @Override
+    public void accept(ConnectionSpecVisitor connectionSpecVisitor) {
+        connectionSpecVisitor.visit(this);
     }
 
 }

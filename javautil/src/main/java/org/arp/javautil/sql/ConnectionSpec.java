@@ -17,4 +17,12 @@ public interface ConnectionSpec {
      * @throws SQLException if an error occurs getting the connection.
      */
     Connection getOrCreate() throws SQLException;
+
+    /**
+     * Performs some processing on this connection spec.
+     *
+     * @param visitor
+     *            a {@link ConnectionSpecVisitor}.
+     */
+    void accept(ConnectionSpecVisitor connectionSpecVisitor);
 }
