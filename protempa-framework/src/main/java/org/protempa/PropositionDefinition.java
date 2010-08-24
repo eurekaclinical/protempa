@@ -15,14 +15,14 @@ public interface PropositionDefinition extends Serializable {
     /**
      * This proposition definition's display name.
      *
-     * @return a {@link String}.
+     * @return a {@link String}. Guaranteed not to be <code>null</code>.
      */
     String getDisplayName();
 
     /**
      * This proposition definition's abbreviated display name.
      *
-     * @return a {@link String}.
+     * @return a {@link String}. Guaranteed not to be <code>null</code>.
      */
     String getAbbreviatedDisplayName();
 

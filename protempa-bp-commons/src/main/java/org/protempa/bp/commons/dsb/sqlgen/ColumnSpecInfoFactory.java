@@ -66,10 +66,8 @@ final class ColumnSpecInfoFactory {
     private int processConstraintSpecs(EntitySpec entitySpec,
             List<ColumnSpec> columnSpecs, int i) {
         ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
-        if (constraintSpecs != null) {
-            for (ColumnSpec spec : constraintSpecs) {
-                i = processConstraintSpec(spec, columnSpecs, i);
-            }
+        for (ColumnSpec spec : constraintSpecs) {
+            i = processConstraintSpec(spec, columnSpecs, i);
         }
         return i;
     }
@@ -114,20 +112,19 @@ final class ColumnSpecInfoFactory {
             List<ColumnSpec> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo) {
         PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
-        if (propertySpecs != null) {
-            Map<String, Integer> propertyIndices =
-                    new HashMap<String, Integer>();
-            for (PropertySpec propertySpec : propertySpecs) {
-                ColumnSpec spec = propertySpec.getSpec();
-                if (spec != null) {
-                    List<ColumnSpec> specAsList = spec.asList();
-                    columnSpecs.addAll(specAsList);
-                    i += specAsList.size();
-                    propertyIndices.put(propertySpec.getName(), i - 1);
-                }
+        Map<String, Integer> propertyIndices =
+                new HashMap<String, Integer>();
+        for (PropertySpec propertySpec : propertySpecs) {
+            ColumnSpec spec = propertySpec.getSpec();
+            if (spec != null) {
+                List<ColumnSpec> specAsList = spec.asList();
+                columnSpecs.addAll(specAsList);
+                i += specAsList.size();
+                propertyIndices.put(propertySpec.getName(), i - 1);
             }
-            columnSpecInfo.setPropertyIndices(propertyIndices);
         }
+        if (propertySpecs.length > 0)
+            columnSpecInfo.setPropertyIndices(propertyIndices);
         return i;
     }
 
@@ -140,8 +137,9 @@ final class ColumnSpecInfoFactory {
             List<ColumnSpec> specAsList = spec.asList();
             columnSpecs.addAll(specAsList);
             i += specAsList.size();
-            if (queryEntitySpec == entitySpec)
+            if (queryEntitySpec == entitySpec) {
                 columnSpecInfo.setFinishTimeIndex(i - 1);
+            }
         }
         return i;
     }
@@ -155,8 +153,9 @@ final class ColumnSpecInfoFactory {
             List<ColumnSpec> specAsList = spec.asList();
             columnSpecs.addAll(specAsList);
             i += specAsList.size();
-            if (queryEntitySpec == entitySpec)
+            if (queryEntitySpec == entitySpec) {
                 columnSpecInfo.setStartTimeIndex(i - 1);
+            }
         }
         return i;
     }

@@ -1,11 +1,14 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.protempa.proposition.value.ValueType;
 
 /**
- *
+ * For specifying properties of a relational database entity.
+ * 
  * @author Andrew Post
  */
 public final class PropertySpec implements Serializable {
@@ -15,14 +18,17 @@ public final class PropertySpec implements Serializable {
     private final ValueType valueType;
 
     /**
-     * Instantiates a property spec.
-     *
-     * @param codes
-     * @param entitySpec
-     * @param startTimeOrTimestampSpec
-     * @param finishTimeSpec
-     * @param propertyValueSpecs
-     * @param constraintSpecs
+     * Instantiates a property specification with a name, path, value type,
+     * and optional mappings from values in the database to values as
+     * specified in a knowledge source.
+     * 
+     * @param name the property's name. Cannot be <code>null</code>.
+     * @param codeToPropIdMap an optional {@link Map<String,String>()} map
+     * from values in the database to values in a knowledge source.
+     * @param codeSpec a {@link ColumnSpec} path through the database from
+     * the corresponding entity's main table to the table and column where this
+     * property is located.
+     * @param valueType the {@link ValueType} type of values of this property.
      */
     public PropertySpec(String name,
             Map<String, String> codeToPropIdMap,
@@ -30,24 +36,49 @@ public final class PropertySpec implements Serializable {
             ValueType valueType) {
         if (name == null)
             throw new IllegalArgumentException("name cannot be null");
+        if (codeSpec == null)
+            throw new IllegalArgumentException("codeSpec cannot be null");
+        if (valueType == null)
+            throw new IllegalArgumentException("valueType cannot be null");
         this.name = name;
-        this.codeToPropIdMap = codeToPropIdMap;
+        if (codeToPropIdMap != null) {
+            this.codeToPropIdMap =
+                    new HashMap<String,String>(codeToPropIdMap);
+        } else {
+            this.codeToPropIdMap = Collections.emptyMap();
+        }
         this.codeSpec = codeSpec;
         this.valueType = valueType;
     }
 
+    /**
+     * Returns the property's name. Guaranteed not <code>null</code>.
+     *
+     * @return a {@link String}.
+     */
     public String getName() {
         return this.name;
     }
 
     public Map<String, String> getCodeToPropIdMap() {
-        return this.codeToPropIdMap;
+        return new HashMap<String,String>(this.codeToPropIdMap);
     }
 
+    /**
+     * Gets the path through the database from this entity's main table to
+     * the table and column where this property is located.
+     *
+     * @return a {@link ColumnSpec}.
+     */
     public ColumnSpec getSpec() {
         return this.codeSpec;
     }
 
+    /**
+     * Returns the type of this property's values.
+     *
+     * @return a {@link ValueType}.
+     */
     public ValueType getValueType() {
         return this.valueType;
     }

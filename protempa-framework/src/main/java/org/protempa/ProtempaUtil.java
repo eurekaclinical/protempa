@@ -1,18 +1,16 @@
 package org.protempa;
 
-import java.text.Format;
 import java.util.Comparator;
-import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
+ * Utility methods for the PROTEMPA project. They are not intended to be
+ * used outside of projects that use PROTEMPA.
+ * 
  * @author Andrew Post
  */
 public final class ProtempaUtil {
 
-    /**
-     * Private constructor.
-     */
     private ProtempaUtil() {
     }
 
@@ -31,32 +29,59 @@ public final class ProtempaUtil {
         return LazyLoggerHolder.instance;
     }
 
+    /**
+     * Comparator for comparing proposition definitions by display name.
+     */
     public static class PropositionDefinitionDisplayNameComparator implements
             Comparator<PropositionDefinition> {
 
-        private final Format dnFormat;
+        /**
+         * For specifying which display name style to use. Options are:
+         * <ul>
+         * <li>ABBREVIATED: as in
+         * {@link PropositionDefinition#getAbbreviatedDisplayName()}
+         * <li>REGULAR: as in {@link PropositionDefinition#getDisplayName()}
+         * </ul>
+         */
+        public static enum Style {
 
+            ABBREVIATED,
+            REGULAR;
+        }
+        private final Style style;
+
+        /**
+         * Instantiates this comparator with the default display name style
+         * ({@link Style.REGULAR}.
+         */
         public PropositionDefinitionDisplayNameComparator() {
-            this(null, null);
+            this(Style.REGULAR);
         }
 
+        /**
+         * Instantiates this comparator to use the short or long display
+         * names when doing comparisons.
+         *
+         * @param style a {@link DisplayNameFormat.Style} representing the
+         * regular or abbrevaited display name.
+         */
         public PropositionDefinitionDisplayNameComparator(
-                DisplayNameFormat.Style style) {
-            this(style, null);
-        }
-
-        public PropositionDefinitionDisplayNameComparator(Locale locale) {
-            this(null, locale);
-        }
-
-        public PropositionDefinitionDisplayNameComparator(
-                DisplayNameFormat.Style style, Locale locale) {
-            this.dnFormat = DisplayNameFormat.getInstance(style, locale);
+                Style style) {
+            this.style = style;
         }
 
         @Override
-        public int compare(PropositionDefinition k1, PropositionDefinition k2) {
-            return dnFormat.format(k1).compareTo(dnFormat.format(k2));
+        public int compare(PropositionDefinition k1,
+                PropositionDefinition k2) {
+            switch (this.style) {
+                case REGULAR:
+                    return k1.getDisplayName().compareTo(k2.getDisplayName());
+                case ABBREVIATED:
+                    return k1.getAbbreviatedDisplayName().compareTo(
+                            k2.getAbbreviatedDisplayName());
+                default:
+                    throw new AssertionError("should not be reached");
+            }
         }
     }
 
@@ -66,7 +91,10 @@ public final class ProtempaUtil {
      * {@link IllegalArgumentException} is thrown.
      *
      * @param array an {@link Object[]}.
-     * @param arrayName the name {@link String} used in the exception message.
+     * @param arrayName the variable name {@link String} of the array (
+     * used in the exception message). Should not be <code>null</code>, or the
+     * exception message will not indicate which parameter was erroneously
+     * <code>null</code>.
      */
     public static void checkArray(Object[] array, String arrayName) {
         if (array == null) {
@@ -77,6 +105,22 @@ public final class ProtempaUtil {
             throw new IllegalArgumentException(arrayName
                     + " cannot be empty");
         }
+        checkArrayForNullElement(array, arrayName);
+    }
+
+    /**
+     * Checks if the specified array has any null elements. If so, an
+     * [@link IllegalArgumentException is thrown.
+     *
+     * @param array an {@link Object[]}. Must not be <code>null</code>, or
+     * a {@link NullPointerException} will be thrown.
+     * @param arrayName the variable name {@link String} of the array (used
+     * in the exception message). Should not be <code>null</code>, or the
+     * exception message will not indicate which parameter was erroneously
+     * <code>null</code>.
+     */
+    public static void checkArrayForNullElement(Object[] array,
+            String arrayName) {
         for (Object elt : array) {
             if (elt == null) {
                 throw new IllegalArgumentException(arrayName

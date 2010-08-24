@@ -61,6 +61,8 @@ public abstract class AbstractPropositionDefinition implements
         this.id = setId0(kb, id);
         this.directChildren = EMPTY_STRING_ARR;
         this.inverseIsA = EMPTY_STRING_ARR;
+        this.displayName = "";
+        this.abbrevDisplayName = "";
         this.changes = new PropertyChangeSupport(this);
     }
 
@@ -109,6 +111,8 @@ public abstract class AbstractPropositionDefinition implements
      *            an abbreviated display name {@link String}.
      */
     public final void setAbbreviatedDisplayName(String abbrev) {
+        if (abbrev == null)
+            abbrev = "";
         String old = this.abbrevDisplayName;
         this.abbrevDisplayName = abbrev;
         this.changes.firePropertyChange("abbreviatedDisplayName", old, abbrev);
@@ -126,6 +130,8 @@ public abstract class AbstractPropositionDefinition implements
      *            a display name {@link String}.
      */
     public final void setDisplayName(String displayName) {
+        if (displayName == null)
+            displayName = "";
         String old = this.displayName;
         this.displayName = displayName;
         this.changes.firePropertyChange("displayName", old, displayName);

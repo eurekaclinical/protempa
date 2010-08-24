@@ -13,7 +13,17 @@ public final class JoinSpec implements Serializable {
     private final ColumnSpec nextColumnSpec;
     private ColumnSpec prevColumnSpec;
 
-    
+    /**
+     * Instantiates a join specification with the join keys of the two tables
+     * and the path through the database from the corresponding entity's
+     * main table to the right-hand-side table.
+     *
+     * @param fromKey a key {@link String} from the left-hand-side table.
+     * @param toKey a key {@link String} from the right-hand-side table.
+     * @param nextColumnSpec a {@link ColumnSpec} representing the path through
+     * the database from the corresponding entity's main table to the
+     * right-hand-side table.
+     */
     public JoinSpec(String fromKey, String toKey, ColumnSpec nextColumnSpec) {
         if (fromKey == null)
             throw new IllegalArgumentException("fromKey cannot be null");
@@ -26,26 +36,63 @@ public final class JoinSpec implements Serializable {
         this.nextColumnSpec = nextColumnSpec;
     }
 
+    /**
+     * Returns the path through the database from the corresponding entity's
+     * main table to the left-hand-side table.
+     *
+     * @return a {@link ColumnSpec}.
+     */
     public ColumnSpec getPrevColumnSpec() {
         return prevColumnSpec;
     }
 
+    /**
+     * Sets the path through the database from the corresponding entity's
+     * main table to the left-hand-side table. We assume that this will not
+     * be called again after the database specification is read in.
+     *
+     * @param prevColumnSpec a {@link ColumnSpec}.
+     */
     void setPrevColumnSpec(ColumnSpec prevColumnSpec) {
         this.prevColumnSpec = prevColumnSpec;
     }
 
+    /**
+     * Gets the key from the left-hand-side table.
+     *
+     * @return a {@link String}.
+     */
     public String getFromKey() {
         return this.fromKey;
     }
 
+    /**
+     * Gets the key from the right-hand-side table.
+     *
+     * @return a {@link String}.
+     */
     public String getToKey() {
         return this.toKey;
     }
 
+    /**
+     * Gets the path through the database from the corresponding entity's main
+     * table to the right-hand-side table.
+     *
+     * @return a {@link ColumnSpec}.
+     */
     public ColumnSpec getNextColumnSpec() {
         return this.nextColumnSpec;
     }
 
+    /**
+     * Performs equality testing by comparing all of this instance's fields
+     * to the fields of another instance (returns <code>false</code> if the
+     * other instance is not a <code>JoinSpec</code>.
+     *
+     * @param obj another {@link Object}.
+     * @return <code>true</code> if equal, <code>false</code> if not.
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -76,6 +123,11 @@ public final class JoinSpec implements Serializable {
         return true;
     }
 
+    /**
+     * Computes a hash code from all of this instance's fields.
+     *
+     * @return an <code>int</code> hash code.
+     */
     @Override
     public int hashCode() {
         int hash = 5;
