@@ -11,6 +11,8 @@ import org.protempa.backend.BackendInstanceSpec;
 public abstract class AbstractCommonsDataSourceBackend
         extends AbstractDataSourceBackend  {
 
+    private String dataSourceBackendId;
+
     @Override
     public void initialize(BackendInstanceSpec config)
         throws DataSourceBackendInitializationException {
@@ -24,5 +26,14 @@ public abstract class AbstractCommonsDataSourceBackend
 
     protected final String nameForErrors() {
         return CommonsBackend.nameForErrors(this);
+    }
+
+    @BackendProperty
+    public final void setDataSourceBackendId(String id) {
+        this.dataSourceBackendId = id;
+    }
+
+    public final String getDataSourceBackendId () {
+        return this.dataSourceBackendId;
     }
 }

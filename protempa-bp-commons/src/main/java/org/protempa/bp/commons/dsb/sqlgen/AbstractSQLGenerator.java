@@ -236,6 +236,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         ConstantParameterResultProcessor resultProcessor =
                 new ConstantParameterResultProcessor();
         resultProcessor.setResults(results);
+        resultProcessor.setDataSourceBackendId(this.backend.getDataSourceBackendId());
 
         return executeSelect(paramIds, filters,
                 keyIds, null, resultProcessor);
@@ -252,6 +253,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         PrimitiveParameterResultProcessorAllKeyIds resultProcessor =
                 new PrimitiveParameterResultProcessorAllKeyIds();
         resultProcessor.setResults(results);
+        resultProcessor.setDataSourceBackendId(this.backend.getDataSourceBackendId());
 
         return executeSelect(paramIds, filters,
                 keyIds, order, resultProcessor);
@@ -266,6 +268,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         EventResultProcessorAllKeyIds resultProcessor =
                 new EventResultProcessorAllKeyIds();
         resultProcessor.setResults(results);
+        resultProcessor.setDataSourceBackendId(this.backend.getDataSourceBackendId());
 
         return executeSelect(eventIds, filters, keyIds, order,
                 resultProcessor);
@@ -1059,6 +1062,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     }
                 }
 
+                cp.setDataSourceBackendId(this.getDataSourceBackendId());
                 Collections.putList(results, keyId, cp);
             }
         }
@@ -1069,6 +1073,15 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
         private Map<String, List<P>> results;
         private EntitySpec entitySpec;
+        private String dataSourceBackendId;
+
+        public String getDataSourceBackendId() {
+            return dataSourceBackendId;
+        }
+
+        public void setDataSourceBackendId(String dataSourceBackendId) {
+            this.dataSourceBackendId = dataSourceBackendId;
+        }
 
         public void setEntitySpec(EntitySpec entitySpec) {
             this.entitySpec = entitySpec;
@@ -1129,6 +1142,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     }
                 }
 
+                p.setDataSourceBackendId(this.getDataSourceBackendId());
                 Collections.putList(results, keyId, p);
             }
         }
@@ -1210,6 +1224,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                         event.setProperty(propertySpec.getName(), value);
                     }
                 }
+                // add in the datasourcebackend id to the event here
+                event.setDataSourceBackendId(this.getDataSourceBackendId());
                 Collections.putList(results, keyId, event);
             }
         }
