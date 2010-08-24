@@ -8,80 +8,80 @@ package org.protempa.proposition.value;
  */
 public class ValueFormat {
 
-	private static final ValueFactory[] PARSE_FACTORY_ORDER = {
-			ValueFactory.BOOLEAN, ValueFactory.NUMBER, ValueFactory.INEQUALITY,
-			ValueFactory.LIST, ValueFactory.NOMINAL };
+    private static final ValueFactory[] PARSE_FACTORY_ORDER = {
+        ValueFactory.BOOLEAN, ValueFactory.NUMBER, ValueFactory.INEQUALITY,
+        ValueFactory.LIST, ValueFactory.NOMINAL};
 
-	private ValueFormat() {
-	}
+    private ValueFormat() {
+    }
 
-	/**
-	 * Returns the given PROTEMPA value formatted as a string.
-	 * 
-	 * @param val
-	 *            a {@link Value}.
-	 * @return a {@link String} or <code>null</code> if <code>value</code>
-	 *         is <code>null</code>.
-	 */
-	public static String format(Value val) {
-		if (val != null) {
-			return val.getFormatted();
-		} else {
-			return null;
-		}
-	}
+    /**
+     * Returns the given PROTEMPA value formatted as a string.
+     *
+     * @param val
+     *            a {@link Value}.
+     * @return a {@link String} or <code>null</code> if <code>value</code>
+     *         is <code>null</code>.
+     */
+    public static String format(Value val) {
+        if (val != null) {
+            return val.getFormatted();
+        } else {
+            return null;
+        }
+    }
 
-	/**
-	 * Parses a string into one of the <code>Value</code> types. The type is
-	 * guessed by examining the string. Note, there is no way for this method to
-	 * distinguish between ordinal and plain text strings, so a
-	 * <code>NominalValue</code> object is returned for all strings.
-	 * 
-	 * @param str
-	 *            a <code>String</code> object.
-	 * @return a <code>Value</code> object. If the <code>str</code>
-	 *         parameter cannot be parsed, it is returned in a
-	 *         <code>NominalValue</code> object.
-	 */
-	@Deprecated
-	public static Value parse(String str) {
-		Value result = null;
+    /**
+     * Parses a string into one of the <code>Value</code> types. The type is
+     * guessed by examining the string. Note, there is no way for this method to
+     * distinguish between ordinal and plain text strings, so a
+     * <code>NominalValue</code> object is returned for all strings.
+     *
+     * @param str
+     *            a <code>String</code> object.
+     * @return a <code>Value</code> object. If the <code>str</code>
+     *         parameter cannot be parsed, it is returned in a
+     *         <code>NominalValue</code> object.
+     */
+    @Deprecated
+    public static Value parse(String str) {
+        Value result = null;
 
-		for (int i = 0; i < PARSE_FACTORY_ORDER.length; i++) {
-			if ((result = PARSE_FACTORY_ORDER[i].getInstance(str)) != null) {
-				break;
-			}
-		}
+        for (int i = 0; i < PARSE_FACTORY_ORDER.length; i++) {
+            if ((result = PARSE_FACTORY_ORDER[i].parseValue(str)) != null) {
+                break;
+            }
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	/**
-	 * Parses a value string into a PROTEMPA value object.
-	 * 
-	 * @param value
-	 *            a value {@link String}.
-	 * @param valueFactoryId
-	 *            the unique id of a value factory.
-	 * @return a {@link Value} object, or <code>null</code> if a
-	 *         <code>null</code> <code>value</code> parameter is passed in.
-	 * @throws IllegalArgumentException
-	 *             if a non-<code>null</code> <code>value</code> is
-	 *             provided but <code>valueFactoryId</code> is
-	 *             <code>null</code>, or if an invalid
-	 *             <code>valueFactoryId</code> is provided.
-	 * @see ValueFactory
-	 */
-	public static Value parse(String value, String valueFactoryId) {
-		if (value != null && valueFactoryId == null) {
-			throw new IllegalArgumentException(
-					"cannot parse value: valueFactoryString is null");
-		}
-		if (value != null) {
-			return ValueFactory.toValueFactory(valueFactoryId).getInstance(
-					value);
-		} else {
-			return null;
-		}
-	}
+    /**
+     * Parses a value string into a PROTEMPA value object.
+     *
+     * @param value
+     *            a value {@link String}.
+     * @param valueFactoryId
+     *            the unique id of a value factory.
+     * @return a {@link Value} object, or <code>null</code> if a
+     *         <code>null</code> <code>value</code> parameter is passed in.
+     * @throws IllegalArgumentException
+     *             if a non-<code>null</code> <code>value</code> is
+     *             provided but <code>valueFactoryId</code> is
+     *             <code>null</code>, or if an invalid
+     *             <code>valueFactoryId</code> is provided.
+     * @see ValueFactory
+     */
+    public static Value parse(String value, ValueType valueType) {
+        if (value != null && valueType == null) {
+            throw new IllegalArgumentException(
+                    "valueType cannot be null");
+        }
+        if (value != null) {
+            return ValueFactory.get(valueType).parseValue(value);
+
+        } else {
+            return null;
+        }
+    }
 }

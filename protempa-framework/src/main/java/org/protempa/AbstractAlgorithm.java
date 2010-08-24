@@ -1,6 +1,6 @@
 package org.protempa;
 
-import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
+import org.protempa.dsb.filter.Filter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -182,7 +182,7 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * 
 	 * @see org.protempa.Algorithm#createDataSourceConstraint()
 	 */
-	public DataSourceConstraint createDataSourceConstraint() {
+	public Filter createDataSourceConstraint() {
 		return null;
 	}
 

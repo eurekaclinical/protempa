@@ -96,16 +96,16 @@ public class NumberValueTest extends TestCase {
 	}
 
 	public void testDecimalPlaces1() {
-		assertEquals("30", ValueFactory.NUMBER.getInstance("30").getFormatted());
+		assertEquals("30", ValueFactory.NUMBER.parseValue("30").getFormatted());
 	}
 
 	public void testDecimalPlaces2() {
-		assertEquals("30.0", ValueFactory.NUMBER.getInstance("30.0")
+		assertEquals("30.0", ValueFactory.NUMBER.parseValue("30.0")
 				.getFormatted());
 	}
 
 	public void testDecimalPlaces3() {
-		assertEquals("30.00", ValueFactory.NUMBER.getInstance("30.00")
+		assertEquals("30.00", ValueFactory.NUMBER.parseValue("30.00")
 				.getFormatted());
 	}
 	

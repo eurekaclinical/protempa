@@ -1,14 +1,11 @@
 package org.protempa.bp.commons.dsb;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.dsb.sqlgen.SQLOrderBy;
-import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
+import org.protempa.dsb.filter.Filter;
 import org.protempa.proposition.ConstantParameter;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
@@ -36,16 +33,16 @@ public interface SQLGenerator {
 
     Map<String, List<ConstantParameter>> readConstantParameters(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints)
+            Filter dataSourceConstraints)
             throws DataSourceReadException;
 
     Map<String, List<PrimitiveParameter>> readPrimitiveParameters(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints, SQLOrderBy order)
+            Filter dataSourceConstraints, SQLOrderBy order)
             throws DataSourceReadException;
 
     Map<String, List<Event>> readEvents(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            Set<String> eventIds, Filter dataSourceConstraints,
             SQLOrderBy order) throws DataSourceReadException;
 
     public GranularityFactory getGranularities();

@@ -1,6 +1,6 @@
 package org.protempa.backend.test;
 
-import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
+import org.protempa.dsb.filter.Filter;
 import org.protempa.*;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,7 @@ public final class MockDataSourceBackend implements DataSourceBackend {
     @Override
     public Map<String, List<ConstantParameter>> getConstantParameters(
             Set<String> keyIds,
-            Set<String> paramIds, DataSourceConstraint dataSourceConstraints,
+            Set<String> paramIds, Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -36,7 +36,7 @@ public final class MockDataSourceBackend implements DataSourceBackend {
 
     @Override
     public Map<String, List<Event>> getEventsAsc(Set<String> keyIds, 
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            Set<String> eventIds, Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -44,7 +44,7 @@ public final class MockDataSourceBackend implements DataSourceBackend {
 
     @Override
     public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            Set<String> eventIds, Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -58,7 +58,7 @@ public final class MockDataSourceBackend implements DataSourceBackend {
     @Override
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints,
+            Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
@@ -67,7 +67,7 @@ public final class MockDataSourceBackend implements DataSourceBackend {
     @Override
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints,
+            Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");

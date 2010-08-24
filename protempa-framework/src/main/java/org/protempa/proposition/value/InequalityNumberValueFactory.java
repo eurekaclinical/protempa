@@ -8,42 +8,32 @@ import java.math.BigDecimal;
  * @author Andrew Post
  */
 public class InequalityNumberValueFactory extends NumericalValueFactory {
-	
-	private static final long serialVersionUID = 2165408517405160378L;
 
-	/**
-	 * Package-private constructor (use the constants defined in
-	 * <code>ValueFactory</code>.
-	 */
-	InequalityNumberValueFactory(String str) {
-		super(str);
-	}
+    private static final long serialVersionUID = 2165408517405160378L;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.virginia.pbhs.parameters.value.ValueFactory#getInstance(java.lang.String)
-	 */
-	@Override
-	public Value getInstance(String s) {
-		InequalityNumberValue result = null;
-		try {
-			s = s.trim();
-			ValueComparator comparator = ValueComparator.parse(s
-					.substring(0, 1));
-			BigDecimal val = new BigDecimal(s.substring(1).trim());
-			result = new InequalityNumberValue(comparator, val);
-		} catch (Exception ex) {
-		}
-		return result;
-	}
+    /**
+     * Package-private constructor (use the constants defined in
+     * <code>ValueFactory</code>.
+     */
+    InequalityNumberValueFactory(ValueType valueType) {
+        super(valueType);
+    }
 
-	@Override
-	public boolean isInstance(Value val) {
-		if (val == null) {
-			return false;
-		} else {
-			return val.getClass().equals(InequalityNumberValue.class);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.virginia.pbhs.parameters.value.ValueFactory#getInstance(java.lang.String)
+     */
+    @Override
+    public Value parseValue(String s) {
+        InequalityNumberValue result = null;
+        try {
+            s = s.trim();
+            ValueComparator comparator = ValueComparator.parse(s.substring(0, 1));
+            BigDecimal val = new BigDecimal(s.substring(1).trim());
+            result = new InequalityNumberValue(comparator, val);
+        } catch (Exception ex) {
+        }
+        return result;
+    }
 }

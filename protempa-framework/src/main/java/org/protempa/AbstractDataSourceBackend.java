@@ -1,6 +1,6 @@
 package org.protempa;
 
-import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
+import org.protempa.dsb.filter.Filter;
 import org.protempa.dsb.*;
 import java.util.List;
 import java.util.Map;
@@ -37,22 +37,20 @@ public abstract class AbstractDataSourceBackend extends
     @Override
     public Map<String, List<PrimitiveParameter>>
             getPrimitiveParametersAsc(Set<String> keyIds, Set<String> paramIds,
-			DataSourceConstraint dataSourceConstraints, QuerySession qs)
+			Filter filters, QuerySession qs)
 			throws DataSourceReadException {
 		return null;
     }
 
     @Override
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
-            Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints,
+            Set<String> keyIds, Set<String> paramIds, Filter filters,
             QuerySession qs)
             throws DataSourceReadException {
         return null;
     }
 
-    public List<String> getAllKeyIds(int start, int count,
-            DataSourceConstraint dataSourceConstraints,
+    public List<String> getAllKeyIds(int start, int count, Filter filters,
             QuerySession qs)
             throws DataSourceReadException {
         return null;
@@ -60,8 +58,7 @@ public abstract class AbstractDataSourceBackend extends
 
     @Override
     public Map<String, List<ConstantParameter>> getConstantParameters(
-            Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints,
+            Set<String> keyIds, Set<String> paramIds, Filter filters,
             QuerySession qs)
             throws DataSourceReadException {
         return null;
@@ -69,16 +66,14 @@ public abstract class AbstractDataSourceBackend extends
 
     @Override
     public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
-            QuerySession qs)
+            Set<String> eventIds, Filter filters, QuerySession qs)
             throws DataSourceReadException {
         return null;
     }
 
     @Override
     public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
-            QuerySession qs)
+            Set<String> eventIds, Filter filters, QuerySession qs)
             throws DataSourceReadException {
         return null;
     }

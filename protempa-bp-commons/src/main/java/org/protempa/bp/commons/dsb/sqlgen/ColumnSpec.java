@@ -2,6 +2,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.arp.javautil.string.StringUtil;
 
@@ -11,34 +12,83 @@ import org.arp.javautil.string.StringUtil;
  * @author Andrew Post
  */
 public final class ColumnSpec implements Serializable {
+
     public static enum Constraint {
-        EQUAL_TO, LIKE
+
+        EQUAL_TO("="),
+        LIKE("LIKE"),
+        GREATER_THAN(">"),
+        GREATER_THAN_OR_EQUAL_TO(">="),
+        LESS_THAN("<"),
+        LESS_THAN_OR_EQUAL_TO("<="),
+        NOT_EQUAL_TO("<>");
+        private String sqlOperator;
+
+        private Constraint(String sqlOperator) {
+            this.sqlOperator = sqlOperator;
+        }
+
+        public String getSqlOperator() {
+            return this.sqlOperator;
+        }
     }
 
-    public static class ConstraintValue {
-        private String code;
+    public static class PropositionIdToSqlCode {
+
+        private String propositionId;
         private Object value;
 
-        public ConstraintValue(String code, Object value) {
-            this.code = code;
+        public PropositionIdToSqlCode(String propositionId, Object value) {
+            this.propositionId = propositionId;
             this.value = value;
         }
 
-        public String getCode() {
-            return this.code;
+        public String getPropositionId() {
+            return this.propositionId;
         }
 
-        public Object getValue() {
+        public Object getSqlCode() {
             return this.value;
         }
-    }
 
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final PropositionIdToSqlCode other = (PropositionIdToSqlCode) obj;
+            if ((this.propositionId == null) ? (other.propositionId != null) :
+                !this.propositionId.equals(other.propositionId)) {
+                return false;
+            }
+            if (this.value != other.value && (this.value == null ||
+                    !this.value.equals(other.value))) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 17 * hash + (this.propositionId != null ?
+                this.propositionId.hashCode() : 0);
+            hash = 17 * hash + (this.value != null ?
+                this.value.hashCode() : 0);
+            return hash;
+        }
+
+
+    }
     private final String schema;
     private final String table;
     private final String column;
     private final JoinSpec joinSpec;
     private Constraint constraint;
-    private ConstraintValue[] constraintValues;
+    private PropositionIdToSqlCode[] propIdToSqlCodes;
 
     public ColumnSpec(String schema, String table, JoinSpec joinSpec) {
         this(schema, table, null, joinSpec);
@@ -49,10 +99,11 @@ public final class ColumnSpec implements Serializable {
     }
 
     public ColumnSpec(String schema, String table, String column,
-            Constraint constraint, ConstraintValue... constraintValue) {
+            Constraint constraint,
+            PropositionIdToSqlCode... propIdToSqlCodes) {
         this(schema, table, column, null);
         this.constraint = constraint;
-        this.constraintValues = constraintValue;
+        this.propIdToSqlCodes = propIdToSqlCodes;
     }
 
     public ColumnSpec(String schema, String table, String column) {
@@ -61,14 +112,16 @@ public final class ColumnSpec implements Serializable {
 
     public ColumnSpec(String schema, String table,
             String column, JoinSpec joinSpec) {
-        if (table == null)
+        if (table == null) {
             throw new IllegalArgumentException("table cannot be null");
+        }
         this.schema = schema;
         this.table = table;
         this.column = column;
         this.joinSpec = joinSpec;
-        if (this.joinSpec != null)
+        if (this.joinSpec != null) {
             this.joinSpec.setPrevColumnSpec(this);
+        }
     }
 
     /**
@@ -94,7 +147,7 @@ public final class ColumnSpec implements Serializable {
     public String getColumn() {
         return this.column;
     }
-    
+
     public JoinSpec getJoin() {
         return this.joinSpec;
     }
@@ -103,13 +156,13 @@ public final class ColumnSpec implements Serializable {
         return this.constraint;
     }
 
-    public ConstraintValue[] getConstraintValues() {
-        return this.constraintValues;
+    public PropositionIdToSqlCode[] getPropositionIdToSqlCodes() {
+        return this.propIdToSqlCodes;
     }
 
     public boolean isSameSchemaAndTable(ColumnSpec columnSpec) {
-        return StringUtil.equals(columnSpec.getSchema(),this.getSchema())
-                   && StringUtil.equals(columnSpec.getTable(),this.getTable());
+        return StringUtil.equals(columnSpec.getSchema(), this.getSchema())
+                && StringUtil.equals(columnSpec.getTable(), this.getTable());
     }
 
     /**
@@ -132,11 +185,7 @@ public final class ColumnSpec implements Serializable {
 
     @Override
     public String toString() {
-        return "ColumnSpec{" + "schema=" +
-                schema + "; table=" + table + "; column=" + column + "}";
+        return "ColumnSpec{" + "schema="
+                + schema + "; table=" + table + "; column=" + column + "}";
     }
-
-
-
-
 }

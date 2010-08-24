@@ -2,7 +2,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
 import java.util.Map;
-import org.protempa.proposition.value.ValueFactory;
+import org.protempa.proposition.value.ValueType;
 
 /**
  *
@@ -12,7 +12,7 @@ public final class PropertySpec implements Serializable {
     private final String name;
     private final Map<String, String> codeToPropIdMap;
     private final ColumnSpec codeSpec;
-    private final ValueFactory valueType;
+    private final ValueType valueType;
 
     /**
      * Instantiates a property spec.
@@ -27,7 +27,7 @@ public final class PropertySpec implements Serializable {
     public PropertySpec(String name,
             Map<String, String> codeToPropIdMap,
             ColumnSpec codeSpec,
-            ValueFactory valueType) {
+            ValueType valueType) {
         if (name == null)
             throw new IllegalArgumentException("name cannot be null");
         this.name = name;
@@ -44,11 +44,11 @@ public final class PropertySpec implements Serializable {
         return this.codeToPropIdMap;
     }
 
-    public ColumnSpec getCodeSpec() {
+    public ColumnSpec getSpec() {
         return this.codeSpec;
     }
 
-    public ValueFactory getValueType() {
+    public ValueType getValueType() {
         return this.valueType;
     }
 }

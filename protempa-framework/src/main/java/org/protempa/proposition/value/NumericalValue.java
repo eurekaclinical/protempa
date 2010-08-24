@@ -5,7 +5,7 @@ package org.protempa.proposition.value;
  * 
  * @author Andrew Post
  */
-public interface NumericalValue extends Value {
+public interface NumericalValue extends Value, OrderedValue {
 	/**
 	 * Gets this value as a number.
 	 * 

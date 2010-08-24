@@ -1,17 +1,14 @@
 package org.protempa.query;
 
 /**
- *
+ * The basic query implementation.
+ * 
  * @author Andrew Post
  */
 public class SimpleQuery extends AbstractQuery {
 
     public SimpleQuery() {
 
-    }
-
-    public SimpleQuery(String keyId) {
-        setKeyIds(new String[] {keyId});
     }
 
     public static SimpleQuery newInstance(String keyId, String... propIds) {
@@ -37,11 +34,12 @@ public class SimpleQuery extends AbstractQuery {
         return new SimpleQuery();
     }
 
+    @Override
     public Query clone() {
         SimpleQuery copy = new SimpleQuery();
         copy.setKeyIds(this.getKeyIds().clone());
         copy.setPropIds(this.getPropIds().clone());
-        copy.setDataSourceConstraints(this.getDataSourceConstraints());
+        copy.setFilters(this.getFilters());
         return copy;
     }
 }

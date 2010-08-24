@@ -1,6 +1,5 @@
 package org.protempa.proposition.value;
 
-import org.protempa.proposition.value.ValueFactory;
 
 import junit.framework.TestCase;
 

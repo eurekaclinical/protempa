@@ -8,7 +8,7 @@ import java.util.List;
  * 
  * @author Andrew Post
  */
-public final class OrdinalValue extends ValueImpl {
+public final class OrdinalValue extends ValueImpl implements OrderedValue {
 
 	private static final long serialVersionUID = -1605459658420554439L;
 
@@ -27,7 +27,7 @@ public final class OrdinalValue extends ValueImpl {
 	 *            the allowed values {@link List<String}.
 	 */
 	OrdinalValue(String value, List<String> sortedAllowedValues) {
-		super(ValueFactory.ORDINAL);
+		super(ValueType.ORDINALVALUE);
 		this.val = value;
 		this.allowedValues = new ArrayList<String>(sortedAllowedValues);
 	}

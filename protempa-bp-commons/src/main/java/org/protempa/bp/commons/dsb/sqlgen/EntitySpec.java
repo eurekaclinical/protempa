@@ -2,9 +2,10 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
 import java.util.Map;
+import org.protempa.ProtempaUtil;
 import org.protempa.bp.commons.dsb.PositionParser;
 import org.protempa.proposition.value.Granularity;
-import org.protempa.proposition.value.ValueFactory;
+import org.protempa.proposition.value.ValueType;
 
 /**
  * Defines a mapping from a proposition to a relational database's physical
@@ -13,79 +14,76 @@ import org.protempa.proposition.value.ValueFactory;
  * @author Andrew Post
  */
 public final class EntitySpec implements Serializable {
-
-    private final String[] codes;
+    private final String name;
+    private final String description;
+    private final String[] propositionIds;
     private final boolean unique;
     private final ColumnSpec baseSpec;
+    private final ColumnSpec uniqueIdSpec;
     private final ColumnSpec startTimeOrTimestampSpec;
     private final ColumnSpec finishTimeSpec;
     private final PropertySpec[] propertySpecs;
     private final Map<String, String> codeToPropIdMap;
     private final ColumnSpec codeSpec;
     private final ColumnSpec[] constraintSpecs;
-    private final ValueFactory valueType;
+    private final ValueType valueType;
     private final Granularity granularity;
     private final PositionParser positionParser;
 
     /**
-     * Instantiates a property spec.
+     * Creates an entity spec instance.
      * 
-     * @param code
-     * @param entitySpec
+     * @param name a {@link String}. Cannot be <code>null</code>.
+     * @param description a {@link String}. The constructor replaces a
+     * <code>null</code> argument with a {@link String} of length zero.
+     * @param propositionIds a {@link String[]} containing proposition ids.
+     * Cannot be <code>null</code>, length zero or contain <code>null</code>
+     * values.
+     * @param unique <code>true</code> if every row in the database table
+     * specified by the <code>baseSpec</code> argument contains a unique
+     * instance of this entity, <code>false</code> otherwise.
+     * @param baseSpec
+     * @param uniqueIdSpec
      * @param startTimeOrTimestampSpec
      * @param finishTimeSpec
-     * @param propertyValueSpecs
+     * @param propertySpecs
+     * @param codeToPropIdMap
+     * @param codeSpec
      * @param constraintSpecs
+     * @param valueType
+     * @param granularity
+     * @param positionParser
      */
-    public EntitySpec(String code,
+    public EntitySpec(String name,
+            String description,
+            String[] propositionIds,
             boolean unique,
             ColumnSpec baseSpec,
+            ColumnSpec uniqueIdSpec,
             ColumnSpec startTimeOrTimestampSpec,
             ColumnSpec finishTimeSpec,
             PropertySpec[] propertySpecs,
             Map<String, String> codeToPropIdMap,
             ColumnSpec codeSpec,
             ColumnSpec[] constraintSpecs,
-            ValueFactory valueType,
+            ValueType valueType,
             Granularity granularity,
             PositionParser positionParser) {
-        this(new String[] {code}, unique, baseSpec, startTimeOrTimestampSpec,
-                finishTimeSpec, propertySpecs, codeToPropIdMap,
-                codeSpec, constraintSpecs,
-                valueType, granularity, positionParser);
-    }
-
-    /**
-     * Instantiates a property spec.
-     *
-     * @param codes
-     * @param entitySpec
-     * @param startTimeOrTimestampSpec
-     * @param finishTimeSpec
-     * @param propertyValueSpecs
-     * @param constraintSpecs
-     */
-    public EntitySpec(String[] codes,
-            boolean unique,
-            ColumnSpec baseSpec,
-            ColumnSpec startTimeOrTimestampSpec,
-            ColumnSpec finishTimeSpec,
-            PropertySpec[] propertySpecs,
-            Map<String, String> codeToPropIdMap,
-            ColumnSpec codeSpec,
-            ColumnSpec[] constraintSpecs,
-            ValueFactory valueType,
-            Granularity granularity,
-            PositionParser positionParser) {
-        if (codes == null)
-            throw new IllegalArgumentException("codes cannot be null");
+        if (name == null)
+            throw new IllegalArgumentException("name cannot be null");
+        ProtempaUtil.checkArray(propositionIds, "propositionIds");
         if (baseSpec == null)
             throw new IllegalArgumentException("baseSpec cannot be null");
-        
-        this.codes = new String[codes.length];
+        this.name = name;
+        if (description == null)
+            description = "";
+        this.description = description;
+        this.propositionIds = new String[propositionIds.length];
         this.unique = unique;
-        System.arraycopy(codes, 0, this.codes, 0, codes.length);
+        System.arraycopy(propositionIds, 0, this.propositionIds, 0,
+                propositionIds.length);
         this.baseSpec = baseSpec;
+        this.uniqueIdSpec = uniqueIdSpec;
         this.startTimeOrTimestampSpec = startTimeOrTimestampSpec;
         this.finishTimeSpec = finishTimeSpec;
         this.propertySpecs = propertySpecs;
@@ -98,10 +96,28 @@ public final class EntitySpec implements Serializable {
     }
 
     /**
+     * Gets this entity spec's name.
+     *
+     * @return a {@link String}.
+     */
+    public String getName() {
+        return this.name;
+    }
+
+    /**
+     * Returns a textual description of this entity spec.
+     *
+     * @return a {@link String}. Cannot be <code>null</code>.
+     */
+    public String getDescription() {
+        return this.description;
+    }
+
+    /**
      * @return the code
      */
-    public String[] getCodes() {
-        return this.codes;
+    public String[] getPropositionIds() {
+        return this.propositionIds;
     }
 
     public boolean isUnique() {
@@ -110,6 +126,10 @@ public final class EntitySpec implements Serializable {
 
     public ColumnSpec getBaseSpec() {
         return this.baseSpec;
+    }
+
+    public ColumnSpec getUniqueIdSpec() {
+        return this.uniqueIdSpec;
     }
 
     public ColumnSpec getStartTimeSpec() {
@@ -136,7 +156,7 @@ public final class EntitySpec implements Serializable {
         return this.constraintSpecs;
     }
 
-    public ValueFactory getValueType() {
+    public ValueType getValueType() {
         return this.valueType;
     }
 
@@ -147,5 +167,4 @@ public final class EntitySpec implements Serializable {
     public PositionParser getPositionParser() {
         return this.positionParser;
     }
-
 }

@@ -42,5 +42,5 @@ public interface Value extends Serializable {
 	 * 
 	 * @return a {@link ValueFactory}.
 	 */
-	ValueFactory getValueFactory();
+	ValueType getType();
 }

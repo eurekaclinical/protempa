@@ -15,7 +15,7 @@ import org.protempa.bp.commons.BackendProperty;
 import org.protempa.bp.commons.dsb.sqlgen.RelationalDatabaseSpec;
 import org.protempa.bp.commons.dsb.sqlgen.SQLGeneratorFactory;
 import org.protempa.bp.commons.dsb.sqlgen.SQLOrderBy;
-import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
+import org.protempa.dsb.filter.Filter;
 import org.protempa.proposition.ConstantParameter;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
@@ -229,7 +229,7 @@ public abstract class RelationalDatabaseDataSourceBackend
     @Override
     public Map<String, List<ConstantParameter>> getConstantParameters(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints,
+            Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
         return this.sqlGenerator.readConstantParameters(keyIds, paramIds,
@@ -239,7 +239,7 @@ public abstract class RelationalDatabaseDataSourceBackend
     @Override
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
             Set<String> keyIds,
-            Set<String> paramIds, DataSourceConstraint dataSourceConstraints,
+            Set<String> paramIds, Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
         return this.sqlGenerator.readPrimitiveParameters(keyIds, paramIds,
@@ -250,7 +250,7 @@ public abstract class RelationalDatabaseDataSourceBackend
     @Override
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
             Set<String> keyIds, Set<String> paramIds,
-            DataSourceConstraint dataSourceConstraints,
+            Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
         return this.sqlGenerator.readPrimitiveParameters(keyIds, paramIds,
@@ -260,22 +260,19 @@ public abstract class RelationalDatabaseDataSourceBackend
 
     @Override
     public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
-            QuerySession qs)
+            Set<String> eventIds, Filter filters, QuerySession qs)
             throws DataSourceReadException {
         return this.sqlGenerator.readEvents(keyIds, eventIds,
-                dataSourceConstraints,
-                SQLOrderBy.ASCENDING);
+                filters, SQLOrderBy.ASCENDING);
     }
 
     @Override
     public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
-            Set<String> eventIds, DataSourceConstraint dataSourceConstraints,
+            Set<String> eventIds, Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
         return this.sqlGenerator.readEvents(keyIds, eventIds,
-                dataSourceConstraints,
-                SQLOrderBy.DESCENDING);
+                dataSourceConstraints, SQLOrderBy.DESCENDING);
     }
 
     

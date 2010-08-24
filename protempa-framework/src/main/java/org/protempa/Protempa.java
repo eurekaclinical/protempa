@@ -7,7 +7,7 @@ import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.InvalidConfigurationsException;
-import org.protempa.dsb.datasourceconstraint.DataSourceConstraint;
+import org.protempa.dsb.filter.Filter;
 import org.protempa.query.Query;
 import org.protempa.query.handler.QueryResultsHandler;
 
@@ -141,13 +141,12 @@ public final class Protempa {
 
         Set<String> keyIdsSet = Arrays.asSet(query.getKeyIds());
         Set<String> propIds = Arrays.asSet(query.getPropIds());
-        DataSourceConstraint dataSourceConstraints = query
-                .getDataSourceConstraints();
+        Filter filters = query.getFilters();
 
         // results.putAll()
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
-        this.abstractionFinder.doFind(keyIdsSet, propIds,
-                dataSourceConstraints, resultHandler, qs);
+        this.abstractionFinder.doFind(keyIdsSet, propIds, filters,
+                resultHandler, qs);
 
         // return new QueryResults(results);
     }

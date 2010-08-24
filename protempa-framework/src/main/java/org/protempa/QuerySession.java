@@ -1,5 +1,6 @@
 package org.protempa;
 
+import org.protempa.dsb.filter.Filter;
 import org.protempa.query.Query;
 import org.protempa.query.handler.QueryResultsHandler;
 
@@ -8,7 +9,7 @@ public class QuerySession {
     private final Query query;
     private final AbstractionFinder finder;
 
-    public QuerySession(Query initialQuery, AbstractionFinder abstractionFinder) {
+    QuerySession(Query initialQuery, AbstractionFinder abstractionFinder) {
         this.finder = abstractionFinder;
         this.id = this.generateId();
         this.query = initialQuery.clone();
@@ -27,18 +28,28 @@ public class QuerySession {
         return query;
     }
 
-     /**
-     * This method returns the results from this query session after applying
-     * the restrictions and constraints held in the Query object passed in. The
-     * result set will be passed to the QueryResultsHandler that is passed in.
-     * 
-     * @param query
-     *            The Query object containing the restrictions/constraints
-     * @param handler
-     *            The QueryResultsHandler object that will handle the result
-     *            set.
-     */
-    public void execute(Query query, QueryResultsHandler handler) {
+//     /**
+//     * This method returns the results from this query session after applying
+//     * the restrictions and constraints held in the Query object passed in. The
+//     * result set will be passed to the QueryResultsHandler that is passed in.
+//     *
+//     * @param query
+//     *            The Query object containing the restrictions/constraints
+//     * @param handler
+//     *            The QueryResultsHandler object that will handle the result
+//     *            set.
+//     */
+//    public void execute(Query query, QueryResultsHandler handler) {
+//        // TODO: implement me
+//    }
+
+    public void filter(Filter constraints,
+            QueryResultsHandler handler) {
+        // TODO: implement me
+    }
+
+    public void drillDown(String propositionId,
+            QueryResultsHandler handler) {
         // TODO: implement me
     }
 
