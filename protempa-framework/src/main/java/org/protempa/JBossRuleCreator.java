@@ -145,7 +145,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             rule.addPattern(new EvalCondition(
                     new HighLevelAbstractionCondition(def, epds), null));
             rule.setConsequence(new HighLevelAbstractionConsequence(def,
-                    epds.length));
+                    epds));
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
             AbstractionCombiner.toRules(knowledgeSource, def, rules);

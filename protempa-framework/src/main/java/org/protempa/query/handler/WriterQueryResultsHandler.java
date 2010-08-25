@@ -19,54 +19,52 @@ import org.protempa.proposition.Proposition;
  * @author Michel Mansour
  *
  */
-public abstract class WriterQueryResultsHandler extends BufferedWriter implements QueryResultsHandler {
-	
-	public WriterQueryResultsHandler(File file)
-	throws IOException {
-		super(new FileWriter(file));
+public abstract class WriterQueryResultsHandler extends BufferedWriter
+        implements QueryResultsHandler {
 
-	}
+    public WriterQueryResultsHandler(File file)
+            throws IOException {
+        super(new FileWriter(file));
 
-	public WriterQueryResultsHandler(String fileName)
-	throws IOException {
-		super(new FileWriter(fileName));
-	}
+    }
 
-	public WriterQueryResultsHandler(OutputStream out) {
-		super(new OutputStreamWriter(out));
-	}
+    public WriterQueryResultsHandler(String fileName)
+            throws IOException {
+        super(new FileWriter(fileName));
+    }
 
-	public WriterQueryResultsHandler(Writer out) {
-		super(out);
-	}
+    public WriterQueryResultsHandler(OutputStream out) {
+        super(new OutputStreamWriter(out));
+    }
 
-	/* (non-Javadoc)
-	 * @see org.protempa.query.handler.QueryResultsHandler#finish()
-	 */
-	@Override
-	public void finish() throws FinderException {
-		try {
-			super.close();
-		} catch (IOException ioe) {
-			throw new FinderException(ioe);
-		}
-	}
+    public WriterQueryResultsHandler(Writer out) {
+        super(out);
+    }
 
-	/* (non-Javadoc)
-	 * @see org.protempa.query.handler.QueryResultsHandler#init()
-	 */
-	@Override
-	public void init() throws FinderException {
-		// TODO Auto-generated method stub
-		
-	}
+    /* (non-Javadoc)
+     * @see org.protempa.query.handler.QueryResultsHandler#finish()
+     */
+    @Override
+    public void finish() throws FinderException {
+        try {
+            super.close();
+        } catch (IOException ioe) {
+            throw new FinderException(ioe);
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see org.protempa.query.handler.QueryResultHandler#handleQueryResult(java.lang.String, java.util.List)
-	 */
-	@Override
-	public abstract void handleQueryResult(String key, List<Proposition> propositions)
-			throws FinderException;
+    /* (non-Javadoc)
+     * @see org.protempa.query.handler.QueryResultsHandler#init()
+     */
+    @Override
+    public void init() throws FinderException {
+        // TODO Auto-generated method stub
+    }
 
-	
+    /* (non-Javadoc)
+     * @see org.protempa.query.handler.QueryResultHandler#handleQueryResult(java.lang.String, java.util.List)
+     */
+    @Override
+    public abstract void handleQueryResult(String key,
+            List<Proposition> propositions) throws FinderException;
 }

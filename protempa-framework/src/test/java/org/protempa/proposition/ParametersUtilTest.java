@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.protempa.proposition.PrimitiveParameter;
-import org.protempa.proposition.PropositionUtil;
 
 
 import junit.framework.TestCase;

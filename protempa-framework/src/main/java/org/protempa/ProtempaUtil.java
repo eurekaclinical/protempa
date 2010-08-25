@@ -1,7 +1,10 @@
 package org.protempa;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.logging.Logger;
+import org.protempa.proposition.TemporalProposition;
+import org.protempa.proposition.comparator.TemporalPropositionIntervalComparator;
 
 /**
  * Utility methods for the PROTEMPA project. They are not intended to be
@@ -128,4 +131,10 @@ public final class ProtempaUtil {
             }
         }
     }
+
+    static final Comparator<TemporalProposition> TEMP_PROP_COMP =
+            new TemporalPropositionIntervalComparator();
+
+    static final Comparator<TemporalProposition>
+            REVERSE_TEMP_PROP_COMP = Collections.reverseOrder(TEMP_PROP_COMP);
 }

@@ -5,7 +5,6 @@ import java.io.Serializable;
 import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.Value;
 
-
 /**
  * Defines offsets for the interval of an abstract parameter defined by a
  * complex abstract parameter definition.
@@ -14,136 +13,147 @@ import org.protempa.proposition.value.Value;
  * 
  */
 public final class Offsets implements Serializable {
-	
-	private static final long serialVersionUID = -3143801827380255487L;
 
-	private String startAbstractParamId;
+    private static final long serialVersionUID = -3143801827380255487L;
+    private String startAbstractParamId;
+    private Value startAbstractParamValue;
+    private String finishAbstractParamId;
+    private Value finishAbstractParamValue;
+    private Integer startOffset;
+    private Unit startOffsetUnits;
+    private Integer finishOffset;
+    private Unit finishOffsetUnits;
+    private IntervalSide startIntervalSide = IntervalSide.START;
+    private IntervalSide finishIntervalSide = IntervalSide.FINISH;
+    private TemporalExtendedPropositionDefinition startExtPropDef;
+    private TemporalExtendedPropositionDefinition finishExtPropDef;
 
-	private Value startAbstractParamValue;
+    public TemporalExtendedPropositionDefinition
+            getFinishTemporalExtendedPropositionDefinition() {
+        return this.finishExtPropDef;
+    }
 
-	private String finishAbstractParamId;
+    public void setFinishTemporalExtendedPropositionDefinition(
+            TemporalExtendedPropositionDefinition tepd) {
+        this.finishExtPropDef = tepd;
+    }
 
-	private Value finishAbstractParamValue;
+//    public String getFinishAbstractParamId() {
+//        return finishAbstractParamId;
+//    }
+//
+//    public void setFinishAbstractParamId(String finishAbstractParamId) {
+//        this.finishAbstractParamId = finishAbstractParamId;
+//    }
 
-	private Integer startOffset;
+    public Value getFinishAbstractParamValue() {
+        return finishAbstractParamValue;
+    }
 
-	private Unit startOffsetUnits;
+    public void setFinishAbstractParamValue(Value finishAbstractParamValue) {
+        this.finishAbstractParamValue = finishAbstractParamValue;
+    }
 
-	private Integer finishOffset;
+    public IntervalSide getFinishIntervalSide() {
+        return finishIntervalSide;
+    }
 
-	private Unit finishOffsetUnits;
+    public void setFinishIntervalSide(IntervalSide finishIntervalSide) {
+        if (finishIntervalSide != null) {
+            this.finishIntervalSide = finishIntervalSide;
+        }
+    }
 
-	private IntervalSide startIntervalSide = IntervalSide.START;
+    public Integer getFinishOffset() {
+        return finishOffset;
+    }
 
-	private IntervalSide finishIntervalSide = IntervalSide.FINISH;
+    public void setFinishOffset(Integer finishOffset) {
+        this.finishOffset = finishOffset;
+    }
 
-	public String getFinishAbstractParamId() {
-		return finishAbstractParamId;
-	}
+    public Unit getFinishOffsetUnits() {
+        return finishOffsetUnits;
+    }
 
-	public void setFinishAbstractParamId(String finishAbstractParamId) {
-		this.finishAbstractParamId = finishAbstractParamId;
-	}
+    public void setFinishOffsetUnits(Unit finishOffsetUnits) {
+        this.finishOffsetUnits = finishOffsetUnits;
+    }
 
-	public Value getFinishAbstractParamValue() {
-		return finishAbstractParamValue;
-	}
+//    public String getStartAbstractParamId() {
+//        return startAbstractParamId;
+//    }
+//
+//    public void setStartAbstractParamId(String startAbstractParamId) {
+//        this.startAbstractParamId = startAbstractParamId;
+//    }
 
-	public void setFinishAbstractParamValue(Value finishAbstractParamValue) {
-		this.finishAbstractParamValue = finishAbstractParamValue;
-	}
+    public TemporalExtendedPropositionDefinition
+            getStartTemporalExtendedPropositionDefinition() {
+        return this.startExtPropDef;
+    }
 
-	public IntervalSide getFinishIntervalSide() {
-		return finishIntervalSide;
-	}
+    public void setStartTemporalExtendedPropositionDefinition(
+            TemporalExtendedPropositionDefinition tepd) {
+        this.startExtPropDef = tepd;
+    }
 
-	public void setFinishIntervalSide(IntervalSide finishIntervalSide) {
-		if (finishIntervalSide != null) {
-			this.finishIntervalSide = finishIntervalSide;
-		}
-	}
+    public Value getStartAbstractParamValue() {
+        return startAbstractParamValue;
+    }
 
-	public Integer getFinishOffset() {
-		return finishOffset;
-	}
+    public void setStartAbstractParamValue(Value startAbstractParamValue) {
+        this.startAbstractParamValue = startAbstractParamValue;
+    }
 
-	public void setFinishOffset(Integer finishOffset) {
-		this.finishOffset = finishOffset;
-	}
+    public IntervalSide getStartIntervalSide() {
+        return startIntervalSide;
+    }
 
-	public Unit getFinishOffsetUnits() {
-		return finishOffsetUnits;
-	}
+    public void setStartIntervalSide(IntervalSide startIntervalSide) {
+        if (startIntervalSide != null) {
+            this.startIntervalSide = startIntervalSide;
+        }
+    }
 
-	public void setFinishOffsetUnits(Unit finishOffsetUnits) {
-		this.finishOffsetUnits = finishOffsetUnits;
-	}
+    public Integer getStartOffset() {
+        return startOffset;
+    }
 
-	public String getStartAbstractParamId() {
-		return startAbstractParamId;
-	}
+    public void setStartOffset(Integer startOffset) {
+        this.startOffset = startOffset;
+    }
 
-	public void setStartAbstractParamId(String startAbstractParamId) {
-		this.startAbstractParamId = startAbstractParamId;
-	}
+    public Unit getStartOffsetUnits() {
+        return startOffsetUnits;
+    }
 
-	public Value getStartAbstractParamValue() {
-		return startAbstractParamValue;
-	}
+    public void setStartOffsetUnits(Unit startOffsetUnits) {
+        this.startOffsetUnits = startOffsetUnits;
+    }
 
-	public void setStartAbstractParamValue(Value startAbstractParamValue) {
-		this.startAbstractParamValue = startAbstractParamValue;
-	}
-
-	public IntervalSide getStartIntervalSide() {
-		return startIntervalSide;
-	}
-
-	public void setStartIntervalSide(IntervalSide startIntervalSide) {
-		if (startIntervalSide != null) {
-			this.startIntervalSide = startIntervalSide;
-		}
-	}
-
-	public Integer getStartOffset() {
-		return startOffset;
-	}
-
-	public void setStartOffset(Integer startOffset) {
-		this.startOffset = startOffset;
-	}
-
-	public Unit getStartOffsetUnits() {
-		return startOffsetUnits;
-	}
-
-	public void setStartOffsetUnits(Unit startOffsetUnits) {
-		this.startOffsetUnits = startOffsetUnits;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder buf = new StringBuilder("Offset start: ");
-		buf.append(startAbstractParamId);
-		buf.append("; ");
-		buf.append(startAbstractParamValue);
-		buf.append("; ");
-		buf.append(startIntervalSide);
-		buf.append("; ");
-		buf.append(startOffset);
-		buf.append("; ");
-		buf.append(startOffsetUnits);
-		buf.append("; offset finish: ");
-		buf.append(finishAbstractParamId);
-		buf.append("; ");
-		buf.append(finishAbstractParamValue);
-		buf.append("; ");
-		buf.append(finishIntervalSide);
-		buf.append("; ");
-		buf.append(finishOffset);
-		buf.append("; ");
-		buf.append(finishOffsetUnits);
-		return buf.toString();
-	}
-
+    @Override
+    public String toString() {
+        StringBuilder buf = new StringBuilder("Offset start: ");
+        buf.append(startAbstractParamId);
+        buf.append("; ");
+        buf.append(startAbstractParamValue);
+        buf.append("; ");
+        buf.append(startIntervalSide);
+        buf.append("; ");
+        buf.append(startOffset);
+        buf.append("; ");
+        buf.append(startOffsetUnits);
+        buf.append("; offset finish: ");
+        buf.append(finishAbstractParamId);
+        buf.append("; ");
+        buf.append(finishAbstractParamValue);
+        buf.append("; ");
+        buf.append(finishIntervalSide);
+        buf.append("; ");
+        buf.append(finishOffset);
+        buf.append("; ");
+        buf.append(finishOffsetUnits);
+        return buf.toString();
+    }
 }

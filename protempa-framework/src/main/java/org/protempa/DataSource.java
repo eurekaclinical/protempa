@@ -13,7 +13,6 @@ import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.proposition.ConstantParameter;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
-import org.protempa.proposition.PropositionUtil;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 
@@ -290,8 +289,7 @@ public final class DataSource extends
     }
 
     private static ProcessQuery<Event> EVENTS_ASC_QUERY =
-        new ProcessQuery<Event>(
-        PropositionUtil.TEMPORAL_PROPOSITION_COMPARATOR) {
+        new ProcessQuery<Event>(ProtempaUtil.TEMP_PROP_COMP) {
 
         @Override
         protected Map<String, List<Event>> executeBackend(
@@ -303,8 +301,7 @@ public final class DataSource extends
     };
 
     private static ProcessQuery<Event> EVENTS_DESC_QUERY =
-            new ProcessQuery<Event>(
-            PropositionUtil.REVERSE_TEMPORAL_PROPOSITION_COMPARATOR) {
+            new ProcessQuery<Event>(ProtempaUtil.REVERSE_TEMP_PROP_COMP) {
 
         @Override
         protected Map<String, List<Event>> executeBackend(
@@ -316,8 +313,7 @@ public final class DataSource extends
     };
     
     private static ProcessQuery<PrimitiveParameter> PRIMPARAM_ASC_QUERY =
-            new ProcessQuery<PrimitiveParameter>(
-            PropositionUtil.TEMPORAL_PROPOSITION_COMPARATOR) {
+            new ProcessQuery<PrimitiveParameter>(ProtempaUtil.TEMP_PROP_COMP) {
 
         @Override
         protected Map<String, List<PrimitiveParameter>> executeBackend(
@@ -332,7 +328,7 @@ public final class DataSource extends
     
     private static ProcessQuery<PrimitiveParameter> PRIMPARAM_DESC_QUERY =
             new ProcessQuery<PrimitiveParameter>(
-            PropositionUtil.REVERSE_TEMPORAL_PROPOSITION_COMPARATOR) {
+            ProtempaUtil.REVERSE_TEMP_PROP_COMP) {
 
         @Override
         protected Map<String, List<PrimitiveParameter>> executeBackend(
@@ -361,6 +357,7 @@ public final class DataSource extends
         }
     };
 
+    @Override
     public void backendUpdated(DataSourceBackendUpdatedEvent evt) {
         clear();
         fireDataSourceUpdated();
@@ -373,6 +370,7 @@ public final class DataSource extends
         super.close();
     }
 
+    @Override
     public void clear() {
 
     }

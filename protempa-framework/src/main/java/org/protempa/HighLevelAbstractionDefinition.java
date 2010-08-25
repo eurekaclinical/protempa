@@ -14,52 +14,45 @@ import java.util.Set;
 
 import org.protempa.proposition.Relation;
 
-
 /**
  * Definition of an extended parameter that's a high-level abstraction.
  * 
  * @author Andrew Post
  */
-public final class HighLevelAbstractionDefinition extends
-		AbstractAbstractionDefinition {
+public final class HighLevelAbstractionDefinition extends AbstractAbstractionDefinition {
 
-	private static final long serialVersionUID = -2434163106247371362L;
+    private static final long serialVersionUID = -2434163106247371362L;
+    private Offsets temporalOffset;
+    private boolean concatenable;
+    private transient Set<ExtendedPropositionDefinition> defs;
+    private transient Set<String> defsAsList;
+    private transient boolean defsAsListOutdated;
+    private transient Map<List<TemporalExtendedPropositionDefinition>, Relation> defPairsMap;
+    private boolean solid;
 
-	private Offsets temporalOffset;
+    public HighLevelAbstractionDefinition(KnowledgeBase kb, String id) {
+        super(kb, id);
+        initInstance();
+        this.concatenable = true;
+        this.solid = true;
+    }
 
-	private boolean concatenable;
+    private void initInstance() {
+        defs = new HashSet<ExtendedPropositionDefinition>();
+        defsAsList = new HashSet<String>();
+        defsAsListOutdated = true;
+        defPairsMap = new HashMap<List<TemporalExtendedPropositionDefinition>, Relation>();
+    }
 
-	private transient Set<ExtendedPropositionDefinition> defs;
-
-	private transient Set<String> defsAsList;
-
-	private transient boolean defsAsListOutdated;
-
-	private transient Map<List<TemporalExtendedPropositionDefinition>, Relation> defPairsMap;
-
-	private boolean solid;
-
-	public HighLevelAbstractionDefinition(KnowledgeBase kb, String id) {
-		super(kb, id);
-		initInstance();
-		this.concatenable = true;
-		this.solid = true;
-	}
-
-	private void initInstance() {
-		defs = new HashSet<ExtendedPropositionDefinition>();
-		defsAsList = new HashSet<String>();
-		defsAsListOutdated = true;
-		defPairsMap = new HashMap<List<TemporalExtendedPropositionDefinition>, Relation>();
-	}
-
-	public void accept(PropositionDefinitionVisitor processor) {
+    @Override
+    public void accept(PropositionDefinitionVisitor processor) {
         if (processor == null) {
             throw new IllegalArgumentException("processor cannot be null.");
         }
-		processor.visit(this);
-	}
+        processor.visit(this);
+    }
 
+    @Override
     public void acceptChecked(PropositionDefinitionCheckedVisitor processor)
             throws ProtempaException {
         if (processor == null) {
@@ -68,304 +61,300 @@ public final class HighLevelAbstractionDefinition extends
         processor.visit(this);
     }
 
-	/**
-	 * Sets the relation between the two temporal extended proposition
-	 * definitions.
-	 * 
-	 * @param lhsDef
-	 *            a {@link TemporalExtendedPropositionDefinition}.
-	 * @param rhsDef
-	 *            a {@link TemporalExtendedPropositionDefinition}.
-	 * @param relation
-	 *            a {@link Relation}.
-	 * @return <code>true</code> if setting the relation was successful,
-	 *         <code>false</code> otherwise (e.g., if one or both of the
-	 *         temporal extended proposition definitions is not already part of
-	 *         this abstraction definition, or if any of the arguments are
-	 *         <code>null</code>).
-	 */
-	public boolean setRelation(TemporalExtendedPropositionDefinition lhsDef,
-			TemporalExtendedPropositionDefinition rhsDef, Relation relation) {
-		if (lhsDef == null || rhsDef == null || relation == null) {
-			return false;
-		}
+    /**
+     * Sets the relation between the two temporal extended proposition
+     * definitions.
+     *
+     * @param lhsDef
+     *            a {@link TemporalExtendedPropositionDefinition}.
+     * @param rhsDef
+     *            a {@link TemporalExtendedPropositionDefinition}.
+     * @param relation
+     *            a {@link Relation}.
+     * @return <code>true</code> if setting the relation was successful,
+     *         <code>false</code> otherwise (e.g., if one or both of the
+     *         temporal extended proposition definitions is not already part of
+     *         this abstraction definition, or if any of the arguments are
+     *         <code>null</code>).
+     */
+    public boolean setRelation(TemporalExtendedPropositionDefinition lhsDef,
+            TemporalExtendedPropositionDefinition rhsDef, Relation relation) {
+        if (lhsDef == null || rhsDef == null || relation == null) {
+            return false;
+        }
 
-		if (!defs.contains(lhsDef) || !defs.contains(rhsDef)) {
-			return false;
-		}
+        if (!defs.contains(lhsDef) || !defs.contains(rhsDef)) {
+            return false;
+        }
 
-		List<TemporalExtendedPropositionDefinition> rulePair = Arrays.asList(
-				lhsDef, rhsDef);
+        List<TemporalExtendedPropositionDefinition> rulePair = Arrays.asList(
+                lhsDef, rhsDef);
 
-		defPairsMap.put(rulePair, relation);
-		return true;
-	}
+        defPairsMap.put(rulePair, relation);
+        return true;
+    }
 
-	/**
-	 * Removes a relation between two temporal extended proposition definitions.
-	 * 
-	 * @param lhsRule
-	 *            a {@link TemporalExtendedPropositionDefinition}.
-	 * @param rhsRule
-	 *            a {@link TemporalExtendedPropositionDefinition}.
-	 * @return <code>true</code> if removing the relation was successful,
-	 *         <code>false</code> otherwise (e.g., if either argument is
-	 *         <code>null</code>, the arguments are not part of this
-	 *         abstraction definition, or if no relation was set for them).
-	 */
-	public boolean removeRelation(
-			TemporalExtendedPropositionDefinition lhsRule,
-			TemporalExtendedPropositionDefinition rhsRule) {
-		List<TemporalExtendedPropositionDefinition> key = Arrays.asList(
-				lhsRule, rhsRule);
-		if (defPairsMap.remove(key) != null) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+    /**
+     * Removes a relation between two temporal extended proposition definitions.
+     *
+     * @param lhsRule
+     *            a {@link TemporalExtendedPropositionDefinition}.
+     * @param rhsRule
+     *            a {@link TemporalExtendedPropositionDefinition}.
+     * @return <code>true</code> if removing the relation was successful,
+     *         <code>false</code> otherwise (e.g., if either argument is
+     *         <code>null</code>, the arguments are not part of this
+     *         abstraction definition, or if no relation was set for them).
+     */
+    public boolean removeRelation(
+            TemporalExtendedPropositionDefinition lhsRule,
+            TemporalExtendedPropositionDefinition rhsRule) {
+        List<TemporalExtendedPropositionDefinition> key = Arrays.asList(
+                lhsRule, rhsRule);
+        if (defPairsMap.remove(key) != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * Gets the extended proposition definitions that are part of this
-	 * abstraction definition.
-	 * 
-	 * @return a {@link Set} of {@link ExtendedPropositionDefinition}s.
-	 */
-	public Set<ExtendedPropositionDefinition> getExtendedPropositionDefinitions() {
-		return Collections.unmodifiableSet(defs);
-	}
+    /**
+     * Gets the extended proposition definitions that are part of this
+     * abstraction definition.
+     *
+     * @return a {@link Set} of {@link ExtendedPropositionDefinition}s.
+     */
+    public Set<ExtendedPropositionDefinition> getExtendedPropositionDefinitions() {
+        return Collections.unmodifiableSet(defs);
+    }
 
-	public Set<String> getAbstractedFrom() {
-		if (this.defsAsListOutdated) {
-			this.defsAsList.clear();
-			for (ExtendedPropositionDefinition epd : this.defs) {
-				this.defsAsList.add(epd.getPropositionId());
-			}
-			this.defsAsListOutdated = false;
-		}
-		return Collections.unmodifiableSet(this.defsAsList);
-	}
+    public Set<String> getAbstractedFrom() {
+        if (this.defsAsListOutdated) {
+            this.defsAsList.clear();
+            for (ExtendedPropositionDefinition epd : this.defs) {
+                this.defsAsList.add(epd.getPropositionId());
+            }
+            this.defsAsListOutdated = false;
+        }
+        return Collections.unmodifiableSet(this.defsAsList);
+    }
 
-	/**
-	 * Adds an extended proposition definition.
-	 * 
-	 * @param def
-	 *            an {@link ExtendedPropositionDefinition}.
-	 * @return <code>true</code> if successfully added, <code>false</code>
-	 *         otherwise (e.g., the {@link ExtendedPropositionDefinition} is
-	 *         <code>null</code> or is already part of this abstraction
-	 *         definition.
-	 */
-	public boolean add(ExtendedPropositionDefinition def) {
-		if (def != null && this.defs.add(def)) {
-			recalculateDirectChildren();
-			this.defsAsListOutdated = true;
-			return true;
-		} else {
-			return false;
-		}
-	}
+    /**
+     * Adds an extended proposition definition.
+     *
+     * @param def
+     *            an {@link ExtendedPropositionDefinition}.
+     * @return <code>true</code> if successfully added, <code>false</code>
+     *         otherwise (e.g., the {@link ExtendedPropositionDefinition} is
+     *         <code>null</code> or is already part of this abstraction
+     *         definition.
+     */
+    public boolean add(ExtendedPropositionDefinition def) {
+        if (def != null && this.defs.add(def)) {
+            recalculateDirectChildren();
+            this.defsAsListOutdated = true;
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	/**
-	 * Gets the relation between two temporal extended proposition definitions.
-	 * 
-	 * @param lhsDef
-	 *            a {@link TemporalExtendedPropositionDefinition}.
-	 * @param rhsDef
-	 *            a {@link TemporalExtendedPropositionDefinition}.
-	 * @return a <code>Relation</code>, or <code>null</code> if none was
-	 *         found.
-	 */
-	public Relation getRelation(TemporalExtendedPropositionDefinition lhsDef,
-			TemporalExtendedPropositionDefinition rhsDef) {
-		return this.defPairsMap.get(Arrays.asList(lhsDef, rhsDef));
-	}
+    /**
+     * Gets the relation between two temporal extended proposition definitions.
+     *
+     * @param lhsDef
+     *            a {@link TemporalExtendedPropositionDefinition}.
+     * @param rhsDef
+     *            a {@link TemporalExtendedPropositionDefinition}.
+     * @return a <code>Relation</code>, or <code>null</code> if none was
+     *         found.
+     */
+    public Relation getRelation(TemporalExtendedPropositionDefinition lhsDef,
+            TemporalExtendedPropositionDefinition rhsDef) {
+        return this.defPairsMap.get(Arrays.asList(lhsDef, rhsDef));
+    }
 
-	public Relation getRelation(
-			List<TemporalExtendedPropositionDefinition> epdPair) {
-		return this.defPairsMap.get(epdPair);
-	}
+    public Relation getRelation(
+            List<TemporalExtendedPropositionDefinition> epdPair) {
+        return this.defPairsMap.get(epdPair);
+    }
 
-	/**
-	 * Removes all relations involving a temporal extended proposition
-	 * definition.
-	 * 
-	 * @param def
-	 *            a {@link TemporalExtendedPropositionDefinition}.
-	 * @return <code>true</code> if all such relations were removed,
-	 *         <code>false</code> otherwise.
-	 */
-	public boolean removeAllRelations(TemporalExtendedPropositionDefinition def) {
-		for (Iterator<List<TemporalExtendedPropositionDefinition>> itr = this.defPairsMap
-				.keySet().iterator(); itr.hasNext();) {
-			List<TemporalExtendedPropositionDefinition> pair = itr.next();
-			if (pair.get(0) == def || pair.get(1) == def) {
-				itr.remove();
-			}
-		}
-		return true;
-	}
+    /**
+     * Removes all relations involving a temporal extended proposition
+     * definition.
+     *
+     * @param def
+     *            a {@link TemporalExtendedPropositionDefinition}.
+     * @return <code>true</code> if all such relations were removed,
+     *         <code>false</code> otherwise.
+     */
+    public boolean removeAllRelations(TemporalExtendedPropositionDefinition def) {
+        for (Iterator<List<TemporalExtendedPropositionDefinition>> itr = this.defPairsMap.keySet().iterator(); itr.hasNext();) {
+            List<TemporalExtendedPropositionDefinition> pair = itr.next();
+            if (pair.get(0) == def || pair.get(1) == def) {
+                itr.remove();
+            }
+        }
+        return true;
+    }
 
-	/**
-	 * Removes an extended proposition definition, and all relations involving
-	 * it.
-	 * 
-	 * @param def
-	 *            an {@link ExtendedPropositionDefinition}.
-	 * @return <code>true</code> if successful, <code>false</code>
-	 *         otherwise.
-	 */
-	public boolean remove(ExtendedPropositionDefinition def) {
-		if (def instanceof TemporalExtendedPropositionDefinition) {
-			if (removeAllRelations((TemporalExtendedPropositionDefinition) def)) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-		boolean result = defs.remove(def);
-		if (result) {
-			recalculateDirectChildren();
-			this.defsAsListOutdated = true;
-		}
-		return result;
-	}
+    /**
+     * Removes an extended proposition definition, and all relations involving
+     * it.
+     *
+     * @param def
+     *            an {@link ExtendedPropositionDefinition}.
+     * @return <code>true</code> if successful, <code>false</code>
+     *         otherwise.
+     */
+    public boolean remove(ExtendedPropositionDefinition def) {
+        if (def instanceof TemporalExtendedPropositionDefinition) {
+            if (removeAllRelations((TemporalExtendedPropositionDefinition) def)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        boolean result = defs.remove(def);
+        if (result) {
+            recalculateDirectChildren();
+            this.defsAsListOutdated = true;
+        }
+        return result;
+    }
 
-	/**
-	 * Gets the temporal extended proposition definitions involved in relations
-	 * as pairs.
-	 * 
-	 * @return an unmodifiable {@link Set} of {@link List}s of two
-	 *         {@link TemporalExtendedPropositionDefinition}s, with the first
-	 *         element the left-hand side of a relation, and the second element
-	 *         the right-hand side of a relation.
-	 */
-	public Set<List<TemporalExtendedPropositionDefinition>> getTemporalExtendedPropositionDefinitionPairs() {
-		return Collections.unmodifiableSet(defPairsMap.keySet());
-	}
+    /**
+     * Gets the temporal extended proposition definitions involved in relations
+     * as pairs.
+     *
+     * @return an unmodifiable {@link Set} of {@link List}s of two
+     *         {@link TemporalExtendedPropositionDefinition}s, with the first
+     *         element the left-hand side of a relation, and the second element
+     *         the right-hand side of a relation.
+     */
+    public Set<List<TemporalExtendedPropositionDefinition>> getTemporalExtendedPropositionDefinitionPairs() {
+        return Collections.unmodifiableSet(defPairsMap.keySet());
+    }
 
-	private void writeObject(ObjectOutputStream s) throws IOException {
-		s.defaultWriteObject();
-		s.writeObject(defPairsMap);
-	}
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.defaultWriteObject();
+        s.writeObject(defPairsMap);
+    }
 
-	@SuppressWarnings("unchecked")
-	private void readObject(ObjectInputStream s) throws IOException,
-			ClassNotFoundException {
-		s.defaultReadObject();
-		initInstance();
+    @SuppressWarnings("unchecked")
+    private void readObject(ObjectInputStream s) throws IOException,
+            ClassNotFoundException {
+        s.defaultReadObject();
+        initInstance();
 
-		Map<List<TemporalExtendedPropositionDefinition>, Relation> rulePairsMap = (Map<List<TemporalExtendedPropositionDefinition>, Relation>) s
-				.readObject();
+        Map<List<TemporalExtendedPropositionDefinition>, Relation> rulePairsMap = (Map<List<TemporalExtendedPropositionDefinition>, Relation>) s.readObject();
 
-		for (List<TemporalExtendedPropositionDefinition> rulePair : rulePairsMap
-				.keySet()) {
-			add(rulePair.get(0));
-			add(rulePair.get(1));
-		}
+        for (List<TemporalExtendedPropositionDefinition> rulePair : rulePairsMap.keySet()) {
+            add(rulePair.get(0));
+            add(rulePair.get(1));
+        }
 
-		for (Map.Entry<List<TemporalExtendedPropositionDefinition>, Relation> me : rulePairsMap
-				.entrySet()) {
-			List<TemporalExtendedPropositionDefinition> rulep = me.getKey();
+        for (Map.Entry<List<TemporalExtendedPropositionDefinition>, Relation> me : rulePairsMap.entrySet()) {
+            List<TemporalExtendedPropositionDefinition> rulep = me.getKey();
 
-			setRelation(rulep.get(0), rulep.get(1), me.getValue());
-		}
-	}
+            setRelation(rulep.get(0), rulep.get(1), me.getValue());
+        }
+    }
 
-	public Offsets getTemporalOffset() {
-		return temporalOffset;
-	}
+    public Offsets getTemporalOffset() {
+        return temporalOffset;
+    }
 
-	public void setTemporalOffset(Offsets temporalOffset) {
-		this.temporalOffset = temporalOffset;
-	}
+    public void setTemporalOffset(Offsets temporalOffset) {
+        this.temporalOffset = temporalOffset;
+    }
 
-	@Override
-	protected String debugMessage() {
-		StringBuilder buffer = new StringBuilder(super.debugMessage());
-		if (temporalOffset == null) {
-			buffer.append("\ttemporalOffset=" + temporalOffset + "\n");
-		} else {
-			buffer.append("\ttemporalOffset=( " + "startParamId="
-					+ temporalOffset.getStartAbstractParamId() + ", "
-					+ "startParamValue="
-					+ temporalOffset.getStartAbstractParamValue() + ", "
-					+ "startSide=" + temporalOffset.getStartIntervalSide()
-					+ ", " + "startOffset=" + temporalOffset.getStartOffset()
-					+ ", " + "finishParam="
-					+ temporalOffset.getFinishAbstractParamId() + ", "
-					+ "finishParamValue="
-					+ temporalOffset.getFinishAbstractParamValue() + ", "
-					+ "finishParamSide="
-					+ temporalOffset.getFinishIntervalSide() + ", "
-					+ "finishOffset=" + temporalOffset.getFinishOffset() + ", "
-					+ ")\n");
-		}
+    @Override
+    protected String debugMessage() {
+        StringBuilder buffer = new StringBuilder(super.debugMessage());
+        if (temporalOffset == null) {
+            buffer.append("\ttemporalOffset=" + temporalOffset + "\n");
+        } else {
+            buffer.append("\ttemporalOffset=( " + "startParamId="
+                    + temporalOffset.getStartTemporalExtendedPropositionDefinition() + ", "
+                    + "startParamValue="
+                    + temporalOffset.getStartAbstractParamValue() + ", "
+                    + "startSide=" + temporalOffset.getStartIntervalSide()
+                    + ", " + "startOffset=" + temporalOffset.getStartOffset()
+                    + ", " + "finishParam="
+                    + temporalOffset.getFinishTemporalExtendedPropositionDefinition() + ", "
+                    + "finishParamValue="
+                    + temporalOffset.getFinishAbstractParamValue() + ", "
+                    + "finishParamSide="
+                    + temporalOffset.getFinishIntervalSide() + ", "
+                    + "finishOffset=" + temporalOffset.getFinishOffset() + ", "
+                    + ")\n");
+        }
 
-		for (Map.Entry<List<TemporalExtendedPropositionDefinition>, Relation> entry : this.defPairsMap
-				.entrySet()) {
-			List<TemporalExtendedPropositionDefinition> params = entry.getKey();
-			Relation rel = entry.getValue();
-			TemporalExtendedPropositionDefinition lhs = params.get(0);
-			TemporalExtendedPropositionDefinition rhs = params.get(1);
-			buffer.append(rel.toString());
-			buffer.append(lhs);
-			buffer.append(",");
-			buffer.append(rhs + "\n");
-		}
+        for (Map.Entry<List<TemporalExtendedPropositionDefinition>, Relation> entry : this.defPairsMap.entrySet()) {
+            List<TemporalExtendedPropositionDefinition> params = entry.getKey();
+            Relation rel = entry.getValue();
+            TemporalExtendedPropositionDefinition lhs = params.get(0);
+            TemporalExtendedPropositionDefinition rhs = params.get(1);
+            buffer.append(rel.toString());
+            buffer.append(lhs);
+            buffer.append(",");
+            buffer.append(rhs + "\n");
+        }
 
-		return buffer.toString();
-	}
+        return buffer.toString();
+    }
 
-	@Override
-	public void reset() {
-		super.reset();
-		temporalOffset = null;
-		initInstance();
-	}
+    @Override
+    public void reset() {
+        super.reset();
+        temporalOffset = null;
+        initInstance();
+    }
 
-	/**
-	 * Sets whether this type of high-level abstraction is concatenable.
-	 * 
-	 * @param concatenable
-	 *            <code>true</code> if concatenable, <code>false</code> if
-	 *            not.
-	 */
-	public void setConcatenable(boolean concatenable) {
-		this.concatenable = concatenable;
-	}
+    /**
+     * Sets whether this type of high-level abstraction is concatenable.
+     *
+     * @param concatenable
+     *            <code>true</code> if concatenable, <code>false</code> if
+     *            not.
+     */
+    public void setConcatenable(boolean concatenable) {
+        this.concatenable = concatenable;
+    }
 
-	/**
-	 * Returns whether this type of high-level abstraction is concatenable.
-	 * 
-	 * The default for high-level abstractions is concatenable.
-	 * 
-	 * @return <code>true</code> if concatenable, <code>false</code> if not.
-	 * @see org.protempa.PropositionDefinition#isConcatenable()
-	 */
-	public boolean isConcatenable() {
-		return this.concatenable;
-	}
+    /**
+     * Returns whether this type of high-level abstraction is concatenable.
+     *
+     * The default for high-level abstractions is concatenable.
+     *
+     * @return <code>true</code> if concatenable, <code>false</code> if not.
+     * @see org.protempa.PropositionDefinition#isConcatenable()
+     */
+    @Override
+    public boolean isConcatenable() {
+        return this.concatenable;
+    }
 
-	/**
-	 * Returns whether this type of high-level abstraction is solid.
-	 * 
-	 * The default for high-level abstractions is solid.
-	 * 
-	 * @return <code>true</code> if solid, <code>false</code> if not.
-	 * @see org.protempa.PropositionDefinition#isSolid()
-	 */
-	public boolean isSolid() {
-		return this.solid;
-	}
+    /**
+     * Returns whether this type of high-level abstraction is solid.
+     *
+     * The default for high-level abstractions is solid.
+     *
+     * @return <code>true</code> if solid, <code>false</code> if not.
+     * @see org.protempa.PropositionDefinition#isSolid()
+     */
+    @Override
+    public boolean isSolid() {
+        return this.solid;
+    }
 
-	@Override
-	protected void recalculateDirectChildren() {
-		String[] old = this.directChildren;
-		Set<String> abstractedFrom = getAbstractedFrom();
-		this.directChildren = abstractedFrom
-				.toArray(new String[abstractedFrom.size()]);
-		this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
-				this.directChildren);
-	}
+    @Override
+    protected void recalculateDirectChildren() {
+        String[] old = this.directChildren;
+        Set<String> abstractedFrom = getAbstractedFrom();
+        this.directChildren = abstractedFrom.toArray(new String[abstractedFrom.size()]);
+        this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+                this.directChildren);
+    }
 }

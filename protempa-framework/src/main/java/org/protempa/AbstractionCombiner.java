@@ -22,7 +22,6 @@ import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 
-
 /**
  * Represents rules that combine two abstract parameters with 1) the same
  * abstraction definition, 2) values, and 3) are within the minimum and maximum
@@ -32,109 +31,109 @@ import org.protempa.proposition.Sequence;
  */
 final class AbstractionCombiner {
 
-	private static final ClassObjectType ABSTRACT_PARAMETER_OBJECT_TYPE =
+    private static final ClassObjectType ABSTRACT_PARAMETER_OBJECT_TYPE =
             new ClassObjectType(AbstractParameter.class);
 
-	private AbstractionCombiner() {
-	}
+    private AbstractionCombiner() {
+    }
 
-	private static class AbstractionCombinerCondition implements EvalExpression {
+    private static class AbstractionCombinerCondition
+            implements EvalExpression {
 
-		private static final long serialVersionUID = -3292416251502209461L;
+        private static final long serialVersionUID = -3292416251502209461L;
+        private final AbstractionDefinition abstractionDefinition;
+        private final HorizontalTemporalInference hti =
+                new HorizontalTemporalInference();
 
-		private final AbstractionDefinition abstractionDefinition;
+        public AbstractionCombinerCondition(
+                AbstractionDefinition abstractionDefinition) {
+            this.abstractionDefinition = abstractionDefinition;
+        }
 
-		private final HorizontalTemporalInference hti = new HorizontalTemporalInference();
+        @Override
+        public boolean evaluate(Tuple arg0, Declaration[] arg1,
+                WorkingMemory arg2, Object context) throws Exception {
+            AbstractParameter a1 =
+                    (AbstractParameter) arg2.getObject(arg0.get(0));
+            AbstractParameter a2 =
+                    (AbstractParameter) arg2.getObject(arg0.get(1));
+            return a1 != a2
+                    && (a1.getValue() == a2.getValue()
+                    || (a1.getValue() != null
+                    && a1.getValue().equals(a2.getValue())))
+                    && (a1.getInterval().compareTo(a2.getInterval()) <= 0)
+                    && (hti.execute(this.abstractionDefinition, a1, a2)
+                    || abstractionDefinition.getGapFunction().execute(a1, a2));
+        }
 
-		public AbstractionCombinerCondition(
-				AbstractionDefinition abstractionDefinition) {
-			this.abstractionDefinition = abstractionDefinition;
-		}
+        @Override
+        public Object createContext() {
+            return null;
+        }
+    }
 
-		public boolean evaluate(Tuple arg0, Declaration[] arg1,
-				WorkingMemory arg2, Object context) throws Exception {
-			AbstractParameter a1 = (AbstractParameter) arg2.getObject(arg0
-					.get(0));
-			AbstractParameter a2 = (AbstractParameter) arg2.getObject(arg0
-					.get(1));
-			return a1 != a2
-					&& (a1.getValue() == a2.getValue()
-                    || (a1.getValue() != null && a1
-							.getValue().equals(a2.getValue())))
-					&& (a1.getInterval().compareTo(a2.getInterval()) <= 0)
-					&& (hti.execute(this.abstractionDefinition, a1, a2)
-                    || abstractionDefinition
-							.getGapFunction().execute(a1, a2));
-		}
+    private static class AbstractionCombinerConsequence
+            implements Consequence {
 
-		public Object createContext() {
-			return null;
-		}
-	}
+        private static final long serialVersionUID = -7984448674528718012L;
 
-	private static class AbstractionCombinerConsequence implements Consequence {
+        public AbstractionCombinerConsequence() {
+        }
 
-		private static final long serialVersionUID = -7984448674528718012L;
+        @SuppressWarnings("unchecked")
+        @Override
+        public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
+                throws Exception {
+            InternalFactHandle a1f = arg0.getTuple().get(0);
+            AbstractParameter a1 = (AbstractParameter) arg1.getObject(a1f);
+            String a1Id = a1.getId();
+            InternalFactHandle a2f = arg0.getTuple().get(1);
+            AbstractParameter a2 = (AbstractParameter) arg1.getObject(a2f);
 
-		public AbstractionCombinerConsequence() {
-		}
-
-		@SuppressWarnings("unchecked")
-		public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
-				throws Exception {
-			InternalFactHandle a1f = arg0.getTuple().get(0);
-			AbstractParameter a1 = (AbstractParameter) arg1.getObject(a1f);
-			String a1Id = a1.getId();
-			InternalFactHandle a2f = arg0.getTuple().get(1);
-			AbstractParameter a2 = (AbstractParameter) arg1.getObject(a2f);
-
-			Sequence<AbstractParameter> s = new Sequence<AbstractParameter>(
-					a1Id, 2);
-			s.add(a1);
-			s.add(a2);
-			Segment<AbstractParameter> segment =
+            Sequence<AbstractParameter> s = new Sequence<AbstractParameter>(
+                    a1Id, 2);
+            s.add(a1);
+            s.add(a2);
+            Segment<AbstractParameter> segment =
                     new Segment<AbstractParameter>(s);
 
-			AbstractParameter result = new AbstractParameter(a1Id);
-			result.setInterval(segment.getInterval());
-			result.setValue(a1.getValue());
-
+            AbstractParameter result = new AbstractParameter(a1Id);
+            result.setInterval(segment.getInterval());
+            result.setValue(a1.getValue());
 
             if (ProtempaUtil.logger().isLoggable(Level.FINE)) {
                 ProtempaUtil.logger().fine(
-					"Created: " + result + " from " + a1 + " " + a2);
+                        "Created: " + result + " from " + a1 + " " + a2);
             }
 
-			arg1.modifyRetract(a1f);
-			arg1.retract(a2f);
-			arg1.modifyInsert(a1f, result);
+            arg1.retract(a1f);
+            arg1.retract(a2f);
+            arg1.insert(result);
+        }
+    }
 
-		}
-	}
-
-	static void toRules(KnowledgeSource knowledgeBaseSource,
-			AbstractionDefinition d, List<Rule> rules) {
-		try {
-			Rule rule = new Rule("ABSTRACTION_COMBINER_" + d.getId());
-			rule.setSalience(new SalienceInteger(3));
-			Pattern p0 = new Pattern(0, ABSTRACT_PARAMETER_OBJECT_TYPE);
-			Constraint c0 = new PredicateConstraint(
-					new ParameterPredicateExpression(d.getId(), null));
-			p0.addConstraint(c0);
-			Pattern p1 = new Pattern(1, ABSTRACT_PARAMETER_OBJECT_TYPE);
-			Constraint c1 = new PredicateConstraint(
-					new ParameterPredicateExpression(d.getId(), null));
-			p1.addConstraint(c1);
-			rule.addPattern(p0);
-			rule.addPattern(p1);
-			rule.addPattern(new EvalCondition(new AbstractionCombinerCondition(
-					d), null));
-			rule.setConsequence(new AbstractionCombinerConsequence());
-			rules.add(rule);
-		} catch (InvalidRuleException e) {
-			ProtempaUtil.logger().log(Level.SEVERE,
-					"Could not create rules from " + d.toString() + ".", e);
-		}
-	}
-
+    static void toRules(KnowledgeSource knowledgeBaseSource,
+            AbstractionDefinition d, List<Rule> rules) {
+        try {
+            Rule rule = new Rule("ABSTRACTION_COMBINER_" + d.getId());
+            rule.setSalience(new SalienceInteger(3));
+            Pattern p0 = new Pattern(0, ABSTRACT_PARAMETER_OBJECT_TYPE);
+            Constraint c0 = new PredicateConstraint(
+                    new ParameterPredicateExpression(d.getId(), null));
+            p0.addConstraint(c0);
+            Pattern p1 = new Pattern(1, ABSTRACT_PARAMETER_OBJECT_TYPE);
+            Constraint c1 = new PredicateConstraint(
+                    new ParameterPredicateExpression(d.getId(), null));
+            p1.addConstraint(c1);
+            rule.addPattern(p0);
+            rule.addPattern(p1);
+            rule.addPattern(new EvalCondition(new AbstractionCombinerCondition(
+                    d), null));
+            rule.setConsequence(new AbstractionCombinerConsequence());
+            rules.add(rule);
+        } catch (InvalidRuleException e) {
+            ProtempaUtil.logger().log(Level.SEVERE,
+                    "Could not create rules from " + d.toString() + ".", e);
+        }
+    }
 }
