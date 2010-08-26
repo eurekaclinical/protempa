@@ -68,7 +68,7 @@ public interface Proposition extends PropositionVisitable, Serializable {
 
     Value getProperty(String name);
 
-    List<Proposition> getReferences(String name);
+    List<Object> getReferences(String name);
 
     Set<String> propertyNames();
 

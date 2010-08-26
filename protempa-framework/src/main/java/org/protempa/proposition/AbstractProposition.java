@@ -24,7 +24,7 @@ public abstract class AbstractProposition implements Proposition {
     protected volatile int hashCode;
     protected final PropertyChangeSupport changes;
     private final Map<String, Value> properties;
-    private final Map<String, List<Proposition>> references;
+    private final Map<String, List<Object>> references;
     private String datasourceBackendId;
     private Object key;
 
@@ -42,7 +42,7 @@ public abstract class AbstractProposition implements Proposition {
         }
         this.changes = new PropertyChangeSupport(this);
         this.properties = new HashMap<String, Value>();
-        this.references = new HashMap<String,List<Proposition>>();
+        this.references = new HashMap<String,List<Object>>();
     }
 
     /*
@@ -87,11 +87,11 @@ public abstract class AbstractProposition implements Proposition {
         return this.key;
     }
 
-    public final void setReferences(String name, List<Proposition> refs) {
+    public final void setReferences(String name, List<Object> refs) {
         this.references.put(name, refs);
     }
 
-    public final List<Proposition> getReferences(String name) {
+    public final List<Object> getReferences(String name) {
         return this.references.get(name);
     }
 

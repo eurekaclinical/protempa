@@ -1,6 +1,12 @@
 package org.protempa;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.protempa.dsb.filter.Filter;
+import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
 import org.protempa.query.handler.QueryResultsHandler;
 
@@ -8,15 +14,19 @@ public class QuerySession {
     private final String id;
     private final Query query;
     private final AbstractionFinder finder;
+    private final Map<Object, Proposition> propositionCache;
 
     QuerySession(Query initialQuery, AbstractionFinder abstractionFinder) {
         this.finder = abstractionFinder;
         this.id = this.generateId();
         this.query = initialQuery.clone();
+        this.propositionCache = new HashMap<Object, Proposition>();
     }
 
     private String generateId() {
-        // TODO: implement a proper key generation routine
+        // TODO: implement a proper key generation routine, possibly
+        // as follows:
+        // return java.util.UUID.randomUUID().toString();
         return "TempID";
     }
 
@@ -28,28 +38,37 @@ public class QuerySession {
         return query;
     }
 
-//     /**
-//     * This method returns the results from this query session after applying
-//     * the restrictions and constraints held in the Query object passed in. The
-//     * result set will be passed to the QueryResultsHandler that is passed in.
-//     *
-//     * @param query
-//     *            The Query object containing the restrictions/constraints
-//     * @param handler
-//     *            The QueryResultsHandler object that will handle the result
-//     *            set.
-//     */
-//    public void execute(Query query, QueryResultsHandler handler) {
-//        // TODO: implement me
-//    }
+    // TODO: This method needs to throw an exception when the proposition
+    // being searched for, does not exist.
+    public List<Proposition> getReferences(Proposition prop, String name) {
+        List<Proposition> references = new LinkedList<Proposition>();
+        for (Object key : prop.getReferences(name)) {
+            references.add(this.propositionCache.get(key));
+        }
+        return references;
+    }
 
-    public void filter(Filter constraints,
-            QueryResultsHandler handler) {
+    // /**
+    // * This method returns the results from this query session after applying
+    // * the restrictions and constraints held in the Query object passed in.
+    // The
+    // * result set will be passed to the QueryResultsHandler that is passed in.
+    // *
+    // * @param query
+    // * The Query object containing the restrictions/constraints
+    // * @param handler
+    // * The QueryResultsHandler object that will handle the result
+    // * set.
+    // */
+    // public void execute(Query query, QueryResultsHandler handler) {
+    // // TODO: implement me
+    // }
+
+    public void filter(Filter constraints, QueryResultsHandler handler) {
         // TODO: implement me
     }
 
-    public void drillDown(String propositionId,
-            QueryResultsHandler handler) {
+    public void drillDown(String propositionId, QueryResultsHandler handler) {
         // TODO: implement me
     }
 
