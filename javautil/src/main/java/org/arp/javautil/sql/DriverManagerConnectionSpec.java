@@ -11,9 +11,9 @@ import java.sql.SQLException;
  * @author Andrew Post
  */
 public class DriverManagerConnectionSpec implements ConnectionSpec {
-    private String url;
-    private String user;
-    private String password;
+    private final String url;
+    private final String user;
+    private final String password;
 
     /**
      * Creates an instance with a specified JDBC URL, and a username and

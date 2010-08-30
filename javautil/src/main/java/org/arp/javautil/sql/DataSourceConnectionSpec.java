@@ -15,9 +15,9 @@ import javax.sql.DataSource;
  * @see InitialContext
  */
 public class DataSourceConnectionSpec implements ConnectionSpec {
-    private String user;
-    private String password;
-    private DataSource dataSource;
+    private final String user;
+    private final String password;
+    private final DataSource dataSource;
 
     /**
      * Creates an instance that will get connections from the database with the
