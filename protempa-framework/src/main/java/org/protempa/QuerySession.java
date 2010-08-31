@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.arp.javautil.collections.Collections;
 import org.protempa.dsb.filter.Filter;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
@@ -38,12 +39,20 @@ public class QuerySession {
         return query;
     }
 
-    // TODO: This method needs to throw an exception when the proposition
-    // being searched for, does not exist.
-    public List<Proposition> getReferences(Proposition prop, String name) {
+    public List<Proposition> getReferences(Proposition prop, String name) throws DataSourceReadException {
         List<Proposition> references = new LinkedList<Proposition>();
+        List<String> notFound = new LinkedList<String>();
         for (Object key : prop.getReferences(name)) {
-            references.add(this.propositionCache.get(key));
+            if (this.propositionCache.containsKey(key)) {
+                references.add(this.propositionCache.get(key));
+            } else {
+                notFound.add(name + " from " + key);
+            }
+        }
+        if (notFound.size() > 0) {
+            throw new DataSourceReadException(
+                    "Could not find the following propositions in the cache "
+                            + Collections.join(notFound, ","));
         }
         return references;
     }
