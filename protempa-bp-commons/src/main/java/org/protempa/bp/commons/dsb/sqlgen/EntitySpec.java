@@ -15,13 +15,14 @@ import org.protempa.proposition.value.ValueType;
  * @author Andrew Post
  */
 public final class EntitySpec implements Serializable {
+    private static final long serialVersionUID = -1935588032831088001L;
 
     private final String name;
     private final String description;
     private final String[] propositionIds;
     private final boolean unique;
     private final ColumnSpec baseSpec;
-    private final ColumnSpec uniqueIdSpec;
+    private final ColumnSpec[] uniqueIdSpecs;
     private final ColumnSpec startTimeOrTimestampSpec;
     private final ColumnSpec finishTimeSpec;
     private final PropertySpec[] propertySpecs;
@@ -46,9 +47,10 @@ public final class EntitySpec implements Serializable {
      * instance of this entity, <code>false</code> otherwise.
      * @param baseSpec a {@link ColumnSpec} representing the path through the
      * database from the key's main table to this entity's main table.
-     * @param uniqueIdSpec a {@link ColumnSpec} representing the path through
-     * the database from this entity's main table to the table and column
-     * where a unique identifier for this entity is located.
+     * @param uniqueIdSpec a {@link ColumnSpec[]} representing the paths
+     * through the database from this entity's main table to
+     * the tables and columns that together form an unique identifier for this
+     * entity.
      * @param startTimeOrTimestampSpec a {@link ColumnSpec} representing
      * the path through the database from this entity's main table to
      * the table and column where the entity's start time (or timestamp, if
@@ -84,7 +86,7 @@ public final class EntitySpec implements Serializable {
             String[] propositionIds,
             boolean unique,
             ColumnSpec baseSpec,
-            ColumnSpec uniqueIdSpec,
+            ColumnSpec[] uniqueIdSpecs,
             ColumnSpec startTimeOrTimestampSpec,
             ColumnSpec finishTimeSpec,
             PropertySpec[] propertySpecs,
@@ -97,15 +99,15 @@ public final class EntitySpec implements Serializable {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
         }
+        this.name = name;
+
         if (positionParser == null) {
             throw new IllegalArgumentException(
                     "positionParser cannot be null");
         }
 
         if (propositionIds != null) {
-            this.propositionIds = new String[propositionIds.length];
-            System.arraycopy(propositionIds, 0, this.propositionIds, 0,
-                    propositionIds.length);
+            this.propositionIds = propositionIds.clone();
             ProtempaUtil.checkArrayForNullElement(this.propositionIds,
                     "propositionIds");
         } else {
@@ -115,22 +117,24 @@ public final class EntitySpec implements Serializable {
         if (baseSpec == null) {
             throw new IllegalArgumentException("baseSpec cannot be null");
         }
+        this.baseSpec = baseSpec;
 
-        this.name = name;
+        
         if (description == null) {
             description = "";
         }
         this.description = description;
+        
         this.unique = unique;
-        this.baseSpec = baseSpec;
-        this.uniqueIdSpec = uniqueIdSpec;
+
+        ProtempaUtil.checkArray(uniqueIdSpecs, "uniqueIdSpecs");
+        this.uniqueIdSpecs = uniqueIdSpecs;
+
         this.startTimeOrTimestampSpec = startTimeOrTimestampSpec;
         this.finishTimeSpec = finishTimeSpec;
 
         if (propertySpecs != null) {
-            this.propertySpecs = new PropertySpec[propertySpecs.length];
-            System.arraycopy(propertySpecs, 0, this.propertySpecs, 0,
-                    propertySpecs.length);
+            this.propertySpecs = propertySpecs.clone();
             ProtempaUtil.checkArrayForNullElement(this.propertySpecs,
                     "propertySpecs");
         } else {
@@ -184,9 +188,7 @@ public final class EntitySpec implements Serializable {
      * @return a {@link String[]} of proposition ids.
      */
     public String[] getPropositionIds() {
-        String[] result = new String[this.propositionIds.length];
-        System.arraycopy(this.propositionIds, 0, result, 0, result.length);
-        return result;
+        return this.propositionIds.clone();
     }
 
     /**
@@ -211,14 +213,14 @@ public final class EntitySpec implements Serializable {
     }
 
     /**
-     * Gets the path through the database from this entity's main table to
-     * the table and column where a unique identifier for this entity is
-     * located.
+     * Gets the paths through the database from this entity's main table to
+     * the tables and columns that together form an unique identifier for this
+     * entity.
      *
-     * @return a {@link ColumnSpec} representing this path.
+     * @return a {@link ColumnSpec[]} representing these paths.
      */
-    public ColumnSpec getUniqueIdSpec() {
-        return this.uniqueIdSpec;
+    public ColumnSpec[] getUniqueIdSpecs() {
+        return this.uniqueIdSpecs;
     }
 
     /**
@@ -253,9 +255,7 @@ public final class EntitySpec implements Serializable {
      * Guaranteed not <code>null</code>.
      */
     public PropertySpec[] getPropertySpecs() {
-        PropertySpec[] result = new PropertySpec[this.propertySpecs.length];
-        System.arraycopy(this.propertySpecs, 0, result, 0, result.length);
-        return result;
+        return this.propertySpecs.clone();
     }
 
     /**
@@ -291,9 +291,7 @@ public final class EntitySpec implements Serializable {
      * @return a {@link ColumnSpec[]}.
      */
     public ColumnSpec[] getConstraintSpecs() {
-        ColumnSpec[] result = new ColumnSpec[this.constraintSpecs.length];
-        System.arraycopy(this.constraintSpecs, 0, result, 0, result.length);
-        return result;
+        return this.constraintSpecs.clone();
     }
 
     /**

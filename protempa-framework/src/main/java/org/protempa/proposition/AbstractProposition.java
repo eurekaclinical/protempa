@@ -24,9 +24,9 @@ public abstract class AbstractProposition implements Proposition {
     protected volatile int hashCode;
     protected final PropertyChangeSupport changes;
     private final Map<String, Value> properties;
-    private final Map<String, List<Object>> references;
+    private final Map<String, List<UniqueIdentifier>> references;
     private String datasourceBackendId;
-    private Object key;
+    private UniqueIdentifier key;
 
     /**
      * Creates a proposition with an id.
@@ -42,14 +42,10 @@ public abstract class AbstractProposition implements Proposition {
         }
         this.changes = new PropertyChangeSupport(this);
         this.properties = new HashMap<String, Value>();
-        this.references = new HashMap<String,List<Object>>();
+        this.references = new HashMap<String,List<UniqueIdentifier>>();
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.virginia.pbhs.parameters.Proposition#getId()
-     */
+    
+    @Override
     public String getId() {
         return this.id;
     }
@@ -61,45 +57,44 @@ public abstract class AbstractProposition implements Proposition {
         this.properties.put(name, value);
     }
 
+    @Override
     public final Value getProperty(String name) {
         return this.properties.get(name);
     }
 
-    public final Set<String> propertyNames() {
-        return this.properties.keySet();
+    @Override
+    public final String[] propertyNames() {
+        Set<String> keys = this.properties.keySet();
+        return keys.toArray(new String[keys.size()]);
     }
 
-    public final void setUniqueIdentifier(Object o) {
+    public final void setUniqueIdentifier(UniqueIdentifier o) {
         this.key = o;
     }
 
+    @Override
     public final String getDataSourceBackendId() {
         return this.datasourceBackendId;
     }
 
     public final void setDataSourceBackendId(String id) {
-        this.hashCode = 0;
         this.datasourceBackendId = id;
     }
 
     @Override
-    public final Object getUniqueIdentifier() {
+    public final UniqueIdentifier getUniqueIdentifier() {
         return this.key;
     }
 
-    public final void setReferences(String name, List<Object> refs) {
+    public final void setReferences(String name, List<UniqueIdentifier> refs) {
         this.references.put(name, refs);
     }
 
-    public final List<Object> getReferences(String name) {
+    @Override
+    public final List<UniqueIdentifier> getReferences(String name) {
         return this.references.get(name);
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
+    
     @Override
     public int hashCode() {
         if (this.hashCode == 0) {
@@ -108,12 +103,8 @@ public abstract class AbstractProposition implements Proposition {
         }
         return this.hashCode;
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.protempa.proposition.Proposition#isEqual(java.lang.Object)
-     */
+    
+    @Override
     public boolean isEqual(Object other) {
         if (other == this) {
             return true;

@@ -3,9 +3,9 @@ package org.protempa.proposition;
 import java.beans.PropertyChangeListener;
 import java.io.Serializable;
 import java.util.List;
-import java.util.Set;
 
 import org.protempa.ProtempaException;
+import org.protempa.QuerySession;
 import org.protempa.proposition.value.Value;
 
 /**
@@ -53,6 +53,15 @@ public interface Proposition extends PropositionVisitable, Serializable {
      */
     void removePropertyChangeListener(PropertyChangeListener l);
 
+    /**
+     * Determines if the specified object is a {@link Proposition} and has
+     * the same field values as this proposition.
+     * 
+     * @param prop an {@link Object}.
+     * @return <code>true</code> if the specified object is a
+     * {@link Proposition} and has the same field values, <code>false</code>
+     * otherwise.
+     */
     boolean isEqual(Object prop);
 
     /**
@@ -63,16 +72,55 @@ public interface Proposition extends PropositionVisitable, Serializable {
      */
     void accept(PropositionVisitor propositionVisitor);
 
+    /**
+     * Performs some processing on this proposition that might throw a
+     * checked exception.
+     *
+     * @param propositionCheckedVisitor
+     * @throws ProtempaException
+     */
     void acceptChecked(PropositionCheckedVisitor propositionCheckedVisitor)
             throws ProtempaException;
 
+    /**
+     * Gets the value of the specified property.
+     *
+     * @param name the name {@link String} of a valid property.
+     * @return the {@link Value} of the specified property.
+     */
     Value getProperty(String name);
 
-    List<Object> getReferences(String name);
+    /**
+     * Gets the global unique identifiers for the propositions that have the
+     * specified 1:N relationship with this proposition.
+     *
+     * @param name the name of the relationship.
+     * @return a {@link List<UniqueIdentifier>} of global unique identifiers.
+     * @see QuerySession#getReferences(org.protempa.proposition.Proposition,
+     * java.lang.String) to get the propositions with the specified
+     * relationship.
+     */
+    List<UniqueIdentifier> getReferences(String name);
 
-    Set<String> propertyNames();
+    /**
+     * Gets an array of properties that this proposition has.
+     *
+     * @return a {@link String[]} of property names.
+     */
+    String[] propertyNames();
 
+    /**
+     * The id of the data source backend from which this proposition came,
+     * or <code>null</code> if the proposition is derived.
+     * 
+     * @return a data source backend id {@link String}.
+     */
     String getDataSourceBackendId();
 
-    Object getUniqueIdentifier();
+    /**
+     * Gets this proposition's global unique identifier.
+     *
+     * @return a {@link UniqueIdentifier}.
+     */
+    UniqueIdentifier getUniqueIdentifier();
 }

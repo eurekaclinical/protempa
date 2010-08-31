@@ -17,6 +17,9 @@ public abstract class AbstractCommonsDataSourceBackend
     public void initialize(BackendInstanceSpec config)
         throws DataSourceBackendInitializationException {
         CommonsBackend.initialize(this, config);
+        if (this.dataSourceBackendId == null)
+            throw new DataSourceBackendInitializationException(
+                    "dataSourceBackendId is not set");
     }
 
     @Override

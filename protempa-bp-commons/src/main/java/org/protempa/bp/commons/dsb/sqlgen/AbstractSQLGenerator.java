@@ -3,6 +3,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,9 +26,11 @@ import org.protempa.dsb.filter.PropertyValueFilter;
 import org.protempa.proposition.ConstantParameter;
 import org.protempa.proposition.DefaultInterval;
 import org.protempa.proposition.Event;
+import org.protempa.proposition.LocalUniqueIdentifier;
 import org.protempa.proposition.PointInterval;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.GranularityFactory;
@@ -110,27 +113,16 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             Set<String> propIds, Filter filters, Set<String> keyIds,
             SQLOrderBy order, ResultProcessorAllKeyIds<P> resultProcessor)
             throws DataSourceReadException {
-        //Map<EntitySpec, List<String>> propSpecMapFromFilters =
-        //        entitySpecMapForFilters(filters);
         Map<EntitySpec, List<String>> propSpecMapFromPropIds =
                 propSpecMapForPropIds(propIds);
 
-        //Collection<Map<PropertySpec, List<String>>> batchMap =
-        //        generateBatches(propertySpecToPropIdMapFromConstraints);
-
         Map<String, List<P>> results = new HashMap<String, List<P>>();
-        //Set<EntitySpec> entitySpecMapKeySet =
-        //        propSpecMapFromFilters.keySet();
-        //for (Map<PropertySpec, List<String>> m : batchMap) {
-        //Set<EntitySpec> entitySpecMapKeySet = new HashSet<EntitySpec>();
         Set<EntitySpec> entitySpecs = new HashSet<EntitySpec>();
         entitySpecs.addAll(this.eventSpecs.values());
         entitySpecs.addAll(this.primitiveParameterSpecs.values());
         entitySpecs.addAll(this.constantSpecs.values());
 
         for (EntitySpec entitySpec : propSpecMapFromPropIds.keySet()) {
-            //Set<EntitySpec> entitySpecs = new HashSet<EntitySpec>(
-            //        entitySpecMapKeySet);
             removeNonApplicableEntitySpecs(entitySpecs, entitySpec);
             Set<Filter> filtersCopy = new HashSet<Filter>();
             for (Iterator<Filter> itr = filters.andIterator();
@@ -138,7 +130,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 filtersCopy.add(itr.next());
             }
             removeNonApplicableFilters(entitySpecs, filtersCopy, entitySpec);
-            //entitySpecs.add(entitySpec);
             String query = generateSelect(entitySpec, propIds,
                     filtersCopy, entitySpecs, keyIds, order);
             SQLGenUtil.logger().log(Level.INFO,
@@ -155,6 +146,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 throw new DataSourceReadException(ex);
             }
 
+            SQLGenUtil.logger().log(Level.INFO,
+                    "Query for {0} in data source backend {1} is complete",
+                    new Object[]{entitySpec.getName(),
+                        this.backendNameForMessages()});
+
             Map<String, List<P>> resultsMap = resultProcessor.getResults();
             for (Map.Entry<String, List<P>> me2 : resultsMap.entrySet()) {
                 if (me2.getValue() == null) {
@@ -168,6 +164,12 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 }
             }
             results.putAll(resultsMap);
+
+            SQLGenUtil.logger().log(Level.INFO,
+                    "Results of query for {0} in data source backend {1} "
+                    + "have been processed",
+                    new Object[]{entitySpec.getName(),
+                        this.backendNameForMessages()});
         }
         return results;
     }
@@ -236,7 +238,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         ConstantParameterResultProcessor resultProcessor =
                 new ConstantParameterResultProcessor();
         resultProcessor.setResults(results);
-        resultProcessor.setDataSourceBackendId(this.backend.getDataSourceBackendId());
+        resultProcessor.setDataSourceBackendId(
+                this.backend.getDataSourceBackendId());
 
         return executeSelect(paramIds, filters,
                 keyIds, null, resultProcessor);
@@ -253,7 +256,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         PrimitiveParameterResultProcessorAllKeyIds resultProcessor =
                 new PrimitiveParameterResultProcessorAllKeyIds();
         resultProcessor.setResults(results);
-        resultProcessor.setDataSourceBackendId(this.backend.getDataSourceBackendId());
+        resultProcessor.setDataSourceBackendId(
+                this.backend.getDataSourceBackendId());
 
         return executeSelect(paramIds, filters,
                 keyIds, order, resultProcessor);
@@ -268,16 +272,17 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         EventResultProcessorAllKeyIds resultProcessor =
                 new EventResultProcessorAllKeyIds();
         resultProcessor.setResults(results);
-        resultProcessor.setDataSourceBackendId(this.backend.getDataSourceBackendId());
+        resultProcessor.setDataSourceBackendId(
+                this.backend.getDataSourceBackendId());
 
         return executeSelect(eventIds, filters, keyIds, order,
                 resultProcessor);
     }
 
     public final String generateSelect(EntitySpec entitySpec,
-            Set<String> propIds,
-            Set<Filter> filters, Set<EntitySpec> entitySpecs,
-            Set<String> keyIds, SQLOrderBy order) {
+            Set<String> propIds, Set<Filter> filters,
+            Set<EntitySpec> entitySpecs, Set<String> keyIds,
+            SQLOrderBy order) {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(
                 entitySpec, entitySpecs, filters);
         Map<ColumnSpec, Integer> referenceIndices =
@@ -312,8 +317,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             }
             filteredConstraintValues =
                     constraintValueList.toArray(
-                    new ColumnSpec.PropositionIdToSqlCode[
-                    constraintValueList.size()]);
+                    new ColumnSpec.PropositionIdToSqlCode[constraintValueList.size()]);
         } else {
             filteredConstraintValues = constraintValues;
         }
@@ -350,12 +354,21 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         if (info.getStartTimeIndex() > 0) {
             i++;
         }
+        if (info.getUniqueIdIndex() > 0) {
+            i += info.getNumberOfUniqueIdColumns();
+        }
         i++; //key id
         int[] indices = new int[i];
         String[] names = new String[i];
         int k = 0;
         indices[k] = 0;
         names[k++] = "keyid";
+        if (info.getUniqueIdIndex() > 0) {
+            indices[k] = info.getUniqueIdIndex();
+            for (int m = 0; m < info.getNumberOfUniqueIdColumns(); m++) {
+                names[k++] = "uniqueid" + m;
+            }
+        }
         if (info.getCodeIndex() > 0) {
             indices[k] = info.getCodeIndex();
             names[k++] = "code";
@@ -786,7 +799,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                                 pdsc2.getPropositionIds()) {
                                             if (propId.equals(propId2)) {
                                                 finish.add(
-                                                    es.getFinishTimeSpec());
+                                                        es.getFinishTimeSpec());
                                                 found = true;
                                                 break;
                                             }
@@ -815,8 +828,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                             referenceIndices, finishTimeSpec);
                                     wherePart.append(" <= {ts '");
                                     wherePart.append(
-                                        AbsoluteTimeGranularity.toSQLString(
-                                        pdsc2.getMaximumFinish()));
+                                            AbsoluteTimeGranularity.toSQLString(
+                                            pdsc2.getMaximumFinish()));
                                     wherePart.append("'}");
                                 }
                             }
@@ -859,10 +872,10 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                                 pdsc2.getPropositionIds()) {
                                             if (propId.equals(propId2)) {
                                                 startFinish.add(
-                                                    new ColumnSpec[]{
-                                                        es.getStartTimeSpec(),
-                                                        es.getFinishTimeSpec()
-                                                    });
+                                                        new ColumnSpec[]{
+                                                            es.getStartTimeSpec(),
+                                                            es.getFinishTimeSpec()
+                                                        });
                                                 found = true;
                                                 break;
                                             }
@@ -898,8 +911,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                             referenceIndices, startTimeSpec);
                                     wherePart.append(" >= {ts '");
                                     wherePart.append(
-                                        AbsoluteTimeGranularity.toSQLString(
-                                        pdsc2.getMinimumStart()));
+                                            AbsoluteTimeGranularity.toSQLString(
+                                            pdsc2.getMinimumStart()));
                                     wherePart.append("'}");
                                 }
                                 if (entitySpec.getFinishTimeSpec() == null
@@ -912,8 +925,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                             startTimeSpec);
                                     wherePart.append(" <= {ts '");
                                     wherePart.append(
-                                        AbsoluteTimeGranularity.toSQLString(
-                                        pdsc2.getMaximumFinish()));
+                                            AbsoluteTimeGranularity.toSQLString(
+                                            pdsc2.getMaximumFinish()));
                                     wherePart.append("'}");
                                 }
                             }
@@ -982,8 +995,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 wherePart.append(" and ");
             }
             ColumnSpec keySpec = info.getColumnSpecs().get(0);
-            wherePart.append("a1.").append(keySpec.getColumn())
-                    .append(" in ('");
+            wherePart.append("a1.").append(keySpec.getColumn()).append(" in ('");
             wherePart.append(
                     org.arp.javautil.collections.Collections.join(
                     keyIds, "','"));
@@ -1029,24 +1041,40 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         public void process(ResultSet resultSet) throws SQLException {
             Map<String, List<ConstantParameter>> results = getResults();
             EntitySpec entitySpec = getEntitySpec();
-            String[] codes = entitySpec.getPropositionIds();
+            String[] propIds = entitySpec.getPropositionIds();
             while (resultSet.next()) {
-                String propId;
+                int i = 1;
+                String keyId = resultSet.getString(i++);
 
-                if (codes.length == 1) {
-                    propId = codes[0];
-                } else {
-                    propId = resultSet.getString(3);
+                String[] uniqueIds = new String[
+                        entitySpec.getUniqueIdSpecs().length];
+                for (int m = 0; m < uniqueIds.length; m++) {
+                    uniqueIds[m] = resultSet.getString(i++);
                 }
 
+
+
                 ValueType vf = entitySpec.getValueType();
+                Value cpVal = ValueFactory.get(vf).parseValue(
+                        resultSet.getString(i++));
+
+                String propId;
+                if (propIds.length == 1) {
+                    propId = propIds[0];
+                } else {
+                    propId = resultSet.getString(i++);
+                }
+
                 ConstantParameter cp =
                         new ConstantParameter(propId);
-                String keyId = resultSet.getString(1);
-                cp.setValue(ValueFactory.get(vf).parseValue(
-                        resultSet.getString(2)));
+                cp.setValue(cpVal);
 
-                int i = 4;
+
+                cp.setUniqueIdentifier(new UniqueIdentifier(
+                        getDataSourceBackendId(),
+                        new MyUniqueIdentifier(entitySpec.getName(),
+                        uniqueIds)));
+
                 PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
                 for (PropertySpec propertySpec : propertySpecs) {
                     ValueType vf2 = propertySpec.getValueType();
@@ -1060,6 +1088,59 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 Collections.putList(results, keyId, cp);
             }
         }
+    }
+
+    private static class MyUniqueIdentifier implements LocalUniqueIdentifier {
+        private static final long serialVersionUID = 3956023315666447630L;
+
+        final String name;
+        String[] dbIds;
+
+        MyUniqueIdentifier(String name, String[] dbIds) {
+            this.name = name;
+            this.dbIds = dbIds;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final MyUniqueIdentifier other = (MyUniqueIdentifier) obj;
+            if ((this.name == null) ? (other.name != null) :
+                !this.name.equals(other.name)) {
+                return false;
+            }
+            if (!Arrays.deepEquals(this.dbIds, other.dbIds)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 3;
+            hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
+            hash = 53 * hash + Arrays.deepHashCode(this.dbIds);
+            return hash;
+        }
+
+        @Override
+        public LocalUniqueIdentifier clone() {
+            MyUniqueIdentifier result;
+            try {
+                result = (MyUniqueIdentifier) super.clone();
+                result.dbIds = this.dbIds.clone();
+                return result;
+            } catch (CloneNotSupportedException ex) {
+                throw new AssertionError("Never reached!");
+            }
+            
+        }
+
     }
 
     private static abstract class ResultProcessorAllKeyIds
@@ -1101,20 +1182,38 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         public void process(ResultSet resultSet) throws SQLException {
             Map<String, List<PrimitiveParameter>> results = getResults();
             EntitySpec entitySpec = getEntitySpec();
-            String[] codes = entitySpec.getPropositionIds();
+            String[] propIds = entitySpec.getPropositionIds();
             while (resultSet.next()) {
-                String keyId = resultSet.getString(1);
-                String propId;
-                if (codes.length == 1) {
-                    propId = codes[0];
-                } else {
-                    propId = resultSet.getString(2);
+                int i = 1;
+                String keyId = resultSet.getString(i++);
+
+                String[] uniqueIds = new String[
+                        entitySpec.getUniqueIdSpecs().length];
+                for (int m = 0; m < uniqueIds.length; m++) {
+                    uniqueIds[m] = resultSet.getString(i++);
                 }
+
+
+
                 ValueType vf = entitySpec.getValueType();
+                Value cpVal = ValueFactory.get(vf).parseValue(
+                        resultSet.getString(i++));
+
+                String propId;
+                if (propIds.length == 1) {
+                    propId = propIds[0];
+                } else {
+                    propId = resultSet.getString(i++);
+                }
+
                 PrimitiveParameter p = new PrimitiveParameter(propId);
+                p.setUniqueIdentifier(new UniqueIdentifier(
+                        getDataSourceBackendId(),
+                        new MyUniqueIdentifier(entitySpec.getName(),
+                        uniqueIds)));
                 try {
                     p.setTimestamp(entitySpec.getPositionParser()
-                            .toLong(resultSet, 3));
+                            .toLong(resultSet, i++));
                 } catch (SQLException e) {
                     SQLGenUtil.logger().log(Level.WARNING,
                             "Could not parse timestamp. Ignoring data value.",
@@ -1122,10 +1221,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     continue;
                 }
                 p.setGranularity(entitySpec.getGranularity());
-                p.setValue(ValueFactory.get(vf).parseValue(
-                        resultSet.getString(3)));
+                p.setValue(cpVal);
 
-                int i = 4;
                 PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
                 for (PropertySpec propertySpec : propertySpecs) {
                     ValueType vf2 = propertySpec.getValueType();
@@ -1150,14 +1247,23 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             while (resultSet.next()) {
                 int i = 1;
                 String keyId = resultSet.getString(i++);
+                String[] uniqueIds = new String[
+                        entitySpec.getUniqueIdSpecs().length];
+                for (int m = 0; m < uniqueIds.length; m++) {
+                    uniqueIds[m] = resultSet.getString(i++);
+                }
                 String propId;
-                String[] codes = entitySpec.getPropositionIds();
-                if (codes.length == 1) {
-                    propId = codes[0];
+                String[] propIds = entitySpec.getPropositionIds();
+                if (propIds.length == 1) {
+                    propId = propIds[0];
                 } else {
                     propId = resultSet.getString(i++);
                 }
                 Event event = new Event(propId);
+                event.setUniqueIdentifier(new UniqueIdentifier(
+                        getDataSourceBackendId(),
+                        new MyUniqueIdentifier(entitySpec.getName(),
+                        uniqueIds)));
                 Granularity gran = entitySpec.getGranularity();
                 //ColumnSpec startTimeSpec = entitySpec.getStartTimeSpec();
                 ColumnSpec finishTimeSpec = entitySpec.getFinishTimeSpec();
@@ -1238,8 +1344,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     entitySpecToPropIdMapFromPropIds);
             if (!inDataSource) {
                 SQLGenUtil.logger().log(Level.INFO,
-                 "Data source backend {0} does not know about proposition {1}",
-                    new Object[]{backendNameForMessages(), propId});
+                        "Data source backend {0} does not know about proposition {1}",
+                        new Object[]{backendNameForMessages(), propId});
             }
         }
         return entitySpecToPropIdMapFromPropIds;

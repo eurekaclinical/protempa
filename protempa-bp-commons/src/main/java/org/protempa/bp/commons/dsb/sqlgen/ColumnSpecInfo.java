@@ -11,6 +11,8 @@ final class ColumnSpecInfo {
     private Map<String, Integer> propertyIndices = null;
     private int codeIndex = -1;
     private Map<String, List<ReferenceSpec>> references;
+    private int uniqueIdIndex = -1;
+    private int numberofUniqueIdColumns;
 
     ColumnSpecInfo() {
 
@@ -70,5 +72,21 @@ final class ColumnSpecInfo {
 
     public void setPropertyIndices(Map<String, Integer> index) {
         this.propertyIndices = index;
+    }
+
+    public void setUniqueIdIndex(int uniqueIdIndex) {
+        this.uniqueIdIndex = uniqueIdIndex;
+    }
+
+    public int getUniqueIdIndex() {
+        return this.uniqueIdIndex;
+    }
+
+    public void setNumberOfUniqueIdColumns(int numCols) {
+        this.numberofUniqueIdColumns = numCols;
+    }
+
+    public int getNumberOfUniqueIdColumns() {
+        return this.numberofUniqueIdColumns;
     }
 }

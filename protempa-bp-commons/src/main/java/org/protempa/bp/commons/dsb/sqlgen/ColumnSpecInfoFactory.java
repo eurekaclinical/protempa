@@ -34,8 +34,10 @@ final class ColumnSpecInfoFactory {
             if (i == 0) {
                 i = processBaseSpec(entitySpec2, columnSpecs, i);
             }
-            i = processStartTimeOrTimestamp(entitySpec, entitySpec2, columnSpecs, i,
+            i = processUniqueId(entitySpec, entitySpec2, columnSpecs, i,
                     columnSpecInfo);
+            i = processStartTimeOrTimestamp(entitySpec, entitySpec2, 
+                    columnSpecs, i, columnSpecInfo);
             i = processFinishTimeSpec(entitySpec, entitySpec2, columnSpecs, i,
                     columnSpecInfo);
             if (entitySpec2 == entitySpec) {
@@ -50,6 +52,21 @@ final class ColumnSpecInfoFactory {
         }
         columnSpecInfo.setColumnSpecs(columnSpecs);
         return columnSpecInfo;
+    }
+
+    private int processUniqueId(EntitySpec entitySpec, EntitySpec entitySpec2,
+            List<ColumnSpec> columnSpecs, int i,
+            ColumnSpecInfo columnSpecInfo) {
+        ColumnSpec[] codeSpecs = entitySpec2.getUniqueIdSpecs();
+        if (codeSpecs != null) {
+            for (ColumnSpec uniqueIdSpec : codeSpecs)
+                i = processConstraintSpec(uniqueIdSpec, columnSpecs, i);
+            if (entitySpec == entitySpec2) {
+                columnSpecInfo.setUniqueIdIndex(i - 1);
+                columnSpecInfo.setNumberOfUniqueIdColumns(codeSpecs.length);
+            }
+        }
+        return i;
     }
 
     private int processCodeSpec(EntitySpec entitySpec, EntitySpec entitySpec2,
