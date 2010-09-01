@@ -8,19 +8,25 @@ package org.protempa.query;
 public class SimpleQuery extends AbstractQuery {
 
     public SimpleQuery() {
-
+        super();
+    }
+    
+    public static SimpleQuery newInstance (SimpleQuery originalQuery) {
+        SimpleQuery query = new SimpleQuery();
+        query.setFilters(originalQuery.getFilters());
+        return query;
     }
 
     public static SimpleQuery newInstance(String keyId, String... propIds) {
         SimpleQuery result = new SimpleQuery();
-        result.setKeyIds(new String[] {keyId});
+        result.setKeyIds(new String[] { keyId });
         result.setPropIds(propIds);
         return result;
     }
 
     public static SimpleQuery newFindAllPropsInstance(String keyId) {
         SimpleQuery result = new SimpleQuery();
-        result.setKeyIds(new String[] {keyId});
+        result.setKeyIds(new String[] { keyId });
         return result;
     }
 
@@ -32,14 +38,5 @@ public class SimpleQuery extends AbstractQuery {
 
     public static SimpleQuery newFindAllPropsForAllKeysInstance() {
         return new SimpleQuery();
-    }
-
-    @Override
-    public Query clone() {
-        SimpleQuery copy = new SimpleQuery();
-        copy.setKeyIds(this.getKeyIds().clone());
-        copy.setPropIds(this.getPropIds().clone());
-        copy.setFilters(this.getFilters());
-        return copy;
     }
 }

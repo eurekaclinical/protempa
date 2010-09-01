@@ -3,7 +3,7 @@ package org.protempa.query;
 import org.protempa.dsb.filter.Filter;
 
 /**
- *
+ * 
  * @author Andrew Post
  */
 public abstract class AbstractQuery implements Query {
@@ -15,7 +15,7 @@ public abstract class AbstractQuery implements Query {
      * Does nothing.
      */
     public AbstractQuery() {
-        
+
     }
 
     @Override
@@ -44,7 +44,7 @@ public abstract class AbstractQuery implements Query {
     public String[] getPropIds() {
         return this.propIds;
     }
-    
+
     @Override
     public void setPropIds(String[] propIds) {
         if (propIds == null)
@@ -53,5 +53,17 @@ public abstract class AbstractQuery implements Query {
     }
 
     @Override
-    public abstract Query clone();
+    public Query clone() {
+        try {
+            Object o = super.clone();
+            Query copy = (Query) o;
+            copy.setKeyIds(this.getKeyIds().clone());
+            copy.setPropIds(this.getPropIds().clone());
+            copy.setFilters(this.getFilters());
+            return copy;
+        } catch (CloneNotSupportedException exception) {
+            throw new AssertionError(
+                    "Classes that implement Query must also implement Cloneable");
+        }
+    }
 }
