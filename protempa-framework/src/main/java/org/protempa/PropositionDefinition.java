@@ -14,21 +14,21 @@ public interface PropositionDefinition extends Serializable {
 
     /**
      * This proposition definition's display name.
-     *
+     * 
      * @return a {@link String}. Guaranteed not to be <code>null</code>.
      */
     String getDisplayName();
 
     /**
      * This proposition definition's abbreviated display name.
-     *
+     * 
      * @return a {@link String}. Guaranteed not to be <code>null</code>.
      */
     String getAbbreviatedDisplayName();
 
     /**
      * This proposition definition's id.
-     *
+     * 
      * @return a {@link String}, guaranteed not to be <code>null</code>.
      */
     String getId();
@@ -37,7 +37,7 @@ public interface PropositionDefinition extends Serializable {
      * Returns the ids of this proposition definition's children. These include
      * proposition definitions with abstracted-from, inverse-isa, and has-part
      * relations.
-     *
+     * 
      * @return an array of {@link String}s, guaranteed not <code>null</code>.
      */
     String[] getDirectChildren();
@@ -45,7 +45,7 @@ public interface PropositionDefinition extends Serializable {
     /**
      * Returns the ids of the proposition definitions that have an is-a
      * relationship with this proposition definition.
-     *
+     * 
      * @return a {@link String[]} of proposition definition ids.
      */
     String[] getInverseIsA();
@@ -54,7 +54,7 @@ public interface PropositionDefinition extends Serializable {
      * Returns whether instances of this proposition definition are
      * concatenable. A proposition is concatenable if, whenever it holds over
      * two consecutive time intervals, it holds also over their union.
-     *
+     * 
      * @return <code>true</code> if concatenable, <code>false</code> if not.
      */
     boolean isConcatenable();
@@ -62,18 +62,18 @@ public interface PropositionDefinition extends Serializable {
     /**
      * Returns whether instances of this proposition definition are solid, that
      * is, they cannot properly overlap.
-     *
+     * 
      * @return <code>true</code> if solid, <code>false</code> if not.
      */
     boolean isSolid();
 
     /**
-     * Gets the id of a {@link TermDefinition} associated with this
+     * Gets the ids of the {@link TermDefinition}s associated with this
      * proposition definition.
-     *
-     * @return a term id {@link String}.
+     * 
+     * @return the term ids as an array of {@link String}s.
      */
-    String getTermId();
+    String[] getTermIds();
 
     void addPropertyChangeListener(PropertyChangeListener listener);
 
@@ -87,19 +87,22 @@ public interface PropositionDefinition extends Serializable {
 
     /**
      * Performs some processing on this proposition definition.
-     *
-     * @param visitor a {@link PropositionDefinitionVisitor}, cannot be
-     * <code>null</code>.
+     * 
+     * @param visitor
+     *            a {@link PropositionDefinitionVisitor}, cannot be
+     *            <code>null</code>.
      */
     void accept(PropositionDefinitionVisitor visitor);
 
     /**
-     * Performs some processing on this proposition definition that might
-     * throw a {@link ProtempaExcception}.
-     *
-     * @param visitor a {@link PropositionDefinitionCheckedVisitor}, cannot be
-     * <code>null</code>.
-     * @throws ProtempaException if an error occurs.
+     * Performs some processing on this proposition definition that might throw
+     * a {@link ProtempaExcception}.
+     * 
+     * @param visitor
+     *            a {@link PropositionDefinitionCheckedVisitor}, cannot be
+     *            <code>null</code>.
+     * @throws ProtempaException
+     *             if an error occurs.
      */
     void acceptChecked(PropositionDefinitionCheckedVisitor visitor)
             throws ProtempaException;

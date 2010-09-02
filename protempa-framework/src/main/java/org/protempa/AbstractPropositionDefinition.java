@@ -38,7 +38,7 @@ public abstract class AbstractPropositionDefinition implements
      */
     private String[] inverseIsA;
     protected String[] directChildren;
-    private String termId;
+    private String[] termIds;
     protected final PropertyChangeSupport changes;
 
     /**
@@ -161,16 +161,16 @@ public abstract class AbstractPropositionDefinition implements
     }
 
     @Override
-    public final String getTermId() {
-        return this.termId;
+    public final String[] getTermIds() {
+        return this.termIds;
     }
 
     /**
      * Assigns this proposition with an associated {@link TermDefinition}.
      * @param termId a term id {@link String}.
      */
-    public final void setTermId(String termId) {
-        this.termId = termId;
+    public final void setTermIds(String[] termIds) {
+        this.termIds = termIds;
     }
 
     @Override
