@@ -1,5 +1,11 @@
 package org.protempa;
 
+/**
+ * Represents a term pulled from a terminology in PROTEMPA.
+ * 
+ * @author Michel Mansour
+ */
+
 public final class Term {
     
     /*
@@ -16,6 +22,16 @@ public final class Term {
      * the short name of this term
      */
     private String abbrevDisplayName;
+    
+    /*
+     * the code for this term in its terminology
+     */
+    private String code;
+    
+    /*
+     * the terminology this term comes from
+     */
+    private Terminology terminology;
     
     /*
      * term IDs related to this one
@@ -96,5 +112,19 @@ public final class Term {
      */
     public String getId() {
         return id;
+    }
+    
+    /**
+     * @return the code
+     */
+    public String getCode() {
+        return code;
+    }
+    
+    /**
+     * @return the terminology
+     */
+    public Terminology getTerminology() {
+        return terminology;
     }
 }
