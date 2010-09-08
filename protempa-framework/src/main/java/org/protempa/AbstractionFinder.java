@@ -217,6 +217,7 @@ final class AbstractionFinder implements Module {
                     propositionIds).executeWithResults(objects).iterateObjects(
                     new ProtempaObjectFilter(propositionIds)));
 //            result.put(entry.getKey(), propositions);
+            qs.addPropositionsToCache(propositions);
             resultHandler.handleQueryResult(entry.getKey(), propositions);
         }
         clear();
