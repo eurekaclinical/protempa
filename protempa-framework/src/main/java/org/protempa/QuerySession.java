@@ -38,6 +38,16 @@ public class QuerySession {
     public Query getQuery() {
         return query;
     }
+    
+    public void addPropositionToCache (Object uid, Proposition proposition) {
+        this.propositionCache.put(uid, proposition);
+    }
+
+    public void addPropositionsToCache (List<Proposition> propositions) {
+        for (Proposition p : propositions) {
+            addPropositionToCache(p.getUniqueIdentifier(), p);
+        }
+    }
 
     public List<Proposition> getReferences(Proposition prop, String name) throws DataSourceReadException {
         List<Proposition> references = new LinkedList<Proposition>();
