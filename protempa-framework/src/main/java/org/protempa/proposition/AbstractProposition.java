@@ -79,7 +79,7 @@ public abstract class AbstractProposition implements Proposition {
         return this.dataSourceType;
     }
 
-    protected void setDataSourceType(DataSourceType type) {
+    public void setDataSourceType(DataSourceType type) {
         this.dataSourceType = type;
     }
 
