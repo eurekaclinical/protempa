@@ -1,5 +1,8 @@
 package org.protempa;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.protempa.backend.BackendNewInstanceException;
 
 public final class TermSource extends
@@ -7,22 +10,51 @@ public final class TermSource extends
 
     private final BackendManager<TermSourceBackendUpdatedEvent, TermSource, TermSourceBackend> backendManager;
 
+    private final Set<String> notFoundTerms;
+
     public TermSource(TermSourceBackend[] backends) {
         super(backends);
-        this.backendManager = 
-                new BackendManager<TermSourceBackendUpdatedEvent, TermSource, 
-                TermSourceBackend>(this, backends);
+        this.backendManager = new BackendManager<TermSourceBackendUpdatedEvent, TermSource, TermSourceBackend>(
+                this, backends);
+        this.notFoundTerms = new HashSet<String>();
     }
-    
+
     /**
      * Connect to the term source's backend(s).
      */
-    private void intitializeIfNeeded() throws BackendInitializationException, 
-        BackendNewInstanceException {
+    private void initializeIfNeeded() throws BackendInitializationException,
+            BackendNewInstanceException {
         if (isClosed()) {
             throw new IllegalStateException("Term source already closed!");
         }
         this.backendManager.initializeIfNeeded();
+    }
+
+    public Term readTerm(String id, Terminology terminology)
+            throws TermSourceReadException {
+        Term result = null;
+        if (!notFoundTerms.contains(id)) {
+            try {
+                initializeIfNeeded();
+            } catch (BackendInitializationException ex) {
+                throw new TermSourceReadException(ex);
+            } catch (BackendNewInstanceException ex) {
+                throw new TermSourceReadException(ex);
+            }
+            if (this.backendManager.getBackends() != null) {
+                for (TermSourceBackend backend : this.backendManager
+                        .getBackends()) {
+                    result = backend.readTerm(id, terminology);
+                    if (result != null) {
+                        return result;
+                    }
+                }
+                this.notFoundTerms.add(id);
+            }
+        }
+
+        return result;
+
     }
 
     /*
