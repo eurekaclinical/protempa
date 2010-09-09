@@ -4,6 +4,7 @@ import java.beans.PropertyChangeListener;
 import java.io.Serializable;
 import java.util.List;
 
+import org.protempa.DataSourceType;
 import org.protempa.ProtempaException;
 import org.protempa.QuerySession;
 import org.protempa.proposition.value.Value;
@@ -29,6 +30,11 @@ public interface Proposition extends PropositionVisitable, Serializable {
      *         represented by this proposition.
      */
     String getId();
+
+    /**
+     * Returns the data source type of the Proposition.
+     */
+    DataSourceType getDataSourceType();
 
     /**
      * Adds a {@link PropertyChangeListener} to the listener list. The listener

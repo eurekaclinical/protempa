@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.protempa.DataSourceType;
 import org.protempa.proposition.value.Value;
 
 /**
@@ -27,6 +28,7 @@ public abstract class AbstractProposition implements Proposition {
     private final Map<String, List<UniqueIdentifier>> references;
     private String datasourceBackendId;
     private UniqueIdentifier key;
+    private DataSourceType dataSourceType;
 
     /**
      * Creates a proposition with an id.
@@ -70,6 +72,15 @@ public abstract class AbstractProposition implements Proposition {
 
     public final void setUniqueIdentifier(UniqueIdentifier o) {
         this.key = o;
+    }
+
+    @Override
+    public DataSourceType getDataSourceType() {
+        return this.dataSourceType;
+    }
+
+    protected void setDataSourceType(DataSourceType type) {
+        this.dataSourceType = type;
     }
 
     @Override

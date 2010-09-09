@@ -4,6 +4,11 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
+import junit.framework.TestCase;
+
+import org.protempa.DataSourceType;
+import org.protempa.DatabaseDataSourceType;
+import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.Granularity;
@@ -12,8 +17,6 @@ import org.protempa.proposition.value.RelativeHourGranularity;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
 
-import junit.framework.TestCase;
-
 public class RelationTest extends TestCase {
 
 	private static final DateFormat DATE_FORMAT = DateFormat.getDateInstance(
@@ -21,6 +24,8 @@ public class RelationTest extends TestCase {
 
 	private static final DateFormat DATE_TIME_FORMAT = DateFormat
 			.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.US);
+	private static final DataSourceType dbDataSourceType = new DatabaseDataSourceType("MockTestDatabase");
+	private static final DataSourceType derivedDataSourceType = new DerivedDataSourceType();
 
 	public void test1HourApartHours() {
 		Interval i1 = new DefaultInterval(0L, RelativeHourGranularity.HOUR, 0L,
@@ -765,11 +770,11 @@ public class RelationTest extends TestCase {
 		TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 				DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
 		PrimitiveParameter creat = ppf.getInstance("CREAT", "11/17/03 8:43 AM",
-				new NumberValue(0.8));
+				new NumberValue(0.8),dbDataSourceType);
 
 		TemporalEventFactory tf = new TemporalEventFactory(DATE_FORMAT,
 				AbsoluteTimeGranularity.DAY);
-		Event ct = tf.getInstance("74160", "11/12/03");
+		Event ct = tf.getInstance("74160", "11/12/03",derivedDataSourceType);
 		Relation r = new Relation(-4, AbsoluteTimeUnit.DAY, null,
 				AbsoluteTimeUnit.DAY, null, null, null, null, null, null, null,
 				null, null, null, null, null);
@@ -781,11 +786,11 @@ public class RelationTest extends TestCase {
 		TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 				DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
 		PrimitiveParameter creat = ppf.getInstance("CREAT", "11/17/03 8:43 AM",
-				new NumberValue(0.8));
+				new NumberValue(0.8), dbDataSourceType);
 
 		TemporalEventFactory tf = new TemporalEventFactory(DATE_FORMAT,
 				AbsoluteTimeGranularity.DAY);
-		Event ct = tf.getInstance("74160", "11/12/03");
+		Event ct = tf.getInstance("74160", "11/12/03",derivedDataSourceType);
 		Relation r = new Relation(-5, AbsoluteTimeUnit.DAY, null,
 				AbsoluteTimeUnit.DAY, null, null, null, null, null, null, null,
 				null, null, null, null, null);
@@ -797,11 +802,11 @@ public class RelationTest extends TestCase {
 		TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 				DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
 		PrimitiveParameter creat = ppf.getInstance("CREAT", "11/17/03 8:43 AM",
-				new NumberValue(0.8));
+				new NumberValue(0.8),dbDataSourceType);
 
 		TemporalEventFactory tf = new TemporalEventFactory(DATE_FORMAT,
 				AbsoluteTimeGranularity.DAY);
-		Event ct = tf.getInstance("74160", "11/12/03");
+		Event ct = tf.getInstance("74160", "11/12/03",derivedDataSourceType);
 		Relation r = new Relation(-6, AbsoluteTimeUnit.DAY, null,
 				AbsoluteTimeUnit.DAY, null, null, null, null, null, null, null,
 				null, null, null, null, null);
@@ -813,11 +818,11 @@ public class RelationTest extends TestCase {
 		TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 				DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
 		PrimitiveParameter creat = ppf.getInstance("CREAT", "11/17/03 8:43 AM",
-				new NumberValue(0.8));
+				new NumberValue(0.8),dbDataSourceType);
 
 		TemporalEventFactory tf = new TemporalEventFactory(DATE_FORMAT,
 				AbsoluteTimeGranularity.DAY);
-		Event ct = tf.getInstance("74160", "11/12/03");
+		Event ct = tf.getInstance("74160", "11/12/03",derivedDataSourceType);
 		Relation r = new Relation(null, AbsoluteTimeUnit.DAY, -5,
 				AbsoluteTimeUnit.DAY, null, null, null, null, null, null, null,
 				null, null, null, null, null);
@@ -829,11 +834,11 @@ public class RelationTest extends TestCase {
 		TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 				DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
 		PrimitiveParameter creat = ppf.getInstance("CREAT", "11/17/03 8:43 AM",
-				new NumberValue(0.8));
+				new NumberValue(0.8),dbDataSourceType);
 
 		TemporalEventFactory tf = new TemporalEventFactory(DATE_FORMAT,
 				AbsoluteTimeGranularity.DAY);
-		Event ct = tf.getInstance("74160", "11/12/03");
+		Event ct = tf.getInstance("74160", "11/12/03",derivedDataSourceType);
 		Relation r = new Relation(null, null, 5, AbsoluteTimeUnit.DAY, null,
 				null, null, null, null, null, null, null, null, null, null,
 				null);
@@ -850,7 +855,7 @@ public class RelationTest extends TestCase {
 
 		TemporalEventFactory tf = new TemporalEventFactory(DATE_FORMAT,
 				AbsoluteTimeGranularity.DAY);
-		Event ct = tf.getInstance("74160", "11/12/03");
+		Event ct = tf.getInstance("74160", "11/12/03",derivedDataSourceType);
 		Relation r = new Relation(null, null, 5, AbsoluteTimeUnit.DAY, null,
 				null, null, null, null, null, null, null, null, null, null,
 				null);
@@ -867,7 +872,7 @@ public class RelationTest extends TestCase {
 
 		TemporalEventFactory tf = new TemporalEventFactory(DATE_FORMAT,
 				AbsoluteTimeGranularity.DAY);
-		Event ct = tf.getInstance("74160", "11/12/03");
+		Event ct = tf.getInstance("74160", "11/12/03",derivedDataSourceType);
 		Relation r = new Relation(null, null, 5, AbsoluteTimeUnit.DAY, null,
 				null, null, null, null, null, null, null, null, null, null,
 				null);
@@ -881,8 +886,8 @@ public class RelationTest extends TestCase {
 		try {
 			TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 					DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
-			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:00 am");
-			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 1:59 am");
+			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:00 am",dbDataSourceType);
+			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 1:59 am",dbDataSourceType);
 			Relation r = new Relation(1, AbsoluteTimeUnit.HOUR, null, null,
 					null, null, null, null, null, null, null, null, null, null,
 					null, null);
@@ -899,8 +904,8 @@ public class RelationTest extends TestCase {
 		try {
 			TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 					DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
-			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:00 am");
-			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 2:00 am");
+			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:00 am",dbDataSourceType);
+			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 2:00 am",dbDataSourceType);
 			Relation r = new Relation(1, AbsoluteTimeUnit.HOUR, null, null,
 					null, null, null, null, null, null, null, null, null, null,
 					null, null);
@@ -917,8 +922,8 @@ public class RelationTest extends TestCase {
 		try {
 			TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 					DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
-			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:00 am");
-			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 2:00 am");
+			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:00 am",dbDataSourceType);
+			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 2:00 am",dbDataSourceType);
 			Relation r = new Relation(null, null, 1, AbsoluteTimeUnit.HOUR,
 					null, null, null, null, null, null, null, null, null, null,
 					null, null);
@@ -935,8 +940,8 @@ public class RelationTest extends TestCase {
 		try {
 			TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 					DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
-			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:00 am");
-			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 2:01 am");
+			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:00 am",dbDataSourceType);
+			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 2:01 am",dbDataSourceType);
 			Relation r = new Relation(null, null, 1, AbsoluteTimeUnit.HOUR,
 					null, null, null, null, null, null, null, null, null, null,
 					null, null);
@@ -953,8 +958,8 @@ public class RelationTest extends TestCase {
 		try {
 			TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 					DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
-			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:01 am");
-			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 2:00 am");
+			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:01 am",dbDataSourceType);
+			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 2:00 am",dbDataSourceType);
 			Relation r = new Relation(null, null, 1, AbsoluteTimeUnit.HOUR,
 					null, null, null, null, null, null, null, null, null, null,
 					null, null);
@@ -971,8 +976,8 @@ public class RelationTest extends TestCase {
 		try {
 			TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 					DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
-			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:01 am");
-			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 2:59 am");
+			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:01 am",dbDataSourceType);
+			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 2:59 am",dbDataSourceType);
 			Relation r = new Relation(null, null, 1, AbsoluteTimeUnit.HOUR,
 					null, null, null, null, null, null, null, null, null, null,
 					null, null);
@@ -989,8 +994,8 @@ public class RelationTest extends TestCase {
 		try {
 			TemporalPrimitiveParameterFactory ppf = new TemporalPrimitiveParameterFactory(
 					DATE_TIME_FORMAT, AbsoluteTimeGranularity.MINUTE);
-			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:01 am");
-			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 3:00 am");
+			PrimitiveParameter pp1 = ppf.getInstance("BLAH", "1/1/07 1:01 am",dbDataSourceType);
+			PrimitiveParameter pp2 = ppf.getInstance("BLAH", "1/1/07 3:00 am",dbDataSourceType);
 			Relation r = new Relation(null, null, 1, AbsoluteTimeUnit.HOUR,
 					null, null, null, null, null, null, null, null, null, null,
 					null, null);

@@ -6,6 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
+import org.protempa.DataSourceType;
+import org.protempa.DatabaseDataSourceType;
+import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
@@ -13,36 +18,37 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalAbstractParameterFactory;
 import org.protempa.proposition.TemporalEventFactory;
 import org.protempa.proposition.TemporalPrimitiveParameterFactory;
-import org.protempa.proposition.stats.MinLengthKaplanMeyer;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.NumberValue;
 
-import junit.framework.TestCase;
-
 public class MinLengthKaplanMeyerTest extends TestCase {
 	private List<Proposition> propositions;
 	private MinLengthKaplanMeyer mls;
+	private DataSourceType dbDataSourceType;
+	private DataSourceType derivedDataSourceType;
 
 	@Override
 	protected void setUp() throws Exception {
 		this.propositions = new ArrayList<Proposition>();
+		this.dbDataSourceType = new DatabaseDataSourceType("MockTestDatabase");
+		this.derivedDataSourceType = new DerivedDataSourceType();
 		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
 
 		TemporalPrimitiveParameterFactory tppf = new TemporalPrimitiveParameterFactory(
 				df, AbsoluteTimeGranularity.DAY);
 
 		PrimitiveParameter pp = tppf.getInstance("1", "1/1/07",
-				new NumberValue(2));
+				new NumberValue(2),dbDataSourceType);
 		this.propositions.add(pp);
 
 		TemporalEventFactory tef = new TemporalEventFactory(df,
 				AbsoluteTimeGranularity.DAY);
 
-		Event event = tef.getInstance("2", "1/1/07", "2/1/07");
-		Event event2 = tef.getInstance("2", "8/15/96", "9/12/96");
-		Event event3 = tef.getInstance("2", "2/1/05", "3/2/05");
-		Event event4 = tef.getInstance("2", "2/1/05", "1/20/06");
+		Event event = tef.getInstance("2", "1/1/07", "2/1/07", derivedDataSourceType);
+		Event event2 = tef.getInstance("2", "8/15/96", "9/12/96", derivedDataSourceType);
+		Event event3 = tef.getInstance("2", "2/1/05", "3/2/05", derivedDataSourceType);
+		Event event4 = tef.getInstance("2", "2/1/05", "1/20/06", derivedDataSourceType);
 		this.propositions.add(event);
 		this.propositions.add(event2);
 		this.propositions.add(event3);

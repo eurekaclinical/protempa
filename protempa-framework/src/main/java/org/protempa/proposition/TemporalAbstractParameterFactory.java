@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 
+import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.value.Granularity;
 
 
@@ -34,6 +35,7 @@ public final class TemporalAbstractParameterFactory {
 
 	public AbstractParameter getInstance(String id, Long start, Long finish) {
 		AbstractParameter e = new AbstractParameter(id);
+		e.setDataSourceType(new DerivedDataSourceType());
 		e.setInterval(new SimpleAbstractParameterInterval(start,
 				this.granularity, finish, this.granularity));
 		return e;
