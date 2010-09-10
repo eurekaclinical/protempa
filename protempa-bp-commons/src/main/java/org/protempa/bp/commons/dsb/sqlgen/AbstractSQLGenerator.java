@@ -17,6 +17,7 @@ import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
 import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
 import org.protempa.DataSourceReadException;
+import org.protempa.DatabaseDataSourceType;
 import org.protempa.bp.commons.dsb.RelationalDatabaseDataSourceBackend;
 import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.Constraint;
 import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.PropositionIdToSqlCode;
@@ -193,7 +194,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
      * same base spec.
      *
      * @param entitySpecs
-     * @param filter
+     * @param filters
      * @param entitySpec
      */
     private void removeNonApplicableFilters(Set<EntitySpec> entitySpecs,
@@ -1259,7 +1260,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 } else {
                     propId = resultSet.getString(i++);
                 }
-                Event event = new Event(propId);
+                Event event = new Event(propId); 
+                event.setDataSourceType(new DatabaseDataSourceType(getDataSourceBackendId()));
                 event.setUniqueIdentifier(new UniqueIdentifier(
                         getDataSourceBackendId(),
                         new MyUniqueIdentifier(entitySpec.getName(),
