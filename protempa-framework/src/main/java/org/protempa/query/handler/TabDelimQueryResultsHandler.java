@@ -304,6 +304,9 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler
             this.writer.write(proposition.getStartFormattedShort());
             this.writer.write('\t');
             this.writer.write(proposition.getFinishFormattedShort());
+            this.writer.write('\t');
+            List ddcs = proposition.getReferences("dischargeDiagnosisCodes");
+            this.writer.write(ddcs != null ? ddcs.toString() : "");
         }
     }
 }

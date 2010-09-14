@@ -2,7 +2,7 @@ package org.protempa;
 
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Interval;
-import org.protempa.proposition.SimpleAbstractParameterInterval;
+import org.protempa.proposition.IntervalFactory;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.NumberValue;
 
@@ -14,35 +14,37 @@ import org.protempa.proposition.value.NumberValue;
  */
 final class ExtendedParameterDurationTestParameters {
 
-	private ExtendedParameterDurationTestParameters() {
+    private static final IntervalFactory intervalFactory =
+            new IntervalFactory();
 
-	}
+    private ExtendedParameterDurationTestParameters() {
+    }
 
-	static AbstractParameter twelveHourParameter() {
-		AbstractParameter param = new AbstractParameter("TEST");
-		param.setValue(new NumberValue(13));
-		Interval ival = new SimpleAbstractParameterInterval(0L,
-				AbsoluteTimeGranularity.HOUR, 12L * 60 * 60 * 1000,
-				AbsoluteTimeGranularity.HOUR);
-		param.setInterval(ival);
-		return param;
-	}
+    static AbstractParameter twelveHourParameter() {
+        AbstractParameter param = new AbstractParameter("TEST");
+        param.setValue(new NumberValue(13));
+        Interval ival = intervalFactory.getInstance(0L,
+                AbsoluteTimeGranularity.HOUR, 12L * 60 * 60 * 1000,
+                AbsoluteTimeGranularity.HOUR);
+        param.setInterval(ival);
+        return param;
+    }
 
-	static AbstractParameter thirteenHourParameter() {
-		AbstractParameter param = new AbstractParameter("TEST");
-		param.setValue(new NumberValue(13));
-		param.setInterval(new SimpleAbstractParameterInterval(0L,
-				AbsoluteTimeGranularity.HOUR, 13L * 60 * 60 * 1000,
-				AbsoluteTimeGranularity.HOUR));
-		return param;
-	}
+    static AbstractParameter thirteenHourParameter() {
+        AbstractParameter param = new AbstractParameter("TEST");
+        param.setValue(new NumberValue(13));
+        param.setInterval(intervalFactory.getInstance(0L,
+                AbsoluteTimeGranularity.HOUR, 13L * 60 * 60 * 1000,
+                AbsoluteTimeGranularity.HOUR));
+        return param;
+    }
 
-	static AbstractParameter elevenHourParameter() {
-		AbstractParameter param = new AbstractParameter("TEST");
-		param.setValue(new NumberValue(13));
-		param.setInterval(new SimpleAbstractParameterInterval(0L,
-				AbsoluteTimeGranularity.HOUR, 11L * 60 * 60 * 1000,
-				AbsoluteTimeGranularity.HOUR));
-		return param;
-	}
+    static AbstractParameter elevenHourParameter() {
+        AbstractParameter param = new AbstractParameter("TEST");
+        param.setValue(new NumberValue(13));
+        param.setInterval(intervalFactory.getInstance(0L,
+                AbsoluteTimeGranularity.HOUR, 11L * 60 * 60 * 1000,
+                AbsoluteTimeGranularity.HOUR));
+        return param;
+    }
 }

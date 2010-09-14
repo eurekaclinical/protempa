@@ -21,7 +21,8 @@ import org.protempa.proposition.value.Granularity;
 public class Segment<T extends TemporalProposition> extends AbstractList<T>
         implements RandomAccess {
 
-    
+    private static final IntervalFactory intervalFactory =
+            new IntervalFactory();
 
     private Sequence<T> ts;
     private int x = -1;
@@ -67,7 +68,8 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
             Long maxStart = maximumStart(this);
             Long minFinish = minimumFinish(this);
             Long maxFinish = maximumFinish(this);
-            return PropositionUtil.createInterval(minStart, maxStart, getStartGranularity(),
+            return intervalFactory.getInstance(minStart, maxStart,
+                    getStartGranularity(),
                     minFinish, maxFinish, getFinishGranularity());
         }
     }

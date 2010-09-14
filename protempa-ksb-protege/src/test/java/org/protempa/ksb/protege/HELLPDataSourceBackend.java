@@ -26,7 +26,7 @@ import org.protempa.bp.commons.BackendProperty;
 import org.protempa.dsb.filter.Filter;
 import org.protempa.proposition.ConstantParameter;
 import org.protempa.proposition.Event;
-import org.protempa.proposition.PointInterval;
+import org.protempa.proposition.IntervalFactory;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.RelativeHourGranularity;
@@ -42,6 +42,8 @@ import org.protempa.proposition.value.ValueType;
  */
 @BackendInfo(displayName = "HELLP Data")
 public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
+    private static final IntervalFactory intervalFactory =
+            new IntervalFactory();
 
     private String dbUrl;
     private String username;
@@ -321,7 +323,7 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
                         Event p = new Event("ICD-9_"
                                 + resultSet.getString(2));
                         long l = RelativeHourGranularity.HOUR.lengthInBaseUnit(resultSet.getInt(3));
-                        p.setInterval(new PointInterval(l,
+                        p.setInterval(intervalFactory.getInstance(l,
                                 RelativeHourGranularity.HOUR, l,
                                 RelativeHourGranularity.HOUR));
                         List<Event> lll = result.get(keyId);
@@ -331,7 +333,7 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
                         Event p = new Event("ICD-9_"
                                 + resultSet.getString(2));
                         long l = RelativeHourGranularity.HOUR.lengthInBaseUnit(resultSet.getInt(3));
-                        p.setInterval(new PointInterval(l,
+                        p.setInterval(intervalFactory.getInstance(l,
                                 RelativeHourGranularity.HOUR, l,
                                 RelativeHourGranularity.HOUR));
                         lll.add(p);

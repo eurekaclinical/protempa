@@ -3,7 +3,9 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import org.arp.javautil.string.StringUtil;
 import org.protempa.ProtempaUtil;
 import org.protempa.bp.commons.dsb.PositionParser;
 import org.protempa.proposition.value.Granularity;
@@ -26,6 +28,7 @@ public final class EntitySpec implements Serializable {
     private final ColumnSpec startTimeOrTimestampSpec;
     private final ColumnSpec finishTimeSpec;
     private final PropertySpec[] propertySpecs;
+    private final ReferenceSpec[] referenceSpecs;
     private final Map<String, String> codeToPropIdMap;
     private final ColumnSpec codeSpec;
     private final ColumnSpec[] constraintSpecs;
@@ -90,6 +93,7 @@ public final class EntitySpec implements Serializable {
             ColumnSpec startTimeOrTimestampSpec,
             ColumnSpec finishTimeSpec,
             PropertySpec[] propertySpecs,
+            ReferenceSpec[] referenceSpecs,
             Map<String, String> codeToPropIdMap,
             ColumnSpec codeSpec,
             ColumnSpec[] constraintSpecs,
@@ -139,6 +143,14 @@ public final class EntitySpec implements Serializable {
                     "propertySpecs");
         } else {
             this.propertySpecs = new PropertySpec[0];
+        }
+
+        if (referenceSpecs != null) {
+            this.referenceSpecs = referenceSpecs.clone();
+            ProtempaUtil.checkArrayForNullElement(this.referenceSpecs,
+                    "referenceSpecs");
+        } else {
+            this.referenceSpecs = new ReferenceSpec[0];
         }
 
         if (codeToPropIdMap != null) {
@@ -259,6 +271,16 @@ public final class EntitySpec implements Serializable {
     }
 
     /**
+     * The entity's references to other entities.
+     *
+     * @return a {@link ReferenceSpec[]} of the entity's references to other
+     * entities. Guaranteed not <code>null</code>.
+     */
+    public ReferenceSpec[] getReferenceSpecs() {
+        return this.referenceSpecs.clone();
+    }
+
+    /**
      * Returns a one-to-one mapping from code to proposition id. If
      * <code>null</code> or a mapping for a code is not defined, it is assumed
      * that the code in the database is the same as the proposition id.
@@ -321,5 +343,28 @@ public final class EntitySpec implements Serializable {
      */
     public PositionParser getPositionParser() {
         return this.positionParser;
+    }
+
+    @Override
+    public String toString() {
+        Map<String,Object> fields = new LinkedHashMap<String,Object>();
+        fields.put("name", this.name);
+        fields.put("description", this.description);
+        fields.put("propositionIds", this.propositionIds);
+        fields.put("unique", this.unique);
+        fields.put("baseSpec", this.baseSpec);
+        fields.put("uniqueIdSpecs", this.uniqueIdSpecs);
+        fields.put("startTimeOrTimestampSpec", this.startTimeOrTimestampSpec);
+        fields.put("finishTimeSpec", this.finishTimeSpec);
+        fields.put("propertySpecs", this.propertySpecs);
+        fields.put("referenceSpecs", this.referenceSpecs);
+        fields.put("codeToPropIdMap", this.codeToPropIdMap);
+        fields.put("codeSpec", this.codeSpec);
+        fields.put("constraintSpecs", this.constraintSpecs);
+        fields.put("valueType", this.valueType);
+        fields.put("granularity", this.granularity);
+        fields.put("positionParser", this.positionParser);
+
+        return StringUtil.getToString(getClass(), fields);
     }
 }

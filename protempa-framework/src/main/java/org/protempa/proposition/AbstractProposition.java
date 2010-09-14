@@ -1,6 +1,8 @@
 package org.protempa.proposition;
 
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,6 @@ public abstract class AbstractProposition implements Proposition {
     protected final PropertyChangeSupport changes;
     private final Map<String, Value> properties;
     private final Map<String, List<UniqueIdentifier>> references;
-    private String datasourceBackendId;
     private UniqueIdentifier key;
     private DataSourceType dataSourceType;
 
@@ -84,26 +85,23 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     @Override
-    public final String getDataSourceBackendId() {
-        return this.datasourceBackendId;
-    }
-
-    public final void setDataSourceBackendId(String id) {
-        this.datasourceBackendId = id;
-    }
-
-    @Override
     public final UniqueIdentifier getUniqueIdentifier() {
         return this.key;
     }
 
     public final void setReferences(String name, List<UniqueIdentifier> refs) {
+        if (refs != null)
+            refs = new ArrayList<UniqueIdentifier>(refs);
         this.references.put(name, refs);
     }
 
     @Override
     public final List<UniqueIdentifier> getReferences(String name) {
-        return this.references.get(name);
+        List<UniqueIdentifier> result = this.references.get(name);
+        if (result != null)
+            return Collections.unmodifiableList(result);
+        else
+            return null;
     }
     
     @Override

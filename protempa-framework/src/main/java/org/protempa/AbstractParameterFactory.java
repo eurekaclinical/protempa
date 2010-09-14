@@ -3,7 +3,7 @@ package org.protempa;
 
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Interval;
-import org.protempa.proposition.PropositionUtil;
+import org.protempa.proposition.IntervalFactory;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.value.Granularity;
@@ -20,12 +20,14 @@ import org.protempa.proposition.value.Value;
  * @author Andrew Post
  */
 public final class AbstractParameterFactory {
+    private static final IntervalFactory intervalFactory =
+            new IntervalFactory();
 
     /**
      * Private constructor.
      */
     private AbstractParameterFactory() {
-        super();
+        
     }
 
     /**
@@ -121,7 +123,7 @@ public final class AbstractParameterFactory {
         if (temporalOffset == null) {
             result.setInterval(segmentIval);
         } else {
-            result.setInterval(PropositionUtil.createInterval(minStart,
+            result.setInterval(intervalFactory.getInstance(minStart,
                     maxStart, startGran, minFinish, maxFinish, finishGran));
         }
 

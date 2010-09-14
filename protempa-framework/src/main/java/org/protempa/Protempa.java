@@ -136,19 +136,12 @@ public final class Protempa {
         if (query == null)
             throw new IllegalArgumentException("query cannot be null");
 
-        // Map<String, List<Proposition>> results =
-        // new HashMap<String, List<Proposition>>();
-
         Set<String> keyIdsSet = Arrays.asSet(query.getKeyIds());
         Set<String> propIds = Arrays.asSet(query.getPropIds());
         Filter filters = query.getFilters();
-
-        // results.putAll()
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
         this.abstractionFinder.doFind(keyIdsSet, propIds, filters,
                 resultHandler, qs);
-
-        // return new QueryResults(results);
     }
 
     /**

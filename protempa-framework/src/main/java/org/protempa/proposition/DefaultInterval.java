@@ -16,206 +16,202 @@ import org.arp.javautil.graph.Weight;
  * 
  * @author Andrew Post
  */
-public final class DefaultInterval extends Interval {
+final class DefaultInterval extends Interval {
 
-	private static final long serialVersionUID = -3498981235848594138L;
+    private static final long serialVersionUID = -3498981235848594138L;
+    private transient ConstraintNetwork cn;
+    private transient boolean constraintNetworkStale = true;
+    private transient boolean simple;
 
-	private transient ConstraintNetwork cn;
+    DefaultInterval(Long minStart, Long maxStart,
+            Granularity startGranularity, Long minFinish, Long maxFinish,
+            Granularity finishGranularity, Long minLength, Long maxLength,
+            Unit lengthUnit) {
+        super(minStart, maxStart, startGranularity, minFinish, maxFinish,
+                finishGranularity, minLength, maxLength, lengthUnit);
+    }
 
-	private transient boolean constraintNetworkStale = true;
+    DefaultInterval(Long start, Granularity startGranularity,
+            Long finish, Granularity finishGranularity, Long length,
+            Unit lengthUnit) {
+        super(start, startGranularity, finish, finishGranularity, length,
+                lengthUnit);
+    }
 
-	private transient boolean simple;
+    DefaultInterval(Long start, Granularity startGranularity,
+            Long finish, Granularity finishGranularity) {
+        super(start, startGranularity, finish, finishGranularity, null, null);
+    }
 
-	public DefaultInterval(Long minStart, Long maxStart,
-			Granularity startGranularity, Long minFinish, Long maxFinish,
-			Granularity finishGranularity, Long minLength, Long maxLength,
-			Unit lengthUnit) {
-		super(minStart, maxStart, startGranularity, minFinish, maxFinish,
-				finishGranularity, minLength, maxLength, lengthUnit);
-	}
+    DefaultInterval(Long start, Granularity startGranularity) {
+        super(start, startGranularity, null, null, null, null);
+    }
 
-	public DefaultInterval(Long start, Granularity startGranularity,
-			Long finish, Granularity finishGranularity, Long length,
-			Unit lengthUnit) {
-		super(start, startGranularity, finish, finishGranularity, length,
-				lengthUnit);
-	}
+    /**
+     * Create an interval with default values (minimumStart=-inf,
+     * maximumStart=+inf, minimumFinish=-inf, maximumFinish=+inf,
+     * minimumDuration=0, maximumDuration=+inf).
+     *
+     * @param description
+     */
+    DefaultInterval() {
+        super();
+    }
 
-	public DefaultInterval(Long start, Granularity startGranularity,
-			Long finish, Granularity finishGranularity) {
-		super(start, startGranularity, finish, finishGranularity, null, null);
-	}
+    private void calculator() {
+        if (constraintNetworkStale) {
+            computeLength();
+            if (cn == null) {
+                cn = new ConstraintNetwork(1);
+                if (v[0] == null || v[1] == null || v[2] == null
+                        || v[3] == null || v[4] != null || v[5] != null
+                        || v[2].compareTo(v[1]) <= 0) {
+                    cn.addInterval(this);
+                } else {
+                    simple = true;
+                }
+            } else {
+                cn.clear();
+                if (v[0] == null || v[1] == null || v[2] == null
+                        || v[3] == null || v[2].compareTo(v[1]) <= 0) {
+                    cn.addInterval(this);
+                } else {
+                    simple = true;
+                }
+            }
+            constraintNetworkStale = false;
+        }
 
-	public DefaultInterval(Long start, Granularity startGranularity) {
-		super(start, startGranularity, null, null, null, null);
-	}
+    }
 
-	/**
-	 * Create an interval with default values (minimumStart=-inf,
-	 * maximumStart=+inf, minimumFinish=-inf, maximumFinish=+inf,
-	 * minimumDuration=0, maximumDuration=+inf).
-	 * 
-	 * @param description
-	 */
-	public DefaultInterval() {
-		super();
-	}
+    public boolean isValid() {
+        calculator();
+        return cn.getConsistent();
+    }
 
-	private void calculator() {
-		if (constraintNetworkStale) {
-			computeLength();
-			if (cn == null) {
-				cn = new ConstraintNetwork(1);
-				if (v[0] == null || v[1] == null || v[2] == null
-						|| v[3] == null || v[4] != null || v[5] != null
-						|| v[2].compareTo(v[1]) <= 0) {
-					cn.addInterval(this);
-				} else {
-					simple = true;
-				}
-			} else {
-				cn.clear();
-				if (v[0] == null || v[1] == null || v[2] == null
-						|| v[3] == null || v[2].compareTo(v[1]) <= 0) {
-					cn.addInterval(this);
-				} else {
-					simple = true;
-				}
-			}
-			constraintNetworkStale = false;
-		}
+    /***************************************************************************
+     * MINIMUM START
+     **************************************************************************/
 
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.virginia.pbhs.parameters.Interval#getMinimumStart()
+     */
+    @Override
+    public Long getMinimumStart() {
+        calculator();
+        if (simple) {
+            return v[0];
+        } else {
+            Weight minStart = cn.getMinimumStart();
+            return minStart.isInfinity() ? null : minStart.value();
+        }
+    }
 
-	public boolean isValid() {
-		calculator();
-		return cn.getConsistent();
-	}
+    /***************************************************************************
+     * MAXIMUM START
+     **************************************************************************/
 
-	/***************************************************************************
-	 * MINIMUM START
-	 **************************************************************************/
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.virginia.pbhs.parameters.Interval#getMaximumStart()
+     */
+    @Override
+    public Long getMaximumStart() {
+        calculator();
+        if (simple) {
+            return v[1];
+        } else {
+            Weight maxStart = cn.getMaximumStart();
+            return maxStart.isInfinity() ? null : maxStart.value();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.virginia.pbhs.parameters.Interval#getMinimumStart()
-	 */
-	@Override
-	public Long getMinimumStart() {
-		calculator();
-		if (simple) {
-			return v[0];
-		} else {
-			Weight minStart = cn.getMinimumStart();
-			return minStart.isInfinity() ? null : minStart.value();
-		}
-	}
+    /***************************************************************************
+     * MINIMUM FINISH
+     **************************************************************************/
 
-	/***************************************************************************
-	 * MAXIMUM START
-	 **************************************************************************/
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.virginia.pbhs.parameters.Interval#getMinimumFinish()
+     */
+    @Override
+    public Long getMinimumFinish() {
+        calculator();
+        if (simple) {
+            return v[2];
+        } else {
+            Weight minFinish = cn.getMinimumFinish();
+            return minFinish.isInfinity() ? null : minFinish.value();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.virginia.pbhs.parameters.Interval#getMaximumStart()
-	 */
-	@Override
-	public Long getMaximumStart() {
-		calculator();
-		if (simple) {
-			return v[1];
-		} else {
-			Weight maxStart = cn.getMaximumStart();
-			return maxStart.isInfinity() ? null : maxStart.value();
-		}
-	}
+    /***************************************************************************
+     * MAXIMUM START
+     **************************************************************************/
 
-	/***************************************************************************
-	 * MINIMUM FINISH
-	 **************************************************************************/
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.virginia.pbhs.parameters.Interval#getMaximumFinish()
+     */
+    @Override
+    public Long getMaximumFinish() {
+        calculator();
+        if (simple) {
+            return v[3];
+        } else {
+            Weight maxFinish = cn.getMaximumFinish();
+            return maxFinish.isInfinity() ? null : maxFinish.value();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.virginia.pbhs.parameters.Interval#getMinimumFinish()
-	 */
-	@Override
-	public Long getMinimumFinish() {
-		calculator();
-		if (simple) {
-			return v[2];
-		} else {
-			Weight minFinish = cn.getMinimumFinish();
-			return minFinish.isInfinity() ? null : minFinish.value();
-		}
-	}
+    /***************************************************************************
+     * MINIMUM DURATION
+     **************************************************************************/
 
-	/***************************************************************************
-	 * MAXIMUM START
-	 **************************************************************************/
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.virginia.pbhs.parameters.Interval#getMinimumDuration()
+     */
+    @Override
+    public Long getMinimumLength() {
+        calculator();
+        if (simple) {
+            return v[2] - v[1];
+        } else {
+            Weight minDur = cn.getMinimumDuration();
+            return minDur.isInfinity() ? null : minDur.value();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.virginia.pbhs.parameters.Interval#getMaximumFinish()
-	 */
-	@Override
-	public Long getMaximumFinish() {
-		calculator();
-		if (simple) {
-			return v[3];
-		} else {
-			Weight maxFinish = cn.getMaximumFinish();
-			return maxFinish.isInfinity() ? null : maxFinish.value();
-		}
-	}
+    /***************************************************************************
+     * MAXIMUM DURATION
+     **************************************************************************/
 
-	/***************************************************************************
-	 * MINIMUM DURATION
-	 **************************************************************************/
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.virginia.pbhs.parameters.IInterval#getMaximumDuration()
+     */
+    @Override
+    public Long getMaximumLength() {
+        calculator();
+        if (simple) {
+            return v[3] - v[0];
+        } else {
+            Weight maxDur = cn.getMaximumDuration();
+            return maxDur.isInfinity() ? null : maxDur.value();
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.virginia.pbhs.parameters.Interval#getMinimumDuration()
-	 */
-	@Override
-	public Long getMinimumLength() {
-		calculator();
-		if (simple) {
-			return v[2] - v[1];
-		} else {
-			Weight minDur = cn.getMinimumDuration();
-			return minDur.isInfinity() ? null : minDur.value();
-		}
-	}
-
-	/***************************************************************************
-	 * MAXIMUM DURATION
-	 **************************************************************************/
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.virginia.pbhs.parameters.IInterval#getMaximumDuration()
-	 */
-	@Override
-	public Long getMaximumLength() {
-		calculator();
-		if (simple) {
-			return v[3] - v[0];
-		} else {
-			Weight maxDur = cn.getMaximumDuration();
-			return maxDur.isInfinity() ? null : maxDur.value();
-		}
-	}
-
-	private void readObject(ObjectInputStream s) throws IOException,
-			ClassNotFoundException {
-		s.defaultReadObject();
-		this.constraintNetworkStale = true;
-	}
-
+    private void readObject(ObjectInputStream s) throws IOException,
+            ClassNotFoundException {
+        s.defaultReadObject();
+        this.constraintNetworkStale = true;
+    }
 }

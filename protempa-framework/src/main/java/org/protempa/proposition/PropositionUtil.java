@@ -432,19 +432,6 @@ public class PropositionUtil {
         }
     }
 
-    public static Interval createInterval(Long minStart, Long maxStart,
-            Granularity startGran, Long minFinish, Long maxFinish,
-            Granularity finishGran) {
-        if (minStart == null || maxStart == null || minFinish == null
-                || maxFinish == null) {
-            return new DefaultInterval(minStart, maxStart, startGran,
-                    minFinish, maxFinish, finishGran, null, null, null);
-        } else {
-            return new SimpleAbstractParameterInterval(minStart, maxStart,
-                    startGran, minFinish, maxFinish, finishGran);
-        }
-    }
-
     static final Comparator<TemporalProposition> TEMP_PROP_COMP =
             new TemporalPropositionIntervalComparator();
 

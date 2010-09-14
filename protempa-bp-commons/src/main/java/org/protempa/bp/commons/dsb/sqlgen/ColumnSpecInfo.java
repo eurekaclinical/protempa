@@ -11,82 +11,82 @@ final class ColumnSpecInfo {
     private Map<String, Integer> propertyIndices = null;
     private int codeIndex = -1;
     private Map<String, List<ReferenceSpec>> references;
-    private int uniqueIdIndex = -1;
-    private int numberofUniqueIdColumns;
+    private int[] uniqueIdIndices;
+    private boolean usingKeyIdIndex;
 
     ColumnSpecInfo() {
 
     }
 
-    public boolean isUnique() {
+    boolean isUnique() {
         return unique;
     }
 
-    public void setUnique(boolean unique) {
+    void setUnique(boolean unique) {
         this.unique = unique;
     }
 
-    public Map<String, List<ReferenceSpec>> getReferences() {
+    Map<String, List<ReferenceSpec>> getReferences() {
         return references;
     }
 
-    public void setReferences(Map<String, List<ReferenceSpec>> references) {
+    void setReferences(Map<String, List<ReferenceSpec>> references) {
         this.references = references;
     }
 
-    public int getCodeIndex() {
+    int getCodeIndex() {
         return codeIndex;
     }
 
-    public void setCodeIndex(int codeIndex) {
+    void setCodeIndex(int codeIndex) {
         this.codeIndex = codeIndex;
     }
 
-    public List<ColumnSpec> getColumnSpecs() {
+    List<ColumnSpec> getColumnSpecs() {
         return columnSpecs;
     }
 
-    public void setColumnSpecs(List<ColumnSpec> columnSpecs) {
+    void setColumnSpecs(List<ColumnSpec> columnSpecs) {
         this.columnSpecs = columnSpecs;
     }
 
-    public int getFinishTimeIndex() {
+    int getFinishTimeIndex() {
         return finishTimeIndex;
     }
 
-    public void setFinishTimeIndex(int finishTimeIndex) {
+    void setFinishTimeIndex(int finishTimeIndex) {
         this.finishTimeIndex = finishTimeIndex;
     }
 
-    public int getStartTimeIndex() {
+    int getStartTimeIndex() {
         return startTimeIndex;
     }
 
-    public void setStartTimeIndex(int startTimeIndex) {
+    void setStartTimeIndex(int startTimeIndex) {
         this.startTimeIndex = startTimeIndex;
     }
 
-    public Map<String, Integer> getPropertyIndices() {
+    Map<String, Integer> getPropertyIndices() {
         return propertyIndices;
     }
 
-    public void setPropertyIndices(Map<String, Integer> index) {
+    void setPropertyIndices(Map<String, Integer> index) {
         this.propertyIndices = index;
     }
 
-    public void setUniqueIdIndex(int uniqueIdIndex) {
-        this.uniqueIdIndex = uniqueIdIndex;
+    void setUniqueIdIndices(int[] uniqueIdIndices) {
+        this.uniqueIdIndices = uniqueIdIndices;
     }
 
-    public int getUniqueIdIndex() {
-        return this.uniqueIdIndex;
+    int[] getUniqueIdIndices() {
+        return this.uniqueIdIndices;
     }
 
-    public void setNumberOfUniqueIdColumns(int numCols) {
-        this.numberofUniqueIdColumns = numCols;
+    boolean isUsingKeyIdIndex() {
+        return this.usingKeyIdIndex;
     }
 
-    public int getNumberOfUniqueIdColumns() {
-        return this.numberofUniqueIdColumns;
+    void setUsingKeyIdIndex(boolean usingKeyIdIndex) {
+        this.usingKeyIdIndex = usingKeyIdIndex;
     }
 }

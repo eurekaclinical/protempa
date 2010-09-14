@@ -2,7 +2,9 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.ProtempaUtil;
 
@@ -13,6 +15,7 @@ import org.protempa.ProtempaUtil;
  * @author Andrew Post
  */
 public final class ColumnSpec implements Serializable {
+    private static final long serialVersionUID = 2254623617064935923L;
 
     /**
      * SQL comparison operators.
@@ -124,7 +127,14 @@ public final class ColumnSpec implements Serializable {
             return hash;
         }
 
+        @Override
+        public String toString() {
+            Map<String,Object> fields = new LinkedHashMap<String,Object>();
+            fields.put("propositionId", this.propositionId);
+            fields.put("sqlCode", this.sqlCode);
 
+            return StringUtil.getToString(getClass(), fields);
+        }
     }
     
     private final String schema;
@@ -339,7 +349,13 @@ public final class ColumnSpec implements Serializable {
 
     @Override
     public String toString() {
-        return "ColumnSpec{" + "schema="
-                + schema + "; table=" + table + "; column=" + column + "}";
+        Map<String,Object> fields = new LinkedHashMap<String,Object>();
+        fields.put("schema", this.schema);
+        fields.put("table", this.table);
+        fields.put("column", this.column);
+        fields.put("joinSpec", this.joinSpec);
+        fields.put("constraint", this.constraint);
+        fields.put("propIdToSqlCodes", this.propIdToSqlCodes);
+        return StringUtil.getToString(getClass(), fields);
     }
 }

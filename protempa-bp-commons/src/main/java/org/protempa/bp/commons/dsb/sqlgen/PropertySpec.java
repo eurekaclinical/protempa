@@ -3,7 +3,9 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import org.arp.javautil.string.StringUtil;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -12,6 +14,7 @@ import org.protempa.proposition.value.ValueType;
  * @author Andrew Post
  */
 public final class PropertySpec implements Serializable {
+    private static final long serialVersionUID = -1917547963157896382L;
     private final String name;
     private final Map<String, String> codeToPropIdMap;
     private final ColumnSpec codeSpec;
@@ -81,5 +84,15 @@ public final class PropertySpec implements Serializable {
      */
     public ValueType getValueType() {
         return this.valueType;
+    }
+
+    @Override
+    public String toString() {
+        Map<String,Object> fields = new LinkedHashMap<String,Object>();
+        fields.put("name", this.name);
+        fields.put("codeToPropIdMap", this.codeToPropIdMap);
+        fields.put("codeSpec", this.codeSpec);
+        fields.put("valueType", this.valueType);
+        return StringUtil.getToString(getClass(), fields);
     }
 }

@@ -33,6 +33,7 @@ public interface Proposition extends PropositionVisitable, Serializable {
 
     /**
      * Returns the data source type of the Proposition.
+     * @return a {@link DataSourceType}.
      */
     DataSourceType getDataSourceType();
 
@@ -114,14 +115,6 @@ public interface Proposition extends PropositionVisitable, Serializable {
      * @return a {@link String[]} of property names.
      */
     String[] propertyNames();
-
-    /**
-     * The id of the data source backend from which this proposition came,
-     * or <code>null</code> if the proposition is derived.
-     * 
-     * @return a data source backend id {@link String}.
-     */
-    String getDataSourceBackendId();
 
     /**
      * Gets this proposition's global unique identifier.

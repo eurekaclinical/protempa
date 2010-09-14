@@ -83,8 +83,7 @@ public final class PrimitiveParameter extends TemporalParameter {
         /*
          * As per Combi et al. Methods Inf. Med. 1995;34:458-74.
          */
-        setInterval(new PointInterval(timestamp, granularity, timestamp,
-                granularity));
+        setInterval(new SimpleInterval(timestamp, granularity));
     }
 
     @Override
