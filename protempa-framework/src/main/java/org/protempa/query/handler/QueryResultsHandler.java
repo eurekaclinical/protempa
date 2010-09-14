@@ -3,6 +3,7 @@ package org.protempa.query.handler;
 import java.util.List;
 
 import org.protempa.FinderException;
+import org.protempa.QuerySession;
 import org.protempa.proposition.Proposition;
 
 /**
@@ -19,10 +20,11 @@ public interface QueryResultsHandler {
      * is guaranteed to be called by Protempa before any query result processing
      * is done.
      *
+     * @param querySession the {@link QuerySession}.
      * @throws FinderException
      *             if any exceptions occur at a lower level
      */
-    public void init() throws FinderException;
+    public void init(QuerySession querySession) throws FinderException;
 
     /**
      * Performs all clean-up functions for the handler. This method is

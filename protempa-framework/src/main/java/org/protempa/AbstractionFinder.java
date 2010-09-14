@@ -93,7 +93,7 @@ final class AbstractionFinder implements Module {
             throw new FinderException("Protempa already closed!");
         }
         try {
-            resultHandler.init();
+            resultHandler.init(qs);
             if (workingMemoryCache != null) {
                 doFindStateful(keyIds, propIds, filters, resultHandler, qs);
             } else {
