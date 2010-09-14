@@ -1,5 +1,7 @@
 package org.protempa.dsb.filter;
 
+import java.util.Map;
+import org.arp.javautil.string.StringUtil;
 import org.protempa.proposition.value.ListValue;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
@@ -88,5 +90,19 @@ public class PropertyValueFilter extends AbstractFilter {
     @Override
     public void accept(FilterVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    protected Map<String,Object> toStringFields() {
+        Map<String,Object> result = super.toStringFields();
+        result.put("property", this.property);
+        result.put("valueComparator", this.valueComparator);
+        result.put("value", this.value);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return StringUtil.getToString(getClass(), toStringFields());
     }
 }

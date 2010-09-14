@@ -1,6 +1,10 @@
 package org.protempa.dsb.filter;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import org.protempa.ProtempaUtil;
 
@@ -80,4 +84,13 @@ public abstract class AbstractFilter implements Filter {
     public Iterator<Filter> andIterator() {
         return new DataSourceConstraintAndIterator(this);
     }
+
+    protected Map<String,Object> toStringFields() {
+        Map<String,Object> result = new LinkedHashMap<String,Object>();
+        result.put("propositionIds", this.propositionIds);
+        result.put("and", this.and);
+        return result;
+    }
+
+    
 }
