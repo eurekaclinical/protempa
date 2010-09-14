@@ -2,6 +2,7 @@ package org.protempa.proposition;
 
 import java.util.Collections;
 
+import org.protempa.DatabaseDataSourceType;
 import org.protempa.proposition.AbstractPropositionVisitor;
 import org.protempa.proposition.PrimitiveParameter;
 
@@ -20,6 +21,7 @@ public class PropositionVisitorTest extends TestCase {
 	public void testPrimitiveParameter() throws Exception {
 		PrimitiveParameterVisitor v = new PrimitiveParameterVisitor();
 		PrimitiveParameter p = new PrimitiveParameter("test");
+		p.setDataSourceType(new DatabaseDataSourceType("TEST"));
 		v.visit(Collections.singleton(p));
 		assertTrue(v.found);
 	}

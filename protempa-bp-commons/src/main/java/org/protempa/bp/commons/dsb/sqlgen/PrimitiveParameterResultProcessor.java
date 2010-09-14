@@ -38,6 +38,7 @@ class PrimitiveParameterResultProcessor extends
                 propId = resultSet.getString(i++);
             }
             PrimitiveParameter p = new PrimitiveParameter(propId);
+            p.setDataSourceType(new DatabaseDataSourceType(getDataSourceBackendId()));
             p.setUniqueIdentifier(uniqueIdentifer);
             try {
                 p.setTimestamp(entitySpec.getPositionParser()

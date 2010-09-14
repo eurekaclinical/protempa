@@ -1,5 +1,6 @@
 package org.protempa.proposition;
 
+import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.value.RelativeHourGranularity;
 
 import junit.framework.TestCase;
@@ -18,6 +19,7 @@ public class AbstractParameterTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         p = new AbstractParameter("TEST");
+        p.setDataSourceType(new DerivedDataSourceType());
         p.setInterval(intervalFactory.getInstance(0L,
                 RelativeHourGranularity.HOUR, 12L,
                 RelativeHourGranularity.HOUR));

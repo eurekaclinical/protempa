@@ -98,6 +98,7 @@ final class AbstractionCombiner {
                     new Segment<AbstractParameter>(s);
 
             AbstractParameter result = new AbstractParameter(a1Id);
+            result.setDataSourceType(new DerivedDataSourceType());
             result.setInterval(segment.getInterval());
             result.setValue(a1.getValue());
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.arp.javautil.collections.Collections;
 import org.protempa.DatabaseDataSourceType;
+import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.ConstantParameter;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Value;
@@ -39,6 +40,7 @@ class ConstantParameterResultProcessor extends
             ConstantParameter cp = new ConstantParameter(propId);
             cp.setValue(cpVal);
             cp.setUniqueIdentifier(uniqueIdentifer);
+            cp.setDataSourceType(new DerivedDataSourceType());
             PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
             for (PropertySpec propertySpec : propertySpecs) {
                 ValueType vf2 = propertySpec.getValueType();

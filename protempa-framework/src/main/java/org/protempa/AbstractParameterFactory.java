@@ -42,6 +42,7 @@ public final class AbstractParameterFactory {
             Offsets temporalOffset,
             TemporalExtendedPropositionDefinition[] epds) {
         AbstractParameter result = new AbstractParameter(propId);
+        result.setDataSourceType(new DerivedDataSourceType());
 
         Long minStart = null;
         Long maxStart = null;
