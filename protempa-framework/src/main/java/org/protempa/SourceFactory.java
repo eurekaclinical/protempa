@@ -2,6 +2,7 @@ package org.protempa;
 
 import org.protempa.backend.InvalidConfigurationsException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendNewInstanceException;
@@ -13,6 +14,8 @@ import org.protempa.backend.BackendSpecLoader;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.Configurations;
 import org.protempa.backend.ConfigurationsProviderManager;
+
+import sun.swing.BakedArrayList;
 
 /**
  *
@@ -28,6 +31,9 @@ public final class SourceFactory {
 
     private final List<BackendInstanceSpec<KnowledgeSourceBackend>>
             knowledgeSourceBackendInstanceSpecs;
+    
+    private final List<BackendInstanceSpec<TermSourceBackend>>
+            termSourceBackendInstanceSpecs;
 
     public SourceFactory(String configurationsId) 
             throws ConfigurationsLoadException, BackendProviderSpecLoaderException,
@@ -45,6 +51,8 @@ public final class SourceFactory {
                 backendProvider.getDataSourceBackendSpecLoader();
         BackendSpecLoader<KnowledgeSourceBackend> ksl =
                 backendProvider.getKnowledgeSourceBackendSpecLoader();
+        BackendSpecLoader<TermSourceBackend> tsl =
+                backendProvider.getTermSourceBackendSpecLoader();
 
         for (String configurationId :
             configurations.loadConfigurationIds(configurationsId)) {
@@ -75,6 +83,13 @@ public final class SourceFactory {
         
         for (BackendSpec backendSpec : ksl) {
             this.knowledgeSourceBackendInstanceSpecs
+                    .addAll(configurations.load(configurationsId, backendSpec));
+        }
+        
+        this.termSourceBackendInstanceSpecs =
+                new ArrayList<BackendInstanceSpec<TermSourceBackend>>();
+        for (BackendSpec backendSpec : tsl) {
+            this.termSourceBackendInstanceSpecs
                     .addAll(configurations.load(configurationsId, backendSpec));
         }
     }
@@ -116,5 +131,19 @@ public final class SourceFactory {
                     .getInstance();
         }
         return new AlgorithmSource(backends);
+    }
+    
+    public TermSource newTermSourceInstance()
+            throws BackendInitializationException, BackendNewInstanceException {
+        TermSourceBackend[] backends = 
+                new TermSourceBackend[
+                this.termSourceBackendInstanceSpecs.size()];
+        for (int i = 0; i < backends.length; i++) {
+            backends[i] = 
+                    this.termSourceBackendInstanceSpecs.get(i)
+                    .getInstance();    
+        }
+        return new TermSource(backends);
+        
     }
 }

@@ -10,6 +10,7 @@ import org.arp.javautil.serviceloader.ServiceLoader;
 import org.protempa.AlgorithmSourceBackend;
 import org.protempa.DataSourceBackend;
 import org.protempa.KnowledgeSourceBackend;
+import org.protempa.TermSourceBackend;
 import org.protempa.backend.BackendProvider;
 import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
@@ -43,6 +44,12 @@ public final class CommonsBackendProvider
             getAlgorithmSourceBackendSpecLoader() 
             throws BackendProviderSpecLoaderException {
         return getBackendSpecLoader(AlgorithmSourceBackend.class);
+    }
+
+    public BackendSpecLoader<TermSourceBackend> 
+            getTermSourceBackendSpecLoader()
+            throws BackendProviderSpecLoaderException {
+        return getBackendSpecLoader(TermSourceBackend.class);
     }
 
     private <B extends org.protempa.Backend> BackendSpecLoader<B>

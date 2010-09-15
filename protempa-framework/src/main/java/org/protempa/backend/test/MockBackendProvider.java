@@ -1,10 +1,12 @@
 package org.protempa.backend.test;
 
 import org.protempa.backend.*;
+
 import java.util.Collections;
 import org.protempa.AlgorithmSourceBackend;
 import org.protempa.DataSourceBackend;
 import org.protempa.KnowledgeSourceBackend;
+import org.protempa.TermSourceBackend;
 
 public final class MockBackendProvider implements BackendProvider {
 
@@ -39,6 +41,14 @@ public final class MockBackendProvider implements BackendProvider {
             new BackendPropertySpec("url", "URL",
             "The URL to the knowledge base", String.class,
             new DefaultBackendPropertyValidator())))));
+    }
+
+    public BackendSpecLoader<TermSourceBackend> getTermSourceBackendSpecLoader()
+            throws BackendProviderSpecLoaderException {
+        return new BackendSpecLoader<TermSourceBackend>(
+                Collections.singletonList(
+               new BackendSpec<TermSourceBackend>(
+               this, "TSBackendSpec1", "TS Backend Spec 1", null)));
     }
 
     public Object newInstance(String resourceId)
