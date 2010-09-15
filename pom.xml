@@ -14,5 +14,6 @@
     <module>protempa-bcp-commons</module>
     <module>protempa-bp-commons</module>
     <module>protempa-ksb-protege</module>
+    <module>protempa-tsb-umls</module>
   </modules>
 </project>
