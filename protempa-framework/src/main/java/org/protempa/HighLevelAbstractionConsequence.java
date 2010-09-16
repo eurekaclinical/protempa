@@ -1,5 +1,8 @@
 package org.protempa;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
@@ -41,26 +44,25 @@ class HighLevelAbstractionConsequence implements Consequence {
     @Override
     public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
             throws Exception {
+        List<TemporalProposition> tps = parameters(arg0.getTuple(), arg1);
         Segment<TemporalProposition> segment =
                 new Segment<TemporalProposition>(
-                parameters(arg0.getTuple(), arg1));
+                new Sequence(cad.getId(), tps));
         Offsets temporalOffset = cad.getTemporalOffset();
         AbstractParameter result =
                 AbstractParameterFactory.getFromAbstraction(cad.getId(),
-                segment, null, temporalOffset, epds);
+                segment, tps, null, temporalOffset, epds);
         arg0.getWorkingMemory().insert(result);
     }
     
     @SuppressWarnings("unchecked")
-    private Sequence<TemporalProposition> parameters(Tuple arg0,
+    private List<TemporalProposition> parameters(Tuple arg0,
             WorkingMemory arg1) {
-        Sequence<TemporalProposition> sequences =
-                new Sequence<TemporalProposition>(
-                cad.getId(), columns);
+        List<TemporalProposition> sequences =
+                new ArrayList<TemporalProposition>(columns);
         for (int i = 0; i < columns; i++) {
             sequences.add((TemporalProposition) arg1.getObject(arg0.get(i)));
         }
-        
         return sequences;
     }
 }

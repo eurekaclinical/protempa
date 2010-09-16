@@ -7,6 +7,7 @@ import org.protempa.proposition.IntervalFactory;
 import org.protempa.proposition.value.Granularity;
 
 /**
+ * A filter for a position (e.g., date/time) range.
  *
  * @author Andrew Post
  */
@@ -16,6 +17,19 @@ public class PositionFilter extends AbstractFilter {
 
     private final Interval ival;
 
+    /**
+     * Initializes a filter with a position range.
+     *
+     * @param propIds a {@link String[]} of proposition ids on which to filter.
+     * @param start the start position in Protempa's {@link Long}
+     * representation.
+     * @param startGran the {@link Granularity} with which to interpret the
+     * start position.
+     * @param finish the finish position in Protempa's {@link Long}
+     * representation.
+     * @param finishGran the {@link Granularity} with which to interpret the
+     * finish position.
+     */
     public PositionFilter(String[] propIds, Long start,
             Granularity startGran, Long finish, Granularity finishGran) {
         super(propIds);
@@ -24,19 +38,31 @@ public class PositionFilter extends AbstractFilter {
     }
 
     /**
-     * @return the startGranularity
+     * Returns the {@link Granularity} with which to interpret the
+     * start position.
+     * 
+     * @return the startGranularity a {@link Granularity}.
      */
     public Granularity getStartGranularity() {
         return this.ival.getStartGranularity();
     }
 
     /**
-     * @return the finishGranularity
+     * Returns the {@link Granularity} with which to interpret the
+     * finish position.
+     *
+     * @return the finishGranularity a {@link Granularity}.
      */
     public Granularity getFinishGranularity() {
         return this.ival.getFinishGranularity();
     }
 
+    /**
+     * Returns the maximum finish position in Protempa's {@link Long}
+     * representation.
+     *
+     * @return a {@link Long}.
+     */
     public Long getMaximumFinish() {
         if (this.ival != null) {
             return this.ival.getMaximumFinish();
@@ -45,6 +71,12 @@ public class PositionFilter extends AbstractFilter {
         }
     }
 
+    /**
+     * Returns the maximum start position in Protempa's {@link Long}
+     * representation.
+     *
+     * @return a {@link Long}.
+     */
     public Long getMaximumStart() {
         if (this.ival != null) {
             return this.ival.getMaximumStart();
@@ -53,6 +85,12 @@ public class PositionFilter extends AbstractFilter {
         }
     }
 
+    /**
+     * Returns the minimum finish position in Protempa's {@link Long}
+     * representation.
+     *
+     * @return a {@link Long}.
+     */
     public Long getMinimumFinish() {
         if (this.ival != null) {
             return this.ival.getMinimumFinish();
@@ -61,6 +99,12 @@ public class PositionFilter extends AbstractFilter {
         }
     }
 
+    /**
+     * Returns the minimum start position in Protempa's {@link Long}
+     * representation.
+     *
+     * @return a {@link Long}.
+     */
     public Long getMinimumStart() {
         if (this.ival != null) {
             return this.ival.getMinimumStart();

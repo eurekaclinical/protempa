@@ -135,6 +135,9 @@ public final class Protempa {
             throws FinderException {
         if (query == null)
             throw new IllegalArgumentException("query cannot be null");
+        if (query.getTermIds().length > 0)
+            throw new UnsupportedOperationException(
+                    "term id support has not been implemented yet.");
 
         Set<String> keyIdsSet = Arrays.asSet(query.getKeyIds());
         Set<String> propIds = Arrays.asSet(query.getPropIds());

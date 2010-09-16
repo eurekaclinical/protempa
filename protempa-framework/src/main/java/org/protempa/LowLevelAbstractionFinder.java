@@ -298,7 +298,7 @@ public final class LowLevelAbstractionFinder {
                                 objAsserter.assertObject(
                                     AbstractParameterFactory
                                     .getFromAbstraction(id,
-                                    lastSeg, prevFoundValue.getValue(),
+                                    lastSeg, null, prevFoundValue.getValue(),
                                     null, null));
                             }
                             lastSeg = new Segment<PrimitiveParameter>(seg);
@@ -314,7 +314,7 @@ public final class LowLevelAbstractionFinder {
             if (lastSeg != null) {
                 objAsserter.assertObject(
                         AbstractParameterFactory.getFromAbstraction(id,
-                        lastSeg, prevFoundValue.getValue(), null, null));
+                        lastSeg, null, prevFoundValue.getValue(), null, null));
                 lastSeg = null;
             }
         }
