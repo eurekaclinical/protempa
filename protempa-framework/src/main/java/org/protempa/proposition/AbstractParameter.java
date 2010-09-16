@@ -55,7 +55,7 @@ public final class AbstractParameter extends TemporalParameter {
         buf.append(" - ");
         buf.append(getFinishFormattedShort());
         buf.append("; ");
-        String[] propNames = propertyNames();
+        String[] propNames = getPropertyNames();
         String[] propStrings = new String[propNames.length];
         int i = 0;
         for (String propertyName : propNames) {

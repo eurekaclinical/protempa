@@ -1,9 +1,9 @@
 package org.protempa.query.handler;
 
+import org.protempa.Derivations;
 import java.util.List;
 
 import org.protempa.FinderException;
-import org.protempa.QuerySession;
 import org.protempa.proposition.Proposition;
 
 /**
@@ -20,11 +20,10 @@ public interface QueryResultsHandler {
      * is guaranteed to be called by Protempa before any query result processing
      * is done.
      *
-     * @param querySession the {@link QuerySession}.
      * @throws FinderException
      *             if any exceptions occur at a lower level
      */
-    public void init(QuerySession querySession) throws FinderException;
+    public void init() throws FinderException;
 
     /**
      * Performs all clean-up functions for the handler. This method is
@@ -44,7 +43,12 @@ public interface QueryResultsHandler {
      *            the identifying key for the result
      * @param propositions
      *            the proposition results for the given key
+     * @param derivationsList a mapping from propositions to derived
+     * abstractions.
+     * and propositions.
      */
     public void handleQueryResult(String key,
-            List<Proposition> propositions) throws FinderException;
+            List<Proposition> propositions, 
+            List<Derivations> derivationsList)
+            throws FinderException;
 }

@@ -10,8 +10,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import org.protempa.FinderException;
-import org.protempa.query.SimpleQuery;
 import org.protempa.proposition.Proposition;
+import org.protempa.query.Query;
 import org.protempa.query.handler.MappingQueryResultsHandler;
 
 /**
@@ -451,8 +451,10 @@ public abstract class AbstractHELLPOneKeyTest extends AbstractTest {
             throws FinderException {
         MappingQueryResultsHandler mqrh =
                 new MappingQueryResultsHandler();
-        protempa.execute(
-                SimpleQuery.newInstance(keyId, ALL_PARAMETERS), mqrh);
+        Query q = new Query();
+        q.setKeyIds(new String[] {keyId});
+        q.setPropIds(ALL_PARAMETERS);
+        protempa.execute(q, mqrh);
         Collection<Proposition> actual =
                 mqrh.getResultMap().get(keyId);
         HashSet<String> names = new HashSet<String>();

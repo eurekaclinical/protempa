@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.arp.javautil.collections.Collections;
 import org.protempa.DatabaseDataSourceType;
 import org.protempa.proposition.PrimitiveParameter;
@@ -21,6 +22,7 @@ class PrimitiveParameterResultProcessor extends
         Map<String, List<PrimitiveParameter>> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
         String[] propIds = entitySpec.getPropositionIds();
+        Logger logger = SQLGenUtil.logger();
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
@@ -44,7 +46,7 @@ class PrimitiveParameterResultProcessor extends
                 p.setTimestamp(entitySpec.getPositionParser()
                         .toLong(resultSet, i++));
             } catch (SQLException e) {
-                SQLGenUtil.logger().log(Level.WARNING,
+                logger.log(Level.WARNING,
                         "Could not parse timestamp. Ignoring data value.", e);
                 continue;
             }
@@ -59,6 +61,7 @@ class PrimitiveParameterResultProcessor extends
             }
             p.setDataSourceType(
                     new DatabaseDataSourceType(getDataSourceBackendId()));
+            logger.log(Level.FINEST, "Created primitive parameter {0}", p);
             Collections.putList(results, keyId, p);
         }
     }

@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.protempa.FinderException;
-import org.protempa.query.SimpleQuery;
+
+
+
 import org.protempa.proposition.Proposition;
+import org.protempa.query.Query;
 import org.protempa.query.handler.MappingQueryResultsHandler;
 
 /**
@@ -35,8 +38,9 @@ public abstract class AbstractHELLPAllKeysOneParameterTest
             try {
                 MappingQueryResultsHandler mqrh =
                         new MappingQueryResultsHandler();
-                protempa.execute(SimpleQuery.newFindForAllKeysInstance(propId),
-                        mqrh);
+                Query q = new Query();
+                q.setPropIds(new String[] {propId});
+                protempa.execute(q, mqrh);
                 Map<String, List<Proposition>> results = mqrh.getResultMap();
                 this.numberOfKeysFound = results.size();
                 for (List<Proposition> vals : results.values()) {

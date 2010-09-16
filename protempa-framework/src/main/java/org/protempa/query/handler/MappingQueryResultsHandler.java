@@ -1,12 +1,12 @@
 package org.protempa.query.handler;
 
+import org.protempa.Derivations;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.protempa.FinderException;
-import org.protempa.QuerySession;
 import org.protempa.proposition.Proposition;
 
 /**
@@ -21,7 +21,6 @@ import org.protempa.proposition.Proposition;
 public class MappingQueryResultsHandler implements QueryResultsHandler {
 
     private Map<String, List<Proposition>> resultMap;
-    private QuerySession querySession;
 
 //	private QueryResults queryResults;
 
@@ -32,15 +31,6 @@ public class MappingQueryResultsHandler implements QueryResultsHandler {
      */
     public final Map<String, List<Proposition>> getResultMap() {
         return Collections.unmodifiableMap(resultMap);
-    }
-
-    /**
-     * Gets the {@link QuerySession}.
-     * 
-     * @return a {@link QuerySession}.
-     */
-    protected QuerySession getQuerySession() {
-        return this.querySession;
     }
 
     /**
@@ -63,16 +53,13 @@ public class MappingQueryResultsHandler implements QueryResultsHandler {
     }
 
     /**
-     * Initializes the map returned by {@link #getResultMap()} and
-     * stores the {@link QuerySession}.
+     * Initializes the map returned by {@link #getResultMap()}.
      *
-     * @param querySession a {@link QuerySession}.
      * @throws FinderException should never throw.
      */
     @Override
-    public void init(QuerySession querySession) throws FinderException {
+    public void init() throws FinderException {
         this.resultMap = new HashMap<String, List<Proposition>>();
-        this.querySession = querySession;
     }
 
     /**
@@ -84,7 +71,8 @@ public class MappingQueryResultsHandler implements QueryResultsHandler {
      * @throws FinderException should never throw.
      */
     @Override
-    public void handleQueryResult(String key, List<Proposition> propositions)
+    public void handleQueryResult(String key, List<Proposition> propositions,
+            List<Derivations> derivationsList)
             throws FinderException {
         resultMap.put(key, propositions);
     }

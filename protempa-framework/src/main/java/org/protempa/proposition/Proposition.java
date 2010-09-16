@@ -114,7 +114,9 @@ public interface Proposition extends PropositionVisitable, Serializable {
      *
      * @return a {@link String[]} of property names.
      */
-    String[] propertyNames();
+    String[] getPropertyNames();
+
+    
 
     /**
      * Gets this proposition's global unique identifier.

@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.protempa.proposition.value.ValueFactory;
 
 import org.arp.javautil.io.IOUtil;
 import org.protempa.backend.BackendInstanceSpec;
@@ -126,8 +125,7 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
         String abbrevDisplayName = vals[1];
         def.setAbbreviatedDisplayName(abbrevDisplayName.length() > 0
                 ? abbrevDisplayName : null);
-        def.setValueFactory(ValueFactory.get(
-                ValueType.valueOf(vals[2])));
+        def.setValueType(ValueType.valueOf(vals[2]));
         return def;
     }
 

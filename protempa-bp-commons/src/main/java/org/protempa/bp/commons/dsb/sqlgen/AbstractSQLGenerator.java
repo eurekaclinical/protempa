@@ -958,7 +958,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             boolean shouldGenerateTable = begin || currentJoin != null;
             if (shouldGenerateTable) {
                 ColumnSpec columnSpec2 = null;
-                if (currentJoin == null) {
+                if (currentJoin == null || columnSpec.getJoin() != null) {
                     columnSpec2 = findColumnSpecWithMatchingSchemaAndTable(j,
                             columnSpecs, columnSpec);
                 }
@@ -1046,7 +1046,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     populateEntitySpecToPropIdMap(new String[]{propId},
                     entitySpecToPropIdMapFromPropIds);
             if (!inDataSource) {
-                SQLGenUtil.logger().log(Level.INFO,
+                SQLGenUtil.logger().log(Level.FINER,
                         "Data source backend {0} does not know about proposition {1}",
                         new Object[]{backendNameForMessages(), propId});
             }

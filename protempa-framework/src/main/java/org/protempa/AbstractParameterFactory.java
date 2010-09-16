@@ -1,6 +1,7 @@
 package org.protempa;
 
 
+import java.util.List;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Interval;
 import org.protempa.proposition.IntervalFactory;
@@ -38,7 +39,8 @@ public final class AbstractParameterFactory {
      * @return
      */
     public static AbstractParameter getFromAbstraction(String propId,
-            Segment<? extends TemporalProposition> segment, Value value,
+            Segment<? extends TemporalProposition> segment,
+            List<TemporalProposition> tps, Value value,
             Offsets temporalOffset,
             TemporalExtendedPropositionDefinition[] epds) {
         AbstractParameter result = new AbstractParameter(propId);
@@ -62,7 +64,7 @@ public final class AbstractParameterFactory {
             }
             startGran = segment.getStartGranularity();
         } else {
-            TemporalProposition param = matchingTemporalProposition(segment,
+            TemporalProposition param = matchingTemporalProposition(tps,
                 temporalOffset.getStartTemporalExtendedPropositionDefinition(),
                 epds);
 
@@ -98,7 +100,7 @@ public final class AbstractParameterFactory {
             }
             finishGran = segment.getFinishGranularity();
         } else {
-            TemporalProposition param = matchingTemporalProposition(segment,
+            TemporalProposition param = matchingTemporalProposition(tps,
                temporalOffset.getFinishTemporalExtendedPropositionDefinition(),
                epds);
 
@@ -134,12 +136,12 @@ public final class AbstractParameterFactory {
     }
 
     private static TemporalProposition matchingTemporalProposition(
-            Segment<? extends TemporalProposition> segment,
+            List<TemporalProposition> tps,
             TemporalExtendedPropositionDefinition tepd,
             TemporalExtendedPropositionDefinition[] epds) {
         for (int i = 0; i < epds.length; i++) {
             if (epds[i] == tepd) {
-                return segment.get(i);
+                return tps.get(i);
             }
         }
         throw new AssertionError("never reached");

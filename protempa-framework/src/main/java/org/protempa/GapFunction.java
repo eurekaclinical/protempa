@@ -1,31 +1,29 @@
 package org.protempa;
 
+import java.io.Serializable;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Interval;
 import org.protempa.proposition.Segment;
 
-public abstract class GapFunction {
-	public static final GapFunction DEFAULT = new SimpleGapFunction();
+public abstract class GapFunction implements Serializable {
 
-	public final boolean execute(AbstractParameter lhs, AbstractParameter rhs) {
-		if (lhs == null || rhs == null) {
-			return false;
-		} else {
-			return execute(lhs.getInterval(), rhs.getInterval());
-		}
-	}
+    public static final GapFunction DEFAULT = new SimpleGapFunction();
 
-	final boolean execute(Segment lhs, Segment rhs) {
-		if (lhs == null || rhs == null) {
-			return false;
-		} else {
-			return execute(lhs.getInterval(), rhs.getInterval());
-		}
-	}
+    public final boolean execute(AbstractParameter lhs, AbstractParameter rhs) {
+        if (lhs == null || rhs == null) {
+            return false;
+        } else {
+            return execute(lhs.getInterval(), rhs.getInterval());
+        }
+    }
 
-	public abstract boolean execute(Interval lhs, Interval rhs);
+    final boolean execute(Segment lhs, Segment rhs) {
+        if (lhs == null || rhs == null) {
+            return false;
+        } else {
+            return execute(lhs.getInterval(), rhs.getInterval());
+        }
+    }
 
-	protected String debugMessage() {
-		return getClass().getName();
-	}
+    public abstract boolean execute(Interval lhs, Interval rhs);
 }

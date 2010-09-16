@@ -66,7 +66,7 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     @Override
-    public final String[] propertyNames() {
+    public final String[] getPropertyNames() {
         Set<String> keys = this.properties.keySet();
         return keys.toArray(new String[keys.size()]);
     }

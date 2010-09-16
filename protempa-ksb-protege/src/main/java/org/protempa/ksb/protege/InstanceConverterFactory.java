@@ -35,8 +35,6 @@ final class InstanceConverterFactory {
 			return new PrimitiveParameterConverter();
 		} else if (parameter.hasType(kb.getCls("SimpleAbstraction"))) {
 			return new LowLevelAbstractionConverter();
-		} else if (parameter.hasType(kb.getCls("AggregateAbstraction"))) {
-			return new AggregationConverter();
 		} else if (parameter.hasType(kb.getCls("SliceAbstraction"))) {
 			return new SliceConverter();
 		} else if (parameter.hasType(kb.getCls("ComplexAbstraction"))) {

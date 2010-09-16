@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.arp.javautil.collections.Collections;
 import org.protempa.DatabaseDataSourceType;
 import org.protempa.proposition.Event;
@@ -23,9 +24,13 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
     public void process(ResultSet resultSet) throws SQLException {
         Map<String, List<Event>> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
+        Logger logger = SQLGenUtil.logger();
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
+
+            String[] uniqueIds = generateUniqueIdsArray(entitySpec);
+            i += uniqueIds.length;
             
             String propId;
             String[] propIds = entitySpec.getPropositionIds();
@@ -34,10 +39,11 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
             } else {
                 propId = resultSet.getString(i++);
             }
+            i -=uniqueIds.length;
             Event event = new Event(propId);
             event.setDataSourceType(
                     new DatabaseDataSourceType(getDataSourceBackendId()));
-            i = eventSetUniqueIdentifier(entitySpec, resultSet, i,
+            i = eventSetUniqueIdentifier(uniqueIds, entitySpec, resultSet, i,
                     event);
             Granularity gran = entitySpec.getGranularity();
             ColumnSpec finishTimeSpec = entitySpec.getFinishTimeSpec();
@@ -47,7 +53,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                             resultSet, i++);
                     event.setInterval(intervalFactory.getInstance(d, gran));
                 } catch (SQLException e) {
-                    SQLGenUtil.logger().log(Level.WARNING, 
+                    logger.log(Level.WARNING,
                             "Could not parse timestamp. Ignoring data value.",
                             e);
                     continue;
@@ -58,7 +64,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                     start = entitySpec.getPositionParser().toLong(
                             resultSet, i++);
                 } catch (SQLException e) {
-                    SQLGenUtil.logger().log(Level.WARNING, 
+                    logger.log(Level.WARNING,
                             "Could not parse start time. Ignoring data value.",
                             e);
                     continue;
@@ -68,7 +74,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                     finish = entitySpec.getPositionParser().toLong(resultSet,
                             i++);
                 } catch (SQLException e) {
-                    SQLGenUtil.logger().log(Level.WARNING, 
+                    logger.log(Level.WARNING,
                             "Could not parse start time. Ignoring data value.",
                             e);
                     continue;
@@ -77,7 +83,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                     event.setInterval(intervalFactory.getInstance(start, gran,
                             finish, gran));
                 } catch (IllegalArgumentException e) {
-                    SQLGenUtil.logger().log(Level.WARNING, 
+                    logger.log(Level.WARNING,
                             "Could not parse the time of event \'" + propId +
                             "\' because finish is before start.", e);
                     continue;
@@ -90,13 +96,14 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                         resultSet.getString(i++));
                 event.setProperty(propertySpec.getName(), value);
             }
+            logger.log(Level.FINEST, "Created event {0}", event);
             Collections.putList(results, keyId, event);
         }
     }
 
-    private int eventSetUniqueIdentifier(EntitySpec entitySpec,
+    private int eventSetUniqueIdentifier(String[] uniqueIds,
+            EntitySpec entitySpec,
             ResultSet resultSet, int i, Event event) throws SQLException {
-        String[] uniqueIds = generateUniqueIdsArray(entitySpec);
         i = readUniqueIds(uniqueIds, resultSet, i);
         UniqueIdentifier uniqueIdentifer = generateUniqueIdentifier(entitySpec,
                 uniqueIds);

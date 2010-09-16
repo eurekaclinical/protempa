@@ -75,6 +75,8 @@ public interface PropositionDefinition extends Serializable {
      */
     String[] getTermIds();
 
+    PropertyDefinition[] getPropertyDefinitions();
+
     void addPropertyChangeListener(PropertyChangeListener listener);
 
     void removePropertyChangeListener(PropertyChangeListener listener);

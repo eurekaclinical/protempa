@@ -2,6 +2,8 @@ package org.protempa;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Abstract base class for all knowledge definition classes.
@@ -39,6 +41,8 @@ public abstract class AbstractPropositionDefinition implements
     private String[] inverseIsA;
     protected String[] directChildren;
     private String[] termIds;
+    private String description;
+    private PropertyDefinition[] propertyDefinitions;
     protected final PropertyChangeSupport changes;
 
     /**
@@ -63,6 +67,8 @@ public abstract class AbstractPropositionDefinition implements
         this.inverseIsA = EMPTY_STRING_ARR;
         this.displayName = "";
         this.abbrevDisplayName = "";
+        this.description = "";
+        this.propertyDefinitions = new PropertyDefinition[0];
         this.changes = new PropertyChangeSupport(this);
     }
 
@@ -111,8 +117,9 @@ public abstract class AbstractPropositionDefinition implements
      *            an abbreviated display name {@link String}.
      */
     public final void setAbbreviatedDisplayName(String abbrev) {
-        if (abbrev == null)
+        if (abbrev == null) {
             abbrev = "";
+        }
         String old = this.abbrevDisplayName;
         this.abbrevDisplayName = abbrev;
         this.changes.firePropertyChange("abbreviatedDisplayName", old, abbrev);
@@ -130,16 +137,30 @@ public abstract class AbstractPropositionDefinition implements
      *            a display name {@link String}.
      */
     public final void setDisplayName(String displayName) {
-        if (displayName == null)
+        if (displayName == null) {
             displayName = "";
+        }
         String old = this.displayName;
         this.displayName = displayName;
         this.changes.firePropertyChange("displayName", old, displayName);
     }
 
+    public String getDescription() {
+        return this.description;
+    }
+
+    public void setDescription(String description) {
+        if (description == null) {
+            description = "";
+        }
+        String old = this.description;
+        this.description = description;
+        this.changes.firePropertyChange("description", old, this.description);
+    }
+
     @Override
     public String[] getInverseIsA() {
-        return inverseIsA;
+        return inverseIsA.clone();
     }
 
     /**
@@ -149,20 +170,23 @@ public abstract class AbstractPropositionDefinition implements
      *            a {@link String[]} of proposition definition ids.
      */
     public void setInverseIsA(String[] inverseIsA) {
+        if (inverseIsA == null) {
+            inverseIsA = EMPTY_STRING_ARR;
+        }
         String[] old = this.inverseIsA;
-        this.inverseIsA = inverseIsA;
-        this.changes.firePropertyChange("inverseIsA", old, inverseIsA);
+        this.inverseIsA = inverseIsA.clone();
+        this.changes.firePropertyChange("inverseIsA", old, getInverseIsA());
         recalculateDirectChildren();
     }
 
     @Override
     public String[] getDirectChildren() {
-        return this.directChildren;
+        return this.directChildren.clone();
     }
 
     @Override
     public final String[] getTermIds() {
-        return this.termIds;
+        return this.termIds.clone();
     }
 
     /**
@@ -170,7 +194,30 @@ public abstract class AbstractPropositionDefinition implements
      * @param termId a term id {@link String}.
      */
     public final void setTermIds(String[] termIds) {
-        this.termIds = termIds;
+        if (termIds == null) {
+            termIds = EMPTY_STRING_ARR;
+        }
+        String[] old = this.termIds;
+        this.termIds = termIds.clone();
+        this.changes.firePropertyChange("termIds", old, getTermIds());
+    }
+
+    @Override
+    public final PropertyDefinition[] getPropertyDefinitions() {
+        return this.propertyDefinitions.clone();
+    }
+
+    public final void setPropertyDefinitions(
+            PropertyDefinition[] propertyDefinitions) {
+        if (propertyDefinitions == null) {
+            propertyDefinitions = new PropertyDefinition[0];
+        } else {
+            propertyDefinitions = propertyDefinitions.clone();
+        }
+        PropertyDefinition[] old = this.propertyDefinitions.clone();
+        this.propertyDefinitions = propertyDefinitions;
+        this.changes.firePropertyChange("propertyDefinitions", old,
+                this.propertyDefinitions);
     }
 
     @Override
@@ -199,22 +246,28 @@ public abstract class AbstractPropositionDefinition implements
      * Resets this proposition definition to default values.
      */
     public void reset() {
+        setDisplayName(null);
+        setAbbreviatedDisplayName(null);
+        setDescription(null);
+        setInverseIsA(null);
+        setTermIds(null);
+        setPropertyDefinitions(null);
     }
 
     protected abstract void recalculateDirectChildren();
 
-    /**
-     * Returns "ID: proposition_id[; DISPLAY_NAME: display_name]"
-     *
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return "ID: "
-                + this.id
-                + (this.displayName != null && this.displayName.length() > 0
-                    ? "; DISPLAY NAME: "
-                + this.displayName
-                : "");
+    protected Map<String, Object> toStringFields() {
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        result.put("id", this.id);
+        result.put("displayName", this.displayName);
+        result.put("description", this.description);
+        result.put("abbreviatedDisplayName", this.abbrevDisplayName);
+        result.put("inverseIsA", this.inverseIsA);
+        result.put("directChildren", this.directChildren);
+        result.put("termIds", this.termIds);
+        result.put("concatenable", isConcatenable());
+        result.put("solid", isSolid());
+        result.put("propertyDefinitions", this.propertyDefinitions);
+        return result;
     }
 }

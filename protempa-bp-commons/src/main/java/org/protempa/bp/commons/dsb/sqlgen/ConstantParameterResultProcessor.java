@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.arp.javautil.collections.Collections;
 import org.protempa.DatabaseDataSourceType;
 import org.protempa.DerivedDataSourceType;
@@ -21,6 +23,7 @@ class ConstantParameterResultProcessor extends
         Map<String, List<ConstantParameter>> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
         String[] propIds = entitySpec.getPropositionIds();
+        Logger logger = SQLGenUtil.logger();
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
@@ -50,6 +53,7 @@ class ConstantParameterResultProcessor extends
             }
             cp.setDataSourceType(
                     new DatabaseDataSourceType(getDataSourceBackendId()));
+            logger.log(Level.FINEST, "Created constant parameter {0}", cp);
             Collections.putList(results, keyId, cp);
         }
     }

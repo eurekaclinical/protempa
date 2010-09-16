@@ -1,5 +1,6 @@
 package org.protempa.query.handler;
 
+import org.protempa.Derivations;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.protempa.FinderException;
 import org.protempa.ProtempaException;
@@ -178,7 +180,8 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler
      * file, output stream or writer.
      */
     @Override
-    public void handleQueryResult(String key, List<Proposition> propositions)
+    public void handleQueryResult(String key, List<Proposition> propositions,
+            List<Derivations> derivationsList)
             throws FinderException {
         for (Comparator<Proposition> c : this.comparator)
             Collections.sort(propositions, c);

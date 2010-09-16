@@ -229,7 +229,7 @@ public final class PrimitiveParameter extends TemporalParameter {
     @Override
     public String toString() {
         StringBuilder buf = new StringBuilder();
-        String[] propNames = propertyNames();
+        String[] propNames = getPropertyNames();
         String[] propStrings = new String[propNames.length];
         int i = 0;
         for (String propertyName : propNames) {

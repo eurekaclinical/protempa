@@ -195,7 +195,7 @@ public final class Event extends TemporalProposition {
         buf.append(" - ");
         buf.append(getFinishFormattedShort());
         buf.append("; ");
-        String[] propNames = propertyNames();
+        String[] propNames = getPropertyNames();
         String[] propStrings = new String[propNames.length];
         int i = 0;
         for (String propertyName : propNames) {

@@ -5,61 +5,58 @@ import edu.stanford.smi.protege.model.Instance;
 import org.protempa.KnowledgeBase;
 import org.protempa.PrimitiveParameterDefinition;
 import org.protempa.proposition.value.ValueFactory;
+import org.protempa.proposition.value.ValueType;
 
 /**
  * @author Andrew Post
  */
 class PrimitiveParameterConverter implements PropositionConverter {
 
-	/**
-	 * 
-	 */
-	PrimitiveParameterConverter() {
+    /**
+     *
+     */
+    PrimitiveParameterConverter() {
+    }
 
-	}
+    @Override
+    public void convert(Instance instance,
+            org.protempa.KnowledgeBase protempaKnowledgeBase,
+            ProtegeKnowledgeSourceBackend backend) {
 
-	public void convert(Instance instance,
-			org.protempa.KnowledgeBase protempaKnowledgeBase,
-			ProtegeKnowledgeSourceBackend backend) {
+        if (instance != null
+                && protempaKnowledgeBase != null
+                && !protempaKnowledgeBase.hasPrimitiveParameterDefinition(instance.getName())) {
 
-		if (instance != null
-				&& protempaKnowledgeBase != null
-				&& !protempaKnowledgeBase
-						.hasPrimitiveParameterDefinition(instance.getName())) {
+            PrimitiveParameterDefinition tc = new PrimitiveParameterDefinition(
+                    protempaKnowledgeBase, instance.getName());
+            Util.setNames(instance, tc);
+            Util.setInverseIsAs(instance, tc);
+            Cls valueType = (Cls) instance.getOwnSlotValue(instance.getKnowledgeBase().getSlot("valueType"));
+            if (valueType != null) {
+                if (valueType.getName().equals("DoubleValue")) {
+                    tc.setValueType(ValueType.NUMBERVALUE);
+                } else if (valueType.getName().equals("InequalityDoubleValue")) {
+                    tc.setValueType(ValueType.INEQUALITYNUMBERVALUE);
+                } else if (valueType.getName().equals("OrdinalValue")) {
+                    tc.setValueType(ValueType.ORDINALVALUE);
+                } else {
+                    tc.setValueType(ValueType.NOMINALVALUE);
+                }
+            }
+        }
+    }
 
-			PrimitiveParameterDefinition tc = new PrimitiveParameterDefinition(
-					protempaKnowledgeBase, instance.getName());
-			Util.setNames(instance, tc);
-			Util.setInverseIsAs(instance, tc);
-			Cls valueType = (Cls) instance.getOwnSlotValue(instance
-					.getKnowledgeBase().getSlot("valueType"));
-			if (valueType != null) {
-				if (valueType.getName().equals("DoubleValue")) {
-					tc.setValueFactory(ValueFactory.NUMBER);
-				} else if (valueType.getName().equals("InequalityDoubleValue")) {
-					tc.setValueFactory(ValueFactory.INEQUALITY);
-				} else if (valueType.getName().equals("OrdinalValue")) {
-					tc.setValueFactory(ValueFactory.ORDINAL);
-				} else {
-					tc.setValueFactory(ValueFactory.NOMINAL);
-				}
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see edu.virginia.pbhs.protempa.protege.ProtegeInstanceConverter#hasParameter(edu.stanford.smi.protege.model.Instance,
-	 *      edu.virginia.pbhs.protempa.KnowledgeBase)
-	 */
-	public boolean protempaKnowledgeBaseHasProposition(
-			Instance protegeParameter, KnowledgeBase protempaKnowledgeBase) {
-		return protegeParameter != null
-				&& protempaKnowledgeBase != null
-				&& protempaKnowledgeBase
-						.hasPrimitiveParameterDefinition(protegeParameter
-								.getName());
-	}
-
+    /*
+     * (non-Javadoc)
+     *
+     * @see edu.virginia.pbhs.protempa.protege.ProtegeInstanceConverter#hasParameter(edu.stanford.smi.protege.model.Instance,
+     *      edu.virginia.pbhs.protempa.KnowledgeBase)
+     */
+    @Override
+    public boolean protempaKnowledgeBaseHasProposition(
+            Instance protegeParameter, KnowledgeBase protempaKnowledgeBase) {
+        return protegeParameter != null
+                && protempaKnowledgeBase != null
+                && protempaKnowledgeBase.hasPrimitiveParameterDefinition(protegeParameter.getName());
+    }
 }

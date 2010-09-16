@@ -1,5 +1,6 @@
 package org.protempa.query.handler;
 
+import org.protempa.Derivations;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -8,9 +9,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.List;
+import java.util.Map;
 
 import org.protempa.FinderException;
-import org.protempa.QuerySession;
 import org.protempa.proposition.Proposition;
 
 /**
@@ -22,7 +23,6 @@ import org.protempa.proposition.Proposition;
  */
 public abstract class WriterQueryResultsHandler extends BufferedWriter
         implements QueryResultsHandler {
-    private QuerySession querySession;
 
     /**
      * Instantiates this handler to write to a file.
@@ -82,23 +82,12 @@ public abstract class WriterQueryResultsHandler extends BufferedWriter
     }
 
     /**
-     * Stores the query session.
+     * No-op.
      *
-     * @param a {@link QuerySession}.
      * @throws FinderException should never throw.
      */
     @Override
-    public void init(QuerySession querySession) throws FinderException {
-        this.querySession = querySession;
-    }
-
-    /**
-     * Gets the {@link QuerySession}.
-     *
-     * @return a {@link QuerySession}.
-     */
-    protected QuerySession getQuerySession() {
-        return this.querySession;
+    public void init() throws FinderException {
     }
 
     /**
@@ -106,10 +95,13 @@ public abstract class WriterQueryResultsHandler extends BufferedWriter
      *
      * @param key a key id {@link String}.
      * @param proposition a {@link List<Proposition>} of propositions.
+     * @param derivations a mapping from propositions to derived abstractions.
      * @throws FinderException if an error occurred writing to the output
      * stream.
      */
     @Override
     public abstract void handleQueryResult(String key,
-            List<Proposition> propositions) throws FinderException;
+            List<Proposition> propositions,
+            List<Derivations> derivationsList)
+            throws FinderException;
 }

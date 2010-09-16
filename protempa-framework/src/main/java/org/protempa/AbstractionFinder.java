@@ -93,7 +93,7 @@ final class AbstractionFinder implements Module {
             throw new FinderException("Protempa already closed!");
         }
         try {
-            resultHandler.init(qs);
+            resultHandler.init();
             if (workingMemoryCache != null) {
                 doFindStateful(keyIds, propIds, filters, resultHandler, qs);
             } else {
@@ -210,15 +210,25 @@ final class AbstractionFinder implements Module {
 //    	Map<String, List<Proposition>> result =
 //                new HashMap<String, List<Proposition>>();
         for (Map.Entry<String, List<Object>> entry :
-                objectsToAssert(keyIds, propositionIds, filters, qs, false).entrySet()) {
+                objectsToAssert(keyIds, propositionIds, filters,
+                qs, false).entrySet()) {
             List objects = new ArrayList(entry.getValue());
             List<Proposition> propositions =
                     resultList(statelessWorkingMemory(
                     propositionIds).executeWithResults(objects).iterateObjects(
                     new ProtempaObjectFilter(propositionIds)));
 //            result.put(entry.getKey(), propositions);
-            qs.addPropositionsToCache(propositions);
-            resultHandler.handleQueryResult(entry.getKey(), propositions);
+            List<Derivations> derivationsList =
+                    new ArrayList<Derivations>(0); //need to populate
+            if (qs.isCachingEnabled()) {
+                qs.addPropositionsToCache(propositions);
+                for (Derivations derivations : derivationsList) {
+                    qs.addDerivationsToCache(derivations.getProposition(),
+                            derivations.getDerivations());
+                }
+            }
+            resultHandler.handleQueryResult(entry.getKey(), propositions,
+                    derivationsList);
         }
         clear();
 //    	return result;
@@ -291,8 +301,21 @@ final class AbstractionFinder implements Module {
                     }
                     workingMemory.fireAllRules();
 //                    results.put(entry.getKey(),
-                    resultHandler.handleQueryResult(entry.getKey(), resultList(workingMemory.iterateObjects(
-                            new ProtempaObjectFilter(propositionIds))));
+                    List<Proposition> resultList = 
+                            resultList(workingMemory.iterateObjects(
+                            new ProtempaObjectFilter(propositionIds)));
+                    List<Derivations> derivationsList =
+                            new ArrayList<Derivations>(0); //need to populate
+                    if (qs.isCachingEnabled()) {
+                        qs.addPropositionsToCache(resultList);
+                        for (Derivations derivations : derivationsList) {
+                            qs.addDerivationsToCache(
+                                    derivations.getProposition(),
+                                    derivations.getDerivations());
+                        }
+                    }
+                    resultHandler.handleQueryResult(entry.getKey(), resultList,
+                            null);
                 } catch (FactException fe) {
                     assert false;
                 }
@@ -400,8 +423,7 @@ final class AbstractionFinder implements Module {
             AbstractionDefinition def =
                     knowledgeSource.readAbstractionDefinition(propId);
             if (def != null) {
-                if (def instanceof LowLevelAbstractionDefinition
-                        || def instanceof AggregationDefinition) {
+                if (def instanceof LowLevelAbstractionDefinition) {
                     sequenceParamIds.add(
                             this.knowledgeSource.primitiveParameterIds(propId));
                 } else {

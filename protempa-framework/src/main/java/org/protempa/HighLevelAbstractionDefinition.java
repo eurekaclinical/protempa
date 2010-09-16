@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.arp.javautil.string.StringUtil;
 
 import org.protempa.proposition.Relation;
 
@@ -266,49 +267,16 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
     }
 
     public void setTemporalOffset(Offsets temporalOffset) {
+        Offsets old = temporalOffset;
         this.temporalOffset = temporalOffset;
-    }
-
-    @Override
-    protected String debugMessage() {
-        StringBuilder buffer = new StringBuilder(super.debugMessage());
-        if (temporalOffset == null) {
-            buffer.append("\ttemporalOffset=" + temporalOffset + "\n");
-        } else {
-            buffer.append("\ttemporalOffset=( " + "startParamId="
-                    + temporalOffset.getStartTemporalExtendedPropositionDefinition() + ", "
-                    + "startParamValue="
-                    + temporalOffset.getStartAbstractParamValue() + ", "
-                    + "startSide=" + temporalOffset.getStartIntervalSide()
-                    + ", " + "startOffset=" + temporalOffset.getStartOffset()
-                    + ", " + "finishParam="
-                    + temporalOffset.getFinishTemporalExtendedPropositionDefinition() + ", "
-                    + "finishParamValue="
-                    + temporalOffset.getFinishAbstractParamValue() + ", "
-                    + "finishParamSide="
-                    + temporalOffset.getFinishIntervalSide() + ", "
-                    + "finishOffset=" + temporalOffset.getFinishOffset() + ", "
-                    + ")\n");
-        }
-
-        for (Map.Entry<List<TemporalExtendedPropositionDefinition>, Relation> entry : this.defPairsMap.entrySet()) {
-            List<TemporalExtendedPropositionDefinition> params = entry.getKey();
-            Relation rel = entry.getValue();
-            TemporalExtendedPropositionDefinition lhs = params.get(0);
-            TemporalExtendedPropositionDefinition rhs = params.get(1);
-            buffer.append(rel.toString());
-            buffer.append(lhs);
-            buffer.append(",");
-            buffer.append(rhs + "\n");
-        }
-
-        return buffer.toString();
+        this.changes.firePropertyChange("temporalOffset", old,
+                this.temporalOffset);
     }
 
     @Override
     public void reset() {
         super.reset();
-        temporalOffset = null;
+        setTemporalOffset(null);
         initInstance();
     }
 
@@ -356,5 +324,20 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
         this.directChildren = abstractedFrom.toArray(new String[abstractedFrom.size()]);
         this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
                 this.directChildren);
+    }
+
+    @Override
+    protected Map<String, Object> toStringFields() {
+        Map<String, Object> result = super.toStringFields();
+        result.put("temporalOffset", this.temporalOffset);
+        result.put("abstractedFrom", getAbstractedFrom());
+        result.put("temporalExtendedPropositionDefinitionPairs",
+                this.defPairsMap.keySet());
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return StringUtil.getToString(getClass(), toStringFields());
     }
 }

@@ -1,141 +1,140 @@
 package org.protempa;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import org.arp.javautil.string.StringUtil;
 
 import org.protempa.proposition.value.ValueFactory;
-
+import org.protempa.proposition.value.ValueType;
 
 /**
  * Defines measurable or observable time-stamped data types.
  * 
  * @author Andrew Post
  */
-public final class PrimitiveParameterDefinition extends
-		AbstractPropositionDefinition {
+public final class PrimitiveParameterDefinition extends AbstractPropositionDefinition {
 
-	private static final long serialVersionUID = 4469613843480322419L;
+    private static final long serialVersionUID = 4469613843480322419L;
+    /**
+     * The default value factory (<code>ValueFactory.NOMINAL</code>).
+     */
+    public static final ValueType DEFAULT_VALUE_TYPE = ValueType.NOMINALVALUE;
+    /**
+     * The allowed types of values for this primitive parameter.
+     */
+    private ValueType valueType;
+    /**
+     * The units for values of this primitive parameter.
+     */
+    private String units;
 
-	/**
-	 * The default value factory (<code>ValueFactory.NOMINAL</code>).
-	 */
-	public static final ValueFactory DEFAULT_VALUE_FACTORY = ValueFactory.NOMINAL;
+    public PrimitiveParameterDefinition(KnowledgeBase kb, String id) {
+        super(kb, id);
+        this.valueType = DEFAULT_VALUE_TYPE;
+        kb.addPrimitiveParameterDefinition(this);
+    }
 
-	/**
-	 * The allowed types of values for this primitive parameter.
-	 */
-	private ValueFactory valueFactory;
+    /**
+     * Gets the value factory for this primitive parameter definition.
+     *
+     * @return a {@link ValueFactory}, guaranteed not to be
+     *         <code>null</code>.
+     */
+    public ValueType getValueType() {
+        return this.valueType;
+    }
 
-	/**
-	 * The units for values of this primitive parameter.
-	 */
-	private String units;
+    /**
+     * Sets the value factory for this primitive parameter definition.
+     *
+     * @param vf
+     *            a {@link ValueFactory}. If <code>null</code>, the
+     *            default value factory (defined by
+     *            <code>DEFAULT_VALUE_FACTORY</code> is set.
+     */
+    public void setValueType(ValueType vf) {
+        if (vf == null) {
+            vf = DEFAULT_VALUE_TYPE;
+        }
+        ValueType old = this.valueType;
+        this.valueType = vf;
+        this.changes.firePropertyChange("valueType", old, this.valueType);
+    }
 
-	private final Set<String> attributes;
+    /**
+     * Returns the units for values of this primitive parameter.
+     *
+     * @return a units {@link String}.
+     */
+    public String getUnits() {
+        return units;
+    }
 
-	public PrimitiveParameterDefinition(KnowledgeBase kb, String id) {
-		super(kb, id);
-		this.valueFactory = DEFAULT_VALUE_FACTORY;
-		kb.addPrimitiveParameterDefinition(this);
-		this.attributes = new HashSet<String>();
-	}
+    /**
+     * Sets the units for values of this primitive parameter.
+     *
+     * @param units
+     *            a units {@link String}.
+     */
+    public void setUnits(String units) {
+        String old = this.units;
+        this.units = units;
+        this.changes.firePropertyChange("units", old, this.units);
+    }
 
-	/**
-	 * Gets the value factory for this primitive parameter definition.
-	 * 
-	 * @return a {@link ValueFactory}, guaranteed not to be
-	 *         <code>null</code>.
-	 */
-	public ValueFactory getValueFactory() {
-		return valueFactory;
-	}
+    @Override
+    public void reset() {
+        super.reset();
+        setUnits(null);
+        setValueType(null);
+    }
 
-	/**
-	 * Sets the value factory for this primitive parameter definition.
-	 * 
-	 * @param vf
-	 *            a {@link ValueFactory}. If <code>null</code>, the
-	 *            default value factory (defined by
-	 *            <code>DEFAULT_VALUE_FACTORY</code> is set.
-	 */
-	public void setValueFactory(ValueFactory vf) {
-		if (vf == null) {
-			this.valueFactory = DEFAULT_VALUE_FACTORY;
-		} else {
-			this.valueFactory = vf;
-		}
-	}
-
-	public boolean addAttribute(String attr) {
-		if (attr != null) {
-			return attributes.add(attr);
-		} else {
-			return false;
-		}
-	}
-
-	public Set<String> getAttributes() {
-		return Collections.unmodifiableSet(attributes);
-	}
-
-	/**
-	 * Returns the units for values of this primitive parameter.
-	 * 
-	 * @return a units {@link String}.
-	 */
-	public String getUnits() {
-		return units;
-	}
-
-	/**
-	 * Sets the units for values of this primitive parameter.
-	 * 
-	 * @param units
-	 *            a units {@link String}.
-	 */
-	public void setUnits(String units) {
-		this.units = units;
-	}
-
-	@Override
-	public void reset() {
-		super.reset();
-		this.units = null;
-		this.attributes.clear();
-		this.valueFactory = DEFAULT_VALUE_FACTORY;
-	}
-
-	public void accept(PropositionDefinitionVisitor processor) {
-		processor.visit(this);
-	}
+    public void accept(PropositionDefinitionVisitor processor) {
+        processor.visit(this);
+    }
 
     public void acceptChecked(PropositionDefinitionCheckedVisitor processor)
             throws ProtempaException {
         processor.visit(this);
     }
 
-	/**
-	 * By definition, primitive parameters are not concatenable.
-	 * 
-	 * @return <code>false</code>.
-	 * @see org.protempa.PropositionDefinition#isConcatenable()
-	 */
-	public boolean isConcatenable() {
-		return false;
-	}
+    /**
+     * By definition, primitive parameters are not concatenable.
+     *
+     * @return <code>false</code>.
+     * @see org.protempa.PropositionDefinition#isConcatenable()
+     */
+    @Override
+    public boolean isConcatenable() {
+        return false;
+    }
 
-	/**
-	 * By definition, primitive parameters are solid.
-	 * @return <code>true</code>.
-	 * @see org.protempa.PropositionDefinition#isSolid()
-	 */
-	public boolean isSolid() {
-		return true;
-	}
+    /**
+     * By definition, primitive parameters are solid.
+     * @return <code>true</code>.
+     * @see org.protempa.PropositionDefinition#isSolid()
+     */
+    @Override
+    public boolean isSolid() {
+        return true;
+    }
 
-	@Override
-	protected void recalculateDirectChildren() {
-		// Do nothing.
-	}
+    @Override
+    protected void recalculateDirectChildren() {
+        // Do nothing.
+    }
+
+    @Override
+    protected Map<String, Object> toStringFields() {
+        Map<String,Object> fields = super.toStringFields();
+        fields.put("valueType", this.valueType);
+        fields.put("units", this.units);
+        return fields;
+    }
+
+    @Override
+    public String toString() {
+        return StringUtil.getToString(getClass(), toStringFields());
+    }
+
+
 }
