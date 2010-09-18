@@ -11,7 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.arp.javautil.string.StringUtil;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.proposition.Relation;
 
@@ -129,6 +129,7 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
         return Collections.unmodifiableSet(defs);
     }
 
+    @Override
     public Set<String> getAbstractedFrom() {
         if (this.defsAsListOutdated) {
             this.defsAsList.clear();
@@ -327,17 +328,13 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
     }
 
     @Override
-    protected Map<String, Object> toStringFields() {
-        Map<String, Object> result = super.toStringFields();
-        result.put("temporalOffset", this.temporalOffset);
-        result.put("abstractedFrom", getAbstractedFrom());
-        result.put("temporalExtendedPropositionDefinitionPairs",
-                this.defPairsMap.keySet());
-        return result;
-    }
-
-    @Override
     public String toString() {
-        return StringUtil.getToString(getClass(), toStringFields());
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("temporalOffset", this.temporalOffset)
+                .append("abstractedFrom", getAbstractedFrom())
+                .append("temporalExtendedPropositionDefinitionPairs",
+                    this.defPairsMap.keySet())
+                .toString();
     }
 }

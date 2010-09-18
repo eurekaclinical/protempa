@@ -2,8 +2,7 @@ package org.protempa;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * Abstract base class for all knowledge definition classes.
@@ -43,6 +42,7 @@ public abstract class AbstractPropositionDefinition implements
     private String[] termIds;
     private String description;
     private PropertyDefinition[] propertyDefinitions;
+    private ReferenceDefinition[] referenceDefinitions;
     protected final PropertyChangeSupport changes;
 
     /**
@@ -69,6 +69,7 @@ public abstract class AbstractPropositionDefinition implements
         this.abbrevDisplayName = "";
         this.description = "";
         this.propertyDefinitions = new PropertyDefinition[0];
+        this.referenceDefinitions = new ReferenceDefinition[0];
         this.changes = new PropertyChangeSupport(this);
     }
 
@@ -207,6 +208,17 @@ public abstract class AbstractPropositionDefinition implements
         return this.propertyDefinitions.clone();
     }
 
+    @Override
+    public final PropertyDefinition propertyDefinition(String name) {
+        for (PropertyDefinition propertyDefinition :
+            this.propertyDefinitions) {
+            if (propertyDefinition.getName().equals(name)) {
+                return propertyDefinition;
+            }
+        }
+        return null;
+    }
+
     public final void setPropertyDefinitions(
             PropertyDefinition[] propertyDefinitions) {
         if (propertyDefinitions == null) {
@@ -218,6 +230,34 @@ public abstract class AbstractPropositionDefinition implements
         this.propertyDefinitions = propertyDefinitions;
         this.changes.firePropertyChange("propertyDefinitions", old,
                 this.propertyDefinitions);
+    }
+
+    @Override
+    public final ReferenceDefinition[] getReferenceDefinitions() {
+        return this.referenceDefinitions.clone();
+    }
+
+    @Override
+    public final ReferenceDefinition referenceDefinition(String name) {
+        for (ReferenceDefinition referenceDefinition :
+            this.referenceDefinitions) {
+            if (referenceDefinition.getName().equals(name)) {
+                return referenceDefinition;
+            }
+        }
+        return null;
+    }
+
+    public final void setReferenceDefinitions(
+            ReferenceDefinition[] referenceDefinitions) {
+        if (referenceDefinitions == null)
+            referenceDefinitions = new ReferenceDefinition[0];
+        else
+            referenceDefinitions = referenceDefinitions.clone();
+        ReferenceDefinition[] old = this.referenceDefinitions.clone();
+        this.referenceDefinitions = referenceDefinitions;
+        this.changes.firePropertyChange("referenceDefinitions", old,
+                this.referenceDefinitions);
     }
 
     @Override
@@ -252,22 +292,25 @@ public abstract class AbstractPropositionDefinition implements
         setInverseIsA(null);
         setTermIds(null);
         setPropertyDefinitions(null);
+        setReferenceDefinitions(null);
     }
 
     protected abstract void recalculateDirectChildren();
 
-    protected Map<String, Object> toStringFields() {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
-        result.put("id", this.id);
-        result.put("displayName", this.displayName);
-        result.put("description", this.description);
-        result.put("abbreviatedDisplayName", this.abbrevDisplayName);
-        result.put("inverseIsA", this.inverseIsA);
-        result.put("directChildren", this.directChildren);
-        result.put("termIds", this.termIds);
-        result.put("concatenable", isConcatenable());
-        result.put("solid", isSolid());
-        result.put("propertyDefinitions", this.propertyDefinitions);
-        return result;
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("id", this.id)
+                .append("displayName", this.displayName)
+                .append("description", this.description)
+                .append("abbreviatedDisplayName", this.abbrevDisplayName)
+                .append("inverseIsA", this.inverseIsA)
+                .append("directChildren", this.directChildren)
+                .append("termIds", this.termIds)
+                .append("concatenable", isConcatenable())
+                .append("solid", isSolid())
+                .append("propertyDefinitions", this.propertyDefinitions)
+                .append("referenceDefinitions", this.referenceDefinitions)
+                .toString();
     }
 }

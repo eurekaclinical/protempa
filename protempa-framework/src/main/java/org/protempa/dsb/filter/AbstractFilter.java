@@ -1,9 +1,8 @@
 package org.protempa.dsb.filter;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.NoSuchElementException;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
 
 /**
@@ -83,11 +82,9 @@ public abstract class AbstractFilter implements Filter {
         return new DataSourceConstraintAndIterator(this);
     }
 
-    protected Map<String,Object> toStringFields() {
-        Map<String,Object> result = new LinkedHashMap<String,Object>();
-        result.put("propositionIds", this.propositionIds);
-        result.put("and", this.and);
-        return result;
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 
     

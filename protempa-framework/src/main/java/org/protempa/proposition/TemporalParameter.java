@@ -1,5 +1,6 @@
 package org.protempa.proposition;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.Value;
 
 /**
@@ -48,5 +49,13 @@ public abstract class TemporalParameter extends TemporalProposition
         return super.isEqual(p)
                 && (this.value == p.value ||
                 (this.value != null && this.value.equals(p.value)));
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("value", this.value)
+                .toString();
     }
 }

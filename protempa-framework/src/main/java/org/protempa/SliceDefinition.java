@@ -2,9 +2,8 @@ package org.protempa;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import org.arp.javautil.string.StringUtil;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * 
@@ -152,17 +151,13 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
     }
 
     @Override
-    protected Map<String, Object> toStringFields() {
-        Map<String,Object> fields = super.toStringFields();
-        fields.put("minIndex", this.minIndex);
-        fields.put("maxIndex", this.maxIndex);
-        fields.put("abstractedFrom", this.abstractedFrom);
-        return fields;
-    }
-
-    @Override
     public String toString() {
-        return StringUtil.getToString(getClass(), toStringFields());
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("minIndex", this.minIndex)
+                .append("maxIndex", this.maxIndex)
+                .append("abstractedFrom", this.abstractedFrom)
+                .toString();
     }
 
 

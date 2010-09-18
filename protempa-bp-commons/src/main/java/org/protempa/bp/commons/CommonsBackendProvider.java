@@ -62,14 +62,14 @@ public final class CommonsBackendProvider
         try {
             classNamesL.add(discoverClass.find(clazz));
         } catch (DiscoveryException de) {
-            throw new BackendProviderSpecLoaderException(de);
+            //throw new BackendProviderSpecLoaderException(de);
         }
         try {
             classNamesL.addAll(ServiceLoader.load(clazz));
         } catch (IOException ex) {
             throw new BackendProviderSpecLoaderException(ex);
         } catch (ClassNotFoundException ex) {
-            throw new BackendProviderSpecLoaderException(ex);
+            //throw new BackendProviderSpecLoaderException(ex);
         }
         for (Class className : classNamesL) {
             try {

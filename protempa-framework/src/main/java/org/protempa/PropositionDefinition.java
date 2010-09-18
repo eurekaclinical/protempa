@@ -77,6 +77,12 @@ public interface PropositionDefinition extends Serializable {
 
     PropertyDefinition[] getPropertyDefinitions();
 
+    PropertyDefinition propertyDefinition(String name);
+
+    ReferenceDefinition[] getReferenceDefinitions();
+
+    ReferenceDefinition referenceDefinition(String name);
+
     void addPropertyChangeListener(PropertyChangeListener listener);
 
     void removePropertyChangeListener(PropertyChangeListener listener);

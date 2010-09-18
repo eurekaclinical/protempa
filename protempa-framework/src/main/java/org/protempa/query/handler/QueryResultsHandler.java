@@ -1,10 +1,12 @@
 package org.protempa.query.handler;
 
-import org.protempa.Derivations;
 import java.util.List;
+import java.util.Map;
 
 import org.protempa.FinderException;
+import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.UniqueIdentifier;
 
 /**
  * Interface defining the operations for handling a single result from a
@@ -23,7 +25,7 @@ public interface QueryResultsHandler {
      * @throws FinderException
      *             if any exceptions occur at a lower level
      */
-    public void init() throws FinderException;
+    public void init(KnowledgeSource knowledgeSource) throws FinderException;
 
     /**
      * Performs all clean-up functions for the handler. This method is
@@ -49,6 +51,7 @@ public interface QueryResultsHandler {
      */
     public void handleQueryResult(String key,
             List<Proposition> propositions, 
-            List<Derivations> derivationsList)
+            Map<Proposition,List<Proposition>> derivations,
+            Map<UniqueIdentifier,List<Proposition>> references)
             throws FinderException;
 }

@@ -109,13 +109,6 @@ public interface Proposition extends PropositionVisitable, Serializable {
      */
     List<UniqueIdentifier> getReferences(String name);
 
-    /**
-     * Gets an array of properties that this proposition has.
-     *
-     * @return a {@link String[]} of property names.
-     */
-    String[] getPropertyNames();
-
     
 
     /**

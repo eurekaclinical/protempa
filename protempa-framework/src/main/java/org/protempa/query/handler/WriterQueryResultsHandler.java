@@ -1,6 +1,5 @@
 package org.protempa.query.handler;
 
-import org.protempa.Derivations;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -12,7 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.protempa.FinderException;
+import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.UniqueIdentifier;
 
 /**
  * An implementation of QueryResultsHandler that provides base functionality
@@ -87,7 +88,7 @@ public abstract class WriterQueryResultsHandler extends BufferedWriter
      * @throws FinderException should never throw.
      */
     @Override
-    public void init() throws FinderException {
+    public void init(KnowledgeSource knowledgeSource) throws FinderException {
     }
 
     /**
@@ -102,6 +103,7 @@ public abstract class WriterQueryResultsHandler extends BufferedWriter
     @Override
     public abstract void handleQueryResult(String key,
             List<Proposition> propositions,
-            List<Derivations> derivationsList)
+            Map<Proposition,List<Proposition>> derivations,
+            Map<UniqueIdentifier,List<Proposition>> references)
             throws FinderException;
 }

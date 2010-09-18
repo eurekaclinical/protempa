@@ -1,9 +1,7 @@
 package org.protempa;
 
 import java.beans.PropertyChangeSupport;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import org.arp.javautil.string.StringUtil;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.Interval;
 import org.protempa.proposition.Relation;
 import org.protempa.proposition.value.Unit;
@@ -100,19 +98,16 @@ public final class MinMaxGapFunction extends GapFunction {
                 null, this.minimumGap, this.minimumGapUnits, this.maximumGap,
                 this.maximumGapUnits, null, null, null, null);
     }
-    
-    protected Map<String,Object> toStringFields() {
-        Map<String,Object> fields = new LinkedHashMap<String,Object>();
-        fields.put("minimumGap", this.minimumGap);
-        fields.put("minimumGapUnits", this.minimumGapUnits);
-        fields.put("maximumGap", this.maximumGap);
-        fields.put("maximumGapUnits", this.maximumGapUnits);
-        return fields;
-    }
 
     @Override
     public String toString() {
-        return StringUtil.getToString(getClass(), toStringFields());
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("minimumGap", this.minimumGap)
+                .append("minimumGapUnits", this.minimumGapUnits)
+                .append("maximumGap", this.maximumGap)
+                .append("maximumGapUnits", this.maximumGapUnits)
+                .toString();
     }
 
 

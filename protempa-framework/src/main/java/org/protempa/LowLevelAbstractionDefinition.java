@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import org.arp.javautil.string.StringUtil;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.value.Unit;
-import org.protempa.proposition.value.ValueFactory;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -19,8 +17,7 @@ import org.protempa.proposition.value.ValueType;
  * 
  * @author Andrew Post
  */
-public final class LowLevelAbstractionDefinition extends
-        AbstractAbstractionDefinition implements PatternFinderUser {
+public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefinition implements PatternFinderUser {
 
     private static final long serialVersionUID = -3829737731539676713L;
     private final Set<String> paramIds;
@@ -395,8 +392,9 @@ public final class LowLevelAbstractionDefinition extends
     }
 
     public void setValueType(ValueType c) {
-        if (c == null)
+        if (c == null) {
             c = DEFAULT_VALUE_TYPE;
+        }
         ValueType old = this.valueType;
         this.valueType = c;
         this.changes.firePropertyChange("valueType", old, this.valueType);
@@ -590,37 +588,31 @@ public final class LowLevelAbstractionDefinition extends
     }
 
     @Override
-    protected Map<String, Object> toStringFields() {
-        Map<String,Object> fields = super.toStringFields();
-        fields.put("algorithmId", this.algorithmId);
-        fields.put("paramIds", this.paramIds);
-        fields.put("minimumDuration", this.minimumDuration);
-        fields.put("minimumDurationUnits", this.minimumDurationUnits);
-        fields.put("maximumDuration", this.maximumDuration);
-        fields.put("maximumDurationUnits", this.maximumDurationUnits);
-        fields.put("valueType", this.valueType);
-        fields.put("minimumPatternLength", this.minimumNumberOfValues);
-        fields.put("maximumPatternLength", this.maximumNumberOfValues);
-        fields.put("minGapBetweenValues",
-                this.gapBtwValues.getMinimumGapBetweenValues());
-        fields.put("minGapBetweenValuesUnits",
-                this.gapBtwValues.getMinimumGapBetweenValuesUnits());
-        fields.put("maxGapBetweenValues",
-                this.gapBtwValues.getMaximumGapBetweenValues());
-        fields.put("maxGapBetweenValuesUnits",
-                this.gapBtwValues.getMaximumGapBetweenValuesUnits());
-        fields.put("maxOverlapping", maxOverlapping);
-        fields.put("skip", skip);
-        fields.put("skipStart", skipStart);
-        fields.put("skipEnd", skipEnd);
-        fields.put("valueDefinitions", this.valueDefinitions);
-        return fields;
-    }
-
-    @Override
     public String toString() {
-        return StringUtil.getToString(getClass(), toStringFields());
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("algorithmId", this.algorithmId)
+                .append("paramIds", this.paramIds)
+                .append("minimumDuration", this.minimumDuration)
+                .append("minimumDurationUnits", this.minimumDurationUnits)
+                .append("maximumDuration", this.maximumDuration)
+                .append("maximumDurationUnits", this.maximumDurationUnits)
+                .append("valueType", this.valueType)
+                .append("minimumPatternLength", this.minimumNumberOfValues)
+                .append("maximumPatternLength", this.maximumNumberOfValues)
+                .append("minGapBetweenValues",
+                    this.gapBtwValues.getMinimumGapBetweenValues())
+                .append("minGapBetweenValuesUnits",
+                    this.gapBtwValues.getMinimumGapBetweenValuesUnits())
+                .append("maxGapBetweenValues",
+                    this.gapBtwValues.getMaximumGapBetweenValues())
+                .append("maxGapBetweenValuesUnits",
+                    this.gapBtwValues.getMaximumGapBetweenValuesUnits())
+                .append("maxOverlapping", maxOverlapping)
+                .append("skip", skip)
+                .append("skipStart", skipStart)
+                .append("skipEnd", skipEnd)
+                .append("valueDefinitions", this.valueDefinitions)
+                .toString();
     }
-
-
 }

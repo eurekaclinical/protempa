@@ -2,6 +2,7 @@ package org.protempa.proposition;
 
 import java.beans.PropertyChangeListener;
 import java.text.Format;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.ProtempaException;
@@ -187,26 +188,6 @@ public final class Event extends TemporalProposition {
     }
 
     @Override
-    public String toString() {
-        StringBuilder buf = new StringBuilder("Event: ");
-        buf.append(getId());
-        buf.append(": ");
-        buf.append(getStartFormattedShort());
-        buf.append(" - ");
-        buf.append(getFinishFormattedShort());
-        buf.append("; ");
-        String[] propNames = getPropertyNames();
-        String[] propStrings = new String[propNames.length];
-        int i = 0;
-        for (String propertyName : propNames) {
-            propStrings[i] = propertyName + ": "
-                    + getProperty(propertyName).getRepr();
-        }
-        buf.append(Arrays.join(propStrings, ", "));
-        return buf.toString();
-    }
-
-    @Override
     public void accept(PropositionVisitor propositionVisitor) {
         propositionVisitor.visit(this);
     }
@@ -216,5 +197,12 @@ public final class Event extends TemporalProposition {
             PropositionCheckedVisitor propositionCheckedVisitor)
             throws ProtempaException {
         propositionCheckedVisitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .toString();
     }
 }

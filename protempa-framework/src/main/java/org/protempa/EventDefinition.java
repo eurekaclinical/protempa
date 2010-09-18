@@ -4,13 +4,12 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.proposition.value.Unit;
 
 import org.arp.javautil.graph.Weight;
-import org.arp.javautil.string.StringUtil;
 
 /**
  * Defines external acts upon an entity such as a patient.
@@ -187,6 +186,7 @@ public final class EventDefinition extends AbstractPropositionDefinition {
      * @return <code>false</code>.
      * @see org.protempa.PropositionDefinition#isConcatenable()
      */
+    @Override
     public boolean isConcatenable() {
         return false;
     }
@@ -197,6 +197,7 @@ public final class EventDefinition extends AbstractPropositionDefinition {
      * @return <code>false</code>.
      * @see org.protempa.PropositionDefinition#isSolid()
      */
+    @Override
     public boolean isSolid() {
         return false;
     }
@@ -222,15 +223,11 @@ public final class EventDefinition extends AbstractPropositionDefinition {
     }
 
     @Override
-    protected Map<String, Object> toStringFields() {
-        Map<String,Object> fields = super.toStringFields();
-        fields.put("hasPart", this.hasPart);
-        return fields;
-    }
-
-    @Override
     public String toString() {
-        return StringUtil.getToString(getClass(), toStringFields());
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("hasPart", this.hasPart)
+                .toString();
     }
 
 

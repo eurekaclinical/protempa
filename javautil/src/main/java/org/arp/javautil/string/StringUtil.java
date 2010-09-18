@@ -1,19 +1,22 @@
 package org.arp.javautil.string;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Map;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.lang.CharUtils;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Andrew Post
  */
 public class StringUtil {
 
-    /**
-     *
-     */
+    private static final char QUOTE = '"';
+    private static final char[] SEARCH_CHARS = new char[] {
+        QUOTE, CharUtils.CR, CharUtils.LF};
+
     private StringUtil() {
-            super();
     }
 
     /**
@@ -34,26 +37,53 @@ public class StringUtil {
         return str1 != null ? str1.equals(str2) : str2 == null;
     }
 
-    public static String getToString(Class cls, Map<String,Object> fields) {
-        StringBuilder result = new StringBuilder();
-        result.append(cls);
-        result.append('{');
-        for (Iterator<Map.Entry<String,Object>> itr =
-                fields.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry<String,Object> me = itr.next();
-            result.append(me.getKey());
-            result.append('=');
-            Object val = me.getValue();
-            if (val instanceof Object[])
-                result.append(Arrays.toString((Object[]) val));
-            else
-                result.append(me.getValue());
-            if (itr.hasNext())
-                result.append("; ");
-
+    public static List<String> escapeDelimitedColumns(
+            List<String> columnValues, char delimiter) {
+        List<String> result = new ArrayList<String>(columnValues.size());
+        for (String value : columnValues) {
+            result.add(StringUtil.escapeDelimitedColumn(value, delimiter));
         }
-        result.append('}');
-        return result.toString();
+        return result;
+    }
+
+    public static String[] escapeDelimitedColumns(String[] columnValues,
+            char delimiter) {
+        String[] result = new String[columnValues.length];
+        for (int i = 0; i < columnValues.length; i++) {
+            String columnValue = columnValues[i];
+            result[i] = StringUtil.escapeDelimitedColumn(columnValue,
+                    delimiter);
+        }
+        return result;
+    }
+
+    public static String escapeDelimitedColumn(String str, char delimiter) {
+        if (str == null)
+            throw new IllegalArgumentException("str cannot be null");
+        if (StringUtils.containsNone(str, SEARCH_CHARS) && 
+                str.indexOf(delimiter) < 0) {
+            return str;
+        } else {
+            StringWriter writer = new StringWriter();
+            try {
+                writer.write(QUOTE);
+                for (int j = 0, n = str.length(); j < n; j++) {
+                    char c = str.charAt(j);
+                    if (c == QUOTE) {
+                        writer.write(QUOTE);
+                    }
+                    writer.write(c);
+                }
+                writer.write(QUOTE);
+                return writer.toString();
+            } finally {
+                try {
+                    writer.close();
+                } catch (IOException ex) {
+                    throw new AssertionError("Should never happen");
+                }
+            }
+        }
     }
 
 }

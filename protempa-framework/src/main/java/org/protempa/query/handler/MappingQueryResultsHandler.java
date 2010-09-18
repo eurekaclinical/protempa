@@ -1,13 +1,14 @@
 package org.protempa.query.handler;
 
-import org.protempa.Derivations;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.protempa.FinderException;
+import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.UniqueIdentifier;
 
 /**
  * An implementation of QueryResultsHandler that stores the results in a map
@@ -58,7 +59,7 @@ public class MappingQueryResultsHandler implements QueryResultsHandler {
      * @throws FinderException should never throw.
      */
     @Override
-    public void init() throws FinderException {
+    public void init(KnowledgeSource knowledgeSource) throws FinderException {
         this.resultMap = new HashMap<String, List<Proposition>>();
     }
 
@@ -72,7 +73,8 @@ public class MappingQueryResultsHandler implements QueryResultsHandler {
      */
     @Override
     public void handleQueryResult(String key, List<Proposition> propositions,
-            List<Derivations> derivationsList)
+            Map<Proposition,List<Proposition>> derivations,
+            Map<UniqueIdentifier, List<Proposition>> references)
             throws FinderException {
         resultMap.put(key, propositions);
     }

@@ -3,9 +3,8 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import org.arp.javautil.string.StringUtil;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
 import org.protempa.bp.commons.dsb.PositionParser;
 import org.protempa.proposition.value.Granularity;
@@ -347,24 +346,23 @@ public final class EntitySpec implements Serializable {
 
     @Override
     public String toString() {
-        Map<String,Object> fields = new LinkedHashMap<String,Object>();
-        fields.put("name", this.name);
-        fields.put("description", this.description);
-        fields.put("propositionIds", this.propositionIds);
-        fields.put("unique", this.unique);
-        fields.put("baseSpec", this.baseSpec);
-        fields.put("uniqueIdSpecs", this.uniqueIdSpecs);
-        fields.put("startTimeOrTimestampSpec", this.startTimeOrTimestampSpec);
-        fields.put("finishTimeSpec", this.finishTimeSpec);
-        fields.put("propertySpecs", this.propertySpecs);
-        fields.put("referenceSpecs", this.referenceSpecs);
-        fields.put("codeToPropIdMap", this.codeToPropIdMap);
-        fields.put("codeSpec", this.codeSpec);
-        fields.put("constraintSpecs", this.constraintSpecs);
-        fields.put("valueType", this.valueType);
-        fields.put("granularity", this.granularity);
-        fields.put("positionParser", this.positionParser);
-
-        return StringUtil.getToString(getClass(), fields);
+        return new ToStringBuilder(this)
+                .append("name", this.name)
+                .append("description", this.description)
+                .append("propositionIds", this.propositionIds)
+                .append("unique", this.unique)
+                .append("baseSpec", this.baseSpec)
+                .append("uniqueIdSpecs", this.uniqueIdSpecs)
+                .append("startTimeOrTimestampSpec", this.startTimeOrTimestampSpec)
+                .append("finishTimeSpec", this.finishTimeSpec)
+                .append("propertySpecs", this.propertySpecs)
+                .append("referenceSpecs", this.referenceSpecs)
+                .append("codeToPropIdMap", this.codeToPropIdMap)
+                .append("codeSpec", this.codeSpec)
+                .append("constraintSpecs", this.constraintSpecs)
+                .append("valueType", this.valueType)
+                .append("granularity", this.granularity)
+                .append("positionParser", this.positionParser)
+                .toString();
     }
 }

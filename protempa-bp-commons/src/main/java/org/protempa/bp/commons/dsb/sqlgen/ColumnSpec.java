@@ -2,9 +2,8 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.ProtempaUtil;
 
@@ -129,11 +128,7 @@ public final class ColumnSpec implements Serializable {
 
         @Override
         public String toString() {
-            Map<String,Object> fields = new LinkedHashMap<String,Object>();
-            fields.put("propositionId", this.propositionId);
-            fields.put("sqlCode", this.sqlCode);
-
-            return StringUtil.getToString(getClass(), fields);
+            return ToStringBuilder.reflectionToString(this);
         }
     }
     
@@ -349,13 +344,13 @@ public final class ColumnSpec implements Serializable {
 
     @Override
     public String toString() {
-        Map<String,Object> fields = new LinkedHashMap<String,Object>();
-        fields.put("schema", this.schema);
-        fields.put("table", this.table);
-        fields.put("column", this.column);
-        fields.put("joinSpec", this.joinSpec);
-        fields.put("constraint", this.constraint);
-        fields.put("propIdToSqlCodes", this.propIdToSqlCodes);
-        return StringUtil.getToString(getClass(), fields);
+        return new ToStringBuilder(this)
+                .append("schema", this.schema)
+                .append("table", this.table)
+                .append("column", this.column)
+                .append("joinSpec", this.joinSpec)
+                .append("constraint", this.constraint)
+                .append("propIdToSqlCodes", this.propIdToSqlCodes)
+                .toString();
     }
 }

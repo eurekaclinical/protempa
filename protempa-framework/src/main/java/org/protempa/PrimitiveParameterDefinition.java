@@ -1,7 +1,6 @@
 package org.protempa;
 
-import java.util.Map;
-import org.arp.javautil.string.StringUtil;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.proposition.value.ValueFactory;
 import org.protempa.proposition.value.ValueType;
@@ -124,16 +123,12 @@ public final class PrimitiveParameterDefinition extends AbstractPropositionDefin
     }
 
     @Override
-    protected Map<String, Object> toStringFields() {
-        Map<String,Object> fields = super.toStringFields();
-        fields.put("valueType", this.valueType);
-        fields.put("units", this.units);
-        return fields;
-    }
-
-    @Override
     public String toString() {
-        return StringUtil.getToString(getClass(), toStringFields());
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("valueType", this.valueType)
+                .append("units", this.units)
+                .toString();
     }
 
 

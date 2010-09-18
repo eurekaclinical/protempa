@@ -1,6 +1,5 @@
 package org.protempa.query.handler;
 
-import org.protempa.Derivations;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import org.arp.javautil.string.StringUtil;
 
 import org.protempa.FinderException;
 import org.protempa.ProtempaException;
@@ -21,6 +21,7 @@ import org.protempa.proposition.Parameter;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
+import org.protempa.proposition.UniqueIdentifier;
 
 /**
  * An implementation of QueryResultsHandler providing functionality for
@@ -29,9 +30,10 @@ import org.protempa.proposition.TemporalProposition;
  * @author Michel Mansour
  *
  */
-public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler
-        implements QueryResultsHandler {
+public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
 
+    private static final char COLUMN_DELIMITER = '\t';
+    
     private final List<Comparator<Proposition>> comparator;
 
     /**
@@ -181,7 +183,8 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler
      */
     @Override
     public void handleQueryResult(String key, List<Proposition> propositions,
-            List<Derivations> derivationsList)
+            Map<Proposition,List<Proposition>> derivations,
+            Map<UniqueIdentifier,List<Proposition>> references)
             throws FinderException {
         for (Comparator<Proposition> c : this.comparator)
             Collections.sort(propositions, c);
@@ -250,7 +253,7 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler
             try {
                 doWriteKeyId();
                 doWritePropId(event);
-                this.writer.write('\t');
+                this.writer.write(COLUMN_DELIMITER);
                 doWriteTime(event);
                 this.writer.newLine();
             } catch (IOException ioe) {
@@ -279,7 +282,7 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler
                 doWriteKeyId();
                 doWritePropId(constantParameter);
                 doWriteValue(constantParameter);
-                this.writer.write('\t');
+                this.writer.write(COLUMN_DELIMITER);
                 this.writer.newLine();
             } catch (IOException ioe) {
                 throw new TabDelimHandlerProtempaException(ioe);
@@ -287,26 +290,35 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler
         }
 
         private void doWriteKeyId() throws IOException {
-            this.writer.write(this.keyId);
-            this.writer.write('\t');
+            this.writer.write(StringUtil.escapeDelimitedColumn(this.keyId,
+                    COLUMN_DELIMITER));
+            this.writer.write(COLUMN_DELIMITER);
         }
 
         private void doWritePropId(Proposition proposition)
                 throws IOException {
-            this.writer.write(proposition.getId());
-            this.writer.write('\t');
+            this.writer.write(
+                    StringUtil.escapeDelimitedColumn(proposition.getId(),
+                    COLUMN_DELIMITER));
+            this.writer.write(COLUMN_DELIMITER);
         }
 
         private void doWriteValue(Parameter parameter) throws IOException {
-            this.writer.write(parameter.getValueFormatted());
-            this.writer.write('\t');
+            this.writer.write(
+                    StringUtil.escapeDelimitedColumn(
+                    parameter.getValueFormatted(), COLUMN_DELIMITER));
+            this.writer.write(COLUMN_DELIMITER);
         }
 
         private void doWriteTime(TemporalProposition proposition)
                 throws IOException {
-            this.writer.write(proposition.getStartFormattedShort());
-            this.writer.write('\t');
-            this.writer.write(proposition.getFinishFormattedShort());
+            this.writer.write(StringUtil.escapeDelimitedColumn(
+                    proposition.getStartFormattedShort(),
+                    COLUMN_DELIMITER));
+            this.writer.write(COLUMN_DELIMITER);
+            this.writer.write(StringUtil.escapeDelimitedColumn(
+                    proposition.getFinishFormattedShort(),
+                    COLUMN_DELIMITER));
         }
     }
 }

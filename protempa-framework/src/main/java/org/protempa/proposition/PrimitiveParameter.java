@@ -2,8 +2,8 @@ package org.protempa.proposition;
 
 import java.beans.PropertyChangeListener;
 import java.text.Format;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
-import org.arp.javautil.arrays.Arrays;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.value.Granularity;
 
@@ -97,8 +97,8 @@ public final class PrimitiveParameter extends TemporalParameter {
     }
 
     public String getTimestampRepr() {
-        return formatTimestamp(granularity != null ?
-            granularity.getReprFormat() : null);
+        return formatTimestamp(granularity != null
+                ? granularity.getReprFormat() : null);
     }
 
     /*
@@ -108,8 +108,8 @@ public final class PrimitiveParameter extends TemporalParameter {
      */
     @Override
     public String getStartFormattedLong() {
-        return formatTimestamp(granularity != null ?
-            granularity.getLongFormat() : null);
+        return formatTimestamp(granularity != null
+                ? granularity.getLongFormat() : null);
     }
 
     /*
@@ -119,8 +119,8 @@ public final class PrimitiveParameter extends TemporalParameter {
      */
     @Override
     public String getFinishFormattedLong() {
-        return formatTimestamp(granularity != null ?
-            granularity.getLongFormat() : null);
+        return formatTimestamp(granularity != null
+                ? granularity.getLongFormat() : null);
     }
 
     /*
@@ -130,8 +130,8 @@ public final class PrimitiveParameter extends TemporalParameter {
      */
     @Override
     public String getStartFormattedMedium() {
-        return formatTimestamp(granularity != null ?
-            granularity.getMediumFormat() : null);
+        return formatTimestamp(granularity != null
+                ? granularity.getMediumFormat() : null);
     }
 
     /*
@@ -141,8 +141,8 @@ public final class PrimitiveParameter extends TemporalParameter {
      */
     @Override
     public String getFinishFormattedMedium() {
-        return formatTimestamp(granularity != null ?
-            granularity.getMediumFormat() : null);
+        return formatTimestamp(granularity != null
+                ? granularity.getMediumFormat() : null);
     }
 
     /*
@@ -152,8 +152,8 @@ public final class PrimitiveParameter extends TemporalParameter {
      */
     @Override
     public String getStartFormattedShort() {
-        return formatTimestamp(granularity != null ?
-            granularity.getShortFormat() : null);
+        return formatTimestamp(granularity != null
+                ? granularity.getShortFormat() : null);
     }
 
     /*
@@ -163,8 +163,8 @@ public final class PrimitiveParameter extends TemporalParameter {
      */
     @Override
     public String getFinishFormattedShort() {
-        return formatTimestamp(granularity != null ?
-            granularity.getShortFormat() : null);
+        return formatTimestamp(granularity != null
+                ? granularity.getShortFormat() : null);
     }
 
     /**
@@ -228,18 +228,10 @@ public final class PrimitiveParameter extends TemporalParameter {
      */
     @Override
     public String toString() {
-        StringBuilder buf = new StringBuilder();
-        String[] propNames = getPropertyNames();
-        String[] propStrings = new String[propNames.length];
-        int i = 0;
-        for (String propertyName : propNames) {
-            propStrings[i] = propertyName + ": "
-                    + getProperty(propertyName).getRepr();
-        }
-        buf.append(Arrays.join(propStrings, ", "));
-        return "PrimitiveParameter: " + getId() + "; " + getValueFormatted()
-                + ": "
-                + getTimestampFormattedShort() + "; " + buf;
+        return new ToStringBuilder(this).appendSuper(super.toString())
+                .append("timestamp", this.timestamp)
+                .append("granularity", this.granularity)
+                .toString();
     }
 
     /*
@@ -258,8 +250,8 @@ public final class PrimitiveParameter extends TemporalParameter {
 
         PrimitiveParameter p = (PrimitiveParameter) o;
         return super.isEqual(p)
-                && (granularity == p.granularity ||
-                (granularity != null && granularity.equals(p.granularity)));
+                && (granularity == p.granularity
+                || (granularity != null && granularity.equals(p.granularity)));
     }
 
     @Override

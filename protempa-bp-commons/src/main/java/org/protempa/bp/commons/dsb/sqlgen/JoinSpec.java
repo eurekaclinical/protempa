@@ -1,9 +1,7 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import org.arp.javautil.string.StringUtil;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * Specifies a relational join between two tables.
@@ -146,12 +144,11 @@ public final class JoinSpec implements Serializable {
 
     @Override
     public String toString() {
-        Map<String,Object> fields = new LinkedHashMap<String,Object>();
-        fields.put("fromKey", this.fromKey);
-        fields.put("toKey", this.toKey);
-        // We don't print prevColumnSpec to avoid a stack overflow.
-        fields.put("nextColumnSpec", this.nextColumnSpec);
-        return StringUtil.getToString(getClass(), fields);
+        return new ToStringBuilder(this)
+                .append("fromKey", this.fromKey)
+                .append("toKey", this.toKey)
+                .append("nextColumnSpec", this.nextColumnSpec)
+                .toString();
     }
 
 }

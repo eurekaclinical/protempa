@@ -2,8 +2,8 @@ package org.protempa.proposition;
 
 import java.beans.PropertyChangeListener;
 import java.text.Format;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
-import org.arp.javautil.arrays.Arrays;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.value.Granularity;
 
@@ -27,43 +27,6 @@ public final class AbstractParameter extends TemporalParameter {
      */
     public AbstractParameter(String id) {
         super(id);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        String valueFormatted = getValueFormatted();
-        boolean hasValue = false;
-        if (valueFormatted != null && valueFormatted.length() > 0) {
-            hasValue = true;
-        }
-
-        StringBuilder buf = new StringBuilder(getId());
-        if (hasValue) {
-            buf.append('(');
-        }
-        buf.append(valueFormatted);
-        if (hasValue) {
-            buf.append(')');
-        }
-        buf.append(": ");
-        buf.append(getStartFormattedShort());
-        buf.append(" - ");
-        buf.append(getFinishFormattedShort());
-        buf.append("; ");
-        String[] propNames = getPropertyNames();
-        String[] propStrings = new String[propNames.length];
-        int i = 0;
-        for (String propertyName : propNames) {
-            propStrings[i] = propertyName + ": "
-                    + getProperty(propertyName).getRepr();
-        }
-        buf.append(Arrays.join(propStrings, ", "));
-        return buf.toString();
     }
 
     @Override
@@ -239,5 +202,12 @@ public final class AbstractParameter extends TemporalParameter {
     public void acceptChecked(PropositionCheckedVisitor
             propositionCheckedVisitor) throws ProtempaException {
         propositionCheckedVisitor.visit(this);
+    }
+    
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .toString();
     }
 }

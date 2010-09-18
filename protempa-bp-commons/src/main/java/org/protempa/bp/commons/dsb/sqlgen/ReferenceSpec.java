@@ -1,9 +1,7 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import org.arp.javautil.string.StringUtil;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
 
 /**
@@ -74,10 +72,10 @@ public class ReferenceSpec implements Serializable {
 
     @Override
     public String toString() {
-        Map<String, Object> fields = new LinkedHashMap<String, Object>();
-        fields.put("referenceName", this.referenceName);
-        fields.put("entityName", this.entityName);
-        fields.put("uniqueIdSpecs", this.uniqueIdSpecs);
-        return StringUtil.getToString(getClass(), fields);
+        return new ToStringBuilder(this)
+                .append("referenceName", this.referenceName)
+                .append("entityName", this.entityName)
+                .append("uniqueIdSpecs", this.uniqueIdSpecs)
+                .toString();
     }
 }

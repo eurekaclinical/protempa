@@ -1,5 +1,6 @@
 package org.protempa.proposition;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.Granularity;
 
 /**
@@ -127,5 +128,13 @@ public abstract class TemporalProposition extends AbstractProposition {
                 || (this.interval != null
                 && this.interval.equals(p.interval)));
 
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .appendSuper(super.toString())
+                .append("interval", this.interval)
+                .toString();
     }
 }

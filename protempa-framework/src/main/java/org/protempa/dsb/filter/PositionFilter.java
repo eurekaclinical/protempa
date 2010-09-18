@@ -1,7 +1,6 @@
 package org.protempa.dsb.filter;
 
-import java.util.Map;
-import org.arp.javautil.string.StringUtil;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.Interval;
 import org.protempa.proposition.IntervalFactory;
 import org.protempa.proposition.value.Granularity;
@@ -118,17 +117,9 @@ public class PositionFilter extends AbstractFilter {
         visitor.visit(this);
     }
 
-    @Override
-    protected Map<String,Object> toStringFields() {
-        Map<String,Object> result = super.toStringFields();
-        result.put("ival", this.ival);
-        return result;
-    }
-
-
 
     @Override
     public String toString() {
-        return StringUtil.getToString(getClass(), toStringFields());
+        return ToStringBuilder.reflectionToString(this);
     }
 }

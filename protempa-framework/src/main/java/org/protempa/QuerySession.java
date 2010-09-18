@@ -43,7 +43,7 @@ public class QuerySession {
         assert abstractionFinder != null : "abstractionFinder cannot be null";
         this.finder = abstractionFinder;
         this.id = this.generateId();
-        this.query = initialQuery.clone();
+        this.query = initialQuery;
         this.propositionCache = new HashMap<Object, Proposition>();
         this.derivationCache = new HashMap<Proposition, List<Proposition>>();
         this.cachingEnabled = false;

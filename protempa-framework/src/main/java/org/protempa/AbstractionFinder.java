@@ -25,6 +25,7 @@ import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Sequence;
+import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.query.handler.QueryResultsHandler;
 
 /**
@@ -93,7 +94,7 @@ final class AbstractionFinder implements Module {
             throw new FinderException("Protempa already closed!");
         }
         try {
-            resultHandler.init();
+            resultHandler.init(this.knowledgeSource);
             if (workingMemoryCache != null) {
                 doFindStateful(keyIds, propIds, filters, resultHandler, qs);
             } else {
@@ -207,8 +208,6 @@ final class AbstractionFinder implements Module {
             Filter filters, QueryResultsHandler resultHandler,
             QuerySession qs)
             throws ProtempaException {
-//    	Map<String, List<Proposition>> result =
-//                new HashMap<String, List<Proposition>>();
         for (Map.Entry<String, List<Object>> entry :
                 objectsToAssert(keyIds, propositionIds, filters,
                 qs, false).entrySet()) {
@@ -217,21 +216,32 @@ final class AbstractionFinder implements Module {
                     resultList(statelessWorkingMemory(
                     propositionIds).executeWithResults(objects).iterateObjects(
                     new ProtempaObjectFilter(propositionIds)));
-//            result.put(entry.getKey(), propositions);
-            List<Derivations> derivationsList =
-                    new ArrayList<Derivations>(0); //need to populate
+            Map<Proposition,List<Proposition>> derivations =
+                    new HashMap<Proposition,List<Proposition>>(); //need to populate
             if (qs.isCachingEnabled()) {
                 qs.addPropositionsToCache(propositions);
-                for (Derivations derivations : derivationsList) {
-                    qs.addDerivationsToCache(derivations.getProposition(),
-                            derivations.getDerivations());
+                for (Map.Entry<Proposition,List<Proposition>> me :
+                    derivations.entrySet()) {
+                    qs.addDerivationsToCache(me.getKey(), me.getValue());
                 }
             }
+            Map<UniqueIdentifier, List<Proposition>> refs =
+                    createReferencesMap(propositions);
             resultHandler.handleQueryResult(entry.getKey(), propositions,
-                    derivationsList);
+                    derivations, refs);
         }
         clear();
-//    	return result;
+    }
+
+    private Map<UniqueIdentifier, List<Proposition>> createReferencesMap(
+            List<Proposition> propositions) {
+        Map<UniqueIdentifier, List<Proposition>> refs =
+                new HashMap<UniqueIdentifier, List<Proposition>>();
+        for (Proposition proposition : propositions) {
+            org.arp.javautil.collections.Collections.putList(refs,
+                    proposition.getUniqueIdentifier(), proposition);
+        }
+        return refs;
     }
 
     @SuppressWarnings("unchecked")
@@ -304,18 +314,20 @@ final class AbstractionFinder implements Module {
                     List<Proposition> resultList = 
                             resultList(workingMemory.iterateObjects(
                             new ProtempaObjectFilter(propositionIds)));
-                    List<Derivations> derivationsList =
-                            new ArrayList<Derivations>(0); //need to populate
+                    Map<Proposition,List<Proposition>> derivationsMap =
+                            new HashMap<Proposition,List<Proposition>>();//need to populate
                     if (qs.isCachingEnabled()) {
                         qs.addPropositionsToCache(resultList);
-                        for (Derivations derivations : derivationsList) {
-                            qs.addDerivationsToCache(
-                                    derivations.getProposition(),
-                                    derivations.getDerivations());
+                        for (Map.Entry<Proposition,List<Proposition>> me :
+                            derivationsMap.entrySet()) {
+                            for (Proposition derived : me.getValue())
+                                qs.addDerivationToCache(me.getKey(), derived);
                         }
                     }
+                    Map<UniqueIdentifier, List<Proposition>> refs =
+                        createReferencesMap(resultList);
                     resultHandler.handleQueryResult(entry.getKey(), resultList,
-                            null);
+                            derivationsMap, refs);
                 } catch (FactException fe) {
                     assert false;
                 }
