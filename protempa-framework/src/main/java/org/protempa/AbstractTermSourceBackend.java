@@ -12,10 +12,21 @@ public abstract class AbstractTermSourceBackend extends
      * A default implementation that returns null
      * 
      * @see org.protempa.TermSourceBackend#readTerm(java.lang.String,
-     * org.protempa.Terminology)
+     *      org.protempa.Terminology)
      */
     @Override
     public Term readTerm(String id, Terminology terminology)
+            throws TermSourceReadException {
+        return null;
+    }
+
+    /**
+     * A default implementation that returns null
+     * 
+     * @see org.protempa.TermSourceBackend#readTerms(String[], Terminology)
+     */
+    @Override
+    public Term[] readTerms(String[] ids, Terminology terminology)
             throws TermSourceReadException {
         return null;
     }
