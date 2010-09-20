@@ -19,6 +19,16 @@ public final class Term {
     private String displayName;
     
     /*
+     * the description of this term
+     */
+    private String description;
+    
+    /*
+     * the semantic type of this term
+     */
+    private String semanticType;
+    
+    /*
      * the short name of this term
      */
     private String abbrevDisplayName;
@@ -47,8 +57,16 @@ public final class Term {
         this.id = id;
     }
     
-    static Term withId(String id) {
+    public static Term withId(String id) {
         return new Term(id);
+    }
+    
+    public static Term parseId(String id) {
+        return new Term(id);
+    }
+    
+    public static String toId(Term term) {
+        return term.getCode();
     }
 
     /**
@@ -63,6 +81,34 @@ public final class Term {
      */
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * @return the semanticType
+     */
+    public String getSemanticType() {
+        return semanticType;
+    }
+
+    /**
+     * @param semanticType the semanticType to set
+     */
+    public void setSemanticType(String semanticType) {
+        this.semanticType = semanticType;
     }
 
     /**
@@ -126,5 +172,12 @@ public final class Term {
      */
     public Terminology getTerminology() {
         return terminology;
+    }
+    
+    /**
+     * @param terminology the terminology to set
+     */
+    public void setTerminology(Terminology terminology) {
+        this.terminology = terminology;
     }
 }
