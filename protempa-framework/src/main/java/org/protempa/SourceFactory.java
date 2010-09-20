@@ -18,7 +18,7 @@ import org.protempa.backend.ConfigurationsProviderManager;
 import sun.swing.BakedArrayList;
 
 /**
- *
+ * 
  * @author Andrew Post
  */
 public final class SourceFactory {
@@ -31,77 +31,76 @@ public final class SourceFactory {
 
     private final List<BackendInstanceSpec<KnowledgeSourceBackend>>
             knowledgeSourceBackendInstanceSpecs;
-    
+
     private final List<BackendInstanceSpec<TermSourceBackend>>
             termSourceBackendInstanceSpecs;
 
-    public SourceFactory(String configurationsId) 
-            throws ConfigurationsLoadException, BackendProviderSpecLoaderException,
-            InvalidConfigurationsException {
-        BackendProvider backendProvider =
-                BackendProviderManager.getBackendProvider();
+    public SourceFactory(String configurationsId)
+            throws ConfigurationsLoadException,
+            BackendProviderSpecLoaderException, InvalidConfigurationsException {
+        BackendProvider backendProvider = BackendProviderManager
+                .getBackendProvider();
 
-        Configurations configurations =
-                ConfigurationsProviderManager.getConfigurationsProvider()
-                .getConfigurations();
-        
-        BackendSpecLoader<AlgorithmSourceBackend> asl =
-                backendProvider.getAlgorithmSourceBackendSpecLoader();
-        BackendSpecLoader<DataSourceBackend> dsl =
-                backendProvider.getDataSourceBackendSpecLoader();
-        BackendSpecLoader<KnowledgeSourceBackend> ksl =
-                backendProvider.getKnowledgeSourceBackendSpecLoader();
-        BackendSpecLoader<TermSourceBackend> tsl =
-                backendProvider.getTermSourceBackendSpecLoader();
+        Configurations configurations = ConfigurationsProviderManager
+                .getConfigurationsProvider().getConfigurations();
 
-        for (String configurationId :
-            configurations.loadConfigurationIds(configurationsId)) {
+        BackendSpecLoader<AlgorithmSourceBackend> asl = backendProvider
+                .getAlgorithmSourceBackendSpecLoader();
+        BackendSpecLoader<DataSourceBackend> dsl = backendProvider
+                .getDataSourceBackendSpecLoader();
+        BackendSpecLoader<KnowledgeSourceBackend> ksl = backendProvider
+                .getKnowledgeSourceBackendSpecLoader();
+        BackendSpecLoader<TermSourceBackend> tsl = backendProvider
+                .getTermSourceBackendSpecLoader();
+
+        for (String configurationId : configurations
+                .loadConfigurationIds(configurationsId)) {
             if (!asl.hasSpec(configurationId) && !dsl.hasSpec(configurationId)
-                    && !ksl.hasSpec(configurationId))
-                throw new InvalidConfigurationsException(
-                        "The backend " + configurationId + " was not found");
+                    && !ksl.hasSpec(configurationId)
+                    && !tsl.hasSpec(configurationId))
+                throw new InvalidConfigurationsException("The backend "
+                        + configurationId + " was not found");
         }
 
-        this.algorithmSourceBackendInstanceSpecs =
+        this.algorithmSourceBackendInstanceSpecs = 
                 new ArrayList<BackendInstanceSpec<AlgorithmSourceBackend>>();
-        
+
         for (BackendSpec backendSpec : asl) {
-            this.algorithmSourceBackendInstanceSpecs
-                    .addAll(configurations.load(configurationsId, backendSpec));
+            this.algorithmSourceBackendInstanceSpecs.addAll(configurations
+                    .load(configurationsId, backendSpec));
         }
 
-        this.dataSourceBackendInstanceSpecs =
-                new ArrayList<BackendInstanceSpec<DataSourceBackend>>();
-        
+        this.dataSourceBackendInstanceSpecs = 
+            new ArrayList<BackendInstanceSpec<DataSourceBackend>>();
+
         for (BackendSpec backendSpec : dsl) {
-            this.dataSourceBackendInstanceSpecs
-                    .addAll(configurations.load(configurationsId, backendSpec));
+            this.dataSourceBackendInstanceSpecs.addAll(configurations.load(
+                    configurationsId, backendSpec));
         }
 
-        this.knowledgeSourceBackendInstanceSpecs =
-                new ArrayList<BackendInstanceSpec<KnowledgeSourceBackend>>();
-        
+        this.knowledgeSourceBackendInstanceSpecs = 
+            new ArrayList<BackendInstanceSpec<KnowledgeSourceBackend>>();
+
         for (BackendSpec backendSpec : ksl) {
-            this.knowledgeSourceBackendInstanceSpecs
-                    .addAll(configurations.load(configurationsId, backendSpec));
+            this.knowledgeSourceBackendInstanceSpecs.addAll(configurations
+                    .load(configurationsId, backendSpec));
         }
-        
-        this.termSourceBackendInstanceSpecs =
-                new ArrayList<BackendInstanceSpec<TermSourceBackend>>();
+
+        this.termSourceBackendInstanceSpecs = 
+            new ArrayList<BackendInstanceSpec<TermSourceBackend>>();
         for (BackendSpec backendSpec : tsl) {
-            this.termSourceBackendInstanceSpecs
-                    .addAll(configurations.load(configurationsId, backendSpec));
+            this.termSourceBackendInstanceSpecs.addAll(configurations.load(
+                    configurationsId, backendSpec));
         }
     }
 
     public DataSource newDataSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
-        DataSourceBackend[] backends =
-                new DataSourceBackend[
-                this.dataSourceBackendInstanceSpecs.size()];
+        DataSourceBackend[] backends = new DataSourceBackend[
+                                           this.dataSourceBackendInstanceSpecs
+                                           .size()];
         for (int i = 0; i < backends.length; i++) {
-            backends[i] =
-                    this.dataSourceBackendInstanceSpecs.get(i)
+            backends[i] = this.dataSourceBackendInstanceSpecs.get(i)
                     .getInstance();
         }
         return new DataSource(backends);
@@ -109,12 +108,11 @@ public final class SourceFactory {
 
     public KnowledgeSource newKnowledgeSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
-        KnowledgeSourceBackend[] backends =
-                new KnowledgeSourceBackend[
-                this.knowledgeSourceBackendInstanceSpecs.size()];
+        KnowledgeSourceBackend[] backends = new KnowledgeSourceBackend[
+                                            this.knowledgeSourceBackendInstanceSpecs
+                                            .size()];
         for (int i = 0; i < backends.length; i++) {
-            backends[i] =
-                    this.knowledgeSourceBackendInstanceSpecs.get(i)
+            backends[i] = this.knowledgeSourceBackendInstanceSpecs.get(i)
                     .getInstance();
         }
         return new KnowledgeSource(backends);
@@ -122,28 +120,26 @@ public final class SourceFactory {
 
     public AlgorithmSource newAlgorithmSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
-        AlgorithmSourceBackend[] backends =
-                new AlgorithmSourceBackend[
-                this.algorithmSourceBackendInstanceSpecs.size()];
+        AlgorithmSourceBackend[] backends = new AlgorithmSourceBackend[
+                                            this.algorithmSourceBackendInstanceSpecs
+                                            .size()];
         for (int i = 0; i < backends.length; i++) {
-            backends[i] =
-                    this.algorithmSourceBackendInstanceSpecs.get(i)
+            backends[i] = this.algorithmSourceBackendInstanceSpecs.get(i)
                     .getInstance();
         }
         return new AlgorithmSource(backends);
     }
-    
+
     public TermSource newTermSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
-        TermSourceBackend[] backends = 
-                new TermSourceBackend[
-                this.termSourceBackendInstanceSpecs.size()];
+        TermSourceBackend[] backends = new TermSourceBackend[
+                                       this.termSourceBackendInstanceSpecs
+                                       .size()];
         for (int i = 0; i < backends.length; i++) {
-            backends[i] = 
-                    this.termSourceBackendInstanceSpecs.get(i)
-                    .getInstance();    
+            backends[i] = this.termSourceBackendInstanceSpecs.get(i)
+                    .getInstance();
         }
         return new TermSource(backends);
-        
+
     }
 }
