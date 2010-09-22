@@ -1,7 +1,9 @@
 package org.protempa.tsb.umls;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.arp.javautil.sql.DatabaseAPI;
 import org.protempa.Term;
@@ -77,10 +79,15 @@ public final class UMLSTermSourceBackend extends
      * org.protempa.Terminology)
      */
     @Override
-    public Term[] readTerms(String[] ids, Terminology terminology)
+    public Map<String, Term> readTerms(String[] ids, Terminology terminology)
             throws TermSourceReadException {
-        // TODO Auto-generated method stub
-        return null;
+        Map<String, Term> result = new HashMap<String, Term>();
+        
+        for (String id : ids) {
+            result.put(id, readTerm(id, terminology));
+        }
+        
+        return result;
     }
 
     @Override
