@@ -17,8 +17,7 @@ public abstract class AbstractTermSourceBackend extends
      *      org.protempa.Terminology)
      */
     @Override
-    public Term readTerm(String id, Terminology terminology)
-            throws TermSourceReadException {
+    public Term readTerm(String id) throws TermSourceReadException {
         return null;
     }
 
@@ -28,7 +27,7 @@ public abstract class AbstractTermSourceBackend extends
      * @see org.protempa.TermSourceBackend#readTerms(String[], Terminology)
      */
     @Override
-    public Map<String, Term> readTerms(String[] ids, Terminology terminology)
+    public Map<String, Term> readTerms(String[] ids)
             throws TermSourceReadException {
         return null;
     }

@@ -30,7 +30,7 @@ public final class TermSource extends
         this.backendManager.initializeIfNeeded();
     }
 
-    public Term readTerm(String id, Terminology terminology)
+    public Term readTerm(String id)
             throws TermSourceReadException {
         Term result = null;
         if (!notFoundTerms.contains(id)) {
@@ -44,7 +44,7 @@ public final class TermSource extends
             if (this.backendManager.getBackends() != null) {
                 for (TermSourceBackend backend : this.backendManager
                         .getBackends()) {
-                    result = backend.readTerm(id, terminology);
+                    result = backend.readTerm(id);
                     if (result != null) {
                         return result;
                     }
