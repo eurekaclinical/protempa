@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.arp.javautil.sql.DatabaseAPI;
+import org.protempa.MalformedTermIdException;
 import org.protempa.Term;
 import org.protempa.TermSourceBackendInitializationException;
 import org.protempa.TermSourceReadException;
@@ -40,21 +41,19 @@ public final class UMLSTermSourceBackend extends
      * org.protempa.Terminology)
      */
     @Override
-    public Term readTerm(String id, Terminology terminology)
+    public Term readTerm(String id)
             throws TermSourceReadException {
-        Term term = Term.withId(id);
-        term.setTerminology(terminology);
-        term.setDisplayName(id);
-
         try {
+            Term term = Term.withId(id);
+
             SAB sab = umls.getSAB(
-                    UMLSQueryStringValue.fromString(terminology.getName()))
+                    UMLSQueryStringValue.fromString(term.getTerminology().getName()))
                     .get(0);
             TerminologyCode code = TerminologyCode.fromStringAndSAB(id, sab);
             List<TerminologyCode> children = umls.getChildrenByCode(code);
             List<Term> childTerms = new ArrayList<Term>();
             for (TerminologyCode child : children) {
-                childTerms.add(Term.withId(child.getCode()));
+                childTerms.add(Term.fromTerminologyAndCode(term.getTerminology(), code.getCode()));
             }
             term.setDirectChildren(childTerms.toArray(new Term[childTerms
                     .size()]));
@@ -63,13 +62,14 @@ public final class UMLSTermSourceBackend extends
             term.setDescription(umls.getSTR(
                     UMLSQueryStringValue.fromString(id), sab, null,
                     UMLSPreferred.NO_PREFERENCE).get(0).getValue());
+            term.setDisplayName(term.getDescription());
 
+            return term;
         } catch (UMLSQueryException ue) {
             throw new TermSourceReadException(ue);
+        } catch (MalformedTermIdException te) {
+            throw new TermSourceReadException(te);
         }
-
-        return term;
-
     }
 
     /*
@@ -79,12 +79,12 @@ public final class UMLSTermSourceBackend extends
      * org.protempa.Terminology)
      */
     @Override
-    public Map<String, Term> readTerms(String[] ids, Terminology terminology)
+    public Map<String, Term> readTerms(String[] ids)
             throws TermSourceReadException {
         Map<String, Term> result = new HashMap<String, Term>();
         
         for (String id : ids) {
-            result.put(id, readTerm(id, terminology));
+            result.put(id, readTerm(id));
         }
         
         return result;
