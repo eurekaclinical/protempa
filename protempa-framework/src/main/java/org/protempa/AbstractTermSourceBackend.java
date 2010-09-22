@@ -1,5 +1,7 @@
 package org.protempa;
 
+import java.util.Map;
+
 /**
  * 
  * @author Michel Mansour
@@ -26,7 +28,7 @@ public abstract class AbstractTermSourceBackend extends
      * @see org.protempa.TermSourceBackend#readTerms(String[], Terminology)
      */
     @Override
-    public Term[] readTerms(String[] ids, Terminology terminology)
+    public Map<String, Term> readTerms(String[] ids, Terminology terminology)
             throws TermSourceReadException {
         return null;
     }

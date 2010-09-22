@@ -1,5 +1,7 @@
 package org.protempa;
 
+import java.util.Map;
+
 /**
  * Interface for term source backends
  * 
@@ -34,6 +36,6 @@ public interface TermSourceBackend extends
      * @throws TermSourceReadException
      *             if the {@link TermSource} is unreadable
      */
-    Term[] readTerms(String[] ids, Terminology terminology)
+    Map<String, Term> readTerms(String[] ids, Terminology terminology)
             throws TermSourceReadException;
 }
