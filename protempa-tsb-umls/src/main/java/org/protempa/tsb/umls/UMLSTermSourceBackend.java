@@ -42,6 +42,7 @@ public final class UMLSTermSourceBackend extends
             throws TermSourceReadException {
         Term term = Term.withId(id);
         term.setTerminology(terminology);
+        term.setDisplayName(id);
 
         try {
             SAB sab = umls.getSAB(
@@ -49,11 +50,11 @@ public final class UMLSTermSourceBackend extends
                     .get(0);
             TerminologyCode code = TerminologyCode.fromStringAndSAB(id, sab);
             List<TerminologyCode> children = umls.getChildrenByCode(code);
-            List<String> childNames = new ArrayList<String>();
+            List<Term> childTerms = new ArrayList<Term>();
             for (TerminologyCode child : children) {
-                childNames.add(child.getCode());
+                childTerms.add(Term.withId(child.getCode()));
             }
-            term.setDirectChildren(childNames.toArray(new String[childNames
+            term.setDirectChildren(childTerms.toArray(new Term[childTerms
                     .size()]));
             term.setSemanticType(umls.getSemanticType(
                     UMLSQueryStringValue.fromString(id), sab).get(0).getType());
