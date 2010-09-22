@@ -49,9 +49,9 @@ public final class Term {
     private String[] inverseIsA;
     
     /*
-     * direct children of this term, stored as IDs
+     * direct children of this term, stored as terms
      */
-    private String[] directChildren;
+    private Term[] directChildren;
     
     private Term(String id) {
         this.id = id;
@@ -142,14 +142,14 @@ public final class Term {
     /**
      * @return the directChildren
      */
-    public String[] getDirectChildren() {
+    public Term[] getDirectChildren() {
         return directChildren;
     }
 
     /**
      * @param directChildren the directChildren to set
      */
-    public void setDirectChildren(String[] directChildren) {
+    public void setDirectChildren(Term[] directChildren) {
         this.directChildren = directChildren;
     }
 
