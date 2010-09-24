@@ -48,7 +48,7 @@ public final class UMLSTermSourceBackend extends
             SAB sab = umls.getSAB(
                     UMLSQueryStringValue.fromString(term.getTerminology()
                             .getName())).get(0);
-            TerminologyCode code = TerminologyCode.fromStringAndSAB(id, sab);
+            TerminologyCode code = TerminologyCode.fromStringAndSAB(term.getCode(), sab);
             List<TerminologyCode> children = umls.getChildrenByCode(code);
             List<Term> childTerms = new ArrayList<Term>();
             for (TerminologyCode child : children) {
@@ -57,14 +57,9 @@ public final class UMLSTermSourceBackend extends
             }
             term.setDirectChildren(childTerms.toArray(new Term[childTerms
                     .size()]));
-            term.setSemanticType(umls.getSemanticType(
-                    UMLSQueryStringValue.fromString(id), sab).get(0).getType());
-            term.setDisplayName(umls.getSTR(
-                    UMLSQueryStringValue.fromString(id), sab, null,
-                    UMLSPreferred.PREFERRED).get(0).getValue());
-//            term.setDescription(umls.getSTR(
-//                    UMLSQueryStringValue.fromString(id), sab, null,
-//                    UMLSPreferred.NO_PREFERENCE).get(0).getValue());
+            term.setSemanticType(umls.getSemanticTypeForTerm(code).getType());
+            term.setDisplayName(umls.getPreferredName(code));
+            term.setDescription(umls.getTermDefinition(code));
 
             return term;
         } catch (UMLSQueryException ue) {
