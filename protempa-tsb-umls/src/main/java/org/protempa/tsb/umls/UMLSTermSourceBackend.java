@@ -24,7 +24,7 @@ import edu.emory.cci.aiw.umls.UMLSQueryException;
 import edu.emory.cci.aiw.umls.UMLSQueryExecutor;
 import edu.emory.cci.aiw.umls.UMLSQueryStringValue;
 
-@BackendInfo(displayName="UMLS term source backend")
+@BackendInfo(displayName = "UMLS term source backend")
 public final class UMLSTermSourceBackend extends
         AbstractCommonsTermSourceBackend {
 
@@ -41,28 +41,30 @@ public final class UMLSTermSourceBackend extends
      * org.protempa.Terminology)
      */
     @Override
-    public Term readTerm(String id)
-            throws TermSourceReadException {
+    public Term readTerm(String id) throws TermSourceReadException {
         try {
             Term term = Term.withId(id);
 
             SAB sab = umls.getSAB(
-                    UMLSQueryStringValue.fromString(term.getTerminology().getName()))
-                    .get(0);
+                    UMLSQueryStringValue.fromString(term.getTerminology()
+                            .getName())).get(0);
             TerminologyCode code = TerminologyCode.fromStringAndSAB(id, sab);
             List<TerminologyCode> children = umls.getChildrenByCode(code);
             List<Term> childTerms = new ArrayList<Term>();
             for (TerminologyCode child : children) {
-                childTerms.add(Term.fromTerminologyAndCode(term.getTerminology(), code.getCode()));
+                childTerms.add(Term.fromTerminologyAndCode(term
+                        .getTerminology(), code.getCode()));
             }
             term.setDirectChildren(childTerms.toArray(new Term[childTerms
                     .size()]));
             term.setSemanticType(umls.getSemanticType(
                     UMLSQueryStringValue.fromString(id), sab).get(0).getType());
-            term.setDescription(umls.getSTR(
+            term.setDisplayName(umls.getSTR(
                     UMLSQueryStringValue.fromString(id), sab, null,
-                    UMLSPreferred.NO_PREFERENCE).get(0).getValue());
-            term.setDisplayName(term.getDescription());
+                    UMLSPreferred.PREFERRED).get(0).getValue());
+//            term.setDescription(umls.getSTR(
+//                    UMLSQueryStringValue.fromString(id), sab, null,
+//                    UMLSPreferred.NO_PREFERENCE).get(0).getValue());
 
             return term;
         } catch (UMLSQueryException ue) {
@@ -82,11 +84,11 @@ public final class UMLSTermSourceBackend extends
     public Map<String, Term> readTerms(String[] ids)
             throws TermSourceReadException {
         Map<String, Term> result = new HashMap<String, Term>();
-        
+
         for (String id : ids) {
             result.put(id, readTerm(id));
         }
-        
+
         return result;
     }
 
@@ -122,17 +124,18 @@ public final class UMLSTermSourceBackend extends
     }
 
     /**
-     * Configures which Java database API to use
-     * ({@link java.sql.DriverManager} or {@link javax.sql.DataSource} by
-     * parsing a {@link DatabaseAPI}'s name. Cannot be null.
-     *
-     * @param databaseAPIString a {@link DatabaseAPI}'s name.
+     * Configures which Java database API to use ({@link java.sql.DriverManager}
+     * or {@link javax.sql.DataSource} by parsing a {@link DatabaseAPI}'s name.
+     * Cannot be null.
+     * 
+     * @param databaseAPIString
+     *            a {@link DatabaseAPI}'s name.
      */
-    @BackendProperty(propertyName="databaseAPI")
+    @BackendProperty(propertyName = "databaseAPI")
     public void parseDatabaseAPI(String databaseAPIString) {
         setDatabaseAPI(DatabaseAPI.valueOf(databaseAPIString));
     }
-    
+
     /**
      * @return the databaseId
      */
@@ -148,7 +151,7 @@ public final class UMLSTermSourceBackend extends
     public void setDatabaseId(String databaseId) {
         this.databaseId = databaseId;
     }
-    
+
     /**
      * @return the username
      */
