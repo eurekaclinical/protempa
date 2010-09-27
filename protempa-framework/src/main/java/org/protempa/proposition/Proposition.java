@@ -3,6 +3,7 @@ package org.protempa.proposition;
 import java.beans.PropertyChangeListener;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 import org.protempa.DataSourceType;
 import org.protempa.ProtempaException;
@@ -109,7 +110,19 @@ public interface Proposition extends PropositionVisitable, Serializable {
      */
     List<UniqueIdentifier> getReferences(String name);
 
-    
+    /**
+     * Get a set of property names from the proposition
+     * 
+     * @return a set containing the names of all the properties contained
+     */
+    Set<String> getPropertyNames();
+
+    /**
+     * Get a set of reference names from the proposition
+     * 
+     * @return a set containing the names of all the references contained
+     */
+    Set<String> getReferenceNames();
 
     /**
      * Gets this proposition's global unique identifier.

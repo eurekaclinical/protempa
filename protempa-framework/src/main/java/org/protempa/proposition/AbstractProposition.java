@@ -6,8 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import java.util.Set;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.DataSourceType;
 import org.protempa.proposition.value.Value;
 
@@ -65,6 +66,11 @@ public abstract class AbstractProposition implements Proposition {
         return this.properties.get(name);
     }
 
+    @Override
+    public final Set<String> getPropertyNames () {
+        return this.properties.keySet();
+    }
+
     public final void setUniqueIdentifier(UniqueIdentifier o) {
         this.key = o;
     }
@@ -97,7 +103,12 @@ public abstract class AbstractProposition implements Proposition {
         else
             return null;
     }
-    
+
+    @Override
+    public final Set<String> getReferenceNames() {
+        return this.references.keySet();
+    }
+
     @Override
     public int hashCode() {
         if (this.hashCode == 0) {
