@@ -82,5 +82,11 @@ public final class UniqueIdentifier implements Serializable {
         return hash;
     }
 
+    @Override
+    public String toString() {
+        return "UniqueIdentifier [dataSourceBackendId=" + dataSourceBackendId
+                + ", localUniqueId=" + localUniqueId + "]";
+    }
+
 
 }
