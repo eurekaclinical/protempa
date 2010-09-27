@@ -51,4 +51,11 @@ class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
             throw new AssertionError("Never reached!");
         }
     }
+
+    @Override
+    public String toString() {
+        return "SQLGenUniqueIdentifier [name=" + name + ", dbIds="
+                + Arrays.toString(dbIds) + "]";
+    }
+    
 }
