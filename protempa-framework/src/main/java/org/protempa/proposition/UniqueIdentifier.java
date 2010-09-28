@@ -7,6 +7,8 @@ package org.protempa.proposition;
 
 import java.io.Serializable;
 
+import org.protempa.SourceId;
+
 /**
  * Implements a global unique identifier for {@link Proposition}s. It
  * implements {@link Serializable} so that unique identifiers
@@ -16,7 +18,7 @@ import java.io.Serializable;
  */
 public final class UniqueIdentifier implements Serializable {
     private static final long serialVersionUID = 396847781133676191L;
-    private final String dataSourceBackendId;
+    private final SourceId sourceId;
     private final LocalUniqueIdentifier localUniqueId;
 
     /**
@@ -27,7 +29,7 @@ public final class UniqueIdentifier implements Serializable {
     public UniqueIdentifier(UniqueIdentifier other) {
         if (other == null)
             throw new IllegalArgumentException("other cannot be null");
-        this.dataSourceBackendId = other.dataSourceBackendId;
+        this.sourceId = other.sourceId;
         this.localUniqueId = other.localUniqueId;
     }
 
@@ -39,14 +41,14 @@ public final class UniqueIdentifier implements Serializable {
      * @param localUniqueId the {@link LocalUniqueIdentifier}, a data source
      * backend-specific unique id for a {@link Proposition}.
      */
-    public UniqueIdentifier(String dataSourceBackendId, 
+    public UniqueIdentifier(SourceId newSourceId, 
             LocalUniqueIdentifier localUniqueId) {
-        if (dataSourceBackendId == null)
+        if (newSourceId == null)
             throw new IllegalArgumentException(
                     "dataSourceBackendId cannot be null");
         if (localUniqueId == null)
             throw new IllegalArgumentException("localUniqueId cannot be null");
-        this.dataSourceBackendId = dataSourceBackendId;
+        this.sourceId = newSourceId;
         this.localUniqueId = localUniqueId.clone();
     }
 
@@ -59,9 +61,9 @@ public final class UniqueIdentifier implements Serializable {
             return false;
         }
         final UniqueIdentifier other = (UniqueIdentifier) obj;
-        if ((this.dataSourceBackendId == null) ?
-            (other.dataSourceBackendId != null) :
-            !this.dataSourceBackendId.equals(other.dataSourceBackendId)) {
+        if ((this.sourceId == null) ?
+            (other.sourceId != null) :
+            !this.sourceId.equals(other.sourceId)) {
             return false;
         }
         if (this.localUniqueId != other.localUniqueId &&
@@ -75,8 +77,8 @@ public final class UniqueIdentifier implements Serializable {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 79 * hash + (this.dataSourceBackendId != null ?
-            this.dataSourceBackendId.hashCode() : 0);
+        hash = 79 * hash + (this.sourceId != null ?
+            this.sourceId.hashCode() : 0);
         hash = 79 * hash + (this.localUniqueId != null ?
             this.localUniqueId.hashCode() : 0);
         return hash;
@@ -84,7 +86,7 @@ public final class UniqueIdentifier implements Serializable {
 
     @Override
     public String toString() {
-        return "UniqueIdentifier [dataSourceBackendId=" + dataSourceBackendId
+        return "UniqueIdentifier [dataSourceBackendId=" + sourceId
                 + ", localUniqueId=" + localUniqueId + "]";
     }
 

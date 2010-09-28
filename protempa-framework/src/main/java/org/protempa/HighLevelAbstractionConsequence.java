@@ -1,13 +1,16 @@
 package org.protempa;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+
+import org.arp.javautil.collections.Collections;
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
 import org.drools.spi.Tuple;
 import org.protempa.proposition.AbstractParameter;
+import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalProposition;
@@ -21,6 +24,7 @@ class HighLevelAbstractionConsequence implements Consequence {
     private final HighLevelAbstractionDefinition cad;
     private final int columns;
     private final TemporalExtendedPropositionDefinition[] epds;
+    private final Map<Proposition, List<Proposition>> derivations;
 
     /**
      *
@@ -31,7 +35,7 @@ class HighLevelAbstractionConsequence implements Consequence {
      *            the number of parameters, must be greater than zero.
      */
     HighLevelAbstractionConsequence(HighLevelAbstractionDefinition def,
-            TemporalExtendedPropositionDefinition[] epds) {
+            TemporalExtendedPropositionDefinition[] epds, Map<Proposition, List<Proposition>> derivations) {
         assert def != null : "def cannot be null";
         assert epds != null : "epds cannot be null";
         int col = epds.length;
@@ -39,6 +43,7 @@ class HighLevelAbstractionConsequence implements Consequence {
         this.cad = def;
         this.columns = col;
         this.epds = epds;
+        this.derivations = derivations;
     }
 
     @Override
@@ -52,6 +57,10 @@ class HighLevelAbstractionConsequence implements Consequence {
         AbstractParameter result =
                 AbstractParameterFactory.getFromAbstraction(cad.getId(),
                 segment, tps, null, temporalOffset, epds);
+        for (Proposition proposition : segment) {
+            Collections.putList(this.derivations, result, proposition);
+            Collections.putList(this.derivations, proposition, result);
+        }
         arg0.getWorkingMemory().insert(result);
     }
     

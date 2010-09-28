@@ -3,6 +3,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
+import org.protempa.DataSourceBackendId;
 import org.protempa.proposition.UniqueIdentifier;
 
 /**
@@ -45,7 +46,7 @@ abstract class AbstractResultProcessor implements ResultProcessor {
             EntitySpec entitySpec, String[] uniqueIds)
             throws SQLException {
         return new UniqueIdentifier(
-                getDataSourceBackendId(),
+                new DataSourceBackendId(getDataSourceBackendId()),
                 new SQLGenUniqueIdentifier(entitySpec.getName(), uniqueIds));
     }
 }

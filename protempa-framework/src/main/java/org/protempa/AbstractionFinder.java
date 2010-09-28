@@ -211,13 +211,14 @@ final class AbstractionFinder implements Module {
         for (Map.Entry<String, List<Object>> entry :
                 objectsToAssert(keyIds, propositionIds, filters,
                 qs, false).entrySet()) {
+            Map<Proposition,List<Proposition>> derivations =
+                new HashMap<Proposition,List<Proposition>>(); //need to populate
             List objects = new ArrayList(entry.getValue());
             List<Proposition> propositions =
                     resultList(statelessWorkingMemory(
-                    propositionIds).executeWithResults(objects).iterateObjects(
+                    propositionIds, derivations).executeWithResults(objects).iterateObjects(
                     new ProtempaObjectFilter(propositionIds)));
-            Map<Proposition,List<Proposition>> derivations =
-                    new HashMap<Proposition,List<Proposition>>(); //need to populate
+
             if (qs.isCachingEnabled()) {
                 qs.addPropositionsToCache(propositions);
                 for (Map.Entry<Proposition,List<Proposition>> me :
@@ -303,6 +304,10 @@ final class AbstractionFinder implements Module {
                     propositionIds, filters, qs, true);
             for (Map.Entry<String, List<Object>> entry : objects.entrySet()) {
                 try {
+                  //TODO:  need to populate
+                    Map<Proposition,List<Proposition>> derivationsMap =
+                        new HashMap<Proposition,List<Proposition>>();
+
                     StatefulSession workingMemory =
                             statefulWorkingMemory(entry.getKey(),
                             propositionIds);
@@ -314,8 +319,6 @@ final class AbstractionFinder implements Module {
                     List<Proposition> resultList = 
                             resultList(workingMemory.iterateObjects(
                             new ProtempaObjectFilter(propositionIds)));
-                    Map<Proposition,List<Proposition>> derivationsMap =
-                            new HashMap<Proposition,List<Proposition>>();//need to populate
                     if (qs.isCachingEnabled()) {
                         qs.addPropositionsToCache(resultList);
                         for (Map.Entry<Proposition,List<Proposition>> me :
@@ -460,9 +463,9 @@ final class AbstractionFinder implements Module {
      *
      * @return a <code>StatelessRuleSession</code>.
      */
-    private StatelessSession statelessWorkingMemory(Set<String> propIds)
+    private StatelessSession statelessWorkingMemory(Set<String> propIds, Map<Proposition,List<Proposition>> derivations)
             throws ProtempaException {
-        return constructRuleBase(propIds, null).newStatelessSession();
+        return constructRuleBase(propIds, null, derivations).newStatelessSession();
     }
 
     /**
@@ -553,7 +556,7 @@ final class AbstractionFinder implements Module {
     }
 
     private RuleBase constructRuleBase(Set<String> propIds,
-            Set<String> oldPropIds)
+            Set<String> oldPropIds, Map<Proposition,List<Proposition>> derivations)
             throws ProtempaException {
         ValidateAlgorithmCheckedVisitor visitor =
                 new ValidateAlgorithmCheckedVisitor();
@@ -569,7 +572,7 @@ final class AbstractionFinder implements Module {
             }
         }
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
-                visitor.getAlgorithms(), knowledgeSource);
+                visitor.getAlgorithms(), knowledgeSource, derivations);
         if (propIds != null) {
             Set<PropositionDefinition> propDefs =
                     new HashSet<PropositionDefinition>();
@@ -603,7 +606,8 @@ final class AbstractionFinder implements Module {
         StatefulSession workingMemory = null;
         if (key != null) {
             if ((workingMemory = this.workingMemoryCache.get(key)) == null) {
-                workingMemory = constructRuleBase(propIds, null).newStatefulSession(false);
+                // TODO:  change the last null parameter to an actual derivations cache
+                workingMemory = constructRuleBase(propIds, null, null).newStatefulSession(false);
                 this.workingMemoryCache.put(key, workingMemory);
                 this.propIdCache.put(key, new HashSet<String>());
             } else {
@@ -623,8 +627,9 @@ final class AbstractionFinder implements Module {
                      * We construct the rule base of proposition definitions
                      * that have not been looked for previously.
                      */
+                 // TODO:  change the last null parameter to an actual derivations cache
                     RuleBase ruleBase = constructRuleBase(propIds,
-                            propIdCacheForKey);
+                            propIdCacheForKey, null);
                     if (propIds != null) {
                         propIdCacheForKey.addAll(propIds);
                     }

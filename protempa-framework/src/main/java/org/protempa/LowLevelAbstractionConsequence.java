@@ -1,13 +1,13 @@
 package org.protempa;
 
+import java.util.List;
+import java.util.Map;
+
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
-import org.protempa.Algorithm;
-import org.protempa.LowLevelAbstractionDefinition;
-import org.protempa.LowLevelAbstractionFinder;
-import org.protempa.ObjectAsserter;
 import org.protempa.proposition.PrimitiveParameter;
+import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Sequence;
 
 
@@ -21,6 +21,8 @@ final class LowLevelAbstractionConsequence implements Consequence {
 	private final LowLevelAbstractionDefinition def;
 
 	private final Algorithm algorithm;
+	
+	private final Map<Proposition, List<Proposition>> derivations;
 
 	private static class MyObjectAsserter implements ObjectAsserter {
 		private WorkingMemory workingMemory;
@@ -32,9 +34,10 @@ final class LowLevelAbstractionConsequence implements Consequence {
 
 	LowLevelAbstractionConsequence(
 			LowLevelAbstractionDefinition simpleAbstractionDef,
-			Algorithm algorithm) {
+			Algorithm algorithm, Map<Proposition, List<Proposition>> derivations) {
 		this.def = simpleAbstractionDef;
 		this.algorithm = algorithm;
+		this.derivations = derivations;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -45,6 +48,6 @@ final class LowLevelAbstractionConsequence implements Consequence {
 		MyObjectAsserter objAsserter = new MyObjectAsserter();
 		objAsserter.workingMemory = arg1;
 		LowLevelAbstractionFinder.process(seq, this.def, this.algorithm,
-				objAsserter);
+				objAsserter, this.derivations);
 	}
 }

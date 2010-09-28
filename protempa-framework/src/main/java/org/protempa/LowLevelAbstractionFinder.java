@@ -1,7 +1,12 @@
 package org.protempa;
 
+import java.util.List;
+import java.util.Map;
+
+import org.arp.javautil.collections.Collections;
 import org.protempa.proposition.Interval;
 import org.protempa.proposition.PrimitiveParameter;
+import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.value.Unit;
@@ -262,7 +267,7 @@ public final class LowLevelAbstractionFinder {
 
     public static void process(Sequence<PrimitiveParameter> seq,
             LowLevelAbstractionDefinition def, Algorithm algorithm,
-            ObjectAsserter objAsserter)
+            ObjectAsserter objAsserter, Map<Proposition, List<Proposition>> derivations)
             throws AlgorithmInitializationException,
             AlgorithmProcessingException {
         if (def == null || seq == null) {
@@ -295,11 +300,14 @@ public final class LowLevelAbstractionFinder {
                                     seg.getLastIndex()));
                         } else {
                             if (lastSeg != null) {
-                                objAsserter.assertObject(
-                                    AbstractParameterFactory
-                                    .getFromAbstraction(id,
+                                Proposition proposition = AbstractParameterFactory.getFromAbstraction(id,
                                     lastSeg, null, prevFoundValue.getValue(),
-                                    null, null));
+                                    null, null);
+                                for (Proposition prop : lastSeg) {
+                                    Collections.putList(derivations, proposition, prop);
+                                    Collections.putList(derivations, prop, proposition);
+                                }
+                                objAsserter.assertObject(proposition);
                             }
                             lastSeg = new Segment<PrimitiveParameter>(seg);
                         }
@@ -312,9 +320,13 @@ public final class LowLevelAbstractionFinder {
             } while (advanceRow(def, seg, lastSeg, algorithm, minPatternLength,
                     maxPatternLength) != null);
             if (lastSeg != null) {
-                objAsserter.assertObject(
-                        AbstractParameterFactory.getFromAbstraction(id,
-                        lastSeg, null, prevFoundValue.getValue(), null, null));
+                Proposition proposition = AbstractParameterFactory.getFromAbstraction(id,
+                        lastSeg, null, prevFoundValue.getValue(), null, null);
+                for (Proposition prop : lastSeg) {
+                    Collections.putList(derivations, proposition, prop);
+                    Collections.putList(derivations, prop, proposition);
+                }
+                objAsserter.assertObject(proposition);
                 lastSeg = null;
             }
         }

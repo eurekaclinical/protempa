@@ -6,14 +6,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.protempa.DataSourceBackendId;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
 
-abstract class RefResultProcessor<P extends Proposition>
-        extends AbstractResultProcessor {
+abstract class RefResultProcessor<P extends Proposition> extends
+        AbstractResultProcessor {
     private ReferenceSpec referenceSpec;
-    private Map<UniqueIdentifier,P> cache;
-    private final Map<P,List<UniqueIdentifier>> references;
+    private Map<UniqueIdentifier, P> cache;
+    private final Map<P, List<UniqueIdentifier>> references;
 
     protected RefResultProcessor() {
         this.references = new HashMap<P, List<UniqueIdentifier>>();
@@ -28,8 +30,7 @@ abstract class RefResultProcessor<P extends Proposition>
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifier = generateUniqueIdentifier(
                     entitySpec, uniqueIds);
-            String[] refUniqueIds =
-                    generateRefUniqueIdsArray(this.referenceSpec);
+            String[] refUniqueIds = generateRefUniqueIdsArray(this.referenceSpec);
             i = readUniqueIds(refUniqueIds, resultSet, i);
             UniqueIdentifier refUniqueIdentifier = generateRefUniqueIdentifier(
                     this.referenceSpec, refUniqueIds);
@@ -53,8 +54,8 @@ abstract class RefResultProcessor<P extends Proposition>
 
     private final void setReferences() {
         String referenceName = this.referenceSpec.getReferenceName();
-        for (Map.Entry<P,List<UniqueIdentifier>> me :
-            this.references.entrySet()) {
+        for (Map.Entry<P, List<UniqueIdentifier>> me : this.references
+                .entrySet()) {
             setReferencesForProposition(referenceName, me.getKey(),
                     me.getValue());
         }
@@ -63,11 +64,11 @@ abstract class RefResultProcessor<P extends Proposition>
     abstract void setReferencesForProposition(String referenceName,
             P proposition, List<UniqueIdentifier> uids);
 
-    final void setCache(Map<UniqueIdentifier,P> cache) {
+    final void setCache(Map<UniqueIdentifier, P> cache) {
         this.cache = cache;
     }
 
-    final Map<UniqueIdentifier,P> getCache() {
+    final Map<UniqueIdentifier, P> getCache() {
         return this.cache;
     }
 
@@ -79,17 +80,15 @@ abstract class RefResultProcessor<P extends Proposition>
         this.referenceSpec = referenceSpec;
     }
 
-    private final String[] generateRefUniqueIdsArray(
-            ReferenceSpec referenceSpec) {
+    private final String[] generateRefUniqueIdsArray(ReferenceSpec referenceSpec) {
         return new String[referenceSpec.getUniqueIdSpecs().length];
     }
 
     private final UniqueIdentifier generateRefUniqueIdentifier(
             ReferenceSpec referenceSpec, String[] uniqueIds)
             throws SQLException {
-        return new UniqueIdentifier(
-                getDataSourceBackendId(),
-                new SQLGenUniqueIdentifier(referenceSpec.getEntityName(),
-                uniqueIds));
+        return new UniqueIdentifier(new DataSourceBackendId(
+                getDataSourceBackendId()), new SQLGenUniqueIdentifier(
+                referenceSpec.getEntityName(), uniqueIds));
     }
 }
