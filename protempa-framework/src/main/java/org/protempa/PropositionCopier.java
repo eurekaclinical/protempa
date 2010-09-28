@@ -38,7 +38,8 @@ class PropositionCopier extends AbstractPropositionVisitor {
     public void visit(AbstractParameter p) {
         AbstractParameter param = new AbstractParameter(propId);
         param.setDataSourceType(new DerivedDataSourceType());
-        param.setUniqueIdentifier(new UniqueIdentifier(new DerivedSourceId(),new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
+        param.setUniqueIdentifier(new UniqueIdentifier(new DerivedSourceId(),
+                new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
         param.setInterval(p.getInterval());
         param.setValue(p.getValue());
         this.arg1.insert(param);
@@ -48,6 +49,9 @@ class PropositionCopier extends AbstractPropositionVisitor {
     public void visit(Event event) {
         Event e = new Event(propId);
         e.setInterval(event.getInterval());
+        e.setDataSourceType(new DerivedDataSourceType());
+        e.setUniqueIdentifier(new UniqueIdentifier(new DerivedSourceId(),
+                new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
         Collections.putList(this.derivations, event, e);
         Collections.putList(this.derivations, e, event);
         this.arg1.insert(e);
@@ -58,6 +62,9 @@ class PropositionCopier extends AbstractPropositionVisitor {
         PrimitiveParameter param = new PrimitiveParameter(propId);
         param.setInterval(primitiveParameter.getInterval());
         param.setValue(primitiveParameter.getValue());
+        param.setDataSourceType(new DerivedDataSourceType());
+        param.setUniqueIdentifier(new UniqueIdentifier(new DerivedSourceId(),
+                new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
         Collections.putList(this.derivations, primitiveParameter, param);
         Collections.putList(this.derivations, param, primitiveParameter);
         this.arg1.insert(param);
