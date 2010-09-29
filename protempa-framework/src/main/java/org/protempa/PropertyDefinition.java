@@ -1,6 +1,7 @@
 package org.protempa;
 
 import java.io.Serializable;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -28,5 +29,10 @@ public final class PropertyDefinition implements Serializable {
     
     public ValueType getValueType() {
         return this.valueType;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

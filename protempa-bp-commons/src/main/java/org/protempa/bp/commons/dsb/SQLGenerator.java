@@ -6,7 +6,7 @@ import java.util.Set;
 import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.dsb.sqlgen.SQLOrderBy;
 import org.protempa.dsb.filter.Filter;
-import org.protempa.proposition.ConstantParameter;
+import org.protempa.proposition.ConstantProposition;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.value.GranularityFactory;
@@ -31,7 +31,7 @@ import org.protempa.proposition.value.UnitFactory;
  */
 public interface SQLGenerator {
 
-    Map<String, List<ConstantParameter>> readConstantParameters(
+    Map<String, List<ConstantProposition>> readConstants(
             Set<String> keyIds, Set<String> paramIds,
             Filter dataSourceConstraints)
             throws DataSourceReadException;

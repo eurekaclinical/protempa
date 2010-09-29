@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 import org.protempa.backend.BackendNewInstanceException;
 
 /**
@@ -16,8 +15,7 @@ import org.protempa.backend.BackendNewInstanceException;
  * @author Andrew Post
  */
 public final class KnowledgeSource
-        extends AbstractSource<KnowledgeSourceUpdatedEvent,
-        KnowledgeSourceBackendUpdatedEvent> {
+        extends AbstractSource<KnowledgeSourceUpdatedEvent, KnowledgeSourceBackendUpdatedEvent> {
 
     /**
      * PROTEMPA knowledge object model.
@@ -26,21 +24,25 @@ public final class KnowledgeSource
     private final BackendManager<KnowledgeSourceBackendUpdatedEvent,
             KnowledgeSource, KnowledgeSourceBackend> backendManager;
     private final Map<Set<String>, Set<String>> leafEventIdCache;
+    private final Map<Set<String>, Set<String>> leafConstantIdCache;
     private final Map<Set<String>, Set<String>> primParamIdCache;
     private final Set<String> notFoundAbstractionDefinitionRequests;
     private final Set<String> notFoundEventDefinitionRequests;
     private final Set<String> notFoundPrimitiveParameterDefinitionRequests;
+    private final Set<String> notFoundConstantDefinitionRequests;
 
     public KnowledgeSource(KnowledgeSourceBackend[] backends) {
         super(backends);
-        this.backendManager = 
-                new BackendManager<KnowledgeSourceBackendUpdatedEvent,
-                KnowledgeSource, KnowledgeSourceBackend>(this, backends);
+        this.backendManager =
+                new BackendManager<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource, KnowledgeSourceBackend>(this, backends);
         this.leafEventIdCache = new HashMap<Set<String>, Set<String>>();
+        this.leafConstantIdCache = new HashMap<Set<String>, Set<String>>();
         this.primParamIdCache = new HashMap<Set<String>, Set<String>>();
         this.notFoundAbstractionDefinitionRequests = new HashSet<String>();
         this.notFoundEventDefinitionRequests = new HashSet<String>();
         this.notFoundPrimitiveParameterDefinitionRequests =
+                new HashSet<String>();
+        this.notFoundConstantDefinitionRequests =
                 new HashSet<String>();
     }
 
@@ -57,6 +59,81 @@ public final class KnowledgeSource
                 && this.protempaKnowledgeBase == null) {
             this.protempaKnowledgeBase = new KnowledgeBase();
         }
+    }
+
+    /**
+     * Returns the specified constant definition.
+     *
+     * @param id
+     *            an constant definition id {@link String}.
+     * @return an {@link ConstantDefinition}, or <code>null</code> if none was
+     *         found with the given <code>id</code>.
+     */
+    public ConstantDefinition readConstantDefinition(String id)
+            throws KnowledgeSourceReadException {
+        ConstantDefinition result = null;
+        if (!this.notFoundConstantDefinitionRequests.contains(id)) {
+            if (protempaKnowledgeBase != null) {
+                result = protempaKnowledgeBase.getConstantDefinition(id);
+            }
+            if (result == null
+                    && !this.notFoundConstantDefinitionRequests.contains(id)) {
+                try {
+                    initializeIfNeeded();
+                } catch (BackendInitializationException ex) {
+                    throw new KnowledgeSourceReadException(ex);
+                } catch (BackendNewInstanceException ex) {
+                    throw new KnowledgeSourceReadException(ex);
+                }
+                if (this.backendManager.getBackends() != null) {
+                    for (KnowledgeSourceBackend backend :
+                            this.backendManager.getBackends()) {
+                        result = backend.readConstantDefinition(id,
+                                protempaKnowledgeBase);
+                        if (result != null) {
+                            return result;
+                        }
+                    }
+                    this.notFoundConstantDefinitionRequests.add(id);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public boolean hasConstantDefinition(String id)
+            throws KnowledgeSourceReadException {
+        boolean result = false;
+        if (!this.notFoundConstantDefinitionRequests.contains(id)) {
+            if (protempaKnowledgeBase != null) {
+                result =
+                        protempaKnowledgeBase.getConstantDefinition(id) != null;
+            }
+            if (!result
+                    && !this.notFoundConstantDefinitionRequests.contains(id)) {
+                try {
+                    initializeIfNeeded();
+                } catch (BackendInitializationException ex) {
+                    throw new KnowledgeSourceReadException(ex);
+                } catch (BackendNewInstanceException ex) {
+                    throw new KnowledgeSourceReadException(ex);
+                }
+                if (this.backendManager.getBackends() != null) {
+                    for (KnowledgeSourceBackend backend :
+                            this.backendManager.getBackends()) {
+                        result = backend.hasConstantDefinition(id,
+                                protempaKnowledgeBase);
+                        if (result) {
+                            return result;
+                        }
+                    }
+                    this.notFoundConstantDefinitionRequests.add(id);
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -100,6 +177,39 @@ public final class KnowledgeSource
         return result;
     }
 
+    public boolean hasEventDefinition(String id)
+            throws KnowledgeSourceReadException {
+        boolean result = false;
+        if (!this.notFoundEventDefinitionRequests.contains(id)) {
+            if (protempaKnowledgeBase != null) {
+                result = protempaKnowledgeBase.getEventDefinition(id) != null;
+            }
+            if (!result
+                    && !this.notFoundEventDefinitionRequests.contains(id)) {
+                try {
+                    initializeIfNeeded();
+                } catch (BackendInitializationException ex) {
+                    throw new KnowledgeSourceReadException(ex);
+                } catch (BackendNewInstanceException ex) {
+                    throw new KnowledgeSourceReadException(ex);
+                }
+                if (this.backendManager.getBackends() != null) {
+                    for (KnowledgeSourceBackend backend :
+                            this.backendManager.getBackends()) {
+                        result = backend.hasEventDefinition(id,
+                                protempaKnowledgeBase);
+                        if (result) {
+                            return result;
+                        }
+                    }
+                    this.notFoundEventDefinitionRequests.add(id);
+                }
+            }
+        }
+
+        return result;
+    }
+
     /**
      * Returns the specified proposition definition.
      *
@@ -115,10 +225,21 @@ public final class KnowledgeSource
             result = readPrimitiveParameterDefinition(id);
             if (result == null) {
                 result = readEventDefinition(id);
+                if (result == null) {
+                    result = readConstantDefinition(id);
+                }
             }
         }
 
         return result;
+    }
+
+    public boolean hasPropositionDefinition(String id)
+            throws KnowledgeSourceReadException {
+        return hasPrimitiveParameterDefinition(id)
+                || hasEventDefinition(id)
+                || hasAbstractionDefinition(id)
+                || hasConstantDefinition(id);
     }
 
     /**
@@ -131,7 +252,7 @@ public final class KnowledgeSource
      *         <code>id</code>.
      */
     public PrimitiveParameterDefinition readPrimitiveParameterDefinition(
-            String id) {
+            String id) throws KnowledgeSourceReadException {
         PrimitiveParameterDefinition result = null;
         if (!this.notFoundPrimitiveParameterDefinitionRequests.contains(id)) {
             if (protempaKnowledgeBase != null) {
@@ -151,11 +272,50 @@ public final class KnowledgeSource
                         }
                         this.notFoundPrimitiveParameterDefinitionRequests.add(id);
                     }
-                } catch (Exception e) {
-                    ProtempaUtil.logger().log(
-                            Level.SEVERE,
+                } catch (BackendInitializationException ex) {
+                    throw new KnowledgeSourceReadException(
                             "An error occurred reading the primitive parameter definitions.",
-                            e);
+                            ex);
+                } catch (BackendNewInstanceException ex) {
+                    throw new KnowledgeSourceReadException(
+                            "An error occurred reading the primitive parameter definitions.",
+                            ex);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public boolean hasPrimitiveParameterDefinition(String id)
+            throws KnowledgeSourceReadException {
+        boolean result = false;
+        if (!this.notFoundPrimitiveParameterDefinitionRequests.contains(id)) {
+            if (protempaKnowledgeBase != null) {
+                result = protempaKnowledgeBase.getPrimitiveParameterDefinition(id) != null;
+            }
+
+            if (!result) {
+                try {
+                    initializeIfNeeded();
+                    if (this.backendManager.getBackends() != null) {
+                        for (KnowledgeSourceBackend backend : this.backendManager.getBackends()) {
+                            result = backend.hasPrimitiveParameterDefinition(
+                                    id, protempaKnowledgeBase);
+                            if (result) {
+                                return result;
+                            }
+                        }
+                        this.notFoundPrimitiveParameterDefinitionRequests.add(id);
+                    }
+                } catch (BackendInitializationException ex) {
+                    throw new KnowledgeSourceReadException(
+                            "An error occurred reading the primitive parameter definitions.",
+                            ex);
+                } catch (BackendNewInstanceException ex) {
+                    throw new KnowledgeSourceReadException(
+                            "An error occurred reading the primitive parameter definitions.",
+                            ex);
                 }
             }
         }
@@ -171,7 +331,8 @@ public final class KnowledgeSource
      * @return an {@link AbstractionDefinition} object, or <code>null</code>
      *         if none was found with the given <code>id</code>.
      */
-    public AbstractionDefinition readAbstractionDefinition(String id) {
+    public AbstractionDefinition readAbstractionDefinition(String id)
+            throws KnowledgeSourceReadException {
         AbstractionDefinition result = null;
         if (!this.notFoundAbstractionDefinitionRequests.contains(id)) {
             if (protempaKnowledgeBase != null) {
@@ -191,11 +352,51 @@ public final class KnowledgeSource
                         }
                         this.notFoundAbstractionDefinitionRequests.add(id);
                     }
-                } catch (Exception e) {
-                    ProtempaUtil.logger().log(
-                            Level.SEVERE,
-                            "An error occurred reading abstract parameter definition "
-                            + id + ".", e);
+                } catch (BackendInitializationException ex) {
+                    throw new KnowledgeSourceReadException(
+                            "An error occurred reading the abstraction definitions.",
+                            ex);
+                } catch (BackendNewInstanceException ex) {
+                    throw new KnowledgeSourceReadException(
+                            "An error occurred reading the abstraction definitions.",
+                            ex);
+                }
+            }
+        }
+        return result;
+    }
+
+    public boolean hasAbstractionDefinition(String id)
+            throws KnowledgeSourceReadException {
+        boolean result = false;
+        if (!this.notFoundAbstractionDefinitionRequests.contains(id)) {
+            if (protempaKnowledgeBase != null) {
+                result =
+                        protempaKnowledgeBase.getAbstractionDefinition(id) != null;
+            }
+            if (!result
+                    && !this.notFoundAbstractionDefinitionRequests.contains(id)) {
+                try {
+                    initializeIfNeeded();
+                    if (this.backendManager.getBackends() != null) {
+                        for (KnowledgeSourceBackend backend :
+                                this.backendManager.getBackends()) {
+                            result = backend.hasAbstractionDefinition(id,
+                                    protempaKnowledgeBase);
+                            if (result) {
+                                return result;
+                            }
+                        }
+                        this.notFoundAbstractionDefinitionRequests.add(id);
+                    }
+                } catch (BackendInitializationException ex) {
+                    throw new KnowledgeSourceReadException(
+                            "An error occurred reading the abstraction definitions.",
+                            ex);
+                } catch (BackendNewInstanceException ex) {
+                    throw new KnowledgeSourceReadException(
+                            "An error occurred reading the abstraction definitions.",
+                            ex);
                 }
             }
         }
@@ -210,14 +411,17 @@ public final class KnowledgeSource
         super.close();
     }
 
+    @Override
     public void clear() {
         if (this.protempaKnowledgeBase != null) {
             this.protempaKnowledgeBase.clear();
             this.leafEventIdCache.clear();
             this.primParamIdCache.clear();
+            this.leafConstantIdCache.clear();
             this.notFoundAbstractionDefinitionRequests.clear();
             this.notFoundEventDefinitionRequests.clear();
             this.notFoundPrimitiveParameterDefinitionRequests.clear();
+            this.notFoundConstantDefinitionRequests.clear();
         }
     }
 
@@ -228,12 +432,14 @@ public final class KnowledgeSource
 
     public Set<String> leafPropositionIds(Set<String> propIds)
             throws KnowledgeSourceReadException {
-        Set<String> primParamIds = new HashSet<String>(
+        Set<String> pIds = new HashSet<String>(
                 primitiveParameterIds(propIds));
         Set<String> eventIds = leafEventIds(propIds);
-        primParamIds.addAll(eventIds);
+        pIds.addAll(eventIds);
+        Set<String> constantIds = leafConstantIds(propIds);
+        pIds.addAll(constantIds);
 
-        return primParamIds;
+        return pIds;
     }
 
     /**
@@ -250,8 +456,9 @@ public final class KnowledgeSource
      */
     public Set<String> primitiveParameterIds(Set<String> propIds)
             throws KnowledgeSourceReadException {
-        if (propIds == null)
+        if (propIds == null) {
             throw new IllegalArgumentException("propIds cannot be null");
+        }
         Set<String> cachedResult = this.primParamIdCache.get(propIds);
         if (cachedResult != null) {
             return cachedResult;
@@ -298,9 +505,10 @@ public final class KnowledgeSource
                     primitiveParameterIdsHelper(abstractedFrom.toArray(
                             new String[abstractedFrom.size()]), result);
                 } else {
-                    if (readEventDefinition(paramId) == null)
-                        throw new KnowledgeSourceReadException(paramId +
-                            " is unknown");
+                    if (readEventDefinition(paramId) == null) {
+                        throw new KnowledgeSourceReadException(paramId
+                                + " is unknown");
+                    }
                 }
             }
         }
@@ -319,8 +527,9 @@ public final class KnowledgeSource
      */
     public Set<String> primitiveParameterIds(String propId)
             throws KnowledgeSourceReadException {
-        if (propId == null)
+        if (propId == null) {
             throw new IllegalArgumentException("propId cannot be null");
+        }
         return primitiveParameterIds(Collections.singleton(propId));
     }
 
@@ -339,8 +548,9 @@ public final class KnowledgeSource
      */
     public Set<String> leafEventIds(Set<String> abstractionAndEventIds)
             throws KnowledgeSourceReadException {
-        if (abstractionAndEventIds == null)
+        if (abstractionAndEventIds == null) {
             throw new IllegalArgumentException("abstractionAndEventIds cannot be null");
+        }
         Set<String> cachedResult =
                 this.leafEventIdCache.get(abstractionAndEventIds);
         if (cachedResult != null) {
@@ -371,8 +581,9 @@ public final class KnowledgeSource
      */
     public Set<String> leafEventIds(String abstractionOrEventId)
             throws KnowledgeSourceReadException {
-        if (abstractionOrEventId == null)
+        if (abstractionOrEventId == null) {
             throw new IllegalArgumentException("abstractionOrEventId cannot be null");
+        }
         return leafEventIds(Collections.singleton(abstractionOrEventId));
     }
 
@@ -410,9 +621,95 @@ public final class KnowledgeSource
                                 result);
                     } else {
                         throw new KnowledgeSourceReadException(
-                                "The proposition definition '" +
-                                abstractParameterOrEventId + "' is unknown");
+                                "The proposition definition '"
+                                + abstractParameterOrEventId + "' is unknown");
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Given a set of constant ids, this method navigates the event
+     * is-a hierarchy and collects and returns the set of constant ids for
+     * retrieval from the data source (e.g., the events at the leaves of the
+     * tree).
+     *
+     * @param constantIds
+     *            a <code>Set</code> of constant id
+     *            <code>String</code>s. Cannot be <code>null</code>.
+     * @return a newly-created unmodifiable <code>Set</code> of constant id
+     *         <code>String</code>s. Guaranteed not to return
+     *         <code>null</code>.
+     */
+    public Set<String> leafConstantIds(Set<String> constantIds)
+            throws KnowledgeSourceReadException {
+        if (constantIds == null) {
+            throw new IllegalArgumentException("constantIds cannot be null");
+        }
+        Set<String> cachedResult =
+                this.leafConstantIdCache.get(constantIds);
+        if (cachedResult != null) {
+            return cachedResult;
+        } else {
+            Set<String> result = new HashSet<String>();
+            if (constantIds != null) {
+                leafConstantIdsHelper(constantIds.toArray(
+                        new String[constantIds.size()]),
+                        result);
+                result = Collections.unmodifiableSet(result);
+                this.leafConstantIdCache.put(constantIds, result);
+            }
+            return result;
+        }
+    }
+
+    /**
+     * Given a constant id, this method navigates the constant is-a
+     * hierarchy and collects and returns the set of constant ids for retrieval
+     * from the data source (e.g., the constants at the leaves of the tree).
+     *
+     * @param constantId
+     *            a constant id <code>String</code>.
+     * @return a newly-created unmodifiable <code>Set</code> of constant id
+     *         <code>String</code>s. Guaranteed not to return
+     *         <code>null</code>.
+     */
+    public Set<String> leafConstantIds(String constantId)
+            throws KnowledgeSourceReadException {
+        if (constantId == null) {
+            throw new IllegalArgumentException("constant cannot be null");
+        }
+        return leafConstantIds(Collections.singleton(constantId));
+    }
+
+    /**
+     * Actually gets the leaf constant ids. This exists so that we can recurse
+     * through the is-a hierarchy and aggregate the results in one set.
+     *
+     * @param constantIds
+     *            a <code>Set</code> of constant id <code>String</code>s.
+     * @param result
+     *            a non-<code>null</code> <code>Set</code> in which to
+     *            aggregate leaf constant ids.
+     */
+    private void leafConstantIdsHelper(String[] constantIds,
+            Set<String> result) throws KnowledgeSourceReadException {
+        if (constantIds != null) {
+            for (String constantId : constantIds) {
+                ConstantDefinition constantDef =
+                        readConstantDefinition(constantId);
+                if (constantDef != null) {
+                    String[] inverseIsA = constantDef.getInverseIsA();
+                    if (inverseIsA.length == 0) {
+                        result.add(constantDef.getId());
+                    } else {
+                        leafConstantIdsHelper(inverseIsA, result);
+                    }
+                } else {
+                    throw new KnowledgeSourceReadException(
+                            "The constant definition '"
+                            + constantId + "' is unknown");
                 }
             }
         }

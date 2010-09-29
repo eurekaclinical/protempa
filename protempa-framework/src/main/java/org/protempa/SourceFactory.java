@@ -1,9 +1,10 @@
 package org.protempa;
 
-import org.protempa.backend.InvalidConfigurationsException;
+import org.protempa.backend.InvalidConfigurationException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.BackendProvider;
@@ -13,9 +14,9 @@ import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.Configurations;
+import org.protempa.backend.ConfigurationsProvider;
 import org.protempa.backend.ConfigurationsProviderManager;
 
-import sun.swing.BakedArrayList;
 
 /**
  * 
@@ -35,63 +36,73 @@ public final class SourceFactory {
     private final List<BackendInstanceSpec<TermSourceBackend>>
             termSourceBackendInstanceSpecs;
 
-    public SourceFactory(String configurationsId)
-            throws ConfigurationsLoadException,
-            BackendProviderSpecLoaderException, InvalidConfigurationsException {
-        BackendProvider backendProvider = BackendProviderManager
-                .getBackendProvider();
+    public SourceFactory(String configurationId) 
+            throws ConfigurationsLoadException, BackendProviderSpecLoaderException,
+            InvalidConfigurationException {
+        Logger logger = ProtempaUtil.logger();
+        logger.fine("Loading backend provider");
+        BackendProvider backendProvider =
+                BackendProviderManager.getBackendProvider();
+        logger.log(Level.FINE, "Got backend provider {0}", 
+                backendProvider.getClass().getName());
+        logger.fine("Loading configurations provider");
+        ConfigurationsProvider configurationsProvider =
+                ConfigurationsProviderManager.getConfigurationsProvider();
+        logger.log(Level.FINE, "Got configurations provider {0}",
+                configurationsProvider.getClass().getName());
+        logger.fine("Getting available configuration files");
+        Configurations configurations = configurationsProvider
+                .getConfigurations();
+        logger.fine("Got available configuration files");
+        logger.fine("Loading configuration " + configurationId);
+        BackendSpecLoader<AlgorithmSourceBackend> asl =
+                backendProvider.getAlgorithmSourceBackendSpecLoader();
+        BackendSpecLoader<DataSourceBackend> dsl =
+                backendProvider.getDataSourceBackendSpecLoader();
+        BackendSpecLoader<KnowledgeSourceBackend> ksl =
+                backendProvider.getKnowledgeSourceBackendSpecLoader();
+        BackendSpecLoader<TermSourceBackend> tsl =
+                backendProvider.getTermSourceBackendSpecLoader();
 
-        Configurations configurations = ConfigurationsProviderManager
-                .getConfigurationsProvider().getConfigurations();
-
-        BackendSpecLoader<AlgorithmSourceBackend> asl = backendProvider
-                .getAlgorithmSourceBackendSpecLoader();
-        BackendSpecLoader<DataSourceBackend> dsl = backendProvider
-                .getDataSourceBackendSpecLoader();
-        BackendSpecLoader<KnowledgeSourceBackend> ksl = backendProvider
-                .getKnowledgeSourceBackendSpecLoader();
-        BackendSpecLoader<TermSourceBackend> tsl = backendProvider
-                .getTermSourceBackendSpecLoader();
-
-        for (String configurationId : configurations
-                .loadConfigurationIds(configurationsId)) {
-            if (!asl.hasSpec(configurationId) && !dsl.hasSpec(configurationId)
-                    && !ksl.hasSpec(configurationId)
-                    && !tsl.hasSpec(configurationId))
-                throw new InvalidConfigurationsException("The backend "
-                        + configurationId + " was not found");
+        for (String specId :
+            configurations.loadConfigurationIds(configurationId)) {
+            if (!asl.hasSpec(specId) && !dsl.hasSpec(specId)
+                    && !ksl.hasSpec(specId) && !tsl.hasSpec(specId))
+                throw new InvalidConfigurationException(
+                        "The backend" + specId + " was not found");
         }
 
         this.algorithmSourceBackendInstanceSpecs = 
                 new ArrayList<BackendInstanceSpec<AlgorithmSourceBackend>>();
 
         for (BackendSpec backendSpec : asl) {
-            this.algorithmSourceBackendInstanceSpecs.addAll(configurations
-                    .load(configurationsId, backendSpec));
+            this.algorithmSourceBackendInstanceSpecs
+                    .addAll(configurations.load(configurationId, backendSpec));
         }
 
         this.dataSourceBackendInstanceSpecs = 
             new ArrayList<BackendInstanceSpec<DataSourceBackend>>();
 
         for (BackendSpec backendSpec : dsl) {
-            this.dataSourceBackendInstanceSpecs.addAll(configurations.load(
-                    configurationsId, backendSpec));
+            this.dataSourceBackendInstanceSpecs
+                    .addAll(configurations.load(configurationId, backendSpec));
         }
 
         this.knowledgeSourceBackendInstanceSpecs = 
             new ArrayList<BackendInstanceSpec<KnowledgeSourceBackend>>();
 
         for (BackendSpec backendSpec : ksl) {
-            this.knowledgeSourceBackendInstanceSpecs.addAll(configurations
-                    .load(configurationsId, backendSpec));
+            this.knowledgeSourceBackendInstanceSpecs
+                    .addAll(configurations.load(configurationId, backendSpec));
         }
 
         this.termSourceBackendInstanceSpecs = 
             new ArrayList<BackendInstanceSpec<TermSourceBackend>>();
         for (BackendSpec backendSpec : tsl) {
-            this.termSourceBackendInstanceSpecs.addAll(configurations.load(
-                    configurationsId, backendSpec));
+            this.termSourceBackendInstanceSpecs
+                    .addAll(configurations.load(configurationId, backendSpec));
         }
+        logger.fine("Configuration " + configurationId + " loaded");
     }
 
     public DataSource newDataSourceInstance()

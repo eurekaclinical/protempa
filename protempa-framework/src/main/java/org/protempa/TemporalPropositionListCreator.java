@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.AbstractPropositionVisitor;
-import org.protempa.proposition.ConstantParameter;
+import org.protempa.proposition.ConstantProposition;
 import org.protempa.proposition.Context;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
@@ -50,7 +50,7 @@ class TemporalPropositionListCreator extends AbstractPropositionVisitor {
     }
 
     @Override
-    public void visit(ConstantParameter constantParameter) {
+    public void visit(ConstantProposition constantParameter) {
         throw new AssertionError("no constant parameters allowed!");
     }
 

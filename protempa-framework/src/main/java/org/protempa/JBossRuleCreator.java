@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.drools.WorkingMemory;
 import org.drools.base.ClassObjectType;
@@ -20,6 +21,7 @@ import org.drools.rule.Rule;
 import org.drools.spi.Constraint;
 import org.drools.spi.PredicateExpression;
 import org.drools.spi.Tuple;
+import org.protempa.proposition.ConstantProposition;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Sequence;
@@ -43,6 +45,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             Proposition.class);
     private final ClassObjectType EVENT_OBJECT_TYPE = new ClassObjectType(
             Event.class);
+    private final ClassObjectType CONSTANT_OBJECT_TYPE =
+            new ClassObjectType(ConstantProposition.class);
     private static final ClassObjectType ARRAY_LIST_OT = new ClassObjectType(
             ArrayList.class);
     private static final ClassObjectType TEMP_PROP_OT = new ClassObjectType(
@@ -72,31 +76,27 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     @Override
     public void visit(
-            LowLevelAbstractionDefinition lowLevelAbstractionDefinition)
+            LowLevelAbstractionDefinition def)
             throws KnowledgeSourceReadException {
-        ProtempaUtil.logger().fine(
-                "Creating rule for " + lowLevelAbstractionDefinition);
+        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         try {
-            Rule rule = new Rule(lowLevelAbstractionDefinition.getId());
+            Rule rule = new Rule(def.getId());
             Pattern p = new Pattern(0, SEQUENCE_OBJECT_TYPE);
-
-            Set<String> propIds = this.knowledgeSource
-                    .primitiveParameterIds(lowLevelAbstractionDefinition
-                            .getId());
+            
+            Set<String> propIds = this.knowledgeSource.primitiveParameterIds(
+                    def.getId());
             Constraint c = new PredicateConstraint(
                     new SequencePredicateExpression(propIds));
             p.addConstraint(c);
             rule.addPattern(p);
-            Algorithm algo = this.algorithms.get(lowLevelAbstractionDefinition);
+            Algorithm algo = this.algorithms.get(def);
 
             rule.setConsequence(new LowLevelAbstractionConsequence(
-                    lowLevelAbstractionDefinition, algo, this.derivations));
+                    def, algo, this.derivations));
             rule.setSalience(new SalienceInteger(1));
-            this.ruleToAbstractionDefinition.put(rule,
-                    lowLevelAbstractionDefinition);
+            this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
-            addInverseIsARule(lowLevelAbstractionDefinition.getId(),
-                    lowLevelAbstractionDefinition.getInverseIsA(),
+            addInverseIsARule(def.getId(), def.getInverseIsA(),
                     SEQUENCE_OBJECT_TYPE);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
@@ -115,6 +115,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             this.tepd = tepd;
         }
 
+        @Override
         public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
                 Declaration[] arg3, WorkingMemory arg4, Object context)
                 throws Exception {
@@ -122,6 +123,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                     || this.tepd.getMatches((Proposition) arg0);
         }
 
+        @Override
         public Object createContext() {
             return null;
         }
@@ -129,7 +131,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     @Override
     public void visit(HighLevelAbstractionDefinition def) {
-        ProtempaUtil.logger().fine("Creating rule for " + def);
+        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         try {
             Rule rule = new Rule(def.getId());
             rule.setSalience(new SalienceInteger(1));
@@ -161,7 +163,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     @Override
     public void visit(SliceDefinition def) {
-        ProtempaUtil.logger().fine("Creating rule for " + def);
+        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         try {
             Rule rule = new Rule("SLICE_" + def.getId());
             Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
@@ -187,13 +189,26 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     @Override
     public void visit(EventDefinition def) {
-        ProtempaUtil.logger().fine("Creating rule for " + def);
+        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         try {
             addInverseIsARule(def.getId(), def.getInverseIsA(),
                     EVENT_OBJECT_TYPE);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
+        }
+
+    }
+
+    @Override
+    public void visit(ConstantDefinition def) {
+        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
+        try {
+            addInverseIsARule(def.getId(), def.getInverseIsA(),
+                    CONSTANT_OBJECT_TYPE);
+        } catch (InvalidRuleException e) {
+            throw new AssertionError(e.getClass().getName() + ": " +
+                    e.getMessage());
         }
 
     }

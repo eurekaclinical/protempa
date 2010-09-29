@@ -1,6 +1,9 @@
 package org.arp.javautil.arrays;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -176,5 +179,41 @@ public final class Arrays {
             }
         }
         return objSet;
+    }
+    
+    /**
+     * Adds the contents of one or more arrays to a collection.
+     *
+     * @param collection a {@link Collection}. Cannot be <code>null</code>.
+     * @param arr zero or more {@link Object[]}.
+     */
+    public static <E> void addAll(Collection<E> collection, E[]... arr) {
+        if (collection == null)
+            throw new IllegalArgumentException("collection cannot be null");
+        for (E[] oarr : arr) {
+            for (E o : oarr) {
+                collection.add(o);
+            }
+        }
+    }
+
+    /**
+     * Returns a newly created random access list with the contents of the
+     * provided arrays.
+     *
+     * @param <E> any class.
+     * @param arrs an {@link E[]}.
+     * @return a newly created random access {@link List<E>}.
+     */
+    public static <E> List<E> asList(E[]... arrs) {
+        int size = 0;
+        for (E[] arr : arrs) {
+            if (arr == null)
+                throw new IllegalArgumentException("Null arrays not allowed");
+            size += arr.length;
+        }
+        List<E> result = new ArrayList<E>(size);
+        addAll(result, arrs);
+        return result;
     }
 }

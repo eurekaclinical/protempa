@@ -32,9 +32,7 @@ final class ColumnSpecInfoFactory {
         List<ColumnSpec> columnSpecs = new ArrayList<ColumnSpec>();
         int i = 0;
         for (EntitySpec entitySpec2 : entitySpecs) {
-            if (i == 0) {
-                i = processBaseSpec(entitySpec2, columnSpecs, i);
-            }
+            i = processBaseSpec(entitySpec2, columnSpecs, i);
             i = processUniqueIds(entitySpec, entitySpec2, columnSpecs, i,
                     columnSpecInfo, referenceSpec);
             i = processStartTimeOrTimestamp(entitySpec, entitySpec2,
@@ -207,7 +205,7 @@ final class ColumnSpecInfoFactory {
             List<ColumnSpec> columnSpecs, int i) {
         ColumnSpec spec = entitySpec.getBaseSpec();
         List<ColumnSpec> specAsList = spec.asList();
-        columnSpecs.addAll(spec.asList());
+        columnSpecs.addAll(specAsList);
         i += specAsList.size();
         return i;
     }

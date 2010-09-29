@@ -12,14 +12,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.protempa.AbstractAlgorithmSourceBackend;
-import org.protempa.AbstractDataSourceBackend;
-import org.protempa.AbstractKnowledgeSourceBackend;
-import org.protempa.Algorithm;
 import org.protempa.AlgorithmSourceBackend;
-import org.protempa.AlgorithmSourceReadException;
-import org.protempa.Algorithms;
-import org.protempa.BackendInitializationException;
 import static org.junit.Assert.*;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendProviderSpecLoaderException;
@@ -31,8 +24,6 @@ import org.protempa.backend.Configurations;
 import org.protempa.backend.ConfigurationsProviderManager;
 import org.protempa.backend.InvalidPropertyNameException;
 import org.protempa.backend.test.MockBackendProvider;
-import org.protempa.proposition.value.GranularityFactory;
-import org.protempa.proposition.value.UnitFactory;
 
 /**
  *
@@ -149,77 +140,5 @@ public class INICommonsConfigurationsTest {
         INICommonsConfigurations instance = new INICommonsConfigurations();
         List<String> result = instance.loadConfigurationIds("test");
         assertEquals(Collections.singletonList("ASBackendSpec1"), result);
-    }
-
-    private static class MockKnowledgeSourceBackend
-            extends AbstractKnowledgeSourceBackend {
-
-        @Override
-        public void initialize(BackendInstanceSpec config)
-                throws BackendInitializationException {
-        }
-
-        @Override
-        public String getDisplayName() {
-            return "Mock Knowledge Source Backend";
-        }
-    }
-
-    private static class MockDataSourceBackend
-            extends AbstractDataSourceBackend {
-
-        @Override
-        public void initialize(BackendInstanceSpec config)
-                throws BackendInitializationException {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public GranularityFactory getGranularityFactory() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public UnitFactory getUnitFactory() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public String getKeyType() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public String getDisplayName() {
-            return "Mock Data Source Backend";
-        }
-
-        
-    }
-
-    private static class MockAlgorithmSourceBackend
-            extends AbstractAlgorithmSourceBackend {
-
-        @Override
-        public Algorithm readAlgorithm(String id, Algorithms algorithms)
-                throws AlgorithmSourceReadException {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public void readAlgorithms(Algorithms algorithms)
-                throws AlgorithmSourceReadException {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        public void initialize(BackendInstanceSpec config)
-                throws BackendInitializationException {
-        }
-
-        @Override
-        public String getDisplayName() {
-            return "Mock Algorithm Source Backend";
-        }
     }
 }

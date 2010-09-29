@@ -12,9 +12,9 @@ import org.protempa.proposition.value.ValueComparator;
  */
 public class PropertyValueFilter extends AbstractFilter {
 
-    private String property;
-    private ValueComparator valueComparator;
-    private Value value;
+    private final String property;
+    private final ValueComparator valueComparator;
+    private final Value value;
 
     /**
      * Instantiate with the proposition ids to which this filter applies,
@@ -27,6 +27,8 @@ public class PropertyValueFilter extends AbstractFilter {
      * <code>null</code>.
      * @param value a {@link Value}. If a {@link ListValue}, it cannot contain
      * nested lists. Cannot be <code>null</code>.
+     * @param negation a <code>boolean</code>, <code>false</code> means find
+     * propositions that do not have the specified value.
      */
     public PropertyValueFilter(String[] propositionIds,
             String property, ValueComparator valueComparator,
@@ -45,6 +47,10 @@ public class PropertyValueFilter extends AbstractFilter {
         if (value == null)
             throw new IllegalArgumentException("value cannot be null");
         if (value instanceof ListValue) {
+            if (valueComparator != ValueComparator.IN && valueComparator != ValueComparator.NOT_IN) {
+                throw new IllegalArgumentException(
+                        "ListValue value arguments are only allowed if the value comparator is IN or NOT_IN");
+            }
             ListValue<Value> lv = (ListValue<Value>) value;
             for (Value v : lv) {
                 if (v instanceof ListValue) {
@@ -65,7 +71,7 @@ public class PropertyValueFilter extends AbstractFilter {
      * @return a property name [@link String}. Cannot be <code>null</code>.
      */
     public String getProperty() {
-        return property;
+        return this.property;
     }
 
     /**
@@ -74,7 +80,7 @@ public class PropertyValueFilter extends AbstractFilter {
      * @return a {@link Value}. Cannot be <code>null</code>.
      */
     public Value getValue() {
-        return value;
+        return this.value;
     }
 
     /**

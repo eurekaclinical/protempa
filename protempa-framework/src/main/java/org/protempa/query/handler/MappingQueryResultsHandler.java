@@ -74,7 +74,7 @@ public class MappingQueryResultsHandler implements QueryResultsHandler {
     @Override
     public void handleQueryResult(String key, List<Proposition> propositions,
             Map<Proposition,List<Proposition>> derivations,
-            Map<UniqueIdentifier, List<Proposition>> references)
+            Map<UniqueIdentifier, Proposition> references)
             throws FinderException {
         resultMap.put(key, propositions);
     }

@@ -104,9 +104,10 @@ public final class EntitySpec implements Serializable {
         }
         this.name = name;
 
-        if (positionParser == null) {
+        if (positionParser == null &&
+                (startTimeOrTimestampSpec != null || finishTimeSpec != null)) {
             throw new IllegalArgumentException(
-                    "positionParser cannot be null");
+                    "positionParser cannot be null for entities with a start time and/or finish time");
         }
 
         if (propositionIds != null) {

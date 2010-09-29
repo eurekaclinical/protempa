@@ -11,24 +11,31 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.string.StringUtil;
+import org.protempa.AbstractPropositionDefinitionVisitor;
 import org.protempa.AbstractionDefinition;
+import org.protempa.ConstantDefinition;
 import org.protempa.EventDefinition;
 import org.protempa.FinderException;
+import org.protempa.HighLevelAbstractionDefinition;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.LowLevelAbstractionDefinition;
 import org.protempa.PrimitiveParameterDefinition;
-import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.ReferenceDefinition;
-import org.protempa.proposition.ConstantParameter;
+import org.protempa.SliceDefinition;
+import org.protempa.proposition.AbstractParameter;
+import org.protempa.proposition.AbstractPropositionVisitor;
+import org.protempa.proposition.ConstantProposition;
+import org.protempa.proposition.Context;
+import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.TemporalParameter;
-import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
 import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueComparator;
 
 /**
  *
@@ -36,10 +43,9 @@ import org.protempa.proposition.value.Value;
  */
 public class TableQueryResultsHandler extends WriterQueryResultsHandler
         implements Serializable {
-    private static final long serialVersionUID = -1503401944818776787L;
 
+    private static final long serialVersionUID = -1503401944818776787L;
     private static final String NULL_COLUMN = "(empty)";
-    
     private final char columnDelimiter;
     private final String rowPropositionId;
     private final ColumnSpec[] columnSpecs;
@@ -94,9 +100,10 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
 
     private void checkConstructorArgs(String rowPropositionId,
             ColumnSpec[] columnSpecs) {
-        if (rowPropositionId == null)
+        if (rowPropositionId == null) {
             throw new IllegalArgumentException(
                     "rowPropositionId cannot be null");
+        }
         ProtempaUtil.checkArray(columnSpecs, "columnSpecs");
     }
 
@@ -133,7 +140,7 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
                         columnNames.add(colName);
                     }
                 }
-            
+
                 write(StringUtils.join(columnNames, this.columnDelimiter));
                 newLine();
             } catch (KnowledgeSourceReadException ex1) {
@@ -146,18 +153,17 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
 
     }
 
-
-
     @Override
     public void handleQueryResult(String key, List<Proposition> propositions,
-            Map<Proposition,List<Proposition>> derivations,
-            Map<UniqueIdentifier, List<Proposition>> references)
+            Map<Proposition, List<Proposition>> derivations,
+            Map<UniqueIdentifier, Proposition> references)
             throws FinderException {
         int n = this.columnSpecs.length;
         List<Proposition> filtered = new ArrayList<Proposition>();
         for (Proposition prop : propositions) {
-            if (prop.getId().equals(this.rowPropositionId))
+            if (prop.getId().equals(this.rowPropositionId)) {
                 filtered.add(prop);
+            }
         }
         for (Proposition prop : filtered) {
             for (int i = 0; i < n; i++) {
@@ -166,19 +172,21 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
 
                     List<String> columnValues = new ArrayList<String>();
                     String[] colValues = columnSpec.columnValues(key,
-                        prop, derivations, references, this.knowledgeSource);
+                            prop, derivations, references, this.knowledgeSource);
                     columnValues.add(key);
-                    for (String colVal : colValues)
+                    for (String colVal : colValues) {
                         columnValues.add(colVal);
+                    }
                     List<String> escapedColumnValues =
                             StringUtil.escapeDelimitedColumns(columnValues,
                             this.columnDelimiter);
                     write(StringUtils.join(escapedColumnValues,
                             this.columnDelimiter));
-                    if (i < n - 1)
+                    if (i < n - 1) {
                         write(this.columnDelimiter);
-                    else
+                    } else {
                         newLine();
+                    }
                 } catch (KnowledgeSourceReadException ex1) {
                     throw new FinderException("Could not read knowledge source",
                             ex1);
@@ -194,6 +202,7 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
      * that represent a proposition or property.
      */
     public static interface ColumnSpec {
+
         /**
          * Gets the names of the columns representing one instance of a
          * proposition or property. These columns may be repeated if the
@@ -221,13 +230,14 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
          * the knowledge source failed.
          */
         String[] columnValues(String key, Proposition proposition,
-                Map<Proposition,List<Proposition>> derivations,
-                Map<UniqueIdentifier,List<Proposition>> references,
+                Map<Proposition, List<Proposition>> derivations,
+                Map<UniqueIdentifier, Proposition> references,
                 KnowledgeSource knowledgeSource) throws
                 KnowledgeSourceReadException;
     }
 
     public static class CountColumnSpec implements ColumnSpec {
+
         private String referenceName;
 
         public CountColumnSpec(String referenceName) {
@@ -237,23 +247,22 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
         @Override
         public String[] columnNames(String propId,
                 KnowledgeSource knowledgeSource) {
-            return new String[] {this.referenceName + "_count"};
+            return new String[]{this.referenceName + "_count"};
         }
 
         @Override
         public String[] columnValues(String key, Proposition proposition,
-                Map<Proposition,List<Proposition>> derivations,
-                Map<UniqueIdentifier, List<Proposition>> references,
+                Map<Proposition, List<Proposition>> derivations,
+                Map<UniqueIdentifier, Proposition> references,
                 KnowledgeSource knowledgeSource) {
-            return new String[] {
-                "" + references.get(proposition.getUniqueIdentifier()).size()
-            };
-
+            return new String[]{
+                        "" + proposition.getReferences(this.referenceName).size()
+                    };
         }
-
     }
 
     public static class AtLeastNColumnSpec implements ColumnSpec {
+
         private int n;
         private String referenceName;
 
@@ -267,52 +276,69 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
         @Override
         public String[] columnNames(String propId,
                 KnowledgeSource knowledgeSource) {
-            return new String[] {propId + "_" + this.referenceName +
-                    "_at_least_" + n};
+            return new String[]{propId + "_" + this.referenceName
+                        + "_at_least_" + n};
         }
 
         @Override
-        public String[] columnValues(String key, 
+        public String[] columnValues(String key,
                 Proposition proposition,
-                Map<Proposition,List<Proposition>> derivations,
-                Map<UniqueIdentifier, List<Proposition>> references,
+                Map<Proposition, List<Proposition>> derivations,
+                Map<UniqueIdentifier, Proposition> references,
                 KnowledgeSource knowledgeSource) {
             boolean atLeastN =
-                    references.get(proposition.getUniqueIdentifier()).size()
+                    proposition.getReferences(this.referenceName).size()
                     >= this.n;
-            return new String[] {
-                "" + atLeastN
-            };
+            return new String[]{
+                        "" + atLeastN
+                    };
         }
-
     }
 
     public static class PropositionColumnSpec implements ColumnSpec {
+
         private String[] propertyNames;
 
         public PropositionColumnSpec(String[] propertyNames) {
-            if (propertyNames == null)
+            if (propertyNames == null) {
                 propertyNames = new String[0];
+            }
             this.propertyNames = propertyNames.clone();
         }
 
-        protected String[] columnNames(PropositionDefinition refProp) {
-            if (refProp == null)
-                throw new IllegalArgumentException("refProp cannot be null");
-            String[] propertyColumnNames =
-                    new String[this.propertyNames.length];
-            for (int i = 0; i < propertyColumnNames.length; i++) {
-                String propName = this.propertyNames[i];
-                if (refProp.propertyDefinition(propName) == null) {
-                    throw new IllegalArgumentException(refProp.getId() +
-                            " does not have a property named " + propName);
+        private class NamesPropositionDefinitionVisitor extends AbstractPropositionDefinitionVisitor {
+
+            private String[] result;
+
+            @Override
+            public void visit(EventDefinition eventDefinition) {
+                String[] propertyColumnNames =
+                        propertyColumnNames(eventDefinition);
+                String refPropId = eventDefinition.getId();
+                this.result = new String[propertyColumnNames.length + 2];
+                this.result[0] = refPropId + "_start";
+                this.result[1] = refPropId + "_finish";
+                int i = 2;
+                for (; i < this.result.length; i++) {
+                    this.result[i] = propertyColumnNames[i - 2];
                 }
-                propertyColumnNames[i] =
-                        refProp.getId() + "_" + propName;
             }
-            String[] result;
-            String refPropId = refProp.getId();
-            if (refProp instanceof PrimitiveParameterDefinition) {
+
+            @Override
+            public void visit(HighLevelAbstractionDefinition highLevelAbstractionDefinition) {
+                visitAbstractionDefinition(highLevelAbstractionDefinition);
+            }
+
+            @Override
+            public void visit(LowLevelAbstractionDefinition lowLevelAbstractionDefinition) {
+                visitAbstractionDefinition(lowLevelAbstractionDefinition);
+            }
+
+            @Override
+            public void visit(PrimitiveParameterDefinition primitiveParameterDefinition) {
+                String[] propertyColumnNames =
+                        propertyColumnNames(primitiveParameterDefinition);
+                String refPropId = primitiveParameterDefinition.getId();
                 result = new String[propertyColumnNames.length + 2];
                 result[0] = refPropId + "_value";
                 result[1] = refPropId + "_tstamp";
@@ -320,74 +346,149 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
                 for (; i < result.length; i++) {
                     result[i] = propertyColumnNames[i - 2];
                 }
-            } else if (refProp instanceof AbstractionDefinition) {
-                result = new String[propertyColumnNames.length + 3];
-                result[0] = refPropId + "_value";
-                result[1] = refPropId + "_start";
-                result[2] = refPropId + "_finish";
-                int i = 3;
-                for (; i < result.length; i++) {
-                    result[i] = propertyColumnNames[i - 3];
-                }
-            } else if (refProp instanceof EventDefinition) {
-                result = new String[propertyColumnNames.length + 2];
-                result[0] = refPropId + "_start";
-                result[1] = refPropId + "_finish";
-                int i = 2;
-                for (; i < result.length; i++) {
-                    result[i] = propertyColumnNames[i - 2];
-                }
-            } else {
-                result = new String[propertyColumnNames.length + 1];
             }
-            return result;
+
+            @Override
+            public void visit(SliceDefinition sliceAbstractionDefinition) {
+                visitAbstractionDefinition(sliceAbstractionDefinition);
+            }
+
+            @Override
+            public void visit(ConstantDefinition constantDefinition) {
+                String[] propertyColumnNames =
+                        propertyColumnNames(constantDefinition);
+                this.result = new String[propertyColumnNames.length];
+                for (int i = 0; i < this.result.length; i++) {
+                    this.result[i] = propertyColumnNames[i];
+                }
+            }
+
+            String[] getResult() {
+                return this.result;
+            }
+
+            private String[] propertyColumnNames(
+                    PropositionDefinition propositionDefinition) {
+                String[] propertyColumnNames =
+                        new String[propertyNames.length];
+                for (int i = 0; i < propertyColumnNames.length; i++) {
+                    String propName = propertyNames[i];
+                    if (propositionDefinition.propertyDefinition(propName)
+                            == null) {
+                        throw new IllegalArgumentException(
+                                propositionDefinition.getId()
+                                + " does not have a property named "
+                                + propName);
+                    }
+                    propertyColumnNames[i] =
+                            propositionDefinition.getId() + "_" + propName;
+                }
+                return propertyColumnNames;
+            }
+
+            private void visitAbstractionDefinition(
+                    AbstractionDefinition abstractionDefinition) {
+                String[] propertyColumnNames =
+                        propertyColumnNames(abstractionDefinition);
+                String refPropId = abstractionDefinition.getId();
+                this.result = new String[propertyColumnNames.length + 3];
+                this.result[0] = refPropId + "_value";
+                this.result[1] = refPropId + "_start";
+                this.result[2] = refPropId + "_finish";
+                int i = 3;
+                for (; i < this.result.length; i++) {
+                    this.result[i] = propertyColumnNames[i - 3];
+                }
+            }
+        }
+
+        protected String[] columnNames(
+                PropositionDefinition propositionDefinition) {
+            if (propositionDefinition == null) {
+                throw new IllegalArgumentException("refProp cannot be null");
+            }
+            NamesPropositionDefinitionVisitor propositionDefinitionVisitor =
+                    new NamesPropositionDefinitionVisitor();
+            propositionDefinition.accept(propositionDefinitionVisitor);
+            return propositionDefinitionVisitor.getResult();
+        }
+
+        private class ValuesPropositionVisitor
+                extends AbstractPropositionVisitor {
+
+            private final int numProperties;
+            private String[] result;
+
+            ValuesPropositionVisitor() {
+                this.numProperties = propertyNames.length;
+            }
+
+            @Override
+            public void visit(AbstractParameter abstractParameter) {
+                this.result = new String[3 + this.numProperties];
+                this.result[0] = abstractParameter.getStartFormattedShort();
+                this.result[1] = abstractParameter.getFinishFormattedShort();
+                this.result[2] = abstractParameter.getValueFormatted();
+                processProperties(abstractParameter, 3);
+            }
+
+            @Override
+            public void visit(Event event) {
+                this.result = new String[2 + this.numProperties];
+                this.result[0] = event.getStartFormattedShort();
+                this.result[1] = event.getFinishFormattedShort();
+                processProperties(event, 2);
+            }
+
+            @Override
+            public void visit(PrimitiveParameter primitiveParameter) {
+                this.result = new String[2 + numProperties];
+                this.result[0] =
+                        primitiveParameter.getTimestampFormattedShort();
+                this.result[1] =
+                        primitiveParameter.getValueFormatted();
+                processProperties(primitiveParameter, 2);
+            }
+
+            @Override
+            public void visit(ConstantProposition constantParameter) {
+                result = new String[numProperties];
+                processProperties(constantParameter, 0);
+            }
+
+            @Override
+            public void visit(Context context) {
+                throw new UnsupportedOperationException(
+                        "Contexts not supported yet");
+            }
+
+            String[] getResult() {
+                return this.result;
+            }
+
+            private void processProperties(Proposition proposition, int j) {
+                for (int i = j; i < this.result.length; i++) {
+                    Value pval =
+                            proposition.getProperty(propertyNames[i - j]);
+                    if (pval != null) {
+                        this.result[i] = pval.getFormatted();
+                    } else {
+                        this.result[i] = NULL_COLUMN;
+                    }
+                }
+            }
         }
 
         @Override
         public String[] columnValues(String key, Proposition proposition,
-                Map<Proposition,List<Proposition>> derivations,
-                Map<UniqueIdentifier, List<Proposition>> references,
+                Map<Proposition, List<Proposition>> derivations,
+                Map<UniqueIdentifier, Proposition> references,
                 KnowledgeSource knowledgeSource)
                 throws KnowledgeSourceReadException {
-            String[] result;
-            PropositionDefinition pd =
-                    knowledgeSource.readPropositionDefinition(
-                    proposition.getId());
-            PropertyDefinition[] pdefs = pd.getPropertyDefinitions();
-            int j;
-            if (proposition instanceof PrimitiveParameter) {
-                PrimitiveParameter pp = (PrimitiveParameter) proposition;
-                result = new String[2 + pdefs.length];
-                result[0] = pp.getTimestampFormattedShort();
-                result[1] = pp.getValueFormatted();
-                j = 2;
-            } else if (proposition instanceof TemporalParameter) {
-                TemporalParameter tp = (TemporalParameter) proposition;
-                result = new String[3 + pdefs.length];
-                result[0] = tp.getStartFormattedShort();
-                result[1] = tp.getFinishFormattedShort();
-                result[2] = tp.getValueFormatted();
-                j = 3;
-            } else if (proposition instanceof TemporalProposition) {
-                TemporalProposition tp = (TemporalProposition) proposition;
-                result = new String[2 + pdefs.length];
-                result[0] = tp.getStartFormattedShort();
-                result[1] = tp.getFinishFormattedShort();
-                j = 2;
-            } else {
-                ConstantParameter cp = (ConstantParameter) proposition;
-                result = new String[1 + pdefs.length];
-                result[0] = cp.getValueFormatted();
-                j = 0;
-            }
-            for (int i = j; i < result.length; i++) {
-                Value pval = proposition.getProperty(pdefs[i - j].getName());
-                if (pval != null)
-                    result[i] = pval.getFormatted();
-                else
-                    result[i] = NULL_COLUMN;
-            }
-            return result;
+            ValuesPropositionVisitor propositionVisitor =
+                    new ValuesPropositionVisitor();
+            proposition.accept(propositionVisitor);
+            return propositionVisitor.getResult();
         }
 
         @Override
@@ -398,21 +499,19 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
                     knowledgeSource.readPropositionDefinition(propId);
             return columnNames(propDef);
         }
-
-
     }
 
-    public static class DirectChildrenColumnSpec extends
-            PropositionColumnSpec {
+    public static class DirectChildrenColumnSpec extends PropositionColumnSpec {
 
         public static enum Order {
+
             INCREASING,
             DECREASING,
             NONE
         }
-
         private final String propositionId;
         private final Order order;
+
         /**
          *
          * @param propositionId
@@ -420,18 +519,20 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
          * temporal propositions and have the same id.
          * @throws KnowledgeSourceReadException
          */
-        public DirectChildrenColumnSpec(String propositionId, 
+        public DirectChildrenColumnSpec(String propositionId,
                 String[] propertyNames, Order order) {
             super(propertyNames);
-            if (order == null)
+            if (order == null) {
                 order = Order.NONE;
-            if (propositionId == null)
+            }
+            if (propositionId == null) {
                 throw new IllegalArgumentException(
                         "propositionId cannot be null");
-            
+            }
+
             this.propositionId = propositionId;
             this.order = order;
-            
+
         }
 
         @Override
@@ -453,8 +554,8 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
 
         @Override
         public String[] columnValues(String key, Proposition proposition,
-                Map<Proposition,List<Proposition>> derivations,
-                Map<UniqueIdentifier,List<Proposition>> references,
+                Map<Proposition, List<Proposition>> derivations,
+                Map<UniqueIdentifier, Proposition> references,
                 KnowledgeSource knowledgeSource)
                 throws KnowledgeSourceReadException {
             List<String> result = new ArrayList<String>();
@@ -480,14 +581,16 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
     }
 
     public static class ReferenceColumnSpec extends PropositionColumnSpec {
+
         private final String referenceName;
 
         public ReferenceColumnSpec(String referenceName,
                 String[] propertyNames) {
             super(propertyNames);
-            if (referenceName == null)
+            if (referenceName == null) {
                 throw new IllegalArgumentException(
                         "referenceName cannot be null");
+            }
             this.referenceName = referenceName;
         }
 
@@ -509,29 +612,135 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
             return super.columnNames(refProp);
         }
 
-        
-
         @Override
         public String[] columnValues(String key, Proposition proposition,
-                Map<Proposition,List<Proposition>> derivations,
-                Map<UniqueIdentifier,List<Proposition>> references,
+                Map<Proposition, List<Proposition>> derivations,
+                Map<UniqueIdentifier, Proposition> references,
                 KnowledgeSource knowledgeSource) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 
+    public static class PropertyOfReferenceColumnSpec implements ColumnSpec {
+
+        private final String[] propertyNames;
+        private final String referenceName;
+        private final String[] columnNames;
+        private final String[] constraintPropertyNames;
+        private final ValueComparator[] valueComparators;
+        private final Value[] valueConstraints;
+
+        public PropertyOfReferenceColumnSpec(String referenceName,
+                String[] propertyNames, String[] constraintPropertyNames,
+                ValueComparator[] valueComparators,
+                Value[] valueConstraints) {
+            if (referenceName == null) {
+                throw new IllegalArgumentException(
+                        "referenceName cannot be null");
+            }
+            ProtempaUtil.checkArray(propertyNames, "propertyNames");
+            if (constraintPropertyNames != null) {
+                if (valueComparators == null
+                        || constraintPropertyNames.length
+                        != valueComparators.length) {
+                    throw new IllegalArgumentException(
+                            "valueComparators must be the same length as constraintPropertyNames");
+                }
+                if (valueConstraints == null
+                        || constraintPropertyNames.length
+                        != valueConstraints.length) {
+                    throw new IllegalArgumentException(
+                            "valueConstraints must be the same length as constraintPropertyNames");
+                }
+                ProtempaUtil.checkArrayForNullElement(constraintPropertyNames,
+                        "constraintPropertyNames");
+                ProtempaUtil.checkArrayForNullElement(valueComparators,
+                        "valueComparators");
+                ProtempaUtil.checkArrayForNullElement(valueConstraints,
+                        "valueConstraints");
+            }
+            this.referenceName = referenceName;
+            this.propertyNames = propertyNames;
+            this.constraintPropertyNames = constraintPropertyNames;
+            this.valueComparators = valueComparators;
+            this.valueConstraints = valueConstraints;
+            this.columnNames = new String[propertyNames.length];
+            List<String> constraintsL =
+                    new ArrayList<String>(this.constraintPropertyNames.length);
+            for (int i = 0; i < this.constraintPropertyNames.length; i++) {
+                constraintsL.add(this.constraintPropertyNames[i] +
+                        this.valueComparators[i].getComparatorString() +
+                        this.valueConstraints[i].getFormatted());
+            }
+            for (int i = 0; i < this.columnNames.length; i++) {
+                this.columnNames[i] = this.referenceName + "."
+                        + this.propertyNames[i] + "(" +
+                    org.arp.javautil.collections.Collections.join(constraintsL,
+                    ",") + ")";
+            }
+        }
+
+        @Override
+        public String[] columnNames(String propId,
+                KnowledgeSource knowledgeSource)
+                throws KnowledgeSourceReadException {
+            return this.columnNames.clone();
+        }
+
+        @Override
+        public String[] columnValues(String key, Proposition proposition,
+                Map<Proposition, List<Proposition>> derivations,
+                Map<UniqueIdentifier, Proposition> references,
+                KnowledgeSource knowledgeSource)
+                throws KnowledgeSourceReadException {
+            List<UniqueIdentifier> uids =
+                    proposition.getReferences(this.referenceName);
+            List<String> props = new ArrayList<String>(uids.size());
+            for (UniqueIdentifier uid : uids) {
+                Proposition prop = references.get(uid);
+                assert prop != null : 
+                    "Could not find proposition with unique identifier "
+                        + uid + " in references " + references;
+                boolean compatible = true;
+                for (int i = 0; i < this.constraintPropertyNames.length; i++) {
+                    String propName = this.constraintPropertyNames[i];
+                    Value value = prop.getProperty(propName);
+                    if (!this.valueComparators[i].subsumes(value.compare(
+                            this.valueConstraints[i]))) {
+                        compatible = false;
+                        break;
+                    }
+                }
+                if (!compatible) {
+                    continue;
+                }
+                for (String propName : this.propertyNames) {
+                    Value value = prop.getProperty(propName);
+                    if (value == null) {
+                        props.add(NULL_COLUMN);
+                    } else {
+                        props.add(value.getFormatted());
+                    }
+                }
+            }
+            return props.toArray(new String[props.size()]);
+        }
+    }
+
     public static class PropertyColumnSpec implements ColumnSpec {
+
         private final String propertyName;
         private final String[] columnNames;
 
         public PropertyColumnSpec(String propertyName) {
-            if (propertyName == null)
+            if (propertyName == null) {
                 throw new IllegalArgumentException(
                         "propertyName cannot be null");
+            }
             this.propertyName = propertyName;
-            this.columnNames = new String[] {
-                this.propertyName
-            };
+            this.columnNames = new String[]{
+                        this.propertyName
+                    };
         }
 
         public String getPropertyName() {
@@ -546,22 +755,19 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
 
         @Override
         public String[] columnValues(String key, Proposition proposition,
-                Map<Proposition,List<Proposition>> derivations,
-                Map<UniqueIdentifier,List<Proposition>> references,
+                Map<Proposition, List<Proposition>> derivations,
+                Map<UniqueIdentifier, Proposition> references,
                 KnowledgeSource knowledgeSource) {
             Value propertyValue = proposition.getProperty(this.propertyName);
             String result;
-            if (propertyValue != null)
+            if (propertyValue != null) {
                 result = propertyValue.getFormatted();
-            else
+            } else {
                 result = NULL_COLUMN;
-            return new String[] {
-                result
-            };
+            }
+            return new String[]{
+                        result
+                    };
         }
-
-
     }
-
-
 }

@@ -37,7 +37,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
             if (propIds.length == 1) {
                 propId = propIds[0];
             } else {
-                propId = resultSet.getString(i++);
+                propId = resultSet.getString(i);
             }
             i -=uniqueIds.length;
             Event event = new Event(propId);
@@ -45,6 +45,8 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                     new DatabaseDataSourceType(getDataSourceBackendId()));
             i = eventSetUniqueIdentifier(uniqueIds, entitySpec, resultSet, i,
                     event);
+            if (propIds.length > 1)
+                i++;
             Granularity gran = entitySpec.getGranularity();
             ColumnSpec finishTimeSpec = entitySpec.getFinishTimeSpec();
             if (finishTimeSpec == null) {
@@ -91,8 +93,8 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
             }
             PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
             for (PropertySpec propertySpec : propertySpecs) {
-                ValueType vf = propertySpec.getValueType();
-                Value value = ValueFactory.get(vf).parseValue(
+                ValueType valueType = propertySpec.getValueType();
+                Value value = ValueFactory.get(valueType).parseValue(
                         resultSet.getString(i++));
                 event.setProperty(propertySpec.getName(), value);
             }

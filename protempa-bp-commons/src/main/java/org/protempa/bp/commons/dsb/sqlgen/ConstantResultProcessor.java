@@ -9,18 +9,18 @@ import java.util.logging.Logger;
 import org.arp.javautil.collections.Collections;
 import org.protempa.DatabaseDataSourceType;
 import org.protempa.DerivedDataSourceType;
-import org.protempa.proposition.ConstantParameter;
+import org.protempa.proposition.ConstantProposition;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueFactory;
 import org.protempa.proposition.value.ValueType;
 
-class ConstantParameterResultProcessor extends
-        AbstractMainResultProcessor<ConstantParameter> {
+class ConstantResultProcessor extends
+        AbstractMainResultProcessor<ConstantProposition> {
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
-        Map<String, List<ConstantParameter>> results = getResults();
+        Map<String, List<ConstantProposition>> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
         String[] propIds = entitySpec.getPropositionIds();
         Logger logger = SQLGenUtil.logger();
@@ -31,17 +31,13 @@ class ConstantParameterResultProcessor extends
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifer = generateUniqueIdentifier(
                     entitySpec, uniqueIds);
-            ValueType vf = entitySpec.getValueType();
-            Value cpVal = ValueFactory.get(vf).parseValue(
-                    resultSet.getString(i++));
             String propId;
             if (propIds.length == 1) {
                 propId = propIds[0];
             } else {
                 propId = resultSet.getString(i++);
             }
-            ConstantParameter cp = new ConstantParameter(propId);
-            cp.setValue(cpVal);
+            ConstantProposition cp = new ConstantProposition(propId);
             cp.setUniqueIdentifier(uniqueIdentifer);
             cp.setDataSourceType(new DerivedDataSourceType());
             PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
@@ -53,7 +49,7 @@ class ConstantParameterResultProcessor extends
             }
             cp.setDataSourceType(
                     new DatabaseDataSourceType(getDataSourceBackendId()));
-            logger.log(Level.FINEST, "Created constant parameter {0}", cp);
+            logger.log(Level.FINEST, "Created constant {0}", cp);
             Collections.putList(results, keyId, cp);
         }
     }

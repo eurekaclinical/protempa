@@ -21,7 +21,7 @@ import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.PropositionIdToSqlCode;
 import org.protempa.dsb.filter.Filter;
 import org.protempa.dsb.filter.PositionFilter;
 import org.protempa.dsb.filter.PropertyValueFilter;
-import org.protempa.proposition.ConstantParameter;
+import org.protempa.proposition.ConstantProposition;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
@@ -98,7 +98,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             populatePropositionMap(this.eventSpecs,
                     relationalDatabaseSpec.getEventSpecs());
             populatePropositionMap(this.constantSpecs,
-                    relationalDatabaseSpec.getConstantParameterSpecs());
+                    relationalDatabaseSpec.getConstantSpecs());
             this.granularities = relationalDatabaseSpec.getGranularities();
             this.units = relationalDatabaseSpec.getUnits();
             this.connectionSpec = connectionSpec;
@@ -145,7 +145,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         Map<String, List<P>> results = new HashMap<String, List<P>>();
         Collection<EntitySpec> allEntitySpecs = allEntitySpecs();
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
-            List<EntitySpec> allEntitySpecsCopy =
+            List<EntitySpec> allEntitySpecsCopy = 
                     new ArrayList<EntitySpec>(allEntitySpecs);
             removeNonApplicableEntitySpecs(entitySpec, allEntitySpecsCopy);
             Set<Filter> filtersCopy = copyFilters(filters);
@@ -164,6 +164,18 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
             ReferenceSpec[] refSpecs = entitySpec.getReferenceSpecs();
             if (refSpecs != null) {
+                /*
+                 * Create a copy of allEntitySpecs with the current entitySpec
+                 * the first item of the list. This is to make sure that
+                 * its joins make it into the list of column specs.
+                 */
+                List<EntitySpec> allEntitySpecsCopyForRefs =
+                        new ArrayList<EntitySpec>(allEntitySpecs.size());
+                allEntitySpecsCopyForRefs.add(entitySpec);
+                for (EntitySpec es : allEntitySpecs) {
+                    if (es != entitySpec)
+                        allEntitySpecsCopyForRefs.add(es);
+                }
                 Map<UniqueIdentifier, P> cache = resultProcessor.createCache();
                 for (ReferenceSpec referenceSpec : refSpecs) {
                     RefResultProcessor<P> refResultProcessor =
@@ -171,7 +183,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                             entitySpec, referenceSpec, cache);
                     Set<Filter> refFiltersCopy = copyFilters(filters);
                     EntitySpec referredToEntitySpec = null;
-                    for (EntitySpec reffedToSpec : allEntitySpecs) {
+                    for (EntitySpec reffedToSpec : allEntitySpecsCopyForRefs) {
                         if (referenceSpec.getEntityName().equals(
                                 reffedToSpec.getName())) {
                             referredToEntitySpec = reffedToSpec;
@@ -179,16 +191,16 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                         }
                     }
                     assert referredToEntitySpec != null :
-                        "refferedToEntitySpec should not be null";
-                    removeNonApplicableFilters(allEntitySpecs, refFiltersCopy,
-                            referredToEntitySpec);
+                            "refferedToEntitySpec should not be null";
+                    removeNonApplicableFilters(allEntitySpecsCopyForRefs,
+                            refFiltersCopy, referredToEntitySpec);
                     generateAndExecute(entitySpec, referenceSpec, propIds,
-                            refFiltersCopy, allEntitySpecs, keyIds, order,
-                            refResultProcessor);
+                            refFiltersCopy, allEntitySpecsCopyForRefs, keyIds,
+                            order, refResultProcessor);
                 }
             }
 
-            SQLGenUtil.logger().log(Level.INFO,
+            SQLGenUtil.logger().log(Level.FINE,
                     "Results of query for {0} in data source backend {1} "
                     + "have been processed",
                     new Object[]{entitySpec.getName(),
@@ -237,12 +249,12 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     private <P extends Proposition> void generateAndExecute(
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
             Set<String> propIds,
-            Set<Filter> filtersCopy, Collection<EntitySpec> entitySpecs,
+            Set<Filter> filtersCopy, Collection<EntitySpec> entitySpecsCopy,
             Set<String> keyIds, SQLOrderBy order,
             ResultProcessor resultProcessor)
             throws DataSourceReadException {
         String query = generateSelect(entitySpec, referenceSpec, propIds,
-                filtersCopy, entitySpecs, keyIds, order);
+                filtersCopy, entitySpecsCopy, keyIds, order);
 
         if (Boolean.getBoolean(SYSTEM_PROPERTY_SKIP_EXECUTION)) {
             SQLGenUtil.logger().log(Level.INFO,
@@ -250,7 +262,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     new Object[]{this.backendNameForMessages(),
                         entitySpec.getName(), query});
         } else {
-            SQLGenUtil.logger().log(Level.INFO,
+            SQLGenUtil.logger().log(Level.FINE,
                     "Data source backend {0} is executing query for {1}: {2}",
                     new Object[]{this.backendNameForMessages(),
                         entitySpec.getName(), query});
@@ -260,7 +272,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             } catch (SQLException ex) {
                 throw new DataSourceReadException(ex);
             }
-            SQLGenUtil.logger().log(Level.INFO,
+            SQLGenUtil.logger().log(Level.FINE,
                     "Query for {0} in data source backend {1} is complete",
                     new Object[]{entitySpec.getName(),
                         this.backendNameForMessages()});
@@ -313,11 +325,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     protected abstract boolean isLimitingSupported();
 
     @Override
-    public Map<String, List<ConstantParameter>> readConstantParameters(
+    public Map<String, List<ConstantProposition>> readConstants(
             Set<String> keyIds, Set<String> paramIds, Filter filters)
             throws DataSourceReadException {
-        ConstantParameterResultProcessorFactory factory =
-                new ConstantParameterResultProcessorFactory();
+        ConstantResultProcessorFactory factory =
+                new ConstantResultProcessorFactory();
 
         return executeSelect(paramIds, filters, keyIds, null, factory);
     }
@@ -345,18 +357,18 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
     private final String generateSelect(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, Set<String> propIds,
-            Set<Filter> filtersCopy, Collection<EntitySpec> entitySpecs,
+            Set<Filter> filtersCopy, Collection<EntitySpec> entitySpecsCopy,
             Set<String> keyIds, SQLOrderBy order) {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(
-                entitySpec, entitySpecs, filtersCopy, referenceSpec);
+                entitySpec, entitySpecsCopy, filtersCopy, referenceSpec);
         Map<ColumnSpec, Integer> referenceIndices =
                 computeReferenceIndices(info.getColumnSpecs());
         StringBuilder selectClause = generateSelectClause(info,
-                referenceIndices);
+                referenceIndices, entitySpec);
         StringBuilder fromClause = generateFromClause(info.getColumnSpecs(),
                 referenceIndices);
         StringBuilder whereClause = generateWhereClause(entitySpec, propIds,
-                info, entitySpecs, filtersCopy, selectClause,
+                info, entitySpecsCopy, filtersCopy, selectClause,
                 referenceIndices, keyIds, order);
         String result = assembleReadPropositionsQuery(
                 selectClause, fromClause, whereClause);
@@ -388,22 +400,19 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return filteredConstraintValues;
     }
 
-    private static ColumnSpec findColumnSpecWithMatchingSchemaAndTable(int j,
+    private static int findPreviousInstance(int j,
             List<ColumnSpec> columnSpecs, ColumnSpec columnSpec) {
-        ColumnSpec columnSpec2 = null;
-        for (int k = 0; k < j; k++) {
-            columnSpec2 = columnSpecs.get(k);
+        for (int i = 0; i < j; i++) {
+            ColumnSpec columnSpec2 = columnSpecs.get(i);
             if (columnSpec.isSameSchemaAndTable(columnSpec2)) {
-                break;
-            } else {
-                columnSpec2 = null;
+                return i;
             }
         }
-        return columnSpec2;
+        return -1;
     }
 
     private StringBuilder generateSelectClause(ColumnSpecInfo info,
-            Map<ColumnSpec, Integer> referenceIndices) {
+            Map<ColumnSpec, Integer> referenceIndices, EntitySpec entitySpec) {
         StringBuilder selectClause = new StringBuilder();
         int i = 0;
         if (info.getFinishTimeIndex() > 0) {
@@ -423,7 +432,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             i += uniqueIdIndices.length;
         }
         if (info.isUsingKeyIdIndex()) {
-            i++; //key id
+            i++;
         }
         int[] indices = new int[i];
         String[] names = new String[i];
@@ -451,17 +460,21 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             names[k++] = "finishtime";
         }
         if (info.getPropertyIndices() != null) {
-            for (Map.Entry<String, Integer> e :
-                    info.getPropertyIndices().entrySet()) {
-                indices[k] = e.getValue();
-                names[k++] = e.getKey() + "_value";
+            PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
+            for (PropertySpec propertySpec : propertySpecs) {
+                String propertyName = propertySpec.getName();
+                int propertyIndex =
+                        info.getPropertyIndices().get(propertyName);
+                indices[k] = propertyIndex;
+                names[k++] = propertyName + "_value";
             }
         }
 
         boolean unique = info.isUnique();
         for (int j = 0; j < indices.length; j++) {
             ColumnSpec cs = info.getColumnSpecs().get(indices[j]);
-            int index = referenceIndices.get(cs);
+            Integer index = referenceIndices.get(cs);
+            assert index != null : "index is null for " + cs;
             String column = cs.getColumn();
             String name = names[j];
             boolean distinctRequested = (j == 0 && !unique);
@@ -503,38 +516,45 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         boolean begin = true;
         for (int j = 0, n = columnSpecs.size(); j < n; j++) {
             ColumnSpec columnSpec = columnSpecs.get(j);
-            boolean shouldGenerateTable = begin || currentJoin != null;
-            if (shouldGenerateTable) {
-                int i = referenceIndices.get(columnSpec);
-                if (!columnSpecCache.containsKey(i)) {
-                    String schema = columnSpec.getSchema();
-                    String table = columnSpec.getTable();
-                    generateFromTable(schema, table, fromPart, i);
-                    columnSpecCache.put(i, columnSpec);
+            //boolean shouldGenerateTable = begin || currentJoin != null;
+            //if (shouldGenerateTable) {
+            Integer i = referenceIndices.get(columnSpec);
+            if (i != null && !columnSpecCache.containsKey(i)) {
+                assert begin || currentJoin != null :
+                        "No 'on' clause can be generated for " + columnSpec
+                        + " because there is no incoming join.";
+                String schema = columnSpec.getSchema();
+                String table = columnSpec.getTable();
+                if (!begin) {
+                    generateJoin(fromPart);
+                }
+                generateFromTable(schema, table, fromPart, i);
+                columnSpecCache.put(i, columnSpec);
 
-                    if (currentJoin != null) {
-                        int fromIndex = referenceIndices.get(
-                                currentJoin.getPrevColumnSpec());
-                        int toIndex = referenceIndices.get(
-                                currentJoin.getNextColumnSpec());
-                        generateOn(fromPart, fromIndex, toIndex,
-                                currentJoin.getFromKey(),
-                                currentJoin.getToKey());
-                    }
+                if (currentJoin != null) {
+                    int fromIndex = referenceIndices.get(
+                            currentJoin.getPrevColumnSpec());
+                    int toIndex = referenceIndices.get(
+                            currentJoin.getNextColumnSpec());
+                    generateOn(fromPart, fromIndex, toIndex,
+                            currentJoin.getFromKey(),
+                            currentJoin.getToKey());
                 }
                 begin = false;
             }
 
+            //}
 
 
-            if (columnSpec.getJoin() != null
-                    && !columnSpecCache.containsKey(
+
+            if (columnSpec.getJoin() != null /*&& !columnSpecCache.containsKey(
                     referenceIndices.get(
-                    columnSpec.getJoin().getNextColumnSpec()))) {
-                generateJoin(fromPart);
+                    columnSpec.getJoin().getNextColumnSpec()))*/) {
+                //generateJoin(fromPart);
                 currentJoin = columnSpec.getJoin();
             } else {
                 currentJoin = null;
+                //begin = true;
             }
         }
         return fromPart;
@@ -609,16 +629,33 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             }
             switch (constraint) {
                 case EQUAL_TO:
+                    if (sqlCodes.length > 1) {
+                        generateInClause(wherePart,
+                                referenceIndices.get(columnSpec),
+                                columnSpec.getColumn(),
+                                sqlCodes, false);
+                    } else {
+                        appendColumnReference(wherePart, referenceIndices,
+                                columnSpec);
+                        wherePart.append(constraint.getSqlOperator());
+                        appendValue(sqlCodes[0], wherePart);
+                    }
+                    break;
                 case LESS_THAN:
                 case LESS_THAN_OR_EQUAL_TO:
                 case GREATER_THAN:
                 case GREATER_THAN_OR_EQUAL_TO:
+                    appendColumnReference(wherePart, referenceIndices,
+                            columnSpec);
+                    wherePart.append(constraint.getSqlOperator());
+                    appendValue(sqlCodes[0], wherePart);
+                    break;
                 case NOT_EQUAL_TO:
                     if (sqlCodes.length > 1) {
                         generateInClause(wherePart,
                                 referenceIndices.get(columnSpec),
                                 columnSpec.getColumn(),
-                                sqlCodes);
+                                sqlCodes, true);
                     } else {
                         appendColumnReference(wherePart, referenceIndices,
                                 columnSpec);
@@ -666,7 +703,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
     private void processAdditionalConstraints(ColumnSpec columnSpec,
             StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
-            ColumnSpec.Constraint constraint,
+            Constraint constraint,
             Value value) {
         if (constraint != null && value != null) {
             if (value instanceof ListValue) {
@@ -681,7 +718,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 }
                 generateInClause(wherePart,
                         referenceIndices.get(columnSpec),
-                        columnSpec.getColumn(), vals);
+                        columnSpec.getColumn(), vals, constraint
+                        == Constraint.NOT_EQUAL_TO);
             } else {
                 appendColumnReference(wherePart, referenceIndices,
                         columnSpec);
@@ -771,8 +809,12 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             case IN:
                 constraint = ColumnSpec.Constraint.EQUAL_TO;
                 break;
+            case NOT_IN:
+                constraint = ColumnSpec.Constraint.NOT_EQUAL_TO;
+                break;
             default:
-                throw new AssertionError("cannot reach");
+                throw new AssertionError("invalid valueComparator: "
+                        + valueComparator);
         }
         return constraint;
     }
@@ -940,7 +982,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     }
 
     public abstract void generateInClause(StringBuilder wherePart,
-            int referenceIndex, String column, Object[] sqlCodes);
+            int referenceIndex, String column, Object[] sqlCodes, boolean not);
 
     public abstract void appendValue(Object val, StringBuilder wherePart);
 
@@ -950,29 +992,56 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             List<ColumnSpec> columnSpecs) {
         Map<ColumnSpec, Integer> result = new HashMap<ColumnSpec, Integer>();
 
-        int i = 1;
+        int index = 1;
         JoinSpec currentJoin = null;
         boolean begin = true;
         for (int j = 0, n = columnSpecs.size(); j < n; j++) {
             ColumnSpec columnSpec = columnSpecs.get(j);
+            /*
+             * Only generate a table if we're the first table or there is an
+             * inbound join.
+             */
             boolean shouldGenerateTable = begin || currentJoin != null;
             if (shouldGenerateTable) {
-                ColumnSpec columnSpec2 = null;
-                if (currentJoin == null || columnSpec.getJoin() != null) {
-                    columnSpec2 = findColumnSpecWithMatchingSchemaAndTable(j,
+                int previousInstanceIndex = -1;
+                //if there's no inbound join, then don't try to reuse an earlier instance.
+                if (currentJoin == null/* || columnSpec.getJoin() != null*/) {
+                    previousInstanceIndex = findPreviousInstance(j,
                             columnSpecs, columnSpec);
-                }
-                if (columnSpec2 != null) {
-                    result.put(columnSpec, result.get(columnSpec2));
                 } else {
-                    result.put(columnSpec, i);
+                    //If there's an inbound join and an earlier instance, then
+                    //use an earlier version only if the inbound join of the earlier
+                    //instance is the same
+                    int cs2i = findPreviousInstance(j, columnSpecs,
+                            columnSpec);
+                    if (cs2i > 0) {
+                        for (int k = 0; k < cs2i; k++) {
+                            ColumnSpec csPrev = columnSpecs.get(k);
+                            JoinSpec prevJoin = csPrev.getJoin();
+                            if (currentJoin.isSameJoin(prevJoin)) {
+                                previousInstanceIndex = cs2i;
+                                //break;
+                            }
+                        }
+
+                    }
+                }
+                //If we found an earlier instance, then use its index otherwise
+                //assign it a new index.
+                if (previousInstanceIndex >= 0) {
+                    ColumnSpec previousInstance =
+                            columnSpecs.get(previousInstanceIndex);
+                    assert result.containsKey(previousInstance) :
+                            "doesn't contain columnSpec " + previousInstance;
+                    result.put(columnSpec, result.get(previousInstance));
+                } else {
+                    result.put(columnSpec, index++);
                 }
                 begin = false;
             }
 
             if (columnSpec.getJoin() != null) {
                 currentJoin = columnSpec.getJoin();
-                i++;
             } else {
                 currentJoin = null;
                 begin = true;

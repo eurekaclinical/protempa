@@ -1,5 +1,7 @@
 package org.protempa.proposition;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 
 public class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
 
@@ -38,7 +40,7 @@ public class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
 
     @Override
     public String toString() {
-        return "DerivedUniqueIdentifier [id=" + id + "]";
+        return ToStringBuilder.reflectionToString(this);
     }
 
     @Override

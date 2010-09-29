@@ -66,7 +66,7 @@ public abstract class AbstractPropositionVisitor implements PropositionVisitor {
 	 * @param primitiveParameter
 	 *            an {@link PrimitiveParameter}.
 	 */
-	public void visit(ConstantParameter constantParameter) {
+	public void visit(ConstantProposition constantParameter) {
 
 	}
 

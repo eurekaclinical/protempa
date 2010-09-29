@@ -53,6 +53,19 @@ public enum ValueComparator {
         }
     },
     /**
+     * The two values are not equal (!=).
+     */
+    NOT_EQUAL_TO("!=", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
+
+        @Override
+        public boolean subsumes(ValueComparator comparator) {
+            if (comparator == null)
+                throw new IllegalArgumentException(
+                        "comparator cannot be null");
+            return NOT_EQUAL_TO.equals(comparator);
+        }
+    },
+    /**
      * Unknown, meaning that the two values are not comparable, for example,
      * comparing a number to a string.
      */
@@ -109,7 +122,19 @@ public enum ValueComparator {
                         "comparator cannot be null");
             return IN.equals(comparator);
         }
+    },
+    NOT_IN("NOT_IN", new CompatibleTypes(ValueType.VALUE, 
+            ValueType.LISTVALUE)) {
+
+        @Override
+        public boolean subsumes(ValueComparator comparator) {
+            if (comparator == null)
+                throw new IllegalArgumentException(
+                        "comparator cannot be null");
+            return NOT_IN.equals(comparator);
+        }
     };
+
     private static final Map<String, ValueComparator> compStringToComp =
             new HashMap<String, ValueComparator>();
 
@@ -121,6 +146,9 @@ public enum ValueComparator {
                 LESS_THAN_OR_EQUAL_TO);
         compStringToComp.put(GREATER_THAN_OR_EQUAL_TO.getComparatorString(),
                 GREATER_THAN_OR_EQUAL_TO);
+        compStringToComp.put(NOT_EQUAL_TO.getComparatorString(), NOT_EQUAL_TO);
+        compStringToComp.put(IN.getComparatorString(), IN);
+        compStringToComp.put(NOT_IN.getComparatorString(), NOT_IN);
         compStringToComp.put(UNKNOWN.getComparatorString(), UNKNOWN);
     }
 

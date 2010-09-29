@@ -1,4 +1,4 @@
-package org.protempa.backend.test;
+package org.protempa.ksb;
 
 import org.protempa.*;
 import org.protempa.backend.BackendInstanceSpec;

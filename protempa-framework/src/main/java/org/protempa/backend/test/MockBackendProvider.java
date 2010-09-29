@@ -10,10 +10,12 @@ import org.protempa.TermSourceBackend;
 
 public final class MockBackendProvider implements BackendProvider {
 
+    @Override
     public String getDisplayName() {
         return "Provider 1";
     }
 
+    @Override
     public BackendSpecLoader<DataSourceBackend>
             getDataSourceBackendSpecLoader() {
         return new BackendSpecLoader<DataSourceBackend>(
@@ -22,6 +24,7 @@ public final class MockBackendProvider implements BackendProvider {
             this, "DSBackendSpec1", "DS Backend Spec 1", null)));
     }
 
+    @Override
     public BackendSpecLoader<KnowledgeSourceBackend>
             getKnowledgeSourceBackendSpecLoader() {
         return new BackendSpecLoader<KnowledgeSourceBackend>(
@@ -31,6 +34,7 @@ public final class MockBackendProvider implements BackendProvider {
             "KS Backend Spec 1", null)));
     }
 
+    @Override
     public BackendSpecLoader<AlgorithmSourceBackend>
             getAlgorithmSourceBackendSpecLoader() {
         return new BackendSpecLoader<AlgorithmSourceBackend>(
@@ -43,6 +47,7 @@ public final class MockBackendProvider implements BackendProvider {
             new DefaultBackendPropertyValidator())))));
     }
 
+    @Override
     public BackendSpecLoader<TermSourceBackend> getTermSourceBackendSpecLoader()
             throws BackendProviderSpecLoaderException {
         return new BackendSpecLoader<TermSourceBackend>(
@@ -51,6 +56,7 @@ public final class MockBackendProvider implements BackendProvider {
                this, "TSBackendSpec1", "TS Backend Spec 1", null)));
     }
 
+    @Override
     public Object newInstance(String resourceId)
             throws BackendNewInstanceException {
         try {

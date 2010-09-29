@@ -6,8 +6,11 @@ import java.util.Set;
 
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.DatabaseAPI;
+import org.protempa.DataSourceBackendFailedValidationException;
 import org.protempa.DataSourceBackendInitializationException;
 import org.protempa.DataSourceReadException;
+import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.QuerySession;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.AbstractCommonsDataSourceBackend;
@@ -16,7 +19,7 @@ import org.protempa.bp.commons.dsb.sqlgen.RelationalDatabaseSpec;
 import org.protempa.bp.commons.dsb.sqlgen.SQLGeneratorFactory;
 import org.protempa.bp.commons.dsb.sqlgen.SQLOrderBy;
 import org.protempa.dsb.filter.Filter;
-import org.protempa.proposition.ConstantParameter;
+import org.protempa.proposition.ConstantProposition;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.value.GranularityFactory;
@@ -34,7 +37,7 @@ public abstract class RelationalDatabaseDataSourceBackend
     private String databaseId;
     private String username;
     private String password;
-    private RelationalDatabaseSpec relationalDatabaseSpec;
+    private final RelationalDatabaseSpec relationalDatabaseSpec;
     private SQLGenerator sqlGenerator;
     
     
@@ -227,12 +230,12 @@ public abstract class RelationalDatabaseDataSourceBackend
 //    }
 
     @Override
-    public Map<String, List<ConstantParameter>> getConstantParameters(
+    public Map<String, List<ConstantProposition>> getConstantParameters(
             Set<String> keyIds, Set<String> paramIds,
             Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
-        return this.sqlGenerator.readConstantParameters(keyIds, paramIds,
+        return this.sqlGenerator.readConstants(keyIds, paramIds,
                 dataSourceConstraints);
     }
 
@@ -275,5 +278,10 @@ public abstract class RelationalDatabaseDataSourceBackend
                 dataSourceConstraints, SQLOrderBy.DESCENDING);
     }
 
-    
+    @Override
+    public void validate(KnowledgeSource knowledgeSource)
+            throws DataSourceBackendFailedValidationException,
+            KnowledgeSourceReadException{
+        this.relationalDatabaseSpec.validate(knowledgeSource);
+    }
 }

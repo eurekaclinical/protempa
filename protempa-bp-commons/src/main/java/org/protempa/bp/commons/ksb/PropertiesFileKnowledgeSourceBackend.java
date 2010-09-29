@@ -9,23 +9,28 @@ import org.protempa.ksb.AbstractPropertiesFileKnowledgeSourceBackend;
  *
  * @author Andrew Post
  */
-@BackendInfo(
-    displayName="Properties File Knowledge Source Backend"
-)
-public class PropertiesFileKnowledgeSourceBackend 
+@BackendInfo(displayName = "Properties File Knowledge Source Backend")
+public class PropertiesFileKnowledgeSourceBackend
         extends AbstractPropertiesFileKnowledgeSourceBackend {
-    
-	private String primitiveParameterDefinitions;
-    
-	private String eventDefinitions;
+
+    private String primitiveParameterDefinitions;
+    private String eventDefinitions;
+    private String constantDefinitions;
 
     public String getEventDefinitions() {
         return eventDefinitions;
     }
 
-    @BackendProperty(
-        displayName="Event Definitions"
-    )
+    @BackendProperty(displayName = "Constant Definitions")
+    public void setConstantDefinitions(String constantDefinitions) {
+        this.constantDefinitions = constantDefinitions;
+    }
+
+    public String getConstantDefinitions() {
+        return this.constantDefinitions;
+    }
+
+    @BackendProperty(displayName = "Event Definitions")
     public void setEventDefinitions(String eventDefinitions) {
         this.eventDefinitions = eventDefinitions;
     }
@@ -34,9 +39,7 @@ public class PropertiesFileKnowledgeSourceBackend
         return primitiveParameterDefinitions;
     }
 
-    @BackendProperty(
-        displayName="Primitive Parameter Definitions"
-    )
+    @BackendProperty(displayName = "Primitive Parameter Definitions")
     public void setPrimitiveParameterDefinitions(
             String primitiveParameterDefinitions) {
         this.primitiveParameterDefinitions = primitiveParameterDefinitions;
@@ -50,6 +53,11 @@ public class PropertiesFileKnowledgeSourceBackend
     @Override
     protected String getPrimitiveParameterDefinitionsPropertiesResourceName() {
         return this.primitiveParameterDefinitions;
+    }
+
+    @Override
+    protected String getConstantDefinitionsPropertiesResourceName() {
+        return this.constantDefinitions;
     }
 
     @Override

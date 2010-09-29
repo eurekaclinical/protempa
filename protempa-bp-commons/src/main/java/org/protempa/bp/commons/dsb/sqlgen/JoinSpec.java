@@ -142,6 +142,32 @@ public final class JoinSpec implements Serializable {
         return hash;
     }
 
+    boolean isSameJoin(JoinSpec other) {
+        if (other == null)
+            return false;
+        if ((this.fromKey == null) ? (other.fromKey != null) :
+            !this.fromKey.equals(other.fromKey)) {
+            return false;
+        }
+        if ((this.toKey == null) ? (other.toKey != null) :
+            !this.toKey.equals(other.toKey)) {
+            return false;
+        }
+        if (this.nextColumnSpec == null && other.nextColumnSpec != null) {
+            return false;
+        }
+        if (this.nextColumnSpec != null && other.nextColumnSpec == null) {
+            return false;
+        }
+        if (!this.nextColumnSpec.isSameSchemaAndTable(other.nextColumnSpec)) {
+            return false;
+        }
+        if (!this.prevColumnSpec.isSameSchemaAndTable(other.prevColumnSpec)) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)

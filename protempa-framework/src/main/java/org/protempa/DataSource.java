@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.protempa.backend.BackendNewInstanceException;
-import org.protempa.proposition.ConstantParameter;
+import org.protempa.proposition.ConstantProposition;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.value.GranularityFactory;
@@ -33,31 +33,25 @@ import org.protempa.proposition.value.UnitFactory;
  * @author Andrew Post
  * @see DataSourceBackend
  */
-public final class DataSource extends
-		AbstractSource<DataSourceUpdatedEvent,
-        DataSourceBackendUpdatedEvent>{
-    
+public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, DataSourceBackendUpdatedEvent> {
+
     private static final String ALWAYS_RESORT_SYSTEM_PROPERTY =
             "protempa.datasource.alwaysresort";
-
     private static final boolean ALWAYS_RESORT =
-                Boolean.getBoolean(ALWAYS_RESORT_SYSTEM_PROPERTY);
+            Boolean.getBoolean(ALWAYS_RESORT_SYSTEM_PROPERTY);
 
     static {
         ProtempaUtil.logger().log(Level.FINE,
                 "Will the data source always resort? {0}", ALWAYS_RESORT);
     }
-    
-    private final BackendManager<DataSourceBackendUpdatedEvent,
-            DataSource, DataSourceBackend> backendManager;
+    private final BackendManager<DataSourceBackendUpdatedEvent, DataSource, DataSourceBackend> backendManager;
 
     public DataSource(DataSourceBackend[] backends) {
         super(backends);
-            this.backendManager =
-                    new BackendManager<DataSourceBackendUpdatedEvent,
-            DataSource, DataSourceBackend>(this, backends);
+        this.backendManager =
+                new BackendManager<DataSourceBackendUpdatedEvent, DataSource, DataSourceBackend>(this, backends);
 
-	}
+    }
 
     /**
      * Returns a string representing the type of keys in this data source (e.g.,
@@ -70,7 +64,7 @@ public final class DataSource extends
      *             if the schema adaptor could not be initialized.
      */
     public String getKeyType() throws DataSourceReadException {
-            initializeIfNeeded();
+        initializeIfNeeded();
         String result = null;
         DataSourceBackend b = null;
         for (DataSourceBackend backend : this.backendManager.getBackends()) {
@@ -79,10 +73,10 @@ public final class DataSource extends
             break;
         }
         assert result != null : "no key type found in " + b.getClass() + "!";
-                return result;
+        return result;
     }
 
-/**
+    /**
      * Returns a string representing the type of keys in this data source (e.g.,
      * patient, case) for display purposes.
      *
@@ -93,18 +87,18 @@ public final class DataSource extends
      *             if the schema adaptor could not be initialized.
      */
     public String getKeyTypeDisplayName()
-                    throws DataSourceReadException {
+            throws DataSourceReadException {
         initializeIfNeeded();
         String result = null;
         DataSourceBackend b = null;
-        for (DataSourceBackend backend: this.backendManager.getBackends()) {
+        for (DataSourceBackend backend : this.backendManager.getBackends()) {
             result = backend.getKeyTypeDisplayName();
             b = backend;
             break;
         }
-        assert result != null : "no key type display name found in " +
-                b.getClass() + "!";
-                return result;
+        assert result != null : "no key type display name found in "
+                + b.getClass() + "!";
+        return result;
     }
 
     /**
@@ -122,18 +116,18 @@ public final class DataSource extends
      *             <code>null</code> key type plural display name.
      */
     public String getKeyTypePluralDisplayName()
-        throws DataSourceReadException {
-            initializeIfNeeded();
-            String result = null;
+            throws DataSourceReadException {
+        initializeIfNeeded();
+        String result = null;
         DataSourceBackend b = null;
-        for (DataSourceBackend backend: this.backendManager.getBackends()) {
+        for (DataSourceBackend backend : this.backendManager.getBackends()) {
             result = backend.getKeyTypePluralDisplayName();
             b = backend;
             break;
         }
-        assert result != null : "no key type plural display name found in " +
-                b.getClass() + "!";
-                return result;
+        assert result != null : "no key type plural display name found in "
+                + b.getClass() + "!";
+        return result;
     }
 
     /**
@@ -150,8 +144,8 @@ public final class DataSource extends
      * @see SchemaAdaptor#getGranularityFactory()
      */
     public GranularityFactory getGranularityFactory()
-        throws DataSourceReadException {
-            initializeIfNeeded();
+            throws DataSourceReadException {
+        initializeIfNeeded();
         GranularityFactory result = null;
         DataSourceBackend b = null;
         for (DataSourceBackend backend : this.backendManager.getBackends()) {
@@ -159,8 +153,8 @@ public final class DataSource extends
             b = backend;
             break;
         }
-        assert result != null : "no granularity factory returned from " +
-                b.getClass() + "!";
+        assert result != null : "no granularity factory returned from "
+                + b.getClass() + "!";
         return result;
     }
 
@@ -178,7 +172,7 @@ public final class DataSource extends
      * @see SchemaAdaptor#getGranularityFactory()
      */
     public UnitFactory getUnitFactory() throws DataSourceReadException {
-            initializeIfNeeded();
+        initializeIfNeeded();
         UnitFactory result = null;
         DataSourceBackend b = null;
         for (DataSourceBackend backend : this.backendManager.getBackends()) {
@@ -186,35 +180,35 @@ public final class DataSource extends
             b = backend;
             break;
         }
-        assert result != null : "no unit factory returned from " +
-                b.getClass() + "!";
+        assert result != null : "no unit factory returned from "
+                + b.getClass() + "!";
         return result;
     }
 
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
-                    Set<String> keyIds, Set<String> paramIds, 
-                    Filter filters, QuerySession qs)
-                    throws DataSourceReadException {
+            Set<String> keyIds, Set<String> paramIds,
+            Filter filters, QuerySession qs)
+            throws DataSourceReadException {
         return PRIMPARAM_ASC_QUERY.execute(this, keyIds, paramIds,
-                filters,qs);
+                filters, qs);
     }
 
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
             Set<String> keyIds, Set<String> paramIds, Filter filters,
-                        QuerySession qs)
-                        throws DataSourceReadException {
+            QuerySession qs)
+            throws DataSourceReadException {
         return PRIMPARAM_DESC_QUERY.execute(this, keyIds, paramIds,
-                filters,qs);
+                filters, qs);
     }
 
     private static void assertOnNullReturnVal(Backend backend,
             String methodName) {
-        String msg = "The " + backend.getClass().getName() + "'s " +
-                methodName + " method returned null -- this should not happen";
+        String msg = "The " + backend.getClass().getName() + "'s "
+                + methodName + " method returned null -- this should not happen";
         throw new AssertionError(msg);
     }
 
-    public Map<String, List<ConstantParameter>> getConstantParameters(
+    public Map<String, List<ConstantProposition>> getConstantParameters(
             Set<String> keyIds, Set<String> paramIds, Filter filters,
             QuerySession qs)
             throws DataSourceException {
@@ -230,12 +224,13 @@ public final class DataSource extends
     public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
             Set<String> eventIds, Filter filters,
             QuerySession qs)
-                        throws DataSourceReadException {
+            throws DataSourceReadException {
         return EVENTS_DESC_QUERY.execute(this, keyIds, eventIds,
                 filters, qs);
     }
 
     private static abstract class ProcessQuery<P> {
+
         private Comparator comparator;
 
         ProcessQuery(Comparator comparator) {
@@ -287,80 +282,107 @@ public final class DataSource extends
                 QuerySession qs)
                 throws DataSourceReadException;
     }
-
     private static ProcessQuery<Event> EVENTS_ASC_QUERY =
-        new ProcessQuery<Event>(ProtempaUtil.TEMP_PROP_COMP) {
+            new ProcessQuery<Event>(ProtempaUtil.TEMP_PROP_COMP) {
 
-        @Override
-        protected Map<String, List<Event>> executeBackend(
-                DataSourceBackend backend, Set<String> keyIds,
-                Set<String> propIds, Filter filters, QuerySession qs)
-                throws DataSourceReadException {
-            return backend.getEventsAsc(keyIds, propIds, filters, qs);
-        }
-    };
-
+                @Override
+                protected Map<String, List<Event>> executeBackend(
+                        DataSourceBackend backend, Set<String> keyIds,
+                        Set<String> propIds, Filter filters, QuerySession qs)
+                        throws DataSourceReadException {
+                    return backend.getEventsAsc(keyIds, propIds, filters, qs);
+                }
+            };
     private static ProcessQuery<Event> EVENTS_DESC_QUERY =
             new ProcessQuery<Event>(ProtempaUtil.REVERSE_TEMP_PROP_COMP) {
 
-        @Override
-        protected Map<String, List<Event>> executeBackend(
-                DataSourceBackend backend, Set<String> keyIds,
-                Set<String> propIds, Filter filters, QuerySession qs)
-                throws DataSourceReadException {
-            return backend.getEventsDesc(keyIds, propIds, filters, qs);
-        }
-    };
-    
+                @Override
+                protected Map<String, List<Event>> executeBackend(
+                        DataSourceBackend backend, Set<String> keyIds,
+                        Set<String> propIds, Filter filters, QuerySession qs)
+                        throws DataSourceReadException {
+                    return backend.getEventsDesc(keyIds, propIds, filters, qs);
+                }
+            };
     private static ProcessQuery<PrimitiveParameter> PRIMPARAM_ASC_QUERY =
             new ProcessQuery<PrimitiveParameter>(ProtempaUtil.TEMP_PROP_COMP) {
 
-        @Override
-        protected Map<String, List<PrimitiveParameter>> executeBackend(
-                DataSourceBackend backend,
-                Set<String> keyIds, Set<String> propIds, Filter filters,
-                QuerySession qs)
-                throws DataSourceReadException {
-            return backend.getPrimitiveParametersAsc(
-                        keyIds, propIds, filters, qs);
-        }
-    };
-    
+                @Override
+                protected Map<String, List<PrimitiveParameter>> executeBackend(
+                        DataSourceBackend backend,
+                        Set<String> keyIds, Set<String> propIds, Filter filters,
+                        QuerySession qs)
+                        throws DataSourceReadException {
+                    return backend.getPrimitiveParametersAsc(
+                            keyIds, propIds, filters, qs);
+                }
+            };
     private static ProcessQuery<PrimitiveParameter> PRIMPARAM_DESC_QUERY =
             new ProcessQuery<PrimitiveParameter>(
             ProtempaUtil.REVERSE_TEMP_PROP_COMP) {
 
-        @Override
-        protected Map<String, List<PrimitiveParameter>> executeBackend(
-                DataSourceBackend backend,
-                Set<String> keyIds, Set<String> propIds,
-                Filter filters,
-                QuerySession qs)
-                throws DataSourceReadException {
-            return backend.getPrimitiveParametersDesc(
-                        keyIds, propIds, filters, qs);
-        }
-    };
+                @Override
+                protected Map<String, List<PrimitiveParameter>> executeBackend(
+                        DataSourceBackend backend,
+                        Set<String> keyIds, Set<String> propIds,
+                        Filter filters,
+                        QuerySession qs)
+                        throws DataSourceReadException {
+                    return backend.getPrimitiveParametersDesc(
+                            keyIds, propIds, filters, qs);
+                }
+            };
+    private static ProcessQuery<ConstantProposition> CONST_QUERY =
+            new ProcessQuery<ConstantProposition>(null) {
 
-    private static ProcessQuery<ConstantParameter> CONST_QUERY =
-            new ProcessQuery<ConstantParameter>(null) {
-
-        @Override
-        protected Map<String, List<ConstantParameter>> executeBackend(
-                DataSourceBackend backend,
-                Set<String> keyIds, Set<String> propIds,
-                Filter filters,
-                QuerySession qs)
-                throws DataSourceReadException {
-            return backend.getConstantParameters(
-                        keyIds, propIds, filters, qs);
-        }
-    };
+                @Override
+                protected Map<String, List<ConstantProposition>> executeBackend(
+                        DataSourceBackend backend,
+                        Set<String> keyIds, Set<String> propIds,
+                        Filter filters,
+                        QuerySession qs)
+                        throws DataSourceReadException {
+                    return backend.getConstantParameters(
+                            keyIds, propIds, filters, qs);
+                }
+            };
 
     @Override
     public void backendUpdated(DataSourceBackendUpdatedEvent evt) {
         clear();
         fireDataSourceUpdated();
+    }
+
+    /**
+     * Determines whether the data source's data element mappings are
+     * consistent with the data elements' definitions.
+     *
+     * @param knowledgeSource a {@link KnowledgeSource}.
+     * @throws DataSourceFailedValidationException if the data element
+     * mappings are not consistent with the data elements' definitions.
+     * @throws DataSourceValidationException if an error occurred during
+     * validation.
+     */
+    void validate(KnowledgeSource knowledgeSource)
+            throws DataSourceFailedValidationException,
+            DataSourceValidationIncompleteException {
+        try {
+            initializeIfNeeded();
+            for (DataSourceBackend backend : this.backendManager.getBackends()) {
+                try {
+                    backend.validate(knowledgeSource);
+                } catch (DataSourceBackendFailedValidationException ex) {
+                    throw new DataSourceFailedValidationException(
+                            "Data source failed validation", ex);
+                } catch (KnowledgeSourceReadException ex) {
+                    throw new DataSourceValidationIncompleteException(
+                            "An error occurred during validation", ex);
+                }
+            }
+        } catch (DataSourceReadException ex) {
+            throw new DataSourceValidationIncompleteException(
+                    "An error occurred during validation", ex);
+        }
     }
 
     @Override
@@ -372,12 +394,12 @@ public final class DataSource extends
 
     @Override
     public void clear() {
-
     }
 
     private void initializeIfNeeded() throws DataSourceReadException {
-        if (isClosed())
+        if (isClosed()) {
             throw new IllegalStateException("Data source already closed!");
+        }
         try {
             this.backendManager.initializeIfNeeded();
         } catch (BackendNewInstanceException iae) {
@@ -398,17 +420,18 @@ public final class DataSource extends
     }
 
     private static Set<String> handleKeyIdSetArgument(Set<String> keyIds) {
-        if (keyIds == null)
+        if (keyIds == null) {
             return new HashSet<String>();
-        else
+        } else {
             return new HashSet<String>(keyIds);
+        }
     }
 
     private static Set<String> handlePropIdSetArgument(Set<String> propIds) {
-        if (propIds != null)
+        if (propIds != null) {
             return new HashSet<String>(propIds);
-        else
+        } else {
             throw new IllegalArgumentException("propIds cannot be null");
+        }
     }
-
 }

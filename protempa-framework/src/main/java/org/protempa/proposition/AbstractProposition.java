@@ -101,7 +101,7 @@ public abstract class AbstractProposition implements Proposition {
         if (result != null)
             return Collections.unmodifiableList(result);
         else
-            return null;
+            return Collections.emptyList();
     }
 
     @Override

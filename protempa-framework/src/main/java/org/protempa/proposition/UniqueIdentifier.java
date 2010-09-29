@@ -6,6 +6,7 @@
 package org.protempa.proposition;
 
 import java.io.Serializable;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.SourceId;
 
@@ -86,9 +87,7 @@ public final class UniqueIdentifier implements Serializable {
 
     @Override
     public String toString() {
-        return "UniqueIdentifier [dataSourceBackendId=" + sourceId
-                + ", localUniqueId=" + localUniqueId + "]";
+        return ToStringBuilder.reflectionToString(this);
     }
-
 
 }

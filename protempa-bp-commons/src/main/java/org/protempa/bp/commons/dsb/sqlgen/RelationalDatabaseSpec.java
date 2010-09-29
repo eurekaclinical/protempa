@@ -1,6 +1,16 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+import org.arp.javautil.arrays.Arrays;
+import org.protempa.DataSourceBackendFailedValidationException;
+import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropertyDefinition;
+import org.protempa.PropositionDefinition;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 
@@ -12,10 +22,13 @@ import org.protempa.proposition.value.UnitFactory;
  * @author Andrew Post
  */
 public class RelationalDatabaseSpec implements Serializable {
+    private static final long serialVersionUID = -7404642542962229266L;
 
-    private EntitySpec[] primitiveParameterSpecs;
-    private EntitySpec[] eventSpecs;
-    private EntitySpec[] constantParameterSpecs;
+    private static final EntitySpec[] EMPTY_ARR = new EntitySpec[0];
+
+    private EntitySpec[] primitiveParameterSpecs = EMPTY_ARR;
+    private EntitySpec[] eventSpecs = EMPTY_ARR;
+    private EntitySpec[] constantSpecs = EMPTY_ARR;
     private UnitFactory units;
     private GranularityFactory granularities;
 
@@ -34,8 +47,8 @@ public class RelationalDatabaseSpec implements Serializable {
      * mappings from primitive parameters to relational database tables.
      * @param eventSpecs a {@link PropertySpec[]} containing mappings from
      * events to relational database tables.
-     * @param constantParameterSpecs a {@link PropertySpec[]} containing
-     * mappings from constant parameters to relational database tables.
+     * @param constantSpecs a {@link PropertySpec[]} containing
+     * mappings from constants to relational database tables.
      * @param units what {@link UnitFactory} from which to get units.
      * @param granularities what {@link GranularityFactory} from which to get
      * granularities.
@@ -43,12 +56,12 @@ public class RelationalDatabaseSpec implements Serializable {
     public RelationalDatabaseSpec(
             EntitySpec[] primitiveParameterSpecs,
             EntitySpec[] eventSpecs,
-            EntitySpec[] constantParameterSpecs,
+            EntitySpec[] constantSpecs,
             UnitFactory units,
             GranularityFactory granularities) {
-        this.primitiveParameterSpecs = primitiveParameterSpecs;
-        this.eventSpecs = eventSpecs;
-        this.constantParameterSpecs = constantParameterSpecs;
+        setPrimitiveParameterSpecs(primitiveParameterSpecs);
+        setConstantSpecs(constantSpecs);
+        setEventSpecs(eventSpecs);
         this.units = units;
         this.granularities = granularities;
     }
@@ -79,29 +92,86 @@ public class RelationalDatabaseSpec implements Serializable {
         this.units = units;
     }
 
-    public EntitySpec[] getConstantParameterSpecs() {
-        return constantParameterSpecs;
+    public EntitySpec[] getConstantSpecs() {
+        return constantSpecs.clone();
     }
 
-    public void setConstantParameterSpecs(
+    public void setConstantSpecs(
             EntitySpec[] constantParameterSpecs) {
-        this.constantParameterSpecs = constantParameterSpecs;
+        if (constantParameterSpecs == null)
+            this.constantSpecs = EMPTY_ARR;
+        else
+            this.constantSpecs = constantParameterSpecs;
     }
 
     public EntitySpec[] getEventSpecs() {
-        return eventSpecs;
+        return eventSpecs.clone();
     }
 
     public void setEventSpecs(EntitySpec[] eventSpecs) {
-        this.eventSpecs = eventSpecs;
+        if (eventSpecs == null)
+            this.eventSpecs = EMPTY_ARR;
+        else
+            this.eventSpecs = eventSpecs.clone();
     }
 
     public EntitySpec[] getPrimitiveParameterSpecs() {
-        return primitiveParameterSpecs;
+        return primitiveParameterSpecs.clone();
     }
 
     public void setPrimitiveParameterSpecs(
             EntitySpec[] primitiveParameterSpecs) {
-        this.primitiveParameterSpecs = primitiveParameterSpecs;
+        if (primitiveParameterSpecs == null)
+            this.primitiveParameterSpecs = EMPTY_ARR;
+        else
+            this.primitiveParameterSpecs = primitiveParameterSpecs.clone();
+    }
+
+    public void validate(KnowledgeSource knowledgeSource) 
+            throws KnowledgeSourceReadException,
+            DataSourceBackendFailedValidationException {
+        List<EntitySpec> allSpecs = Arrays.asList(this.eventSpecs,
+                this.constantSpecs, this.primitiveParameterSpecs);
+
+        Logger logger = SQLGenUtil.logger();
+        for (EntitySpec entitySpec : allSpecs) {
+            String entitySpecName = entitySpec.getName();
+            logger.finer("Validating entity spec " + entitySpecName);
+            String[] propIds = entitySpec.getPropositionIds();
+            Set<String> propNames = new HashSet<String>();
+            PropertySpec[] propSpecs = entitySpec.getPropertySpecs();
+            logger.finer("Checking for duplicate properties");
+            for (PropertySpec propSpec : propSpecs) {
+                String propSpecName = propSpec.getName();
+                if (!propNames.add(propSpecName))
+                    throw new DataSourceBackendFailedValidationException(
+                            "Duplicate property name " + propSpecName +
+                            " in entity spec " + entitySpecName);
+            }
+            logger.finer("No duplicate properties found");
+            logger.finer(
+                    "Checking for invalid proposition ids and properties");
+            for (String propId : propIds) {
+                PropositionDefinition propDef =
+                        knowledgeSource.readPropositionDefinition(propId);
+                if (!knowledgeSource.hasPropositionDefinition(propId)) {
+                    throw new DataSourceBackendFailedValidationException(
+                            "Invalid proposition id named in entity spec "
+                            + entitySpecName + ": " + propId);
+                }
+                PropertyDefinition[] propertyDefs =
+                        propDef.getPropertyDefinitions();
+                for (PropertyDefinition propertyDef : propertyDefs) {
+                    String propName = propertyDef.getName();
+                    if (!propNames.contains(propName)) {
+                        throw new DataSourceBackendFailedValidationException(
+                                "Required property " + propName +
+                                " missing from entity spec " + entitySpecName);
+                    }
+
+                }
+            }
+            logger.finer("No invalid proposition ids or properties found");
+        }
     }
 }

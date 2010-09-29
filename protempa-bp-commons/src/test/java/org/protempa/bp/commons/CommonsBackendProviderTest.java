@@ -2,9 +2,6 @@ package org.protempa.bp.commons;
 
 import java.util.Arrays;
 import org.protempa.backend.BackendProviderSpecLoaderException;
-import org.protempa.bp.commons.test.MockDataSourceBackend;
-import org.protempa.bp.commons.test.MockAlgorithmSourceBackend;
-import org.protempa.bp.commons.test.MockKnowledgeSourceBackend;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;

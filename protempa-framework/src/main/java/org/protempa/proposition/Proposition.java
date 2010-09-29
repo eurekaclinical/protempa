@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.protempa.DataSourceType;
-import org.protempa.ProtempaException;
 import org.protempa.QuerySession;
 import org.protempa.proposition.value.Value;
 
@@ -22,7 +21,8 @@ import org.protempa.proposition.value.Value;
  * 
  * @author Andrew Post
  */
-public interface Proposition extends PropositionVisitable, Serializable {
+public interface Proposition extends PropositionVisitable,
+        PropositionCheckedVisitable, Serializable {
 
     /**
      * Gets this proposition's data type.
@@ -73,24 +73,6 @@ public interface Proposition extends PropositionVisitable, Serializable {
     boolean isEqual(Object prop);
 
     /**
-     * Performs some processing on this proposition.
-     * 
-     * @param visitor
-     *            a {@link PropositionVisitor}.
-     */
-    void accept(PropositionVisitor propositionVisitor);
-
-    /**
-     * Performs some processing on this proposition that might throw a
-     * checked exception.
-     *
-     * @param propositionCheckedVisitor
-     * @throws ProtempaException
-     */
-    void acceptChecked(PropositionCheckedVisitor propositionCheckedVisitor)
-            throws ProtempaException;
-
-    /**
      * Gets the value of the specified property.
      *
      * @param name the name {@link String} of a valid property.
@@ -104,6 +86,7 @@ public interface Proposition extends PropositionVisitable, Serializable {
      *
      * @param name the name of the relationship.
      * @return a {@link List<UniqueIdentifier>} of global unique identifiers.
+     * Guaranteed not <code>null</code>.
      * @see QuerySession#getReferences(org.protempa.proposition.Proposition,
      * java.lang.String) to get the propositions with the specified
      * relationship.

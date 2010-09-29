@@ -54,6 +54,47 @@ final class AbstractionFinder implements Module {
         this.knowledgeSource = knowledgeSource;
         this.algorithmSource = algorithmSource;
 
+        this.dataSource.addSourceListener(
+                new SourceListener<DataSourceUpdatedEvent>() {
+
+            @Override
+            public void sourceUpdated(DataSourceUpdatedEvent event) {
+            }
+
+            @Override
+            public void closedUnexpectedly(SourceClosedUnexpectedlyEvent e) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+        });
+
+        this.knowledgeSource.addSourceListener(
+                new SourceListener<KnowledgeSourceUpdatedEvent>() {
+
+            @Override
+            public void sourceUpdated(KnowledgeSourceUpdatedEvent event) {
+            }
+
+            @Override
+            public void closedUnexpectedly(SourceClosedUnexpectedlyEvent e) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+        });
+
+        this.algorithmSource.addSourceListener(
+                new SourceListener<AlgorithmSourceUpdatedEvent>() {
+
+            @Override
+            public void sourceUpdated(AlgorithmSourceUpdatedEvent event) {
+            }
+
+            @Override
+            public void closedUnexpectedly(SourceClosedUnexpectedlyEvent e) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+        });
+
         if (cacheFoundAbstractParameters) {
             this.workingMemoryCache = new HashMap<String, StatefulSession>();
         } else {
@@ -64,7 +105,8 @@ final class AbstractionFinder implements Module {
         } else {
             this.propIdCache = null;
         }
-        this.sequences = new HashMap<String, Map<Set<String>, Sequence<PrimitiveParameter>>>();
+        this.sequences = new HashMap<String, Map<Set<String>,
+                Sequence<PrimitiveParameter>>>();
     }
 
     DataSource getDataSource() {
@@ -226,21 +268,33 @@ final class AbstractionFinder implements Module {
                     qs.addDerivationsToCache(me.getKey(), me.getValue());
                 }
             }
-            Map<UniqueIdentifier, List<Proposition>> refs =
-                    createReferencesMap(propositions);
+            Map<UniqueIdentifier, Proposition> refs =
+                    createReferencesMap(objects, propositions);
             resultHandler.handleQueryResult(entry.getKey(), propositions,
                     derivations, refs);
         }
         clear();
     }
 
-    private Map<UniqueIdentifier, List<Proposition>> createReferencesMap(
+    private Map<UniqueIdentifier, Proposition> createReferencesMap(
+            List propositionsOrSequences,
             List<Proposition> propositions) {
-        Map<UniqueIdentifier, List<Proposition>> refs =
-                new HashMap<UniqueIdentifier, List<Proposition>>();
+        Map<UniqueIdentifier, Proposition> refs =
+                new HashMap<UniqueIdentifier, Proposition>();
+        for (Object o : propositionsOrSequences) {
+            if (o instanceof Sequence) {
+                Sequence seq = (Sequence) o;
+                for (Object obj : seq) {
+                    Proposition prop = (Proposition) obj;
+                    refs.put(prop.getUniqueIdentifier(), prop);
+                }
+            } else {
+                Proposition prop = (Proposition) o;
+                refs.put(prop.getUniqueIdentifier(), prop);
+            }
+        }
         for (Proposition proposition : propositions) {
-            org.arp.javautil.collections.Collections.putList(refs,
-                    proposition.getUniqueIdentifier(), proposition);
+            refs.put(proposition.getUniqueIdentifier(), proposition);
         }
         return refs;
     }
@@ -298,8 +352,6 @@ final class AbstractionFinder implements Module {
             Filter filters, QueryResultsHandler resultHandler, QuerySession qs)
             throws ProtempaException {
         if (keyIds != null && !keyIds.isEmpty()) {
-//            Map<String, List<Proposition>> results =
-//                    new HashMap<String, List<Proposition>>();
             Map<String, List<Object>> objects = objectsToAssert(keyIds,
                     propositionIds, filters, qs, true);
             for (Map.Entry<String, List<Object>> entry : objects.entrySet()) {
@@ -311,11 +363,11 @@ final class AbstractionFinder implements Module {
                     StatefulSession workingMemory =
                             statefulWorkingMemory(entry.getKey(),
                             propositionIds);
-                    for (Object obj : entry.getValue()) {
+                    List<Object> objs = entry.getValue();
+                    for (Object obj : objs) {
                         workingMemory.insert(obj);
                     }
                     workingMemory.fireAllRules();
-//                    results.put(entry.getKey(),
                     List<Proposition> resultList = 
                             resultList(workingMemory.iterateObjects(
                             new ProtempaObjectFilter(propositionIds)));
@@ -327,8 +379,8 @@ final class AbstractionFinder implements Module {
                                 qs.addDerivationToCache(me.getKey(), derived);
                         }
                     }
-                    Map<UniqueIdentifier, List<Proposition>> refs =
-                        createReferencesMap(resultList);
+                    Map<UniqueIdentifier, Proposition> refs =
+                        createReferencesMap(objs, resultList);
                     resultHandler.handleQueryResult(entry.getKey(), resultList,
                             derivationsMap, refs);
                 } catch (FactException fe) {
@@ -472,13 +524,13 @@ final class AbstractionFinder implements Module {
      * Collect all of the propositions for which we need to create rules.
      * 
      * @param algorithms an empty {@link Map} that will be populated with
-     * algorithms for each low-level abstraction definition for which a rule
+     * algorithms for each proposition definition for which a rule
      * will be created.
-     * @param propDefs an empry {@link Set} that will be populated with
+     * @param propDefs an empty {@link Set} that will be populated with
      * the proposition definitions for which rules will be created.
      * @param propIds the proposition id {@link String}s to be found.
      * @throws org.protempa.ProtempaException if an error occurs
-     * reading the algorithm specified by a low-level abstraction definition.
+     * reading the algorithm specified by a proposition definition.
      */
     private void aggregateChildren(ValidateAlgorithmCheckedVisitor visitor,
             Set<PropositionDefinition> propDefs,
@@ -500,6 +552,15 @@ final class AbstractionFinder implements Module {
                     propDefs.add(ad);
                     aggregateChildren(visitor, propDefs,
                             ad.getDirectChildren());
+                } else {
+                    ConstantDefinition cd =
+                        this.knowledgeSource.readConstantDefinition(propId);
+                    if (cd != null) {
+                        cd.acceptChecked(visitor);
+                        propDefs.add(cd);
+                        aggregateChildren(visitor, propDefs,
+                                cd.getDirectChildren());
+                    }
                 }
             }
         }
@@ -552,6 +613,10 @@ final class AbstractionFinder implements Module {
         @Override
         public void visit(SliceDefinition sliceAbstractionDefinition)
                 throws ProtempaException {
+        }
+
+        @Override
+        public void visit(ConstantDefinition def) throws ProtempaException {
         }
     }
 

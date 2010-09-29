@@ -1,4 +1,4 @@
-package org.protempa.bp.commons.test;
+package org.protempa.bp.commons;
 
 import org.protempa.bp.commons.*;
 import org.protempa.Algorithm;

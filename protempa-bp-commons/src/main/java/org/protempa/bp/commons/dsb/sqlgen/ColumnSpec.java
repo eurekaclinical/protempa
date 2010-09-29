@@ -51,7 +51,7 @@ public final class ColumnSpec implements Serializable {
     public static class PropositionIdToSqlCode {
 
         private String propositionId;
-        private Object sqlCode;
+        private String sqlCode;
 
         /**
          * Instantiates a mapping between a proposition id and a code in a
@@ -60,7 +60,7 @@ public final class ColumnSpec implements Serializable {
          * @param propositionId a proposition id {@link String}.
          * @param sqlCode a code {@link Object} in a relational database.
          */
-        public PropositionIdToSqlCode(String propositionId, Object sqlCode) {
+        public PropositionIdToSqlCode(String propositionId, String sqlCode) {
             if (propositionId == null)
                 throw new IllegalArgumentException(
                         "propositionId cannot be null");
@@ -84,7 +84,7 @@ public final class ColumnSpec implements Serializable {
          *
          * @return a code {@link Object} in a relational database.
          */
-        public Object getSqlCode() {
+        public String getSqlCode() {
             return this.sqlCode;
         }
 
@@ -242,10 +242,7 @@ public final class ColumnSpec implements Serializable {
           throw new IllegalArgumentException(
            "propIdToSqlCodes must be specified if a constraint is specified.");
         if (propIdToSqlCodes != null) {
-            this.propIdToSqlCodes = new PropositionIdToSqlCode[
-                    propIdToSqlCodes.length];
-            System.arraycopy(propIdToSqlCodes, 0, this.propIdToSqlCodes, 0,
-                    propIdToSqlCodes.length);
+            this.propIdToSqlCodes = propIdToSqlCodes.clone();
             ProtempaUtil.checkArrayForNullElement(this.propIdToSqlCodes,
                     "propIdToSqlCodes");
         } else {
@@ -319,9 +316,27 @@ public final class ColumnSpec implements Serializable {
      * @return <code>true</code> if the given column specification has the
      * same schema and table as this one, <code>false</code> if not.
      */
-    public boolean isSameSchemaAndTable(ColumnSpec columnSpec) {
-        return StringUtil.equals(columnSpec.getSchema(), this.getSchema())
-                && StringUtil.equals(columnSpec.getTable(), this.getTable());
+    boolean isSameSchemaAndTable(ColumnSpec columnSpec) {
+        return StringUtil.equals(columnSpec.schema, this.schema)
+                && StringUtil.equals(columnSpec.table, this.table);
+    }
+
+    boolean isSameJoin(ColumnSpec columnSpec) {
+        JoinSpec otherJoinSpec = columnSpec.getJoin();
+        if (this.joinSpec == null) {
+            return otherJoinSpec == null;
+        } else if (otherJoinSpec == null) {
+            return false;
+        } else {
+            String joinSpecFromKey = this.joinSpec.getFromKey();
+            String joinSpecToKey = this.joinSpec.getToKey();
+            String otherJoinSpecFromKey = otherJoinSpec.getFromKey();
+            String otherJoinSpecToKey = otherJoinSpec.getToKey();
+            return joinSpecFromKey.equals(otherJoinSpecFromKey) &&
+                    joinSpecToKey.equals(otherJoinSpecToKey) &&
+                    this.joinSpec.getNextColumnSpec().isSameSchemaAndTable(
+                    otherJoinSpec.getNextColumnSpec());
+        }
     }
 
     /**
@@ -334,7 +349,7 @@ public final class ColumnSpec implements Serializable {
     List<ColumnSpec> asList() {
         List<ColumnSpec> columnSpecs = new ArrayList<ColumnSpec>();
         ColumnSpec spec = this;
-        columnSpecs.add(this);
+        columnSpecs.add(spec);
         while (spec.getJoin() != null) {
             spec = spec.getJoin().getNextColumnSpec();
             columnSpecs.add(spec);
@@ -344,13 +359,6 @@ public final class ColumnSpec implements Serializable {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("schema", this.schema)
-                .append("table", this.table)
-                .append("column", this.column)
-                .append("joinSpec", this.joinSpec)
-                .append("constraint", this.constraint)
-                .append("propIdToSqlCodes", this.propIdToSqlCodes)
-                .toString();
+        return ToStringBuilder.reflectionToString(this);
     }
 }

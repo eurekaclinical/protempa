@@ -97,20 +97,9 @@ public final class EventDefinition extends AbstractPropositionDefinition {
             this.side = side;
         }
 
-        protected String debugMessage() {
-            String lineSep = System.getProperty("line.separator");
-            StringBuilder buffer = new StringBuilder();
-            buffer.append("HasPartOffset:");
-            buffer.append(lineSep);
-            buffer.append("\teventDefinitionId=" + eventDefinitionId);
-            buffer.append(lineSep);
-            buffer.append("\toffset=" + offset);
-            buffer.append(lineSep);
-            buffer.append("\toffsetUnits=" + offsetUnits);
-            buffer.append(lineSep);
-            buffer.append("\tside=" + side);
-            buffer.append(lineSep);
-            return buffer.toString();
+        @Override
+        public String toString() {
+            return ToStringBuilder.reflectionToString(this);
         }
     }
     /**

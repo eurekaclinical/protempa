@@ -1,6 +1,8 @@
-package org.protempa.bp.commons.test;
+package org.protempa.bp.commons;
 
+import org.protempa.DataSourceBackendFailedValidationException;
 import org.protempa.DataSourceBackendInitializationException;
+import org.protempa.KnowledgeSource;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.*;
 import org.protempa.proposition.value.GranularityFactory;
@@ -29,6 +31,11 @@ public class MockDataSourceBackend extends AbstractCommonsDataSourceBackend {
     @Override
     public String getKeyType() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void validate(KnowledgeSource knowledgeSource)
+            throws DataSourceBackendFailedValidationException {
     }
 
 }

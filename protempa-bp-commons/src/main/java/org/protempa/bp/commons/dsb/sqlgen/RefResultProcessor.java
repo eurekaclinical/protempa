@@ -39,11 +39,11 @@ abstract class RefResultProcessor<P extends Proposition> extends
         setReferences();
     }
 
-    final void addToReferences(UniqueIdentifier uniqueIdentifier,
+    private final void addToReferences(UniqueIdentifier uniqueIdentifier,
             UniqueIdentifier refUniqueIdentifier) {
         P proposition = this.cache.get(uniqueIdentifier);
-        if (proposition == null)
-            throw new AssertionError("proposition cannot be null");
+        assert proposition != null : "No proposition for unique identifier " +
+                uniqueIdentifier;
         List<UniqueIdentifier> l = this.references.get(proposition);
         if (l == null) {
             l = new ArrayList<UniqueIdentifier>();

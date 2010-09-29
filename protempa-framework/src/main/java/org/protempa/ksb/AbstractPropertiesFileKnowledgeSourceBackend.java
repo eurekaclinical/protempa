@@ -14,20 +14,25 @@ import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.proposition.value.ValueType;
 
 /**
- * A simple way of defining primitive parameters. It looks for two properties:
- * PRIMITIVE_PARAMETER_DEFINITIONS and EVENT_DEFINITIONS.
+ * A simple way of defining primitive parameters. It looks for three properties:
+ * PRIMITIVE_PARAMETER_DEFINITIONS, EVENT_DEFINITIONS and CONSTANT_DEFINITIONS.
  * PRIMITIVE_PARAMETER_DEFINITIONS specifies a properties file on the classpath
  * containing the primitive parameter definitions, and EVENT_DEFINITIONS
  * specifies a properties file on the classpath containing the event
- * definitions. The properties files are loaded using this class' class loader,
+ * definitions. CONSTANT_DEFINITIONS specifies a properties file on the classpath
+ * containing the constant definitions.
+ * The properties files are loaded using this class' class loader,
  * and relative classpaths are resolved relative to this class.
  * 
  * The primitive parameter definitions properties file specifies one line per
- * primitive parameter in the format: id =
+ * primitive parameter definition in the format: id =
  * displayName|abbrevDisplayName|valueFactoryStr
  * 
- * The event definitions properties file specifies one line per event in the
- * format: id = displayName|abbrevDisplayName
+ * The event definitions properties file specifies one line per event 
+ * definition in the format: id = displayName|abbrevDisplayName
+ *
+ * The constant definitions properties file specifies one line per constant
+ * definition in the format: id = displayName|abbrevDisplayName
  * 
  * @author Andrew Post
  */
@@ -36,12 +41,16 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
 
     private Properties primParams;
     private Properties events;
+    private Properties constants;
     private Map<String, String[]> primParamsMap;
     private Map<String, String[]> eventsMap;
+    private Map<String, String[]> constantsMap;
 
     protected abstract String getEventDefinitionsPropertiesResourceName();
 
     protected abstract String getPrimitiveParameterDefinitionsPropertiesResourceName();
+
+    protected abstract String getConstantDefinitionsPropertiesResourceName();
 
     @Override
     public final void initialize(BackendInstanceSpec config)
@@ -51,11 +60,14 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
                     getPrimitiveParameterDefinitionsPropertiesResourceName());
             this.events = IOUtil.createPropertiesFromResource(this.getClass(),
                     getEventDefinitionsPropertiesResourceName());
+            this.constants = IOUtil.createPropertiesFromResource(this.getClass(),
+                    getConstantDefinitionsPropertiesResourceName());
             if (getPrimitiveParameterDefinitionsPropertiesResourceName() == null
-                    && getEventDefinitionsPropertiesResourceName() == null) {
+                    && getEventDefinitionsPropertiesResourceName() == null
+                    && getConstantDefinitionsPropertiesResourceName() == null) {
                 KSUtil.logger().warning(
                         getClass().getName()
-                        + " does not define PRIMITIVE_PARAMETER_DEFINITIONS or EVENT_DEFINITIONS in its properties file.");
+                        + " does not define PRIMITIVE_PARAMETER_DEFINITIONS or EVENT_DEFINITIONS or CONSTANT_DEFINITIONS in its properties file.");
             }
             KSUtil.logger().fine(getClass().getName() + " initialized");
         } catch (IOException e) {
@@ -64,12 +76,6 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.protempa.AbstractKnowledgeSourceBackend#readEventDefinition(java.lang.String,
-     *      org.protempa.KnowledgeBase)
-     */
     @Override
     public final EventDefinition readEventDefinition(String id,
             KnowledgeBase protempaKnowledgeBase)
@@ -85,17 +91,37 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
         return def;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.protempa.AbstractKnowledgeSourceBackend#readEventDefinitions(org.protempa.KnowledgeBase)
-     */
     private void readEventDefinitions(KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
         if (this.eventsMap == null) {
             this.eventsMap = new HashMap<String, String[]>();
             extractDefinitions(this.events, this.eventsMap, 2,
                     getEventDefinitionsPropertiesResourceName());
+        }
+    }
+
+    @Override
+    public final ConstantDefinition readConstantDefinition(String id,
+            KnowledgeBase protempaKnowledgeBase)
+            throws KnowledgeSourceReadException {
+        readConstantDefinitions(protempaKnowledgeBase);
+        String[] vals = this.constantsMap.get(id);
+        if (vals == null) {
+            return null;
+        }
+        ConstantDefinition def =
+                new ConstantDefinition(protempaKnowledgeBase, id);
+        def.setDisplayName(vals[0]);
+        def.setAbbreviatedDisplayName(vals[1]);
+        return def;
+    }
+
+    private void readConstantDefinitions(KnowledgeBase protempaKnowledgeBase)
+            throws KnowledgeSourceReadException {
+        if (this.constantsMap == null) {
+            this.constantsMap = new HashMap<String, String[]>();
+            extractDefinitions(this.constants, this.constantsMap, 2,
+                    getConstantDefinitionsPropertiesResourceName());
         }
     }
 
@@ -129,6 +155,8 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
         return def;
     }
 
+
+
     /*
      * (non-Javadoc)
      *
@@ -138,6 +166,7 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
     public final void close() {
         this.eventsMap = null;
         this.primParamsMap = null;
+        this.constantsMap = null;
     }
 
     private boolean extractDefinitions(Properties properties,

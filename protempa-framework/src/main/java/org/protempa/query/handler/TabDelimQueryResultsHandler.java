@@ -15,7 +15,7 @@ import org.protempa.FinderException;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.AbstractPropositionCheckedVisitor;
-import org.protempa.proposition.ConstantParameter;
+import org.protempa.proposition.ConstantProposition;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.PrimitiveParameter;
@@ -184,7 +184,7 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
     @Override
     public void handleQueryResult(String key, List<Proposition> propositions,
             Map<Proposition,List<Proposition>> derivations,
-            Map<UniqueIdentifier,List<Proposition>> references)
+            Map<UniqueIdentifier,Proposition> references)
             throws FinderException {
         for (Comparator<Proposition> c : this.comparator)
             Collections.sort(propositions, c);
@@ -276,12 +276,11 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
         }
 
         @Override
-        public void visit(ConstantParameter constantParameter)
+        public void visit(ConstantProposition constant)
                 throws TabDelimHandlerProtempaException {
             try {
                 doWriteKeyId();
-                doWritePropId(constantParameter);
-                doWriteValue(constantParameter);
+                doWritePropId(constant);
                 this.writer.write(COLUMN_DELIMITER);
                 this.writer.newLine();
             } catch (IOException ioe) {

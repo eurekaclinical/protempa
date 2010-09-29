@@ -4,7 +4,6 @@ import java.beans.PropertyChangeListener;
 import java.text.Format;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import org.arp.javautil.arrays.Arrays;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.value.Granularity;
 

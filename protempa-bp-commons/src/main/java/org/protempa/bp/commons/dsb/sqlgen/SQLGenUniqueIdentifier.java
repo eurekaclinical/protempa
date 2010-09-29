@@ -1,6 +1,7 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.util.Arrays;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.LocalUniqueIdentifier;
 
 class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
@@ -11,7 +12,7 @@ class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
 
     SQLGenUniqueIdentifier(String name, String[] dbIds) {
         this.name = name;
-        this.dbIds = dbIds;
+        this.dbIds = dbIds.clone();
     }
 
     @Override
@@ -54,8 +55,6 @@ class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
 
     @Override
     public String toString() {
-        return "SQLGenUniqueIdentifier [name=" + name + ", dbIds="
-                + Arrays.toString(dbIds) + "]";
+        return ToStringBuilder.reflectionToString(this);
     }
-    
 }
