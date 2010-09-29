@@ -3,8 +3,8 @@ package org.protempa.ksb.protege;
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
 import org.protempa.KnowledgeBase;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PrimitiveParameterDefinition;
-import org.protempa.proposition.value.ValueFactory;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -21,7 +21,8 @@ class PrimitiveParameterConverter implements PropositionConverter {
     @Override
     public void convert(Instance instance,
             org.protempa.KnowledgeBase protempaKnowledgeBase,
-            ProtegeKnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend) 
+            throws KnowledgeSourceReadException {
 
         if (instance != null
                 && protempaKnowledgeBase != null
@@ -29,9 +30,11 @@ class PrimitiveParameterConverter implements PropositionConverter {
 
             PrimitiveParameterDefinition tc = new PrimitiveParameterDefinition(
                     protempaKnowledgeBase, instance.getName());
-            Util.setNames(instance, tc);
-            Util.setInverseIsAs(instance, tc);
-            Cls valueType = (Cls) instance.getOwnSlotValue(instance.getKnowledgeBase().getSlot("valueType"));
+            ConnectionManager cm = backend.getConnectionManager();
+            Util.setNames(instance, tc, cm);
+            Util.setInverseIsAs(instance, tc, cm);
+            Util.setProperties(instance, tc, cm);
+            Cls valueType = (Cls) cm.getOwnSlotValue(instance, cm.getSlot("valueType"));
             if (valueType != null) {
                 if (valueType.getName().equals("DoubleValue")) {
                     tc.setValueType(ValueType.NUMBERVALUE);

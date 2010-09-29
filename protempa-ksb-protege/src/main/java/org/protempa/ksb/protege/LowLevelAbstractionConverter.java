@@ -9,6 +9,7 @@ import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
 import org.protempa.KnowledgeBase;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.LowLevelAbstractionDefinition;
 import org.protempa.LowLevelAbstractionValueDefinition;
 import org.protempa.SlidingWindowWidthMode;
@@ -30,26 +31,29 @@ class LowLevelAbstractionConverter implements PropositionConverter {
     }
 
     @Override
-    public void convert(Instance simpleAbstractionInstance,
+    public void convert(Instance lowLevelAbstractionInstance,
             org.protempa.KnowledgeBase protempaKnowledgeBase,
-            ProtegeKnowledgeSourceBackend backend) {
-        assert simpleAbstractionInstance != null :
+            ProtegeKnowledgeSourceBackend backend) 
+            throws KnowledgeSourceReadException {
+        assert lowLevelAbstractionInstance != null :
                 "simpleAbstractionInstance cannot be null";
         assert protempaKnowledgeBase != null :
                 "protempaKnowledgeBase cannot be null";
         assert backend != null : "backend cannot be null";
 
-        LowLevelAbstractionDefinition d = constructDetector(
-                simpleAbstractionInstance, protempaKnowledgeBase,
+        LowLevelAbstractionDefinition d = construct(
+                lowLevelAbstractionInstance, protempaKnowledgeBase,
                 backend);
-        setGapBetweenValues(simpleAbstractionInstance, d, backend);
-        setPatternLength(simpleAbstractionInstance, d);
+        setGapBetweenValues(lowLevelAbstractionInstance, d, backend);
+        ConnectionManager cm = backend.getConnectionManager();
+        setPatternLength(lowLevelAbstractionInstance, d, cm);
         if (d != null) {
-            for (Iterator<?> itr = simpleAbstractionInstance.getOwnSlotValues(
-                    simpleAbstractionInstance.getKnowledgeBase().getSlot("allowedValues")).iterator(); itr.hasNext();) {
+            for (Iterator<?> itr = cm.getOwnSlotValues(lowLevelAbstractionInstance,
+                    cm.getSlot(
+                    "allowedValues")).iterator(); itr.hasNext();) {
 
                 Instance allowedValue = (Instance) itr.next();
-                constructDetectorValue(d, allowedValue, backend);
+                constructValue(d, allowedValue, cm);
             }
         }
     }
@@ -61,25 +65,28 @@ class LowLevelAbstractionConverter implements PropositionConverter {
     }
 
     /**
-     * @param simpleAbstractionInstance
+     * @param lowLevelAbstractionInstance
      * @param protempaKnowledgeBase
      * @param config
      * @param backend
      */
-    private static LowLevelAbstractionDefinition constructDetector(
-            Instance simpleAbstractionInstance,
+    private static LowLevelAbstractionDefinition construct(
+            Instance lowLevelAbstractionInstance,
             org.protempa.KnowledgeBase protempaKnowledgeBase,
-            ProtegeKnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend) 
+            throws KnowledgeSourceReadException {
         LowLevelAbstractionDefinition result = null;
-        if (!protempaKnowledgeBase.hasAbstractionDefinition(simpleAbstractionInstance.getName())) {
+        if (!protempaKnowledgeBase.hasAbstractionDefinition(lowLevelAbstractionInstance.getName())) {
             LowLevelAbstractionDefinition d = new LowLevelAbstractionDefinition(
-                    protempaKnowledgeBase, simpleAbstractionInstance.getName());
-            Util.setNames(simpleAbstractionInstance, d);
-            Util.setInverseIsAs(simpleAbstractionInstance, d);
-            Util.setGap(simpleAbstractionInstance, d, backend);
-            setDuration(simpleAbstractionInstance, d, backend);
-            setValueType(simpleAbstractionInstance, d);
-            Instance algoIntf = (Instance) simpleAbstractionInstance.getOwnSlotValue(simpleAbstractionInstance.getKnowledgeBase().getSlot("usingAlgorithm"));
+                    protempaKnowledgeBase, lowLevelAbstractionInstance.getName());
+            ConnectionManager cm = backend.getConnectionManager();
+            Util.setNames(lowLevelAbstractionInstance, d, cm);
+            Util.setInverseIsAs(lowLevelAbstractionInstance, d, cm);
+            Util.setGap(lowLevelAbstractionInstance, d, backend, cm);
+            Util.setProperties(lowLevelAbstractionInstance, d, cm);
+            setDuration(lowLevelAbstractionInstance, d, backend, cm);
+            setValueType(lowLevelAbstractionInstance, d, cm);
+            Instance algoIntf = (Instance) cm.getOwnSlotValue(lowLevelAbstractionInstance, cm.getSlot("usingAlgorithm"));
             // set parameter types here?
             if (algoIntf != null) {
                 d.setAlgorithmId(algoIntf.getName());
@@ -96,15 +103,16 @@ class LowLevelAbstractionConverter implements PropositionConverter {
      */
     private static void setDuration(Instance instance,
             LowLevelAbstractionDefinition d,
-            ProtegeKnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
         d.setMinimumDuration(Util.parseTimeConstraint(instance,
-                "minDuration"));
+                "minDuration", cm));
         d.setMinimumDurationUnits(Util.parseUnitsConstraint(instance,
-                "minDurationUnits", backend));
+                "minDurationUnits", backend, cm));
         d.setMaximumDuration(Util.parseTimeConstraint(instance,
-                "maxDuration"));
+                "maxDuration", cm));
         d.setMaximumDurationUnits(Util.parseUnitsConstraint(instance,
-                "maxDurationUnits", backend));
+                "maxDurationUnits", backend, cm));
     }
 
     /**
@@ -113,16 +121,16 @@ class LowLevelAbstractionConverter implements PropositionConverter {
      * @param config
      * @param backend
      */
-    private static void constructDetectorValue(
+    private static void constructValue(
             LowLevelAbstractionDefinition llad, Instance allowedValue,
-            ProtegeKnowledgeSourceBackend backend) {
+            ConnectionManager cm) throws KnowledgeSourceReadException {
         if (llad != null && allowedValue != null) {
             LowLevelAbstractionValueDefinition d = new LowLevelAbstractionValueDefinition(
                     llad, allowedValue.getName());
-            d.setValue(new NominalValue((String) allowedValue.getOwnSlotValue(allowedValue.getKnowledgeBase().getSlot(
+            d.setValue(new NominalValue((String) cm.getOwnSlotValue(allowedValue, cm.getSlot(
                     "displayName"))));
-            d.setParameterValue("minThreshold", ValueFormat.parse((String) allowedValue.getOwnSlotValue(allowedValue.getKnowledgeBase().getSlot("minValThreshold"))));
-            d.setParameterValue("maxThreshold", ValueFormat.parse((String) allowedValue.getOwnSlotValue(allowedValue.getKnowledgeBase().getSlot("maxValThreshold"))));
+            d.setParameterValue("minThreshold", ValueFormat.parse((String) cm.getOwnSlotValue(allowedValue, cm.getSlot("minValThreshold"))));
+            d.setParameterValue("maxThreshold", ValueFormat.parse((String) cm.getOwnSlotValue(allowedValue, cm.getSlot("maxValThreshold"))));
             setThresholdComps(d, allowedValue);
         }
     }
@@ -134,14 +142,16 @@ class LowLevelAbstractionConverter implements PropositionConverter {
      * @return
      */
     private static Cls readAndSetTypes(Slot valueTypeP,
-            Collection<?> abstractedFroms, LowLevelAbstractionDefinition d) {
+            Collection<?> abstractedFroms, LowLevelAbstractionDefinition d,
+            ConnectionManager cm) throws KnowledgeSourceReadException {
         Cls finalValueTypeAF = null;
         boolean valueTypeConsistent = true;
         for (Iterator<?> itr3 = abstractedFroms.iterator(); itr3.hasNext();) {
             Instance abstractedFrom = (Instance) itr3.next();
             String abstractedFromName = abstractedFrom.getName();
             d.addPrimitiveParameterId(abstractedFromName);
-            Cls valueTypeAF = (Cls) abstractedFrom.getOwnSlotValue(valueTypeP);
+            Cls valueTypeAF =
+                    (Cls) cm.getOwnSlotValue(abstractedFrom, valueTypeP);
             if (finalValueTypeAF == null) {
                 finalValueTypeAF = valueTypeAF;
             } else {
@@ -161,15 +171,17 @@ class LowLevelAbstractionConverter implements PropositionConverter {
      */
     private static void setGapBetweenValues(Instance abstractParameter,
             LowLevelAbstractionDefinition d,
-            ProtegeKnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend)
+            throws KnowledgeSourceReadException {
+        ConnectionManager cm = backend.getConnectionManager();
         d.setMinimumGapBetweenValues(Util.parseTimeConstraint(
-                abstractParameter, "minGapValues"));
+                abstractParameter, "minGapValues", cm));
         d.setMinimumGapBetweenValuesUnits(Util.parseUnitsConstraint(
-                abstractParameter, "minGapValuesUnits", backend));
+                abstractParameter, "minGapValuesUnits", backend, cm));
         d.setMaximumGapBetweenValues(Util.parseTimeConstraint(
-                abstractParameter, "maxGapValues"));
+                abstractParameter, "maxGapValues", cm));
         d.setMaximumGapBetweenValuesUnits(Util.parseUnitsConstraint(
-                abstractParameter, "maxGapValuesUnits", backend));
+                abstractParameter, "maxGapValuesUnits", backend, cm));
     }
 
     /**
@@ -177,10 +189,11 @@ class LowLevelAbstractionConverter implements PropositionConverter {
      * @param d
      */
     private static void setPatternLength(Instance abstractParameter,
-            LowLevelAbstractionDefinition d) {
-        Integer minNumVal = (Integer) abstractParameter.getOwnSlotValue(abstractParameter.getKnowledgeBase().getSlot(
+            LowLevelAbstractionDefinition d, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        Integer minNumVal = (Integer) cm.getOwnSlotValue(abstractParameter, cm.getSlot(
                 "minValues"));
-        Integer maxNumVal = (Integer) abstractParameter.getOwnSlotValue(abstractParameter.getKnowledgeBase().getSlot(
+        Integer maxNumVal = (Integer) cm.getOwnSlotValue(abstractParameter, cm.getSlot(
                 "maxValues"));
         if (minNumVal != null || maxNumVal != null) {
             d.setSlidingWindowWidthMode(SlidingWindowWidthMode.RANGE);
@@ -199,8 +212,8 @@ class LowLevelAbstractionConverter implements PropositionConverter {
      * @param d
      */
     private static void setValueType(Instance instance,
-            LowLevelAbstractionDefinition d) {
-        Cls finalValueTypeAF = readAndSetTypes(instance.getKnowledgeBase().getSlot("valueType"), instance.getOwnSlotValues(instance.getKnowledgeBase().getSlot("abstractedFrom")), d);
+            LowLevelAbstractionDefinition d, ConnectionManager cm) throws KnowledgeSourceReadException {
+        Cls finalValueTypeAF = readAndSetTypes(cm.getSlot("valueType"), cm.getOwnSlotValues(instance, cm.getSlot("abstractedFrom")), d, cm);
         if (finalValueTypeAF != null) {
             d.setValueType((ValueType) Util.VALUE_CLASS_NAME_TO_VALUE_TYPE.get(finalValueTypeAF.getName()));
         }

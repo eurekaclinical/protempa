@@ -5,49 +5,52 @@ import java.util.Iterator;
 
 import edu.stanford.smi.protege.model.Instance;
 import org.protempa.KnowledgeBase;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.SliceDefinition;
 
 final class SliceConverter implements
         PropositionConverter {
-
-    /**
-     *
-     */
+    
     SliceConverter() {
     }
 
+    @Override
     public void convert(Instance protegeParameter,
             KnowledgeBase protempaKnowledgeBase,
-            ProtegeKnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend) 
+            throws KnowledgeSourceReadException {
         assert protempaKnowledgeBase != null :
                 "protempaKnowledgeBase cannot be null";
 
         SliceDefinition ad = new SliceDefinition(
                 protempaKnowledgeBase, protegeParameter.getName());
-        Util.setNames(protegeParameter, ad);
-        Util.setInverseIsAs(protegeParameter, ad);
+        ConnectionManager cm = backend.getConnectionManager();
+        Util.setNames(protegeParameter, ad, cm);
+        Util.setInverseIsAs(protegeParameter, ad, cm);
+        Util.setProperties(protegeParameter, ad, cm);
         Integer maxIndexInt =
-                (Integer) protegeParameter.getOwnSlotValue(
-                protegeParameter.getKnowledgeBase().getSlot("maxIndex"));
+                (Integer) cm.getOwnSlotValue(protegeParameter,
+                cm.getSlot("maxIndex"));
         if (maxIndexInt != null) {
             ad.setMaxIndex(maxIndexInt.intValue());
         }
         Integer minIndexInt =
-                (Integer) protegeParameter.getOwnSlotValue(
-                protegeParameter.getKnowledgeBase().getSlot("minIndex"));
+                (Integer) cm.getOwnSlotValue(protegeParameter,
+                cm.getSlot("minIndex"));
         if (maxIndexInt != null) {
             ad.setMinIndex(minIndexInt.intValue());
         }
 
         Collection abstractedFromInstances =
-                protegeParameter.getOwnSlotValues(
-                protegeParameter.getKnowledgeBase().getSlot("abstractedFrom"));
+                cm.getOwnSlotValues(protegeParameter,
+                cm.getSlot("abstractedFrom"));
         for (Iterator itr = abstractedFromInstances.iterator();
                 itr.hasNext();) {
             ad.addAbstractedFrom(((Instance) itr.next()).getName());
         }
     }
 
+    @Override
     public boolean protempaKnowledgeBaseHasProposition(
             Instance protegeParameter, KnowledgeBase protempaKnowledgeBase) {
         String propId = protegeParameter.getName();

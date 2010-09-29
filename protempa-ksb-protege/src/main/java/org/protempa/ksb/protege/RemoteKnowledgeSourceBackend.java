@@ -1,5 +1,7 @@
 package org.protempa.ksb.protege;
 
+import edu.stanford.smi.protege.event.ProjectEvent;
+import org.protempa.UnrecoverableBackendErrorEvent;
 import org.protempa.KnowledgeSourceBackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.BackendInfo;
@@ -20,34 +22,21 @@ import org.protempa.bp.commons.BackendProperty;
  * 
  * @author Andrew Post
  */
-@BackendInfo (
-    displayName="Remote Protege knowledge base backend"
-)
-public final class RemoteKnowledgeSourceBackend extends
-		ProtegeKnowledgeSourceBackend {
+@BackendInfo(displayName = "Remote Protege knowledge base backend")
+public final class RemoteKnowledgeSourceBackend
+        extends ProtegeKnowledgeSourceBackend {
 
-    
     private String hostname;
-
-    
     private String username;
-
-    
     private String password;
-
-    
     private String knowledgeBaseName;
-
-    
     private String units;
 
     public String getHostname() {
         return hostname;
     }
 
-    @BackendProperty(
-        displayName="Hostname"
-    )
+    @BackendProperty(displayName = "Hostname")
     public void setHostname(String hostname) {
         this.hostname = hostname;
     }
@@ -56,9 +45,7 @@ public final class RemoteKnowledgeSourceBackend extends
         return knowledgeBaseName;
     }
 
-    @BackendProperty(
-        displayName="Knowledge base name"
-    )
+    @BackendProperty(displayName = "Knowledge base name")
     public void setKnowledgeBaseName(String knowledgeBaseName) {
         this.knowledgeBaseName = knowledgeBaseName;
     }
@@ -67,9 +54,7 @@ public final class RemoteKnowledgeSourceBackend extends
         return password;
     }
 
-    @BackendProperty(
-        displayName="Password"
-    )
+    @BackendProperty(displayName = "Password")
     public void setPassword(String password) {
         this.password = password;
     }
@@ -78,9 +63,7 @@ public final class RemoteKnowledgeSourceBackend extends
         return units;
     }
 
-    @BackendProperty(
-        displayName="Units"
-    )
+    @BackendProperty(displayName = "Units")
     public void setUnits(String units) {
         this.units = units;
     }
@@ -89,28 +72,27 @@ public final class RemoteKnowledgeSourceBackend extends
         return username;
     }
 
-    @BackendProperty(
-        displayName="Username"
-    )
+    @BackendProperty(displayName = "Username")
     public void setUsername(String username) {
         this.username = username;
     }
 
-
-	
-	/**
-	 * Instantiates the backend with no initial configuration.
-	 */
-	public RemoteKnowledgeSourceBackend() {
+    /**
+     * Instantiates the backend with no initial configuration.
+     */
+    public RemoteKnowledgeSourceBackend() {
     }
 
-	@Override
-	protected ConnectionManager initConnectionManager(
-            BackendInstanceSpec configuration) 
+    @Override
+    ConnectionManager initConnectionManager(BackendInstanceSpec configuration)
             throws KnowledgeSourceBackendInitializationException {
-		initUnits(units);
-		return new RemoteConnectionManager(hostname, username,
-				password, knowledgeBaseName);
-	}
-	
+        initUnits(units);
+        return new RemoteConnectionManager(hostname, username,
+                password, knowledgeBaseName);
+    }
+
+    @Override
+    public void serverSessionLost(ProjectEvent pe) {
+        fireUnrecoverableError(new UnrecoverableBackendErrorEvent(pe));
+    }
 }

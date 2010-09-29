@@ -1,18 +1,21 @@
 package org.protempa.ksb.protege;
 
+import edu.stanford.smi.protege.model.Cls;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import edu.stanford.smi.protege.model.Instance;
+import edu.stanford.smi.protege.model.Slot;
 import org.protempa.AbstractAbstractionDefinition;
 import org.protempa.AbstractPropositionDefinition;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropertyDefinition;
 import org.protempa.SimpleGapFunction;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
-import org.protempa.proposition.value.ValueFactory;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -37,14 +40,17 @@ class Util {
      * Days (24 * 60 * 60 * 1000 milliseconds).
      */
     private static final String DAY = "Day";
-    static final Map<String, AbsoluteTimeUnit> ABSOLUTE_DURATION_MULTIPLIER = new HashMap<String, AbsoluteTimeUnit>();
+    static final Map<String, AbsoluteTimeUnit> ABSOLUTE_DURATION_MULTIPLIER =
+            new HashMap<String, AbsoluteTimeUnit>();
 
     static {
         ABSOLUTE_DURATION_MULTIPLIER.put(MINUTE, AbsoluteTimeUnit.MINUTE);
         ABSOLUTE_DURATION_MULTIPLIER.put(HOUR, AbsoluteTimeUnit.HOUR);
         ABSOLUTE_DURATION_MULTIPLIER.put(DAY, AbsoluteTimeUnit.DAY);
     }
-    static final Map<String, RelativeHourUnit> RELATIVE_HOURS_DURATION_MULTIPLIER = new HashMap<String, RelativeHourUnit>();
+    static final Map<String, RelativeHourUnit>
+            RELATIVE_HOURS_DURATION_MULTIPLIER =
+            new HashMap<String, RelativeHourUnit>();
 
     static {
         RELATIVE_HOURS_DURATION_MULTIPLIER.put(HOUR, RelativeHourUnit.HOUR);
@@ -71,7 +77,8 @@ class Util {
 
     private static class LazyLoggerHolder {
 
-        private static Logger instance = Logger.getLogger(Util.class.getPackage().getName());
+        private static Logger instance = Logger.getLogger(
+                Util.class.getPackage().getName());
     }
 
     static Logger logger() {
@@ -93,20 +100,24 @@ class Util {
      * @return a <code>Weight</code> object representing a time in
      *         milliseconds.
      */
-    static Integer parseTimeConstraint(Instance instance, String constraint) {
+    static Integer parseTimeConstraint(Instance instance, String constraint,
+            ConnectionManager cm) throws KnowledgeSourceReadException {
         Integer constraintValue = null;
         if (instance != null && constraint != null) {
-            constraintValue = (Integer) instance.getOwnSlotValue(instance.getKnowledgeBase().getSlot(constraint));
+            constraintValue = (Integer) cm.getOwnSlotValue(instance,
+                    cm.getSlot(constraint));
         }
 
         return constraintValue;
     }
 
     static Unit parseUnitsConstraint(Instance instance, String constraintUnits,
-            ProtegeKnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
         String constraintUnitsValue = null;
         if (instance != null && constraintUnits != null) {
-            constraintUnitsValue = (String) instance.getOwnSlotValue(instance.getKnowledgeBase().getSlot(constraintUnits));
+            constraintUnitsValue = (String) cm.getOwnSlotValue(instance,
+                    cm.getSlot(constraintUnits));
         }
 
         if (constraintUnitsValue == null) {
@@ -121,22 +132,30 @@ class Util {
      * @param d
      */
     static void setGap(Instance instance, AbstractAbstractionDefinition d,
-            ProtegeKnowledgeSourceBackend backend) {
-        Integer maxGap = (Integer) instance.getOwnSlotValue(instance.getKnowledgeBase().getSlot("maxGap"));
+            ProtegeKnowledgeSourceBackend backend, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        Integer maxGap = (Integer) cm.getOwnSlotValue(instance,
+                cm.getSlot("maxGap"));
         Unit maxGapUnits = Util.parseUnitsConstraint(instance, "maxGapUnits",
-                backend);
+                backend, cm);
         d.setGapFunction(new SimpleGapFunction(maxGap, maxGapUnits));
     }
 
     static void setNames(Instance complexAbstractionInstance,
-            AbstractPropositionDefinition cad) {
-        cad.setDisplayName((String) complexAbstractionInstance.getOwnSlotValue(complexAbstractionInstance.getKnowledgeBase().getSlot("displayName")));
-        cad.setAbbreviatedDisplayName((String) complexAbstractionInstance.getOwnSlotValue(complexAbstractionInstance.getKnowledgeBase().getSlot("abbrevDisplayName")));
+            AbstractPropositionDefinition cad, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        cad.setDisplayName(
+                (String) cm.getOwnSlotValue(complexAbstractionInstance,
+                cm.getSlot("displayName")));
+        cad.setAbbreviatedDisplayName((String) cm.getOwnSlotValue(
+                complexAbstractionInstance, cm.getSlot("abbrevDisplayName")));
     }
 
     static void setInverseIsAs(Instance propInstance,
-            AbstractPropositionDefinition propDef) {
-        Collection<?> isas = propInstance.getDirectOwnSlotValues(propInstance.getKnowledgeBase().getSlot("inverseIsA"));
+            AbstractPropositionDefinition propDef, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        Collection<?> isas = propInstance.getDirectOwnSlotValues(
+                cm.getSlot("inverseIsA"));
         if (isas != null) {
             String[] inverseIsAs = new String[isas.size()];
             int i = 0;
@@ -145,5 +164,26 @@ class Util {
             }
             propDef.setInverseIsA(inverseIsAs);
         }
+    }
+
+    static void setProperties(Instance propInstance,
+            AbstractPropositionDefinition d, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        Slot propertySlot = cm.getSlot("property");
+        Slot valueTypeSlot = cm.getSlot("valueType");
+        Collection<?> properties = 
+                cm.getOwnSlotValues(propInstance, propertySlot);
+        PropertyDefinition[] propDefs =
+                new PropertyDefinition[properties.size()];
+        int i = 0;
+        for (Object propertyInstance : properties) {
+            Instance inst = (Instance) propertyInstance;
+            Cls valueTypeCls = (Cls) cm.getOwnSlotValue(inst, valueTypeSlot);
+            PropertyDefinition propDef = new PropertyDefinition(inst.getName(),
+                VALUE_CLASS_NAME_TO_VALUE_TYPE.get(valueTypeCls.getName()));
+            propDefs[i] = propDef;
+            i++;
+        }
+        d.setPropertyDefinitions(propDefs);
     }
 }

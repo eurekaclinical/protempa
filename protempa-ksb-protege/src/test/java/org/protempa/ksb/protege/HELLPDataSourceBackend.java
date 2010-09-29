@@ -16,16 +16,18 @@ import org.arp.javautil.sql.InvalidConnectionSpecArguments;
 import org.arp.javautil.sql.SQLExecutor;
 import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
 import org.arp.javautil.sql.SQLExecutor.StatementPreparer;
+import org.protempa.DataSourceBackendFailedValidationException;
 import org.protempa.DataSourceBackendInitializationException;
 import org.protempa.DataSourceReadException;
 import org.protempa.DatabaseDataSourceType;
+import org.protempa.KnowledgeSource;
 import org.protempa.QuerySession;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.AbstractCommonsDataSourceBackend;
 import org.protempa.bp.commons.BackendInfo;
 import org.protempa.bp.commons.BackendProperty;
 import org.protempa.dsb.filter.Filter;
-import org.protempa.proposition.ConstantParameter;
+import org.protempa.proposition.ConstantProposition;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.IntervalFactory;
 import org.protempa.proposition.PrimitiveParameter;
@@ -233,12 +235,12 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
     }
 
     @Override
-    public Map<String, List<ConstantParameter>> getConstantParameters(
+    public Map<String, List<ConstantProposition>> getConstantParameters(
             Set<String> keyIds, Set<String> paramIds,
             Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
-        return new HashMap<String, List<ConstantParameter>>(0);
+        return new HashMap<String, List<ConstantProposition>>(0);
     }
 
     @Override
@@ -372,5 +374,10 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
     @Override
     public String getKeyTypePluralDisplayName() {
         return "cases";
+    }
+
+    @Override
+    public void validate(KnowledgeSource knowledgeSource)
+            throws DataSourceBackendFailedValidationException {
     }
 }

@@ -1,5 +1,6 @@
 package org.protempa.ksb.protege;
 
+import edu.stanford.smi.protege.event.ProjectEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -94,5 +95,10 @@ public final class LocalKnowledgeSourceBackend extends ProtegeKnowledgeSourceBac
         initUnits(units);
 		return new LocalConnectionManager(projectString);
 	}
+
+    @Override
+    public void serverSessionLost(ProjectEvent pe) {
+        //shouldn't happend.
+    }
 
 }

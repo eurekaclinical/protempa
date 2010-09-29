@@ -10,6 +10,7 @@ import edu.stanford.smi.protege.model.Instance;
 import org.protempa.HighLevelAbstractionDefinition;
 import org.protempa.IntervalSide;
 import org.protempa.KnowledgeBase;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.TemporalExtendedParameterDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.Offsets;
@@ -32,7 +33,8 @@ class HighLevelAbstractionConverter implements PropositionConverter {
     @Override
     public void convert(Instance complexAbstractionInstance,
             KnowledgeBase protempaKnowledgeBase,
-            ProtegeKnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend) 
+            throws KnowledgeSourceReadException {
 
         if (complexAbstractionInstance != null
                 && protempaKnowledgeBase != null
@@ -43,9 +45,11 @@ class HighLevelAbstractionConverter implements PropositionConverter {
                     new HighLevelAbstractionDefinition(
                     protempaKnowledgeBase,
                     complexAbstractionInstance.getName());
-            Util.setNames(complexAbstractionInstance, cad);
-            Util.setInverseIsAs(complexAbstractionInstance, cad);
-            Util.setGap(complexAbstractionInstance, cad, backend);
+            ConnectionManager cm = backend.getConnectionManager();
+            Util.setNames(complexAbstractionInstance, cad, cm);
+            Util.setInverseIsAs(complexAbstractionInstance, cad, cm);
+            Util.setProperties(complexAbstractionInstance, cad, cm);
+            Util.setGap(complexAbstractionInstance, cad, backend, cm);
             Map<Instance, TemporalExtendedPropositionDefinition>
                     extendedParameterCache =
                     new HashMap<Instance,
@@ -63,27 +67,26 @@ class HighLevelAbstractionConverter implements PropositionConverter {
             HighLevelAbstractionDefinition cad,
             ProtegeKnowledgeSourceBackend backend,
             Map<Instance, TemporalExtendedPropositionDefinition>
-                    extendedParameterCache) {
+                    extendedParameterCache) 
+                    throws KnowledgeSourceReadException {
+        ConnectionManager cm = backend.getConnectionManager();
         Instance temporalOffsetInstance =
-                (Instance) complexAbstractionInstance
-                .getOwnSlotValue(complexAbstractionInstance.getKnowledgeBase()
-                .getSlot("temporalOffsets"));
+                (Instance) cm.getOwnSlotValue(complexAbstractionInstance,
+                cm.getSlot("temporalOffsets"));
         if (temporalOffsetInstance != null) {
             Offsets temporalOffsets = new Offsets();
             Instance startExtendedParamInstance =
-                    (Instance) temporalOffsetInstance.getOwnSlotValue(
-                    temporalOffsetInstance.getKnowledgeBase()
-                    .getSlot("startExtendedProposition"));
+                    (Instance) cm.getOwnSlotValue(temporalOffsetInstance,
+                    cm.getSlot("startExtendedProposition"));
             Instance finishExtendedParamInstance =
-                    (Instance) temporalOffsetInstance
-                    .getOwnSlotValue(temporalOffsetInstance
-                    .getKnowledgeBase().getSlot("finishExtendedProposition"));
+                    (Instance) cm.getOwnSlotValue(temporalOffsetInstance,
+                    cm.getSlot("finishExtendedProposition"));
             if (startExtendedParamInstance != null) {
                 temporalOffsets.setStartTemporalExtendedPropositionDefinition(
                         extendedParameterCache.get(
                         startExtendedParamInstance));
                 temporalOffsets.setStartAbstractParamValue(
-                        extendedParameterValue(startExtendedParamInstance));
+                        extendedParameterValue(startExtendedParamInstance, cm));
             }
 
             if (finishExtendedParamInstance != null) {
@@ -91,29 +94,27 @@ class HighLevelAbstractionConverter implements PropositionConverter {
                         extendedParameterCache.get(
                         finishExtendedParamInstance));
                 temporalOffsets.setFinishAbstractParamValue(
-                        extendedParameterValue(finishExtendedParamInstance));
+                        extendedParameterValue(finishExtendedParamInstance,
+                        cm));
             }
 
             temporalOffsets.setStartIntervalSide(IntervalSide.intervalSide(
-                    (String) temporalOffsetInstance.getOwnSlotValue(
-                    temporalOffsetInstance.getKnowledgeBase()
-                    .getSlot("startSide"))));
+                    (String) cm.getOwnSlotValue(temporalOffsetInstance,
+                    cm.getSlot("startSide"))));
             temporalOffsets.setFinishIntervalSide(IntervalSide.intervalSide(
-                    (String) temporalOffsetInstance.getOwnSlotValue(
-                    temporalOffsetInstance.getKnowledgeBase().getSlot(
-                    "finishSide"))));
-
+                    (String) cm.getOwnSlotValue(temporalOffsetInstance,
+                    cm.getSlot("finishSide"))));
             Integer startOffset = Util.parseTimeConstraint(
-                    temporalOffsetInstance, "startOffset");
+                    temporalOffsetInstance, "startOffset", cm);
             temporalOffsets.setStartOffset(startOffset);
 
             temporalOffsets.setStartOffsetUnits(Util.parseUnitsConstraint(
-                    temporalOffsetInstance, "startOffsetUnits", backend));
+                    temporalOffsetInstance, "startOffsetUnits", backend, cm));
             Integer finishOffset = Util.parseTimeConstraint(
-                    temporalOffsetInstance, "finishOffset");
+                    temporalOffsetInstance, "finishOffset", cm);
             temporalOffsets.setFinishOffset(finishOffset);
             temporalOffsets.setFinishOffsetUnits(Util.parseUnitsConstraint(
-                    temporalOffsetInstance, "finishOffsetUnits", backend));
+                    temporalOffsetInstance, "finishOffsetUnits", backend, cm));
             cad.setTemporalOffset(temporalOffsets);
         }
     }
@@ -156,12 +157,11 @@ class HighLevelAbstractionConverter implements PropositionConverter {
      * @return <code>true</code> if the provided Protege instance is a
      *         Parameter, <code>false</code> otherwise.
      */
-    private static boolean isParameter(Instance extendedParameter) {
-        Instance proposition = (Instance) extendedParameter.getOwnSlotValue(
-                extendedParameter.getKnowledgeBase().getSlot(
-                "proposition"));
-        if (proposition.hasType(proposition.getKnowledgeBase().getCls(
-                "Parameter"))) {
+    private static boolean isParameter(Instance extendedParameter,
+            ConnectionManager cm) throws KnowledgeSourceReadException {
+        Instance proposition = (Instance) cm.getOwnSlotValue(extendedParameter,
+                cm.getSlot("proposition"));
+        if (proposition.hasType(cm.getCls("Parameter"))) {
             return true;
         } else {
             return false;
@@ -170,22 +170,23 @@ class HighLevelAbstractionConverter implements PropositionConverter {
 
     private static TemporalExtendedPropositionDefinition
             newTemporalExtendedPropositionDefinition(
-            Instance extendedProposition, HighLevelAbstractionDefinition cad,
-            ProtegeKnowledgeSourceBackend backend) {
+            Instance extendedProposition,
+            ProtegeKnowledgeSourceBackend backend)
+            throws KnowledgeSourceReadException {
+        ConnectionManager cm = backend.getConnectionManager();
         String ad = propositionId(extendedProposition);
 
-        String displayName = (String) extendedProposition.getOwnSlotValue(
-                extendedProposition.getKnowledgeBase().getSlot("displayName"));
+        String displayName = (String) cm.getOwnSlotValue(extendedProposition,
+                cm.getSlot("displayName"));
         String abbrevDisplayName =
-                (String) extendedProposition.getOwnSlotValue(
-                extendedProposition.getKnowledgeBase().getSlot(
-                "abbrevDisplayName"));
+                (String) cm.getOwnSlotValue(extendedProposition,
+                cm.getSlot("abbrevDisplayName"));
 
         TemporalExtendedPropositionDefinition result;
-        if (isParameter(extendedProposition)) {
+        if (isParameter(extendedProposition, cm)) {
             TemporalExtendedParameterDefinition r =
                     new TemporalExtendedParameterDefinition(ad);
-            r.setValue(extendedParameterValue(extendedProposition));
+            r.setValue(extendedParameterValue(extendedProposition, cm));
             result = r;
         } else {
             result = new TemporalExtendedPropositionDefinition(ad);
@@ -194,13 +195,13 @@ class HighLevelAbstractionConverter implements PropositionConverter {
         result.setDisplayName(displayName);
         result.setAbbreviatedDisplayName(abbrevDisplayName);
         result.setMinLength(Util.parseTimeConstraint(extendedProposition,
-                "minDuration"));
+                "minDuration", cm));
         result.setMinLengthUnit(Util.parseUnitsConstraint(extendedProposition,
-                "minDurationUnits", backend));
+                "minDurationUnits", backend, cm));
         result.setMaxLength(Util.parseTimeConstraint(extendedProposition,
-                "maxDuration"));
+                "maxDuration", cm));
         result.setMaxLengthUnit(Util.parseUnitsConstraint(extendedProposition,
-                "maxDurationUnits", backend));
+                "maxDurationUnits", backend, cm));
 
         return result;
     }
@@ -219,51 +220,53 @@ class HighLevelAbstractionConverter implements PropositionConverter {
             Map<Instance, TemporalExtendedPropositionDefinition>
             extendedParameterCache,
             Instance instance, HighLevelAbstractionDefinition cad,
-            ProtegeKnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend) 
+            throws KnowledgeSourceReadException {
+        ConnectionManager cm = backend.getConnectionManager();
         for (Iterator<?> itr = instance.getOwnSlotValues(
                 instance.getKnowledgeBase().getSlot("withRelations"))
                 .iterator(); itr.hasNext();) {
             Instance relationInstance = (Instance) itr.next();
 
             Instance lhsExtendedParameter = 
-                    (Instance) relationInstance.getOwnSlotValue(
-                    relationInstance.getKnowledgeBase().getSlot("lhs"));
+                    (Instance) cm.getOwnSlotValue(relationInstance,
+                    cm.getSlot("lhs"));
             Instance rhsExtendedParameter = 
-                    (Instance) relationInstance.getOwnSlotValue(
-                    relationInstance.getKnowledgeBase().getSlot("rhs"));
+                    (Instance) cm.getOwnSlotValue(relationInstance,
+                    cm.getSlot("rhs"));
 
             Integer mins1s2 = Util.parseTimeConstraint(relationInstance,
-                    "mins1s2");
+                    "mins1s2", cm);
             Unit mins1s2Units = Util.parseUnitsConstraint(relationInstance,
-                    "mins1s2Units", backend);
+                    "mins1s2Units", backend, cm);
             Integer maxs1s2 = Util.parseTimeConstraint(relationInstance,
-                    "maxs1s2");
+                    "maxs1s2", cm);
             Unit maxs1s2Units = Util.parseUnitsConstraint(relationInstance,
-                    "maxs1s2Units", backend);
+                    "maxs1s2Units", backend, cm);
             Integer mins1f2 = Util.parseTimeConstraint(relationInstance,
-                    "mins1f2");
+                    "mins1f2", cm);
             Unit mins1f2Units = Util.parseUnitsConstraint(relationInstance,
-                    "mins1f2Units", backend);
+                    "mins1f2Units", backend, cm);
             Integer maxs1f2 = Util.parseTimeConstraint(relationInstance,
-                    "maxs1f2");
+                    "maxs1f2", cm);
             Unit maxs1f2Units = Util.parseUnitsConstraint(relationInstance,
-                    "maxs1f2Units", backend);
+                    "maxs1f2Units", backend, cm);
             Integer minf1s2 = Util.parseTimeConstraint(relationInstance,
-                    "minf1s2");
+                    "minf1s2", cm);
             Unit minf1s2Units = Util.parseUnitsConstraint(relationInstance,
-                    "minf1s2Units", backend);
+                    "minf1s2Units", backend, cm);
             Integer maxf1s2 = Util.parseTimeConstraint(relationInstance,
-                    "maxf1s2");
+                    "maxf1s2", cm);
             Unit maxf1s2Units = Util.parseUnitsConstraint(relationInstance,
-                    "maxf1s2Units", backend);
+                    "maxf1s2Units", backend, cm);
             Integer minf1f2 = Util.parseTimeConstraint(relationInstance,
-                    "minf1f2");
+                    "minf1f2", cm);
             Unit minf1f2Units = Util.parseUnitsConstraint(relationInstance,
-                    "minf1f2Units", backend);
+                    "minf1f2Units", backend, cm);
             Integer maxf1f2 = Util.parseTimeConstraint(relationInstance,
-                    "maxf1f2");
+                    "maxf1f2", cm);
             Unit maxf1f2Units = Util.parseUnitsConstraint(relationInstance,
-                    "maxf1f2Units", backend);
+                    "maxf1f2Units", backend, cm);
 
             Relation relation = new Relation(mins1s2, mins1s2Units, maxs1s2,
                     maxs1s2Units, mins1f2, mins1f2Units, maxs1f2, maxs1f2Units,
@@ -281,16 +284,16 @@ class HighLevelAbstractionConverter implements PropositionConverter {
     }
 
     private static Value extendedParameterValue(
-            Instance extendedParamInstance) {
+            Instance extendedParamInstance, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
         Value result = null;
         String resultStr = null;
         Instance paramConstraint =
-                (Instance) extendedParamInstance.getOwnSlotValue(
-                extendedParamInstance.getKnowledgeBase().getSlot(
-                "parameterValue"));
+                (Instance) cm.getOwnSlotValue(extendedParamInstance,
+                cm.getSlot("parameterValue"));
         if (paramConstraint != null) {
-            resultStr = (String) paramConstraint.getOwnSlotValue(
-                    paramConstraint.getKnowledgeBase().getSlot("displayName"));
+            resultStr = (String) cm.getOwnSlotValue(paramConstraint,
+                    cm.getSlot("displayName"));
             if (resultStr != null) {
                 result = new NominalValue(resultStr);
             }
@@ -314,20 +317,18 @@ class HighLevelAbstractionConverter implements PropositionConverter {
             HighLevelAbstractionDefinition cad,
             Map<Instance, TemporalExtendedPropositionDefinition>
             extendedParameterCache,
-            ProtegeKnowledgeSourceBackend backend) {
+            ProtegeKnowledgeSourceBackend backend)
+            throws KnowledgeSourceReadException {
         Set<Object> extendedParameters = new HashSet<Object>();
-
-        for (Iterator<?> itr = complexAbstractionInstance.getOwnSlotValues(
-                complexAbstractionInstance.getKnowledgeBase().getSlot(
-                "withRelations")).iterator(); itr.hasNext();) {
+        ConnectionManager cm = backend.getConnectionManager();
+        for (Iterator<?> itr = cm.getOwnSlotValues(complexAbstractionInstance,
+                cm.getSlot("withRelations")).iterator(); itr.hasNext();) {
             Instance relation = (Instance) itr.next();
-            Object lhs = relation.getOwnSlotValue(
-                    relation.getKnowledgeBase().getSlot("lhs"));
+            Object lhs = cm.getOwnSlotValue(relation, cm.getSlot("lhs"));
             if (lhs != null) {
                 extendedParameters.add(lhs);
             }
-            Object rhs = relation.getOwnSlotValue(
-                    relation.getKnowledgeBase().getSlot("rhs"));
+            Object rhs = cm.getOwnSlotValue(relation, cm.getSlot("rhs"));
             if (rhs != null) {
                 extendedParameters.add(rhs);
             }
@@ -337,7 +338,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
             Instance extendedParameter = (Instance) itr.next();
             TemporalExtendedPropositionDefinition def =
                     newTemporalExtendedPropositionDefinition(
-                    extendedParameter, cad, backend);
+                    extendedParameter, backend);
             extendedParameterCache.put(extendedParameter, def);
             cad.add(def);
         }
