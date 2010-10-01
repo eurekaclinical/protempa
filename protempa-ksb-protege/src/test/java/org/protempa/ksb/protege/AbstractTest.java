@@ -7,6 +7,7 @@ import org.protempa.DataSource;
 import org.protempa.DataSourceFailedValidationException;
 import org.protempa.DataSourceValidationIncompleteException;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.Protempa;
 import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.BackendProviderSpecLoaderException;
@@ -48,6 +49,8 @@ public class AbstractTest {
         } catch (BackendProviderSpecLoaderException ex) {
             throw new RuntimeException(ex);
         } catch (InvalidConfigurationException ex) {
+            throw new RuntimeException(ex);
+        } catch (KnowledgeSourceReadException ex) {
             throw new RuntimeException(ex);
         }
     }

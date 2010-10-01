@@ -1,42 +1,47 @@
 package org.protempa;
 
+import java.util.List;
+import java.util.Map;
+
 /**
- * Skeletal implementation of the <code>KnowledgeSourceBackend</code>
- * interface to minimize the effort required to implement this interface.
+ * Skeletal implementation of the <code>KnowledgeSourceBackend</code> interface
+ * to minimize the effort required to implement this interface.
  * 
  * @author Andrew Post
  */
-public abstract class AbstractKnowledgeSourceBackend
-        extends AbstractBackend<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource>
+public abstract class AbstractKnowledgeSourceBackend extends
+        AbstractBackend<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource>
         implements KnowledgeSourceBackend {
 
     /**
      * A default implementation that returns <code>null</code>.
-     *
+     * 
      * @see org.protempa.KnowledgeSourceBackend#readAbstractionDefinition(java.lang.String,
      *      org.protempa.KnowledgeBase)
      */
     @Override
     public AbstractionDefinition readAbstractionDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase) throws KnowledgeSourceReadException {
+            KnowledgeBase protempaKnowledgeBase)
+            throws KnowledgeSourceReadException {
         return null;
     }
 
     /**
      * A default implementation that returns <code>null</code>.
-     *
+     * 
      * @see org.protempa.KnowledgeSourceBackend#readEventDefinition(java.lang.String,
      *      org.protempa.KnowledgeBase)
      */
     @Override
     public EventDefinition readEventDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase) throws KnowledgeSourceReadException {
+            KnowledgeBase protempaKnowledgeBase)
+            throws KnowledgeSourceReadException {
         return null;
     }
 
     /**
      * A default implementation that returns <code>null</code>.
-     *
+     * 
      * @see org.protempa.KnowledgeSourceBackend#readPrimitiveParameterDefinition(java.lang.String,
      *      org.protempa.KnowledgeBase)
      */
@@ -58,19 +63,18 @@ public abstract class AbstractKnowledgeSourceBackend
     public boolean hasPrimitiveParameterDefinition(String id,
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
-        return readPrimitiveParameterDefinition(id,
-                protempaKnowledgeBase) != null;
+        return readPrimitiveParameterDefinition(id, protempaKnowledgeBase) != null;
     }
 
     @Override
-    public boolean hasEventDefinition(String id, 
+    public boolean hasEventDefinition(String id,
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
         return readEventDefinition(id, protempaKnowledgeBase) != null;
     }
 
     @Override
-    public boolean hasAbstractionDefinition(String id, 
+    public boolean hasAbstractionDefinition(String id,
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
         return readAbstractionDefinition(id, protempaKnowledgeBase) != null;
@@ -84,8 +88,17 @@ public abstract class AbstractKnowledgeSourceBackend
     }
 
     /**
+     * A default implementation that returns null
+     */
+    @Override
+    public Map<String, List<String>> mapTermsToPropositionDefinitions()
+            throws KnowledgeSourceReadException {
+        return null;
+    }
+
+    /**
      * Implemented as a no-op.
-     *
+     * 
      * @see org.protempa.KnowledgeSourceBackend#close()
      */
     @Override
@@ -94,7 +107,7 @@ public abstract class AbstractKnowledgeSourceBackend
 
     /**
      * Notifies registered listeners that the backend has been updated.
-     *
+     * 
      * @see org.protempa.KnowledgeSourceBackendUpdatedEvent
      * @see org.protempa.KnowledgeSourceBackendListener
      */

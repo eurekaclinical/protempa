@@ -24,59 +24,65 @@ public final class Protempa {
     public static Protempa newInstance(String configurationId)
             throws ConfigurationsLoadException, BackendInitializationException,
             BackendNewInstanceException, BackendProviderSpecLoaderException,
-            InvalidConfigurationException,
-            DataSourceFailedValidationException, 
-            DataSourceValidationIncompleteException {
+            InvalidConfigurationException, DataSourceFailedValidationException,
+            DataSourceValidationIncompleteException,
+            KnowledgeSourceReadException {
         return newInstance(new SourceFactory(configurationId));
     }
 
     public static Protempa newInstance(SourceFactory sourceFactory)
             throws BackendInitializationException, BackendNewInstanceException,
-            DataSourceFailedValidationException, 
-            DataSourceValidationIncompleteException {
+            DataSourceFailedValidationException,
+            DataSourceValidationIncompleteException,
+            KnowledgeSourceReadException {
         return new Protempa(sourceFactory.newDataSourceInstance(),
-                sourceFactory.newKnowledgeSourceInstance(),
-                sourceFactory.newAlgorithmSourceInstance(), false);
+                sourceFactory.newKnowledgeSourceInstance(), sourceFactory
+                        .newAlgorithmSourceInstance(), false);
     }
 
     public static Protempa newInstance(String configurationsId, boolean useCache)
             throws ConfigurationsLoadException, BackendInitializationException,
             BackendNewInstanceException, BackendProviderSpecLoaderException,
             InvalidConfigurationException, DataSourceFailedValidationException,
-            DataSourceValidationIncompleteException {
+            DataSourceValidationIncompleteException,
+            KnowledgeSourceReadException {
         return newInstance(new SourceFactory(configurationsId), useCache);
     }
 
     public static Protempa newInstance(SourceFactory sourceFactory,
             boolean useCache) throws BackendInitializationException,
-            BackendNewInstanceException,
-            DataSourceFailedValidationException,
-            DataSourceValidationIncompleteException {
+            BackendNewInstanceException, DataSourceFailedValidationException,
+            DataSourceValidationIncompleteException,
+            KnowledgeSourceReadException {
         return new Protempa(sourceFactory.newDataSourceInstance(),
-                sourceFactory.newKnowledgeSourceInstance(),
-                sourceFactory.newAlgorithmSourceInstance(), useCache);
+                sourceFactory.newKnowledgeSourceInstance(), sourceFactory
+                        .newAlgorithmSourceInstance(), useCache);
     }
 
     /**
      * Constructor that configures PROTEMPA not to cache found abstract
      * parameters.
      * 
-     * @param dataSource a {@link DataSource}. Will be closed
-     * when {@link #close()} is called.
-     * @param knowledgeSource a {@link KnowledgeSource}. Will be closed when
-     * {@link #close()} is called.
-     * @param algorithmSource an {@link AlgorithmSource}. Will be closed when
-     * {@link #close()} is called.
-     * @throws DataSourceFailedValidationException if the data source's
-     * data element mappings are inconsistent with those defined in the
-     * knowledge source.
-     * @throws DataSourceValidationIncompleteException if an error occurred
-     * during data source validation.
+     * @param dataSource
+     *            a {@link DataSource}. Will be closed when {@link #close()} is
+     *            called.
+     * @param knowledgeSource
+     *            a {@link KnowledgeSource}. Will be closed when
+     *            {@link #close()} is called.
+     * @param algorithmSource
+     *            an {@link AlgorithmSource}. Will be closed when
+     *            {@link #close()} is called.
+     * @throws DataSourceFailedValidationException
+     *             if the data source's data element mappings are inconsistent
+     *             with those defined in the knowledge source.
+     * @throws DataSourceValidationIncompleteException
+     *             if an error occurred during data source validation.
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
-            AlgorithmSource algorithmSource) 
+            AlgorithmSource algorithmSource)
             throws DataSourceFailedValidationException,
-            DataSourceValidationIncompleteException {
+            DataSourceValidationIncompleteException,
+            KnowledgeSourceReadException {
         this(dataSource, knowledgeSource, algorithmSource, false);
     }
 
@@ -84,26 +90,30 @@ public final class Protempa {
      * Constructor that lets the user specify whether or not to cache found
      * abstract parameters.
      * 
-     * @param dataSource a {@link DataSource}. Will be closed
-     * when {@link #close()} is called.
-     * @param knowledgeSource a {@link KnowledgeSource}. Will be closed when
-     * {@link #close()} is called.
-     * @param algorithmSource an {@link AlgorithmSource}. Will be closed when
-     * {@link #close()} is called.
+     * @param dataSource
+     *            a {@link DataSource}. Will be closed when {@link #close()} is
+     *            called.
+     * @param knowledgeSource
+     *            a {@link KnowledgeSource}. Will be closed when
+     *            {@link #close()} is called.
+     * @param algorithmSource
+     *            an {@link AlgorithmSource}. Will be closed when
+     *            {@link #close()} is called.
      * @param cacheFoundAbstractParameters
      *            <code>true</code> to cache found abstract parameters,
      *            <code>false</code> not to cache found abstract parameters.
-     * @throws DataSourceFailedValidationException if the data source's
-     * data element mappings are inconsistent with those defined in the
-     * knowledge source.
-     * @throws DataSourceValidationIncompleteException if an error occurred
-     * during data source validation.
+     * @throws DataSourceFailedValidationException
+     *             if the data source's data element mappings are inconsistent
+     *             with those defined in the knowledge source.
+     * @throws DataSourceValidationIncompleteException
+     *             if an error occurred during data source validation.
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource,
-            boolean cacheFoundAbstractParameters) 
+            boolean cacheFoundAbstractParameters)
             throws DataSourceFailedValidationException,
-            DataSourceValidationIncompleteException {
+            DataSourceValidationIncompleteException,
+            KnowledgeSourceReadException {
         if (dataSource == null) {
             throw new IllegalArgumentException("dataSource cannot be null");
         }
@@ -117,20 +127,20 @@ public final class Protempa {
         if (!Boolean.getBoolean("protempa.skip.datasource.validation")) {
             logger.fine("Beginning data source validation");
             dataSource.validate(knowledgeSource);
-            logger.fine(
-              "Data source validation completed with no validation failures");
+            logger
+                    .fine("Data source validation completed with no validation failures");
         } else {
             logger.fine("Skipping data source validation");
         }
         this.abstractionFinder = new AbstractionFinder(dataSource,
-            knowledgeSource, algorithmSource, cacheFoundAbstractParameters);
+                knowledgeSource, algorithmSource, cacheFoundAbstractParameters);
     }
 
     /**
      * Gets the data source.
-     *
+     * 
      * @return a {@link DataSource}. WIll be closed when {@link #close()} is
-     * called.
+     *         called.
      */
     public DataSource getDataSource() {
         return this.abstractionFinder.getDataSource();
@@ -138,9 +148,9 @@ public final class Protempa {
 
     /**
      * Gets the knowledge source.
-     *
+     * 
      * @return a {@link KnowledgeSource}. WIll be closed when {@link #close()}
-     * is called.
+     *         is called.
      */
     public KnowledgeSource getKnowledgeSource() {
         return this.abstractionFinder.getKnowledgeSource();
@@ -148,9 +158,9 @@ public final class Protempa {
 
     /**
      * Gets the algorithm source.
-     *
+     * 
      * @return an {@link AlgorithmSource}. WIll be closed when {@link #close()}
-     * is called.
+     *         is called.
      */
     public AlgorithmSource getAlgorithmSource() {
         return this.abstractionFinder.getAlgorithmSource();
@@ -188,9 +198,12 @@ public final class Protempa {
     /**
      * Executes a query.
      * 
-     * @param query a {@link Query}.
-     * @param resultHandler a {@link QueryResultsHandler}.
-     * @throws FinderException if an error occurred during query.
+     * @param query
+     *            a {@link Query}.
+     * @param resultHandler
+     *            a {@link QueryResultsHandler}.
+     * @throws FinderException
+     *             if an error occurred during query.
      */
     public void execute(Query query, QueryResultsHandler resultHandler)
             throws FinderException {
@@ -211,8 +224,8 @@ public final class Protempa {
     }
 
     /**
-     * Closes resources created by this object and the data source,
-     * knowledge source, and algorithm source.
+     * Closes resources created by this object and the data source, knowledge
+     * source, and algorithm source.
      */
     public void close() {
         this.abstractionFinder.close();
@@ -223,8 +236,8 @@ public final class Protempa {
     }
 
     /**
-     * Clears resources created by this object and the data source,
-     * knowledge source and algorithm source.
+     * Clears resources created by this object and the data source, knowledge
+     * source and algorithm source.
      */
     public void clear() {
         this.abstractionFinder.clear();
