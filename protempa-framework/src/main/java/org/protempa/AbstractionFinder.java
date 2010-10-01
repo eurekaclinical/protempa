@@ -39,20 +39,23 @@ final class AbstractionFinder implements Module {
     private final Map<String, Set<String>> propIdCache;
     private final DataSource dataSource;
     private final KnowledgeSource knowledgeSource;
-    private final Map<String, List<String>> termToPropDefMap;
+    private final TermSource termSource;
     private final AlgorithmSource algorithmSource;
+    private final Map<String, List<String>> termToPropDefMap;
     private boolean clearNeeded;
     private final Map<String, Map<Set<String>, Sequence<PrimitiveParameter>>> sequences;
     private boolean closed;
 
     AbstractionFinder(DataSource dataSource, KnowledgeSource knowledgeSource,
-            AlgorithmSource algorithmSource,
-            boolean cacheFoundAbstractParameters) throws KnowledgeSourceReadException {
+            AlgorithmSource algorithmSource, TermSource termSource,
+            boolean cacheFoundAbstractParameters)
+            throws KnowledgeSourceReadException {
         assert dataSource != null : "dataSource cannot be null";
         assert knowledgeSource != null : "knowledgeSource cannot be null";
         assert algorithmSource != null : "algorithmSource cannot be null";
         this.dataSource = dataSource;
         this.knowledgeSource = knowledgeSource;
+        this.termSource = termSource;
         this.algorithmSource = algorithmSource;
 
         try {
@@ -91,6 +94,20 @@ final class AbstractionFinder implements Module {
                                 "Not supported yet.");
                     }
 
+                });
+
+        this.termSource
+                .addSourceListener(new SourceListener<TermSourceUpdatedEvent>() {
+                    @Override
+                    public void sourceUpdated(TermSourceUpdatedEvent event) {
+                    }
+
+                    @Override
+                    public void closedUnexpectedly(
+                            SourceClosedUnexpectedlyEvent e) {
+                        throw new UnsupportedOperationException(
+                                "Not supported yet");
+                    }
                 });
 
         this.algorithmSource
@@ -132,6 +149,10 @@ final class AbstractionFinder implements Module {
 
     AlgorithmSource getAlgorithmSource() {
         return this.algorithmSource;
+    }
+    
+    TermSource getTermSource() {
+        return this.termSource;
     }
 
     Set<String> getKnownKeys() {
@@ -265,8 +286,8 @@ final class AbstractionFinder implements Module {
         for (Map.Entry<String, List<Object>> entry : objectsToAssert(keyIds,
                 propositionIds, filters, qs, false).entrySet()) {
             Map<Proposition, List<Proposition>> derivations = new HashMap<Proposition, List<Proposition>>(); // need
-                                                                                                             // to
-                                                                                                             // populate
+            // to
+            // populate
             List objects = new ArrayList(entry.getValue());
             List<Proposition> propositions = resultList(statelessWorkingMemory(
                     propositionIds, derivations).executeWithResults(objects)

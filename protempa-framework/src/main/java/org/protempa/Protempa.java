@@ -37,7 +37,8 @@ public final class Protempa {
             KnowledgeSourceReadException {
         return new Protempa(sourceFactory.newDataSourceInstance(),
                 sourceFactory.newKnowledgeSourceInstance(), sourceFactory
-                        .newAlgorithmSourceInstance(), false);
+                        .newAlgorithmSourceInstance(), sourceFactory
+                        .newTermSourceInstance(), false);
     }
 
     public static Protempa newInstance(String configurationsId, boolean useCache)
@@ -56,7 +57,8 @@ public final class Protempa {
             KnowledgeSourceReadException {
         return new Protempa(sourceFactory.newDataSourceInstance(),
                 sourceFactory.newKnowledgeSourceInstance(), sourceFactory
-                        .newAlgorithmSourceInstance(), useCache);
+                        .newAlgorithmSourceInstance(), sourceFactory
+                        .newTermSourceInstance(), useCache);
     }
 
     /**
@@ -79,11 +81,11 @@ public final class Protempa {
      *             if an error occurred during data source validation.
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
-            AlgorithmSource algorithmSource)
+            AlgorithmSource algorithmSource, TermSource termSource)
             throws DataSourceFailedValidationException,
             DataSourceValidationIncompleteException,
             KnowledgeSourceReadException {
-        this(dataSource, knowledgeSource, algorithmSource, false);
+        this(dataSource, knowledgeSource, algorithmSource, termSource, false);
     }
 
     /**
@@ -99,6 +101,9 @@ public final class Protempa {
      * @param algorithmSource
      *            an {@link AlgorithmSource}. Will be closed when
      *            {@link #close()} is called.
+     * @param termSource
+     *            a {@link TermSource}. Will be closed when {@link #close()} is
+     *            called.
      * @param cacheFoundAbstractParameters
      *            <code>true</code> to cache found abstract parameters,
      *            <code>false</code> not to cache found abstract parameters.
@@ -109,7 +114,7 @@ public final class Protempa {
      *             if an error occurred during data source validation.
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
-            AlgorithmSource algorithmSource,
+            AlgorithmSource algorithmSource, TermSource termSource,
             boolean cacheFoundAbstractParameters)
             throws DataSourceFailedValidationException,
             DataSourceValidationIncompleteException,
@@ -133,13 +138,14 @@ public final class Protempa {
             logger.fine("Skipping data source validation");
         }
         this.abstractionFinder = new AbstractionFinder(dataSource,
-                knowledgeSource, algorithmSource, cacheFoundAbstractParameters);
+                knowledgeSource, algorithmSource, termSource,
+                cacheFoundAbstractParameters);
     }
 
     /**
      * Gets the data source.
      * 
-     * @return a {@link DataSource}. WIll be closed when {@link #close()} is
+     * @return a {@link DataSource}. Will be closed when {@link #close()} is
      *         called.
      */
     public DataSource getDataSource() {
@@ -149,7 +155,7 @@ public final class Protempa {
     /**
      * Gets the knowledge source.
      * 
-     * @return a {@link KnowledgeSource}. WIll be closed when {@link #close()}
+     * @return a {@link KnowledgeSource}. Will be closed when {@link #close()}
      *         is called.
      */
     public KnowledgeSource getKnowledgeSource() {
@@ -159,11 +165,21 @@ public final class Protempa {
     /**
      * Gets the algorithm source.
      * 
-     * @return an {@link AlgorithmSource}. WIll be closed when {@link #close()}
+     * @return an {@link AlgorithmSource}. Will be closed when {@link #close()}
      *         is called.
      */
     public AlgorithmSource getAlgorithmSource() {
         return this.abstractionFinder.getAlgorithmSource();
+    }
+
+    /**
+     * Gets the term source.
+     * 
+     * @return a {@link TermSource}. Will be closed when {@link #close()} is
+     *         called
+     */
+    public TermSource getTermSource() {
+        return this.abstractionFinder.getTermSource();
     }
 
     public void detachSession(QuerySession querySession) {
@@ -232,6 +248,7 @@ public final class Protempa {
         this.abstractionFinder.getAlgorithmSource().close();
         this.abstractionFinder.getDataSource().close();
         this.abstractionFinder.getKnowledgeSource().close();
+        this.abstractionFinder.getTermSource().close();
         ProtempaUtil.logger().fine("Protempa closed");
     }
 
@@ -244,6 +261,7 @@ public final class Protempa {
         this.abstractionFinder.getAlgorithmSource().clear();
         this.abstractionFinder.getDataSource().clear();
         this.abstractionFinder.getKnowledgeSource().clear();
+        this.abstractionFinder.getTermSource().clear();
         ProtempaUtil.logger().fine("Protempa cleared");
     }
 }
