@@ -19,7 +19,7 @@
       <id>protege</id>
       <name>Local Protege Repository</name>
       <layout>default</layout>
-      <url>file://repository</url>
+      <url>file://${basedir}/repository</url>
     </repository>
   </repositories>
   <dependencies>
