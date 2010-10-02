@@ -2,6 +2,7 @@ package org.protempa.query.handler.table;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
@@ -28,6 +29,6 @@ public abstract class AbstractColumnSpec implements TableColumnSpec {
             ColumnSpecConstraint ccc = constraints[i];
             constraintsL.add(ccc.getFormatted());
         }
-        return org.arp.javautil.collections.Collections.join(constraintsL, ",");
+        return StringUtils.join(constraintsL, ',');
     }
 }

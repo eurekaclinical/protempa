@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.collections.Collections;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
@@ -1119,10 +1120,9 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 wherePart.append(" and ");
             }
             ColumnSpec keySpec = info.getColumnSpecs().get(0);
-            wherePart.append("a1.").append(keySpec.getColumn()).append(" in ('");
-            wherePart.append(
-                    org.arp.javautil.collections.Collections.join(
-                    keyIds, "','"));
+            wherePart.append("a1.").append(keySpec.getColumn())
+                    .append(" in ('");
+            wherePart.append(StringUtils.join(keyIds, "','"));
             wherePart.append("')");
         }
     }

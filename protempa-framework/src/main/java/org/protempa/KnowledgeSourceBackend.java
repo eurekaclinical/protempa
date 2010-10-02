@@ -3,7 +3,6 @@ package org.protempa;
 import java.util.List;
 import java.util.Map;
 
-import com.sun.xml.internal.fastinfoset.sax.Properties;
 
 /**
  * Translates from an arbitrary knowledge base to a PROTEMPA knowledge base.
@@ -17,7 +16,7 @@ public interface KnowledgeSourceBackend extends
         Backend<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource> {
 
     /**
-     * Read a primitive parameter definition into the given PROTEMPA knowledge
+     * Reads a primitive parameter definition into the given PROTEMPA knowledge
      * base.
      * 
      * @param id
@@ -32,7 +31,7 @@ public interface KnowledgeSourceBackend extends
             throws KnowledgeSourceReadException;
 
     /**
-     * Read an abstraction definition into the given PROTEMPA knowledge base.
+     * Reads an abstraction definition into the given PROTEMPA knowledge base.
      * 
      * @param id
      *            an abstraction id {@link String}.
@@ -46,7 +45,7 @@ public interface KnowledgeSourceBackend extends
             throws KnowledgeSourceReadException;
 
     /**
-     * Read an event definition into the given PROTEMPA knowledge base.
+     * Reads an event definition into the given PROTEMPA knowledge base.
      * 
      * @param id
      *            an event id.
@@ -70,19 +69,31 @@ public interface KnowledgeSourceBackend extends
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException;
 
+    /**
+     * Reads a constant definition into the given PROTEMPA knowledge base.
+     *
+     * @param id
+     *            an event id.
+     * @param protempaKnowledgeBase
+     *            the PROTEMPA {@link KnowledgeBase} to use.
+     * @return the {@link ConstantDefinition}, or <code>null</code> if none
+     * with the given id was found.
+     */
     ConstantDefinition readConstantDefinition(String id,
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException;
-
-    boolean hasConstantDefinition(String id, KnowledgeBase protempaKnowledgeBase)
+            
+    boolean hasConstantDefinition(String id,
+            KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException;
 
     /**
-     * Maps term IDs to proposition definition IDs
+     * Maps term IDs to proposition definition IDs.
      * 
      * @return a {@link Map} of {@link String}s to a {@link List} of
      *         <code>String</code>s, with the keys being {@link Term} IDs and
      *         the values being lists of {@link PropositionDefinition} IDs.
+     *         Guaranteed not to return <code>null</code>.
      */
     Map<String, List<String>> mapTermsToPropositionDefinitions()
             throws KnowledgeSourceReadException;

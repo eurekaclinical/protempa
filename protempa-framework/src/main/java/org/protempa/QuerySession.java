@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 
 import org.arp.javautil.collections.Collections;
@@ -112,7 +113,7 @@ public class QuerySession {
         if (notFound.size() > 0) {
             throw new DataSourceReadException(
                     "Could not find the following propositions in the cache "
-                            + Collections.join(notFound, ","));
+                            + StringUtils.join(notFound, ','));
         }
         return references;
     }

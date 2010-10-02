@@ -1,5 +1,6 @@
 package org.protempa;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -88,12 +89,14 @@ public abstract class AbstractKnowledgeSourceBackend extends
     }
 
     /**
-     * A default implementation that returns null
+     * A default implementation that returns an empty map.
+     *
+     * @return a {@link Map<String, List<String>>}.
      */
     @Override
     public Map<String, List<String>> mapTermsToPropositionDefinitions()
             throws KnowledgeSourceReadException {
-        return null;
+        return new HashMap<String, List<String>>();
     }
 
     /**

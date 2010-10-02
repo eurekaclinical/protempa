@@ -1,5 +1,6 @@
 package org.protempa.backend;
 
+import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 
 /**
@@ -20,7 +21,7 @@ public final class BackendPropertySpec {
         String[] allowedClassesStringArray = new String[ALLOWED_CLASSES.length];
         for (int i = 0; i < ALLOWED_CLASSES.length; i++)
             allowedClassesStringArray[i] = ALLOWED_CLASSES[i].getName();
-        return Arrays.join(allowedClassesStringArray, ", ");
+        return StringUtils.join(allowedClassesStringArray, ", ");
     }
 
     private final String name;

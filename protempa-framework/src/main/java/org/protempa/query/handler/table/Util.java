@@ -1,6 +1,6 @@
 package org.protempa.query.handler.table;
 
-import org.arp.javautil.arrays.Arrays;
+import org.apache.commons.lang.StringUtils;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
@@ -25,7 +25,7 @@ public class Util {
             derivedPropDisplayNames[i] =
                     Util.propositionDefinitionDisplayName(propDef);
         }
-        return Arrays.join(derivedPropDisplayNames, ",");
+        return StringUtils.join(derivedPropDisplayNames, ',');
     }
 
     static String propositionDefinitionDisplayName(

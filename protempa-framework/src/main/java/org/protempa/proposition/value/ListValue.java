@@ -2,8 +2,8 @@ package org.protempa.proposition.value;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 
-import org.arp.javautil.collections.Collections;
 
 /**
  * Represents lists of values.
@@ -45,7 +45,7 @@ public class ListValue<V extends Value> extends ArrayList<V> implements Value {
                 l.add(val.getFormatted());
             }
         }
-        return '[' + Collections.join(l, ", ") + ']';
+        return '[' + StringUtils.join(l, ", ") + ']';
     }
 
     @Override

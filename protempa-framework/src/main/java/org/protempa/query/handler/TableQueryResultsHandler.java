@@ -153,7 +153,8 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
                     List<String> columnValues = new ArrayList<String>();
                     String[] colValues = columnSpec.columnValues(key,
                             prop, derivations, references, this.knowledgeSource);
-                    columnValues.add(key);
+                    if (i == 0)
+                        columnValues.add(key);
                     for (String colVal : colValues) {
                         columnValues.add(colVal);
                     }

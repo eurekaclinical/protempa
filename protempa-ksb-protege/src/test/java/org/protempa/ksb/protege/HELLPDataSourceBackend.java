@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.DatabaseAPI;
 import org.arp.javautil.sql.InvalidConnectionSpecArguments;
@@ -139,7 +140,7 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
         if (keyIds != null && !keyIds.isEmpty()) {
             primParamAscStmt.append(" AND keyId IN (");
             where = true;
-            primParamAscStmt.append(org.arp.javautil.collections.Collections.join(Collections.nCopies(keyIds.size(), "?"),
+            primParamAscStmt.append(StringUtils.join(Collections.nCopies(keyIds.size(), '?'),
                     ","));
             primParamAscStmt.append(')');
         }
@@ -150,9 +151,9 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
                 primParamAscStmt.append(" AND paramId IN (");
                 where = true;
             }
-            primParamAscStmt.append(org.arp.javautil.collections.Collections.join(
+            primParamAscStmt.append(StringUtils.join(
                     Collections.nCopies(paramIds.size(),
-                    "?"), ","));
+                    '?'), '?'));
             primParamAscStmt.append(")");
         }
         if (minValidL != null) {
@@ -265,7 +266,7 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
         if (keyIds != null && !keyIds.isEmpty()) {
             primParamAscStmt.append(" WHERE paramId = 'ICD9' AND keyId IN (");
             where = true;
-            primParamAscStmt.append(org.arp.javautil.collections.Collections.join(Collections.nCopies(keyIds.size(), "?"),
+            primParamAscStmt.append(StringUtils.join(Collections.nCopies(keyIds.size(), '?'),
                     ","));
             primParamAscStmt.append(')');
         }
@@ -276,9 +277,9 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
                 primParamAscStmt.append(" WHERE paramId = 'ICD9' AND value IN (");
                 where = true;
             }
-            primParamAscStmt.append(org.arp.javautil.collections.Collections.join(
+            primParamAscStmt.append(StringUtils.join(
                     Collections.nCopies(paramIds.size(),
-                    "?"), ","));
+                    '?'), ','));
             primParamAscStmt.append(")");
         }
         if (minValidL != null) {
