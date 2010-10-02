@@ -27,7 +27,7 @@ import org.protempa.bp.commons.AbstractCommonsDataSourceBackend;
 import org.protempa.bp.commons.BackendInfo;
 import org.protempa.bp.commons.BackendProperty;
 import org.protempa.dsb.filter.Filter;
-import org.protempa.proposition.ConstantProposition;
+import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.IntervalFactory;
 import org.protempa.proposition.PrimitiveParameter;
@@ -235,12 +235,12 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
     }
 
     @Override
-    public Map<String, List<ConstantProposition>> getConstantParameters(
+    public Map<String, List<Constant>> getConstantPropositions(
             Set<String> keyIds, Set<String> paramIds,
             Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
-        return new HashMap<String, List<ConstantProposition>>(0);
+        return new HashMap<String, List<Constant>>(0);
     }
 
     @Override

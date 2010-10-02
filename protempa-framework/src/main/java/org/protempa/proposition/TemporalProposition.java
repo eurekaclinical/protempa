@@ -1,5 +1,6 @@
 package org.protempa.proposition;
 
+import java.text.Format;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.Granularity;
 
@@ -16,6 +17,8 @@ public abstract class TemporalProposition extends AbstractProposition {
      */
     private Interval interval;
 
+    private final IntervalFactory intervalFactory;
+
     /**
      * Creates a proposition with an id.
      *
@@ -24,6 +27,8 @@ public abstract class TemporalProposition extends AbstractProposition {
      */
     TemporalProposition(String id) {
         super(id);
+        this.intervalFactory = new IntervalFactory();
+        this.interval = this.intervalFactory.getInstance();
     }
 
     /**
@@ -42,45 +47,59 @@ public abstract class TemporalProposition extends AbstractProposition {
      *            an <code>Interval</code>.
      */
     public void setInterval(Interval interval) {
+        if (interval == null)
+            interval = this.intervalFactory.getInstance();
         this.interval = interval;
         this.hashCode = 0;
     }
 
     public final Granularity getStartGranularity() {
         Interval ival = getInterval();
-        if (ival != null) {
-            return ival.getStartGranularity();
-        } else {
-            return null;
-        }
+        return ival.getStartGranularity();
     }
 
     public final Granularity getFinishGranularity() {
         Interval ival = getInterval();
-        if (ival != null) {
-            return ival.getFinishGranularity();
-        } else {
-            return null;
-        }
+        return ival.getFinishGranularity();
     }
 
-    public abstract String getStartRepr();
-
-    public abstract String getFinishRepr();
+    public String getStartRepr() {
+        Granularity startGran = getStartGranularity();
+        return formatStart(startGran != null ? startGran.getReprFormat() :
+            null);
+    }
 
     /**
      * Returns the earliest valid time of this proposition as a long string.
      *
      * @return a <code>String</code>.
      */
-    public abstract String getStartFormattedLong();
+    public String getStartFormattedLong() {
+        Granularity startGran = getStartGranularity();
+        return formatStart(startGran != null ? startGran.getLongFormat() : null);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.protempa.proposition.TemporalProposition#getFinishRepr()
+     */
+    public String getFinishRepr() {
+        Granularity finishGran = getFinishGranularity();
+        return formatFinish(finishGran != null ? finishGran.getReprFormat()
+                : null);
+    }
 
     /**
      * Returns the latest valid time of this proposition as a long string.
      *
      * @return a <code>String</code>.
      */
-    public abstract String getFinishFormattedLong();
+    public String getFinishFormattedLong() {
+        Granularity finishGran = getFinishGranularity();
+        return formatFinish(finishGran != null ? finishGran.getLongFormat()
+                : null);
+    }
 
     /**
      * Returns the earliest valid time of this proposition as a medium-length
@@ -88,7 +107,11 @@ public abstract class TemporalProposition extends AbstractProposition {
      *
      * @return a <code>String</code>.
      */
-    public abstract String getStartFormattedMedium();
+    public String getStartFormattedMedium() {
+        Granularity startGran = getStartGranularity();
+        return formatStart(startGran != null ? startGran.getMediumFormat()
+                : null);
+    }
 
     /**
      * Returns the earliest valid time of this proposition as a medium-length
@@ -96,21 +119,89 @@ public abstract class TemporalProposition extends AbstractProposition {
      *
      * @return a <code>String</code>.
      */
-    public abstract String getFinishFormattedMedium();
+    public String getFinishFormattedMedium() {
+        Granularity finishGran = getFinishGranularity();
+        return formatFinish(finishGran != null ? finishGran.getMediumFormat()
+                : null);
+    }
 
     /**
      * Returns the earliest valid time of this proposition as a short string.
      *
      * @return a <code>String</code>.
      */
-    public abstract String getStartFormattedShort();
+    public String getStartFormattedShort() {
+        Granularity startGran = getStartGranularity();
+        return formatStart(startGran != null ? startGran.getShortFormat()
+                : null);
+    }
 
     /**
      * Returns the earliest valid time of this proposition as a short string.
      *
      * @return a <code>String</code>.
      */
-    public abstract String getFinishFormattedShort();
+    public String getFinishFormattedShort() {
+        Granularity finishGran = getFinishGranularity();
+        return formatFinish(finishGran != null ? finishGran.getShortFormat()
+                : null);
+    }
+
+    /**
+     * Uses the given <code>Format</code> to format the start of this
+     * parameter's interval.
+     *
+     * @param format
+     *            a <code>Format</code> object.
+     * @return the start of this parameter's interval as a formatted
+     *         <code>String</code>.
+     */
+    private String formatStart(Format format) {
+        Interval interval = getInterval();
+        if (format != null && interval != null) {
+            Long minStart = interval.getMinimumStart();
+            if (minStart != null)
+                return format.format(minStart);
+            else
+                return "Unknown";
+        } else if (interval != null) {
+            Long minStart = interval.getMinimumStart();
+            if (minStart != null)
+                return "" + minStart;
+            else
+                return "Unknown";
+        } else {
+            return "Unknown";
+        }
+    }
+
+    /**
+     * Uses the given <code>Format</code> to format the finish of this
+     * parameter's interval.
+     *
+     * @param format
+     *            a <code>Format</code> object.
+     * @return the finish of this parameter's interval as a formatted
+     *         <code>String</code>.
+     */
+    private String formatFinish(Format format) {
+        Interval interval = getInterval();
+        if (format != null && interval != null) {
+            Long minFinish = interval.getMinimumFinish();
+            if (minFinish != null)
+                return format.format(minFinish);
+            else
+                return "Unknown";
+        } else if (interval != null) {
+            Long minFinish = interval.getMinimumFinish();
+            if (minFinish != null)
+                return "" + minFinish;
+            else
+                return "Unknown";
+        } else {
+            return "Unknown";
+        }
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -125,8 +216,7 @@ public abstract class TemporalProposition extends AbstractProposition {
         TemporalProposition p = (TemporalProposition) other;
         return super.isEqual(p)
                 && (this.interval == p.interval
-                || (this.interval != null
-                && this.interval.equals(p.interval)));
+                || this.interval.equals(p.interval));
 
     }
 

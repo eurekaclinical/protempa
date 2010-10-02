@@ -220,24 +220,38 @@ public final class KnowledgeSource
      */
     public PropositionDefinition readPropositionDefinition(String id)
             throws KnowledgeSourceReadException {
-        PropositionDefinition result = readAbstractionDefinition(id);
+        PropositionDefinition result = readTemporalPropositionDefinition(id);
         if (result == null) {
-            result = readPrimitiveParameterDefinition(id);
-            if (result == null) {
-                result = readEventDefinition(id);
-                if (result == null) {
-                    result = readConstantDefinition(id);
-                }
-            }
+            result = readConstantDefinition(id);
         }
 
         return result;
     }
 
+    public TemporalPropositionDefinition readTemporalPropositionDefinition(
+            String propId) throws KnowledgeSourceReadException {
+        TemporalPropositionDefinition result =
+                readAbstractionDefinition(propId);
+        if (result == null) {
+            result = readPrimitiveParameterDefinition(propId);
+            if (result == null) {
+                result = readEventDefinition(propId);
+            }
+        }
+        return result;
+    }
+
     public boolean hasPropositionDefinition(String id)
             throws KnowledgeSourceReadException {
-        return hasPrimitiveParameterDefinition(id) || hasEventDefinition(id)
-                || hasAbstractionDefinition(id) || hasConstantDefinition(id);
+        return hasTemporalPropositionDefinition(id)
+                || hasConstantDefinition(id);
+    }
+
+    public boolean hasTemporalPropositionDefinition(String id)
+            throws KnowledgeSourceReadException {
+        return hasPrimitiveParameterDefinition(id)
+                || hasEventDefinition(id)
+                || hasAbstractionDefinition(id);
     }
 
     /**
@@ -506,7 +520,8 @@ public final class KnowledgeSource
                     primitiveParameterIdsHelper(abstractedFrom
                             .toArray(new String[abstractedFrom.size()]), result);
                 } else {
-                    if (readEventDefinition(paramId) == null) {
+                    if (readEventDefinition(paramId) == null &&
+                            readConstantDefinition(paramId) == null) {
                         throw new KnowledgeSourceReadException(paramId
                                 + " is unknown");
                     }
@@ -618,7 +633,11 @@ public final class KnowledgeSource
                         leafEventIdsHelper(af.toArray(new String[af.size()]),
                                 result);
                     } else {
-                        throw new KnowledgeSourceReadException(
+                        ConstantDefinition constantDef =
+                                readConstantDefinition(
+                                abstractParameterOrEventId);
+                        if (constantDef == null)
+                            throw new KnowledgeSourceReadException(
                                 "The proposition definition '"
                                         + abstractParameterOrEventId
                                         + "' is unknown");
@@ -700,9 +719,10 @@ public final class KnowledgeSource
                         leafConstantIdsHelper(inverseIsA, result);
                     }
                 } else {
-                    throw new KnowledgeSourceReadException(
-                            "The constant definition '" + constantId
-                                    + "' is unknown");
+                    if (!hasTemporalPropositionDefinition(constantId))
+                        throw new KnowledgeSourceReadException(
+                            "The proposition definition '"
+                            + constantId + "' is unknown");
                 }
             }
         }

@@ -10,7 +10,9 @@ import org.protempa.proposition.value.ValueType;
  * 
  * @author Andrew Post
  */
-public final class PrimitiveParameterDefinition extends AbstractPropositionDefinition {
+public final class PrimitiveParameterDefinition extends 
+        AbstractPropositionDefinition implements
+        TemporalPropositionDefinition {
 
     private static final long serialVersionUID = 4469613843480322419L;
     /**

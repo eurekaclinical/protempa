@@ -19,7 +19,7 @@ import org.protempa.bp.commons.dsb.sqlgen.RelationalDatabaseSpec;
 import org.protempa.bp.commons.dsb.sqlgen.SQLGeneratorFactory;
 import org.protempa.bp.commons.dsb.sqlgen.SQLOrderBy;
 import org.protempa.dsb.filter.Filter;
-import org.protempa.proposition.ConstantProposition;
+import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.value.GranularityFactory;
@@ -230,7 +230,7 @@ public abstract class RelationalDatabaseDataSourceBackend
 //    }
 
     @Override
-    public Map<String, List<ConstantProposition>> getConstantParameters(
+    public Map<String, List<Constant>> getConstantPropositions(
             Set<String> keyIds, Set<String> paramIds,
             Filter dataSourceConstraints,
             QuerySession qs)

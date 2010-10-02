@@ -58,7 +58,7 @@ public interface PropositionVisitor {
 	 * @param constantParameter
 	 *            an {@link ConstantParameter}. Cannot be <code>null</code>.
 	 */
-	void visit(ConstantProposition constantParameter);
+	void visit(Constant constantParameter);
 
 	/**
 	 * Processes a context.

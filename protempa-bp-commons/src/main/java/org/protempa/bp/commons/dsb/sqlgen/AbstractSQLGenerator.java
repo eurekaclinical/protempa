@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.arp.javautil.collections.Collections;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
@@ -21,7 +22,7 @@ import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.PropositionIdToSqlCode;
 import org.protempa.dsb.filter.Filter;
 import org.protempa.dsb.filter.PositionFilter;
 import org.protempa.dsb.filter.PropertyValueFilter;
-import org.protempa.proposition.ConstantProposition;
+import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
@@ -106,6 +107,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             throw new IllegalArgumentException(
                     "relationalDatabaseSpec cannot be null");
         }
+        
         this.backend = backend;
     }
 
@@ -144,8 +146,13 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
         Map<String, List<P>> results = new HashMap<String, List<P>>();
         Collection<EntitySpec> allEntitySpecs = allEntitySpecs();
+        Logger logger = SQLGenUtil.logger();
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
-            List<EntitySpec> allEntitySpecsCopy = 
+            logger.log(Level.FINE,
+                    "Data source backend {0} is processing entity spec {1}",
+                    new Object[]{backendNameForMessages(),
+                        entitySpec.getName()});
+            List<EntitySpec> allEntitySpecsCopy =
                     new ArrayList<EntitySpec>(allEntitySpecs);
             removeNonApplicableEntitySpecs(entitySpec, allEntitySpecsCopy);
             Set<Filter> filtersCopy = copyFilters(filters);
@@ -169,18 +176,23 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                  * the first item of the list. This is to make sure that
                  * its joins make it into the list of column specs.
                  */
-                List<EntitySpec> allEntitySpecsCopyForRefs =
-                        new ArrayList<EntitySpec>(allEntitySpecs.size());
-                allEntitySpecsCopyForRefs.add(entitySpec);
-                for (EntitySpec es : allEntitySpecs) {
-                    if (es != entitySpec)
-                        allEntitySpecsCopyForRefs.add(es);
-                }
                 Map<UniqueIdentifier, P> cache = resultProcessor.createCache();
                 for (ReferenceSpec referenceSpec : refSpecs) {
                     RefResultProcessor<P> refResultProcessor =
                             factory.getRefInstance(dataSourceBackendId,
                             entitySpec, referenceSpec, cache);
+                    logger.log(Level.FINE,
+                            "Data source backend {0} is processing reference {1} for entity spec {2}",
+                            new Object[]{backendNameForMessages(),
+                                referenceSpec.getReferenceName(), entitySpec.getName()});
+                    List<EntitySpec> allEntitySpecsCopyForRefs =
+                            new ArrayList<EntitySpec>(allEntitySpecs.size());
+                    allEntitySpecsCopyForRefs.add(entitySpec);
+                    for (EntitySpec es : allEntitySpecs) {
+                        if (es != entitySpec) {
+                            allEntitySpecsCopyForRefs.add(es);
+                        }
+                    }
                     Set<Filter> refFiltersCopy = copyFilters(filters);
                     EntitySpec referredToEntitySpec = null;
                     for (EntitySpec reffedToSpec : allEntitySpecsCopyForRefs) {
@@ -192,15 +204,34 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     }
                     assert referredToEntitySpec != null :
                             "refferedToEntitySpec should not be null";
+                    for (Iterator<EntitySpec> itr =
+                            allEntitySpecsCopyForRefs.iterator();
+                            itr.hasNext();) {
+                        EntitySpec es = itr.next();
+                        if (es != entitySpec
+                                && !referenceSpec.getEntityName().equals(
+                                es.getName())
+                                && !SQLGenUtil.isInReferences(entitySpec,
+                                es.getReferenceSpecs())) {
+                            itr.remove();
+                        }
+                    }
                     removeNonApplicableFilters(allEntitySpecsCopyForRefs,
                             refFiltersCopy, referredToEntitySpec);
                     generateAndExecute(entitySpec, referenceSpec, propIds,
                             refFiltersCopy, allEntitySpecsCopyForRefs, keyIds,
                             order, refResultProcessor);
+                    logger.log(Level.FINE, "Data source backend {0} is done processing reference {1} for entity spec {2}",
+                            new Object[]{backendNameForMessages(),
+                                referenceSpec.getReferenceName(), entitySpec.getName()});
                 }
+                logger.log(Level.FINE,
+                        "Data source backend {0} is done processing entity spec {1}",
+                        new Object[]{backendNameForMessages(),
+                            entitySpec.getName()});
             }
 
-            SQLGenUtil.logger().log(Level.FINE,
+            logger.log(Level.FINE,
                     "Results of query for {0} in data source backend {1} "
                     + "have been processed",
                     new Object[]{entitySpec.getName(),
@@ -253,29 +284,37 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             Set<String> keyIds, SQLOrderBy order,
             ResultProcessor resultProcessor)
             throws DataSourceReadException {
+        Logger logger = SQLGenUtil.logger();
+        logger.log(Level.FINE,
+                "Data source backend {0} is generating query for {1}",
+                new Object[]{backendNameForMessages(),
+                    entitySpec.getName()});
         String query = generateSelect(entitySpec, referenceSpec, propIds,
                 filtersCopy, entitySpecsCopy, keyIds, order);
-
+        logger.log(Level.FINE,
+                "Data source backend {0} generated the following query for {1}: {2}",
+                new Object[]{backendNameForMessages(),
+                    entitySpec.getName(), query});
         if (Boolean.getBoolean(SYSTEM_PROPERTY_SKIP_EXECUTION)) {
-            SQLGenUtil.logger().log(Level.INFO,
-                    "Data source backend {0} is skipping query for {1}: {2}",
-                    new Object[]{this.backendNameForMessages(),
-                        entitySpec.getName(), query});
+            logger.log(Level.INFO,
+                    "Data source backend {0} is skipping query for {1}",
+                    new Object[]{backendNameForMessages(),
+                        entitySpec.getName()});
         } else {
-            SQLGenUtil.logger().log(Level.FINE,
-                    "Data source backend {0} is executing query for {1}: {2}",
-                    new Object[]{this.backendNameForMessages(),
-                        entitySpec.getName(), query});
+            logger.log(Level.FINE,
+                    "Data source backend {0} is executing query for {1}",
+                    new Object[]{backendNameForMessages(),
+                        entitySpec.getName()});
             try {
                 SQLExecutor.executeSQL(getConnectionSpec(), query,
                         resultProcessor);
             } catch (SQLException ex) {
                 throw new DataSourceReadException(ex);
             }
-            SQLGenUtil.logger().log(Level.FINE,
+            logger.log(Level.FINE,
                     "Query for {0} in data source backend {1} is complete",
                     new Object[]{entitySpec.getName(),
-                        this.backendNameForMessages()});
+                        backendNameForMessages()});
         }
     }
 
@@ -325,7 +364,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     protected abstract boolean isLimitingSupported();
 
     @Override
-    public Map<String, List<ConstantProposition>> readConstants(
+    public Map<String, List<Constant>> readConstants(
             Set<String> keyIds, Set<String> paramIds, Filter filters)
             throws DataSourceReadException {
         ConstantResultProcessorFactory factory =
@@ -516,6 +555,29 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         boolean begin = true;
         for (int j = 0, n = columnSpecs.size(); j < n; j++) {
             ColumnSpec columnSpec = columnSpecs.get(j);
+
+            currentJoin = null;
+            for (int k = j - 1; k >= 0; k--) {
+                ColumnSpec prevColumnSpec = columnSpecs.get(k);
+                JoinSpec js = prevColumnSpec.getJoin();
+                if (js != null && js.getNextColumnSpec() == columnSpec) {
+                    currentJoin = js;
+                    break;
+                }
+            }
+
+            if (currentJoin == null) {
+                for (int k = 0; k < j; k++) {
+                    ColumnSpec prevColumnSpec = columnSpecs.get(k);
+                    JoinSpec js = prevColumnSpec.getJoin();
+                    if (js != null
+                            && js.getNextColumnSpec().isSameSchemaAndTable(columnSpec)) {
+                        currentJoin = js;
+                        break;
+                    }
+                }
+            }
+
             //boolean shouldGenerateTable = begin || currentJoin != null;
             //if (shouldGenerateTable) {
             Integer i = referenceIndices.get(columnSpec);
@@ -545,17 +607,17 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
             //}
 
+//            if (columnSpec.getJoin() != null /*&& !columnSpecCache.containsKey(
+//                    referenceIndices.get(
+//                    columnSpec.getJoin().getNextColumnSpec()))*/) {
+//                //generateJoin(fromPart);
+//                currentJoin = columnSpec.getJoin();
+//            } else {
+//                currentJoin = null;
+//                //begin = true;
+//            }
 
 
-            if (columnSpec.getJoin() != null /*&& !columnSpecCache.containsKey(
-                    referenceIndices.get(
-                    columnSpec.getJoin().getNextColumnSpec()))*/) {
-                //generateJoin(fromPart);
-                currentJoin = columnSpec.getJoin();
-            } else {
-                currentJoin = null;
-                //begin = true;
-            }
         }
         return fromPart;
     }
@@ -1124,7 +1186,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     }
 
     private EntitySpec entitySpec(String propId) {
-        //TODO This is where the code goes for PropertySpecs defining a temp table.
         if (this.primitiveParameterSpecs.containsKey(propId)) {
             return this.primitiveParameterSpecs.get(propId);
         } else if (this.eventSpecs.containsKey(propId)) {

@@ -336,21 +336,34 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
     }
 
     public boolean isLengthGreaterThan(int duration, Unit durationUnits) {
-        if (durationUnits == null || getMinimumStart() == null
-                || getMinimumFinish() == null) {
-            return getMinimumStart() + duration < getMinimumFinish();
+        Long minS = getMinimumStart();
+        Long minF = getMinimumFinish();
+        if (durationUnits == null || minS == null || minF == null) {
+            if (minF == null)
+                return false;
+            else if (minS == null)
+                return true;
+            else
+                return minS + duration < minF;
         } else {
             return !Relation.isGreaterThanOrEqualToDuration(durationUnits,
-                    getMinimumStart(), getMinimumFinish(), duration);
+                    minS, minF, duration);
         }
     }
 
     public boolean isLengthLessThan(int duration, Unit durationUnits) {
-        if (durationUnits == null || getMaximumStart() == null
-                || getMaximumFinish() == null) {
-            return getMaximumStart() + duration > getMaximumFinish();
+        Long maxS = getMaximumStart();
+        Long maxF = getMaximumFinish();
+        if (durationUnits == null || maxS == null || maxF == null) {
+            if (maxF == null)
+                return false;
+            else if (maxS == null)
+                return true;
+            else
+                return maxS + duration > maxF;
         } else {
-            return !Relation.isLessThanOrEqualToDuration(durationUnits, this.getMaximumStart(), getMaximumFinish(), duration);
+            return !Relation.isLessThanOrEqualToDuration(durationUnits,
+                    maxS, maxF, duration);
         }
     }
 

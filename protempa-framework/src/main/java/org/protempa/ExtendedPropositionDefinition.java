@@ -1,6 +1,7 @@
 package org.protempa;
 
 import java.io.Serializable;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.proposition.Proposition;
 
@@ -105,6 +106,6 @@ public class ExtendedPropositionDefinition implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Extended proposition: " + propositionId;
+		return ToStringBuilder.reflectionToString(this);
 	}
 }

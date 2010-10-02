@@ -1,5 +1,6 @@
 package org.protempa.proposition;
 
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -107,6 +108,16 @@ public abstract class AbstractProposition implements Proposition {
     @Override
     public final Set<String> getReferenceNames() {
         return this.references.keySet();
+    }
+
+    @Override
+    public final void addPropertyChangeListener(PropertyChangeListener l) {
+        this.changes.addPropertyChangeListener(l);
+    }
+
+    @Override
+    public final void removePropertyChangeListener(PropertyChangeListener l) {
+        this.changes.removePropertyChangeListener(l);
     }
 
     @Override

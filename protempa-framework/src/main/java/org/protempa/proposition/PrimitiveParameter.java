@@ -1,6 +1,5 @@
 package org.protempa.proposition;
 
-import java.beans.PropertyChangeListener;
 import java.text.Format;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
@@ -22,11 +21,13 @@ public final class PrimitiveParameter extends TemporalParameter {
      * This primitive parameter's timestamp. Could also store some other kind of
      * position value.
      */
-    private long timestamp;
+    private Long timestamp;
     /**
      * This primitive parameter's granularity.
      */
     private Granularity granularity;
+
+    private final IntervalFactory intervalFactory;
 
     /**
      * Creates a parameter with an identification string.
@@ -37,14 +38,16 @@ public final class PrimitiveParameter extends TemporalParameter {
      */
     public PrimitiveParameter(String id) {
         super(id);
+        this.intervalFactory = new IntervalFactory();
     }
 
     /**
      * Returns this parameter's timestamp (or other kind of position value).
+     * A <code>null</code> value means the timestamp is unknown.
      *
-     * @return a <code>long</code>.
+     * @return a {@link Long}.
      */
-    public long getTimestamp() {
+    public Long getTimestamp() {
         return timestamp;
     }
 
@@ -54,7 +57,7 @@ public final class PrimitiveParameter extends TemporalParameter {
      * @param timestamp
      *            a <code>long</code>.
      */
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
         resetInterval();
     }
@@ -83,7 +86,8 @@ public final class PrimitiveParameter extends TemporalParameter {
         /*
          * As per Combi et al. Methods Inf. Med. 1995;34:458-74.
          */
-        setInterval(new SimpleInterval(timestamp, granularity));
+        setInterval(this.intervalFactory.getInstance(
+                timestamp, granularity, timestamp, granularity));
     }
 
     @Override
@@ -209,16 +213,6 @@ public final class PrimitiveParameter extends TemporalParameter {
         } else {
             return "" + timestamp;
         }
-    }
-
-    @Override
-    public void addPropertyChangeListener(PropertyChangeListener l) {
-        this.changes.addPropertyChangeListener(l);
-    }
-
-    @Override
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        this.changes.removePropertyChangeListener(l);
     }
 
     /*

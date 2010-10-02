@@ -9,7 +9,8 @@ import java.util.Set;
  * @author Andrew Post
  * 
  */
-public interface AbstractionDefinition extends PropositionDefinition {
+public interface AbstractionDefinition extends PropositionDefinition,
+        TemporalPropositionDefinition {
 
 	public abstract String getDescription();
 

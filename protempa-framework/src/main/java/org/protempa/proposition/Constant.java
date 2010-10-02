@@ -1,6 +1,5 @@
 package org.protempa.proposition;
 
-import java.beans.PropertyChangeListener;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.ProtempaException;
@@ -10,7 +9,7 @@ import org.protempa.ProtempaException;
  * 
  * @author Andrew Post
  */
-public final class ConstantProposition extends AbstractProposition {
+public final class Constant extends AbstractProposition {
 
     private static final long serialVersionUID = 7205801414947324421L;
 
@@ -20,18 +19,8 @@ public final class ConstantProposition extends AbstractProposition {
      * @param id
      *            an identifier <code>String</code>.
      */
-    public ConstantProposition(String id) {
+    public Constant(String id) {
         super(id);
-    }
-
-    @Override
-    public void addPropertyChangeListener(PropertyChangeListener l) {
-        this.changes.addPropertyChangeListener(l);
-    }
-
-    @Override
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        this.changes.removePropertyChangeListener(l);
     }
     
     @Override
@@ -39,19 +28,23 @@ public final class ConstantProposition extends AbstractProposition {
         if (o == this) {
             return true;
         }
-        if (!(o instanceof ConstantProposition)) {
+        if (!(o instanceof Constant)) {
             return false;
         }
 
-        ConstantProposition p = (ConstantProposition) o;
+        Constant p = (Constant) o;
         return super.isEqual(p);
     }
 
+    @Override
     public void accept(PropositionVisitor propositionVisitor) {
-        throw new UnsupportedOperationException("Unimplemented");
+        propositionVisitor.visit(this);
     }
 
-    public void acceptChecked(PropositionCheckedVisitor propositionCheckedVisitor) throws ProtempaException {
+    @Override
+    public void acceptChecked(
+            PropositionCheckedVisitor propositionCheckedVisitor)
+            throws ProtempaException {
         propositionCheckedVisitor.visit(this);
     }
 

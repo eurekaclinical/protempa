@@ -9,7 +9,7 @@ import org.protempa.QueryResults;
 import org.protempa.QueryResults.QueryResultsEntry;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.AbstractPropositionCheckedVisitor;
-import org.protempa.proposition.ConstantProposition;
+import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.PrimitiveParameter;
@@ -132,7 +132,7 @@ public class TabDelimQueryResultsWriter extends QueryResultsWriter {
         }
 
         @Override
-        public void visit(ConstantProposition constant)
+        public void visit(Constant constant)
                 throws TabDelimWriterProtempaException {
             try {
                 doWriteKeyId();

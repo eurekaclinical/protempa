@@ -50,45 +50,44 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
             Granularity gran = entitySpec.getGranularity();
             ColumnSpec finishTimeSpec = entitySpec.getFinishTimeSpec();
             if (finishTimeSpec == null) {
+                Long d = null;
                 try {
-                    long d = entitySpec.getPositionParser().toLong(
+                    d = entitySpec.getPositionParser().toLong(
                             resultSet, i++);
-                    event.setInterval(intervalFactory.getInstance(d, gran));
                 } catch (SQLException e) {
                     logger.log(Level.WARNING,
-                            "Could not parse timestamp. Ignoring data value.",
+                            "Could not parse timestamp. Leaving the finish time unset.",
                             e);
-                    continue;
                 }
+                event.setInterval(intervalFactory.getInstance(d, gran));
             } else {
-                long start;
+                Long start = null;
                 try {
                     start = entitySpec.getPositionParser().toLong(
                             resultSet, i++);
                 } catch (SQLException e) {
                     logger.log(Level.WARNING,
-                            "Could not parse start time. Ignoring data value.",
+                            "Could not parse start time. Leaving the start time/timestamp unset.",
                             e);
-                    continue;
                 }
-                long finish;
+                Long finish = null;
                 try {
                     finish = entitySpec.getPositionParser().toLong(resultSet,
                             i++);
                 } catch (SQLException e) {
                     logger.log(Level.WARNING,
-                            "Could not parse start time. Ignoring data value.",
+                            "Could not parse start time. Leaving the finish time unset.",
                             e);
-                    continue;
                 }
                 try {
                     event.setInterval(intervalFactory.getInstance(start, gran,
                             finish, gran));
                 } catch (IllegalArgumentException e) {
                     logger.log(Level.WARNING,
-                            "Could not parse the time of event \'" + propId +
+                            "Could not parse the time of event \'" + event +
                             "\' because finish is before start.", e);
-                    continue;
+                    event.setInterval(intervalFactory.getInstance(null, gran,
+                            null, gran));
                 }
             }
             PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();

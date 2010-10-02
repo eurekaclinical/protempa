@@ -7,6 +7,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.arp.javautil.serviceloader.ServiceLoader;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.bp.commons.dsb.RelationalDatabaseDataSourceBackend;
@@ -58,7 +59,8 @@ public class SQLGeneratorFactory {
     public SQLGenerator newInstance() throws SQLException,
             SQLGeneratorNotFoundException,
             SQLGeneratorLoadException {
-
+        Logger logger = SQLGenUtil.logger();
+        logger.fine("Loading a compatible SQL generator");
         List<Class<? extends ProtempaSQLGenerator>> candidates;
         try {
             candidates = ServiceLoader.load(ProtempaSQLGenerator.class);
@@ -84,18 +86,19 @@ public class SQLGeneratorFactory {
             try {
                 if (candidateInstance.checkCompatibility(con)) {
                     DatabaseMetaData metaData = con.getMetaData();
-                    SQLGenUtil.logger().log(Level.FINE,
+                    logger.log(Level.FINE,
                         "{0} is compatible with database {1} ({2})",
                         new Object[] {candidateInstance.getClass().getName(),
                         metaData.getDatabaseProductName(),
                         metaData.getDatabaseProductVersion()});
-                    SQLGenUtil.logger().log(Level.FINE,
+                    logger.log(Level.FINE,
                         "{0} is compatible with driver {1} ({2})",
                         new Object[] {candidateInstance.getClass().getName(),
                         metaData.getDriverName(),
                         metaData.getDriverVersion()});
                     candidateInstance.initialize(this.relationalDatabaseSpec,
                             this.connectionSpec, this.backend);
+                    logger.fine("SQL generator loaded");
                     return candidateInstance;
                 }
             } finally {

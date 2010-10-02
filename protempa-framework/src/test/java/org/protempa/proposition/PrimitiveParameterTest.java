@@ -3,8 +3,6 @@ package org.protempa.proposition;
 import java.util.Calendar;
 
 import org.protempa.DatabaseDataSourceType;
-import org.protempa.proposition.Interval;
-import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.NumberValue;
 

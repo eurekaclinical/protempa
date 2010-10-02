@@ -4,7 +4,7 @@ import org.protempa.dsb.filter.Filter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.protempa.proposition.ConstantProposition;
+import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.value.GranularityFactory;
@@ -17,7 +17,7 @@ import org.protempa.proposition.value.UnitFactory;
 public interface DataSourceBackend extends
 		Backend<DataSourceBackendUpdatedEvent, DataSource>{
 
-    Map<String, List<ConstantProposition>> getConstantParameters(
+    Map<String, List<Constant>> getConstantPropositions(
             Set<String> keyIds, Set<String> paramIds, Filter filters,
             QuerySession qs)
             throws DataSourceReadException;

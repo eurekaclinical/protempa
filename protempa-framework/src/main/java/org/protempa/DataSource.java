@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.protempa.backend.BackendNewInstanceException;
-import org.protempa.proposition.ConstantProposition;
+import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.value.GranularityFactory;
@@ -208,10 +208,10 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
         throw new AssertionError(msg);
     }
 
-    public Map<String, List<ConstantProposition>> getConstantParameters(
+    public Map<String, List<Constant>> getConstantPropositions(
             Set<String> keyIds, Set<String> paramIds, Filter filters,
             QuerySession qs)
-            throws DataSourceException {
+            throws DataSourceReadException {
         return CONST_QUERY.execute(this, keyIds, paramIds, filters, qs);
     }
 
@@ -332,17 +332,17 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
                             keyIds, propIds, filters, qs);
                 }
             };
-    private static ProcessQuery<ConstantProposition> CONST_QUERY =
-            new ProcessQuery<ConstantProposition>(null) {
+    private static ProcessQuery<Constant> CONST_QUERY =
+            new ProcessQuery<Constant>(null) {
 
                 @Override
-                protected Map<String, List<ConstantProposition>> executeBackend(
+                protected Map<String, List<Constant>> executeBackend(
                         DataSourceBackend backend,
                         Set<String> keyIds, Set<String> propIds,
                         Filter filters,
                         QuerySession qs)
                         throws DataSourceReadException {
-                    return backend.getConstantParameters(
+                    return backend.getConstantPropositions(
                             keyIds, propIds, filters, qs);
                 }
             };

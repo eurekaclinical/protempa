@@ -17,7 +17,8 @@ import org.arp.javautil.graph.Weight;
  * @author Andrew Post
  * 
  */
-public final class EventDefinition extends AbstractPropositionDefinition {
+public final class EventDefinition extends AbstractPropositionDefinition
+        implements TemporalPropositionDefinition {
 
     private static final long serialVersionUID = 5251628049452634144L;
 
@@ -154,6 +155,7 @@ public final class EventDefinition extends AbstractPropositionDefinition {
         return result;
     }
 
+    @Override
     public void accept(PropositionDefinitionVisitor processor) {
         if (processor == null) {
             throw new IllegalArgumentException("processor cannot be null.");
@@ -161,6 +163,7 @@ public final class EventDefinition extends AbstractPropositionDefinition {
         processor.visit(this);
     }
 
+    @Override
     public void acceptChecked(PropositionDefinitionCheckedVisitor processor)
             throws ProtempaException {
         if (processor == null) {

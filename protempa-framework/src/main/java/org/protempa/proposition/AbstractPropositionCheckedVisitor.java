@@ -42,7 +42,7 @@ public class AbstractPropositionCheckedVisitor
 
     }
 
-    public void visit(ConstantProposition constantParameter)
+    public void visit(Constant constantParameter)
             throws ProtempaException {
 
     }

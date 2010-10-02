@@ -9,18 +9,18 @@ import java.util.logging.Logger;
 import org.arp.javautil.collections.Collections;
 import org.protempa.DatabaseDataSourceType;
 import org.protempa.DerivedDataSourceType;
-import org.protempa.proposition.ConstantProposition;
+import org.protempa.proposition.Constant;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueFactory;
 import org.protempa.proposition.value.ValueType;
 
 class ConstantResultProcessor extends
-        AbstractMainResultProcessor<ConstantProposition> {
+        AbstractMainResultProcessor<Constant> {
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
-        Map<String, List<ConstantProposition>> results = getResults();
+        Map<String, List<Constant>> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
         String[] propIds = entitySpec.getPropositionIds();
         Logger logger = SQLGenUtil.logger();
@@ -37,7 +37,7 @@ class ConstantResultProcessor extends
             } else {
                 propId = resultSet.getString(i++);
             }
-            ConstantProposition cp = new ConstantProposition(propId);
+            Constant cp = new Constant(propId);
             cp.setUniqueIdentifier(uniqueIdentifer);
             cp.setDataSourceType(new DerivedDataSourceType());
             PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();

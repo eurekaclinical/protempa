@@ -1,6 +1,5 @@
 package org.protempa.proposition;
 
-import java.beans.PropertyChangeListener;
 import org.protempa.ProtempaException;
 
 /**
@@ -56,14 +55,6 @@ public final class Context extends TemporalProposition {
 	@Override
 	public String getStartFormattedShort() {
 		return null;
-	}
-
-	public void addPropertyChangeListener(PropertyChangeListener l) {
-		this.changes.addPropertyChangeListener(l);
-	}
-    
-	public void removePropertyChangeListener(PropertyChangeListener l) {
-		this.changes.removePropertyChangeListener(l);
 	}
 
 	public void accept(PropositionVisitor propositionVisitor) {

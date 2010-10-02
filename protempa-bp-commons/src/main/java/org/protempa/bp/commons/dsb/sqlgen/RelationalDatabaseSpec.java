@@ -101,7 +101,7 @@ public class RelationalDatabaseSpec implements Serializable {
         if (constantParameterSpecs == null)
             this.constantSpecs = EMPTY_ARR;
         else
-            this.constantSpecs = constantParameterSpecs;
+            this.constantSpecs = constantParameterSpecs.clone();
     }
 
     public EntitySpec[] getEventSpecs() {

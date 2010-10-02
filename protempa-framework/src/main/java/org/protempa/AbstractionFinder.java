@@ -21,6 +21,7 @@ import org.drools.ObjectFilter;
 import org.drools.RuleBase;
 import org.drools.StatefulSession;
 import org.drools.StatelessSession;
+import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
@@ -348,30 +349,47 @@ final class AbstractionFinder implements Module {
             Set<String> propositionIds, Filter filters, QuerySession qs,
             boolean stateful) throws DataSourceReadException,
             KnowledgeSourceReadException {
+        Map<String, List<Object>> objects =
+                new HashMap<String, List<Object>>();
 
         // Add events
         Set<String> eventIds = knowledgeSource.leafEventIds(propositionIds);
-        Map<String, List<Object>> objects = new HashMap<String, List<Object>>();
         if (!eventIds.isEmpty() || propositionIds == null
                 || propositionIds.isEmpty()) {
-            Map<String, List<Event>> tempObjects = createEvents(dataSource,
-                    keyIds, eventIds, filters, qs);
-            for (Map.Entry<String, List<Event>> entry : tempObjects.entrySet()) {
-                objects.put(entry.getKey(), new ArrayList<Object>(entry
-                        .getValue()));
+            Map<String, List<Event>> tempObjects =
+                    createEvents(dataSource, keyIds, eventIds, filters, qs);
+            for (Map.Entry<String, List<Event>> entry :
+                    tempObjects.entrySet()) {
+                org.arp.javautil.collections.Collections.putListAll(objects,
+                        entry.getKey(), entry.getValue());
             }
         }
 
-        // Add parameteres. Requires special handling, because Sequence objects
+        // Add constants
+        Set<String> constantIds =
+                knowledgeSource.leafConstantIds(propositionIds);
+        if (!constantIds.isEmpty() || propositionIds == null
+                || propositionIds.isEmpty()) {
+            Map<String, List<Constant>> tempObjects =
+                    createConstantPropositions(dataSource, keyIds, constantIds,
+                    filters, qs);
+            for (Map.Entry<String, List<Constant>> entry :
+                    tempObjects.entrySet()) {
+                org.arp.javautil.collections.Collections.putListAll(objects,
+                        entry.getKey(), entry.getValue());
+            }
+        }
+
+        // Add parameters. Requires special handling, because Sequence objects
         // do not override equals. Can we eliminate sequence cache?
-        for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> entry : createSequencesFromPrimitiveParameters(
-                keyIds,
-                dataSource.getPrimitiveParametersAsc(keyIds, knowledgeSource
-                        .primitiveParameterIds(propositionIds), filters, qs),
-                propositionIds, stateful).entrySet()) {
-            objects
-                    .put(entry.getKey(),
-                            new ArrayList<Object>(entry.getValue()));
+        for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> entry :
+                createSequencesFromPrimitiveParameters(
+                keyIds, dataSource.getPrimitiveParametersAsc(keyIds,
+                knowledgeSource.primitiveParameterIds(propositionIds),
+                filters, qs), propositionIds,
+                stateful).entrySet()) {
+            org.arp.javautil.collections.Collections.putListAll(objects,
+                        entry.getKey(), entry.getValue());
         }
 
         return objects;
@@ -422,6 +440,15 @@ final class AbstractionFinder implements Module {
             Set<String> keyIds, Set<String> eventIds, Filter filters,
             QuerySession qs) throws DataSourceReadException {
         return dataSource.getEventsAsc(keyIds, eventIds, filters, qs);
+    }
+
+    private Map<String, List<Constant>> createConstantPropositions(
+            DataSource dataSource,
+            Set<String> keyIds, Set<String> constantIds,
+            Filter filters, QuerySession qs)
+            throws DataSourceReadException {
+        return dataSource.getConstantPropositions(keyIds, constantIds, filters,
+                qs);
     }
 
     /*

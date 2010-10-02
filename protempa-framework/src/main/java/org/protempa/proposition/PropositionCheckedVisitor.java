@@ -61,7 +61,7 @@ public interface PropositionCheckedVisitor {
 	 * @param constantParameter
 	 *            an {@link ConstantParameter}. Cannot be <code>null</code>.
 	 */
-	void visit(ConstantProposition constantParameter) throws ProtempaException;
+	void visit(Constant constantParameter) throws ProtempaException;
 
 	/**
 	 * Processes a context.

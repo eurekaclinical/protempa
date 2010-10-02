@@ -21,7 +21,7 @@ import org.drools.rule.Rule;
 import org.drools.spi.Constraint;
 import org.drools.spi.PredicateExpression;
 import org.drools.spi.Tuple;
-import org.protempa.proposition.ConstantProposition;
+import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Sequence;
@@ -46,7 +46,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     private final ClassObjectType EVENT_OBJECT_TYPE = new ClassObjectType(
             Event.class);
     private final ClassObjectType CONSTANT_OBJECT_TYPE =
-            new ClassObjectType(ConstantProposition.class);
+            new ClassObjectType(Constant.class);
     private static final ClassObjectType ARRAY_LIST_OT = new ClassObjectType(
             ArrayList.class);
     private static final ClassObjectType TEMP_PROP_OT = new ClassObjectType(
