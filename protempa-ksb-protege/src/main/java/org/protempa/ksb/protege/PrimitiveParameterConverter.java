@@ -34,6 +34,7 @@ class PrimitiveParameterConverter implements PropositionConverter {
             Util.setNames(instance, tc, cm);
             Util.setInverseIsAs(instance, tc, cm);
             Util.setProperties(instance, tc, cm);
+            Util.setTerms(instance, tc, cm);
             Cls valueType = (Cls) cm.getOwnSlotValue(instance, cm.getSlot("valueType"));
             if (valueType != null) {
                 if (valueType.getName().equals("DoubleValue")) {

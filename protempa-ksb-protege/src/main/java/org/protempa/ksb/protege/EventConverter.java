@@ -27,6 +27,7 @@ class EventConverter implements PropositionConverter {
             ConnectionManager cm = backend.getConnectionManager();
             Util.setNames(protegeProposition, eventDef, cm);
             Util.setProperties(protegeProposition, eventDef, cm);
+            Util.setTerms(protegeProposition, eventDef, cm);
             Util.setInverseIsAs(protegeProposition, eventDef, cm);
 
             Collection<?> hasParts = cm.getOwnSlotValues(protegeProposition,

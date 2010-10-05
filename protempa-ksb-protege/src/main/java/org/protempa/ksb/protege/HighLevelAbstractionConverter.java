@@ -49,6 +49,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
             Util.setNames(complexAbstractionInstance, cad, cm);
             Util.setInverseIsAs(complexAbstractionInstance, cad, cm);
             Util.setProperties(complexAbstractionInstance, cad, cm);
+            Util.setTerms(complexAbstractionInstance, cad, cm);
             Util.setGap(complexAbstractionInstance, cad, backend, cm);
             Map<Instance, TemporalExtendedPropositionDefinition>
                     extendedParameterCache =

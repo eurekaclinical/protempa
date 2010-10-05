@@ -23,6 +23,7 @@ class ConstantConverter implements PropositionConverter {
             ConnectionManager cm = backend.getConnectionManager();
             Util.setNames(protegeProposition, constantDef, cm);
             Util.setProperties(protegeProposition, constantDef, cm);
+            Util.setTerms(protegeProposition, constantDef, cm);
             Util.setInverseIsAs(protegeProposition, constantDef, cm);
         }
     }

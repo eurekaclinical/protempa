@@ -84,6 +84,7 @@ class LowLevelAbstractionConverter implements PropositionConverter {
             Util.setInverseIsAs(lowLevelAbstractionInstance, d, cm);
             Util.setGap(lowLevelAbstractionInstance, d, backend, cm);
             Util.setProperties(lowLevelAbstractionInstance, d, cm);
+            Util.setTerms(lowLevelAbstractionInstance, d, cm);
             setDuration(lowLevelAbstractionInstance, d, backend, cm);
             setValueType(lowLevelAbstractionInstance, d, cm);
             Instance algoIntf = (Instance) cm.getOwnSlotValue(lowLevelAbstractionInstance, cm.getSlot("usingAlgorithm"));

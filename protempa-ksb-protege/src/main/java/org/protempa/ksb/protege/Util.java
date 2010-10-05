@@ -40,23 +40,19 @@ class Util {
      * Days (24 * 60 * 60 * 1000 milliseconds).
      */
     private static final String DAY = "Day";
-    static final Map<String, AbsoluteTimeUnit> ABSOLUTE_DURATION_MULTIPLIER =
-            new HashMap<String, AbsoluteTimeUnit>();
+    static final Map<String, AbsoluteTimeUnit> ABSOLUTE_DURATION_MULTIPLIER = new HashMap<String, AbsoluteTimeUnit>();
 
     static {
         ABSOLUTE_DURATION_MULTIPLIER.put(MINUTE, AbsoluteTimeUnit.MINUTE);
         ABSOLUTE_DURATION_MULTIPLIER.put(HOUR, AbsoluteTimeUnit.HOUR);
         ABSOLUTE_DURATION_MULTIPLIER.put(DAY, AbsoluteTimeUnit.DAY);
     }
-    static final Map<String, RelativeHourUnit>
-            RELATIVE_HOURS_DURATION_MULTIPLIER =
-            new HashMap<String, RelativeHourUnit>();
+    static final Map<String, RelativeHourUnit> RELATIVE_HOURS_DURATION_MULTIPLIER = new HashMap<String, RelativeHourUnit>();
 
     static {
         RELATIVE_HOURS_DURATION_MULTIPLIER.put(HOUR, RelativeHourUnit.HOUR);
     }
-    static final Map<String, ValueType> VALUE_CLASS_NAME_TO_VALUE_TYPE =
-            new HashMap<String, ValueType>();
+    static final Map<String, ValueType> VALUE_CLASS_NAME_TO_VALUE_TYPE = new HashMap<String, ValueType>();
 
     static {
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("Value", ValueType.VALUE);
@@ -66,8 +62,8 @@ class Util {
                 ValueType.ORDINALVALUE);
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("NumericalValue",
                 ValueType.NUMERICALVALUE);
-        VALUE_CLASS_NAME_TO_VALUE_TYPE.put("DoubleValue",
-                ValueType.NUMBERVALUE);
+        VALUE_CLASS_NAME_TO_VALUE_TYPE
+                .put("DoubleValue", ValueType.NUMBERVALUE);
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("InequalityDoubleValue",
                 ValueType.INEQUALITYNUMBERVALUE);
     }
@@ -77,8 +73,8 @@ class Util {
 
     private static class LazyLoggerHolder {
 
-        private static Logger instance = Logger.getLogger(
-                Util.class.getPackage().getName());
+        private static Logger instance = Logger.getLogger(Util.class
+                .getPackage().getName());
     }
 
     static Logger logger() {
@@ -88,7 +84,7 @@ class Util {
     /**
      * Calculates a time constraint in milliseconds from a pair of time
      * constraint and units values in a Protege instance.
-     *
+     * 
      * @param instance
      *            a Protege <code>Instance</code> object.
      * @param constraint
@@ -97,15 +93,14 @@ class Util {
      * @param constraintUnits
      *            a time constraint units slot name. May have the values
      *            "Minute", "Hour", or "Day".
-     * @return a <code>Weight</code> object representing a time in
-     *         milliseconds.
+     * @return a <code>Weight</code> object representing a time in milliseconds.
      */
     static Integer parseTimeConstraint(Instance instance, String constraint,
             ConnectionManager cm) throws KnowledgeSourceReadException {
         Integer constraintValue = null;
         if (instance != null && constraint != null) {
-            constraintValue = (Integer) cm.getOwnSlotValue(instance,
-                    cm.getSlot(constraint));
+            constraintValue = (Integer) cm.getOwnSlotValue(instance, cm
+                    .getSlot(constraint));
         }
 
         return constraintValue;
@@ -116,8 +111,8 @@ class Util {
             throws KnowledgeSourceReadException {
         String constraintUnitsValue = null;
         if (instance != null && constraintUnits != null) {
-            constraintUnitsValue = (String) cm.getOwnSlotValue(instance,
-                    cm.getSlot(constraintUnits));
+            constraintUnitsValue = (String) cm.getOwnSlotValue(instance, cm
+                    .getSlot(constraintUnits));
         }
 
         if (constraintUnitsValue == null) {
@@ -134,8 +129,8 @@ class Util {
     static void setGap(Instance instance, AbstractAbstractionDefinition d,
             ProtegeKnowledgeSourceBackend backend, ConnectionManager cm)
             throws KnowledgeSourceReadException {
-        Integer maxGap = (Integer) cm.getOwnSlotValue(instance,
-                cm.getSlot("maxGap"));
+        Integer maxGap = (Integer) cm.getOwnSlotValue(instance, cm
+                .getSlot("maxGap"));
         Unit maxGapUnits = Util.parseUnitsConstraint(instance, "maxGapUnits",
                 backend, cm);
         d.setGapFunction(new SimpleGapFunction(maxGap, maxGapUnits));
@@ -144,9 +139,8 @@ class Util {
     static void setNames(Instance complexAbstractionInstance,
             AbstractPropositionDefinition cad, ConnectionManager cm)
             throws KnowledgeSourceReadException {
-        cad.setDisplayName(
-                (String) cm.getOwnSlotValue(complexAbstractionInstance,
-                cm.getSlot("displayName")));
+        cad.setDisplayName((String) cm.getOwnSlotValue(
+                complexAbstractionInstance, cm.getSlot("displayName")));
         cad.setAbbreviatedDisplayName((String) cm.getOwnSlotValue(
                 complexAbstractionInstance, cm.getSlot("abbrevDisplayName")));
     }
@@ -154,8 +148,8 @@ class Util {
     static void setInverseIsAs(Instance propInstance,
             AbstractPropositionDefinition propDef, ConnectionManager cm)
             throws KnowledgeSourceReadException {
-        Collection<?> isas = propInstance.getDirectOwnSlotValues(
-                cm.getSlot("inverseIsA"));
+        Collection<?> isas = propInstance.getDirectOwnSlotValues(cm
+                .getSlot("inverseIsA"));
         if (isas != null) {
             String[] inverseIsAs = new String[isas.size()];
             int i = 0;
@@ -171,19 +165,35 @@ class Util {
             throws KnowledgeSourceReadException {
         Slot propertySlot = cm.getSlot("property");
         Slot valueTypeSlot = cm.getSlot("valueType");
-        Collection<?> properties = 
-                cm.getOwnSlotValues(propInstance, propertySlot);
-        PropertyDefinition[] propDefs =
-                new PropertyDefinition[properties.size()];
+        Collection<?> properties = cm.getOwnSlotValues(propInstance,
+                propertySlot);
+        PropertyDefinition[] propDefs = new PropertyDefinition[properties
+                .size()];
         int i = 0;
         for (Object propertyInstance : properties) {
             Instance inst = (Instance) propertyInstance;
             Cls valueTypeCls = (Cls) cm.getOwnSlotValue(inst, valueTypeSlot);
             PropertyDefinition propDef = new PropertyDefinition(inst.getName(),
-                VALUE_CLASS_NAME_TO_VALUE_TYPE.get(valueTypeCls.getName()));
+                    VALUE_CLASS_NAME_TO_VALUE_TYPE.get(valueTypeCls.getName()));
             propDefs[i] = propDef;
             i++;
         }
         d.setPropertyDefinitions(propDefs);
+    }
+
+    static void setTerms(Instance propInstance,
+            AbstractPropositionDefinition d, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        Slot termSlot = cm.getSlot("term");
+        Collection<?> terms = cm.getOwnSlotValues(propInstance, termSlot);
+        String[] termIds = new String[terms.size()];
+        int i = 0;
+        for (Object termInstance : terms) {
+            Instance inst = (Instance) termInstance;
+            String termId = (String) cm.getOwnSlotValue(inst, cm
+                    .getSlot("termId"));
+            termIds[i] = termId;
+        }
+        d.setTermIds(termIds);
     }
 }

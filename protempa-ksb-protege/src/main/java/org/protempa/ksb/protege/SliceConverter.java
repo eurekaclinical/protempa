@@ -28,6 +28,7 @@ final class SliceConverter implements
         Util.setNames(protegeParameter, ad, cm);
         Util.setInverseIsAs(protegeParameter, ad, cm);
         Util.setProperties(protegeParameter, ad, cm);
+        Util.setTerms(protegeParameter, ad, cm);
         Integer maxIndexInt =
                 (Integer) cm.getOwnSlotValue(protegeParameter,
                 cm.getSlot("maxIndex"));
