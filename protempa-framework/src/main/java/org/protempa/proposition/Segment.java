@@ -113,11 +113,11 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
 
     public Granularity getFinishGranularity() {
         calcMaxFinishParam();
-        return maxFinishParam.getFinishGranularity();
+        return maxFinishParam.getInterval().getFinishGranularity();
     }
 
     public Granularity getStartGranularity() {
-        return first().getStartGranularity();
+        return first().getInterval().getStartGranularity();
     }
 
     /*

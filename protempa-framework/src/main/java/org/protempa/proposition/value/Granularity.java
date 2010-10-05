@@ -16,55 +16,52 @@ import java.text.Format;
  */
 public interface Granularity extends Comparable<Granularity>, Serializable {
 
-	/**
-	 * Returns the granularity's plural name.
-	 * 
-	 * @return a {@link String}
-	 */
-	String getPluralName();
+    /**
+     * Returns the granularity's plural name.
+     *
+     * @return a {@link String}
+     */
+    String getPluralName();
 
-	/**
-	 * Returns the granularity's singular name.
-	 * 
-	 * @return a {@link String}
-	 */
-	String getName();
+    /**
+     * Returns the granularity's singular name.
+     *
+     * @return a {@link String}
+     */
+    String getName();
 
-	/**
-	 * Returns a shorter version of the granularity's name.
-	 * 
-	 * @return a {@link String}
-	 */
-	String getAbbrevatedName();
+    /**
+     * Returns a shorter version of the granularity's name.
+     *
+     * @return a {@link String}
+     */
+    String getAbbrevatedName();
 
-	Format getReprFormat();
+    Format getLongFormat();
 
-	Format getLongFormat();
+    Format getMediumFormat();
 
-	Format getMediumFormat();
+    Format getShortFormat();
 
-	Format getShortFormat();
+    long earliest(long pos);
 
-	long earliest(long pos);
+    long latest(long pos);
 
-	long latest(long pos);
+    long minimumDistance(long position, long distance, Unit distanceUnit);
 
-	long minimumDistance(long position, long distance, Unit distanceUnit);
+    long maximumDistance(long position, long distance, Unit distanceUnit);
 
-	long maximumDistance(long position, long distance, Unit distanceUnit);
+    /**
+     * Calculates the distance between two positions.
+     *
+     * @param start
+     * @param startGranularity
+     * @param finish
+     * @param finishGranularity
+     * @return
+     */
+    long distance(long start, long finish, Granularity finishGranularity,
+            Unit distanceUnit);
 
-	/**
-	 * Calculates the distance between two positions.
-	 * 
-	 * @param start
-	 * @param startGranularity
-	 * @param finish
-	 * @param finishGranularity
-	 * @return
-	 */
-	long distance(long start, long finish, Granularity finishGranularity,
-			Unit distanceUnit);
-	
-	Unit getCorrespondingUnit();
-
+    Unit getCorrespondingUnit();
 }

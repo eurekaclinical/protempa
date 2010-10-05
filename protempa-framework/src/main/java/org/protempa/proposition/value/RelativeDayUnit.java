@@ -12,63 +12,44 @@ import java.util.ResourceBundle;
  */
 public class RelativeDayUnit extends AbstractRelativeTimeUnit {
 
-	private static final long serialVersionUID = -6754830065091052862L;
+    private static final long serialVersionUID = -6754830065091052862L;
+    private static final ResourceBundle resourceBundle = ValueUtil.resourceBundle();
+    private static String[] ABBREV_NAMES = {resourceBundle.getString("rel_time_field_abbrev_day")};
+    private static String[] NAMES = {resourceBundle.getString("rel_time_field_singular_day")};
+    private static final String[] PLURAL_NAMES = {resourceBundle.getString("rel_time_field_plural_day")};
+    private static final String[] longRelativeTimeFormats = {resourceBundle.getString("long_rel_time_format_gran_day")};
+    private static final String[] mediumRelativeTimeFormats = {resourceBundle.getString("med_rel_time_format_gran_day")};
+    private static String[] shortRelativeTimeFormats = {resourceBundle.getString("short_rel_time_format_gran_day")};
+    private static final int[] CALENDAR_TIME_UNITS = {Calendar.DATE};
+    public static final RelativeDayUnit DAY = new RelativeDayUnit(NAMES[0],
+            PLURAL_NAMES[0], ABBREV_NAMES[0], shortRelativeTimeFormats[0],
+            mediumRelativeTimeFormats[0], longRelativeTimeFormats[0], 1L,
+            CALENDAR_TIME_UNITS[0]);
+    private static final RelativeDayUnit[] VALUES = new RelativeDayUnit[]{DAY};
+    private static int nextOrdinal = 0;
+    private int ordinal = nextOrdinal++;
 
-	private static final ResourceBundle resourceBundle = ValueUtil
-			.resourceBundle();
+    private RelativeDayUnit(String name, String pluralName,
+            String abbreviation, String shortFormat,
+            String mediumFormat,
+            String longFormat, long length, int calUnits) {
+        super(name, pluralName, abbreviation, shortFormat,
+                mediumFormat, longFormat, length, calUnits);
+    }
 
-	private static String[] ABBREV_NAMES = { resourceBundle
-			.getString("rel_time_field_abbrev_day") };
+    /**
+     * Used by built-in serialization.
+     *
+     * @return the unserialized object.
+     * @throws ObjectStreamException
+     */
+    private Object readResolve() throws ObjectStreamException {
+        return VALUES[ordinal];
+    }
 
-	private static String[] NAMES = { resourceBundle
-			.getString("rel_time_field_singular_day") };
-
-	private static final String[] PLURAL_NAMES = { resourceBundle
-			.getString("rel_time_field_plural_day") };
-
-	private static final String[] longRelativeTimeFormats = { resourceBundle
-			.getString("long_rel_time_format_gran_day") };
-
-	private static final String[] mediumRelativeTimeFormats = { resourceBundle
-			.getString("med_rel_time_format_gran_day") };
-
-	private static String[] shortRelativeTimeFormats = { resourceBundle
-			.getString("short_rel_time_format_gran_day") };
-
-	private static final int[] CALENDAR_TIME_UNITS = { Calendar.DATE };
-
-	public static final RelativeDayUnit DAY = new RelativeDayUnit(NAMES[0],
-			PLURAL_NAMES[0], ABBREV_NAMES[0], shortRelativeTimeFormats[0],
-			mediumRelativeTimeFormats[0], longRelativeTimeFormats[0], 1L,
-			CALENDAR_TIME_UNITS[0]);
-
-	private static final RelativeDayUnit[] VALUES = new RelativeDayUnit[] { DAY };
-
-	private static int nextOrdinal = 0;
-
-	private int ordinal = nextOrdinal++;
-
-	private RelativeDayUnit(String name, String pluralName,
-			String abbreviation, String shortFormat, String mediumFormat,
-			String longFormat, long length, int calUnits) {
-		super(name, pluralName, abbreviation, shortFormat, mediumFormat, longFormat, length, calUnits);
-	}
-
-	/**
-	 * Used by built-in serialization.
-	 * 
-	 * @return the unserialized object.
-	 * @throws ObjectStreamException
-	 */
-	private Object readResolve() throws ObjectStreamException {
-		return VALUES[ordinal];
-	}
-
-	public int compareTo(Unit arg0) {
-		RelativeDayUnit rtu = (RelativeDayUnit) arg0;
-		return this.ordinal - rtu.ordinal;
-	}
-	
-	
-
+    @Override
+    public int compareTo(Unit arg0) {
+        RelativeDayUnit rtu = (RelativeDayUnit) arg0;
+        return this.ordinal - rtu.ordinal;
+    }
 }

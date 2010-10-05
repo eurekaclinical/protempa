@@ -1,7 +1,6 @@
 package org.protempa.proposition;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.RandomAccess;
 import org.protempa.proposition.comparator.MaxFinishTemporalPropositionComparator;
 import org.protempa.proposition.comparator.TemporalPropositionIntervalComparator;
 
-import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Unit;
 
 /**

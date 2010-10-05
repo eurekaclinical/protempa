@@ -1,8 +1,10 @@
 package org.protempa.proposition;
 
 import java.text.Format;
+import java.text.NumberFormat;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.Granularity;
+import org.protempa.proposition.value.Unit;
 
 /**
  * A proposition with a valid timestamp or interval.
@@ -12,11 +14,17 @@ import org.protempa.proposition.value.Granularity;
 public abstract class TemporalProposition extends AbstractProposition {
 
     private static final long serialVersionUID = 3263217702318065414L;
+
+    private static final NumberFormat numberFormat =
+            NumberFormat.getInstance();
+    static {
+        numberFormat.setGroupingUsed(true);
+    }
+
     /**
      * The interval over which the proposition is valid.
      */
     private Interval interval;
-
     private final IntervalFactory intervalFactory;
 
     /**
@@ -36,7 +44,7 @@ public abstract class TemporalProposition extends AbstractProposition {
      *
      * @return an <code>Interval</code>.
      */
-    public Interval getInterval() {
+    public final Interval getInterval() {
         return this.interval;
     }
 
@@ -46,27 +54,12 @@ public abstract class TemporalProposition extends AbstractProposition {
      * @param interval
      *            an <code>Interval</code>.
      */
-    public void setInterval(Interval interval) {
-        if (interval == null)
+    public final void setInterval(Interval interval) {
+        if (interval == null) {
             interval = this.intervalFactory.getInstance();
+        }
         this.interval = interval;
         this.hashCode = 0;
-    }
-
-    public final Granularity getStartGranularity() {
-        Interval ival = getInterval();
-        return ival.getStartGranularity();
-    }
-
-    public final Granularity getFinishGranularity() {
-        Interval ival = getInterval();
-        return ival.getFinishGranularity();
-    }
-
-    public String getStartRepr() {
-        Granularity startGran = getStartGranularity();
-        return formatStart(startGran != null ? startGran.getReprFormat() :
-            null);
     }
 
     /**
@@ -74,20 +67,27 @@ public abstract class TemporalProposition extends AbstractProposition {
      *
      * @return a <code>String</code>.
      */
-    public String getStartFormattedLong() {
-        Granularity startGran = getStartGranularity();
+    public final String getStartFormattedLong() {
+        Granularity startGran = this.interval.getStartGranularity();
         return formatStart(startGran != null ? startGran.getLongFormat() : null);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.protempa.proposition.TemporalProposition#getFinishRepr()
-     */
-    public String getFinishRepr() {
-        Granularity finishGran = getFinishGranularity();
-        return formatFinish(finishGran != null ? finishGran.getReprFormat()
-                : null);
+    public final String getLengthFormattedLong() {
+        Unit lengthUnit = this.interval.getLengthUnit();
+        return formatLength(lengthUnit != null
+                ? lengthUnit.getLongFormat() : null);
+    }
+
+    public final String getLengthFormattedMedium() {
+        Unit lengthUnit = this.interval.getLengthUnit();
+        return formatLength(lengthUnit != null
+                ? lengthUnit.getMediumFormat() : null);
+    }
+
+    public final String getLengthFormattedShort() {
+        Unit lengthUnit = this.interval.getLengthUnit();
+        return formatLength(lengthUnit != null
+                ? lengthUnit.getShortFormat() : null);
     }
 
     /**
@@ -95,8 +95,8 @@ public abstract class TemporalProposition extends AbstractProposition {
      *
      * @return a <code>String</code>.
      */
-    public String getFinishFormattedLong() {
-        Granularity finishGran = getFinishGranularity();
+    public final String getFinishFormattedLong() {
+        Granularity finishGran = this.interval.getFinishGranularity();
         return formatFinish(finishGran != null ? finishGran.getLongFormat()
                 : null);
     }
@@ -107,8 +107,8 @@ public abstract class TemporalProposition extends AbstractProposition {
      *
      * @return a <code>String</code>.
      */
-    public String getStartFormattedMedium() {
-        Granularity startGran = getStartGranularity();
+    public final String getStartFormattedMedium() {
+        Granularity startGran = this.interval.getStartGranularity();
         return formatStart(startGran != null ? startGran.getMediumFormat()
                 : null);
     }
@@ -119,8 +119,8 @@ public abstract class TemporalProposition extends AbstractProposition {
      *
      * @return a <code>String</code>.
      */
-    public String getFinishFormattedMedium() {
-        Granularity finishGran = getFinishGranularity();
+    public final String getFinishFormattedMedium() {
+        Granularity finishGran = this.interval.getFinishGranularity();
         return formatFinish(finishGran != null ? finishGran.getMediumFormat()
                 : null);
     }
@@ -130,8 +130,8 @@ public abstract class TemporalProposition extends AbstractProposition {
      *
      * @return a <code>String</code>.
      */
-    public String getStartFormattedShort() {
-        Granularity startGran = getStartGranularity();
+    public final String getStartFormattedShort() {
+        Granularity startGran = this.interval.getStartGranularity();
         return formatStart(startGran != null ? startGran.getShortFormat()
                 : null);
     }
@@ -141,8 +141,8 @@ public abstract class TemporalProposition extends AbstractProposition {
      *
      * @return a <code>String</code>.
      */
-    public String getFinishFormattedShort() {
-        Granularity finishGran = getFinishGranularity();
+    public final String getFinishFormattedShort() {
+        Granularity finishGran = this.interval.getFinishGranularity();
         return formatFinish(finishGran != null ? finishGran.getShortFormat()
                 : null);
     }
@@ -159,17 +159,19 @@ public abstract class TemporalProposition extends AbstractProposition {
     private String formatStart(Format format) {
         Interval interval = getInterval();
         if (format != null && interval != null) {
-            Long minStart = interval.getMinimumStart();
-            if (minStart != null)
+            Long minStart = interval.getMinStart();
+            if (minStart != null) {
                 return format.format(minStart);
-            else
+            } else {
                 return "Unknown";
+            }
         } else if (interval != null) {
-            Long minStart = interval.getMinimumStart();
-            if (minStart != null)
-                return "" + minStart;
-            else
+            Long minStart = interval.getMinStart();
+            if (minStart != null) {
+                return numberFormat.format(minStart);
+            } else {
                 return "Unknown";
+            }
         } else {
             return "Unknown";
         }
@@ -187,17 +189,40 @@ public abstract class TemporalProposition extends AbstractProposition {
     private String formatFinish(Format format) {
         Interval interval = getInterval();
         if (format != null && interval != null) {
-            Long minFinish = interval.getMinimumFinish();
-            if (minFinish != null)
+            Long minFinish = interval.getMinFinish();
+            if (minFinish != null) {
                 return format.format(minFinish);
-            else
+            } else {
                 return "Unknown";
+            }
         } else if (interval != null) {
-            Long minFinish = interval.getMinimumFinish();
-            if (minFinish != null)
-                return "" + minFinish;
-            else
+            Long minFinish = interval.getMinFinish();
+            if (minFinish != null) {
+                return numberFormat.format(minFinish);
+            } else {
                 return "Unknown";
+            }
+        } else {
+            return "Unknown";
+        }
+    }
+
+    private String formatLength(Format format) {
+        Interval interval = getInterval();
+        if (format != null && interval != null) {
+            Long minLength = interval.getMinLength();
+            if (minLength != null) {
+                return format.format(minLength);
+            } else {
+                return "Unknown";
+            }
+        } else if (interval != null) {
+            Long minLength = interval.getMinLength();
+            if (minLength != null) {
+                return numberFormat.format(minLength);
+            } else {
+                return "Unknown";
+            }
         } else {
             return "Unknown";
         }
@@ -224,7 +249,6 @@ public abstract class TemporalProposition extends AbstractProposition {
     public String toString() {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())
-                .append("interval", this.interval)
-                .toString();
+                .append("interval", this.interval).toString();
     }
 }

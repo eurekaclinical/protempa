@@ -163,8 +163,11 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
 
     protected void computeLength() {
         if (!this.minLengthComputed || !this.maxLengthComputed) {
+            //set default min and max length
             Long w4 = 0L;
             Long w5 = null;
+
+            //set granularities
             Granularity g1 = null;
             Granularity g2 = null;
             if (startGranularity != null && finishGranularity != null) {
@@ -180,6 +183,8 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
             } else {
                 g1 = finishGranularity;
             }
+
+            //set min length
             if (!this.minLengthComputed) {
                 if (this.minLength == null) {
                     if (g1 != null) {
@@ -202,6 +207,8 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
                 }
                 minLengthComputed = true;
             }
+
+            //set max length
             if (!this.maxLengthComputed) {
                 if (this.maxLength == null) {
                     if (g1 != null) {
@@ -225,44 +232,67 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
                 }
                 this.maxLengthComputed = true;
             }
+
+            //set min and max length
             this.v[4] = w4;
             this.v[5] = w5;
         }
     }
 
+    /**
+     * Gets the minimum start in internal PROTEMPA units.
+     *
+     * @return a {@link Long}.
+     */
     public Long getMinimumStart() {
         return v[0];
     }
 
+    /**
+     * Gets the maximum start in internal PROTEMPA units.
+     *
+     * @return a {@link Long}.
+     */
     public Long getMaximumStart() {
         return v[1];
     }
 
+    /**
+     * Gets the minimum finish in internal PROTEMPA units.
+     *
+     * @return a {@link Long}.
+     */
     public Long getMinimumFinish() {
         return v[2];
     }
 
+    /**
+     * Gets the maximum finish in internal PROTEMPA units.
+     *
+     * @return a {@link Long}.
+     */
     public Long getMaximumFinish() {
         return v[3];
     }
 
+    /**
+     * Gets the minimum length in internal PROTEMPA units.
+     *
+     * @return a {@link Long}.
+     */
     public Long getMinimumLength() {
         computeLength();
         return v[4];
     }
 
+    /**
+     * Gets the maximum length in internal PROTEMPA units.
+     *
+     * @return a {@link Long}.
+     */
     public Long getMaximumLength() {
         computeLength();
         return v[5];
-    }
-
-    public void reset() {
-        v[0] = null;
-        v[1] = null;
-        v[2] = null;
-        v[3] = null;
-        v[4] = 0L;
-        v[5] = null;
     }
 
     private void initVw() {
@@ -275,6 +305,11 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
                     v[5] != null ? new Weight(v[5]) : Weight.POS_INFINITY};
     }
 
+    /**
+     * Gets the minimum start in constraint network weights.
+     *
+     * @return a {@link Weight}.
+     */
     Weight getSpecifiedMinimumStart() {
         if (vw == null) {
             initVw();
@@ -282,6 +317,11 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
         return vw[0];
     }
 
+    /**
+     * Gets the maximum start in constraint network weights.
+     *
+     * @return a {@link Weight}.
+     */
     Weight getSpecifiedMaximumStart() {
         if (vw == null) {
             initVw();
@@ -289,6 +329,11 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
         return vw[1];
     }
 
+    /**
+     * Gets the minimum finish in constraint network weights.
+     *
+     * @return a {@link Weight}.
+     */
     Weight getSpecifiedMinimumFinish() {
         if (vw == null) {
             initVw();
@@ -296,6 +341,11 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
         return vw[2];
     }
 
+    /**
+     * Gets the maximum finish in constraint network weights.
+     *
+     * @return a {@link Weight}.
+     */
     Weight getSpecifiedMaximumFinish() {
         if (vw == null) {
             initVw();
@@ -303,6 +353,11 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
         return vw[3];
     }
 
+    /**
+     * Gets the minimum length in constraint network weights.
+     *
+     * @return a {@link Weight}.
+     */
     Weight getSpecifiedMinimumLength() {
         if (vw == null) {
             initVw();
@@ -310,6 +365,11 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
         return vw[4];
     }
 
+    /**
+     * Gets the maximum length in constraint network weights.
+     *
+     * @return a {@link Weight}.
+     */
     Weight getSpecifiedMaximumLength() {
         if (vw == null) {
             initVw();
@@ -520,49 +580,64 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
     }
 
     /**
-     * @return the minStart
+     * Gets the minimum start in the current start granularity.
+     *
+     * @return a {@link Long}.
      */
     public Long getMinStart() {
         return minStart;
     }
 
     /**
-     * @return the maxStart
+     * Gets the maximum start in the current start granularity.
+     *
+     * @return a {@link Long}.
      */
     public Long getMaxStart() {
         return maxStart;
     }
 
     /**
-     * @return the startGranularity
+     * Gets the start granularity.
+     *
+     * @return a {@link Granularity}.
      */
     public Granularity getStartGranularity() {
         return startGranularity;
     }
 
     /**
-     * @return the minFinish
+     * Gets the minimum finish in the current finish granularity.
+     *
+     * @return a {@link Long}.
      */
     public Long getMinFinish() {
         return minFinish;
     }
 
     /**
-     * @return the maxFinish
+     * Gets the maximum finish in the current finish granularity.
+     *
+     * @return a {@link Long}.
      */
     public Long getMaxFinish() {
         return maxFinish;
     }
 
     /**
-     * @return the finishGranularity
+     * Returns the finish granularity.
+     *
+     * @return a {@link Granularity}.
      */
     public Granularity getFinishGranularity() {
         return finishGranularity;
     }
 
     /**
-     * @return the minDistance
+     * Gets the minimum length in the finest granularity of those defined for
+     * the start and finish.
+     *
+     * @return a {@link Long}.
      */
     public Long getMinLength() {
         computeLength();
@@ -619,7 +694,10 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
     }
 
     /**
-     * @return the maxDistance
+     * Gets the maximum length in the finest granularity of those defined for
+     * the start and finish.
+     *
+     * @return a {@link Long}.
      */
     public Long getMaxLength() {
         computeLength();
@@ -627,7 +705,9 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
     }
 
     /**
-     * @return the distanceUnit
+     * Gets the units of the length.
+     *
+     * @return a {@link Unit}.
      */
     public Unit getLengthUnit() {
         computeLength();

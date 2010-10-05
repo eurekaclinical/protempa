@@ -89,7 +89,7 @@ public final class AbstractParameterFactory {
                 minStart += startOffset;
                 maxStart += startOffset;
             }
-            startGran = param.getStartGranularity();
+            startGran = param.getInterval().getStartGranularity();
         }
 
         Granularity finishGran;
@@ -125,7 +125,7 @@ public final class AbstractParameterFactory {
                 minFinish += finishOffset;
                 maxFinish += finishOffset;
             }
-            finishGran = param.getFinishGranularity();
+            finishGran = param.getInterval().getFinishGranularity();
         }
 
         if (temporalOffset == null) {

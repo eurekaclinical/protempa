@@ -5,41 +5,36 @@ import org.protempa.proposition.Segment;
 import junit.framework.TestCase;
 
 public abstract class SegmentChecker extends TestCase {
-	protected Long minStart;
 
-	protected Long maxStart;
+    protected Long minStart;
+    protected Long maxStart;
+    protected Long minFinish;
+    protected Long maxFinish;
+    protected Long minDuration;
+    protected Long maxDuration;
+    protected Segment seg;
 
-	protected Long minFinish;
+    public void testLength1MinStart() {
+        assertEquals(minStart, seg.getInterval().getMinimumStart());
+    }
 
-	protected Long maxFinish;
+    public void testLength1MaxStart() {
+        assertEquals(maxStart, seg.getInterval().getMaximumStart());
+    }
 
-	protected Long minDuration;
+    public void testLength1MinFinish() {
+        assertEquals(minFinish, seg.getInterval().getMinimumFinish());
+    }
 
-	protected Long maxDuration;
+    public void testLength1MaxFinish() {
+        assertEquals(maxFinish, seg.getInterval().getMaximumFinish());
+    }
 
-	protected Segment seg;
+    public void testLength1MinDuration() {
+        assertEquals(minDuration, seg.getInterval().getMinimumLength());
+    }
 
-	public void testLength1MinStart() {
-		assertEquals(minStart, seg.getInterval().getMinimumStart());
-	}
-
-	public void testLength1MaxStart() {
-		assertEquals(maxStart, seg.getInterval().getMaximumStart());
-	}
-
-	public void testLength1MinFinish() {
-		assertEquals(minFinish, seg.getInterval().getMinimumFinish());
-	}
-
-	public void testLength1MaxFinish() {
-		assertEquals(maxFinish, seg.getInterval().getMaximumFinish());
-	}
-
-	public void testLength1MinDuration() {
-		assertEquals(minDuration, seg.getInterval().getMinimumLength());
-	}
-
-	public void testLength1MaxDuration() {
-		assertEquals(maxDuration, seg.getInterval().getMaximumLength());
-	}
+    public void testLength1MaxDuration() {
+        assertEquals(maxDuration, seg.getInterval().getMaximumLength());
+    }
 }

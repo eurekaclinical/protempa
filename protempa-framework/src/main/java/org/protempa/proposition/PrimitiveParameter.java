@@ -1,6 +1,5 @@
 package org.protempa.proposition;
 
-import java.text.Format;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.ProtempaException;
@@ -90,87 +89,6 @@ public final class PrimitiveParameter extends TemporalParameter {
                 timestamp, granularity, timestamp, granularity));
     }
 
-    @Override
-    public String getStartRepr() {
-        return getTimestampRepr();
-    }
-
-    @Override
-    public String getFinishRepr() {
-        return getTimestampRepr();
-    }
-
-    public String getTimestampRepr() {
-        return formatTimestamp(granularity != null
-                ? granularity.getReprFormat() : null);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.virginia.pbhs.parameters.Parameter#getStartFormattedLong()
-     */
-    @Override
-    public String getStartFormattedLong() {
-        return formatTimestamp(granularity != null
-                ? granularity.getLongFormat() : null);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.virginia.pbhs.parameters.Parameter#getFinishFormattedLong()
-     */
-    @Override
-    public String getFinishFormattedLong() {
-        return formatTimestamp(granularity != null
-                ? granularity.getLongFormat() : null);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.virginia.pbhs.parameters.Parameter#getStartFormattedMedium()
-     */
-    @Override
-    public String getStartFormattedMedium() {
-        return formatTimestamp(granularity != null
-                ? granularity.getMediumFormat() : null);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.virginia.pbhs.parameters.Parameter#getFinishFormattedMedium()
-     */
-    @Override
-    public String getFinishFormattedMedium() {
-        return formatTimestamp(granularity != null
-                ? granularity.getMediumFormat() : null);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.virginia.pbhs.parameters.Parameter#getStartFormattedShort()
-     */
-    @Override
-    public String getStartFormattedShort() {
-        return formatTimestamp(granularity != null
-                ? granularity.getShortFormat() : null);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.virginia.pbhs.parameters.Parameter#getFinishFormattedShort()
-     */
-    @Override
-    public String getFinishFormattedShort() {
-        return formatTimestamp(granularity != null
-                ? granularity.getShortFormat() : null);
-    }
-
     /**
      * Returns this parameter's timestamp as a long formatted string.
      *
@@ -196,23 +114,6 @@ public final class PrimitiveParameter extends TemporalParameter {
      */
     public String getTimestampFormattedShort() {
         return getStartFormattedShort();
-    }
-
-    /**
-     * Converts this parameter's timestamp into a meaningful string
-     * representation.
-     *
-     * @param format
-     *            a {@link Format} that creates a meaningful string
-     *            representation of a <code>long</code>.
-     * @return a {@link String}.
-     */
-    public String formatTimestamp(Format format) {
-        if (format != null) {
-            return format.format(timestamp);
-        } else {
-            return "" + timestamp;
-        }
     }
 
     /*

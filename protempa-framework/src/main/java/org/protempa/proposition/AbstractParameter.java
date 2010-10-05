@@ -1,7 +1,5 @@
 package org.protempa.proposition;
 
-import java.beans.PropertyChangeListener;
-import java.text.Format;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.ProtempaException;
@@ -44,10 +42,11 @@ public final class AbstractParameter extends TemporalParameter {
         }
 
         AbstractParameter a = (AbstractParameter) o;
-        Granularity startGranularity = getStartGranularity();
-        Granularity aStartGranularity = a.getStartGranularity();
-        Granularity finishGranularity = getFinishGranularity();
-        Granularity aFinishGranularity = a.getFinishGranularity();
+        Granularity startGranularity = getInterval().getStartGranularity();
+        Granularity aStartGranularity = a.getInterval().getStartGranularity();
+        Granularity finishGranularity = getInterval().getFinishGranularity();
+        Granularity aFinishGranularity = 
+                a.getInterval().getFinishGranularity();
         return super.isEqual(a)
                 && (startGranularity == aStartGranularity ||
                 (startGranularity != null &&

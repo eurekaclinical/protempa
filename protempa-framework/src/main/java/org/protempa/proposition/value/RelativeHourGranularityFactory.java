@@ -7,13 +7,13 @@ package org.protempa.proposition.value;
  * 
  */
 public final class RelativeHourGranularityFactory implements GranularityFactory {
-	
-	public RelativeHourGranularity toGranularity(String id) {
-		if (RelativeHourGranularity.HOUR.getName().equals(id)) {
-			return RelativeHourGranularity.HOUR;
-		} else {
-			return null;
-		}
-	}
 
+    @Override
+    public RelativeHourGranularity toGranularity(String id) {
+        if (RelativeHourGranularity.HOUR.getName().equals(id)) {
+            return RelativeHourGranularity.HOUR;
+        } else {
+            return null;
+        }
+    }
 }

@@ -41,10 +41,9 @@ public class PropositionColumnSpec implements TableColumnSpec {
         @Override
         public void visit(EventDefinition eventDefinition) {
             String[] propertyColumnNames = propertyColumnNames(eventDefinition);
-            String refPropDisplayName = Util.propositionDefinitionDisplayName(eventDefinition);
             this.result = new String[propertyColumnNames.length + 2];
-            this.result[0] = refPropDisplayName + "_start";
-            this.result[1] = refPropDisplayName + "_finish";
+            this.result[0] = "start";
+            this.result[1] = "finish";
             int i = 2;
             for (; i < this.result.length; i++) {
                 this.result[i] = propertyColumnNames[i - 2];
@@ -64,10 +63,9 @@ public class PropositionColumnSpec implements TableColumnSpec {
         @Override
         public void visit(PrimitiveParameterDefinition primitiveParameterDefinition) {
             String[] propertyColumnNames = propertyColumnNames(primitiveParameterDefinition);
-            String refPropDisplayName = Util.propositionDefinitionDisplayName(primitiveParameterDefinition);
             result = new String[propertyColumnNames.length + 2];
-            result[0] = refPropDisplayName + "_value";
-            result[1] = refPropDisplayName + "_tstamp";
+            result[0] = "value";
+            result[1] = "tstamp";
             int i = 2;
             for (; i < result.length; i++) {
                 result[i] = propertyColumnNames[i - 2];
@@ -96,18 +94,17 @@ public class PropositionColumnSpec implements TableColumnSpec {
             String[] propertyColumnNames = new String[propertyNames.length];
             for (int i = 0; i < propertyColumnNames.length; i++) {
                 String propName = propertyNames[i];
-                propertyColumnNames[i] = Util.propositionDefinitionDisplayName(propositionDefinition) + "_" + propName;
+                propertyColumnNames[i] = propName;
             }
             return propertyColumnNames;
         }
 
         private void visitAbstractionDefinition(AbstractionDefinition abstractionDefinition) {
             String[] propertyColumnNames = propertyColumnNames(abstractionDefinition);
-            String refPropDisplayName = Util.propositionDefinitionDisplayName(abstractionDefinition);
             this.result = new String[propertyColumnNames.length + 3];
-            this.result[0] = refPropDisplayName + "_value";
-            this.result[1] = refPropDisplayName + "_start";
-            this.result[2] = refPropDisplayName + "_finish";
+            this.result[0] = "value";
+            this.result[1] = "start";
+            this.result[2] = "finish";
             int i = 3;
             for (; i < this.result.length; i++) {
                 this.result[i] = propertyColumnNames[i - 3];
