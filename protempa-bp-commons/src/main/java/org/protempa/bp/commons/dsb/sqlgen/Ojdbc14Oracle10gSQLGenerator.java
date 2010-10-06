@@ -123,11 +123,6 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
     }
 
     @Override
-    public void generateJoin(StringBuilder fromPart) {
-        fromPart.append(" join ");
-    }
-
-    @Override
     public void generateFromSeparator(StringBuilder fromPart) {
         fromPart.append(',');
     }

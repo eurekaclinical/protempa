@@ -114,11 +114,6 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
     }
 
     @Override
-    public void generateJoin(StringBuilder fromPart) {
-        fromPart.append(" join ");
-    }
-
-    @Override
     public void appendValue(Object val, StringBuilder wherePart) {
         boolean isNumber;
         if (!(val instanceof Number)) {

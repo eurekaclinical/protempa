@@ -232,7 +232,7 @@ public final class EntitySpec implements Serializable {
      * @return a {@link ColumnSpec[]} representing these paths.
      */
     public ColumnSpec[] getUniqueIdSpecs() {
-        return this.uniqueIdSpecs;
+        return this.uniqueIdSpecs.clone();
     }
 
     /**

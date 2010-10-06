@@ -15,69 +15,63 @@ import java.util.Map;
  */
 public abstract class AbstractPropositionVisitor implements PropositionVisitor {
 
-	public void visit(Map<String, List<Proposition>> finderResult) {
-		for (List<Proposition> listOfProps : finderResult.values()) {
-			visit(listOfProps);
-		}
+    public void visit(Map<String, List<Proposition>> finderResult) {
+        for (List<Proposition> listOfProps : finderResult.values()) {
+            visit(listOfProps);
+        }
 
-	}
+    }
 
-	public void visit(Collection<? extends Proposition> propositions) {
-		for (Proposition proposition : propositions) {
-			proposition.accept(this);
-		}
-	}
+    public void visit(Collection<? extends Proposition> propositions) {
+        for (Proposition proposition : propositions) {
+            proposition.accept(this);
+        }
+    }
 
-	/**
-	 * Processes abstract parameters. This default implementation is a no-op.
-	 * 
-	 * @param abstractParameter
-	 *            an {@link AbstractParameter}.
-	 */
-	public void visit(AbstractParameter abstractParameter) {
+    /**
+     * Processes abstract parameters. This default implementation is a no-op.
+     *
+     * @param abstractParameter
+     *            an {@link AbstractParameter}.
+     */
+    public void visit(AbstractParameter abstractParameter) {
+    }
 
-	}
+    /**
+     * Processes events. This default implementation is a no-op.
+     *
+     * @param event
+     *            an {@link Event}.
+     * @throws UnsupportedOperationException.
+     */
+    public void visit(Event event) {
+    }
 
-	/**
-	 * Processes events. This default implementation is a no-op.
-	 * 
-	 * @param event
-	 *            an {@link Event}.
-	 * @throws UnsupportedOperationException.
-	 */
-	public void visit(Event event) {
+    /**
+     * Processes primitive parameters. This default implementation is a no-op.
+     *
+     * @param primitiveParameter
+     *            an {@link PrimitiveParameter}.
+     * @throws UnsupportedOperationException.
+     */
+    public void visit(PrimitiveParameter primitiveParameter) {
+    }
 
-	}
+    /**
+     * Processes constant parameters. This default implementation is a no-op.
+     *
+     * @param primitiveParameter
+     *            an {@link PrimitiveParameter}.
+     */
+    public void visit(Constant constantParameter) {
+    }
 
-	/**
-	 * Processes primitive parameters. This default implementation is a no-op.
-	 * 
-	 * @param primitiveParameter
-	 *            an {@link PrimitiveParameter}.
-	 * @throws UnsupportedOperationException.
-	 */
-	public void visit(PrimitiveParameter primitiveParameter) {
-
-	}
-
-	/**
-	 * Processes constant parameters. This default implementation is a no-op.
-	 * 
-	 * @param primitiveParameter
-	 *            an {@link PrimitiveParameter}.
-	 */
-	public void visit(Constant constantParameter) {
-
-	}
-
-	/**
-	 * Processes contexts. This default implementation is a no-op.
-	 * 
-	 * @param context
-	 *            a {@link Context}.
-	 */
-	public void visit(Context context) {
-
-	}
-
+    /**
+     * Processes contexts. This default implementation is a no-op.
+     *
+     * @param context
+     *            a {@link Context}.
+     */
+    public void visit(Context context) {
+    }
 }

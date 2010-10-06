@@ -545,7 +545,19 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     public abstract void generateOn(StringBuilder fromPart, int fromIndex,
             int toIndex, String fromKey, String toKey);
 
-    public abstract void generateJoin(StringBuilder fromPart);
+    public void generateJoin(JoinSpec.JoinType joinType,
+            StringBuilder fromPart) {
+        switch (joinType) {
+            case INNER:
+                fromPart.append(" join ");
+                break;
+            case LEFT_OUTER:
+                fromPart.append(" left outer join ");
+                break;
+            default:
+                throw new AssertionError("invalid join type: " + joinType);
+        }
+    }
 
     private StringBuilder generateFromClause(List<ColumnSpec> columnSpecs,
             Map<ColumnSpec, Integer> referenceIndices) {
@@ -589,7 +601,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 String schema = columnSpec.getSchema();
                 String table = columnSpec.getTable();
                 if (!begin) {
-                    generateJoin(fromPart);
+                    generateJoin(currentJoin.getJoinType(), fromPart);
                 }
                 generateFromTable(schema, table, fromPart, i);
                 columnSpecCache.put(i, columnSpec);

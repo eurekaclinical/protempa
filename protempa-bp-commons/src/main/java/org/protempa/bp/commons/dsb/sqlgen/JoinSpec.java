@@ -9,16 +9,24 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author Andrew Post
  */
 public final class JoinSpec implements Serializable {
+
+    public static enum JoinType {
+        INNER,
+        LEFT_OUTER
+    }
+
     private static final long serialVersionUID = 7297631285803290163L;
     private final String fromKey;
     private final String toKey;
     private final ColumnSpec nextColumnSpec;
+    private final JoinType joinType;
     private ColumnSpec prevColumnSpec;
 
     /**
-     * Instantiates a join specification with the join keys of the two tables
-     * and the path through the database from the corresponding entity's
-     * main table to the right-hand-side table.
+     * Instantiates a join specification with the join keys of the two tables,
+     * the path through the database from the corresponding entity's
+     * main table to the right-hand-side table, and the default join type
+     * ({@link JoinType.INNER}).
      *
      * @param fromKey a key {@link String} from the left-hand-side table.
      * @param toKey a key {@link String} from the right-hand-side table.
@@ -27,15 +35,36 @@ public final class JoinSpec implements Serializable {
      * right-hand-side table.
      */
     public JoinSpec(String fromKey, String toKey, ColumnSpec nextColumnSpec) {
+        this(fromKey, toKey, null, nextColumnSpec);
+    }
+
+    /**
+     * Instantiates a join specification with the join keys of the two tables,
+     * the path through the database from the corresponding entity's
+     * main table to the right-hand-side table, and the join type.
+     *
+     * @param fromKey a key {@link String} from the left-hand-side table.
+     * @param toKey a key {@link String} from the right-hand-side table.
+     * @param nextColumnSpec a {@link ColumnSpec} representing the path through
+     * the database from the corresponding entity's main table to the
+     * right-hand-side table.
+     * @param joinType a {@link JoinType}.
+     */
+    public JoinSpec(String fromKey, String toKey, JoinType joinType,
+            ColumnSpec nextColumnSpec) {
         if (fromKey == null)
             throw new IllegalArgumentException("fromKey cannot be null");
         if (toKey == null)
             throw new IllegalArgumentException("toKey cannot be null");
         if (nextColumnSpec == null)
-            throw new IllegalArgumentException("nextColumnSpec cannot be null");
+            throw new IllegalArgumentException(
+                    "nextColumnSpec cannot be null");
+        if (joinType == null)
+            joinType = JoinType.INNER;
         this.fromKey = fromKey;
         this.toKey = toKey;
         this.nextColumnSpec = nextColumnSpec;
+        this.joinType = joinType;
     }
 
     /**
@@ -88,6 +117,15 @@ public final class JoinSpec implements Serializable {
     }
 
     /**
+     * Gets the join type. The default is {@link JoinType.INNER}.
+     * 
+     * @return a {@link JoinType}.
+     */
+    public JoinType getJoinType() {
+        return this.joinType;
+    }
+
+    /**
      * Performs equality testing by comparing all of this instance's fields
      * to the fields of another instance (returns <code>false</code> if the
      * other instance is not a <code>JoinSpec</code>.
@@ -122,6 +160,9 @@ public final class JoinSpec implements Serializable {
                 !this.prevColumnSpec.equals(other.prevColumnSpec))) {
             return false;
         }
+        if (this.joinType != other.joinType) {
+            return false;
+        }
         return true;
     }
 
@@ -133,12 +174,14 @@ public final class JoinSpec implements Serializable {
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 59 * hash + (this.fromKey != null ? this.fromKey.hashCode() : 0);
+        hash = 59 * hash +
+                (this.fromKey != null ? this.fromKey.hashCode() : 0);
         hash = 59 * hash + (this.toKey != null ? this.toKey.hashCode() : 0);
         hash = 59 * hash + (this.nextColumnSpec != null ?
             this.nextColumnSpec.hashCode() : 0);
         hash = 59 * hash + (this.prevColumnSpec != null ?
             this.prevColumnSpec.hashCode() : 0);
+        hash = 59 * hash + this.joinType.hashCode();
         return hash;
     }
 
@@ -165,6 +208,9 @@ public final class JoinSpec implements Serializable {
         if (!this.prevColumnSpec.isSameSchemaAndTable(other.prevColumnSpec)) {
             return false;
         }
+        if (this.joinType != other.joinType) {
+            return false;
+        }
         return true;
     }
 
@@ -174,6 +220,7 @@ public final class JoinSpec implements Serializable {
                 .append("fromKey", this.fromKey)
                 .append("toKey", this.toKey)
                 .append("nextColumnSpec", this.nextColumnSpec)
+                .append("joinType", this.joinType)
                 .toString();
     }
 
