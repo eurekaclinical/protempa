@@ -13,19 +13,22 @@ public final class AtLeastNColumnSpec extends AbstractColumnSpec {
 
     private final int n;
     private final String referenceName;
+    private final String[] propositionIds;
     private final String[] derivedPropositionIds;
     private final ColumnSpecConstraint[] constraints;
 
     public AtLeastNColumnSpec(String referenceName, int n) {
-        this(referenceName, n, null);
+        this(referenceName, n, null, null);
     }
 
     public AtLeastNColumnSpec(String referenceName, int n,
+            String[] propositionIds,
             String[] derivedPropositionIds) {
-        this(referenceName, n, derivedPropositionIds, null);
+        this(referenceName, n, propositionIds, derivedPropositionIds, null);
     }
 
     public AtLeastNColumnSpec(String referenceName, int n,
+            String[] propositionIds,
             String[] derivedPropositionIds,
             ColumnSpecConstraint[] constraints) {
         if (referenceName == null) {
@@ -37,9 +40,14 @@ public final class AtLeastNColumnSpec extends AbstractColumnSpec {
         if (constraints != null) {
             ProtempaUtil.checkArrayForNullElement(constraints, "constraints");
         }
-        if (derivedPropositionIds != null)
+        if (derivedPropositionIds != null) {
             ProtempaUtil.checkArrayForNullElement(derivedPropositionIds,
                     "derivedPropositionIds");
+        }
+        if (propositionIds != null) {
+            ProtempaUtil.checkArrayForNullElement(propositionIds,
+                    "propositionIds");
+        }
         this.n = n;
         this.referenceName = referenceName;
         if (derivedPropositionIds != null) {
@@ -52,19 +60,29 @@ public final class AtLeastNColumnSpec extends AbstractColumnSpec {
         } else {
             this.constraints = new ColumnSpecConstraint[0];
         }
+        if (propositionIds != null) {
+            this.propositionIds = propositionIds.clone();
+        } else {
+            this.propositionIds = new String[0];
+        }
     }
 
     @Override
     public String[] columnNames(String propId,
-            KnowledgeSource knowledgeSource) 
+            KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
         StringBuilder builder = new StringBuilder();
         builder.append("atleast");
         builder.append(this.n);
         builder.append('(');
         builder.append(this.referenceName);
+        if (this.propositionIds.length > 0) {
+            builder.append('.');
+            builder.append(Util.propositionDefinitionDisplayNames(
+                    this.propositionIds, knowledgeSource));
+        }
         if (this.derivedPropositionIds.length > 0) {
-            String derivedPropDisplayNames = 
+            String derivedPropDisplayNames =
                     Util.propositionDefinitionDisplayNames(
                     this.derivedPropositionIds, knowledgeSource);
             builder.append("->");
@@ -75,8 +93,6 @@ public final class AtLeastNColumnSpec extends AbstractColumnSpec {
         return new String[]{builder.toString()};
     }
 
-    
-
     @Override
     public String[] columnValues(String key, Proposition proposition,
             Map<Proposition, List<Proposition>> derivations,
@@ -86,19 +102,30 @@ public final class AtLeastNColumnSpec extends AbstractColumnSpec {
                 proposition.getReferences(this.referenceName);
         int count = 0;
         if (this.derivedPropositionIds.length == 0) {
-            count = uids.size();
+            for (UniqueIdentifier uid : uids) {
+                Proposition reffedProp = references.get(uid);
+                if (this.propositionIds.length == 0
+                        || Arrays.contains(
+                        this.propositionIds, reffedProp.getId())) {
+                    count++;
+                }
+            }
         } else {
             for (UniqueIdentifier uid : uids) {
                 Proposition reffedProp = references.get(uid);
-                List<Proposition> derivedProps = derivations.get(reffedProp);
-                for (Proposition derivedProp : derivedProps) {
-                    if (!constraintsCheckCompatible(derivedProp,
-                            this.constraints)) {
-                        continue;
-                    }
-                    if (Arrays.contains(this.derivedPropositionIds,
-                            derivedProp.getId())) {
-                        count++;
+                if (this.propositionIds.length == 0
+                        || Arrays.contains(this.propositionIds, reffedProp.getId())) {
+                    List<Proposition> derivedProps =
+                            derivations.get(reffedProp);
+                    for (Proposition derivedProp : derivedProps) {
+                        if (!constraintsCheckCompatible(derivedProp,
+                                this.constraints)) {
+                            continue;
+                        }
+                        if (Arrays.contains(this.derivedPropositionIds,
+                                derivedProp.getId())) {
+                            count++;
+                        }
                     }
                 }
             }

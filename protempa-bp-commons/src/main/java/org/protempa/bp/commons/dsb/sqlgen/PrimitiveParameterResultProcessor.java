@@ -33,23 +33,32 @@ class PrimitiveParameterResultProcessor extends
             ValueType vf = entitySpec.getValueType();
             Value cpVal = ValueFactory.get(vf).parseValue(
                     resultSet.getString(i++));
-            String propId;
-            if (propIds.length == 1) {
-                propId = propIds[0];
+            String propId = null;
+            if (!isCasePresent()) {
+                if (propIds.length == 1) {
+                    propId = propIds[0];
+                } else {
+                    propId = resultSet.getString(i++);
+                }
             } else {
-                propId = resultSet.getString(i++);
+                i++;
             }
-            PrimitiveParameter p = new PrimitiveParameter(propId);
-            p.setDataSourceType(new DatabaseDataSourceType(getDataSourceBackendId()));
-            p.setUniqueIdentifier(uniqueIdentifer);
+            Long timestamp = null;
             try {
-                p.setTimestamp(entitySpec.getPositionParser()
-                        .toLong(resultSet, i++));
+                timestamp = entitySpec.getPositionParser().toLong(resultSet,
+                        i++);
             } catch (SQLException e) {
                 logger.log(Level.WARNING,
                         "Could not parse timestamp. Ignoring data value.", e);
                 continue;
             }
+            if (isCasePresent()) {
+                propId = resultSet.getString(i++);
+            }
+            PrimitiveParameter p = new PrimitiveParameter(propId);
+            p.setTimestamp(timestamp);
+            p.setDataSourceType(new DatabaseDataSourceType(getDataSourceBackendId()));
+            p.setUniqueIdentifier(uniqueIdentifer);
             p.setGranularity(entitySpec.getGranularity());
             p.setValue(cpVal);
             PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();

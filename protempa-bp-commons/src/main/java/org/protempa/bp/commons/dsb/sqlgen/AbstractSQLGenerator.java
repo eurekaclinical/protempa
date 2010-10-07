@@ -15,7 +15,6 @@ import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.collections.Collections;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
-import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
 import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.dsb.RelationalDatabaseDataSourceBackend;
 import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.Constraint;
@@ -126,16 +125,43 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return this.units;
     }
 
-    private static void appendColumnReference(StringBuilder wherePart,
+    private void appendColumnRef(StringBuilder wherePart,
             Map<ColumnSpec, Integer> referenceIndices, ColumnSpec columnSpec) {
-        wherePart.append("a");
-        Integer tableNumber = referenceIndices.get(columnSpec);
-        if (tableNumber == null) {
-            throw new AssertionError("tableNumber is null");
+        if (columnSpec.getColumnOp() != null)
+            wherePart.append(introduceOp(columnSpec.getColumnOp(),
+                appendColumnReference(referenceIndices, columnSpec)));
+        else
+            wherePart.append(appendColumnReference(referenceIndices,
+                    columnSpec));
+    }
+
+    public String introduceOp(ColumnSpec.ColumnOp columnOp,
+            String columnRef) {
+        StringBuilder builder = new StringBuilder();
+        switch (columnOp) {
+            case UPPER:
+                builder.append("upper");
+                break;
+            default:
+                throw new AssertionError("invalid column op: " + columnOp);
         }
-        wherePart.append(tableNumber);
-        wherePart.append(".");
-        wherePart.append(columnSpec.getColumn());
+        builder.append('(');
+        builder.append(columnRef);
+        builder.append(')');
+        return builder.toString();
+    }
+
+    public String appendColumnReference(
+            Map<ColumnSpec, Integer> referenceIndices,
+            ColumnSpec columnSpec) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("a");
+        Integer tableNumber = referenceIndices.get(columnSpec);
+        assert tableNumber != null : "tableNumber is null";
+        builder.append(tableNumber);
+        builder.append(".");
+        builder.append(columnSpec.getColumn());
+        return builder.toString();
     }
 
     private <P extends Proposition> Map<String, List<P>> executeSelect(
@@ -283,7 +309,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             Set<String> propIds,
             Set<Filter> filtersCopy, Collection<EntitySpec> entitySpecsCopy,
             Set<String> keyIds, SQLOrderBy order,
-            ResultProcessor resultProcessor)
+            SQLGenResultProcessor resultProcessor)
             throws DataSourceReadException {
         Logger logger = SQLGenUtil.logger();
         logger.log(Level.FINE,
@@ -291,7 +317,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 new Object[]{backendNameForMessages(),
                     entitySpec.getName()});
         String query = generateSelect(entitySpec, referenceSpec, propIds,
-                filtersCopy, entitySpecsCopy, keyIds, order);
+                filtersCopy, entitySpecsCopy, keyIds, order, resultProcessor);
         logger.log(Level.FINE,
                 "Data source backend {0} generated the following query for {1}: {2}",
                 new Object[]{backendNameForMessages(),
@@ -398,7 +424,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     private final String generateSelect(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, Set<String> propIds,
             Set<Filter> filtersCopy, Collection<EntitySpec> entitySpecsCopy,
-            Set<String> keyIds, SQLOrderBy order) {
+            Set<String> keyIds, SQLOrderBy order,
+            SQLGenResultProcessor resultProcessor) {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(
                 entitySpec, entitySpecsCopy, filtersCopy, referenceSpec);
         Map<ColumnSpec, Integer> referenceIndices =
@@ -409,7 +436,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 referenceIndices);
         StringBuilder whereClause = generateWhereClause(entitySpec, propIds,
                 info, entitySpecsCopy, filtersCopy, selectClause,
-                referenceIndices, keyIds, order);
+                referenceIndices, keyIds, order, resultProcessor);
         String result = assembleReadPropositionsQuery(
                 selectClause, fromClause, whereClause);
         return result;
@@ -640,7 +667,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             ColumnSpecInfo info, Collection<EntitySpec> entitySpecs,
             Set<Filter> filtersCopy, StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
-            Set<String> keyIds, SQLOrderBy order) {
+            Set<String> keyIds, SQLOrderBy order,
+            SQLGenResultProcessor resultProcessor) {
         StringBuilder wherePart = new StringBuilder();
         int i = 1;
         for (EntitySpec entitySpec : entitySpecs) {
@@ -651,7 +679,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     filtersCopy, wherePart, referenceIndices);
             i = processPropertyValueSpecsForWhereClause(entitySpec, i);
             i = processConstraintSpecsForWhereClause(propIds, entitySpec,
-                    i, wherePart, selectPart, referenceIndices, filtersCopy);
+                    i, wherePart, selectPart, referenceIndices, filtersCopy,
+                    resultProcessor);
         }
         processKeyIdConstraintsForWhereClause(info, wherePart, keyIds);
 
@@ -692,9 +721,10 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
     private void processConstraints(ColumnSpec columnSpec, Set<String> propIds,
             StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
-            boolean selectPartHasCaseStmt, StringBuilder selectPart,
-            ColumnSpec.Constraint constraint,
-            ColumnSpec.PropositionIdToSqlCode[] propIdToSqlCodes) {
+            boolean selectPartHasCaseStmt, StringBuilder selectPart) {
+        ColumnSpec.Constraint constraint = columnSpec.getConstraint();
+        ColumnSpec.PropositionIdToSqlCode[] propIdToSqlCodes =
+                columnSpec.getPropositionIdToSqlCodes();
         if (constraint != null) {
             PropositionIdToSqlCode[] filteredConstraintValues =
                     filterConstraintValues(propIds, propIdToSqlCodes);
@@ -710,7 +740,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                 columnSpec.getColumn(),
                                 sqlCodes, false);
                     } else {
-                        appendColumnReference(wherePart, referenceIndices,
+                        appendColumnRef(wherePart, referenceIndices,
                                 columnSpec);
                         wherePart.append(constraint.getSqlOperator());
                         appendValue(sqlCodes[0], wherePart);
@@ -720,7 +750,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 case LESS_THAN_OR_EQUAL_TO:
                 case GREATER_THAN:
                 case GREATER_THAN_OR_EQUAL_TO:
-                    appendColumnReference(wherePart, referenceIndices,
+                    appendColumnRef(wherePart, referenceIndices,
                             columnSpec);
                     wherePart.append(constraint.getSqlOperator());
                     appendValue(sqlCodes[0], wherePart);
@@ -732,7 +762,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                 columnSpec.getColumn(),
                                 sqlCodes, true);
                     } else {
-                        appendColumnReference(wherePart, referenceIndices,
+                        appendColumnRef(wherePart, referenceIndices,
                                 columnSpec);
                         wherePart.append(constraint.getSqlOperator());
                         appendValue(sqlCodes[0], wherePart);
@@ -747,7 +777,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                         wherePart.append('(');
                     }
                     for (int k = 0; k < sqlCodes.length; k++) {
-                        appendColumnReference(wherePart, referenceIndices,
+                        appendColumnRef(wherePart, referenceIndices,
                                 columnSpec);
                         wherePart.append(" LIKE ");
                         appendValue(sqlCodes[k], wherePart);
@@ -755,20 +785,22 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                             wherePart.append(" or ");
                         }
                         selectPart.append("when ");
-                        appendColumnReference(selectPart, referenceIndices,
+                        appendColumnRef(selectPart, referenceIndices,
                                 columnSpec);
                         selectPart.append(" like ");
                         appendValue(sqlCodes[k], selectPart);
                         selectPart.append(" then ");
-                        selectPart.append("'");
                         appendValue(
                                 filteredConstraintValues[k].getPropositionId(),
                                 selectPart);
-                        selectPart.append("'");
+                        if (k < sqlCodes.length - 1)
+                            selectPart.append(" ");
                     }
                     if (sqlCodes.length > 1) {
                         wherePart.append(')');
                     }
+                    if (selectPartHasCaseStmt)
+                        selectPart.append(" end ");
                     break;
                 default:
                     throw new AssertionError("should not happen");
@@ -796,7 +828,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                         columnSpec.getColumn(), vals, constraint
                         == Constraint.NOT_EQUAL_TO);
             } else {
-                appendColumnReference(wherePart, referenceIndices,
+                appendColumnRef(wherePart, referenceIndices,
                         columnSpec);
                 wherePart.append(constraint.getSqlOperator());
                 appendValue(value.getFormatted(), wherePart);
@@ -823,13 +855,14 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             EntitySpec entitySpec,
             int i, StringBuilder wherePart, StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
-            Set<Filter> filtersCopy) {
+            Set<Filter> filtersCopy, SQLGenResultProcessor resultProcessor) {
         boolean selectPartHasCaseStmt = false;
         ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
         for (ColumnSpec constraintSpec : constraintSpecs) {
             i = processConstraintSpecForWhereClause(null, constraintSpec,
                     i, wherePart,
-                    selectPart, referenceIndices, selectPartHasCaseStmt);
+                    selectPart, referenceIndices, selectPartHasCaseStmt,
+                    resultProcessor);
         }
         for (Iterator<Filter> itr = filtersCopy.iterator(); itr.hasNext();) {
             Filter filter = itr.next();
@@ -854,11 +887,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
         i = processConstraintSpecForWhereClause(propIds, codeSpec, i,
                 wherePart, selectPart, referenceIndices,
-                selectPartHasCaseStmt);
-        if (selectPartHasCaseStmt) {
-            selectPart.append(" else 'OTHER' end ");
-            selectPart.append("code ");
-        }
+                selectPartHasCaseStmt, resultProcessor);
         return i;
     }
 
@@ -898,7 +927,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             ColumnSpec columnSpec, int i, StringBuilder wherePart,
             StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
-            boolean selectPartHasCaseStmt) {
+            boolean selectPartHasCaseStmt, 
+            SQLGenResultProcessor resultProcessor) {
         if (columnSpec == null) {
             return i;
         }
@@ -912,10 +942,10 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             wherePart.append(" and ");
         }
         wherePart.append('(');
+        resultProcessor.setCasePresent(columnSpec.getConstraint() ==
+                ColumnSpec.Constraint.LIKE);
         processConstraints(columnSpec, propIds, wherePart,
-                referenceIndices, selectPartHasCaseStmt, selectPart,
-                columnSpec.getConstraint(),
-                columnSpec.getPropositionIdToSqlCodes());
+                referenceIndices, selectPartHasCaseStmt, selectPart);
 
         wherePart.append(')');
 
@@ -976,7 +1006,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                     wherePart.append(" and ");
                                 }
 
-                                appendColumnReference(wherePart,
+                                appendColumnRef(wherePart,
                                         referenceIndices, finishTimeSpec);
                                 wherePart.append(" <= {ts '");
                                 wherePart.append(
@@ -1018,7 +1048,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                 if (wherePart.length() > 0) {
                                     wherePart.append(" and ");
                                 }
-                                appendColumnReference(wherePart,
+                                appendColumnRef(wherePart,
                                         referenceIndices, startTimeSpec);
                                 wherePart.append(" >= {ts '");
                                 wherePart.append(
@@ -1031,7 +1061,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                 if (wherePart.length() > 0) {
                                     wherePart.append(" and ");
                                 }
-                                appendColumnReference(wherePart,
+                                appendColumnRef(wherePart,
                                         referenceIndices,
                                         startTimeSpec);
                                 wherePart.append(" <= {ts '");

@@ -9,7 +9,8 @@ public final class ColumnSpecConstraint {
     private final ValueComparator valueComparator;
     private final Value value;
 
-    public ColumnSpecConstraint(String propertyName, ValueComparator valueComparator, Value value) {
+    public ColumnSpecConstraint(String propertyName,
+            ValueComparator valueComparator, Value value) {
         if (propertyName == null) {
             throw new IllegalArgumentException("propertyName cannot be null");
         }

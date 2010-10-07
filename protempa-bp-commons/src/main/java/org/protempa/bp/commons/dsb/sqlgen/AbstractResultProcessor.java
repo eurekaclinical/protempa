@@ -10,9 +10,10 @@ import org.protempa.proposition.UniqueIdentifier;
  *
  * @author Andrew Post
  */
-abstract class AbstractResultProcessor implements ResultProcessor {
+abstract class AbstractResultProcessor implements SQLGenResultProcessor {
     private String dataSourceBackendId;
     private EntitySpec entitySpec;
+    private boolean casePresent;
 
     final String getDataSourceBackendId() {
         return dataSourceBackendId;
@@ -28,6 +29,16 @@ abstract class AbstractResultProcessor implements ResultProcessor {
 
     final EntitySpec getEntitySpec() {
         return this.entitySpec;
+    }
+
+    @Override
+    public final boolean isCasePresent() {
+        return this.casePresent;
+    }
+
+    @Override
+    public final void setCasePresent(boolean casePresent) {
+        this.casePresent = casePresent;
     }
 
     protected final String[] generateUniqueIdsArray(EntitySpec entitySpec) {

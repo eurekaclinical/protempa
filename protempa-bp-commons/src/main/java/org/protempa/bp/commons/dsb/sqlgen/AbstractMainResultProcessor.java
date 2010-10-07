@@ -7,9 +7,10 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
 
 abstract class AbstractMainResultProcessor<P extends Proposition>
-        extends AbstractResultProcessor {
+        extends AbstractResultProcessor implements SQLGenResultProcessor {
 
     private Map<String, List<P>> results;
+    
 
     final Map<String, List<P>> getResults() {
         return this.results;

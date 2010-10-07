@@ -31,10 +31,15 @@ class ConstantResultProcessor extends
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifer = generateUniqueIdentifier(
                     entitySpec, uniqueIds);
-            String propId;
-            if (propIds.length == 1) {
-                propId = propIds[0];
+            String propId = null;
+            if (!isCasePresent()) {
+                if (propIds.length == 1) {
+                    propId = propIds[0];
+                } else {
+                    propId = resultSet.getString(i++);
+                }
             } else {
+                i++;
                 propId = resultSet.getString(i++);
             }
             Constant cp = new Constant(propId);

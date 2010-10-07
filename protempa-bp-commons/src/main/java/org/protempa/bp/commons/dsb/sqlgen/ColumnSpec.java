@@ -16,6 +16,10 @@ import org.protempa.ProtempaUtil;
 public final class ColumnSpec implements Serializable {
     private static final long serialVersionUID = 2254623617064935923L;
 
+    public static enum ColumnOp {
+        UPPER
+    }
+
     /**
      * SQL comparison operators.
      */
@@ -50,8 +54,8 @@ public final class ColumnSpec implements Serializable {
      */
     public static class PropositionIdToSqlCode {
 
-        private String propositionId;
-        private String sqlCode;
+        private final String propositionId;
+        private final String sqlCode;
 
         /**
          * Instantiates a mapping between a proposition id and a code in a
@@ -114,7 +118,8 @@ public final class ColumnSpec implements Serializable {
         }
 
         /**
-         * Generates a hash from the proposition id and code.
+         * Generates a hash from the proposition id, code, and value of
+         * ignoreCase.
          *
          * @return an <code>int</code> hash.
          */
@@ -138,6 +143,7 @@ public final class ColumnSpec implements Serializable {
     private final JoinSpec joinSpec;
     private final Constraint constraint;
     private final PropositionIdToSqlCode[] propIdToSqlCodes;
+    private final ColumnOp columnOp;
 
     /**
      * Instantiates part of a path using a schema, table and join.
@@ -177,11 +183,35 @@ public final class ColumnSpec implements Serializable {
      * @param propIdToSqlCodes a {@link PropositionIdToSqlCode...}. If
      * <code>constraint</code> is not <code>null</code>, then this argument
      * cannot be <code>null</code> either.
+     * @param columnOp a {@link ColumnOp} (optional).
+     */
+    public ColumnSpec(String schema, String table, String column,
+            Constraint constraint,
+            PropositionIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp) {
+        this(schema, table, column, null, constraint, propIdToSqlCodes,
+                columnOp);
+    }
+
+    /**
+     * Specifies part of path in which the column has one or more constraints
+     * on its value. This constructor may only used for the last part of a
+     * path.
+     *
+     * @param schema a schema {@link String}, if the underlying database
+     * requires it (e.g., Oracle).
+     * @param table a table {@link String}. Cannot be <code>null</code>.
+     * @param column a column {@link String}. Cannot be <code>null</code>
+     * unless <code>constraint</code> is also <code>null</code>.
+     * @param constraint a {@link Constraint}.
+     * @param propIdToSqlCodes a {@link PropositionIdToSqlCode...}. If
+     * <code>constraint</code> is not <code>null</code>, then this argument
+     * cannot be <code>null</code> either.
      */
     public ColumnSpec(String schema, String table, String column,
             Constraint constraint,
             PropositionIdToSqlCode... propIdToSqlCodes) {
-        this(schema, table, column, null, constraint, propIdToSqlCodes);
+        this(schema, table, column, null, constraint, propIdToSqlCodes,
+                null);
     }
 
     /**
@@ -210,7 +240,7 @@ public final class ColumnSpec implements Serializable {
      */
     public ColumnSpec(String schema, String table,
             String column, JoinSpec joinSpec) {
-        this(schema, table, column, joinSpec, null);
+        this(schema, table, column, joinSpec, null, null, null);
     }
 
     /**
@@ -226,7 +256,7 @@ public final class ColumnSpec implements Serializable {
      */
     private ColumnSpec(String schema, String table,
             String column, JoinSpec joinSpec, Constraint constraint,
-            PropositionIdToSqlCode... propIdToSqlCodes) {
+            PropositionIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp) {
         if (table == null) {
             throw new IllegalArgumentException("table cannot be null");
         }
@@ -251,6 +281,7 @@ public final class ColumnSpec implements Serializable {
         if (this.joinSpec != null) {
             this.joinSpec.setPrevColumnSpec(this);
         }
+        this.columnOp = columnOp;
     }
 
     /**
@@ -306,6 +337,10 @@ public final class ColumnSpec implements Serializable {
      */
     public PropositionIdToSqlCode[] getPropositionIdToSqlCodes() {
         return this.propIdToSqlCodes;
+    }
+
+    public ColumnOp getColumnOp() {
+        return this.columnOp;
     }
 
     /**

@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import org.arp.javautil.collections.Collections;
 import org.protempa.DatabaseDataSourceType;
 import org.protempa.proposition.Event;
+import org.protempa.proposition.Interval;
 import org.protempa.proposition.IntervalFactory;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Granularity;
@@ -25,30 +26,27 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
         Map<String, List<Event>> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
         Logger logger = SQLGenUtil.logger();
+        String[] propIds = entitySpec.getPropositionIds();
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
-
             String[] uniqueIds = generateUniqueIdsArray(entitySpec);
-            i += uniqueIds.length;
-            
-            String propId;
-            String[] propIds = entitySpec.getPropositionIds();
-            if (propIds.length == 1) {
-                propId = propIds[0];
+            i = readUniqueIds(uniqueIds, resultSet, i);
+            UniqueIdentifier uniqueIdentifier = generateUniqueIdentifier(
+                    entitySpec, uniqueIds);
+            String propId = null;
+            if (!isCasePresent()) {
+                if (propIds.length == 1) {
+                    propId = propIds[0];
+                } else {
+                    propId = resultSet.getString(i++);
+                }
             } else {
-                propId = resultSet.getString(i);
-            }
-            i -=uniqueIds.length;
-            Event event = new Event(propId);
-            event.setDataSourceType(
-                    new DatabaseDataSourceType(getDataSourceBackendId()));
-            i = eventSetUniqueIdentifier(uniqueIds, entitySpec, resultSet, i,
-                    event);
-            if (propIds.length > 1)
                 i++;
-            Granularity gran = entitySpec.getGranularity();
+            }
             ColumnSpec finishTimeSpec = entitySpec.getFinishTimeSpec();
+            Granularity gran = entitySpec.getGranularity();
+            Interval interval = null;
             if (finishTimeSpec == null) {
                 Long d = null;
                 try {
@@ -59,7 +57,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                             "Could not parse timestamp. Leaving the finish time unset.",
                             e);
                 }
-                event.setInterval(intervalFactory.getInstance(d, gran));
+                interval = intervalFactory.getInstance(d, gran);
             } else {
                 Long start = null;
                 try {
@@ -80,16 +78,23 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                             e);
                 }
                 try {
-                    event.setInterval(intervalFactory.getInstance(start, gran,
-                            finish, gran));
+                    interval = intervalFactory.getInstance(start, gran,
+                            finish, gran);
                 } catch (IllegalArgumentException e) {
                     logger.log(Level.WARNING,
-                            "Could not parse the time of event \'" + event +
-                            "\' because finish is before start.", e);
-                    event.setInterval(intervalFactory.getInstance(null, gran,
-                            null, gran));
+                            "Finish is before start", e);
+                    interval = intervalFactory.getInstance(null, gran,
+                            null, gran);
                 }
             }
+            if (isCasePresent()) {
+                propId = resultSet.getString(i++);
+            }
+            Event event = new Event(propId);
+            event.setDataSourceType(
+                    new DatabaseDataSourceType(getDataSourceBackendId()));
+            event.setUniqueIdentifier(uniqueIdentifier);
+            event.setInterval(interval);
             PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
             for (PropertySpec propertySpec : propertySpecs) {
                 ValueType valueType = propertySpec.getValueType();
