@@ -1,5 +1,6 @@
 package org.protempa;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -717,9 +718,9 @@ public final class KnowledgeSource
      *         <code>String</code>s, with the keys being {@link Term} IDs and
      *         the values being lists of {@link PropositionDefinition} IDs.
      */
-    public Map<String, List<String>> mapTermsToPropDefinitions()
+    public List<String> getPropositionDefinitionsByTerm(String termId)
             throws KnowledgeSourceReadException {
-        Map<String, List<String>> result = new HashMap<String, List<String>>();
+        List<String> result = new ArrayList<String>();
         try {
             initializeIfNeeded();
         } catch (BackendInitializationException ex) {
@@ -728,7 +729,7 @@ public final class KnowledgeSource
             throw new KnowledgeSourceReadException(ex);
         }
         for (KnowledgeSourceBackend backend : backendManager.getBackends()) {
-            result.putAll(backend.mapTermsToPropositionDefinitions());
+            result.addAll(backend.getPropositionDefinitionsByTerm(termId));
         }
 
         return result;

@@ -1,5 +1,6 @@
 package org.protempa;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,9 +95,9 @@ public abstract class AbstractKnowledgeSourceBackend extends
      * @return a {@link Map<String, List<String>>}.
      */
     @Override
-    public Map<String, List<String>> mapTermsToPropositionDefinitions()
+    public List<String> getPropositionDefinitionsByTerm(String termId)
             throws KnowledgeSourceReadException {
-        return new HashMap<String, List<String>>();
+        return new ArrayList<String>();
     }
 
     /**

@@ -3,7 +3,6 @@ package org.protempa;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Translates from an arbitrary knowledge base to a PROTEMPA knowledge base.
  * Users of <code>KnowledgeSourceBackend</code> implementations must first call
@@ -27,8 +26,8 @@ public interface KnowledgeSourceBackend extends
      *         none with the given id was found.
      */
     PrimitiveParameterDefinition readPrimitiveParameterDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
+	    KnowledgeBase protempaKnowledgeBase)
+	    throws KnowledgeSourceReadException;
 
     /**
      * Reads an abstraction definition into the given PROTEMPA knowledge base.
@@ -41,8 +40,8 @@ public interface KnowledgeSourceBackend extends
      *         with the given id was found.
      */
     AbstractionDefinition readAbstractionDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
+	    KnowledgeBase protempaKnowledgeBase)
+	    throws KnowledgeSourceReadException;
 
     /**
      * Reads an event definition into the given PROTEMPA knowledge base.
@@ -55,46 +54,46 @@ public interface KnowledgeSourceBackend extends
      *         the given id was found.
      */
     EventDefinition readEventDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
+	    KnowledgeBase protempaKnowledgeBase)
+	    throws KnowledgeSourceReadException;
 
     boolean hasPrimitiveParameterDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
+	    KnowledgeBase protempaKnowledgeBase)
+	    throws KnowledgeSourceReadException;
 
     boolean hasEventDefinition(String id, KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
+	    throws KnowledgeSourceReadException;
 
     boolean hasAbstractionDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
+	    KnowledgeBase protempaKnowledgeBase)
+	    throws KnowledgeSourceReadException;
 
     /**
      * Reads a constant definition into the given PROTEMPA knowledge base.
-     *
+     * 
      * @param id
      *            an event id.
      * @param protempaKnowledgeBase
      *            the PROTEMPA {@link KnowledgeBase} to use.
-     * @return the {@link ConstantDefinition}, or <code>null</code> if none
-     * with the given id was found.
+     * @return the {@link ConstantDefinition}, or <code>null</code> if none with
+     *         the given id was found.
      */
     ConstantDefinition readConstantDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
-            
-    boolean hasConstantDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
+	    KnowledgeBase protempaKnowledgeBase)
+	    throws KnowledgeSourceReadException;
+
+    boolean hasConstantDefinition(String id, KnowledgeBase protempaKnowledgeBase)
+	    throws KnowledgeSourceReadException;
 
     /**
-     * Maps term IDs to proposition definition IDs.
+     * Gets the proposition definitions that are associated with the given term.
      * 
-     * @return a {@link Map} of {@link String}s to a {@link List} of
-     *         <code>String</code>s, with the keys being {@link Term} IDs and
-     *         the values being lists of {@link PropositionDefinition} IDs.
-     *         Guaranteed not to return <code>null</code>.
+     * @param termId
+     *            the term ID to look for
+     * 
+     * @return a {@link List} of proposition definitions associated with the
+     *         given term ID
      */
-    Map<String, List<String>> mapTermsToPropositionDefinitions()
-            throws KnowledgeSourceReadException;
+    List<String> getPropositionDefinitionsByTerm(String termId)
+	    throws KnowledgeSourceReadException;
 }
