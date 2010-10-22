@@ -10,6 +10,7 @@ import org.protempa.HighLevelAbstractionDefinition;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.LowLevelAbstractionDefinition;
+import org.protempa.PairDefinition;
 import org.protempa.PrimitiveParameterDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaException;
@@ -141,6 +142,12 @@ public class PropositionColumnSpec implements TableColumnSpec {
                 propertyColumnNames[i] = propName;
             }
             return propertyColumnNames;
+        }
+
+        @Override
+        public void visit(PairDefinition def) {
+            // TODO Auto-generated method stub
+            
         }
     }
 

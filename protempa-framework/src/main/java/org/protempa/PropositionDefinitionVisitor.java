@@ -70,5 +70,14 @@ public interface PropositionDefinitionVisitor {
      *            a {@link ConstantDefinition}. Cannot be
      *            <code>null</code>.
      */
+
     void visit(ConstantDefinition def);
+    /**
+     * Process a pair definition.
+     *
+     * @param def
+     *            a {@link PairDefinition}. Cannot be
+     *            <code>null</code>.
+     */
+    void visit(PairDefinition def);
 }

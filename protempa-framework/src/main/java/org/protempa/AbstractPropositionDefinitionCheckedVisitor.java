@@ -137,4 +137,22 @@ public abstract class AbstractPropositionDefinitionCheckedVisitor implements
                 "Visiting SliceAbstractionDefinitions is unsupported.");
 
     }
+
+    /**
+     * Processes pair abstraction definitions. This default implementation
+     * throws an {@link UnsupportedOperationException).
+     *
+     * @param pairAbstractionDefinition
+     *            a {@link pairDefinition}.
+     * @throws ProtempaException if an error occurs.
+     * @throws UnsupportedOperationException.
+     * @see org.protempa.PropositionDefinitionVisitor#visit(org.protempa.PairDefinition)
+     */
+    @Override
+    public void visit(PairDefinition pairDefinition)
+            throws ProtempaException {
+        throw new UnsupportedOperationException(
+                "Visiting PairDefinitions is unsupported.");
+
+    }
 }

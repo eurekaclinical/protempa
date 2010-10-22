@@ -42,7 +42,7 @@ final class AbstractionFinder implements Module {
     private final KnowledgeSource knowledgeSource;
     private final TermSource termSource;
     private final AlgorithmSource algorithmSource;
-    private final Map<String, List<String>> termToPropDefMap;
+//    private final Map<String, List<String>> termToPropDefMap;
     private boolean clearNeeded;
     private final Map<String, Map<Set<String>, Sequence<PrimitiveParameter>>> sequences;
     private boolean closed;
@@ -59,12 +59,12 @@ final class AbstractionFinder implements Module {
         this.termSource = termSource;
         this.algorithmSource = algorithmSource;
 
-        try {
-            this.termToPropDefMap = knowledgeSource.mapTermsToPropDefinitions();
-        } catch (KnowledgeSourceReadException ex) {
-            throw new KnowledgeSourceReadException(
-                    "Unable to map term IDs to proposition definition IDs", ex);
-        }
+//        try {
+//            this.termToPropDefMap = knowledgeSource.mapTermsToPropDefinitions();
+//        } catch (KnowledgeSourceReadException ex) {
+//            throw new KnowledgeSourceReadException(
+//                    "Unable to map term IDs to proposition definition IDs", ex);
+//        }
 
         this.dataSource
                 .addSourceListener(new SourceListener<DataSourceUpdatedEvent>() {
@@ -674,6 +674,11 @@ final class AbstractionFinder implements Module {
 
         @Override
         public void visit(SliceDefinition sliceAbstractionDefinition)
+                throws ProtempaException {
+        }
+
+        @Override
+        public void visit(PairDefinition pairAbstractionDefinition)
                 throws ProtempaException {
         }
 

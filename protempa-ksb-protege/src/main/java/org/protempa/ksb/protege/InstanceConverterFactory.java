@@ -43,7 +43,10 @@ final class InstanceConverterFactory {
             return new EventConverter();
         } else if (parameter.hasType(kb.getCls("Constant"))) {
             return new ConstantConverter();
-        } else {
+        } else if (parameter.hasType(kb.getCls("PairAbstraction"))) {
+            return new PairAbstractionConverter();
+        }
+        else {
             return null;
         }
     }

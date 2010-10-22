@@ -116,4 +116,18 @@ public abstract class AbstractPropositionDefinitionVisitor implements
         throw new UnsupportedOperationException(
                 "Visiting ConstantDefinitions is unsupported");
     }
+
+    /**
+     * Processes constant definitions. This default implementation throws an
+     * {@link UnsupportedOperationException).
+     *
+     * @param constantDefinition
+     *            a {@link ConstantDefinition}.
+     * @throws UnsupportedOperationException.
+     */
+    @Override
+    public void visit(PairDefinition pairDefinition) {
+        throw new UnsupportedOperationException(
+                "Visiting PairDefinitions is unsupported");
+    }
 }
