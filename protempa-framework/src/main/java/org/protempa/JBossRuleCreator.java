@@ -108,14 +108,34 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
         private static final long serialVersionUID = -6225160728904051528L;
         private TemporalExtendedPropositionDefinition tepd;
-        private TemporalExtendedPropositionDefinition rightHandSide;
 
         private GetMatchesPredicateExpression(
                 TemporalExtendedPropositionDefinition tepd) {
             this.tepd = tepd;
         }
 
-        private GetMatchesPredicateExpression(
+        @Override
+        public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
+                Declaration[] arg3, WorkingMemory arg4, Object context)
+                throws Exception {
+            return this.tepd == null
+                    || this.tepd.getMatches((Proposition) arg0);
+        }
+
+        @Override
+        public Object createContext() {
+            return null;
+        }
+    }
+
+    private static final class GetMatchesPredicateExpressionPair implements
+            PredicateExpression {
+
+        private static final long serialVersionUID = -6225160728904051528L;
+        private TemporalExtendedPropositionDefinition tepd;
+        private TemporalExtendedPropositionDefinition rightHandSide;
+
+        private GetMatchesPredicateExpressionPair(
                 TemporalExtendedPropositionDefinition leftHandSide,
                 TemporalExtendedPropositionDefinition rightHandSide) {
             this.tepd = leftHandSide;
@@ -126,9 +146,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
                 Declaration[] arg3, WorkingMemory arg4, Object context)
                 throws Exception {
-            return this.tepd == null
-                    || this.tepd.getMatches((Proposition) arg0)
-                    || this.rightHandSide == null
+            return this.tepd.getMatches((Proposition) arg0)
                     || this.rightHandSide.getMatches((Proposition) arg0);
         }
 
@@ -146,11 +164,12 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             rule.setSalience(new SalienceInteger(1));
             Set<ExtendedPropositionDefinition> epdsC = def
                     .getExtendedPropositionDefinitions();
-            TemporalExtendedPropositionDefinition[] epds = (TemporalExtendedPropositionDefinition[]) epdsC
+            TemporalExtendedPropositionDefinition[] epds =
+                    (TemporalExtendedPropositionDefinition[]) epdsC
                     .toArray(new TemporalExtendedPropositionDefinition[epdsC
                             .size()]);
             for (int i = 0; i < epds.length; i++) {
-                Pattern p = new Pattern(i, PROPOSITION_OBJECT_TYPE);
+                Pattern p = new Pattern(i, TEMP_PROP_OT);
                 Constraint c = new PredicateConstraint(
                         new GetMatchesPredicateExpression(epds[i]));
                 p.addConstraint(c);
@@ -203,10 +222,16 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             Rule rule = new Rule("PAIR_" + def.getId());
             Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
             sourceP.addConstraint(new PredicateConstraint(
-                    new PropositionPredicateExpression(def.getAbstractedFrom())));
+                    new PropositionPredicateExpression(
+                    def.getAbstractedFrom())));
+            TemporalExtendedPropositionDefinition lhProp =
+                    def.getLeftHandProposition();
+            assert lhProp != null : "lhProp should not be null";
+            TemporalExtendedPropositionDefinition rhProp =
+                    def.getRightHandProposition();
+            assert rhProp != null : "rhProp should not be null";
             sourceP.addConstraint(new PredicateConstraint(
-                    new GetMatchesPredicateExpression(def.getLeftHandProposition(),
-                            def.getRightHandProposition())));
+                    new GetMatchesPredicateExpressionPair(lhProp, rhProp)));
 
             Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
             resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
