@@ -23,7 +23,7 @@ import org.protempa.proposition.UniqueIdentifier;
 class PropositionCopier extends AbstractPropositionVisitor {
 
     private final String propId;
-    private final WorkingMemory arg1;
+    private final WorkingMemory workingMemory;
     private final Map<Proposition, List<Proposition>> derivations;
 
     PropositionCopier(String propId, WorkingMemory workingMemory,
@@ -31,7 +31,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
         super();
         this.derivations = derivations;
         this.propId = propId;
-        this.arg1 = workingMemory;
+        this.workingMemory = workingMemory;
     }
 
     @Override
@@ -42,7 +42,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
                 new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
         param.setInterval(p.getInterval());
         param.setValue(p.getValue());
-        this.arg1.insert(param);
+        this.workingMemory.insert(param);
     }
 
     @Override
@@ -54,7 +54,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
                 new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
         Collections.putList(this.derivations, event, e);
         Collections.putList(this.derivations, e, event);
-        this.arg1.insert(e);
+        this.workingMemory.insert(e);
     }
 
     @Override
@@ -67,7 +67,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
                 new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
         Collections.putList(this.derivations, primitiveParameter, param);
         Collections.putList(this.derivations, param, primitiveParameter);
-        this.arg1.insert(param);
+        this.workingMemory.insert(param);
     }
 
     @Override

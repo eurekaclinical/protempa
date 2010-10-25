@@ -150,7 +150,7 @@ class Util {
             throws KnowledgeSourceReadException {
         Collection<?> isas = propInstance.getDirectOwnSlotValues(cm
                 .getSlot("inverseIsA"));
-        if (isas != null) {
+        if (isas != null && !isas.isEmpty()) {
             String[] inverseIsAs = new String[isas.size()];
             int i = 0;
             for (Object isAInstance : isas) {

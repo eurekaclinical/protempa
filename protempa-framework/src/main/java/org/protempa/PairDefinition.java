@@ -35,8 +35,10 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     @Override
     public Set<String> getAbstractedFrom() {
         HashSet<String> set = new HashSet<String>();
-        set.add(this.leftHandProposition.getPropositionId());
-        set.add(this.rightHandProposition.getPropositionId());
+        if (this.leftHandProposition != null)
+            set.add(this.leftHandProposition.getPropositionId());
+        if (this.rightHandProposition != null)
+            set.add(this.rightHandProposition.getPropositionId());
         return set;
     }
 
@@ -105,6 +107,12 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     protected void recalculateDirectChildren() {
         String[] old = this.directChildren;
         Set<String> abstractedFrom = getAbstractedFrom();
+        String[] inverseIsA = getInverseIsA();
+        if (inverseIsA != null) {
+            for (String propId : inverseIsA) {
+                abstractedFrom.add(propId);
+            }
+        }
         this.directChildren = abstractedFrom.toArray(new String[abstractedFrom
                 .size()]);
         this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
@@ -117,6 +125,8 @@ public class PairDefinition extends AbstractAbstractionDefinition {
                 .append("temporalOffset", this.temporalOffset)
                 .append("abstractedFrom", getAbstractedFrom())
                 .append("left temporal proposition", this.leftHandProposition)
+                .append("right temporal proposition",
+                this.rightHandProposition)
                 .append("relation", this.relation).toString();
     }
 
@@ -125,6 +135,7 @@ public class PairDefinition extends AbstractAbstractionDefinition {
         return gapFunction;
     }
 
+    @Override
     public void setGapFunction(GapFunction gapFunction) {
         if (gapFunction == null) {
             gapFunction = GapFunction.DEFAULT;
@@ -140,7 +151,11 @@ public class PairDefinition extends AbstractAbstractionDefinition {
 
     public void setLeftHandProposition(
             TemporalExtendedPropositionDefinition proposition) {
+        TemporalExtendedPropositionDefinition old = this.leftHandProposition;
         this.leftHandProposition = proposition;
+        recalculateDirectChildren();
+        this.changes.firePropertyChange("leftHandProposition", old,
+                this.leftHandProposition);
     }
 
     public TemporalExtendedPropositionDefinition getRightHandProposition() {
@@ -149,6 +164,10 @@ public class PairDefinition extends AbstractAbstractionDefinition {
 
     public void setRightHandProposition(
             TemporalExtendedPropositionDefinition rightHandProposition) {
+        TemporalExtendedPropositionDefinition old = this.rightHandProposition;
         this.rightHandProposition = rightHandProposition;
+        recalculateDirectChildren();
+        this.changes.firePropertyChange("rightHandProposition", old,
+                this.rightHandProposition);
     }
 }

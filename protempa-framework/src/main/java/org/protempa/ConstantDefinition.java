@@ -16,11 +16,21 @@ public final class ConstantDefinition extends AbstractPropositionDefinition {
         kb.addConstantDefinition(this);
     }
 
+    /**
+     * By definition, constants are not concatenable.
+     *
+     * @return <code>false</code>.
+     */
     @Override
     public boolean isConcatenable() {
         return false;
     }
 
+    /**
+     * By definition, there can be multiple constants with the same id.
+     *
+     * @return <code>false</code>.
+     */
     @Override
     public boolean isSolid() {
         return false;

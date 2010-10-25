@@ -600,7 +600,8 @@ public final class KnowledgeSource
             Set<String> result) throws KnowledgeSourceReadException {
         if (abstractionAndEventIds != null) {
             for (String abstractParameterOrEventId : abstractionAndEventIds) {
-                EventDefinition eventDef = this.readEventDefinition(abstractParameterOrEventId);
+                EventDefinition eventDef =
+                        this.readEventDefinition(abstractParameterOrEventId);
                 if (eventDef != null) {
                     String[] inverseIsA = eventDef.getInverseIsA();
                     if (inverseIsA.length == 0) {
@@ -609,7 +610,8 @@ public final class KnowledgeSource
                         leafEventIdsHelper(inverseIsA, result);
                     }
                 } else {
-                    AbstractionDefinition apDef = readAbstractionDefinition(abstractParameterOrEventId);
+                    AbstractionDefinition apDef =
+                        readAbstractionDefinition(abstractParameterOrEventId);
                     if (apDef != null) {
                         Set<String> af = apDef.getAbstractedFrom();
                         leafEventIdsHelper(af.toArray(new String[af.size()]),
@@ -652,7 +654,8 @@ public final class KnowledgeSource
         } else {
             Set<String> result = new HashSet<String>();
             if (constantIds != null) {
-                leafConstantIdsHelper(constantIds.toArray(new String[constantIds.size()]), result);
+                leafConstantIdsHelper(constantIds.toArray(
+                        new String[constantIds.size()]), result);
                 result = Collections.unmodifiableSet(result);
                 this.leafConstantIdCache.put(constantIds, result);
             }

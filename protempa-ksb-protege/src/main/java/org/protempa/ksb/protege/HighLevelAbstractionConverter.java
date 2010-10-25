@@ -47,7 +47,6 @@ class HighLevelAbstractionConverter implements PropositionConverter {
                     complexAbstractionInstance.getName());
             ConnectionManager cm = backend.getConnectionManager();
             Util.setNames(complexAbstractionInstance, cad, cm);
-            Util.setInverseIsAs(complexAbstractionInstance, cad, cm);
             Util.setProperties(complexAbstractionInstance, cad, cm);
             Util.setTerms(complexAbstractionInstance, cad, cm);
             Util.setGap(complexAbstractionInstance, cad, backend, cm);
@@ -59,6 +58,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
                     extendedParameterCache, backend);
             addRelationships(extendedParameterCache,
                     complexAbstractionInstance, cad, backend);
+            Util.setInverseIsAs(complexAbstractionInstance, cad, cm);
             setTemporalOffsets(complexAbstractionInstance, cad, backend,
                     extendedParameterCache);
         }

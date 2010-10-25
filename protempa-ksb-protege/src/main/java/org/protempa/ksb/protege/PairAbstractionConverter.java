@@ -1,7 +1,5 @@
 package org.protempa.ksb.protege;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 
 import org.protempa.KnowledgeBase;
@@ -24,8 +22,6 @@ public class PairAbstractionConverter implements PropositionConverter {
             KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        Util.logger().log(Level.INFO,
-                "PairAbstractionConverter.convert() called");
         if (protegeProposition != null
                 && protempaKnowledgeBase != null
                 && !protempaKnowledgeBase
@@ -34,19 +30,16 @@ public class PairAbstractionConverter implements PropositionConverter {
                     protegeProposition.getName());
             ConnectionManager cm = backend.getConnectionManager();
             Util.setNames(protegeProposition, pd, cm);
-            Util.setInverseIsAs(protegeProposition, pd, cm);
             Util.setProperties(protegeProposition, pd, cm);
             Util.setTerms(protegeProposition, pd, cm);
-            Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache = new HashMap<Instance, TemporalExtendedPropositionDefinition>();
             addComponentAbstractionDefinitions(protegeProposition, pd,
-                    extendedParameterCache, backend);
-            addRelationships(extendedParameterCache, protegeProposition, pd,
                     backend);
+            addRelationships(protegeProposition, pd, backend);
+            Util.setInverseIsAs(protegeProposition, pd, cm);
         }
     }
 
     private void addRelationships(
-            Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache,
             Instance protegeProposition, PairDefinition pd,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
@@ -54,10 +47,6 @@ public class PairAbstractionConverter implements PropositionConverter {
         Slot slot = cm.getSlot("withRelation");
         Instance relationInstance = (Instance) cm.getOwnSlotValue(
                 protegeProposition, slot);
-        Instance lhsExtendedParameter = (Instance) cm.getOwnSlotValue(
-                relationInstance, cm.getSlot("lhs"));
-        Instance rhsExtendedParameter = (Instance) cm.getOwnSlotValue(
-                relationInstance, cm.getSlot("rhs"));
 
         Integer mins1s2 = Util.parseTimeConstraint(relationInstance, "mins1s2",
                 cm);
@@ -97,15 +86,7 @@ public class PairAbstractionConverter implements PropositionConverter {
                 minf1s2, minf1s2Units, maxf1s2, maxf1s2Units, minf1f2,
                 minf1f2Units, maxf1f2, maxf1f2Units);
 
-        TemporalExtendedPropositionDefinition lhsEP = extendedParameterCache
-                .get(lhsExtendedParameter);
-
-        TemporalExtendedPropositionDefinition rhsEP = extendedParameterCache
-                .get(rhsExtendedParameter);
-
         pd.setRelation(relation);
-        pd.setLeftHandProposition(lhsEP);
-        pd.setRightHandProposition(rhsEP);
 
     }
 
@@ -132,23 +113,21 @@ public class PairAbstractionConverter implements PropositionConverter {
     private static void addComponentAbstractionDefinitions(
             Instance pairAbstractionInstance,
             PairDefinition pd,
-            Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         ConnectionManager cm = backend.getConnectionManager();
-        Instance relation = (Instance) cm.getOwnSlotValues(
+        Instance relation = (Instance) cm.getOwnSlotValue(
                 pairAbstractionInstance, cm.getSlot("withRelation"));
         Instance lhs = (Instance) cm.getOwnSlotValue(relation,
                 cm.getSlot("lhs"));
+        assert lhs != null : "lhs cannot be null";
         Instance rhs = (Instance) cm.getOwnSlotValue(relation,
                 cm.getSlot("rhs"));
-
-        TemporalExtendedPropositionDefinition lhsDefinition = newTemporalExtendedPropositionDefinition(
-                lhs, backend);
-        TemporalExtendedPropositionDefinition rhsDefinition = newTemporalExtendedPropositionDefinition(
-                rhs, backend);
-        extendedParameterCache.put(lhs, lhsDefinition);
-        extendedParameterCache.put(rhs, rhsDefinition);
+        assert rhs != null : "rhs cannot be null";
+        TemporalExtendedPropositionDefinition lhsDefinition =
+                newTemporalExtendedPropositionDefinition(lhs, backend);
+        TemporalExtendedPropositionDefinition rhsDefinition =
+                newTemporalExtendedPropositionDefinition(rhs, backend);
         pd.setLeftHandProposition(lhsDefinition);
         pd.setRightHandProposition(rhsDefinition);
     }
@@ -179,15 +158,15 @@ public class PairAbstractionConverter implements PropositionConverter {
      *            an ExtendedProposition.
      * @return a proposition id {@link String}.
      */
-    private static String propositionId(Instance extendedProposition) {
-        Instance proposition = (Instance) extendedProposition
-                .getOwnSlotValue(extendedProposition.getKnowledgeBase()
-                        .getSlot("proposition"));
-        if (proposition.hasType(proposition.getKnowledgeBase().getCls(
-                "ConstantParameter"))) {
+    private static String propositionId(Instance extendedProposition, 
+            ConnectionManager cm) throws KnowledgeSourceReadException {
+        Instance proposition = (Instance)
+                cm.getOwnSlotValue(extendedProposition,
+                cm.getSlot("proposition"));
+        if (proposition.hasType(cm.getCls("ConstantParameter"))) {
             throw new IllegalStateException(
                     "Constant parameters are not yet supported as "
-                            + "components of a high level abstraction definition.");
+                            + "components of a pair definition.");
         } else {
             return proposition.getName();
         }
@@ -213,7 +192,7 @@ public class PairAbstractionConverter implements PropositionConverter {
             Instance extendedProposition, ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         ConnectionManager cm = backend.getConnectionManager();
-        String ad = propositionId(extendedProposition);
+        String ad = propositionId(extendedProposition, cm);
 
         String displayName = (String) cm.getOwnSlotValue(extendedProposition,
                 cm.getSlot("displayName"));
@@ -222,8 +201,8 @@ public class PairAbstractionConverter implements PropositionConverter {
 
         TemporalExtendedPropositionDefinition result;
         if (isParameter(extendedProposition, cm)) {
-            TemporalExtendedParameterDefinition r = new TemporalExtendedParameterDefinition(
-                    ad);
+            TemporalExtendedParameterDefinition r =
+                    new TemporalExtendedParameterDefinition(ad);
             r.setValue(extendedParameterValue(extendedProposition, cm));
             result = r;
         } else {

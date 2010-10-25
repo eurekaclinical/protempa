@@ -184,10 +184,9 @@ public final class EventDefinition extends AbstractPropositionDefinition
     }
 
     /**
-     * By definition, events can overlap.
+     * By definition, events with the same id can overlap.
      *
      * @return <code>false</code>.
-     * @see org.protempa.PropositionDefinition#isSolid()
      */
     @Override
     public boolean isSolid() {
