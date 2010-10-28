@@ -1,7 +1,10 @@
 package org.protempa.query.handler.table;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.arp.javautil.arrays.Arrays;
 import org.protempa.AbstractPropositionDefinitionVisitor;
 import org.protempa.AbstractionDefinition;
 import org.protempa.ConstantDefinition;
@@ -14,6 +17,7 @@ import org.protempa.PairDefinition;
 import org.protempa.PrimitiveParameterDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaException;
+import org.protempa.ProtempaUtil;
 import org.protempa.SliceDefinition;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.AbstractPropositionCheckedVisitor;
@@ -25,62 +29,115 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Value;
 
-public class PropositionColumnSpec implements TableColumnSpec {
+public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
+    private final Link[] links;
     private final String[] propertyNames;
     private final boolean showDisplayName;
     private final boolean showAbbrevDisplayName;
+    private final int numInstances;
+    private final boolean showPosition;
+    private final String columnNamePrefixOverride;
 
     public PropositionColumnSpec(String[] propertyNames) {
-        this(propertyNames, false, false);
+        this(propertyNames, false, false, false);
     }
 
     public PropositionColumnSpec(String[] propertyNames,
-            boolean showDisplayName, boolean showAbbrevDisplayName) {
+            boolean showDisplayName, boolean showAbbrevDisplayName,
+            boolean showPosition) {
+        this(propertyNames, showDisplayName, showAbbrevDisplayName, 
+                showPosition, null);
+    }
+
+    public PropositionColumnSpec(String[] propertyNames,
+            boolean showDisplayName, boolean showAbbrevDisplayName,
+            boolean showPosition, Link[] links) {
+        this(propertyNames, showDisplayName, showAbbrevDisplayName, 
+                showPosition, links, 1);
+    }
+
+    public PropositionColumnSpec(String[] propertyNames,
+            boolean showDisplayName, boolean showAbbrevDisplayName,
+            boolean showPosition, Link[] links, int numInstances) {
+        this(null, propertyNames, showDisplayName, showAbbrevDisplayName,
+                showPosition, links, numInstances);
+    }
+
+    public PropositionColumnSpec(String columnNamePrefixOverride,
+            String[] propertyNames,
+            boolean showDisplayName, boolean showAbbrevDisplayName,
+            boolean showPosition, Link[] links, int numInstances) {
         if (propertyNames == null) {
             propertyNames = new String[0];
         }
         this.propertyNames = propertyNames.clone();
         this.showDisplayName = showDisplayName;
         this.showAbbrevDisplayName = showAbbrevDisplayName;
+        this.showPosition = showPosition;
+
+        if (links == null) {
+            this.links = new Link[0];
+        } else {
+            ProtempaUtil.checkArrayForNullElement(links, "links");
+            this.links = links.clone();
+        }
+
+        if (numInstances < 1) {
+            throw new IllegalArgumentException("numInstances cannot be < 1");
+        }
+        this.numInstances = numInstances;
+        this.columnNamePrefixOverride = columnNamePrefixOverride;
     }
 
     private class NamesPropositionDefinitionVisitor
             extends AbstractPropositionDefinitionVisitor {
 
         private String[] result;
+        private String prefix;
+
+        NamesPropositionDefinitionVisitor(String prefix) {
+            this.prefix = prefix;
+        }
 
         @Override
         public void visit(EventDefinition eventDefinition) {
             String[] propertyColumnNames =
                     propertyColumnNames();
-            this.result = new String[numColumns(propertyColumnNames, 2)];
+            this.result = new String[numColumns(propertyColumnNames, 0, 3)];
             int i = displayNames(0);
-            this.result[i++] = "start";
-            this.result[i++] = "finish";
+            if (PropositionColumnSpec.this.showPosition) {
+                this.result[i++] = this.prefix + "_start";
+                this.result[i++] = this.prefix + "_finish";
+                this.result[i++] = this.prefix + "_length";
+            }
             populatePropertyColumnNames(i, propertyColumnNames);
         }
 
         @Override
-        public void visit(HighLevelAbstractionDefinition
-                highLevelAbstractionDefinition) {
+        public void visit(
+              HighLevelAbstractionDefinition highLevelAbstractionDefinition) {
             visitAbstractionDefinition(highLevelAbstractionDefinition);
         }
 
         @Override
-        public void visit(LowLevelAbstractionDefinition
-                lowLevelAbstractionDefinition) {
+        public void visit(
+                LowLevelAbstractionDefinition lowLevelAbstractionDefinition) {
             visitAbstractionDefinition(lowLevelAbstractionDefinition);
         }
 
         @Override
-        public void visit(PrimitiveParameterDefinition
-                primitiveParameterDefinition) {
+        public void visit(
+                PrimitiveParameterDefinition primitiveParameterDefinition) {
             String[] propertyColumnNames = propertyColumnNames();
-            result = new String[numColumns(propertyColumnNames, 2)];
+            result = new String[numColumns(propertyColumnNames, 1, 1)];
             int i = displayNames(0);
-            result[i++] = "value";
-            result[i++] = "tstamp";
+            System.err.println("primitiveParameterDefinition: " +
+                    primitiveParameterDefinition);
+            result[i++] = this.prefix + "_value";
+            if (showPosition) {
+                result[i++] = this.prefix + "_tstamp";
+            }
             populatePropertyColumnNames(i, propertyColumnNames);
         }
 
@@ -92,7 +149,7 @@ public class PropositionColumnSpec implements TableColumnSpec {
         @Override
         public void visit(ConstantDefinition constantDefinition) {
             String[] propertyColumnNames = propertyColumnNames();
-            this.result = new String[numColumns(propertyColumnNames, 0)];
+            this.result = new String[numColumns(propertyColumnNames, 0, 0)];
             int i = displayNames(0);
             populatePropertyColumnNames(i, propertyColumnNames);
         }
@@ -104,12 +161,22 @@ public class PropositionColumnSpec implements TableColumnSpec {
         private void visitAbstractionDefinition(
                 AbstractionDefinition abstractionDefinition) {
             String[] propertyColumnNames = propertyColumnNames();
-            this.result = new String[numColumns(propertyColumnNames, 3)];
+            this.result = new String[numColumns(propertyColumnNames, 1, 3)];
             int i = displayNames(0);
-            this.result[i++] = "value";
-            this.result[i++] = "start";
-            this.result[i++] = "finish";
+            System.err.println("abstractionDefinition: " +
+                    abstractionDefinition);
+            this.result[i++] = this.prefix + "_value";
+            if (showPosition) {
+                this.result[i++] = this.prefix + "_start";
+                this.result[i++] = this.prefix + "_finish";
+                this.result[i++] = this.prefix + "_length";
+            }
             populatePropertyColumnNames(i, propertyColumnNames);
+        }
+
+        @Override
+        public void visit(PairDefinition def) {
+            visitAbstractionDefinition(def);
         }
 
         private void populatePropertyColumnNames(int i,
@@ -122,48 +189,43 @@ public class PropositionColumnSpec implements TableColumnSpec {
 
         private int displayNames(int i) {
             if (showDisplayName) {
-                result[i++] = "displayName";
+                result[i++] = this.prefix + "_displayName";
             }
             if (showAbbrevDisplayName) {
-                result[i++] = "abbrevDisplayName";
+                result[i++] = this.prefix + "_abbrevDisplayName";
             }
             return i;
         }
 
-        private int numColumns(String[] propertyColumnNames, int n) {
-            return propertyColumnNames.length + n + (showDisplayName ? 1 : 0) +
-                    (showAbbrevDisplayName ? 1 : 0);
+        private int numColumns(String[] propertyColumnNames, int m, int n) {
+            return propertyColumnNames.length + m + (showDisplayName ? 1 : 0)
+                    + (showAbbrevDisplayName ? 1 : 0)
+                    + (showPosition ? n : 0);
         }
 
         private String[] propertyColumnNames() {
             String[] propertyColumnNames = new String[propertyNames.length];
             for (int i = 0; i < propertyColumnNames.length; i++) {
                 String propName = propertyNames[i];
-                propertyColumnNames[i] = propName;
+                propertyColumnNames[i] = this.prefix + "." + propName;
             }
             return propertyColumnNames;
         }
-
-        @Override
-        public void visit(PairDefinition def) {
-            // TODO Auto-generated method stub
-            
-        }
     }
 
-    protected String[] columnNames(PropositionDefinition
-            propositionDefinition) {
+    protected String[] columnNames(String prefix,
+            PropositionDefinition propositionDefinition) {
         if (propositionDefinition == null) {
-            throw new IllegalArgumentException("refProp cannot be null");
+            throw new IllegalArgumentException(
+                    "propositionDefinition cannot be null");
         }
         NamesPropositionDefinitionVisitor propositionDefinitionVisitor =
-                new NamesPropositionDefinitionVisitor();
+                new NamesPropositionDefinitionVisitor(prefix);
         propositionDefinition.accept(propositionDefinitionVisitor);
         return propositionDefinitionVisitor.getResult();
     }
 
-    private class ValuesPropositionVisitor extends 
-            AbstractPropositionCheckedVisitor {
+    private class ValuesPropositionVisitor extends AbstractPropositionCheckedVisitor {
 
         private final int numProperties;
         private final KnowledgeSource knowledgeSource;
@@ -175,47 +237,47 @@ public class PropositionColumnSpec implements TableColumnSpec {
         }
 
         @Override
-        public void visit(AbstractParameter abstractParameter) 
+        public void visit(AbstractParameter abstractParameter)
                 throws KnowledgeSourceReadException {
-            this.result = new String[3 + this.numProperties +
-                    (showDisplayName ? 1 : 0) +
-                    (showAbbrevDisplayName ? 1 : 0)];
+            this.result = new String[numColumns(1, 3)];
             int i = displayNames(0, abstractParameter);
-            this.result[i++] = abstractParameter.getStartFormattedShort();
-            this.result[i++] = abstractParameter.getFinishFormattedShort();
+            if (showPosition) {
+                this.result[i++] = abstractParameter.getStartFormattedShort();
+                this.result[i++] = abstractParameter.getFinishFormattedShort();
+                this.result[i++] = abstractParameter.getLengthFormattedShort();
+            }
             this.result[i++] = abstractParameter.getValueFormatted();
             processProperties(abstractParameter, i);
         }
 
         @Override
         public void visit(Event event) throws KnowledgeSourceReadException {
-            this.result = new String[2 + this.numProperties +
-                    (showDisplayName ? 1 : 0) +
-                    (showAbbrevDisplayName ? 1 : 0)];
+            this.result = new String[numColumns(0, 3)];
             int i = displayNames(0, event);
-            this.result[i++] = event.getStartFormattedShort();
-            this.result[i++] = event.getFinishFormattedShort();
+            if (showPosition) {
+                this.result[i++] = event.getStartFormattedShort();
+                this.result[i++] = event.getFinishFormattedShort();
+                this.result[i++] = event.getLengthFormattedShort();
+            }
             processProperties(event, i);
         }
 
         @Override
-        public void visit(PrimitiveParameter primitiveParameter) 
+        public void visit(PrimitiveParameter primitiveParameter)
                 throws KnowledgeSourceReadException {
-            this.result = new String[2 + numProperties +
-                    (showDisplayName ? 1 : 0) +
-                    (showAbbrevDisplayName ? 1 : 0)];
+            this.result = new String[numColumns(1, 1)];
             int i = displayNames(0, primitiveParameter);
-            this.result[i++] = primitiveParameter.getTimestampFormattedShort();
+            if (showPosition)
+                this.result[i++] =
+                        primitiveParameter.getTimestampFormattedShort();
             this.result[i++] = primitiveParameter.getValueFormatted();
             processProperties(primitiveParameter, i);
         }
 
         @Override
-        public void visit(Constant constantParameter) 
+        public void visit(Constant constantParameter)
                 throws KnowledgeSourceReadException {
-            result = new String[numProperties +
-                    (showDisplayName ? 1 : 0) +
-                    (showAbbrevDisplayName ? 1 : 0)];
+            result = new String[numColumns(0, 0)];
             int i = displayNames(0, constantParameter);
             processProperties(constantParameter, i);
         }
@@ -227,6 +289,12 @@ public class PropositionColumnSpec implements TableColumnSpec {
 
         String[] getResult() {
             return this.result;
+        }
+
+        private int numColumns(int m, int n) {
+            return this.numProperties + m + (showDisplayName ? 1 : 0)
+                    + (showAbbrevDisplayName ? 1 : 0)
+                    + (showPosition ? n : 0);
         }
 
         private int displayNames(int i,
@@ -257,20 +325,33 @@ public class PropositionColumnSpec implements TableColumnSpec {
     }
 
     @Override
-    public String[] columnValues(String key, Proposition proposition, 
+    public String[] columnValues(String key, Proposition proposition,
             Map<Proposition, List<Proposition>> derivations,
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
-        ValuesPropositionVisitor propositionVisitor = 
-                new ValuesPropositionVisitor(knowledgeSource);
-        try {
-            proposition.acceptChecked(propositionVisitor);
-        } catch (ProtempaException ex) {
-            throw new KnowledgeSourceReadException(
-                    "Error writing column values", ex);
+        Collection<Proposition> propositions =
+                this.traverseLinks(this.links, proposition, derivations,
+                references, knowledgeSource);
+        List<String> result = new ArrayList<String>();
+        int i = 0;
+        for (Proposition prop : propositions) {
+            if (i < this.numInstances) {
+                ValuesPropositionVisitor propositionVisitor =
+                        new ValuesPropositionVisitor(knowledgeSource);
+                try {
+                    prop.acceptChecked(propositionVisitor);
+                } catch (ProtempaException ex) {
+                    throw new KnowledgeSourceReadException(
+                            "Error writing column values", ex);
+                }
+                Arrays.addAll(result, propositionVisitor.getResult());
+                i++;
+            } else {
+                break;
+            }
         }
-        return propositionVisitor.getResult();
+        return result.toArray(new String[result.size()]);
     }
 
     @Override
@@ -278,6 +359,14 @@ public class PropositionColumnSpec implements TableColumnSpec {
             throws KnowledgeSourceReadException {
         PropositionDefinition propDef =
                 knowledgeSource.readPropositionDefinition(propId);
-        return columnNames(propDef);
+        String headerString = this.columnNamePrefixOverride != null ?
+            this.columnNamePrefixOverride :
+            generateLinksHeaderString(this.links);
+        String[] one = columnNames(headerString, propDef);
+        String[] result = new String[one.length * this.numInstances];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = one[i % one.length];
+        }
+        return result;
     }
 }

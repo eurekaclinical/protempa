@@ -1,0 +1,56 @@
+package org.protempa.query.handler.table;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import org.protempa.KnowledgeSource;
+import org.protempa.proposition.Proposition;
+import org.protempa.proposition.UniqueIdentifier;
+
+/**
+ *
+ * @author Andrew Post
+ */
+public final class Derivation extends AbstractLink {
+
+    public Derivation(String[] propositionIds) {
+        this(propositionIds, null);
+    }
+
+    public Derivation(String[] propositionIds,
+            PropertyConstraint[] constraints) {
+        this(propositionIds, constraints, null, -1, -1);
+    }
+
+    public Derivation(String[] propositionIds,
+            PropertyConstraint[] constraints,
+            Comparator<Proposition> comparator, int index) {
+        this(propositionIds, constraints, comparator, index,
+                index >= 0 ? index + 1 : -1);
+    }
+
+    public Derivation(String[] propositionIds,
+            PropertyConstraint[] constraints, 
+            Comparator<Proposition> comparator, int fromIndex, int toIndex) {
+        super(propositionIds, constraints, comparator, fromIndex, toIndex);
+        
+    }
+
+    @Override
+    public String headerFragment() {
+        return createHeaderFragment("derived");
+    }
+
+
+
+    @Override
+    public Collection<Proposition> traverse(Proposition proposition,
+            Map<Proposition, List<Proposition>> derivations,
+            Map<UniqueIdentifier, Proposition> references,
+            KnowledgeSource knowledgeSource) {
+        List<Proposition> derivedProps = derivations.get(proposition);
+        
+        return createResults(derivedProps);
+    }
+}

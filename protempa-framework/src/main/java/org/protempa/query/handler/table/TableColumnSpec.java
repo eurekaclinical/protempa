@@ -26,7 +26,9 @@ public interface TableColumnSpec {
      * @throws KnowledgeSourceReadException if an attempt at reading from
      * the knowledge source failed.
      */
-    String[] columnNames(String rowPropositionId, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException;
+    String[] columnNames(String rowPropositionId, 
+            KnowledgeSource knowledgeSource)
+            throws KnowledgeSourceReadException;
 
     /**
      * Gets the values of the specified propositions or properties for
@@ -40,5 +42,9 @@ public interface TableColumnSpec {
      * @throws KnowledgeSourceReadException if an attempt at reading from
      * the knowledge source failed.
      */
-    String[] columnValues(String key, Proposition proposition, Map<Proposition, List<Proposition>> derivations, Map<UniqueIdentifier, Proposition> references, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException;
+    String[] columnValues(String key, Proposition proposition, 
+            Map<Proposition, List<Proposition>> derivations,
+            Map<UniqueIdentifier, Proposition> references,
+            KnowledgeSource knowledgeSource)
+            throws KnowledgeSourceReadException;
 }

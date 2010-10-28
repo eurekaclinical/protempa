@@ -16,9 +16,6 @@ import org.protempa.proposition.TemporalProposition;
 /**
  * High level abstraction definition condition.
  * 
- * FIXME This will fail if we have multiple inputs of the same type and value,
- * due to the key chosen in the parameters map.
- * 
  * @author Andrew Post
  */
 class HighLevelAbstractionCondition implements EvalExpression {
