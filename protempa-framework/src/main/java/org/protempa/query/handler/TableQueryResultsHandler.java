@@ -8,6 +8,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.FinderException;
@@ -19,7 +21,7 @@ import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.query.handler.table.TableColumnSpec;
 
 /**
- *
+ * 
  * @author Andrew Post
  */
 public class TableQueryResultsHandler extends WriterQueryResultsHandler
@@ -56,8 +58,7 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
 
     public TableQueryResultsHandler(String fileName, char columnDelimiter,
             String rowPropositionId, TableColumnSpec[] columnSpecs,
-            boolean headerWritten)
-            throws IOException {
+            boolean headerWritten) throws IOException {
         super(fileName);
         checkConstructorArgs(rowPropositionId, columnSpecs);
         this.columnDelimiter = columnDelimiter;
@@ -68,8 +69,7 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
 
     public TableQueryResultsHandler(File file, char columnDelimiter,
             String rowPropositionId, TableColumnSpec[] columnSpecs,
-            boolean headerWritten)
-            throws IOException {
+            boolean headerWritten) throws IOException {
         super(file);
         checkConstructorArgs(rowPropositionId, columnSpecs);
         this.columnDelimiter = columnDelimiter;
@@ -111,11 +111,29 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
                 List<String> columnNames = new ArrayList<String>();
                 columnNames.add("KeyId");
                 for (TableColumnSpec columnSpec : this.columnSpecs) {
+                    Util.logger().log(
+                            Level.FINE,
+                            "Processing columnSpec type "
+                                    + columnSpec.getClass().getName());
                     String[] colNames = columnSpec.columnNames(
                             this.rowPropositionId, knowledgeSource);
-                    String[] escapedColNames =
-                            StringUtil.escapeDelimitedColumns(colNames,
-                            this.columnDelimiter);
+
+                    for (int index = 0; index < colNames.length; index++) {
+                        if (colNames[index] == null) {
+                            colNames[index] = "(null)";
+                        } else if (colNames[index].length() == 0) {
+                            colNames[index] = "(empty)";
+                        }
+                    }
+
+                    String[] escapedColNames = StringUtil
+                            .escapeDelimitedColumns(colNames,
+                                    this.columnDelimiter);
+                    Util.logger().log(
+                            Level.FINE,
+                            "Got the following columns for proposition "
+                                    + this.rowPropositionId + ": "
+                                    + StringUtils.join(escapedColNames, ","));
                     for (String colName : escapedColNames) {
                         columnNames.add(colName);
                     }
@@ -124,8 +142,7 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
                 write(StringUtils.join(columnNames, this.columnDelimiter));
                 newLine();
             } catch (KnowledgeSourceReadException ex1) {
-                throw new FinderException("Error reading knowledge source",
-                        ex1);
+                throw new FinderException("Error reading knowledge source", ex1);
             } catch (IOException ex) {
                 throw new FinderException("Could not write header", ex);
             }
@@ -151,16 +168,26 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
                 try {
 
                     List<String> columnValues = new ArrayList<String>();
-                    String[] colValues = columnSpec.columnValues(key,
-                            prop, derivations, references, this.knowledgeSource);
+                    String[] colValues = columnSpec.columnValues(key, prop,
+                            derivations, references, this.knowledgeSource);
                     if (i == 0)
                         columnValues.add(key);
                     for (String colVal : colValues) {
                         columnValues.add(colVal);
                     }
-                    List<String> escapedColumnValues =
-                            StringUtil.escapeDelimitedColumns(columnValues,
-                            this.columnDelimiter);
+
+                    for (int index = 0; index < columnValues.size(); index++) {
+                        if (columnValues.get(index) == null) {
+                            columnValues.set(index, "(null)");
+                        } else if (columnValues.get(index).length() == 0) {
+                            columnValues.set(index, "(empty)");
+                        }
+                    }
+
+                    List<String> escapedColumnValues = StringUtil
+                            .escapeDelimitedColumns(columnValues,
+                                    this.columnDelimiter);
+
                     write(StringUtils.join(escapedColumnValues,
                             this.columnDelimiter));
                     if (i < n - 1) {
@@ -169,8 +196,8 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
                         newLine();
                     }
                 } catch (KnowledgeSourceReadException ex1) {
-                    throw new FinderException("Could not read knowledge source",
-                            ex1);
+                    throw new FinderException(
+                            "Could not read knowledge source", ex1);
                 } catch (IOException ex) {
                     throw new FinderException("Could not write row" + ex);
                 }
