@@ -19,15 +19,12 @@ public interface TableColumnSpec {
      * specification results in matching more than one proposition or
      * property.
      *
-     * @param rowPropositionId the id {@link String} of the proposition
-     * represented in each row of the table.
      * @param knowledgeSource the active {@link KnowledgeSource}.
      * @return a {@link String[]} of column names.
      * @throws KnowledgeSourceReadException if an attempt at reading from
      * the knowledge source failed.
      */
-    String[] columnNames(String rowPropositionId, 
-            KnowledgeSource knowledgeSource)
+    String[] columnNames(KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException;
 
     /**

@@ -72,12 +72,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         this.columnNamePrefixOverride = columnNamePrefixOverride;
     }
 
-    protected String[] columnNames(String prefix,
-            PropositionDefinition propositionDefinition) {
-        if (propositionDefinition == null) {
-            throw new IllegalArgumentException(
-                    "propositionDefinition cannot be null");
-        }
+    protected String[] columnNames(String prefix) {
         List<String> results = new ArrayList<String>();
         if (this.outputConfig.showValue()) {
             results.add(StringUtils.defaultIfEmpty(
@@ -294,13 +289,11 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     }
 
     @Override
-    public String[] columnNames(String propId, KnowledgeSource knowledgeSource)
+    public String[] columnNames(KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
-        PropositionDefinition propDef = knowledgeSource
-                .readPropositionDefinition(propId);
         String headerString = this.columnNamePrefixOverride != null ? this.columnNamePrefixOverride
                 : generateLinksHeaderString(this.links);
-        String[] one = columnNames(headerString, propDef);
+        String[] one = columnNames(headerString);
         String[] result = new String[one.length * this.numInstances];
         for (int i = 0; i < result.length; i++) {
             result[i] = one[i % one.length];

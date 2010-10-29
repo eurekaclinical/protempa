@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -29,74 +30,71 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
 
     private static final long serialVersionUID = -1503401944818776787L;
     private final char columnDelimiter;
-    private final String rowPropositionId;
+    private final String[] rowPropositionIds;
     private final TableColumnSpec[] columnSpecs;
     private final boolean headerWritten;
     private KnowledgeSource knowledgeSource;
 
     public TableQueryResultsHandler(Writer out, char columnDelimiter,
-            String rowPropositionId, TableColumnSpec[] columnSpecs,
+            String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
             boolean headerWritten) {
         super(out);
-        checkConstructorArgs(rowPropositionId, columnSpecs);
+        checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
-        this.rowPropositionId = rowPropositionId;
+        this.rowPropositionIds = rowPropositionIds.clone();
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
     }
 
     public TableQueryResultsHandler(OutputStream out, char columnDelimiter,
-            String rowPropositionId, TableColumnSpec[] columnSpecs,
+            String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
             boolean headerWritten) {
         super(out);
-        checkConstructorArgs(rowPropositionId, columnSpecs);
+        checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
-        this.rowPropositionId = rowPropositionId;
+        this.rowPropositionIds = rowPropositionIds.clone();
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
     }
 
     public TableQueryResultsHandler(String fileName, char columnDelimiter,
-            String rowPropositionId, TableColumnSpec[] columnSpecs,
+            String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
             boolean headerWritten) throws IOException {
         super(fileName);
-        checkConstructorArgs(rowPropositionId, columnSpecs);
+        checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
-        this.rowPropositionId = rowPropositionId;
+        this.rowPropositionIds = rowPropositionIds.clone();
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
     }
 
     public TableQueryResultsHandler(File file, char columnDelimiter,
-            String rowPropositionId, TableColumnSpec[] columnSpecs,
+            String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
             boolean headerWritten) throws IOException {
         super(file);
-        checkConstructorArgs(rowPropositionId, columnSpecs);
+        checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
-        this.rowPropositionId = rowPropositionId;
+        this.rowPropositionIds = rowPropositionIds.clone();
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
     }
 
-    private void checkConstructorArgs(String rowPropositionId,
+    private void checkConstructorArgs(String[] rowPropositionIds,
             TableColumnSpec[] columnSpecs) {
-        if (rowPropositionId == null) {
-            throw new IllegalArgumentException(
-                    "rowPropositionId cannot be null");
-        }
+        ProtempaUtil.checkArray(rowPropositionIds, "rowPropositionIds");
         ProtempaUtil.checkArray(columnSpecs, "columnSpecs");
     }
 
-    public String getRowPropositionId() {
-        return rowPropositionId;
+    public String[] getRowPropositionIds() {
+        return this.rowPropositionIds.clone();
     }
 
     public char getColumnDelimiter() {
-        return columnDelimiter;
+        return this.columnDelimiter;
     }
 
     public TableColumnSpec[] getColumnSpecs() {
-        return columnSpecs.clone();
+        return this.columnSpecs.clone();
     }
 
     public boolean isHeaderWritten() {
@@ -115,8 +113,8 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
                             Level.FINE,
                             "Processing columnSpec type "
                                     + columnSpec.getClass().getName());
-                    String[] colNames = columnSpec.columnNames(
-                            this.rowPropositionId, knowledgeSource);
+                    String[] colNames =
+                            columnSpec.columnNames(knowledgeSource);
 
                     for (int index = 0; index < colNames.length; index++) {
                         if (colNames[index] == null) {
@@ -132,7 +130,8 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
                     Util.logger().log(
                             Level.FINE,
                             "Got the following columns for proposition "
-                                    + this.rowPropositionId + ": "
+                                    + Arrays.toString(this.rowPropositionIds)
+                                    + ": "
                                     + StringUtils.join(escapedColNames, ","));
                     for (String colName : escapedColNames) {
                         columnNames.add(colName);
@@ -158,7 +157,8 @@ public class TableQueryResultsHandler extends WriterQueryResultsHandler
         int n = this.columnSpecs.length;
         List<Proposition> filtered = new ArrayList<Proposition>();
         for (Proposition prop : propositions) {
-            if (prop.getId().equals(this.rowPropositionId)) {
+            if (org.arp.javautil.arrays.Arrays.contains(this.rowPropositionIds,
+                    prop.getId())) {
                 filtered.add(prop);
             }
         }

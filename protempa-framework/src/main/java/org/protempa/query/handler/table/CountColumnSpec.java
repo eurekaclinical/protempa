@@ -25,7 +25,7 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
     }
 
     @Override
-    public String[] columnNames(String propId, KnowledgeSource knowledgeSource)
+    public String[] columnNames(KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
         StringBuilder builder = new StringBuilder();
         if (this.columnNameOverride != null) {
