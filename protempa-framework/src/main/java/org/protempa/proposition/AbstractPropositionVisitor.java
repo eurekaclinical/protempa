@@ -58,12 +58,12 @@ public abstract class AbstractPropositionVisitor implements PropositionVisitor {
     }
 
     /**
-     * Processes constant parameters. This default implementation is a no-op.
+     * Processes constants. This default implementation is a no-op.
      *
      * @param primitiveParameter
      *            an {@link PrimitiveParameter}.
      */
-    public void visit(Constant constantParameter) {
+    public void visit(Constant constant) {
     }
 
     /**

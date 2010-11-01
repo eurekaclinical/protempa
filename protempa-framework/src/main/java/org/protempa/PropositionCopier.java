@@ -3,11 +3,13 @@ package org.protempa;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import org.arp.javautil.collections.Collections;
 import org.drools.WorkingMemory;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.AbstractPropositionVisitor;
+import org.protempa.proposition.Constant;
 import org.protempa.proposition.Context;
 import org.protempa.proposition.DerivedUniqueIdentifier;
 import org.protempa.proposition.Event;
@@ -43,6 +45,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
         param.setInterval(p.getInterval());
         param.setValue(p.getValue());
         this.workingMemory.insert(param);
+        ProtempaUtil.logger().log(Level.FINER, "Asserted {0}", param);
     }
 
     @Override
@@ -55,6 +58,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
         Collections.putList(this.derivations, event, e);
         Collections.putList(this.derivations, e, event);
         this.workingMemory.insert(e);
+        ProtempaUtil.logger().log(Level.FINER, "Asserted {0}", e);
     }
 
     @Override
@@ -68,9 +72,25 @@ class PropositionCopier extends AbstractPropositionVisitor {
         Collections.putList(this.derivations, primitiveParameter, param);
         Collections.putList(this.derivations, param, primitiveParameter);
         this.workingMemory.insert(param);
+        ProtempaUtil.logger().log(Level.FINER, "Asserted {0}", param);
     }
 
     @Override
+    public void visit(Constant constant) {
+        Constant newConstant = new Constant(propId);
+        newConstant.setDataSourceType(new DerivedDataSourceType());
+        newConstant.setUniqueIdentifier(new UniqueIdentifier(new DerivedSourceId(),
+                new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
+        Collections.putList(this.derivations, constant, newConstant);
+        Collections.putList(this.derivations, newConstant, constant);
+        this.workingMemory.insert(newConstant);
+        ProtempaUtil.logger().log(Level.FINER, "Asserted {0}", newConstant);
+    }
+
+
+
+    @Override
     public void visit(Context context) {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

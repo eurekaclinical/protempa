@@ -8,14 +8,22 @@ import java.util.logging.Logger;
 
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
 import org.protempa.AbstractAbstractionDefinition;
 import org.protempa.AbstractPropositionDefinition;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropertyDefinition;
 import org.protempa.SimpleGapFunction;
+import org.protempa.TemporalExtendedParameterDefinition;
+import org.protempa.TemporalExtendedPropositionDefinition;
+import org.protempa.proposition.Relation;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
+import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
+import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -40,19 +48,23 @@ class Util {
      * Days (24 * 60 * 60 * 1000 milliseconds).
      */
     private static final String DAY = "Day";
-    static final Map<String, AbsoluteTimeUnit> ABSOLUTE_DURATION_MULTIPLIER = new HashMap<String, AbsoluteTimeUnit>();
+    static final Map<String, AbsoluteTimeUnit> ABSOLUTE_DURATION_MULTIPLIER =
+            new HashMap<String, AbsoluteTimeUnit>();
 
     static {
         ABSOLUTE_DURATION_MULTIPLIER.put(MINUTE, AbsoluteTimeUnit.MINUTE);
         ABSOLUTE_DURATION_MULTIPLIER.put(HOUR, AbsoluteTimeUnit.HOUR);
         ABSOLUTE_DURATION_MULTIPLIER.put(DAY, AbsoluteTimeUnit.DAY);
     }
-    static final Map<String, RelativeHourUnit> RELATIVE_HOURS_DURATION_MULTIPLIER = new HashMap<String, RelativeHourUnit>();
+    static final Map<String, RelativeHourUnit> 
+            RELATIVE_HOURS_DURATION_MULTIPLIER =
+            new HashMap<String, RelativeHourUnit>();
 
     static {
         RELATIVE_HOURS_DURATION_MULTIPLIER.put(HOUR, RelativeHourUnit.HOUR);
     }
-    static final Map<String, ValueType> VALUE_CLASS_NAME_TO_VALUE_TYPE = new HashMap<String, ValueType>();
+    static final Map<String, ValueType> VALUE_CLASS_NAME_TO_VALUE_TYPE =
+            new HashMap<String, ValueType>();
 
     static {
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("Value", ValueType.VALUE);
@@ -62,8 +74,8 @@ class Util {
                 ValueType.ORDINALVALUE);
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("NumericalValue",
                 ValueType.NUMERICALVALUE);
-        VALUE_CLASS_NAME_TO_VALUE_TYPE
-                .put("DoubleValue", ValueType.NUMBERVALUE);
+        VALUE_CLASS_NAME_TO_VALUE_TYPE.put("DoubleValue",
+                ValueType.NUMBERVALUE);
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("InequalityDoubleValue",
                 ValueType.INEQUALITYNUMBERVALUE);
     }
@@ -73,8 +85,8 @@ class Util {
 
     private static class LazyLoggerHolder {
 
-        private static Logger instance = Logger.getLogger(Util.class
-                .getPackage().getName());
+        private static Logger instance =
+                Logger.getLogger(Util.class.getPackage().getName());
     }
 
     static Logger logger() {
@@ -99,8 +111,8 @@ class Util {
             ConnectionManager cm) throws KnowledgeSourceReadException {
         Integer constraintValue = null;
         if (instance != null && constraint != null) {
-            constraintValue = (Integer) cm.getOwnSlotValue(instance, cm
-                    .getSlot(constraint));
+            constraintValue = (Integer) cm.getOwnSlotValue(instance,
+                    cm.getSlot(constraint));
         }
 
         return constraintValue;
@@ -111,8 +123,8 @@ class Util {
             throws KnowledgeSourceReadException {
         String constraintUnitsValue = null;
         if (instance != null && constraintUnits != null) {
-            constraintUnitsValue = (String) cm.getOwnSlotValue(instance, cm
-                    .getSlot(constraintUnits));
+            constraintUnitsValue = (String) cm.getOwnSlotValue(instance,
+                    cm.getSlot(constraintUnits));
         }
 
         if (constraintUnitsValue == null) {
@@ -129,8 +141,8 @@ class Util {
     static void setGap(Instance instance, AbstractAbstractionDefinition d,
             ProtegeKnowledgeSourceBackend backend, ConnectionManager cm)
             throws KnowledgeSourceReadException {
-        Integer maxGap = (Integer) cm.getOwnSlotValue(instance, cm
-                .getSlot("maxGap"));
+        Integer maxGap =
+                (Integer) cm.getOwnSlotValue(instance, cm.getSlot("maxGap"));
         Unit maxGapUnits = Util.parseUnitsConstraint(instance, "maxGapUnits",
                 backend, cm);
         d.setGapFunction(new SimpleGapFunction(maxGap, maxGapUnits));
@@ -145,18 +157,30 @@ class Util {
                 complexAbstractionInstance, cm.getSlot("abbrevDisplayName")));
     }
 
+    /**
+     * Sets inverseIsA on the given proposition definition. Automatically
+     * resolves duplicate entries but logs a warning.
+     * 
+     * @param propInstance a Protege proposition definition {@link Instance}.
+     * @param propDef the corresponding {@link AbstractPropositionDefinition}.
+     * @param cm a {@link ConnectionManager}.
+     * @throws KnowledgeSourceReadException if there is an error accessing
+     * the Protege ontology.
+     */
     static void setInverseIsAs(Instance propInstance,
             AbstractPropositionDefinition propDef, ConnectionManager cm)
             throws KnowledgeSourceReadException {
-        Collection<?> isas = propInstance.getDirectOwnSlotValues(cm
-                .getSlot("inverseIsA"));
+        Collection<?> isas = 
+                propInstance.getDirectOwnSlotValues(cm.getSlot("inverseIsA"));
+        Logger logger = Util.logger();
         if (isas != null && !isas.isEmpty()) {
-            String[] inverseIsAs = new String[isas.size()];
-            int i = 0;
-            for (Object isAInstance : isas) {
-                inverseIsAs[i++] = ((Instance) isAInstance).getName();
-            }
-            propDef.setInverseIsA(inverseIsAs);
+            Set<String> inverseIsANames =
+                    resolveAndLogDuplicates(isas, logger, propInstance,
+                    "inverseIsA");
+            String[] inverseIsAsArr =
+                    inverseIsANames.toArray(
+                    new String[inverseIsANames.size()]);
+            propDef.setInverseIsA(inverseIsAsArr);
         }
     }
 
@@ -167,14 +191,14 @@ class Util {
         Slot valueTypeSlot = cm.getSlot("valueType");
         Collection<?> properties = cm.getOwnSlotValues(propInstance,
                 propertySlot);
-        PropertyDefinition[] propDefs = new PropertyDefinition[properties
-                .size()];
+        PropertyDefinition[] propDefs =
+                new PropertyDefinition[properties.size()];
         int i = 0;
         for (Object propertyInstance : properties) {
             Instance inst = (Instance) propertyInstance;
             Cls valueTypeCls = (Cls) cm.getOwnSlotValue(inst, valueTypeSlot);
             PropertyDefinition propDef = new PropertyDefinition(inst.getName(),
-                    VALUE_CLASS_NAME_TO_VALUE_TYPE.get(valueTypeCls.getName()));
+                VALUE_CLASS_NAME_TO_VALUE_TYPE.get(valueTypeCls.getName()));
             propDefs[i] = propDef;
             i++;
         }
@@ -190,10 +214,161 @@ class Util {
         int i = 0;
         for (Object termInstance : terms) {
             Instance inst = (Instance) termInstance;
-            String termId = (String) cm.getOwnSlotValue(inst, cm
-                    .getSlot("termId"));
+            String termId =
+                    (String) cm.getOwnSlotValue(inst, cm.getSlot("termId"));
             termIds[i] = termId;
         }
         d.setTermIds(termIds);
+    }
+
+    static Relation instanceToRelation(Instance relationInstance, 
+            ConnectionManager cm, ProtegeKnowledgeSourceBackend backend)
+            throws KnowledgeSourceReadException {
+        Integer mins1s2 = Util.parseTimeConstraint(relationInstance,
+                "mins1s2", cm);
+        Unit mins1s2Units = Util.parseUnitsConstraint(relationInstance,
+                "mins1s2Units", backend, cm);
+        Integer maxs1s2 = Util.parseTimeConstraint(relationInstance,
+                "maxs1s2", cm);
+        Unit maxs1s2Units = Util.parseUnitsConstraint(relationInstance,
+                "maxs1s2Units", backend, cm);
+        Integer mins1f2 = Util.parseTimeConstraint(relationInstance,
+                "mins1f2", cm);
+        Unit mins1f2Units = Util.parseUnitsConstraint(relationInstance,
+                "mins1f2Units", backend, cm);
+        Integer maxs1f2 = Util.parseTimeConstraint(relationInstance,
+                "maxs1f2", cm);
+        Unit maxs1f2Units = Util.parseUnitsConstraint(relationInstance,
+                "maxs1f2Units", backend, cm);
+        Integer minf1s2 = Util.parseTimeConstraint(relationInstance,
+                "minf1s2", cm);
+        Unit minf1s2Units = Util.parseUnitsConstraint(relationInstance,
+                "minf1s2Units", backend, cm);
+        Integer maxf1s2 = Util.parseTimeConstraint(relationInstance,
+                "maxf1s2", cm);
+        Unit maxf1s2Units = Util.parseUnitsConstraint(relationInstance,
+                "maxf1s2Units", backend, cm);
+        Integer minf1f2 = Util.parseTimeConstraint(relationInstance,
+                "minf1f2", cm);
+        Unit minf1f2Units = Util.parseUnitsConstraint(relationInstance,
+                "minf1f2Units", backend, cm);
+        Integer maxf1f2 = Util.parseTimeConstraint(relationInstance,
+                "maxf1f2", cm);
+        Unit maxf1f2Units = Util.parseUnitsConstraint(relationInstance,
+                "maxf1f2Units", backend, cm);
+        Relation relation = new Relation(mins1s2, mins1s2Units, maxs1s2,
+                maxs1s2Units, mins1f2, mins1f2Units, maxs1f2, maxs1f2Units,
+                minf1s2, minf1s2Units, maxf1s2, maxf1s2Units, minf1f2,
+                minf1f2Units, maxf1f2, maxf1f2Units);
+        return relation;
+    }
+
+    static TemporalExtendedPropositionDefinition
+            instanceToTemporalExtendedPropositionDefinition(
+            Instance extendedProposition,
+            ProtegeKnowledgeSourceBackend backend)
+            throws KnowledgeSourceReadException {
+        ConnectionManager cm = backend.getConnectionManager();
+        String ad = propositionId(extendedProposition);
+
+        String displayName = (String) cm.getOwnSlotValue(extendedProposition,
+                cm.getSlot("displayName"));
+        String abbrevDisplayName =
+                (String) cm.getOwnSlotValue(extendedProposition,
+                cm.getSlot("abbrevDisplayName"));
+
+        TemporalExtendedPropositionDefinition result;
+        if (isParameter(extendedProposition, cm)) {
+            TemporalExtendedParameterDefinition r =
+                    new TemporalExtendedParameterDefinition(ad);
+            r.setValue(extendedParameterValue(extendedProposition, cm));
+            result = r;
+        } else {
+            result = new TemporalExtendedPropositionDefinition(ad);
+        }
+
+        result.setDisplayName(displayName);
+        result.setAbbreviatedDisplayName(abbrevDisplayName);
+        result.setMinLength(Util.parseTimeConstraint(extendedProposition,
+                "minDuration", cm));
+        result.setMinLengthUnit(Util.parseUnitsConstraint(extendedProposition,
+                "minDurationUnits", backend, cm));
+        result.setMaxLength(Util.parseTimeConstraint(extendedProposition,
+                "maxDuration", cm));
+        result.setMaxLengthUnit(Util.parseUnitsConstraint(extendedProposition,
+                "maxDurationUnits", backend, cm));
+
+        return result;
+    }
+
+    static Value extendedParameterValue(
+            Instance extendedParamInstance, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        Value result = null;
+        String resultStr = null;
+        Instance paramConstraint =
+                (Instance) cm.getOwnSlotValue(extendedParamInstance,
+                cm.getSlot("parameterValue"));
+        if (paramConstraint != null) {
+            resultStr = (String) cm.getOwnSlotValue(paramConstraint,
+                    cm.getSlot("displayName"));
+            if (resultStr != null) {
+                result = new NominalValue(resultStr);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns whether a Protege instance is a Parameter.
+     *
+     * @param extendedParameter
+     *            a Protege instance that is assumed to be a Proposition.
+     * @return <code>true</code> if the provided Protege instance is a
+     *         Parameter, <code>false</code> otherwise.
+     */
+    private static boolean isParameter(Instance extendedParameter,
+            ConnectionManager cm) throws KnowledgeSourceReadException {
+        Instance proposition = (Instance) cm.getOwnSlotValue(extendedParameter,
+                cm.getSlot("proposition"));
+        if (proposition.hasType(cm.getCls("Parameter"))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Returns the proposition id for an extended proposition definition.
+     *
+     * @param extendedProposition
+     *            an ExtendedProposition.
+     * @return a proposition id {@link String}.
+     */
+    private static String propositionId(Instance extendedProposition) {
+        Instance proposition =
+                (Instance) extendedProposition.getOwnSlotValue(
+                extendedProposition.getKnowledgeBase().getSlot("proposition"));
+        if (proposition.hasType(proposition.getKnowledgeBase().getCls(
+                "ConstantParameter"))) {
+            throw new IllegalStateException(
+                    "Constant parameters are not yet supported as " +
+                    "components of a high level abstraction definition.");
+        } else {
+            return proposition.getName();
+        }
+    }
+
+    private static Set<String> resolveAndLogDuplicates(Collection<?> isas,
+            Logger logger, Instance propInstance, String slotName) {
+        Set<String> inverseIsAs = new HashSet<String>();
+        for (Object isAInstance : isas) {
+            String name = ((Instance) isAInstance).getName();
+            if (!inverseIsAs.add(name)) {
+                logger.log(Level.WARNING, "Duplicate {0} in {1}: {2}",
+                        new Object[]{slotName, propInstance.getName(), name});
+            }
+        }
+        return inverseIsAs;
     }
 }

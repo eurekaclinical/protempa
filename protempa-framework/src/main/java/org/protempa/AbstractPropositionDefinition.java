@@ -168,11 +168,15 @@ public abstract class AbstractPropositionDefinition implements
      * Sets the children of this proposition definition.
      *
      * @param inverseIsA
-     *            a {@link String[]} of proposition definition ids.
+     *            a {@link String[]} of proposition definition ids. No
+     *            <code>null</code> or duplicate elements allowed.
      */
     public void setInverseIsA(String[] inverseIsA) {
         if (inverseIsA == null) {
             inverseIsA = EMPTY_STRING_ARR;
+        } else {
+            ProtempaUtil.checkArrayForNullElement(inverseIsA, "inverseIsA");
+            ProtempaUtil.checkArrayForDuplicates(inverseIsA, "inverseIsA");
         }
         String[] old = this.inverseIsA;
         this.inverseIsA = inverseIsA.clone();
@@ -191,12 +195,17 @@ public abstract class AbstractPropositionDefinition implements
     }
 
     /**
-     * Assigns this proposition with an associated {@link TermDefinition}.
-     * @param termId a term id {@link String}.
+     * Assigns this proposition with associated {@link TermDefinition} ids.
+     * 
+     * @param termId a term definition id {@link String}.  No
+     *            <code>null</code> or duplicate elements allowed.
      */
     public final void setTermIds(String[] termIds) {
         if (termIds == null) {
             termIds = EMPTY_STRING_ARR;
+        } else {
+            ProtempaUtil.checkArrayForNullElement(termIds, "termIds");
+            ProtempaUtil.checkArrayForDuplicates(termIds, "termIds");
         }
         String[] old = this.termIds;
         this.termIds = termIds.clone();
@@ -224,6 +233,10 @@ public abstract class AbstractPropositionDefinition implements
         if (propertyDefinitions == null) {
             propertyDefinitions = new PropertyDefinition[0];
         } else {
+            ProtempaUtil.checkArrayForNullElement(propertyDefinitions,
+                    "propertyDefinitions");
+            ProtempaUtil.checkArrayForDuplicates(propertyDefinitions,
+                    "propertyDefinitions");
             propertyDefinitions = propertyDefinitions.clone();
         }
         PropertyDefinition[] old = this.propertyDefinitions.clone();
@@ -250,10 +263,15 @@ public abstract class AbstractPropositionDefinition implements
 
     public final void setReferenceDefinitions(
             ReferenceDefinition[] referenceDefinitions) {
-        if (referenceDefinitions == null)
+        if (referenceDefinitions == null) {
             referenceDefinitions = new ReferenceDefinition[0];
-        else
+        } else {
+            ProtempaUtil.checkArrayForNullElement(referenceDefinitions,
+                    "referenceDefinitions");
+            ProtempaUtil.checkArrayForDuplicates(referenceDefinitions,
+                    "referenceDefinitions");
             referenceDefinitions = referenceDefinitions.clone();
+        }
         ReferenceDefinition[] old = this.referenceDefinitions.clone();
         this.referenceDefinitions = referenceDefinitions;
         this.changes.firePropertyChange("referenceDefinitions", old,

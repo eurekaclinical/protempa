@@ -1,131 +1,118 @@
 package org.protempa.query.handler.table;
 
+/**
+ * An immutable class for configurating {@link TableColumnSpec}s.
+ *
+ * @author Himanshu Rathod
+ */
 public class OutputConfig {
-    private boolean showValue;
-    private boolean showDisplayName;
-    private boolean showAbbrevDisplayName;
-    private boolean showStartOrTimestamp;
-    private boolean showFinish;
-    private boolean showLength;
-    private String valueHeading;
-    private String displayNameHeading;
-    private String abbrevDisplayNameHeading;
-    private String startOrTimestampHeading;
-    private String finishHeading;
-    private String lengthHeading;
-
-    public OutputConfig(OutputConfig orig) {
-        this.showValue = orig.showValue;
-        this.showDisplayName = orig.showDisplayName;
-        this.showAbbrevDisplayName = orig.showAbbrevDisplayName;
-        this.showStartOrTimestamp = orig.showStartOrTimestamp;
-        this.showFinish = orig.showFinish;
-        this.showLength = orig.showLength;
-        this.valueHeading = orig.valueHeading;
-        this.displayNameHeading = orig.displayNameHeading;
-        this.abbrevDisplayNameHeading = orig.abbrevDisplayNameHeading;
-        this.startOrTimestampHeading = orig.startOrTimestampHeading;
-        this.finishHeading = orig.finishHeading;
-        this.lengthHeading = orig.lengthHeading;
-    }
+    private final boolean showValue;
+    private final boolean showDisplayName;
+    private final boolean showAbbrevDisplayName;
+    private final boolean showStartOrTimestamp;
+    private final boolean showFinish;
+    private final boolean showLength;
+    private final String valueHeading;
+    private final String displayNameHeading;
+    private final String abbrevDisplayNameHeading;
+    private final String startOrTimestampHeading;
+    private final String finishHeading;
+    private final String lengthHeading;
 
     public OutputConfig() {
+        this.showValue = false;
+        this.showDisplayName = false;
+        this.showAbbrevDisplayName = false;
+        this.showStartOrTimestamp = false;
+        this.showFinish = false;
+        this.showLength = false;
+        this.valueHeading = "";
+        this.displayNameHeading = "";
+        this.abbrevDisplayNameHeading = "";
+        this.startOrTimestampHeading = "";
+        this.finishHeading = "";
+        this.lengthHeading = "";
+    }
+
+    public OutputConfig(boolean showValue, boolean showDisplayName,
+            boolean showAbbrevDisplayName,
+            boolean showStartOrTimestamp, boolean showFinish,
+            boolean showLength,
+            String valueHeading, String displayNameHeading,
+            String abbrevDisplayNameHeading, String startOrTimestampHeading,
+            String finishHeading, String lengthHeading) {
+        this.showValue = showValue;
+        this.showDisplayName = showDisplayName;
+        this.showAbbrevDisplayName = showAbbrevDisplayName;
+        this.showStartOrTimestamp = showStartOrTimestamp;
+        this.showFinish = showFinish;
+        this.showLength = showLength;
+        if (valueHeading == null)
+            valueHeading = "";
+        this.valueHeading = valueHeading;
+        if (displayNameHeading == null)
+            displayNameHeading = "";
+        this.displayNameHeading = displayNameHeading;
+        if (abbrevDisplayNameHeading == null)
+            abbrevDisplayNameHeading = "";
+        this.abbrevDisplayNameHeading = abbrevDisplayNameHeading;
+        if (startOrTimestampHeading == null)
+            startOrTimestampHeading = "";
+        this.startOrTimestampHeading = startOrTimestampHeading;
+        if (finishHeading == null)
+            finishHeading = "";
+        this.finishHeading = finishHeading;
+        if (lengthHeading == null)
+            lengthHeading = "";
+        this.lengthHeading = lengthHeading;
     }
 
     public String getValueHeading() {
         return valueHeading;
     }
 
-    public void setValueHeading(String valueHeading) {
-        this.valueHeading = valueHeading;
-    }
-
     public String getDisplayNameHeading() {
         return displayNameHeading;
-    }
-
-    public void setDisplayNameHeading(String displayNameHeading) {
-        this.displayNameHeading = displayNameHeading;
     }
 
     public String getAbbrevDisplayNameHeading() {
         return abbrevDisplayNameHeading;
     }
 
-    public void setAbbrevDisplayNameHeading(String abbrevDisplayNameHeading) {
-        this.abbrevDisplayNameHeading = abbrevDisplayNameHeading;
-    }
-
     public String getStartOrTimestampHeading() {
         return startOrTimestampHeading;
-    }
-
-    public void setStartOrTimestampHeading(String startOrTimestampHeading) {
-        this.startOrTimestampHeading = startOrTimestampHeading;
     }
 
     public String getFinishHeading() {
         return finishHeading;
     }
 
-    public void setFinishHeading(String finishHeading) {
-        this.finishHeading = finishHeading;
-    }
-
     public String getLengthHeading() {
         return lengthHeading;
-    }
-
-    public void setLengthHeading(String lengthHeading) {
-        this.lengthHeading = lengthHeading;
     }
 
     public boolean showValue() {
         return showValue;
     }
 
-    public void setShowValue(boolean showValue) {
-        this.showValue = showValue;
-    }
-
     public boolean showDisplayName() {
         return showDisplayName;
-    }
-
-    public void setShowDisplayName(boolean showDisplayName) {
-        this.showDisplayName = showDisplayName;
     }
 
     public boolean showAbbrevDisplayName() {
         return showAbbrevDisplayName;
     }
 
-    public void setShowAbbrevDisplayName(boolean showAbbrevDisplayName) {
-        this.showAbbrevDisplayName = showAbbrevDisplayName;
-    }
-
     public boolean showStartOrTimestamp() {
         return showStartOrTimestamp;
-    }
-
-    public void setShowStartOrTimestamp(boolean showStartOrTimestamp) {
-        this.showStartOrTimestamp = showStartOrTimestamp;
     }
 
     public boolean showFinish() {
         return showFinish;
     }
 
-    public void setShowFinish(boolean showFinish) {
-        this.showFinish = showFinish;
-    }
-
     public boolean showLength() {
         return showLength;
-    }
-
-    public void setShowLength(boolean showLength) {
-        this.showLength = showLength;
     }
 
     public int numActiveColumns() {

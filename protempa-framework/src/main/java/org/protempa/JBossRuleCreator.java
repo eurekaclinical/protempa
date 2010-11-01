@@ -2,7 +2,6 @@ package org.protempa;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -95,8 +94,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             rule.setSalience(new SalienceInteger(1));
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
-            addInverseIsARule(def.getId(), def.getInverseIsA(),
-                    SEQUENCE_OBJECT_TYPE);
+            addInverseIsARule(def, SEQUENCE_OBJECT_TYPE);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -182,7 +180,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
             AbstractionCombiner.toRules(knowledgeSource, def, rules);
-            addInverseIsARule(def.getId(), def.getInverseIsA(), TEMP_PROP_OT);
+            addInverseIsARule(def, TEMP_PROP_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -196,7 +194,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             Rule rule = new Rule("SLICE_" + def.getId());
             Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
             sourceP.addConstraint(new PredicateConstraint(
-                    new PropositionPredicateExpression(def.getAbstractedFrom())));
+                    new PropositionPredicateExpression(
+                    def.getAbstractedFrom())));
 
             Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
             resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
@@ -208,7 +207,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             rule.setSalience(new SalienceInteger(-2));
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
-            addInverseIsARule(def.getId(), def.getInverseIsA(), TEMP_PROP_OT);
+            addInverseIsARule(def, TEMP_PROP_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -251,10 +250,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     @Override
     public void visit(EventDefinition def) {
-        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         try {
-            addInverseIsARule(def.getId(), def.getInverseIsA(),
-                    EVENT_OBJECT_TYPE);
+            addInverseIsARule(def, EVENT_OBJECT_TYPE);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -264,10 +261,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     @Override
     public void visit(ConstantDefinition def) {
-        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         try {
-            addInverseIsARule(def.getId(), def.getInverseIsA(),
-                    CONSTANT_OBJECT_TYPE);
+            addInverseIsARule(def, CONSTANT_OBJECT_TYPE);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -283,20 +278,18 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         return this.rules;
     }
 
-    private void addInverseIsARule(String propId, String[] inverseIsA,
+    private void addInverseIsARule(PropositionDefinition def,
             ClassObjectType objectType) {
-        Rule rule = new Rule("INVERSEISA_" + propId);
-        Pattern p = new Pattern(0, objectType);
-        Set<String> propIdSet = new HashSet<String>();
-        if (inverseIsA != null) {
-            for (String pId : inverseIsA) {
-                propIdSet.add(pId);
-            }
-        }
-        if (!propIdSet.isEmpty()) {
+        String[] inverseIsA = def.getInverseIsA();
+        if (inverseIsA.length > 0) {
+            String propId = def.getId();
+            ProtempaUtil.logger().log(Level.FINER, 
+                    "Creating inverseIsA rule for {0}", def);
             Constraint c = new PredicateConstraint(
-                    new PropositionPredicateExpression(propIdSet));
+                    new PropositionPredicateExpression(inverseIsA));
+            Pattern p = new Pattern(0, objectType);
             p.addConstraint(c);
+            Rule rule = new Rule("INVERSEISA_" + propId);
             rule.addPattern(p);
             rule.setConsequence(new InverseIsAConsequence(propId,
                     this.derivations));

@@ -1205,6 +1205,24 @@ public class RelationTest extends TestCase {
         assertTrue(gap.hasRelation(iOrder, iToday));
     }
 
+    public void testIntervalsAtLeast30DaysApart() throws ParseException {
+        Interval earlier = intervalFactory.getInstance(
+                DATE_FORMAT.parse("1/1/09").getTime(),
+                AbsoluteTimeGranularity.DAY,
+                DATE_FORMAT.parse("1/5/09").getTime(),
+                AbsoluteTimeGranularity.DAY);
+        Interval later = intervalFactory.getInstance(
+                DATE_FORMAT.parse("2/10/09").getTime(),
+                AbsoluteTimeGranularity.DAY,
+                DATE_FORMAT.parse("2/12/09").getTime(),
+                AbsoluteTimeGranularity.DAY);
+        Relation relation = new Relation(null, null, null, null, null, null,
+                null, null,
+                31, AbsoluteTimeUnit.DAY, null, AbsoluteTimeUnit.DAY, null,
+                null, null, null);
+        assertTrue(relation.hasRelation(earlier, later));
+    }
+
     private static boolean testBetweenDatesDay(String first, String second,
             int distanceBetween, Unit unitsBetween) throws ParseException {
         return testBetween(DATE_FORMAT.parse(first).getTime(),

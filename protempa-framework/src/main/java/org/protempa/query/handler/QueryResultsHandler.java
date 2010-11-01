@@ -41,15 +41,15 @@ public interface QueryResultsHandler {
      * Handles a single query result, which is the list of propositions
      * associated with the given key.
      *
-     * @param key
-     *            the identifying key for the result
+     * @param keyId
+     *            the identifying key id for the result
      * @param propositions
      *            the proposition results for the given key
      * @param derivationsList a mapping from propositions to derived
      * abstractions.
      * and propositions.
      */
-    public void handleQueryResult(String key,
+    public void handleQueryResult(String keyId,
             List<Proposition> propositions, 
             Map<Proposition,List<Proposition>> derivations,
             Map<UniqueIdentifier,Proposition> references)

@@ -1,7 +1,10 @@
 package org.protempa;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.comparator.TemporalPropositionIntervalComparator;
@@ -129,6 +132,16 @@ public final class ProtempaUtil {
                 throw new IllegalArgumentException(arrayName
                         + " cannot contain null values");
             }
+        }
+    }
+
+    static void checkArrayForDuplicates(Object[] array, String arrayName) {
+        Set set = new HashSet();
+        for (Object obj : array) {
+            if (!set.add(obj))
+                throw new IllegalArgumentException(arrayName +
+                        " cannot contain duplicate elements: " + 
+                        Arrays.toString(array) + "; " + obj);
         }
     }
 

@@ -25,7 +25,7 @@ import org.protempa.query.handler.table.TableColumnSpec;
  * 
  * @author Andrew Post
  */
-public class TableQueryResultsHandler extends WriterQueryResultsHandler
+public final class TableQueryResultsHandler extends WriterQueryResultsHandler
         implements Serializable {
 
     private static final long serialVersionUID = -1503401944818776787L;

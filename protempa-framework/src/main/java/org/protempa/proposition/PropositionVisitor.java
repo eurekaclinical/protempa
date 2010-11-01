@@ -53,12 +53,12 @@ public interface PropositionVisitor {
 	void visit(AbstractParameter abstractParameter);
 
 	/**
-	 * Processes a constant parameter.
+	 * Processes a constant.
 	 * 
-	 * @param constantParameter
-	 *            an {@link ConstantParameter}. Cannot be <code>null</code>.
+	 * @param constant
+	 *            an {@link Constant}. Cannot be <code>null</code>.
 	 */
-	void visit(Constant constantParameter);
+	void visit(Constant constant);
 
 	/**
 	 * Processes a context.

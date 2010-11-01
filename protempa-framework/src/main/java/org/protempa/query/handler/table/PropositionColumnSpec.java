@@ -31,7 +31,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     private final OutputConfig outputConfig;
 
     public PropositionColumnSpec(String[] propertyNames) {
-        this(propertyNames, new OutputConfig());
+        this(propertyNames, null);
     }
 
     public PropositionColumnSpec(String[] propertyNames,
@@ -53,10 +53,17 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             String[] propertyNames, OutputConfig outputConfig, Link[] links,
             int numInstances) {
         if (propertyNames == null) {
-            propertyNames = new String[0];
+            this.propertyNames = new String[0];
+        } else {
+            ProtempaUtil.checkArrayForNullElement(propertyNames,
+                    "propertyNames");
+            this.propertyNames = propertyNames.clone();
         }
-        this.propertyNames = propertyNames.clone();
-        this.outputConfig = new OutputConfig(outputConfig);
+
+        if (outputConfig == null)
+            this.outputConfig = new OutputConfig();
+        else
+            this.outputConfig = outputConfig;
 
         if (links == null) {
             this.links = new Link[0];

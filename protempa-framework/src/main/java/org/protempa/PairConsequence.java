@@ -3,6 +3,8 @@ package org.protempa;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.arp.javautil.collections.Collections;
 import org.drools.WorkingMemory;
@@ -17,7 +19,9 @@ import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalProposition;
 
 public final class PairConsequence implements Consequence {
+
     private static final long serialVersionUID = -3641374073069516895L;
+
     private final PairDefinition def;
     private final Map<Proposition, List<Proposition>> derivations;
 
@@ -31,8 +35,8 @@ public final class PairConsequence implements Consequence {
     @Override
     public void evaluate(KnowledgeHelper knowledgeHelper,
             WorkingMemory workingMemory) throws Exception {
-        List<PropositionVisitable> l = (List<PropositionVisitable>) knowledgeHelper
-                .get(knowledgeHelper.getDeclaration("result"));
+        Logger logger = ProtempaUtil.logger();
+        List<PropositionVisitable> l = (List<PropositionVisitable>) knowledgeHelper.get(knowledgeHelper.getDeclaration("result"));
         TemporalPropositionListCreator c = new TemporalPropositionListCreator();
         c.visit(l);
         List<TemporalProposition> pl = c.getTemporalPropositionList();
@@ -40,40 +44,38 @@ public final class PairConsequence implements Consequence {
 
         TemporalExtendedPropositionDefinition leftProp = def.getLeftHandProposition();
         TemporalExtendedPropositionDefinition rightProp = def.getRightHandProposition();
-
+        Relation relation = def.getRelation();
         for (int i = 0; i < pl.size() - 1; i++) {
-            if (leftProp.getMatches(pl.get(i)) && rightProp.getMatches(pl.get(i+1))) {
-              Relation relation = def.getRelation();
-              TemporalProposition left = pl.get(i);
-              TemporalProposition right = pl.get(i+1);
-              if (relation.hasRelation(left.getInterval(),
-                      right.getInterval())) {
-                  List<TemporalProposition> tps = new ArrayList<TemporalProposition>();
-                  tps.add(left);
-                  tps.add(right);
-                  Segment<TemporalProposition> segment = new Segment<TemporalProposition>(
-                          new Sequence(def.getId(), tps));
-                  Offsets temporalOffset = def.getTemporalOffset();
-                  AbstractParameter result = AbstractParameterFactory
-                          .getFromAbstraction(
-                                  def.getId(),
-                                  segment,
-                                  tps,
-                                  null,
-                                  temporalOffset,
-                                  new TemporalExtendedPropositionDefinition[] {
-                                          def.getLeftHandProposition(),
-                                          def.getRightHandProposition() });
-                  for (Proposition proposition : segment) {
-                      Collections.putList(this.derivations, result,
-                              proposition);
-                      Collections.putList(this.derivations,
-                              proposition, result);
-                  }
-                  knowledgeHelper.getWorkingMemory().insert(result);
-              }
+            TemporalProposition left = pl.get(i);
+            TemporalProposition right = pl.get(i + 1);
+            if (leftProp.getMatches(left) && rightProp.getMatches(right)) {
+                if (relation.hasRelation(left.getInterval(),
+                        right.getInterval())) {
+                    List<TemporalProposition> tps = new ArrayList<TemporalProposition>();
+                    tps.add(left);
+                    tps.add(right);
+                    Segment<TemporalProposition> segment = new Segment<TemporalProposition>(
+                            new Sequence(def.getId(), tps));
+                    Offsets temporalOffset = def.getTemporalOffset();
+                    AbstractParameter result = AbstractParameterFactory.getFromAbstraction(
+                            def.getId(),
+                            segment,
+                            tps,
+                            null,
+                            temporalOffset,
+                            new TemporalExtendedPropositionDefinition[]{
+                                def.getLeftHandProposition(),
+                                def.getRightHandProposition()});
+                    for (Proposition proposition : segment) {
+                        Collections.putList(this.derivations, result,
+                                proposition);
+                        Collections.putList(this.derivations,
+                                proposition, result);
+                    }
+                    knowledgeHelper.getWorkingMemory().insert(result);
+                    logger.log(Level.FINER, "Asserted {0}", result);
+                }
             }
         }
     }
-
 }

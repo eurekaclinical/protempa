@@ -3,6 +3,8 @@ package org.protempa;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.arp.javautil.collections.Collections;
 import org.drools.WorkingMemory;
@@ -21,6 +23,7 @@ import org.protempa.proposition.TemporalProposition;
 class HighLevelAbstractionConsequence implements Consequence {
 
     private static final long serialVersionUID = -833609244124008166L;
+    
     private final HighLevelAbstractionDefinition cad;
     private final int columns;
     private final TemporalExtendedPropositionDefinition[] epds;
@@ -49,6 +52,7 @@ class HighLevelAbstractionConsequence implements Consequence {
     @Override
     public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
             throws Exception {
+        Logger logger = ProtempaUtil.logger();
         List<TemporalProposition> tps = parameters(arg0.getTuple(), arg1);
         Segment<TemporalProposition> segment =
                 new Segment<TemporalProposition>(
@@ -62,6 +66,7 @@ class HighLevelAbstractionConsequence implements Consequence {
             Collections.putList(this.derivations, proposition, result);
         }
         arg0.getWorkingMemory().insert(result);
+        logger.log(Level.FINER, "Asserted {0}", result);
     }
     
     @SuppressWarnings("unchecked")
