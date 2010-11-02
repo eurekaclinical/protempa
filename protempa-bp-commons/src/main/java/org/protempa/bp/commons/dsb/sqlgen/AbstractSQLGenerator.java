@@ -21,6 +21,7 @@ import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.Constraint;
 import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.PropositionIdToSqlCode;
 import org.protempa.dsb.filter.Filter;
 import org.protempa.dsb.filter.PositionFilter;
+import org.protempa.dsb.filter.PositionFilter.Side;
 import org.protempa.dsb.filter.PropertyValueFilter;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
@@ -999,7 +1000,27 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                             PositionFilter pdsc2 =
                                     (PositionFilter) filter;
 
-                            boolean outputFinish = true;
+                            boolean outputStart =
+                                    pdsc2.getMinimumStart() != null &&
+                                    pdsc2.getStartSide() == Side.FINISH;
+
+                            boolean outputFinish = 
+                                    pdsc2.getMaximumFinish() != null &&
+                                    pdsc2.getFinishSide() == Side.FINISH;
+
+                            if (outputStart) {
+                                if (wherePart.length() > 0) {
+                                    wherePart.append(" and ");
+                                }
+
+                                appendColumnRef(wherePart,
+                                        referenceIndices, finishTimeSpec);
+                                wherePart.append(" >= {ts '");
+                                wherePart.append(
+                                        AbsoluteTimeGranularity.toSQLString(
+                                        pdsc2.getMinimumStart()));
+                                wherePart.append("'}");
+                            }
 
                             if (outputFinish) {
                                 if (wherePart.length() > 0) {
@@ -1041,8 +1062,14 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                         if (filter instanceof PositionFilter) {
                             PositionFilter pdsc2 = (PositionFilter) filter;
 
-                            boolean outputStart = true;
-                            boolean outputFinish = true;
+                            boolean outputStart = 
+                                    pdsc2.getMinimumStart() != null &&
+                                    (pdsc2.getStartSide() == Side.START ||
+                                    entitySpec.getFinishTimeSpec() == null);
+                            boolean outputFinish = 
+                                    pdsc2.getMaximumFinish() != null &&
+                                    (pdsc2.getFinishSide() == Side.START ||
+                                    entitySpec.getFinishTimeSpec() == null);
 
                             if (outputStart) {
                                 if (wherePart.length() > 0) {
@@ -1056,8 +1083,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                         pdsc2.getMinimumStart()));
                                 wherePart.append("'}");
                             }
-                            if (entitySpec.getFinishTimeSpec() == null
-                                    || outputFinish) {
+                            if (outputFinish) {
                                 if (wherePart.length() > 0) {
                                     wherePart.append(" and ");
                                 }
