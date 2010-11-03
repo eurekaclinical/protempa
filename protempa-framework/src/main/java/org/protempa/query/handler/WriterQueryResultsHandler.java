@@ -69,17 +69,16 @@ public abstract class WriterQueryResultsHandler extends BufferedWriter
     }
 
     /**
-     * Closes the output stream.
+     * Cleans up any resources other than closing the output stream. Call
+     * {@link #close()} to close the output stream if desired.
+     *
+     * The default implementation is a no-op.
      * 
-     * @throws FinderException if an error occurred closing the output stream.
+     * @throws FinderException if an error occurred.
      */
     @Override
     public void finish() throws FinderException {
-        try {
-            super.close();
-        } catch (IOException ioe) {
-            throw new FinderException(ioe);
-        }
+        
     }
 
     /**
