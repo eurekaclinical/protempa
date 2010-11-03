@@ -214,11 +214,14 @@ class Util {
         int i = 0;
         for (Object termInstance : terms) {
             Instance inst = (Instance) termInstance;
-            String termId =
-                    (String) cm.getOwnSlotValue(inst, cm.getSlot("termId"));
-            termIds[i] = termId;
+//            String termId =
+//                    (String) cm.getOwnSlotValue(inst, cm.getSlot("termId"));
+//            termIds[i] = termId;
+            String name = inst.getName();
+            termIds[i] = name;
         }
         d.setTermIds(termIds);
+//        d.setTermIds(null);
     }
 
     static Relation instanceToRelation(Instance relationInstance, 
