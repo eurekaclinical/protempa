@@ -18,7 +18,7 @@ public enum ValueComparator {
         ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean subsumes(ValueComparator comparator) {
+        public boolean contains(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
@@ -32,7 +32,7 @@ public enum ValueComparator {
         ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean subsumes(ValueComparator comparator) {
+        public boolean contains(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
@@ -45,7 +45,7 @@ public enum ValueComparator {
     EQUAL_TO("=", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
 
         @Override
-        public boolean subsumes(ValueComparator comparator) {
+        public boolean contains(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
@@ -58,7 +58,7 @@ public enum ValueComparator {
     NOT_EQUAL_TO("!=", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
 
         @Override
-        public boolean subsumes(ValueComparator comparator) {
+        public boolean contains(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
@@ -72,7 +72,7 @@ public enum ValueComparator {
     UNKNOWN("?", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
 
         @Override
-        public boolean subsumes(ValueComparator comparator) {
+        public boolean contains(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
@@ -86,7 +86,7 @@ public enum ValueComparator {
             ValueType.ORDEREDVALUE, ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean subsumes(ValueComparator comparator) {
+        public boolean contains(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
@@ -102,7 +102,7 @@ public enum ValueComparator {
             ValueType.ORDEREDVALUE, ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean subsumes(ValueComparator comparator) {
+        public boolean contains(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
@@ -116,7 +116,7 @@ public enum ValueComparator {
     IN("IN", new CompatibleTypes(ValueType.VALUE, ValueType.LISTVALUE)) {
 
         @Override
-        public boolean subsumes(ValueComparator comparator) {
+        public boolean contains(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
@@ -127,7 +127,7 @@ public enum ValueComparator {
             ValueType.LISTVALUE)) {
 
         @Override
-        public boolean subsumes(ValueComparator comparator) {
+        public boolean contains(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
@@ -214,14 +214,14 @@ public enum ValueComparator {
     }
 
     /**
-     * Returns whether this {@link ValueComparator} is subsumed by the
-     * specified {@link ValueComparator}.
+     * Returns whether this {@link ValueComparator} is the same as or contains
+     * the specified {@link ValueComparator}.
      *
      * @param comparator a {@link ValueComparator}.
      * @return <code>true</code> if this {@link ValueComparator} is subsumed
      * by the specified {@link ValueComparator}, <code>false</code> otherwise.
      */
-    public abstract boolean subsumes(ValueComparator comparator);
+    public abstract boolean contains(ValueComparator comparator);
 
     /**
      * Returns whether this {@link ValueComparator} is compatible with the

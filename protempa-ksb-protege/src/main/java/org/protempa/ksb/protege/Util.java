@@ -20,10 +20,14 @@ import org.protempa.TemporalExtendedParameterDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.proposition.Relation;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
+import org.protempa.proposition.value.ValueSet;
+import org.protempa.proposition.value.ValueSet.ValueSetElement;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueFactory;
+import org.protempa.proposition.value.ValueSet;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -56,8 +60,7 @@ class Util {
         ABSOLUTE_DURATION_MULTIPLIER.put(HOUR, AbsoluteTimeUnit.HOUR);
         ABSOLUTE_DURATION_MULTIPLIER.put(DAY, AbsoluteTimeUnit.DAY);
     }
-    static final Map<String, RelativeHourUnit> 
-            RELATIVE_HOURS_DURATION_MULTIPLIER =
+    static final Map<String, RelativeHourUnit> RELATIVE_HOURS_DURATION_MULTIPLIER =
             new HashMap<String, RelativeHourUnit>();
 
     static {
@@ -78,6 +81,58 @@ class Util {
                 ValueType.NUMBERVALUE);
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("InequalityDoubleValue",
                 ValueType.INEQUALITYNUMBERVALUE);
+    }
+
+    private static ValueSet parseValueSet(Cls valueTypeCls,
+            ValueType valueType,
+            ConnectionManager cm) throws KnowledgeSourceReadException {
+        Slot valueSetSlot = cm.getSlot("valueSet");
+        Collection objs =
+                    valueTypeCls.getDirectTemplateSlotValues(valueSetSlot);
+        ValueSet valueSet = null;
+        Slot displayNameSlot = cm.getSlot("displayName");
+        Slot abbrevDisplayNameSlot = cm.getSlot("abbrevDisplayName");
+        Slot valueSlot = cm.getSlot("value");
+        if (!objs.isEmpty()) {
+            valueSet = parseEnumeratedValueSet(objs, cm, displayNameSlot,
+                    abbrevDisplayNameSlot, valueSlot, valueType);
+        }
+        return valueSet;
+    }
+
+    private static ValueSet parseEnumeratedValueSet(Collection objs,
+            ConnectionManager cm, Slot displayNameSlot,
+            Slot abbrevDisplayNameSlot, Slot valueSlot, ValueType valueType)
+            throws KnowledgeSourceReadException {
+        ValueSetElement[] vses = new ValueSetElement[objs.size()];
+        int i = 0;
+        for (Object obj : objs) {
+            Instance valueSetEltInst = (Instance) obj;
+            String displayName = (String) cm.getOwnSlotValue(
+                            valueSetEltInst, displayNameSlot);
+            String abbrevDisplayName = (String) cm.getOwnSlotValue(
+                            valueSetEltInst, abbrevDisplayNameSlot);
+            String value = (String) cm.getOwnSlotValue(valueSetEltInst,
+                            valueSlot);
+            Value val = ValueFactory.get(valueType).parseValue(value);
+            vses[i] = new ValueSetElement(val, displayName, abbrevDisplayName);
+            i++;
+        }
+        return new ValueSet(vses);
+    }
+
+    private static ValueType parseValueType(Cls valueTypeCls) {
+        Collection superClasses = valueTypeCls.getSuperclasses();
+        ValueType valueType = null;
+        for (Object superCls : superClasses) {
+            Cls superClsCls = (Cls) superCls;
+            String superClsName = superClsCls.getName();
+            valueType = VALUE_CLASS_NAME_TO_VALUE_TYPE.get(superClsName);
+            if (valueType != null) {
+                break;
+            }
+        }
+        return valueType;
     }
 
     private Util() {
@@ -170,7 +225,7 @@ class Util {
     static void setInverseIsAs(Instance propInstance,
             AbstractPropositionDefinition propDef, ConnectionManager cm)
             throws KnowledgeSourceReadException {
-        Collection<?> isas = 
+        Collection<?> isas =
                 propInstance.getDirectOwnSlotValues(cm.getSlot("inverseIsA"));
         Logger logger = Util.logger();
         if (isas != null && !isas.isEmpty()) {
@@ -197,8 +252,10 @@ class Util {
         for (Object propertyInstance : properties) {
             Instance inst = (Instance) propertyInstance;
             Cls valueTypeCls = (Cls) cm.getOwnSlotValue(inst, valueTypeSlot);
+            ValueType valueType = parseValueType(valueTypeCls);
+            ValueSet valueSet = parseValueSet(valueTypeCls, valueType, cm);
             PropertyDefinition propDef = new PropertyDefinition(inst.getName(),
-                VALUE_CLASS_NAME_TO_VALUE_TYPE.get(valueTypeCls.getName()));
+                    valueType, valueSet);
             propDefs[i] = propDef;
             i++;
         }
@@ -224,7 +281,7 @@ class Util {
 //        d.setTermIds(null);
     }
 
-    static Relation instanceToRelation(Instance relationInstance, 
+    static Relation instanceToRelation(Instance relationInstance,
             ConnectionManager cm, ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         Integer mins1s2 = Util.parseTimeConstraint(relationInstance,
@@ -266,8 +323,7 @@ class Util {
         return relation;
     }
 
-    static TemporalExtendedPropositionDefinition
-            instanceToTemporalExtendedPropositionDefinition(
+    static TemporalExtendedPropositionDefinition instanceToTemporalExtendedPropositionDefinition(
             Instance extendedProposition,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
@@ -355,8 +411,8 @@ class Util {
         if (proposition.hasType(proposition.getKnowledgeBase().getCls(
                 "ConstantParameter"))) {
             throw new IllegalStateException(
-                    "Constant parameters are not yet supported as " +
-                    "components of a high level abstraction definition.");
+                    "Constant parameters are not yet supported as "
+                    + "components of a high level abstraction definition.");
         } else {
             return proposition.getName();
         }

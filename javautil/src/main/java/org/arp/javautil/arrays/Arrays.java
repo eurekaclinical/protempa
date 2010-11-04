@@ -84,15 +84,15 @@ public final class Arrays {
 
     /**
      * Returns a Set (specfically, a HashSet) with all the unique elements
-     * from the given array of String objects.
-     * @param objs An array of String objects.
+     * from the given array of objects.
+     * @param objs An array of objects.
      * @return A Set object containing all the unique elements from the array.
      */
-    public static Set<String> asSet(String[] objs) {
-        Set<String> objSet = null;
+    public static <E> Set<E> asSet(E[] objs) {
+        Set<E> objSet = null;
         if (objs != null) {
-            objSet = new HashSet<String>();
-            for (String obj : objs) {
+            objSet = new HashSet<E>();
+            for (E obj : objs) {
                 objSet.add(obj);
             }
         }

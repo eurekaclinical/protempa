@@ -19,46 +19,72 @@ import org.protempa.query.handler.QueryResultsHandler;
  */
 public final class Protempa {
 
+    private static final String PROTEMPA_STARTUP_FAILURE_MSG =
+            "PROTEMPA could not start up";
     private final AbstractionFinder abstractionFinder;
 
     public static Protempa newInstance(String configurationId)
-            throws ConfigurationsLoadException, BackendInitializationException,
-            BackendNewInstanceException, BackendProviderSpecLoaderException,
-            InvalidConfigurationException, DataSourceFailedValidationException,
-            DataSourceValidationIncompleteException,
-            KnowledgeSourceReadException {
-        return newInstance(new SourceFactory(configurationId));
+            throws ProtempaStartupException {
+        try {
+            return newInstance(new SourceFactory(configurationId));
+        } catch (ConfigurationsLoadException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        } catch (BackendProviderSpecLoaderException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        } catch (InvalidConfigurationException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        }
     }
 
     public static Protempa newInstance(SourceFactory sourceFactory)
-            throws BackendInitializationException, BackendNewInstanceException,
-            DataSourceFailedValidationException,
-            DataSourceValidationIncompleteException,
-            KnowledgeSourceReadException {
-        return new Protempa(sourceFactory.newDataSourceInstance(),
-                sourceFactory.newKnowledgeSourceInstance(), sourceFactory
-                        .newAlgorithmSourceInstance(), sourceFactory
-                        .newTermSourceInstance(), false);
+            throws ProtempaStartupException {
+        try {
+            return new Protempa(sourceFactory.newDataSourceInstance(),
+                    sourceFactory.newKnowledgeSourceInstance(),
+                    sourceFactory.newAlgorithmSourceInstance(),
+                    sourceFactory.newTermSourceInstance(), false);
+        } catch (BackendInitializationException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        } catch (BackendNewInstanceException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        }
     }
 
-    public static Protempa newInstance(String configurationsId, boolean useCache)
-            throws ConfigurationsLoadException, BackendInitializationException,
-            BackendNewInstanceException, BackendProviderSpecLoaderException,
-            InvalidConfigurationException, DataSourceFailedValidationException,
-            DataSourceValidationIncompleteException,
-            KnowledgeSourceReadException {
-        return newInstance(new SourceFactory(configurationsId), useCache);
+    public static Protempa newInstance(String configurationsId,
+            boolean useCache) throws ProtempaStartupException {
+        try {
+            return newInstance(new SourceFactory(configurationsId), useCache);
+        } catch (ConfigurationsLoadException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        } catch (BackendProviderSpecLoaderException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        } catch (InvalidConfigurationException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        }
     }
 
     public static Protempa newInstance(SourceFactory sourceFactory,
-            boolean useCache) throws BackendInitializationException,
-            BackendNewInstanceException, DataSourceFailedValidationException,
-            DataSourceValidationIncompleteException,
-            KnowledgeSourceReadException {
-        return new Protempa(sourceFactory.newDataSourceInstance(),
-                sourceFactory.newKnowledgeSourceInstance(), sourceFactory
-                        .newAlgorithmSourceInstance(), sourceFactory
-                        .newTermSourceInstance(), useCache);
+            boolean useCache) throws ProtempaStartupException {
+        try {
+            return new Protempa(sourceFactory.newDataSourceInstance(),
+                    sourceFactory.newKnowledgeSourceInstance(),
+                    sourceFactory.newAlgorithmSourceInstance(),
+                    sourceFactory.newTermSourceInstance(), useCache);
+        } catch (BackendInitializationException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        } catch (BackendNewInstanceException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        }
     }
 
     /**
@@ -82,9 +108,7 @@ public final class Protempa {
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource, TermSource termSource)
-            throws DataSourceFailedValidationException,
-            DataSourceValidationIncompleteException,
-            KnowledgeSourceReadException {
+            throws ProtempaStartupException {
         this(dataSource, knowledgeSource, algorithmSource, termSource, false);
     }
 
@@ -116,30 +140,41 @@ public final class Protempa {
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource, TermSource termSource,
             boolean cacheFoundAbstractParameters)
-            throws DataSourceFailedValidationException,
-            DataSourceValidationIncompleteException,
-            KnowledgeSourceReadException {
-        if (dataSource == null) {
-            throw new IllegalArgumentException("dataSource cannot be null");
+            throws ProtempaStartupException {
+        try {
+            if (dataSource == null) {
+                throw new IllegalArgumentException(
+                        "dataSource cannot be null");
+            }
+            if (knowledgeSource == null) {
+                throw new IllegalArgumentException(
+                        "knowledgeSource cannot be null");
+            }
+            if (algorithmSource == null) {
+                throw new IllegalArgumentException(
+                        "algorithmSource cannot be null");
+            }
+            Logger logger = ProtempaUtil.logger();
+            if (!Boolean.getBoolean("protempa.skip.datasource.validation")) {
+                logger.fine("Beginning data source validation");
+                dataSource.validate(knowledgeSource);
+                logger.fine("Data source validation completed with no validation failures");
+            } else {
+                logger.fine("Skipping data source validation");
+            }
+            this.abstractionFinder = new AbstractionFinder(dataSource,
+                    knowledgeSource, algorithmSource, termSource,
+                    cacheFoundAbstractParameters);
+        } catch (DataSourceFailedValidationException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        } catch (DataSourceValidationIncompleteException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
+        } catch (KnowledgeSourceReadException ex) {
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
+                    ex);
         }
-        if (knowledgeSource == null) {
-            throw new IllegalArgumentException("knowledgeSource cannot be null");
-        }
-        if (algorithmSource == null) {
-            throw new IllegalArgumentException("algorithmSource cannot be null");
-        }
-        Logger logger = ProtempaUtil.logger();
-        if (!Boolean.getBoolean("protempa.skip.datasource.validation")) {
-            logger.fine("Beginning data source validation");
-            dataSource.validate(knowledgeSource);
-            logger
-                    .fine("Data source validation completed with no validation failures");
-        } else {
-            logger.fine("Skipping data source validation");
-        }
-        this.abstractionFinder = new AbstractionFinder(dataSource,
-                knowledgeSource, algorithmSource, termSource,
-                cacheFoundAbstractParameters);
     }
 
     /**
@@ -223,11 +258,13 @@ public final class Protempa {
      */
     public void execute(Query query, QueryResultsHandler resultHandler)
             throws FinderException {
-        if (query == null)
+        if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
-        if (query.getTermIds().length > 0)
+        }
+        if (query.getTermIds().length > 0) {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
+        }
         Logger logger = ProtempaUtil.logger();
         logger.fine("Executing query");
         Set<String> keyIdsSet = Arrays.asSet(query.getKeyIds());

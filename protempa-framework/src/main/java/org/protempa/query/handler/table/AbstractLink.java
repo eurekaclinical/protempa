@@ -154,7 +154,7 @@ public abstract class AbstractLink implements Link {
             String propName = ccc.getPropertyName();
             Value value = proposition.getProperty(propName);
             ValueComparator vc = ccc.getValueComparator();
-            if (!vc.subsumes(value.compare(ccc.getValue()))) {
+            if (!vc.contains(value.compare(ccc.getValue()))) {
                 return false;
             }
         }

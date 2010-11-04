@@ -2,33 +2,88 @@ package org.protempa;
 
 import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueSet;
 import org.protempa.proposition.value.ValueType;
 
 /**
+ * Defines a property of a proposition definition.
  *
  * @author Andrew Post
  */
 public final class PropertyDefinition implements Serializable {
     private static final long serialVersionUID = 5258018980150529695L;
 
-    private String name;
-    private ValueType valueType;
+    private final String name;
+    private final ValueType valueType;
+    private final ValueSet valueSet;
 
+    /**
+     * Initializes the property definition with a name, a value type and a
+     * <code>null</code> value set.
+     * 
+     * @param name a name {@link String}. Cannot be <code>null</code>.
+     * @param valueType a {@link ValueType}. Cannot be <code>null</code>.
+     */
     public PropertyDefinition(String name, ValueType valueType) {
+        this(name, valueType, null);
+    }
+
+    /**
+     * Initializes the property definition with a name, a value type and a
+     * value set.
+     * 
+     * @param name a name {@link String}. Cannot be <code>null</code>.
+     * @param valueType a {@link ValueType}. Cannot be <code>null</code>.
+     * @param valueSet a {@link EnumeratedValueSet} that is compatible with
+     * the given <code>valueType</code>.
+     *
+     * @see ValueType#isCompatible(ValueSet) 
+     */
+    public PropertyDefinition(String name, ValueType valueType,
+            ValueSet valueSet) {
         if (name == null)
             throw new IllegalArgumentException("name cannot be null");
         if (valueType == null)
             throw new IllegalArgumentException("valueType cannot be null");
         this.name = name;
         this.valueType = valueType;
+        this.valueSet = valueSet;
     }
 
+    /**
+     * Returns the property's name.
+     *
+     * @return a {@link String}.
+     */
     public String getName() {
         return this.name;
     }
-    
+
+    /**
+     * Returns the property's value type.
+     *
+     * @return a {@link ValueType}.
+     */
     public ValueType getValueType() {
         return this.valueType;
+    }
+
+    /**
+     * Returns the property's value set (for nominal and ordinal values).
+     *
+     * @return the {@link EnumeratedValueSet}, or <code>null</code> if none is
+     * defined.
+     */
+    public ValueSet getValueSet() {
+        return this.valueSet;
+    }
+
+    public boolean isInValueSet(Value value) {
+        if (this.valueSet != null)
+            return this.valueSet.isInValueSet(value);
+        else
+            return true;
     }
 
     @Override

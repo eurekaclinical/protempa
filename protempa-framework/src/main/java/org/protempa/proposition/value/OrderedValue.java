@@ -6,6 +6,6 @@ package org.protempa.proposition.value;
  *
  * @author Andrew Post
  */
-public interface OrderedValue {
+public interface OrderedValue extends Value {
 
 }
