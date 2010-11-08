@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
 
 /**
  * Convenience class for executing SQL queries.
@@ -53,6 +54,7 @@ public final class SQLExecutor {
         try {
             ResultSet resultSet = null;
             try {
+                SQLUtil.logger().log(Level.FINE, "executing SQL: " + sql);
                 stmt.execute(sql);
                 if (resultProcessor != null) {
                     resultProcessor.process(stmt.getResultSet());
@@ -74,6 +76,7 @@ public final class SQLExecutor {
             throw new IllegalArgumentException("connection cannot be null");
         PreparedStatement stmt = null;
         try {
+            SQLUtil.logger().log(Level.FINE, "executing SQL: " + sql);
             stmt = connection.prepareStatement(sql);
             executeSQL(connection, stmt, stmtPreparer, resultProcessor);
         } finally {
@@ -83,9 +86,8 @@ public final class SQLExecutor {
         }
     }
 
-    public static void executeSQL(ConnectionSpec connectionCreator,
-            String sql, ResultProcessor resultProcessor)
-            throws SQLException {
+    public static void executeSQL(ConnectionSpec connectionCreator, String sql,
+            ResultProcessor resultProcessor) throws SQLException {
         if (connectionCreator == null)
             throw new IllegalArgumentException(
                     "connectionCreator cannot be null");
@@ -100,9 +102,9 @@ public final class SQLExecutor {
         }
     }
 
-    public static void executeSQL(ConnectionSpec connectionCreator,
-            String sql, StatementPreparer stmtPreparer,
-            ResultProcessor resultProcessor) throws SQLException {
+    public static void executeSQL(ConnectionSpec connectionCreator, String sql,
+            StatementPreparer stmtPreparer, ResultProcessor resultProcessor)
+            throws SQLException {
         if (connectionCreator == null)
             throw new IllegalArgumentException(
                     "connectionCreator cannot be null");
