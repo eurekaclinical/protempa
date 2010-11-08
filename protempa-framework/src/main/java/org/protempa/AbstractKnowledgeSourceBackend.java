@@ -1,9 +1,7 @@
 package org.protempa;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Skeletal implementation of the <code>KnowledgeSourceBackend</code> interface
@@ -91,7 +89,7 @@ public abstract class AbstractKnowledgeSourceBackend extends
 
     /**
      * A default implementation that returns an empty map.
-     *
+     * 
      * @return a {@link Map<String, List<String>>}.
      */
     @Override
