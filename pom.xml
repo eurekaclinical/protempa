@@ -6,6 +6,9 @@
   <version>2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>PROTEMPA</name>
+  <scm>
+    <connection>scm:svn:svn://scm.cci.emory.edu/svn/protempa/trunk</connection>
+  </scm>
 
   <modules>
     <module>javautil</module>
