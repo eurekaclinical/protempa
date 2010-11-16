@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
@@ -12,7 +13,7 @@ import org.protempa.proposition.UniqueIdentifier;
  *
  * @author Andrew Post
  */
-public final class Derivation extends AbstractLink {
+public final class Derivation extends Link {
 
     public Derivation(String[] propositionIds) {
         this(propositionIds, null);
@@ -38,7 +39,7 @@ public final class Derivation extends AbstractLink {
     }
 
     @Override
-    public String headerFragment() {
+    String headerFragment() {
         return createHeaderFragment("derived");
     }
 
@@ -50,7 +51,12 @@ public final class Derivation extends AbstractLink {
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource) {
         List<Proposition> derivedProps = derivations.get(proposition);
-        
+        assert derivedProps != null : "derivedProps cannot be null";
         return createResults(derivedProps);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

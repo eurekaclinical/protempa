@@ -20,7 +20,6 @@ import org.protempa.TemporalExtendedParameterDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.proposition.Relation;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
-import org.protempa.proposition.value.ValueSet;
 import org.protempa.proposition.value.ValueSet.ValueSetElement;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.RelativeHourUnit;
@@ -94,13 +93,15 @@ class Util {
         Slot abbrevDisplayNameSlot = cm.getSlot("abbrevDisplayName");
         Slot valueSlot = cm.getSlot("value");
         if (!objs.isEmpty()) {
-            valueSet = parseEnumeratedValueSet(objs, cm, displayNameSlot,
+            valueSet = parseEnumeratedValueSet(valueTypeCls, objs, cm,
+                    displayNameSlot,
                     abbrevDisplayNameSlot, valueSlot, valueType);
         }
         return valueSet;
     }
 
-    private static ValueSet parseEnumeratedValueSet(Collection objs,
+    private static ValueSet parseEnumeratedValueSet(Cls valueSetCls,
+            Collection objs,
             ConnectionManager cm, Slot displayNameSlot,
             Slot abbrevDisplayNameSlot, Slot valueSlot, ValueType valueType)
             throws KnowledgeSourceReadException {
@@ -118,7 +119,7 @@ class Util {
             vses[i] = new ValueSetElement(val, displayName, abbrevDisplayName);
             i++;
         }
-        return new ValueSet(vses);
+        return new ValueSet(valueSetCls.getName(), vses);
     }
 
     private static ValueType parseValueType(Cls valueTypeCls) {
@@ -253,9 +254,8 @@ class Util {
             Instance inst = (Instance) propertyInstance;
             Cls valueTypeCls = (Cls) cm.getOwnSlotValue(inst, valueTypeSlot);
             ValueType valueType = parseValueType(valueTypeCls);
-            ValueSet valueSet = parseValueSet(valueTypeCls, valueType, cm);
             PropertyDefinition propDef = new PropertyDefinition(inst.getName(),
-                    valueType, valueSet);
+                    valueType, valueTypeCls.getName());
             propDefs[i] = propDef;
             i++;
         }

@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.logging.Level;
 import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
@@ -56,8 +57,12 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
                 }
                 j++;
             }
+            Util.logger().log(Level.FINEST, "{0} traversed to {1} with {2}",
+                new Object[] {getClass().getName(), result, link});
             num = result.size();
         }
+        Util.logger().log(Level.FINER, "{0} traversed to {1}",
+                new Object[] {getClass().getName(), result});
         return result;
     }
 }

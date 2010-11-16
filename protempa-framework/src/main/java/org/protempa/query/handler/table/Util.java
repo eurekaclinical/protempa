@@ -1,5 +1,6 @@
 package org.protempa.query.handler.table;
 
+import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
@@ -10,8 +11,6 @@ import org.protempa.PropositionDefinition;
  * @author Andrew Post
  */
 public class Util {
-
-    static final String NULL_COLUMN = "(empty)";
 
     private Util() {}
 
@@ -42,5 +41,15 @@ public class Util {
                 return propositionDefinition.getId();
             }
         }
+    }
+
+    static Logger logger() {
+        return LazyLoggerHolder.instance;
+    }
+
+    private static class LazyLoggerHolder {
+
+        private static Logger instance =
+                Logger.getLogger(Util.class.getPackage().getName());
     }
 }

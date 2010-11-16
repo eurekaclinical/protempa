@@ -27,12 +27,12 @@ public class AbstractTest {
     static void initProtempa(String configurationsId) {
         try {
             protempa = Protempa.newInstance(configurationsId);
-        } catch (ProtempaStartupException e) {
-            throw new RuntimeException(e);
+            dataSource = protempa.getDataSource();
+            knowledgeSource = protempa.getKnowledgeSource();
+            algorithmSource = protempa.getAlgorithmSource();
+        } catch (ProtempaStartupException ex) {
+            throw new RuntimeException(ex);
         }
-        dataSource = protempa.getDataSource();
-        knowledgeSource = protempa.getKnowledgeSource();
-        algorithmSource = protempa.getAlgorithmSource();
     }
 
     static void shutdownProtempa() {

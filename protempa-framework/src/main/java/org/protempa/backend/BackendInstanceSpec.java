@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.Backend;
 import org.protempa.BackendInitializationException;
 
@@ -101,5 +102,10 @@ public final class BackendInstanceSpec<B extends Backend> {
         B backend = backendSpec.newBackendInstance();
         backend.initialize(this);
         return backend;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

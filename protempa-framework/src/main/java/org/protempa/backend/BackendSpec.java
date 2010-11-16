@@ -1,6 +1,7 @@
 package org.protempa.backend;
 
 import java.util.List;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.Backend;
 
 /**
@@ -53,5 +54,10 @@ public final class BackendSpec<B extends Backend> {
 
     B newBackendInstance() throws BackendNewInstanceException {
         return (B) this.backendProvider.newInstance(id);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

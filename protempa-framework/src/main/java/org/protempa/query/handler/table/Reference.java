@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
@@ -14,7 +14,7 @@ import org.protempa.proposition.UniqueIdentifier;
  *
  * @author Andrew Post
  */
-public final class Reference extends AbstractLink {
+public final class Reference extends Link {
     private final String referenceName;
     
 
@@ -52,7 +52,7 @@ public final class Reference extends AbstractLink {
     }
 
     @Override
-    public String headerFragment() {
+    String headerFragment() {
         return createHeaderFragment(this.referenceName);
     }
 
@@ -66,9 +66,15 @@ public final class Reference extends AbstractLink {
         List<Proposition> props = new ArrayList<Proposition>();
         for (UniqueIdentifier uid : uids) {
             Proposition prop = references.get(uid);
+	    assert prop != null : "prop cannot be null";
             props.add(prop);
         }
 
         return createResults(props);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

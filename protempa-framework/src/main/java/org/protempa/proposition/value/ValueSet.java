@@ -82,14 +82,19 @@ public final class ValueSet {
             return ToStringBuilder.reflectionToString(this);
         }
     }
-    
+
+    private final String id;
     private final ValueSetElement[] valueSetElements;
     private final Map<Value, ValueSetElement> values;
     private final Set<Value> valuesKeySet;
     private final OrderedValue lowerBound;
     private final OrderedValue upperBound;
 
-    public ValueSet(OrderedValue lowerBound, OrderedValue upperBound) {
+    public ValueSet(String id, OrderedValue lowerBound,
+            OrderedValue upperBound) {
+        if (id == null)
+            throw new IllegalArgumentException("id cannot be null");
+        this.id = id;
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
         this.valueSetElements = new ValueSetElement[0];
@@ -98,13 +103,18 @@ public final class ValueSet {
     }
 
     /**
-     * Instantiates a new value set with the specified values.
+     * Instantiates a new value set with the specified values (value set
+     * elements).
      *
-     * @param valueSetElements a {@link Set<Value>}.
+     * @param valueSetElements a {@link ValueSetElement[]}. No duplicate
+     * {@link ValueSetElement}s are allowed.
      */
-    public ValueSet(ValueSetElement[] valueSetElements) {
+    public ValueSet(String id, ValueSetElement[] valueSetElements) {
+        if (id == null)
+            throw new IllegalArgumentException("id cannot be null");
         ProtempaUtil.checkArray(valueSetElements, "valueSetElements");
 
+        this.id = id;
         this.valueSetElements = valueSetElements.clone();
 
         this.values = new HashMap<Value, ValueSetElement>();
@@ -122,9 +132,18 @@ public final class ValueSet {
     }
 
     /**
+     * Returns the value set's unique identifier.
+     *
+     * @return a unique identifer {@link String}.
+     */
+    public String getId() {
+        return this.id;
+    }
+
+    /**
      * Gets the elements of this value set, if specified.
      *
-     * @return a {@link ValueSetElement[]}.
+     * @return a {@link ValueSetElement[]}. Guaranteed not null.
      */
     public ValueSetElement[] getValueSetElements() {
         return this.valueSetElements;
@@ -132,6 +151,7 @@ public final class ValueSet {
 
     /**
      * Gets the lower bound of this value set, if specified.
+     * 
      * @return a lower bound {@link OrderedValue}.
      */
     public OrderedValue getLowerBound() {
@@ -140,7 +160,8 @@ public final class ValueSet {
 
     /**
      * Gets the upper bound of this value set, if specified.
-     * @return
+     *
+     * @return an upper bound {@link OrderedValue}.
      */
     public OrderedValue getUpperBound() {
         return this.upperBound;

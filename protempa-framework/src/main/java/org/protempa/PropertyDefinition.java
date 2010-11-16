@@ -2,8 +2,6 @@ package org.protempa;
 
 import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueSet;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -16,7 +14,7 @@ public final class PropertyDefinition implements Serializable {
 
     private final String name;
     private final ValueType valueType;
-    private final ValueSet valueSet;
+    private final String valueSetId;
 
     /**
      * Initializes the property definition with a name, a value type and a
@@ -41,14 +39,14 @@ public final class PropertyDefinition implements Serializable {
      * @see ValueType#isCompatible(ValueSet) 
      */
     public PropertyDefinition(String name, ValueType valueType,
-            ValueSet valueSet) {
+            String valueSetId) {
         if (name == null)
             throw new IllegalArgumentException("name cannot be null");
         if (valueType == null)
             throw new IllegalArgumentException("valueType cannot be null");
         this.name = name;
         this.valueType = valueType;
-        this.valueSet = valueSet;
+        this.valueSetId = valueSetId;
     }
 
     /**
@@ -75,15 +73,8 @@ public final class PropertyDefinition implements Serializable {
      * @return the {@link EnumeratedValueSet}, or <code>null</code> if none is
      * defined.
      */
-    public ValueSet getValueSet() {
-        return this.valueSet;
-    }
-
-    public boolean isInValueSet(Value value) {
-        if (this.valueSet != null)
-            return this.valueSet.isInValueSet(value);
-        else
-            return true;
+    public String getValueSetId() {
+        return this.valueSetId;
     }
 
     @Override

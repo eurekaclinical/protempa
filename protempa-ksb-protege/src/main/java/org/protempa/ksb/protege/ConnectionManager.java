@@ -113,9 +113,9 @@ abstract class ConnectionManager {
                  * dispose() could throw this exception?
                  */
                 Util.logger().fine("Done closing connection.");
+            } finally {
+                this.project = null;
             }
-
-            project = null;
 
         }
     }

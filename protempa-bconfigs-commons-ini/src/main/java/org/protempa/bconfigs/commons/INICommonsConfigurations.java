@@ -51,6 +51,7 @@ public class INICommonsConfigurations implements Configurations {
         CommonsUtil.logger().fine("Using configurations path " + this.pathname);
     }
 
+    @Override
     public <B extends Backend> List<BackendInstanceSpec<B>> load(
             String configurationsId,
             BackendSpec<B> backendSpec)
@@ -98,6 +99,7 @@ public class INICommonsConfigurations implements Configurations {
         }
     }
 
+    @Override
     public void save(String configurationsId,
             List<BackendInstanceSpec> backendInstanceSpecs)
             throws ConfigurationsSaveException {
@@ -135,6 +137,7 @@ public class INICommonsConfigurations implements Configurations {
         }
     }
 
+    @Override
     public List<String> loadConfigurationIds(String configurationsId)
             throws ConfigurationsLoadException {
         if (configurationsId == null)
@@ -169,6 +172,7 @@ public class INICommonsConfigurations implements Configurations {
         }
     }
 
+    @Override
     public void remove(String configurationsId) 
             throws ConfigurationRemoveException {
         if (configurationsId == null)

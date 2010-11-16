@@ -3,9 +3,6 @@ package org.protempa.proposition.value;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
-import org.protempa.ProtempaUtil;
-
-
 /**
  * Utilities for the time units project.
  * 
@@ -13,30 +10,32 @@ import org.protempa.ProtempaUtil;
  */
 final class ValueUtil {
 
-	private ValueUtil() {
+    private ValueUtil() {
+    }
 
-	}
+    private static class LazyResourceBundleHolder {
 
-	private static class LazyResourceBundleHolder {
-		private static ResourceBundle instance = ResourceBundle
-				.getBundle("org.protempa.proposition.value.resources.bundles.Messages");
-	}
-	
-	private static class LazyLoggerHolder {
-		private static Logger instance = Logger.getLogger(ValueUtil.class
-				.getPackage().getName());
-	}
+        private static ResourceBundle instance =
+                ResourceBundle.getBundle(
+                "org.protempa.proposition.value.resources.bundles.Messages");
+    }
 
-	/**
-	 * Gets the messages for this project's resource bundle.
-	 * 
-	 * @return a <code>ResourceBundle</code>.
-	 */
-	static ResourceBundle resourceBundle() {
-		return LazyResourceBundleHolder.instance;
-	}
-	
-	static Logger logger() {
-		return LazyLoggerHolder.instance;
-	}
+    private static class LazyLoggerHolder {
+
+        private static Logger instance =
+                Logger.getLogger(ValueUtil.class.getPackage().getName());
+    }
+
+    /**
+     * Gets the messages for this project's resource bundle.
+     *
+     * @return a <code>ResourceBundle</code>.
+     */
+    static ResourceBundle resourceBundle() {
+        return LazyResourceBundleHolder.instance;
+    }
+
+    static Logger logger() {
+        return LazyLoggerHolder.instance;
+    }
 }

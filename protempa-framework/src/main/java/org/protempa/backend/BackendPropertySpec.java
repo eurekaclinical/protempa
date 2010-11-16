@@ -1,6 +1,7 @@
 package org.protempa.backend;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.arp.javautil.arrays.Arrays;
 
 /**
@@ -63,5 +64,10 @@ public final class BackendPropertySpec {
     public void validate(Object value) throws InvalidPropertyValueException {
         if (this.validator != null)
             this.validator.validate(this.name, value);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

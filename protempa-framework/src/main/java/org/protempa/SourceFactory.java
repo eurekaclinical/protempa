@@ -14,7 +14,6 @@ import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.Configurations;
-import org.protempa.backend.ConfigurationsProvider;
 import org.protempa.backend.ConfigurationsProviderManager;
 
 
@@ -45,15 +44,10 @@ public final class SourceFactory {
                 BackendProviderManager.getBackendProvider();
         logger.log(Level.FINE, "Got backend provider {0}", 
                 backendProvider.getClass().getName());
-        logger.fine("Loading configurations provider");
-        ConfigurationsProvider configurationsProvider =
-                ConfigurationsProviderManager.getConfigurationsProvider();
-        logger.log(Level.FINE, "Got configurations provider {0}",
-                configurationsProvider.getClass().getName());
-        logger.fine("Getting available configuration files");
-        Configurations configurations = configurationsProvider
-                .getConfigurations();
-        logger.fine("Got available configuration files");
+        logger.fine("Loading configurations");
+        Configurations configurations =
+                ConfigurationsProviderManager.getConfigurations();
+        logger.fine("Got available configurations");
         logger.fine("Loading configuration " + configurationId);
         BackendSpecLoader<AlgorithmSourceBackend> asl =
                 backendProvider.getAlgorithmSourceBackendSpecLoader();

@@ -28,8 +28,7 @@ public interface QueryResultsHandler {
     public void init(KnowledgeSource knowledgeSource) throws FinderException;
 
     /**
-     * Performs all clean-up functions for the handler. This method is
-     * guaranteed to be called by Protempa as soon as all query results have
+     * Called by Protempa as soon as all query results have
      * been retrieved from the data source.
      *
      * @throws FinderException
