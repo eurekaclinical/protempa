@@ -1,6 +1,8 @@
 package org.protempa;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.protempa.backend.BackendNewInstanceException;
@@ -30,8 +32,7 @@ public final class TermSource extends
         this.backendManager.initializeIfNeeded();
     }
 
-    public Term readTerm(String id)
-            throws TermSourceReadException {
+    public Term readTerm(String id) throws TermSourceReadException {
         Term result = null;
         if (!notFoundTerms.contains(id)) {
             try {
@@ -54,7 +55,35 @@ public final class TermSource extends
         }
 
         return result;
+    }
 
+    /**
+     * Gets the term subsumption for the given term ID
+     * 
+     * @param termId
+     *            the term ID to subsume
+     * @return a {@link List} of term IDs composing the given term's subsumption
+     */
+    public List<String> getTermSubsumption(String termId)
+            throws TermSourceReadException {
+        List<String> result = null;
+        try {
+            initializeIfNeeded();
+        } catch (BackendInitializationException ex) {
+            throw new TermSourceReadException(ex);
+        } catch (BackendNewInstanceException ex) {
+            throw new TermSourceReadException(ex);
+        }
+        if (this.backendManager.getBackends() != null) {
+            for (TermSourceBackend backend : this.backendManager.getBackends()) {
+                result = backend.getSubsumption(termId);
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+
+        return result;
     }
 
     /*
