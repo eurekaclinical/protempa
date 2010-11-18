@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.protempa.backend.BackendNewInstanceException;
+import org.protempa.query.And;
 
 
 /**
@@ -721,7 +722,7 @@ public final class KnowledgeSource
      *         <code>String</code>s, with the keys being {@link Term} IDs and
      *         the values being lists of {@link PropositionDefinition} IDs.
      */
-    public List<String> getPropositionDefinitionsByTerm(String termId)
+    public List<String> getPropositionDefinitionsByTerm(And<TermSubsumption> termSubsumptionClause)
             throws KnowledgeSourceReadException {
         List<String> result = new ArrayList<String>();
         try {
@@ -732,7 +733,7 @@ public final class KnowledgeSource
             throw new KnowledgeSourceReadException(ex);
         }
         for (KnowledgeSourceBackend backend : backendManager.getBackends()) {
-            result.addAll(backend.getPropositionDefinitionsByTerm(termId));
+            result.addAll(backend.getPropositionsByTermSubsumption(termSubsumptionClause));
         }
 
         return result;

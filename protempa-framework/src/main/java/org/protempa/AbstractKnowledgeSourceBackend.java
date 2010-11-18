@@ -3,6 +3,8 @@ package org.protempa;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.protempa.query.And;
+
 /**
  * Skeletal implementation of the <code>KnowledgeSourceBackend</code> interface
  * to minimize the effort required to implement this interface.
@@ -88,12 +90,24 @@ public abstract class AbstractKnowledgeSourceBackend extends
     }
 
     /**
-     * A default implementation that returns an empty map.
+     * A default implementation that returns an empty List.
      * 
-     * @return a {@link Map<String, List<String>>}.
+     * @return a {@link List<String>}.
      */
     @Override
-    public List<String> getPropositionDefinitionsByTerm(String termId)
+    public List<String> getPropositionsByTermSubsumption(And<TermSubsumption> termId)
+            throws KnowledgeSourceReadException {
+        return new ArrayList<String>();
+    }
+    
+
+    /** 
+     * A default implementation that returns an empty list.
+     * 
+     * @see org.protempa.KnowledgeSourceBackend#getPropositionsByTerm(java.lang.String)
+     */
+    @Override
+    public List<String> getPropositionsByTerm(String termId)
             throws KnowledgeSourceReadException {
         return new ArrayList<String>();
     }
