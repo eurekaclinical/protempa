@@ -1,16 +1,17 @@
 package org.protempa.bp.commons;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Arrays;
-import org.protempa.backend.BackendProviderSpecLoaderException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import static org.junit.Assert.*;
 
 import org.junit.AfterClass;
-import org.junit.Test;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.protempa.AlgorithmSourceBackend;
 import org.protempa.DataSourceBackend;
 import org.protempa.KnowledgeSourceBackend;
@@ -18,6 +19,7 @@ import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendPropertySpec;
 import org.protempa.backend.BackendProvider;
 import org.protempa.backend.BackendProviderManager;
+import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
 import org.protempa.backend.BackendSpecNotFoundException;
