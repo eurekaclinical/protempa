@@ -1,5 +1,6 @@
 package org.protempa;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,4 +33,17 @@ public interface TermSourceBackend extends
      *             if the {@link TermSource} is unreadable
      */
     Map<String, Term> readTerms(String[] ids) throws TermSourceReadException;
+
+    /**
+     * Retrieves all of the descendants of the term specified by the given ID.
+     * In this case, the descendants include the given term itself.
+     * 
+     * @param id
+     *            the term whose descendants are to be retrieved
+     * @return a {@link List} of {@link String}s that are the term IDs of the
+     *         descendents of the given term
+     * @throws TermSourceReadException
+     *             if the {@link TermSource} is unreadable
+     */
+    List<String> getSubsumption(String id) throws TermSourceReadException;
 }

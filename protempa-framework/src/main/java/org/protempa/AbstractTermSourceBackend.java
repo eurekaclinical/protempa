@@ -1,5 +1,6 @@
 package org.protempa;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,6 +49,18 @@ public abstract class AbstractTermSourceBackend extends
      */
     @Override
     public String getDisplayName() {
+        return null;
+    }
+    
+
+    /**
+     * A default implementation that returns null
+     * 
+     * @see org.protempa.TermSourceBackend#getSubsumption(java.lang.String)
+     */
+    @Override
+    public List<String> getSubsumption(String id)
+            throws TermSourceReadException {
         return null;
     }
 
