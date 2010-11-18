@@ -1,6 +1,5 @@
 package org.protempa;
 
-import org.protempa.dsb.filter.Filter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,12 +20,14 @@ import org.drools.ObjectFilter;
 import org.drools.RuleBase;
 import org.drools.StatefulSession;
 import org.drools.StatelessSession;
+import org.protempa.dsb.filter.Filter;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.query.And;
 import org.protempa.query.handler.QueryResultsHandler;
 
 /**
@@ -42,7 +43,7 @@ final class AbstractionFinder implements Module {
     private final KnowledgeSource knowledgeSource;
     private final TermSource termSource;
     private final AlgorithmSource algorithmSource;
-//    private final Map<String, List<String>> termToPropDefMap;
+    // private final Map<String, List<String>> termToPropDefMap;
     private boolean clearNeeded;
     private final Map<String, Map<Set<String>, Sequence<PrimitiveParameter>>> sequences;
     private boolean closed;
@@ -58,13 +59,6 @@ final class AbstractionFinder implements Module {
         this.knowledgeSource = knowledgeSource;
         this.termSource = termSource;
         this.algorithmSource = algorithmSource;
-
-//        try {
-//            this.termToPropDefMap = knowledgeSource.mapTermsToPropDefinitions();
-//        } catch (KnowledgeSourceReadException ex) {
-//            throw new KnowledgeSourceReadException(
-//                    "Unable to map term IDs to proposition definition IDs", ex);
-//        }
 
         this.dataSource
                 .addSourceListener(new SourceListener<DataSourceUpdatedEvent>() {
@@ -151,7 +145,7 @@ final class AbstractionFinder implements Module {
     AlgorithmSource getAlgorithmSource() {
         return this.algorithmSource;
     }
-    
+
     TermSource getTermSource() {
         return this.termSource;
     }
@@ -164,7 +158,8 @@ final class AbstractionFinder implements Module {
         }
     }
 
-    void doFind(Set<String> keyIds, Set<String> propIds, Filter filters,
+    void doFind(Set<String> keyIds, Set<String> propIds,
+            Set<And<String>> termIds, Filter filters,
             QueryResultsHandler resultHandler, QuerySession qs)
             throws FinderException {
         if (this.closed) {
@@ -172,6 +167,11 @@ final class AbstractionFinder implements Module {
         }
         try {
             resultHandler.init(this.knowledgeSource);
+            List<String> termPropIds = getPropIdsFromTerms(explodeTerms(termIds));
+            List<String> allPropIds = new ArrayList<String>();
+            allPropIds.addAll(propIds);
+            allPropIds.addAll(termPropIds);
+
             if (workingMemoryCache != null) {
                 doFindStateful(keyIds, propIds, filters, resultHandler, qs);
             } else {
@@ -200,6 +200,37 @@ final class AbstractionFinder implements Module {
     public void close() {
         clear();
         this.closed = true;
+    }
+
+    private List<String> getPropIdsFromTerms(
+            Set<And<TermSubsumption>> termSubsumptionClauses)
+            throws KnowledgeSourceReadException {
+        List<String> result = new ArrayList<String>();
+
+        for (And<TermSubsumption> subsumpClause : termSubsumptionClauses) {
+            result.addAll(this.knowledgeSource
+                    .getPropositionDefinitionsByTerm(subsumpClause));
+        }
+
+        return result;
+    }
+
+    private Set<And<TermSubsumption>> explodeTerms(Set<And<String>> termClauses)
+            throws TermSourceReadException {
+        Set<And<TermSubsumption>> result = new HashSet<And<TermSubsumption>>();
+
+        for (And<String> termClause : termClauses) {
+            And<TermSubsumption> subsumpClause = new And<TermSubsumption>();
+            List<TermSubsumption> tss = new ArrayList<TermSubsumption>();
+            for (String termId : termClause.getAnded()) {
+                tss.add(TermSubsumption.fromTerms(this.termSource
+                        .getTermSubsumption(termId)));
+            }
+            subsumpClause.setAnded(tss);
+            result.add(subsumpClause);
+        }
+
+        return result;
     }
 
     private static byte[] detachWorkingMemory(StatefulSession workingMemory)
@@ -349,32 +380,29 @@ final class AbstractionFinder implements Module {
             Set<String> propositionIds, Filter filters, QuerySession qs,
             boolean stateful) throws DataSourceReadException,
             KnowledgeSourceReadException {
-        Map<String, List<Object>> objects =
-                new HashMap<String, List<Object>>();
+        Map<String, List<Object>> objects = new HashMap<String, List<Object>>();
 
         // Add events
         Set<String> eventIds = knowledgeSource.leafEventIds(propositionIds);
         if (!eventIds.isEmpty() || propositionIds == null
                 || propositionIds.isEmpty()) {
-            Map<String, List<Event>> tempObjects =
-                    createEvents(dataSource, keyIds, eventIds, filters, qs);
-            for (Map.Entry<String, List<Event>> entry :
-                    tempObjects.entrySet()) {
+            Map<String, List<Event>> tempObjects = createEvents(dataSource,
+                    keyIds, eventIds, filters, qs);
+            for (Map.Entry<String, List<Event>> entry : tempObjects.entrySet()) {
                 org.arp.javautil.collections.Collections.putListAll(objects,
                         entry.getKey(), entry.getValue());
             }
         }
 
         // Add constants
-        Set<String> constantIds =
-                knowledgeSource.leafConstantIds(propositionIds);
+        Set<String> constantIds = knowledgeSource
+                .leafConstantIds(propositionIds);
         if (!constantIds.isEmpty() || propositionIds == null
                 || propositionIds.isEmpty()) {
-            Map<String, List<Constant>> tempObjects =
-                    createConstantPropositions(dataSource, keyIds, constantIds,
-                    filters, qs);
-            for (Map.Entry<String, List<Constant>> entry :
-                    tempObjects.entrySet()) {
+            Map<String, List<Constant>> tempObjects = createConstantPropositions(
+                    dataSource, keyIds, constantIds, filters, qs);
+            for (Map.Entry<String, List<Constant>> entry : tempObjects
+                    .entrySet()) {
                 org.arp.javautil.collections.Collections.putListAll(objects,
                         entry.getKey(), entry.getValue());
             }
@@ -382,14 +410,13 @@ final class AbstractionFinder implements Module {
 
         // Add parameters. Requires special handling, because Sequence objects
         // do not override equals. Can we eliminate sequence cache?
-        for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> entry :
-                createSequencesFromPrimitiveParameters(
-                keyIds, dataSource.getPrimitiveParametersAsc(keyIds,
-                knowledgeSource.primitiveParameterIds(propositionIds),
-                filters, qs), propositionIds,
-                stateful).entrySet()) {
+        for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> entry : createSequencesFromPrimitiveParameters(
+                keyIds,
+                dataSource.getPrimitiveParametersAsc(keyIds,
+                        knowledgeSource.primitiveParameterIds(propositionIds),
+                        filters, qs), propositionIds, stateful).entrySet()) {
             org.arp.javautil.collections.Collections.putListAll(objects,
-                        entry.getKey(), entry.getValue());
+                    entry.getKey(), entry.getValue());
         }
 
         return objects;
@@ -406,8 +433,8 @@ final class AbstractionFinder implements Module {
                     // TODO: need to populate
                     Map<Proposition, List<Proposition>> derivationsMap = new HashMap<Proposition, List<Proposition>>();
 
-                    StatefulSession workingMemory = statefulWorkingMemory(entry
-                            .getKey(), propositionIds);
+                    StatefulSession workingMemory = statefulWorkingMemory(
+                            entry.getKey(), propositionIds);
                     List<Object> objs = entry.getValue();
                     for (Object obj : objs) {
                         workingMemory.insert(obj);
@@ -443,10 +470,8 @@ final class AbstractionFinder implements Module {
     }
 
     private Map<String, List<Constant>> createConstantPropositions(
-            DataSource dataSource,
-            Set<String> keyIds, Set<String> constantIds,
-            Filter filters, QuerySession qs)
-            throws DataSourceReadException {
+            DataSource dataSource, Set<String> keyIds, Set<String> constantIds,
+            Filter filters, QuerySession qs) throws DataSourceReadException {
         return dataSource.getConstantPropositions(keyIds, constantIds, filters,
                 qs);
     }
@@ -617,8 +642,8 @@ final class AbstractionFinder implements Module {
                     if (cd != null) {
                         cd.acceptChecked(visitor);
                         propDefs.add(cd);
-                        aggregateChildren(visitor, propDefs, cd
-                                .getDirectChildren());
+                        aggregateChildren(visitor, propDefs,
+                                cd.getDirectChildren());
                     }
                 }
             }
@@ -696,18 +721,18 @@ final class AbstractionFinder implements Module {
         Set<String> propIdsToFilter = new HashSet<String>();
         if (oldPropIds != null) {
             Set<PropositionDefinition> propDefsToFilter = new HashSet<PropositionDefinition>();
-            aggregateChildren(visitor, propDefsToFilter, oldPropIds
-                    .toArray(new String[oldPropIds.size()]));
+            aggregateChildren(visitor, propDefsToFilter,
+                    oldPropIds.toArray(new String[oldPropIds.size()]));
             for (PropositionDefinition propDef : propDefsToFilter) {
                 propIdsToFilter.add(propDef.getId());
             }
         }
-        JBossRuleCreator ruleCreator = new JBossRuleCreator(visitor
-                .getAlgorithms(), knowledgeSource, derivations);
+        JBossRuleCreator ruleCreator = new JBossRuleCreator(
+                visitor.getAlgorithms(), knowledgeSource, derivations);
         if (propIds != null) {
             Set<PropositionDefinition> propDefs = new HashSet<PropositionDefinition>();
-            aggregateChildren(visitor, propDefs, propIds
-                    .toArray(new String[propIds.size()]));
+            aggregateChildren(visitor, propDefs,
+                    propIds.toArray(new String[propIds.size()]));
             for (Iterator<PropositionDefinition> itr = propDefs.iterator(); itr
                     .hasNext();) {
                 PropositionDefinition def = itr.next();
