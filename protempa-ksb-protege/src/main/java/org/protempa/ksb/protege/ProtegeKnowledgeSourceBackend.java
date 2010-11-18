@@ -1,11 +1,13 @@
 package org.protempa.ksb.protege;
 
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+import java.util.Set;
 
 import org.protempa.AbstractionDefinition;
 import org.protempa.ConstantDefinition;
@@ -14,17 +16,18 @@ import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSourceBackendInitializationException;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PrimitiveParameterDefinition;
+import org.protempa.TermSubsumption;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.AbstractCommonsKnowledgeSourceBackend;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
+import org.protempa.query.And;
 
 import edu.stanford.smi.protege.event.ProjectEvent;
 import edu.stanford.smi.protege.event.ProjectListener;
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
-import edu.stanford.smi.protege.model.Slot;
 
 /**
  * Abstract class for converting a Protege knowledge base into a PROTEMPA
@@ -78,9 +81,6 @@ public abstract class ProtegeKnowledgeSourceBackend extends
                 this.primitiveParameterCls = this.cm
                         .getCls("PrimitiveParameter");
                 this.constantCls = this.cm.getCls("Constant");
-//                Util.logger().log(Level.INFO, "Start terms: " + Calendar.getInstance().getTimeInMillis());
-//                this.populateTermToPropMap();
-//                Util.logger().log(Level.INFO, "End terms: " + Calendar.getInstance().getTimeInMillis());
             } catch (KnowledgeSourceReadException e) {
                 throw new KnowledgeSourceBackendInitializationException(e);
             }
@@ -93,28 +93,6 @@ public abstract class ProtegeKnowledgeSourceBackend extends
 
     ConnectionManager getConnectionManager() {
         return this.cm;
-    }
-
-    private void populateTermToPropMap() throws KnowledgeSourceReadException {
-        Slot termSlot = cm.getSlot("term");
-        Slot termIdSlot = cm.getSlot("termId");
-        List<Instance> clsInsts = new ArrayList<Instance>();
-        clsInsts.addAll(this.cm.getInstances(this.abstractParameterCls));
-        clsInsts.addAll(this.cm.getInstances(this.eventCls));
-        clsInsts.addAll(this.cm.getInstances(this.primitiveParameterCls));
-        clsInsts.addAll(this.cm.getInstances(this.constantCls));
-
-        for (Instance event : clsInsts) {
-            for (Object inst : this.cm.getOwnSlotValues(event, termSlot)) {
-                Instance termInst = (Instance) inst;
-                String termId = (String) this.cm.getOwnSlotValue(termInst,
-                        termIdSlot);
-                if (!termToPropMap.containsKey(termId)) {
-                    termToPropMap.put(termId, new ArrayList<String>());
-                }
-                termToPropMap.get(termId).add(event.getName());
-            }
-        }
     }
 
     protected void initUnits(String unitsStr)
@@ -222,6 +200,73 @@ public abstract class ProtegeKnowledgeSourceBackend extends
         } else {
             return null;
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.protempa.AbstractKnowledgeSourceBackend#getPropositionsByTerm(java.lang.String)
+     */
+    @Override
+    public List<String> getPropositionsByTerm(String termId)
+            throws KnowledgeSourceReadException {
+        List<String> result = new ArrayList<String>();
+        
+        Instance termInstance = getInstance(termId);
+        if (termInstance != null) {
+            Collection props = cm.getOwnSlotValues(termInstance, cm.getSlot("termProposition"));
+            Iterator it = props.iterator();
+            while (it.hasNext()) {
+                Instance prop = (Instance) it.next();
+                result.add(prop.getName());
+            }
+        }
+        
+        return new ArrayList<String>();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.protempa.AbstractKnowledgeSourceBackend#getPropositionDefinitionsByTerm
+     * (java.lang.And<TermSubsumption>)
+     */
+    @Override
+    public List<String> getPropositionsByTermSubsumption(And<TermSubsumption> termIds)
+            throws KnowledgeSourceReadException {
+        List<String> result = new ArrayList<String>();
+        List<Set<String>> propIdSets = new ArrayList<Set<String>>();
+        
+        // collects the set of proposition IDs for each term subsumption
+        for (TermSubsumption ts : termIds.getAnded()) {
+            Set<String> subsumpPropIds = new HashSet<String>();
+            for (String termId : ts.getTerms()) {
+                Instance termInstance = getInstance(termId);
+                if (termInstance != null) {
+                    Collection props = cm.getOwnSlotValues(termInstance, cm.getSlot("termProposition"));
+                    Iterator it = props.iterator();
+                    while (it.hasNext()) {
+                        Instance prop = (Instance) it.next();
+                        subsumpPropIds.add(prop.getName());
+                    }
+                }
+            }
+            propIdSets.add(subsumpPropIds);
+        }
+        
+        // finds the intersection of the sets of proposition IDs
+        boolean firstPass = true;
+        Set<String> matchingPropIds = new HashSet<String>();
+        for (Set<String> propIdSet : propIdSets) {
+            if (firstPass) {
+                matchingPropIds.addAll(propIdSet);
+                firstPass = false;
+            } else {
+                matchingPropIds.retainAll(propIdSet);
+            }
+        }
+        result.addAll(matchingPropIds);
+        
+        return result;
     }
 
     /**
@@ -342,4 +387,5 @@ public abstract class ProtegeKnowledgeSourceBackend extends
             throws KnowledgeSourceReadException {
         return hasInstance(id);
     }
+
 }
