@@ -62,7 +62,7 @@ public final class Term {
     private static Pattern idPattern;
 
     static {
-        idPattern = Pattern.compile("\\w:\\w");
+        idPattern = Pattern.compile(".+:.+");
     }
 
     private static boolean checkId(String id) {
@@ -72,15 +72,15 @@ public final class Term {
     private Term(String id, String terminology, String code) {
         this(id, Terminology.withName(terminology), code);
     }
-    
+
     private Term(String id, Terminology terminology, String code) {
         this.id = id;
         this.terminology = terminology;
-        this.code = code;    
+        this.code = code;
     }
-    
-    private Term(Terminology terminology, String code) {
-        this(makeId(terminology, code), terminology, code);
+
+    private Term(String terminology, String code) {
+        this(makeId(Terminology.withName(terminology), code), terminology, code);
     }
 
     /**
@@ -97,14 +97,16 @@ public final class Term {
             return term;
         } else {
             throw new MalformedTermIdException(
-                    "Term IDs must be of the form: <SAB>:<terminology code>");
+                    "Bad term ID: "
+                            + id
+                            + "\nTerm IDs must be of the form: <terminology name>:<terminology code>");
         }
     }
-    
-    public static Term fromTerminologyAndCode(Terminology terminology, String code) {
+
+    public static Term fromTerminologyAndCode(String terminology, String code) {
         return new Term(terminology, code);
     }
-    
+
     /**
      * Defines how term IDs are constructed
      * 
