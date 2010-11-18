@@ -9,6 +9,7 @@ import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.InvalidConfigurationException;
 import org.protempa.dsb.filter.Filter;
+import org.protempa.query.And;
 import org.protempa.query.Query;
 import org.protempa.query.handler.QueryResultsHandler;
 
@@ -269,9 +270,10 @@ public final class Protempa {
         logger.fine("Executing query");
         Set<String> keyIdsSet = Arrays.asSet(query.getKeyIds());
         Set<String> propIds = Arrays.asSet(query.getPropIds());
+        Set<And<String>> termIds = Arrays.asSet(query.getTermIds());
         Filter filters = query.getFilters();
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
-        this.abstractionFinder.doFind(keyIdsSet, propIds, filters,
+        this.abstractionFinder.doFind(keyIdsSet, propIds, termIds, filters,
                 resultHandler, qs);
         logger.fine("Query execution complete");
     }
