@@ -1,7 +1,9 @@
 package org.protempa.query;
 
 import java.io.Serializable;
+
 import org.protempa.ProtempaUtil;
+import org.protempa.TermSubsumption;
 import org.protempa.dsb.filter.Filter;
 
 /**
@@ -17,7 +19,7 @@ public class Query implements Serializable {
     private final String[] keyIds;
     private final Filter filters;
     private final String[] propIds;
-    private final And[] termIds;
+    private final And<String>[] termIds;
 
     /**
      * Creates new Query instance.
@@ -79,7 +81,7 @@ public class Query implements Serializable {
      * @return a {@link String[]} of term ids representing disjunctive
      * normal form.
      */
-    public final And[] getTermIds() {
+    public final And<String>[] getTermIds() {
         return this.termIds.clone();
     }
 

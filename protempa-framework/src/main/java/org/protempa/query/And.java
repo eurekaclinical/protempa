@@ -3,6 +3,10 @@ package org.protempa.query;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A list of PROTEMPA ids that are chained together by boolean
@@ -12,30 +16,38 @@ import java.io.Serializable;
  *
  * @author Andrew Post
  */
-public final class And implements Serializable, Cloneable {
+public final class And<E> implements Serializable, Cloneable {
     private static final long serialVersionUID = -5176413026732863737L;
-    private String[] anded;
+    private List<E> anded;
     private PropertyChangeSupport changes;
 
     public And() {
-        this.anded = new String[0];
+        this.anded = new ArrayList<E>();
         this.changes = new PropertyChangeSupport(this);
     }
 
-    public And(String... anded) {
-        this.anded = anded.clone();
+    public And(E... anded) {
+//        this.anded = anded.clone();
+        this.anded = new ArrayList<E>();
+        for (E e : anded) {
+            this.anded.add(e);
+        }
     }
 
-    public void setAnded(String[] anded) {
+    @SuppressWarnings("unchecked")
+    public void setAnded(List<E> anded) {
         if (anded == null)
-            anded = new String[0];
-        String[] old = this.anded;
-        this.anded = anded.clone();
+            anded = new ArrayList<E>();
+        List<E> old = this.anded;
+        this.anded = new ArrayList<E>();
+        for (E e : anded) {
+            this.anded.add(e);
+        }
         this.changes.firePropertyChange("anded", old, this.anded);
     }
 
-    public String[] getAnded() {
-        return this.anded.clone();
+    public List<E> getAnded() {
+        return Collections.unmodifiableList(anded);
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
