@@ -77,6 +77,7 @@ abstract class ConnectionManager {
                     "Could not load project");
             } else {
                 this.protegeKnowledgeBase = this.project.getKnowledgeBase();
+                Util.logger().fine("Project opened successfully");
             }
         }
     }
