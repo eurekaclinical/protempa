@@ -1,6 +1,5 @@
 package org.protempa;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,7 +57,8 @@ public final class TermSource extends
     }
 
     /**
-     * Gets the term subsumption for the given term ID
+     * Gets the term subsumption for the given term ID. The subsumption is the
+     * term itself and all of its descendants.
      * 
      * @param termId
      *            the term ID to subsume

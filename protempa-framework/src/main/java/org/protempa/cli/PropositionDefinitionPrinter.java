@@ -1,5 +1,6 @@
 package org.protempa.cli;
 
+import org.apache.commons.lang.StringUtils;
 import org.protempa.AbstractPropositionDefinitionVisitor;
 import org.protempa.ConstantDefinition;
 import org.protempa.EventDefinition;
@@ -27,6 +28,7 @@ class PropositionDefinitionPrinter
         printDisplayNames(eventDefinition);
         printProperties(eventDefinition);
         printReferences(eventDefinition);
+        printTerms(eventDefinition);
     }
 
     @Override
@@ -37,6 +39,7 @@ class PropositionDefinitionPrinter
         printDisplayNames(highLevelAbstractionDefinition);
         printProperties(highLevelAbstractionDefinition);
         printReferences(highLevelAbstractionDefinition);
+        printTerms(highLevelAbstractionDefinition);
     }
 
     @Override
@@ -49,6 +52,7 @@ class PropositionDefinitionPrinter
                 lowLevelAbstractionDefinition.getValueType());
         printProperties(lowLevelAbstractionDefinition);
         printReferences(lowLevelAbstractionDefinition);
+        printTerms(lowLevelAbstractionDefinition);
     }
 
     @Override
@@ -63,6 +67,7 @@ class PropositionDefinitionPrinter
                 primitiveParameterDefinition.getUnits());
         printProperties(primitiveParameterDefinition);
         printReferences(primitiveParameterDefinition);
+        printTerms(primitiveParameterDefinition);
     }
 
     @Override
@@ -72,14 +77,16 @@ class PropositionDefinitionPrinter
         printDisplayNames(sliceAbstractionDefinition);
         printProperties(sliceAbstractionDefinition);
         printReferences(sliceAbstractionDefinition);
+        printTerms(sliceAbstractionDefinition);
     }
 
     @Override
     public void visit(ConstantDefinition constantDefinition) {
-        System.out.println("Event definition " + constantDefinition.getId());
+        System.out.println("Constant definition " + constantDefinition.getId());
         printDisplayNames(constantDefinition);
         printProperties(constantDefinition);
         printReferences(constantDefinition);
+        printTerms(constantDefinition);
     }
 
     @Override
@@ -88,6 +95,7 @@ class PropositionDefinitionPrinter
         printDisplayNames(pairDefinition);
         printProperties(pairDefinition);
         printReferences(pairDefinition);
+        printTerms(pairDefinition);
     }
 
     private void printReferences(PropositionDefinition propositionDefinition) {
@@ -137,5 +145,10 @@ class PropositionDefinitionPrinter
                 propositionDefinition.getDisplayName());
         System.out.println("Abbreviated display name: " +
                 propositionDefinition.getAbbreviatedDisplayName());
+    }
+
+    private void printTerms(PropositionDefinition propositionDefinition) {
+        System.out.println("Associated terms: " +
+                StringUtils.join(propositionDefinition.getTermIds(), ", "));
     }
 }

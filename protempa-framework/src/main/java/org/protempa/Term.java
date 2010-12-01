@@ -52,9 +52,9 @@ public final class Term {
     private String[] inverseIsA;
 
     /*
-     * direct children of this term, stored as terms
+     * direct children of this term
      */
-    private Term[] directChildren;
+    private String[] directChildren;
 
     /*
      * TermID pattern
@@ -77,6 +77,8 @@ public final class Term {
         this.id = id;
         this.terminology = terminology;
         this.code = code;
+        this.displayName = "";
+        this.abbrevDisplayName = "";
     }
 
     private Term(String terminology, String code) {
@@ -102,7 +104,7 @@ public final class Term {
                             + "\nTerm IDs must be of the form: <terminology name>:<terminology code>");
         }
     }
-
+    
     public static Term fromTerminologyAndCode(String terminology, String code) {
         return new Term(terminology, code);
     }
@@ -131,6 +133,8 @@ public final class Term {
      *            the displayName to set
      */
     public void setDisplayName(String displayName) {
+        if (displayName == null)
+            displayName = "";
         this.displayName = displayName;
     }
 
@@ -176,14 +180,19 @@ public final class Term {
      *            the abbrevDisplayName to set
      */
     public void setAbbrevDisplayName(String abbrevDisplayName) {
+        if (abbrevDisplayName == null)
+            abbrevDisplayName = "";
         this.abbrevDisplayName = abbrevDisplayName;
     }
 
     /**
-     * @return the inverseIsA
+     * Returns a newly-created array of the ids of the terms with which this
+     * term has an inverse is-a relationship.
+     *
+     * @return a {@link String[]}.
      */
     public String[] getInverseIsA() {
-        return inverseIsA;
+        return inverseIsA.clone();
     }
 
     /**
@@ -191,22 +200,29 @@ public final class Term {
      *            the inverseIsA to set
      */
     public void setInverseIsA(String[] inverseIsA) {
-        this.inverseIsA = inverseIsA;
+        if (inverseIsA == null)
+            inverseIsA = new String[0];
+        this.inverseIsA = inverseIsA.clone();
     }
 
     /**
-     * @return the directChildren
+     * Returns a newly-created array of the ids of this term's direct children.
+     *
+     * @return a {@link String[]}.
      */
-    public Term[] getDirectChildren() {
-        return directChildren;
+    public String[] getDirectChildren() {
+        return directChildren.clone();
     }
 
     /**
      * @param directChildren
      *            the directChildren to set
      */
-    public void setDirectChildren(Term[] directChildren) {
-        this.directChildren = directChildren;
+    public void setDirectChildren(String[] directChildren) {
+        if (directChildren == null) {
+            directChildren = new String[0];
+        }
+        this.directChildren = directChildren.clone();
     }
 
     /**

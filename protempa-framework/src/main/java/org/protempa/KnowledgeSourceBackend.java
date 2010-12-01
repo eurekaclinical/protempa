@@ -1,7 +1,6 @@
 package org.protempa;
 
 import java.util.List;
-import java.util.Map;
 
 import org.protempa.query.And;
 

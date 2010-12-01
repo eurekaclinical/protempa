@@ -22,7 +22,6 @@ import edu.emory.cci.aiw.umls.TerminologyCode;
 import edu.emory.cci.aiw.umls.UMLSDatabaseConnection;
 import edu.emory.cci.aiw.umls.UMLSQueryException;
 import edu.emory.cci.aiw.umls.UMLSQueryExecutor;
-import edu.emory.cci.aiw.umls.UMLSQueryStringValue;
 
 @BackendInfo(displayName = "UMLS term source backend")
 public final class UMLSTermSourceBackend extends
@@ -54,12 +53,12 @@ public final class UMLSTermSourceBackend extends
             TerminologyCode code = TerminologyCode.fromStringAndSAB(
                     term.getCode(), sab);
             List<TerminologyCode> children = umls.getChildrenByCode(code);
-            List<Term> childTerms = new ArrayList<Term>();
+            List<String> childTerms = new ArrayList<String>();
             for (TerminologyCode child : children) {
                 childTerms.add(Term.fromTerminologyAndCode(sab.getName(),
-                        code.getCode()));
+                        child.getCode()).getId());
             }
-            term.setDirectChildren(childTerms.toArray(new Term[childTerms
+            term.setDirectChildren(childTerms.toArray(new String[childTerms
                     .size()]));
             term.setSemanticType(umls.getSemanticTypeForTerm(code).getType());
             term.setDisplayName(umls.getPreferredName(code));
@@ -152,8 +151,8 @@ public final class UMLSTermSourceBackend extends
             throw new TermSourceBackendInitializationException(
                     "Term source backend "
                             + nameForErrors()
-                            + " requires a Java database API (DriverManager or "
-                            + "DataSource) to be specified in its configuration");
+                            + " requires a Java database API (DRIVERMANAGER or "
+                            + "DATASOURCE) to be specified in its configuration");
         }
         umls = UMLSDatabaseConnection.getConnection(databaseAPI,
                 getDatabaseId(), username, password);
