@@ -155,23 +155,10 @@ public final class Protempa {
                 throw new IllegalArgumentException(
                         "algorithmSource cannot be null");
             }
-            Logger logger = ProtempaUtil.logger();
-            if (!Boolean.getBoolean("protempa.skip.datasource.validation")) {
-                logger.fine("Beginning data source validation");
-                dataSource.validate(knowledgeSource);
-                logger.fine("Data source validation completed with no validation failures");
-            } else {
-                logger.fine("Skipping data source validation");
-            }
+            
             this.abstractionFinder = new AbstractionFinder(dataSource,
                     knowledgeSource, algorithmSource, termSource,
                     cacheFoundAbstractParameters);
-        } catch (DataSourceFailedValidationException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
-        } catch (DataSourceValidationIncompleteException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
         } catch (KnowledgeSourceReadException ex) {
             throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
                     ex);
@@ -276,6 +263,20 @@ public final class Protempa {
         this.abstractionFinder.doFind(keyIdsSet, propIds, termIds, filters,
                 resultHandler, qs);
         logger.fine("Query execution complete");
+    }
+
+    /**
+     * Runs each data source backend's validation routine.
+     *
+     * @throws DataSourceFailedValidationException if validation failed.
+     * @throws DataSourceValidationIncompleteException if an error occurred
+     * during validation that prevented its completion.
+     */
+    public void validateDataSource() throws
+            DataSourceFailedValidationException,
+            DataSourceValidationIncompleteException {
+        DataSource dataSource = getDataSource();
+        dataSource.validate(getKnowledgeSource());
     }
 
     /**
