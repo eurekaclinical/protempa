@@ -116,4 +116,29 @@ public interface KnowledgeSourceBackend extends
      */
     List<String> getPropositionsByTerm(String termId)
             throws KnowledgeSourceReadException;
+
+    /**
+     * Returns a boolean indicating whether the specified value set id exists in
+     * the knowledge base
+     * 
+     * @param id
+     *            The id of the value set to check
+     * @param kb
+     *            The knowledge base to check the value set id against
+     * @return
+     */
+    boolean hasValueSet(String id, KnowledgeBase kb)
+            throws KnowledgeSourceReadException;
+
+    /**
+     * Reads the value set from the knowledge base and returns it
+     * 
+     * @param id
+     *            The id of the value set to read
+     * @param kb
+     *            The knowledge base to read the value set from
+     * @return The ValueSet object
+     */
+    ValueSet readValueSet(String id, KnowledgeBase kb)
+            throws KnowledgeSourceReadException;
 }

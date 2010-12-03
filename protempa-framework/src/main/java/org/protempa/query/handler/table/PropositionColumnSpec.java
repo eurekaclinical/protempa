@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaException;
 import org.protempa.ProtempaUtil;
@@ -21,6 +23,7 @@ import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueSet;
 
 public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
@@ -29,29 +32,33 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     private final int numInstances;
     private final String columnNamePrefixOverride;
     private final OutputConfig outputConfig;
+    private final ValueOutputConfig valueOutputConfig;
 
     public PropositionColumnSpec(String[] propertyNames) {
-        this(propertyNames, null);
+        this(propertyNames, null, null);
     }
 
     public PropositionColumnSpec(String[] propertyNames,
-            OutputConfig outputConfig) {
-        this(propertyNames, outputConfig, null);
+            OutputConfig outputConfig, ValueOutputConfig valueOutputConfig) {
+        this(propertyNames, outputConfig, valueOutputConfig, null);
     }
 
     public PropositionColumnSpec(String[] propertyNames,
-            OutputConfig outputConfig, Link[] links) {
-        this(propertyNames, outputConfig, links, 1);
+            OutputConfig outputConfig, ValueOutputConfig valueOutputConfig,
+            Link[] links) {
+        this(propertyNames, outputConfig, valueOutputConfig, links, 1);
     }
 
     public PropositionColumnSpec(String[] propertyNames,
-            OutputConfig outputConfig, Link[] links, int numInstances) {
-        this(null, propertyNames, outputConfig, links, numInstances);
+            OutputConfig outputConfig, ValueOutputConfig valueOutputConfig,
+            Link[] links, int numInstances) {
+        this(null, propertyNames, outputConfig, valueOutputConfig, links,
+                numInstances);
     }
 
     public PropositionColumnSpec(String columnNamePrefixOverride,
-            String[] propertyNames, OutputConfig outputConfig, Link[] links,
-            int numInstances) {
+            String[] propertyNames, OutputConfig outputConfig,
+            ValueOutputConfig valueOutputConfig, Link[] links, int numInstances) {
         if (propertyNames == null) {
             this.propertyNames = new String[0];
         } else {
@@ -64,6 +71,12 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             this.outputConfig = new OutputConfig();
         else
             this.outputConfig = outputConfig;
+
+        if (valueOutputConfig == null) {
+            this.valueOutputConfig = (new ValueOutputConfigBuilder()).build();
+        } else {
+            this.valueOutputConfig = valueOutputConfig;
+        }
 
         if (links == null) {
             this.links = new Link[0];
@@ -202,7 +215,6 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         public void visit(Constant constantParameter)
                 throws KnowledgeSourceReadException {
             List<String> resultList = new ArrayList<String>();
-
             if (outputConfig.showValue()) {
                 resultList.add(null);
             }
@@ -245,12 +257,42 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             }
         }
 
+        private String getOutputValue(Proposition proposition,
+                String propertyName, Value value) {
+            String result = null;
+            if (valueOutputConfig.isShowPropertyValueDisplayName()
+                    || valueOutputConfig.isShowPropertyValueAbbrevDisplayName()) {
+                try {
+                    PropositionDefinition propositionDef = this.knowledgeSource
+                            .readPropositionDefinition(proposition.getId());
+                    PropertyDefinition propertyDef = propositionDef
+                            .propertyDefinition(propertyName);
+                    ValueSet valueSet = this.knowledgeSource
+                            .readValueSet(propertyDef.getValueSetId());
+                    if (valueOutputConfig
+                            .isShowPropertyValueAbbrevDisplayName()) {
+                        result = valueSet.abbrevDisplayName(value);
+                    } else if (valueOutputConfig
+                            .isShowPropertyValueDisplayName()) {
+                        result = valueSet.displayName(value);
+                    }
+                } catch (KnowledgeSourceReadException e) {
+                    Util.logger().log(Level.SEVERE, e.getMessage(), e);
+                }
+
+            } else {
+                result = value.getFormatted();
+            }
+            return result;
+        }
+
         private void processProperties(Proposition proposition,
                 List<String> resultList) {
             for (String propertyName : propertyNames) {
-                Value pval = proposition.getProperty(propertyName);
-                if (pval != null) {
-                    resultList.add(pval.getFormatted());
+                Value value = proposition.getProperty(propertyName);
+                if (value != null) {
+                    resultList.add(this.getOutputValue(proposition,
+                            propertyName, value));
                 } else {
                     resultList.add(null);
                 }

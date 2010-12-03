@@ -3,6 +3,7 @@ package org.protempa;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.protempa.proposition.value.ValueSet;
 import org.protempa.query.And;
 
 /**
@@ -89,19 +90,30 @@ public abstract class AbstractKnowledgeSourceBackend extends
         return readConstantDefinition(id, protempaKnowledgeBase) != null;
     }
 
+    @Override
+    public boolean hasValueSet(String id, KnowledgeBase kb)
+            throws KnowledgeSourceReadException {
+        return readValueSet(id, kb) != null;
+    }
+
+    @Override
+    public ValueSet readValueSet(String id, KnowledgeBase kb)
+            throws KnowledgeSourceReadException {
+        return null;
+    }
+
     /**
      * A default implementation that returns an empty List.
      * 
      * @return a {@link List<String>}.
      */
     @Override
-    public List<String> getPropositionsByTermSubsumption(And<TermSubsumption> termId)
-            throws KnowledgeSourceReadException {
+    public List<String> getPropositionsByTermSubsumption(
+            And<TermSubsumption> termId) throws KnowledgeSourceReadException {
         return new ArrayList<String>();
     }
-    
 
-    /** 
+    /**
      * A default implementation that returns an empty list.
      * 
      * @see org.protempa.KnowledgeSourceBackend#getPropositionsByTerm(java.lang.String)

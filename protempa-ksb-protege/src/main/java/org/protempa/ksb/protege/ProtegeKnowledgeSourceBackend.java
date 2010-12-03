@@ -22,6 +22,8 @@ import org.protempa.bp.commons.AbstractCommonsKnowledgeSourceBackend;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
+import org.protempa.proposition.value.ValueSet;
+import org.protempa.proposition.value.ValueType;
 import org.protempa.query.And;
 
 import edu.stanford.smi.protege.event.ProjectEvent;
@@ -157,6 +159,38 @@ public abstract class ProtegeKnowledgeSourceBackend extends
         return instance;
     }
 
+    private boolean hasClass(String name, String superClass)
+            throws KnowledgeSourceReadException {
+        Cls cls = this.cm.getCls(name);
+        Cls superCls = this.cm.getCls(superClass);
+        if (cls != null && cls.hasSuperclass(superCls)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns the Cls from Protege if a matching Cls is found with the given
+     * ancestor
+     * 
+     * @param name
+     *            Name of the class to fetch
+     * @param superClass
+     *            name of the anscestor
+     * @return A Cls containing the given class name
+     * @throws KnowledgeSourceReadException
+     */
+    private Cls readClass(String name, String superClass)
+            throws KnowledgeSourceReadException {
+        Cls cls = this.cm.getCls(name);
+        Cls superCls = this.cm.getCls(superClass);
+        if (cls != null && cls.hasSuperclass(superCls)) {
+            return cls;
+        } else {
+            return null;
+        }
+    }
+
     private boolean hasInstance(String name)
             throws KnowledgeSourceReadException {
         return this.instanceCache.containsKey(name)
@@ -202,24 +236,29 @@ public abstract class ProtegeKnowledgeSourceBackend extends
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.protempa.AbstractKnowledgeSourceBackend#getPropositionsByTerm(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.protempa.AbstractKnowledgeSourceBackend#getPropositionsByTerm(java
+     * .lang.String)
      */
     @Override
     public List<String> getPropositionsByTerm(String termId)
             throws KnowledgeSourceReadException {
         List<String> result = new ArrayList<String>();
-        
+
         Instance termInstance = getInstance(termId);
         if (termInstance != null) {
-            Collection props = cm.getOwnSlotValues(termInstance, cm.getSlot("termProposition"));
+            Collection props = cm.getOwnSlotValues(termInstance,
+                    cm.getSlot("termProposition"));
             Iterator it = props.iterator();
             while (it.hasNext()) {
                 Instance prop = (Instance) it.next();
                 result.add(prop.getName());
             }
         }
-        
+
         return new ArrayList<String>();
     }
 
@@ -231,18 +270,19 @@ public abstract class ProtegeKnowledgeSourceBackend extends
      * (java.lang.And<TermSubsumption>)
      */
     @Override
-    public List<String> getPropositionsByTermSubsumption(And<TermSubsumption> termIds)
-            throws KnowledgeSourceReadException {
+    public List<String> getPropositionsByTermSubsumption(
+            And<TermSubsumption> termIds) throws KnowledgeSourceReadException {
         List<String> result = new ArrayList<String>();
         List<Set<String>> propIdSets = new ArrayList<Set<String>>();
-        
+
         // collects the set of proposition IDs for each term subsumption
         for (TermSubsumption ts : termIds.getAnded()) {
             Set<String> subsumpPropIds = new HashSet<String>();
             for (String termId : ts.getTerms()) {
                 Instance termInstance = getInstance(termId);
                 if (termInstance != null) {
-                    Collection props = cm.getOwnSlotValues(termInstance, cm.getSlot("termProposition"));
+                    Collection props = cm.getOwnSlotValues(termInstance,
+                            cm.getSlot("termProposition"));
                     Iterator it = props.iterator();
                     while (it.hasNext()) {
                         Instance prop = (Instance) it.next();
@@ -252,7 +292,7 @@ public abstract class ProtegeKnowledgeSourceBackend extends
             }
             propIdSets.add(subsumpPropIds);
         }
-        
+
         // finds the intersection of the sets of proposition IDs
         boolean firstPass = true;
         Set<String> matchingPropIds = new HashSet<String>();
@@ -265,7 +305,7 @@ public abstract class ProtegeKnowledgeSourceBackend extends
             }
         }
         result.addAll(matchingPropIds);
-        
+
         return result;
     }
 
@@ -349,14 +389,13 @@ public abstract class ProtegeKnowledgeSourceBackend extends
 
     Unit parseUnit(String protegeUnitStr) {
         switch (this.units) {
-            case ABSOLUTE:
-                return Util.ABSOLUTE_DURATION_MULTIPLIER.get(protegeUnitStr);
-            case RELATIVE_HOURS:
-                return Util.RELATIVE_HOURS_DURATION_MULTIPLIER
-                        .get(protegeUnitStr);
-            default:
-                assert false : this.units;
-                return null;
+        case ABSOLUTE:
+            return Util.ABSOLUTE_DURATION_MULTIPLIER.get(protegeUnitStr);
+        case RELATIVE_HOURS:
+            return Util.RELATIVE_HOURS_DURATION_MULTIPLIER.get(protegeUnitStr);
+        default:
+            assert false : this.units;
+            return null;
         }
     }
 
@@ -388,4 +427,22 @@ public abstract class ProtegeKnowledgeSourceBackend extends
         return hasInstance(id);
     }
 
+    @Override
+    public boolean hasValueSet(String id, KnowledgeBase kb)
+            throws KnowledgeSourceReadException {
+        return this.hasClass(id, "Value");
+    }
+
+    @Override
+    public ValueSet readValueSet(String id, KnowledgeBase kb)
+            throws KnowledgeSourceReadException {
+        Cls cls = this.readClass(id, "Value");
+        if (cls == null) {
+            return null;
+        } else {
+            ValueType valueType = Util.parseValueType(cls);
+            assert valueType != null : "Could not find value type for " + id;
+            return Util.parseValueSet(cls, valueType, cm);
+        }
+    }
 }

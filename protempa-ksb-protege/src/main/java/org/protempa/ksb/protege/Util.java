@@ -82,7 +82,7 @@ class Util {
                 ValueType.INEQUALITYNUMBERVALUE);
     }
 
-    private static ValueSet parseValueSet(Cls valueTypeCls,
+    static ValueSet parseValueSet(Cls valueTypeCls,
             ValueType valueType,
             ConnectionManager cm) throws KnowledgeSourceReadException {
         Slot valueSetSlot = cm.getSlot("valueSet");
@@ -122,7 +122,7 @@ class Util {
         return new ValueSet(valueSetCls.getName(), vses);
     }
 
-    private static ValueType parseValueType(Cls valueTypeCls) {
+    static ValueType parseValueType(Cls valueTypeCls) {
         Collection superClasses = valueTypeCls.getSuperclasses();
         ValueType valueType = null;
         for (Object superCls : superClasses) {

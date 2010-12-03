@@ -1,8 +1,11 @@
 package org.protempa.query.handler.table;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
@@ -13,15 +16,18 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
 
     private final String columnNameOverride;
     private final Link[] links;
+    private final boolean countUnique;
 
     public CountColumnSpec(Link[] links) {
-        this(null, links);
+        this(null, links, false);
     }
 
-    public CountColumnSpec(String columnNameOverride, Link[] links) {
+    public CountColumnSpec(String columnNameOverride, Link[] links,
+            boolean countUnique) {
         ProtempaUtil.checkArray(links, "links");
         this.links = links.clone();
         this.columnNameOverride = columnNameOverride;
+        this.countUnique = countUnique;
     }
 
     @Override
@@ -31,11 +37,15 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
         if (this.columnNameOverride != null) {
             builder.append(this.columnNameOverride);
         } else {
-            builder.append("count(");
+            if (this.countUnique) {
+                builder.append("countUnique(");
+            } else {
+                builder.append("count(");
+            }
             builder.append(generateLinksHeaderString(this.links));
             builder.append(')');
         }
-        return new String[]{builder.toString()};
+        return new String[] { builder.toString() };
     }
 
     @Override
@@ -43,8 +53,22 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
             Map<Proposition, List<Proposition>> derivations,
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource) {
+        List<String> result = new ArrayList<String>();
         Collection<Proposition> props = traverseLinks(this.links, proposition,
                 derivations, references, knowledgeSource);
-        return new String[]{"" + props.size()};
+        if (this.countUnique) {
+            for (Proposition p : props) {
+                Util.logger().log(Level.FINEST,
+                        "Looking at proposition id " + p.getId());
+                if (!result.contains(p.getId())) {
+                    Util.logger().log(Level.FINEST,
+                            "Adding to count: " + p.getId());
+                    result.add(p.getId());
+                }
+            }
+            return new String[] { "" + result.size() };
+        } else {
+            return new String[] { "" + props.size() };
+        }
     }
 }

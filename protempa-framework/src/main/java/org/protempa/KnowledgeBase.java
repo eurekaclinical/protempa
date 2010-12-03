@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.protempa.proposition.value.ValueSet;
 
 /**
  * A collection of primitive parameter definitions, abstract parameter
@@ -54,29 +56,29 @@ public final class KnowledgeBase implements Serializable {
     private Set<ConstantDefinition> constantDefinitions;
     private Map<String, ConstantDefinition> constantIdToConstantDefinitionMap;
 
+    private Set<ValueSet> valueSets;
+    private Map<String, ValueSet> valueSetIdtoValueSetMap;
+
     KnowledgeBase() {
         initialize();
     }
 
     private void initialize() {
         this.abstractionDefinitions = new HashSet<AbstractionDefinition>();
-        this.primitiveParameterDefinitions =
-                new HashSet<PrimitiveParameterDefinition>();
-        this.abstractionIdToAbstractionDefinitionMap =
-                new HashMap<String, AbstractionDefinition>();
-        this.primitiveParameterIdToPrimitiveParameterDefinitionMap =
-                new HashMap<String, PrimitiveParameterDefinition>();
+        this.primitiveParameterDefinitions = new HashSet<PrimitiveParameterDefinition>();
+        this.abstractionIdToAbstractionDefinitionMap = new HashMap<String, AbstractionDefinition>();
+        this.primitiveParameterIdToPrimitiveParameterDefinitionMap = new HashMap<String, PrimitiveParameterDefinition>();
         this.eventDefinitions = new HashSet<EventDefinition>();
-        this.eventIdToEventDefinitionMap =
-                new HashMap<String, EventDefinition>();
+        this.eventIdToEventDefinitionMap = new HashMap<String, EventDefinition>();
         this.constantDefinitions = new HashSet<ConstantDefinition>();
-        this.constantIdToConstantDefinitionMap =
-                new HashMap<String, ConstantDefinition>();
+        this.constantIdToConstantDefinitionMap = new HashMap<String, ConstantDefinition>();
+        this.valueSets = new HashSet<ValueSet>();
+        this.valueSetIdtoValueSetMap = new HashMap<String, ValueSet>();
     }
 
     /**
      * Overrides default serialization.
-     *
+     * 
      * @param s
      *            an <code>ObjectOutputStream</code> object.
      * @throws IOException
@@ -91,7 +93,7 @@ public final class KnowledgeBase implements Serializable {
 
     /**
      * Overrides default de-serialization.
-     *
+     * 
      * @param s
      *            an <code>ObjectInputStream</code> object.
      * @throws IOException
@@ -104,22 +106,21 @@ public final class KnowledgeBase implements Serializable {
             ClassNotFoundException {
         initialize();
 
-        Set<PrimitiveParameterDefinition> primitiveParameterDefinitions =
-                (Set<PrimitiveParameterDefinition>) s.readObject();
-        Set<AbstractionDefinition> abstractionDefinitions =
-                (Set<AbstractionDefinition>) s.readObject();
-        Set<EventDefinition> eventDefinitions = 
-                (Set<EventDefinition>) s.readObject();
-        Set<ConstantDefinition> constantDefinitions =
-                (Set<ConstantDefinition>) s.readObject();
+        Set<PrimitiveParameterDefinition> primitiveParameterDefinitions = (Set<PrimitiveParameterDefinition>) s
+                .readObject();
+        Set<AbstractionDefinition> abstractionDefinitions = (Set<AbstractionDefinition>) s
+                .readObject();
+        Set<EventDefinition> eventDefinitions = (Set<EventDefinition>) s
+                .readObject();
+        Set<ConstantDefinition> constantDefinitions = (Set<ConstantDefinition>) s
+                .readObject();
 
         if (primitiveParameterDefinitions != null) {
-            for (PrimitiveParameterDefinition def :
-                primitiveParameterDefinitions) {
+            for (PrimitiveParameterDefinition def : primitiveParameterDefinitions) {
                 if (def != null && !addPrimitiveParameterDefinition(def)) {
-                    System.err.println(
-                            "Could not add de-serialized primitive parameter definition "
-                            + def + ".");
+                    System.err
+                            .println("Could not add de-serialized primitive parameter definition "
+                                    + def + ".");
                 }
             }
         }
@@ -127,8 +128,9 @@ public final class KnowledgeBase implements Serializable {
         if (abstractionDefinitions != null) {
             for (AbstractionDefinition def : abstractionDefinitions) {
                 if (def != null && !addAbstractionDefinition(def)) {
-                    System.err.println("Could not add de-serialized abstract parameter definition "
-                            + def + ".");
+                    System.err
+                            .println("Could not add de-serialized abstract parameter definition "
+                                    + def + ".");
                 }
             }
         }
@@ -136,8 +138,9 @@ public final class KnowledgeBase implements Serializable {
         if (eventDefinitions != null) {
             for (EventDefinition def : eventDefinitions) {
                 if (def != null && !addEventDefinition(def)) {
-                    System.err.println("Could not add de-serialized event definition "
-                            + def + ".");
+                    System.err
+                            .println("Could not add de-serialized event definition "
+                                    + def + ".");
                 }
             }
         }
@@ -145,8 +148,9 @@ public final class KnowledgeBase implements Serializable {
         if (constantDefinitions != null) {
             for (ConstantDefinition def : constantDefinitions) {
                 if (def != null && !addConstantDefinition(def)) {
-                    System.err.println("Could not add de-serialized constant definition "
-                            + def + ".");
+                    System.err
+                            .println("Could not add de-serialized constant definition "
+                                    + def + ".");
                 }
             }
         }
@@ -165,7 +169,8 @@ public final class KnowledgeBase implements Serializable {
     boolean isUniqueKnowledgeDefinitionObjectId(String id) {
         return !this.abstractionIdToAbstractionDefinitionMap.containsKey(id)
                 && !this.eventIdToEventDefinitionMap.containsKey(id)
-                && !this.primitiveParameterIdToPrimitiveParameterDefinitionMap.containsKey(id)
+                && !this.primitiveParameterIdToPrimitiveParameterDefinitionMap
+                        .containsKey(id)
                 && !this.constantIdToConstantDefinitionMap.containsKey(id);
     }
 
@@ -193,9 +198,17 @@ public final class KnowledgeBase implements Serializable {
         return constantIdToConstantDefinitionMap.get(constantId);
     }
 
+    public boolean hasValueSet (String valueSetId) {
+        return getValueSet(valueSetId) != null;
+    }
+
+    public ValueSet getValueSet(String valueSetId) {
+        return valueSetIdtoValueSetMap.get(valueSetId);
+    }
+
     /**
      * Returns all abstraction definitions.
-     *
+     * 
      * @return an unmodifiable <code>Set</code> of
      *         <code>AbstractionDefinition</code>s.
      */
@@ -213,12 +226,12 @@ public final class KnowledgeBase implements Serializable {
 
     /**
      * Returns whether this knowledge base has a type class with the given id.
-     *
+     * 
      * @param id
      *            a type class id <code>String</code>.
      * @return <code>true</code> if this knowledge base has the given type
-     *         class, <code>false</code> if not. Returns <code>false</code>
-     *         if the <code>id</code> parameter is <code>null</code>.
+     *         class, <code>false</code> if not. Returns <code>false</code> if
+     *         the <code>id</code> parameter is <code>null</code>.
      */
     public boolean hasPrimitiveParameterDefinition(String id) {
         return getPrimitiveParameterDefinition(id) != null;
@@ -226,7 +239,7 @@ public final class KnowledgeBase implements Serializable {
 
     /**
      * Gets the type class with the given id.
-     *
+     * 
      * @param id
      *            a primitive parameter id <code>String</code>.
      * @return a <code>TypeClass</code> object, or <code>null</code> if not
@@ -267,7 +280,8 @@ public final class KnowledgeBase implements Serializable {
     boolean addPrimitiveParameterDefinition(
             PrimitiveParameterDefinition primitiveParameterDefinition) {
         if (primitiveParameterDefinition == null
-                || !primitiveParameterDefinitions.add(primitiveParameterDefinition)) {
+                || !primitiveParameterDefinitions
+                        .add(primitiveParameterDefinition)) {
             return false;
         }
         primitiveParameterIdToPrimitiveParameterDefinitionMap.put(
@@ -293,16 +307,13 @@ public final class KnowledgeBase implements Serializable {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append(this.abstractionDefinitions)
-                .append(this.constantDefinitions)
-                .append(this.eventDefinitions)
-                .append(this.primitiveParameterDefinitions)
-                .toString();
+        return new ToStringBuilder(this).append(this.abstractionDefinitions)
+                .append(this.constantDefinitions).append(this.eventDefinitions)
+                .append(this.primitiveParameterDefinitions).toString();
     }
 }
