@@ -259,7 +259,7 @@ public abstract class ProtegeKnowledgeSourceBackend extends
             }
         }
 
-        return new ArrayList<String>();
+        return result;
     }
 
     /*

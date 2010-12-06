@@ -1,5 +1,7 @@
 package org.protempa.ksb.protege;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +71,8 @@ public final class ProtegeKnowledgeSourceBackendTest {
     
     @Test
     public void testGetPropositionsByTerm() throws Exception {
-        
+        List<String> result = backend.getPropositionsByTerm("ICD9CM:250.0");
+        assertEquals(1, result.size());
     }
     
     @Test
