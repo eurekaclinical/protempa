@@ -24,28 +24,33 @@ import org.protempa.backend.BackendProviderSpecLoaderException;
 public final class CommonsBackendProvider
         implements BackendProvider {
 
+    @Override
     public String getDisplayName() {
         return CommonsUtil.resourceBundle().getString("displayName");
     }
 
+    @Override
     public BackendSpecLoader<DataSourceBackend>
             getDataSourceBackendSpecLoader() 
             throws BackendProviderSpecLoaderException {
         return getBackendSpecLoader(DataSourceBackend.class);
     }
 
+    @Override
     public BackendSpecLoader<KnowledgeSourceBackend>
             getKnowledgeSourceBackendSpecLoader() 
             throws BackendProviderSpecLoaderException {
         return getBackendSpecLoader(KnowledgeSourceBackend.class);
     }
 
+    @Override
     public BackendSpecLoader<AlgorithmSourceBackend>
             getAlgorithmSourceBackendSpecLoader() 
             throws BackendProviderSpecLoaderException {
         return getBackendSpecLoader(AlgorithmSourceBackend.class);
     }
 
+    @Override
     public BackendSpecLoader<TermSourceBackend> 
             getTermSourceBackendSpecLoader()
             throws BackendProviderSpecLoaderException {
@@ -62,14 +67,17 @@ public final class CommonsBackendProvider
         try {
             classNamesL.add(discoverClass.find(clazz));
         } catch (DiscoveryException de) {
-            //throw new BackendProviderSpecLoaderException(de);
+            throw new BackendProviderSpecLoaderException(
+                    "Error loading backend", de);
         }
         try {
             classNamesL.addAll(ServiceLoader.load(clazz));
         } catch (IOException ex) {
-            throw new BackendProviderSpecLoaderException(ex);
+            throw new BackendProviderSpecLoaderException(
+                    "Error loading backend", ex);
         } catch (ClassNotFoundException ex) {
-            //throw new BackendProviderSpecLoaderException(ex);
+            throw new BackendProviderSpecLoaderException(
+                    "Error loading backend", ex);
         }
         for (Class className : classNamesL) {
             try {
@@ -83,6 +91,7 @@ public final class CommonsBackendProvider
         return new BackendSpecLoader<B>(backendSpecs);
     }
 
+    @Override
     public Object newInstance(String resourceId)
             throws BackendNewInstanceException {
         try {
