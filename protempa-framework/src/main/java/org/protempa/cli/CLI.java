@@ -173,7 +173,8 @@ public abstract class CLI {
     public final void printException(Exception cliException) {
         System.err.print(cliException.getMessage());
         Throwable cause = cliException.getCause();
-        if (cause != null && cause.getMessage().length() > 0) {
+        if (cause != null && cause.getMessage() != null &&
+                cause.getMessage().length() > 0) {
             System.err.print(": ");
             System.err.println(cause.getMessage());
         } else {
