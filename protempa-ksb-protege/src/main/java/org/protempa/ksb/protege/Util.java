@@ -87,7 +87,7 @@ class Util {
             ConnectionManager cm) throws KnowledgeSourceReadException {
         Slot valueSetSlot = cm.getSlot("valueSet");
         Collection objs =
-                    valueTypeCls.getDirectTemplateSlotValues(valueSetSlot);
+                valueTypeCls.getDirectTemplateSlotValues(valueSetSlot);
         ValueSet valueSet = null;
         Slot displayNameSlot = cm.getSlot("displayName");
         Slot abbrevDisplayNameSlot = cm.getSlot("abbrevDisplayName");
@@ -110,11 +110,11 @@ class Util {
         for (Object obj : objs) {
             Instance valueSetEltInst = (Instance) obj;
             String displayName = (String) cm.getOwnSlotValue(
-                            valueSetEltInst, displayNameSlot);
+                    valueSetEltInst, displayNameSlot);
             String abbrevDisplayName = (String) cm.getOwnSlotValue(
-                            valueSetEltInst, abbrevDisplayNameSlot);
+                    valueSetEltInst, abbrevDisplayNameSlot);
             String value = (String) cm.getOwnSlotValue(valueSetEltInst,
-                            valueSlot);
+                    valueSlot);
             Value val = ValueFactory.get(valueType).parseValue(value);
             vses[i] = new ValueSetElement(val, displayName, abbrevDisplayName);
             i++;
@@ -132,6 +132,10 @@ class Util {
             if (valueType != null) {
                 break;
             }
+        }
+        if (valueType == null) {
+            throw new AssertionError("valueTypeCls " + valueTypeCls.getName() +
+                    " has no corresponding value type");
         }
         return valueType;
     }
@@ -253,6 +257,10 @@ class Util {
         for (Object propertyInstance : properties) {
             Instance inst = (Instance) propertyInstance;
             Cls valueTypeCls = (Cls) cm.getOwnSlotValue(inst, valueTypeSlot);
+            if (valueTypeCls == null) {
+                throw new AssertionError("property " + inst.getName() +
+                        " cannot have a null value type");
+            }
             ValueType valueType = parseValueType(valueTypeCls);
             PropertyDefinition propDef = new PropertyDefinition(inst.getName(),
                     valueType, valueTypeCls.getName());
