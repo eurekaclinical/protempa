@@ -24,24 +24,19 @@ import org.protempa.bp.commons.BackendProperty;
  * 
  * @author Andrew Post
  */
-@BackendInfo(
-    displayName="Local Protege knowledge base backend"
-)
-public final class LocalKnowledgeSourceBackend extends ProtegeKnowledgeSourceBackend {
-    
-    private String projectString;
-    
-    private String projectResource;
+@BackendInfo(displayName = "Local Protege knowledge base backend")
+public final class LocalKnowledgeSourceBackend
+        extends ProtegeKnowledgeSourceBackend {
 
+    private String projectString;
+    private String projectResource;
     private String units;
 
     public String getProjectResource() {
         return projectResource;
     }
 
-    @BackendProperty(
-        displayName="Project resource"
-    )
+    @BackendProperty(displayName = "Project resource")
     public void setProjectResource(String projectResource) {
         this.projectResource = projectResource;
     }
@@ -50,9 +45,7 @@ public final class LocalKnowledgeSourceBackend extends ProtegeKnowledgeSourceBac
         return projectString;
     }
 
-    @BackendProperty(
-        displayName="Project string"
-    )
+    @BackendProperty(displayName = "Project string")
     public void setProjectString(String projectString) {
         this.projectString = projectString;
     }
@@ -61,28 +54,27 @@ public final class LocalKnowledgeSourceBackend extends ProtegeKnowledgeSourceBac
         return units;
     }
 
-    @BackendProperty(
-        displayName="Units"
-    )
+    @BackendProperty(displayName = "Units")
     public void setUnits(String units) {
         this.units = units;
     }
 
-	/**
-	 * Instantiates the backend with no initial configuration.
-	 */
-	public LocalKnowledgeSourceBackend() {
-		super();
-	}
+    /**
+     * Instantiates the backend with no initial configuration.
+     */
+    public LocalKnowledgeSourceBackend() {
+        super();
+    }
 
-	@Override
-	ConnectionManager initConnectionManager(
-            BackendInstanceSpec configuration) 
-            throws KnowledgeSourceBackendInitializationException{
+    @Override
+    ConnectionManager initConnectionManager(
+            BackendInstanceSpec configuration)
+            throws KnowledgeSourceBackendInitializationException {
         if (projectString == null) {
-            if (projectResource == null)
+            if (projectResource == null) {
                 throw new IllegalStateException(
                     "No Protege project filename or resource name specified");
+            }
             URL projectURL = getClass().getResource(projectResource);
             try {
                 URI projectURI = projectURL.toURI();
@@ -93,12 +85,11 @@ public final class LocalKnowledgeSourceBackend extends ProtegeKnowledgeSourceBac
 
         }
         initUnits(units);
-		return new LocalConnectionManager(projectString);
-	}
+        return new LocalConnectionManager(projectString);
+    }
 
     @Override
     public void serverSessionLost(ProjectEvent pe) {
         //shouldn't happend.
     }
-
 }

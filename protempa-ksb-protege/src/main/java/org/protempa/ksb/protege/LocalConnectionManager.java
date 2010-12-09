@@ -36,14 +36,14 @@ final class LocalConnectionManager extends ConnectionManager {
     @SuppressWarnings("unchecked")
     @Override
     protected Project initProject() {
-            Collection errors = new ArrayList();
+        Collection errors = new ArrayList();
         String projectFilePathOrURI = getProjectIdentifier();
         Util.logger().fine("Trying to load Protege project "
-            + projectFilePathOrURI);
+                + projectFilePathOrURI);
         Project project = new Project(projectFilePathOrURI, errors);
         if (errors.size() == 0) {
             Util.logger().fine("Protege project "
-                + projectFilePathOrURI + " is opened.");
+                    + projectFilePathOrURI + " is opened.");
             return project;
         } else {
             throw new IllegalStateException(
@@ -51,5 +51,4 @@ final class LocalConnectionManager extends ConnectionManager {
                     + projectFilePathOrURI + ": " + errors);
         }
     }
-
 }
