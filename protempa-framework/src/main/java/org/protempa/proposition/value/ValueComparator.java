@@ -18,11 +18,11 @@ public enum ValueComparator {
         ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean contains(ValueComparator comparator) {
+        public boolean is(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return GREATER_THAN.equals(comparator);
+            return GREATER_THAN.is(comparator);
         }
     },
     /**
@@ -32,11 +32,11 @@ public enum ValueComparator {
         ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean contains(ValueComparator comparator) {
+        public boolean is(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return LESS_THAN.equals(comparator);
+            return LESS_THAN.is(comparator);
         }
     },
     /**
@@ -45,11 +45,11 @@ public enum ValueComparator {
     EQUAL_TO("=", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
 
         @Override
-        public boolean contains(ValueComparator comparator) {
+        public boolean is(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return EQUAL_TO.equals(comparator);
+            return EQUAL_TO.is(comparator);
         }
     },
     /**
@@ -58,11 +58,11 @@ public enum ValueComparator {
     NOT_EQUAL_TO("!=", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
 
         @Override
-        public boolean contains(ValueComparator comparator) {
+        public boolean is(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return NOT_EQUAL_TO.equals(comparator);
+            return NOT_EQUAL_TO.is(comparator);
         }
     },
     /**
@@ -72,11 +72,11 @@ public enum ValueComparator {
     UNKNOWN("?", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
 
         @Override
-        public boolean contains(ValueComparator comparator) {
+        public boolean is(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return UNKNOWN.equals(comparator);
+            return UNKNOWN.is(comparator);
         }
     },
     /**
@@ -86,13 +86,13 @@ public enum ValueComparator {
             ValueType.ORDEREDVALUE, ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean contains(ValueComparator comparator) {
+        public boolean is(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return EQUAL_TO.equals(comparator)
-                    || GREATER_THAN.equals(comparator)
-                    || GREATER_THAN_OR_EQUAL_TO.equals(comparator);
+            return EQUAL_TO.is(comparator)
+                    || GREATER_THAN.is(comparator)
+                    || GREATER_THAN_OR_EQUAL_TO.is(comparator);
         }
     },
     /**
@@ -102,12 +102,12 @@ public enum ValueComparator {
             ValueType.ORDEREDVALUE, ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean contains(ValueComparator comparator) {
+        public boolean is(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return EQUAL_TO.equals(comparator) || LESS_THAN.equals(comparator)
-                    || LESS_THAN_OR_EQUAL_TO.equals(comparator);
+            return EQUAL_TO.is(comparator) || LESS_THAN.is(comparator)
+                    || LESS_THAN_OR_EQUAL_TO.is(comparator);
         }
     },
     /**
@@ -116,22 +116,22 @@ public enum ValueComparator {
     IN("IN", new CompatibleTypes(ValueType.VALUE, ValueType.LISTVALUE)) {
 
         @Override
-        public boolean contains(ValueComparator comparator) {
+        public boolean is(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return IN.equals(comparator);
+            return IN.is(comparator);
         }
     },
     NOT_IN("NOT_IN", new CompatibleTypes(ValueType.VALUE, 
             ValueType.LISTVALUE)) {
 
         @Override
-        public boolean contains(ValueComparator comparator) {
+        public boolean is(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return NOT_IN.equals(comparator);
+            return NOT_IN.is(comparator);
         }
     };
 
@@ -221,7 +221,7 @@ public enum ValueComparator {
      * @return <code>true</code> if this {@link ValueComparator} is subsumed
      * by the specified {@link ValueComparator}, <code>false</code> otherwise.
      */
-    public abstract boolean contains(ValueComparator comparator);
+    public abstract boolean is(ValueComparator comparator);
 
     /**
      * Returns whether this {@link ValueComparator} is compatible with the

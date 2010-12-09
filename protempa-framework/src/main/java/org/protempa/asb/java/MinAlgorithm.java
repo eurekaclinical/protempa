@@ -56,8 +56,8 @@ public final class MinAlgorithm extends AbstractAlgorithm {
         }
 
         if (minVal != null
-                && (minThresholdComp == null || minThreshold == null || minThresholdComp.contains(minVal.compare(minThreshold)))
-                && (maxThresholdComp == null || maxThreshold == null || maxThresholdComp.contains(minVal.compare(maxThreshold)))) {
+                && (minThresholdComp == null || minThreshold == null || minThresholdComp.is(minVal.compare(minThreshold)))
+                && (maxThresholdComp == null || maxThreshold == null || maxThresholdComp.is(minVal.compare(maxThreshold)))) {
             return BooleanValue.TRUE;
         } else {
             return null;
