@@ -70,9 +70,11 @@ public class UMLSTermSourceBackendTest {
     }
 
     @Test
-    public void testGetDescendants() throws Exception {
+    public void testGetSubsumption() throws Exception {
         assertEquals(1, backend.getSubsumption("ICD9CM:250.02").size());
         assertEquals(5, backend.getSubsumption("ICD9CM:250.0").size());
+        System.out.println(backend.getSubsumption("ICD9CM:250.0"));
         assertEquals(51, backend.getSubsumption("ICD9CM:250").size());
+        System.out.println(backend.getSubsumption("ICD9CM:100.0"));
     }
 }

@@ -3,14 +3,18 @@ package org.protempa.ksb.protege;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.protempa.TermSubsumption;
 import org.protempa.backend.BackendPropertySpec;
 import org.protempa.backend.test.MockBackendInstanceSpec;
 import org.protempa.backend.test.MockBackendPropertySpec;
+import org.protempa.query.And;
 
 public final class ProtegeKnowledgeSourceBackendTest {
     private RemoteKnowledgeSourceBackend backend;
@@ -60,8 +64,6 @@ public final class ProtegeKnowledgeSourceBackendTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        System.out.println("Setup complete!");
     }
     
     @After
@@ -77,6 +79,24 @@ public final class ProtegeKnowledgeSourceBackendTest {
     
     @Test
     public void testGetPropositionsByTermSubsumption() throws Exception {
+        List<String> termIds = new ArrayList<String>();
+        Set<And<TermSubsumption>> termSub = new HashSet<And<TermSubsumption>>();
+        termIds.add("ICD9CM:250.0");
+        termIds.add("ICD9CM:250.00");
+        termIds.add("ICD9CM:250.01");
+        termIds.add("ICD9CM:250.02");
+        termIds.add("ICD9CM:250.03");
+        And<TermSubsumption> and = new And<TermSubsumption>(TermSubsumption.fromTerms(termIds));
+        termSub.add(and);
         
+        List<String> actual = backend.getPropositionsByTermSubsumption(and);
+        Set<String> expected = new HashSet<String>();
+        expected.add("250.0");
+        expected.add("250.00");
+        expected.add("250.01");
+        expected.add("250.02");
+        expected.add("250.03");
+
+        assertEquals(expected, new HashSet<String>(actual));
     }
 }
