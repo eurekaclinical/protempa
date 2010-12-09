@@ -20,8 +20,9 @@ final class ColumnSpecInfoFactory {
             Collection<EntitySpec> entitySpecs,
             Collection<Filter> filters, ReferenceSpec referenceSpec) {
         ColumnSpecInfo columnSpecInfo = new ColumnSpecInfo();
-        if (referenceSpec == null)
+        if (referenceSpec == null) {
             columnSpecInfo.setUsingKeyIdIndex(true);
+        }
         EntitySpec refEntitySpec = null;
         if (referenceSpec != null) {
             refEntitySpec = findRefEntitySpec(entitySpecs, referenceSpec);
@@ -40,7 +41,7 @@ final class ColumnSpecInfoFactory {
             i = processFinishTimeSpec(entitySpec, entitySpec2, columnSpecs,
                     i, columnSpecInfo, referenceSpec);
             if (entitySpec2 == entitySpec) {
-                i = processPropertySpecs(entitySpec2, columnSpecs, i,
+                i = processPropertyAndValueSpecs(entitySpec2, columnSpecs, i,
                         columnSpecInfo, referenceSpec);
             }
             i = processCodeSpec(entitySpec, entitySpec2, columnSpecs, i,
@@ -69,14 +70,17 @@ final class ColumnSpecInfoFactory {
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
         ColumnSpec[] codeSpecs = entitySpec.getUniqueIdSpecs();
         ColumnSpec[] refSpecs = null;
-        if (referenceSpec != null)
+        if (referenceSpec != null) {
             refSpecs = referenceSpec.getUniqueIdSpecs();
+        }
         int numUniqueIndices = codeSpecs.length;
-        if (refSpecs != null)
+        if (refSpecs != null) {
             numUniqueIndices += refSpecs.length;
+        }
         int[] uniqueIndices = null;
-        if (entitySpec == entitySpec2 || referenceSpec != null)
+        if (entitySpec == entitySpec2 || referenceSpec != null) {
             uniqueIndices = new int[numUniqueIndices];
+        }
         int j = 0;
         if (codeSpecs != null && uniqueIndices != null) {
             for (ColumnSpec uniqueIdSpec : codeSpecs) {
@@ -90,8 +94,9 @@ final class ColumnSpecInfoFactory {
                 uniqueIndices[j++] = i - 1;
             }
         }
-        if (uniqueIndices != null)
+        if (uniqueIndices != null) {
             columnSpecInfo.setUniqueIdIndices(uniqueIndices);
+        }
         return i;
     }
 
@@ -150,7 +155,7 @@ final class ColumnSpecInfoFactory {
         return i;
     }
 
-    private static int processPropertySpecs(EntitySpec entitySpec,
+    private static int processPropertyAndValueSpecs(EntitySpec entitySpec,
             List<ColumnSpec> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
         PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
@@ -168,6 +173,15 @@ final class ColumnSpecInfoFactory {
         if (propertySpecs.length > 0 && referenceSpec == null) {
             columnSpecInfo.setPropertyIndices(propertyIndices);
         }
+
+        ColumnSpec valueSpec = entitySpec.getValueSpec();
+        if (valueSpec != null) {
+            List<ColumnSpec> specAsList = valueSpec.asList();
+            columnSpecs.addAll(specAsList);
+            i += specAsList.size();
+            columnSpecInfo.setValueIndex(i - 1);
+        }
+
         return i;
     }
 

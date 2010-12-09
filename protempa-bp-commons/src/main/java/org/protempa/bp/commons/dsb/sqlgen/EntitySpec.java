@@ -32,6 +32,7 @@ public final class EntitySpec implements Serializable {
     private final ColumnSpec codeSpec;
     private final ColumnSpec[] constraintSpecs;
     private final ValueType valueType;
+    private final ColumnSpec valueSpec;
     private final Granularity granularity;
     private final PositionParser positionParser;
 
@@ -96,6 +97,7 @@ public final class EntitySpec implements Serializable {
             Map<String, String> codeToPropIdMap,
             ColumnSpec codeSpec,
             ColumnSpec[] constraintSpecs,
+            ColumnSpec valueSpec,
             ValueType valueType,
             Granularity granularity,
             PositionParser positionParser) {
@@ -171,7 +173,16 @@ public final class EntitySpec implements Serializable {
             this.constraintSpecs = new ColumnSpec[0];
         }
 
+        if (valueType != null && valueSpec == null) {
+            throw new IllegalArgumentException(
+                    "valueType must have a corresponding valueSpec");
+        }
+        if (valueType == null && valueSpec != null) {
+            throw new IllegalArgumentException(
+                    "valueSpec must have a corresponding valueType");
+        }
         this.valueType = valueType;
+        this.valueSpec = valueSpec;
         this.granularity = granularity;
         this.positionParser = positionParser;
     }
@@ -327,6 +338,16 @@ public final class EntitySpec implements Serializable {
     }
 
     /**
+     * Gets the path through the database from this entity's main table to
+     * the table and column where this entity's value is located.
+     *
+     * @return a {@link ColumnSpec}.
+     */
+    public ColumnSpec getValueSpec() {
+        return this.valueSpec;
+    }
+
+    /**
      * Returns the granularity for interpreting this entity' start and finish
      * times.
      *
@@ -362,6 +383,7 @@ public final class EntitySpec implements Serializable {
                 .append("codeSpec", this.codeSpec)
                 .append("constraintSpecs", this.constraintSpecs)
                 .append("valueType", this.valueType)
+                .append("valueSpec", this.valueSpec)
                 .append("granularity", this.granularity)
                 .append("positionParser", this.positionParser)
                 .toString();

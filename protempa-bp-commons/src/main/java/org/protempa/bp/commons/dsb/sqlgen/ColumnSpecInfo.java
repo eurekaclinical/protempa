@@ -9,6 +9,7 @@ final class ColumnSpecInfo {
     private int startTimeIndex = -1;
     private int finishTimeIndex = -1;
     private Map<String, Integer> propertyIndices = null;
+    private int valueIndex = -1;
     private int codeIndex = -1;
     private Map<String, List<ReferenceSpec>> references;
     private int[] uniqueIdIndices;
@@ -72,6 +73,14 @@ final class ColumnSpecInfo {
 
     void setPropertyIndices(Map<String, Integer> index) {
         this.propertyIndices = index;
+    }
+
+    int getValueIndex() {
+        return valueIndex;
+    }
+
+    void setValueIndex(int valueIndex) {
+        this.valueIndex = valueIndex;
     }
 
     void setUniqueIdIndices(int[] uniqueIdIndices) {

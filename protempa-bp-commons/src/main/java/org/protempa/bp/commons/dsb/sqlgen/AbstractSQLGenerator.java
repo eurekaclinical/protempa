@@ -502,6 +502,9 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         if (info.isUsingKeyIdIndex()) {
             i++;
         }
+        if (info.getValueIndex() > 0) {
+            i++;
+        }
         int[] indices = new int[i];
         String[] names = new String[i];
         int k = 0;
@@ -526,6 +529,10 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         if (info.getFinishTimeIndex() > 0) {
             indices[k] = info.getFinishTimeIndex();
             names[k++] = "finishtime";
+        }
+        if (info.getValueIndex() > 0) {
+            indices[k] = info.getValueIndex();
+            names[k++] = "value";
         }
         if (info.getPropertyIndices() != null) {
             PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();

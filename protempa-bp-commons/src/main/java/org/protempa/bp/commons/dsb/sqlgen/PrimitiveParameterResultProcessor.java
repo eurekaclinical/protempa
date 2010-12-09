@@ -30,9 +30,7 @@ class PrimitiveParameterResultProcessor extends
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifer = generateUniqueIdentifier(
                     entitySpec, uniqueIds);
-            ValueType vf = entitySpec.getValueType();
-            Value cpVal = ValueFactory.get(vf).parseValue(
-                    resultSet.getString(i++));
+            
             String propId = null;
             if (!isCasePresent()) {
                 if (propIds.length == 1) {
@@ -55,6 +53,11 @@ class PrimitiveParameterResultProcessor extends
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
             }
+
+            ValueType vf = entitySpec.getValueType();
+            Value cpVal = ValueFactory.get(vf).parseValue(
+                    resultSet.getString(i++));
+
             PrimitiveParameter p = new PrimitiveParameter(propId);
             p.setTimestamp(timestamp);
             p.setDataSourceType(new DatabaseDataSourceType(getDataSourceBackendId()));
