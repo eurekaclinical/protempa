@@ -233,7 +233,7 @@ public abstract class Link {
             String propName = ccc.getPropertyName();
             Value value = proposition.getProperty(propName);
             ValueComparator vc = ccc.getValueComparator();
-            if (!vc.contains(value.compare(ccc.getValue()))) {
+            if (!vc.is(value.compare(ccc.getValue()))) {
                 return false;
             }
         }
