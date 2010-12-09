@@ -82,6 +82,7 @@ public abstract class CLI {
     private CommandLine commandLine;
     private final String shellCommand;
     private final Argument[] arguments;
+    private final boolean configurationIdEnabled;
 
     /**
      * Instantiates the application with a required shell command name.
@@ -105,6 +106,27 @@ public abstract class CLI {
      * @param arguments a {@link Argument[]}.
      */
     protected CLI(String shellCommand, Argument[] arguments) {
+        this(shellCommand, arguments, true);
+    }
+
+    /**
+     * Instantiates the application with a required shell command name,
+     * optional arguments that are not prefixed with option syntax, and
+     * whether to create the configuration id option. The latter is
+     * <code>true</code> by default, and normally would be unless PROTEMPA
+     * would not be initialized by the program for some reason.
+     *
+     * To add options, override
+     * {@link #addCustomCliOptions(org.apache.commons.cli.Options)}.
+     *
+     * @param shellCommand a {@link String}, cannot be <code>null</code> or
+     * empty.
+     * @param arguments a {@link Argument[]}.
+     * @param configurationIdEnabled whether or not the configuration id option
+     * should be created.
+     */
+    protected CLI(String shellCommand, Argument[] arguments,
+            boolean configurationIdEnabled) {
         if (shellCommand == null || shellCommand.trim().length() == 0) {
             throw new IllegalArgumentException(
                     "shellCommand cannot be null or empty");
@@ -115,6 +137,7 @@ public abstract class CLI {
             arguments = new Argument[0];
         }
         this.arguments = arguments;
+        this.configurationIdEnabled = configurationIdEnabled;
     }
 
     /**
@@ -136,6 +159,17 @@ public abstract class CLI {
     }
 
     /**
+     * Whether the configuration option will be created. This is
+     * <code>true</code> unless otherwise specified, and must be
+     * <code>true</code> if {@link #initialize()} will be called.
+     *
+     * @return <code>true</code> or <code>false</code>.
+     */
+    public final boolean isConfigurationIdEnabled() {
+        return this.configurationIdEnabled;
+    }
+
+    /**
      * Initializes PROTEMPA with the specified configuration. Must be called
      * after {@link #processArgs(java.lang.String[], int, int) }.
      *
@@ -145,6 +179,10 @@ public abstract class CLI {
      */
     public final void initialize()
             throws ProtempaStartupException {
+        if (!this.configurationIdEnabled) {
+            throw new IllegalStateException(
+                    "Cannot initialize without a configuration id");
+        }
         this.protempa = Protempa.newInstance(commandLine.getOptionValue("c"));
     }
 
@@ -152,7 +190,8 @@ public abstract class CLI {
      * Implemented with whatever is done with the instance of PROTEMPA
      * created with {@link #initialize(java.lang.String)}, and processing of 
      * any arguments and command line options specified in
-     * {@link #addCustomCliOptions(org.apache.commons.cli.Options)}.
+     * {@link #addCustomCliOptions(org.apache.commons.cli.Options)}. The
+     * default implementation is a no-op.
      *
      * @param protempa an instance of {@link Protempa}.
      * @param commandLine the {@link CommandLine} options passed in by the
@@ -161,8 +200,9 @@ public abstract class CLI {
      * of this method. The convention is for any such exceptions to be nested
      * in an instance of {@link CLIException}.
      */
-    public abstract void execute(Protempa protempa, CommandLine commandLine)
-            throws CLIException;
+    public void execute(Protempa protempa, CommandLine commandLine)
+            throws CLIException {
+    }
 
     /**
      * Prints to the console an exception's message and its nested
@@ -173,8 +213,8 @@ public abstract class CLI {
     public final void printException(Exception cliException) {
         System.err.print(cliException.getMessage());
         Throwable cause = cliException.getCause();
-        if (cause != null && cause.getMessage() != null &&
-                cause.getMessage().length() > 0) {
+        if (cause != null && cause.getMessage() != null
+                && cause.getMessage().length() > 0) {
             System.err.print(": ");
             System.err.println(cause.getMessage());
         } else {
@@ -190,6 +230,9 @@ public abstract class CLI {
      * throws an exception.
      */
     public final void execute() throws CLIException {
+        if (this.protempa == null) {
+            throw new IllegalStateException("PROTEMPA not initialized.");
+        }
         execute(this.protempa, this.commandLine);
     }
 
@@ -197,7 +240,10 @@ public abstract class CLI {
      * Closes the instance of {@link Protempa} created by {@link #initialize(java.lang.String)}.
      */
     public final void close() {
+        if (this.protempa == null)
+            throw new IllegalStateException("PROTEMPA not initialized");
         this.protempa.close();
+        this.protempa = null;
     }
 
     /**
@@ -210,37 +256,39 @@ public abstract class CLI {
      * There always must be at least one argument for the configuration id.
      *
      * @param args the argument {@link String[]} passed into <code>main</code>.
+     * @return a {@link CommandLine} instance.
      */
-    public final void processOptionsAndArgs(String[] args) {
+    public final CommandLine processOptionsAndArgs(String[] args) {
         if (args == null) {
             throw new IllegalArgumentException("args cannot be null");
         }
-        
+
 
         Options cliOptions = constructCliOptions();
 
         CommandLineParser parser = new PosixParser();
         try {
-            commandLine = parser.parse(cliOptions, args);
+            this.commandLine = parser.parse(cliOptions, args);
         } catch (ParseException ex) {
             System.err.println(ex.getMessage());
             System.exit(1);
         }
 
-        String commandLineSyntax = commandLineSyntax(arguments);
+        String commandLineSyntax = commandLineSyntax(this.arguments);
 
-        if (commandLine.hasOption("h")) {
+        if (this.commandLine.hasOption("h")) {
             new HelpFormatter().printHelp(commandLineSyntax, cliOptions);
             System.exit(0);
         }
 
-        if (!commandLine.hasOption("c")) {
+        if (this.configurationIdEnabled && !this.commandLine.hasOption("c")) {
             System.err.println("missing option: c");
             System.exit(1);
         }
 
-        checkInvalidArguments(arguments);
+        checkInvalidArguments(this.arguments);
 
+        return this.commandLine;
     }
 
     /**
@@ -298,8 +346,10 @@ public abstract class CLI {
     private Options constructCliOptions() {
         Options options = new Options();
         options.addOption("h", "help", false, "print this message");
-        options.addOption("c", "configuration", true,
-                "PROTEMPA configuration id");
+        if (configurationIdEnabled) {
+            options.addOption("c", "configuration", true,
+                    "PROTEMPA configuration id");
+        }
         addCustomCliOptions(options);
         return options;
     }
@@ -332,10 +382,10 @@ public abstract class CLI {
             for (int i = arguments.length; i < leftOverArgs.length; i++) {
                 extraArgs.add(leftOverArgs[i]);
             }
-            System.err.println("Invalid extra argument(s): " +
-                    StringUtils.join(extraArgs, ","));
+            System.err.println("Invalid extra argument(s): "
+                    + StringUtils.join(extraArgs, ","));
             System.exit(1);
         }
-        
+
     }
 }
