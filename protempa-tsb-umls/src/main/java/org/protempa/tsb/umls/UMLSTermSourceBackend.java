@@ -106,7 +106,6 @@ public final class UMLSTermSourceBackend extends
         try {
             Term term = Term.withId(id);
             result.add(term.getId());
-//            SAB sab = sabFromTerm(term);
             SAB sab = SAB.withName(term.getTerminology().getName());
 
             // populate the queue with the term's direct children

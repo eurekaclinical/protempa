@@ -1,5 +1,8 @@
 package org.protempa.tsb.umls;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,11 +11,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.protempa.Term;
+import org.protempa.TermSourceReadException;
 import org.protempa.backend.BackendPropertySpec;
 import org.protempa.backend.test.MockBackendInstanceSpec;
 import org.protempa.backend.test.MockBackendPropertySpec;
-
-import static org.junit.Assert.assertEquals;
 
 public class UMLSTermSourceBackendTest {
     private UMLSTermSourceBackend backend;
@@ -54,8 +56,6 @@ public class UMLSTermSourceBackendTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        System.out.println("Setup complete!");
     }
 
     @After
@@ -73,8 +73,14 @@ public class UMLSTermSourceBackendTest {
     public void testGetSubsumption() throws Exception {
         assertEquals(1, backend.getSubsumption("ICD9CM:250.02").size());
         assertEquals(5, backend.getSubsumption("ICD9CM:250.0").size());
-        System.out.println(backend.getSubsumption("ICD9CM:250.0"));
         assertEquals(51, backend.getSubsumption("ICD9CM:250").size());
-        System.out.println(backend.getSubsumption("ICD9CM:100.0"));
+        
+        // tests an invalid code
+        try {
+            backend.getSubsumption("ICD9:250.0");
+            fail("exception not thrown");
+        } catch (TermSourceReadException ex) {
+            
+        }
     }
 }
