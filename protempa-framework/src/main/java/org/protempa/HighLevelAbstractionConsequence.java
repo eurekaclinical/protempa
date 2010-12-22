@@ -66,7 +66,7 @@ class HighLevelAbstractionConsequence implements Consequence {
             Collections.putList(this.derivations, proposition, result);
         }
         arg0.getWorkingMemory().insert(result);
-        logger.log(Level.FINER, "Asserted {0}", result);
+        logger.log(Level.FINER, "Asserted derived proposition {0}", result);
     }
     
     @SuppressWarnings("unchecked")

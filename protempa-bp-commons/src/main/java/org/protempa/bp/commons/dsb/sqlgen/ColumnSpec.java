@@ -144,6 +144,7 @@ public final class ColumnSpec implements Serializable {
     private final Constraint constraint;
     private final PropositionIdToSqlCode[] propIdToSqlCodes;
     private final ColumnOp columnOp;
+    private final boolean propositionIdsComplete;
 
     /**
      * Instantiates part of a path using a schema, table and join.
@@ -187,9 +188,10 @@ public final class ColumnSpec implements Serializable {
      */
     public ColumnSpec(String schema, String table, String column,
             Constraint constraint,
-            PropositionIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp) {
+            PropositionIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp,
+            boolean propositionIdsComplete) {
         this(schema, table, column, null, constraint, propIdToSqlCodes,
-                columnOp);
+                columnOp, propositionIdsComplete);
     }
 
     /**
@@ -209,9 +211,10 @@ public final class ColumnSpec implements Serializable {
      */
     public ColumnSpec(String schema, String table, String column,
             Constraint constraint,
-            PropositionIdToSqlCode... propIdToSqlCodes) {
+            PropositionIdToSqlCode[] propIdToSqlCodes,
+            boolean propositionIdsComplete) {
         this(schema, table, column, null, constraint, propIdToSqlCodes,
-                null);
+                null, false);
     }
 
     /**
@@ -240,7 +243,7 @@ public final class ColumnSpec implements Serializable {
      */
     public ColumnSpec(String schema, String table,
             String column, JoinSpec joinSpec) {
-        this(schema, table, column, joinSpec, null, null, null);
+        this(schema, table, column, joinSpec, null, null, null, false);
     }
 
     /**
@@ -256,7 +259,8 @@ public final class ColumnSpec implements Serializable {
      */
     private ColumnSpec(String schema, String table,
             String column, JoinSpec joinSpec, Constraint constraint,
-            PropositionIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp) {
+            PropositionIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp,
+            boolean propositionIdsComplete) {
         if (table == null) {
             throw new IllegalArgumentException("table cannot be null");
         }
@@ -282,6 +286,7 @@ public final class ColumnSpec implements Serializable {
             this.joinSpec.setPrevColumnSpec(this);
         }
         this.columnOp = columnOp;
+        this.propositionIdsComplete = propositionIdsComplete;
     }
 
     /**
@@ -341,6 +346,10 @@ public final class ColumnSpec implements Serializable {
 
     public ColumnOp getColumnOp() {
         return this.columnOp;
+    }
+
+    public boolean isPropositionIdsComplete() {
+        return this.propositionIdsComplete;
     }
 
     /**

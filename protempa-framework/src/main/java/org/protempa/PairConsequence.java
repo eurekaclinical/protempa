@@ -73,7 +73,7 @@ public final class PairConsequence implements Consequence {
                                 proposition, result);
                     }
                     knowledgeHelper.getWorkingMemory().insert(result);
-                    logger.log(Level.FINER, "Asserted {0}", result);
+                    logger.log(Level.FINER, "Asserted derived proposition{0}", result);
                 }
             }
         }

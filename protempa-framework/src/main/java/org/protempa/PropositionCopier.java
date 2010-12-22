@@ -45,7 +45,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
         param.setInterval(p.getInterval());
         param.setValue(p.getValue());
         this.workingMemory.insert(param);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted {0}", param);
+        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", param);
     }
 
     @Override
@@ -58,7 +58,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
         Collections.putList(this.derivations, event, e);
         Collections.putList(this.derivations, e, event);
         this.workingMemory.insert(e);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted {0}", e);
+        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", e);
     }
 
     @Override
@@ -72,7 +72,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
         Collections.putList(this.derivations, primitiveParameter, param);
         Collections.putList(this.derivations, param, primitiveParameter);
         this.workingMemory.insert(param);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted {0}", param);
+        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", param);
     }
 
     @Override
@@ -84,7 +84,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
         Collections.putList(this.derivations, constant, newConstant);
         Collections.putList(this.derivations, newConstant, constant);
         this.workingMemory.insert(newConstant);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted {0}", newConstant);
+        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", newConstant);
     }
 
 

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.drools.FactException;
 import org.drools.ObjectFilter;
@@ -315,16 +316,18 @@ final class AbstractionFinder implements Module {
             Set<String> propositionIds, Filter filters,
             QueryResultsHandler resultHandler, QuerySession qs)
             throws ProtempaException {
+        Logger logger = ProtempaUtil.logger();
         for (Map.Entry<String, List<Object>> entry : objectsToAssert(keyIds,
                 propositionIds, filters, qs, false).entrySet()) {
-            Map<Proposition, List<Proposition>> derivations = new HashMap<Proposition, List<Proposition>>(); // need
-            // to
-            // populate
+            Map<Proposition, List<Proposition>> derivations =
+                    new HashMap<Proposition, List<Proposition>>();
             List objects = new ArrayList(entry.getValue());
+            logger.log(Level.FINER, "About to assert raw data {0}", objects);
             List<Proposition> propositions = resultList(statelessWorkingMemory(
                     propositionIds, derivations).executeWithResults(objects)
                     .iterateObjects(new ProtempaObjectFilter(propositionIds)));
-
+            logger.log(Level.FINER, "Retrieved propositions {0}",
+                    propositions);
             if (qs.isCachingEnabled()) {
                 qs.addPropositionsToCache(propositions);
                 for (Map.Entry<Proposition, List<Proposition>> me : derivations

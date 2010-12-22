@@ -62,7 +62,7 @@ public abstract class Link {
             throw new IllegalArgumentException(
                     "fromIndex cannot be greater than or equal to toIndex");
         }
-        
+
         this.comparator = comparator;
         this.fromIndex = fromIndex;
         this.toIndex = toIndex;
@@ -150,10 +150,10 @@ public abstract class Link {
         boolean sep2Needed = sep1Needed && range.length() > 0;
         String sep2 = sep2Needed ? ", " : "";
 
-        return '.' + ref + startParen + id +
-                StringUtils.join(this.propositionIds, ',') + sep1 +
-                constraintHeaderString(this.constraints) + finishParen +
-                sep2 + range;
+        return '.' + ref + startParen + id
+                + StringUtils.join(this.propositionIds, ',') + sep1
+                + constraintHeaderString(this.constraints) + finishParen
+                + sep2 + range;
     }
 
     /**
@@ -164,17 +164,19 @@ public abstract class Link {
      *
      * @return a {@link List<Proposition>}.
      */
-    final List<Proposition> createResults(Collection<Proposition> propositions) {
+    protected final List<Proposition> createResults(Collection<Proposition> propositions) {
         List<Proposition> result = new ArrayList<Proposition>();
-        for (Proposition derivedProp : propositions) {
-            addToResults(derivedProp, result);
+        if (propositions != null) {
+            for (Proposition derivedProp : propositions) {
+                addToResults(derivedProp, result);
+            }
+
+            result = filterResults(result);
         }
-        
-        result = filterResults(result);
 
         return result;
     }
-    
+
     private String constraintHeaderString(PropertyConstraint[] constraints) {
         List<String> constraintsL = new ArrayList<String>(constraints.length);
         for (int i = 0; i < constraints.length; i++) {
@@ -216,6 +218,8 @@ public abstract class Link {
     }
 
     private void addToResults(Proposition prop, Collection<Proposition> result) {
+        assert prop != null : "prop cannot be null";
+        assert result != null : "result cannot be null";
         if (this.propositionIds.length == 0
                 || Arrays.contains(this.propositionIds, prop.getId())) {
             boolean compatible = constraintsCheckCompatible(prop,

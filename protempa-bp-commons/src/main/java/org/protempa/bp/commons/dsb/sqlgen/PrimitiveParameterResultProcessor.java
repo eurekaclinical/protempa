@@ -50,6 +50,15 @@ class PrimitiveParameterResultProcessor extends
                         "Could not parse timestamp. Ignoring data value.", e);
                 continue;
             }
+            PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
+            Value[] propertyValues = new Value[propertySpecs.length];
+            for (int j = 0; j < propertySpecs.length; j++) {
+                PropertySpec propertySpec = propertySpecs[j];
+                ValueType valueType = propertySpec.getValueType();
+                Value value = ValueFactory.get(valueType).parseValue(
+                        resultSet.getString(i++));
+                propertyValues[j] = value;
+            }
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
             }
@@ -64,12 +73,9 @@ class PrimitiveParameterResultProcessor extends
             p.setUniqueIdentifier(uniqueIdentifer);
             p.setGranularity(entitySpec.getGranularity());
             p.setValue(cpVal);
-            PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
-            for (PropertySpec propertySpec : propertySpecs) {
-                ValueType vf2 = propertySpec.getValueType();
-                Value value = ValueFactory.get(vf2).parseValue(
-                        resultSet.getString(i++));
-                p.setProperty(propertySpec.getName(), value);
+            for (int j = 0; j < propertySpecs.length; j++) {
+                PropertySpec propertySpec = propertySpecs[j];
+                p.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             p.setDataSourceType(
                     new DatabaseDataSourceType(getDataSourceBackendId()));

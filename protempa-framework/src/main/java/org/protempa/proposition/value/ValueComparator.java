@@ -22,7 +22,7 @@ public enum ValueComparator {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return GREATER_THAN.is(comparator);
+            return GREATER_THAN.equals(comparator);
         }
     },
     /**
@@ -36,7 +36,7 @@ public enum ValueComparator {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return LESS_THAN.is(comparator);
+            return LESS_THAN.equals(comparator);
         }
     },
     /**
@@ -49,7 +49,7 @@ public enum ValueComparator {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return EQUAL_TO.is(comparator);
+            return EQUAL_TO.equals(comparator);
         }
     },
     /**
@@ -62,7 +62,7 @@ public enum ValueComparator {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return NOT_EQUAL_TO.is(comparator);
+            return NOT_EQUAL_TO.equals(comparator);
         }
     },
     /**
@@ -76,7 +76,7 @@ public enum ValueComparator {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return UNKNOWN.is(comparator);
+            return UNKNOWN.equals(comparator);
         }
     },
     /**
@@ -90,9 +90,9 @@ public enum ValueComparator {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return EQUAL_TO.is(comparator)
-                    || GREATER_THAN.is(comparator)
-                    || GREATER_THAN_OR_EQUAL_TO.is(comparator);
+            return EQUAL_TO.equals(comparator)
+                    || GREATER_THAN.equals(comparator)
+                    || GREATER_THAN_OR_EQUAL_TO.equals(comparator);
         }
     },
     /**
@@ -106,8 +106,8 @@ public enum ValueComparator {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return EQUAL_TO.is(comparator) || LESS_THAN.is(comparator)
-                    || LESS_THAN_OR_EQUAL_TO.is(comparator);
+            return EQUAL_TO.equals(comparator) || LESS_THAN.equals(comparator)
+                    || LESS_THAN_OR_EQUAL_TO.equals(comparator);
         }
     },
     /**
@@ -120,7 +120,7 @@ public enum ValueComparator {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return IN.is(comparator);
+            return IN.equals(comparator);
         }
     },
     NOT_IN("NOT_IN", new CompatibleTypes(ValueType.VALUE, 
@@ -131,7 +131,7 @@ public enum ValueComparator {
             if (comparator == null)
                 throw new IllegalArgumentException(
                         "comparator cannot be null");
-            return NOT_IN.is(comparator);
+            return NOT_IN.equals(comparator);
         }
     };
 

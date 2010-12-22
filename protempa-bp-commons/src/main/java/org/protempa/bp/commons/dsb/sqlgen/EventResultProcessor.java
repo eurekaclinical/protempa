@@ -87,6 +87,15 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                             null, gran);
                 }
             }
+            PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
+            Value[] propertyValues = new Value[propertySpecs.length];
+            for (int j = 0; j < propertySpecs.length; j++) {
+                PropertySpec propertySpec = propertySpecs[j];
+                ValueType valueType = propertySpec.getValueType();
+                Value value = ValueFactory.get(valueType).parseValue(
+                        resultSet.getString(i++));
+                propertyValues[j] = value;
+            }
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
             }
@@ -95,25 +104,12 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                     new DatabaseDataSourceType(getDataSourceBackendId()));
             event.setUniqueIdentifier(uniqueIdentifier);
             event.setInterval(interval);
-            PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
-            for (PropertySpec propertySpec : propertySpecs) {
-                ValueType valueType = propertySpec.getValueType();
-                Value value = ValueFactory.get(valueType).parseValue(
-                        resultSet.getString(i++));
-                event.setProperty(propertySpec.getName(), value);
+            for (int j = 0; j < propertySpecs.length; j++) {
+                PropertySpec propertySpec = propertySpecs[j];
+                event.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             logger.log(Level.FINEST, "Created event {0}", event);
             Collections.putList(results, keyId, event);
         }
-    }
-
-    private int eventSetUniqueIdentifier(String[] uniqueIds,
-            EntitySpec entitySpec,
-            ResultSet resultSet, int i, Event event) throws SQLException {
-        i = readUniqueIds(uniqueIds, resultSet, i);
-        UniqueIdentifier uniqueIdentifer = generateUniqueIdentifier(entitySpec,
-                uniqueIds);
-        event.setUniqueIdentifier(uniqueIdentifer);
-        return i;
     }
 }

@@ -40,17 +40,25 @@ class ConstantResultProcessor extends
                 }
             } else {
                 i++;
+            }
+            PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
+            Value[] propertyValues = new Value[propertySpecs.length];
+            for (int j = 0; j < propertySpecs.length; j++) {
+                PropertySpec propertySpec = propertySpecs[j];
+                ValueType valueType = propertySpec.getValueType();
+                Value value = ValueFactory.get(valueType).parseValue(
+                        resultSet.getString(i++));
+                propertyValues[j] = value;
+            }
+            if (isCasePresent()) {
                 propId = resultSet.getString(i++);
             }
             Constant cp = new Constant(propId);
             cp.setUniqueIdentifier(uniqueIdentifer);
             cp.setDataSourceType(new DerivedDataSourceType());
-            PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
-            for (PropertySpec propertySpec : propertySpecs) {
-                ValueType vf2 = propertySpec.getValueType();
-                Value value = ValueFactory.get(vf2).parseValue(
-                        resultSet.getString(i++));
-                cp.setProperty(propertySpec.getName(), value);
+            for (int j = 0; j < propertySpecs.length; j++) {
+                PropertySpec propertySpec = propertySpecs[j];
+                cp.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             cp.setDataSourceType(
                     new DatabaseDataSourceType(getDataSourceBackendId()));

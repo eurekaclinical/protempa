@@ -50,9 +50,7 @@ public final class Derivation extends Link {
             Map<Proposition, List<Proposition>> derivations,
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource) {
-        List<Proposition> derivedProps = derivations.get(proposition);
-        assert derivedProps != null : "derivedProps cannot be null";
-        return createResults(derivedProps);
+        return createResults(derivations.get(proposition));
     }
 
     @Override
