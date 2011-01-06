@@ -20,6 +20,7 @@ import org.protempa.bp.commons.BackendProperty;
 import edu.emory.cci.aiw.umls.SAB;
 import edu.emory.cci.aiw.umls.TerminologyCode;
 import edu.emory.cci.aiw.umls.UMLSDatabaseConnection;
+import edu.emory.cci.aiw.umls.UMLSNoSuchTermException;
 import edu.emory.cci.aiw.umls.UMLSQueryException;
 import edu.emory.cci.aiw.umls.UMLSQueryExecutor;
 
@@ -34,9 +35,9 @@ public final class UMLSTermSourceBackend extends
     private UMLSQueryExecutor umls;
 
     public UMLSTermSourceBackend() {
-        
+
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -48,7 +49,7 @@ public final class UMLSTermSourceBackend extends
         try {
             Term term = Term.withId(id);
 
-//            SAB sab = sabFromTerm(term);
+            // SAB sab = sabFromTerm(term);
             SAB sab = SAB.withName(term.getTerminology().getName());
             TerminologyCode code = TerminologyCode.fromStringAndSAB(
                     term.getCode(), sab);
@@ -100,38 +101,18 @@ public final class UMLSTermSourceBackend extends
             throws TermSourceReadException {
         List<String> result = new ArrayList<String>();
 
-        // stores the unexpanded children
-        Queue<TerminologyCode> descendants = new LinkedList<TerminologyCode>();
-
         try {
             Term term = Term.withId(id);
-            result.add(term.getId());
             SAB sab = SAB.withName(term.getTerminology().getName());
+            TerminologyCode code = TerminologyCode.fromStringAndSAB(
+                    term.getCode(), sab);
 
-            // populate the queue with the term's direct children
-            descendants.addAll(umls.getChildrenByCode(TerminologyCode
-                    .fromStringAndSAB(term.getCode(), sab)));
-
-            // loop through all the children until the queue is empty
-            // kind of like BFS/DFS
-            while (!descendants.isEmpty()) {
-                // dequeue from the descendants and set as the current term
-                TerminologyCode current = descendants.remove();
-                Term curTerm = Term.fromTerminologyAndCode(current.getSab()
-                        .getName(), current.getCode());
-                
-                // add the current child under examination to the result set
-                result.add(curTerm.getId());
-
-                // get all of the current term's children and add them to the
-                // queue
-                List<TerminologyCode> curChildren = umls
-                        .getChildrenByCode(TerminologyCode.fromStringAndSAB(
-                                curTerm.getCode(), sab));
-                if (!curChildren.isEmpty()) {
-                    descendants.addAll(curChildren);
-                }
+            for (TerminologyCode tc : umls.getTermSubsumption(code)) {
+                result.add(Term.fromTerminologyAndCode(tc.getSab().getName(),
+                        tc.getCode()).getId());
             }
+        } catch (UMLSNoSuchTermException ex) {
+            throw new TermSourceReadException(ex);
         } catch (UMLSQueryException ex) {
             throw new TermSourceReadException(ex);
         } catch (MalformedTermIdException ex) {
