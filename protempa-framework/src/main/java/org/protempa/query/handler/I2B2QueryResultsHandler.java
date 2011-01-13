@@ -190,6 +190,54 @@ public final class I2B2QueryResultsHandler extends WriterQueryResultsHandler
 			e.printStackTrace();
 		}
     }
+    
+    public void finish() throws FinderException {
+try {
+        	
+			Class.forName ("oracle.jdbc.driver.OracleDriver");
+			try {
+
+				String[] CS = {"jdbc:oracle:thin:@localhost:1521/XE" , "i2b2metadata" , "demouser"};
+//				String[] CS = {"jdbc:oracle:thin:@aiwdev01.eushc.org:1521/AIWD" , "i2b2comorbiditiesmetadata" , "i2b2"};
+				java.sql.Connection cn = java.sql.DriverManager.getConnection (CS[0] , CS[1] , CS[2]);
+				System.out.println("/n/n/n/n/n/n/n/n META /n/n/n/n/n/n/n/n/n");
+				doMetaData();
+		        persistMetaData (cn);
+		        cn.close();
+			}
+			catch (Exception sqle) {
+
+				System.err.println ("Bad connection parameters for META");
+				sqle.printStackTrace();
+			}
+        }
+        catch (Exception e) {
+
+        	e.printStackTrace();
+        }
+        try {
+
+			Class.forName ("oracle.jdbc.driver.OracleDriver");
+			try {
+
+//				String[] CS = {"jdbc:oracle:thin:@aiwdev01.eushc.org:1521/AIWD" , "i2b2comorbiditiesdata" , "i2b2"};
+				String[] CS = {"jdbc:oracle:thin:@localhost:1521/XE" , "i2b2demodata" , "demouser"};
+				java.sql.Connection cn = java.sql.DriverManager.getConnection (CS[0] , CS[1] , CS[2]);
+		        doData();
+		        persistData (cn);
+		        cn.close();
+			}
+			catch (Exception sqle) {
+
+				System.err.println ("Bad connection parameters for DATA");
+				sqle.printStackTrace();
+			}
+        }
+        catch (Exception e) {
+
+        	e.printStackTrace();
+        }
+    }
 
     @Override
 	public void handleQueryResult(String key, List<Proposition> propositions,
@@ -328,52 +376,6 @@ public final class I2B2QueryResultsHandler extends WriterQueryResultsHandler
 				// }
 			}
 			handleRecord(accumulator);
-			
-			try {
-	        	
-				Class.forName ("oracle.jdbc.driver.OracleDriver");
-				try {
-
-					String[] CS = {"jdbc:oracle:thin:@localhost:1521/XE" , "i2b2metadata" , "demouser"};
-//					String[] CS = {"jdbc:oracle:thin:@aiwdev01.eushc.org:1521/AIWD" , "i2b2comorbiditiesmetadata" , "i2b2"};
-					java.sql.Connection cn = java.sql.DriverManager.getConnection (CS[0] , CS[1] , CS[2]);
-					System.out.println("/n/n/n/n/n/n/n/n META /n/n/n/n/n/n/n/n/n");
-					doMetaData();
-			        persistMetaData (cn);
-			        cn.close();
-				}
-				catch (Exception sqle) {
-
-					System.err.println ("Bad connection parameters for META");
-					sqle.printStackTrace();
-				}
-	        }
-	        catch (Exception e) {
-
-	        	e.printStackTrace();
-	        }
-	        try {
-
-				Class.forName ("oracle.jdbc.driver.OracleDriver");
-				try {
-
-//					String[] CS = {"jdbc:oracle:thin:@aiwdev01.eushc.org:1521/AIWD" , "i2b2comorbiditiesdata" , "i2b2"};
-					String[] CS = {"jdbc:oracle:thin:@localhost:1521/XE" , "i2b2demodata" , "demouser"};
-					java.sql.Connection cn = java.sql.DriverManager.getConnection (CS[0] , CS[1] , CS[2]);
-			        doData();
-			        persistData (cn);
-			        cn.close();
-				}
-				catch (Exception sqle) {
-
-					System.err.println ("Bad connection parameters for DATA");
-					sqle.printStackTrace();
-				}
-	        }
-	        catch (Exception e) {
-
-	        	e.printStackTrace();
-	        }
 		}
 	}
     
