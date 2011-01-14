@@ -12,13 +12,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -29,25 +27,16 @@ import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.AbstractionDefinition;
 import org.protempa.ConstantDefinition;
-import org.protempa.DataSource;
 import org.protempa.DataSourceReadException;
 import org.protempa.EventDefinition;
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.ProtempaException;
 import org.protempa.ProtempaUtil;
 import org.protempa.QuerySession;
-import org.protempa.TermSourceReadException;
-import org.protempa.TermSubsumption;
 import org.protempa.dsb.filter.Filter;
-import org.protempa.proposition.Constant;
-import org.protempa.proposition.Event;
-import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.Sequence;
 import org.protempa.proposition.UniqueIdentifier;
-import org.protempa.query.And;
 import org.protempa.query.Query;
 import org.protempa.query.handler.table.TableColumnSpec;
 
@@ -55,6 +44,8 @@ import org.protempa.query.handler.table.TableColumnSpec;
  * 
  * @author Andrew Post
  */
+//TODO: implement QueryResultsHandler
+//TODO: move to registry repository
 public final class I2B2QueryResultsHandler extends WriterQueryResultsHandler
         implements Serializable {
 
@@ -80,35 +71,38 @@ public final class I2B2QueryResultsHandler extends WriterQueryResultsHandler
 
     public I2B2QueryResultsHandler(OutputStream out, char columnDelimiter,
             String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
-            boolean headerWritten) {
+            boolean headerWritten, Query query) {
         super(out);
         checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
         this.rowPropositionIds = rowPropositionIds.clone();
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
+        this.query = query;
     }
 
     public I2B2QueryResultsHandler(String fileName, char columnDelimiter,
             String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
-            boolean headerWritten) throws IOException {
+            boolean headerWritten, Query query) throws IOException {
         super(fileName);
         checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
         this.rowPropositionIds = rowPropositionIds.clone();
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
+        this.query = query;
     }
 
     public I2B2QueryResultsHandler(File file, char columnDelimiter,
             String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
-            boolean headerWritten) throws IOException {
+            boolean headerWritten, Query query) throws IOException {
         super(file);
         checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
         this.rowPropositionIds = rowPropositionIds.clone();
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
+        this.query = query;
     }
 
     private void checkConstructorArgs(String[] rowPropositionIds,
@@ -179,9 +173,9 @@ public final class I2B2QueryResultsHandler extends WriterQueryResultsHandler
             }
         }
 
-        // create tree
+        // Create the ontology tree
         try {
-			objectsToAssert(org.arp.javautil.arrays.Arrays.asSet(query.getKeyIds()), 
+			createOntologyTree(org.arp.javautil.arrays.Arrays.asSet(query.getKeyIds()), 
 					org.arp.javautil.arrays.Arrays.asSet(query.getPropIds()),
 					query.getFilters() ,null , false);
 		} catch (DataSourceReadException e) {
@@ -192,17 +186,15 @@ public final class I2B2QueryResultsHandler extends WriterQueryResultsHandler
     }
     
     public void finish() throws FinderException {
-try {
-        	
+    	try {	
 			Class.forName ("oracle.jdbc.driver.OracleDriver");
 			try {
-
+				//TODO: give as argument
 				String[] CS = {"jdbc:oracle:thin:@localhost:1521/XE" , "i2b2metadata" , "demouser"};
-//				String[] CS = {"jdbc:oracle:thin:@aiwdev01.eushc.org:1521/AIWD" , "i2b2comorbiditiesmetadata" , "i2b2"};
 				java.sql.Connection cn = java.sql.DriverManager.getConnection (CS[0] , CS[1] , CS[2]);
 				System.out.println("/n/n/n/n/n/n/n/n META /n/n/n/n/n/n/n/n/n");
 				doMetaData();
-		        persistMetaData (cn);
+		        persistMetaData(cn);
 		        cn.close();
 			}
 			catch (Exception sqle) {
@@ -219,12 +211,10 @@ try {
 
 			Class.forName ("oracle.jdbc.driver.OracleDriver");
 			try {
-
-//				String[] CS = {"jdbc:oracle:thin:@aiwdev01.eushc.org:1521/AIWD" , "i2b2comorbiditiesdata" , "i2b2"};
 				String[] CS = {"jdbc:oracle:thin:@localhost:1521/XE" , "i2b2demodata" , "demouser"};
 				java.sql.Connection cn = java.sql.DriverManager.getConnection (CS[0] , CS[1] , CS[2]);
 		        doData();
-		        persistData (cn);
+		        persistData(cn);
 		        cn.close();
 			}
 			catch (Exception sqle) {
@@ -257,73 +247,6 @@ try {
 			}
 		}
 		for (Proposition prop : filtered) {
-
-			// try {
-			//
-			// String id = prop.getId();
-			// write("\t\t" + id + "\n");
-			// int[] ia = {0,0,0,0,0,0};
-			// ia[0] = (this.knowledgeSource.hasAbstractionDefinition (id)) ?
-			// 1:0;
-			// ia[1] = (this.knowledgeSource.hasConstantDefinition (id)) ? 1:0;
-			// ia[2] = (this.knowledgeSource.hasEventDefinition (id)) ? 1:0;
-			// ia[3] = (this.knowledgeSource.hasPrimitiveParameterDefinition
-			// (id)) ? 1:0;
-			// ia[4] = (this.knowledgeSource.hasPropositionDefinition (id)) ?
-			// 1:0;
-			// ia[5] = (this.knowledgeSource.hasTemporalPropositionDefinition
-			// (id)) ? 1:0;
-			// System.out.println(Arrays.toString (ia));
-			//
-			// AbstractionDefinition ad =
-			// this.knowledgeSource.readAbstractionDefinition (id);
-			// ConstantDefinition cd =
-			// this.knowledgeSource.readConstantDefinition (id);
-			// EventDefinition ed = this.knowledgeSource.readEventDefinition
-			// (id);
-			// if (ed != null) {
-			//
-			// write ("getDescription:" +
-			// ((ed.getDescription()==null)?"null":ed.getDescription()) + "\t");
-			// write ("getDisplayName():" +
-			// ((ed.getDisplayName()==null)?"null":ed.getDisplayName()) + "\t");
-			// write ("getAbbreviatedDisplayName():" +
-			// ((ed.getAbbreviatedDisplayName()==null)?"null":ed.getAbbreviatedDisplayName())
-			// + "\t");
-			// write ("getInverseIsA():" + Arrays.toString(ed.getInverseIsA()) +
-			// "\t");
-			// write ("\n");
-			// }
-			// else {
-			// System.out.print("ed == null");
-			// }
-			// PrimitiveParameterDefinition ppd =
-			// this.knowledgeSource.readPrimitiveParameterDefinition (id);
-			// PropositionDefinition pd =
-			// this.knowledgeSource.readPropositionDefinition (id);
-			// if (pd != null) {
-			//
-			// PropertyDefinition[] pda = pd.getPropertyDefinitions();
-			// for (PropertyDefinition x : pda) {
-			// write (x.toString() + "\n");
-			// }
-			// }
-			// else {
-			// write("pd == null\n");
-			// }
-			// TemporalPropositionDefinition tpd =
-			// this.knowledgeSource.readTemporalPropositionDefinition (id);
-			// if (tpd != null) {
-			//
-			// }
-			// else {
-			// System.out.print("tpd == null");
-			// }
-			// }
-			// catch(Exception e) {
-			// e.printStackTrace();
-			// }
-
 			ArrayList<String> accumulator = new ArrayList<String>(1 << 8);
 			for (int i = 0; i < n; i++) {
 
@@ -356,71 +279,35 @@ try {
 									this.columnDelimiter);
 
 					accumulator.addAll(escapedColumnValues);
-
-					// write(StringUtils.join (escapedColumnValues ,
-					// this.columnDelimiter));
-					// if (i < n-1) {
-					// write (this.columnDelimiter);
-					// }
-					// else {
-					// newLine();
-					// }
 				} catch (KnowledgeSourceReadException ex1) {
 
 					throw new FinderException(
 							"Could not read knowledge source", ex1);
 				}
-				// catch (IOException ex) {
-				//
-				// throw new FinderException ("Could not write row" + ex);
-				// }
 			}
 			handleRecord(accumulator);
 		}
 	}
     
     public void treeLeafEventIds (String abstractionOrEventId , DefaultMutableTreeNode root) throws KnowledgeSourceReadException {
-
     	if (abstractionOrEventId == null) {
-
     		throw new IllegalArgumentException ("abstractionAndEventIds cannot be null");
     	}
 		treeLeafEventIdsHelper (abstractionOrEventId , root);
     }
     
     private void treeLeafEventIdsHelper (String abstractionOrEventId , DefaultMutableTreeNode n) throws KnowledgeSourceReadException {
-
         if (abstractionOrEventId == null) {
 
         	return;
         }
-
 		EventDefinition eventDef = knowledgeSource.readEventDefinition (abstractionOrEventId);
 		if (eventDef != null) {
 
 			String[] inverseIsA = eventDef.getInverseIsA();
             if (inverseIsA.length == 0) {
-
-//            	System.out.println(abstractionOrEventId);
             	String ss = eventDef.getDisplayName();
-//            	PropertyDefinition[] pd = eventDef.getPropertyDefinitions();
-//            	for (PropertyDefinition p : pd) {
-//
-//            		if (p==null) continue;
-//            		String _s = p.getName();
-//            		System.out.print ("getName():" + _s);
-//            		org.protempa.proposition.value.ValueSet vs = p.getValueSet();
-//            		if (vs != null) {
-//
-//            			org.protempa.proposition.value.ValueSet.ValueSetElement[] vsea = vs.getValueSetElements();
-//            			if (vsea != null) {
-//
-//                    		System.out.println ("\tgetValueSet().getValueSetElements():" + Arrays.toString(vsea));
-//            			}
-//            		}
-//            	}
             	if ((ss != null) && (ss.length() > 0)) {
-
                 	try {
 
                 		Double.parseDouble (eventDef.getId());
@@ -446,7 +333,6 @@ try {
             	DefaultMutableTreeNode c = new DefaultMutableTreeNode (eventDef.getId());
             	n.add (c);
             	for (String s : inverseIsA) {
-
 //                	System.out.println ("inverseIsA_" + s);
             		treeLeafEventIdsHelper (s , c);
             	}
@@ -477,9 +363,7 @@ try {
         }
     }
     
-    private ArrayList<DefaultMutableTreeNode> nodes = new ArrayList<DefaultMutableTreeNode>();
-    
-	private Map<String, List<Object>> objectsToAssert(Set<String> keyIds,
+	private Map<String, List<Object>> createOntologyTree(Set<String> keyIds,
 			Set<String> propositionIds, Filter filters, QuerySession qs,
 			boolean stateful) throws DataSourceReadException,
 			KnowledgeSourceReadException {
@@ -516,10 +400,11 @@ try {
 		TreeMap<String, DefaultMutableTreeNode> drug = new TreeMap<String, DefaultMutableTreeNode>();
 		// TreeMap<String,DefaultMutableTreeNode> enct = new
 		// TreeMap<String,DefaultMutableTreeNode>();
-		Enumeration<DefaultMutableTreeNode> childs = ROOT.children();
-		while (childs.hasMoreElements()) {
+		@SuppressWarnings("unchecked")
+		Enumeration<DefaultMutableTreeNode> children = ROOT.children();
+		while (children.hasMoreElements()) {
 
-			DefaultMutableTreeNode x = childs.nextElement();
+			DefaultMutableTreeNode x = children.nextElement();
 			if (((String) x.getUserObject()).equals("Encounter")) {
 
 				// enct.put((String)x.getUserObject() , x);
@@ -579,7 +464,6 @@ try {
 	public static DefaultMutableTreeNode grove = new DefaultMutableTreeNode ("PROTEMPA");		//	reference to the collection of trees... embodying the ontology
 	public static List<String> columnDescriptor = null;
 
-	static boolean flag = true;
 	static TreeMap<String,Provider_Dimension> providers = new TreeMap<String,Provider_Dimension>();
 	static TreeMap<String,Discharge> discharge = new TreeMap<String,Discharge>();
 	static ArrayList<Observation_Fact> obx_cache = new ArrayList<Observation_Fact> ();
@@ -646,16 +530,6 @@ try {
 	public static void handleRecord (List<String> record) {
 
 		raw_data.add(record);
-//		if (flag) {
-//
-//			flag = !flag;
-//			for (String s : columnDescriptor) {
-//				if (s==null) break;
-//				System.out.print(s + "\t");
-//			}
-//			System.out.print("\n");
-//			System.out.flush();
-//		}
 		for (String s : record) {
 			System.err.print(s + "\t");
 		}
@@ -698,6 +572,7 @@ try {
 		//	collect these and put in database.
 	}
 
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	public static void doMetaData() {
 
 		//
@@ -706,22 +581,20 @@ try {
 		//
 
 		for (List<String> record : raw_data) {
-
 			Provider_Dimension pd = new Provider_Dimension (record);
 			if ( ! providers.containsKey(pd.getMD5())) {
 
-				providers.put (pd.getMD5() , pd);
+				providers.put (pd.getMD5(), pd);
 			}
 			Discharge d = new Discharge (record);
 			if ( ! discharge.containsKey(d.getMD5())) {
 
-				discharge.put (d.getMD5() , d);
+				discharge.put (d.getMD5(), d);
 			}
 		}
 
 		ArrayList<String[]> sa = new ArrayList<String[]> (1<<10);
 		for (Discharge dd : discharge.values()) {
-
 			sa.add (new String[] {dd.healthcareEntity , dd.dischargeUnit});
 		}
 		DefaultMutableTreeNode discharges = new DefaultMutableTreeNode("Discharges");
@@ -730,24 +603,20 @@ try {
 
 		DefaultMutableTreeNode provs = new DefaultMutableTreeNode("Providers");
 		for (Provider_Dimension dd : providers.values()) {
-
 			provs.add (new DefaultMutableTreeNode (dd.last + ", " + dd.first));
 		}
 		grove.add(provs);
-
+		
 		Enumeration<DefaultMutableTreeNode> emu = grove.breadthFirstEnumeration();
 		while (emu.hasMoreElements()) {
-
 			DefaultMutableTreeNode x = (DefaultMutableTreeNode)emu.nextElement();
 			if (x.isLeaf()) {
-
 				continue;
 			}
 			MD5.alphabetizeChildren(x);
 		}
 		emu = grove.children();
 		while (emu.hasMoreElements()) {		//	temporary kludge
-
 			DefaultMutableTreeNode x = (DefaultMutableTreeNode)emu.nextElement();
 			if (x.getUserObject().equals("Drug")) {
 
@@ -763,7 +632,6 @@ try {
 
 		Enumeration<DefaultMutableTreeNode> enm = grove.breadthFirstEnumeration();
 		while (enm.hasMoreElements()) {
-
 			DefaultMutableTreeNode x = enm.nextElement();
 			cache.put ((String)x.getUserObject() , x);
 			System.out.println ("put ========>>>>> " + x.getUserObject());
@@ -771,9 +639,7 @@ try {
 
 
 		emu = grove.breadthFirstEnumeration();
-		ArrayList<String[]> toREST = new ArrayList<String[]>(1<<12);
 		while (emu.hasMoreElements()) {
-
 			DefaultMutableTreeNode x = (DefaultMutableTreeNode)emu.nextElement();
 			String[] rest = new String[14];
 			Object[] oa = x.getUserObjectPath();
@@ -781,7 +647,6 @@ try {
 			rest[0] = Integer.toString (x.getLevel() + 1);
 			String path = "";
 			for (Object o : oa) {
-
 				path += "\\";
 				path += o;
 			}
@@ -791,11 +656,9 @@ try {
 			System.out.print(x.getUserObject() + "\t");		//	c_name				!null	VARCHAR2(2000)
 			System.out.print("N\t");						//	c_synonym_cd		!null	CHAR(1)
 			if (x.isLeaf()) {
-
 				System.out.print("LAE\t");
 			}
 			else {
-
 				System.out.print("FAE\t");					//	c_visualattributes	!null	CHAR(1)
 			}
 			System.out.print("\t");							//	c_totalnum					NUMBER(22,0)
@@ -827,7 +690,7 @@ try {
 
 		PreparedStatement p = null;
 		try {
-
+			@SuppressWarnings("unchecked")
 			Enumeration<DefaultMutableTreeNode> emu = grove.depthFirstEnumeration();
 			while (emu.hasMoreElements()) {
 
@@ -1578,6 +1441,7 @@ try {
 			try {
 
 				String[] dt = record.get(6).split("/");
+				@SuppressWarnings("deprecation")
 				java.util.Date ddd = new java.util.Date (2009 , Integer.parseInt(dt[1]) , Integer.parseInt(dt[0]));
 				start_date = ddd;
 			}
@@ -1811,10 +1675,10 @@ try {
 						good++;
 					}
 					catch (Exception e) {
-
+						//TODO: find out why are there duplicate records
 						bad++;
-						e.printStackTrace();
-						System.out.println (this.visit.encounter_num + " " + this.patient.patient_num + " " + (String)concept.concept_cd + " " + this.provider_id + " " + this.start_date + " " + this.modifier_cd);
+						//e.printStackTrace();
+						//System.out.println (this.visit.encounter_num + " " + this.patient.patient_num + " " + (String)concept.concept_cd + " " + this.provider_id + " " + this.start_date + " " + this.modifier_cd);
 					}
 					finally {
 
