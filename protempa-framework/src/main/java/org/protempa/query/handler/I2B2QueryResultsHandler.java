@@ -18,9 +18,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.commons.lang.StringUtils;
@@ -572,7 +569,7 @@ public final class I2B2QueryResultsHandler extends WriterQueryResultsHandler
 		//	collect these and put in database.
 	}
 
-	@SuppressWarnings({ "unchecked", "deprecation" })
+	@SuppressWarnings({ "unchecked" })
 	public static void doMetaData() {
 
 		//
@@ -679,11 +676,13 @@ public final class I2B2QueryResultsHandler extends WriterQueryResultsHandler
 			System.out.print("\t");							//	valuetype_cd				VARCHAR2(50)
 			System.out.print("\n");
 		}
+		/*
 		JFrame jf = new JFrame ("PROTEMPA");
 	    jf.setSize (1000 , 621);
 	    jf.getContentPane().add (new JScrollPane (new JTree (grove)));
 	    jf.setVisible (true);
 	    jf.show();
+	    */
 	}
 
 	public static void persistMetaData (Connection con) {
