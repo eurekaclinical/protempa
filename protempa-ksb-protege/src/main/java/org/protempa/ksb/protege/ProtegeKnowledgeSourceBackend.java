@@ -2,11 +2,9 @@ package org.protempa.ksb.protege;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.protempa.AbstractionDefinition;
@@ -37,17 +35,16 @@ import edu.stanford.smi.protege.model.Instance;
  * 
  * @author Andrew Post
  */
-public abstract class ProtegeKnowledgeSourceBackend extends
-        AbstractCommonsKnowledgeSourceBackend implements ProjectListener {
-
+public abstract class ProtegeKnowledgeSourceBackend 
+        extends AbstractCommonsKnowledgeSourceBackend
+        implements ProjectListener {
+    
     private ConnectionManager cm;
     private Units units;
-    private final Map<String, Instance> instanceCache;
     private Cls eventCls;
     private Cls constantCls;
     private Cls abstractParameterCls;
     private Cls primitiveParameterCls;
-    private Map<String, List<String>> termToPropMap;
 
     private static enum Units {
 
@@ -64,8 +61,6 @@ public abstract class ProtegeKnowledgeSourceBackend extends
     };
 
     protected ProtegeKnowledgeSourceBackend() {
-        this.instanceCache = new HashMap<String, Instance>();
-        this.termToPropMap = new HashMap<String, List<String>>();
     }
 
     @Override
@@ -80,8 +75,7 @@ public abstract class ProtegeKnowledgeSourceBackend extends
             try {
                 this.abstractParameterCls = this.cm.getCls("AbstractParameter");
                 this.eventCls = this.cm.getCls("Event");
-                this.primitiveParameterCls = this.cm
-                        .getCls("PrimitiveParameter");
+                this.primitiveParameterCls = this.cm.getCls("PrimitiveParameter");
                 this.constantCls = this.cm.getCls("Constant");
             } catch (KnowledgeSourceReadException e) {
                 throw new KnowledgeSourceBackendInitializationException(e);
@@ -120,7 +114,6 @@ public abstract class ProtegeKnowledgeSourceBackend extends
             this.cm.close();
             this.cm = null;
         }
-        this.instanceCache.clear();
         this.abstractParameterCls = null;
         this.eventCls = null;
         this.primitiveParameterCls = null;
@@ -151,12 +144,7 @@ public abstract class ProtegeKnowledgeSourceBackend extends
 
     private Instance getInstance(String name)
             throws KnowledgeSourceReadException {
-        Instance instance;
-        if ((instance = this.instanceCache.get(name)) == null) {
-            instance = this.cm.getInstance(name);
-            this.instanceCache.put(name, instance);
-        }
-        return instance;
+        return this.cm.getInstance(name);
     }
 
     private boolean hasClass(String name, String superClass)
@@ -193,8 +181,7 @@ public abstract class ProtegeKnowledgeSourceBackend extends
 
     private boolean hasInstance(String name)
             throws KnowledgeSourceReadException {
-        return this.instanceCache.containsKey(name)
-                || this.cm.getInstance(name) != null;
+        return this.cm.getInstance(name) != null;
     }
 
     @Override
@@ -218,18 +205,17 @@ public abstract class ProtegeKnowledgeSourceBackend extends
         Instance candidateAbstractParameter = getInstance(name);
         if (candidateAbstractParameter != null
                 && this.cm.hasType(candidateAbstractParameter,
-                        this.cm.getCls("ParameterConstraint"))) {
+                this.cm.getCls("ParameterConstraint"))) {
             candidateAbstractParameter = (Instance) this.cm.getOwnSlotValue(
                     candidateAbstractParameter,
                     this.cm.getSlot("allowedValueOf"));
         }
         if (candidateAbstractParameter != null
                 && this.cm.hasType(candidateAbstractParameter,
-                        this.abstractParameterCls)) {
+                this.abstractParameterCls)) {
             convertAbstractedFrom(candidateAbstractParameter,
                     protempaKnowledgeBase);
-            AbstractionDefinition result = protempaKnowledgeBase
-                    .getAbstractionDefinition(name);
+            AbstractionDefinition result = protempaKnowledgeBase.getAbstractionDefinition(name);
             return result;
         } else {
             return null;
@@ -326,11 +312,10 @@ public abstract class ProtegeKnowledgeSourceBackend extends
     private void convertAbstractedFrom(Instance proposition,
             KnowledgeBase protempaKb) throws KnowledgeSourceReadException {
         if (proposition != null && protempaKb != null) {
-            PropositionConverter converter = InstanceConverterFactory
-                    .getInstance(proposition);
+            PropositionConverter converter = InstanceConverterFactory.getInstance(proposition);
             if (converter != null
                     && !converter.protempaKnowledgeBaseHasProposition(
-                            proposition, protempaKb)) {
+                    proposition, protempaKb)) {
                 converter.convert(proposition, protempaKb, this);
             }
         }
@@ -353,11 +338,10 @@ public abstract class ProtegeKnowledgeSourceBackend extends
     private void convertIsA(Instance proposition, KnowledgeBase protempaKb)
             throws KnowledgeSourceReadException {
         if (proposition != null && protempaKb != null) {
-            PropositionConverter converter = InstanceConverterFactory
-                    .getInstance(proposition);
+            PropositionConverter converter = InstanceConverterFactory.getInstance(proposition);
             if (converter != null
                     && !converter.protempaKnowledgeBaseHasProposition(
-                            proposition, protempaKb)) {
+                    proposition, protempaKb)) {
                 converter.convert(proposition, protempaKb, this);
             }
         }
@@ -389,13 +373,13 @@ public abstract class ProtegeKnowledgeSourceBackend extends
 
     Unit parseUnit(String protegeUnitStr) {
         switch (this.units) {
-        case ABSOLUTE:
-            return Util.ABSOLUTE_DURATION_MULTIPLIER.get(protegeUnitStr);
-        case RELATIVE_HOURS:
-            return Util.RELATIVE_HOURS_DURATION_MULTIPLIER.get(protegeUnitStr);
-        default:
-            assert false : this.units;
-            return null;
+            case ABSOLUTE:
+                return Util.ABSOLUTE_DURATION_MULTIPLIER.get(protegeUnitStr);
+            case RELATIVE_HOURS:
+                return Util.RELATIVE_HOURS_DURATION_MULTIPLIER.get(protegeUnitStr);
+            default:
+                assert false : this.units;
+                return null;
         }
     }
 
