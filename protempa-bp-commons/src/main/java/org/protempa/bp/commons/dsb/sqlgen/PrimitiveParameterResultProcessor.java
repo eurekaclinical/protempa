@@ -14,33 +14,41 @@ import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueFactory;
 import org.protempa.proposition.value.ValueType;
 
-class PrimitiveParameterResultProcessor extends
-        AbstractMainResultProcessor<PrimitiveParameter> {
+class PrimitiveParameterResultProcessor
+        extends AbstractMainResultProcessor<PrimitiveParameter> {
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
         Map<String, List<PrimitiveParameter>> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
         String[] propIds = entitySpec.getPropositionIds();
+        ColumnSpec codeSpec = entitySpec.getCodeSpec();
+        if (codeSpec != null) {
+            List<ColumnSpec> codeSpecL = codeSpec.asList();
+            codeSpec = codeSpecL.get(codeSpecL.size() - 1);
+        }
         Logger logger = SQLGenUtil.logger();
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
+
             String[] uniqueIds = generateUniqueIdsArray(entitySpec);
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifer = generateUniqueIdentifier(
                     entitySpec, uniqueIds);
-            
+
             String propId = null;
             if (!isCasePresent()) {
-                if (propIds.length == 1) {
+                if (codeSpec == null) {
                     propId = propIds[0];
                 } else {
-                    propId = resultSet.getString(i++);
+                    String code = resultSet.getString(i++);
+                    propId = sqlCodeToPropositionId(codeSpec, code);
                 }
             } else {
                 i++;
             }
+
             Long timestamp = null;
             try {
                 timestamp = entitySpec.getPositionParser().toLong(resultSet,
@@ -50,6 +58,11 @@ class PrimitiveParameterResultProcessor extends
                         "Could not parse timestamp. Ignoring data value.", e);
                 continue;
             }
+            
+            ValueType vf = entitySpec.getValueType();
+            Value cpVal = ValueFactory.get(vf).parseValue(
+                    resultSet.getString(i++));
+            
             PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
             Value[] propertyValues = new Value[propertySpecs.length];
             for (int j = 0; j < propertySpecs.length; j++) {
@@ -59,13 +72,10 @@ class PrimitiveParameterResultProcessor extends
                         resultSet.getString(i++));
                 propertyValues[j] = value;
             }
+            
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
             }
-
-            ValueType vf = entitySpec.getValueType();
-            Value cpVal = ValueFactory.get(vf).parseValue(
-                    resultSet.getString(i++));
 
             PrimitiveParameter p = new PrimitiveParameter(propId);
             p.setTimestamp(timestamp);

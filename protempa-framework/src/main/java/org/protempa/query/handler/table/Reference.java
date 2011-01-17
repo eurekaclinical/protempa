@@ -66,8 +66,9 @@ public final class Reference extends Link {
         List<Proposition> props = new ArrayList<Proposition>();
         for (UniqueIdentifier uid : uids) {
             Proposition prop = references.get(uid);
-	    assert prop != null : "prop cannot be null";
-            props.add(prop);
+            if (prop != null) {
+                props.add(prop);
+            }
         }
 
         return createResults(props);

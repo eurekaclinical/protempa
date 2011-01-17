@@ -64,14 +64,14 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
-        Collection<Proposition> propositions = this.traverseLinks(this.links,
+        Collection<Proposition> propositions = traverseLinks(this.links,
                 proposition, derivations, references, knowledgeSource);
         NumericalValue value = null;
         for (Proposition prop : propositions) {
             if (prop instanceof PrimitiveParameter) {
                 PrimitiveParameter pp = (PrimitiveParameter) prop;
                 Value val = pp.getValue();
-                if (val.getType() != ValueType.NUMERICALVALUE) {
+                if (!ValueType.NUMERICALVALUE.isInstance(val)) {
                     throw new IllegalStateException("only numerical values allowed");
                 } else {
                     NumericalValue nv = (NumericalValue) val;

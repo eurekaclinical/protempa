@@ -23,24 +23,33 @@ class ConstantResultProcessor extends
         Map<String, List<Constant>> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
         String[] propIds = entitySpec.getPropositionIds();
+        ColumnSpec codeSpec = entitySpec.getCodeSpec();
+        if (codeSpec != null) {
+            List<ColumnSpec> codeSpecL = codeSpec.asList();
+            codeSpec = codeSpecL.get(codeSpecL.size() - 1);
+        }
         Logger logger = SQLGenUtil.logger();
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
+
             String[] uniqueIds = generateUniqueIdsArray(entitySpec);
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifer = generateUniqueIdentifier(
                     entitySpec, uniqueIds);
+
             String propId = null;
             if (!isCasePresent()) {
-                if (propIds.length == 1) {
+                if (codeSpec == null) {
                     propId = propIds[0];
                 } else {
-                    propId = resultSet.getString(i++);
+                    String code = resultSet.getString(i++);
+                    propId = sqlCodeToPropositionId(codeSpec, code);
                 }
             } else {
                 i++;
             }
+            
             PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
             Value[] propertyValues = new Value[propertySpecs.length];
             for (int j = 0; j < propertySpecs.length; j++) {
@@ -50,9 +59,11 @@ class ConstantResultProcessor extends
                         resultSet.getString(i++));
                 propertyValues[j] = value;
             }
+            
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
             }
+            
             Constant cp = new Constant(propId);
             cp.setUniqueIdentifier(uniqueIdentifer);
             cp.setDataSourceType(new DerivedDataSourceType());

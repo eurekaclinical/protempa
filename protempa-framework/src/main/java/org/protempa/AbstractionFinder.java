@@ -413,11 +413,18 @@ final class AbstractionFinder implements Module {
 
         // Add parameters. Requires special handling, because Sequence objects
         // do not override equals. Can we eliminate sequence cache?
-        for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> entry : createSequencesFromPrimitiveParameters(
-                keyIds,
+        Set<String> primitiveParameterIds =
+                knowledgeSource.primitiveParameterIds(propositionIds);
+        Map<String, List<PrimitiveParameter>> keyIdsToPrimParams =
                 dataSource.getPrimitiveParametersAsc(keyIds,
-                        knowledgeSource.primitiveParameterIds(propositionIds),
-                        filters, qs), propositionIds, stateful).entrySet()) {
+                        primitiveParameterIds,
+                        filters, qs);
+        Map<String, List<Sequence<PrimitiveParameter>>> keyIdsToSequences =
+                createSequencesFromPrimitiveParameters(
+                keyIdsToPrimParams, propositionIds, primitiveParameterIds,
+                stateful);
+        for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> entry :
+            keyIdsToSequences.entrySet()) {
             org.arp.javautil.collections.Collections.putListAll(objects,
                     entry.getKey(), entry.getValue());
         }
@@ -479,62 +486,22 @@ final class AbstractionFinder implements Module {
                 qs);
     }
 
-    /*
-     * FIXME The primitive parameters are sorted already, yet we resort them in
-     * Sequence.
-     */
-    private List<Sequence<PrimitiveParameter>> createSequencesFromPrimitiveParameters(
-            String keyId, List<PrimitiveParameter> primParams,
-            Set<String> propositionIds, boolean stateful)
-            throws KnowledgeSourceReadException {
-        ArrayList<Sequence<PrimitiveParameter>> result = new ArrayList<Sequence<PrimitiveParameter>>();
-        if (primParams != null && !primParams.isEmpty()) {
-            Map<Set<String>, Sequence<PrimitiveParameter>> seqKey = this.sequences
-                    .get(keyId);
-            if (seqKey == null) {
-                seqKey = new HashMap<Set<String>, Sequence<PrimitiveParameter>>();
-            }
-            for (Set<String> paramIds : extractSequenceParamIds(propositionIds)) {
-                if (!seqKey.containsKey(paramIds)) {
-                    seqKey.put(paramIds, new Sequence<PrimitiveParameter>(
-                            paramIds));
-                }
-            }
-            if (stateful) {
-                this.sequences.put(keyId, seqKey);
-            }
-
-            for (Map.Entry<Set<String>, Sequence<PrimitiveParameter>> entry : seqKey
-                    .entrySet()) {
-                Set<String> key = entry.getKey();
-                Sequence<PrimitiveParameter> seq = entry.getValue();
-                if (seq.isEmpty()) {
-                    for (PrimitiveParameter parameter : primParams) {
-                        if (key.contains(parameter.getId())) {
-                            seq.add(parameter);
-                        }
-                    }
-                }
-                result.add(seq);
-            }
-        }
-        return result;
-    }
-
     private Map<String, List<Sequence<PrimitiveParameter>>> createSequencesFromPrimitiveParameters(
-            Set<String> keyIds,
             Map<String, List<PrimitiveParameter>> primParams,
-            Set<String> propositionIds, boolean stateful)
+            Set<String> propositionIds, Set<String> primParamIds, boolean stateful)
             throws KnowledgeSourceReadException {
-        Map<String, List<Sequence<PrimitiveParameter>>> result = new HashMap<String, List<Sequence<PrimitiveParameter>>>();
+        Map<String, List<Sequence<PrimitiveParameter>>> result =
+                new HashMap<String, List<Sequence<PrimitiveParameter>>>();
         if (primParams != null && !primParams.isEmpty()) {
-            for (String keyId : keyIds) {
-                Map<Set<String>, Sequence<PrimitiveParameter>> seqKey = this.sequences
-                        .get(keyId);
+            for (String keyId : primParams.keySet()) {
+                Map<Set<String>, Sequence<PrimitiveParameter>> seqKey =
+                        this.sequences.get(keyId);
                 if (seqKey == null) {
-                    seqKey = new HashMap<Set<String>, Sequence<PrimitiveParameter>>();
+                    seqKey =
+                        new HashMap<Set<String>, Sequence<PrimitiveParameter>>();
                 }
-                for (Set<String> paramIds : extractSequenceParamIds(propositionIds)) {
+                for (Set<String> paramIds :
+                    extractSequenceParamIds(propositionIds, primParamIds)) {
                     if (!seqKey.containsKey(paramIds)) {
                         seqKey.put(paramIds, new Sequence<PrimitiveParameter>(
                                 paramIds));
@@ -544,7 +511,8 @@ final class AbstractionFinder implements Module {
                     this.sequences.put(keyId, seqKey);
                 }
 
-                List<Sequence<PrimitiveParameter>> paramSeqs = new ArrayList<Sequence<PrimitiveParameter>>();
+                List<Sequence<PrimitiveParameter>> paramSeqs =
+                        new ArrayList<Sequence<PrimitiveParameter>>();
                 for (Map.Entry<Set<String>, Sequence<PrimitiveParameter>> entry : seqKey
                         .entrySet()) {
                     Set<String> key = entry.getKey();
@@ -566,6 +534,7 @@ final class AbstractionFinder implements Module {
     }
 
     private void extractSequenceParamIdsHelper(Set<String> propIds,
+            Set<String> paramIds,
             Set<Set<String>> sequenceParamIds)
             throws KnowledgeSourceReadException {
         for (String propId : propIds) {
@@ -577,18 +546,20 @@ final class AbstractionFinder implements Module {
                             .primitiveParameterIds(propId));
                 } else {
                     extractSequenceParamIdsHelper(def.getAbstractedFrom(),
+                            paramIds,
                             sequenceParamIds);
                 }
-            } else {
+            } else if (paramIds.contains(propId)) {
                 sequenceParamIds.add(Collections.singleton(propId));
             }
         }
     }
 
-    private Set<Set<String>> extractSequenceParamIds(Set<String> propIds)
+    private Set<Set<String>> extractSequenceParamIds(Set<String> propIds,
+            Set<String> paramIds)
             throws KnowledgeSourceReadException {
         Set<Set<String>> result = new HashSet<Set<String>>();
-        extractSequenceParamIdsHelper(propIds, result);
+        extractSequenceParamIdsHelper(propIds, paramIds, result);
         return result;
     }
 

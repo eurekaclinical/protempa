@@ -2,7 +2,6 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
 import org.protempa.DataSourceBackendId;
 import org.protempa.proposition.UniqueIdentifier;
 

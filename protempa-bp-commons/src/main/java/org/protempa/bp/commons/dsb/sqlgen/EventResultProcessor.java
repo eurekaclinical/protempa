@@ -25,25 +25,34 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
     public void process(ResultSet resultSet) throws SQLException {
         Map<String, List<Event>> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
-        Logger logger = SQLGenUtil.logger();
         String[] propIds = entitySpec.getPropositionIds();
+        ColumnSpec codeSpec = entitySpec.getCodeSpec();
+        if (codeSpec != null) {
+            List<ColumnSpec> codeSpecL = codeSpec.asList();
+            codeSpec = codeSpecL.get(codeSpecL.size() - 1);
+        }
+        Logger logger = SQLGenUtil.logger();
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
+
             String[] uniqueIds = generateUniqueIdsArray(entitySpec);
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifier = generateUniqueIdentifier(
                     entitySpec, uniqueIds);
+
             String propId = null;
             if (!isCasePresent()) {
-                if (propIds.length == 1) {
+                if (codeSpec == null) {
                     propId = propIds[0];
                 } else {
-                    propId = resultSet.getString(i++);
+                    String code = resultSet.getString(i++);
+                    propId = sqlCodeToPropositionId(codeSpec, code);
                 }
             } else {
                 i++;
             }
+            
             ColumnSpec finishTimeSpec = entitySpec.getFinishTimeSpec();
             Granularity gran = entitySpec.getGranularity();
             Interval interval = null;
@@ -87,6 +96,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                             null, gran);
                 }
             }
+
             PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
             Value[] propertyValues = new Value[propertySpecs.length];
             for (int j = 0; j < propertySpecs.length; j++) {
@@ -96,9 +106,11 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                         resultSet.getString(i++));
                 propertyValues[j] = value;
             }
+
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
             }
+            
             Event event = new Event(propId);
             event.setDataSourceType(
                     new DatabaseDataSourceType(getDataSourceBackendId()));

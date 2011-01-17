@@ -167,9 +167,36 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return builder.toString();
     }
 
-    private <P extends Proposition> Map<String, List<P>> executeSelect(
-            Set<String> propIds, Filter filters, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessorFactory<P> factory)
+    private void executeSelect(Logger logger, String backendNameForMessages,
+            String entitySpecName, String query,
+            SQLGenResultProcessor resultProcessor)
+            throws DataSourceReadException {
+        if (Boolean.getBoolean(SYSTEM_PROPERTY_SKIP_EXECUTION)) {
+            logger.log(Level.INFO, 
+                    "Data source backend {0} is skipping query for {1}",
+                    new Object[]{backendNameForMessages, entitySpecName});
+        } else {
+            logger.log(Level.FINE, 
+                    "Data source backend {0} is executing query for {1}",
+                    new Object[]{backendNameForMessages, entitySpecName});
+            try {
+                SQLExecutor.executeSQL(getConnectionSpec(), query,
+                        resultProcessor);
+            } catch (SQLException ex) {
+                throw new DataSourceReadException(
+                        "Error executing query in data source backend " +
+                        backendNameForMessages + " for " + entitySpecName, ex);
+            }
+            logger.log(Level.FINE, 
+                    "Query for {0} in data source backend {1} is complete",
+                    new Object[]{entitySpecName, backendNameForMessages});
+        }
+    }
+
+    private <P extends Proposition> Map<String, List<P>> 
+            readPropositions(Set<String> propIds, Filter filters, 
+            Set<String> keyIds, SQLOrderBy order,
+            SQLGenResultProcessorFactory<P> factory)
             throws DataSourceReadException {
         Map<EntitySpec, List<String>> entitySpecMapFromPropIds =
                 entitySpecMapForPropIds(propIds);
@@ -207,7 +234,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     this.backend.getDataSourceBackendId();
             AbstractMainResultProcessor resultProcessor =
                     factory.getInstance(dataSourceBackendId, entitySpec);
-            generateAndExecute(entitySpec, null, propIds, filtersCopy,
+            generateAndExecuteSelect(entitySpec, null, propIds, filtersCopy,
                     allEntitySpecsCopy, keyIds, order, resultProcessor);
 
             processResults(resultProcessor, results);
@@ -262,7 +289,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     }
                     removeNonApplicableFilters(allEntitySpecsCopyForRefs,
                             refFiltersCopy, referredToEntitySpec);
-                    generateAndExecute(entitySpec, referenceSpec, propIds,
+                    generateAndExecuteSelect(entitySpec, referenceSpec, propIds,
                             refFiltersCopy, allEntitySpecsCopyForRefs, keyIds,
                             order, refResultProcessor);
                     logger.log(Level.FINE, "Data source backend {0} is done processing reference {1} for entity spec {2}",
@@ -279,7 +306,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     "Results of query for {0} in data source backend {1} "
                     + "have been processed",
                     new Object[]{entitySpec.getName(),
-                        this.backendNameForMessages()});
+                    backendNameForMessages()});
         }
         return results;
     }
@@ -321,7 +348,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         }
     }
 
-    private <P extends Proposition> void generateAndExecute(
+    private <P extends Proposition> void generateAndExecuteSelect(
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
             Set<String> propIds,
             Set<Filter> filtersCopy, Collection<EntitySpec> entitySpecsCopy,
@@ -329,37 +356,22 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             SQLGenResultProcessor resultProcessor)
             throws DataSourceReadException {
         Logger logger = SQLGenUtil.logger();
+        String backendNameForMessages = backendNameForMessages();
+        String entitySpecName = entitySpec.getName();
+
         logger.log(Level.FINE,
                 "Data source backend {0} is generating query for {1}",
-                new Object[]{backendNameForMessages(),
-                    entitySpec.getName()});
+                new Object[]{backendNameForMessages, entitySpecName});
+
         String query = generateSelect(entitySpec, referenceSpec, propIds,
                 filtersCopy, entitySpecsCopy, keyIds, order, resultProcessor);
+
         logger.log(Level.FINE,
-                "Data source backend {0} generated the following query for {1}: {2}",
-                new Object[]{backendNameForMessages(),
-                    entitySpec.getName(), query});
-        if (Boolean.getBoolean(SYSTEM_PROPERTY_SKIP_EXECUTION)) {
-            logger.log(Level.INFO,
-                    "Data source backend {0} is skipping query for {1}",
-                    new Object[]{backendNameForMessages(),
-                        entitySpec.getName()});
-        } else {
-            logger.log(Level.FINE,
-                    "Data source backend {0} is executing query for {1}",
-                    new Object[]{backendNameForMessages(),
-                        entitySpec.getName()});
-            try {
-                SQLExecutor.executeSQL(getConnectionSpec(), query,
-                        resultProcessor);
-            } catch (SQLException ex) {
-                throw new DataSourceReadException(ex);
-            }
-            logger.log(Level.FINE,
-                    "Query for {0} in data source backend {1} is complete",
-                    new Object[]{entitySpec.getName(),
-                        backendNameForMessages()});
-        }
+            "Data source backend {0} generated the following query for {1}: {2}",
+                new Object[]{backendNameForMessages, entitySpecName, query});
+        
+        executeSelect(logger, backendNameForMessages, entitySpecName, query,
+                resultProcessor);
     }
 
     private static void removeNonApplicableEntitySpecs(EntitySpec entitySpec,
@@ -414,7 +426,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         ConstantResultProcessorFactory factory =
                 new ConstantResultProcessorFactory();
 
-        return executeSelect(paramIds, filters, keyIds, null, factory);
+        return readPropositions(paramIds, filters, keyIds, null, factory);
     }
 
     @Override
@@ -425,7 +437,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         PrimitiveParameterResultProcessorFactory factory =
                 new PrimitiveParameterResultProcessorFactory();
 
-        return executeSelect(paramIds, filters, keyIds, order, factory);
+        return readPropositions(paramIds, filters, keyIds, order, factory);
     }
 
     @Override
@@ -435,7 +447,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         EventResultProcessorFactory factory =
                 new EventResultProcessorFactory();
 
-        return executeSelect(eventIds, filters, keyIds, order, factory);
+        return readPropositions(eventIds, filters, keyIds, order, factory);
     }
 
     private final String generateSelect(EntitySpec entitySpec,
@@ -1064,43 +1076,49 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 } else {
                     for (Filter filter : filtersCopy) {
                         if (filter instanceof PositionFilter) {
-                            PositionFilter pdsc2 =
-                                    (PositionFilter) filter;
+                            Set<String> entitySpecPropIds =
+                                    org.arp.javautil.arrays.Arrays.asSet(
+                                    entitySpec.getPropositionIds());
+                            if (Collections.containsAny(entitySpecPropIds,
+                                    filter.getPropositionIds())) {
+                                PositionFilter pdsc2 =
+                                        (PositionFilter) filter;
 
-                            boolean outputStart =
-                                    pdsc2.getMinimumStart() != null
-                                    && pdsc2.getStartSide() == Side.FINISH;
+                                boolean outputStart =
+                                        pdsc2.getMinimumStart() != null
+                                        && pdsc2.getStartSide() == Side.FINISH;
 
-                            boolean outputFinish =
-                                    pdsc2.getMaximumFinish() != null
-                                    && pdsc2.getFinishSide() == Side.FINISH;
+                                boolean outputFinish =
+                                        pdsc2.getMaximumFinish() != null
+                                        && pdsc2.getFinishSide() == Side.FINISH;
 
-                            if (outputStart) {
-                                if (wherePart.length() > 0) {
-                                    wherePart.append(" and ");
+                                if (outputStart) {
+                                    if (wherePart.length() > 0) {
+                                        wherePart.append(" and ");
+                                    }
+
+                                    appendColumnRef(wherePart,
+                                            referenceIndices, finishTimeSpec);
+                                    wherePart.append(" >= {ts '");
+                                    wherePart.append(
+                                            AbsoluteTimeGranularity.toSQLString(
+                                            pdsc2.getMinimumStart()));
+                                    wherePart.append("'}");
                                 }
 
-                                appendColumnRef(wherePart,
-                                        referenceIndices, finishTimeSpec);
-                                wherePart.append(" >= {ts '");
-                                wherePart.append(
-                                        AbsoluteTimeGranularity.toSQLString(
-                                        pdsc2.getMinimumStart()));
-                                wherePart.append("'}");
-                            }
+                                if (outputFinish) {
+                                    if (wherePart.length() > 0) {
+                                        wherePart.append(" and ");
+                                    }
 
-                            if (outputFinish) {
-                                if (wherePart.length() > 0) {
-                                    wherePart.append(" and ");
+                                    appendColumnRef(wherePart,
+                                            referenceIndices, finishTimeSpec);
+                                    wherePart.append(" <= {ts '");
+                                    wherePart.append(
+                                            AbsoluteTimeGranularity.toSQLString(
+                                            pdsc2.getMaximumFinish()));
+                                    wherePart.append("'}");
                                 }
-
-                                appendColumnRef(wherePart,
-                                        referenceIndices, finishTimeSpec);
-                                wherePart.append(" <= {ts '");
-                                wherePart.append(
-                                        AbsoluteTimeGranularity.toSQLString(
-                                        pdsc2.getMaximumFinish()));
-                                wherePart.append("'}");
                             }
                         }
                     }
@@ -1127,41 +1145,47 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                             itr.hasNext();) {
                         Filter filter = itr.next();
                         if (filter instanceof PositionFilter) {
-                            PositionFilter pdsc2 = (PositionFilter) filter;
+                            Set<String> entitySpecPropIds =
+                                    org.arp.javautil.arrays.Arrays.asSet(
+                                    entitySpec.getPropositionIds());
+                            if (Collections.containsAny(entitySpecPropIds,
+                                    filter.getPropositionIds())) {
+                                PositionFilter pdsc2 = (PositionFilter) filter;
 
-                            boolean outputStart =
-                                    pdsc2.getMinimumStart() != null
-                                    && (pdsc2.getStartSide() == Side.START
-                                    || entitySpec.getFinishTimeSpec() == null);
-                            boolean outputFinish =
-                                    pdsc2.getMaximumFinish() != null
-                                    && (pdsc2.getFinishSide() == Side.START
-                                    || entitySpec.getFinishTimeSpec() == null);
+                                boolean outputStart =
+                                        pdsc2.getMinimumStart() != null
+                                        && (pdsc2.getStartSide() == Side.START
+                                        || entitySpec.getFinishTimeSpec() == null);
+                                boolean outputFinish =
+                                        pdsc2.getMaximumFinish() != null
+                                        && (pdsc2.getFinishSide() == Side.START
+                                        || entitySpec.getFinishTimeSpec() == null);
 
-                            if (outputStart) {
-                                if (wherePart.length() > 0) {
-                                    wherePart.append(" and ");
+                                if (outputStart) {
+                                    if (wherePart.length() > 0) {
+                                        wherePart.append(" and ");
+                                    }
+                                    appendColumnRef(wherePart,
+                                            referenceIndices, startTimeSpec);
+                                    wherePart.append(" >= {ts '");
+                                    wherePart.append(
+                                            AbsoluteTimeGranularity.toSQLString(
+                                            pdsc2.getMinimumStart()));
+                                    wherePart.append("'}");
                                 }
-                                appendColumnRef(wherePart,
-                                        referenceIndices, startTimeSpec);
-                                wherePart.append(" >= {ts '");
-                                wherePart.append(
-                                        AbsoluteTimeGranularity.toSQLString(
-                                        pdsc2.getMinimumStart()));
-                                wherePart.append("'}");
-                            }
-                            if (outputFinish) {
-                                if (wherePart.length() > 0) {
-                                    wherePart.append(" and ");
+                                if (outputFinish) {
+                                    if (wherePart.length() > 0) {
+                                        wherePart.append(" and ");
+                                    }
+                                    appendColumnRef(wherePart,
+                                            referenceIndices,
+                                            startTimeSpec);
+                                    wherePart.append(" <= {ts '");
+                                    wherePart.append(
+                                            AbsoluteTimeGranularity.toSQLString(
+                                            pdsc2.getMaximumFinish()));
+                                    wherePart.append("'}");
                                 }
-                                appendColumnRef(wherePart,
-                                        referenceIndices,
-                                        startTimeSpec);
-                                wherePart.append(" <= {ts '");
-                                wherePart.append(
-                                        AbsoluteTimeGranularity.toSQLString(
-                                        pdsc2.getMaximumFinish()));
-                                wherePart.append("'}");
                             }
                         }
                     }

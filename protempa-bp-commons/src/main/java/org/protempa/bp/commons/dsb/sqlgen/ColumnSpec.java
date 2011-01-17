@@ -14,9 +14,11 @@ import org.protempa.ProtempaUtil;
  * @author Andrew Post
  */
 public final class ColumnSpec implements Serializable {
+
     private static final long serialVersionUID = 2254623617064935923L;
 
     public static enum ColumnOp {
+
         UPPER
     }
 
@@ -32,7 +34,6 @@ public final class ColumnSpec implements Serializable {
         LESS_THAN("<"),
         LESS_THAN_OR_EQUAL_TO("<="),
         NOT_EQUAL_TO("<>");
-        
         private String sqlOperator;
 
         private Constraint(String sqlOperator) {
@@ -65,11 +66,13 @@ public final class ColumnSpec implements Serializable {
          * @param sqlCode a code {@link Object} in a relational database.
          */
         public PropositionIdToSqlCode(String propositionId, String sqlCode) {
-            if (propositionId == null)
+            if (propositionId == null) {
                 throw new IllegalArgumentException(
                         "propositionId cannot be null");
-            if (sqlCode == null)
+            }
+            if (sqlCode == null) {
                 throw new IllegalArgumentException("sqlCode cannot be null");
+            }
             this.propositionId = propositionId;
             this.sqlCode = sqlCode;
         }
@@ -136,7 +139,6 @@ public final class ColumnSpec implements Serializable {
             return ToStringBuilder.reflectionToString(this);
         }
     }
-    
     private final String schema;
     private final String table;
     private final String column;
@@ -269,12 +271,14 @@ public final class ColumnSpec implements Serializable {
         this.column = column;
         this.joinSpec = joinSpec;
         this.constraint = constraint;
-        if (this.constraint != null && this.column == null)
+        if (this.constraint != null && this.column == null) {
             throw new IllegalArgumentException(
-                "A column must be specified if a constraint is specified.");
-        if (this.constraint != null && propIdToSqlCodes == null)
-          throw new IllegalArgumentException(
-           "propIdToSqlCodes must be specified if a constraint is specified.");
+                    "A column must be specified if a constraint is specified.");
+        }
+        if (this.constraint != null && propIdToSqlCodes == null) {
+            throw new IllegalArgumentException(
+                    "propIdToSqlCodes must be specified if a constraint is specified.");
+        }
         if (propIdToSqlCodes != null) {
             this.propIdToSqlCodes = propIdToSqlCodes.clone();
             ProtempaUtil.checkArrayForNullElement(this.propIdToSqlCodes,
@@ -341,7 +345,7 @@ public final class ColumnSpec implements Serializable {
      * @return a {@link PropositionIdToSqlCode[]}.
      */
     public PropositionIdToSqlCode[] getPropositionIdToSqlCodes() {
-        return this.propIdToSqlCodes;
+        return this.propIdToSqlCodes.clone();
     }
 
     public ColumnOp getColumnOp() {
@@ -376,9 +380,9 @@ public final class ColumnSpec implements Serializable {
             String joinSpecToKey = this.joinSpec.getToKey();
             String otherJoinSpecFromKey = otherJoinSpec.getFromKey();
             String otherJoinSpecToKey = otherJoinSpec.getToKey();
-            return joinSpecFromKey.equals(otherJoinSpecFromKey) &&
-                    joinSpecToKey.equals(otherJoinSpecToKey) &&
-                    this.joinSpec.getNextColumnSpec().isSameSchemaAndTable(
+            return joinSpecFromKey.equals(otherJoinSpecFromKey)
+                    && joinSpecToKey.equals(otherJoinSpecToKey)
+                    && this.joinSpec.getNextColumnSpec().isSameSchemaAndTable(
                     otherJoinSpec.getNextColumnSpec());
         }
     }

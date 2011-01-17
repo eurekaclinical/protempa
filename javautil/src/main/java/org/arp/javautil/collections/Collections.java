@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Extra utilities for collections.
@@ -45,5 +46,37 @@ public class Collections {
             Collection<? extends V> values) {
         for (V value : values)
             putList(map, key, value);
+    }
+
+    /**
+     * Checks if any of a collection's elements are also in the provided set.
+     *
+     * @param aSet a {@link Set}.
+     * @param aColl a {@link Collection}.
+     * @return <code>true</code> or <code>false</code>.
+     */
+    public static <K> boolean containsAny(Set<K> aSet, Collection<K> aColl) {
+        for (K obj : aColl) {
+            if (aSet.contains(obj)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks whether any of an arrys's elements are also in the provided set.
+     *
+     * @param aSet a {@link Set}.
+     * @param arr an array.
+     * @return <code>true</code> or <code>false</code>.
+     */
+    public static <K> boolean containsAny(Set<K> aSet, K[] arr) {
+        for (K obj : arr) {
+            if (aSet.contains(obj)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
