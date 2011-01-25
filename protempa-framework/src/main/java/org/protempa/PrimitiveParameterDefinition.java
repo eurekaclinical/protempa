@@ -1,5 +1,7 @@
 package org.protempa;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.proposition.value.ValueFactory;
@@ -121,7 +123,17 @@ public final class PrimitiveParameterDefinition extends
 
     @Override
     protected void recalculateDirectChildren() {
-        // Do nothing.
+        String[] old = this.directChildren;
+        Set<String> c = new HashSet<String>();
+        String[] inverseIsA = getInverseIsA();
+        if (inverseIsA != null) {
+            for (String propId : inverseIsA) {
+                c.add(propId);
+            }
+        }
+        this.directChildren = c.toArray(new String[c.size()]);
+        this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+                this.directChildren);
     }
 
     @Override

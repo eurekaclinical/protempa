@@ -172,11 +172,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             SQLGenResultProcessor resultProcessor)
             throws DataSourceReadException {
         if (Boolean.getBoolean(SYSTEM_PROPERTY_SKIP_EXECUTION)) {
-            logger.log(Level.INFO, 
+            logger.log(Level.INFO,
                     "Data source backend {0} is skipping query for {1}",
                     new Object[]{backendNameForMessages, entitySpecName});
         } else {
-            logger.log(Level.FINE, 
+            logger.log(Level.FINE,
                     "Data source backend {0} is executing query for {1}",
                     new Object[]{backendNameForMessages, entitySpecName});
             try {
@@ -184,17 +184,24 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                         resultProcessor);
             } catch (SQLException ex) {
                 throw new DataSourceReadException(
-                        "Error executing query in data source backend " +
-                        backendNameForMessages + " for " + entitySpecName, ex);
+                        "Error executing query in data source backend "
+                        + backendNameForMessages + " for " + entitySpecName, ex);
             }
-            logger.log(Level.FINE, 
+            logger.log(Level.FINE,
                     "Query for {0} in data source backend {1} is complete",
                     new Object[]{entitySpecName, backendNameForMessages});
         }
     }
 
-    private <P extends Proposition> Map<String, List<P>> 
-            readPropositions(Set<String> propIds, Filter filters, 
+    private Object[] extractSqlCodes(PropositionIdToSqlCode[] filteredConstraintValues) {
+        Object[] sqlCodes = new Object[filteredConstraintValues.length];
+        for (int i = 0; i < sqlCodes.length; i++) {
+            sqlCodes[i] = filteredConstraintValues[i].getSqlCode();
+        }
+        return sqlCodes;
+    }
+
+    private <P extends Proposition> Map<String, List<P>> readPropositions(Set<String> propIds, Filter filters,
             Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessorFactory<P> factory)
             throws DataSourceReadException {
@@ -306,7 +313,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     "Results of query for {0} in data source backend {1} "
                     + "have been processed",
                     new Object[]{entitySpec.getName(),
-                    backendNameForMessages()});
+                        backendNameForMessages()});
         }
         return results;
     }
@@ -367,9 +374,9 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 filtersCopy, entitySpecsCopy, keyIds, order, resultProcessor);
 
         logger.log(Level.FINE,
-            "Data source backend {0} generated the following query for {1}: {2}",
+                "Data source backend {0} generated the following query for {1}: {2}",
                 new Object[]{backendNameForMessages, entitySpecName, query});
-        
+
         executeSelect(logger, backendNameForMessages, entitySpecName, query,
                 resultProcessor);
     }
@@ -766,7 +773,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
      */
     private void processConstraints(ColumnSpec columnSpec, Set<String> propIds,
             StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
-            boolean selectPartHasCaseStmt, StringBuilder selectPart) {
+            StringBuilder selectPart) {
         ColumnSpec.Constraint constraint = columnSpec.getConstraint();
         ColumnSpec.PropositionIdToSqlCode[] propIdToSqlCodes =
                 columnSpec.getPropositionIdToSqlCodes();
@@ -782,10 +789,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 }
                 wherePart.append('(');
             }
-            Object[] sqlCodes = new Object[filteredConstraintValues.length];
-            for (int i = 0; i < sqlCodes.length; i++) {
-                sqlCodes[i] = filteredConstraintValues[i].getSqlCode();
-            }
+            Object[] sqlCodes = extractSqlCodes(filteredConstraintValues);
+
             switch (constraint) {
                 case EQUAL_TO:
                     if (wherePart != null) {
@@ -831,10 +836,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     }
                     break;
                 case LIKE:
-                    if (!selectPartHasCaseStmt) {
-                        selectPart.append(", case ");
-                        selectPartHasCaseStmt = true;
-                    }
+                    generateCaseClause(selectPart, sqlCodes, referenceIndices,
+                            columnSpec, filteredConstraintValues);
                     if (wherePart != null && sqlCodes.length > 1) {
                         wherePart.append('(');
                     }
@@ -848,25 +851,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                 wherePart.append(" or ");
                             }
                         }
-                        selectPart.append("when ");
-                        appendColumnRef(selectPart, referenceIndices,
-                                columnSpec);
-                        selectPart.append(" like ");
-                        appendValue(sqlCodes[k], selectPart);
-                        selectPart.append(" then ");
-                        appendValue(
-                                filteredConstraintValues[k].getPropositionId(),
-                                selectPart);
-                        if (k < sqlCodes.length - 1) {
-                            selectPart.append(" ");
-                        }
                     }
                     if (wherePart != null && sqlCodes.length > 1) {
                         wherePart.append(')');
                     }
-                    if (selectPartHasCaseStmt) {
-                        selectPart.append(" end ");
-                    }
+
                     break;
                 default:
                     throw new AssertionError("should not happen");
@@ -876,6 +865,28 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             }
         }
 
+    }
+
+    private void generateCaseClause(StringBuilder selectPart,
+            Object[] sqlCodes, Map<ColumnSpec, Integer> referenceIndices,
+            ColumnSpec columnSpec,
+            PropositionIdToSqlCode[] filteredConstraintValues) {
+        selectPart.append(", case ");
+        for (int k = 0; k < sqlCodes.length; k++) {
+            selectPart.append("when ");
+            appendColumnRef(selectPart, referenceIndices,
+                    columnSpec);
+            selectPart.append(" like ");
+            appendValue(sqlCodes[k], selectPart);
+            selectPart.append(" then ");
+            appendValue(
+                    filteredConstraintValues[k].getPropositionId(),
+                    selectPart);
+            if (k < sqlCodes.length - 1) {
+                selectPart.append(" ");
+            }
+        }
+        selectPart.append(" end ");
     }
 
     private void processAdditionalConstraints(ColumnSpec columnSpec,
@@ -931,13 +942,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 entitySpec.getName());
         SQLGenUtil.logger().log(Level.FINEST,
                 "Details of entity spec {0}", entitySpec);
-        boolean selectPartHasCaseStmt = false;
         ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
         for (ColumnSpec constraintSpec : constraintSpecs) {
             i = processConstraintSpecForWhereClause(null, constraintSpec,
                     i, wherePart,
-                    selectPart, referenceIndices, selectPartHasCaseStmt,
-                    resultProcessor);
+                    selectPart, referenceIndices, resultProcessor);
         }
         for (Iterator<Filter> itr = filtersCopy.iterator(); itr.hasNext();) {
             Filter filter = itr.next();
@@ -968,12 +977,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     && propIds.containsAll(Arrays.asList(
                     entitySpec.getPropositionIds()))) {
                 i = processConstraintSpecForWhereClause(propIds, codeSpec, i,
-                        null, selectPart, referenceIndices,
-                        selectPartHasCaseStmt, resultProcessor);
+                        null, selectPart, referenceIndices, resultProcessor);
             } else {
                 i = processConstraintSpecForWhereClause(propIds, codeSpec, i,
                         wherePart, selectPart, referenceIndices,
-                        selectPartHasCaseStmt, resultProcessor);
+                        resultProcessor);
             }
         }
 
@@ -1016,7 +1024,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             ColumnSpec columnSpec, int i, StringBuilder wherePart,
             StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
-            boolean selectPartHasCaseStmt,
             SQLGenResultProcessor resultProcessor) {
         if (columnSpec != null) {
             while (columnSpec.getJoin() != null) {
@@ -1027,7 +1034,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             resultProcessor.setCasePresent(columnSpec.getConstraint()
                     == ColumnSpec.Constraint.LIKE);
             processConstraints(columnSpec, propIds, wherePart,
-                    referenceIndices, selectPartHasCaseStmt, selectPart);
+                    referenceIndices, selectPart);
         }
         return i;
     }

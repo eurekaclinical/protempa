@@ -24,10 +24,10 @@ import org.protempa.proposition.value.ValueType;
 public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
 
     public enum AggregationType {
+
         MAX,
         MIN
     }
-
     private final Link[] links;
     private final String columnNamePrefixOverride;
     private AggregationType aggregationType;
@@ -71,19 +71,21 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             if (prop instanceof PrimitiveParameter) {
                 PrimitiveParameter pp = (PrimitiveParameter) prop;
                 Value val = pp.getValue();
-                if (!ValueType.NUMERICALVALUE.isInstance(val)) {
-                    throw new IllegalStateException("only numerical values allowed");
-                } else {
-                    NumericalValue nv = (NumericalValue) val;
-                    if (value == null) {
-                        value = nv;
-                    } else if (aggregationType == AggregationType.MAX) {
-                        if (nv.compare(value).is(ValueComparator.GREATER_THAN)) {
-                            value = nv;
-                        }
+                if (val != null) {
+                    if (!ValueType.NUMERICALVALUE.isInstance(val)) {
+                        throw new IllegalStateException("only numerical values allowed");
                     } else {
-                        if (nv.compare(value).is(ValueComparator.LESS_THAN)) {
+                        NumericalValue nv = (NumericalValue) val;
+                        if (value == null) {
                             value = nv;
+                        } else if (aggregationType == AggregationType.MAX) {
+                            if (nv.compare(value).is(ValueComparator.GREATER_THAN)) {
+                                value = nv;
+                            }
+                        } else {
+                            if (nv.compare(value).is(ValueComparator.LESS_THAN)) {
+                                value = nv;
+                            }
                         }
                     }
                 }
@@ -91,18 +93,22 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                 throw new IllegalStateException("only primitive parameters allowed");
             }
         }
-        return new String[] {value.getFormatted()};
+        if (value != null) {
+            return new String[]{value.getFormatted()};
+        } else {
+            return new String[]{null};
+        }
     }
 
     @Override
     public String[] columnNames(KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
-        String headerString = 
+        String headerString =
                 this.columnNamePrefixOverride != null
                 ? this.columnNamePrefixOverride
-                : generateLinksHeaderString(this.links) + 
-                (this.aggregationType == AggregationType.MIN ? "_min"
+                : generateLinksHeaderString(this.links)
+                + (this.aggregationType == AggregationType.MIN ? "_min"
                 : "_max");
-        return new String[] {headerString};
+        return new String[]{headerString};
     }
 }

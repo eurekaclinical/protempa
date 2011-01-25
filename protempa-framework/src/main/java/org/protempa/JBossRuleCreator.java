@@ -22,6 +22,7 @@ import org.drools.spi.PredicateExpression;
 import org.drools.spi.Tuple;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
+import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalProposition;
@@ -46,6 +47,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             Event.class);
     private final ClassObjectType CONSTANT_OBJECT_TYPE = new ClassObjectType(
             Constant.class);
+    private final ClassObjectType PRIMITIVE_PARAMETER_OBJECT_TYPE =
+            new ClassObjectType(PrimitiveParameter.class);
     private static final ClassObjectType ARRAY_LIST_OT = new ClassObjectType(
             ArrayList.class);
     private static final ClassObjectType TEMP_PROP_OT = new ClassObjectType(
@@ -263,6 +266,16 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     public void visit(ConstantDefinition def) {
         try {
             addInverseIsARule(def, CONSTANT_OBJECT_TYPE);
+        } catch (InvalidRuleException e) {
+            throw new AssertionError(e.getClass().getName() + ": "
+                    + e.getMessage());
+        }
+    }
+
+    @Override
+    public void visit(PrimitiveParameterDefinition def) {
+        try {
+            addInverseIsARule(def, PRIMITIVE_PARAMETER_OBJECT_TYPE);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
