@@ -1,12 +1,9 @@
 package org.protempa;
 
-import java.util.List;
-import java.util.Map;
 
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
-import org.protempa.proposition.Proposition;
 import org.protempa.proposition.PropositionVisitable;
 
 /**
@@ -20,11 +17,11 @@ class InverseIsAConsequence implements Consequence {
 
     private static final long serialVersionUID = 6157152982863451759L;
     private final String eventId;
-    private final Map<Proposition, List<Proposition>> derivations;
+    private final DerivationsBuilder listener;
 
-    InverseIsAConsequence(String eventId, Map<Proposition,
-            List<Proposition>> derivations) {
-        this.derivations = derivations;
+    InverseIsAConsequence(String eventId, 
+            DerivationsBuilder listener) {
+        this.listener = listener;
         this.eventId = eventId;
     }
 
@@ -36,6 +33,6 @@ class InverseIsAConsequence implements Consequence {
                 (PropositionVisitable) workingMemory.getObject(
                 knowledgeHelper.getTuple().get(0));
         o.accept(new PropositionCopier(this.eventId, workingMemory,
-                this.derivations));
+                this.listener));
     }
 }

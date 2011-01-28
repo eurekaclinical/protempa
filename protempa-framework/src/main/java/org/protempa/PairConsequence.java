@@ -2,11 +2,9 @@ package org.protempa;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.arp.javautil.collections.Collections;
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
@@ -23,12 +21,11 @@ public final class PairConsequence implements Consequence {
     private static final long serialVersionUID = -3641374073069516895L;
 
     private final PairDefinition def;
-    private final Map<Proposition, List<Proposition>> derivations;
+    private final DerivationsBuilder derivationsBuilder;
 
-    PairConsequence(PairDefinition def,
-            Map<Proposition, List<Proposition>> derivations) {
+    PairConsequence(PairDefinition def, DerivationsBuilder derivationsBuilder) {
         assert def != null : "def cannot be null";
-        this.derivations = derivations;
+        this.derivationsBuilder = derivationsBuilder;
         this.def = def;
     }
 
@@ -66,13 +63,12 @@ public final class PairConsequence implements Consequence {
                             new TemporalExtendedPropositionDefinition[]{
                                 def.getLeftHandProposition(),
                                 def.getRightHandProposition()});
-                    for (Proposition proposition : segment) {
-                        Collections.putList(this.derivations, result,
-                                proposition);
-                        Collections.putList(this.derivations,
-                                proposition, result);
-                    }
+                    
                     knowledgeHelper.getWorkingMemory().insert(result);
+                    for (Proposition proposition : segment) {
+                        derivationsBuilder.propositionAsserted(proposition, result);
+                    }
+                    
                     logger.log(Level.FINER, "Asserted derived proposition{0}", result);
                 }
             }

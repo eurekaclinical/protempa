@@ -53,16 +53,17 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             ArrayList.class);
     private static final ClassObjectType TEMP_PROP_OT = new ClassObjectType(
             TemporalProposition.class);
-    private final Map<Proposition, List<Proposition>> derivations;
+    private final DerivationsBuilder derivationsBuilder;
 
     JBossRuleCreator(Map<LowLevelAbstractionDefinition, Algorithm> algorithms,
             KnowledgeSource knowledgeSource,
-            Map<Proposition, List<Proposition>> derivations) {
+                DerivationsBuilder derivationsBuilder) {
         this.algorithms = algorithms;
         this.knowledgeSource = knowledgeSource;
         this.rules = new ArrayList<Rule>();
-        this.ruleToAbstractionDefinition = new HashMap<Rule, AbstractionDefinition>();
-        this.derivations = derivations;
+        this.ruleToAbstractionDefinition =
+                new HashMap<Rule, AbstractionDefinition>();
+        this.derivationsBuilder = derivationsBuilder;
     }
 
     /**
@@ -93,7 +94,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             Algorithm algo = this.algorithms.get(def);
 
             rule.setConsequence(new LowLevelAbstractionConsequence(def, algo,
-                    this.derivations));
+                    this.derivationsBuilder));
             rule.setSalience(new SalienceInteger(1));
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
@@ -179,7 +180,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             rule.addPattern(new EvalCondition(
                     new HighLevelAbstractionCondition(def, epds), null));
             rule.setConsequence(new HighLevelAbstractionConsequence(def, epds,
-                    this.derivations));
+                    this.derivationsBuilder));
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
             AbstractionCombiner.toRules(knowledgeSource, def, rules);
@@ -206,7 +207,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             resultP.addConstraint(new PredicateConstraint(
                     new CollectionSizeExpression(1)));
             rule.addPattern(resultP);
-            rule.setConsequence(new SliceConsequence(def, this.derivations));
+            rule.setConsequence(new SliceConsequence(def, this.derivationsBuilder));
             rule.setSalience(new SalienceInteger(-2));
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
@@ -241,7 +242,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             resultP.addConstraint(new PredicateConstraint(
                     new CollectionSizeExpression(2)));
             rule.addPattern(resultP);
-            rule.setConsequence(new PairConsequence(def, this.derivations));
+            rule.setConsequence(new PairConsequence(def, this.derivationsBuilder));
             rule.setSalience(new SalienceInteger(-2));
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
@@ -305,7 +306,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             Rule rule = new Rule("INVERSEISA_" + propId);
             rule.addPattern(p);
             rule.setConsequence(new InverseIsAConsequence(propId,
-                    this.derivations));
+                    this.derivationsBuilder));
             rule.setSalience(new SalienceInteger(1));
             rules.add(rule);
         }

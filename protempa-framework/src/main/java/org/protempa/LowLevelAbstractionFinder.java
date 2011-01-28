@@ -1,9 +1,6 @@
 package org.protempa;
 
-import java.util.List;
-import java.util.Map;
 
-import org.arp.javautil.collections.Collections;
 import org.protempa.proposition.Interval;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
@@ -265,9 +262,9 @@ public final class LowLevelAbstractionFinder {
         return nextSeg;
     }
 
-    public static void process(Sequence<PrimitiveParameter> seq,
+    static void process(Sequence<PrimitiveParameter> seq,
             LowLevelAbstractionDefinition def, Algorithm algorithm,
-            ObjectAsserter objAsserter, Map<Proposition, List<Proposition>> derivations)
+            ObjectAsserter objAsserter, DerivationsBuilder derivationsBuilder)
             throws AlgorithmInitializationException,
             AlgorithmProcessingException {
         if (def == null || seq == null) {
@@ -293,7 +290,7 @@ public final class LowLevelAbstractionFinder {
                                 && foundValue.equals(prevFoundValue)
                                 && (HTI.execute(def, lastSeg, seg)
                                 || gf.execute(lastSeg, seg))) {
-                            lastSeg.resetState(seq, 
+                            lastSeg.resetState(seq,
                                     Math.min(lastSeg.getFirstIndex(),
                                     seg.getFirstIndex()),
                                     Math.max(lastSeg.getLastIndex(),
@@ -301,32 +298,33 @@ public final class LowLevelAbstractionFinder {
                         } else {
                             if (lastSeg != null) {
                                 Proposition proposition = AbstractParameterFactory.getFromAbstraction(id,
-                                    lastSeg, null, prevFoundValue.getValue(),
-                                    null, null);
-                                for (Proposition prop : lastSeg) {
-                                    Collections.putList(derivations, proposition, prop);
-                                    Collections.putList(derivations, prop, proposition);
-                                }
+                                        lastSeg, null, prevFoundValue.getValue(),
+                                        null, null);
+                                
                                 objAsserter.assertObject(proposition);
+                                for (Proposition prop : lastSeg) {
+                                    derivationsBuilder.propositionAsserted(prop, proposition);
+                                }
                             }
                             lastSeg = new Segment<PrimitiveParameter>(seg);
                         }
                         prevFoundValue = foundValue;
                     } while ((nextSeg = nextSegmentAfterMatch(def, seg,
-                        algorithm, minPatternLength, maxPatternLength)) != null
-                        && (foundValue =
-                        def.satisfiedBy(nextSeg, algorithm)) != null);
+                            algorithm, minPatternLength, maxPatternLength)) != null
+                            && (foundValue =
+                            def.satisfiedBy(nextSeg, algorithm)) != null);
                 }
             } while (advanceRow(def, seg, lastSeg, algorithm, minPatternLength,
                     maxPatternLength) != null);
             if (lastSeg != null) {
                 Proposition proposition = AbstractParameterFactory.getFromAbstraction(id,
                         lastSeg, null, prevFoundValue.getValue(), null, null);
-                for (Proposition prop : lastSeg) {
-                    Collections.putList(derivations, proposition, prop);
-                    Collections.putList(derivations, prop, proposition);
-                }
+                
                 objAsserter.assertObject(proposition);
+                for (Proposition prop : lastSeg) {
+                    derivationsBuilder.propositionAsserted(prop, proposition);
+                }
+                
                 lastSeg = null;
             }
         }
