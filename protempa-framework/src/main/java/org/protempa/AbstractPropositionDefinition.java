@@ -62,7 +62,7 @@ public abstract class AbstractPropositionDefinition implements
             throw new IllegalArgumentException(
                     "A knowledge base must be specified");
         }
-        this.id = setId0(kb, id);
+        this.id = setId0(kb, id).intern();
         this.directChildren = EMPTY_STRING_ARR;
         this.inverseIsA = EMPTY_STRING_ARR;
         this.displayName = "";

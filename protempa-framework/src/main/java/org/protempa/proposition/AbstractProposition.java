@@ -43,13 +43,13 @@ public abstract class AbstractProposition implements Proposition {
         if (id == null) {
             this.id = "";
         } else {
-            this.id = id;
+            this.id = id.intern();
         }
         this.changes = new PropertyChangeSupport(this);
         this.properties = new HashMap<String, Value>();
-        this.references = new HashMap<String,List<UniqueIdentifier>>();
+        this.references = new HashMap<String, List<UniqueIdentifier>>();
     }
-    
+
     @Override
     public String getId() {
         return this.id;
@@ -59,7 +59,7 @@ public abstract class AbstractProposition implements Proposition {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
         }
-        this.properties.put(name, value);
+        this.properties.put(name.intern(), value);
     }
 
     @Override
@@ -68,7 +68,7 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     @Override
-    public final Set<String> getPropertyNames () {
+    public final Set<String> getPropertyNames() {
         return this.properties.keySet();
     }
 
@@ -91,18 +91,23 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     public final void setReferences(String name, List<UniqueIdentifier> refs) {
-        if (refs != null)
+        if (name == null) {
+            throw new IllegalArgumentException("name cannot be null");
+        }
+        if (refs != null) {
             refs = new ArrayList<UniqueIdentifier>(refs);
-        this.references.put(name, refs);
+        }
+        this.references.put(name.intern(), refs);
     }
 
     @Override
     public final List<UniqueIdentifier> getReferences(String name) {
         List<UniqueIdentifier> result = this.references.get(name);
-        if (result != null)
+        if (result != null) {
             return Collections.unmodifiableList(result);
-        else
+        } else {
             return Collections.emptyList();
+        }
     }
 
     @Override
@@ -128,7 +133,7 @@ public abstract class AbstractProposition implements Proposition {
         }
         return this.hashCode;
     }
-    
+
     @Override
     public boolean isEqual(Object other) {
         if (other == this) {
@@ -146,16 +151,9 @@ public abstract class AbstractProposition implements Proposition {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("id", this.id)
-                .append("properties", this.properties)
-                .append("references", this.references)
-                .append("uniqueIdentifier", this.key)
-                .append("dataSourceType", this.dataSourceType)
-                .toString();
+        return new ToStringBuilder(this).append("id", this.id).append("properties", this.properties).append("references", this.references).append("uniqueIdentifier", this.key).append("dataSourceType", this.dataSourceType).toString();
 
     }
-    
     // The following code implements hashCode() and equals() using unique 
     // identifiers, as well as the datasource backend identifiers.
     /*
@@ -166,40 +164,40 @@ public abstract class AbstractProposition implements Proposition {
     /*
     @Override
     public int hashCode() {
-        if (this.hashCode == 0) {
-            if (this.key == null
-                    || this.datasourceBackendId == null) {
-                this.hashCode = super.hashCode();
-            } else {
-                this.hashCode = 17;
-                this.hashCode += 37 * this.key.hashCode();
-                this.hashCode += 37 * this.datasourceBackendId.hashCode();
-            }
-        }
-        return this.hashCode;
+    if (this.hashCode == 0) {
+    if (this.key == null
+    || this.datasourceBackendId == null) {
+    this.hashCode = super.hashCode();
+    } else {
+    this.hashCode = 17;
+    this.hashCode += 37 * this.key.hashCode();
+    this.hashCode += 37 * this.datasourceBackendId.hashCode();
+    }
+    }
+    return this.hashCode;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        } else {
-            if (!(obj instanceof Proposition)) {
-                return false;
-            }
-            Proposition prop = (Proposition) obj;
-            if (prop.getUniqueIdentifier() == null
-                    || this.key == null
-                    || prop.getDataSourceBackendId() == null
-                    || this.datasourceBackendId == null) {
-                return false;
-            } else {
-                return prop.getUniqueIdentifier().equals(
-                        this.key)
-                        && prop.getDataSourceBackendId().equals(
-                                this.datasourceBackendId);
-            }
-        }
+    if (this == obj) {
+    return true;
+    } else {
+    if (!(obj instanceof Proposition)) {
+    return false;
     }
-    */
+    Proposition prop = (Proposition) obj;
+    if (prop.getUniqueIdentifier() == null
+    || this.key == null
+    || prop.getDataSourceBackendId() == null
+    || this.datasourceBackendId == null) {
+    return false;
+    } else {
+    return prop.getUniqueIdentifier().equals(
+    this.key)
+    && prop.getDataSourceBackendId().equals(
+    this.datasourceBackendId);
+    }
+    }
+    }
+     */
 }

@@ -31,8 +31,9 @@ public class MinLengthKaplanMeyerTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		this.propositions = new ArrayList<Proposition>();
-		this.dbDataSourceType = new DatabaseDataSourceType("MockTestDatabase");
-		this.derivedDataSourceType = new DerivedDataSourceType();
+		this.dbDataSourceType = 
+                        DatabaseDataSourceType.getInstance("MockTestDatabase");
+		this.derivedDataSourceType = DerivedDataSourceType.getInstance();
 		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
 
 		TemporalPrimitiveParameterFactory tppf = new TemporalPrimitiveParameterFactory(

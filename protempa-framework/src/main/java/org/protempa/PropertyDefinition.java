@@ -44,7 +44,7 @@ public final class PropertyDefinition implements Serializable {
             throw new IllegalArgumentException("name cannot be null");
         if (valueType == null)
             throw new IllegalArgumentException("valueType cannot be null");
-        this.name = name;
+        this.name = name.intern();
         this.valueType = valueType;
         this.valueSetId = valueSetId;
     }

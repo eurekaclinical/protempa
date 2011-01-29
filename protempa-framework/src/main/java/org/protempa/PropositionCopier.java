@@ -35,8 +35,9 @@ class PropositionCopier extends AbstractPropositionVisitor {
     @Override
     public void visit(AbstractParameter p) {
         AbstractParameter param = new AbstractParameter(propId);
-        param.setDataSourceType(new DerivedDataSourceType());
-        param.setUniqueIdentifier(new UniqueIdentifier(new DerivedSourceId(),
+        param.setDataSourceType(DerivedDataSourceType.getInstance());
+        param.setUniqueIdentifier(new UniqueIdentifier(
+                DerivedSourceId.getInstance(),
                 new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
         param.setInterval(p.getInterval());
         param.setValue(p.getValue());
@@ -49,8 +50,9 @@ class PropositionCopier extends AbstractPropositionVisitor {
     public void visit(Event event) {
         Event e = new Event(propId);
         e.setInterval(event.getInterval());
-        e.setDataSourceType(new DerivedDataSourceType());
-        e.setUniqueIdentifier(new UniqueIdentifier(new DerivedSourceId(),
+        e.setDataSourceType(DerivedDataSourceType.getInstance());
+        e.setUniqueIdentifier(new UniqueIdentifier(
+                DerivedSourceId.getInstance(),
                 new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
         this.workingMemory.insert(e);
         this.derivationsBuilder.propositionAsserted(event, e);
@@ -62,8 +64,9 @@ class PropositionCopier extends AbstractPropositionVisitor {
         PrimitiveParameter param = new PrimitiveParameter(propId);
         param.setInterval(primitiveParameter.getInterval());
         param.setValue(primitiveParameter.getValue());
-        param.setDataSourceType(new DerivedDataSourceType());
-        param.setUniqueIdentifier(new UniqueIdentifier(new DerivedSourceId(),
+        param.setDataSourceType(DerivedDataSourceType.getInstance());
+        param.setUniqueIdentifier(new UniqueIdentifier(
+                DerivedSourceId.getInstance(),
                 new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
         this.workingMemory.insert(param);
         this.derivationsBuilder.propositionAsserted(primitiveParameter, param);
@@ -73,8 +76,9 @@ class PropositionCopier extends AbstractPropositionVisitor {
     @Override
     public void visit(Constant constant) {
         Constant newConstant = new Constant(propId);
-        newConstant.setDataSourceType(new DerivedDataSourceType());
-        newConstant.setUniqueIdentifier(new UniqueIdentifier(new DerivedSourceId(),
+        newConstant.setDataSourceType(DerivedDataSourceType.getInstance());
+        newConstant.setUniqueIdentifier(new UniqueIdentifier(
+                DerivedSourceId.getInstance(),
                 new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
         this.workingMemory.insert(newConstant);
         this.derivationsBuilder.propositionAsserted(constant, newConstant);

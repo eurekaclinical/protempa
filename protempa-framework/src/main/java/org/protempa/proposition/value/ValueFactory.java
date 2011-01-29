@@ -2,7 +2,7 @@ package org.protempa.proposition.value;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 /**
@@ -34,7 +34,7 @@ public class ValueFactory implements Serializable {
     private static final ValueFactory[] VALUES = {VALUE, NOMINAL, BOOLEAN,
         INEQUALITY, NUMERICAL, ORDINAL, NUMBER, LIST};
     private static final Map<ValueType, ValueFactory> VALUE_TYPE_TO_VALUE_FACTORY =
-            new HashMap<ValueType, ValueFactory>();
+            new EnumMap<ValueType, ValueFactory>(ValueType.class);
 
     static {
         VALUE_TYPE_TO_VALUE_FACTORY.put(ValueType.VALUE, VALUE);

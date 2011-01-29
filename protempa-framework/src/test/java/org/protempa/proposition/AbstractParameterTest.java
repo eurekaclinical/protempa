@@ -19,7 +19,7 @@ public class AbstractParameterTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         p = new AbstractParameter("TEST");
-        p.setDataSourceType(new DerivedDataSourceType());
+        p.setDataSourceType(DerivedDataSourceType.getInstance());
         p.setInterval(intervalFactory.getInstance(0L,
                 RelativeHourGranularity.HOUR, 12L,
                 RelativeHourGranularity.HOUR));

@@ -45,8 +45,9 @@ public final class AbstractParameterFactory {
             List<TemporalProposition> tps, Value value, Offsets temporalOffset,
             TemporalExtendedPropositionDefinition[] epds) {
         AbstractParameter result = new AbstractParameter(propId);
-        result.setDataSourceType(new DerivedDataSourceType());
-        result.setUniqueIdentifier(new UniqueIdentifier(new DerivedSourceId(),
+        result.setDataSourceType(DerivedDataSourceType.getInstance());
+        result.setUniqueIdentifier(new UniqueIdentifier(
+                DerivedSourceId.getInstance(),
                 new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
 
         Long minStart = null;

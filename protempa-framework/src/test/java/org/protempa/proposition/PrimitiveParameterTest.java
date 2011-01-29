@@ -28,7 +28,7 @@ public class PrimitiveParameterTest extends TestCase {
         cal.set(2007, Calendar.MARCH, 1, 15, 11);
 
         p = new PrimitiveParameter("TEST");
-        p.setDataSourceType(new DatabaseDataSourceType("TEST"));
+        p.setDataSourceType(DatabaseDataSourceType.getInstance("TEST"));
         p.setValue(new NumberValue(13));
         p.setTimestamp(cal.getTimeInMillis());
         p.setGranularity(AbsoluteTimeGranularity.MINUTE);
@@ -77,7 +77,7 @@ public class PrimitiveParameterTest extends TestCase {
 
     public void testEqualAll() {
         PrimitiveParameter p2 = new PrimitiveParameter("TEST");
-        p2.setDataSourceType(new DatabaseDataSourceType("TEST"));
+        p2.setDataSourceType(DatabaseDataSourceType.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();
         cal.clear();
@@ -89,7 +89,7 @@ public class PrimitiveParameterTest extends TestCase {
 
     public void testIdsNotEqual() {
         PrimitiveParameter p2 = new PrimitiveParameter("TEST2");
-        p2.setDataSourceType(new DatabaseDataSourceType("TEST"));
+        p2.setDataSourceType(DatabaseDataSourceType.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();
         cal.clear();
@@ -101,7 +101,7 @@ public class PrimitiveParameterTest extends TestCase {
 
     public void testTimestampsNotEqual() {
         PrimitiveParameter p2 = new PrimitiveParameter("TEST2");
-        p2.setDataSourceType(new DatabaseDataSourceType("TEST"));
+        p2.setDataSourceType(DatabaseDataSourceType.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();
         cal.clear();
@@ -113,7 +113,7 @@ public class PrimitiveParameterTest extends TestCase {
 
     public void testGranularitiesNotEqual() {
         PrimitiveParameter p2 = new PrimitiveParameter("TEST2");
-        p2.setDataSourceType(new DatabaseDataSourceType("TEST"));
+        p2.setDataSourceType(DatabaseDataSourceType.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();
         cal.clear();

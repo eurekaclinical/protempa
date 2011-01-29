@@ -1,6 +1,8 @@
 package org.protempa;
 
-public interface DataSourceType {
+import java.io.Serializable;
+
+public interface DataSourceType extends Serializable {
 
     public boolean isDerived();
 

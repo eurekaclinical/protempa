@@ -38,8 +38,10 @@ public class RelationTest extends TestCase {
                 null, null, null);
         assertTrue(r.hasRelation(i1, i2));
     }
-	private static final DataSourceType dbDataSourceType = new DatabaseDataSourceType("MockTestDatabase");
-	private static final DataSourceType derivedDataSourceType = new DerivedDataSourceType();
+	private static final DataSourceType dbDataSourceType =
+                DatabaseDataSourceType.getInstance("MockTestDatabase");
+	private static final DataSourceType derivedDataSourceType =
+                DerivedDataSourceType.getInstance();
 
     public void test1MinuteApartHours() {
         Interval i1 = new DefaultInterval(0L, RelativeHourGranularity.HOUR, 0L,

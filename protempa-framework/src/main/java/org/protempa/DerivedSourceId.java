@@ -1,10 +1,24 @@
 package org.protempa;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 public class DerivedSourceId implements SourceId {
+
+    private static final long serialVersionUID = -7137216308980692834L;
 
     private static final int hashCode = 31;
 
-    DerivedSourceId() {
+    private static class DerivedSourceIdContainer {
+        private static final DerivedSourceId derivedSourceId =
+                new DerivedSourceId();
+    }
+
+    static DerivedSourceId getInstance() {
+        return DerivedSourceIdContainer.derivedSourceId;
+    }
+
+
+    private DerivedSourceId() {
     }
 
     @Override
@@ -28,7 +42,7 @@ public class DerivedSourceId implements SourceId {
 
     @Override
     public String toString() {
-        return "DerivedSourceId []";
+        return ToStringBuilder.reflectionToString(this);
     }
 
 }

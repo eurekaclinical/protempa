@@ -79,7 +79,6 @@ class PrimitiveParameterResultProcessor
 
             PrimitiveParameter p = new PrimitiveParameter(propId);
             p.setTimestamp(timestamp);
-            p.setDataSourceType(new DatabaseDataSourceType(getDataSourceBackendId()));
             p.setUniqueIdentifier(uniqueIdentifer);
             p.setGranularity(entitySpec.getGranularity());
             p.setValue(cpVal);
@@ -88,7 +87,7 @@ class PrimitiveParameterResultProcessor
                 p.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             p.setDataSourceType(
-                    new DatabaseDataSourceType(getDataSourceBackendId()));
+                DatabaseDataSourceType.getInstance(getDataSourceBackendId()));
             logger.log(Level.FINEST, "Created primitive parameter {0}", p);
             Collections.putList(results, keyId, p);
         }

@@ -37,7 +37,8 @@ public final class SQLExecutor {
         try {
             preparedStmt.execute();
             if (resultProcessor != null) {
-                resultProcessor.process(preparedStmt.getResultSet());
+                resultSet = preparedStmt.getResultSet();
+                resultProcessor.process(resultSet);
             }
         } finally {
             if (resultSet != null) {
@@ -57,7 +58,8 @@ public final class SQLExecutor {
                 SQLUtil.logger().log(Level.FINE, "executing SQL: " + sql);
                 stmt.execute(sql);
                 if (resultProcessor != null) {
-                    resultProcessor.process(stmt.getResultSet());
+                    resultSet = stmt.getResultSet();
+                    resultProcessor.process(resultSet);
                 }
             } finally {
                 if (resultSet != null) {

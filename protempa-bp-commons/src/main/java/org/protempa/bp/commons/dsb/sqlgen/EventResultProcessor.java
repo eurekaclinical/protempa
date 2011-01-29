@@ -113,7 +113,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
             
             Event event = new Event(propId);
             event.setDataSourceType(
-                    new DatabaseDataSourceType(getDataSourceBackendId()));
+                DatabaseDataSourceType.getInstance(getDataSourceBackendId()));
             event.setUniqueIdentifier(uniqueIdentifier);
             event.setInterval(interval);
             for (int j = 0; j < propertySpecs.length; j++) {

@@ -22,16 +22,16 @@ public class ParametersUtilTest extends TestCase {
 		PrimitiveParameter[] paramsArr = new PrimitiveParameter[4];
 		paramsArr[3] = new PrimitiveParameter("TEST");
 		paramsArr[3].setTimestamp(6L);
-		paramsArr[3].setDataSourceType(new DatabaseDataSourceType("TEST"));
+		paramsArr[3].setDataSourceType(DatabaseDataSourceType.getInstance("TEST"));
 		paramsArr[2] = new PrimitiveParameter("TEST");
 		paramsArr[2].setTimestamp(4L);
-		paramsArr[2].setDataSourceType(new DatabaseDataSourceType("TEST"));
+		paramsArr[2].setDataSourceType(DatabaseDataSourceType.getInstance("TEST"));
 		paramsArr[1] = new PrimitiveParameter("TEST");
 		paramsArr[1].setTimestamp(2L);
-		paramsArr[1].setDataSourceType(new DatabaseDataSourceType("TEST"));
+		paramsArr[1].setDataSourceType(DatabaseDataSourceType.getInstance("TEST"));
 		paramsArr[0] = new PrimitiveParameter("TEST");
 		paramsArr[0].setTimestamp(0L);
-		paramsArr[0].setDataSourceType(new DatabaseDataSourceType("TEST"));
+		paramsArr[0].setDataSourceType(DatabaseDataSourceType.getInstance("TEST"));
 
 		params = Arrays.asList(paramsArr);
 	}

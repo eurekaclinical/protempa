@@ -21,11 +21,13 @@ public abstract class TemporalProposition extends AbstractProposition {
         numberFormat.setGroupingUsed(true);
     }
 
+    private static final IntervalFactory intervalFactory =
+            new IntervalFactory();
+
     /**
      * The interval over which the proposition is valid.
      */
     private Interval interval;
-    private final IntervalFactory intervalFactory;
 
     /**
      * Creates a proposition with an id.
@@ -35,8 +37,7 @@ public abstract class TemporalProposition extends AbstractProposition {
      */
     TemporalProposition(String id) {
         super(id);
-        this.intervalFactory = new IntervalFactory();
-        this.interval = this.intervalFactory.getInstance();
+        this.interval = intervalFactory.getInstance();
     }
 
     /**
@@ -56,7 +57,7 @@ public abstract class TemporalProposition extends AbstractProposition {
      */
     public final void setInterval(Interval interval) {
         if (interval == null) {
-            interval = this.intervalFactory.getInstance();
+            interval = intervalFactory.getInstance();
         }
         this.interval = interval;
         this.hashCode = 0;
@@ -157,7 +158,6 @@ public abstract class TemporalProposition extends AbstractProposition {
      *         <code>String</code>.
      */
     private String formatStart(Format format) {
-        Interval interval = getInterval();
         if (format != null && interval != null) {
             Long minStart = interval.getMinStart();
             if (minStart != null) {
@@ -187,7 +187,6 @@ public abstract class TemporalProposition extends AbstractProposition {
      *         <code>String</code>.
      */
     private String formatFinish(Format format) {
-        Interval interval = getInterval();
         if (format != null && interval != null) {
             Long minFinish = interval.getMinFinish();
             if (minFinish != null) {
@@ -208,7 +207,6 @@ public abstract class TemporalProposition extends AbstractProposition {
     }
 
     private String formatLength(Format format) {
-        Interval interval = getInterval();
         if (format != null && interval != null) {
             Long minLength = interval.getMinLength();
             if (minLength != null) {

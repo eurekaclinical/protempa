@@ -7,8 +7,9 @@ import org.protempa.proposition.LocalUniqueIdentifier;
 class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
 
     private static final long serialVersionUID = 3956023315666447630L;
-    final String name;
-    String[] dbIds;
+    
+    private final String name;
+    private String[] dbIds;
 
     SQLGenUniqueIdentifier(String name, String[] dbIds) {
         this.name = name;
@@ -24,7 +25,8 @@ class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
             return false;
         }
         final SQLGenUniqueIdentifier other = (SQLGenUniqueIdentifier) obj;
-        if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
+        if ((this.name == null) ? (other.name != null) :
+            !this.name.equals(other.name)) {
             return false;
         }
         if (!Arrays.deepEquals(this.dbIds, other.dbIds)) {

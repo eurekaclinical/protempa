@@ -8,7 +8,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.arp.javautil.collections.Collections;
 import org.protempa.DatabaseDataSourceType;
-import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Value;
@@ -66,13 +65,12 @@ class ConstantResultProcessor extends
             
             Constant cp = new Constant(propId);
             cp.setUniqueIdentifier(uniqueIdentifer);
-            cp.setDataSourceType(new DerivedDataSourceType());
             for (int j = 0; j < propertySpecs.length; j++) {
                 PropertySpec propertySpec = propertySpecs[j];
                 cp.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             cp.setDataSourceType(
-                    new DatabaseDataSourceType(getDataSourceBackendId()));
+                DatabaseDataSourceType.getInstance(getDataSourceBackendId()));
             logger.log(Level.FINEST, "Created constant {0}", cp);
             Collections.putList(results, keyId, cp);
         }

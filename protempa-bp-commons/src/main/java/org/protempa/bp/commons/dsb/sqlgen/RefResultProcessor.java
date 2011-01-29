@@ -87,7 +87,7 @@ abstract class RefResultProcessor<P extends Proposition> extends
     private final UniqueIdentifier generateRefUniqueIdentifier(
             ReferenceSpec referenceSpec, String[] uniqueIds)
             throws SQLException {
-        return new UniqueIdentifier(new DataSourceBackendId(
+        return new UniqueIdentifier(DataSourceBackendId.getInstance(
                 getDataSourceBackendId()), new SQLGenUniqueIdentifier(
                 referenceSpec.getEntityName(), uniqueIds));
     }

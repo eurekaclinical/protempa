@@ -1,5 +1,7 @@
 package org.protempa;
 
-public interface SourceId {
+import java.io.Serializable;
+
+public interface SourceId extends Serializable {
 
 }

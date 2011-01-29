@@ -56,7 +56,7 @@ abstract class AbstractResultProcessor implements SQLGenResultProcessor {
             EntitySpec entitySpec, String[] uniqueIds)
             throws SQLException {
         return new UniqueIdentifier(
-                new DataSourceBackendId(getDataSourceBackendId()),
+                DataSourceBackendId.getInstance(getDataSourceBackendId()),
                 new SQLGenUniqueIdentifier(entitySpec.getName(), uniqueIds));
     }
 }

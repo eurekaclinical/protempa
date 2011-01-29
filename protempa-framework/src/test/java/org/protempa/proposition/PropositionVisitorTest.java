@@ -21,7 +21,7 @@ public class PropositionVisitorTest extends TestCase {
 	public void testPrimitiveParameter() throws Exception {
 		PrimitiveParameterVisitor v = new PrimitiveParameterVisitor();
 		PrimitiveParameter p = new PrimitiveParameter("test");
-		p.setDataSourceType(new DatabaseDataSourceType("TEST"));
+		p.setDataSourceType(DatabaseDataSourceType.getInstance("TEST"));
 		v.visit(Collections.singleton(p));
 		assertTrue(v.found);
 	}
