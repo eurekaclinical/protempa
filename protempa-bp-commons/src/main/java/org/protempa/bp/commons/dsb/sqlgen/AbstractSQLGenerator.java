@@ -179,9 +179,10 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             logger.log(Level.FINE,
                     "Data source backend {0} is executing query for {1}",
                     new Object[]{backendNameForMessages, entitySpecName});
+
             try {
                 SQLExecutor.executeSQL(getConnectionSpec(), query,
-                        resultProcessor);
+                        resultProcessor, true, 100);
             } catch (SQLException ex) {
                 throw new DataSourceReadException(
                         "Error executing query in data source backend "

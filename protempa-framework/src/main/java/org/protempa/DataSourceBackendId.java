@@ -1,30 +1,27 @@
 package org.protempa;
 
-import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 public class DataSourceBackendId implements SourceId {
 
     private static final long serialVersionUID = -201656715932739725L;
 
-    private static Map<String, WeakReference<DataSourceBackendId>> cache =
-            new WeakHashMap<String, WeakReference<DataSourceBackendId>>();
+    private static Map<String, DataSourceBackendId> cache =
+            new HashMap<String, DataSourceBackendId>();
 
     private final String id;
     private int hashCode = -1;
 
 
     public static DataSourceBackendId getInstance(String id) {
-        WeakReference<DataSourceBackendId> wrResult = cache.get(id);
-        if (wrResult != null) {
-            return wrResult.get();
-        } else {
-            DataSourceBackendId result = new DataSourceBackendId(id);
-            cache.put(id, new WeakReference<DataSourceBackendId>(result));
-            return result;
+        DataSourceBackendId result = cache.get(id);
+        if (result == null) {
+            result = new DataSourceBackendId(id);
+            cache.put(id, result);
         }
+        return result;
     }
 
     private DataSourceBackendId(String newId) {

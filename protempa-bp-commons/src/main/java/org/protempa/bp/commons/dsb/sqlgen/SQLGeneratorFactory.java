@@ -19,6 +19,7 @@ import org.protempa.bp.commons.dsb.RelationalDatabaseDataSourceBackend;
  * @author Andrew Post
  */
 public class SQLGeneratorFactory {
+
     private ConnectionSpec connectionSpec;
     private RelationalDatabaseSpec relationalDatabaseSpec;
     private RelationalDatabaseDataSourceBackend backend;
@@ -34,7 +35,7 @@ public class SQLGeneratorFactory {
             RelationalDatabaseDataSourceBackend backend) {
         assert connectionSpec != null : "connectionSpec cannot be null!";
         assert relationalDatabaseSpec != null :
-            "relationalDatabaseSpec cannot be null";
+                "relationalDatabaseSpec cannot be null";
         assert backend != null : "backend cannot be null!";
         this.connectionSpec = connectionSpec;
         this.relationalDatabaseSpec = relationalDatabaseSpec;
@@ -74,8 +75,8 @@ public class SQLGeneratorFactory {
                 candidateInstance = candidate.newInstance();
             } catch (Exception ex) {
                 throw new SQLGeneratorLoadException(
-                        "Could not create a new instance of SQL generator " +
-                        candidate.getName(), ex);
+                        "Could not create a new instance of SQL generator "
+                        + candidate.getName(), ex);
             }
             candidateInstance.loadDriverIfNeeded();
             /*
@@ -87,22 +88,29 @@ public class SQLGeneratorFactory {
                 if (candidateInstance.checkCompatibility(con)) {
                     DatabaseMetaData metaData = con.getMetaData();
                     logger.log(Level.FINE,
-                        "{0} is compatible with database {1} ({2})",
-                        new Object[] {candidateInstance.getClass().getName(),
-                        metaData.getDatabaseProductName(),
-                        metaData.getDatabaseProductVersion()});
+                            "{0} is compatible with database {1} ({2})",
+                            new Object[]{candidateInstance.getClass().getName(),
+                                metaData.getDatabaseProductName(),
+                                metaData.getDatabaseProductVersion()});
                     logger.log(Level.FINE,
-                        "{0} is compatible with driver {1} ({2})",
-                        new Object[] {candidateInstance.getClass().getName(),
-                        metaData.getDriverName(),
-                        metaData.getDriverVersion()});
+                            "{0} is compatible with driver {1} ({2})",
+                            new Object[]{candidateInstance.getClass().getName(),
+                                metaData.getDriverName(),
+                                metaData.getDriverVersion()});
                     candidateInstance.initialize(this.relationalDatabaseSpec,
                             this.connectionSpec, this.backend);
                     logger.fine("SQL generator loaded");
                     return candidateInstance;
                 }
-            } finally {
                 con.close();
+                con = null;
+            } finally {
+                if (con != null) {
+                    try {
+                        con.close();
+                    } catch (SQLException ex) {
+                    }
+                }
             }
         }
         throw new SQLGeneratorNotFoundException();

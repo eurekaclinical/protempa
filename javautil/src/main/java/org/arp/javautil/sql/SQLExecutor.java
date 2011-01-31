@@ -27,79 +27,193 @@ public final class SQLExecutor {
     public static void executeSQL(Connection connection,
             PreparedStatement preparedStmt, StatementPreparer stmtPreparer,
             ResultProcessor resultProcessor) throws SQLException {
-        if (connection == null)
+        if (connection == null) {
             throw new IllegalArgumentException("connection cannot be null");
+        }
         if (stmtPreparer != null) {
             stmtPreparer.prepare(preparedStmt);
         }
 
-        ResultSet resultSet = null;
-        try {
-            preparedStmt.execute();
-            if (resultProcessor != null) {
-                resultSet = preparedStmt.getResultSet();
-                resultProcessor.process(resultSet);
-            }
-        } finally {
-            if (resultSet != null) {
-                resultSet.close();
-            }
-        }
-    }
+        preparedStmt.execute();
 
-    public static void executeSQL(Connection connection, String sql,
-            ResultProcessor resultProcessor) throws SQLException {
-        if (connection == null)
-            throw new IllegalArgumentException("connection cannot be null");
-        Statement stmt = connection.createStatement();
-        try {
-            ResultSet resultSet = null;
+        if (resultProcessor != null) {
+            ResultSet resultSet = preparedStmt.getResultSet();
             try {
-                SQLUtil.logger().log(Level.FINE, "executing SQL: " + sql);
-                stmt.execute(sql);
-                if (resultProcessor != null) {
-                    resultSet = stmt.getResultSet();
-                    resultProcessor.process(resultSet);
-                }
+                resultProcessor.process(resultSet);
+                resultSet.close();
+                resultSet = null;
             } finally {
                 if (resultSet != null) {
-                    resultSet.close();
+                    try {
+                        resultSet.close();
+                    } catch (SQLException ex) {
+                    }
                 }
             }
-        } finally {
+        }
+    }
+
+    public static void executeSQL(Connection connection, String sql,
+            ResultProcessor resultProcessor) throws SQLException {
+        if (connection == null) {
+            throw new IllegalArgumentException("connection cannot be null");
+        }
+        Statement stmt = connection.createStatement();
+        try {
+            SQLUtil.logger().log(Level.FINE, "executing SQL: " + sql);
+
+            stmt.execute(sql);
+
+            if (resultProcessor != null) {
+                ResultSet resultSet = stmt.getResultSet();
+                try {
+                    resultProcessor.process(resultSet);
+                    resultSet.close();
+                    resultSet = null;
+                } finally {
+                    if (resultSet != null) {
+                        try {
+                            resultSet.close();
+                        } catch (SQLException ex) {
+                        }
+                    }
+                }
+            }
             stmt.close();
+            stmt = null;
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+    }
+
+    public static void executeSQL(Connection connection, String sql,
+            ResultProcessor resultProcessor, int fetchSize) throws SQLException {
+        if (connection == null) {
+            throw new IllegalArgumentException("connection cannot be null");
+        }
+        Statement stmt = connection.createStatement();
+        try {
+            SQLUtil.logger().log(Level.FINE, "executing SQL: " + sql);
+            stmt.setFetchSize(fetchSize);
+            stmt.execute(sql);
+
+            if (resultProcessor != null) {
+                ResultSet resultSet = stmt.getResultSet();
+                try {
+                    resultProcessor.process(resultSet);
+                    resultSet.close();
+                    resultSet = null;
+                } finally {
+                    if (resultSet != null) {
+                        try {
+                            resultSet.close();
+                        } catch (SQLException ex) {
+                        }
+                    }
+
+                }
+            }
+            stmt.close();
+            stmt = null;
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException ex) {
+                }
+            }
         }
     }
 
     public static void executeSQL(Connection connection, String sql,
             StatementPreparer stmtPreparer, ResultProcessor resultProcessor)
             throws SQLException {
-        if (connection == null)
+        if (connection == null) {
             throw new IllegalArgumentException("connection cannot be null");
-        PreparedStatement stmt = null;
+        }
+        SQLUtil.logger().log(Level.FINE, "executing SQL: " + sql);
+        PreparedStatement stmt = connection.prepareStatement(sql);
         try {
-            SQLUtil.logger().log(Level.FINE, "executing SQL: " + sql);
-            stmt = connection.prepareStatement(sql);
             executeSQL(connection, stmt, stmtPreparer, resultProcessor);
+            stmt.close();
+            stmt = null;
         } finally {
             if (stmt != null) {
-                stmt.close();
+                try {
+                    stmt.close();
+                } catch (SQLException ex) {
+                }
             }
         }
     }
 
     public static void executeSQL(ConnectionSpec connectionCreator, String sql,
             ResultProcessor resultProcessor) throws SQLException {
-        if (connectionCreator == null)
+        if (connectionCreator == null) {
             throw new IllegalArgumentException(
                     "connectionCreator cannot be null");
-        Connection con = null;
+        }
+        Connection con = connectionCreator.getOrCreate();
         try {
-            con = connectionCreator.getOrCreate();
             executeSQL(con, sql, resultProcessor);
+            con.close();
+            con = null;
         } finally {
             if (con != null) {
-                con.close();
+                try {
+                    con.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+    }
+
+    public static void executeSQL(ConnectionSpec connectionCreator, String sql,
+            ResultProcessor resultProcessor, boolean readOnly) throws SQLException {
+        if (connectionCreator == null) {
+            throw new IllegalArgumentException(
+                    "connectionCreator cannot be null");
+        }
+        Connection con = connectionCreator.getOrCreate();
+        con.setReadOnly(true);
+        try {
+            executeSQL(con, sql, resultProcessor);
+            con.close();
+            con = null;
+        } finally {
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (SQLException ex) {
+                }
+            }
+        }
+    }
+
+    public static void executeSQL(ConnectionSpec connectionCreator, String sql,
+            ResultProcessor resultProcessor, boolean readOnly, int fetchSize)
+            throws SQLException {
+        if (connectionCreator == null) {
+            throw new IllegalArgumentException(
+                    "connectionCreator cannot be null");
+        }
+        Connection con = connectionCreator.getOrCreate();
+        con.setReadOnly(true);
+        try {
+            executeSQL(con, sql, resultProcessor, fetchSize);
+            con.close();
+            con = null;
+        } finally {
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (SQLException ex) {
+                }
             }
         }
     }
@@ -107,16 +221,21 @@ public final class SQLExecutor {
     public static void executeSQL(ConnectionSpec connectionCreator, String sql,
             StatementPreparer stmtPreparer, ResultProcessor resultProcessor)
             throws SQLException {
-        if (connectionCreator == null)
+        if (connectionCreator == null) {
             throw new IllegalArgumentException(
                     "connectionCreator cannot be null");
-        Connection con = null;
+        }
+        Connection con = connectionCreator.getOrCreate();
         try {
-            con = connectionCreator.getOrCreate();
             executeSQL(con, sql, stmtPreparer, resultProcessor);
+            con.close();
+            con = null;
         } finally {
             if (con != null) {
-                con.close();
+                try {
+                    con.close();
+                } catch (SQLException ex) {
+                }
             }
         }
     }

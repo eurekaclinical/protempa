@@ -48,7 +48,7 @@ class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
         SQLGenUniqueIdentifier result;
         try {
             result = (SQLGenUniqueIdentifier) super.clone();
-            result.dbIds = this.dbIds.clone();
+            result.dbIds = this.dbIds;
             return result;
         } catch (CloneNotSupportedException ex) {
             throw new AssertionError("Never reached!");

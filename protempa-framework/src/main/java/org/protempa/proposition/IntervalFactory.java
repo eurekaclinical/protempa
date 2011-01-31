@@ -1,5 +1,9 @@
 package org.protempa.proposition;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.collections.map.ReferenceMap;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.Granularity;
 
@@ -11,6 +15,12 @@ import org.protempa.proposition.value.Granularity;
  * @author Andrew Post
  */
 public final class IntervalFactory {
+
+    private static class DefaultIntervalContainer {
+
+        private static Interval defaultInterval = new DefaultInterval();
+    }
+    private static final Map cache = new ReferenceMap();
 
     /**
      * Returns an interval specified by the given minimum start, maximum start,
@@ -42,14 +52,21 @@ public final class IntervalFactory {
     public Interval getInstance(Long minStart, Long maxStart,
             Granularity startGran, Long minFinish, Long maxFinish,
             Granularity finishGran) {
-        if (minStart == null || maxStart == null || minFinish == null
-                || maxFinish == null) {
-            return new DefaultInterval(minStart, maxStart, startGran,
-                    minFinish, maxFinish, finishGran, null, null, null);
-        } else {
-            return new SimpleInterval(minStart, maxStart,
-                    startGran, minFinish, maxFinish, finishGran);
+        List<Object> key = Arrays.asList(new Object[]{minStart, maxStart,
+                    startGran, minFinish, maxFinish, finishGran});
+        Interval result = (Interval) cache.get(key);
+        if (result == null) {
+            if (minStart == null || maxStart == null || minFinish == null
+                    || maxFinish == null) {
+                result = new DefaultInterval(minStart, maxStart, startGran,
+                        minFinish, maxFinish, finishGran, null, null, null);
+            } else {
+                result = new SimpleInterval(minStart, maxStart,
+                        startGran, minFinish, maxFinish, finishGran);
+            }
+            cache.put(key, result);
         }
+        return result;
     }
 
     /**
@@ -70,11 +87,18 @@ public final class IntervalFactory {
      */
     public Interval getInstance(Long start, Granularity startGran,
             Long finish, Granularity finishGran) {
-        if (start == null || finish == null) {
-            return new DefaultInterval(start, startGran, finish, finishGran);
-        } else {
-            return new SimpleInterval(start, startGran, finish, finishGran);
+        List<Object> key = Arrays.asList(new Object[]{start, startGran,
+                    finish, finishGran});
+        Interval result = (Interval) cache.get(key);
+        if (result == null) {
+            if (start == null || finish == null) {
+                result = new DefaultInterval(start, startGran, finish, finishGran);
+            } else {
+                result = new SimpleInterval(start, startGran, finish, finishGran);
+            }
+            cache.put(key, result);
         }
+        return result;
     }
 
     /**
@@ -92,11 +116,17 @@ public final class IntervalFactory {
      * @return an {@link Interval}.
      */
     public Interval getInstance(Long position, Granularity gran) {
-        if (position == null) {
-            return new DefaultInterval(position, gran, position, gran);
-        } else {
-            return new SimpleInterval(position, gran);
+        List<Object> key = Arrays.asList(new Object[]{position, gran});
+        Interval result = (Interval) cache.get(key);
+        if (result == null) {
+            if (position == null) {
+                result = new DefaultInterval(position, gran, position, gran);
+            } else {
+                result = new SimpleInterval(position, gran);
+            }
+            cache.put(key, result);
         }
+        return result;
     }
 
     /**
@@ -105,6 +135,6 @@ public final class IntervalFactory {
      * @return an {@link Interval}.
      */
     public Interval getInstance() {
-        return new DefaultInterval();
+        return DefaultIntervalContainer.defaultInterval;
     }
 }

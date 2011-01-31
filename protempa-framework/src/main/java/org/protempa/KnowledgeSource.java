@@ -2,11 +2,11 @@ package org.protempa;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.proposition.value.ValueSet;
@@ -40,9 +40,9 @@ public final class KnowledgeSource
         super(backends);
         this.backendManager = new BackendManager<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource, KnowledgeSourceBackend>(
                 this, backends);
-        this.leafEventIdCache = new WeakHashMap<Set<String>, Set<String>>();
-        this.leafConstantIdCache = new WeakHashMap<Set<String>, Set<String>>();
-        this.primParamIdCache = new WeakHashMap<Set<String>, Set<String>>();
+        this.leafEventIdCache = new HashMap<Set<String>, Set<String>>();
+        this.leafConstantIdCache = new HashMap<Set<String>, Set<String>>();
+        this.primParamIdCache = new HashMap<Set<String>, Set<String>>();
         this.notFoundAbstractionDefinitionRequests = new HashSet<String>();
         this.notFoundEventDefinitionRequests = new HashSet<String>();
         this.notFoundPrimitiveParameterDefinitionRequests = new HashSet<String>();
