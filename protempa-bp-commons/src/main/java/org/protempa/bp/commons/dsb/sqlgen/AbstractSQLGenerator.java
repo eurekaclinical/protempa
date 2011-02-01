@@ -725,7 +725,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     i, wherePart, selectPart, referenceIndices, filtersCopy,
                     resultProcessor);
         }
-        processKeyIdConstraintsForWhereClause(info, wherePart, keyIds);
+        processKeyIdConstraintsForWhereClause(info, wherePart, keyIds, referenceIndices);
 
         if (wherePart.length() > 0) {
             wherePart.insert(0, "where ");
@@ -1281,15 +1281,18 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     }
 
     private void processKeyIdConstraintsForWhereClause(ColumnSpecInfo info,
-            StringBuilder wherePart, Set<String> keyIds) {
+            StringBuilder wherePart, Set<String> keyIds, Map<ColumnSpec, Integer> referenceIndices) {
         if (keyIds != null && !keyIds.isEmpty()) {
             if (wherePart.length() > 0) {
                 wherePart.append(" and ");
             }
             ColumnSpec keySpec = info.getColumnSpecs().get(0);
-            wherePart.append("a1.").append(keySpec.getColumn()).append(" in ('");
-            wherePart.append(StringUtils.join(keyIds, "','"));
-            wherePart.append("')");
+
+//            wherePart.append("a1.").append(keySpec.getColumn()).append(" in ('");
+//            wherePart.append(StringUtils.join(keyIds, "','"));
+//            wherePart.append("')");
+            
+            generateInClause(wherePart, 1, keySpec.getColumn(), keyIds.toArray(), false);
         }
     }
 
