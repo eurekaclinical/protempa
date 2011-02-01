@@ -44,24 +44,9 @@ public class Collections {
      */
     public static <K, V> void putListAll(Map<K, List<V>> map, K key,
             Collection<? extends V> values) {
-        for (V value : values)
+        for (V value : values) {
             putList(map, key, value);
-    }
-
-    /**
-     * Checks if any of a collection's elements are also in the provided set.
-     *
-     * @param aSet a {@link Set}.
-     * @param aColl a {@link Collection}.
-     * @return <code>true</code> or <code>false</code>.
-     */
-    public static <K> boolean containsAny(Set<K> aSet, Collection<K> aColl) {
-        for (K obj : aColl) {
-            if (aSet.contains(obj)) {
-                return true;
-            }
         }
-        return false;
     }
 
     /**
@@ -78,5 +63,23 @@ public class Collections {
             }
         }
         return false;
+    }
+
+    /**
+     * Sequentially adds the contents of the specified <code>collections</code>
+     * to <code>collection</code>.
+     * 
+     * @param <K>
+     * @param collection a {@link Collection}.
+     * @param collections the {@link Collection}s whose contents to insert.
+     * <code>Null</code> collections will be skipped.
+     */
+    public static <K> void addAll(Collection<K> collection,
+            Collection<? extends K>... collections) {
+        for (Collection<? extends K> c : collections) {
+            if (c != null) {
+                collection.addAll(c);
+            }
+        }
     }
 }

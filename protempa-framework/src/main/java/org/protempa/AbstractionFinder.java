@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -220,6 +219,22 @@ final class AbstractionFinder implements Module {
             sequenceList.add(seq);
         }
         return sequenceList;
+    }
+
+    private void addToCache(QuerySession qs, List<Proposition> propositions, Map<Proposition, List<Proposition>> derivations) {
+        qs.addPropositionsToCache(propositions);
+        for (Map.Entry<Proposition, List<Proposition>> me : derivations.entrySet()) {
+            qs.addDerivationsToCache(me.getKey(), me.getValue());
+        }
+    }
+
+    private void extractRequestedPropositions(List<Proposition> propositions, Set<String> propositionIds) {
+        for (Iterator<Proposition> itr = propositions.iterator(); itr.hasNext();) {
+            Proposition prop = itr.next();
+            if (!propositionIds.contains(prop.getId())) {
+                itr.remove();
+            }
+        }
     }
 
     private Map<Set<String>, Sequence<PrimitiveParameter>> getOrCreateEmptySequenceKeyMap(String keyId,
@@ -501,7 +516,7 @@ final class AbstractionFinder implements Module {
 
         @Override
         public List<Proposition> execute(RuleBase ruleBase,
-                String keyIds, Set<String> propositionIds, List objects)
+                String keyId, Set<String> propositionIds, List objects)
                 throws ProtempaException {
 
             StatelessSession statelessSession = ruleBase.newStatelessSession();
@@ -537,8 +552,6 @@ final class AbstractionFinder implements Module {
         @Override
         public void cleanup() {
         }
-
-        
     }
 
     private void doFindExecute(Set<String> keyIds,
@@ -546,25 +559,26 @@ final class AbstractionFinder implements Module {
             QueryResultsHandler resultHandler, QuerySession qs,
             ExecutionStrategy strategy) throws ProtempaException {
         Logger logger = ProtempaUtil.logger();
-        
+
         DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
         logger.log(Level.FINE, "Creating rule base");
         RuleBase ruleBase = strategy.getOrCreateRuleBase(propositionIds,
                 derivationsBuilder, qs);
         logger.log(Level.FINE, "Rule base is created");
-        
+
         logger.log(Level.FINE, "Now processing data");
-        for (Map.Entry<String, List<Object>> entry : objectsToAssert(keyIds,
-                propositionIds, filters, qs, false).entrySet()) {
-            List objects = new ArrayList(entry.getValue());
-            logger.log(Level.FINER, "About to assert raw data {0}", objects);
-            List<Proposition> propositions = strategy.execute(ruleBase, 
-                    entry.getKey(), propositionIds, objects);
+        for (Iterator<ObjectEntry> itr = new ObjectIterator(keyIds,
+                propositionIds, filters, qs, false); itr.hasNext();) {
+            ObjectEntry entry = itr.next();
+            logger.log(Level.FINER, "About to assert raw data {0}",
+                    entry.propositions);
+            List<Proposition> propositions = strategy.execute(ruleBase,
+                    entry.keyId, propositionIds, entry.propositions);
             logger.log(Level.FINER, "Retrieved propositions: {0}",
                     propositions);
             processResults(qs, propositions,
                     derivationsBuilder.toDerivations(),
-                    propositionIds, resultHandler, entry);
+                    propositionIds, resultHandler, entry.keyId);
             derivationsBuilder.reset();
         }
         strategy.cleanup();
@@ -575,45 +589,28 @@ final class AbstractionFinder implements Module {
             List<Proposition> propositions,
             Map<Proposition, List<Proposition>> derivations,
             Set<String> propositionIds, QueryResultsHandler resultHandler,
-            Entry<String, List<Object>> entry) throws FinderException {
+            String keyId) throws FinderException {
         Logger logger = ProtempaUtil.logger();
         if (qs.isCachingEnabled()) {
-            qs.addPropositionsToCache(propositions);
-            for (Map.Entry<Proposition, List<Proposition>> me :
-                    derivations.entrySet()) {
-                qs.addDerivationsToCache(me.getKey(), me.getValue());
-            }
+            addToCache(qs, propositions, derivations);
         }
         Map<UniqueIdentifier, Proposition> refs =
-                createReferencesMap(propositions);
+                createReferences(propositions);
         logger.log(Level.FINER, "References: {0}", refs);
-        for (Iterator<Proposition> itr = propositions.iterator();
-                itr.hasNext();) {
-            Proposition prop = itr.next();
-            if (!propositionIds.contains(prop.getId())) {
-                itr.remove();
-            }
-        }
+
+        extractRequestedPropositions(propositions, propositionIds);
         logger.log(Level.FINER, "Filtered propositions: {0}", propositions);
-        resultHandler.handleQueryResult(entry.getKey(), propositions,
+
+        resultHandler.handleQueryResult(keyId, propositions,
                 derivations, refs);
     }
 
-    private Map<UniqueIdentifier, Proposition> createReferencesMap(
-            List propositionsOrSequences) {
+    private Map<UniqueIdentifier, Proposition> createReferences(
+            List<Proposition> propositions) {
         Map<UniqueIdentifier, Proposition> refs =
                 new HashMap<UniqueIdentifier, Proposition>();
-        for (Object o : propositionsOrSequences) {
-            if (o instanceof Sequence) {
-                Sequence seq = (Sequence) o;
-                for (Object obj : seq) {
-                    Proposition prop = (Proposition) obj;
-                    refs.put(prop.getUniqueIdentifier(), prop);
-                }
-            } else {
-                Proposition prop = (Proposition) o;
-                refs.put(prop.getUniqueIdentifier(), prop);
-            }
+        for (Proposition proposition : propositions) {
+            refs.put(proposition.getUniqueIdentifier(), proposition);
         }
         return refs;
     }
@@ -633,93 +630,119 @@ final class AbstractionFinder implements Module {
         return result;
     }
 
-    private Map<String, List<Object>> objectsToAssert(Set<String> keyIds,
-            Set<String> propositionIds, Filter filters, QuerySession qs,
-            boolean stateful) throws DataSourceReadException,
-            KnowledgeSourceReadException {
-        Logger logger = ProtempaUtil.logger();
-        Map<String, List<Object>> objects = new HashMap<String, List<Object>>();
+    private static class ObjectEntry {
 
-        logger.log(Level.FINE, "Retrieving data");
-
-        // Add events
-        Set<String> eventIds = knowledgeSource.leafEventIds(propositionIds);
-        logger.log(Level.FINE, "Event ids: {0}", eventIds);
-        if (!eventIds.isEmpty() || propositionIds == null
-                || propositionIds.isEmpty()) {
-            Map<String, List<Event>> tempObjects = createEvents(dataSource,
-                    keyIds, eventIds, filters, qs);
-            for (Map.Entry<String, List<Event>> entry : tempObjects.entrySet()) {
-                org.arp.javautil.collections.Collections.putListAll(objects,
-                        entry.getKey(), entry.getValue());
-            }
-        }
-
-        // Add constants
-        Set<String> constantIds = knowledgeSource.leafConstantIds(propositionIds);
-        logger.log(Level.FINE, "Constant ids: {0}", constantIds);
-        if (!constantIds.isEmpty() || propositionIds == null
-                || propositionIds.isEmpty()) {
-            Map<String, List<Constant>> tempObjects = createConstantPropositions(
-                    dataSource, keyIds, constantIds, filters, qs);
-            for (Map.Entry<String, List<Constant>> entry : tempObjects.entrySet()) {
-                org.arp.javautil.collections.Collections.putListAll(objects,
-                        entry.getKey(), entry.getValue());
-            }
-        }
-
-        // Add parameters. Requires special handling, because Sequence objects
-        // do not override equals. Can we eliminate sequence cache?
-        Set<String> primitiveParameterIds =
-                knowledgeSource.primitiveParameterIds(propositionIds);
-        logger.log(Level.FINE, "Primitive parameter ids: {0}", primitiveParameterIds);
-        Map<String, List<PrimitiveParameter>> keyIdsToPrimParams =
-                dataSource.getPrimitiveParametersAsc(keyIds,
-                primitiveParameterIds,
-                filters, qs);
-
-        if (logger.isLoggable(Level.FINEST)) {
-            for (Map.Entry<String, List<PrimitiveParameter>> e :
-                    keyIdsToPrimParams.entrySet()) {
-                logger.log(Level.FINEST, "RETURNED PRIMITIVE PARAMETERS: {0}",
-                        e);
-            }
-        }
-
-        Map<String, List<Sequence<PrimitiveParameter>>> keyIdsToSequences =
-                createSequencesFromPrimitiveParameters(
-                keyIdsToPrimParams, propositionIds,
-                stateful);
-
-        if (logger.isLoggable(Level.FINEST)) {
-            for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> e :
-                    keyIdsToSequences.entrySet()) {
-                logger.log(Level.FINEST, "SEQUENCES: {0}", e);
-            }
-        }
-
-        for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> entry :
-                keyIdsToSequences.entrySet()) {
-            org.arp.javautil.collections.Collections.putListAll(objects,
-                    entry.getKey(), entry.getValue());
-        }
-
-        logger.log(Level.FINE, "Data retrieval is complete");
-
-        return objects;
+        String keyId;
+        List<Object> propositions;
     }
 
-    private Map<String, List<Event>> createEvents(DataSource dataSource,
-            Set<String> keyIds, Set<String> eventIds, Filter filters,
-            QuerySession qs) throws DataSourceReadException {
-        return dataSource.getEventsAsc(keyIds, eventIds, filters, qs);
-    }
+    private class ObjectIterator implements Iterator<ObjectEntry> {
 
-    private Map<String, List<Constant>> createConstantPropositions(
-            DataSource dataSource, Set<String> keyIds, Set<String> constantIds,
-            Filter filters, QuerySession qs) throws DataSourceReadException {
-        return dataSource.getConstantPropositions(keyIds, constantIds, filters,
-                qs);
+        private Map<String, List<Event>> events;
+        private Map<String, List<Constant>> constants;
+        private Map<String, List<Sequence<PrimitiveParameter>>> primitiveParameters;
+        private Set<String> keyIds;
+        private Iterator<String> keyIdItr;
+
+        ObjectIterator(Set<String> keyIds,
+                Set<String> propositionIds, Filter filters, QuerySession qs,
+                boolean stateful)
+                throws KnowledgeSourceReadException, DataSourceReadException {
+            Logger logger = ProtempaUtil.logger();
+
+            logger.log(Level.FINE, "Starting data retrieval");
+            retrieveEvents(propositionIds, keyIds, filters, qs);
+            retrieveConstants(propositionIds, keyIds, filters, qs);
+            retrievePrimitiveParameters(propositionIds, keyIds, filters, qs,
+                    stateful);
+            aggregateKeyIds();
+
+            logger.log(Level.FINE, "Data retrieval is complete");
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.keyIdItr.hasNext();
+        }
+
+        @Override
+        public ObjectEntry next() {
+            ObjectEntry result = new ObjectEntry();
+            result.keyId = this.keyIdItr.next();
+            result.propositions = new ArrayList<Object>();
+            org.arp.javautil.collections.Collections.addAll(
+                    result.propositions, events.get(result.keyId),
+                    constants.get(result.keyId),
+                    primitiveParameters.get(result.keyId));
+            return result;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        private void aggregateKeyIds() {
+            this.keyIds = new HashSet<String>();
+            org.arp.javautil.collections.Collections.addAll(this.keyIds,
+                    events.keySet(), constants.keySet(),
+                    primitiveParameters.keySet());
+            this.keyIdItr = this.keyIds.iterator();
+        }
+
+        private void retrievePrimitiveParameters(Set<String> propositionIds,
+                Set<String> keyIds, Filter filters,
+                QuerySession qs, boolean stateful)
+                throws KnowledgeSourceReadException, DataSourceReadException {
+            Logger logger = ProtempaUtil.logger();
+            // Add parameters. Requires special handling, because Sequence objects
+            // do not override equals. Can we eliminate sequence cache?
+            Set<String> primitiveParameterIds =
+                    knowledgeSource.primitiveParameterIds(propositionIds);
+            logger.log(Level.FINE, "Primitive parameter ids: {0}",
+                    primitiveParameterIds);
+            Map<String, List<PrimitiveParameter>> keyIdsToPrimParams =
+                    dataSource.getPrimitiveParametersAsc(keyIds,
+                    primitiveParameterIds, filters, qs);
+            if (logger.isLoggable(Level.FINEST)) {
+                for (Map.Entry<String, List<PrimitiveParameter>> e :
+                        keyIdsToPrimParams.entrySet()) {
+                    logger.log(Level.FINEST,
+                            "RETURNED PRIMITIVE PARAMETERS: {0}", e);
+                }
+            }
+            this.primitiveParameters =
+                    createSequencesFromPrimitiveParameters(keyIdsToPrimParams,
+                    propositionIds, stateful);
+            if (logger.isLoggable(Level.FINEST)) {
+                for (Map.Entry<String, List<Sequence<PrimitiveParameter>>> e :
+                        this.primitiveParameters.entrySet()) {
+                    logger.log(Level.FINEST, "SEQUENCES: {0}", e);
+                }
+            }
+        }
+
+        private void retrieveConstants(Set<String> propositionIds,
+                Set<String> keyIds, Filter filters, QuerySession qs)
+                throws KnowledgeSourceReadException, DataSourceReadException {
+            Logger logger = ProtempaUtil.logger();
+            Set<String> constantIds =
+                    knowledgeSource.leafConstantIds(propositionIds);
+            logger.log(Level.FINE, "Constant ids: {0}", constantIds);
+            this.constants = dataSource.getConstantPropositions(keyIds,
+                    constantIds, filters, qs);
+        }
+
+        private void retrieveEvents(Set<String> propositionIds,
+                Set<String> keyIds, Filter filters, QuerySession qs)
+                throws DataSourceReadException, KnowledgeSourceReadException {
+            Logger logger = ProtempaUtil.logger();
+            Set<String> eventIds =
+                    knowledgeSource.leafEventIds(propositionIds);
+            logger.log(Level.FINE, "Event ids: {0}", eventIds);
+            this.events = dataSource.getEventsAsc(keyIds, eventIds,
+                    filters, qs);
+        }
     }
 
     private Map<String, List<Sequence<PrimitiveParameter>>> createSequencesFromPrimitiveParameters(

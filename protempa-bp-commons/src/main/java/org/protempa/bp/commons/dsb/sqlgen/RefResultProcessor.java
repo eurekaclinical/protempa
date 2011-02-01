@@ -2,10 +2,10 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.arp.javautil.collections.Collections;
 
 import org.protempa.DataSourceBackendId;
 import org.protempa.proposition.Proposition;
@@ -44,12 +44,7 @@ abstract class RefResultProcessor<P extends Proposition> extends
         P proposition = this.cache.get(uniqueIdentifier);
         assert proposition != null : "No proposition for unique identifier " +
                 uniqueIdentifier;
-        List<UniqueIdentifier> l = this.references.get(proposition);
-        if (l == null) {
-            l = new ArrayList<UniqueIdentifier>();
-            this.references.put(proposition, l);
-        }
-        l.add(refUniqueIdentifier);
+        Collections.putList(this.references, proposition, refUniqueIdentifier);
     }
 
     private final void setReferences() {

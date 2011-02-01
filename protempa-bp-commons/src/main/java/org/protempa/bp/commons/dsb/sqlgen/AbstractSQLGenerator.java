@@ -202,7 +202,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return sqlCodes;
     }
 
-    private <P extends Proposition> Map<String, List<P>> readPropositions(Set<String> propIds, Filter filters,
+    private <P extends Proposition> Map<String, List<P>> readPropositions(
+            Set<String> propIds, Filter filters,
             Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessorFactory<P> factory)
             throws DataSourceReadException {
@@ -210,6 +211,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 entitySpecMapForPropIds(propIds);
 
         Map<String, List<P>> results = new HashMap<String, List<P>>();
+        
         Collection<EntitySpec> allEntitySpecs = allEntitySpecs();
         Logger logger = SQLGenUtil.logger();
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
