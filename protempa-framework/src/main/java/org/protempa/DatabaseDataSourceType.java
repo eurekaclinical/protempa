@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-public class DatabaseDataSourceType implements DataSourceType {
+public final class DatabaseDataSourceType implements DataSourceType {
 
     private static final long serialVersionUID = 1408930133143229497L;
     
@@ -40,4 +40,28 @@ public class DatabaseDataSourceType implements DataSourceType {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final DatabaseDataSourceType other = (DatabaseDataSourceType) obj;
+        if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 97 * hash + (this.id != null ? this.id.hashCode() : 0);
+        return hash;
+    }
+
+    
 }

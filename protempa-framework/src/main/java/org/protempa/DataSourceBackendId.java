@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-public class DataSourceBackendId implements SourceId {
+public final class DataSourceBackendId implements SourceId {
 
     private static final long serialVersionUID = -201656715932739725L;
 

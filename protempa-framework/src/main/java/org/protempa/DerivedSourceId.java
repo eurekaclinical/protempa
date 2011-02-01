@@ -2,7 +2,7 @@ package org.protempa;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-public class DerivedSourceId implements SourceId {
+public final class DerivedSourceId implements SourceId {
 
     private static final long serialVersionUID = -7137216308980692834L;
 
