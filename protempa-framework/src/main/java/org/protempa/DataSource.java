@@ -185,6 +185,15 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
         return result;
     }
 
+    /**
+     *
+     * @param keyIds
+     * @param paramIds
+     * @param filters
+     * @param qs
+     * @return an unmodifiable {@link Map<String, List<PrimitiveParameter>>}.
+     * @throws DataSourceReadException
+     */
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
             Set<String> keyIds, Set<String> paramIds,
             Filter filters, QuerySession qs)
@@ -193,6 +202,15 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
                 filters, qs);
     }
 
+    /**
+     *
+     * @param keyIds
+     * @param paramIds
+     * @param filters
+     * @param qs
+     * @return an unmodifiable {@link Map<String, List<PrimitiveParameter>>}.
+     * @throws DataSourceReadException
+     */
     public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
             Set<String> keyIds, Set<String> paramIds, Filter filters,
             QuerySession qs)
@@ -201,13 +219,16 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
                 filters, qs);
     }
 
-    private static void assertOnNullReturnVal(Backend backend,
-            String methodName) {
-        String msg = "The " + backend.getClass().getName() + "'s "
-                + methodName + " method returned null -- this should not happen";
-        throw new AssertionError(msg);
-    }
-
+    /**
+     *
+     * @param keyIds
+     * @param paramIds
+     * @param filters
+     * @param qs
+     * @return an unmodifiable {@link Map<String, List<Constant>>}.
+     * 
+     * @throws DataSourceReadException
+     */
     public Map<String, List<Constant>> getConstantPropositions(
             Set<String> keyIds, Set<String> paramIds, Filter filters,
             QuerySession qs)
@@ -215,12 +236,30 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
         return CONST_QUERY.execute(this, keyIds, paramIds, filters, qs);
     }
 
+    /**
+     *
+     * @param keyIds
+     * @param eventIds
+     * @param filters
+     * @param qs
+     * @return an unmodifiable {@link Map<String, List<Event>>}.
+     * @throws DataSourceReadException
+     */
     public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
             Set<String> eventIds, Filter filters, QuerySession qs)
             throws DataSourceReadException {
         return EVENTS_ASC_QUERY.execute(this, keyIds, eventIds, filters, qs);
     }
 
+    /**
+     *
+     * @param keyIds
+     * @param eventIds
+     * @param filters
+     * @param qs
+     * @return an unmodifiable {@link Map<String, List<Event>>}.
+     * @throws DataSourceReadException
+     */
     public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
             Set<String> eventIds, Filter filters,
             QuerySession qs)

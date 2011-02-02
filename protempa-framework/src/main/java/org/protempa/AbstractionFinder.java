@@ -567,8 +567,9 @@ final class AbstractionFinder implements Module {
         logger.log(Level.FINE, "Rule base is created");
 
         logger.log(Level.FINE, "Now processing data");
-        for (Iterator<ObjectEntry> itr = new ObjectIterator(keyIds,
-                propositionIds, filters, qs, false); itr.hasNext();) {
+        ObjectIterator objectIterator = new ObjectIterator(keyIds,
+                propositionIds, filters, qs, false);
+        for (Iterator<ObjectEntry> itr = objectIterator; itr.hasNext();) {
             ObjectEntry entry = itr.next();
             logger.log(Level.FINER, "About to assert raw data {0}",
                     entry.propositions);

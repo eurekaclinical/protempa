@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.collections.Collections;
+import org.arp.javautil.map.CacheMap;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
 import org.protempa.DataSourceReadException;
@@ -210,8 +211,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         Map<EntitySpec, List<String>> entitySpecMapFromPropIds =
                 entitySpecMapForPropIds(propIds);
 
-        Map<String, List<P>> results = new HashMap<String, List<P>>();
-        
+        Map<String, List<P>> results = new CacheMap<String, List<P>>();
+
         Collection<EntitySpec> allEntitySpecs = allEntitySpecs();
         Logger logger = SQLGenUtil.logger();
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
@@ -247,7 +248,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             generateAndExecuteSelect(entitySpec, null, propIds, filtersCopy,
                     allEntitySpecsCopy, keyIds, order, resultProcessor);
 
-            processResults(resultProcessor, results);
+            Map<String, List<P>> resultsMap = resultProcessor.getResults();
+            for (Map.Entry<String, List<P>> entry : resultsMap.entrySet()) {
+                Collections.putListMult(results, entry.getKey(),
+                        entry.getValue());
+            }
 
             ReferenceSpec[] refSpecs = entitySpec.getReferenceSpecs();
             if (refSpecs != null) {
@@ -338,24 +343,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             }
         }
         return filtersCopy;
-    }
-
-    private static <P extends Proposition> void processResults(
-            AbstractMainResultProcessor<P> resultProcessor,
-            Map<String, List<P>> results) {
-        Map<String, List<P>> resultsMap = resultProcessor.getResults();
-        for (Map.Entry<String, List<P>> me2 : resultsMap.entrySet()) {
-            List<P> me2Value = me2.getValue();
-            if (me2Value == null) {
-                me2Value = new ArrayList<P>(0);
-            }
-            List<P> rList = results.get(me2.getKey());
-            if (rList == null) {
-                results.put(me2.getKey(), me2Value);
-            } else {
-                rList.addAll(me2Value);
-            }
-        }
     }
 
     private <P extends Proposition> void generateAndExecuteSelect(
@@ -1293,7 +1280,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 //            wherePart.append("a1.").append(keySpec.getColumn()).append(" in ('");
 //            wherePart.append(StringUtils.join(keyIds, "','"));
 //            wherePart.append("')");
-            
+
             generateInClause(wherePart, 1, keySpec.getColumn(), keyIds.toArray(), false);
         }
     }
