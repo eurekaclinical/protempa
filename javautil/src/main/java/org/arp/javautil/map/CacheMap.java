@@ -11,7 +11,6 @@ import java.util.UUID;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
 
 public class CacheMap<K, V> implements Map<K, V> {
 
@@ -22,15 +21,8 @@ public class CacheMap<K, V> implements Map<K, V> {
     public CacheMap() {
         this.id = UUID.randomUUID().toString();
         this.cacheManager = CacheManager.create();
-        
-        CacheConfiguration cacheConfig = new CacheConfiguration(id, 10);
-        cacheConfig.setDiskStorePath("/tmp/cache");
-        cacheConfig.setOverflowToDisk(true);
-        cacheConfig.setDiskPersistent(false);
-        cacheConfig.setEternal(true);
-        
-        cache = new Cache(cacheConfig);
-        cacheManager.addCache(cache);
+        this.cacheManager.addCache(this.id);
+        cache = this.cacheManager.getCache(this.id);
     }
 
     @Override
@@ -120,16 +112,16 @@ public class CacheMap<K, V> implements Map<K, V> {
     @Override
     protected void finalize() throws Throwable {
         this.cache.dispose();
-        this.cacheManager.removeCache(this.id);
-        this.cacheManager.shutdown();
+        // this.cacheManager.removeCache(this.id);
+        // this.cacheManager.shutdown();
         super.finalize();
     }
-    
+
     class CacheMapEntry implements Map.Entry<K, V> {
         K key;
         V value;
-        
-        CacheMapEntry (K k, V v) {
+
+        CacheMapEntry(K k, V v) {
             this.key = k;
             this.value = v;
         }
@@ -149,15 +141,6 @@ public class CacheMap<K, V> implements Map<K, V> {
             this.value = value;
             return value;
         }
-        
-    }
 
-    public static void main(String[] args) {
-        Map<String, String> testMap = new CacheMap<String,String>();
-        int i;
-        for (i = 0; i < 100; i++) {
-            testMap.put("Key " + i, "TEST VALUE " + i);
-        }
-        System.out.println("KEY 23: " + testMap.get("Key 23"));
     }
 }
