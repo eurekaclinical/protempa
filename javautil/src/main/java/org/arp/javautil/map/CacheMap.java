@@ -43,10 +43,12 @@ public class CacheMap<K, V> implements Map<K, V> {
         @Override
         public void run() {
             if (cache != null) {
-                Logger logger = MapUtil.logger();
-                logger.log(Level.FINE, "Disposing cache " + new String(id));
-                cache.setDisabled(true);
-                cache.dispose();
+                synchronized (cache) {
+                    Logger logger = MapUtil.logger();
+                    logger.log(Level.FINE, "Disposing cache " + new String(id));
+                    cache.setDisabled(true);
+                    cache.dispose();
+                }
             }
         }
     }
@@ -195,10 +197,12 @@ public class CacheMap<K, V> implements Map<K, V> {
     @Override
     protected void finalize() throws Throwable {
         if (this.cache != null) {
-            Logger logger = MapUtil.logger();
-            logger.log(Level.FINE, "Disposing cache " + new String(id));
-            this.cache.setDisabled(true);
-            this.cache.dispose();
+            synchronized (cache) {
+                Logger logger = MapUtil.logger();
+                logger.log(Level.FINE, "Disposing cache " + new String(id));
+                this.cache.setDisabled(true);
+                this.cache.dispose();
+            }
         }
         super.finalize();
     }
