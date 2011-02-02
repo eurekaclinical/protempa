@@ -14,16 +14,15 @@ import java.util.logging.Logger;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import net.sf.ehcache.Status;
 
 /**
- * Implements EHCache-backed {@link Map}. Because this map is backed by a
- * cache, some aspects of {@link Map}'s contract for modifiable maps cannot be
+ * Implements EHCache-backed {@link Map}. Because this map is backed by a cache,
+ * some aspects of {@link Map}'s contract for modifiable maps cannot be
  * implemented. Thus, users of this implementation that expose instances of it
  * as a {@link Map} should wrap it in
  * {@link java.util.Collections#unmodifiableMap(java.util.Map)} so that callers
  * cannot modify it, and the map should not be modified after it is so wrapped.
- *
+ * 
  * @author Himanshu Rathod
  * @author Andrew Post
  */
@@ -43,34 +42,28 @@ public class CacheMap<K, V> implements Map<K, V> {
 
         @Override
         public void run() {
-            Logger logger = MapUtil.logger();
-            synchronized (cacheManager) {
-                if (cacheManager.getStatus() == Status.STATUS_ALIVE) {
-                    logger.log(Level.FINE,
-                            "cacheManager shutting down cache {0}",
-                            new String(id));
-                    cacheManager.shutdown();
-                }
+            if (cache != null) {
+                Logger logger = MapUtil.logger();
+                logger.log(Level.FINE, "Disposing cache " + new String(id));
+                cache.setDisabled(true);
+                cache.dispose();
             }
         }
     }
 
     public CacheMap() {
-        Logger logger = MapUtil.logger();
         this.id = UUID.randomUUID().toString();
-
-        this.cacheManager = new CacheManager();
-
+        this.cacheManager = CacheManager.create();
 
         Runtime.getRuntime().addShutdownHook(
                 new Thread(new ShutdownRunnable(this.id)));
 
+        Logger logger = MapUtil.logger();
         if (logger.isLoggable(Level.FINE)) {
-            File file = new File(this.cacheManager.getDiskStorePath(),
-                    this.id);
+            File file = new File(this.cacheManager.getDiskStorePath(), this.id);
             String path = file.getAbsolutePath();
-            logger.log(Level.FINE, "Creating cache {0} in {1}",
-                    new Object[]{this.id, path});
+            logger.log(Level.FINE, "Creating cache {0} in {1}", new Object[] {
+                    this.id, path });
 
         }
 
@@ -138,10 +131,13 @@ public class CacheMap<K, V> implements Map<K, V> {
      * Note that if <code>arg1</code>'s state changes, the map will not reflect
      * the change unless this method is called again with the changed object.
      * 
-     * @param arg0 a key.
-     * @param arg1 a value.
+     * @param arg0
+     *            a key.
+     * @param arg1
+     *            a value.
      * @return
      */
+    @SuppressWarnings("unchecked")
     @Override
     public V put(K arg0, V arg1) {
         Element old = this.cache.get(arg0);
@@ -198,12 +194,11 @@ public class CacheMap<K, V> implements Map<K, V> {
 
     @Override
     protected void finalize() throws Throwable {
-        Logger logger = MapUtil.logger();
-        synchronized (this.cacheManager) {
-            logger.log(Level.FINE, "cacheManager removing cache {0}", this.id);
-            if (cacheManager.getStatus() == Status.STATUS_ALIVE) {
-                cacheManager.shutdown();
-            }
+        if (this.cache != null) {
+            Logger logger = MapUtil.logger();
+            logger.log(Level.FINE, "Disposing cache " + new String(id));
+            this.cache.setDisabled(true);
+            this.cache.dispose();
         }
         super.finalize();
     }
@@ -233,14 +228,5 @@ public class CacheMap<K, V> implements Map<K, V> {
             this.value = value;
             return value;
         }
-    }
-
-    public static void main(String[] args) {
-        CacheMap<String, String> testMap = new CacheMap<String, String>();
-        int i;
-        for (i = 0; i < 100000; i++) {
-            testMap.put("Key " + i, "TEST VALUE " + i);
-        }
-        System.out.println("KEY 23: " + testMap.get("Key 23"));
     }
 }
