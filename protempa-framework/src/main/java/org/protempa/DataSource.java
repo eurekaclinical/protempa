@@ -1,10 +1,10 @@
 package org.protempa;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import org.protempa.dsb.filter.Filter;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -159,17 +159,14 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
     }
 
     /**
-     * Returns an object for accessing the length units of returned data from
-     * the schema adaptor for this data source.
+     * Returns the length units of returned data from
+     * this data source.
      *
-     * @return a {@link GranularityFactory}, or <code>null</code> if the data
+     * @return a {@link UnitFactory}, or <code>null</code> if the data
      *         source could not be initialized or the schema adaptor returned a
-     *         null GranularityFactory.
-     * @throws TerminologyAdaptorInitializationException
-     *             if the terminology adaptor could not be initialized.
-     * @throws SchemaAdaptorInitializationException
-     *             if the schema adaptor could not be initialized.
-     * @see SchemaAdaptor#getGranularityFactory()
+     *         null UnitFactory.
+     * @throws DataSourceReadException
+     *             if the data source could not be initialized.
      */
     public UnitFactory getUnitFactory() throws DataSourceReadException {
         initializeIfNeeded();
@@ -186,94 +183,207 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
     }
 
     /**
-     *
-     * @param keyIds
-     * @param paramIds
-     * @param filters
+     * Queries for primitive parameters.
+     * 
+     * @param keyIds the key id {@link String}s to query.
+     * @param propIds the proposition id {@link String}s of the primitive
+     * parameters of interest.
+     * @param filters {@link Filter}s to constraint the query.
      * @param qs
-     * @return an unmodifiable {@link Map<String, List<PrimitiveParameter>>}.
+     * @return an immutable {@link Map<String, List<PrimitiveParameter>>}.
      * @throws DataSourceReadException
      */
-    public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
-            Set<String> keyIds, Set<String> paramIds,
+    public Map<String, List<PrimitiveParameter>> getPrimitiveParameters(
+            Set<String> keyIds, Set<String> propIds,
             Filter filters, QuerySession qs)
             throws DataSourceReadException {
-        return PRIMPARAM_ASC_QUERY.execute(this, keyIds, paramIds,
-                filters, qs);
+        return PRIMPARAM_QUERY.execute(this, keyIds, propIds, filters, qs);
     }
 
     /**
+     * Queries for constants.
      *
-     * @param keyIds
-     * @param paramIds
-     * @param filters
+     * @param keyIds the key id {@link String}s to query.
+     * @param propIds the proposition id {@link String}s of the primitive
+     * parameters of interest.
+     * @param filters {@link Filter}s to constraint the query.
      * @param qs
-     * @return an unmodifiable {@link Map<String, List<PrimitiveParameter>>}.
-     * @throws DataSourceReadException
-     */
-    public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
-            Set<String> keyIds, Set<String> paramIds, Filter filters,
-            QuerySession qs)
-            throws DataSourceReadException {
-        return PRIMPARAM_DESC_QUERY.execute(this, keyIds, paramIds,
-                filters, qs);
-    }
-
-    /**
-     *
-     * @param keyIds
-     * @param paramIds
-     * @param filters
-     * @param qs
-     * @return an unmodifiable {@link Map<String, List<Constant>>}.
+     * @return an immutable {@link Map<String, List<Constant>>}.
      * 
      * @throws DataSourceReadException
      */
     public Map<String, List<Constant>> getConstantPropositions(
-            Set<String> keyIds, Set<String> paramIds, Filter filters,
+            Set<String> keyIds, Set<String> propIds, Filter filters,
             QuerySession qs)
             throws DataSourceReadException {
-        return CONST_QUERY.execute(this, keyIds, paramIds, filters, qs);
+        return CONST_QUERY.execute(this, keyIds, propIds, filters, qs);
     }
 
     /**
+     * Queries for events.
      *
-     * @param keyIds
-     * @param eventIds
-     * @param filters
+     * @param keyIds the key id {@link String}s to query.
+     * @param propIds the proposition id {@link String}s of the primitive
+     * parameters of interest.
+     * @param filters {@link Filter}s to constraint the query.
      * @param qs
-     * @return an unmodifiable {@link Map<String, List<Event>>}.
+     * @return an immutable {@link Map<String, List<Event>>}.
      * @throws DataSourceReadException
      */
-    public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
-            Set<String> eventIds, Filter filters, QuerySession qs)
+    public Map<String, List<Event>> getEvents(Set<String> keyIds,
+            Set<String> propIds, Filter filters, QuerySession qs)
             throws DataSourceReadException {
-        return EVENTS_ASC_QUERY.execute(this, keyIds, eventIds, filters, qs);
+        return EVENTS_QUERY.execute(this, keyIds, propIds, filters, qs);
     }
 
     /**
+     * The map implementation that is returned by the query methods. It is
+     * backed by maps that are returned by the configured data source backends.
+     * The implementation is immutable. Write methods will throw
+     * {@link UnsupportedOperationException}.
      *
-     * @param keyIds
-     * @param eventIds
-     * @param filters
-     * @param qs
-     * @return an unmodifiable {@link Map<String, List<Event>>}.
-     * @throws DataSourceReadException
+     * @see #getEvents(java.util.Set, java.util.Set, org.protempa.dsb.filter.Filter, org.protempa.QuerySession)
+     * @see #getConstantPropositions(java.util.Set, java.util.Set, org.protempa.dsb.filter.Filter, org.protempa.QuerySession)
+     * @see #getPrimitiveParameters(java.util.Set, java.util.Set, org.protempa.dsb.filter.Filter, org.protempa.QuerySession) 
      */
-    public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
-            Set<String> eventIds, Filter filters,
-            QuerySession qs)
-            throws DataSourceReadException {
-        return EVENTS_DESC_QUERY.execute(this, keyIds, eventIds,
-                filters, qs);
+    public static class DataSourceResultMap<P> implements Map<String, List<P>> {
+
+        private class DataSourceResultMapEntry implements
+                Map.Entry<String, List<P>> {
+
+            String key;
+            List<P> value;
+
+            @Override
+            public String getKey() {
+                return this.key;
+            }
+
+            @Override
+            public List<P> getValue() {
+                return this.value;
+            }
+
+            @Override
+            public List<P> setValue(List<P> value) {
+                throw new UnsupportedOperationException(
+                        "This map is immutable");
+            }
+        }
+        
+        private List<Map<String, List<P>>> maps;
+
+        private DataSourceResultMap(List<Map<String, List<P>>> maps) {
+            this.maps = maps;
+        }
+
+        @Override
+        public int size() {
+            int size = 0;
+            for (Map<String, List<P>> map : this.maps) {
+                size += map.size();
+            }
+            return size;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return size() == 0;
+        }
+
+        @Override
+        public boolean containsKey(Object o) {
+            boolean containsKey = false;
+            for (Map<String, List<P>> map : this.maps) {
+                if (map.containsKey(o)) {
+                    containsKey = true;
+                    break;
+                }
+            }
+            return containsKey;
+        }
+
+        @Override
+        public boolean containsValue(Object o) {
+            boolean containsValue = false;
+            for (Map<String, List<P>> map : this.maps) {
+                if (map.containsValue(o)) {
+                    containsValue = true;
+                    break;
+                }
+            }
+            return containsValue;
+        }
+
+        @Override
+        public List<P> get(Object o) {
+            List<P> result = new ArrayList<P>();
+            for (Map<String, List<P>> map : this.maps) {
+                List<P> r = (List<P>) map.get(o);
+                if (r != null) {
+                    result.addAll(r);
+                }
+            }
+            return result;
+        }
+
+        @Override
+        public List<P> put(String k, List<P> v) {
+            throw new UnsupportedOperationException("This map is immutable");
+        }
+
+        @Override
+        public List<P> remove(Object o) {
+            throw new UnsupportedOperationException("This map is immutable");
+        }
+
+        @Override
+        public void putAll(Map<? extends String, ? extends List<P>> map) {
+            throw new UnsupportedOperationException("This map is immutable");
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("This map is immutable");
+        }
+
+        @Override
+        public Set<String> keySet() {
+            Set<String> result = new HashSet<String>();
+            for (Map<String, List<P>> map : this.maps) {
+                result.addAll(map.keySet());
+            }
+            return result;
+        }
+
+        @Override
+        public Set<Entry<String, List<P>>> entrySet() {
+            Set<Entry<String, List<P>>> result =
+                    new HashSet<Entry<String, List<P>>>();
+            for (Map<String, List<P>> map : this.maps) {
+                for (Map.Entry<String, List<P>> me : map.entrySet()) {
+                    DataSourceResultMapEntry newMe = new DataSourceResultMapEntry();
+                    newMe.key = me.getKey();
+                    newMe.value = me.getValue();
+                    result.add(newMe);
+                }
+            }
+            return result;
+        }
+
+        @Override
+        public Collection<List<P>> values() {
+            Collection<List<P>> result = new ArrayList<List<P>>();
+            for (Map<String, List<P>> map : this.maps) {
+                result.addAll(map.values());
+            }
+            return result;
+        }
     }
 
     private static abstract class ProcessQuery<P> {
 
-        private Comparator comparator;
-
-        ProcessQuery(Comparator comparator) {
-            this.comparator = comparator;
+        ProcessQuery() {
         }
 
         Map<String, List<P>> execute(DataSource dataSource,
@@ -283,33 +393,21 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
                 throws DataSourceReadException {
             Set<String> notNullKeyIds = handleKeyIdSetArgument(keyIds);
             Set<String> notNullPropIds = handlePropIdSetArgument(propIds);
-            Map<String, List<P>> result = new HashMap<String, List<P>>();
 
             dataSource.initializeIfNeeded();
             List<DataSourceBackend> backends =
                     dataSource.backendManager.getBackends();
+            List<Map<String, List<P>>> resultMaps = 
+                    new ArrayList<Map<String, List<P>>>(backends.size());
             for (DataSourceBackend backend : backends) {
-                Map<String, List<P>> events = executeBackend(backend,
+                resultMaps.add(executeBackend(backend,
                         notNullKeyIds,
-                        notNullPropIds, filters, qs);
-                if (events == null) {
-                    events = new HashMap<String, List<P>>();
-                }
-                for (Map.Entry<String, List<P>> entry : events.entrySet()) {
-                    if (result.containsKey(entry.getKey())) {
-                        result.get(entry.getKey()).addAll(entry.getValue());
-                    } else {
-                        result.put(entry.getKey(), entry.getValue());
-                    }
-                }
+                        notNullPropIds, filters, qs));
+
             }
-            if (this.comparator != null) {
-                if (ALWAYS_RESORT || backends.size() > 1) {
-                    for (Map.Entry<String, List<P>> entry : result.entrySet()) {
-                        Collections.sort(entry.getValue(), this.comparator);
-                    }
-                }
-            }
+
+            Map<String, List<P>> result =
+                    new DataSourceResultMap<P>(resultMaps);
 
             return result;
         }
@@ -321,30 +419,19 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
                 QuerySession qs)
                 throws DataSourceReadException;
     }
-    private static ProcessQuery<Event> EVENTS_ASC_QUERY =
-            new ProcessQuery<Event>(ProtempaUtil.TEMP_PROP_COMP) {
+    private static ProcessQuery<Event> EVENTS_QUERY =
+            new ProcessQuery<Event>() {
 
                 @Override
                 protected Map<String, List<Event>> executeBackend(
                         DataSourceBackend backend, Set<String> keyIds,
                         Set<String> propIds, Filter filters, QuerySession qs)
                         throws DataSourceReadException {
-                    return backend.getEventsAsc(keyIds, propIds, filters, qs);
+                    return backend.getEvents(keyIds, propIds, filters, qs);
                 }
             };
-    private static ProcessQuery<Event> EVENTS_DESC_QUERY =
-            new ProcessQuery<Event>(ProtempaUtil.REVERSE_TEMP_PROP_COMP) {
-
-                @Override
-                protected Map<String, List<Event>> executeBackend(
-                        DataSourceBackend backend, Set<String> keyIds,
-                        Set<String> propIds, Filter filters, QuerySession qs)
-                        throws DataSourceReadException {
-                    return backend.getEventsDesc(keyIds, propIds, filters, qs);
-                }
-            };
-    private static ProcessQuery<PrimitiveParameter> PRIMPARAM_ASC_QUERY =
-            new ProcessQuery<PrimitiveParameter>(ProtempaUtil.TEMP_PROP_COMP) {
+    private static ProcessQuery<PrimitiveParameter> PRIMPARAM_QUERY =
+            new ProcessQuery<PrimitiveParameter>() {
 
                 @Override
                 protected Map<String, List<PrimitiveParameter>> executeBackend(
@@ -352,27 +439,12 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
                         Set<String> keyIds, Set<String> propIds, Filter filters,
                         QuerySession qs)
                         throws DataSourceReadException {
-                    return backend.getPrimitiveParametersAsc(
-                            keyIds, propIds, filters, qs);
-                }
-            };
-    private static ProcessQuery<PrimitiveParameter> PRIMPARAM_DESC_QUERY =
-            new ProcessQuery<PrimitiveParameter>(
-            ProtempaUtil.REVERSE_TEMP_PROP_COMP) {
-
-                @Override
-                protected Map<String, List<PrimitiveParameter>> executeBackend(
-                        DataSourceBackend backend,
-                        Set<String> keyIds, Set<String> propIds,
-                        Filter filters,
-                        QuerySession qs)
-                        throws DataSourceReadException {
-                    return backend.getPrimitiveParametersDesc(
+                    return backend.getPrimitiveParameters(
                             keyIds, propIds, filters, qs);
                 }
             };
     private static ProcessQuery<Constant> CONST_QUERY =
-            new ProcessQuery<Constant>(null) {
+            new ProcessQuery<Constant>() {
 
                 @Override
                 protected Map<String, List<Constant>> executeBackend(

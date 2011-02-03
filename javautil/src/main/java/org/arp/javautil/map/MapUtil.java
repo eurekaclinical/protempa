@@ -10,7 +10,8 @@ public class MapUtil {
 
     private static class LazyLoggerHolder {
 
-        private static Logger instance = Logger.getLogger(MapUtil.class.getPackage().getName());
+        private static Logger instance =
+                Logger.getLogger(MapUtil.class.getPackage().getName());
     }
 
     /**

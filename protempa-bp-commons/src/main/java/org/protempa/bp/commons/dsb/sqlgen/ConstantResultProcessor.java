@@ -32,10 +32,11 @@ class ConstantResultProcessor extends
             int i = 1;
             String keyId = resultSet.getString(i++);
 
-            String[] uniqueIds = generateUniqueIdsArray(entitySpec);
+            String[] uniqueIds = 
+                    new String[entitySpec.getUniqueIdSpecs().length];
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifer = generateUniqueIdentifier(
-                    entitySpec, uniqueIds);
+                    entitySpec.getName(), uniqueIds);
 
             String propId = null;
             if (!isCasePresent()) {

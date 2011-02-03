@@ -2,6 +2,8 @@ package org.protempa.proposition.value;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.util.Map;
+import org.apache.commons.collections.map.ReferenceMap;
 
 /**
  * @author Andrew Post
@@ -17,15 +19,30 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
     }
     private final BigDecimal num;
     private volatile int hashCode;
+    
+    private static final Map cache = new ReferenceMap();
+
+    public static NumberValue getInstance(double num) {
+        return getInstance(BigDecimal.valueOf(num));
+    }
+
+    public static NumberValue getInstance(BigDecimal num) {
+        NumberValue result = (NumberValue) cache.get(num);
+        if (result == null) {
+            result = new NumberValue(num);
+            cache.put(num, result);
+        }
+        return result;
+    }
 
     public NumberValue(double num) {
-        this(new BigDecimal(num));
+        this(BigDecimal.valueOf(num));
     }
 
     public NumberValue(BigDecimal num) {
         super(ValueType.NUMBERVALUE);
         if (num == null) {
-            this.num = new BigDecimal(0);
+            this.num = BigDecimal.ZERO;
         } else {
             this.num = num;
         }

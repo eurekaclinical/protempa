@@ -24,7 +24,7 @@ public final class InequalityNumberValue extends ValueImpl implements
      *            a <code>double</code>.
      */
     public InequalityNumberValue(ValueComparator comparator, double val) {
-        this(comparator, new BigDecimal(val));
+        this(comparator, BigDecimal.valueOf(val));
     }
 
     /**
@@ -41,9 +41,9 @@ public final class InequalityNumberValue extends ValueImpl implements
     public InequalityNumberValue(ValueComparator comparator, BigDecimal val) {
         super(ValueType.INEQUALITYNUMBERVALUE);
         if (val != null) {
-            this.val = new NumberValue(val);
+            this.val = NumberValue.getInstance(val);
         } else {
-            this.val = new NumberValue(0);
+            this.val = NumberValue.getInstance(0);
         }
         if (comparator == null) {
             comp = ValueComparator.EQUAL_TO;

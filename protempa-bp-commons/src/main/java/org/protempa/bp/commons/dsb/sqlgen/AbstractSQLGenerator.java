@@ -249,10 +249,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     allEntitySpecsCopy, keyIds, order, resultProcessor);
 
             Map<String, List<P>> resultsMap = resultProcessor.getResults();
-            for (Map.Entry<String, List<P>> entry : resultsMap.entrySet()) {
-                Collections.putListMult(results, entry.getKey(),
-                        entry.getValue());
-            }
 
             ReferenceSpec[] refSpecs = entitySpec.getReferenceSpecs();
             if (refSpecs != null) {
@@ -315,6 +311,18 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                         "Data source backend {0} is done processing entity spec {1}",
                         new Object[]{backendNameForMessages(),
                             entitySpec.getName()});
+            }
+
+            for (Map.Entry<String, List<P>> entry : resultsMap.entrySet()) {
+                String key = entry.getKey();
+                List<P> l = results.get(key);
+                if (l == null) {
+                    l = new ArrayList<P>();
+                }
+                for (P val : entry.getValue()) {
+                    l.add(val);
+                }
+                results.put(key, l);
             }
 
             logger.log(Level.FINE,
@@ -484,9 +492,13 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     constraintValueList.add(constraintValue);
                 }
             }
-            filteredConstraintValues =
-                    constraintValueList.toArray(
-                    new ColumnSpec.PropositionIdToSqlCode[constraintValueList.size()]);
+            if (constraintValueList.isEmpty()) {
+                filteredConstraintValues = constraintValues;
+            } else {
+                filteredConstraintValues =
+                        constraintValueList.toArray(
+                        new ColumnSpec.PropositionIdToSqlCode[constraintValueList.size()]);
+            }
         } else {
             filteredConstraintValues = constraintValues;
         }

@@ -703,7 +703,7 @@ final class AbstractionFinder implements Module {
             logger.log(Level.FINE, "Primitive parameter ids: {0}",
                     primitiveParameterIds);
             Map<String, List<PrimitiveParameter>> keyIdsToPrimParams =
-                    dataSource.getPrimitiveParametersAsc(keyIds,
+                    dataSource.getPrimitiveParameters(keyIds,
                     primitiveParameterIds, filters, qs);
             if (logger.isLoggable(Level.FINEST)) {
                 for (Map.Entry<String, List<PrimitiveParameter>> e :
@@ -741,7 +741,7 @@ final class AbstractionFinder implements Module {
             Set<String> eventIds =
                     knowledgeSource.leafEventIds(propositionIds);
             logger.log(Level.FINE, "Event ids: {0}", eventIds);
-            this.events = dataSource.getEventsAsc(keyIds, eventIds,
+            this.events = dataSource.getEvents(keyIds, eventIds,
                     filters, qs);
         }
     }

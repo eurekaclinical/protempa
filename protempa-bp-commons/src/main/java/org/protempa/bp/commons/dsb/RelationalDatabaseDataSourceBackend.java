@@ -17,7 +17,6 @@ import org.protempa.bp.commons.AbstractCommonsDataSourceBackend;
 import org.protempa.bp.commons.BackendProperty;
 import org.protempa.bp.commons.dsb.sqlgen.RelationalDatabaseSpec;
 import org.protempa.bp.commons.dsb.sqlgen.SQLGeneratorFactory;
-import org.protempa.bp.commons.dsb.sqlgen.SQLOrderBy;
 import org.protempa.dsb.filter.Filter;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
@@ -240,42 +239,21 @@ public abstract class RelationalDatabaseDataSourceBackend
     }
 
     @Override
-    public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
-            Set<String> keyIds,
-            Set<String> paramIds, Filter dataSourceConstraints,
-            QuerySession qs)
-            throws DataSourceReadException {
-        return this.sqlGenerator.readPrimitiveParameters(keyIds, paramIds,
-                dataSourceConstraints,
-                SQLOrderBy.DESCENDING);
-    }
-
-    @Override
-    public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
+    public Map<String, List<PrimitiveParameter>> getPrimitiveParameters(
             Set<String> keyIds, Set<String> paramIds,
             Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
         return this.sqlGenerator.readPrimitiveParameters(keyIds, paramIds,
-                dataSourceConstraints,
-                SQLOrderBy.ASCENDING);
+                dataSourceConstraints, null);
     }
 
     @Override
-    public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
+    public Map<String, List<Event>> getEvents(Set<String> keyIds,
             Set<String> eventIds, Filter filters, QuerySession qs)
             throws DataSourceReadException {
         return this.sqlGenerator.readEvents(keyIds, eventIds,
-                filters, SQLOrderBy.ASCENDING);
-    }
-
-    @Override
-    public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
-            Set<String> eventIds, Filter dataSourceConstraints,
-            QuerySession qs)
-            throws DataSourceReadException {
-        return this.sqlGenerator.readEvents(keyIds, eventIds,
-                dataSourceConstraints, SQLOrderBy.DESCENDING);
+                filters, null);
     }
 
     @Override

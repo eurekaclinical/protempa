@@ -23,8 +23,7 @@ abstract class AbstractMainResultProcessor<P extends Proposition>
     }
 
     final Map<UniqueIdentifier,P> createCache() {
-        Map<UniqueIdentifier,P> result =
-                new HashMap<UniqueIdentifier,P>();
+        Map<UniqueIdentifier,P> result = new HashMap<UniqueIdentifier,P>();
         if (this.results != null) {
             for (List<P> props : this.results.values()) {
                 for (P prop : props) {

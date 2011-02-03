@@ -36,18 +36,10 @@ public abstract class AbstractDataSourceBackend extends
 
     @Override
     public Map<String, List<PrimitiveParameter>>
-            getPrimitiveParametersAsc(Set<String> keyIds, Set<String> paramIds,
+            getPrimitiveParameters(Set<String> keyIds, Set<String> paramIds,
 			Filter filters, QuerySession qs)
 			throws DataSourceReadException {
 		return null;
-    }
-
-    @Override
-    public Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
-            Set<String> keyIds, Set<String> paramIds, Filter filters,
-            QuerySession qs)
-            throws DataSourceReadException {
-        return null;
     }
 
     public List<String> getAllKeyIds(int start, int count, Filter filters,
@@ -65,14 +57,7 @@ public abstract class AbstractDataSourceBackend extends
     }
 
     @Override
-    public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
-            Set<String> eventIds, Filter filters, QuerySession qs)
-            throws DataSourceReadException {
-        return null;
-    }
-
-    @Override
-    public Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
+    public Map<String, List<Event>> getEvents(Set<String> keyIds,
             Set<String> eventIds, Filter filters, QuerySession qs)
             throws DataSourceReadException {
         return null;

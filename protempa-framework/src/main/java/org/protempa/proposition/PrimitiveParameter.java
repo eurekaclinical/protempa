@@ -26,7 +26,8 @@ public final class PrimitiveParameter extends TemporalParameter {
      */
     private Granularity granularity;
 
-    private final IntervalFactory intervalFactory;
+    private static final IntervalFactory intervalFactory =
+            new IntervalFactory();
 
     /**
      * Creates a parameter with an identification string.
@@ -37,7 +38,6 @@ public final class PrimitiveParameter extends TemporalParameter {
      */
     public PrimitiveParameter(String id) {
         super(id);
-        this.intervalFactory = new IntervalFactory();
     }
 
     /**
@@ -85,7 +85,7 @@ public final class PrimitiveParameter extends TemporalParameter {
         /*
          * As per Combi et al. Methods Inf. Med. 1995;34:458-74.
          */
-        setInterval(this.intervalFactory.getInstance(
+        setInterval(intervalFactory.getInstance(
                 timestamp, granularity, timestamp, granularity));
     }
 

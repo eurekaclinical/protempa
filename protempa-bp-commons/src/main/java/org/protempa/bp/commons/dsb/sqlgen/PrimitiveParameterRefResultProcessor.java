@@ -1,6 +1,5 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
-import java.util.List;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.UniqueIdentifier;
 
@@ -12,9 +11,9 @@ final class PrimitiveParameterRefResultProcessor extends
         RefResultProcessor<PrimitiveParameter> {
 
     @Override
-    void setReferencesForProposition(String referenceName, 
+    void addReferenceForProposition(String referenceName, 
             PrimitiveParameter primitiveParameter, 
-            List<UniqueIdentifier> uids) {
-        primitiveParameter.setReferences(referenceName, uids);
+            UniqueIdentifier uid) {
+        primitiveParameter.addReference(referenceName, uid);
     }
 }

@@ -40,10 +40,6 @@ abstract class AbstractResultProcessor implements SQLGenResultProcessor {
         this.casePresent = casePresent;
     }
 
-    protected final String[] generateUniqueIdsArray(EntitySpec entitySpec) {
-        return new String[entitySpec.getUniqueIdSpecs().length];
-    }
-
     protected final int readUniqueIds(String[] uniqueIds, ResultSet resultSet,
             int i) throws SQLException {
         for (int m = 0; m < uniqueIds.length; m++) {
@@ -53,10 +49,10 @@ abstract class AbstractResultProcessor implements SQLGenResultProcessor {
     }
     
     protected final UniqueIdentifier generateUniqueIdentifier(
-            EntitySpec entitySpec, String[] uniqueIds)
+            String entitySpecName, String[] uniqueIds)
             throws SQLException {
         return new UniqueIdentifier(
                 DataSourceBackendId.getInstance(getDataSourceBackendId()),
-                new SQLGenUniqueIdentifier(entitySpec.getName(), uniqueIds));
+                new SQLGenUniqueIdentifier(entitySpecName, uniqueIds));
     }
 }

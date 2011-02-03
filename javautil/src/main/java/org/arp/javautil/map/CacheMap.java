@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.Status;
 
 /**
  * Implements EHCache-backed {@link Map}. Because this map is backed by a cache,
@@ -28,48 +29,49 @@ import net.sf.ehcache.Element;
  */
 public class CacheMap<K, V> implements Map<K, V> {
 
-    private final CacheManager cacheManager;
+    /*
+     * Wrap the cache manager in a static class so it gets created lazily
+     * and in a threadsafe manner. Add a runtime hook so it gets shutdown
+     * upon JVM shutdown.
+     */
+    private static class CacheManagerHolder {
+        
+        static final CacheManager cacheManager = new CacheManager();
+
+        static {
+            Runtime runtime = Runtime.getRuntime();
+            runtime.addShutdownHook(new Thread("CacheMapShutdown") {
+
+                @Override
+                public void run() {
+                    Logger logger = MapUtil.logger();
+                    synchronized (CacheManagerHolder.cacheManager) {
+                        logger.log(Level.FINE,
+                                "Shutting down CacheMap's cache manager");
+                        CacheManagerHolder.cacheManager.shutdown();
+                    }
+                }
+            });
+        }
+    }
     private final Cache cache;
     private String id;
 
-    private class ShutdownRunnable implements Runnable {
-
-        private String id;
-
-        public ShutdownRunnable(String id) {
-            this.id = new String(id);
-        }
-
-        @Override
-        public void run() {
-            if (cache != null) {
-                synchronized (cache) {
-                    Logger logger = MapUtil.logger();
-                    logger.log(Level.FINE, "Disposing cache " + new String(id));
-                    cache.setDisabled(true);
-                    cache.dispose();
-                }
-            }
-        }
-    }
-
     public CacheMap() {
         this.id = UUID.randomUUID().toString();
-        this.cacheManager = CacheManager.create();
-
-        Runtime.getRuntime().addShutdownHook(
-                new Thread(new ShutdownRunnable(this.id)));
+        CacheManager cacheManager = CacheManagerHolder.cacheManager;
 
         Logger logger = MapUtil.logger();
         if (logger.isLoggable(Level.FINE)) {
-            File file = new File(this.cacheManager.getDiskStorePath(), this.id);
+            File file = new File(cacheManager.getDiskStorePath(),
+                    this.id);
             String path = file.getAbsolutePath();
-            logger.log(Level.FINE, "Creating cache {0} in {1}", new Object[] {
-                    this.id, path });
+            logger.log(Level.FINE, "Creating CacheMap cache {0} in {1}",
+                    new Object[]{this.id, path});
 
         }
 
-        this.cacheManager.addCache(this.id);
+        cacheManager.addCache(this.id);
         this.cache = cacheManager.getCache(this.id);
     }
 
@@ -194,12 +196,22 @@ public class CacheMap<K, V> implements Map<K, V> {
         return values;
     }
 
+    /**
+     * Disposes the cache upon GC.
+     * @throws Throwable
+     */
     @Override
     protected void finalize() throws Throwable {
-        if (this.cache != null) {
-            synchronized (cache) {
+        /*
+         * Synchronizes with the cache manager instance so if it is getting
+         * shutdown we don't try to dispose of the cache at the same time
+         * (and vice versa).
+         */
+        synchronized (CacheManagerHolder.cacheManager) {
+            if (CacheManagerHolder.cacheManager.getStatus()
+                    == Status.STATUS_ALIVE) {
                 Logger logger = MapUtil.logger();
-                logger.log(Level.FINE, "Disposing cache " + new String(id));
+                logger.log(Level.FINE, "Disposing CacheMap cache " + id);
                 this.cache.setDisabled(true);
                 this.cache.dispose();
             }

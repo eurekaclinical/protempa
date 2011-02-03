@@ -28,7 +28,7 @@ public final class NumberValueFactory extends NumericalValueFactory {
     public Value parseValue(String val) {
         if (val != null) {
             try {
-                return new NumberValue(new BigDecimal(val.trim()));
+                return NumberValue.getInstance(new BigDecimal(val.trim()));
             } catch (NumberFormatException e) {
                 return null;
             }

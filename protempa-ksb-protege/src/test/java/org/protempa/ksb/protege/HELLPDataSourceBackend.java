@@ -126,7 +126,7 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
     }
 
     @Override
-    public Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
+    public Map<String, List<PrimitiveParameter>> getPrimitiveParameters(
             Set<String> keyIds, Set<String> paramIds,
             Filter dataSourceConstraints, QuerySession qs)
             throws DataSourceReadException {
@@ -245,7 +245,7 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
     }
 
     @Override
-    public Map<String, List<Event>> getEventsAsc(Set<String> keyIds,
+    public Map<String, List<Event>> getEvents(Set<String> keyIds,
             Set<String> paramIds, Filter filters, QuerySession qs)
             throws DataSourceReadException {
         boolean where = false;

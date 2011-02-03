@@ -11,7 +11,9 @@ import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 
 /**
- *
+ * Interface for data source backends, which provide access to data sources
+ * for PROTEMPA.
+ * 
  * @author Andrew Post
  */
 public interface DataSourceBackend extends
@@ -22,24 +24,15 @@ public interface DataSourceBackend extends
             QuerySession qs)
             throws DataSourceReadException;
 
-    Map<String, List<Event>> getEventsAsc(Set<String> keyIds, 
-            Set<String> eventIds, Filter filters, QuerySession qs)
-            throws DataSourceReadException;
-
-    Map<String, List<Event>> getEventsDesc(Set<String> keyIds,
+    Map<String, List<Event>> getEvents(Set<String> keyIds,
             Set<String> eventIds, Filter filters, QuerySession qs)
             throws DataSourceReadException;
 
     GranularityFactory getGranularityFactory();
 
-    Map<String, List<PrimitiveParameter>> getPrimitiveParametersAsc(
+    Map<String, List<PrimitiveParameter>> getPrimitiveParameters(
             Set<String> keyIds, Set<String> paramIds,
             Filter filters, QuerySession qs)
-            throws DataSourceReadException;
-
-    Map<String, List<PrimitiveParameter>> getPrimitiveParametersDesc(
-            Set<String> keyIds, Set<String> paramIds, Filter filters,
-            QuerySession qs)
             throws DataSourceReadException;
 
     UnitFactory getUnitFactory();

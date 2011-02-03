@@ -63,7 +63,7 @@ public final class SourceFactory {
             if (!asl.hasSpec(specId) && !dsl.hasSpec(specId)
                     && !ksl.hasSpec(specId) && !tsl.hasSpec(specId))
                 throw new InvalidConfigurationException(
-                        "The backend" + specId + " was not found");
+                        "The backend " + specId + " was not found");
         }
 
         this.algorithmSourceBackendInstanceSpecs = 

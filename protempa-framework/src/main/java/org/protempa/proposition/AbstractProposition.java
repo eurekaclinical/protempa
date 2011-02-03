@@ -100,6 +100,23 @@ public abstract class AbstractProposition implements Proposition {
         this.references.put(name.intern(), refs);
     }
 
+    public final void addReference(String name, UniqueIdentifier ref) {
+        if (name == null) {
+            throw new IllegalArgumentException("name cannot be null");
+        }
+        if (ref == null) {
+            throw new IllegalArgumentException("ref cannot be null");
+        }
+        List<UniqueIdentifier> refs = this.references.get(name);
+        if (refs == null) {
+            refs = new ArrayList<UniqueIdentifier>();
+            refs.add(ref);
+            this.references.put(name.intern(), refs);
+        } else {
+            refs.add(ref);
+        }
+    }
+
     @Override
     public final List<UniqueIdentifier> getReferences(String name) {
         List<UniqueIdentifier> result = this.references.get(name);
