@@ -209,7 +209,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return sqlCodes;
     }
 
-    private <P extends Proposition> Map<String, List<P>> readPropositions(
+    private <P extends Proposition> ResultCache<P> readPropositions(
             Set<String> propIds, Filter filters,
             Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessorFactory<P> factory)
@@ -217,7 +217,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         Map<EntitySpec, List<String>> entitySpecMapFromPropIds =
                 entitySpecMapForPropIds(propIds);
 
-        Map<String, List<P>> results = new CacheMap<String, List<P>>();
+        ResultCache<P> results = new ResultCache<P>();
 
         Collection<EntitySpec> allEntitySpecs = allEntitySpecs();
         Logger logger = SQLGenUtil.logger();
@@ -249,12 +249,10 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     "allEntitySpecsCopy should have at least one element";
             String dataSourceBackendId =
                     this.backend.getDataSourceBackendId();
-            AbstractMainResultProcessor resultProcessor =
-                    factory.getInstance(dataSourceBackendId, entitySpec);
+            AbstractMainResultProcessor<P> resultProcessor =
+                    factory.getInstance(dataSourceBackendId, entitySpec, results);
             generateAndExecuteSelect(entitySpec, null, propIds, filtersCopy,
                     allEntitySpecsCopy, keyIds, order, resultProcessor);
-
-            Map<String, List<P>> resultsMap = resultProcessor.getResults();
 
             ReferenceSpec[] refSpecs = entitySpec.getReferenceSpecs();
             if (refSpecs != null) {
@@ -263,11 +261,10 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                  * the first item of the list. This is to make sure that
                  * its joins make it into the list of column specs.
                  */
-                Map<UniqueIdentifier, P> cache = resultProcessor.createCache();
                 for (ReferenceSpec referenceSpec : refSpecs) {
                     RefResultProcessor<P> refResultProcessor =
                             factory.getRefInstance(dataSourceBackendId,
-                            entitySpec, referenceSpec, cache);
+                            entitySpec, referenceSpec, results);
                     logger.log(Level.FINE,
                             "Data source backend {0} is processing reference {1} for entity spec {2}",
                             new Object[]{backendNameForMessages(),
@@ -319,18 +316,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                             entitySpec.getName()});
             }
 
-            for (Map.Entry<String, List<P>> entry : resultsMap.entrySet()) {
-                String key = entry.getKey();
-                List<P> l = results.get(key);
-                if (l == null) {
-                    l = new ArrayList<P>();
-                }
-                for (P val : entry.getValue()) {
-                    l.add(val);
-                }
-                results.put(key, l);
-            }
-
             logger.log(Level.FINE,
                     "Results of query for {0} in data source backend {1} "
                     + "have been processed",
@@ -345,7 +330,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         entitySpecs.addAll(this.eventSpecs.values());
         entitySpecs.addAll(this.primitiveParameterSpecs.values());
         entitySpecs.addAll(this.constantSpecs.values());
-        return new ArrayList(entitySpecs);
+        return new ArrayList<EntitySpec>(entitySpecs);
     }
 
     private static Set<Filter> copyFilters(Filter filters) {
@@ -431,7 +416,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     protected abstract boolean isLimitingSupported();
 
     @Override
-    public Map<String, List<Constant>> readConstants(
+    public ResultCache<Constant> readConstants(
             Set<String> keyIds, Set<String> paramIds, Filter filters)
             throws DataSourceReadException {
         ConstantResultProcessorFactory factory =
@@ -441,7 +426,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     }
 
     @Override
-    public Map<String, List<PrimitiveParameter>> readPrimitiveParameters(
+    public ResultCache<PrimitiveParameter> readPrimitiveParameters(
             Set<String> keyIds, Set<String> paramIds, Filter filters,
             SQLOrderBy order)
             throws DataSourceReadException {
@@ -452,7 +437,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     }
 
     @Override
-    public Map<String, List<Event>> readEvents(Set<String> keyIds,
+    public ResultCache<Event> readEvents(Set<String> keyIds,
             Set<String> eventIds, Filter filters,
             SQLOrderBy order) throws DataSourceReadException {
         EventResultProcessorFactory factory =
@@ -927,7 +912,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         }
 
     }
-
+    
     private void processAdditionalConstraints(ColumnSpec columnSpec,
             StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
             Constraint constraint, Value value) {
