@@ -29,7 +29,7 @@ class InverseIsAConsequence implements Consequence {
     public void evaluate(KnowledgeHelper knowledgeHelper,
             WorkingMemory workingMemory)
             throws Exception {
-        PropositionVisitable o = 
+        PropositionVisitable o =
                 (PropositionVisitable) workingMemory.getObject(
                 knowledgeHelper.getTuple().get(0));
         o.accept(new PropositionCopier(this.eventId, workingMemory,

@@ -20,7 +20,7 @@ import org.arp.javautil.sql.SQLExecutor;
 import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.dsb.RelationalDatabaseDataSourceBackend;
 import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.Constraint;
-import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.PropositionIdToSqlCode;
+import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.KnowledgeSourceIdToSqlCode;
 import org.protempa.dsb.filter.Filter;
 import org.protempa.dsb.filter.PositionFilter;
 import org.protempa.dsb.filter.PositionFilter.Side;
@@ -31,11 +31,17 @@ import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
+import org.protempa.proposition.value.BooleanValue;
 import org.protempa.proposition.value.GranularityFactory;
+import org.protempa.proposition.value.InequalityNumberValue;
 import org.protempa.proposition.value.ListValue;
+import org.protempa.proposition.value.NominalValue;
+import org.protempa.proposition.value.NumberValue;
+import org.protempa.proposition.value.OrdinalValue;
 import org.protempa.proposition.value.UnitFactory;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
+import org.protempa.proposition.value.ValueVisitor;
 
 /**
  * Abstract class for implement database and driver-specific SQL generators.
@@ -195,7 +201,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         }
     }
 
-    private Object[] extractSqlCodes(PropositionIdToSqlCode[] filteredConstraintValues) {
+    private Object[] extractSqlCodes(KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
         Object[] sqlCodes = new Object[filteredConstraintValues.length];
         for (int i = 0; i < sqlCodes.length; i++) {
             sqlCodes[i] = filteredConstraintValues[i].getSqlCode();
@@ -480,15 +486,15 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             StringBuilder selectClause, StringBuilder fromClause,
             StringBuilder whereClause);
 
-    private static PropositionIdToSqlCode[] filterConstraintValues(
-            Set<String> propIds, PropositionIdToSqlCode[] constraintValues) {
-        ColumnSpec.PropositionIdToSqlCode[] filteredConstraintValues;
-        if (propIds != null) {
-            List<ColumnSpec.PropositionIdToSqlCode> constraintValueList =
-                    new ArrayList<ColumnSpec.PropositionIdToSqlCode>();
-            for (ColumnSpec.PropositionIdToSqlCode constraintValue :
+    private static KnowledgeSourceIdToSqlCode[] filterKnowledgeSourceIdToSqlCodesById(
+            Set<?> ids, KnowledgeSourceIdToSqlCode[] constraintValues) {
+        ColumnSpec.KnowledgeSourceIdToSqlCode[] filteredConstraintValues;
+        if (ids != null) {
+            List<ColumnSpec.KnowledgeSourceIdToSqlCode> constraintValueList =
+                    new ArrayList<ColumnSpec.KnowledgeSourceIdToSqlCode>();
+            for (ColumnSpec.KnowledgeSourceIdToSqlCode constraintValue :
                     constraintValues) {
-                if (propIds.contains(constraintValue.getPropositionId())) {
+                if (ids.contains(constraintValue.getPropositionId())) {
                     constraintValueList.add(constraintValue);
                 }
             }
@@ -497,7 +503,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             } else {
                 filteredConstraintValues =
                         constraintValueList.toArray(
-                        new ColumnSpec.PropositionIdToSqlCode[constraintValueList.size()]);
+                        new ColumnSpec.KnowledgeSourceIdToSqlCode[constraintValueList.size()]);
             }
         } else {
             filteredConstraintValues = constraintValues;
@@ -663,8 +669,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 }
             }
 
-            //boolean shouldGenerateTable = begin || currentJoin != null;
-            //if (shouldGenerateTable) {
             Integer i = referenceIndices.get(columnSpec);
             if (i != null && !columnSpecCache.containsKey(i)) {
                 assert begin || currentJoin != null :
@@ -689,20 +693,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 }
                 begin = false;
             }
-
-            //}
-
-//            if (columnSpec.getJoin() != null /*&& !columnSpecCache.containsKey(
-//                    referenceIndices.get(
-//                    columnSpec.getJoin().getNextColumnSpec()))*/) {
-//                //generateJoin(fromPart);
-//                currentJoin = columnSpec.getJoin();
-//            } else {
-//                currentJoin = null;
-//                //begin = true;
-//            }
-
-
         }
         return fromPart;
     }
@@ -767,31 +757,37 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
      * If wherePart is null, it skips creating the where clause part.
      * 
      * @param columnSpec
-     * @param propIds
+     * @param ids
      * @param wherePart
      * @param referenceIndices
      * @param selectPartHasCaseStmt
      * @param selectPart
      */
-    private void processConstraints(ColumnSpec columnSpec, Set<String> propIds,
+    private void processConstraint(ColumnSpec columnSpec,
+            Set<?> ids,
             StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
-            StringBuilder selectPart) {
-        ColumnSpec.Constraint constraint = columnSpec.getConstraint();
-        ColumnSpec.PropositionIdToSqlCode[] propIdToSqlCodes =
+            StringBuilder selectPart, Constraint constraintOverride) {
+        Constraint constraint = columnSpec.getConstraint();
+        if (constraintOverride != null) {
+            constraint = constraintOverride;
+        }
+        ColumnSpec.KnowledgeSourceIdToSqlCode[] propIdToSqlCodes =
                 columnSpec.getPropositionIdToSqlCodes();
         if (constraint != null) {
-            PropositionIdToSqlCode[] filteredConstraintValues =
-                    filterConstraintValues(propIds, propIdToSqlCodes);
-            if (filteredConstraintValues.length == 0) {
-                return;
-            }
+            KnowledgeSourceIdToSqlCode[] filteredConstraintValues =
+                    filterKnowledgeSourceIdToSqlCodesById(ids, propIdToSqlCodes);
             if (wherePart != null) {
                 if (wherePart.length() > 0) {
                     wherePart.append(" and ");
                 }
                 wherePart.append('(');
             }
-            Object[] sqlCodes = extractSqlCodes(filteredConstraintValues);
+            Object[] sqlCodes = null;
+            if (filteredConstraintValues.length > 0) {
+                sqlCodes = extractSqlCodes(filteredConstraintValues);
+            } else {
+                sqlCodes = ids.toArray();
+            }
 
             switch (constraint) {
                 case EQUAL_TO:
@@ -838,8 +834,10 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     }
                     break;
                 case LIKE:
-                    generateCaseClause(selectPart, sqlCodes, referenceIndices,
-                            columnSpec, filteredConstraintValues);
+                    if (selectPart != null) {
+                        generateCaseClause(selectPart, sqlCodes, referenceIndices,
+                                columnSpec, filteredConstraintValues);
+                    }
                     if (wherePart != null && sqlCodes.length > 1) {
                         wherePart.append('(');
                     }
@@ -872,7 +870,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     private void generateCaseClause(StringBuilder selectPart,
             Object[] sqlCodes, Map<ColumnSpec, Integer> referenceIndices,
             ColumnSpec columnSpec,
-            PropositionIdToSqlCode[] filteredConstraintValues) {
+            KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
         selectPart.append(", case ");
         for (int k = 0; k < sqlCodes.length; k++) {
             selectPart.append("when ");
@@ -891,31 +889,53 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         selectPart.append(" end ");
     }
 
+    private static class ValueExtractor implements ValueVisitor {
+
+        Set<Object> values = new HashSet<Object>();
+
+        @Override
+        public void visit(NominalValue nominalValue) {
+            values.add(nominalValue.getString());
+        }
+
+        @Override
+        public void visit(OrdinalValue ordinalValue) {
+            values.add(ordinalValue.getValue());
+        }
+
+        @Override
+        public void visit(BooleanValue booleanValue) {
+            values.add(booleanValue.getBoolean());
+        }
+
+        @Override
+        public void visit(ListValue<? extends Value> listValue) {
+            for (Value val : listValue) {
+                val.accept(this);
+            }
+        }
+
+        @Override
+        public void visit(NumberValue numberValue) {
+            values.add(numberValue.getNumber());
+        }
+
+        @Override
+        public void visit(InequalityNumberValue inequalityNumberValue) {
+            throw new UnsupportedOperationException(
+                    "inequalityNumberValue not supported");
+        }
+
+    }
+
     private void processAdditionalConstraints(ColumnSpec columnSpec,
             StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
-            Constraint constraint,
-            Value value) {
+            Constraint constraint, Value value) {
         if (constraint != null && value != null) {
-            if (value instanceof ListValue) {
-                ListValue<Value> lvalue = (ListValue<Value>) value;
-                Object[] vals = new Object[lvalue.size()];
-                /*
-                 * We assume that lvalue does not contain any nested lists
-                 * because PropertyValueFilter does not allow them.
-                 */
-                for (int i = 0; i < vals.length; i++) {
-                    vals[i] = lvalue.get(i).getFormatted();
-                }
-                generateInClause(wherePart,
-                        referenceIndices.get(columnSpec),
-                        columnSpec.getColumn(), vals, constraint
-                        == Constraint.NOT_EQUAL_TO);
-            } else {
-                appendColumnRef(wherePart, referenceIndices,
-                        columnSpec);
-                wherePart.append(constraint.getSqlOperator());
-                appendValue(value.getFormatted(), wherePart);
-            }
+            ValueExtractor ve = new ValueExtractor();
+            value.accept(ve);
+            processConstraint(columnSpec, ve.values, wherePart,
+                    referenceIndices, null, constraint);
         }
     }
 
@@ -1022,53 +1042,57 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return constraint;
     }
 
+    private static class ColumnSpecLooper {
+
+        ColumnSpec lastColumnSpec;
+        int i;
+
+        ColumnSpecLooper(ColumnSpec columnSpec, int i) {
+            if (columnSpec != null) {
+                while (columnSpec.getJoin() != null) {
+                    columnSpec = columnSpec.getJoin().getNextColumnSpec();
+                    i++;
+                }
+            }
+            this.lastColumnSpec = columnSpec;
+            this.i = i;
+        }
+    }
+
     private int processConstraintSpecForWhereClause(Set<String> propIds,
             ColumnSpec columnSpec, int i, StringBuilder wherePart,
             StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
             SQLGenResultProcessor resultProcessor) {
+        ColumnSpecLooper csl = new ColumnSpecLooper(columnSpec, i);
         if (columnSpec != null) {
-            while (columnSpec.getJoin() != null) {
-                columnSpec = columnSpec.getJoin().getNextColumnSpec();
-                i++;
-            }
+            columnSpec = csl.lastColumnSpec;
 
             resultProcessor.setCasePresent(columnSpec.getConstraint()
                     == ColumnSpec.Constraint.LIKE);
-            processConstraints(columnSpec, propIds, wherePart,
-                    referenceIndices, selectPart);
+            processConstraint(columnSpec, propIds, wherePart,
+                    referenceIndices, selectPart, null);
         }
-        return i;
+        return csl.i;
     }
 
     private int processPropertyValueFilter(ColumnSpec columnSpec, int i,
             StringBuilder wherePart,
             Map<ColumnSpec, Integer> referenceIndices,
-            ColumnSpec.Constraint additionalConstraint,
-            Value additionalValue) {
-        if (columnSpec == null) {
-            return i;
+            ColumnSpec.Constraint constraint,
+            Value value) {
+
+        ColumnSpecLooper csl = new ColumnSpecLooper(columnSpec, i);
+
+        if (columnSpec != null && constraint != null
+                && value != null) {
+
+            processAdditionalConstraints(csl.lastColumnSpec, wherePart,
+                    referenceIndices, constraint,
+                    value);
         }
 
-        while (columnSpec.getJoin() != null) {
-            columnSpec = columnSpec.getJoin().getNextColumnSpec();
-            i++;
-        }
-
-        if (wherePart.length() > 0) {
-            wherePart.append(" and ");
-        }
-
-        wherePart.append('(');
-        if (additionalConstraint != null
-                && additionalValue != null) {
-            processAdditionalConstraints(columnSpec, wherePart,
-                    referenceIndices, additionalConstraint,
-                    additionalValue);
-        }
-        wherePart.append(')');
-
-        return i;
+        return csl.i;
     }
 
     private int processFinishTimeSpecForWhereClause(
@@ -1251,7 +1275,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                             JoinSpec prevJoin = csPrev.getJoin();
                             if (currentJoin.isSameJoin(prevJoin)) {
                                 previousInstanceIndex = cs2i;
-                                //break;
                             }
                         }
 
@@ -1288,10 +1311,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 wherePart.append(" and ");
             }
             ColumnSpec keySpec = info.getColumnSpecs().get(0);
-
-//            wherePart.append("a1.").append(keySpec.getColumn()).append(" in ('");
-//            wherePart.append(StringUtils.join(keyIds, "','"));
-//            wherePart.append("')");
 
             generateInClause(wherePart, 1, keySpec.getColumn(), keyIds.toArray(), false);
         }

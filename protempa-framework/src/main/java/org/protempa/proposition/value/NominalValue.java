@@ -69,6 +69,7 @@ public final class NominalValue extends ValueImpl {
      *
      * @see org.protempa.proposition.value.Value#getFormatted()
      */
+    @Override
     public String getFormatted() {
         return val;
     }
@@ -81,6 +82,7 @@ public final class NominalValue extends ValueImpl {
      *
      * @see org.protempa.proposition.value.Value#getRepr()
      */
+    @Override
     public String getRepr() {
         return reprType() + val;
     }
@@ -96,5 +98,13 @@ public final class NominalValue extends ValueImpl {
         return comp > 0 ? ValueComparator.GREATER_THAN
                 : (comp < 0 ? ValueComparator.LESS_THAN
                 : ValueComparator.EQUAL_TO);
+    }
+
+    @Override
+    public void accept(ValueVisitor valueVisitor) {
+        if (valueVisitor == null) {
+            throw new IllegalArgumentException("valueVisitor cannot be null");
+        }
+        valueVisitor.visit(this);
     }
 }

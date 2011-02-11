@@ -52,6 +52,7 @@ public final class BooleanValue extends ValueImpl {
      *
      * @see org.protempa.proposition.value.Value#getFormatted()
      */
+    @Override
     public String getFormatted() {
         return val.toString();
     }
@@ -64,6 +65,7 @@ public final class BooleanValue extends ValueImpl {
      *
      * @see org.protempa.proposition.value.Value#getRepr()
      */
+    @Override
     public String getRepr() {
         return reprType() + val.toString();
     }
@@ -95,5 +97,13 @@ public final class BooleanValue extends ValueImpl {
     @Override
     public int hashCode() {
         return val.hashCode();
+    }
+
+    @Override
+    public void accept(ValueVisitor valueVisitor) {
+        if (valueVisitor == null) {
+            throw new IllegalArgumentException("valueVisitor cannot be null");
+        }
+        valueVisitor.visit(this);
     }
 }

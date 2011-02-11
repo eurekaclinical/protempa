@@ -72,4 +72,12 @@ public class ListValue<V extends Value> extends ArrayList<V> implements Value {
         b.append(']');
         return b.toString();
     }
+
+    @Override
+    public void accept(ValueVisitor valueVisitor) {
+        if (valueVisitor == null) {
+            throw new IllegalArgumentException("valueVisitor cannot be null");
+        }
+        valueVisitor.visit(this);
+    }
 }

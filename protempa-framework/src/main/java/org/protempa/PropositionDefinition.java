@@ -10,7 +10,9 @@ import java.io.Serializable;
  * 
  * @author Andrew Post
  */
-public interface PropositionDefinition extends Serializable {
+public interface PropositionDefinition extends Serializable, 
+        PropositionDefinitionVisitable,
+        PropositionDefinitionCheckedVisitable {
 
     /**
      * This proposition definition's display name.
@@ -92,26 +94,4 @@ public interface PropositionDefinition extends Serializable {
 
     void removePropertyChangeListener(String proeprtyName,
             PropertyChangeListener listener);
-
-    /**
-     * Performs some processing on this proposition definition.
-     * 
-     * @param visitor
-     *            a {@link PropositionDefinitionVisitor}, cannot be
-     *            <code>null</code>.
-     */
-    void accept(PropositionDefinitionVisitor visitor);
-
-    /**
-     * Performs some processing on this proposition definition that might throw
-     * a {@link ProtempaExcception}.
-     * 
-     * @param visitor
-     *            a {@link PropositionDefinitionCheckedVisitor}, cannot be
-     *            <code>null</code>.
-     * @throws ProtempaException
-     *             if an error occurs.
-     */
-    void acceptChecked(PropositionDefinitionCheckedVisitor visitor)
-            throws ProtempaException;
 }

@@ -52,10 +52,12 @@ public final class InequalityNumberValue extends ValueImpl implements
         }
     }
 
+    @Override
     public Number getNumber() {
         return val.getNumber();
     }
 
+    @Override
     public double doubleValue() {
         if (comp == ValueComparator.EQUAL_TO) {
             return val.doubleValue();
@@ -70,10 +72,12 @@ public final class InequalityNumberValue extends ValueImpl implements
         return comp;
     }
 
+    @Override
     public String getFormatted() {
         return comp.getComparatorString() + " " + val.getFormatted();
     }
 
+    @Override
     public String getRepr() {
         return reprType() + comp.getComparatorString() + " " + val.getRepr();
     }
@@ -151,5 +155,13 @@ public final class InequalityNumberValue extends ValueImpl implements
                 return ValueComparator.UNKNOWN;
             }
         }
+    }
+
+    @Override
+    public void accept(ValueVisitor valueVisitor) {
+        if (valueVisitor == null) {
+            throw new IllegalArgumentException("valueVisitor cannot be null");
+        }
+        valueVisitor.visit(this);
     }
 }

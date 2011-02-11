@@ -7,7 +7,7 @@ import java.io.Serializable;
  * 
  * @author Andrew Post
  */
-public interface Value extends Serializable {
+public interface Value extends Serializable, ValueVisitable {
 	/**
 	 * Returns a string representing this value for display purposes. This is
 	 * NOT guaranteed to be a 100% faithful representation of this object's

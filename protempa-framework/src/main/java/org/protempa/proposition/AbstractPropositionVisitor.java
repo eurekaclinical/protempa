@@ -13,8 +13,10 @@ import java.util.Map;
  * @author Andrew Post
  * 
  */
-public abstract class AbstractPropositionVisitor implements PropositionVisitor {
+public abstract class AbstractPropositionVisitor
+        implements PropositionVisitor {
 
+    @Override
     public void visit(Map<String, List<Proposition>> finderResult) {
         for (List<Proposition> listOfProps : finderResult.values()) {
             visit(listOfProps);
@@ -22,6 +24,7 @@ public abstract class AbstractPropositionVisitor implements PropositionVisitor {
 
     }
 
+    @Override
     public void visit(Collection<? extends Proposition> propositions) {
         for (Proposition proposition : propositions) {
             proposition.accept(this);
@@ -34,6 +37,7 @@ public abstract class AbstractPropositionVisitor implements PropositionVisitor {
      * @param abstractParameter
      *            an {@link AbstractParameter}.
      */
+    @Override
     public void visit(AbstractParameter abstractParameter) {
     }
 
@@ -44,6 +48,7 @@ public abstract class AbstractPropositionVisitor implements PropositionVisitor {
      *            an {@link Event}.
      * @throws UnsupportedOperationException.
      */
+    @Override
     public void visit(Event event) {
     }
 
@@ -54,6 +59,7 @@ public abstract class AbstractPropositionVisitor implements PropositionVisitor {
      *            an {@link PrimitiveParameter}.
      * @throws UnsupportedOperationException.
      */
+    @Override
     public void visit(PrimitiveParameter primitiveParameter) {
     }
 
@@ -63,6 +69,7 @@ public abstract class AbstractPropositionVisitor implements PropositionVisitor {
      * @param primitiveParameter
      *            an {@link PrimitiveParameter}.
      */
+    @Override
     public void visit(Constant constant) {
     }
 
@@ -72,6 +79,7 @@ public abstract class AbstractPropositionVisitor implements PropositionVisitor {
      * @param context
      *            a {@link Context}.
      */
+    @Override
     public void visit(Context context) {
     }
 }

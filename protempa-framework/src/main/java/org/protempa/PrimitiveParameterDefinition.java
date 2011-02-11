@@ -91,13 +91,21 @@ public final class PrimitiveParameterDefinition extends
         setValueType(null);
     }
 
-    public void accept(PropositionDefinitionVisitor processor) {
-        processor.visit(this);
+    @Override
+    public void accept(PropositionDefinitionVisitor visitor) {
+        if (visitor == null) {
+            throw new IllegalArgumentException("visitor cannot be null.");
+        }
+        visitor.visit(this);
     }
 
-    public void acceptChecked(PropositionDefinitionCheckedVisitor processor)
+    @Override
+    public void acceptChecked(PropositionDefinitionCheckedVisitor visitor)
             throws ProtempaException {
-        processor.visit(this);
+        if (visitor == null) {
+            throw new IllegalArgumentException("visitor cannot be null.");
+        }
+        visitor.visit(this);
     }
 
     /**

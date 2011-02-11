@@ -115,15 +115,24 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
 
     @Override
     public void appendValue(Object val, StringBuilder wherePart) {
-        boolean isNumber;
-        if (!(val instanceof Number)) {
-            isNumber = false;
+        boolean numberOrBoolean;
+        if (!(val instanceof Number) && !(val instanceof Boolean)) {
+            numberOrBoolean = false;
             wherePart.append("'");
         } else {
-            isNumber = true;
+            numberOrBoolean = true;
         }
-        wherePart.append(val);
-        if (!isNumber) {
+        if (val instanceof Boolean) {
+            Boolean boolVal = (Boolean) val;
+            if (boolVal.equals(Boolean.TRUE)) {
+                wherePart.append(1);
+            } else {
+                wherePart.append(0);
+            }
+        } else {
+            wherePart.append(val);
+        }
+        if (!numberOrBoolean) {
             wherePart.append("'");
         }
     }

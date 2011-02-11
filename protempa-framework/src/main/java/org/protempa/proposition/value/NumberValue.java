@@ -135,4 +135,12 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
     public Number getNumber() {
         return num;
     }
+
+    @Override
+    public void accept(ValueVisitor valueVisitor) {
+        if (valueVisitor == null) {
+            throw new IllegalArgumentException("valueVisitor cannot be null");
+        }
+        valueVisitor.visit(this);
+    }
 }

@@ -53,10 +53,10 @@ public final class ColumnSpec implements Serializable {
      * A container for a one-to-one mapping from a proposition id to a
      * database code.
      */
-    public static class PropositionIdToSqlCode {
+    public static class KnowledgeSourceIdToSqlCode {
 
         private final String propositionId;
-        private final String sqlCode;
+        private final Object sqlCode;
 
         /**
          * Instantiates a mapping between a proposition id and a code in a
@@ -65,7 +65,7 @@ public final class ColumnSpec implements Serializable {
          * @param propositionId a proposition id {@link String}.
          * @param sqlCode a code {@link Object} in a relational database.
          */
-        public PropositionIdToSqlCode(String propositionId, String sqlCode) {
+        public KnowledgeSourceIdToSqlCode(String propositionId, Object sqlCode) {
             if (propositionId == null) {
                 throw new IllegalArgumentException(
                         "propositionId cannot be null");
@@ -87,11 +87,11 @@ public final class ColumnSpec implements Serializable {
         }
 
         /**
-         * Returns the code {@link String} in the mapping.
+         * Returns the code {@link Object} in the mapping.
          *
          * @return a code {@link Object} in a relational database.
          */
-        public String getSqlCode() {
+        public Object getSqlCode() {
             return this.sqlCode;
         }
 
@@ -110,7 +110,7 @@ public final class ColumnSpec implements Serializable {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final PropositionIdToSqlCode other = (PropositionIdToSqlCode) obj;
+            final KnowledgeSourceIdToSqlCode other = (KnowledgeSourceIdToSqlCode) obj;
             if (!this.propositionId.equals(other.propositionId)) {
                 return false;
             }
@@ -144,7 +144,7 @@ public final class ColumnSpec implements Serializable {
     private final String column;
     private final JoinSpec joinSpec;
     private final Constraint constraint;
-    private final PropositionIdToSqlCode[] propIdToSqlCodes;
+    private final KnowledgeSourceIdToSqlCode[] propIdToSqlCodes;
     private final ColumnOp columnOp;
     private final boolean propositionIdsComplete;
 
@@ -190,7 +190,7 @@ public final class ColumnSpec implements Serializable {
      */
     public ColumnSpec(String schema, String table, String column,
             Constraint constraint,
-            PropositionIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp,
+            KnowledgeSourceIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp,
             boolean propositionIdsComplete) {
         this(schema, table, column, null, constraint, propIdToSqlCodes,
                 columnOp, propositionIdsComplete);
@@ -213,7 +213,7 @@ public final class ColumnSpec implements Serializable {
      */
     public ColumnSpec(String schema, String table, String column,
             Constraint constraint,
-            PropositionIdToSqlCode[] propIdToSqlCodes,
+            KnowledgeSourceIdToSqlCode[] propIdToSqlCodes,
             boolean propositionIdsComplete) {
         this(schema, table, column, null, constraint, propIdToSqlCodes,
                 null, false);
@@ -261,7 +261,7 @@ public final class ColumnSpec implements Serializable {
      */
     private ColumnSpec(String schema, String table,
             String column, JoinSpec joinSpec, Constraint constraint,
-            PropositionIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp,
+            KnowledgeSourceIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp,
             boolean propositionIdsComplete) {
         if (table == null) {
             throw new IllegalArgumentException("table cannot be null");
@@ -284,7 +284,7 @@ public final class ColumnSpec implements Serializable {
             ProtempaUtil.checkArrayForNullElement(this.propIdToSqlCodes,
                     "propIdToSqlCodes");
         } else {
-            this.propIdToSqlCodes = new PropositionIdToSqlCode[0];
+            this.propIdToSqlCodes = new KnowledgeSourceIdToSqlCode[0];
         }
         if (this.joinSpec != null) {
             this.joinSpec.setPrevColumnSpec(this);
@@ -344,7 +344,7 @@ public final class ColumnSpec implements Serializable {
      *
      * @return a {@link PropositionIdToSqlCode[]}.
      */
-    public PropositionIdToSqlCode[] getPropositionIdToSqlCodes() {
+    public KnowledgeSourceIdToSqlCode[] getPropositionIdToSqlCodes() {
         return this.propIdToSqlCodes.clone();
     }
 

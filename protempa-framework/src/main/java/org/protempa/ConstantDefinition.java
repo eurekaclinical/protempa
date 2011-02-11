@@ -51,6 +51,7 @@ public final class ConstantDefinition extends AbstractPropositionDefinition {
                 this.directChildren);
     }
 
+    @Override
     public void accept(PropositionDefinitionVisitor processor) {
         if (processor == null) {
             throw new IllegalArgumentException("processor cannot be null.");
@@ -58,6 +59,7 @@ public final class ConstantDefinition extends AbstractPropositionDefinition {
         processor.visit(this);
     }
 
+    @Override
     public void acceptChecked(PropositionDefinitionCheckedVisitor processor)
             throws ProtempaException {
         if (processor == null) {

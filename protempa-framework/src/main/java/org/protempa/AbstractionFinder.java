@@ -484,6 +484,17 @@ final class AbstractionFinder implements Module {
                 Set<PropositionDefinition> propDefs, String[] propIds)
                 throws ProtempaException {
             for (String propId : propIds) {
+//                PropositionDefinition pd = knowledgeSource.readPropositionDefinition(propId);
+//                if (pd != null) {
+//                    pd.acceptChecked(visitor);
+//                    String[] directChildren = pd.getDirectChildren();
+//                    if (directChildren.length > 0) {
+//                        propDefs.add(pd);
+//                        aggregateChildren(visitor, propDefs, directChildren);
+//                    }
+//                } else {
+//                    throw new FinderException("Invalid proposition id: " + propId);
+//                }
                 EventDefinition ed = knowledgeSource.readEventDefinition(propId);
                 if (ed != null) {
                     String[] edDirectChildren = ed.getDirectChildren();

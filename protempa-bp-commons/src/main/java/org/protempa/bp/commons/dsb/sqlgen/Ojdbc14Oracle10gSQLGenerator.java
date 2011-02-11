@@ -15,12 +15,14 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
             "select {0} from {1} {2}";
 
     @Override
-    public boolean checkCompatibility(Connection connection) 
+    public boolean checkCompatibility(Connection connection)
             throws SQLException {
-        if (!checkDriverCompatibility(connection))
+        if (!checkDriverCompatibility(connection)) {
             return false;
-        if (!checkDatabaseCompatibility(connection))
+        }
+        if (!checkDatabaseCompatibility(connection)) {
             return false;
+        }
 
         return true;
     }
@@ -59,7 +61,7 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
 
     @Override
     public void generateFromTable(String schema, String table,
-        StringBuilder fromPart, int i) {
+            StringBuilder fromPart, int i) {
         if (schema != null) {
             fromPart.append(schema);
             fromPart.append('.');
@@ -75,19 +77,26 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
         fromPart.append(' ');
     }
 
-
-
     @Override
     public void appendValue(Object val, StringBuilder wherePart) {
-        boolean isNumber;
-        if (!(val instanceof Number)) {
-            isNumber = false;
+        boolean numberOrBoolean;
+        if (!(val instanceof Number) && !(val instanceof Boolean)) {
+            numberOrBoolean = false;
             wherePart.append("'");
         } else {
-            isNumber = true;
+            numberOrBoolean = true;
         }
-        wherePart.append(val);
-        if (!isNumber) {
+        if (val instanceof Boolean) {
+            Boolean boolVal = (Boolean) val;
+            if (boolVal.equals(Boolean.TRUE)) {
+                wherePart.append(1);
+            } else {
+                wherePart.append(0);
+            }
+        } else {
+            wherePart.append(val);
+        }
+        if (!numberOrBoolean) {
             wherePart.append("'");
         }
     }
@@ -95,23 +104,27 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
     private boolean checkDatabaseCompatibility(Connection connection)
             throws SQLException {
         DatabaseMetaData metaData = connection.getMetaData();
-        if (!metaData.getDatabaseProductName().equals("Oracle"))
+        if (!metaData.getDatabaseProductName().equals("Oracle")) {
             return false;
-        if (metaData.getDatabaseMajorVersion() != 10)
+        }
+        if (metaData.getDatabaseMajorVersion() != 10) {
             return false;
-        
+        }
+
         return true;
     }
 
-    private boolean checkDriverCompatibility(Connection connection) 
+    private boolean checkDriverCompatibility(Connection connection)
             throws SQLException {
         DatabaseMetaData metaData = connection.getMetaData();
         String name = metaData.getDriverName();
-        if (!name.equals("Oracle JDBC driver"))
+        if (!name.equals("Oracle JDBC driver")) {
             return false;
-        if (metaData.getDriverMajorVersion() != 10)
+        }
+        if (metaData.getDriverMajorVersion() != 10) {
             return false;
-        
+        }
+
         return true;
     }
 
@@ -130,7 +143,7 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
     @Override
     public void processOrderBy(int startReferenceIndex, String startColumn,
             int finishReferenceIndex, String finishColumn,
-            StringBuilder wherePart,SQLOrderBy order) {
+            StringBuilder wherePart, SQLOrderBy order) {
         wherePart.append(" order by ");
         wherePart.append('a').append(startReferenceIndex);
         wherePart.append('.').append(startColumn);
@@ -154,8 +167,9 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
         wherePart.append(referenceIndex);
         wherePart.append(".");
         wherePart.append(column);
-        if (not)
+        if (not) {
             wherePart.append(" NOT");
+        }
         wherePart.append(" IN (");
         for (int k = 0; k < sqlCodes.length; k++) {
             Object val = sqlCodes[k];
@@ -180,5 +194,4 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
     protected String getDriverClassNameToLoad() {
         return "oracle.jdbc.driver.OracleDriver";
     }
-
 }
