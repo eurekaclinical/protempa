@@ -15,13 +15,11 @@ class ConstantResultProcessorFactory
 
     @Override
     AbstractMainResultProcessor<Constant> getInstance(
-            String dataSourceBackendId, EntitySpec entitySpec) {
-        Map<String, List<Constant>> results =
-                new HashMap<String, List<Constant>>();
+            String dataSourceBackendId, EntitySpec entitySpec, ResultCache<Constant> cache) {
 
         ConstantResultProcessor resultProcessor =
                 new ConstantResultProcessor();
-        resultProcessor.setResults(results);
+        resultProcessor.setResults(cache);
         resultProcessor.setDataSourceBackendId(dataSourceBackendId);
         resultProcessor.setEntitySpec(entitySpec);
         return resultProcessor;
@@ -31,7 +29,7 @@ class ConstantResultProcessorFactory
     RefResultProcessor<Constant> getRefInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             ReferenceSpec referenceSpec,
-            Map<UniqueIdentifier,Constant> cache) {
+            ResultCache<Constant> cache) {
         ConstantRefResultProcessor resultProcessor =
                 new ConstantRefResultProcessor();
         resultProcessor.setCache(cache);
