@@ -235,7 +235,7 @@ public abstract class RelationalDatabaseDataSourceBackend
             QuerySession qs)
             throws DataSourceReadException {
         return this.sqlGenerator.readConstants(keyIds, paramIds,
-                dataSourceConstraints);
+                dataSourceConstraints).getPatientCache();
     }
 
     @Override
@@ -245,7 +245,7 @@ public abstract class RelationalDatabaseDataSourceBackend
             QuerySession qs)
             throws DataSourceReadException {
         return this.sqlGenerator.readPrimitiveParameters(keyIds, paramIds,
-                dataSourceConstraints, null);
+                dataSourceConstraints, null).getPatientCache();
     }
 
     @Override
@@ -253,7 +253,7 @@ public abstract class RelationalDatabaseDataSourceBackend
             Set<String> eventIds, Filter filters, QuerySession qs)
             throws DataSourceReadException {
         return this.sqlGenerator.readEvents(keyIds, eventIds,
-                filters, null);
+                filters, null).getPatientCache();
     }
 
     @Override
