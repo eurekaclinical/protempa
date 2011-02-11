@@ -2,11 +2,11 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.arp.javautil.collections.Collections;
+
 import org.protempa.DatabaseDataSourceType;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.UniqueIdentifier;
@@ -14,12 +14,11 @@ import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueFactory;
 import org.protempa.proposition.value.ValueType;
 
-class ConstantResultProcessor extends
-        AbstractMainResultProcessor<Constant> {
+class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
-        Map<String, List<Constant>> results = getResults();
+        ResultCache<Constant> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
         String[] propIds = entitySpec.getPropositionIds();
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
@@ -73,7 +72,13 @@ class ConstantResultProcessor extends
             cp.setDataSourceType(
                 DatabaseDataSourceType.getInstance(getDataSourceBackendId()));
             logger.log(Level.FINEST, "Created constant {0}", cp);
-            Collections.putList(results, keyId, cp);
+//            Collections.putList(results, keyId, cp);
+            List<Constant> propList = results.getPatientPropositions(keyId);
+            if (propList == null) {
+                propList = new ArrayList<Constant>();
+            }
+            propList.add(cp);
+            results.put(keyId, propList);
         }
     }
 }
