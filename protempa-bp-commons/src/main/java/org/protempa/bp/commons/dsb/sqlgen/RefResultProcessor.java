@@ -2,7 +2,6 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
@@ -10,7 +9,7 @@ import org.protempa.proposition.UniqueIdentifier;
 abstract class RefResultProcessor<P extends Proposition> extends
         AbstractResultProcessor {
     private ReferenceSpec referenceSpec;
-    private Map<UniqueIdentifier, P> cache;
+    private ResultCache<P> cache;
 
     protected RefResultProcessor() {
     }
@@ -20,13 +19,12 @@ abstract class RefResultProcessor<P extends Proposition> extends
         EntitySpec entitySpec = getEntitySpec();
         while (resultSet.next()) {
             int i = 1;
-            String[] uniqueIds = 
-                    new String[entitySpec.getUniqueIdSpecs().length];
+            String[] uniqueIds = new String[entitySpec.getUniqueIdSpecs().length];
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifier = generateUniqueIdentifier(
                     entitySpec.getName(), uniqueIds);
-            String[] refUniqueIds =
-                    new String[this.referenceSpec.getUniqueIdSpecs().length];
+            String[] refUniqueIds = new String[this.referenceSpec
+                    .getUniqueIdSpecs().length];
             i = readUniqueIds(refUniqueIds, resultSet, i);
             UniqueIdentifier refUniqueIdentifier = generateUniqueIdentifier(
                     this.referenceSpec.getEntityName(), refUniqueIds);
@@ -36,9 +34,9 @@ abstract class RefResultProcessor<P extends Proposition> extends
 
     private final void addToReferences(UniqueIdentifier uniqueIdentifier,
             UniqueIdentifier refUniqueIdentifier) {
-        P proposition = this.cache.get(uniqueIdentifier);
-        assert proposition != null : "No proposition for unique identifier " +
-                uniqueIdentifier;
+        P proposition = this.cache.getProposition(uniqueIdentifier);
+        assert proposition != null : "No proposition for unique identifier "
+                + uniqueIdentifier;
         addReferenceForProposition(this.referenceSpec.getReferenceName(),
                 proposition, refUniqueIdentifier);
     }
@@ -46,11 +44,11 @@ abstract class RefResultProcessor<P extends Proposition> extends
     abstract void addReferenceForProposition(String referenceName,
             P proposition, UniqueIdentifier uid);
 
-    final void setCache(Map<UniqueIdentifier, P> cache) {
+    final void setCache(ResultCache<P> cache) {
         this.cache = cache;
     }
 
-    final Map<UniqueIdentifier, P> getCache() {
+    final ResultCache<P> getCache() {
         return this.cache;
     }
 
