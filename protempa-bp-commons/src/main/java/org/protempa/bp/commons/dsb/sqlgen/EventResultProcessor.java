@@ -116,7 +116,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
             logger.log(Level.FINEST, "Created event {0}", event);
             List<Event> propList = results.getPatientPropositions(keyId);
             if (propList == null) {
-                propList = new ArrayList<Event>();
+                propList = new ArrayList<Event>(500);
             }
             propList.add(event);
             results.put(keyId, propList);

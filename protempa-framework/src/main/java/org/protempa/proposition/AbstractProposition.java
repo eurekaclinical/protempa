@@ -21,6 +21,9 @@ import org.protempa.proposition.value.Value;
 public abstract class AbstractProposition implements Proposition {
 
     private static final long serialVersionUID = -6210974161591587259L;
+
+    private static final int DEFAULT_REFERENCE_LIST_SIZE = 100;
+
     /**
      * An identification <code>String</code> for this proposition.
      */
@@ -109,7 +112,8 @@ public abstract class AbstractProposition implements Proposition {
         }
         List<UniqueIdentifier> refs = this.references.get(name);
         if (refs == null) {
-            refs = new ArrayList<UniqueIdentifier>();
+            refs =
+                new ArrayList<UniqueIdentifier>(DEFAULT_REFERENCE_LIST_SIZE);
             refs.add(ref);
             this.references.put(name.intern(), refs);
         } else {

@@ -64,22 +64,4 @@ public class Collections {
         }
         return false;
     }
-
-    /**
-     * Sequentially adds the contents of the specified <code>collections</code>
-     * to <code>collection</code>.
-     * 
-     * @param <K>
-     * @param collection a {@link Collection}.
-     * @param collections the {@link Collection}s whose contents to insert.
-     * <code>Null</code> collections will be skipped.
-     */
-    public static <K> void addAll(Collection<K> collection,
-            Collection<? extends K>... collections) {
-        for (Collection<? extends K> c : collections) {
-            if (c != null) {
-                collection.addAll(c);
-            }
-        }
-    }
 }

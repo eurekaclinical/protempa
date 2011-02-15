@@ -66,7 +66,7 @@ class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
             logger.log(Level.FINEST, "Created constant {0}", cp);
             List<Constant> propList = results.getPatientPropositions(keyId);
             if (propList == null) {
-                propList = new ArrayList<Constant>();
+                propList = new ArrayList<Constant>(500);
             }
             propList.add(cp);
             results.put(keyId, propList);

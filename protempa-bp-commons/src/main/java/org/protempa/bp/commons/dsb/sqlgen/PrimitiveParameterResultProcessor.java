@@ -85,7 +85,7 @@ class PrimitiveParameterResultProcessor extends
             List<PrimitiveParameter> propList = results
                     .getPatientPropositions(keyId);
             if (propList == null) {
-                propList = new ArrayList<PrimitiveParameter>();
+                propList = new ArrayList<PrimitiveParameter>(500);
             }
             propList.add(p);
             results.put(keyId, propList);
