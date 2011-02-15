@@ -11,6 +11,7 @@ public final class BooleanValue extends ValueImpl {
     public static final BooleanValue TRUE = new BooleanValue(true);
     public static final BooleanValue FALSE = new BooleanValue(false);
     private final Boolean val;
+    private transient volatile int hashCode;
 
     public BooleanValue(boolean val) {
         this(Boolean.valueOf(val));
@@ -96,7 +97,10 @@ public final class BooleanValue extends ValueImpl {
      */
     @Override
     public int hashCode() {
-        return val.hashCode();
+        if (this.hashCode == 0) {
+            this.hashCode = this.val.hashCode();
+        }
+        return this.hashCode;
     }
 
     @Override

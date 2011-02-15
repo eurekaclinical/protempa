@@ -113,7 +113,7 @@ public final class BellmanFord {
 			Map<Object, Weight> shortestDistances) {
 
 		// Distance from source to itself.
-		shortestDistances.put(sourceOrDest, Weight.ZERO);
+		shortestDistances.put(sourceOrDest, WeightFactory.ZERO);
 
 		/*
 		 * Initialize all shortest distances to maximum. Iterations of
@@ -122,7 +122,8 @@ public final class BellmanFord {
 		for (Iterator itr = g.iterator(); itr.hasNext();) {
 			Object vertex = itr.next();
 			if (vertex != sourceOrDest) {
-				shortestDistances.put(vertex, Weight.POS_INFINITY);
+				shortestDistances.put(vertex, 
+                                        WeightFactory.POS_INFINITY);
 			}
 		}
 	}

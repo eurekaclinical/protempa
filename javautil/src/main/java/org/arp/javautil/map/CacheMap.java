@@ -15,6 +15,7 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
+import net.sf.ehcache.config.CacheConfiguration;
 
 /**
  * Implements EHCache-backed {@link Map}. Because this map is backed by a cache,
@@ -35,7 +36,7 @@ public class CacheMap<K, V> implements Map<K, V> {
      * upon JVM shutdown.
      */
     private static class CacheManagerHolder {
-        
+
         static final CacheManager cacheManager = new CacheManager();
 
         static {

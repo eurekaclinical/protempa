@@ -3,7 +3,7 @@ package org.protempa.proposition;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 
 import junit.framework.TestCase;
-import org.arp.javautil.graph.Weight;
+import org.arp.javautil.graph.WeightFactory;
 
 /**
  * @author Andrew Post
@@ -12,6 +12,7 @@ public class ConstraintNetworkTest extends TestCase {
 
     private static final IntervalFactory intervalFactory =
             new IntervalFactory();
+    private static final WeightFactory weightFactory = new WeightFactory();
 
     /**
      * Constructor for ConstraintNetworkTest.
@@ -55,7 +56,7 @@ public class ConstraintNetworkTest extends TestCase {
         ConstraintNetwork cn = new ConstraintNetwork(2);
         cn.addInterval(interval1);
         cn.addInterval(interval2);
-        assertEquals(new Weight(1172823060000L), cn.getMinimumStart());
+        assertEquals(weightFactory.getInstance(1172823060000L), cn.getMinimumStart());
     }
 
     public void testMaxStartBetweenTwoPrimitiveParameterIntervals() {
@@ -66,7 +67,7 @@ public class ConstraintNetworkTest extends TestCase {
         ConstraintNetwork cn = new ConstraintNetwork(2);
         cn.addInterval(interval1);
         cn.addInterval(interval2);
-        assertEquals(new Weight(1172823119999L), cn.getMaximumStart());
+        assertEquals(weightFactory.getInstance(1172823119999L), cn.getMaximumStart());
     }
 
     public void testMinFinishBetweenTwoPrimitiveParameterIntervals() {
@@ -77,7 +78,7 @@ public class ConstraintNetworkTest extends TestCase {
         ConstraintNetwork cn = new ConstraintNetwork();
         cn.addInterval(interval1);
         cn.addInterval(interval2);
-        assertEquals(new Weight(1172823120000L), cn.getMinimumFinish());
+        assertEquals(weightFactory.getInstance(1172823120000L), cn.getMinimumFinish());
     }
 
     public void testMaxFinishBetweenTwoPrimitiveParameterIntervals() {
@@ -88,7 +89,7 @@ public class ConstraintNetworkTest extends TestCase {
         ConstraintNetwork cn = new ConstraintNetwork(2);
         cn.addInterval(interval1);
         cn.addInterval(interval2);
-        assertEquals(new Weight(1172823179999L), cn.getMaximumFinish());
+        assertEquals(weightFactory.getInstance(1172823179999L), cn.getMaximumFinish());
     }
 
     public void testMinDistanceBetweenTwoPrimitiveParameterIntervals() {
@@ -99,7 +100,7 @@ public class ConstraintNetworkTest extends TestCase {
         ConstraintNetwork cn = new ConstraintNetwork(2);
         cn.addInterval(interval1);
         cn.addInterval(interval2);
-        assertEquals(new Weight(1), cn.getMinimumDuration());
+        assertEquals(weightFactory.getInstance(1), cn.getMinimumDuration());
     }
 
     public void testMaxDistanceBetweenTwoPrimitiveParameterIntervals() {
@@ -110,6 +111,6 @@ public class ConstraintNetworkTest extends TestCase {
         ConstraintNetwork cn = new ConstraintNetwork(2);
         cn.addInterval(interval1);
         cn.addInterval(interval2);
-        assertEquals(new Weight(119999), cn.getMaximumDuration());
+        assertEquals(weightFactory.getInstance(119999), cn.getMaximumDuration());
     }
 }

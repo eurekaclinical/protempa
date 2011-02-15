@@ -18,7 +18,7 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
         REPR_FORMAT.setGroupingUsed(false);
     }
     private final BigDecimal num;
-    private volatile int hashCode;
+    private transient volatile int hashCode;
     
     private static final Map cache = new ReferenceMap();
 
@@ -26,13 +26,24 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
         return getInstance(BigDecimal.valueOf(num));
     }
 
+    public static NumberValue getInstance(long num) {
+        return getInstance(BigDecimal.valueOf(num));
+    }
+
     public static NumberValue getInstance(BigDecimal num) {
+        if (num == null) {
+            throw new IllegalArgumentException("num cannot be null");
+        }
         NumberValue result = (NumberValue) cache.get(num);
         if (result == null) {
             result = new NumberValue(num);
             cache.put(num, result);
         }
         return result;
+    }
+
+    public NumberValue(long num) {
+        this(BigDecimal.valueOf(num));
     }
 
     public NumberValue(double num) {

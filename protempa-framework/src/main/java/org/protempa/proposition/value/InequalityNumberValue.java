@@ -11,7 +11,7 @@ public final class InequalityNumberValue extends ValueImpl implements
     private static final long serialVersionUID = 1485092589217545627L;
     private final NumberValue val;
     private final ValueComparator comp;
-    private volatile int hashCode;
+    private transient volatile int hashCode;
 
     /**
      * Creates a new <code>InequalityNumberValue</code> with the given

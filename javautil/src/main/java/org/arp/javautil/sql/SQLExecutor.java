@@ -35,13 +35,16 @@ public final class SQLExecutor {
         }
 
         preparedStmt.execute();
+        SQLUtil.logger().log(Level.FINE, "Done executing SQL");
 
         if (resultProcessor != null) {
             ResultSet resultSet = preparedStmt.getResultSet();
+            SQLUtil.logger().log(Level.FINE, "Processing result set");
             try {
                 resultProcessor.process(resultSet);
                 resultSet.close();
                 resultSet = null;
+                SQLUtil.logger().log(Level.FINE, "Done processing result set");
             } finally {
                 if (resultSet != null) {
                     try {
@@ -60,16 +63,18 @@ public final class SQLExecutor {
         }
         Statement stmt = connection.createStatement();
         try {
-            SQLUtil.logger().log(Level.FINE, "executing SQL: " + sql);
-
+            SQLUtil.logger().log(Level.FINE, "Executing SQL: " + sql);
             stmt.execute(sql);
+            SQLUtil.logger().log(Level.FINE, "Done executing SQL");
 
             if (resultProcessor != null) {
                 ResultSet resultSet = stmt.getResultSet();
+                SQLUtil.logger().log(Level.FINE, "Processing result set");
                 try {
                     resultProcessor.process(resultSet);
                     resultSet.close();
                     resultSet = null;
+                    SQLUtil.logger().log(Level.FINE, "Done processing result set");
                 } finally {
                     if (resultSet != null) {
                         try {
@@ -101,13 +106,16 @@ public final class SQLExecutor {
             SQLUtil.logger().log(Level.FINE, "executing SQL: " + sql);
             stmt.setFetchSize(fetchSize);
             stmt.execute(sql);
+            SQLUtil.logger().log(Level.FINE, "Done executing SQL");
 
             if (resultProcessor != null) {
                 ResultSet resultSet = stmt.getResultSet();
+                SQLUtil.logger().log(Level.FINE, "Processing result set");
                 try {
                     resultProcessor.process(resultSet);
                     resultSet.close();
                     resultSet = null;
+                    SQLUtil.logger().log(Level.FINE, "Done processing result set");
                 } finally {
                     if (resultSet != null) {
                         try {

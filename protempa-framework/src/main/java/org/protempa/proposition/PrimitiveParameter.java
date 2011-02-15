@@ -16,15 +16,6 @@ import org.protempa.proposition.value.Granularity;
 public final class PrimitiveParameter extends TemporalParameter {
 
     private static final long serialVersionUID = 693807976086426915L;
-    /**
-     * This primitive parameter's timestamp. Could also store some other kind of
-     * position value.
-     */
-    private Long timestamp;
-    /**
-     * This primitive parameter's granularity.
-     */
-    private Granularity granularity;
 
     private static final IntervalFactory intervalFactory =
             new IntervalFactory();
@@ -47,7 +38,12 @@ public final class PrimitiveParameter extends TemporalParameter {
      * @return a {@link Long}.
      */
     public Long getTimestamp() {
-        return timestamp;
+        Interval interval = getInterval();
+        if (interval != null) {
+            return interval.getMinStart();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -57,8 +53,12 @@ public final class PrimitiveParameter extends TemporalParameter {
      *            a <code>long</code>.
      */
     public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
-        resetInterval();
+        Interval interval = getInterval();
+        if (interval != null) {
+            resetInterval(timestamp, interval.getStartGranularity());
+        } else {
+            resetInterval(null, interval.getStartGranularity());
+        }
     }
 
     /**
@@ -67,7 +67,12 @@ public final class PrimitiveParameter extends TemporalParameter {
      * @return a {@link Granularity} object.
      */
     public Granularity getGranularity() {
-        return this.granularity;
+        Interval interval = getInterval();
+        if (interval != null) {
+            return interval.getStartGranularity();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -77,11 +82,15 @@ public final class PrimitiveParameter extends TemporalParameter {
      *            a {@link Granularity} object.
      */
     public void setGranularity(Granularity granularity) {
-        this.granularity = granularity;
-        resetInterval();
+        Interval interval = getInterval();
+        if (interval != null) {
+            resetInterval(interval.getMinStart(), granularity);
+        } else {
+            resetInterval(null, granularity);
+        }
     }
 
-    private void resetInterval() {
+    private void resetInterval(Long timestamp, Granularity granularity) {
         /*
          * As per Combi et al. Methods Inf. Med. 1995;34:458-74.
          */
@@ -116,24 +125,12 @@ public final class PrimitiveParameter extends TemporalParameter {
         return getStartFormattedShort();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
         return new ToStringBuilder(this).appendSuper(super.toString())
-                .append("timestamp", this.timestamp)
-                .append("granularity", this.granularity)
                 .toString();
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.protempa.proposition.TemporalParameter#isEqual(java.lang.Object)
-     */
+    
     @Override
     public boolean isEqual(Object o) {
         if (o == this) {
@@ -144,9 +141,7 @@ public final class PrimitiveParameter extends TemporalParameter {
         }
 
         PrimitiveParameter p = (PrimitiveParameter) o;
-        return super.isEqual(p)
-                && (granularity == p.granularity
-                || (granularity != null && granularity.equals(p.granularity)));
+        return super.isEqual(p);
     }
 
     @Override

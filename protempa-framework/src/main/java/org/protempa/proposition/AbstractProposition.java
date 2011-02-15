@@ -26,7 +26,7 @@ public abstract class AbstractProposition implements Proposition {
      */
     private final String id;
     private static volatile int nextHashCode = 17;
-    protected volatile int hashCode;
+    protected transient volatile int hashCode;
     protected final PropertyChangeSupport changes;
     private final Map<String, Value> properties;
     private final Map<String, List<UniqueIdentifier>> references;

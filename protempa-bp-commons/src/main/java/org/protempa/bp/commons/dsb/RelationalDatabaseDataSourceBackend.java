@@ -38,8 +38,6 @@ public abstract class RelationalDatabaseDataSourceBackend
     private String password;
     private final RelationalDatabaseSpec relationalDatabaseSpec;
     private SQLGenerator sqlGenerator;
-    
-    
 
     /**
      * Instantiates the backend with the specification of a mapping from

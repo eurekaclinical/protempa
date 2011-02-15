@@ -13,7 +13,7 @@ public final class OrdinalValue extends ValueImpl implements OrderedValue {
     private static final long serialVersionUID = -1605459658420554439L;
     private final String val;
     private final List<String> allowedValues;
-    private volatile int hashCode;
+    private transient volatile int hashCode;
 
     /**
      * Creates an ordinal value of a type with allowed values.

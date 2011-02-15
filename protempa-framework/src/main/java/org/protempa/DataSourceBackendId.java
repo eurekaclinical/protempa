@@ -12,7 +12,7 @@ public final class DataSourceBackendId implements SourceId {
             new HashMap<String, DataSourceBackendId>();
 
     private final String id;
-    private int hashCode = -1;
+    private transient int hashCode;
 
 
     public static DataSourceBackendId getInstance(String id) {
@@ -30,15 +30,14 @@ public final class DataSourceBackendId implements SourceId {
 
     @Override
     public int hashCode() {
-        if (hashCode >= 0) {
-            return hashCode;
-        } else {
+        if (hashCode == 0) {
             final int prime = 31;
             int result = 1;
             result = prime * result + ((id == null) ? 0 : id.hashCode());
             this.hashCode = result;
             return result;
         }
+        return this.hashCode;
     }
 
     @Override

@@ -4,13 +4,16 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import edu.stanford.smi.protege.model.Instance;
+import org.arp.javautil.graph.WeightFactory;
 import org.protempa.EventDefinition;
 import org.protempa.IntervalSide;
 import org.protempa.KnowledgeBase;
-import org.arp.javautil.graph.Weight;
 import org.protempa.KnowledgeSourceReadException;
 
 class EventConverter implements PropositionConverter {
+    
+    private static final WeightFactory weightFactory =
+            new WeightFactory();
 
     @Override
     public void convert(Instance protegeProposition,
@@ -40,7 +43,7 @@ class EventConverter implements PropositionConverter {
                         ((Instance) cm.getOwnSlotValue(hasPartInstance, cm.getSlot(
                         "offsetEvent"))).getName(),
                         IntervalSide.intervalSide((String) cm.getOwnSlotValue(hasPartInstance, cm.getSlot("offsetSide"))),
-                        cst != null ? new Weight(cst) : null, Util.parseUnitsConstraint(hasPartInstance,
+                        cst != null ? weightFactory.getInstance(cst) : null, Util.parseUnitsConstraint(hasPartInstance,
                         "finishOffsetUnits", backend, cm)));
             }
         }

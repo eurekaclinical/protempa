@@ -1,5 +1,6 @@
 <ehcache>
-    <diskStore path="java.io.tmpdir"/>
+    <!--<diskStore path="java.io.tmpdir"/>-->
+    <diskStore path="/opt/data/aiw-resultcache"/>
     <defaultCache
         maxElementsInMemory="500"
         eternal="true"

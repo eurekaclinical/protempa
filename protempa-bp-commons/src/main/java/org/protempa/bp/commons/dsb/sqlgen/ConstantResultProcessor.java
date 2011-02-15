@@ -11,8 +11,6 @@ import org.protempa.DatabaseDataSourceType;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueFactory;
-import org.protempa.proposition.value.ValueType;
 
 class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
 
@@ -27,6 +25,8 @@ class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
             codeSpec = codeSpecL.get(codeSpecL.size() - 1);
         }
         Logger logger = SQLGenUtil.logger();
+        PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
+        Value[] propertyValues = new Value[propertySpecs.length];
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
@@ -49,15 +49,7 @@ class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
                 i++;
             }
             
-            PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
-            Value[] propertyValues = new Value[propertySpecs.length];
-            for (int j = 0; j < propertySpecs.length; j++) {
-                PropertySpec propertySpec = propertySpecs[j];
-                ValueType valueType = propertySpec.getValueType();
-                Value value = ValueFactory.get(valueType).parseValue(
-                        resultSet.getString(i++));
-                propertyValues[j] = value;
-            }
+            i = extractPropertyValues(propertySpecs, resultSet, i, propertyValues);
             
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
@@ -72,7 +64,6 @@ class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
             cp.setDataSourceType(
                 DatabaseDataSourceType.getInstance(getDataSourceBackendId()));
             logger.log(Level.FINEST, "Created constant {0}", cp);
-//            Collections.putList(results, keyId, cp);
             List<Constant> propList = results.getPatientPropositions(keyId);
             if (propList == null) {
                 propList = new ArrayList<Constant>();

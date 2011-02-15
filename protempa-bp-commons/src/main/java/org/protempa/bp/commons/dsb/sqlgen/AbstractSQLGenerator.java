@@ -14,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.collections.Collections;
-import org.arp.javautil.map.CacheMap;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
 import org.protempa.DataSourceReadException;
@@ -29,7 +28,6 @@ import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.BooleanValue;
 import org.protempa.proposition.value.GranularityFactory;
@@ -52,6 +50,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
     private static final String SYSTEM_PROPERTY_SKIP_EXECUTION =
             "protempa.dsb.relationaldatabase.skipexecution";
+
+    private static final int FETCH_SIZE = 1000;
 
     private static Set<EntitySpec> applicableEntitySpecs(
             Collection<EntitySpec> entitySpecs, Filter f) {
@@ -189,7 +189,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
             try {
                 SQLExecutor.executeSQL(getConnectionSpec(), query,
-                        resultProcessor, true, 100);
+                        resultProcessor, true, FETCH_SIZE);
             } catch (SQLException ex) {
                 throw new DataSourceReadException(
                         "Error executing query in data source backend "

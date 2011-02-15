@@ -9,6 +9,7 @@ public final class NominalValue extends ValueImpl {
 
     private static final long serialVersionUID = 440118249272295573L;
     private final String val;
+    private transient volatile int hashCode;
 
     /**
      * Creates a new <code>NominalValue</code> with the given value.
@@ -33,7 +34,10 @@ public final class NominalValue extends ValueImpl {
      */
     @Override
     public int hashCode() {
-        return val.hashCode();
+        if (this.hashCode == 0) {
+            this.hashCode = val.hashCode();
+        }
+        return this.hashCode;
     }
 
     /*

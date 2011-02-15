@@ -1,6 +1,5 @@
 package org.arp.javautil.graph;
 
-import org.arp.javautil.graph.Weight;
 
 import junit.framework.TestCase;
 
@@ -56,27 +55,27 @@ public class WeightTest extends TestCase {
 	}
 
 	public void testPosInfinityGreaterThanNotInfinity() {
-		assertTrue(Weight.POS_INFINITY.greaterThan(Long.MAX_VALUE));
+		assertTrue(WeightFactory.POS_INFINITY.greaterThan(Long.MAX_VALUE));
 	}
 
 	public void testNegInfinityLessThanNotInfinity() {
-		assertTrue(Weight.NEG_INFINITY.lessThan(Long.MIN_VALUE));
+		assertTrue(WeightFactory.NEG_INFINITY.lessThan(Long.MIN_VALUE));
 	}
 
 	public void testCompareNegInfinityPosInfinity() {
-		assertTrue(Weight.NEG_INFINITY.compareTo(Weight.POS_INFINITY) == -1);
+		assertTrue(WeightFactory.NEG_INFINITY.compareTo(WeightFactory.POS_INFINITY) == -1);
 	}
 
 	public void testComparePosInfinityNegInfinity() {
-		assertTrue(Weight.POS_INFINITY.compareTo(Weight.NEG_INFINITY) == 1);
+		assertTrue(WeightFactory.POS_INFINITY.compareTo(WeightFactory.NEG_INFINITY) == 1);
 	}
 
 	public void testComparePosInfinityPosInfinity() {
-		assertEquals(Weight.POS_INFINITY, Weight.POS_INFINITY);
+		assertEquals(WeightFactory.POS_INFINITY, WeightFactory.POS_INFINITY);
 	}
 
 	public void testCompareNegInfinityNegInfinity() {
-		assertEquals(Weight.NEG_INFINITY, Weight.NEG_INFINITY);
+		assertEquals(WeightFactory.NEG_INFINITY, WeightFactory.NEG_INFINITY);
 	}
 
 	public void testIsWithinRange1() {
@@ -85,12 +84,12 @@ public class WeightTest extends TestCase {
 	}
 
 	public void testIsWithinRange2() {
-		assertTrue((new Weight(20)).isWithinRange(Weight.ZERO,
-				Weight.POS_INFINITY));
+		assertTrue((new Weight(20)).isWithinRange(WeightFactory.ZERO,
+				WeightFactory.POS_INFINITY));
 	}
 
 	public void testIsWithinRange3() {
-		assertFalse((new Weight(20)).isWithinRange(Weight.ZERO,
-				Weight.NEG_INFINITY));
+		assertFalse((new Weight(20)).isWithinRange(WeightFactory.ZERO,
+				WeightFactory.NEG_INFINITY));
 	}
 }

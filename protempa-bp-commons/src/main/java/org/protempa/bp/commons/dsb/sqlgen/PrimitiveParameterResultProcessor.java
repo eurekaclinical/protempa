@@ -4,12 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.arp.javautil.collections.Collections;
 import org.protempa.DatabaseDataSourceType;
-import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Value;
@@ -30,6 +27,8 @@ class PrimitiveParameterResultProcessor extends
             codeSpec = codeSpecL.get(codeSpecL.size() - 1);
         }
         Logger logger = SQLGenUtil.logger();
+        PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
+        Value[] propertyValues = new Value[propertySpecs.length];
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
@@ -65,16 +64,7 @@ class PrimitiveParameterResultProcessor extends
             ValueType vf = entitySpec.getValueType();
             Value cpVal = ValueFactory.get(vf).parseValue(
                     resultSet.getString(i++));
-
-            PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
-            Value[] propertyValues = new Value[propertySpecs.length];
-            for (int j = 0; j < propertySpecs.length; j++) {
-                PropertySpec propertySpec = propertySpecs[j];
-                ValueType valueType = propertySpec.getValueType();
-                Value value = ValueFactory.get(valueType).parseValue(
-                        resultSet.getString(i++));
-                propertyValues[j] = value;
-            }
+            i = extractPropertyValues(propertySpecs, resultSet, i, propertyValues);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
@@ -92,7 +82,6 @@ class PrimitiveParameterResultProcessor extends
             p.setDataSourceType(DatabaseDataSourceType
                     .getInstance(getDataSourceBackendId()));
             logger.log(Level.FINEST, "Created primitive parameter {0}", p);
-            // Collections.putList(results, keyId, p);
             List<PrimitiveParameter> propList = results
                     .getPatientPropositions(keyId);
             if (propList == null) {
@@ -102,4 +91,6 @@ class PrimitiveParameterResultProcessor extends
             results.put(keyId, propList);
         }
     }
+
+    
 }

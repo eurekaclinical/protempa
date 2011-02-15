@@ -1,5 +1,8 @@
 package org.protempa.proposition;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -7,6 +10,7 @@ import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Unit;
 
 import org.arp.javautil.graph.Weight;
+import org.arp.javautil.graph.WeightFactory;
 
 /**
  * A representation of an interval, designed according to the definition of an
@@ -21,11 +25,10 @@ import org.arp.javautil.graph.Weight;
 public abstract class Interval implements Comparable<Interval>, Serializable {
 
     private static final long serialVersionUID = -8876433661943628691L;
-    private final Start start;
-    private final Finish finish;
-    protected final Long[] v;
-    private Weight[] vw;
-    private volatile int hashCode;
+
+    private static final WeightFactory weightFactory = new WeightFactory();
+
+    //Serialize these
     private Long minStart;
     private Long maxStart;
     private Granularity startGranularity;
@@ -35,8 +38,15 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
     private Long minLength;
     private Long maxLength;
     private Unit lengthUnit;
-    private boolean minLengthComputed;
-    private boolean maxLengthComputed;
+
+    //Compute these
+    private transient Start start;
+    private transient Finish finish;
+    protected transient Long[] v;
+    private transient Weight[] vw;
+    private transient volatile int hashCode;
+    private transient boolean minLengthComputed;
+    private transient boolean maxLengthComputed;
 
     /**
      * Create an interval with default values (minimumStart=-inf,
@@ -57,7 +67,7 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
 
     Interval(Long minStart, Long maxStart, Granularity startGranularity,
             Long minFinish, Long maxFinish, Granularity finishGranularity,
-            Long minLength, Long maxLength, Unit distanceUnit) {
+            Long minLength, Long maxLength, Unit lengthUnit) {
         if (minStart != null && maxFinish != null && minStart > maxFinish) {
             throw new IllegalArgumentException(
                     "maxFinish cannot be before minStart; maxFinish="
@@ -71,7 +81,21 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
             throw new IllegalArgumentException(
                     "maxLength must be positive or 0 but was " + maxLength);
         }
+        
+        this.minStart = minStart;
+        this.maxStart = maxStart;
+        this.startGranularity = startGranularity;
+        this.minFinish = minFinish;
+        this.maxFinish = maxFinish;
+        this.finishGranularity = finishGranularity;
+        this.minLength = minLength;
+        this.maxLength = maxLength;
+        this.lengthUnit = lengthUnit;
+        
+        init();
+    }
 
+    private void init() throws IllegalArgumentException {
         this.start = new Start(this);
         this.finish = new Finish(this);
 
@@ -81,7 +105,6 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
         Long w3 = null;
         Long w4 = 0L;
         Long w5 = null;
-
         if (startGranularity != null) {
             if (minStart != null) {
                 w0 = minStart;
@@ -97,7 +120,6 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
                 w1 = maxStart;
             }
         }
-
         if (finishGranularity != null) {
             if (minFinish != null) {
                 w2 = minFinish;
@@ -113,7 +135,6 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
                 w3 = maxFinish;
             }
         }
-
         Granularity g1 = null;
         if (startGranularity != null && finishGranularity != null) {
             if (startGranularity.compareTo(finishGranularity) < 0) {
@@ -128,7 +149,7 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
         }
         if (minLength != null) {
             if (g1 != null) {
-                w4 = g1.minimumDistance(maxStart, minLength, distanceUnit);
+                w4 = g1.minimumDistance(maxStart, minLength, lengthUnit);
             } else if (minFinish != null && maxStart != null) {
                 w4 = minLength.longValue();
             }
@@ -136,27 +157,14 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
         }
         if (maxLength != null) {
             if (g1 != null) {
-                w5 = g1.maximumDistance(minStart, maxLength, distanceUnit);
+                w5 = g1.maximumDistance(minStart, maxLength, lengthUnit);
             } else if (maxFinish != null && minStart != null) {
                 w5 = minLength.longValue();
             }
             this.maxLengthComputed = true;
         }
-
-        this.minStart = minStart;
-        this.maxStart = maxStart;
-        this.startGranularity = startGranularity;
-        this.minFinish = minFinish;
-        this.maxFinish = maxFinish;
-        this.finishGranularity = finishGranularity;
-        this.minLength = minLength;
-        this.maxLength = maxLength;
-        this.lengthUnit = distanceUnit;
-
         v = new Long[]{w0, w1, w2, w3, w4, w5};
-        if ((v[0] != null && v[1] != null && v[0].compareTo(v[1]) > 0)
-                || (v[2] != null && v[3] != null && v[2].compareTo(v[3]) > 0)
-                || (v[4] != null && v[5] != null && v[4].compareTo(v[5]) > 0)) {
+        if ((v[0] != null && v[1] != null && v[0].compareTo(v[1]) > 0) || (v[2] != null && v[3] != null && v[2].compareTo(v[3]) > 0) || (v[4] != null && v[5] != null && v[4].compareTo(v[5]) > 0)) {
             throw new IllegalArgumentException("Illegal values for interval");
         }
     }
@@ -297,12 +305,12 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
 
     private void initVw() {
         this.vw = new Weight[]{
-                    v[0] != null ? new Weight(v[0]) : Weight.NEG_INFINITY,
-                    v[1] != null ? new Weight(v[1]) : Weight.POS_INFINITY,
-                    v[2] != null ? new Weight(v[2]) : Weight.NEG_INFINITY,
-                    v[3] != null ? new Weight(v[3]) : Weight.POS_INFINITY,
-                    v[4] != null ? new Weight(v[4]) : Weight.ZERO,
-                    v[5] != null ? new Weight(v[5]) : Weight.POS_INFINITY};
+                    v[0] != null ? weightFactory.getInstance(v[0]) : WeightFactory.NEG_INFINITY,
+                    v[1] != null ? weightFactory.getInstance(v[1]) : WeightFactory.POS_INFINITY,
+                    v[2] != null ? weightFactory.getInstance(v[2]) : WeightFactory.NEG_INFINITY,
+                    v[3] != null ? weightFactory.getInstance(v[3]) : WeightFactory.POS_INFINITY,
+                    v[4] != null ? weightFactory.getInstance(v[4]) : WeightFactory.ZERO,
+                    v[5] != null ? weightFactory.getInstance(v[5]) : WeightFactory.POS_INFINITY};
     }
 
     /**
@@ -437,9 +445,7 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
         return Arrays.asList(v).toString();
     }
 
-    static final class Start implements Serializable {
-
-        private static final long serialVersionUID = 8966134801723368830L;
+    static final class Start {
         private final Interval interval;
         private volatile int hashCode;
 
@@ -473,9 +479,7 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
         }
     }
 
-    static final class Finish implements Serializable {
-
-        private static final long serialVersionUID = -3475866103582928640L;
+    static final class Finish {
         private final Interval interval;
         private volatile int hashCode;
 
@@ -498,23 +502,13 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
             }
             return hashCode;
         }
-
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.lang.Object#toString()
-         */
+        
         @Override
         public String toString() {
             return "" + interval + " finish";
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object other) {
         if (other == this) {
@@ -528,12 +522,7 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
         Interval otherIval = (Interval) other;
         return Arrays.equals(this.v, otherIval.v);
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
+    
     @Override
     public int hashCode() {
         if (this.hashCode == 0) {
@@ -712,5 +701,30 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
     public Unit getLengthUnit() {
         computeLength();
         return lengthUnit;
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException,
+            ClassNotFoundException {
+        s.defaultReadObject();
+
+        if (minStart != null && maxFinish != null && minStart > maxFinish) {
+            throw new InvalidObjectException(
+                    "maxFinish cannot be before minStart; maxFinish="
+                    + maxFinish + "; minStart=" + minStart);
+        }
+        if (minLength != null && minLength < 0) {
+            throw new InvalidObjectException(
+                    "minLength must be positive or 0 but was " + minLength);
+        }
+        if (maxLength != null && maxLength < 0) {
+            throw new InvalidObjectException(
+                    "maxLength must be positive or 0 but was " + maxLength);
+        }
+
+        try {
+            init();
+        } catch (IllegalArgumentException iae) {
+            throw new InvalidObjectException(iae.getMessage());
+        }
     }
 }

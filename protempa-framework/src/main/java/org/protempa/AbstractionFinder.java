@@ -484,39 +484,14 @@ final class AbstractionFinder implements Module {
                 Set<PropositionDefinition> propDefs, String[] propIds)
                 throws ProtempaException {
             for (String propId : propIds) {
-//                PropositionDefinition pd = knowledgeSource.readPropositionDefinition(propId);
-//                if (pd != null) {
-//                    pd.acceptChecked(visitor);
-//                    String[] directChildren = pd.getDirectChildren();
-//                    if (directChildren.length > 0) {
-//                        propDefs.add(pd);
-//                        aggregateChildren(visitor, propDefs, directChildren);
-//                    }
-//                } else {
-//                    throw new FinderException("Invalid proposition id: " + propId);
-//                }
-                EventDefinition ed = knowledgeSource.readEventDefinition(propId);
-                if (ed != null) {
-                    String[] edDirectChildren = ed.getDirectChildren();
-                    if (edDirectChildren.length > 0) {
-                        propDefs.add(ed);
-                        aggregateChildren(visitor, propDefs, edDirectChildren);
-                    }
+                PropositionDefinition pd = knowledgeSource.readPropositionDefinition(propId);
+                if (pd != null) {
+                    pd.acceptChecked(visitor);
+                    propDefs.add(pd);
+                    String[] directChildren = pd.getDirectChildren();
+                    aggregateChildren(visitor, propDefs, directChildren);
                 } else {
-                    AbstractionDefinition ad = knowledgeSource.readAbstractionDefinition(propId);
-                    if (ad != null) {
-                        ad.acceptChecked(visitor);
-                        propDefs.add(ad);
-                        aggregateChildren(visitor, propDefs, ad.getDirectChildren());
-                    } else {
-                        ConstantDefinition cd = knowledgeSource.readConstantDefinition(propId);
-                        if (cd != null) {
-                            cd.acceptChecked(visitor);
-                            propDefs.add(cd);
-                            aggregateChildren(visitor, propDefs,
-                                    cd.getDirectChildren());
-                        }
-                    }
+                    throw new FinderException("Invalid proposition id: " + propId);
                 }
             }
         }

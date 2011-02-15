@@ -14,8 +14,6 @@ import org.protempa.proposition.IntervalFactory;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueFactory;
-import org.protempa.proposition.value.ValueType;
 
 class EventResultProcessor extends AbstractMainResultProcessor<Event> {
     private static final IntervalFactory intervalFactory = new IntervalFactory();
@@ -31,6 +29,8 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
             codeSpec = codeSpecL.get(codeSpecL.size() - 1);
         }
         Logger logger = SQLGenUtil.logger();
+        PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
+        Value[] propertyValues = new Value[propertySpecs.length];
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
@@ -97,16 +97,8 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                             gran);
                 }
             }
-
-            PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
-            Value[] propertyValues = new Value[propertySpecs.length];
-            for (int j = 0; j < propertySpecs.length; j++) {
-                PropertySpec propertySpec = propertySpecs[j];
-                ValueType valueType = propertySpec.getValueType();
-                Value value = ValueFactory.get(valueType).parseValue(
-                        resultSet.getString(i++));
-                propertyValues[j] = value;
-            }
+            
+            i = extractPropertyValues(propertySpecs, resultSet, i, propertyValues);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
@@ -122,7 +114,6 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                 event.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             logger.log(Level.FINEST, "Created event {0}", event);
-            // Collections.putList(results, keyId, event);
             List<Event> propList = results.getPatientPropositions(keyId);
             if (propList == null) {
                 propList = new ArrayList<Event>();
