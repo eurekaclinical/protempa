@@ -6,5 +6,6 @@
         eternal="true"
         overflowToDisk="true"
         diskPersistent="false"
+        diskSpoolBufferSizeMB="100"
         />
 </ehcache>
