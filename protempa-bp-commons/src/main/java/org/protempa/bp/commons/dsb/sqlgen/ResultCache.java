@@ -50,6 +50,15 @@ public class ResultCache<P extends Proposition> {
         Collections.putList(this.referencesCache, uid, reference);
     }
 
+    public void put(UniqueIdentifier uid, P proposition) {
+        assert this.conversionMap.containsKey(uid) : "Trying to store an unknown Proposition";
+
+        Location location = this.conversionMap.get(uid);
+        List<P> propList = this.patientCache.get(location.getPatientKey());
+        propList.set(location.getIndex(), proposition);
+        this.patientCache.put(location.getPatientKey(), propList);
+    }
+
     void put(String key, List<P> propList) {
         // first, we add to or update the patients cache
         this.patientCache.put(key, propList);
