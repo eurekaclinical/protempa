@@ -1,6 +1,7 @@
 package org.arp.javautil.map;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -11,11 +12,10 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
-import net.sf.ehcache.config.CacheConfiguration;
 
 /**
  * Implements EHCache-backed {@link Map}. Because this map is backed by a cache,
@@ -31,9 +31,9 @@ import net.sf.ehcache.config.CacheConfiguration;
 public class CacheMap<K, V> implements Map<K, V> {
 
     /*
-     * Wrap the cache manager in a static class so it gets created lazily
-     * and in a threadsafe manner. Add a runtime hook so it gets shutdown
-     * upon JVM shutdown.
+     * Wrap the cache manager in a static class so it gets created lazily and in
+     * a threadsafe manner. Add a runtime hook so it gets shutdown upon JVM
+     * shutdown.
      */
     private static class CacheManagerHolder {
 
@@ -55,7 +55,8 @@ public class CacheMap<K, V> implements Map<K, V> {
             });
         }
     }
-    private final Cache cache;
+
+    private final Ehcache cache;
     private String id;
 
     public CacheMap() {
@@ -64,16 +65,15 @@ public class CacheMap<K, V> implements Map<K, V> {
 
         Logger logger = MapUtil.logger();
         if (logger.isLoggable(Level.FINE)) {
-            File file = new File(cacheManager.getDiskStorePath(),
-                    this.id);
+            File file = new File(cacheManager.getDiskStorePath(), this.id);
             String path = file.getAbsolutePath();
             logger.log(Level.FINE, "Creating CacheMap cache {0} in {1}",
-                    new Object[]{this.id, path});
+                    new Object[] { this.id, path });
 
         }
 
         cacheManager.addCache(this.id);
-        this.cache = cacheManager.getCache(this.id);
+        this.cache = cacheManager.getEhcache(this.id);
     }
 
     @Override
@@ -97,9 +97,7 @@ public class CacheMap<K, V> implements Map<K, V> {
         Set<Entry<K, V>> entrySet = new HashSet<Entry<K, V>>();
         List<K> keys = (List<K>) this.cache.getKeys();
         for (K key : keys) {
-            Element elt = this.cache.get(key);
-            V value = (V) elt.getValue();
-            CacheMapEntry entry = new CacheMapEntry(key, value);
+            CacheMapEntry entry = new CacheMapEntry(this.cache, key);
             entrySet.add(entry);
         }
         return entrySet;
@@ -199,18 +197,18 @@ public class CacheMap<K, V> implements Map<K, V> {
 
     /**
      * Disposes the cache upon GC.
+     * 
      * @throws Throwable
      */
     @Override
     protected void finalize() throws Throwable {
         /*
          * Synchronizes with the cache manager instance so if it is getting
-         * shutdown we don't try to dispose of the cache at the same time
-         * (and vice versa).
+         * shutdown we don't try to dispose of the cache at the same time (and
+         * vice versa).
          */
         synchronized (CacheManagerHolder.cacheManager) {
-            if (CacheManagerHolder.cacheManager.getStatus()
-                    == Status.STATUS_ALIVE) {
+            if (CacheManagerHolder.cacheManager.getStatus() == Status.STATUS_ALIVE) {
                 Logger logger = MapUtil.logger();
                 logger.log(Level.FINE, "Disposing CacheMap cache " + id);
                 this.cache.setDisabled(true);
@@ -222,12 +220,12 @@ public class CacheMap<K, V> implements Map<K, V> {
 
     class CacheMapEntry implements Map.Entry<K, V> {
 
-        K key;
-        V value;
+        private final Ehcache cache;
+        private final K key;
 
-        CacheMapEntry(K k, V v) {
+        CacheMapEntry(Ehcache c, K k) {
+            this.cache = c;
             this.key = k;
-            this.value = v;
         }
 
         @Override
@@ -235,15 +233,39 @@ public class CacheMap<K, V> implements Map<K, V> {
             return this.key;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public V getValue() {
-            return this.value;
+            if (this.cache.isKeyInCache(this.key)) {
+                Serializable value = this.cache.get(this.key).getValue();
+                if (value != null) {
+                    return (V) value;
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public V setValue(V value) {
-            this.value = value;
-            return value;
+            Element old = null;
+            if (this.cache.isKeyInCache(this.key)) {
+                old = this.cache.get(this.key);
+                this.cache.put(new Element(this.key, value));
+            }
+            if (old != null) {
+                Serializable oldVal = old.getValue();
+                if (oldVal != null) {
+                    return (V) oldVal;
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
         }
     }
 }
