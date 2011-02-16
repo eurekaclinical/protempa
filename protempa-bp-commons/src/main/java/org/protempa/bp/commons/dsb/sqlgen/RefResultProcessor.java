@@ -39,6 +39,7 @@ abstract class RefResultProcessor<P extends Proposition> extends
                 + uniqueIdentifier;
         addReferenceForProposition(this.referenceSpec.getReferenceName(),
                 proposition, refUniqueIdentifier);
+        this.cache.put(uniqueIdentifier, proposition);
     }
 
     abstract void addReferenceForProposition(String referenceName,
