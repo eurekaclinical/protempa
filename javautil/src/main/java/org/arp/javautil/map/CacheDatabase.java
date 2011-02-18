@@ -26,22 +26,26 @@ public class CacheDatabase {
         Runtime.getRuntime().addShutdownHook(new Thread("CacheDBShutdownHook") {
             @Override
             public void run() {
-                try {
-                    @SuppressWarnings("unchecked")
-                    List<String> dbNames = CacheDatabase.env.getDatabaseNames();
-                    for (String dbName : dbNames) {
-                        CacheDatabase.getDatabase(dbName).close();
+                if (env != null) {
+                    try {
+                        @SuppressWarnings("unchecked")
+                        List<String> dbNames = CacheDatabase.env
+                                .getDatabaseNames();
+                        for (String dbName : dbNames) {
+                            CacheDatabase.getDatabase(dbName).close();
+                        }
+                        classCatalog.close();
+                        env.close();
+                    } catch (DatabaseException e) {
+                        e.printStackTrace();
                     }
-                } catch (DatabaseException e) {
-                    e.printStackTrace();
+                    File dataDir = new File(location);
+                    for (File f : dataDir.listFiles()) {
+                        f.delete();
+                    }
+                    dataDir.delete();
                 }
-                File dataDir = new File(location);
-                for (File f : dataDir.listFiles()) {
-                    f.delete();
-                }
-                dataDir.delete();
             }
-
         });
     }
 
@@ -73,6 +77,7 @@ public class CacheDatabase {
         if (!envFile.exists()) {
             envFile.mkdirs();
         }
+
         env = new Environment(envFile, envConf);
 
         DatabaseConfig dbConfig = new DatabaseConfig();
@@ -82,10 +87,5 @@ public class CacheDatabase {
         Database catalogDb = env.openDatabase(null, CLASS_CATALOG, dbConfig);
 
         classCatalog = new StoredClassCatalog(catalogDb);
-    }
-
-    public void close() throws DatabaseException {
-        classCatalog.close();
-        env.close();
     }
 }
