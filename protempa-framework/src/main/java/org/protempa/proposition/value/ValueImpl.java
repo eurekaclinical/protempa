@@ -18,6 +18,7 @@ abstract class ValueImpl implements Value {
     private static class NumberValueComparatorClass implements
             ValueComparatorClass {
 
+        @Override
         public ValueComparator compare(ValueImpl val1, Value val2) {
             return val1.compareNumberValue((NumberValue) val2);
         }
@@ -26,6 +27,7 @@ abstract class ValueImpl implements Value {
     private static class InequalityNumberValueComparatorClass implements
             ValueComparatorClass {
 
+        @Override
         public ValueComparator compare(ValueImpl val1, Value val2) {
             return val1.compareInequalityNumberValue((InequalityNumberValue) val2);
         }
@@ -34,6 +36,7 @@ abstract class ValueImpl implements Value {
     private static class NominalValueComparatorClass implements
             ValueComparatorClass {
 
+        @Override
         public ValueComparator compare(ValueImpl val1, Value val2) {
             return val1.compareNominalValue((NominalValue) val2);
         }
@@ -42,6 +45,7 @@ abstract class ValueImpl implements Value {
     private static class OrdinalValueComparatorClass implements
             ValueComparatorClass {
 
+        @Override
         public ValueComparator compare(ValueImpl val1, Value val2) {
             return val1.compareOrdinalValue((OrdinalValue) val2);
         }
@@ -50,6 +54,7 @@ abstract class ValueImpl implements Value {
     private static class BooleanValueComparatorClass implements
             ValueComparatorClass {
 
+        @Override
         public ValueComparator compare(ValueImpl val1, Value val2) {
             return val1.compareBooleanValue((BooleanValue) val2);
         }
@@ -70,9 +75,7 @@ abstract class ValueImpl implements Value {
     }
     private final ValueType type;
 
-    /**
-     *
-     */
+    
     ValueImpl(ValueType valueType) {
         this.type = valueType;
     }
@@ -98,6 +101,7 @@ abstract class ValueImpl implements Value {
         return ValueComparator.UNKNOWN;
     }
 
+    @Override
     public ValueComparator compare(Value val) {
         if (val == null) {
             return ValueComparator.UNKNOWN;
@@ -109,12 +113,8 @@ abstract class ValueImpl implements Value {
     protected String reprType() {
         return reprType(this.type);
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.protempa.proposition.value.Value#getValueFactory()
-     */
+    
+    @Override
     public final ValueType getType() {
         return this.type;
     }

@@ -106,25 +106,26 @@ public final class OrdinalValue extends ValueImpl implements OrderedValue {
         return hashCode;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof NominalValue)) {
+        if (obj == null) {
             return false;
         }
-
-        OrdinalValue v = (OrdinalValue) obj;
-
-        return (val == v.val || (val != null && val.equals(v.val)))
-                || allowedValues == v.allowedValues
-                || allowedValues.equals(v.allowedValues);
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final OrdinalValue other = (OrdinalValue) obj;
+        if (!this.val.equals(other.val)) {
+            return false;
+        }
+        if (this.allowedValues != other.allowedValues &&
+                !this.allowedValues.equals(other.allowedValues)) {
+            return false;
+        }
+        return true;
     }
 
     @Override

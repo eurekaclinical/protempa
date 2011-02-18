@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+/**
+ * A unique identifier for a data source backend.
+ * 
+ * @author Himanshu Rathod
+ */
 public final class DataSourceBackendId implements SourceId {
 
     private static final long serialVersionUID = -201656715932739725L;
@@ -12,9 +17,14 @@ public final class DataSourceBackendId implements SourceId {
             new HashMap<String, DataSourceBackendId>();
 
     private final String id;
-    private transient int hashCode;
+    private transient volatile int hashCode;
 
-
+    /**
+     * Creates a data source backend id.
+     * 
+     * @param id the id {@link String}. Cannot be <code>null</code>.
+     * @return a {@link DataSourceBackendId}.
+     */
     public static DataSourceBackendId getInstance(String id) {
         DataSourceBackendId result = cache.get(id);
         if (result == null) {
@@ -24,18 +34,25 @@ public final class DataSourceBackendId implements SourceId {
         return result;
     }
 
+    /**
+     * Creates a new data source backend id. Only used by
+     * {@link #getInstance(java.lang.String)}.
+     * 
+     * @param newId the id {@link String}. Cannot be <code>null</code>.
+     */
     private DataSourceBackendId(String newId) {
+        if (newId == null) {
+            throw new IllegalArgumentException("newId cannot be null");
+        }
         this.id = newId;
     }
 
     @Override
     public int hashCode() {
-        if (hashCode == 0) {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((id == null) ? 0 : id.hashCode());
+        if (this.hashCode == 0) {
+            int result = 17;
+            result = 37 * result + id.hashCode();
             this.hashCode = result;
-            return result;
         }
         return this.hashCode;
     }
@@ -51,15 +68,8 @@ public final class DataSourceBackendId implements SourceId {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        DataSourceBackendId other = (DataSourceBackendId) obj;
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
-        return true;
+        final DataSourceBackendId other = (DataSourceBackendId) obj;
+        return this.id.equals(other.id);
     }
 
     @Override

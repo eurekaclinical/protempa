@@ -81,7 +81,10 @@ public final class BooleanValue extends ValueImpl {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof BooleanValue)) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
             return false;
         }
 

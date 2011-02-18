@@ -16,6 +16,7 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
+import net.sf.ehcache.config.CacheConfiguration;
 
 /**
  * Implements EHCache-backed {@link Map}. Because this map is backed by a cache,
@@ -55,11 +56,11 @@ public class CacheMap<K, V> implements Map<K, V> {
             });
         }
     }
-
+    
     private final Ehcache cache;
     private String id;
 
-    public CacheMap() {
+    public CacheMap(int maxElementsInMemory) {
         this.id = UUID.randomUUID().toString();
         CacheManager cacheManager = CacheManagerHolder.cacheManager;
 
@@ -74,6 +75,14 @@ public class CacheMap<K, V> implements Map<K, V> {
 
         cacheManager.addCache(this.id);
         this.cache = cacheManager.getEhcache(this.id);
+        CacheConfiguration config = this.cache.getCacheConfiguration();
+        if (maxElementsInMemory >= 0) {
+            config.setMaxElementsInMemory(maxElementsInMemory);
+        }
+    }
+
+    public CacheMap() {
+        this(-1);
     }
 
     @Override

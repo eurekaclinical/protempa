@@ -4,14 +4,16 @@ import java.util.Arrays;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.LocalUniqueIdentifier;
 
-class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
+final class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
 
     private static final long serialVersionUID = 3956023315666447630L;
-    
     private final String name;
     private String[] dbIds;
+    private volatile transient int hashCode;
 
     SQLGenUniqueIdentifier(String name, String[] dbIds) {
+        assert name != null : "name cannot be null";
+        assert dbIds != null : "dbIds cannot be null";
         this.name = name;
         this.dbIds = dbIds.clone();
     }
@@ -25,11 +27,10 @@ class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
             return false;
         }
         final SQLGenUniqueIdentifier other = (SQLGenUniqueIdentifier) obj;
-        if ((this.name == null) ? (other.name != null) :
-            !this.name.equals(other.name)) {
+        if (!this.name.equals(other.name)) {
             return false;
         }
-        if (!Arrays.deepEquals(this.dbIds, other.dbIds)) {
+        if (!Arrays.equals(this.dbIds, other.dbIds)) {
             return false;
         }
         return true;
@@ -37,10 +38,13 @@ class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
-        hash = 53 * hash + Arrays.deepHashCode(this.dbIds);
-        return hash;
+        if (this.hashCode == 0) {
+            int hash = 3;
+            hash = 53 * hash + this.name.hashCode();
+            hash = 53 * hash + Arrays.hashCode(this.dbIds);
+            this.hashCode = hash;
+        }
+        return this.hashCode;
     }
 
     @Override

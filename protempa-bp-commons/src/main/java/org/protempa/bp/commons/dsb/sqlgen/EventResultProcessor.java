@@ -2,7 +2,6 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,7 +15,10 @@ import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Value;
 
 class EventResultProcessor extends AbstractMainResultProcessor<Event> {
+
     private static final IntervalFactory intervalFactory = new IntervalFactory();
+
+    private static final int FLUSH_SIZE = 50000;
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
@@ -31,11 +33,12 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
         Logger logger = SQLGenUtil.logger();
         PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
         Value[] propertyValues = new Value[propertySpecs.length];
+        int count = 0;
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
 
-            String[] uniqueIds = 
+            String[] uniqueIds =
                     new String[entitySpec.getUniqueIdSpecs().length];
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifier = generateUniqueIdentifier(
@@ -97,7 +100,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                             gran);
                 }
             }
-            
+
             i = extractPropertyValues(propertySpecs, resultSet, i, propertyValues);
 
             if (isCasePresent()) {
@@ -105,8 +108,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
             }
 
             Event event = new Event(propId);
-            event.setDataSourceType(DatabaseDataSourceType
-                    .getInstance(getDataSourceBackendId()));
+            event.setDataSourceType(DatabaseDataSourceType.getInstance(getDataSourceBackendId()));
             event.setUniqueIdentifier(uniqueIdentifier);
             event.setInterval(interval);
             for (int j = 0; j < propertySpecs.length; j++) {
@@ -114,12 +116,11 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                 event.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             logger.log(Level.FINEST, "Created event {0}", event);
-            List<Event> propList = results.getPatientPropositions(keyId);
-            if (propList == null) {
-                propList = new ArrayList<Event>(500);
+            results.add(keyId, event);
+            if (++count % FLUSH_SIZE == 0) {
+                results.flush();
             }
-            propList.add(event);
-            results.put(keyId, propList);
         }
+        results.flush();
     }
 }

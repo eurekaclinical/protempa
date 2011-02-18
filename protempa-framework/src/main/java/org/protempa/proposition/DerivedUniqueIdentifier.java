@@ -2,13 +2,16 @@ package org.protempa.proposition;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-
-public class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
+public final class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
 
     private static final long serialVersionUID = -7548400029812453768L;
-    private String id;
+    private final String id;
+    private transient volatile int hashCode;
 
     public DerivedUniqueIdentifier(String newId) {
+        if (newId == null) {
+            throw new IllegalArgumentException("newId cannot be null");
+        }
         this.id = newId;
     }
 
@@ -18,6 +21,9 @@ public class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
         if (obj == null) {
             return false;
         }
@@ -25,7 +31,7 @@ public class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
             return false;
         }
         final DerivedUniqueIdentifier other = (DerivedUniqueIdentifier) obj;
-        if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
+        if (!this.id.equals(other.id)) {
             return false;
         }
         return true;
@@ -33,9 +39,12 @@ public class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
-        return hash;
+        if (this.hashCode == 0) {
+            int hash = 3;
+            hash = 53 * hash + this.id.hashCode();
+            this.hashCode = hash;
+        }
+        return this.hashCode;
     }
 
     @Override
@@ -46,8 +55,7 @@ public class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
     @Override
     public LocalUniqueIdentifier clone() {
         try {
-            DerivedUniqueIdentifier clone = (DerivedUniqueIdentifier) super
-                    .clone();
+            DerivedUniqueIdentifier clone = (DerivedUniqueIdentifier) super.clone();
             // TODO:  Do we need to copy the ID?  Or is the cloned object 
             // a new object without a proper ID?
             // clone.id = this.id;
@@ -56,5 +64,4 @@ public class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
             throw new AssertionError(cnse);
         }
     }
-
 }

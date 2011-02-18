@@ -2,7 +2,6 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,6 +14,8 @@ import org.protempa.proposition.value.ValueType;
 
 class PrimitiveParameterResultProcessor extends
         AbstractMainResultProcessor<PrimitiveParameter> {
+
+    private static final int FLUSH_SIZE = 50000;
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
@@ -29,6 +30,7 @@ class PrimitiveParameterResultProcessor extends
         Logger logger = SQLGenUtil.logger();
         PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
         Value[] propertyValues = new Value[propertySpecs.length];
+        int count = 0;
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
@@ -82,14 +84,12 @@ class PrimitiveParameterResultProcessor extends
             p.setDataSourceType(DatabaseDataSourceType
                     .getInstance(getDataSourceBackendId()));
             logger.log(Level.FINEST, "Created primitive parameter {0}", p);
-            List<PrimitiveParameter> propList = results
-                    .getPatientPropositions(keyId);
-            if (propList == null) {
-                propList = new ArrayList<PrimitiveParameter>(500);
+            results.add(keyId, p);
+            if (++count % FLUSH_SIZE == 0) {
+                results.flush();
             }
-            propList.add(p);
-            results.put(keyId, propList);
         }
+        results.flush();
     }
 
     

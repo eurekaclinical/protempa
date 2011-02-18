@@ -8,6 +8,9 @@ import org.protempa.proposition.UniqueIdentifier;
 
 abstract class RefResultProcessor<P extends Proposition> extends
         AbstractResultProcessor {
+
+    private static final int FLUSH_SIZE = 25000;
+
     private ReferenceSpec referenceSpec;
     private ResultCache<P> cache;
 
@@ -17,6 +20,7 @@ abstract class RefResultProcessor<P extends Proposition> extends
     @Override
     public final void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
+        int count = 0;
         while (resultSet.next()) {
             int i = 1;
             String[] uniqueIds = new String[entitySpec.getUniqueIdSpecs().length];
@@ -29,17 +33,20 @@ abstract class RefResultProcessor<P extends Proposition> extends
             UniqueIdentifier refUniqueIdentifier = generateUniqueIdentifier(
                     this.referenceSpec.getEntityName(), refUniqueIds);
             addToReferences(uniqueIdentifier, refUniqueIdentifier);
+            if (++count % FLUSH_SIZE == 0) {
+                this.cache.flushReferences();
+            }
         }
+        this.cache.flushReferences();
     }
 
     private final void addToReferences(UniqueIdentifier uniqueIdentifier,
             UniqueIdentifier refUniqueIdentifier) {
-        P proposition = this.cache.getProposition(uniqueIdentifier);
+        P proposition = this.cache.addReference(uniqueIdentifier, refUniqueIdentifier);
         assert proposition != null : "No proposition for unique identifier "
                 + uniqueIdentifier;
         addReferenceForProposition(this.referenceSpec.getReferenceName(),
                 proposition, refUniqueIdentifier);
-        this.cache.put(uniqueIdentifier, proposition);
     }
 
     abstract void addReferenceForProposition(String referenceName,

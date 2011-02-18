@@ -40,23 +40,19 @@ public final class NominalValue extends ValueImpl {
         return this.hashCode;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof NominalValue)) {
+        if (obj == null) {
             return false;
         }
-
-        NominalValue v = (NominalValue) obj;
-
-        return val == v.val || val.equals(v.val);
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final NominalValue other = (NominalValue) obj;
+        return this.val.equals(other.val);
     }
 
     /**

@@ -412,7 +412,10 @@ public final class Weight implements Comparable<Weight>, Serializable {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Weight)) {
+        if (o == null) {
+            return false;
+        }
+        if (getClass() != o.getClass()) {
             return false;
         }
 
