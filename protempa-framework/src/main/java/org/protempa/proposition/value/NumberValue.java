@@ -72,13 +72,17 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof NumberValue)) {
+        if (obj == null) {
             return false;
         }
-
-        NumberValue nv = (NumberValue) obj;
-
-        return num == nv.num || num.equals(nv.num);
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final NumberValue other = (NumberValue) obj;
+        if (this.num != other.num && !this.num.equals(other.num)) {
+            return false;
+        }
+        return true;
     }
 
     /*

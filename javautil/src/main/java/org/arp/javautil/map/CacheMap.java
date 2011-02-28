@@ -153,10 +153,11 @@ public class CacheMap<K, V> implements Map<K, V> {
     @Override
     public V put(K arg0, V arg1) {
         Element old = this.cache.get(arg0);
-        this.cache.put(new Element(arg0, arg1));
         if (old != null) {
+            this.cache.replace(new Element(arg0, arg1));
             return (V) old.getValue();
         } else {
+            this.cache.put(new Element(arg0, arg1));
             return null;
         }
     }
@@ -166,7 +167,7 @@ public class CacheMap<K, V> implements Map<K, V> {
     public void putAll(Map<? extends K, ? extends V> arg0) {
         Set<K> keys = (Set<K>) arg0.keySet();
         for (K key : keys) {
-            this.cache.put(new Element(key, arg0.get(key)));
+            put(key, arg0.get(key));
         }
     }
 

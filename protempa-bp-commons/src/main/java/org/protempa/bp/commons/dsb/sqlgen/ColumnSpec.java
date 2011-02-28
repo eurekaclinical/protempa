@@ -2,7 +2,9 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.ProtempaUtil;
@@ -145,6 +147,7 @@ public final class ColumnSpec implements Serializable {
     private final JoinSpec joinSpec;
     private final Constraint constraint;
     private final KnowledgeSourceIdToSqlCode[] propIdToSqlCodes;
+    private final Map<Object, String> propIdForSqlCode;
     private final ColumnOp columnOp;
     private final boolean propositionIdsComplete;
 
@@ -216,7 +219,7 @@ public final class ColumnSpec implements Serializable {
             KnowledgeSourceIdToSqlCode[] propIdToSqlCodes,
             boolean propositionIdsComplete) {
         this(schema, table, column, null, constraint, propIdToSqlCodes,
-                null, false);
+                null, propositionIdsComplete);
     }
 
     /**
@@ -286,6 +289,11 @@ public final class ColumnSpec implements Serializable {
         } else {
             this.propIdToSqlCodes = new KnowledgeSourceIdToSqlCode[0];
         }
+        this.propIdForSqlCode = new HashMap<Object, String>();
+        for (KnowledgeSourceIdToSqlCode k : this.propIdToSqlCodes) {
+            propIdForSqlCode.put(k.sqlCode, k.propositionId);
+        }
+
         if (this.joinSpec != null) {
             this.joinSpec.setPrevColumnSpec(this);
         }
@@ -336,6 +344,10 @@ public final class ColumnSpec implements Serializable {
      */
     public Constraint getConstraint() {
         return this.constraint;
+    }
+
+    String propositionIdFor(String sqlCode) {
+        return this.propIdForSqlCode.get(sqlCode);
     }
 
     /**

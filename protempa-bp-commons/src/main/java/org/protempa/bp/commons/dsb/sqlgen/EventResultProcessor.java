@@ -1,6 +1,7 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
@@ -18,7 +19,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
 
     private static final IntervalFactory intervalFactory = new IntervalFactory();
 
-    private static final int FLUSH_SIZE = 50000;
+    private static final int FLUSH_SIZE = 100000;
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
@@ -34,12 +35,16 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
         PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
         Value[] propertyValues = new Value[propertySpecs.length];
         int count = 0;
+        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+        int startColumnType = -1;
+        int finishColumnType = -1;
+        String[] uniqueIds =
+                    new String[entitySpec.getUniqueIdSpecs().length];
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
 
-            String[] uniqueIds =
-                    new String[entitySpec.getUniqueIdSpecs().length];
+            
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifier = generateUniqueIdentifier(
                     entitySpec.getName(), uniqueIds);
@@ -51,6 +56,9 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                 } else {
                     String code = resultSet.getString(i++);
                     propId = sqlCodeToPropositionId(codeSpec, code);
+                    if (propId == null) {
+                        continue;
+                    }
                 }
             } else {
                 i++;
@@ -60,9 +68,14 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
             Granularity gran = entitySpec.getGranularity();
             Interval interval = null;
             if (finishTimeSpec == null) {
+                if (finishColumnType == -1) {
+                    finishColumnType = resultSetMetaData.getColumnType(i);
+                }
                 Long d = null;
                 try {
-                    d = entitySpec.getPositionParser().toLong(resultSet, i++);
+                    d = entitySpec.getPositionParser().toLong(resultSet, i,
+                            finishColumnType);
+                    i++;
                 } catch (SQLException e) {
                     logger.log(
                             Level.WARNING,
@@ -71,25 +84,35 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                 }
                 interval = intervalFactory.getInstance(d, gran);
             } else {
+                if (startColumnType == -1) {
+                    startColumnType = resultSetMetaData.getColumnType(i);
+                }
                 Long start = null;
                 try {
                     start = entitySpec.getPositionParser().toLong(resultSet,
-                            i++);
+                            i, startColumnType);
                 } catch (SQLException e) {
                     logger.log(
                             Level.WARNING,
                             "Could not parse start time. Leaving the start time/timestamp unset.",
                             e);
+                } finally {
+                    i++;
+                }
+                if (finishColumnType == -1) {
+                    finishColumnType = resultSetMetaData.getColumnType(i);
                 }
                 Long finish = null;
                 try {
                     finish = entitySpec.getPositionParser().toLong(resultSet,
-                            i++);
+                            i, finishColumnType);
                 } catch (SQLException e) {
                     logger.log(
                             Level.WARNING,
                             "Could not parse start time. Leaving the finish time unset.",
                             e);
+                } finally {
+                    i++;
                 }
                 try {
                     interval = intervalFactory.getInstance(start, gran, finish,

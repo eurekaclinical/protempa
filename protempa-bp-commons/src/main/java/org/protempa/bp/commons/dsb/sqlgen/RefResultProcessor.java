@@ -21,14 +21,16 @@ abstract class RefResultProcessor<P extends Proposition> extends
     public final void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
         int count = 0;
+        String[] uniqueIds = new String[entitySpec.getUniqueIdSpecs().length];
+        String[] refUniqueIds = new String[this.referenceSpec
+                    .getUniqueIdSpecs().length];
         while (resultSet.next()) {
             int i = 1;
-            String[] uniqueIds = new String[entitySpec.getUniqueIdSpecs().length];
+            
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifier = generateUniqueIdentifier(
                     entitySpec.getName(), uniqueIds);
-            String[] refUniqueIds = new String[this.referenceSpec
-                    .getUniqueIdSpecs().length];
+            
             i = readUniqueIds(refUniqueIds, resultSet, i);
             UniqueIdentifier refUniqueIdentifier = generateUniqueIdentifier(
                     this.referenceSpec.getEntityName(), refUniqueIds);
@@ -42,17 +44,19 @@ abstract class RefResultProcessor<P extends Proposition> extends
 
     private final void addToReferences(UniqueIdentifier uniqueIdentifier,
             UniqueIdentifier refUniqueIdentifier) {
-        P proposition = this.cache.addReference(uniqueIdentifier, refUniqueIdentifier);
+        P proposition =
+                this.cache.uidToProposition(uniqueIdentifier);
         assert proposition != null : "No proposition for unique identifier "
                 + uniqueIdentifier;
-        addReferenceForProposition(this.referenceSpec.getReferenceName(),
-                proposition, refUniqueIdentifier);
+        addReference(proposition, this.referenceSpec.getReferenceName(),
+                refUniqueIdentifier);
     }
 
-    abstract void addReferenceForProposition(String referenceName,
-            P proposition, UniqueIdentifier uid);
+    abstract void addReference(
+            P proposition, String referenceName, UniqueIdentifier uid);
 
     final void setCache(ResultCache<P> cache) {
+        assert cache != null : "cache cannot be null";
         this.cache = cache;
     }
 
@@ -65,6 +69,7 @@ abstract class RefResultProcessor<P extends Proposition> extends
     }
 
     final void setReferenceSpec(ReferenceSpec referenceSpec) {
+        assert referenceSpec != null : "referenceSpec cannot be null";
         this.referenceSpec = referenceSpec;
     }
 }

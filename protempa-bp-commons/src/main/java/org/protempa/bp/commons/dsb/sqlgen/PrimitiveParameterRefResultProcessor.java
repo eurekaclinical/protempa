@@ -11,8 +11,8 @@ final class PrimitiveParameterRefResultProcessor extends
         RefResultProcessor<PrimitiveParameter> {
 
     @Override
-    void addReferenceForProposition(String referenceName, 
-            PrimitiveParameter primitiveParameter, 
+    void addReference(
+            PrimitiveParameter primitiveParameter, String referenceName,
             UniqueIdentifier uid) {
         primitiveParameter.addReference(referenceName, uid);
     }

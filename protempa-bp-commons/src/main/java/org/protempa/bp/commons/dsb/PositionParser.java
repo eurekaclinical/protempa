@@ -8,5 +8,5 @@ import java.sql.SQLException;
  * @author Andrew Post
  */
 public interface PositionParser {
-    long toLong(ResultSet resultSet, int columnIndex) throws SQLException;
+    long toLong(ResultSet resultSet, int columnIndex, int colType) throws SQLException;
 }

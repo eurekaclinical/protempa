@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.arp.javautil.arrays.Arrays;
 
 import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.proposition.value.ValueSet;
@@ -80,8 +81,7 @@ public final class KnowledgeSource
             if (protempaKnowledgeBase != null) {
                 result = protempaKnowledgeBase.getConstantDefinition(id);
             }
-            if (result == null
-                    && !this.notFoundConstantDefinitionRequests.contains(id)) {
+            if (result == null) {
                 try {
                     initializeIfNeeded();
                 } catch (BackendInitializationException ex) {
@@ -112,8 +112,7 @@ public final class KnowledgeSource
             if (protempaKnowledgeBase != null) {
                 result = protempaKnowledgeBase.getConstantDefinition(id) != null;
             }
-            if (!result
-                    && !this.notFoundConstantDefinitionRequests.contains(id)) {
+            if (!result) {
                 try {
                     initializeIfNeeded();
                 } catch (BackendInitializationException ex) {
@@ -152,8 +151,7 @@ public final class KnowledgeSource
             if (protempaKnowledgeBase != null) {
                 result = protempaKnowledgeBase.getEventDefinition(id);
             }
-            if (result == null
-                    && !this.notFoundEventDefinitionRequests.contains(id)) {
+            if (result == null) {
                 try {
                     initializeIfNeeded();
                 } catch (BackendInitializationException ex) {
@@ -184,7 +182,7 @@ public final class KnowledgeSource
             if (protempaKnowledgeBase != null) {
                 result = protempaKnowledgeBase.getEventDefinition(id) != null;
             }
-            if (!result && !this.notFoundEventDefinitionRequests.contains(id)) {
+            if (!result) {
                 try {
                     initializeIfNeeded();
                 } catch (BackendInitializationException ex) {
@@ -346,8 +344,7 @@ public final class KnowledgeSource
             if (protempaKnowledgeBase != null) {
                 result = protempaKnowledgeBase.getAbstractionDefinition(id);
             }
-            if (result == null
-                    && !this.notFoundAbstractionDefinitionRequests.contains(id)) {
+            if (result == null) {
                 try {
                     initializeIfNeeded();
                     if (this.backendManager.getBackends() != null) {
@@ -381,8 +378,7 @@ public final class KnowledgeSource
             if (protempaKnowledgeBase != null) {
                 result = protempaKnowledgeBase.getAbstractionDefinition(id) != null;
             }
-            if (!result
-                    && !this.notFoundAbstractionDefinitionRequests.contains(id)) {
+            if (!result) {
                 try {
                     initializeIfNeeded();
                     if (this.backendManager.getBackends() != null) {
@@ -415,7 +411,7 @@ public final class KnowledgeSource
             if (protempaKnowledgeBase != null) {
                 result = protempaKnowledgeBase.getValueSet(id);
             }
-            if (result == null && !this.notFoundValueSetRequests.contains(id)) {
+            if (result == null) {
                 try {
                     initializeIfNeeded();
                     if (this.backendManager.getBackends() != null) {
@@ -448,7 +444,7 @@ public final class KnowledgeSource
             if (protempaKnowledgeBase != null) {
                 result = protempaKnowledgeBase.getValueSet(id) != null;
             }
-            if (!result && !this.notFoundValueSetRequests.contains(id)) {
+            if (!result) {
                 try {
                     initializeIfNeeded();
                     if (this.backendManager.getBackends() != null) {
@@ -497,13 +493,30 @@ public final class KnowledgeSource
         }
     }
 
-    public Set<String> leafPropositionIds(String propId)
+    /**
+     * Returns the set of proposition ids needed to find instances of
+     * the given proposition.
+     *
+     * @param propId
+     *            one or multiple proposition id <code>String</code>s.
+     *            Cannot be <code>null</code>.
+     * @return a newly-created {@link Set} of proposition id
+     *         {@link String}s. Guaranteed not to return <code>null</code>.
+     */
+    public Set<String> leafPropositionIds(String... propId)
             throws KnowledgeSourceReadException {
-        return leafPropositionIds(Collections.singleton(propId));
+        Set<String> propIds = Arrays.asSet(propId);
+        return leafPropositionIds(propIds);
     }
 
     public Set<String> leafPropositionIds(Set<String> propIds)
             throws KnowledgeSourceReadException {
+        if (propIds == null) {
+            throw new IllegalArgumentException("propIds cannot be null");
+        }
+        if (propIds.contains(null)) {
+            throw new IllegalArgumentException("propIds cannot contain a null element");
+        }
         Set<String> pIds = new HashSet<String>(primitiveParameterIds(propIds));
         Set<String> eventIds = leafEventIds(propIds);
         pIds.addAll(eventIds);
@@ -528,6 +541,9 @@ public final class KnowledgeSource
             throws KnowledgeSourceReadException {
         if (propIds == null) {
             throw new IllegalArgumentException("propIds cannot be null");
+        }
+        if (propIds.contains(null)) {
+            throw new IllegalArgumentException("propIds cannot contain a null element");
         }
         Set<String> cachedResult = this.primParamIdCache.get(propIds);
         if (cachedResult != null) {
@@ -588,17 +604,15 @@ public final class KnowledgeSource
      * the given proposition.
      * 
      * @param propId
-     *            an abstraction id <code>String</code>. Cannot be
-     *            <code>null</code>.
+     *            one or multiple proposition id <code>String</code>s.
+     *            Cannot be <code>null</code>.
      * @return a newly-created {@link Set} of primitive parameter id
      *         {@link String}s. Guaranteed not to return <code>null</code>.
      */
-    public Set<String> primitiveParameterIds(String propId)
+    public Set<String> primitiveParameterIds(String... propId)
             throws KnowledgeSourceReadException {
-        if (propId == null) {
-            throw new IllegalArgumentException("propId cannot be null");
-        }
-        return primitiveParameterIds(Collections.singleton(propId));
+        Set<String> pIds = Arrays.asSet(propId);
+        return primitiveParameterIds(pIds);
     }
 
     /**
@@ -607,28 +621,31 @@ public final class KnowledgeSource
      * retrieval from the data source (e.g., the events at the leaves of the
      * tree).
      * 
-     * @param abstractionAndEventIds
-     *            a <code>Set</code> of abstraction and event id
+     * @param propIds
+     *            a <code>Set</code> of proposition id
      *            <code>String</code>s. Cannot be <code>null</code>.
      * @return a newly-created unmodifiable <code>Set</code> of event id
      *         <code>String</code>s. Guaranteed not to return <code>null</code>.
      */
-    public Set<String> leafEventIds(Set<String> abstractionAndEventIds)
+    public Set<String> leafEventIds(Set<String> propIds)
             throws KnowledgeSourceReadException {
-        if (abstractionAndEventIds == null) {
+        if (propIds == null) {
             throw new IllegalArgumentException(
                     "abstractionAndEventIds cannot be null");
         }
-        Set<String> cachedResult = this.leafEventIdCache.get(abstractionAndEventIds);
+        if (propIds.contains(null)) {
+            throw new IllegalArgumentException("abstractionAndEventIds cannot contain a null element");
+        }
+        Set<String> cachedResult = this.leafEventIdCache.get(propIds);
         if (cachedResult != null) {
             return cachedResult;
         } else {
             Set<String> result = new HashSet<String>();
-            if (abstractionAndEventIds != null) {
+            if (propIds != null) {
                 leafEventIdsHelper(
-                        abstractionAndEventIds.toArray(new String[abstractionAndEventIds.size()]), result);
+                        propIds.toArray(new String[propIds.size()]), result);
                 result = Collections.unmodifiableSet(result);
-                this.leafEventIdCache.put(abstractionAndEventIds, result);
+                this.leafEventIdCache.put(propIds, result);
             }
             return result;
         }
@@ -639,18 +656,15 @@ public final class KnowledgeSource
      * hierarchy and collects and returns the set of event ids for retrieval
      * from the data source (e.g., the events at the leaves of the tree).
      * 
-     * @param abstractionOrEventId
-     *            an abstraction or event id <code>String</code>.
+     * @param propId
+     *            one or multiple proposition id <code>String</code>s.
      * @return a newly-created unmodifiable <code>Set</code> of event id
      *         <code>String</code>s. Guaranteed not to return <code>null</code>.
      */
-    public Set<String> leafEventIds(String abstractionOrEventId)
+    public Set<String> leafEventIds(String... propId)
             throws KnowledgeSourceReadException {
-        if (abstractionOrEventId == null) {
-            throw new IllegalArgumentException(
-                    "abstractionOrEventId cannot be null");
-        }
-        return leafEventIds(Collections.singleton(abstractionOrEventId));
+        Set<String> propIds = Arrays.asSet(propId);
+        return leafEventIds(propIds);
     }
 
     /**
@@ -706,28 +720,31 @@ public final class KnowledgeSource
      * hierarchy and collects and returns the set of constant ids for retrieval
      * from the data source (e.g., the events at the leaves of the tree).
      * 
-     * @param constantIds
-     *            a <code>Set</code> of constant id <code>String</code>s. Cannot
+     * @param propIds
+     *            a <code>Set</code> of proposition id <code>String</code>s. Cannot
      *            be <code>null</code>.
      * @return a newly-created unmodifiable <code>Set</code> of constant id
      *         <code>String</code>s. Guaranteed not to return <code>null</code>.
      */
-    public Set<String> leafConstantIds(Set<String> constantIds)
+    public Set<String> leafConstantIds(Set<String> propIds)
             throws KnowledgeSourceReadException {
-        if (constantIds == null) {
+        if (propIds == null) {
             throw new IllegalArgumentException("constantIds cannot be null");
         }
-        Set<String> cachedResult = this.leafConstantIdCache.get(constantIds);
+        if (propIds.contains(null)) {
+            throw new IllegalArgumentException("constantIds cannot contain a null element");
+        }
+        Set<String> cachedResult = this.leafConstantIdCache.get(propIds);
         if (cachedResult != null) {
             return cachedResult;
         } else {
             Set<String> result = new HashSet<String>();
-            if (constantIds != null) {
+            if (propIds != null) {
                 leafConstantIdsHelper(
-                        constantIds.toArray(new String[constantIds.size()]),
+                        propIds.toArray(new String[propIds.size()]),
                         result);
                 result = Collections.unmodifiableSet(result);
-                this.leafConstantIdCache.put(constantIds, result);
+                this.leafConstantIdCache.put(propIds, result);
             }
             return result;
         }
@@ -738,17 +755,15 @@ public final class KnowledgeSource
      * and collects and returns the set of constant ids for retrieval from the
      * data source (e.g., the constants at the leaves of the tree).
      * 
-     * @param constantId
-     *            a constant id <code>String</code>.
+     * @param propId
+     *            one or multiple proposition id <code>String</code>s.
      * @return a newly-created unmodifiable <code>Set</code> of constant id
      *         <code>String</code>s. Guaranteed not to return <code>null</code>.
      */
-    public Set<String> leafConstantIds(String constantId)
+    public Set<String> leafConstantIds(String... propId)
             throws KnowledgeSourceReadException {
-        if (constantId == null) {
-            throw new IllegalArgumentException("constant cannot be null");
-        }
-        return leafConstantIds(Collections.singleton(constantId));
+        Set<String> propIds = Arrays.asSet(propId);
+        return leafConstantIds(propIds);
     }
 
     /**

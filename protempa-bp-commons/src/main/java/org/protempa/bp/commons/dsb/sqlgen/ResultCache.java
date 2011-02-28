@@ -13,10 +13,10 @@ import org.protempa.proposition.UniqueIdentifier;
 
 public class ResultCache<P extends Proposition> {
 
-    private final Map<String, List<P>> inMemoryPatientCache;
-    private final Map<RefCacheKey, List<P>> refInMemoryPatientCache;
+    private Map<String, List<P>> inMemoryPatientCache;
+    private Map<RefCacheKey, List<P>> refInMemoryPatientCache;
     private final List<Map<String, List<P>>> patientCache;
-    private final Map<UniqueIdentifier, Location> conversionMap;
+    private Map<UniqueIdentifier, Location> conversionMap;
     private int patientCacheNumber;
 
     ResultCache() {
@@ -27,7 +27,7 @@ public class ResultCache<P extends Proposition> {
         this.conversionMap = new CacheMap<UniqueIdentifier, Location>(500000);
     }
 
-    P addReference(UniqueIdentifier uid, UniqueIdentifier refuid) {
+    P uidToProposition(UniqueIdentifier uid) {
         Location loc = this.conversionMap.get(uid);
         assert loc != null : "Could not find the location for proposition "
                 + uid;
@@ -56,7 +56,7 @@ public class ResultCache<P extends Proposition> {
         List<P> propList =
                 this.patientCache.get(this.patientCacheNumber).get(keyId);
         if (propList == null) {
-            propList = new ArrayList<P>(1000);
+            propList = new ArrayList<P>();
         }
         propList.addAll(propositions);
         put(keyId, propList);
@@ -66,7 +66,7 @@ public class ResultCache<P extends Proposition> {
         keyId = keyId.intern();
         List<P> propList = this.inMemoryPatientCache.get(keyId);
         if (propList == null) {
-            propList = new ArrayList<P>(1000);
+            propList = new ArrayList<P>();
             this.inMemoryPatientCache.put(keyId, propList);
         }
         propList.add(proposition);
@@ -81,9 +81,15 @@ public class ResultCache<P extends Proposition> {
                 addAll(keyId, propList);
             }
         }
-        this.inMemoryPatientCache.clear();
+        for (List<P> value : this.inMemoryPatientCache.values()) {
+            value.clear();
+        }
         this.patientCache.add(new CacheMap<String, List<P>>());
         this.patientCacheNumber++;
+    }
+
+    void clear() {
+        this.conversionMap.clear();
     }
 
     private void put(String key, List<P> propList) {
@@ -107,6 +113,9 @@ public class ResultCache<P extends Proposition> {
     }
 
     public Map<String, List<P>> getPatientCache() {
+        this.inMemoryPatientCache = null;
+        this.refInMemoryPatientCache = null;
+        this.conversionMap = null;
         return new DataSourceResultMap<P>(this.patientCache);
     }
 

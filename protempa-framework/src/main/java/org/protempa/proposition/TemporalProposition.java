@@ -158,22 +158,20 @@ public abstract class TemporalProposition extends AbstractProposition {
      *         <code>String</code>.
      */
     private String formatStart(Format format) {
-        if (format != null && interval != null) {
+        if (format != null) {
             Long minStart = interval.getMinStart();
             if (minStart != null) {
                 return format.format(minStart);
             } else {
                 return "Unknown";
             }
-        } else if (interval != null) {
+        } else {
             Long minStart = interval.getMinStart();
             if (minStart != null) {
                 return numberFormat.format(minStart);
             } else {
                 return "Unknown";
             }
-        } else {
-            return "Unknown";
         }
     }
 
@@ -187,42 +185,38 @@ public abstract class TemporalProposition extends AbstractProposition {
      *         <code>String</code>.
      */
     private String formatFinish(Format format) {
-        if (format != null && interval != null) {
+        if (format != null) {
             Long minFinish = interval.getMinFinish();
             if (minFinish != null) {
                 return format.format(minFinish);
             } else {
                 return "Unknown";
             }
-        } else if (interval != null) {
+        } else {
             Long minFinish = interval.getMinFinish();
             if (minFinish != null) {
                 return numberFormat.format(minFinish);
             } else {
                 return "Unknown";
             }
-        } else {
-            return "Unknown";
         }
     }
 
     private String formatLength(Format format) {
-        if (format != null && interval != null) {
+        if (format != null) {
             Long minLength = interval.getMinLength();
             if (minLength != null) {
                 return format.format(minLength);
             } else {
                 return "Unknown";
             }
-        } else if (interval != null) {
+        } else {
             Long minLength = interval.getMinLength();
             if (minLength != null) {
                 return numberFormat.format(minLength);
             } else {
                 return "Unknown";
             }
-        } else {
-            return "Unknown";
         }
     }
 

@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.ValueSet;
@@ -27,19 +25,10 @@ public final class KnowledgeBase implements Serializable {
 
     private static final long serialVersionUID = 5988857805118255882L;
     /**
-     * The abstract parameter definitions in this knowledge base.
-     */
-    private Set<AbstractionDefinition> abstractionDefinitions;
-    /**
-     * The primitive parameter definitions in this knowledge base.
-     */
-    private Set<PrimitiveParameterDefinition> primitiveParameterDefinitions;
-    /**
      * Map of primitive parameter id <code>String</code> objects to
      * <code>PrimitiveParameterDefinition</code> objects.
      */
-    private Map<String, PrimitiveParameterDefinition> primitiveParameterIdToPrimitiveParameterDefinitionMap;
-
+    private Map<String, PrimitiveParameterDefinition> idToPrimitiveParameterDefinitionMap;
     /**
      * Value used to create an unique default id for a new abstract parameter
      * definition.
@@ -49,31 +38,21 @@ public final class KnowledgeBase implements Serializable {
      * Map of abstract parameter id <code>String</code> objects to
      * <code>AbstractParameterDefinition</code> objects.
      */
-    private Map<String, AbstractionDefinition> abstractionIdToAbstractionDefinitionMap;
-    private Set<EventDefinition> eventDefinitions;
-    private Map<String, EventDefinition> eventIdToEventDefinitionMap;
-
-    private Set<ConstantDefinition> constantDefinitions;
-    private Map<String, ConstantDefinition> constantIdToConstantDefinitionMap;
-
-    private Set<ValueSet> valueSets;
-    private Map<String, ValueSet> valueSetIdtoValueSetMap;
+    private Map<String, AbstractionDefinition> idToAbstractionDefinitionMap;
+    private Map<String, EventDefinition> idToEventDefinitionMap;
+    private Map<String, ConstantDefinition> idToConstantDefinitionMap;
+    private Map<String, ValueSet> idtoValueSetMap;
 
     KnowledgeBase() {
         initialize();
     }
 
     private void initialize() {
-        this.abstractionDefinitions = new HashSet<AbstractionDefinition>();
-        this.primitiveParameterDefinitions = new HashSet<PrimitiveParameterDefinition>();
-        this.abstractionIdToAbstractionDefinitionMap = new HashMap<String, AbstractionDefinition>();
-        this.primitiveParameterIdToPrimitiveParameterDefinitionMap = new HashMap<String, PrimitiveParameterDefinition>();
-        this.eventDefinitions = new HashSet<EventDefinition>();
-        this.eventIdToEventDefinitionMap = new HashMap<String, EventDefinition>();
-        this.constantDefinitions = new HashSet<ConstantDefinition>();
-        this.constantIdToConstantDefinitionMap = new HashMap<String, ConstantDefinition>();
-        this.valueSets = new HashSet<ValueSet>();
-        this.valueSetIdtoValueSetMap = new HashMap<String, ValueSet>();
+        this.idToAbstractionDefinitionMap = new HashMap<String, AbstractionDefinition>();
+        this.idToPrimitiveParameterDefinitionMap = new HashMap<String, PrimitiveParameterDefinition>();
+        this.idToEventDefinitionMap = new HashMap<String, EventDefinition>();
+        this.idToConstantDefinitionMap = new HashMap<String, ConstantDefinition>();
+        this.idtoValueSetMap = new HashMap<String, ValueSet>();
     }
 
     /**
@@ -85,10 +64,10 @@ public final class KnowledgeBase implements Serializable {
      *             if serialization failed.
      */
     private void writeObject(ObjectOutputStream s) throws IOException {
-        s.writeObject(this.primitiveParameterDefinitions);
-        s.writeObject(this.abstractionDefinitions);
-        s.writeObject(this.eventDefinitions);
-        s.writeObject(this.constantDefinitions);
+        s.writeObject(this.idToPrimitiveParameterDefinitionMap.values());
+        s.writeObject(this.idToAbstractionDefinitionMap.values());
+        s.writeObject(this.idToEventDefinitionMap.values());
+        s.writeObject(this.idToConstantDefinitionMap.values());
     }
 
     /**
@@ -106,21 +85,16 @@ public final class KnowledgeBase implements Serializable {
             ClassNotFoundException {
         initialize();
 
-        Set<PrimitiveParameterDefinition> primitiveParameterDefinitions = (Set<PrimitiveParameterDefinition>) s
-                .readObject();
-        Set<AbstractionDefinition> abstractionDefinitions = (Set<AbstractionDefinition>) s
-                .readObject();
-        Set<EventDefinition> eventDefinitions = (Set<EventDefinition>) s
-                .readObject();
-        Set<ConstantDefinition> constantDefinitions = (Set<ConstantDefinition>) s
-                .readObject();
+        Collection<PrimitiveParameterDefinition> primitiveParameterDefinitions = (Collection<PrimitiveParameterDefinition>) s.readObject();
+        Collection<AbstractionDefinition> abstractionDefinitions = (Collection<AbstractionDefinition>) s.readObject();
+        Collection<EventDefinition> eventDefinitions = (Collection<EventDefinition>) s.readObject();
+        Collection<ConstantDefinition> constantDefinitions = (Collection<ConstantDefinition>) s.readObject();
 
         if (primitiveParameterDefinitions != null) {
             for (PrimitiveParameterDefinition def : primitiveParameterDefinitions) {
                 if (def != null && !addPrimitiveParameterDefinition(def)) {
-                    System.err
-                            .println("Could not add de-serialized primitive parameter definition "
-                                    + def + ".");
+                    System.err.println("Could not add de-serialized primitive parameter definition "
+                            + def + ".");
                 }
             }
         }
@@ -128,9 +102,8 @@ public final class KnowledgeBase implements Serializable {
         if (abstractionDefinitions != null) {
             for (AbstractionDefinition def : abstractionDefinitions) {
                 if (def != null && !addAbstractionDefinition(def)) {
-                    System.err
-                            .println("Could not add de-serialized abstract parameter definition "
-                                    + def + ".");
+                    System.err.println("Could not add de-serialized abstract parameter definition "
+                            + def + ".");
                 }
             }
         }
@@ -138,9 +111,8 @@ public final class KnowledgeBase implements Serializable {
         if (eventDefinitions != null) {
             for (EventDefinition def : eventDefinitions) {
                 if (def != null && !addEventDefinition(def)) {
-                    System.err
-                            .println("Could not add de-serialized event definition "
-                                    + def + ".");
+                    System.err.println("Could not add de-serialized event definition "
+                            + def + ".");
                 }
             }
         }
@@ -148,9 +120,8 @@ public final class KnowledgeBase implements Serializable {
         if (constantDefinitions != null) {
             for (ConstantDefinition def : constantDefinitions) {
                 if (def != null && !addConstantDefinition(def)) {
-                    System.err
-                            .println("Could not add de-serialized constant definition "
-                                    + def + ".");
+                    System.err.println("Could not add de-serialized constant definition "
+                            + def + ".");
                 }
             }
         }
@@ -167,15 +138,10 @@ public final class KnowledgeBase implements Serializable {
     }
 
     boolean isUniqueKnowledgeDefinitionObjectId(String id) {
-        return !this.abstractionIdToAbstractionDefinitionMap.containsKey(id)
-                && !this.eventIdToEventDefinitionMap.containsKey(id)
-                && !this.primitiveParameterIdToPrimitiveParameterDefinitionMap
-                        .containsKey(id)
-                && !this.constantIdToConstantDefinitionMap.containsKey(id);
-    }
-
-    public Set<EventDefinition> getEventDefinitions() {
-        return Collections.unmodifiableSet(eventDefinitions);
+        return !this.idToAbstractionDefinitionMap.containsKey(id)
+                && !this.idToEventDefinitionMap.containsKey(id)
+                && !this.idToPrimitiveParameterDefinitionMap.containsKey(id)
+                && !this.idToConstantDefinitionMap.containsKey(id);
     }
 
     public boolean hasEventDefinition(String eventId) {
@@ -183,11 +149,7 @@ public final class KnowledgeBase implements Serializable {
     }
 
     public EventDefinition getEventDefinition(String eventId) {
-        return eventIdToEventDefinitionMap.get(eventId);
-    }
-
-    public Set<ConstantDefinition> getConstantDefinitions() {
-        return Collections.unmodifiableSet(this.constantDefinitions);
+        return idToEventDefinitionMap.get(eventId);
     }
 
     public boolean hasConstantDefinition(String constantId) {
@@ -195,25 +157,15 @@ public final class KnowledgeBase implements Serializable {
     }
 
     public ConstantDefinition getConstantDefinition(String constantId) {
-        return constantIdToConstantDefinitionMap.get(constantId);
+        return idToConstantDefinitionMap.get(constantId);
     }
 
-    public boolean hasValueSet (String valueSetId) {
+    public boolean hasValueSet(String valueSetId) {
         return getValueSet(valueSetId) != null;
     }
 
     public ValueSet getValueSet(String valueSetId) {
-        return valueSetIdtoValueSetMap.get(valueSetId);
-    }
-
-    /**
-     * Returns all abstraction definitions.
-     * 
-     * @return an unmodifiable <code>Set</code> of
-     *         <code>AbstractionDefinition</code>s.
-     */
-    public Set<AbstractionDefinition> getAbstractionDefinitions() {
-        return Collections.unmodifiableSet(abstractionDefinitions);
+        return idtoValueSetMap.get(valueSetId);
     }
 
     public boolean hasAbstractionDefinition(String paramId) {
@@ -221,7 +173,7 @@ public final class KnowledgeBase implements Serializable {
     }
 
     public AbstractionDefinition getAbstractionDefinition(String paramId) {
-        return abstractionIdToAbstractionDefinitionMap.get(paramId);
+        return idToAbstractionDefinitionMap.get(paramId);
     }
 
     /**
@@ -247,62 +199,62 @@ public final class KnowledgeBase implements Serializable {
      */
     public PrimitiveParameterDefinition getPrimitiveParameterDefinition(
             String id) {
-        return primitiveParameterIdToPrimitiveParameterDefinitionMap.get(id);
+        return idToPrimitiveParameterDefinitionMap.get(id);
     }
 
     boolean addConstantDefinition(ConstantDefinition def) {
         assert def != null : "def cannot be null";
-        boolean result = this.constantDefinitions.add(def);
-        if (result) {
-            this.constantIdToConstantDefinitionMap.put(def.getId(), def);
+        String id = def.getId();
+        if (this.idToConstantDefinitionMap.containsKey(id)) {
+            return false;
+        } else {
+            this.idToConstantDefinitionMap.put(id, def);
+            return true;
         }
-        return result;
+
     }
 
     boolean addEventDefinition(EventDefinition def) {
         assert def != null : "def cannot be null";
-        boolean result = eventDefinitions.add(def);
-        if (result) {
-            eventIdToEventDefinitionMap.put(def.getId(), def);
+        String id = def.getId();
+        if (idToEventDefinitionMap.containsKey(id)) {
+            return false;
+        } else {
+            idToEventDefinitionMap.put(id, def);
+            return true;
         }
-        return result;
     }
 
     boolean addAbstractionDefinition(AbstractionDefinition def) {
         assert def != null : "def cannot be null";
-        boolean result = abstractionDefinitions.add(def);
-        if (result) {
-            abstractionIdToAbstractionDefinitionMap.put(def.getId(), def);
+        String id = def.getId();
+        if (this.idToAbstractionDefinitionMap.containsKey(id)) {
+            return false;
+        } else {
+            idToAbstractionDefinitionMap.put(id, def);
+            return true;
         }
-        return result;
     }
 
     boolean addPrimitiveParameterDefinition(
-            PrimitiveParameterDefinition primitiveParameterDefinition) {
-        if (primitiveParameterDefinition == null
-                || !primitiveParameterDefinitions
-                        .add(primitiveParameterDefinition)) {
+            PrimitiveParameterDefinition def) {
+        assert def != null : "def cannot be null";
+        String id = def.getId();
+        if (this.idToPrimitiveParameterDefinitionMap.containsKey(id)) {
             return false;
+        } else {
+            idToPrimitiveParameterDefinitionMap.put(
+                    id,
+                    def);
+            return true;
         }
-        primitiveParameterIdToPrimitiveParameterDefinitionMap.put(
-                primitiveParameterDefinition.getId(),
-                primitiveParameterDefinition);
-        return true;
-    }
-
-    public Set<PrimitiveParameterDefinition> getPrimitiveParameterDefinitions() {
-        return Collections.unmodifiableSet(primitiveParameterDefinitions);
     }
 
     void clear() {
-        this.abstractionDefinitions.clear();
-        this.abstractionIdToAbstractionDefinitionMap.clear();
-        this.eventDefinitions.clear();
-        this.eventIdToEventDefinitionMap.clear();
-        this.primitiveParameterDefinitions.clear();
-        this.primitiveParameterIdToPrimitiveParameterDefinitionMap.clear();
-        this.constantDefinitions.clear();
-        this.constantIdToConstantDefinitionMap.clear();
+        this.idToAbstractionDefinitionMap.clear();
+        this.idToEventDefinitionMap.clear();
+        this.idToPrimitiveParameterDefinitionMap.clear();
+        this.idToConstantDefinitionMap.clear();
     }
 
     /*
@@ -312,8 +264,6 @@ public final class KnowledgeBase implements Serializable {
      */
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append(this.abstractionDefinitions)
-                .append(this.constantDefinitions).append(this.eventDefinitions)
-                .append(this.primitiveParameterDefinitions).toString();
+        return new ToStringBuilder(this).append(this.idToAbstractionDefinitionMap.values()).append(this.idToConstantDefinitionMap.values()).append(this.idToEventDefinitionMap.values()).append(this.idToPrimitiveParameterDefinitionMap.values()).toString();
     }
 }

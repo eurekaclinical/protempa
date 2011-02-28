@@ -10,7 +10,7 @@ import org.protempa.proposition.UniqueIdentifier;
 final class EventRefResultProcessor extends RefResultProcessor<Event> {
 
     @Override
-    void addReferenceForProposition(String referenceName, Event event,
+    void addReference( Event event, String referenceName,
             UniqueIdentifier uid) {
         event.addReference(referenceName, uid);
     }

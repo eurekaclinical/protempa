@@ -15,9 +15,8 @@ import java.sql.Types;
 public final class JDBCDateTimePositionParser implements PositionParser {
 
     @Override
-    public long toLong(ResultSet resultSet, int columnIndex)
+    public long toLong(ResultSet resultSet, int columnIndex, int colType)
             throws SQLException {
-        int colType = resultSet.getMetaData().getColumnType(columnIndex);
         switch (colType) {
             case Types.DATE:
                 Date date = resultSet.getDate(columnIndex);

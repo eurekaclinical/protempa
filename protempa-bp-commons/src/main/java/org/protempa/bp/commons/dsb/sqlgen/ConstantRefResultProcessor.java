@@ -11,8 +11,8 @@ final class ConstantRefResultProcessor extends
         RefResultProcessor<Constant> {
 
     @Override
-    void addReferenceForProposition(String referenceName,
-            Constant constantParameter, UniqueIdentifier uid) {
+    void addReference(
+            Constant constantParameter, String referenceName, UniqueIdentifier uid) {
         constantParameter.addReference(referenceName, uid);
     }
 }

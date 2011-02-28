@@ -13,7 +13,7 @@ import org.protempa.proposition.value.Value;
 
 class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
 
-    private static final int FLUSH_SIZE = 50000;
+    private static final int FLUSH_SIZE = 100000;
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
@@ -29,12 +29,12 @@ class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
         PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
         Value[] propertyValues = new Value[propertySpecs.length];
         int count = 0;
+        String[] uniqueIds =
+                    new String[entitySpec.getUniqueIdSpecs().length];
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
-
-            String[] uniqueIds =
-                    new String[entitySpec.getUniqueIdSpecs().length];
+            
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifer = generateUniqueIdentifier(
                     entitySpec.getName(), uniqueIds);
@@ -46,6 +46,9 @@ class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
                 } else {
                     String code = resultSet.getString(i++);
                     propId = sqlCodeToPropositionId(codeSpec, code);
+                    if (propId == null) {
+                        continue;
+                    }
                 }
             } else {
                 i++;

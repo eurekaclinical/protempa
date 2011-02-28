@@ -35,16 +35,12 @@ import edu.stanford.smi.protege.model.Instance;
  * 
  * @author Andrew Post
  */
-public abstract class ProtegeKnowledgeSourceBackend 
+public abstract class ProtegeKnowledgeSourceBackend
         extends AbstractCommonsKnowledgeSourceBackend
         implements ProjectListener {
-    
+
     private ConnectionManager cm;
     private Units units;
-    private Cls eventCls;
-    private Cls constantCls;
-    private Cls abstractParameterCls;
-    private Cls primitiveParameterCls;
 
     private static enum Units {
 
@@ -72,14 +68,6 @@ public abstract class ProtegeKnowledgeSourceBackend
 
             pcm.init();
             this.cm = pcm;
-            try {
-                this.abstractParameterCls = this.cm.getCls("AbstractParameter");
-                this.eventCls = this.cm.getCls("Event");
-                this.primitiveParameterCls = this.cm.getCls("PrimitiveParameter");
-                this.constantCls = this.cm.getCls("Constant");
-            } catch (KnowledgeSourceReadException e) {
-                throw new KnowledgeSourceBackendInitializationException(e);
-            }
         }
     }
 
@@ -114,10 +102,6 @@ public abstract class ProtegeKnowledgeSourceBackend
             this.cm.close();
             this.cm = null;
         }
-        this.abstractParameterCls = null;
-        this.eventCls = null;
-        this.primitiveParameterCls = null;
-        this.constantCls = null;
     }
 
     @Override
@@ -125,9 +109,7 @@ public abstract class ProtegeKnowledgeSourceBackend
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
         Instance instance = getInstance(name);
-        if (instance != null && this.cm.hasType(instance, this.constantCls)) {
-            convertIsA(instance, protempaKnowledgeBase);
-        }
+        convert(instance, protempaKnowledgeBase);
         return protempaKnowledgeBase.getConstantDefinition(name);
     }
 
@@ -136,9 +118,7 @@ public abstract class ProtegeKnowledgeSourceBackend
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
         Instance instance = getInstance(name);
-        if (instance != null && this.cm.hasType(instance, this.eventCls)) {
-            convertIsA(instance, protempaKnowledgeBase);
-        }
+        convert(instance, protempaKnowledgeBase);
         return protempaKnowledgeBase.getEventDefinition(name);
     }
 
@@ -189,13 +169,9 @@ public abstract class ProtegeKnowledgeSourceBackend
             String name, KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
         Instance instance = getInstance(name);
-        if (instance != null
-                && this.cm.hasType(instance, this.primitiveParameterCls)) {
-            convertIsA(instance, protempaKnowledgeBase);
-            return protempaKnowledgeBase.getPrimitiveParameterDefinition(name);
-        } else {
-            return null;
-        }
+        convert(instance, protempaKnowledgeBase);
+        return protempaKnowledgeBase.getPrimitiveParameterDefinition(name);
+
     }
 
     @Override
@@ -203,23 +179,9 @@ public abstract class ProtegeKnowledgeSourceBackend
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
         Instance candidateAbstractParameter = getInstance(name);
-        if (candidateAbstractParameter != null
-                && this.cm.hasType(candidateAbstractParameter,
-                this.cm.getCls("ParameterConstraint"))) {
-            candidateAbstractParameter = (Instance) this.cm.getOwnSlotValue(
-                    candidateAbstractParameter,
-                    this.cm.getSlot("allowedValueOf"));
-        }
-        if (candidateAbstractParameter != null
-                && this.cm.hasType(candidateAbstractParameter,
-                this.abstractParameterCls)) {
-            convertAbstractedFrom(candidateAbstractParameter,
-                    protempaKnowledgeBase);
-            AbstractionDefinition result = protempaKnowledgeBase.getAbstractionDefinition(name);
-            return result;
-        } else {
-            return null;
-        }
+        convert(candidateAbstractParameter, protempaKnowledgeBase);
+        AbstractionDefinition result = protempaKnowledgeBase.getAbstractionDefinition(name);
+        return result;
     }
 
     /*
@@ -298,32 +260,6 @@ public abstract class ProtegeKnowledgeSourceBackend
     /**
      * Converts the given proposition instance and all proposition instances in
      * its dependency tree, which is defined by proposition instances connected
-     * by the abstractedFrom relationship.
-     * 
-     * @param proposition
-     *            a proposition instance.
-     * @param protegeKb
-     *            a Protege
-     *            <code>edu.stanford.smi.protege.model.KnowledgeBase</code>
-     *            instance.
-     * @param protempaKb
-     *            a PROTEMPA <code>KnowledgeBase</code> instance.
-     */
-    private void convertAbstractedFrom(Instance proposition,
-            KnowledgeBase protempaKb) throws KnowledgeSourceReadException {
-        if (proposition != null && protempaKb != null) {
-            PropositionConverter converter = InstanceConverterFactory.getInstance(proposition);
-            if (converter != null
-                    && !converter.protempaKnowledgeBaseHasProposition(
-                    proposition, protempaKb)) {
-                converter.convert(proposition, protempaKb, this);
-            }
-        }
-    }
-
-    /**
-     * Converts the given proposition instance and all proposition instances in
-     * its dependency tree, which is defined by proposition instances connected
      * by the isA relationship.
      * 
      * @param proposition
@@ -335,15 +271,12 @@ public abstract class ProtegeKnowledgeSourceBackend
      * @param protempaKb
      *            a PROTEMPA <code>KnowledgeBase</code> instance.
      */
-    private void convertIsA(Instance proposition, KnowledgeBase protempaKb)
+    private void convert(Instance proposition, KnowledgeBase protempaKb)
             throws KnowledgeSourceReadException {
         if (proposition != null && protempaKb != null) {
-            PropositionConverter converter = InstanceConverterFactory.getInstance(proposition);
-            if (converter != null
-                    && !converter.protempaKnowledgeBaseHasProposition(
-                    proposition, protempaKb)) {
-                converter.convert(proposition, protempaKb, this);
-            }
+            PropositionConverter converter =
+                    InstanceConverterFactory.getInstance(proposition);
+            converter.convert(proposition, protempaKb, this);
         }
     }
 

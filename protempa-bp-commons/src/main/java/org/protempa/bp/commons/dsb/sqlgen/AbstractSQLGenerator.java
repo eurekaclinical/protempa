@@ -2,7 +2,6 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -310,11 +309,14 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                             new Object[]{backendNameForMessages(),
                                 referenceSpec.getReferenceName(), entitySpec.getName()});
                 }
+
                 logger.log(Level.FINE,
                         "Data source backend {0} is done processing entity spec {1}",
                         new Object[]{backendNameForMessages(),
                             entitySpec.getName()});
             }
+
+            results.clear();
 
             logger.log(Level.FINE,
                     "Results of query for {0} in data source backend {1} "
@@ -472,14 +474,14 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             StringBuilder whereClause);
 
     private static KnowledgeSourceIdToSqlCode[] filterKnowledgeSourceIdToSqlCodesById(
-            Set<?> ids, KnowledgeSourceIdToSqlCode[] constraintValues) {
+            Set<?> propIds, KnowledgeSourceIdToSqlCode[] constraintValues) {
         ColumnSpec.KnowledgeSourceIdToSqlCode[] filteredConstraintValues;
-        if (ids != null) {
+        if (propIds != null) {
             List<ColumnSpec.KnowledgeSourceIdToSqlCode> constraintValueList =
                     new ArrayList<ColumnSpec.KnowledgeSourceIdToSqlCode>();
             for (ColumnSpec.KnowledgeSourceIdToSqlCode constraintValue :
                     constraintValues) {
-                if (ids.contains(constraintValue.getPropositionId())) {
+                if (propIds.contains(constraintValue.getPropositionId())) {
                     constraintValueList.add(constraintValue);
                 }
             }
@@ -742,14 +744,14 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
      * If wherePart is null, it skips creating the where clause part.
      * 
      * @param columnSpec
-     * @param ids
+     * @param propIds
      * @param wherePart
      * @param referenceIndices
      * @param selectPartHasCaseStmt
      * @param selectPart
      */
     private void processConstraint(ColumnSpec columnSpec,
-            Set<?> ids,
+            Set<?> propIds,
             StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
             StringBuilder selectPart, Constraint constraintOverride) {
         Constraint constraint = columnSpec.getConstraint();
@@ -760,7 +762,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 columnSpec.getPropositionIdToSqlCodes();
         if (constraint != null) {
             KnowledgeSourceIdToSqlCode[] filteredConstraintValues =
-                    filterKnowledgeSourceIdToSqlCodesById(ids, propIdToSqlCodes);
+                    filterKnowledgeSourceIdToSqlCodesById(propIds, propIdToSqlCodes);
             if (wherePart != null) {
                 if (wherePart.length() > 0) {
                     wherePart.append(" and ");
@@ -771,7 +773,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             if (filteredConstraintValues.length > 0) {
                 sqlCodes = extractSqlCodes(filteredConstraintValues);
             } else {
-                sqlCodes = ids.toArray();
+                sqlCodes = propIds.toArray();
             }
 
             switch (constraint) {
@@ -980,9 +982,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         //skip the code part of the where clause.
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
         if (codeSpec != null) {
-            if (codeSpec.isPropositionIdsComplete()
-                    && propIds.containsAll(Arrays.asList(
-                    entitySpec.getPropositionIds()))) {
+            List<ColumnSpec> codeSpecL = codeSpec.asList();
+
+            if (codeSpecL.get(codeSpecL.size() - 1).isPropositionIdsComplete()
+                    && completeOrNoOverlap(propIds,
+                    entitySpec.getPropositionIds())) {
                 i = processConstraintSpecForWhereClause(propIds, codeSpec, i,
                         null, selectPart, referenceIndices, resultProcessor);
             } else {
@@ -993,6 +997,26 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         }
 
         return i;
+    }
+
+    private static boolean completeOrNoOverlap(Set<String> propIds,
+            String[] entitySpecPropIds) {
+        List<String> entitySpecPropIdsL = new ArrayList(entitySpecPropIds.length);
+        for (String entitySpecPropId : entitySpecPropIds) {
+            entitySpecPropIdsL.add(entitySpecPropId);
+        }
+        entitySpecPropIdsL.removeAll(propIds);
+        boolean result = entitySpecPropIdsL.size() < entitySpecPropIds.length * 0.15f;
+        if (!result) {
+            result = true;
+            for (String propId : entitySpecPropIds) {
+                if (propIds.contains(propId)) {
+                    result = false;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     private static Constraint valueComparatorToSqlOp(

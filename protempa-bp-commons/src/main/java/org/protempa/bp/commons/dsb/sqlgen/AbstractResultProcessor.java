@@ -19,10 +19,13 @@ abstract class AbstractResultProcessor implements SQLGenResultProcessor {
     }
 
     final void setDataSourceBackendId(String dataSourceBackendId) {
+        assert dataSourceBackendId != null :
+            "dataSourceBackendId cannot be null";
         this.dataSourceBackendId = dataSourceBackendId;
     }
 
     final void setEntitySpec(EntitySpec entitySpec) {
+        assert entitySpec != null : "entitySpec cannot be null";
         this.entitySpec = entitySpec;
     }
 
@@ -51,8 +54,9 @@ abstract class AbstractResultProcessor implements SQLGenResultProcessor {
     protected final UniqueIdentifier generateUniqueIdentifier(
             String entitySpecName, String[] uniqueIds)
             throws SQLException {
+        
         return new UniqueIdentifier(
-                DataSourceBackendId.getInstance(getDataSourceBackendId()),
+                DataSourceBackendId.getInstance(this.dataSourceBackendId),
                 new SQLGenUniqueIdentifier(entitySpecName, uniqueIds));
     }
 }
