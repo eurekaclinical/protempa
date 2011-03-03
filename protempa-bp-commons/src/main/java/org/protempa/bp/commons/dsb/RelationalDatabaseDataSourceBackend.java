@@ -1,11 +1,13 @@
 package org.protempa.bp.commons.dsb;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.DatabaseAPI;
+import org.arp.javautil.sql.InvalidConnectionSpecArguments;
 import org.protempa.DataSourceBackendFailedValidationException;
 import org.protempa.DataSourceBackendInitializationException;
 import org.protempa.DataSourceReadException;
@@ -17,6 +19,8 @@ import org.protempa.bp.commons.AbstractCommonsDataSourceBackend;
 import org.protempa.bp.commons.BackendProperty;
 import org.protempa.bp.commons.dsb.sqlgen.RelationalDatabaseSpec;
 import org.protempa.bp.commons.dsb.sqlgen.SQLGeneratorFactory;
+import org.protempa.bp.commons.dsb.sqlgen.SQLGeneratorLoadException;
+import org.protempa.bp.commons.dsb.sqlgen.SQLGeneratorNotFoundException;
 import org.protempa.dsb.filter.Filter;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
@@ -36,8 +40,12 @@ public abstract class RelationalDatabaseDataSourceBackend
     private String databaseId;
     private String username;
     private String password;
-    private final RelationalDatabaseSpec relationalDatabaseSpec;
+    private RelationalDatabaseSpec relationalDatabaseSpec;
     private SQLGenerator sqlGenerator;
+
+    public RelationalDatabaseDataSourceBackend() {
+        this(null);
+    }
 
     /**
      * Instantiates the backend with the specification of a mapping from
@@ -48,9 +56,17 @@ public abstract class RelationalDatabaseDataSourceBackend
      */
     public RelationalDatabaseDataSourceBackend(
             RelationalDatabaseSpec relationalDatabaseSpec) {
+        this(relationalDatabaseSpec, null);
+    }
+
+    public RelationalDatabaseDataSourceBackend(
+            RelationalDatabaseSpec relationalDatabaseSpec,
+            DatabaseAPI databaseAPI) {
         this.relationalDatabaseSpec = relationalDatabaseSpec;
-        this.databaseAPI = DatabaseAPI.DRIVERMANAGER;
-        
+        if (databaseAPI == null) {
+            databaseAPI = DatabaseAPI.DRIVERMANAGER;
+        }
+        this.databaseAPI = databaseAPI;
     }
 
     /**
@@ -66,15 +82,14 @@ public abstract class RelationalDatabaseDataSourceBackend
      * compatible with the database and available drivers is not available.
      */
     @Override
-    public void initialize(BackendInstanceSpec config)
+    public final void initialize(BackendInstanceSpec config)
             throws DataSourceBackendInitializationException {
         super.initialize(config);
 
-        if (this.databaseAPI == null) {
+        if (this.relationalDatabaseSpec == null) {
             throw new DataSourceBackendInitializationException(
-                    "Data source backend " + nameForErrors() +
-                    " requires a Java database API (DriverManager or " +
-                    "DataSource) to be specified in its configuration");
+                    "A RelationalDatabaseSpec is required for " +
+                    nameForErrors());
         }
         
         try {
@@ -83,11 +98,35 @@ public abstract class RelationalDatabaseDataSourceBackend
                     this.databaseId, this.username, this.password);
             this.sqlGenerator = new SQLGeneratorFactory(connectionSpecInstance,
                     this.relationalDatabaseSpec, this).newInstance();
-        } catch (Exception ex) {
+        } catch (InvalidConnectionSpecArguments ex) {
+            throw new DataSourceBackendInitializationException(
+                    "Could not initialize data source backend " +
+                    nameForErrors(), ex);
+        } catch (SQLGeneratorNotFoundException ex) {
+            throw new DataSourceBackendInitializationException(
+                    "Could not initialize data source backend " +
+                    nameForErrors(), ex);
+        } catch (SQLGeneratorLoadException ex) {
+            throw new DataSourceBackendInitializationException(
+                    "Could not initialize data source backend " +
+                    nameForErrors(), ex);
+        } catch (SQLException ex) {
             throw new DataSourceBackendInitializationException(
                     "Could not initialize data source backend " +
                     nameForErrors(), ex);
         }
+    }
+
+    public void setRelationalDatabaseSpec(RelationalDatabaseSpec spec) {
+        if (this.sqlGenerator != null) {
+            throw new IllegalStateException(
+                    "cannot set this field after initialize has been called");
+        }
+        this.relationalDatabaseSpec = spec;
+    }
+
+    public RelationalDatabaseSpec getRelationalDatabaseSpec() {
+        return this.relationalDatabaseSpec;
     }
 
     /**
@@ -101,13 +140,20 @@ public abstract class RelationalDatabaseDataSourceBackend
 
     /**
      * Configures which Java database API to use
-     * ({@link java.sql.DriverManager} or {@link javax.sql.DataSource}. Must
-     * be set to something not <code>null</code> before any of the read
-     * methods are called.
+     * ({@link java.sql.DriverManager} or {@link javax.sql.DataSource}. If
+     * <code>null</code>, the default is assigned
+     * ({@link DatabaseAPI.DRIVERMANAGER}).
      *
      * @param databaseAPI a {@link DatabaseAPI}.
      */
     public void setDatabaseAPI(DatabaseAPI databaseAPI) {
+        if (this.sqlGenerator != null) {
+            throw new IllegalStateException(
+                    "cannot set this field after initialize has been called");
+        }
+        if (databaseAPI == null) {
+            databaseAPI = DatabaseAPI.DRIVERMANAGER;
+        }
         this.databaseAPI = databaseAPI;
     }
 
@@ -140,6 +186,10 @@ public abstract class RelationalDatabaseDataSourceBackend
      */
     @BackendProperty
     public void setDatabaseId(String databaseId) {
+        if (this.sqlGenerator != null) {
+            throw new IllegalStateException(
+                    "cannot set this field after initialize has been called");
+        }
         this.databaseId = databaseId;
     }
 
@@ -159,6 +209,10 @@ public abstract class RelationalDatabaseDataSourceBackend
      */
     @BackendProperty
     public void setUsername(String user) {
+        if (this.sqlGenerator != null) {
+            throw new IllegalStateException(
+                    "cannot set this field after initialize has been called");
+        }
         this.username = user;
     }
 
@@ -178,6 +232,10 @@ public abstract class RelationalDatabaseDataSourceBackend
      */
     @BackendProperty
     public void setPassword(String password) {
+        if (this.sqlGenerator != null) {
+            throw new IllegalStateException(
+                    "cannot set this field after initialize has been called");
+        }
         this.password = password;
     }
 
@@ -260,4 +318,11 @@ public abstract class RelationalDatabaseDataSourceBackend
             KnowledgeSourceReadException{
         this.relationalDatabaseSpec.validate(knowledgeSource);
     }
+
+    @Override
+    public void close() {
+        this.sqlGenerator = null;
+    }
+
+
 }
