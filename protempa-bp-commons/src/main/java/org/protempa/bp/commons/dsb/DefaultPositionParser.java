@@ -9,7 +9,8 @@ import java.sql.SQLException;
  */
 public final class DefaultPositionParser implements PositionParser {
 
-    public long toLong(ResultSet resultSet, int columnIndex, int colType)
+    @Override
+    public Long toLong(ResultSet resultSet, int columnIndex, int colType)
             throws SQLException {
         return resultSet.getLong(columnIndex);
     }
