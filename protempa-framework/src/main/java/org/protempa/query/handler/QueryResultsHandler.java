@@ -43,7 +43,8 @@ public interface QueryResultsHandler {
      * @param keyId
      *            the identifying key id for the result
      * @param propositions
-     *            the proposition results for the given key
+     *            the proposition results for the given key as an unmodifiable
+     *            {@link List<Proposition>}.
      * @param derivationsList a mapping from propositions to derived
      * abstractions.
      * and propositions.

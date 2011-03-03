@@ -7,8 +7,10 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.arp.javautil.string.StringUtil;
 
 import org.protempa.FinderException;
@@ -33,8 +35,9 @@ import org.protempa.proposition.UniqueIdentifier;
 public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
 
     private static final char COLUMN_DELIMITER = '\t';
-    
     private final List<Comparator<Proposition>> comparator;
+    private final TabDelimHandlerPropositionVisitor visitor;
+    private final boolean includeDerived;
 
     /**
      * Instantiates this handler to write to a {@link Writer}. No sorting
@@ -43,8 +46,11 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
      * @param out a {@link Writer}.
      */
     public TabDelimQueryResultsHandler(Writer out) {
-        super(out);
-        this.comparator = Collections.emptyList();
+        this(out, null);
+    }
+
+    public TabDelimQueryResultsHandler(Writer out, boolean includeDerived) {
+        this(out, null, includeDerived);
     }
 
     /**
@@ -59,14 +65,21 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
      */
     public TabDelimQueryResultsHandler(Writer out,
             List<? extends Comparator<Proposition>> comparator) {
+        this(out, comparator, false);
+    }
+
+    public TabDelimQueryResultsHandler(Writer out,
+            List<? extends Comparator<Proposition>> comparator,
+            boolean includeDerived) {
         super(out);
         if (comparator == null) {
             this.comparator = Collections.emptyList();
         } else {
-            this.comparator = 
-                new ArrayList<Comparator<Proposition>>(comparator);
+            this.comparator =
+                    new ArrayList<Comparator<Proposition>>(comparator);
         }
-        
+        this.visitor = new TabDelimHandlerPropositionVisitor(this);
+        this.includeDerived = includeDerived;
     }
 
     /**
@@ -76,8 +89,11 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
      * @param out an {@link OutputStream}.
      */
     public TabDelimQueryResultsHandler(OutputStream out) {
-        super(out);
-        this.comparator = Collections.emptyList();
+        this(out, null);
+    }
+
+    public TabDelimQueryResultsHandler(OutputStream out, boolean includeDerived) {
+        this(out, null, includeDerived);
     }
 
     /**
@@ -92,13 +108,21 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
      */
     public TabDelimQueryResultsHandler(OutputStream out,
             List<? extends Comparator<Proposition>> comparator) {
+        this(out, comparator, false);
+    }
+
+    public TabDelimQueryResultsHandler(OutputStream out,
+            List<? extends Comparator<Proposition>> comparator,
+            boolean includeDerived) {
         super(out);
         if (comparator == null) {
             this.comparator = Collections.emptyList();
         } else {
             this.comparator =
-                new ArrayList<Comparator<Proposition>>(comparator);
+                    new ArrayList<Comparator<Proposition>>(comparator);
         }
+        this.visitor = new TabDelimHandlerPropositionVisitor(this);
+        this.includeDerived = includeDerived;
     }
 
     /**
@@ -109,8 +133,11 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
      * @throws IOException if an error occurred opening/creating the file.
      */
     public TabDelimQueryResultsHandler(String fileName) throws IOException {
-        super(fileName);
-        this.comparator = Collections.emptyList();
+        this(fileName, null);
+    }
+
+    public TabDelimQueryResultsHandler(String fileName, boolean includeDerived) throws IOException {
+        this(fileName, null, includeDerived);
     }
 
     /**
@@ -128,6 +155,12 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
     public TabDelimQueryResultsHandler(String fileName,
             List<? extends Comparator<Proposition>> comparator)
             throws IOException {
+        this(fileName, comparator, false);
+    }
+
+    public TabDelimQueryResultsHandler(String fileName,
+            List<? extends Comparator<Proposition>> comparator,
+            boolean includeDerived) throws IOException {
         super(fileName);
         if (comparator == null) {
             this.comparator = Collections.emptyList();
@@ -135,6 +168,8 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
             this.comparator =
                     new ArrayList<Comparator<Proposition>>(comparator);
         }
+        this.visitor = new TabDelimHandlerPropositionVisitor(this);
+        this.includeDerived = includeDerived;
     }
 
     /**
@@ -146,8 +181,11 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
      * @throws IOException if an error occurred opening/creating the file.
      */
     public TabDelimQueryResultsHandler(File file) throws IOException {
-        super(file);
-        this.comparator = Collections.emptyList();
+        this(file, null);
+    }
+
+    public TabDelimQueryResultsHandler(File file, boolean includeDerived) throws IOException {
+        this(file, null, includeDerived);
     }
 
     /**
@@ -164,6 +202,12 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
     public TabDelimQueryResultsHandler(File file,
             List<? extends Comparator<Proposition>> comparator)
             throws IOException {
+        this(file, comparator, false);
+    }
+
+    public TabDelimQueryResultsHandler(File file,
+            List<? extends Comparator<Proposition>> comparator,
+            boolean includeDerived) throws IOException {
         super(file);
         if (comparator == null) {
             this.comparator = Collections.emptyList();
@@ -171,6 +215,8 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
             this.comparator =
                     new ArrayList<Comparator<Proposition>>(comparator);
         }
+        this.visitor = new TabDelimHandlerPropositionVisitor(this);
+        this.includeDerived = includeDerived;
     }
 
     /**
@@ -183,14 +229,19 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
      */
     @Override
     public void handleQueryResult(String key, List<Proposition> propositions,
-            Map<Proposition,List<Proposition>> derivations,
-            Map<UniqueIdentifier,Proposition> references)
+            Map<Proposition, List<Proposition>> derivations,
+            Map<UniqueIdentifier, Proposition> references)
             throws FinderException {
-        for (Comparator<Proposition> c : this.comparator)
-            Collections.sort(propositions, c);
+        Set<Proposition> propositionsAsSet = new HashSet<Proposition>();
+        addDerived(propositions, derivations, propositionsAsSet);
+        List<Proposition> propositionsCopy =
+                new ArrayList<Proposition>(propositionsAsSet);
+        for (Comparator<Proposition> c : this.comparator) {
+            Collections.sort(propositionsCopy, c);
+        }
+        this.visitor.setKeyId(key);
         try {
-            new TabDelimHandlerPropositionVisitor(key, this)
-                    .visit(propositions);
+            this.visitor.visit(propositionsCopy);
         } catch (TabDelimHandlerProtempaException pe) {
             throw new FinderException(pe);
         } catch (ProtempaException pe) {
@@ -198,10 +249,22 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
         }
     }
 
+    private void addDerived(List<Proposition> propositions, Map<Proposition, 
+            List<Proposition>> derivations,
+            Set<Proposition> propositionsAsSet) {
+        for (Proposition prop : propositions) {
+            boolean added = propositionsAsSet.add(prop);
+            if (added && this.includeDerived) {
+                List<Proposition> derivedProps = derivations.get(prop);
+                addDerived(derivedProps, derivations, propositionsAsSet);
+            }
+        }
+    }
+
     private final static class TabDelimHandlerProtempaException
             extends ProtempaException {
-        private static final long serialVersionUID = 2008992530872178708L;
 
+        private static final long serialVersionUID = 2008992530872178708L;
         private IOException ioe;
 
         TabDelimHandlerProtempaException(IOException cause) {
@@ -224,13 +287,20 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
     private final static class TabDelimHandlerPropositionVisitor
             extends AbstractPropositionCheckedVisitor {
 
-        private final String keyId;
+        private String keyId;
         private final TabDelimQueryResultsHandler writer;
 
-        TabDelimHandlerPropositionVisitor(String keyId,
+        TabDelimHandlerPropositionVisitor(
                 TabDelimQueryResultsHandler writer) {
-            this.keyId = keyId;
             this.writer = writer;
+        }
+
+        void setKeyId(String keyId) {
+            this.keyId = keyId;
+        }
+
+        String getKeyId() {
+            return this.keyId;
         }
 
         @Override

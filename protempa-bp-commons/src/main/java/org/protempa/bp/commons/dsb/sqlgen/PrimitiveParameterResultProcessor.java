@@ -71,8 +71,7 @@ class PrimitiveParameterResultProcessor extends
                 i++;
             } catch (SQLException e) {
                 logger.log(Level.WARNING,
-                        "Could not parse timestamp. Ignoring data value.", e);
-                continue;
+                        "Could not parse timestamp. Leaving timestamp unset.", e);
             }
 
             ValueType vf = entitySpec.getValueType();

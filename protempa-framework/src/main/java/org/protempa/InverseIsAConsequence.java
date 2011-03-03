@@ -16,13 +16,12 @@ import org.protempa.proposition.PropositionVisitable;
 class InverseIsAConsequence implements Consequence {
 
     private static final long serialVersionUID = 6157152982863451759L;
-    private final String eventId;
+    private final String propId;
     private final DerivationsBuilder listener;
 
-    InverseIsAConsequence(String eventId, 
-            DerivationsBuilder listener) {
+    InverseIsAConsequence(String propId, DerivationsBuilder listener) {
         this.listener = listener;
-        this.eventId = eventId;
+        this.propId = propId;
     }
 
     @Override
@@ -32,7 +31,7 @@ class InverseIsAConsequence implements Consequence {
         PropositionVisitable o =
                 (PropositionVisitable) workingMemory.getObject(
                 knowledgeHelper.getTuple().get(0));
-        o.accept(new PropositionCopier(this.eventId, workingMemory,
+        o.accept(new PropositionCopier(this.propId, workingMemory,
                 this.listener));
     }
 }

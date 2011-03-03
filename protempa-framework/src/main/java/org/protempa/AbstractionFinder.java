@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.drools.ObjectFilter;
 import org.drools.RuleBase;
 import org.drools.StatefulSession;
 import org.drools.StatelessSession;
@@ -228,13 +227,14 @@ final class AbstractionFinder implements Module {
         }
     }
 
-    private void extractRequestedPropositions(List<Proposition> propositions, Set<String> propositionIds) {
-        for (Iterator<Proposition> itr = propositions.iterator(); itr.hasNext();) {
-            Proposition prop = itr.next();
-            if (!propositionIds.contains(prop.getId())) {
-                itr.remove();
+    private List<Proposition> extractRequestedPropositions(List<Proposition> propositions, Set<String> propositionIds) {
+        List<Proposition> result = new ArrayList<Proposition>();
+        for (Proposition prop : propositions) {
+            if (propositionIds.contains(prop.getId())) {
+                result.add(prop);
             }
         }
+        return result;
     }
 
     private Map<Set<String>, Sequence<PrimitiveParameter>> getOrCreateEmptySequenceKeyMap(String keyId,
@@ -329,36 +329,6 @@ final class AbstractionFinder implements Module {
                     ProtempaUtil.logger().log(Level.SEVERE,
                             "Could not dispose stateful rule session.", e);
                 }
-            }
-        }
-    }
-
-    private static final class ProtempaObjectFilter implements ObjectFilter {
-
-        private static final long serialVersionUID = 3649738847744966643L;
-        private final Set<String> paramIds;
-
-        ProtempaObjectFilter(Set<String> paramIds) {
-            if (paramIds != null) {
-                this.paramIds = paramIds;
-            } else {
-                this.paramIds = Collections.emptySet();
-            }
-        }
-
-        @Override
-        public boolean accept(Object workingMemoryObject) {
-            if (paramIds.isEmpty()) {
-                return true;
-            }
-            if (workingMemoryObject instanceof Proposition) {
-                return this.paramIds.contains(((Proposition) workingMemoryObject).getId()) ? true
-                        : false;
-            } else {
-                Sequence<?> s = (Sequence<?>) workingMemoryObject;
-                return s.getPropositionIds().size() == 1
-                        && this.paramIds.containsAll(s.getPropositionIds()) ? true
-                        : false;
             }
         }
     }
@@ -508,7 +478,7 @@ final class AbstractionFinder implements Module {
             StatelessSession statelessSession = ruleBase.newStatelessSession();
             StatelessSessionResult result =
                     statelessSession.executeWithResults(objects);
-            return unpackSequences(result.iterateObjects());
+            return unpack(result.iterateObjects());
         }
 
         @Override
@@ -530,7 +500,7 @@ final class AbstractionFinder implements Module {
                 workingMemory.insert(obj);
             }
             workingMemory.fireAllRules();
-            List<Proposition> resultList = unpackSequences(
+            List<Proposition> resultList = unpack(
                     workingMemory.iterateObjects());
             return resultList;
         }
@@ -563,7 +533,7 @@ final class AbstractionFinder implements Module {
                     entry.keyId, propositionIds, entry.propositions);
             logger.log(Level.FINER, "Retrieved propositions: {0}",
                     propositions);
-            processResults(qs, propositions,
+            processResults(qs, Collections.unmodifiableList(propositions),
                     derivationsBuilder.toDerivations(),
                     propositionIds, resultHandler, entry.keyId);
             derivationsBuilder.reset();
@@ -578,17 +548,22 @@ final class AbstractionFinder implements Module {
             Set<String> propositionIds, QueryResultsHandler resultHandler,
             String keyId) throws FinderException {
         Logger logger = ProtempaUtil.logger();
+        
         if (qs.isCachingEnabled()) {
             addToCache(qs, propositions, derivations);
         }
+        
         Map<UniqueIdentifier, Proposition> refs =
                 createReferences(propositions);
         logger.log(Level.FINER, "References: {0}", refs);
+        List<Proposition> filteredPropositions =
+                extractRequestedPropositions(propositions, propositionIds);
+        logger.log(Level.FINER, "Proposition ids: {0}", propositionIds);
+        logger.log(Level.FINER, "Filtered propositions: {0}",
+                filteredPropositions);
 
-        extractRequestedPropositions(propositions, propositionIds);
-        logger.log(Level.FINER, "Filtered propositions: {0}", propositions);
-
-        resultHandler.handleQueryResult(keyId, propositions,
+        resultHandler.handleQueryResult(keyId, 
+                Collections.unmodifiableList(filteredPropositions),
                 derivations, refs);
     }
 
@@ -602,7 +577,11 @@ final class AbstractionFinder implements Module {
         return refs;
     }
 
-    private static List<Proposition> unpackSequences(Iterator<?> objects) {
+    /**
+     * Copies the results of rules engine processing into a
+     * list of propositions.
+     */
+    private static List<Proposition> unpack(Iterator<?> objects) {
         List<Proposition> result = new ArrayList<Proposition>(500);
         for (; objects.hasNext();) {
             Object obj = objects.next();
@@ -663,15 +642,18 @@ final class AbstractionFinder implements Module {
             result.keyId = this.keyIdItr.next();
             result.propositions = new ArrayList<Object>(500);
             try {
+                List<PrimitiveParameter> primParams =
+                        this.primitiveParameters.get(result.keyId);
                 List<Sequence<PrimitiveParameter>> sequences =
                         createSequencesFromPrimitiveParameters(result.keyId,
-                        this.primitiveParameters.get(result.keyId),
+                        primParams,
                         this.propositionIds, this.stateful);
 
                 this.logger.log(Level.FINEST, "SEQUENCES: {0}", sequences);
                 result.propositions.addAll(this.events.get(result.keyId));
                 result.propositions.addAll(this.constants.get(result.keyId));
                 result.propositions.addAll(sequences);
+                result.propositions.addAll(primParams);
             } catch (KnowledgeSourceReadException ex) {
                 throw new IllegalStateException(ex);
             }

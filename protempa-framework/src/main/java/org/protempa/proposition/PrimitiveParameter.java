@@ -57,7 +57,7 @@ public final class PrimitiveParameter extends TemporalParameter {
         if (interval != null) {
             resetInterval(timestamp, interval.getStartGranularity());
         } else {
-            resetInterval(null, interval.getStartGranularity());
+            resetInterval(timestamp, null);
         }
     }
 

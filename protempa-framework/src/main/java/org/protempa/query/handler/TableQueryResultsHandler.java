@@ -112,7 +112,7 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
                     Util.logger().log(
                             Level.FINE,
                             "Processing columnSpec type "
-                                    + columnSpec.getClass().getName());
+                            + columnSpec.getClass().getName());
                     String[] colNames =
                             columnSpec.columnNames(knowledgeSource);
 
@@ -124,15 +124,14 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
                         }
                     }
 
-                    String[] escapedColNames = StringUtil
-                            .escapeDelimitedColumns(colNames,
-                                    this.columnDelimiter);
+                    String[] escapedColNames = StringUtil.escapeDelimitedColumns(colNames,
+                            this.columnDelimiter);
                     Util.logger().log(
                             Level.FINE,
                             "Got the following columns for proposition "
-                                    + Arrays.toString(this.rowPropositionIds)
-                                    + ": "
-                                    + StringUtils.join(escapedColNames, ","));
+                            + Arrays.toString(this.rowPropositionIds)
+                            + ": "
+                            + StringUtils.join(escapedColNames, ","));
                     for (String colName : escapedColNames) {
                         columnNames.add(colName);
                     }
@@ -155,41 +154,45 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
             Map<UniqueIdentifier, Proposition> references)
             throws FinderException {
         int n = this.columnSpecs.length;
-        List<Proposition> filtered = new ArrayList<Proposition>();
         for (Proposition prop : propositions) {
-            if (org.arp.javautil.arrays.Arrays.contains(this.rowPropositionIds,
-                    prop.getId())) {
-                filtered.add(prop);
+            if (!org.arp.javautil.arrays.Arrays.contains(
+                    this.rowPropositionIds, prop.getId())) {
+                continue;
             }
-        }
-        for (Proposition prop : filtered) {
             for (int i = 0; i < n; i++) {
                 TableColumnSpec columnSpec = this.columnSpecs[i];
                 try {
-
-                    List<String> columnValues = new ArrayList<String>();
                     String[] colValues = columnSpec.columnValues(key, prop,
                             derivations, references, this.knowledgeSource);
-                    if (i == 0)
-                        columnValues.add(key);
-                    for (String colVal : colValues) {
-                        columnValues.add(colVal);
+                    String[] columnValues;
+                    if (i == 0) {
+                        columnValues = new String[colValues.length + 1];
+                        columnValues[0] = key;
+                        System.arraycopy(colValues, 0, columnValues, 1,
+                                colValues.length);
+                    } else {
+                        columnValues = new String[colValues.length];
+                        System.arraycopy(colValues, 0, columnValues, 0,
+                                colValues.length);
                     }
 
-                    for (int index = 0; index < columnValues.size(); index++) {
-                        if (columnValues.get(index) == null) {
-                            columnValues.set(index, "(null)");
-                        } else if (columnValues.get(index).length() == 0) {
-                            columnValues.set(index, "(empty)");
+                    for (int index = 0; index < columnValues.length; index++) {
+                        if (columnValues[index] == null) {
+                            columnValues[index] = "(null)";
+                        } else if (columnValues[index].length() == 0) {
+                            columnValues[index] = "(empty)";
                         }
                     }
 
-                    List<String> escapedColumnValues = StringUtil
-                            .escapeDelimitedColumns(columnValues,
-                                    this.columnDelimiter);
+                    StringUtil.escapeDelimitedColumnsInPlace(columnValues,
+                            this.columnDelimiter);
 
-                    write(StringUtils.join(escapedColumnValues,
-                            this.columnDelimiter));
+                    for (int index = 0; index < columnValues.length; index++) {
+                        write(columnValues[index]);
+                        if (index < columnValues.length - 1) {
+                            write(this.columnDelimiter);
+                        }
+                    }
                     if (i < n - 1) {
                         write(this.columnDelimiter);
                     } else {

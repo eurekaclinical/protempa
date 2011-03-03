@@ -46,6 +46,15 @@ public class StringUtil {
         return result;
     }
 
+    public static void escapeDelimitedColumnsInPlace(
+            List<String> columnValues, char delimiter) {
+        for (int i = 0, n = columnValues.size(); i < n; i++) {
+            String value = columnValues.get(i);
+            columnValues.set(i,
+                    StringUtil.escapeDelimitedColumn(value, delimiter));
+        }
+    }
+
     public static String[] escapeDelimitedColumns(String[] columnValues,
             char delimiter) {
         String[] result = new String[columnValues.length];
@@ -55,6 +64,15 @@ public class StringUtil {
                     delimiter);
         }
         return result;
+    }
+
+    public static void escapeDelimitedColumnsInPlace(String[] columnValues,
+            char delimiter) {
+        for (int i = 0; i < columnValues.length; i++) {
+            String columnValue = columnValues[i];
+            columnValues[i] = StringUtil.escapeDelimitedColumn(columnValue,
+                    delimiter);
+        }
     }
 
     public static String escapeDelimitedColumn(String str, char delimiter) {

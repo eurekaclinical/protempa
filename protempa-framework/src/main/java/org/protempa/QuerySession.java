@@ -222,7 +222,8 @@ public class QuerySession {
     /**
      * Adds the given propositions to a unique identifier -> proposition cache.
      *
-     * @param propositions a {@link List<Proposition>}.
+     * @param propositions a {@link List<Proposition>}. This will be passed
+     * an unmodifiable list.
      */
     void addPropositionsToCache (List<Proposition> propositions) {
         assert propositions != null : "propositions cannot be null";

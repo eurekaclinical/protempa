@@ -2,7 +2,6 @@ package org.protempa.bp.commons.dsb;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Date;
 
 /**
