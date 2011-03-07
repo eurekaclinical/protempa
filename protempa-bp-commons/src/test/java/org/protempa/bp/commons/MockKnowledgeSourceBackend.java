@@ -1,7 +1,5 @@
 package org.protempa.bp.commons;
 
-import org.protempa.bp.commons.*;
-
 @BackendInfo(displayName = "Mock Knowledge Source Backend")
 public class MockKnowledgeSourceBackend 
         extends AbstractCommonsKnowledgeSourceBackend {
