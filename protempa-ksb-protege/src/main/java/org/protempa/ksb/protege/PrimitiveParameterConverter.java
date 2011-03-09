@@ -19,35 +19,27 @@ class PrimitiveParameterConverter implements PropositionConverter {
     }
 
     @Override
-    public void convert(Instance instance,
+    public PrimitiveParameterDefinition convert(Instance instance,
             org.protempa.KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend) 
             throws KnowledgeSourceReadException {
-
-        if (instance != null
-                && protempaKnowledgeBase != null
-                && !protempaKnowledgeBase.hasPrimitiveParameterDefinition(instance.getName())) {
-
-            PrimitiveParameterDefinition tc = new PrimitiveParameterDefinition(
+        PrimitiveParameterDefinition result =
+                protempaKnowledgeBase.getPrimitiveParameterDefinition(
+                instance.getName());
+        if (result == null) {
+            result = new PrimitiveParameterDefinition(
                     protempaKnowledgeBase, instance.getName());
             ConnectionManager cm = backend.getConnectionManager();
-            Util.setNames(instance, tc, cm);
-            Util.setInverseIsAs(instance, tc, cm);
-            Util.setProperties(instance, tc, cm);
-            Util.setTerms(instance, tc, cm);
+            Util.setNames(instance, result, cm);
+            Util.setInverseIsAs(instance, result, cm);
+            Util.setProperties(instance, result, cm);
+            Util.setTerms(instance, result, cm);
             Cls valueType = (Cls) cm.getOwnSlotValue(instance, cm.getSlot("valueType"));
             if (valueType != null) {
-                if (valueType.getName().equals("DoubleValue")) {
-                    tc.setValueType(ValueType.NUMBERVALUE);
-                } else if (valueType.getName().equals("InequalityDoubleValue")) {
-                    tc.setValueType(ValueType.INEQUALITYNUMBERVALUE);
-                } else if (valueType.getName().equals("OrdinalValue")) {
-                    tc.setValueType(ValueType.ORDINALVALUE);
-                } else {
-                    tc.setValueType(ValueType.NOMINALVALUE);
-                }
+                result.setValueType(Util.parseValueType(valueType));
             }
         }
+        return result;
     }
 
     /*
@@ -59,8 +51,6 @@ class PrimitiveParameterConverter implements PropositionConverter {
     @Override
     public boolean protempaKnowledgeBaseHasProposition(
             Instance protegeParameter, KnowledgeBase protempaKnowledgeBase) {
-        return protegeParameter != null
-                && protempaKnowledgeBase != null
-                && protempaKnowledgeBase.hasPrimitiveParameterDefinition(protegeParameter.getName());
+        return protempaKnowledgeBase.hasPrimitiveParameterDefinition(protegeParameter.getName());
     }
 }

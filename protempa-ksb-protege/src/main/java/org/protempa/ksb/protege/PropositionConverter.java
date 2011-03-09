@@ -3,6 +3,7 @@ package org.protempa.ksb.protege;
 import edu.stanford.smi.protege.model.Instance;
 import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 
 /**
  * @author Andrew Post
@@ -21,7 +22,7 @@ public interface PropositionConverter {
      * @param backend
      *            the Protege {@link KnowledgeSourceBackend}.
      */
-    void convert(Instance protegeProposition,
+    PropositionDefinition convert(Instance protegeProposition,
             KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException;

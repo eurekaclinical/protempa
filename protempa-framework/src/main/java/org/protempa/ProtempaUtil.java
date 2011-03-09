@@ -136,7 +136,7 @@ public final class ProtempaUtil {
     }
 
     static void checkArrayForDuplicates(Object[] array, String arrayName) {
-        Set set = new HashSet();
+        Set<Object> set = new HashSet<Object>();
         for (Object obj : array) {
             if (!set.add(obj))
                 throw new IllegalArgumentException(arrayName +

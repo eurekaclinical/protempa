@@ -59,6 +59,10 @@ public interface KnowledgeSourceBackend extends
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException;
 
+    PropositionDefinition readPropositionDefinition(String id,
+            KnowledgeBase protempaKnowledgeBase)
+            throws KnowledgeSourceReadException;
+
     boolean hasPrimitiveParameterDefinition(String id,
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException;
@@ -141,5 +145,11 @@ public interface KnowledgeSourceBackend extends
      * @return The ValueSet object
      */
     ValueSet readValueSet(String id, KnowledgeBase kb)
+            throws KnowledgeSourceReadException;
+
+    List<PropositionDefinition> readInverseIsA(PropositionDefinition propDef, KnowledgeBase kb)
+            throws KnowledgeSourceReadException;
+
+    List<PropositionDefinition> readAbstractedFrom(AbstractionDefinition abstractionDefinition, KnowledgeBase kb)
             throws KnowledgeSourceReadException;
 }

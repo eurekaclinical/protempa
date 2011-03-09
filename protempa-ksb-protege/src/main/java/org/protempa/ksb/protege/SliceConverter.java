@@ -15,7 +15,7 @@ final class SliceConverter implements
     }
 
     @Override
-    public void convert(Instance protegeParameter,
+    public SliceDefinition convert(Instance protegeParameter,
             KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend) 
             throws KnowledgeSourceReadException {
@@ -49,6 +49,7 @@ final class SliceConverter implements
                 itr.hasNext();) {
             ad.addAbstractedFrom(((Instance) itr.next()).getName());
         }
+        return ad;
     }
 
     @Override
@@ -58,6 +59,7 @@ final class SliceConverter implements
         return protempaKnowledgeBase.hasAbstractionDefinition(propId)
                 || protempaKnowledgeBase.hasEventDefinition(propId)
                 || protempaKnowledgeBase
-                .hasPrimitiveParameterDefinition(propId);
+                .hasPrimitiveParameterDefinition(propId)
+                || protempaKnowledgeBase.hasConstantDefinition(propId);
     }
 }

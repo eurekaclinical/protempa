@@ -15,6 +15,7 @@ import org.drools.rule.Rule;
 class JBossRuleBaseFactory {
 
     private final JBossRuleCreator ruleCreator;
+    private final KnowledgeSource knowledgeSource;
 
     /**
      * Provides a knowledge source and an algorithm source.
@@ -24,10 +25,11 @@ class JBossRuleBaseFactory {
      * @param algorithmSource
      *            the <code>AlgorithmSource</code> to use.
      */
-    JBossRuleBaseFactory(JBossRuleCreator ruleCreator) {
+    JBossRuleBaseFactory(JBossRuleCreator ruleCreator, KnowledgeSource knowledgeSource) {
         assert ruleCreator != null : "ruleCreator cannot be null";
 
         this.ruleCreator = ruleCreator;
+        this.knowledgeSource = knowledgeSource;
     }
 
     RuleBase newInstance() throws PropositionDefinitionInstantiationException {
@@ -62,7 +64,7 @@ class JBossRuleBaseFactory {
         config.setShadowProxy(false);
         try {
             config.setConflictResolver(new PROTEMPAConflictResolver(
-                    this.ruleCreator.getKnowledgeSource(),
+                    this.knowledgeSource,
                     this.ruleCreator.getRuleToAbstractionDefinitionMap()));
         } catch (KnowledgeSourceReadException ex) {
             throw new PropositionDefinitionInstantiationException(

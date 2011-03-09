@@ -28,6 +28,10 @@ class TemporalPropositionListCreator extends AbstractPropositionVisitor {
         return this.tempPropList;
     }
 
+    void reset() {
+        this.tempPropList.clear();
+    }
+
     void visit(List<PropositionVisitable> propositionVisitableList) {
         for (PropositionVisitable pv : propositionVisitableList) {
             pv.accept(this);

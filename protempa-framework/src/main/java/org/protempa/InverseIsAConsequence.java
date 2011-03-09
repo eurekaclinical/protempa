@@ -16,12 +16,13 @@ import org.protempa.proposition.PropositionVisitable;
 class InverseIsAConsequence implements Consequence {
 
     private static final long serialVersionUID = 6157152982863451759L;
-    private final String propId;
-    private final DerivationsBuilder listener;
+    
+    private final PropositionCopier copier;
 
     InverseIsAConsequence(String propId, DerivationsBuilder listener) {
-        this.listener = listener;
-        this.propId = propId;
+        assert propId != null : "propId cannot be null";
+        assert listener != null : "listener cannot be null";
+        this.copier = new PropositionCopier(propId, listener);
     }
 
     @Override
@@ -31,7 +32,7 @@ class InverseIsAConsequence implements Consequence {
         PropositionVisitable o =
                 (PropositionVisitable) workingMemory.getObject(
                 knowledgeHelper.getTuple().get(0));
-        o.accept(new PropositionCopier(this.propId, workingMemory,
-                this.listener));
+        this.copier.setWorkingMemory(workingMemory);
+        o.accept(this.copier);
     }
 }

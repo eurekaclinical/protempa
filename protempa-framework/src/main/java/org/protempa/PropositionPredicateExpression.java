@@ -10,7 +10,6 @@ import org.drools.rule.Declaration;
 import org.drools.spi.PredicateExpression;
 import org.drools.spi.Tuple;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.Sequence;
 
 class PropositionPredicateExpression implements PredicateExpression {
 
@@ -36,12 +35,7 @@ class PropositionPredicateExpression implements PredicateExpression {
     public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
             Declaration[] arg3, WorkingMemory arg4, Object context)
             throws Exception {
-        if (arg0 instanceof Proposition) {
-            return this.propIds.contains(((Proposition) arg0).getId());
-        } else {
-            return this.propIds.containsAll(
-                    ((Sequence) arg0).getPropositionIds());
-        }
+        return this.propIds.contains(((Proposition) arg0).getId());
     }
 
     @Override

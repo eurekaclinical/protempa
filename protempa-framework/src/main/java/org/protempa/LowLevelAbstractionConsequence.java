@@ -17,6 +17,7 @@ final class LowLevelAbstractionConsequence implements Consequence {
     private final LowLevelAbstractionDefinition def;
     private final Algorithm algorithm;
     private final DerivationsBuilder derivationsBuilder;
+    private final MyObjectAsserter objAsserter;
 
     private static class MyObjectAsserter implements ObjectAsserter {
 
@@ -35,6 +36,7 @@ final class LowLevelAbstractionConsequence implements Consequence {
         this.def = simpleAbstractionDef;
         this.algorithm = algorithm;
         this.derivationsBuilder = derivationsBuilder;
+        this.objAsserter = new MyObjectAsserter();
     }
 
     @SuppressWarnings("unchecked")
@@ -42,7 +44,7 @@ final class LowLevelAbstractionConsequence implements Consequence {
     public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
             throws Exception {
         Sequence<PrimitiveParameter> seq = (Sequence<PrimitiveParameter>) arg1.getObject(arg0.getTuple().get(0));
-        MyObjectAsserter objAsserter = new MyObjectAsserter();
+        
         objAsserter.workingMemory = arg1;
         LowLevelAbstractionFinder.process(seq, this.def, this.algorithm,
                 objAsserter, this.derivationsBuilder);

@@ -20,6 +20,11 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 public abstract class AbstractPropositionDefinition implements
         PropositionDefinition {
 
+    private static final PropertyDefinition[] EMPTY_PROPERTIES =
+            new PropertyDefinition[0];
+    private static final ReferenceDefinition[] EMPTY_REFERENCES =
+            new ReferenceDefinition[0];
+
     protected static final String DIRECT_CHILDREN_PROPERTY = "directChildren";
     private static final String[] EMPTY_STRING_ARR = new String[0];
     /**
@@ -68,8 +73,8 @@ public abstract class AbstractPropositionDefinition implements
         this.displayName = "";
         this.abbrevDisplayName = "";
         this.description = "";
-        this.propertyDefinitions = new PropertyDefinition[0];
-        this.referenceDefinitions = new ReferenceDefinition[0];
+        this.propertyDefinitions = EMPTY_PROPERTIES;
+        this.referenceDefinitions = EMPTY_REFERENCES;
         this.changes = new PropertyChangeSupport(this);
     }
 
@@ -230,16 +235,18 @@ public abstract class AbstractPropositionDefinition implements
 
     public final void setPropertyDefinitions(
             PropertyDefinition[] propertyDefinitions) {
+        PropertyDefinition[] old;
         if (propertyDefinitions == null) {
-            propertyDefinitions = new PropertyDefinition[0];
+            propertyDefinitions = EMPTY_PROPERTIES;
+            old = propertyDefinitions;
         } else {
             ProtempaUtil.checkArrayForNullElement(propertyDefinitions,
                     "propertyDefinitions");
             ProtempaUtil.checkArrayForDuplicates(propertyDefinitions,
                     "propertyDefinitions");
             propertyDefinitions = propertyDefinitions.clone();
+            old = this.propertyDefinitions.clone();
         }
-        PropertyDefinition[] old = this.propertyDefinitions.clone();
         this.propertyDefinitions = propertyDefinitions;
         this.changes.firePropertyChange("propertyDefinitions", old,
                 this.propertyDefinitions);
@@ -263,16 +270,19 @@ public abstract class AbstractPropositionDefinition implements
 
     public final void setReferenceDefinitions(
             ReferenceDefinition[] referenceDefinitions) {
+        ReferenceDefinition[] old;
         if (referenceDefinitions == null) {
-            referenceDefinitions = new ReferenceDefinition[0];
+            referenceDefinitions = EMPTY_REFERENCES;
+            old = referenceDefinitions;
         } else {
             ProtempaUtil.checkArrayForNullElement(referenceDefinitions,
                     "referenceDefinitions");
             ProtempaUtil.checkArrayForDuplicates(referenceDefinitions,
                     "referenceDefinitions");
             referenceDefinitions = referenceDefinitions.clone();
+            old = this.referenceDefinitions.clone();
         }
-        ReferenceDefinition[] old = this.referenceDefinitions.clone();
+         
         this.referenceDefinitions = referenceDefinitions;
         this.changes.firePropertyChange("referenceDefinitions", old,
                 this.referenceDefinitions);

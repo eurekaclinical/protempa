@@ -21,19 +21,26 @@ import org.protempa.proposition.UniqueIdentifier;
 class PropositionCopier extends AbstractPropositionVisitor {
 
     private final String propId;
-    private final WorkingMemory workingMemory;
     private final DerivationsBuilder derivationsBuilder;
+    private WorkingMemory workingMemory;
 
-    PropositionCopier(String propId, WorkingMemory workingMemory,
-            DerivationsBuilder derivationsBuilder) {
+    PropositionCopier(String propId, DerivationsBuilder derivationsBuilder) {
         super();
         this.derivationsBuilder = derivationsBuilder;
         this.propId = propId;
+    }
+
+    public void setWorkingMemory(WorkingMemory workingMemory) {
         this.workingMemory = workingMemory;
+    }
+
+    public WorkingMemory getWorkingMemory() {
+        return this.workingMemory;
     }
 
     @Override
     public void visit(AbstractParameter p) {
+        assert this.workingMemory != null : "workingMemory wasn't set";
         AbstractParameter param = new AbstractParameter(propId);
         param.setDataSourceType(DerivedDataSourceType.getInstance());
         param.setUniqueIdentifier(new UniqueIdentifier(
@@ -48,6 +55,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
 
     @Override
     public void visit(Event event) {
+        assert this.workingMemory != null : "workingMemory wasn't set";
         Event e = new Event(propId);
         e.setInterval(event.getInterval());
         e.setDataSourceType(DerivedDataSourceType.getInstance());
@@ -61,6 +69,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
 
     @Override
     public void visit(PrimitiveParameter primitiveParameter) {
+        assert this.workingMemory != null : "workingMemory wasn't set";
         PrimitiveParameter param = new PrimitiveParameter(propId);
         param.setInterval(primitiveParameter.getInterval());
         param.setValue(primitiveParameter.getValue());
@@ -75,6 +84,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
 
     @Override
     public void visit(Constant constant) {
+        assert this.workingMemory != null : "workingMemory wasn't set";
         Constant newConstant = new Constant(propId);
         newConstant.setDataSourceType(DerivedDataSourceType.getInstance());
         newConstant.setUniqueIdentifier(new UniqueIdentifier(
@@ -89,6 +99,7 @@ class PropositionCopier extends AbstractPropositionVisitor {
 
     @Override
     public void visit(Context context) {
+        assert this.workingMemory != null : "workingMemory wasn't set";
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }

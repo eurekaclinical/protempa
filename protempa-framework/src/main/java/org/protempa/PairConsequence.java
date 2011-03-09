@@ -20,13 +20,23 @@ public final class PairConsequence implements Consequence {
 
     private static final long serialVersionUID = -3641374073069516895L;
 
-    private final PairDefinition def;
     private final DerivationsBuilder derivationsBuilder;
+    private final TemporalPropositionListCreator creator;
+    private final TemporalExtendedPropositionDefinition[] leftAndRightHandSide;
+    private final String propId;
+    private final Offsets temporalOffset;
+    private final Relation relation;
 
     PairConsequence(PairDefinition def, DerivationsBuilder derivationsBuilder) {
         assert def != null : "def cannot be null";
         this.derivationsBuilder = derivationsBuilder;
-        this.def = def;
+        this.creator = new TemporalPropositionListCreator();
+        this.leftAndRightHandSide = new TemporalExtendedPropositionDefinition[]{
+                                def.getLeftHandProposition(),
+                                def.getRightHandProposition()};
+        this.propId = def.getId();
+        this.temporalOffset = def.getTemporalOffset();
+        this.relation = def.getRelation();
     }
 
     @Override
@@ -34,14 +44,13 @@ public final class PairConsequence implements Consequence {
             WorkingMemory workingMemory) throws Exception {
         Logger logger = ProtempaUtil.logger();
         List<PropositionVisitable> l = (List<PropositionVisitable>) knowledgeHelper.get(knowledgeHelper.getDeclaration("result"));
-        TemporalPropositionListCreator c = new TemporalPropositionListCreator();
-        c.visit(l);
-        List<TemporalProposition> pl = c.getTemporalPropositionList();
+        this.creator.reset();
+        this.creator.visit(l);
+        List<TemporalProposition> pl = this.creator.getTemporalPropositionList();
         java.util.Collections.sort(pl, ProtempaUtil.TEMP_PROP_COMP);
 
-        TemporalExtendedPropositionDefinition leftProp = def.getLeftHandProposition();
-        TemporalExtendedPropositionDefinition rightProp = def.getRightHandProposition();
-        Relation relation = def.getRelation();
+        TemporalExtendedPropositionDefinition leftProp = this.leftAndRightHandSide[0];
+        TemporalExtendedPropositionDefinition rightProp = this.leftAndRightHandSide[1];
         for (int i = 0; i < pl.size() - 1; i++) {
             TemporalProposition left = pl.get(i);
             TemporalProposition right = pl.get(i + 1);
@@ -52,17 +61,14 @@ public final class PairConsequence implements Consequence {
                     tps.add(left);
                     tps.add(right);
                     Segment<TemporalProposition> segment = new Segment<TemporalProposition>(
-                            new Sequence(def.getId(), tps));
-                    Offsets temporalOffset = def.getTemporalOffset();
+                            new Sequence(this.propId, tps));
                     AbstractParameter result = AbstractParameterFactory.getFromAbstraction(
-                            def.getId(),
+                            this.propId,
                             segment,
                             tps,
                             null,
-                            temporalOffset,
-                            new TemporalExtendedPropositionDefinition[]{
-                                def.getLeftHandProposition(),
-                                def.getRightHandProposition()});
+                            this.temporalOffset,
+                            this.leftAndRightHandSide);
                     
                     knowledgeHelper.getWorkingMemory().insert(result);
                     for (Proposition proposition : segment) {

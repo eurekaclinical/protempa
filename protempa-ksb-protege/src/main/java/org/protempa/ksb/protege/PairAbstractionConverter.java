@@ -13,25 +13,24 @@ import edu.stanford.smi.protege.model.Slot;
 public class PairAbstractionConverter implements PropositionConverter {
 
     @Override
-    public void convert(Instance protegeProposition,
+    public PairDefinition convert(Instance protegeProposition,
             KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        if (protegeProposition != null
-                && protempaKnowledgeBase != null
-                && !protempaKnowledgeBase
-                        .hasAbstractionDefinition(protegeProposition.getName())) {
-            PairDefinition pd = new PairDefinition(protempaKnowledgeBase,
+        PairDefinition result = (PairDefinition) protempaKnowledgeBase.getAbstractionDefinition(protegeProposition.getName());
+        if (result == null) {
+            result = new PairDefinition(protempaKnowledgeBase,
                     protegeProposition.getName());
             ConnectionManager cm = backend.getConnectionManager();
-            Util.setNames(protegeProposition, pd, cm);
-            Util.setProperties(protegeProposition, pd, cm);
-            Util.setTerms(protegeProposition, pd, cm);
-            addComponentAbstractionDefinitions(protegeProposition, pd,
+            Util.setNames(protegeProposition, result, cm);
+            Util.setProperties(protegeProposition, result, cm);
+            Util.setTerms(protegeProposition, result, cm);
+            addComponentAbstractionDefinitions(protegeProposition, result,
                     backend);
-            setRelation(protegeProposition, pd, backend);
-            Util.setInverseIsAs(protegeProposition, pd, cm);
+            setRelation(protegeProposition, result, backend);
+            Util.setInverseIsAs(protegeProposition, result, cm);
         }
+        return result;
     }
 
     private void setRelation(
@@ -53,9 +52,7 @@ public class PairAbstractionConverter implements PropositionConverter {
     @Override
     public boolean protempaKnowledgeBaseHasProposition(
             Instance protegeParameter, KnowledgeBase protempaKnowledgeBase) {
-        return protegeParameter != null
-                && protempaKnowledgeBase != null
-                && protempaKnowledgeBase
+        return protempaKnowledgeBase
                         .hasAbstractionDefinition(protegeParameter.getName());
     }
 

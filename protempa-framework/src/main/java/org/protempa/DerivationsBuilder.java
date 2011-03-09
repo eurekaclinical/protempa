@@ -23,14 +23,14 @@ class DerivationsBuilder {
     }
 
     Map<Proposition, List<Proposition>> toDerivations() {
-        return derivations;
+        return this.derivations;
     }
 
     void propositionAsserted(Proposition oldProposition,
             Proposition newProposition) {
         assert oldProposition != null : "old proposition cannot be null";
         assert newProposition != null : "new proposition cannot be null";
-        Collections.putList(derivations, oldProposition, newProposition);
-        Collections.putList(derivations, newProposition, oldProposition);
+        Collections.putList(this.derivations, oldProposition, newProposition);
+        Collections.putList(this.derivations, newProposition, oldProposition);
     }
 }

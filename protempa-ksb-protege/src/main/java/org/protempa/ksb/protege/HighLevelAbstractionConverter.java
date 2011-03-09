@@ -23,43 +23,42 @@ import org.protempa.proposition.Relation;
  */
 class HighLevelAbstractionConverter implements PropositionConverter {
 
-    
-
     HighLevelAbstractionConverter() {
     }
 
     @Override
-    public void convert(Instance complexAbstractionInstance,
+    public HighLevelAbstractionDefinition convert(Instance complexAbstractionInstance,
             KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend) 
             throws KnowledgeSourceReadException {
+        HighLevelAbstractionDefinition result =
+                (HighLevelAbstractionDefinition) 
+                protempaKnowledgeBase.getAbstractionDefinition(
+                complexAbstractionInstance.getName());
 
-        if (complexAbstractionInstance != null
-                && protempaKnowledgeBase != null
-                && !protempaKnowledgeBase.hasAbstractionDefinition(
-                complexAbstractionInstance.getName())) {
-
-            HighLevelAbstractionDefinition cad =
+        if (result == null) {
+            result =
                     new HighLevelAbstractionDefinition(
                     protempaKnowledgeBase,
                     complexAbstractionInstance.getName());
             ConnectionManager cm = backend.getConnectionManager();
-            Util.setNames(complexAbstractionInstance, cad, cm);
-            Util.setProperties(complexAbstractionInstance, cad, cm);
-            Util.setTerms(complexAbstractionInstance, cad, cm);
-            Util.setGap(complexAbstractionInstance, cad, backend, cm);
+            Util.setNames(complexAbstractionInstance, result, cm);
+            Util.setProperties(complexAbstractionInstance, result, cm);
+            Util.setTerms(complexAbstractionInstance, result, cm);
+            Util.setGap(complexAbstractionInstance, result, backend, cm);
             Map<Instance, TemporalExtendedPropositionDefinition>
                     extendedParameterCache =
                     new HashMap<Instance,
                     TemporalExtendedPropositionDefinition>();
-            addComponentAbstractionDefinitions(complexAbstractionInstance, cad,
+            addComponentAbstractionDefinitions(complexAbstractionInstance, result,
                     extendedParameterCache, backend);
             addRelationships(extendedParameterCache,
-                    complexAbstractionInstance, cad, backend);
-            Util.setInverseIsAs(complexAbstractionInstance, cad, cm);
-            setTemporalOffsets(complexAbstractionInstance, cad, backend,
+                    complexAbstractionInstance, result, backend);
+            Util.setInverseIsAs(complexAbstractionInstance, result, cm);
+            setTemporalOffsets(complexAbstractionInstance, result, backend,
                     extendedParameterCache);
         }
+        return result;
     }
 
     private static void setTemporalOffsets(Instance complexAbstractionInstance,
@@ -122,9 +121,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
     @Override
     public boolean protempaKnowledgeBaseHasProposition(
             Instance protegeParameter, KnowledgeBase protempaKnowledgeBase) {
-        return protegeParameter != null
-                && protempaKnowledgeBase != null
-                && protempaKnowledgeBase.hasAbstractionDefinition(
+        return protempaKnowledgeBase.hasAbstractionDefinition(
                 protegeParameter.getName());
     }
 

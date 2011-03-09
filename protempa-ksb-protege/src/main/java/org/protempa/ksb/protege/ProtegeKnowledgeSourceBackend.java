@@ -14,6 +14,7 @@ import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSourceBackendInitializationException;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PrimitiveParameterDefinition;
+import org.protempa.PropositionDefinition;
 import org.protempa.TermSubsumption;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.AbstractCommonsKnowledgeSourceBackend;
@@ -159,11 +160,6 @@ public abstract class ProtegeKnowledgeSourceBackend
         }
     }
 
-    private boolean hasInstance(String name)
-            throws KnowledgeSourceReadException {
-        return this.cm.getInstance(name) != null;
-    }
-
     @Override
     public PrimitiveParameterDefinition readPrimitiveParameterDefinition(
             String name, KnowledgeBase protempaKnowledgeBase)
@@ -180,7 +176,41 @@ public abstract class ProtegeKnowledgeSourceBackend
             throws KnowledgeSourceReadException {
         Instance candidateAbstractParameter = getInstance(name);
         convert(candidateAbstractParameter, protempaKnowledgeBase);
-        AbstractionDefinition result = protempaKnowledgeBase.getAbstractionDefinition(name);
+        AbstractionDefinition result =
+                protempaKnowledgeBase.getAbstractionDefinition(name);
+        return result;
+    }
+
+    @Override
+    public List<PropositionDefinition> readAbstractedFrom(
+            AbstractionDefinition abstractionDefinition,
+            KnowledgeBase protempaKnowledgeBase)
+            throws KnowledgeSourceReadException {
+        List<PropositionDefinition> result =
+                new ArrayList<PropositionDefinition>();
+        Instance instance = getInstance(abstractionDefinition.getId());
+        Collection children =
+                cm.getOwnSlotValues(instance, cm.getSlot("abstractedFrom"));
+        for (Iterator itr = children.iterator(); itr.hasNext();) {
+            Instance child = (Instance) itr.next();
+            result.add(convert(child, protempaKnowledgeBase));
+        }
+        return result;
+    }
+
+    @Override
+    public List<PropositionDefinition> readInverseIsA(
+            PropositionDefinition propDef, KnowledgeBase protempaKnowledgeBase)
+            throws KnowledgeSourceReadException {
+        List<PropositionDefinition> result =
+                new ArrayList<PropositionDefinition>();
+        Instance instance = getInstance(propDef.getId());
+        Collection children =
+                cm.getOwnSlotValues(instance, cm.getSlot("inverseIsA"));
+        for (Iterator itr = children.iterator(); itr.hasNext();) {
+            Instance child = (Instance) itr.next();
+            result.add(convert(child, protempaKnowledgeBase));
+        }
         return result;
     }
 
@@ -271,13 +301,11 @@ public abstract class ProtegeKnowledgeSourceBackend
      * @param protempaKb
      *            a PROTEMPA <code>KnowledgeBase</code> instance.
      */
-    private void convert(Instance proposition, KnowledgeBase protempaKb)
-            throws KnowledgeSourceReadException {
-        if (proposition != null && protempaKb != null) {
-            PropositionConverter converter =
-                    InstanceConverterFactory.getInstance(proposition);
-            converter.convert(proposition, protempaKb, this);
-        }
+    private PropositionDefinition convert(Instance proposition, 
+            KnowledgeBase protempaKb) throws KnowledgeSourceReadException {
+        PropositionConverter converter =
+                InstanceConverterFactory.getInstance(proposition);
+        return converter.convert(proposition, protempaKb, this);
     }
 
     /*
@@ -317,49 +345,25 @@ public abstract class ProtegeKnowledgeSourceBackend
     }
 
     @Override
-    public boolean hasAbstractionDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        return hasInstance(id);
-    }
-
-    @Override
-    public boolean hasEventDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        return hasInstance(id);
-    }
-
-    @Override
-    public boolean hasConstantDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        return hasInstance(id);
-    }
-
-    @Override
-    public boolean hasPrimitiveParameterDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        return hasInstance(id);
-    }
-
-    @Override
-    public boolean hasValueSet(String id, KnowledgeBase kb)
-            throws KnowledgeSourceReadException {
-        return this.hasClass(id, "Value");
-    }
-
-    @Override
     public ValueSet readValueSet(String id, KnowledgeBase kb)
             throws KnowledgeSourceReadException {
         Cls cls = this.readClass(id, "Value");
         if (cls == null) {
             return null;
         } else {
-            ValueType valueType = Util.parseValueType(cls);
+            ValueType valueType = Util.parseValueSet(cls);
             assert valueType != null : "Could not find value type for " + id;
             return Util.parseValueSet(cls, valueType, cm);
         }
     }
+
+    @Override
+    public PropositionDefinition readPropositionDefinition(String name,
+            KnowledgeBase protempaKnowledgeBase)
+            throws KnowledgeSourceReadException {
+        Instance instance = getInstance(name);
+        return convert(instance, protempaKnowledgeBase);
+    }
+
+
 }

@@ -113,8 +113,7 @@ final class AbstractionCombiner {
         }
     }
 
-    static void toRules(KnowledgeSource knowledgeBaseSource,
-            AbstractionDefinition d, List<Rule> rules) {
+    static void toRules(AbstractionDefinition d, List<Rule> rules) {
         try {
             Rule rule = new Rule("ABSTRACTION_COMBINER_" + d.getId());
             rule.setSalience(new SalienceInteger(3));

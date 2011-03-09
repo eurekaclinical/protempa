@@ -16,14 +16,19 @@ import org.protempa.proposition.TemporalProposition;
 final class SliceConsequence implements Consequence {
 
     private static final long serialVersionUID = -7485083104777547624L;
-
-    private final SliceDefinition def;
-    private final DerivationsBuilder listener;
+    
+    private final PropositionCopier copier;
+    private final TemporalPropositionListCreator creator;
+    private int minIndex;
+    private int maxIndex;
 
     SliceConsequence(SliceDefinition def, DerivationsBuilder listener) {
         assert def != null : "def cannot be null";
-        this.listener = listener;
-        this.def = def;
+        assert listener != null : "listener cannot be null";
+        this.minIndex = def.getMinIndex();
+        this.maxIndex = def.getMaxIndex();
+        this.copier = new PropositionCopier(def.getId(), listener);
+        this.creator = new TemporalPropositionListCreator();
     }
 
     @Override
@@ -31,11 +36,9 @@ final class SliceConsequence implements Consequence {
         List<PropositionVisitable> l =
                 (List<PropositionVisitable>) arg0.get(
                 arg0.getDeclaration("result"));
-        TemporalPropositionListCreator c = new TemporalPropositionListCreator();
-        c.visit(l);
-        List<TemporalProposition> pl = c.getTemporalPropositionList();
-        int minIndex = def.getMinIndex();
-        int maxIndex = def.getMaxIndex();
+        this.creator.reset();
+        this.creator.visit(l);
+        List<TemporalProposition> pl = creator.getTemporalPropositionList();
         if (minIndex < 0) {
             Collections.sort(pl, ProtempaUtil.REVERSE_TEMP_PROP_COMP);
             minIndex = -minIndex - 1;
@@ -43,9 +46,8 @@ final class SliceConsequence implements Consequence {
         } else {
             Collections.sort(pl, ProtempaUtil.TEMP_PROP_COMP);
         }
-
-        PropositionCopier copier =
-                new PropositionCopier(def.getId(), arg1, this.listener);
+        
+        copier.setWorkingMemory(arg1);
         for (ListIterator<TemporalProposition> itr = pl.listIterator(minIndex);
                 itr.hasNext() && itr.nextIndex() < maxIndex;) {
             TemporalProposition o = itr.next();

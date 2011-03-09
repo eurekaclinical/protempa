@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
@@ -49,24 +50,19 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
     private static final String SYSTEM_PROPERTY_SKIP_EXECUTION =
             "protempa.dsb.relationaldatabase.skipexecution";
-
     private static final int FETCH_SIZE = 1000;
 
     private static Set<EntitySpec> applicableEntitySpecs(
             Collection<EntitySpec> entitySpecs, Filter f) {
         Set<EntitySpec> entitySpecsSet = new HashSet<EntitySpec>();
         for (EntitySpec es : entitySpecs) {
+            PROPIDS:
             for (String propId : es.getPropositionIds()) {
-                boolean found = false;
                 for (String propId2 : f.getPropositionIds()) {
                     if (propId.equals(propId2)) {
-                        found = true;
                         entitySpecsSet.add(es);
-                        break;
+                        break PROPIDS;
                     }
-                }
-                if (found) {
-                    break;
                 }
             }
         }
@@ -912,9 +908,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             throw new UnsupportedOperationException(
                     "inequalityNumberValue not supported");
         }
-
     }
-    
+
     private void processAdditionalConstraints(ColumnSpec columnSpec,
             StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
             Constraint constraint, Value value) {
@@ -999,23 +994,28 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return i;
     }
 
+    /**
+     * Returns <code>true</code> if the query contains >= 85% of the
+     * proposition ids that are known to the data source or if the where
+     * clause would contain more than 4000 codes.
+     *
+     * @param propIds
+     * @param entitySpecPropIds
+     * @return
+     */
     private static boolean completeOrNoOverlap(Set<String> propIds,
             String[] entitySpecPropIds) {
-        List<String> entitySpecPropIdsL = new ArrayList(entitySpecPropIds.length);
+
+        //Everything known to the data source that is not in the query.
+        List<String> entitySpecPropIdsL =
+                new ArrayList<String>(entitySpecPropIds.length);
         for (String entitySpecPropId : entitySpecPropIds) {
-            entitySpecPropIdsL.add(entitySpecPropId);
-        }
-        entitySpecPropIdsL.removeAll(propIds);
-        boolean result = entitySpecPropIdsL.size() < entitySpecPropIds.length * 0.15f;
-        if (!result) {
-            result = true;
-            for (String propId : entitySpecPropIds) {
-                if (propIds.contains(propId)) {
-                    result = false;
-                    break;
-                }
+            if (!propIds.contains(entitySpecPropId)) {
+                entitySpecPropIdsL.add(entitySpecPropId);
             }
         }
+        boolean result = entitySpecPropIdsL.size() <
+                entitySpecPropIds.length * 0.15f || entitySpecPropIdsL.size() > 4000;
         return result;
     }
 

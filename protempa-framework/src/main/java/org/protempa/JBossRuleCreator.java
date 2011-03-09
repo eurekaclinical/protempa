@@ -35,42 +35,34 @@ import org.protempa.proposition.TemporalProposition;
  */
 class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
-    private final Map<LowLevelAbstractionDefinition, Algorithm> algorithms;
-    private final KnowledgeSource knowledgeSource;
-    private final List<Rule> rules;
-    private final Map<Rule, AbstractionDefinition> ruleToAbstractionDefinition;
-    private final ClassObjectType SEQUENCE_OBJECT_TYPE = new ClassObjectType(
+    private static final ClassObjectType SEQUENCE_OBJECT_TYPE = new ClassObjectType(
             Sequence.class);
-    private final ClassObjectType PROPOSITION_OBJECT_TYPE = new ClassObjectType(
-            Proposition.class);
-    private final ClassObjectType EVENT_OBJECT_TYPE = new ClassObjectType(
+    private static final ClassObjectType EVENT_OBJECT_TYPE = new ClassObjectType(
             Event.class);
-    private final ClassObjectType CONSTANT_OBJECT_TYPE = new ClassObjectType(
+    private static final ClassObjectType CONSTANT_OBJECT_TYPE = new ClassObjectType(
             Constant.class);
-    private final ClassObjectType PRIMITIVE_PARAMETER_OBJECT_TYPE =
+    private static final ClassObjectType PRIMITIVE_PARAMETER_OBJECT_TYPE =
             new ClassObjectType(PrimitiveParameter.class);
     private static final ClassObjectType ARRAY_LIST_OT = new ClassObjectType(
             ArrayList.class);
     private static final ClassObjectType TEMP_PROP_OT = new ClassObjectType(
             TemporalProposition.class);
+    private static final SalienceInteger ONE_SALIENCE = new SalienceInteger(1);
+    private static final SalienceInteger MINUS_TWO_SALIENCE =
+            new SalienceInteger(-2);
+
+    private final Map<LowLevelAbstractionDefinition, Algorithm> algorithms;
+    private final List<Rule> rules;
+    private final Map<Rule, AbstractionDefinition> ruleToAbstractionDefinition;
     private final DerivationsBuilder derivationsBuilder;
 
     JBossRuleCreator(Map<LowLevelAbstractionDefinition, Algorithm> algorithms,
-            KnowledgeSource knowledgeSource,
                 DerivationsBuilder derivationsBuilder) {
         this.algorithms = algorithms;
-        this.knowledgeSource = knowledgeSource;
         this.rules = new ArrayList<Rule>();
         this.ruleToAbstractionDefinition =
                 new HashMap<Rule, AbstractionDefinition>();
         this.derivationsBuilder = derivationsBuilder;
-    }
-
-    /**
-     * @return the knowledgeSource
-     */
-    KnowledgeSource getKnowledgeSource() {
-        return this.knowledgeSource;
     }
 
     Map<Rule, AbstractionDefinition> getRuleToAbstractionDefinitionMap() {
@@ -85,8 +77,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             Rule rule = new Rule(def.getId());
             Pattern p = new Pattern(0, SEQUENCE_OBJECT_TYPE);
 
-            Set<String> propIds = this.knowledgeSource
-                    .primitiveParameterIds(def.getId());
+            Set<String> propIds = def.getAbstractedFrom();
             Constraint c = new PredicateConstraint(
                     new SequencePredicateExpression(propIds));
             p.addConstraint(c);
@@ -95,7 +86,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
             rule.setConsequence(new LowLevelAbstractionConsequence(def, algo,
                     this.derivationsBuilder));
-            rule.setSalience(new SalienceInteger(1));
+            rule.setSalience(ONE_SALIENCE);
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
             addInverseIsARule(def, SEQUENCE_OBJECT_TYPE);
@@ -163,11 +154,10 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         try {
             Rule rule = new Rule(def.getId());
-            rule.setSalience(new SalienceInteger(1));
+            rule.setSalience(ONE_SALIENCE);
             Set<ExtendedPropositionDefinition> epdsC = def
                     .getExtendedPropositionDefinitions();
-            TemporalExtendedPropositionDefinition[] epds =
-                    (TemporalExtendedPropositionDefinition[]) epdsC
+            TemporalExtendedPropositionDefinition[] epds = epdsC
                     .toArray(new TemporalExtendedPropositionDefinition[epdsC
                             .size()]);
             for (int i = 0; i < epds.length; i++) {
@@ -183,7 +173,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                     this.derivationsBuilder));
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
-            AbstractionCombiner.toRules(knowledgeSource, def, rules);
+            AbstractionCombiner.toRules(def, rules);
             addInverseIsARule(def, TEMP_PROP_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
@@ -208,7 +198,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                     new CollectionSizeExpression(1)));
             rule.addPattern(resultP);
             rule.setConsequence(new SliceConsequence(def, this.derivationsBuilder));
-            rule.setSalience(new SalienceInteger(-2));
+            rule.setSalience(MINUS_TWO_SALIENCE);
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
             addInverseIsARule(def, TEMP_PROP_OT);
@@ -243,7 +233,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                     new CollectionSizeExpression(2)));
             rule.addPattern(resultP);
             rule.setConsequence(new PairConsequence(def, this.derivationsBuilder));
-            rule.setSalience(new SalienceInteger(-2));
+            rule.setSalience(MINUS_TWO_SALIENCE);
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
         } catch (InvalidRuleException e) {
@@ -307,7 +297,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             rule.addPattern(p);
             rule.setConsequence(new InverseIsAConsequence(propId,
                     this.derivationsBuilder));
-            rule.setSalience(new SalienceInteger(1));
+            rule.setSalience(ONE_SALIENCE);
             rules.add(rule);
         }
     }

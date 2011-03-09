@@ -31,7 +31,7 @@ class LowLevelAbstractionConverter implements PropositionConverter {
     }
 
     @Override
-    public void convert(Instance lowLevelAbstractionInstance,
+    public LowLevelAbstractionDefinition convert(Instance lowLevelAbstractionInstance,
             org.protempa.KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend) 
             throws KnowledgeSourceReadException {
@@ -56,6 +56,7 @@ class LowLevelAbstractionConverter implements PropositionConverter {
                 constructValue(d, allowedValue, cm);
             }
         }
+        return d;
     }
 
     @Override

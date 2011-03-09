@@ -9,30 +9,28 @@ import org.protempa.KnowledgeSourceReadException;
 class ConstantConverter implements PropositionConverter {
 
     @Override
-    public void convert(Instance protegeProposition,
+    public ConstantDefinition convert(Instance protegeProposition,
             KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        if (protegeProposition != null
-                && protempaKnowledgeBase != null
-                && !protempaKnowledgeBase.hasConstantDefinition(
-                protegeProposition.getName())) {
-
-            ConstantDefinition constantDef = new ConstantDefinition(
+        ConstantDefinition result = 
+                protempaKnowledgeBase.getConstantDefinition(
+                protegeProposition.getName());
+        if (result == null) {
+            result = new ConstantDefinition(
                     protempaKnowledgeBase, protegeProposition.getName());
             ConnectionManager cm = backend.getConnectionManager();
-            Util.setNames(protegeProposition, constantDef, cm);
-            Util.setProperties(protegeProposition, constantDef, cm);
-            Util.setTerms(protegeProposition, constantDef, cm);
-            Util.setInverseIsAs(protegeProposition, constantDef, cm);
+            Util.setNames(protegeProposition, result, cm);
+            Util.setProperties(protegeProposition, result, cm);
+            Util.setTerms(protegeProposition, result, cm);
+            Util.setInverseIsAs(protegeProposition, result, cm);
         }
+        return result;
     }
 
     @Override
     public boolean protempaKnowledgeBaseHasProposition(
             Instance protegeProposition, KnowledgeBase protempaKnowledgeBase) {
-        return protegeProposition != null
-                && protempaKnowledgeBase != null
-                && protempaKnowledgeBase.hasConstantDefinition(protegeProposition.getName());
+        return protempaKnowledgeBase.hasConstantDefinition(protegeProposition.getName());
     }
 }

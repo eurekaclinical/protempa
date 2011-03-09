@@ -123,6 +123,15 @@ class Util {
     }
 
     static ValueType parseValueType(Cls valueTypeCls) {
+        ValueType result = 
+                VALUE_CLASS_NAME_TO_VALUE_TYPE.get(valueTypeCls.getName());
+        if (result == null) {
+            result = parseValueSet(valueTypeCls);
+        }
+        return result;
+    }
+
+    static ValueType parseValueSet(Cls valueTypeCls) {
         Collection superClasses = valueTypeCls.getSuperclasses();
         ValueType valueType = null;
         for (Object superCls : superClasses) {

@@ -626,8 +626,8 @@ abstract class ConnectionManager {
                             OWN_SLOT_VALUE_GETTER);
     }
 
-    private final ProtegeCommand<Collection, SlotValueSpec>
-        OWN_SLOT_VALUES_GETTER = new ProtegeCommand<Collection,
+    private final ProtegeCommand<Collection<?>, SlotValueSpec>
+        OWN_SLOT_VALUES_GETTER = new ProtegeCommand<Collection<?>,
         SlotValueSpec>("get own slot values") {
 
             @Override
@@ -638,7 +638,7 @@ abstract class ConnectionManager {
 
     };
 
-    Collection getOwnSlotValues(Frame frame, Slot slot)
+    Collection<?> getOwnSlotValues(Frame frame, Slot slot)
         throws KnowledgeSourceReadException {
             return getFromProtege(new SlotValueSpec(frame, slot),
                             OWN_SLOT_VALUES_GETTER);
@@ -691,9 +691,9 @@ abstract class ConnectionManager {
     }
 
     private static final class SetSlotValuesSpec extends SlotValueSpec {
-            Collection value;
+            Collection<?> value;
 
-            SetSlotValuesSpec(Frame frame, Slot slot, Collection value) {
+            SetSlotValuesSpec(Frame frame, Slot slot, Collection<?> value) {
                     super(frame, slot);
                     this.value = value;
             }
@@ -713,7 +713,7 @@ abstract class ConnectionManager {
 
     };
 
-    void setOwnSlotValues(Instance instance, Slot slot, Collection values)
+    void setOwnSlotValues(Instance instance, Slot slot, Collection<?> values)
         throws KnowledgeSourceReadException {
             getFromProtege(new SetSlotValuesSpec(instance, slot, values),
                             OWN_SLOT_VALUES_SETTER);

@@ -2,6 +2,7 @@ package org.protempa;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.protempa.proposition.value.ValueSet;
 import org.protempa.query.And;
@@ -122,6 +123,75 @@ public abstract class AbstractKnowledgeSourceBackend extends
     public List<String> getPropositionsByTerm(String termId)
             throws KnowledgeSourceReadException {
         return new ArrayList<String>();
+    }
+
+    @Override
+    public List<PropositionDefinition> readAbstractedFrom(
+            AbstractionDefinition abstractionDefinition,
+            KnowledgeBase kb) throws KnowledgeSourceReadException {
+        if (abstractionDefinition == null) {
+            throw new IllegalArgumentException("abstractionDefinition cannot be null");
+        }
+        Set<String> children = abstractionDefinition.getAbstractedFrom();
+        List<PropositionDefinition> result =
+                new ArrayList<PropositionDefinition>(children.size());
+        readPropositionDefinitions(children, kb, result);
+        return result;
+    }
+
+    
+
+    @Override
+    public List<PropositionDefinition> readInverseIsA(
+            PropositionDefinition propDef, KnowledgeBase kb)
+            throws KnowledgeSourceReadException {
+        if (propDef == null) {
+            throw new IllegalArgumentException("propDef cannot be null");
+        }
+        String[] children = propDef.getInverseIsA();
+        List<PropositionDefinition> result =
+                new ArrayList<PropositionDefinition>(children.length);
+        readPropositionDefinitions(children, kb, result);
+        return result;
+    }
+
+
+    private void readPropositionDefinitions(Set<String> children,
+            KnowledgeBase kb, List<PropositionDefinition> result)
+            throws KnowledgeSourceReadException {
+        for (String childId : children) {
+            PropositionDefinition propDef = readPropositionDefinition(childId, kb);
+            if (propDef != null) {
+                result.add(propDef);
+            }
+        }
+    }
+
+    private void readPropositionDefinitions(String[] children,
+            KnowledgeBase kb, List<PropositionDefinition> result)
+            throws KnowledgeSourceReadException {
+        for (String childId : children) {
+            PropositionDefinition propDef = readPropositionDefinition(childId, kb);
+            if (propDef != null) {
+                result.add(propDef);
+            }
+        }
+    }
+
+    @Override
+    public PropositionDefinition readPropositionDefinition(String childId, KnowledgeBase kb)
+            throws KnowledgeSourceReadException {
+        PropositionDefinition def = readAbstractionDefinition(childId, kb);
+        if (def == null) {
+            def = readEventDefinition(childId, kb);
+            if (def == null) {
+                def = readConstantDefinition(childId, kb);
+                if (def == null) {
+                    def = readPrimitiveParameterDefinition(childId, kb);
+                }
+            }
+        }
+        return def;
     }
 
     /**

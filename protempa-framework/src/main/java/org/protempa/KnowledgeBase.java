@@ -144,6 +144,20 @@ public final class KnowledgeBase implements Serializable {
                 && !this.idToConstantDefinitionMap.containsKey(id);
     }
 
+    public PropositionDefinition getPropositionDefinition(String propId) {
+        PropositionDefinition result = getEventDefinition(propId);
+        if (result == null) {
+            result = getPrimitiveParameterDefinition(propId);
+            if (result == null) {
+                result = getConstantDefinition(propId);
+                if (result == null) {
+                    result = getAbstractionDefinition(propId);
+                }
+            }
+        }
+        return result;
+    }
+
     public boolean hasEventDefinition(String eventId) {
         return getEventDefinition(eventId) != null;
     }

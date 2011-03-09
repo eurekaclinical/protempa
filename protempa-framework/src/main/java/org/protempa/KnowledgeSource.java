@@ -1,12 +1,14 @@
 package org.protempa;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
+import org.apache.commons.collections.map.ReferenceMap;
 import org.arp.javautil.arrays.Arrays;
 
 import org.protempa.backend.BackendNewInstanceException;
@@ -28,27 +30,43 @@ public final class KnowledgeSource
      */
     private KnowledgeBase protempaKnowledgeBase;
     private final BackendManager<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource, KnowledgeSourceBackend> backendManager;
-    private final Map<Set<String>, Set<String>> leafEventIdCache;
-    private final Map<Set<String>, Set<String>> leafConstantIdCache;
-    private final Map<Set<String>, Set<String>> primParamIdCache;
-    private final Set<String> notFoundAbstractionDefinitionRequests;
-    private final Set<String> notFoundEventDefinitionRequests;
-    private final Set<String> notFoundPrimitiveParameterDefinitionRequests;
-    private final Set<String> notFoundConstantDefinitionRequests;
-    private final Set<String> notFoundValueSetRequests;
+    private final Map<Set<String>, Set<String>> propIdCache;
+    private final Map<Set<String>, Set<PropositionDefinition>> propIdPropCache;
+    private final Map<String, Object> notFoundPrimitiveParameterDefinitionRequests;
+    private final Map<String, Object> notFoundEventDefinitionRequests;
+    private final Map<String, Object> notFoundConstantDefinitionRequests;
+    private final Map<String, Object> notFoundAbstractionDefinitionRequests;
+    private final Map<String, Object> notFoundValueSetRequests;
+    private final Map<String, Object> notFoundPropositionDefinitionRequests;
+    private final PropositionDefinitionReader propDefReader;
+    private final ConstantDefinitionReader constantDefReader;
+    private final EventDefinitionReader eventDefReader;
+    private final PrimitiveParameterDefinitionReader primParamDefReader;
+    private final AbstractionDefinitionReader abstractionDefReader;
+    private final Map<PropositionDefinition, List<PropositionDefinition>> inverseIsACache;
+    private final Map<PropositionDefinition, List<PropositionDefinition>> abstractedFromCache;
 
+    @SuppressWarnings("unchecked")
     public KnowledgeSource(KnowledgeSourceBackend[] backends) {
         super(backends);
         this.backendManager = new BackendManager<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource, KnowledgeSourceBackend>(
                 this, backends);
-        this.leafEventIdCache = new HashMap<Set<String>, Set<String>>();
-        this.leafConstantIdCache = new HashMap<Set<String>, Set<String>>();
-        this.primParamIdCache = new HashMap<Set<String>, Set<String>>();
-        this.notFoundAbstractionDefinitionRequests = new HashSet<String>();
-        this.notFoundEventDefinitionRequests = new HashSet<String>();
-        this.notFoundPrimitiveParameterDefinitionRequests = new HashSet<String>();
-        this.notFoundConstantDefinitionRequests = new HashSet<String>();
-        this.notFoundValueSetRequests = new HashSet<String>();
+        this.propIdCache = new ReferenceMap();
+        this.propIdPropCache = new ReferenceMap();
+        this.inverseIsACache = new ReferenceMap();
+        this.abstractedFromCache = new ReferenceMap();
+        this.notFoundPrimitiveParameterDefinitionRequests = new WeakHashMap<String, Object>();
+        this.notFoundAbstractionDefinitionRequests = new WeakHashMap<String, Object>();
+        this.notFoundConstantDefinitionRequests = new WeakHashMap<String, Object>();
+        this.notFoundEventDefinitionRequests = new WeakHashMap<String, Object>();
+        this.notFoundValueSetRequests = new WeakHashMap<String, Object>();
+        this.notFoundPropositionDefinitionRequests = new WeakHashMap<String, Object>();
+
+        this.propDefReader = new PropositionDefinitionReader();
+        this.constantDefReader = new ConstantDefinitionReader();
+        this.eventDefReader = new EventDefinitionReader();
+        this.primParamDefReader = new PrimitiveParameterDefinitionReader();
+        this.abstractionDefReader = new AbstractionDefinitionReader();
     }
 
     /**
@@ -76,43 +94,22 @@ public final class KnowledgeSource
      */
     public ConstantDefinition readConstantDefinition(String id)
             throws KnowledgeSourceReadException {
-        ConstantDefinition result = null;
-        if (!this.notFoundConstantDefinitionRequests.contains(id)) {
-            if (protempaKnowledgeBase != null) {
-                result = protempaKnowledgeBase.getConstantDefinition(id);
-            }
-            if (result == null) {
-                try {
-                    initializeIfNeeded();
-                } catch (BackendInitializationException ex) {
-                    throw new KnowledgeSourceReadException(ex);
-                } catch (BackendNewInstanceException ex) {
-                    throw new KnowledgeSourceReadException(ex);
-                }
-                if (this.backendManager.getBackends() != null) {
-                    for (KnowledgeSourceBackend backend : this.backendManager.getBackends()) {
-                        result = backend.readConstantDefinition(id,
-                                protempaKnowledgeBase);
-                        if (result != null) {
-                            return result;
-                        }
-                    }
-                    this.notFoundConstantDefinitionRequests.add(id);
-                }
-            }
-        }
-
-        return result;
+        return this.constantDefReader.read(id);
     }
 
     public boolean hasConstantDefinition(String id)
             throws KnowledgeSourceReadException {
-        boolean result = false;
-        if (!this.notFoundConstantDefinitionRequests.contains(id)) {
-            if (protempaKnowledgeBase != null) {
-                result = protempaKnowledgeBase.getConstantDefinition(id) != null;
-            }
-            if (!result) {
+        return this.constantDefReader.has(id);
+    }
+
+    public List<PropositionDefinition> readInverseIsA(PropositionDefinition propDef)
+            throws KnowledgeSourceReadException {
+        List<PropositionDefinition> result = this.inverseIsACache.get(propDef);
+        if (result != null) {
+            return result;
+        } else {
+            result = new ArrayList<PropositionDefinition>();
+            if (propDef != null) {
                 try {
                     initializeIfNeeded();
                 } catch (BackendInitializationException ex) {
@@ -122,18 +119,60 @@ public final class KnowledgeSource
                 }
                 if (this.backendManager.getBackends() != null) {
                     for (KnowledgeSourceBackend backend : this.backendManager.getBackends()) {
-                        result = backend.hasConstantDefinition(id,
-                                protempaKnowledgeBase);
-                        if (result) {
-                            return result;
-                        }
+                        result.addAll(backend.readInverseIsA(propDef,
+                                protempaKnowledgeBase));
                     }
-                    this.notFoundConstantDefinitionRequests.add(id);
                 }
             }
+            result = Collections.unmodifiableList(result);
+            if (propDef != null) {
+                this.inverseIsACache.put(propDef, result);
+            }
+            return result;
         }
+    }
 
-        return result;
+    public List<PropositionDefinition> readInverseIsA(String id)
+            throws KnowledgeSourceReadException {
+        PropositionDefinition propDef = readPropositionDefinition(id);
+        return readInverseIsA(propDef);
+    }
+
+    public List<PropositionDefinition> readAbstractedFrom(AbstractionDefinition propDef)
+            throws KnowledgeSourceReadException {
+        List<PropositionDefinition> result =
+                this.abstractedFromCache.get(propDef);
+        if (result != null) {
+            return result;
+        } else {
+            result = new ArrayList<PropositionDefinition>();
+            if (propDef != null) {
+                try {
+                    initializeIfNeeded();
+                } catch (BackendInitializationException ex) {
+                    throw new KnowledgeSourceReadException(ex);
+                } catch (BackendNewInstanceException ex) {
+                    throw new KnowledgeSourceReadException(ex);
+                }
+                if (this.backendManager.getBackends() != null) {
+                    for (KnowledgeSourceBackend backend : this.backendManager.getBackends()) {
+                        result.addAll(backend.readAbstractedFrom(propDef,
+                                protempaKnowledgeBase));
+                    }
+                }
+            }
+            result = Collections.unmodifiableList(result);
+            if (propDef != null) {
+                this.abstractedFromCache.put(propDef, result);
+            }
+            return result;
+        }
+    }
+
+    public List<PropositionDefinition> readAbstractedFrom(String id)
+            throws KnowledgeSourceReadException {
+        AbstractionDefinition propDef = readAbstractionDefinition(id);
+        return readAbstractedFrom(propDef);
     }
 
     /**
@@ -146,64 +185,229 @@ public final class KnowledgeSource
      */
     public EventDefinition readEventDefinition(String id)
             throws KnowledgeSourceReadException {
-        EventDefinition result = null;
-        if (!this.notFoundEventDefinitionRequests.contains(id)) {
-            if (protempaKnowledgeBase != null) {
-                result = protempaKnowledgeBase.getEventDefinition(id);
-            }
-            if (result == null) {
-                try {
-                    initializeIfNeeded();
-                } catch (BackendInitializationException ex) {
-                    throw new KnowledgeSourceReadException(ex);
-                } catch (BackendNewInstanceException ex) {
-                    throw new KnowledgeSourceReadException(ex);
-                }
-                if (this.backendManager.getBackends() != null) {
-                    for (KnowledgeSourceBackend backend : this.backendManager.getBackends()) {
-                        result = backend.readEventDefinition(id,
-                                protempaKnowledgeBase);
-                        if (result != null) {
-                            return result;
-                        }
-                    }
-                    this.notFoundEventDefinitionRequests.add(id);
-                }
-            }
-        }
-
-        return result;
+        return eventDefReader.read(id);
     }
 
     public boolean hasEventDefinition(String id)
             throws KnowledgeSourceReadException {
-        boolean result = false;
-        if (!this.notFoundEventDefinitionRequests.contains(id)) {
-            if (protempaKnowledgeBase != null) {
-                result = protempaKnowledgeBase.getEventDefinition(id) != null;
-            }
-            if (!result) {
-                try {
-                    initializeIfNeeded();
-                } catch (BackendInitializationException ex) {
-                    throw new KnowledgeSourceReadException(ex);
-                } catch (BackendNewInstanceException ex) {
-                    throw new KnowledgeSourceReadException(ex);
+        return this.eventDefReader.has(id);
+    }
+
+    private abstract class AbstractPropositionDefinitionReader<P extends PropositionDefinition> {
+
+        P read(String id) throws KnowledgeSourceReadException {
+            P result = null;
+            if (!isInNotFound(id)) {
+                if (protempaKnowledgeBase != null) {
+                    result = readFromKnowledgeBase(id);
                 }
-                if (this.backendManager.getBackends() != null) {
-                    for (KnowledgeSourceBackend backend : this.backendManager.getBackends()) {
-                        result = backend.hasEventDefinition(id,
-                                protempaKnowledgeBase);
-                        if (result) {
-                            return result;
+
+                if (result == null) {
+                    try {
+                        initializeIfNeeded();
+                        if (backendManager.getBackends() != null) {
+                            for (KnowledgeSourceBackend backend : backendManager.getBackends()) {
+                                result = readFromBackend(id, backend);
+                                if (result != null) {
+                                    return result;
+                                }
+                            }
+                            putInNotFound(id);
                         }
+                    } catch (BackendInitializationException ex) {
+                        throw new KnowledgeSourceReadException(
+                                "An error occurred reading the proposition definition" + id,
+                                ex);
+                    } catch (BackendNewInstanceException ex) {
+                        throw new KnowledgeSourceReadException(
+                                "An error occurred reading the proposition definition" + id,
+                                ex);
                     }
-                    this.notFoundEventDefinitionRequests.add(id);
                 }
             }
+
+            return result;
         }
 
-        return result;
+        boolean has(String id) throws KnowledgeSourceReadException {
+            boolean result = false;
+            if (!isInNotFound(id)) {
+                if (protempaKnowledgeBase != null) {
+                    if (readFromKnowledgeBase(id) != null) {
+                        result = true;
+                    }
+                }
+
+                if (!result) {
+                    try {
+                        initializeIfNeeded();
+                        if (backendManager.getBackends() != null) {
+                            for (KnowledgeSourceBackend backend : backendManager.getBackends()) {
+                                result = readFromBackend(id, backend) != null;
+                                if (result) {
+                                    return result;
+                                }
+                            }
+                            putInNotFound(id);
+                        }
+                    } catch (BackendInitializationException ex) {
+                        throw new KnowledgeSourceReadException(
+                                "An error occurred reading the proposition definition" + id,
+                                ex);
+                    } catch (BackendNewInstanceException ex) {
+                        throw new KnowledgeSourceReadException(
+                                "An error occurred reading the proposition definition" + id,
+                                ex);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        protected abstract boolean isInNotFound(String id);
+
+        protected abstract void putInNotFound(String id);
+
+        protected abstract P readFromKnowledgeBase(String id);
+
+        protected abstract P readFromBackend(String id, KnowledgeSourceBackend backend)
+                throws KnowledgeSourceReadException;
+    }
+
+    private final class PropositionDefinitionReader
+            extends AbstractPropositionDefinitionReader<PropositionDefinition> {
+
+        @Override
+        protected PropositionDefinition readFromKnowledgeBase(String id) {
+            return protempaKnowledgeBase.getPropositionDefinition(id);
+        }
+
+        @Override
+        protected PropositionDefinition readFromBackend(String id,
+                KnowledgeSourceBackend backend)
+                throws KnowledgeSourceReadException {
+            return backend.readPropositionDefinition(
+                    id, protempaKnowledgeBase);
+        }
+
+        @Override
+        protected boolean isInNotFound(String id) {
+            return notFoundPropositionDefinitionRequests.containsKey(id);
+        }
+
+        @Override
+        protected void putInNotFound(String id) {
+            notFoundPropositionDefinitionRequests.put(id, null);
+        }
+    }
+
+    private final class EventDefinitionReader
+            extends AbstractPropositionDefinitionReader<EventDefinition> {
+
+        @Override
+        protected EventDefinition readFromKnowledgeBase(String id) {
+            return protempaKnowledgeBase.getEventDefinition(id);
+        }
+
+        @Override
+        protected EventDefinition readFromBackend(String id,
+                KnowledgeSourceBackend backend)
+                throws KnowledgeSourceReadException {
+            return backend.readEventDefinition(
+                    id, protempaKnowledgeBase);
+        }
+
+        @Override
+        protected boolean isInNotFound(String id) {
+            return notFoundEventDefinitionRequests.containsKey(id);
+        }
+
+        @Override
+        protected void putInNotFound(String id) {
+            notFoundEventDefinitionRequests.put(id, null);
+        }
+    }
+
+    private final class ConstantDefinitionReader
+            extends AbstractPropositionDefinitionReader<ConstantDefinition> {
+
+        @Override
+        protected ConstantDefinition readFromKnowledgeBase(String id) {
+            return protempaKnowledgeBase.getConstantDefinition(id);
+        }
+
+        @Override
+        protected ConstantDefinition readFromBackend(String id,
+                KnowledgeSourceBackend backend)
+                throws KnowledgeSourceReadException {
+            return backend.readConstantDefinition(
+                    id, protempaKnowledgeBase);
+        }
+
+        @Override
+        protected boolean isInNotFound(String id) {
+            return notFoundConstantDefinitionRequests.containsKey(id);
+        }
+
+        @Override
+        protected void putInNotFound(String id) {
+            notFoundConstantDefinitionRequests.put(id, null);
+        }
+    }
+
+    private final class PrimitiveParameterDefinitionReader
+            extends AbstractPropositionDefinitionReader<PrimitiveParameterDefinition> {
+
+        @Override
+        protected PrimitiveParameterDefinition readFromKnowledgeBase(String id) {
+            return protempaKnowledgeBase.getPrimitiveParameterDefinition(id);
+        }
+
+        @Override
+        protected PrimitiveParameterDefinition readFromBackend(String id,
+                KnowledgeSourceBackend backend)
+                throws KnowledgeSourceReadException {
+            return backend.readPrimitiveParameterDefinition(
+                    id, protempaKnowledgeBase);
+        }
+
+        @Override
+        protected boolean isInNotFound(String id) {
+            return notFoundPrimitiveParameterDefinitionRequests.containsKey(id);
+        }
+
+        @Override
+        protected void putInNotFound(String id) {
+            notFoundPrimitiveParameterDefinitionRequests.put(id, null);
+        }
+    }
+
+    private final class AbstractionDefinitionReader
+            extends AbstractPropositionDefinitionReader<AbstractionDefinition> {
+
+        @Override
+        protected AbstractionDefinition readFromKnowledgeBase(String id) {
+            return protempaKnowledgeBase.getAbstractionDefinition(id);
+        }
+
+        @Override
+        protected AbstractionDefinition readFromBackend(String id,
+                KnowledgeSourceBackend backend)
+                throws KnowledgeSourceReadException {
+            return backend.readAbstractionDefinition(
+                    id, protempaKnowledgeBase);
+        }
+
+        @Override
+        protected boolean isInNotFound(String id) {
+            return notFoundAbstractionDefinitionRequests.containsKey(id);
+        }
+
+        @Override
+        protected void putInNotFound(String id) {
+            notFoundAbstractionDefinitionRequests.put(id, null);
+        }
     }
 
     /**
@@ -216,17 +420,13 @@ public final class KnowledgeSource
      */
     public PropositionDefinition readPropositionDefinition(String id)
             throws KnowledgeSourceReadException {
-        PropositionDefinition result = readTemporalPropositionDefinition(id);
-        if (result == null) {
-            result = readConstantDefinition(id);
-        }
-
-        return result;
+        return this.propDefReader.read(id);
     }
 
     public TemporalPropositionDefinition readTemporalPropositionDefinition(
             String propId) throws KnowledgeSourceReadException {
-        TemporalPropositionDefinition result = readAbstractionDefinition(propId);
+        TemporalPropositionDefinition result =
+                readAbstractionDefinition(propId);
         if (result == null) {
             result = readPrimitiveParameterDefinition(propId);
             if (result == null) {
@@ -259,74 +459,12 @@ public final class KnowledgeSource
      */
     public PrimitiveParameterDefinition readPrimitiveParameterDefinition(
             String id) throws KnowledgeSourceReadException {
-        PrimitiveParameterDefinition result = null;
-        if (!this.notFoundPrimitiveParameterDefinitionRequests.contains(id)) {
-            if (protempaKnowledgeBase != null) {
-                result = protempaKnowledgeBase.getPrimitiveParameterDefinition(id);
-            }
-
-            if (result == null) {
-                try {
-                    initializeIfNeeded();
-                    if (this.backendManager.getBackends() != null) {
-                        for (KnowledgeSourceBackend backend : this.backendManager.getBackends()) {
-                            result = backend.readPrimitiveParameterDefinition(
-                                    id, protempaKnowledgeBase);
-                            if (result != null) {
-                                return result;
-                            }
-                        }
-                        this.notFoundPrimitiveParameterDefinitionRequests.add(id);
-                    }
-                } catch (BackendInitializationException ex) {
-                    throw new KnowledgeSourceReadException(
-                            "An error occurred reading the primitive parameter definitions.",
-                            ex);
-                } catch (BackendNewInstanceException ex) {
-                    throw new KnowledgeSourceReadException(
-                            "An error occurred reading the primitive parameter definitions.",
-                            ex);
-                }
-            }
-        }
-
-        return result;
+        return this.primParamDefReader.read(id);
     }
 
     public boolean hasPrimitiveParameterDefinition(String id)
             throws KnowledgeSourceReadException {
-        boolean result = false;
-        if (!this.notFoundPrimitiveParameterDefinitionRequests.contains(id)) {
-            if (protempaKnowledgeBase != null) {
-                result = protempaKnowledgeBase.getPrimitiveParameterDefinition(id) != null;
-            }
-
-            if (!result) {
-                try {
-                    initializeIfNeeded();
-                    if (this.backendManager.getBackends() != null) {
-                        for (KnowledgeSourceBackend backend : this.backendManager.getBackends()) {
-                            result = backend.hasPrimitiveParameterDefinition(
-                                    id, protempaKnowledgeBase);
-                            if (result) {
-                                return result;
-                            }
-                        }
-                        this.notFoundPrimitiveParameterDefinitionRequests.add(id);
-                    }
-                } catch (BackendInitializationException ex) {
-                    throw new KnowledgeSourceReadException(
-                            "An error occurred reading the primitive parameter definitions.",
-                            ex);
-                } catch (BackendNewInstanceException ex) {
-                    throw new KnowledgeSourceReadException(
-                            "An error occurred reading the primitive parameter definitions.",
-                            ex);
-                }
-            }
-        }
-
-        return result;
+        return this.primParamDefReader.has(id);
     }
 
     /**
@@ -339,75 +477,17 @@ public final class KnowledgeSource
      */
     public AbstractionDefinition readAbstractionDefinition(String id)
             throws KnowledgeSourceReadException {
-        AbstractionDefinition result = null;
-        if (!this.notFoundAbstractionDefinitionRequests.contains(id)) {
-            if (protempaKnowledgeBase != null) {
-                result = protempaKnowledgeBase.getAbstractionDefinition(id);
-            }
-            if (result == null) {
-                try {
-                    initializeIfNeeded();
-                    if (this.backendManager.getBackends() != null) {
-                        for (KnowledgeSourceBackend backend : this.backendManager.getBackends()) {
-                            result = backend.readAbstractionDefinition(id,
-                                    protempaKnowledgeBase);
-                            if (result != null) {
-                                return result;
-                            }
-                        }
-                        this.notFoundAbstractionDefinitionRequests.add(id);
-                    }
-                } catch (BackendInitializationException ex) {
-                    throw new KnowledgeSourceReadException(
-                            "An error occurred reading the abstraction definitions.",
-                            ex);
-                } catch (BackendNewInstanceException ex) {
-                    throw new KnowledgeSourceReadException(
-                            "An error occurred reading the abstraction definitions.",
-                            ex);
-                }
-            }
-        }
-        return result;
+        return this.abstractionDefReader.read(id);
     }
 
     public boolean hasAbstractionDefinition(String id)
             throws KnowledgeSourceReadException {
-        boolean result = false;
-        if (!this.notFoundAbstractionDefinitionRequests.contains(id)) {
-            if (protempaKnowledgeBase != null) {
-                result = protempaKnowledgeBase.getAbstractionDefinition(id) != null;
-            }
-            if (!result) {
-                try {
-                    initializeIfNeeded();
-                    if (this.backendManager.getBackends() != null) {
-                        for (KnowledgeSourceBackend backend : this.backendManager.getBackends()) {
-                            result = backend.hasAbstractionDefinition(id,
-                                    protempaKnowledgeBase);
-                            if (result) {
-                                return result;
-                            }
-                        }
-                        this.notFoundAbstractionDefinitionRequests.add(id);
-                    }
-                } catch (BackendInitializationException ex) {
-                    throw new KnowledgeSourceReadException(
-                            "An error occurred reading the abstraction definitions.",
-                            ex);
-                } catch (BackendNewInstanceException ex) {
-                    throw new KnowledgeSourceReadException(
-                            "An error occurred reading the abstraction definitions.",
-                            ex);
-                }
-            }
-        }
-        return result;
+        return this.abstractionDefReader.has(id);
     }
 
     public ValueSet readValueSet(String id) throws KnowledgeSourceReadException {
         ValueSet result = null;
-        if (!this.notFoundValueSetRequests.contains(id)) {
+        if (!this.notFoundValueSetRequests.containsKey(id)) {
             if (protempaKnowledgeBase != null) {
                 result = protempaKnowledgeBase.getValueSet(id);
             }
@@ -422,7 +502,7 @@ public final class KnowledgeSource
                                 return result;
                             }
                         }
-                        this.notFoundValueSetRequests.add(id);
+                        this.notFoundValueSetRequests.put(id, null);
                     }
                 } catch (BackendInitializationException ex) {
                     throw new KnowledgeSourceReadException(
@@ -440,7 +520,7 @@ public final class KnowledgeSource
 
     public boolean hasValueSet(String id) throws KnowledgeSourceReadException {
         boolean result = false;
-        if (!this.notFoundValueSetRequests.contains(id)) {
+        if (!this.notFoundValueSetRequests.containsKey(id)) {
             if (protempaKnowledgeBase != null) {
                 result = protempaKnowledgeBase.getValueSet(id) != null;
             }
@@ -455,7 +535,7 @@ public final class KnowledgeSource
                                 return result;
                             }
                         }
-                        this.notFoundValueSetRequests.add(id);
+                        this.notFoundValueSetRequests.put(id, null);
                     }
                 } catch (BackendInitializationException ex) {
                     throw new KnowledgeSourceReadException(
@@ -483,13 +563,17 @@ public final class KnowledgeSource
     public void clear() {
         if (this.protempaKnowledgeBase != null) {
             this.protempaKnowledgeBase.clear();
-            this.leafEventIdCache.clear();
-            this.primParamIdCache.clear();
-            this.leafConstantIdCache.clear();
-            this.notFoundAbstractionDefinitionRequests.clear();
-            this.notFoundEventDefinitionRequests.clear();
+            this.propIdCache.clear();
+            this.propIdPropCache.clear();
+            this.inverseIsACache.clear();
+            this.abstractedFromCache.clear();
             this.notFoundPrimitiveParameterDefinitionRequests.clear();
+            this.notFoundAbstractionDefinitionRequests.clear();
             this.notFoundConstantDefinitionRequests.clear();
+            this.notFoundEventDefinitionRequests.clear();
+            this.notFoundValueSetRequests.clear();
+            this.notFoundPropositionDefinitionRequests.clear();
+
         }
     }
 
@@ -515,15 +599,77 @@ public final class KnowledgeSource
             throw new IllegalArgumentException("propIds cannot be null");
         }
         if (propIds.contains(null)) {
+            throw new IllegalArgumentException("propIds cannot contain null");
+        }
+        return leafPropositionIds(new HashSet<String>(propIds),
+                this.propIdCache);
+    }
+
+    public Set<PropositionDefinition> leafPropositionDefinitions(
+            Set<String> propIds)
+            throws KnowledgeSourceReadException {
+        if (propIds == null) {
+            throw new IllegalArgumentException("propIds cannot be null");
+        }
+        if (propIds.contains(null)) {
+            throw new IllegalArgumentException("propIds cannot contain null");
+        }
+        return leafPropositionDefinitions(new HashSet<String>(propIds),
+                this.propIdPropCache);
+    }
+
+    private Set<String> leafPropositionIds(Set<String> propIds,
+            Map<Set<String>, Set<String>> cache)
+            throws KnowledgeSourceReadException {
+        if (propIds == null) {
+            throw new IllegalArgumentException("propIds cannot be null");
+        }
+        if (propIds.contains(null)) {
             throw new IllegalArgumentException("propIds cannot contain a null element");
         }
-        Set<String> pIds = new HashSet<String>(primitiveParameterIds(propIds));
-        Set<String> eventIds = leafEventIds(propIds);
-        pIds.addAll(eventIds);
-        Set<String> constantIds = leafConstantIds(propIds);
-        pIds.addAll(constantIds);
 
-        return pIds;
+        Set<String> cachedResult = cache.get(propIds);
+        if (cachedResult != null) {
+            return cachedResult;
+        } else {
+            Set<String> result = new HashSet<String>();
+            if (propIds != null) {
+                leafPropositionIdsHelper(propIds, result, null);
+                result = Collections.unmodifiableSet(result);
+                cache.put(propIds, result);
+            }
+            return result;
+        }
+    }
+
+    private Set<PropositionDefinition> leafPropositionDefinitions(Set<String> propIds,
+            Map<Set<String>, Set<PropositionDefinition>> cache)
+            throws KnowledgeSourceReadException {
+        if (propIds == null) {
+            throw new IllegalArgumentException("propIds cannot be null");
+        }
+        if (propIds.contains(null)) {
+            throw new IllegalArgumentException("propIds cannot contain a null element");
+        }
+
+        Set<PropositionDefinition> cachedResult = cache.get(propIds);
+        if (cachedResult != null) {
+            return cachedResult;
+        } else {
+            Set<PropositionDefinition> propResult = new HashSet<PropositionDefinition>();
+            if (propIds != null) {
+                leafPropositionIdsHelper(propIds, null, propResult);
+                propResult = Collections.unmodifiableSet(propResult);
+                cache.put(propIds, propResult);
+            }
+            return propResult;
+        }
+    }
+
+    public Set<String> leafPrimitiveParameterIds(String... propId)
+            throws KnowledgeSourceReadException {
+        Set<String> propIds = Arrays.asSet(propId);
+        return leafPrimitiveParameterIds(propIds);
     }
 
     /**
@@ -537,264 +683,117 @@ public final class KnowledgeSource
      * @return an unmodifiable <code>Set</code> of primitive parameter id
      *         <code>String</code>s. Guaranteed not to return <code>null</code>.
      */
-    public Set<String> primitiveParameterIds(Set<String> propIds)
+    public Set<String> leafPrimitiveParameterIds(Set<String> propIds)
             throws KnowledgeSourceReadException {
         if (propIds == null) {
             throw new IllegalArgumentException("propIds cannot be null");
         }
         if (propIds.contains(null)) {
-            throw new IllegalArgumentException("propIds cannot contain a null element");
+            throw new IllegalArgumentException("propIds cannot contain null");
         }
-        Set<String> cachedResult = this.primParamIdCache.get(propIds);
-        if (cachedResult != null) {
-            return cachedResult;
-        } else {
-            Set<String> result = new HashSet<String>();
-            if (propIds != null) {
-                primitiveParameterIdsHelper(
-                        propIds.toArray(new String[propIds.size()]), result);
-                result = Collections.unmodifiableSet(result);
-                this.primParamIdCache.put(propIds, result);
-            }
-            return result;
-        }
-    }
-
-    /**
-     * Helper method for finding primitive parameter ids.
-     * 
-     * @param paramIds
-     *            a {@link Set} of proposition id {@link String}s, must not be
-     *            <code>null</code>.
-     * @param result
-     *            a {@link Set} for storing the primitive parameter ids to
-     *            return, must not be <code>null</code>.
-     */
-    private void primitiveParameterIdsHelper(String[] paramIds,
-            Set<String> result) throws KnowledgeSourceReadException {
-        for (String paramId : paramIds) {
-            PrimitiveParameterDefinition primParamDef = readPrimitiveParameterDefinition(paramId);
-            if (primParamDef != null) {
-                String[] primParamDefInverseIsA = primParamDef.getInverseIsA();
-                if (primParamDefInverseIsA.length == 0) {
-                    result.add(paramId);
-                } else {
-                    primitiveParameterIdsHelper(primParamDefInverseIsA, result);
-                }
-            } else {
-                AbstractionDefinition def = readAbstractionDefinition(paramId);
-                if (def != null) {
-                    primitiveParameterIdsHelper(def.getInverseIsA(), result);
-                    Set<String> abstractedFrom = def.getAbstractedFrom();
-                    primitiveParameterIdsHelper(
-                            abstractedFrom.toArray(new String[abstractedFrom.size()]), result);
-                } else {
-                    if (readEventDefinition(paramId) == null
-                            && readConstantDefinition(paramId) == null) {
-                        throw new KnowledgeSourceReadException(paramId
-                                + " is unknown");
-                    }
-                }
+        Set<String> pids = leafPropositionIds(new HashSet<String>(propIds),
+                this.propIdCache);
+        Set<String> result = new HashSet<String>();
+        for (String pid : pids) {
+            if (hasPrimitiveParameterDefinition(pid)) {
+                result.add(pid);
             }
         }
+        return Collections.unmodifiableSet(result);
     }
 
-    /**
-     * Returns the set of primitive parameter ids needed to find instances of
-     * the given proposition.
-     * 
-     * @param propId
-     *            one or multiple proposition id <code>String</code>s.
-     *            Cannot be <code>null</code>.
-     * @return a newly-created {@link Set} of primitive parameter id
-     *         {@link String}s. Guaranteed not to return <code>null</code>.
-     */
-    public Set<String> primitiveParameterIds(String... propId)
-            throws KnowledgeSourceReadException {
-        Set<String> pIds = Arrays.asSet(propId);
-        return primitiveParameterIds(pIds);
-    }
 
-    /**
-     * Given a set of abstraction and event ids, this method navigates the event
-     * is-a hierarchy and collects and returns the set of event ids for
-     * retrieval from the data source (e.g., the events at the leaves of the
-     * tree).
-     * 
-     * @param propIds
-     *            a <code>Set</code> of proposition id
-     *            <code>String</code>s. Cannot be <code>null</code>.
-     * @return a newly-created unmodifiable <code>Set</code> of event id
-     *         <code>String</code>s. Guaranteed not to return <code>null</code>.
-     */
-    public Set<String> leafEventIds(Set<String> propIds)
-            throws KnowledgeSourceReadException {
-        if (propIds == null) {
-            throw new IllegalArgumentException(
-                    "abstractionAndEventIds cannot be null");
-        }
-        if (propIds.contains(null)) {
-            throw new IllegalArgumentException("abstractionAndEventIds cannot contain a null element");
-        }
-        Set<String> cachedResult = this.leafEventIdCache.get(propIds);
-        if (cachedResult != null) {
-            return cachedResult;
-        } else {
-            Set<String> result = new HashSet<String>();
-            if (propIds != null) {
-                leafEventIdsHelper(
-                        propIds.toArray(new String[propIds.size()]), result);
-                result = Collections.unmodifiableSet(result);
-                this.leafEventIdCache.put(propIds, result);
-            }
-            return result;
-        }
-    }
 
-    /**
-     * Given an abstraction or event id, this method navigates the event is-a
-     * hierarchy and collects and returns the set of event ids for retrieval
-     * from the data source (e.g., the events at the leaves of the tree).
-     * 
-     * @param propId
-     *            one or multiple proposition id <code>String</code>s.
-     * @return a newly-created unmodifiable <code>Set</code> of event id
-     *         <code>String</code>s. Guaranteed not to return <code>null</code>.
-     */
     public Set<String> leafEventIds(String... propId)
             throws KnowledgeSourceReadException {
         Set<String> propIds = Arrays.asSet(propId);
         return leafEventIds(propIds);
     }
 
-    /**
-     * Actually gets the leaf event ids. This exists so that we can recurse
-     * through the is-a hierarchy and aggregate the results in one set.
-     * 
-     * @param abstractionAndEventIds
-     *            a <code>Set</code> of abstraction and event id
-     *            <code>String</code>s.
-     * @param result
-     *            a non-<code>null</code> <code>Set</code> in which to aggregate
-     *            leaf event ids.
-     */
-    private void leafEventIdsHelper(String[] abstractionAndEventIds,
-            Set<String> result) throws KnowledgeSourceReadException {
-        if (abstractionAndEventIds != null) {
-            for (String abstractParameterOrEventId : abstractionAndEventIds) {
-                EventDefinition eventDef = this.readEventDefinition(abstractParameterOrEventId);
-                if (eventDef != null) {
-                    String[] inverseIsA = eventDef.getInverseIsA();
-                    if (inverseIsA.length == 0) {
-                        result.add(eventDef.getId());
-                    } else {
-                        leafEventIdsHelper(inverseIsA, result);
-                    }
-                } else {
-                    AbstractionDefinition apDef = readAbstractionDefinition(abstractParameterOrEventId);
-                    if (apDef != null) {
-                        Set<String> af = apDef.getAbstractedFrom();
-                        leafEventIdsHelper(af.toArray(new String[af.size()]),
-                                result);
-                    } else {
-                        ConstantDefinition constantDef = readConstantDefinition(abstractParameterOrEventId);
-                        if (constantDef == null) {
-                            PrimitiveParameterDefinition ppDef =
-                                    this.readPrimitiveParameterDefinition(
-                                    abstractParameterOrEventId);
-                            if (ppDef == null) {
-                                throw new KnowledgeSourceReadException(
-                                        "The proposition definition '"
-                                        + abstractParameterOrEventId
-                                        + "' is unknown");
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Given a set of constant ids, this method navigates the event is-a
-     * hierarchy and collects and returns the set of constant ids for retrieval
-     * from the data source (e.g., the events at the leaves of the tree).
-     * 
-     * @param propIds
-     *            a <code>Set</code> of proposition id <code>String</code>s. Cannot
-     *            be <code>null</code>.
-     * @return a newly-created unmodifiable <code>Set</code> of constant id
-     *         <code>String</code>s. Guaranteed not to return <code>null</code>.
-     */
-    public Set<String> leafConstantIds(Set<String> propIds)
+    public Set<String> leafEventIds(Set<String> propIds)
             throws KnowledgeSourceReadException {
         if (propIds == null) {
-            throw new IllegalArgumentException("constantIds cannot be null");
+            throw new IllegalArgumentException("propIds cannot be null");
         }
         if (propIds.contains(null)) {
-            throw new IllegalArgumentException("constantIds cannot contain a null element");
+            throw new IllegalArgumentException("propIds cannot contain null");
         }
-        Set<String> cachedResult = this.leafConstantIdCache.get(propIds);
-        if (cachedResult != null) {
-            return cachedResult;
-        } else {
-            Set<String> result = new HashSet<String>();
-            if (propIds != null) {
-                leafConstantIdsHelper(
-                        propIds.toArray(new String[propIds.size()]),
-                        result);
-                result = Collections.unmodifiableSet(result);
-                this.leafConstantIdCache.put(propIds, result);
+        Set<String> pids = leafPropositionIds(new HashSet<String>(propIds),
+                this.propIdCache);
+        Set<String> result = new HashSet<String>();
+        for (String pid : pids) {
+            if (hasEventDefinition(pid)) {
+                result.add(pid);
             }
-            return result;
         }
+        return result;
     }
 
-    /**
-     * Given a constant id, this method navigates the constant is-a hierarchy
-     * and collects and returns the set of constant ids for retrieval from the
-     * data source (e.g., the constants at the leaves of the tree).
-     * 
-     * @param propId
-     *            one or multiple proposition id <code>String</code>s.
-     * @return a newly-created unmodifiable <code>Set</code> of constant id
-     *         <code>String</code>s. Guaranteed not to return <code>null</code>.
-     */
     public Set<String> leafConstantIds(String... propId)
             throws KnowledgeSourceReadException {
         Set<String> propIds = Arrays.asSet(propId);
         return leafConstantIds(propIds);
     }
 
+    public Set<String> leafConstantIds(Set<String> propIds)
+            throws KnowledgeSourceReadException {
+        if (propIds == null) {
+            throw new IllegalArgumentException("propIds cannot be null");
+        }
+        if (propIds.contains(null)) {
+            throw new IllegalArgumentException("propIds cannot contain null");
+        }
+        Set<String> pids = leafPropositionIds(new HashSet<String>(propIds),
+                this.propIdCache);
+        Set<String> result = new HashSet<String>();
+        for (String pid : pids) {
+            if (hasConstantDefinition(pid)) {
+                result.add(pid);
+            }
+        }
+        return result;
+    }
+
     /**
      * Actually gets the leaf constant ids. This exists so that we can recurse
      * through the is-a hierarchy and aggregate the results in one set.
      * 
-     * @param constantIds
+     * @param propIds
      *            a <code>Set</code> of constant id <code>String</code>s.
      * @param result
      *            a non-<code>null</code> <code>Set</code> in which to aggregate
      *            leaf constant ids.
      */
-    private void leafConstantIdsHelper(String[] constantIds, Set<String> result)
+    private void leafPropositionIdsHelper(Collection<String> propIds,
+            Set<String> result, Set<PropositionDefinition> propResult)
             throws KnowledgeSourceReadException {
-        if (constantIds != null) {
-            for (String constantId : constantIds) {
-                ConstantDefinition constantDef = readConstantDefinition(constantId);
-                if (constantDef != null) {
-                    String[] inverseIsA = constantDef.getInverseIsA();
-                    if (inverseIsA.length == 0) {
-                        result.add(constantDef.getId());
-                    } else {
-                        leafConstantIdsHelper(inverseIsA, result);
-                    }
-                } else {
-                    if (!hasTemporalPropositionDefinition(constantId)) {
-                        throw new KnowledgeSourceReadException(
-                                "The proposition definition '" + constantId
-                                + "' is unknown");
-                    }
+        List<PropositionDefinition> propDefs = new ArrayList<PropositionDefinition>();
+        for (String propId : propIds) {
+            PropositionDefinition propDef = readPropositionDefinition(propId);
+            if (propDef != null) {
+                propDefs.add(propDef);
+            }
+        }
+        leafPropositionIdsHelper(propDefs, result, propResult);
+    }
+
+    private void leafPropositionIdsHelper(List<PropositionDefinition> propDefs,
+            Set<String> result, Set<PropositionDefinition> propResult)
+            throws KnowledgeSourceReadException {
+        for (PropositionDefinition propDef : propDefs) {
+            List<PropositionDefinition> children =
+                    new ArrayList<PropositionDefinition>(
+                    readAbstractedFrom(propDef.getId()));
+            children.addAll(readInverseIsA(propDef.getId()));
+            if (children.isEmpty()) {
+                if (result != null) {
+                    result.add(propDef.getId());
                 }
+                if (propResult != null) {
+                    propResult.add(propDef);
+                }
+            } else {
+                leafPropositionIdsHelper(children, result, propResult);
             }
         }
     }

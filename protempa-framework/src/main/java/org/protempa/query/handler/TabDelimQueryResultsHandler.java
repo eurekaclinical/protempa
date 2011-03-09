@@ -249,14 +249,16 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
         }
     }
 
-    private void addDerived(List<Proposition> propositions, Map<Proposition, 
-            List<Proposition>> derivations,
+    private void addDerived(List<Proposition> propositions,
+            Map<Proposition, List<Proposition>> derivations,
             Set<Proposition> propositionsAsSet) {
         for (Proposition prop : propositions) {
             boolean added = propositionsAsSet.add(prop);
             if (added && this.includeDerived) {
                 List<Proposition> derivedProps = derivations.get(prop);
-                addDerived(derivedProps, derivations, propositionsAsSet);
+                if (derivedProps != null) {
+                    addDerived(derivedProps, derivations, propositionsAsSet);
+                }
             }
         }
     }
