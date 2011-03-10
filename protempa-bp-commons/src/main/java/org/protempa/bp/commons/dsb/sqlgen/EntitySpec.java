@@ -116,8 +116,14 @@ public final class EntitySpec implements Serializable {
             this.propositionIds = propositionIds.clone();
             ProtempaUtil.checkArrayForNullElement(this.propositionIds,
                     "propositionIds");
+            if (this.propositionIds.length == 0) {
+                throw new IllegalArgumentException("propositionIds must have at least one element");
+            }
+            if (this.propositionIds.length > 1 && codeSpec == null) {
+                throw new IllegalArgumentException("if propositionIds has multiple proposition ids, there must be a codeSpec to differentiate between them");
+            }
         } else {
-            this.propositionIds = new String[0];
+            throw new IllegalArgumentException("propositionIds cannot be null");
         }
 
         if (baseSpec == null) {

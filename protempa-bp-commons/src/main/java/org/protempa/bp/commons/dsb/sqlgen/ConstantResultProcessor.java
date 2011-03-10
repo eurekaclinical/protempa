@@ -42,6 +42,7 @@ class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
             String propId = null;
             if (!isCasePresent()) {
                 if (codeSpec == null) {
+                    assert propIds.length == 1: "Don't know which proposition id to assign to";
                     propId = propIds[0];
                 } else {
                     String code = resultSet.getString(i++);
