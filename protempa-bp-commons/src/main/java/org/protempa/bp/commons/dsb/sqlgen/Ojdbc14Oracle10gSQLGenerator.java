@@ -163,9 +163,10 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
     public void generateInClause(StringBuilder wherePart,
             int referenceIndex, String column, Object[] sqlCodes,
             boolean not) {
-        wherePart.append("a");
+        wherePart.append('(');
+        wherePart.append('a');
         wherePart.append(referenceIndex);
-        wherePart.append(".");
+        wherePart.append('.');
         wherePart.append(column);
         if (not) {
             wherePart.append(" NOT");
@@ -187,6 +188,7 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
                 }
             }
         }
+        wherePart.append(')');
         wherePart.append(") ");
     }
 

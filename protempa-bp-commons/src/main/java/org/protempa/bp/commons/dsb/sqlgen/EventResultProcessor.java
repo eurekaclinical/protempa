@@ -18,7 +18,6 @@ import org.protempa.proposition.value.Value;
 class EventResultProcessor extends AbstractMainResultProcessor<Event> {
 
     private static final IntervalFactory intervalFactory = new IntervalFactory();
-
     private static final int FLUSH_SIZE = 100000;
 
     @Override
@@ -39,12 +38,12 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
         int startColumnType = -1;
         int finishColumnType = -1;
         String[] uniqueIds =
-                    new String[entitySpec.getUniqueIdSpecs().length];
+                new String[entitySpec.getUniqueIdSpecs().length];
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
 
-            
+
             i = readUniqueIds(uniqueIds, resultSet, i);
             UniqueIdentifier uniqueIdentifier = generateUniqueIdentifier(
                     entitySpec.getName(), uniqueIds);
@@ -114,12 +113,13 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                 } finally {
                     i++;
                 }
-                try {
-                    interval = intervalFactory.getInstance(start, gran, finish,
-                            gran);
-                } catch (IllegalArgumentException e) {
-                    logger.log(Level.WARNING, "Finish is before start", e);
+                if (finish != null && start != null && finish.compareTo(start) < 0) {
+                    logger.log(Level.WARNING, "Finish {0} is before start {1}: Leaving time unset",
+                            new Object[]{finish, start});
                     interval = intervalFactory.getInstance(null, gran, null,
+                            gran);
+                } else {
+                    interval = intervalFactory.getInstance(start, gran, finish,
                             gran);
                 }
             }
