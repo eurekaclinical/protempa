@@ -699,7 +699,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     i, wherePart, selectPart, referenceIndices, filtersCopy,
                     resultProcessor);
         }
-        processKeyIdConstraintsForWhereClause(info, wherePart, keyIds, referenceIndices);
+        processKeyIdConstraintsForWhereClause(info, wherePart, keyIds);
 
         if (wherePart.length() > 0) {
             wherePart.insert(0, "where ");
@@ -941,10 +941,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             int i, StringBuilder wherePart, StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
             Set<Filter> filtersCopy, SQLGenResultProcessor resultProcessor) {
-        SQLGenUtil.logger().log(Level.FINER,
+        Logger logger = SQLGenUtil.logger();
+        logger.log(Level.FINER,
                 "Processing constraint specs for entity spec {0}",
                 entitySpec.getName());
-        SQLGenUtil.logger().log(Level.FINEST,
+        logger.log(Level.FINEST,
                 "Details of entity spec {0}", entitySpec);
         ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
         for (ColumnSpec constraintSpec : constraintSpecs) {
@@ -978,7 +979,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
         if (codeSpec != null) {
             List<ColumnSpec> codeSpecL = codeSpec.asList();
-
             if (codeSpecL.get(codeSpecL.size() - 1).isPropositionIdsComplete()
                     && completeOrNoOverlap(propIds,
                     entitySpec.getPropositionIds())) {
@@ -1015,7 +1015,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             }
         }
         boolean result = entitySpecPropIdsL.size() <
-                entitySpecPropIds.length * 0.15f || entitySpecPropIdsL.size() > 4000;
+                entitySpecPropIds.length * 0.15f || entitySpecPropIdsL.size() > 2000;
         return result;
     }
 
@@ -1314,14 +1314,15 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     }
 
     private void processKeyIdConstraintsForWhereClause(ColumnSpecInfo info,
-            StringBuilder wherePart, Set<String> keyIds, Map<ColumnSpec, Integer> referenceIndices) {
+            StringBuilder wherePart, Set<String> keyIds) {
         if (keyIds != null && !keyIds.isEmpty()) {
             if (wherePart.length() > 0) {
                 wherePart.append(" and ");
             }
             ColumnSpec keySpec = info.getColumnSpecs().get(0);
 
-            generateInClause(wherePart, 1, keySpec.getColumn(), keyIds.toArray(), false);
+            generateInClause(wherePart, 1, keySpec.getColumn(),
+                    keyIds.toArray(), false);
         }
     }
 
