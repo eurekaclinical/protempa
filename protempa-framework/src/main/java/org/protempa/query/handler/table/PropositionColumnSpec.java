@@ -248,6 +248,8 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 List<String> resultList) throws KnowledgeSourceReadException {
             PropositionDefinition propositionDefinition = knowledgeSource
                     .readPropositionDefinition(proposition.getId());
+            assert propositionDefinition != null :
+                "Could not find proposition definition for " + proposition.getId();
             if (outputConfig.showDisplayName()) {
                 resultList.add(propositionDefinition.getDisplayName());
             }
