@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.apache.commons.lang.StringUtils;
-import org.arp.javautil.arrays.Arrays;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropertyDefinition;
@@ -33,6 +32,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     private final String columnNamePrefixOverride;
     private final OutputConfig outputConfig;
     private final ValueOutputConfig valueOutputConfig;
+    private final ValuesPropositionVisitor propositionVisitor;
 
     public PropositionColumnSpec(String[] propertyNames) {
         this(propertyNames, null, null);
@@ -67,10 +67,11 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             this.propertyNames = propertyNames.clone();
         }
 
-        if (outputConfig == null)
+        if (outputConfig == null) {
             this.outputConfig = new OutputConfig();
-        else
+        } else {
             this.outputConfig = outputConfig;
+        }
 
         if (valueOutputConfig == null) {
             this.valueOutputConfig = (new ValueOutputConfigBuilder()).build();
@@ -90,6 +91,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         }
         this.numInstances = numInstances;
         this.columnNamePrefixOverride = columnNamePrefixOverride;
+        propositionVisitor = new ValuesPropositionVisitor();
     }
 
     protected String[] columnNames(String prefix) {
@@ -130,25 +132,31 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         return results.toArray(new String[results.size()]);
     }
 
-    private class ValuesPropositionVisitor extends
-            AbstractPropositionCheckedVisitor {
+    private class ValuesPropositionVisitor extends AbstractPropositionCheckedVisitor {
 
-        private final KnowledgeSource knowledgeSource;
-        private String[] result;
+        private KnowledgeSource knowledgeSource;
+        private List<String> resultList;
 
-        ValuesPropositionVisitor(KnowledgeSource knowledgeSource) {
+        ValuesPropositionVisitor() {
+            this.resultList = new ArrayList<String>();
+        }
+        
+        void setKnowledgeSource(KnowledgeSource knowledgeSource) {
             this.knowledgeSource = knowledgeSource;
         }
+        
+        KnowledgeSource getKnowledgeSource() {
+            return this.knowledgeSource;
+        }
+
 
         @Override
         public void visit(AbstractParameter abstractParameter)
                 throws KnowledgeSourceReadException {
-            List<String> resultList = new ArrayList<String>();
-
             if (outputConfig.showValue()) {
                 resultList.add(abstractParameter.getValueFormatted());
             }
-            displayNames(abstractParameter, resultList);
+            displayNames(abstractParameter);
             if (outputConfig.showStartOrTimestamp()) {
                 resultList.add(abstractParameter.getStartFormattedShort());
             }
@@ -158,20 +166,15 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             if (outputConfig.showLength()) {
                 resultList.add(abstractParameter.getLengthFormattedShort());
             }
-            processProperties(abstractParameter, resultList);
-
-            this.result = new String[resultList.size()];
-            resultList.toArray(result);
+            processProperties(abstractParameter);
         }
 
         @Override
         public void visit(Event event) throws KnowledgeSourceReadException {
-            List<String> resultList = new ArrayList<String>();
-
             if (outputConfig.showValue()) {
                 resultList.add(null);
             }
-            displayNames(event, resultList);
+            displayNames(event);
             if (outputConfig.showStartOrTimestamp()) {
                 resultList.add(event.getStartFormattedShort());
             }
@@ -181,21 +184,16 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             if (outputConfig.showLength()) {
                 resultList.add(event.getLengthFormattedShort());
             }
-            processProperties(event, resultList);
-
-            this.result = new String[resultList.size()];
-            resultList.toArray(result);
+            processProperties(event);
         }
 
         @Override
         public void visit(PrimitiveParameter primitiveParameter)
                 throws KnowledgeSourceReadException {
-            List<String> resultList = new ArrayList<String>();
-
             if (outputConfig.showValue()) {
                 resultList.add(primitiveParameter.getValueFormatted());
             }
-            displayNames(primitiveParameter, resultList);
+            displayNames(primitiveParameter);
             if (outputConfig.showStartOrTimestamp()) {
                 resultList.add(primitiveParameter.getStartFormattedShort());
             }
@@ -205,20 +203,16 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             if (outputConfig.showLength()) {
                 resultList.add(primitiveParameter.getLengthFormattedShort());
             }
-            processProperties(primitiveParameter, resultList);
-
-            this.result = new String[resultList.size()];
-            resultList.toArray(result);
+            processProperties(primitiveParameter);
         }
 
         @Override
         public void visit(Constant constantParameter)
                 throws KnowledgeSourceReadException {
-            List<String> resultList = new ArrayList<String>();
             if (outputConfig.showValue()) {
                 resultList.add(null);
             }
-            displayNames(constantParameter, resultList);
+            displayNames(constantParameter);
             if (outputConfig.showStartOrTimestamp()) {
                 resultList.add(null);
             }
@@ -228,10 +222,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             if (outputConfig.showLength()) {
                 resultList.add(null);
             }
-            processProperties(constantParameter, resultList);
-
-            this.result = new String[resultList.size()];
-            resultList.toArray(result);
+            processProperties(constantParameter);
         }
 
         @Override
@@ -240,60 +231,82 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                     "Contexts not supported yet");
         }
 
-        String[] getResult() {
-            return this.result;
+        List<String> getResult() {
+            return this.resultList;
         }
 
-        private void displayNames(Proposition proposition,
-                List<String> resultList) throws KnowledgeSourceReadException {
-            PropositionDefinition propositionDefinition = knowledgeSource
-                    .readPropositionDefinition(proposition.getId());
-            assert propositionDefinition != null :
-                "Could not find proposition definition for " + proposition.getId();
-            if (outputConfig.showDisplayName()) {
-                resultList.add(propositionDefinition.getDisplayName());
-            }
-            if (outputConfig.showAbbrevDisplayName()) {
-                resultList.add(propositionDefinition
-                        .getAbbreviatedDisplayName());
+        void clear() {
+            this.resultList.clear();
+        }
+
+        private void displayNames(Proposition proposition) throws KnowledgeSourceReadException {
+            boolean showDisplayName = outputConfig.showDisplayName();
+            boolean showAbbrevDisplayName = outputConfig.showAbbrevDisplayName();
+            if (showDisplayName || showAbbrevDisplayName) {
+                PropositionDefinition propositionDefinition =
+                        knowledgeSource.readPropositionDefinition(proposition.getId());
+                if (propositionDefinition != null) {
+                    if (showDisplayName) {
+                        resultList.add(propositionDefinition.getDisplayName());
+                    }
+                    if (showAbbrevDisplayName) {
+                        resultList.add(
+                                propositionDefinition.getAbbreviatedDisplayName());
+                    }
+                } else {
+                    Util.logger().log(Level.WARNING,
+                            "Cannot write display name for {0} because it is not in the knowledge source", proposition.getId());
+                }
             }
         }
 
-        private String getOutputValue(Proposition proposition,
-                String propertyName, Value value) {
-            String result = null;
-            if (valueOutputConfig.isShowPropertyValueDisplayName()
-                    || valueOutputConfig.isShowPropertyValueAbbrevDisplayName()) {
+        private String getOutputPropertyValue(Proposition proposition,
+                String propertyName, Value propertyValue) {
+            String outputValue = null;
+            boolean showDisplayName =
+                    valueOutputConfig.isShowPropertyValueDisplayName();
+            boolean showAbbrevDisplayName =
+                    valueOutputConfig.isShowPropertyValueAbbrevDisplayName();
+            if (showDisplayName || showAbbrevDisplayName) {
                 try {
-                    PropositionDefinition propositionDef = this.knowledgeSource
-                            .readPropositionDefinition(proposition.getId());
-                    PropertyDefinition propertyDef = propositionDef
-                            .propertyDefinition(propertyName);
-                    ValueSet valueSet = this.knowledgeSource
-                            .readValueSet(propertyDef.getValueSetId());
-                    if (valueOutputConfig
-                            .isShowPropertyValueAbbrevDisplayName()) {
-                        result = valueSet.abbrevDisplayName(value);
-                    } else if (valueOutputConfig
-                            .isShowPropertyValueDisplayName()) {
-                        result = valueSet.displayName(value);
+                    PropositionDefinition propositionDef =
+                            this.knowledgeSource.readPropositionDefinition(proposition.getId());
+                    if (propositionDef != null) {
+                        PropertyDefinition propertyDef =
+                                propositionDef.propertyDefinition(propertyName);
+                        ValueSet valueSet =
+                                this.knowledgeSource.readValueSet(propertyDef.getValueSetId());
+                        if (valueSet != null) {
+                            if (showAbbrevDisplayName) {
+
+                                outputValue = valueSet.abbrevDisplayName(propertyValue);
+                            } else if (showDisplayName) {
+                                outputValue = valueSet.displayName(propertyValue);
+                            }
+                        } else {
+                            Util.logger().log(Level.WARNING,
+                                    "Cannot write value set display name because value set {0} is not in the knowledge source", propertyDef.getValueSetId());
+                        }
+                    } else {
+                        Util.logger().log(Level.WARNING,
+                                "Cannot write value set display name because proposition {0} is not in the knowledgeSource", proposition.getId());
+                        outputValue = propertyValue.getFormatted();
                     }
                 } catch (KnowledgeSourceReadException e) {
                     Util.logger().log(Level.SEVERE, e.getMessage(), e);
                 }
 
             } else {
-                result = value.getFormatted();
+                outputValue = propertyValue.getFormatted();
             }
-            return result;
+            return outputValue;
         }
 
-        private void processProperties(Proposition proposition,
-                List<String> resultList) {
+        private void processProperties(Proposition proposition) {
             for (String propertyName : propertyNames) {
                 Value value = proposition.getProperty(propertyName);
                 if (value != null) {
-                    resultList.add(this.getOutputValue(proposition,
+                    resultList.add(getOutputPropertyValue(proposition,
                             propertyName, value));
                 } else {
                     resultList.add(null);
@@ -310,24 +323,24 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             throws KnowledgeSourceReadException {
         Collection<Proposition> propositions = this.traverseLinks(this.links,
                 proposition, derivations, references, knowledgeSource);
+        propositionVisitor.setKnowledgeSource(knowledgeSource);
         List<String> result = new ArrayList<String>();
         int i = 0;
         for (Proposition prop : propositions) {
             if (i < this.numInstances) {
-                ValuesPropositionVisitor propositionVisitor = new ValuesPropositionVisitor(
-                        knowledgeSource);
                 try {
                     prop.acceptChecked(propositionVisitor);
                 } catch (ProtempaException ex) {
                     throw new KnowledgeSourceReadException(
                             "Error writing column values", ex);
                 }
-                Arrays.addAll(result, propositionVisitor.getResult());
                 i++;
             } else {
                 break;
             }
         }
+        result.addAll(propositionVisitor.getResult());
+        propositionVisitor.clear();
         while (i < this.numInstances) {
             int j = 0;
             while (j < (this.outputConfig.numActiveColumns() + this.propertyNames.length)) {

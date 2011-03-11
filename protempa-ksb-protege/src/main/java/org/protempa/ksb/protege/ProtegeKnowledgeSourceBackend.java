@@ -128,16 +128,6 @@ public abstract class ProtegeKnowledgeSourceBackend
         return this.cm.getInstance(name);
     }
 
-    private boolean hasClass(String name, String superClass)
-            throws KnowledgeSourceReadException {
-        Cls cls = this.cm.getCls(name);
-        Cls superCls = this.cm.getCls(superClass);
-        if (cls != null && cls.hasSuperclass(superCls)) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Returns the Cls from Protege if a matching Cls is found with the given
      * ancestor
@@ -167,7 +157,6 @@ public abstract class ProtegeKnowledgeSourceBackend
         Instance instance = getInstance(name);
         convert(instance, protempaKnowledgeBase);
         return protempaKnowledgeBase.getPrimitiveParameterDefinition(name);
-
     }
 
     @Override
@@ -176,9 +165,7 @@ public abstract class ProtegeKnowledgeSourceBackend
             throws KnowledgeSourceReadException {
         Instance candidateAbstractParameter = getInstance(name);
         convert(candidateAbstractParameter, protempaKnowledgeBase);
-        AbstractionDefinition result =
-                protempaKnowledgeBase.getAbstractionDefinition(name);
-        return result;
+        return protempaKnowledgeBase.getAbstractionDefinition(name);
     }
 
     @Override
@@ -189,11 +176,13 @@ public abstract class ProtegeKnowledgeSourceBackend
         List<PropositionDefinition> result =
                 new ArrayList<PropositionDefinition>();
         Instance instance = getInstance(abstractionDefinition.getId());
-        Collection children =
-                cm.getOwnSlotValues(instance, cm.getSlot("abstractedFrom"));
-        for (Iterator itr = children.iterator(); itr.hasNext();) {
-            Instance child = (Instance) itr.next();
-            result.add(convert(child, protempaKnowledgeBase));
+        if (instance != null) {
+            Collection<?> children =
+                    cm.getOwnSlotValues(instance, cm.getSlot("abstractedFrom"));
+            for (Iterator<?> itr = children.iterator(); itr.hasNext();) {
+                Instance child = (Instance) itr.next();
+                result.add(convert(child, protempaKnowledgeBase));
+            }
         }
         return result;
     }
@@ -205,11 +194,13 @@ public abstract class ProtegeKnowledgeSourceBackend
         List<PropositionDefinition> result =
                 new ArrayList<PropositionDefinition>();
         Instance instance = getInstance(propDef.getId());
-        Collection children =
-                cm.getOwnSlotValues(instance, cm.getSlot("inverseIsA"));
-        for (Iterator itr = children.iterator(); itr.hasNext();) {
-            Instance child = (Instance) itr.next();
-            result.add(convert(child, protempaKnowledgeBase));
+        if (instance != null) {
+            Collection<?> children =
+                    cm.getOwnSlotValues(instance, cm.getSlot("inverseIsA"));
+            for (Iterator<?> itr = children.iterator(); itr.hasNext();) {
+                Instance child = (Instance) itr.next();
+                result.add(convert(child, protempaKnowledgeBase));
+            }
         }
         return result;
     }
@@ -228,9 +219,9 @@ public abstract class ProtegeKnowledgeSourceBackend
 
         Instance termInstance = getInstance(termId);
         if (termInstance != null) {
-            Collection props = cm.getOwnSlotValues(termInstance,
+            Collection<?> props = cm.getOwnSlotValues(termInstance,
                     cm.getSlot("termProposition"));
-            Iterator it = props.iterator();
+            Iterator<?> it = props.iterator();
             while (it.hasNext()) {
                 Instance prop = (Instance) it.next();
                 result.add(prop.getName());
@@ -259,9 +250,9 @@ public abstract class ProtegeKnowledgeSourceBackend
             for (String termId : ts.getTerms()) {
                 Instance termInstance = getInstance(termId);
                 if (termInstance != null) {
-                    Collection props = cm.getOwnSlotValues(termInstance,
+                    Collection<?> props = cm.getOwnSlotValues(termInstance,
                             cm.getSlot("termProposition"));
-                    Iterator it = props.iterator();
+                    Iterator<?> it = props.iterator();
                     while (it.hasNext()) {
                         Instance prop = (Instance) it.next();
                         subsumpPropIds.add(prop.getName());
@@ -301,11 +292,15 @@ public abstract class ProtegeKnowledgeSourceBackend
      * @param protempaKb
      *            a PROTEMPA <code>KnowledgeBase</code> instance.
      */
-    private PropositionDefinition convert(Instance proposition, 
+    private PropositionDefinition convert(Instance proposition,
             KnowledgeBase protempaKb) throws KnowledgeSourceReadException {
         PropositionConverter converter =
-                InstanceConverterFactory.getInstance(proposition);
-        return converter.convert(proposition, protempaKb, this);
+                InstanceConverterFactory.getInstance(proposition, this.cm);
+        if (converter != null) {
+            return converter.convert(proposition, protempaKb, this);
+        } else {
+            return null;
+        }
     }
 
     /*
@@ -364,6 +359,4 @@ public abstract class ProtegeKnowledgeSourceBackend
         Instance instance = getInstance(name);
         return convert(instance, protempaKnowledgeBase);
     }
-
-
 }

@@ -78,13 +78,21 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                         NumericalValue nv = (NumericalValue) val;
                         if (value == null) {
                             value = nv;
-                        } else if (aggregationType == AggregationType.MAX) {
-                            if (nv.compare(value).is(ValueComparator.GREATER_THAN)) {
-                                value = nv;
-                            }
                         } else {
-                            if (nv.compare(value).is(ValueComparator.LESS_THAN)) {
-                                value = nv;
+                            switch (aggregationType) {
+                                case MAX:
+                                    if (nv.compare(value).is(ValueComparator.GREATER_THAN)) {
+                                        value = nv;
+                                    }
+                                    break;
+                                case MIN:
+                                    if (nv.compare(value).is(ValueComparator.LESS_THAN)) {
+                                        value = nv;
+                                    }
+                                    break;
+                                default:
+                                    throw new AssertionError("invalid aggregation type: " + aggregationType);
+
                             }
                         }
                     }

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.arp.javautil.arrays.Arrays;
@@ -23,8 +24,7 @@ import org.protempa.proposition.value.ValueComparator;
  * @author Andrew Post
  */
 public abstract class Link {
-
-    private final String[] propositionIds;
+    private final Set<String> propIdsAsSet;
     private final PropertyConstraint[] constraints;
     private final Comparator<Proposition> comparator;
     private final int fromIndex;
@@ -46,11 +46,11 @@ public abstract class Link {
     Link(String[] propositionIds, PropertyConstraint[] constraints,
             Comparator<Proposition> comparator, int fromIndex, int toIndex) {
         if (propositionIds == null) {
-            this.propositionIds = new String[0];
+            this.propIdsAsSet = Collections.emptySet();
         } else {
             ProtempaUtil.checkArrayForNullElement(propositionIds,
                     "propositionIds");
-            this.propositionIds = propositionIds.clone();
+            this.propIdsAsSet = Arrays.asSet(propositionIds);
         }
         if (constraints == null) {
             this.constraints = new PropertyConstraint[0];
@@ -76,7 +76,7 @@ public abstract class Link {
      * of interest. Guaranteed not <code>null</code>.
      */
     public final String[] getPropositionIds() {
-        return this.propositionIds.clone();
+        return this.propIdsAsSet.toArray(new String[this.propIdsAsSet.size()]);
     }
 
     /**
@@ -136,12 +136,11 @@ public abstract class Link {
      * @return a header fragment {@link String}.
      */
     final String createHeaderFragment(String ref) {
-        boolean sep1Needed = this.propositionIds.length > 0
-                && this.constraints.length > 0;
+        int size = this.propIdsAsSet.size();
+        boolean sep1Needed = size > 0 && this.constraints.length > 0;
         String sep1 = sep1Needed ? ", " : "";
-        String id = this.propositionIds.length > 0 ? "id=" : "";
-        boolean parenNeeded = this.propositionIds.length > 0
-                || this.constraints.length > 0;
+        String id = size > 0 ? "id=" : "";
+        boolean parenNeeded = size > 0 || this.constraints.length > 0;
         String startParen = parenNeeded ? "(" : "";
         String finishParen = parenNeeded ? ")" : "";
 
@@ -151,7 +150,7 @@ public abstract class Link {
         String sep2 = sep2Needed ? ", " : "";
 
         return '.' + ref + startParen + id
-                + StringUtils.join(this.propositionIds, ',') + sep1
+                + StringUtils.join(this.propIdsAsSet, ',') + sep1
                 + constraintHeaderString(this.constraints) + finishParen
                 + sep2 + range;
     }
@@ -220,8 +219,8 @@ public abstract class Link {
     private void addToResults(Proposition prop, Collection<Proposition> result) {
         assert prop != null : "prop cannot be null";
         assert result != null : "result cannot be null";
-        if (this.propositionIds.length == 0
-                || Arrays.contains(this.propositionIds, prop.getId())) {
+        if (this.propIdsAsSet.isEmpty()
+                || this.propIdsAsSet.contains(prop.getId())) {
             boolean compatible = constraintsCheckCompatible(prop,
                     this.constraints);
             if (compatible) {

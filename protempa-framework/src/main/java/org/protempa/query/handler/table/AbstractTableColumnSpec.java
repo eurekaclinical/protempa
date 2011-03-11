@@ -1,11 +1,14 @@
 package org.protempa.query.handler.table;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
@@ -42,6 +45,8 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource) {
         Queue<Proposition> result = new LinkedList<Proposition>();
+        Set<Proposition> cache = new HashSet<Proposition>();
+        Logger logger = Util.logger();
         result.add(proposition);
         int num = 1;
         for (Link link : links) {
@@ -51,18 +56,22 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
                 Collection<Proposition> c = link.traverse(prop, derivations,
                         references, knowledgeSource);
                 for (Proposition p : c) {
-                    if (!result.contains(p)) {
+                    if (cache.add(p)) {
                         result.add(p);
                     }
                 }
                 j++;
             }
-            Util.logger().log(Level.FINEST, "{0} traversed to {1} with {2}",
-                new Object[] {getClass().getName(), result, link});
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST, "{0} traversed to {1} with {2}",
+                        new Object[]{getClass().getName(), result, link});
+            }
             num = result.size();
         }
-        Util.logger().log(Level.FINER, "{0} traversed to {1}",
-                new Object[] {getClass().getName(), result});
+        if (logger.isLoggable(Level.FINER)) {
+            logger.log(Level.FINER, "{0} traversed to {1}",
+                    new Object[]{getClass().getName(), result});
+        }
         return result;
     }
 }
