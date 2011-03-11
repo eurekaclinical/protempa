@@ -702,8 +702,6 @@ public final class KnowledgeSource
         return Collections.unmodifiableSet(result);
     }
 
-
-
     public Set<String> leafEventIds(String... propId)
             throws KnowledgeSourceReadException {
         Set<String> propIds = Arrays.asSet(propId);
