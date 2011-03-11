@@ -2,6 +2,7 @@ package org.protempa.ksb.protege;
 
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.KnowledgeBase;
+import org.protempa.KnowledgeSourceReadException;
 
 /**
  * Factory for constructing a PROTEMPA abstraction definition from a Protege
@@ -27,23 +28,23 @@ final class InstanceConverterFactory {
      *         or <code>null</code> if the given <code>instance</code> is
      *         <code>null</code> or not a Protege parameter instance.
      */
-    static PropositionConverter getInstance(Instance parameter) {
-        KnowledgeBase kb = parameter.getKnowledgeBase();
+    static PropositionConverter getInstance(Instance parameter,
+            ConnectionManager cm) throws KnowledgeSourceReadException {
         if (parameter == null) {
             return null;
-        } else if (parameter.hasType(kb.getCls("PrimitiveParameter"))) {
+        } else if (parameter.hasType(cm.getCls("PrimitiveParameter"))) {
             return new PrimitiveParameterConverter();
-        } else if (parameter.hasType(kb.getCls("SimpleAbstraction"))) {
+        } else if (parameter.hasType(cm.getCls("SimpleAbstraction"))) {
             return new LowLevelAbstractionConverter();
-        } else if (parameter.hasType(kb.getCls("SliceAbstraction"))) {
+        } else if (parameter.hasType(cm.getCls("SliceAbstraction"))) {
             return new SliceConverter();
-        } else if (parameter.hasType(kb.getCls("ComplexAbstraction"))) {
+        } else if (parameter.hasType(cm.getCls("ComplexAbstraction"))) {
             return new HighLevelAbstractionConverter();
-        } else if (parameter.hasType(kb.getCls("Event"))) {
+        } else if (parameter.hasType(cm.getCls("Event"))) {
             return new EventConverter();
-        } else if (parameter.hasType(kb.getCls("Constant"))) {
+        } else if (parameter.hasType(cm.getCls("Constant"))) {
             return new ConstantConverter();
-        } else if (parameter.hasType(kb.getCls("PairAbstraction"))) {
+        } else if (parameter.hasType(cm.getCls("PairAbstraction"))) {
             return new PairAbstractionConverter();
         }
         else {
