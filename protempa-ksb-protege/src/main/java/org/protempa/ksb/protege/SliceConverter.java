@@ -6,21 +6,20 @@ import java.util.Iterator;
 import edu.stanford.smi.protege.model.Instance;
 import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.SliceDefinition;
 
 final class SliceConverter implements
         PropositionConverter {
-    
+
     SliceConverter() {
     }
 
     @Override
     public SliceDefinition convert(Instance protegeParameter,
             KnowledgeBase protempaKnowledgeBase,
-            ProtegeKnowledgeSourceBackend backend) 
+            ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        assert protempaKnowledgeBase != null :
-                "protempaKnowledgeBase cannot be null";
 
         SliceDefinition ad = new SliceDefinition(
                 protempaKnowledgeBase, protegeParameter.getName());
@@ -42,10 +41,10 @@ final class SliceConverter implements
             ad.setMinIndex(minIndexInt.intValue());
         }
 
-        Collection abstractedFromInstances =
+        Collection<?> abstractedFromInstances =
                 cm.getOwnSlotValues(protegeParameter,
                 cm.getSlot("abstractedFrom"));
-        for (Iterator itr = abstractedFromInstances.iterator();
+        for (Iterator<?> itr = abstractedFromInstances.iterator();
                 itr.hasNext();) {
             ad.addAbstractedFrom(((Instance) itr.next()).getName());
         }
@@ -53,13 +52,9 @@ final class SliceConverter implements
     }
 
     @Override
-    public boolean protempaKnowledgeBaseHasProposition(
-            Instance protegeParameter, KnowledgeBase protempaKnowledgeBase) {
-        String propId = protegeParameter.getName();
-        return protempaKnowledgeBase.hasAbstractionDefinition(propId)
-                || protempaKnowledgeBase.hasEventDefinition(propId)
-                || protempaKnowledgeBase
-                .hasPrimitiveParameterDefinition(propId)
-                || protempaKnowledgeBase.hasConstantDefinition(propId);
+    public PropositionDefinition readPropositionDefinition(
+            Instance protegeProposition, KnowledgeBase protempaKnowledgeBase) {
+        return protempaKnowledgeBase.getAbstractionDefinition(
+                protegeProposition.getName());
     }
 }

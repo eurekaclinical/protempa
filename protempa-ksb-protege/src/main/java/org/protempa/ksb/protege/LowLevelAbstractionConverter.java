@@ -12,6 +12,7 @@ import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.LowLevelAbstractionDefinition;
 import org.protempa.LowLevelAbstractionValueDefinition;
+import org.protempa.PropositionDefinition;
 import org.protempa.SlidingWindowWidthMode;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.ValueComparator;
@@ -35,12 +36,6 @@ class LowLevelAbstractionConverter implements PropositionConverter {
             org.protempa.KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend) 
             throws KnowledgeSourceReadException {
-        assert lowLevelAbstractionInstance != null :
-                "simpleAbstractionInstance cannot be null";
-        assert protempaKnowledgeBase != null :
-                "protempaKnowledgeBase cannot be null";
-        assert backend != null : "backend cannot be null";
-
         LowLevelAbstractionDefinition d = construct(
                 lowLevelAbstractionInstance, protempaKnowledgeBase,
                 backend);
@@ -60,9 +55,10 @@ class LowLevelAbstractionConverter implements PropositionConverter {
     }
 
     @Override
-    public boolean protempaKnowledgeBaseHasProposition(
-            Instance protegeParameter, KnowledgeBase protempaKnowledgeBase) {
-        return protempaKnowledgeBase.hasAbstractionDefinition(protegeParameter.getName());
+    public PropositionDefinition readPropositionDefinition(
+            Instance protegeProposition, KnowledgeBase protempaKnowledgeBase) {
+        return protempaKnowledgeBase.getAbstractionDefinition(
+                protegeProposition.getName());
     }
 
     /**

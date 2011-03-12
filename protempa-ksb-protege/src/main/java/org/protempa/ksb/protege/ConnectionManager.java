@@ -13,8 +13,6 @@ import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.KnowledgeBase;
 import edu.stanford.smi.protege.model.Project;
 import edu.stanford.smi.protege.model.Slot;
-import java.util.Map;
-import org.apache.commons.collections.map.ReferenceMap;
 import org.protempa.KnowledgeSourceBackendInitializationException;
 import org.protempa.KnowledgeSourceReadException;
 
@@ -95,6 +93,7 @@ abstract class ConnectionManager {
     void close() {
         if (this.project != null) {
             Util.logger().fine("Closing Protege project");
+
             for (Iterator<ProjectListener> itr = this.projectListeners.iterator(); itr.hasNext();) {
                 this.project.removeProjectListener(itr.next());
                 itr.remove();
@@ -272,7 +271,7 @@ abstract class ConnectionManager {
                  * @see ConnectionManager.ProtegeCommand#get(java.lang.Object)
                  */
                 @Override
-                public Instance get(String name) {
+                Instance get(String name) {
                     return protegeKnowledgeBase.getInstance(name);
                 }
             };
@@ -294,31 +293,31 @@ abstract class ConnectionManager {
      *
      * @see #getInstances(Cls)
      */
-    private final ProtegeCommand<Collection<Instance>, Cls> INSTANCES_GETTER = new ProtegeCommand<Collection<Instance>, Cls>(
-            "get instances") {
+    private final ProtegeCommand<Collection<Instance>, Cls> INSTANCES_GETTER =
+            new ProtegeCommand<Collection<Instance>, Cls>("get instances") {
 
-        /**
-         * Gets all instances of a specified cls from the knowledge base.
-         *
-         * @param cls
-         *            the <code>Cls</code>.
-         * @return a <code>Collection</code> of <code>Instance</code>s.
-         *         Guaranteed not to be <code>null</code>.
-         * @see ConnectionManager.ProtegeCommand#get(java.lang.Object)
-         */
-        @SuppressWarnings("unchecked")
-        @Override
-        public Collection<Instance> get(Cls cls) {
-            Collection result = protegeKnowledgeBase.getInstances(cls);
-            // Protect against Protege returning null (its API doesn't guarantee
-            // a non-null return value).
-            if (result != null) {
-                return result;
-            } else {
-                return new ArrayList(0);
-            }
-        }
-    };
+                /**
+                 * Gets all instances of a specified cls from the knowledge base.
+                 *
+                 * @param cls
+                 *            the <code>Cls</code>.
+                 * @return a <code>Collection</code> of <code>Instance</code>s.
+                 *         Guaranteed not to be <code>null</code>.
+                 * @see ConnectionManager.ProtegeCommand#get(java.lang.Object)
+                 */
+                @SuppressWarnings("unchecked")
+                @Override
+                Collection<Instance> get(Cls cls) {
+                    Collection result = protegeKnowledgeBase.getInstances(cls);
+                    // Protect against Protege returning null (its API doesn't guarantee
+                    // a non-null return value).
+                    if (result != null) {
+                        return result;
+                    } else {
+                        return new ArrayList(0);
+                    }
+                }
+            };
 
     /**
      * Gets all instances of the specified cls from the knowledge base.
@@ -351,7 +350,7 @@ abstract class ConnectionManager {
                  * @see ConnectionManager.ProtegeCommand#get(java.lang.Object)
                  */
                 @Override
-                public Cls get(String name) {
+                Cls get(String name) {
                     return protegeKnowledgeBase.getCls(name);
                 }
             };
@@ -386,7 +385,7 @@ abstract class ConnectionManager {
                  * @see ConnectionManager.ProtegeCommand#get(java.lang.Object)
                  */
                 @Override
-                public Slot get(String name) {
+                Slot get(String name) {
                     return protegeKnowledgeBase.getSlot(name);
                 }
             };
@@ -451,7 +450,7 @@ abstract class ConnectionManager {
                  * @see ConnectionManager.ProtegeCommand#get(java.lang.Object)
                  */
                 @Override
-                public Instance get(InstanceSpec instanceSpec) {
+                Instance get(InstanceSpec instanceSpec) {
                     return protegeKnowledgeBase.createInstance(instanceSpec.name,
                             instanceSpec.cls);
                 }
@@ -489,7 +488,7 @@ abstract class ConnectionManager {
                  * @see ConnectionManager.ProtegeCommand#get(java.lang.Object)
                  */
                 @Override
-                public Instance get(Instance instance) {
+                Instance get(Instance instance) {
                     protegeKnowledgeBase.deleteInstance(instance);
                     return instance;
                 }
@@ -524,12 +523,12 @@ abstract class ConnectionManager {
             new ProtegeCommand<Cls, ClsSpec>("create cls") {
 
                 @Override
-                public Cls get(ClsSpec clsSpec) {
+                Cls get(ClsSpec clsSpec) {
                     return protegeKnowledgeBase.createCls(clsSpec.name, clsSpec.clses);
                 }
             };
 
-    <E extends Collection<Cls>>   Cls createCls(String name, E clses)
+    <E extends Collection<Cls>>     Cls createCls(String name, E clses)
             throws KnowledgeSourceReadException {
         return getFromProtege(new ClsSpec(name, clses), CLS_CREATOR);
     }
@@ -567,12 +566,12 @@ abstract class ConnectionManager {
             "create instance multiple inheritance") {
 
                 @Override
-                public Instance get(InstanceSpecMultipleInheritance clsSpec) {
+                Instance get(InstanceSpecMultipleInheritance clsSpec) {
                     return protegeKnowledgeBase.createCls(clsSpec.name, clsSpec.clses);
                 }
             };
 
-    <E extends Collection<Cls>>   Instance createInstance(String name, E clses)
+    <E extends Collection<Cls>>     Instance createInstance(String name, E clses)
             throws KnowledgeSourceReadException {
         return getFromProtege(new InstanceSpecMultipleInheritance(name, clses),
                 INSTANCE_CREATOR_MULTIPLE_INHERITANCE);
@@ -596,7 +595,7 @@ abstract class ConnectionManager {
             new ProtegeCommand<Object, SlotValueSpec>("get own slot value") {
 
                 @Override
-                public Object get(SlotValueSpec slotValueSpec) {
+                Object get(SlotValueSpec slotValueSpec) {
                     return protegeKnowledgeBase.getOwnSlotValue(slotValueSpec.frame,
                             slotValueSpec.slot);
                 }

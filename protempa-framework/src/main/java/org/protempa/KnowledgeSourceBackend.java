@@ -18,12 +18,15 @@ public interface KnowledgeSourceBackend extends
 
     /**
      * Reads a primitive parameter definition into the given PROTEMPA knowledge
-     * base.
+     * base. This will only get called if the proposition definition has
+     * not already been loaded.
      * 
      * @param id
-     *            a primitive parameter id {@link String}.
+     *            a primitive parameter id {@link String}. Guaranteed not
+     *            <code>null</code>.
      * @param protempaKnowledgeBase
-     *            the PROTEMPA {@link KnowledgeBase} to use.
+     *            the PROTEMPA {@link KnowledgeBase} to use. Guaranteed not
+     *            <code>null</code>.
      * @return the {@link PrimitiveParameterDefinition}, or <code>null</code> if
      *         none with the given id was found.
      */
@@ -33,11 +36,15 @@ public interface KnowledgeSourceBackend extends
 
     /**
      * Reads an abstraction definition into the given PROTEMPA knowledge base.
+     * This will only get called if the proposition definition has not already
+     * been loaded.
      * 
      * @param id
-     *            an abstraction id {@link String}.
+     *            an abstraction id {@link String}. Guaranteed not
+     *            <code>null</code>.
      * @param protempaKnowledgeBase
-     *            the PROTEMPA {@link KnowledgeBase} to use.
+     *            the PROTEMPA {@link KnowledgeBase} to use. Guaranteed not
+     *            <code>null</code>.
      * @return the {@link AbstractionDefinition}, or <code>null</code> if none
      *         with the given id was found.
      */
@@ -46,12 +53,16 @@ public interface KnowledgeSourceBackend extends
             throws KnowledgeSourceReadException;
 
     /**
-     * Reads an event definition into the given PROTEMPA knowledge base.
+     * Reads an event definition into the given PROTEMPA knowledge base. This
+     * will only get called if the proposition definition has not already been
+     * loaded.
      * 
      * @param id
-     *            an event id.
+     *            an event id {@link String}. Guaranteed not
+     *            <code>null</code>.
      * @param protempaKnowledgeBase
-     *            the PROTEMPA {@link KnowledgeBase} to use.
+     *            the PROTEMPA {@link KnowledgeBase} to use. Guaranteed not
+     *            <code>null</code>.
      * @return the {@link EventDefinition}, or <code>null</code> if none with
      *         the given id was found.
      */
@@ -59,36 +70,39 @@ public interface KnowledgeSourceBackend extends
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException;
 
+    /**
+     * Reads a proposition definition into the given PROTEMPA knowledge base.
+     * This will only get called if the proposition definition has not already
+     * been loaded.
+     *
+     * @param id
+     *            a proposition id {@link String}. Guaranteed not
+     *            <code>null</code>.
+     * @param protempaKnowledgeBase
+     *            the PROTEMPA {@link KnowledgeBase} to use. Guaranteed not
+     *            <code>null</code>.
+     * @return the {@link PropositionDefinition}, or <code>null</code> if none
+     * with the given id was found.
+     */
     PropositionDefinition readPropositionDefinition(String id,
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException;
 
-    boolean hasPrimitiveParameterDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
-
-    boolean hasEventDefinition(String id, KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
-
-    boolean hasAbstractionDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
-
     /**
-     * Reads a constant definition into the given PROTEMPA knowledge base.
+     * Reads a constant definition into the given PROTEMPA knowledge base. This
+     * only will get called if the proposition definition has not already been
+     * loaded.
      * 
-     * @param id
-     *            an event id.
+     * @param id a constant id {@link String}.  Guaranteed not
+     *            <code>null</code>.
      * @param protempaKnowledgeBase
-     *            the PROTEMPA {@link KnowledgeBase} to use.
+     *            the PROTEMPA {@link KnowledgeBase} to use. Guaranteed not
+     *            <code>null</code>.
      * @return the {@link ConstantDefinition}, or <code>null</code> if none with
      *         the given id was found.
      */
     ConstantDefinition readConstantDefinition(String id,
             KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException;
-
-    boolean hasConstantDefinition(String id, KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException;
 
     /**
@@ -123,20 +137,8 @@ public interface KnowledgeSourceBackend extends
             throws KnowledgeSourceReadException;
 
     /**
-     * Returns a boolean indicating whether the specified value set id exists in
-     * the knowledge base
-     * 
-     * @param id
-     *            The id of the value set to check
-     * @param kb
-     *            The knowledge base to check the value set id against
-     * @return
-     */
-    boolean hasValueSet(String id, KnowledgeBase kb)
-            throws KnowledgeSourceReadException;
-
-    /**
-     * Reads the value set from the knowledge base and returns it
+     * Reads the value set from the knowledge base and returns it. This only
+     * will get called if the value set has not already been loaded.
      * 
      * @param id
      *            The id of the value set to read
@@ -147,9 +149,41 @@ public interface KnowledgeSourceBackend extends
     ValueSet readValueSet(String id, KnowledgeBase kb)
             throws KnowledgeSourceReadException;
 
-    List<PropositionDefinition> readInverseIsA(PropositionDefinition propDef, KnowledgeBase kb)
+    /**
+     * Reads all of the proposition definitions that have the
+     * <code>inverseIsA> relationship with a given proposition definition.
+     *
+     * Implementing this is a little tricky because you need to check if
+     * a proposition definition has already been loaded before trying to
+     * create it.
+     *
+     * @param propDef a {@link PropositionDefinition}.
+     * @param kb a PROTEMPA {@link KnowledgeBase}. This can be used to check
+     * if a proposition definition has already been created.
+     * @return a {@link List<PropositionDefinition>}.
+     * @throws KnowledgeSourceReadException if an error occurred in executing
+     * this operation.
+     */
+    List<PropositionDefinition> readInverseIsA(PropositionDefinition propDef,
+            KnowledgeBase kb)
             throws KnowledgeSourceReadException;
 
-    List<PropositionDefinition> readAbstractedFrom(AbstractionDefinition abstractionDefinition, KnowledgeBase kb)
+    /**
+     * Reads all of the proposition definitions that have the
+     * <code>abstractedFrom> relationship with a given proposition definition.
+     *
+     * Implementing this is a little tricky because you need to check if
+     * a proposition definition has already been loaded before trying to
+     * create it.
+     *
+     * @param propDef a {@link PropositionDefinition}.
+     * @param kb a PROTEMPA {@link KnowledgeBase}. This can be used to check
+     * if a proposition definition has already been created.
+     * @return a {@link List<PropositionDefinition>}.
+     * @throws KnowledgeSourceReadException if an error occurred in executing
+     * this operation.
+     */
+    List<PropositionDefinition> readAbstractedFrom(
+            AbstractionDefinition abstractionDefinition, KnowledgeBase kb)
             throws KnowledgeSourceReadException;
 }

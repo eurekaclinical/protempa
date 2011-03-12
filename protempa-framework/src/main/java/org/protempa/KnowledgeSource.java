@@ -26,7 +26,7 @@ public final class KnowledgeSource
         extends AbstractSource<KnowledgeSourceUpdatedEvent, KnowledgeSourceBackendUpdatedEvent> {
 
     /**
-     * PROTEMPA knowledge object model.
+     * PROTEMPA knowledge base.
      */
     private KnowledgeBase protempaKnowledgeBase;
     private final BackendManager<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource, KnowledgeSourceBackend> backendManager;
@@ -87,10 +87,11 @@ public final class KnowledgeSource
     /**
      * Returns the specified constant definition.
      * 
-     * @param id
-     *            an constant definition id {@link String}.
-     * @return an {@link ConstantDefinition}, or <code>null</code> if none was
+     * @param id a proposition id {@link String}. Cannot be <code>null</code>.
+     * @return a {@link ConstantDefinition}, or <code>null</code> if none was
      *         found with the given <code>id</code>.
+     * @throws KnowledgeSourceReadException if an error occurred reading from
+     * the knowledge base.
      */
     public ConstantDefinition readConstantDefinition(String id)
             throws KnowledgeSourceReadException {
@@ -178,10 +179,11 @@ public final class KnowledgeSource
     /**
      * Returns the specified event definition.
      * 
-     * @param id
-     *            an event definition id {@link String}.
+     * @param id a proposition id {@link String}. Cannot be <code>null</code>.
      * @return an {@link EventDefinition}, or <code>null</code> if none was
      *         found with the given <code>id</code>.
+     * @throws KnowledgeSourceReadException if an error occurred reading from
+     * the knowledge base.
      */
     public EventDefinition readEventDefinition(String id)
             throws KnowledgeSourceReadException {
@@ -196,6 +198,9 @@ public final class KnowledgeSource
     private abstract class AbstractPropositionDefinitionReader<P extends PropositionDefinition> {
 
         P read(String id) throws KnowledgeSourceReadException {
+            if (id == null) {
+                throw new IllegalArgumentException("id cannot be null");
+            }
             P result = null;
             if (!isInNotFound(id)) {
                 if (protempaKnowledgeBase != null) {
@@ -230,6 +235,9 @@ public final class KnowledgeSource
         }
 
         boolean has(String id) throws KnowledgeSourceReadException {
+            if (id == null) {
+                throw new IllegalArgumentException("id cannot be null");
+            }
             boolean result = false;
             if (!isInNotFound(id)) {
                 if (protempaKnowledgeBase != null) {
@@ -414,15 +422,29 @@ public final class KnowledgeSource
      * Returns the specified proposition definition.
      * 
      * @param id
-     *            a proposition definition id {@link String}.
+     *            a proposition id {@link String}. Cannot be
+     *            <code>null</code>.
      * @return a {@link PropositionDefinition}, or <code>null</code> if none was
      *         found with the given <code>id</code>.
+     * @throws KnowledgeSourceReadException if an error occurred reading from
+     * the knowledge base.
      */
     public PropositionDefinition readPropositionDefinition(String id)
             throws KnowledgeSourceReadException {
         return this.propDefReader.read(id);
     }
 
+    /**
+     * Returns the specified temporal proposition definition.
+     *
+     * @param id
+     *            a proposition id {@link String}. Cannot be
+     *            <code>null</code>.
+     * @return a {@link TemporalPropositionDefinition}, or <code>null</code>
+     * if none was found with the given <code>id</code>.
+     * @throws KnowledgeSourceReadException if an error occurred reading from
+     * the knowledge base.
+     */
     public TemporalPropositionDefinition readTemporalPropositionDefinition(
             String propId) throws KnowledgeSourceReadException {
         TemporalPropositionDefinition result =
@@ -452,7 +474,8 @@ public final class KnowledgeSource
      * Read the primitive parameter definition with the given id.
      * 
      * @param id
-     *            a primitive parameter definition id <code>String</code>.
+     *            a proposition id {@link String}.
+     *            Cannot be <code>null</code>.
      * @return a {@link PrimitiveParameterDefinition} object, or
      *         <code>null</code> if none was found with the given
      *         <code>id</code>.
@@ -471,9 +494,12 @@ public final class KnowledgeSource
      * Read the abstraction definition with the given id.
      * 
      * @param id
-     *            an abstraction definition id.
+     *            a proposition definition id {@link String}.
+     *            Cannot be <code>null</code>.
      * @return an {@link AbstractionDefinition} object, or <code>null</code> if
      *         none was found with the given <code>id</code>.
+     * @throws KnowledgeSourceReadException if an error occurred reading from
+     * the knowledge base.
      */
     public AbstractionDefinition readAbstractionDefinition(String id)
             throws KnowledgeSourceReadException {
@@ -529,8 +555,8 @@ public final class KnowledgeSource
                     initializeIfNeeded();
                     if (this.backendManager.getBackends() != null) {
                         for (KnowledgeSourceBackend backend : this.backendManager.getBackends()) {
-                            result = backend.hasValueSet(id,
-                                    protempaKnowledgeBase);
+                            result = backend.readValueSet(id,
+                                    protempaKnowledgeBase) != null;
                             if (result) {
                                 return result;
                             }
@@ -587,43 +613,27 @@ public final class KnowledgeSource
      * @return a newly-created {@link Set} of proposition id
      *         {@link String}s. Guaranteed not to return <code>null</code>.
      */
-    public Set<String> leafPropositionIds(String... propId)
+    public Set<String> leafPropositionIds(String... propIds)
             throws KnowledgeSourceReadException {
-        Set<String> propIds = Arrays.asSet(propId);
-        return leafPropositionIds(propIds);
-    }
-
-    public Set<String> leafPropositionIds(Set<String> propIds)
-            throws KnowledgeSourceReadException {
-        if (propIds == null) {
-            throw new IllegalArgumentException("propIds cannot be null");
-        }
-        if (propIds.contains(null)) {
-            throw new IllegalArgumentException("propIds cannot contain null");
-        }
-        return leafPropositionIds(new HashSet<String>(propIds),
-                this.propIdCache);
+        Set<String> propIdsAsSet = Arrays.asSet(propIds);
+        return leafPropositionIds(propIdsAsSet, this.propIdCache);
     }
 
     public Set<PropositionDefinition> leafPropositionDefinitions(
+            String... propIds) throws KnowledgeSourceReadException {
+        return leafPropositionDefinitions(Arrays.asSet(propIds));
+    }
+
+    Set<PropositionDefinition> leafPropositionDefinitions(
             Set<String> propIds)
             throws KnowledgeSourceReadException {
-        if (propIds == null) {
-            throw new IllegalArgumentException("propIds cannot be null");
-        }
-        if (propIds.contains(null)) {
-            throw new IllegalArgumentException("propIds cannot contain null");
-        }
-        return leafPropositionDefinitions(new HashSet<String>(propIds),
-                this.propIdPropCache);
+        assert propIds != null : "propIds cannot be null";
+        return leafPropositionDefinitions(propIds, this.propIdPropCache);
     }
 
     private Set<String> leafPropositionIds(Set<String> propIds,
             Map<Set<String>, Set<String>> cache)
             throws KnowledgeSourceReadException {
-        if (propIds == null) {
-            throw new IllegalArgumentException("propIds cannot be null");
-        }
         if (propIds.contains(null)) {
             throw new IllegalArgumentException("propIds cannot contain a null element");
         }
@@ -645,9 +655,6 @@ public final class KnowledgeSource
     private Set<PropositionDefinition> leafPropositionDefinitions(Set<String> propIds,
             Map<Set<String>, Set<PropositionDefinition>> cache)
             throws KnowledgeSourceReadException {
-        if (propIds == null) {
-            throw new IllegalArgumentException("propIds cannot be null");
-        }
         if (propIds.contains(null)) {
             throw new IllegalArgumentException("propIds cannot contain a null element");
         }
@@ -656,7 +663,8 @@ public final class KnowledgeSource
         if (cachedResult != null) {
             return cachedResult;
         } else {
-            Set<PropositionDefinition> propResult = new HashSet<PropositionDefinition>();
+            Set<PropositionDefinition> propResult =
+                    new HashSet<PropositionDefinition>();
             if (propIds != null) {
                 leafPropositionIdsHelper(propIds, null, propResult);
                 propResult = Collections.unmodifiableSet(propResult);
@@ -666,10 +674,10 @@ public final class KnowledgeSource
         }
     }
 
-    public Set<String> leafPrimitiveParameterIds(String... propId)
+    public Set<String> leafPrimitiveParameterIds(String... propIds)
             throws KnowledgeSourceReadException {
-        Set<String> propIds = Arrays.asSet(propId);
-        return leafPrimitiveParameterIds(propIds);
+        Set<String> propIdsAsSet = Arrays.asSet(propIds);
+        return leafPrimitiveParameterIds(propIdsAsSet);
     }
 
     /**
@@ -683,16 +691,9 @@ public final class KnowledgeSource
      * @return an unmodifiable <code>Set</code> of primitive parameter id
      *         <code>String</code>s. Guaranteed not to return <code>null</code>.
      */
-    public Set<String> leafPrimitiveParameterIds(Set<String> propIds)
+    private Set<String> leafPrimitiveParameterIds(Set<String> propIds)
             throws KnowledgeSourceReadException {
-        if (propIds == null) {
-            throw new IllegalArgumentException("propIds cannot be null");
-        }
-        if (propIds.contains(null)) {
-            throw new IllegalArgumentException("propIds cannot contain null");
-        }
-        Set<String> pids = leafPropositionIds(new HashSet<String>(propIds),
-                this.propIdCache);
+        Set<String> pids = leafPropositionIds(propIds, this.propIdCache);
         Set<String> result = new HashSet<String>();
         for (String pid : pids) {
             if (hasPrimitiveParameterDefinition(pid)) {
@@ -702,22 +703,15 @@ public final class KnowledgeSource
         return Collections.unmodifiableSet(result);
     }
 
-    public Set<String> leafEventIds(String... propId)
+    public Set<String> leafEventIds(String... propIds)
             throws KnowledgeSourceReadException {
-        Set<String> propIds = Arrays.asSet(propId);
-        return leafEventIds(propIds);
+        Set<String> propIdsAsSet = Arrays.asSet(propIds);
+        return leafEventIds(propIdsAsSet);
     }
 
-    public Set<String> leafEventIds(Set<String> propIds)
+    private Set<String> leafEventIds(Set<String> propIds)
             throws KnowledgeSourceReadException {
-        if (propIds == null) {
-            throw new IllegalArgumentException("propIds cannot be null");
-        }
-        if (propIds.contains(null)) {
-            throw new IllegalArgumentException("propIds cannot contain null");
-        }
-        Set<String> pids = leafPropositionIds(new HashSet<String>(propIds),
-                this.propIdCache);
+        Set<String> pids = leafPropositionIds(propIds, this.propIdCache);
         Set<String> result = new HashSet<String>();
         for (String pid : pids) {
             if (hasEventDefinition(pid)) {
@@ -727,22 +721,15 @@ public final class KnowledgeSource
         return result;
     }
 
-    public Set<String> leafConstantIds(String... propId)
+    public Set<String> leafConstantIds(String... propIds)
             throws KnowledgeSourceReadException {
-        Set<String> propIds = Arrays.asSet(propId);
-        return leafConstantIds(propIds);
+        Set<String> propIdsAsSet = Arrays.asSet(propIds);
+        return leafConstantIds(propIdsAsSet);
     }
 
-    public Set<String> leafConstantIds(Set<String> propIds)
+    private Set<String> leafConstantIds(Set<String> propIds)
             throws KnowledgeSourceReadException {
-        if (propIds == null) {
-            throw new IllegalArgumentException("propIds cannot be null");
-        }
-        if (propIds.contains(null)) {
-            throw new IllegalArgumentException("propIds cannot contain null");
-        }
-        Set<String> pids = leafPropositionIds(new HashSet<String>(propIds),
-                this.propIdCache);
+        Set<String> pids = leafPropositionIds(propIds, this.propIdCache);
         Set<String> result = new HashSet<String>();
         for (String pid : pids) {
             if (hasConstantDefinition(pid)) {
@@ -779,13 +766,14 @@ public final class KnowledgeSource
             Set<String> result, Set<PropositionDefinition> propResult)
             throws KnowledgeSourceReadException {
         for (PropositionDefinition propDef : propDefs) {
+            String propDefId = propDef.getId();
             List<PropositionDefinition> children =
                     new ArrayList<PropositionDefinition>(
-                    readAbstractedFrom(propDef.getId()));
-            children.addAll(readInverseIsA(propDef.getId()));
+                    readAbstractedFrom(propDefId));
+            children.addAll(readInverseIsA(propDefId));
             if (children.isEmpty()) {
                 if (result != null) {
-                    result.add(propDef.getId());
+                    result.add(propDefId);
                 }
                 if (propResult != null) {
                     propResult.add(propDef);

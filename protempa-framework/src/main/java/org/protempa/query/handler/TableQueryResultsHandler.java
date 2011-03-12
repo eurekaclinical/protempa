@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.string.StringUtil;
@@ -103,6 +104,7 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
 
     @Override
     public void init(KnowledgeSource knowledgeSource) throws FinderException {
+        Logger logger = Util.logger();
         this.knowledgeSource = knowledgeSource;
         if (this.headerWritten) {
             try {
@@ -111,8 +113,8 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
                 for (TableColumnSpec columnSpec : this.columnSpecs) {
                     Util.logger().log(
                             Level.FINE,
-                            "Processing columnSpec type "
-                            + columnSpec.getClass().getName());
+                            "Processing columnSpec type {0}",
+                            columnSpec.getClass().getName());
                     String[] colNames =
                             columnSpec.columnNames(knowledgeSource);
 
@@ -126,12 +128,13 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
 
                     String[] escapedColNames = StringUtil.escapeDelimitedColumns(colNames,
                             this.columnDelimiter);
-                    Util.logger().log(
-                            Level.FINE,
-                            "Got the following columns for proposition "
-                            + Arrays.toString(this.rowPropositionIds)
-                            + ": "
-                            + StringUtils.join(escapedColNames, ","));
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.log(
+                                Level.FINE,
+                                "Got the following columns for proposition {0}: {1}",
+                                new Object[]{Arrays.toString(this.rowPropositionIds),
+                                    StringUtils.join(escapedColNames, ",")});
+                    }
                     for (String colName : escapedColNames) {
                         columnNames.add(colName);
                     }
@@ -184,11 +187,9 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
                         }
                     }
 
-                    StringUtil.escapeDelimitedColumnsInPlace(columnValues,
-                            this.columnDelimiter);
-
                     for (int index = 0; index < columnValues.length; index++) {
-                        write(columnValues[index]);
+                        StringUtil.escapeDelimitedColumn(columnValues[index],
+                                this.columnDelimiter, this);
                         if (index < columnValues.length - 1) {
                             write(this.columnDelimiter);
                         }

@@ -2,6 +2,7 @@ package org.arp.javautil.string;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang.CharUtils;
@@ -13,7 +14,7 @@ import org.apache.commons.lang.StringUtils;
 public class StringUtil {
 
     private static final char QUOTE = '"';
-    private static final char[] SEARCH_CHARS = new char[] {
+    private static final char[] SEARCH_CHARS = new char[]{
         QUOTE, CharUtils.CR, CharUtils.LF};
 
     private StringUtil() {
@@ -30,7 +31,7 @@ public class StringUtil {
      *         otherwise.
      */
     public static boolean getEmptyOrNull(String str) {
-            return str == null || str.trim().length() == 0;
+        return str == null || str.trim().length() == 0;
     }
 
     public static boolean equals(String str1, String str2) {
@@ -75,33 +76,65 @@ public class StringUtil {
         }
     }
 
-    public static String escapeDelimitedColumn(String str, char delimiter) {
-        if (str == null)
+    /**
+     * Escapes a column in a delimited file and writes it directly to a
+     * {@link Writer}. This is somewhat more efficient than
+     * {@link #escapeDelimitedColumn(java.lang.String, char)} because it does
+     * less temporary object creation. The performance difference will become
+     * more apparent when writing large delimited files.
+     * 
+     * @param str a column {@link String}.
+     * @param delimiter the file's delimiter character.
+     * @param writer the {@link Writer} to which to write the escaped column.
+     * @throws IOException if an error writing to <code>writer</code> occurs.
+     */
+    public static void escapeDelimitedColumn(String str, char delimiter,
+            Writer writer) throws IOException {
+        if (str == null) {
             throw new IllegalArgumentException("str cannot be null");
-        if (StringUtils.containsNone(str, SEARCH_CHARS) && 
-                str.indexOf(delimiter) < 0) {
-            return str;
+        }
+        if (StringUtils.containsNone(str, SEARCH_CHARS)
+                && str.indexOf(delimiter) < 0) {
+            writer.write(str);
         } else {
-            StringWriter writer = new StringWriter();
-            try {
-                writer.write(QUOTE);
-                for (int j = 0, n = str.length(); j < n; j++) {
-                    char c = str.charAt(j);
-                    if (c == QUOTE) {
-                        writer.write(QUOTE);
-                    }
-                    writer.write(c);
+            writer.write(QUOTE);
+            for (int j = 0, n = str.length(); j < n; j++) {
+                char c = str.charAt(j);
+                if (c == QUOTE) {
+                    writer.write(QUOTE);
                 }
-                writer.write(QUOTE);
-                return writer.toString();
-            } finally {
-                try {
-                    writer.close();
-                } catch (IOException ex) {
-                    throw new AssertionError("Should never happen");
-                }
+                writer.write(c);
             }
+            writer.write(QUOTE);
         }
     }
 
+    /**
+     * Escapes a column in a delimited file.
+     *
+     * @param str a column {@link String}.
+     * @param delimiter the file's delimiter character.
+     * @return the escaped column {@link String}.
+     */
+    public static String escapeDelimitedColumn(String str, char delimiter) {
+        if (str == null) {
+            throw new IllegalArgumentException("str cannot be null");
+        }
+        if (StringUtils.containsNone(str, SEARCH_CHARS)
+                && str.indexOf(delimiter) < 0) {
+            return str;
+        } else {
+            StringBuilder writer = new StringBuilder();
+            writer.append(QUOTE);
+            for (int j = 0, n = str.length(); j < n; j++) {
+                char c = str.charAt(j);
+                if (c == QUOTE) {
+                    writer.append(QUOTE);
+                }
+                writer.append(c);
+            }
+            writer.append(QUOTE);
+            return writer.toString();
+        }
+    }
 }

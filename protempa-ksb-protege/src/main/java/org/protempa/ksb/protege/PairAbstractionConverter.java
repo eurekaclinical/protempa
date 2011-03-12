@@ -1,6 +1,5 @@
 package org.protempa.ksb.protege;
 
-
 import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PairDefinition;
@@ -9,6 +8,7 @@ import org.protempa.proposition.Relation;
 
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
+import org.protempa.PropositionDefinition;
 
 public class PairAbstractionConverter implements PropositionConverter {
 
@@ -17,20 +17,25 @@ public class PairAbstractionConverter implements PropositionConverter {
             KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        PairDefinition result = (PairDefinition) protempaKnowledgeBase.getAbstractionDefinition(protegeProposition.getName());
-        if (result == null) {
-            result = new PairDefinition(protempaKnowledgeBase,
-                    protegeProposition.getName());
-            ConnectionManager cm = backend.getConnectionManager();
-            Util.setNames(protegeProposition, result, cm);
-            Util.setProperties(protegeProposition, result, cm);
-            Util.setTerms(protegeProposition, result, cm);
-            addComponentAbstractionDefinitions(protegeProposition, result,
-                    backend);
-            setRelation(protegeProposition, result, backend);
-            Util.setInverseIsAs(protegeProposition, result, cm);
-        }
+        PairDefinition result = new PairDefinition(protempaKnowledgeBase,
+                protegeProposition.getName());
+        ConnectionManager cm = backend.getConnectionManager();
+        Util.setNames(protegeProposition, result, cm);
+        Util.setProperties(protegeProposition, result, cm);
+        Util.setTerms(protegeProposition, result, cm);
+        addComponentAbstractionDefinitions(protegeProposition, result,
+                backend);
+        setRelation(protegeProposition, result, backend);
+        Util.setInverseIsAs(protegeProposition, result, cm);
+
         return result;
+    }
+
+    @Override
+    public PropositionDefinition readPropositionDefinition(
+            Instance protegeProposition, KnowledgeBase protempaKnowledgeBase) {
+        return protempaKnowledgeBase.getAbstractionDefinition(
+                protegeProposition.getName());
     }
 
     private void setRelation(
@@ -43,17 +48,10 @@ public class PairAbstractionConverter implements PropositionConverter {
                 protegeProposition, slot);
 
         Relation relation = Util.instanceToRelation(relationInstance,
-                    cm, backend);
+                cm, backend);
 
         pd.setRelation(relation);
 
-    }
-
-    @Override
-    public boolean protempaKnowledgeBaseHasProposition(
-            Instance protegeParameter, KnowledgeBase protempaKnowledgeBase) {
-        return protempaKnowledgeBase
-                        .hasAbstractionDefinition(protegeParameter.getName());
     }
 
     /**
@@ -88,5 +86,4 @@ public class PairAbstractionConverter implements PropositionConverter {
         pd.setLeftHandProposition(lhsDefinition);
         pd.setRightHandProposition(rhsDefinition);
     }
-
 }

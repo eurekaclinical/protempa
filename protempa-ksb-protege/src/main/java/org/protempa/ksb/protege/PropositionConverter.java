@@ -27,18 +27,6 @@ public interface PropositionConverter {
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException;
 
-    /**
-     * Checks if the given Protege parameter instance is already in the given
-     * PROTEMPA knowledge base.
-     *
-     * @param protegeProposition
-     *            the Protege proposition {@link Instance}.
-     * @param protempaKnowledgeBase
-     *            the PROTEMPA {@link KnowledgeBase}.
-     * @return <code>true</code> if is already in the knowledge base,
-     *         <code>false</code> otherwise. Also returns <code>false</code>
-     *         if either parameter is <code>null</code>.
-     */
-    boolean protempaKnowledgeBaseHasProposition(Instance protegeProposition,
-            KnowledgeBase protempaKnowledgeBase);
+    PropositionDefinition readPropositionDefinition(
+            Instance protegeProposition, KnowledgeBase protempaKnowledgeBase);
 }

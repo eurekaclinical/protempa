@@ -361,35 +361,36 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
         }
 
         private void doWriteKeyId() throws IOException {
-            this.writer.write(StringUtil.escapeDelimitedColumn(this.keyId,
-                    COLUMN_DELIMITER));
+            StringUtil.escapeDelimitedColumn(this.keyId,
+                    COLUMN_DELIMITER, this.writer);
             this.writer.write(COLUMN_DELIMITER);
         }
 
         private void doWritePropId(Proposition proposition)
                 throws IOException {
-            this.writer.write(
-                    StringUtil.escapeDelimitedColumn(proposition.getId(),
-                    COLUMN_DELIMITER));
+            StringUtil.escapeDelimitedColumn(proposition.getId(),
+                    COLUMN_DELIMITER, this.writer);
             this.writer.write(COLUMN_DELIMITER);
         }
 
         private void doWriteValue(Parameter parameter) throws IOException {
-            this.writer.write(
-                    StringUtil.escapeDelimitedColumn(
-                    parameter.getValueFormatted(), COLUMN_DELIMITER));
+            StringUtil.escapeDelimitedColumn(
+                    parameter.getValueFormatted(), COLUMN_DELIMITER,
+                    this.writer);
             this.writer.write(COLUMN_DELIMITER);
         }
 
         private void doWriteTime(TemporalProposition proposition)
                 throws IOException {
-            this.writer.write(StringUtil.escapeDelimitedColumn(
+            StringUtil.escapeDelimitedColumn(
                     proposition.getStartFormattedShort(),
-                    COLUMN_DELIMITER));
+                    COLUMN_DELIMITER, this.writer);
             this.writer.write(COLUMN_DELIMITER);
-            this.writer.write(StringUtil.escapeDelimitedColumn(
-                    proposition.getFinishFormattedShort(),
-                    COLUMN_DELIMITER));
+            String finish = proposition.getFinishFormattedShort();
+            if (!finish.isEmpty()) {
+                StringUtil.escapeDelimitedColumn(finish, COLUMN_DELIMITER,
+                        this.writer);
+            }
         }
     }
 }

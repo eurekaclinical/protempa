@@ -29,6 +29,7 @@ import edu.stanford.smi.protege.event.ProjectEvent;
 import edu.stanford.smi.protege.event.ProjectListener;
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
+import edu.stanford.smi.protege.model.Slot;
 
 /**
  * Abstract class for converting a Protege knowledge base into a PROTEMPA
@@ -42,6 +43,7 @@ public abstract class ProtegeKnowledgeSourceBackend
 
     private ConnectionManager cm;
     private Units units;
+    private InstanceConverterFactory instanceConverterFactory;
 
     private static enum Units {
 
@@ -69,6 +71,7 @@ public abstract class ProtegeKnowledgeSourceBackend
 
             pcm.init();
             this.cm = pcm;
+            this.instanceConverterFactory = new InstanceConverterFactory(pcm);
         }
     }
 
@@ -103,13 +106,17 @@ public abstract class ProtegeKnowledgeSourceBackend
             this.cm.close();
             this.cm = null;
         }
+        if (this.instanceConverterFactory != null) {
+            this.instanceConverterFactory.close();
+            this.instanceConverterFactory = null;
+        }
     }
 
     @Override
     public ConstantDefinition readConstantDefinition(String name,
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
-        Instance instance = getInstance(name);
+        Instance instance = this.cm.getInstance(name);
         convert(instance, protempaKnowledgeBase);
         return protempaKnowledgeBase.getConstantDefinition(name);
     }
@@ -118,14 +125,9 @@ public abstract class ProtegeKnowledgeSourceBackend
     public EventDefinition readEventDefinition(String name,
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
-        Instance instance = getInstance(name);
+        Instance instance = this.cm.getInstance(name);
         convert(instance, protempaKnowledgeBase);
         return protempaKnowledgeBase.getEventDefinition(name);
-    }
-
-    private Instance getInstance(String name)
-            throws KnowledgeSourceReadException {
-        return this.cm.getInstance(name);
     }
 
     /**
@@ -154,7 +156,7 @@ public abstract class ProtegeKnowledgeSourceBackend
     public PrimitiveParameterDefinition readPrimitiveParameterDefinition(
             String name, KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
-        Instance instance = getInstance(name);
+        Instance instance = this.cm.getInstance(name);
         convert(instance, protempaKnowledgeBase);
         return protempaKnowledgeBase.getPrimitiveParameterDefinition(name);
     }
@@ -163,7 +165,7 @@ public abstract class ProtegeKnowledgeSourceBackend
     public AbstractionDefinition readAbstractionDefinition(String name,
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
-        Instance candidateAbstractParameter = getInstance(name);
+        Instance candidateAbstractParameter = this.cm.getInstance(name);
         convert(candidateAbstractParameter, protempaKnowledgeBase);
         return protempaKnowledgeBase.getAbstractionDefinition(name);
     }
@@ -175,13 +177,14 @@ public abstract class ProtegeKnowledgeSourceBackend
             throws KnowledgeSourceReadException {
         List<PropositionDefinition> result =
                 new ArrayList<PropositionDefinition>();
-        Instance instance = getInstance(abstractionDefinition.getId());
+        Instance instance = this.cm.getInstance(abstractionDefinition.getId());
         if (instance != null) {
             Collection<?> children =
-                    cm.getOwnSlotValues(instance, cm.getSlot("abstractedFrom"));
+                    cm.getOwnSlotValues(instance,
+                    cm.getSlot("abstractedFrom"));
             for (Iterator<?> itr = children.iterator(); itr.hasNext();) {
                 Instance child = (Instance) itr.next();
-                result.add(convert(child, protempaKnowledgeBase));
+                result.add(convert(child, protempaKnowledgeBase, true));
             }
         }
         return result;
@@ -193,13 +196,13 @@ public abstract class ProtegeKnowledgeSourceBackend
             throws KnowledgeSourceReadException {
         List<PropositionDefinition> result =
                 new ArrayList<PropositionDefinition>();
-        Instance instance = getInstance(propDef.getId());
+        Instance instance = this.cm.getInstance(propDef.getId());
         if (instance != null) {
             Collection<?> children =
                     cm.getOwnSlotValues(instance, cm.getSlot("inverseIsA"));
             for (Iterator<?> itr = children.iterator(); itr.hasNext();) {
                 Instance child = (Instance) itr.next();
-                result.add(convert(child, protempaKnowledgeBase));
+                result.add(convert(child, protempaKnowledgeBase, true));
             }
         }
         return result;
@@ -217,7 +220,7 @@ public abstract class ProtegeKnowledgeSourceBackend
             throws KnowledgeSourceReadException {
         List<String> result = new ArrayList<String>();
 
-        Instance termInstance = getInstance(termId);
+        Instance termInstance = this.cm.getInstance(termId);
         if (termInstance != null) {
             Collection<?> props = cm.getOwnSlotValues(termInstance,
                     cm.getSlot("termProposition"));
@@ -244,14 +247,16 @@ public abstract class ProtegeKnowledgeSourceBackend
         List<String> result = new ArrayList<String>();
         List<Set<String>> propIdSets = new ArrayList<Set<String>>();
 
+        Slot termPropositionSlot = this.cm.getSlot("termProposition");
+
         // collects the set of proposition IDs for each term subsumption
         for (TermSubsumption ts : termIds.getAnded()) {
             Set<String> subsumpPropIds = new HashSet<String>();
             for (String termId : ts.getTerms()) {
-                Instance termInstance = getInstance(termId);
+                Instance termInstance = this.cm.getInstance(termId);
                 if (termInstance != null) {
                     Collection<?> props = cm.getOwnSlotValues(termInstance,
-                            cm.getSlot("termProposition"));
+                            termPropositionSlot);
                     Iterator<?> it = props.iterator();
                     while (it.hasNext()) {
                         Instance prop = (Instance) it.next();
@@ -293,14 +298,29 @@ public abstract class ProtegeKnowledgeSourceBackend
      *            a PROTEMPA <code>KnowledgeBase</code> instance.
      */
     private PropositionDefinition convert(Instance proposition,
-            KnowledgeBase protempaKb) throws KnowledgeSourceReadException {
+            KnowledgeBase protempaKb, boolean check) throws KnowledgeSourceReadException {
         PropositionConverter converter =
-                InstanceConverterFactory.getInstance(proposition, this.cm);
+                this.instanceConverterFactory.getInstance(proposition);
         if (converter != null) {
-            return converter.convert(proposition, protempaKb, this);
+            PropositionDefinition result = null;
+            if (check) {
+                result = converter.readPropositionDefinition(proposition,
+                        protempaKb);
+                if (result == null) {
+                    result = converter.convert(proposition, protempaKb, this);
+                }
+            } else {
+                result = converter.convert(proposition, protempaKb, this);
+            }
+            return result;
         } else {
             return null;
         }
+    }
+
+    private PropositionDefinition convert(Instance proposition,
+            KnowledgeBase protempaKb) throws KnowledgeSourceReadException {
+        return convert(proposition, protempaKb, false);
     }
 
     /*
@@ -309,22 +329,22 @@ public abstract class ProtegeKnowledgeSourceBackend
      */
     @Override
     public void formChanged(ProjectEvent arg0) {
-        this.fireKnowledgeSourceBackendUpdated();
+        fireKnowledgeSourceBackendUpdated();
     }
 
     @Override
     public void projectClosed(ProjectEvent arg0) {
-        this.fireKnowledgeSourceBackendUpdated();
+        fireKnowledgeSourceBackendUpdated();
     }
 
     @Override
     public void projectSaved(ProjectEvent arg0) {
-        this.fireKnowledgeSourceBackendUpdated();
+        fireKnowledgeSourceBackendUpdated();
     }
 
     @Override
     public void runtimeClsWidgetCreated(ProjectEvent arg0) {
-        this.fireKnowledgeSourceBackendUpdated();
+        fireKnowledgeSourceBackendUpdated();
     }
 
     Unit parseUnit(String protegeUnitStr) {
@@ -356,7 +376,7 @@ public abstract class ProtegeKnowledgeSourceBackend
     public PropositionDefinition readPropositionDefinition(String name,
             KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
-        Instance instance = getInstance(name);
+        Instance instance = this.cm.getInstance(name);
         return convert(instance, protempaKnowledgeBase);
     }
 }

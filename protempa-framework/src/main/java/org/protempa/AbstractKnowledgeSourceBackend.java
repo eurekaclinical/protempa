@@ -18,10 +18,13 @@ public abstract class AbstractKnowledgeSourceBackend extends
         implements KnowledgeSourceBackend {
 
     /**
-     * A default implementation that returns <code>null</code>.
-     * 
-     * @see org.protempa.KnowledgeSourceBackend#readAbstractionDefinition(java.lang.String,
-     *      org.protempa.KnowledgeBase)
+     * A default implementation that returns <code>null</code>. Override this
+     * if your knowledge base contains abstraction definitions.
+     *
+     * @param id a proposition id {@link String}.
+     * @param protempaKnowledgeBase  a PROTEMPA {@link KnowledgeBase}.
+     * @return an {@link AbstractionDefinition}, always <code>null</code> in
+     * this implementation.
      */
     @Override
     public AbstractionDefinition readAbstractionDefinition(String id,
@@ -31,10 +34,13 @@ public abstract class AbstractKnowledgeSourceBackend extends
     }
 
     /**
-     * A default implementation that returns <code>null</code>.
-     * 
-     * @see org.protempa.KnowledgeSourceBackend#readEventDefinition(java.lang.String,
-     *      org.protempa.KnowledgeBase)
+     * A default implementation that returns <code>null</code>. Override this
+     * if your knowledge base contains event definitions.
+     *
+     * @param id a proposition id {@link String}.
+     * @param protempaKnowledgeBase  a PROTEMPA {@link KnowledgeBase}.
+     * @return an {@link EventDefinition}, always <code>null</code> in
+     * this implementation.
      */
     @Override
     public EventDefinition readEventDefinition(String id,
@@ -44,10 +50,13 @@ public abstract class AbstractKnowledgeSourceBackend extends
     }
 
     /**
-     * A default implementation that returns <code>null</code>.
-     * 
-     * @see org.protempa.KnowledgeSourceBackend#readPrimitiveParameterDefinition(java.lang.String,
-     *      org.protempa.KnowledgeBase)
+     * A default implementation that returns <code>null</code>. Override this
+     * if your knowledge base contains primitive parameter definitions.
+     *
+     * @param id a proposition id {@link String}.
+     * @param protempaKnowledgeBase  a PROTEMPA {@link KnowledgeBase}.
+     * @return a {@link PrimitiveParameterDefinition}, always
+     * <code>null</code> in this implementation.
      */
     @Override
     public PrimitiveParameterDefinition readPrimitiveParameterDefinition(
@@ -56,6 +65,15 @@ public abstract class AbstractKnowledgeSourceBackend extends
         return null;
     }
 
+    /**
+     * A default implementation that returns <code>null</code>. Override this
+     * if your knowledge base contains constant definitions.
+     *
+     * @param id a proposition id {@link String}.
+     * @param protempaKnowledgeBase  a PROTEMPA {@link KnowledgeBase}.
+     * @return a {@link ConstantDefinition}, always <code>null</code> in
+     * this implementation.
+     */
     @Override
     public ConstantDefinition readConstantDefinition(String id,
             KnowledgeBase protempaKnowledgeBase)
@@ -63,40 +81,15 @@ public abstract class AbstractKnowledgeSourceBackend extends
         return null;
     }
 
-    @Override
-    public boolean hasPrimitiveParameterDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        return readPrimitiveParameterDefinition(id, protempaKnowledgeBase) != null;
-    }
-
-    @Override
-    public boolean hasEventDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        return readEventDefinition(id, protempaKnowledgeBase) != null;
-    }
-
-    @Override
-    public boolean hasAbstractionDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        return readAbstractionDefinition(id, protempaKnowledgeBase) != null;
-    }
-
-    @Override
-    public boolean hasConstantDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        return readConstantDefinition(id, protempaKnowledgeBase) != null;
-    }
-
-    @Override
-    public boolean hasValueSet(String id, KnowledgeBase kb)
-            throws KnowledgeSourceReadException {
-        return readValueSet(id, kb) != null;
-    }
-
+    /**
+     * A default implementation that returns <code>null</code>. Override this
+     * if your knowledge base contains value sets.
+     *
+     * @param id a proposition id {@link String}.
+     * @param protempaKnowledgeBase  a PROTEMPA {@link KnowledgeBase}.
+     * @return an {@link ValueSet}, always <code>null</code> in
+     * this implementation.
+     */
     @Override
     public ValueSet readValueSet(String id, KnowledgeBase kb)
             throws KnowledgeSourceReadException {
@@ -125,6 +118,20 @@ public abstract class AbstractKnowledgeSourceBackend extends
         return new ArrayList<String>();
     }
 
+    /**
+     * A default implementation that calls
+     * {@link #readPropositionDefinition(java.lang.String, org.protempa.KnowledgeBase).
+     * You may want to override this if your knowledge base supports a more
+     * efficient implementation.
+     * 
+     * @param abstractionDefinition an {@link AbstractionDefinition}, cannot
+     * be <code>null</code>.
+     * @param kb the PROTEMPA {@link KnowledgeBase}.
+     * Guaranteed not <code>null</code>.
+     * @return a {@link List<PropositionDefinition}s.
+     * @throws KnowledgeSourceReadException if an error occurred when
+     * performing this operation.
+     */
     @Override
     public List<PropositionDefinition> readAbstractedFrom(
             AbstractionDefinition abstractionDefinition,
@@ -139,15 +146,24 @@ public abstract class AbstractKnowledgeSourceBackend extends
         return result;
     }
 
-    
-
+    /**
+     * A default implementation that calls
+     * {@link #readPropositionDefinition(java.lang.String, org.protempa.KnowledgeBase).
+     * You may want to override this if your knowledge base supports a more
+     * efficient implementation.
+     *
+     * @param abstractionDefinition a {@link PropositionDefinition},
+     * guaranteed not to be <code>null</code>.
+     * @param kb the PROTEMPA {@link KnowledgeBase}. Guaranteed not
+     * <code>null</code>.
+     * @return a {@link List<PropositionDefinition}s.
+     * @throws KnowledgeSourceReadException if an error occurred when
+     * performing this operation.
+     */
     @Override
     public List<PropositionDefinition> readInverseIsA(
             PropositionDefinition propDef, KnowledgeBase kb)
             throws KnowledgeSourceReadException {
-        if (propDef == null) {
-            throw new IllegalArgumentException("propDef cannot be null");
-        }
         String[] children = propDef.getInverseIsA();
         List<PropositionDefinition> result =
                 new ArrayList<PropositionDefinition>(children.length);
