@@ -1,5 +1,9 @@
 package org.protempa.proposition;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import org.protempa.ProtempaException;
 
 /**
@@ -9,12 +13,17 @@ import org.protempa.ProtempaException;
  * 
  * @author Andrew Post
  */
-public final class Context extends TemporalProposition {
+public final class Context extends TemporalProposition implements Serializable {
 
     private static final long serialVersionUID = -836727551420756824L;
 
     Context(String id) {
         super(id);
+    }
+
+    @Override
+    public void setInterval(Interval interval) {
+        super.setInterval(interval);
     }
 
     @Override
@@ -25,5 +34,15 @@ public final class Context extends TemporalProposition {
     @Override
     public void acceptChecked(PropositionCheckedVisitor propositionCheckedVisitor) throws ProtempaException {
         throw new UnsupportedOperationException("Unimplemented");
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        writeAbstractProposition(s);
+        writeTemporalProposition(s);
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        readAbstractProposition(s);
+        readTemporalProposition(s);
     }
 }

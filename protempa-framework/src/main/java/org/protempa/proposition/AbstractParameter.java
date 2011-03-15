@@ -1,5 +1,9 @@
 package org.protempa.proposition;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.ProtempaException;
@@ -12,7 +16,8 @@ import org.protempa.proposition.value.Granularity;
  * 
  * @author Andrew Post
  */
-public final class AbstractParameter extends TemporalParameter {
+public final class AbstractParameter extends TemporalParameter
+        implements Serializable {
 
     private static final long serialVersionUID = -137441242472941229L;
 
@@ -25,6 +30,13 @@ public final class AbstractParameter extends TemporalParameter {
      */
     public AbstractParameter(String id) {
         super(id);
+    }
+
+    protected AbstractParameter() {}
+
+    @Override
+    public void setInterval(Interval interval) {
+        super.setInterval(interval);
     }
 
     /*
@@ -72,5 +84,17 @@ public final class AbstractParameter extends TemporalParameter {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())
                 .toString();
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        writeAbstractProposition(s);
+        writeTemporalProposition(s);
+        writeTemporalParameter(s);
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        readAbstractProposition(s);
+        readTemporalProposition(s);
+        readTemporalParameter(s);
     }
 }

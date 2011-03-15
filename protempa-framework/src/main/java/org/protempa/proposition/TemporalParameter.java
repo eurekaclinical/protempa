@@ -1,7 +1,12 @@
 package org.protempa.proposition;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueFactory;
+import org.protempa.proposition.value.ValueType;
 
 /**
  * @author Andrew Post
@@ -15,6 +20,8 @@ public abstract class TemporalParameter extends TemporalProposition
     TemporalParameter(String id) {
         super(id);
     }
+
+    protected TemporalParameter() {}
 
     @Override
     public Value getValue() {
@@ -47,15 +54,31 @@ public abstract class TemporalParameter extends TemporalProposition
 
         TemporalParameter p = (TemporalParameter) o;
         return super.isEqual(p)
-                && (this.value == p.value ||
-                (this.value != null && this.value.equals(p.value)));
+                && (this.value == p.value
+                || (this.value != null && this.value.equals(p.value)));
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("value", this.value)
-                .toString();
+        return new ToStringBuilder(this).appendSuper(super.toString()).append("value", this.value).toString();
     }
+
+    protected void writeTemporalParameter(ObjectOutputStream s) throws IOException {
+        if (this.value != null) {
+            s.writeObject(this.value.getType());
+            s.writeObject(this.value.getRepr());
+        } else {
+            s.writeObject(null);
+        }
+    }
+
+    protected void readTemporalParameter(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        ValueType valueType = (ValueType) s.readObject();
+        if (valueType != null) {
+            this.value =
+                    ValueFactory.get(valueType).parseRepr((String) s.readObject());
+        }
+    }
+
+
 }

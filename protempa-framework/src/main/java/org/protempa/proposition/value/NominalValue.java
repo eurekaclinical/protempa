@@ -1,5 +1,8 @@
 package org.protempa.proposition.value;
 
+import java.util.Map;
+import org.apache.commons.collections.map.ReferenceMap;
+
 /**
  * A {@link String} value.
  * 
@@ -11,8 +14,35 @@ public final class NominalValue extends ValueImpl {
     private final String val;
     private transient volatile int hashCode;
 
+    @SuppressWarnings("unchecked")
+    private static final Map<String, NominalValue> cache = new ReferenceMap();
+
     /**
-     * Creates a new <code>NominalValue</code> with the given value.
+     * Creates a new nominal value. If <code>val</code>'s length is less
+     * than 20 characters, the created {@link NominalValue} object will be
+     * cached and reused.
+     * 
+     * @param val a {@link String}. If <code>null</code>, {@link NominalValue}
+     * with <code>""</code> will be created.
+     * @return a {@link NominalValue}.
+     */
+    public static NominalValue getInstance(String val) {
+        if (val != null && val.length() < 20) {
+            NominalValue result = cache.get(val);
+            if (result == null) {
+                val = val.intern();
+                result = new NominalValue(val);
+                cache.put(val, result);
+            }
+            return result;
+        } else {
+            return new NominalValue(val);
+        }
+    }
+
+    /**
+     * Creates a new nominal value with the given value. The recommended way to
+     * create nominal values is with {@link #getInstance(java.lang.String) }.
      *
      * @param val
      *            a <code>String</code>. If <code>null</code>, the default
@@ -26,12 +56,7 @@ public final class NominalValue extends ValueImpl {
             this.val = "";
         }
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
+    
     @Override
     public int hashCode() {
         if (this.hashCode == 0) {
@@ -40,6 +65,13 @@ public final class NominalValue extends ValueImpl {
         return this.hashCode;
     }
 
+    /**
+     * Compares this nominal value and another for string equality.
+     *
+     * @param obj another object.
+     * @return <code>true</code> if the two nominal values' strings are equal,
+     * <code>false</code> if not.
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -64,10 +96,8 @@ public final class NominalValue extends ValueImpl {
         return val;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.protempa.proposition.value.Value#getFormatted()
+    /**
+     * Returns the same thing as {@link #getString}.
      */
     @Override
     public String getFormatted() {
@@ -87,10 +117,14 @@ public final class NominalValue extends ValueImpl {
         return reprType() + val;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.protempa.proposition.value.ValueImpl#compareNominalValue(org.protempa.proposition.value.NominalValue)
+    /**
+     * Compares this nominal value and another lexically.
+     * 
+     * @param d2 another {@link NominalValue}.
+     * @return {@link ValueComparator.GREATER_THAN},
+     * {@link ValueComparator.LESS_THAN} or {@link ValueComparator.EQUAL_TO}
+     * depending on whether this nominal value is lexically greater than,
+     * less than or equal to the nominal value provided as argument.
      */
     @Override
     protected ValueComparator compareNominalValue(NominalValue d2) {

@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
-import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
@@ -28,7 +27,6 @@ import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.BooleanValue;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.InequalityNumberValue;
@@ -174,13 +172,17 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             SQLGenResultProcessor resultProcessor)
             throws DataSourceReadException {
         if (Boolean.getBoolean(SYSTEM_PROPERTY_SKIP_EXECUTION)) {
-            logger.log(Level.INFO,
-                    "Data source backend {0} is skipping query for {1}",
-                    new Object[]{backendNameForMessages, entitySpecName});
+            if (logger.isLoggable(Level.INFO)) {
+                logger.log(Level.INFO,
+                        "Data source backend {0} is skipping query for {1}",
+                        new Object[]{backendNameForMessages, entitySpecName});
+            }
         } else {
-            logger.log(Level.FINE,
-                    "Data source backend {0} is executing query for {1}",
-                    new Object[]{backendNameForMessages, entitySpecName});
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE,
+                        "Data source backend {0} is executing query for {1}",
+                        new Object[]{backendNameForMessages, entitySpecName});
+            }
 
             try {
                 SQLExecutor.executeSQL(getConnectionSpec(), query,
@@ -190,9 +192,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                         "Error executing query in data source backend "
                         + backendNameForMessages + " for " + entitySpecName, ex);
             }
-            logger.log(Level.FINE,
-                    "Query for {0} in data source backend {1} is complete",
-                    new Object[]{entitySpecName, backendNameForMessages});
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE,
+                        "Query for {0} in data source backend {1} is complete",
+                        new Object[]{entitySpecName, backendNameForMessages});
+            }
         }
     }
 
@@ -217,10 +221,12 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         Collection<EntitySpec> allEntitySpecs = allEntitySpecs();
         Logger logger = SQLGenUtil.logger();
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
-            logger.log(Level.FINE,
-                    "Data source backend {0} is processing entity spec {1}",
-                    new Object[]{backendNameForMessages(),
-                        entitySpec.getName()});
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE,
+                        "Data source backend {0} is processing entity spec {1}",
+                        new Object[]{backendNameForMessages(),
+                            entitySpec.getName()});
+            }
             List<EntitySpec> allEntitySpecsCopy =
                     new ArrayList<EntitySpec>(allEntitySpecs);
             removeNonApplicableEntitySpecs(entitySpec, allEntitySpecsCopy);
@@ -260,10 +266,12 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     RefResultProcessor<P> refResultProcessor =
                             factory.getRefInstance(dataSourceBackendId,
                             entitySpec, referenceSpec, results);
-                    logger.log(Level.FINE,
-                            "Data source backend {0} is processing reference {1} for entity spec {2}",
-                            new Object[]{backendNameForMessages(),
-                                referenceSpec.getReferenceName(), entitySpec.getName()});
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.log(Level.FINE,
+                                "Data source backend {0} is processing reference {1} for entity spec {2}",
+                                new Object[]{backendNameForMessages(),
+                                    referenceSpec.getReferenceName(), entitySpec.getName()});
+                    }
                     List<EntitySpec> allEntitySpecsCopyForRefs =
                             new ArrayList<EntitySpec>(allEntitySpecs.size());
                     allEntitySpecsCopyForRefs.add(entitySpec);
@@ -301,24 +309,28 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     generateAndExecuteSelect(entitySpec, referenceSpec, propIds,
                             refFiltersCopy, allEntitySpecsCopyForRefs, keyIds,
                             order, refResultProcessor);
-                    logger.log(Level.FINE, "Data source backend {0} is done processing reference {1} for entity spec {2}",
-                            new Object[]{backendNameForMessages(),
-                                referenceSpec.getReferenceName(), entitySpec.getName()});
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.log(Level.FINE, "Data source backend {0} is done processing reference {1} for entity spec {2}",
+                                new Object[]{backendNameForMessages(),
+                                    referenceSpec.getReferenceName(), entitySpec.getName()});
+                    }
                 }
-
-                logger.log(Level.FINE,
-                        "Data source backend {0} is done processing entity spec {1}",
-                        new Object[]{backendNameForMessages(),
-                            entitySpec.getName()});
+                if (logger.isLoggable(Level.FINE)) {
+                    logger.log(Level.FINE,
+                            "Data source backend {0} is done processing entity spec {1}",
+                            new Object[]{backendNameForMessages(),
+                                entitySpec.getName()});
+                }
             }
 
             results.clear();
-
-            logger.log(Level.FINE,
-                    "Results of query for {0} in data source backend {1} "
-                    + "have been processed",
-                    new Object[]{entitySpec.getName(),
-                        backendNameForMessages()});
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE,
+                        "Results of query for {0} in data source backend {1} "
+                        + "have been processed",
+                        new Object[]{entitySpec.getName(),
+                            backendNameForMessages()});
+            }
         }
         return results;
     }
@@ -353,16 +365,20 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         String backendNameForMessages = backendNameForMessages();
         String entitySpecName = entitySpec.getName();
 
-        logger.log(Level.FINE,
-                "Data source backend {0} is generating query for {1}",
-                new Object[]{backendNameForMessages, entitySpecName});
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE,
+                    "Data source backend {0} is generating query for {1}",
+                    new Object[]{backendNameForMessages, entitySpecName});
+        }
 
         String query = generateSelect(entitySpec, referenceSpec, propIds,
                 filtersCopy, entitySpecsCopy, keyIds, order, resultProcessor);
 
-        logger.log(Level.FINE,
-                "Data source backend {0} generated the following query for {1}: {2}",
-                new Object[]{backendNameForMessages, entitySpecName, query});
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE,
+                    "Data source backend {0} generated the following query for {1}: {2}",
+                    new Object[]{backendNameForMessages, entitySpecName, query});
+        }
 
         executeSelect(logger, backendNameForMessages, entitySpecName, query,
                 resultProcessor);
@@ -1014,8 +1030,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 entitySpecPropIdsL.add(entitySpecPropId);
             }
         }
-        boolean result = entitySpecPropIdsL.size() <
-                entitySpecPropIds.length * 0.15f || entitySpecPropIdsL.size() > 2000;
+        boolean result = entitySpecPropIdsL.size()
+                < entitySpecPropIds.length * 0.15f || entitySpecPropIdsL.size() > 2000;
         return result;
     }
 
@@ -1141,11 +1157,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
                                     appendColumnRef(wherePart,
                                             referenceIndices, finishTimeSpec);
-                                    wherePart.append(" >= {ts '");
-                                    wherePart.append(
-                                            AbsoluteTimeGranularity.toSQLString(
-                                            pdsc2.getMinimumStart()));
-                                    wherePart.append("'}");
+                                    wherePart.append(" >= ");
+                                    wherePart.append(entitySpec.getPositionParser().format(pdsc2.getMinimumStart()));
                                 }
 
                                 if (outputFinish) {
@@ -1155,11 +1168,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
                                     appendColumnRef(wherePart,
                                             referenceIndices, finishTimeSpec);
-                                    wherePart.append(" <= {ts '");
-                                    wherePart.append(
-                                            AbsoluteTimeGranularity.toSQLString(
-                                            pdsc2.getMaximumFinish()));
-                                    wherePart.append("'}");
+                                    wherePart.append(" <= ");
+                                    wherePart.append(entitySpec.getPositionParser().format(pdsc2.getMaximumFinish()));
                                 }
                             }
                         }
@@ -1209,11 +1219,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                     }
                                     appendColumnRef(wherePart,
                                             referenceIndices, startTimeSpec);
-                                    wherePart.append(" >= {ts '");
-                                    wherePart.append(
-                                            AbsoluteTimeGranularity.toSQLString(
-                                            pdsc2.getMinimumStart()));
-                                    wherePart.append("'}");
+                                    wherePart.append(" >= ");
+                                    wherePart.append(entitySpec.getPositionParser().format(pdsc2.getMinimumStart()));
                                 }
                                 if (outputFinish) {
                                     if (wherePart.length() > 0) {
@@ -1222,11 +1229,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                     appendColumnRef(wherePart,
                                             referenceIndices,
                                             startTimeSpec);
-                                    wherePart.append(" <= {ts '");
-                                    wherePart.append(
-                                            AbsoluteTimeGranularity.toSQLString(
-                                            pdsc2.getMaximumFinish()));
-                                    wherePart.append("'}");
+                                    wherePart.append(" <= ");
+                                    wherePart.append(entitySpec.getPositionParser().format(pdsc2.getMaximumFinish()));
                                 }
                             }
                         }
@@ -1375,8 +1379,9 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             boolean inDataSource =
                     populateEntitySpecToPropIdMap(new String[]{propId},
                     entitySpecToPropIdMapFromPropIds);
-            if (!inDataSource) {
-                SQLGenUtil.logger().log(Level.FINER,
+            Logger logger = SQLGenUtil.logger();
+            if (!inDataSource && logger.isLoggable(Level.FINER)) {
+                logger.log(Level.FINER,
                         "Data source backend {0} does not know about proposition {1}",
                         new Object[]{backendNameForMessages(), propId});
             }

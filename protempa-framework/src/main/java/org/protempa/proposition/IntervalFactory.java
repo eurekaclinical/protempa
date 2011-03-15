@@ -20,7 +20,9 @@ public final class IntervalFactory {
 
         private static Interval defaultInterval = new DefaultInterval();
     }
-    private static final Map cache = new ReferenceMap();
+    @SuppressWarnings("unchecked")
+    private static final Map<List<Object>, Interval> cache =
+            new ReferenceMap();
 
     /**
      * Returns an interval specified by the given minimum start, maximum start,
@@ -54,7 +56,7 @@ public final class IntervalFactory {
             Granularity finishGran) {
         List<Object> key = Arrays.asList(new Object[]{minStart, maxStart,
                     startGran, minFinish, maxFinish, finishGran});
-        Interval result = (Interval) cache.get(key);
+        Interval result = cache.get(key);
         if (result == null) {
             if (minStart == null || maxStart == null || minFinish == null
                     || maxFinish == null) {
@@ -89,7 +91,7 @@ public final class IntervalFactory {
             Long finish, Granularity finishGran) {
         List<Object> key = Arrays.asList(new Object[]{start, startGran,
                     finish, finishGran});
-        Interval result = (Interval) cache.get(key);
+        Interval result = cache.get(key);
         if (result == null) {
             if (start == null || finish == null) {
                 result = new DefaultInterval(start, startGran, finish, finishGran);
@@ -117,7 +119,7 @@ public final class IntervalFactory {
      */
     public Interval getInstance(Long position, Granularity gran) {
         List<Object> key = Arrays.asList(new Object[]{position, gran});
-        Interval result = (Interval) cache.get(key);
+        Interval result = cache.get(key);
         if (result == null) {
             if (position == null) {
                 result = new DefaultInterval(position, gran, position, gran);

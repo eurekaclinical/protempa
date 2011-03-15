@@ -18,10 +18,9 @@ import org.arp.javautil.graph.Weight;
  */
 final class DefaultInterval extends Interval {
 
-    private static final long serialVersionUID = -3498981235848594138L;
-    private transient ConstraintNetwork cn;
-    private transient boolean constraintNetworkStale = true;
-    private transient boolean simple;
+    private ConstraintNetwork cn;
+    private boolean constraintNetworkStale = true;
+    private boolean simple;
 
     DefaultInterval(Long minStart, Long maxStart,
             Granularity startGranularity, Long minFinish, Long maxFinish,

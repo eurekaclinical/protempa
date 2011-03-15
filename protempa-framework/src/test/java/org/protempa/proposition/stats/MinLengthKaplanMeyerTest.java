@@ -9,7 +9,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.protempa.DataSourceType;
-import org.protempa.DatabaseDataSourceType;
+import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Event;
@@ -32,7 +32,7 @@ public class MinLengthKaplanMeyerTest extends TestCase {
 	protected void setUp() throws Exception {
 		this.propositions = new ArrayList<Proposition>();
 		this.dbDataSourceType = 
-                        DatabaseDataSourceType.getInstance("MockTestDatabase");
+                        DataSourceBackendDataSourceType.getInstance("MockTestDatabase");
 		this.derivedDataSourceType = DerivedDataSourceType.getInstance();
 		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
 

@@ -39,10 +39,11 @@
             <version>1.5.11</version>
         </dependency>
         <dependency>
-            <groupId>berkeleydb</groupId>
+            <!--<groupId>berkeleydb</groupId>-->
+            <groupId>com.sleepycat</groupId>
             <artifactId>je</artifactId>
-            <version>3.2.76</version>
-            <optional>false</optional>
+            <!--<version>3.2.76</version>-->
+            <version>4.1.7</version>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
@@ -114,4 +115,11 @@
             </build>
         </profile>
     </profiles>
+    <repositories>
+        <repository>
+            <id>oracle-repo</id>
+            <name>Oracle Repository</name>
+            <url>http://download.oracle.com/maven</url>
+        </repository>
+    </repositories>
 </project>

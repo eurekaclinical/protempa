@@ -1,9 +1,9 @@
 package org.protempa;
 
+import java.io.ObjectStreamException;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-public final class DerivedDataSourceType implements DataSourceType {
-    private static final long serialVersionUID = 8407624453239522038L;
+public final class DerivedDataSourceType extends DataSourceType {
     
     private static class DerivedDataSourceTypeContainer {
         private static DerivedDataSourceType INSTANCE = 
@@ -32,5 +32,4 @@ public final class DerivedDataSourceType implements DataSourceType {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
-
 }

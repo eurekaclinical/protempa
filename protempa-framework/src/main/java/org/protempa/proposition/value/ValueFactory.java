@@ -68,6 +68,7 @@ public class ValueFactory implements Serializable {
     private ValueType type;
 
     ValueFactory(ValueType type) {
+        assert type != null : "type cannot be null";
         this.type = type;
     }
 

@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.protempa.DatabaseDataSourceType;
+import org.protempa.DataSourceBackendDataSourceType;
+import org.protempa.DataSourceType;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.Interval;
 import org.protempa.proposition.IntervalFactory;
@@ -18,7 +19,7 @@ import org.protempa.proposition.value.Value;
 class EventResultProcessor extends AbstractMainResultProcessor<Event> {
 
     private static final IntervalFactory intervalFactory = new IntervalFactory();
-    private static final int FLUSH_SIZE = 100000;
+    private static final int FLUSH_SIZE = 250000;
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
@@ -39,6 +40,8 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
         int finishColumnType = -1;
         String[] uniqueIds =
                 new String[entitySpec.getUniqueIdSpecs().length];
+        DataSourceType dsType =
+                DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
@@ -79,7 +82,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                 } catch (SQLException e) {
                     logger.log(
                             Level.WARNING,
-                            "Could not parse timestamp. Leaving the finish time unset.",
+                            "Could not parse timestamp. Leaving the start time/timestamp unset.",
                             e);
                 }
                 interval = intervalFactory.getInstance(d, gran);
@@ -125,14 +128,15 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                 }
             }
 
-            i = extractPropertyValues(propertySpecs, resultSet, i, propertyValues);
+            i = extractPropertyValues(propertySpecs, resultSet, i, 
+                    propertyValues);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
             }
 
             Event event = new Event(propId);
-            event.setDataSourceType(DatabaseDataSourceType.getInstance(getDataSourceBackendId()));
+            event.setDataSourceType(dsType);
             event.setUniqueIdentifier(uniqueIdentifier);
             event.setInterval(interval);
             for (int j = 0; j < propertySpecs.length; j++) {

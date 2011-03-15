@@ -20,7 +20,7 @@ import org.arp.javautil.sql.SQLExecutor.StatementPreparer;
 import org.protempa.DataSourceBackendFailedValidationException;
 import org.protempa.DataSourceBackendInitializationException;
 import org.protempa.DataSourceReadException;
-import org.protempa.DatabaseDataSourceType;
+import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.KnowledgeSource;
 import org.protempa.QuerySession;
 import org.protempa.backend.BackendInstanceSpec;
@@ -327,7 +327,7 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
                         Event p = new Event("ICD-9_"
                                 + resultSet.getString(2));
                         p.setDataSourceType(
-                                DatabaseDataSourceType.getInstance(getDataSourceBackendId()));
+                                DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId()));
                         long l = RelativeHourGranularity.HOUR.lengthInBaseUnit(resultSet.getInt(3));
                         p.setInterval(intervalFactory.getInstance(l,
                                 RelativeHourGranularity.HOUR, l,
@@ -339,7 +339,7 @@ public class HELLPDataSourceBackend extends AbstractCommonsDataSourceBackend {
                         Event p = new Event("ICD-9_"
                                 + resultSet.getString(2));
                         p.setDataSourceType(
-                                DatabaseDataSourceType.getInstance(getDataSourceBackendId()));
+                                DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId()));
                         long l = RelativeHourGranularity.HOUR.lengthInBaseUnit(resultSet.getInt(3));
                         p.setInterval(intervalFactory.getInstance(l,
                                 RelativeHourGranularity.HOUR, l,

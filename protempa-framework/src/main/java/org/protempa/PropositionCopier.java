@@ -71,7 +71,8 @@ class PropositionCopier extends AbstractPropositionVisitor {
     public void visit(PrimitiveParameter primitiveParameter) {
         assert this.workingMemory != null : "workingMemory wasn't set";
         PrimitiveParameter param = new PrimitiveParameter(propId);
-        param.setInterval(primitiveParameter.getInterval());
+        param.setTimestamp(primitiveParameter.getTimestamp());
+        param.setGranularity(primitiveParameter.getGranularity());
         param.setValue(primitiveParameter.getValue());
         param.setDataSourceType(DerivedDataSourceType.getInstance());
         param.setUniqueIdentifier(new UniqueIdentifier(

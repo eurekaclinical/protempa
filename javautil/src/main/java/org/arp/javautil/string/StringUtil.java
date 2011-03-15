@@ -1,7 +1,6 @@
 package org.arp.javautil.string;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,6 +72,29 @@ public class StringUtil {
             String columnValue = columnValues[i];
             columnValues[i] = StringUtil.escapeDelimitedColumn(columnValue,
                     delimiter);
+        }
+    }
+
+    public static void escapeAndWriteDelimitedColumns(String[] columnValues,
+            char delimiter, Writer writer) throws IOException {
+        for (int i = 0; i < columnValues.length; i++) {
+            String columnValue = columnValues[i];
+            escapeDelimitedColumn(columnValue, delimiter, writer);
+            if (i < columnValues.length - 1) {
+                writer.write(delimiter);
+            }
+        }
+    }
+
+    public static void escapeAndWriteDelimitedColumns(
+            List<String> columnValues,
+            char delimiter, Writer writer) throws IOException {
+        for (int i = 0, n = columnValues.size(); i < n; i++) {
+            String columnValue = columnValues.get(i);
+            escapeDelimitedColumn(columnValue, delimiter, writer);
+            if (i < n - 1) {
+                writer.write(delimiter);
+            }
         }
     }
 

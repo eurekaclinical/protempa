@@ -44,8 +44,7 @@ public final class PropertySpec implements Serializable {
             throw new IllegalArgumentException("valueType cannot be null");
         this.name = name;
         if (codeToPropIdMap != null) {
-            this.codeToPropIdMap =
-                    new HashMap<String,String>(codeToPropIdMap);
+            this.codeToPropIdMap = new HashMap<String,String>(codeToPropIdMap);
         } else {
             this.codeToPropIdMap = Collections.emptyMap();
         }
@@ -62,8 +61,12 @@ public final class PropertySpec implements Serializable {
         return this.name;
     }
 
-    public Map<String, String> getCodeToPropIdMap() {
-        return new HashMap<String,String>(this.codeToPropIdMap);
+    public boolean codeToPropIdMapContainsKey(String key) {
+        return this.codeToPropIdMap.containsKey(key);
+    }
+
+    public String propositionIdFor(String key) {
+        return this.codeToPropIdMap.get(key);
     }
 
     /**

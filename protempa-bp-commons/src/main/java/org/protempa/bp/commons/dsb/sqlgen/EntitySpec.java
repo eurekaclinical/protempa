@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
-import org.protempa.bp.commons.dsb.PositionParser;
+import org.protempa.bp.commons.dsb.PositionFormat;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.ValueType;
 
@@ -34,7 +34,7 @@ public final class EntitySpec implements Serializable {
     private final ValueType valueType;
     private final ColumnSpec valueSpec;
     private final Granularity granularity;
-    private final PositionParser positionParser;
+    private final PositionFormat positionParser;
 
     /**
      * Creates an entity spec instance.
@@ -100,7 +100,7 @@ public final class EntitySpec implements Serializable {
             ColumnSpec valueSpec,
             ValueType valueType,
             Granularity granularity,
-            PositionParser positionParser) {
+            PositionFormat positionParser) {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
         }
@@ -368,7 +368,7 @@ public final class EntitySpec implements Serializable {
      * finish times in the database.
      * @return a {@link PositionParser}. Cannot be <code>null</code>.
      */
-    public PositionParser getPositionParser() {
+    public PositionFormat getPositionParser() {
         return this.positionParser;
     }
 

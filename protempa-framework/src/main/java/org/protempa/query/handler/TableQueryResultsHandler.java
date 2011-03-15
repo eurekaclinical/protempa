@@ -111,9 +111,7 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
                 List<String> columnNames = new ArrayList<String>();
                 columnNames.add("KeyId");
                 for (TableColumnSpec columnSpec : this.columnSpecs) {
-                    Util.logger().log(
-                            Level.FINE,
-                            "Processing columnSpec type {0}",
+                    logger.log(Level.FINE,"Processing columnSpec type {0}",
                             columnSpec.getClass().getName());
                     String[] colNames =
                             columnSpec.columnNames(knowledgeSource);
@@ -126,21 +124,19 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
                         }
                     }
 
-                    String[] escapedColNames = StringUtil.escapeDelimitedColumns(colNames,
-                            this.columnDelimiter);
                     if (logger.isLoggable(Level.FINE)) {
                         logger.log(
                                 Level.FINE,
                                 "Got the following columns for proposition {0}: {1}",
                                 new Object[]{Arrays.toString(this.rowPropositionIds),
-                                    StringUtils.join(escapedColNames, ",")});
+                                    colNames});
                     }
-                    for (String colName : escapedColNames) {
+                    for (String colName : colNames) {
                         columnNames.add(colName);
                     }
                 }
-
-                write(StringUtils.join(columnNames, this.columnDelimiter));
+                StringUtil.escapeAndWriteDelimitedColumns(columnNames,
+                        this.columnDelimiter, this);
                 newLine();
             } catch (KnowledgeSourceReadException ex1) {
                 throw new FinderException("Error reading knowledge source", ex1);

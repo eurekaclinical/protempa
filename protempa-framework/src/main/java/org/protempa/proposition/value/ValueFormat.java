@@ -61,25 +61,17 @@ public class ValueFormat {
      *
      * @param value
      *            a value {@link String}.
-     * @param valueFactoryId
-     *            the unique id of a value factory.
+     * @param valueType the value's {@link ValueType}
+     * (cannot be <code>null</code>).
      * @return a {@link Value} object, or <code>null</code> if a
      *         <code>null</code> <code>value</code> parameter is passed in.
-     * @throws IllegalArgumentException
-     *             if a non-<code>null</code> <code>value</code> is
-     *             provided but <code>valueFactoryId</code> is
-     *             <code>null</code>, or if an invalid
-     *             <code>valueFactoryId</code> is provided.
-     * @see ValueFactory
      */
     public static Value parse(String value, ValueType valueType) {
-        if (value != null && valueType == null) {
-            throw new IllegalArgumentException(
-                    "valueType cannot be null");
+        if (valueType == null) {
+            throw new IllegalArgumentException("valueType cannot be null");
         }
         if (value != null) {
             return ValueFactory.get(valueType).parseValue(value);
-
         } else {
             return null;
         }

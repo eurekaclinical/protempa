@@ -389,7 +389,7 @@ class Util {
             resultStr = (String) cm.getOwnSlotValue(paramConstraint,
                     cm.getSlot("displayName"));
             if (resultStr != null) {
-                result = new NominalValue(resultStr);
+                result = NominalValue.getInstance(resultStr);
             }
         }
         return result;
@@ -440,7 +440,7 @@ class Util {
         Set<String> inverseIsAs = new HashSet<String>();
         for (Object isAInstance : isas) {
             String name = ((Instance) isAInstance).getName();
-            if (!inverseIsAs.add(name)) {
+            if (!inverseIsAs.add(name) && logger.isLoggable(Level.WARNING)) {
                 logger.log(Level.WARNING, "Duplicate {0} in {1}: {2}",
                         new Object[]{slotName, propInstance.getName(), name});
             }

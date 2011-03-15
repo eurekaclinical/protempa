@@ -20,10 +20,15 @@ import java.util.Set;
  */
 public class DataSourceResultMap<P> implements Map<String, List<P>> {
 
-    private class DataSourceResultMapEntry implements Map.Entry<String, List<P>> {
+    public class DataSourceResultMapEntry implements Map.Entry<String, List<P>> {
 
-        String key;
-        List<P> value;
+        private String key;
+        private List<P> value;
+
+        public DataSourceResultMapEntry(String key, List<P> value) {
+            this.key = key;
+            this.value = value;
+        }
 
         @Override
         public String getKey() {
@@ -40,10 +45,15 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
             throw new UnsupportedOperationException("This map is immutable");
         }
     }
+
     private List<Map<String, List<P>>> maps;
 
     public DataSourceResultMap(List<Map<String, List<P>>> maps) {
         this.maps = maps;
+    }
+
+    protected List<Map<String, List<P>>> getMaps() {
+        return this.maps;
     }
 
     @Override
@@ -61,6 +71,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
     }
 
     @Override
+    @SuppressWarnings("element-type-mismatch")
     public boolean containsKey(Object o) {
         boolean containsKey = false;
         for (Map<String, List<P>> map : this.maps) {
@@ -73,6 +84,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
     }
 
     @Override
+    @SuppressWarnings("element-type-mismatch")
     public boolean containsValue(Object o) {
         boolean containsValue = false;
         for (Map<String, List<P>> map : this.maps) {
@@ -88,7 +100,8 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
     public List<P> get(Object o) {
         List<P> result = new ArrayList<P>();
         for (Map<String, List<P>> map : this.maps) {
-            List<P> r = (List<P>) map.get(o);
+            @SuppressWarnings("element-type-mismatch")
+            List<P> r = map.get(o);
             if (r != null) {
                 result.addAll(r);
             }
@@ -127,12 +140,12 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
 
     @Override
     public Set<Entry<String, List<P>>> entrySet() {
-        Set<Entry<String, List<P>>> result = new HashSet<Entry<String, List<P>>>();
+        Set<Entry<String, List<P>>> result =
+                new HashSet<Entry<String, List<P>>>();
         for (Map<String, List<P>> map : this.maps) {
             for (Map.Entry<String, List<P>> me : map.entrySet()) {
-                DataSourceResultMapEntry newMe = new DataSourceResultMapEntry();
-                newMe.key = me.getKey();
-                newMe.value = me.getValue();
+                DataSourceResultMapEntry newMe = new DataSourceResultMapEntry(
+                        me.getKey(), me.getValue());
                 result.add(newMe);
             }
         }

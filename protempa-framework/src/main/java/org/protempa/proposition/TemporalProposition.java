@@ -1,5 +1,8 @@
 package org.protempa.proposition;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.Format;
 import java.text.NumberFormat;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -21,13 +24,13 @@ public abstract class TemporalProposition extends AbstractProposition {
         numberFormat.setGroupingUsed(true);
     }
 
-    private static final IntervalFactory intervalFactory =
+    protected static final IntervalFactory INTERVAL_FACTORY =
             new IntervalFactory();
 
     /**
      * The interval over which the proposition is valid.
      */
-    private Interval interval;
+    private transient Interval interval;
 
     /**
      * Creates a proposition with an id.
@@ -37,8 +40,10 @@ public abstract class TemporalProposition extends AbstractProposition {
      */
     TemporalProposition(String id) {
         super(id);
-        this.interval = intervalFactory.getInstance();
+        this.interval = INTERVAL_FACTORY.getInstance();
     }
+
+    protected TemporalProposition() {}
 
     /**
      * The range of time over which this parameter's value is true.
@@ -55,9 +60,9 @@ public abstract class TemporalProposition extends AbstractProposition {
      * @param interval
      *            an <code>Interval</code>.
      */
-    public final void setInterval(Interval interval) {
+    protected void setInterval(Interval interval) {
         if (interval == null) {
-            interval = intervalFactory.getInstance();
+            interval = INTERVAL_FACTORY.getInstance();
         }
         this.interval = interval;
         this.hashCode = 0;
@@ -242,5 +247,21 @@ public abstract class TemporalProposition extends AbstractProposition {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())
                 .append("interval", this.interval).toString();
+    }
+
+    protected void writeTemporalProposition(ObjectOutputStream s) throws IOException {
+        s.writeObject(this.interval.getMinStart());
+        s.writeObject(this.interval.getMaxStart());
+        s.writeObject(this.interval.getStartGranularity());
+        s.writeObject(this.interval.getMinFinish());
+        s.writeObject(this.interval.getMaxFinish());
+        s.writeObject(this.interval.getFinishGranularity());
+    }
+
+    protected void readTemporalProposition(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        setInterval(INTERVAL_FACTORY.getInstance((Long) s.readObject(),
+                (Long) s.readObject(), (Granularity) s.readObject(),
+                (Long) s.readObject(), (Long) s.readObject(),
+                (Granularity) s.readObject()));
     }
 }

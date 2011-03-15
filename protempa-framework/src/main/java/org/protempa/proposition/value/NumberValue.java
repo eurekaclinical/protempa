@@ -20,7 +20,9 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
     private final BigDecimal num;
     private transient volatile int hashCode;
     
-    private static final Map cache = new ReferenceMap();
+    @SuppressWarnings("unchecked")
+    private static final Map<BigDecimal,NumberValue> cache =
+            new ReferenceMap();
 
     public static NumberValue getInstance(double num) {
         return getInstance(BigDecimal.valueOf(num));
@@ -34,7 +36,7 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
         if (num == null) {
             throw new IllegalArgumentException("num cannot be null");
         }
-        NumberValue result = (NumberValue) cache.get(num);
+        NumberValue result = cache.get(num);
         if (result == null) {
             result = new NumberValue(num);
             cache.put(num, result);

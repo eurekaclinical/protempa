@@ -1,5 +1,9 @@
 package org.protempa.proposition;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.ProtempaException;
@@ -11,7 +15,7 @@ import org.protempa.ProtempaException;
  * 
  * @author Andrew Post
  */
-public final class Event extends TemporalProposition {
+public final class Event extends TemporalProposition implements Serializable {
 
     private static final long serialVersionUID = -47155268578773061L;
 
@@ -23,6 +27,13 @@ public final class Event extends TemporalProposition {
      */
     public Event(String id) {
         super(id);
+    }
+
+    protected Event() {}
+
+    @Override
+    public void setInterval(Interval interval) {
+        super.setInterval(interval);
     }
 
     /*
@@ -60,5 +71,15 @@ public final class Event extends TemporalProposition {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())
                 .toString();
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        writeAbstractProposition(s);
+        writeTemporalProposition(s);
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        readAbstractProposition(s);
+        readTemporalProposition(s);
     }
 }

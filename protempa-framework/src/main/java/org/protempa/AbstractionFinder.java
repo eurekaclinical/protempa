@@ -18,6 +18,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.drools.RuleBase;
+import org.drools.RuleBaseConfiguration;
+import org.drools.RuleBaseConfiguration.AssertBehaviour;
 import org.drools.StatefulSession;
 import org.drools.StatelessSession;
 import org.drools.StatelessSessionResult;
@@ -314,20 +316,70 @@ final class AbstractionFinder implements Module {
 
     private interface ExecutionStrategy {
 
-        List<Proposition> execute(RuleBase ruleBase,
+        void initialize();
+
+        List<Proposition> execute(
                 String keyIds, Set<String> propositionIds, List<?> objects)
                 throws ProtempaException;
 
         void cleanup();
 
-        RuleBase getOrCreateRuleBase(Set<String> propIds,
+        void createRuleBase(Set<String> propIds,
                 DerivationsBuilder listener, QuerySession qs)
                 throws ProtempaException;
     }
 
-    private abstract class AbstractExecutionStrategy implements ExecutionStrategy {
+    private abstract class AbstractExecutionStrategy
+            implements ExecutionStrategy {
 
-        protected class ValidateAlgorithmCheckedVisitor
+        protected RuleBase ruleBase;
+
+        @Override
+        public void createRuleBase(Set<String> propIds,
+                DerivationsBuilder listener,
+                QuerySession qs) throws ProtempaException {
+            ValidateAlgorithmCheckedVisitor visitor =
+                    new ValidateAlgorithmCheckedVisitor(algorithmSource);
+            JBossRuleCreator ruleCreator = new JBossRuleCreator(
+                    visitor.getAlgorithms(), listener);
+            List<PropositionDefinition> propDefs =
+                    new ArrayList<PropositionDefinition>(propIds.size());
+            for (String propId : propIds) {
+                PropositionDefinition propDef =
+                        knowledgeSource.readPropositionDefinition(propId);
+                if (propDef != null) {
+                    propDefs.add(propDef);
+                } else {
+                    throw new FinderException("Invalid proposition id: " + propId);
+                }
+            }
+            if (propIds != null) {
+                Set<PropositionDefinition> result =
+                        new HashSet<PropositionDefinition>();
+                aggregateChildren(visitor, result, propDefs);
+                ruleCreator.visit(result);
+            }
+            this.ruleBase =
+                    new JBossRuleBaseFactory(ruleCreator, createRuleBaseConfiguration(ruleCreator)).newInstance();
+            clearNeeded = true;
+        }
+
+        protected RuleBaseConfiguration createRuleBaseConfiguration(JBossRuleCreator ruleCreator) throws PropositionDefinitionInstantiationException {
+            RuleBaseConfiguration config = new RuleBaseConfiguration();
+            config.setShadowProxy(false);
+            try {
+                config.setConflictResolver(new PROTEMPAConflictResolver(
+                        knowledgeSource,
+                        ruleCreator.getRuleToAbstractionDefinitionMap()));
+            } catch (KnowledgeSourceReadException ex) {
+                throw new PropositionDefinitionInstantiationException(
+                        "Could not instantiate proposition definitions", ex);
+            }
+            config.setAssertBehaviour(AssertBehaviour.EQUALITY);
+            return config;
+        }
+
+        private class ValidateAlgorithmCheckedVisitor
                 extends AbstractPropositionDefinitionCheckedVisitor {
 
             private final Map<LowLevelAbstractionDefinition, Algorithm> algorithms;
@@ -391,37 +443,6 @@ final class AbstractionFinder implements Module {
             }
         }
 
-        @Override
-        public RuleBase getOrCreateRuleBase(Set<String> propIds,
-                DerivationsBuilder listener,
-                QuerySession qs) throws ProtempaException {
-            ValidateAlgorithmCheckedVisitor visitor =
-                    new ValidateAlgorithmCheckedVisitor(algorithmSource);
-            JBossRuleCreator ruleCreator = new JBossRuleCreator(
-                    visitor.getAlgorithms(), listener);
-            List<PropositionDefinition> propDefs =
-                    new ArrayList<PropositionDefinition>(propIds.size());
-            for (String propId : propIds) {
-                PropositionDefinition propDef =
-                        knowledgeSource.readPropositionDefinition(propId);
-                if (propDef != null) {
-                    propDefs.add(propDef);
-                } else {
-                    throw new FinderException("Invalid proposition id: " + propId);
-                }
-            }
-            if (propIds != null) {
-                Set<PropositionDefinition> result =
-                        new HashSet<PropositionDefinition>();
-                aggregateChildren(visitor, result, propDefs);
-                ruleCreator.visit(result);
-            }
-            RuleBase ruleBase =
-                    new JBossRuleBaseFactory(ruleCreator, knowledgeSource).newInstance();
-            clearNeeded = true;
-            return ruleBase;
-        }
-
         /**
          * Collect all of the propositions for which we need to create rules.
          *
@@ -438,7 +459,7 @@ final class AbstractionFinder implements Module {
          *             if an error occurs reading the algorithm specified by a
          *             proposition definition.
          */
-        protected void aggregateChildren(
+        private void aggregateChildren(
                 ValidateAlgorithmCheckedVisitor validatorVisitor,
                 Set<PropositionDefinition> result, List<PropositionDefinition> propDefs)
                 throws ProtempaException {
@@ -457,14 +478,19 @@ final class AbstractionFinder implements Module {
     private class StatelessExecutionStrategy
             extends AbstractExecutionStrategy {
 
+        private StatelessSession statelessSession;
+
         @Override
-        public List<Proposition> execute(RuleBase ruleBase,
+        public void initialize() {
+            this.statelessSession = ruleBase.newStatelessSession();
+        }
+
+        @Override
+        public List<Proposition> execute(
                 String keyId, Set<String> propositionIds, List<?> objects)
                 throws ProtempaException {
-
-            StatelessSession statelessSession = ruleBase.newStatelessSession();
             StatelessSessionResult result =
-                    statelessSession.executeWithResults(objects);
+                    this.statelessSession.executeWithResults(objects);
             return unpack(result.iterateObjects());
         }
 
@@ -472,13 +498,28 @@ final class AbstractionFinder implements Module {
         public void cleanup() {
             clear();
         }
+
+        @Override
+        protected RuleBaseConfiguration createRuleBaseConfiguration(
+                JBossRuleCreator ruleCreator) throws PropositionDefinitionInstantiationException {
+            RuleBaseConfiguration result =
+                    super.createRuleBaseConfiguration(ruleCreator);
+            result.setSequential(true);
+            return result;
+        }
+
+
     }
 
     private class StatefulExecutionStrategy
             extends AbstractExecutionStrategy {
 
         @Override
-        public List<Proposition> execute(RuleBase ruleBase,
+        public void initialize() {
+        }
+
+        @Override
+        public List<Proposition> execute(
                 String keyId, Set<String> propositionIds, List<?> objects)
                 throws ProtempaException {
             StatefulSession workingMemory =
@@ -505,11 +546,11 @@ final class AbstractionFinder implements Module {
 
         DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
         logger.log(Level.FINE, "Creating rule base");
-        RuleBase ruleBase = strategy.getOrCreateRuleBase(propositionIds,
-                derivationsBuilder, qs);
+        strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
         logger.log(Level.FINE, "Rule base is created");
 
         logger.log(Level.FINE, "Now retrieving data");
+        strategy.initialize();
         ObjectIterator objectIterator = new ObjectIterator(keyIds,
                 propositionIds, filters, qs, false);
         logger.log(Level.FINE, "Now processing data");
@@ -517,7 +558,7 @@ final class AbstractionFinder implements Module {
             ObjectEntry entry = itr.next();
             logger.log(Level.FINER, "About to assert raw data {0}",
                     entry.propositions);
-            List<Proposition> propositions = strategy.execute(ruleBase,
+            List<Proposition> propositions = strategy.execute(
                     entry.keyId, propositionIds, entry.propositions);
             logger.log(Level.FINER, "Retrieved propositions: {0}",
                     propositions);

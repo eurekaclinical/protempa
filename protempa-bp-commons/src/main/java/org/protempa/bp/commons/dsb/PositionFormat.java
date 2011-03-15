@@ -7,6 +7,7 @@ import java.sql.SQLException;
  *
  * @author Andrew Post
  */
-public interface PositionParser {
+public interface PositionFormat {
     Long toLong(ResultSet resultSet, int columnIndex, int colType) throws SQLException;
+    String format(Long position);
 }

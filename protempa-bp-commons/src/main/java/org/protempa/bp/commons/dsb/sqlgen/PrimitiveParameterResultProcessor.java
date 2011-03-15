@@ -6,17 +6,18 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.protempa.DatabaseDataSourceType;
+import org.protempa.DataSourceBackendDataSourceType;
+import org.protempa.DataSourceType;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueFactory;
+import org.protempa.proposition.value.ValueFormat;
 import org.protempa.proposition.value.ValueType;
 
 class PrimitiveParameterResultProcessor extends
         AbstractMainResultProcessor<PrimitiveParameter> {
 
-    private static final int FLUSH_SIZE = 100000;
+    private static final int FLUSH_SIZE = 250000;
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
@@ -37,6 +38,8 @@ class PrimitiveParameterResultProcessor extends
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
 
         int timestampColumnType = -1;
+        DataSourceType dsType =
+                DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
@@ -75,9 +78,9 @@ class PrimitiveParameterResultProcessor extends
                         "Could not parse timestamp. Leaving timestamp unset.", e);
             }
 
-            ValueType vf = entitySpec.getValueType();
-            Value cpVal = ValueFactory.get(vf).parseValue(
-                    resultSet.getString(i++));
+            ValueType valueType = entitySpec.getValueType();
+            Value cpVal = ValueFormat.parse(resultSet.getString(i++), 
+                    valueType);
             i = extractPropertyValues(propertySpecs, resultSet, i,
                     propertyValues);
 
@@ -94,8 +97,7 @@ class PrimitiveParameterResultProcessor extends
                 PropertySpec propertySpec = propertySpecs[j];
                 p.setProperty(propertySpec.getName(), propertyValues[j]);
             }
-            p.setDataSourceType(DatabaseDataSourceType
-                    .getInstance(getDataSourceBackendId()));
+            p.setDataSourceType(dsType);
             logger.log(Level.FINEST, "Created primitive parameter {0}", p);
             results.add(keyId, p);
             if (++count % FLUSH_SIZE == 0) {

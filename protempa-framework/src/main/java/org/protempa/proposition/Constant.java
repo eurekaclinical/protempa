@@ -1,5 +1,9 @@
 package org.protempa.proposition;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.ProtempaException;
@@ -9,7 +13,8 @@ import org.protempa.ProtempaException;
  * 
  * @author Andrew Post
  */
-public final class Constant extends AbstractProposition {
+public final class Constant extends AbstractProposition
+        implements Serializable {
 
     private static final long serialVersionUID = 7205801414947324421L;
 
@@ -22,6 +27,8 @@ public final class Constant extends AbstractProposition {
     public Constant(String id) {
         super(id);
     }
+
+    protected Constant() {}
     
     @Override
     public boolean isEqual(Object o) {
@@ -53,5 +60,13 @@ public final class Constant extends AbstractProposition {
         return new ToStringBuilder(this)
                 .appendSuper(super.toString())
                 .toString();
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        writeAbstractProposition(s);
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        readAbstractProposition(s);
     }
 }

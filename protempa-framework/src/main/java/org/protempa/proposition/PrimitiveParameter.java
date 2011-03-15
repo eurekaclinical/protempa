@@ -1,5 +1,9 @@
 package org.protempa.proposition;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.ProtempaException;
@@ -13,12 +17,10 @@ import org.protempa.proposition.value.Granularity;
  * 
  * @author Andrew Post
  */
-public final class PrimitiveParameter extends TemporalParameter {
+public final class PrimitiveParameter extends TemporalParameter
+        implements Serializable {
 
     private static final long serialVersionUID = 693807976086426915L;
-
-    private static final IntervalFactory intervalFactory =
-            new IntervalFactory();
 
     /**
      * Creates a parameter with an identification string.
@@ -30,6 +32,8 @@ public final class PrimitiveParameter extends TemporalParameter {
     public PrimitiveParameter(String id) {
         super(id);
     }
+
+    protected PrimitiveParameter() {}
 
     /**
      * Returns this parameter's timestamp (or other kind of position value).
@@ -94,7 +98,7 @@ public final class PrimitiveParameter extends TemporalParameter {
         /*
          * As per Combi et al. Methods Inf. Med. 1995;34:458-74.
          */
-        setInterval(intervalFactory.getInstance(
+        setInterval(INTERVAL_FACTORY.getInstance(
                 timestamp, granularity, timestamp, granularity));
     }
 
@@ -127,10 +131,9 @@ public final class PrimitiveParameter extends TemporalParameter {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString())
-                .toString();
+        return new ToStringBuilder(this).appendSuper(super.toString()).toString();
     }
-    
+
     @Override
     public boolean isEqual(Object o) {
         if (o == this) {
@@ -154,5 +157,21 @@ public final class PrimitiveParameter extends TemporalParameter {
             PropositionCheckedVisitor propositionCheckedVisitor)
             throws ProtempaException {
         propositionCheckedVisitor.visit(this);
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        writeAbstractProposition(s);
+        s.writeObject(getTimestamp());
+        s.writeObject(getGranularity());
+        writeTemporalParameter(s);
+    }
+
+    
+
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        readAbstractProposition(s);
+        setTimestamp((Long) s.readObject());
+        setGranularity((Granularity) s.readObject());
+        readTemporalParameter(s);
     }
 }

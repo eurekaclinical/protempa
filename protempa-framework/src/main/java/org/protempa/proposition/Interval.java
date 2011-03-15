@@ -22,13 +22,10 @@ import org.arp.javautil.graph.WeightFactory;
  * 
  * @author Andrew Post
  */
-public abstract class Interval implements Comparable<Interval>, Serializable {
-
-    private static final long serialVersionUID = -8876433661943628691L;
+public abstract class Interval implements Comparable<Interval> {
 
     private static final WeightFactory weightFactory = new WeightFactory();
-
-    //Serialize these
+    
     private Long minStart;
     private Long maxStart;
     private Granularity startGranularity;
@@ -40,13 +37,13 @@ public abstract class Interval implements Comparable<Interval>, Serializable {
     private Unit lengthUnit;
 
     //Compute these
-    private transient Start start;
-    private transient Finish finish;
-    protected transient Long[] v;
-    private transient Weight[] vw;
-    private transient volatile int hashCode;
-    private transient boolean minLengthComputed;
-    private transient boolean maxLengthComputed;
+    private Start start;
+    private Finish finish;
+    protected Long[] v;
+    private Weight[] vw;
+    private volatile int hashCode;
+    private boolean minLengthComputed;
+    private boolean maxLengthComputed;
 
     /**
      * Create an interval with default values (minimumStart=-inf,

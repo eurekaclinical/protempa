@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.arp.javautil.map.CacheMap;
-import org.protempa.DataSourceResultMap;
+//import org.arp.javautil.map.CacheMap;
+import org.arp.javautil.map.DatabaseMap;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
 
@@ -23,8 +23,10 @@ public class ResultCache<P extends Proposition> {
         this.inMemoryPatientCache = new HashMap<String, List<P>>();
         this.refInMemoryPatientCache = new HashMap<RefCacheKey, List<P>>();
         this.patientCache = new ArrayList<Map<String, List<P>>>();
-        this.patientCache.add(new CacheMap<String, List<P>>());
-        this.conversionMap = new CacheMap<UniqueIdentifier, Location>(500000);
+//        this.patientCache.add(new CacheMap<String, List<P>>());
+//        this.conversionMap = new CacheMap<UniqueIdentifier, Location>(500000);
+        this.patientCache.add(new DatabaseMap<String, List<P>>());
+        this.conversionMap = new DatabaseMap<UniqueIdentifier, Location>();
     }
 
     P uidToProposition(UniqueIdentifier uid) {
@@ -84,7 +86,8 @@ public class ResultCache<P extends Proposition> {
         for (List<P> value : this.inMemoryPatientCache.values()) {
             value.clear();
         }
-        this.patientCache.add(new CacheMap<String, List<P>>());
+        //this.patientCache.add(new CacheMap<String, List<P>>());
+        this.patientCache.add(new DatabaseMap<String, List<P>>());
         this.patientCacheNumber++;
     }
 
@@ -116,7 +119,7 @@ public class ResultCache<P extends Proposition> {
         this.inMemoryPatientCache = null;
         this.refInMemoryPatientCache = null;
         this.conversionMap = null;
-        return new DataSourceResultMap<P>(this.patientCache);
+        return new BerkeleyDBDataSourceResultMap<P>(this.patientCache);
     }
 
     private static class RefCacheKey {

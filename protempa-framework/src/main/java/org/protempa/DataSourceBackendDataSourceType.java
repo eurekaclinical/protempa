@@ -4,17 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-public final class DatabaseDataSourceType implements DataSourceType {
-
-    private static final long serialVersionUID = 1408930133143229497L;
+public final class DataSourceBackendDataSourceType extends DataSourceType {
     
-    private static Map<String, DatabaseDataSourceType> cache =
-            new HashMap<String, DatabaseDataSourceType>();
+    private static Map<String, DataSourceBackendDataSourceType> cache =
+            new HashMap<String, DataSourceBackendDataSourceType>();
 
-    public static DatabaseDataSourceType getInstance(String id) {
-        DatabaseDataSourceType result = cache.get(id);
+    public static DataSourceBackendDataSourceType getInstance(String id) {
+        DataSourceBackendDataSourceType result = cache.get(id);
         if (result == null) {
-            result = new DatabaseDataSourceType(id);
+            result = new DataSourceBackendDataSourceType(id);
             cache.put(id, result);
         }
         return result;
@@ -22,8 +20,12 @@ public final class DatabaseDataSourceType implements DataSourceType {
     
     private final String id;
 
-    private DatabaseDataSourceType(String id) {
+    private DataSourceBackendDataSourceType(String id) {
         this.id = id;
+    }
+
+    public String getId() {
+        return this.id;
     }
 
     @Override
@@ -33,7 +35,7 @@ public final class DatabaseDataSourceType implements DataSourceType {
 
     @Override
     public String getStringRepresentation() {
-        return ("Database - " + this.id);
+        return ("Data source backend - " + this.id);
     }
 
     @Override
@@ -49,7 +51,7 @@ public final class DatabaseDataSourceType implements DataSourceType {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final DatabaseDataSourceType other = (DatabaseDataSourceType) obj;
+        final DataSourceBackendDataSourceType other = (DataSourceBackendDataSourceType) obj;
         if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
             return false;
         }
@@ -62,6 +64,4 @@ public final class DatabaseDataSourceType implements DataSourceType {
         hash = 97 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
-
-    
 }

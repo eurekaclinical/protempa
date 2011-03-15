@@ -1,10 +1,10 @@
 package org.protempa;
 
-import java.io.Serializable;
+public abstract class DataSourceType {
 
-public interface DataSourceType extends Serializable {
+    DataSourceType() {}
 
-    public boolean isDerived();
+    public abstract boolean isDerived();
 
-    public String getStringRepresentation();
+    public abstract String getStringRepresentation();
 }

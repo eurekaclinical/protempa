@@ -6,14 +6,15 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.protempa.DatabaseDataSourceType;
+import org.protempa.DataSourceBackendDataSourceType;
+import org.protempa.DataSourceType;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Value;
 
 class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
 
-    private static final int FLUSH_SIZE = 100000;
+    private static final int FLUSH_SIZE = 250000;
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
@@ -31,6 +32,8 @@ class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
         int count = 0;
         String[] uniqueIds =
                     new String[entitySpec.getUniqueIdSpecs().length];
+        DataSourceType dsType =
+                DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
@@ -55,7 +58,8 @@ class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
                 i++;
             }
 
-            i = extractPropertyValues(propertySpecs, resultSet, i, propertyValues);
+            i = extractPropertyValues(propertySpecs, resultSet, i,
+                    propertyValues);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
@@ -67,8 +71,7 @@ class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
                 PropertySpec propertySpec = propertySpecs[j];
                 cp.setProperty(propertySpec.getName(), propertyValues[j]);
             }
-            cp.setDataSourceType(
-                    DatabaseDataSourceType.getInstance(getDataSourceBackendId()));
+            cp.setDataSourceType(dsType);
             logger.log(Level.FINEST, "Created constant {0}", cp);
             results.add(keyId, cp);
             if (++count % FLUSH_SIZE == 0) {

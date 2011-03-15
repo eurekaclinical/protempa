@@ -1,7 +1,6 @@
 package org.protempa.proposition;
 
 import java.beans.PropertyChangeListener;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +21,7 @@ import org.protempa.proposition.value.Value;
  * @author Andrew Post
  */
 public interface Proposition extends PropositionVisitable,
-        PropositionCheckedVisitable, Serializable {
+        PropositionCheckedVisitable {
 
     /**
      * Gets this proposition's data type.

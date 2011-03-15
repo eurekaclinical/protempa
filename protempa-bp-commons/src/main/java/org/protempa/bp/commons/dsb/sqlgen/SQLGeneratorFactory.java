@@ -87,16 +87,18 @@ public class SQLGeneratorFactory {
             try {
                 if (candidateInstance.checkCompatibility(con)) {
                     DatabaseMetaData metaData = con.getMetaData();
-                    logger.log(Level.FINE,
-                            "{0} is compatible with database {1} ({2})",
-                            new Object[]{candidateInstance.getClass().getName(),
-                                metaData.getDatabaseProductName(),
-                                metaData.getDatabaseProductVersion()});
-                    logger.log(Level.FINE,
-                            "{0} is compatible with driver {1} ({2})",
-                            new Object[]{candidateInstance.getClass().getName(),
-                                metaData.getDriverName(),
-                                metaData.getDriverVersion()});
+                    if (logger.isLoggable(Level.FINE)) {
+                        logger.log(Level.FINE,
+                                "{0} is compatible with database {1} ({2})",
+                                new Object[]{candidateInstance.getClass().getName(),
+                                    metaData.getDatabaseProductName(),
+                                    metaData.getDatabaseProductVersion()});
+                        logger.log(Level.FINE,
+                                "{0} is compatible with driver {1} ({2})",
+                                new Object[]{candidateInstance.getClass().getName(),
+                                    metaData.getDriverName(),
+                                    metaData.getDriverVersion()});
+                    }
                     candidateInstance.initialize(this.relationalDatabaseSpec,
                             this.connectionSpec, this.backend);
                     logger.fine("SQL generator loaded");

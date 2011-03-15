@@ -15,7 +15,7 @@ import org.drools.rule.Rule;
 class JBossRuleBaseFactory {
 
     private final JBossRuleCreator ruleCreator;
-    private final KnowledgeSource knowledgeSource;
+    private final RuleBaseConfiguration ruleBaseConfiguration;
 
     /**
      * Provides a knowledge source and an algorithm source.
@@ -25,15 +25,15 @@ class JBossRuleBaseFactory {
      * @param algorithmSource
      *            the <code>AlgorithmSource</code> to use.
      */
-    JBossRuleBaseFactory(JBossRuleCreator ruleCreator, KnowledgeSource knowledgeSource) {
+    JBossRuleBaseFactory(JBossRuleCreator ruleCreator, RuleBaseConfiguration ruleBaseConfiguration) {
         assert ruleCreator != null : "ruleCreator cannot be null";
 
         this.ruleCreator = ruleCreator;
-        this.knowledgeSource = knowledgeSource;
+        this.ruleBaseConfiguration = ruleBaseConfiguration;
     }
 
     RuleBase newInstance() throws PropositionDefinitionInstantiationException {
-        return newRuleBase(newRuleBaseConfiguration(), newPackage());
+        return newRuleBase(this.ruleBaseConfiguration, newPackage());
     }
 
     private Package newPackage() {
@@ -56,21 +56,5 @@ class JBossRuleBaseFactory {
                     "Could not instantiate proposition definitions", e);
         }
         return ruleBase;
-    }
-
-    private RuleBaseConfiguration newRuleBaseConfiguration()
-            throws PropositionDefinitionInstantiationException {
-        RuleBaseConfiguration config = new RuleBaseConfiguration();
-        config.setShadowProxy(false);
-        try {
-            config.setConflictResolver(new PROTEMPAConflictResolver(
-                    this.knowledgeSource,
-                    this.ruleCreator.getRuleToAbstractionDefinitionMap()));
-        } catch (KnowledgeSourceReadException ex) {
-            throw new PropositionDefinitionInstantiationException(
-                    "Could not instantiate proposition definitions", ex);
-        }
-        config.setAssertBehaviour(AssertBehaviour.EQUALITY);
-        return config;
     }
 }

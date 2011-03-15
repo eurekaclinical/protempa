@@ -1,8 +1,6 @@
 package org.protempa;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import org.protempa.dsb.filter.Filter;
 import java.util.HashSet;

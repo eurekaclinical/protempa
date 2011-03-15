@@ -24,6 +24,6 @@ public final class NominalValueFactory extends ValueFactory {
      */
     @Override
     public NominalValue parseValue(String val) {
-        return new NominalValue(val);
+        return NominalValue.getInstance(val);
     }
 }

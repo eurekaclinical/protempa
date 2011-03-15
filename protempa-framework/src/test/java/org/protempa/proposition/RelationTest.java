@@ -7,7 +7,7 @@ import java.util.Locale;
 import junit.framework.TestCase;
 
 import org.protempa.DataSourceType;
-import org.protempa.DatabaseDataSourceType;
+import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
@@ -39,7 +39,7 @@ public class RelationTest extends TestCase {
         assertTrue(r.hasRelation(i1, i2));
     }
 	private static final DataSourceType dbDataSourceType =
-                DatabaseDataSourceType.getInstance("MockTestDatabase");
+                DataSourceBackendDataSourceType.getInstance("MockTestDatabase");
 	private static final DataSourceType derivedDataSourceType =
                 DerivedDataSourceType.getInstance();
 

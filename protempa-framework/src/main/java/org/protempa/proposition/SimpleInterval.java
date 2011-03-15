@@ -10,8 +10,6 @@ import org.protempa.proposition.value.Granularity;
  */
 final class SimpleInterval extends Interval {
 
-    private static final long serialVersionUID = 3429887577277940890L;
-
     SimpleInterval(Long minStart, Long maxStart,
             Granularity startGranularity, Long minFinish, Long maxFinish,
             Granularity finishGranularity) {

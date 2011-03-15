@@ -15,18 +15,18 @@ import com.sleepycat.je.DatabaseException;
 public class DatabaseMap<K, V> implements Map<K, V> {
 
     private final Database db;
-    private final StoredMap storedMap;
-    private int size;
+    private final StoredMap<K,V> storedMap;
 
+    @SuppressWarnings("unchecked")
     public DatabaseMap() throws DatabaseError {
         try {
-        String dbName = UUID.randomUUID().toString();
-        this.db = CacheDatabase.getDatabase(dbName);
+            String dbName = UUID.randomUUID().toString();
+            this.db = CacheDatabase.createDatabase(dbName);
 
-        ClassCatalog catalog = CacheDatabase.getClassCatalog();
-        EntryBinding binding = new SerialBinding(catalog, null);
-        storedMap = new StoredMap(db, binding, binding, true);
-        size = 0;
+            ClassCatalog catalog = CacheDatabase.createOrGetClassCatalog();
+            EntryBinding<K> kBinding = new SerialBinding<K>(catalog, null);
+            EntryBinding<V> vBinding = new SerialBinding<V>(catalog, null);
+            storedMap = new StoredMap<K, V>(db, kBinding, vBinding, true);
         } catch (DatabaseException dbe) {
             throw new DatabaseError(dbe);
         }
@@ -39,15 +39,16 @@ public class DatabaseMap<K, V> implements Map<K, V> {
     @Override
     public void clear() {
         this.storedMap.clear();
-        this.size = 0;
     }
 
     @Override
+    @SuppressWarnings("element-type-mismatch")
     public boolean containsKey(Object arg0) {
         return this.storedMap.containsKey(arg0);
     }
 
     @Override
+    @SuppressWarnings("element-type-mismatch")
     public boolean containsValue(Object arg0) {
         return this.storedMap.containsValue(arg0);
     }
@@ -58,10 +59,10 @@ public class DatabaseMap<K, V> implements Map<K, V> {
         return this.storedMap.entrySet();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("element-type-mismatch")
     @Override
     public V get(Object arg0) {
-        return (V) this.storedMap.get(arg0);
+        return this.storedMap.get(arg0);
     }
 
     @Override
@@ -69,7 +70,6 @@ public class DatabaseMap<K, V> implements Map<K, V> {
         return this.storedMap.isEmpty();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Set<K> keySet() {
         return this.storedMap.keySet();
@@ -77,11 +77,7 @@ public class DatabaseMap<K, V> implements Map<K, V> {
 
     @Override
     public V put(K arg0, V arg1) {
-        @SuppressWarnings("unchecked")
-        V old = (V) this.storedMap.put(arg0, arg1);
-        if (old == null) {
-            this.size++;
-        }
+        V old = this.storedMap.put(arg0, arg1);
         return old;
     }
 
@@ -92,50 +88,41 @@ public class DatabaseMap<K, V> implements Map<K, V> {
 
     @Override
     public V remove(Object arg0) {
-        @SuppressWarnings("unchecked")
-        V old = (V) this.storedMap.remove(arg0);
-        if (old != null) {
-            this.size--;
-        }
+        @SuppressWarnings("element-type-mismatch")
+        V old = this.storedMap.remove(arg0);
         return old;
     }
 
     @Override
     public int size() {
-        return this.size;
+        return this.storedMap.size();
     }
-
-    @SuppressWarnings("unchecked")
+    
     @Override
     public Collection<V> values() {
-        return (Collection<V>) this.storedMap.values();
+        return this.storedMap.values();
     }
 
-    class DatabaseMapEntry implements Entry<K, V> {
-        private final StoredMap map;
-        private final K key;
-
-        public DatabaseMapEntry(StoredMap storedMap, K k) {
-            this.map = storedMap;
-            this.key = k;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
         }
-
-        @Override
-        public K getKey() {
-            return this.key;
+        if (getClass() != obj.getClass()) {
+            return false;
         }
-
         @SuppressWarnings("unchecked")
-        @Override
-        public V getValue() {
-            return (V) this.map.get(this.key);
+        final DatabaseMap<K, V> other = (DatabaseMap<K, V>) obj;
+        if (this.storedMap != other.storedMap && 
+                (this.storedMap == null
+                || !this.storedMap.equals(other.storedMap))) {
+            return false;
         }
+        return true;
+    }
 
-        @SuppressWarnings("unchecked")
-        @Override
-        public V setValue(V arg0) {
-            return (V) this.map.put(this.key, arg0);
-        }
-
+    @Override
+    public int hashCode() {
+        return this.storedMap.hashCode();
     }
 }
