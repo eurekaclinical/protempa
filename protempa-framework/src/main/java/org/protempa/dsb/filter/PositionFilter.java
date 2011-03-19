@@ -30,7 +30,7 @@ public class PositionFilter extends AbstractFilter {
     private final Side finishSide;
 
     /**
-     * Initializes a filter with a position range.
+     * Creates a filter with a position range.
      *
      * @param propIds a {@link String[]} of proposition ids on which to filter.
      * @param start the start position in Protempa's {@link Long}
@@ -107,11 +107,7 @@ public class PositionFilter extends AbstractFilter {
      * @return a {@link Long}.
      */
     public Long getMaximumFinish() {
-        if (this.ival != null) {
-            return this.ival.getMaximumFinish();
-        } else {
-            return null;
-        }
+        return this.ival.getMaximumFinish();
     }
 
     /**
@@ -121,11 +117,7 @@ public class PositionFilter extends AbstractFilter {
      * @return a {@link Long}.
      */
     public Long getMaximumStart() {
-        if (this.ival != null) {
-            return this.ival.getMaximumStart();
-        } else {
-            return null;
-        }
+        return this.ival.getMaximumStart();
     }
 
     /**
@@ -135,11 +127,7 @@ public class PositionFilter extends AbstractFilter {
      * @return a {@link Long}.
      */
     public Long getMinimumFinish() {
-        if (this.ival != null) {
-            return this.ival.getMinimumFinish();
-        } else {
-            return null;
-        }
+        return this.ival.getMinimumFinish();
     }
 
     /**
@@ -149,11 +137,7 @@ public class PositionFilter extends AbstractFilter {
      * @return a {@link Long}.
      */
     public Long getMinimumStart() {
-        if (this.ival != null) {
-            return this.ival.getMinimumStart();
-        } else {
-            return null;
-        }
+        return this.ival.getMinimumStart();
     }
 
     /**

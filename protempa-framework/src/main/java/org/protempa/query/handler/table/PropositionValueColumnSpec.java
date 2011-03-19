@@ -23,6 +23,8 @@ import org.protempa.proposition.value.ValueType;
  */
 public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
 
+    private static final Link[] EMPTY_LINK_ARRAY = new Link[0];
+
     public enum AggregationType {
 
         MAX,
@@ -42,7 +44,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             AggregationType aggregationType) {
 
         if (links == null) {
-            this.links = new Link[0];
+            this.links = EMPTY_LINK_ARRAY;
         } else {
             ProtempaUtil.checkArrayForNullElement(links, "links");
             this.links = links.clone();

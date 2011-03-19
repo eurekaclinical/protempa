@@ -3,6 +3,8 @@ package org.protempa.query;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
+import org.apache.commons.lang.ArrayUtils;
+import org.protempa.ProtempaUtil;
 import org.protempa.dsb.filter.Filter;
 
 /**
@@ -10,10 +12,11 @@ import org.protempa.dsb.filter.Filter;
  * @author Andrew Post
  */
 public class DefaultQueryBuilder implements QueryBuilder, Serializable {
+
     private static final long serialVersionUID = -3920993703423486485L;
-    private String[] keyIds = new String[0];
+    private String[] keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
     private Filter filters;
-    private String[] propIds = new String[0];
+    private String[] propIds = ArrayUtils.EMPTY_STRING_ARRAY;
     private And[] termIds = new And[0];
     private final PropertyChangeSupport changes;
 
@@ -62,8 +65,9 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * an empty {@link String[]} will be stored.
      */
     public final void setKeyIds(String[] keyIds) {
-        if (keyIds == null)
-            keyIds = new String[0];
+        if (keyIds == null) {
+            keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
+        }
         String[] old = this.keyIds;
         this.keyIds = keyIds.clone();
         this.changes.firePropertyChange("keyIds", old, this.keyIds);
@@ -87,10 +91,13 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * <code>null</code>, an empty {@link String[]} will be stored.
      */
     public final void setPropIds(String[] propIds) {
-        if (propIds == null)
-            propIds = new String[0];
         String[] old = this.propIds;
-        this.propIds = propIds.clone();
+        if (propIds == null) {
+            this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
+        } else {
+            this.propIds = propIds.clone();
+            ProtempaUtil.internAll(this.propIds);
+        }
         this.changes.firePropertyChange("propIds", old, this.propIds);
     }
 
@@ -122,8 +129,9 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * normal form.
      */
     public final void setTermIds(And[] termIds) {
-        if (termIds == null)
+        if (termIds == null) {
             termIds = new And[0];
+        }
         And[] old = this.termIds;
         this.termIds = termIds.clone();
         this.changes.firePropertyChange("termIds", old, this.termIds);
@@ -177,5 +185,4 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         return new Query(this.keyIds, this.filters, this.propIds,
                 this.termIds);
     }
-
 }

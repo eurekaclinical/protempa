@@ -2,6 +2,7 @@ package org.protempa;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
@@ -24,9 +25,7 @@ public abstract class AbstractPropositionDefinition implements
             new PropertyDefinition[0];
     private static final ReferenceDefinition[] EMPTY_REFERENCES =
             new ReferenceDefinition[0];
-
     protected static final String DIRECT_CHILDREN_PROPERTY = "directChildren";
-    private static final String[] EMPTY_STRING_ARR = new String[0];
     /**
      * The id of propositions created by this definition.
      */
@@ -48,7 +47,7 @@ public abstract class AbstractPropositionDefinition implements
     private String description;
     private PropertyDefinition[] propertyDefinitions;
     private ReferenceDefinition[] referenceDefinitions;
-    protected final PropertyChangeSupport changes;
+    protected PropertyChangeSupport changes;
 
     /**
      * Creates a new knowledge definition.
@@ -68,14 +67,13 @@ public abstract class AbstractPropositionDefinition implements
                     "A knowledge base must be specified");
         }
         this.id = setId0(kb, id).intern();
-        this.directChildren = EMPTY_STRING_ARR;
-        this.inverseIsA = EMPTY_STRING_ARR;
+        this.directChildren = ArrayUtils.EMPTY_STRING_ARRAY;
+        this.inverseIsA = ArrayUtils.EMPTY_STRING_ARRAY;
         this.displayName = "";
         this.abbrevDisplayName = "";
         this.description = "";
         this.propertyDefinitions = EMPTY_PROPERTIES;
         this.referenceDefinitions = EMPTY_REFERENCES;
-        this.changes = new PropertyChangeSupport(this);
     }
 
     /**
@@ -100,7 +98,7 @@ public abstract class AbstractPropositionDefinition implements
         if (id == null || id.length() == 0) {
             return kb.getNextKnowledgeDefinitionObjectId();
         } else if (!kb.isUniqueKnowledgeDefinitionObjectId(id)) {
-            return kb.getNextKnowledgeDefinitionObjectId();
+            throw new IllegalArgumentException("duplicate proposition definition id: " + id);
         } else {
             return id;
         }
@@ -128,7 +126,9 @@ public abstract class AbstractPropositionDefinition implements
         }
         String old = this.abbrevDisplayName;
         this.abbrevDisplayName = abbrev;
-        this.changes.firePropertyChange("abbreviatedDisplayName", old, abbrev);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("abbreviatedDisplayName", old, abbrev);
+        }
     }
 
     @Override
@@ -148,7 +148,9 @@ public abstract class AbstractPropositionDefinition implements
         }
         String old = this.displayName;
         this.displayName = displayName;
-        this.changes.firePropertyChange("displayName", old, displayName);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("displayName", old, displayName);
+        }
     }
 
     public String getDescription() {
@@ -161,7 +163,9 @@ public abstract class AbstractPropositionDefinition implements
         }
         String old = this.description;
         this.description = description;
-        this.changes.firePropertyChange("description", old, this.description);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("description", old, this.description);
+        }
     }
 
     @Override
@@ -177,15 +181,17 @@ public abstract class AbstractPropositionDefinition implements
      *            <code>null</code> or duplicate elements allowed.
      */
     public void setInverseIsA(String[] inverseIsA) {
+        String[] old = this.inverseIsA;
         if (inverseIsA == null) {
-            inverseIsA = EMPTY_STRING_ARR;
+            this.inverseIsA = ArrayUtils.EMPTY_STRING_ARRAY;
         } else {
             ProtempaUtil.checkArrayForNullElement(inverseIsA, "inverseIsA");
             ProtempaUtil.checkArrayForDuplicates(inverseIsA, "inverseIsA");
+            this.inverseIsA = inverseIsA.clone();
         }
-        String[] old = this.inverseIsA;
-        this.inverseIsA = inverseIsA.clone();
-        this.changes.firePropertyChange("inverseIsA", old, getInverseIsA());
+        if (this.changes != null) {
+            this.changes.firePropertyChange("inverseIsA", old, getInverseIsA());
+        }
         recalculateDirectChildren();
     }
 
@@ -206,15 +212,18 @@ public abstract class AbstractPropositionDefinition implements
      *            <code>null</code> or duplicate elements allowed.
      */
     public final void setTermIds(String[] termIds) {
+        String[] old = this.termIds;
         if (termIds == null) {
-            termIds = EMPTY_STRING_ARR;
+            this.termIds = ArrayUtils.EMPTY_STRING_ARRAY;
         } else {
             ProtempaUtil.checkArrayForNullElement(termIds, "termIds");
             ProtempaUtil.checkArrayForDuplicates(termIds, "termIds");
+            this.termIds = termIds.clone();
         }
-        String[] old = this.termIds;
-        this.termIds = termIds.clone();
-        this.changes.firePropertyChange("termIds", old, getTermIds());
+
+        if (this.changes != null) {
+            this.changes.firePropertyChange("termIds", old, getTermIds());
+        }
     }
 
     @Override
@@ -225,7 +234,7 @@ public abstract class AbstractPropositionDefinition implements
     @Override
     public final PropertyDefinition propertyDefinition(String name) {
         for (PropertyDefinition propertyDefinition :
-            this.propertyDefinitions) {
+                this.propertyDefinitions) {
             if (propertyDefinition.getName().equals(name)) {
                 return propertyDefinition;
             }
@@ -235,21 +244,20 @@ public abstract class AbstractPropositionDefinition implements
 
     public final void setPropertyDefinitions(
             PropertyDefinition[] propertyDefinitions) {
-        PropertyDefinition[] old;
+        PropertyDefinition[] old = this.propertyDefinitions;
         if (propertyDefinitions == null) {
-            propertyDefinitions = EMPTY_PROPERTIES;
-            old = propertyDefinitions;
+            this.propertyDefinitions = EMPTY_PROPERTIES;
         } else {
             ProtempaUtil.checkArrayForNullElement(propertyDefinitions,
                     "propertyDefinitions");
             ProtempaUtil.checkArrayForDuplicates(propertyDefinitions,
                     "propertyDefinitions");
-            propertyDefinitions = propertyDefinitions.clone();
-            old = this.propertyDefinitions.clone();
+            this.propertyDefinitions = propertyDefinitions.clone();
         }
-        this.propertyDefinitions = propertyDefinitions;
-        this.changes.firePropertyChange("propertyDefinitions", old,
-                this.propertyDefinitions);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("propertyDefinitions", old,
+                    this.propertyDefinitions);
+        }
     }
 
     @Override
@@ -260,7 +268,7 @@ public abstract class AbstractPropositionDefinition implements
     @Override
     public final ReferenceDefinition referenceDefinition(String name) {
         for (ReferenceDefinition referenceDefinition :
-            this.referenceDefinitions) {
+                this.referenceDefinitions) {
             if (referenceDefinition.getName().equals(name)) {
                 return referenceDefinition;
             }
@@ -270,44 +278,55 @@ public abstract class AbstractPropositionDefinition implements
 
     public final void setReferenceDefinitions(
             ReferenceDefinition[] referenceDefinitions) {
-        ReferenceDefinition[] old;
+        ReferenceDefinition[] old = this.referenceDefinitions;
         if (referenceDefinitions == null) {
-            referenceDefinitions = EMPTY_REFERENCES;
-            old = referenceDefinitions;
+            this.referenceDefinitions = EMPTY_REFERENCES;
         } else {
             ProtempaUtil.checkArrayForNullElement(referenceDefinitions,
                     "referenceDefinitions");
             ProtempaUtil.checkArrayForDuplicates(referenceDefinitions,
                     "referenceDefinitions");
-            referenceDefinitions = referenceDefinitions.clone();
-            old = this.referenceDefinitions.clone();
+            this.referenceDefinitions = referenceDefinitions.clone();
         }
-         
-        this.referenceDefinitions = referenceDefinitions;
-        this.changes.firePropertyChange("referenceDefinitions", old,
-                this.referenceDefinitions);
+
+        if (this.changes != null) {
+            this.changes.firePropertyChange("referenceDefinitions", old,
+                    this.referenceDefinitions);
+        }
     }
 
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
-        this.changes.addPropertyChangeListener(listener);
+        if (this.changes == null) {
+            this.changes = new PropertyChangeSupport(this);
+        }
+        if (this.changes != null) {
+            this.changes.addPropertyChangeListener(listener);
+        }
     }
 
     @Override
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        this.changes.removePropertyChangeListener(listener);
+        if (this.changes != null) {
+            this.changes.removePropertyChangeListener(listener);
+        }
     }
 
     @Override
     public void addPropertyChangeListener(String propertyName,
             PropertyChangeListener listener) {
+        if (this.changes == null) {
+            this.changes = new PropertyChangeSupport(this);
+        }
         this.changes.addPropertyChangeListener(propertyName, listener);
     }
 
     @Override
     public void removePropertyChangeListener(String propertyName,
             PropertyChangeListener listener) {
-        this.changes.removePropertyChangeListener(propertyName, listener);
+        if (this.changes != null) {
+            this.changes.removePropertyChangeListener(propertyName, listener);
+        }
     }
 
     /**
@@ -327,18 +346,6 @@ public abstract class AbstractPropositionDefinition implements
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("id", this.id)
-                .append("displayName", this.displayName)
-                .append("description", this.description)
-                .append("abbreviatedDisplayName", this.abbrevDisplayName)
-                .append("inverseIsA", this.inverseIsA)
-                .append("directChildren", this.directChildren)
-                .append("termIds", this.termIds)
-                .append("concatenable", isConcatenable())
-                .append("solid", isSolid())
-                .append("propertyDefinitions", this.propertyDefinitions)
-                .append("referenceDefinitions", this.referenceDefinitions)
-                .toString();
+        return new ToStringBuilder(this).append("id", this.id).append("displayName", this.displayName).append("description", this.description).append("abbreviatedDisplayName", this.abbrevDisplayName).append("inverseIsA", this.inverseIsA).append("directChildren", this.directChildren).append("termIds", this.termIds).append("concatenable", isConcatenable()).append("solid", isSolid()).append("propertyDefinitions", this.propertyDefinitions).append("referenceDefinitions", this.referenceDefinitions).toString();
     }
 }

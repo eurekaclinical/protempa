@@ -34,5 +34,6 @@ class InverseIsAConsequence implements Consequence {
                 knowledgeHelper.getTuple().get(0));
         this.copier.setWorkingMemory(workingMemory);
         o.accept(this.copier);
+        this.copier.setWorkingMemory(null);
     }
 }

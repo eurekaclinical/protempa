@@ -1,6 +1,7 @@
 package org.protempa;
 
 import java.util.regex.Pattern;
+import org.apache.commons.lang.ArrayUtils;
 
 /**
  * Represents a term pulled from a terminology in PROTEMPA.
@@ -201,7 +202,7 @@ public final class Term {
      */
     public void setInverseIsA(String[] inverseIsA) {
         if (inverseIsA == null)
-            inverseIsA = new String[0];
+            inverseIsA = ArrayUtils.EMPTY_STRING_ARRAY;
         this.inverseIsA = inverseIsA.clone();
     }
 
@@ -220,7 +221,7 @@ public final class Term {
      */
     public void setDirectChildren(String[] directChildren) {
         if (directChildren == null) {
-            directChildren = new String[0];
+            directChildren = ArrayUtils.EMPTY_STRING_ARRAY;
         }
         this.directChildren = directChildren.clone();
     }

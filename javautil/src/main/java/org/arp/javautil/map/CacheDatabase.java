@@ -10,11 +10,13 @@ import com.sleepycat.je.DatabaseConfig;
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.logging.Level;
 
 class CacheDatabase {
 
@@ -93,6 +95,15 @@ class CacheDatabase {
             EnvironmentConfig envConf = new EnvironmentConfig();
             envConf.setAllowCreate(true);
             envConf.setTransactional(true);
+            MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+            MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
+            long max = memoryUsage.getMax();
+            long used = memoryUsage.getUsed();
+            long available = max - used;
+            long cacheSize = Math.round(available/2.0);
+            envConf.setCacheSize(cacheSize);
+            MapUtil.logger().log(Level.FINE, "Cache size set to {0} bytes",
+                    cacheSize);
 
             File envFile = new File(location);
             if (!envFile.exists()) {

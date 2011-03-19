@@ -2,7 +2,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.protempa.DataSourceBackendId;
+import org.protempa.proposition.DataSourceBackendId;
 import org.protempa.proposition.UniqueIdentifier;
 
 /**
@@ -43,7 +43,7 @@ abstract class AbstractResultProcessor implements SQLGenResultProcessor {
         this.casePresent = casePresent;
     }
 
-    protected final int readUniqueIds(String[] uniqueIds, ResultSet resultSet,
+    protected static int readUniqueIds(String[] uniqueIds, ResultSet resultSet,
             int i) throws SQLException {
         for (int m = 0; m < uniqueIds.length; m++) {
             uniqueIds[m] = resultSet.getString(i++);

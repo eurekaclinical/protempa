@@ -1,6 +1,7 @@
 package org.protempa.query;
 
 import java.io.Serializable;
+import org.apache.commons.lang.ArrayUtils;
 
 import org.protempa.ProtempaUtil;
 import org.protempa.TermSubsumption;
@@ -27,17 +28,19 @@ public class Query implements Serializable {
     public Query(String[] keyIds, Filter filters, String[] propIds,
             And[] termIds) {
         if (keyIds == null)
-            keyIds = new String[0];
+            keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         if (propIds == null)
-            propIds = new String[0];
+            propIds = ArrayUtils.EMPTY_STRING_ARRAY;
         if (termIds == null)
             termIds = new And[0];
         ProtempaUtil.checkArrayForNullElement(keyIds, "keyIds");
         ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
         ProtempaUtil.checkArrayForNullElement(termIds, "termIds");
         this.keyIds = keyIds.clone();
+        ProtempaUtil.internAll(this.keyIds);
         this.filters = filters;
         this.propIds = propIds.clone();
+        ProtempaUtil.internAll(this.propIds);
         this.termIds = termIds.clone();
     }
 

@@ -44,7 +44,7 @@ public final class Reference extends Link {
         super(propositionIds, constraints, comparator, fromIndex, toIndex);
         if (referenceName == null)
             throw new IllegalArgumentException("referenceName cannot be null");
-        this.referenceName = referenceName;
+        this.referenceName = referenceName.intern();
     }
 
     public String getReferenceName() {

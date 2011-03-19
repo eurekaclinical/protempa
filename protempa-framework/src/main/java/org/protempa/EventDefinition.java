@@ -196,30 +196,32 @@ public final class EventDefinition extends AbstractPropositionDefinition
     @Override
     protected void recalculateDirectChildren() {
         String[] old = this.directChildren;
-        Set<String> c = new HashSet<String>();
-        if (this.hasPart != null) {
-            for (HasPartOffset hpo : this.hasPart) {
-                c.add(hpo.getEventDefinitionId());
-            }
+        Set<String> c;
+        if (!this.hasPart.isEmpty()) {
+            c = new HashSet<String>();
+        } else {
+            c = null;
+        }
+        for (HasPartOffset hpo : this.hasPart) {
+            c.add(hpo.getEventDefinitionId());
         }
         String[] inverseIsA = getInverseIsA();
-        if (inverseIsA != null) {
+        if (c != null) {
             for (String propId : inverseIsA) {
                 c.add(propId);
             }
+            this.directChildren = c.toArray(new String[c.size()]);
+        } else {
+            this.directChildren = inverseIsA;
         }
-        this.directChildren = c.toArray(new String[c.size()]);
-        this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
-                this.directChildren);
+        if (this.changes != null) {
+            this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+                    this.directChildren);
+        }
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("hasPart", this.hasPart)
-                .toString();
+        return new ToStringBuilder(this).appendSuper(super.toString()).append("hasPart", this.hasPart).toString();
     }
-
-
 }

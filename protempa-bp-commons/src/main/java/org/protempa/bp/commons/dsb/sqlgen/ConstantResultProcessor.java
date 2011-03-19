@@ -14,12 +14,13 @@ import org.protempa.proposition.value.Value;
 
 class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
 
-    private static final int FLUSH_SIZE = 250000;
+    private static final int FLUSH_SIZE = 100000;
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
         ResultCache<Constant> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
+        boolean hasRefs = entitySpec.getReferenceSpecs().length > 0;
         String[] propIds = entitySpec.getPropositionIds();
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
         if (codeSpec != null) {
@@ -75,9 +76,9 @@ class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
             logger.log(Level.FINEST, "Created constant {0}", cp);
             results.add(keyId, cp);
             if (++count % FLUSH_SIZE == 0) {
-                results.flush();
+                results.flush(hasRefs);
             }
         }
-        results.flush();
+        results.flush(hasRefs);
     }
 }

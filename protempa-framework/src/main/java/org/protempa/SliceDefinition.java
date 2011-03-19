@@ -72,6 +72,7 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
         return maxIndex;
     }
 
+    @Override
     public void accept(PropositionDefinitionVisitor processor) {
         if (processor == null) {
             throw new IllegalArgumentException("processor cannot be null.");
@@ -79,6 +80,7 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
         processor.visit(this);
     }
 
+    @Override
     public void acceptChecked(PropositionDefinitionCheckedVisitor processor)
             throws ProtempaException {
         if (processor == null) {
@@ -146,19 +148,14 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
     protected void recalculateDirectChildren() {
         String[] old = this.directChildren;
         this.directChildren = this.abstractedFrom.toArray(new String[this.abstractedFrom.size()]);
-        this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
-                this.directChildren);
+        if (this.changes != null) {
+            this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+                    this.directChildren);
+        }
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("minIndex", this.minIndex)
-                .append("maxIndex", this.maxIndex)
-                .append("abstractedFrom", this.abstractedFrom)
-                .toString();
+        return new ToStringBuilder(this).appendSuper(super.toString()).append("minIndex", this.minIndex).append("maxIndex", this.maxIndex).append("abstractedFrom", this.abstractedFrom).toString();
     }
-
-
 }

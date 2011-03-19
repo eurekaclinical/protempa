@@ -37,7 +37,7 @@ public class ReferenceSpec implements Serializable {
             throw new IllegalArgumentException("uniqueIdSpecs cannot be null");
         this.uniqueIdSpecs = uniqueIdSpecs.clone();
         ProtempaUtil.checkArray(this.uniqueIdSpecs, "uniqueIdSpecs");
-        this.referenceName = referenceName;
+        this.referenceName = referenceName.intern();
         this.entityName = entityName;
     }
 

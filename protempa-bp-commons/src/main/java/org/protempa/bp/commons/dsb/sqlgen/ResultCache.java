@@ -3,10 +3,11 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-//import org.arp.javautil.map.CacheMap;
+import org.arp.javautil.collections.Collections;
 import org.arp.javautil.map.DatabaseMap;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
@@ -14,79 +15,93 @@ import org.protempa.proposition.UniqueIdentifier;
 public class ResultCache<P extends Proposition> {
 
     private Map<String, List<P>> inMemoryPatientCache;
-    private Map<RefCacheKey, List<P>> refInMemoryPatientCache;
     private final List<Map<String, List<P>>> patientCache;
-    private Map<UniqueIdentifier, Location> conversionMap;
+    private Map<UniqueIdentifier, List<UniqueIdentifier>> tmpInMemoryRefCache;
+    private List<DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>>> tmpReferenceCache;
+    private DatabaseMap<UniqueIdentifier, Location> conversionMap;
     private int patientCacheNumber;
+    private int tmpReferenceCacheNumber = -1;
 
     ResultCache() {
         this.inMemoryPatientCache = new HashMap<String, List<P>>();
-        this.refInMemoryPatientCache = new HashMap<RefCacheKey, List<P>>();
         this.patientCache = new ArrayList<Map<String, List<P>>>();
-//        this.patientCache.add(new CacheMap<String, List<P>>());
-//        this.conversionMap = new CacheMap<UniqueIdentifier, Location>(500000);
         this.patientCache.add(new DatabaseMap<String, List<P>>());
         this.conversionMap = new DatabaseMap<UniqueIdentifier, Location>();
+        this.tmpReferenceCache =
+                new ArrayList<DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>>>();
+        this.tmpInMemoryRefCache = new HashMap<UniqueIdentifier, List<UniqueIdentifier>>();
     }
 
-    P uidToProposition(UniqueIdentifier uid) {
-        Location loc = this.conversionMap.get(uid);
-        assert loc != null : "Could not find the location for proposition "
-                + uid;
-        RefCacheKey rck = new RefCacheKey();
-        rck.cacheNumber = loc.cacheNumber;
-        rck.patientKey = loc.patientKey;
-        List<P> props = this.refInMemoryPatientCache.get(rck);
-        if (props == null) {
-            props = this.patientCache.get(loc.cacheNumber).get(loc.patientKey);
-            this.refInMemoryPatientCache.put(rck, props);
-        }
-        return props.get(loc.index);
+    public Map<String, List<P>> getPatientCache() {
+        this.inMemoryPatientCache = null;
+        this.conversionMap.shutdown();
+        this.conversionMap = null;
+        this.tmpInMemoryRefCache = null;
+        this.tmpReferenceCache = null;
+        return new BerkeleyDBDataSourceResultMap<P>(this.patientCache);
+    }
+
+    void addReference(UniqueIdentifier uid, UniqueIdentifier refUid) {
+        Collections.putList(this.tmpInMemoryRefCache, uid, refUid);
     }
 
     void flushReferences() {
-        for (Map.Entry<RefCacheKey, List<P>> me :
-                this.refInMemoryPatientCache.entrySet()) {
-            RefCacheKey rck = me.getKey();
-            List<P> rpl = me.getValue();
-            this.patientCache.get(rck.cacheNumber).put(rck.patientKey, rpl);
+        this.tmpReferenceCache.add(new DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>>());
+        this.tmpReferenceCacheNumber++;
+        DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>> dm =
+                this.tmpReferenceCache.get(this.tmpReferenceCacheNumber);
+        for (Iterator<Map.Entry<UniqueIdentifier, List<UniqueIdentifier>>> itr =
+                this.tmpInMemoryRefCache.entrySet().iterator();
+                itr.hasNext();) {
+            Map.Entry<UniqueIdentifier, List<UniqueIdentifier>> me = itr.next();
+            dm.put(me.getKey(), me.getValue());
+            itr.remove();
         }
-        this.refInMemoryPatientCache.clear();
     }
 
-    private void addAll(String keyId, List<P> propositions) {
-        List<P> propList =
-                this.patientCache.get(this.patientCacheNumber).get(keyId);
-        if (propList == null) {
-            propList = new ArrayList<P>();
+    void flushReferencesFull(RefResultProcessor<P> resultProcessor) {
+        for (Iterator<DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>>> itr = this.tmpReferenceCache.iterator(); itr.hasNext();) {
+            DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>> dm = itr.next();
+            for (UniqueIdentifier uid : dm.keySet()) {
+                Location loc = this.conversionMap.get(uid);
+                if (loc != null) {
+                    Map<String, List<P>> pc = this.patientCache.get(loc.cacheNumber);
+                    List<P> propositions = pc.remove(loc.patientKey);
+                    for (P proposition : propositions) {
+                        for (DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>> dm2 : this.tmpReferenceCache) {
+                            List<UniqueIdentifier> uids = dm2.remove(proposition.getUniqueIdentifier());
+                            if (uids != null) {
+                                resultProcessor.addReferences(proposition, uids);
+                            }
+                        }
+                    }
+                    pc.put(loc.patientKey, propositions);
+                }
+            }
+            dm.shutdown();
+            itr.remove();
         }
-        propList.addAll(propositions);
-        put(keyId, propList);
+        this.tmpReferenceCache.clear();
+        this.tmpReferenceCacheNumber = -1;
     }
 
     void add(String keyId, P proposition) {
         keyId = keyId.intern();
-        List<P> propList = this.inMemoryPatientCache.get(keyId);
-        if (propList == null) {
-            propList = new ArrayList<P>();
-            this.inMemoryPatientCache.put(keyId, propList);
-        }
-        propList.add(proposition);
+        Collections.putList(this.inMemoryPatientCache, keyId, proposition);
     }
 
-    void flush() {
+    void flush(boolean hasRefs) {
         for (Map.Entry<String, List<P>> me :
                 this.inMemoryPatientCache.entrySet()) {
             List<P> propList = me.getValue();
             String keyId = me.getKey();
             if (propList != null) {
-                addAll(keyId, propList);
+                addAll(keyId, propList, hasRefs);
             }
         }
         for (List<P> value : this.inMemoryPatientCache.values()) {
             value.clear();
         }
-        //this.patientCache.add(new CacheMap<String, List<P>>());
         this.patientCache.add(new DatabaseMap<String, List<P>>());
         this.patientCacheNumber++;
     }
@@ -95,66 +110,38 @@ public class ResultCache<P extends Proposition> {
         this.conversionMap.clear();
     }
 
-    private void put(String key, List<P> propList) {
+    private void put(String key, List<P> propList, boolean hasRefs) {
         // first, we add to or update the patients cache
         this.patientCache.get(this.patientCacheNumber).put(key, propList);
 
-        // now we add to or update the propositions cache, and also record
-        // the mapping from one cache to the other in the conversion map
-        for (int index = 0; index < propList.size(); index++) {
-            P prop = propList.get(index);
-            UniqueIdentifier uid = prop.getUniqueIdentifier();
+        if (hasRefs) {
+            // now we add to or update the propositions cache, and also record
+            // the mapping from one cache to the other in the conversion map
+            for (int i = 0, n = propList.size(); i < n; i++) {
+                P prop = propList.get(i);
+                UniqueIdentifier uid = prop.getUniqueIdentifier();
 
-            // we add a conversion from the UID to a location in the
-            // patients cache if it doesn't already exist
-            if (!this.conversionMap.containsKey(uid)) {
-                Location loc =
-                        new Location(key, index, this.patientCacheNumber);
-                this.conversionMap.put(uid, loc);
+                // we add a conversion from the UID to a location in the
+                // patients cache if it doesn't already exist
+                if (!this.conversionMap.containsKey(uid)) {
+                    Location loc =
+                            new Location(key, i, this.patientCacheNumber);
+                    this.conversionMap.put(uid, loc);
+                }
             }
         }
     }
 
-    public Map<String, List<P>> getPatientCache() {
-        this.inMemoryPatientCache = null;
-        this.refInMemoryPatientCache = null;
-        this.conversionMap = null;
-        return new BerkeleyDBDataSourceResultMap<P>(this.patientCache);
-    }
-
-    private static class RefCacheKey {
-
-        String patientKey;
-        int cacheNumber;
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final RefCacheKey other = (RefCacheKey) obj;
-            if ((this.patientKey == null) ? (other.patientKey != null)
-                    : !this.patientKey.equals(other.patientKey)) {
-                return false;
-            }
-            if (this.cacheNumber != other.cacheNumber) {
-                return false;
-            }
-            return true;
+    private void addAll(String keyId, List<P> propositions, boolean hasRefs) {
+        List<P> propList =
+                this.patientCache.get(this.patientCacheNumber).remove(keyId);
+        if (propList == null) {
+            propList = new ArrayList<P>();
         }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 53 * hash + (this.patientKey != null ? this.patientKey.hashCode() : 0);
-            hash = 53 * hash + this.cacheNumber;
-            return hash;
-        }
+        propList.addAll(propositions);
+        put(keyId, propList, hasRefs);
     }
-
+    
     /**
      * Stores an index to a proposition for a key.
      *

@@ -43,6 +43,7 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
         checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
         this.rowPropositionIds = rowPropositionIds.clone();
+        ProtempaUtil.internAll(this.rowPropositionIds);
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
     }
@@ -54,6 +55,7 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
         checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
         this.rowPropositionIds = rowPropositionIds.clone();
+        ProtempaUtil.internAll(this.rowPropositionIds);
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
     }
@@ -65,6 +67,7 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
         checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
         this.rowPropositionIds = rowPropositionIds.clone();
+        ProtempaUtil.internAll(this.rowPropositionIds);
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
     }
@@ -76,6 +79,7 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
         checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
         this.rowPropositionIds = rowPropositionIds.clone();
+        ProtempaUtil.internAll(this.rowPropositionIds);
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
     }

@@ -258,7 +258,8 @@ public abstract class TemporalProposition extends AbstractProposition {
         s.writeObject(this.interval.getFinishGranularity());
     }
 
-    protected void readTemporalProposition(ObjectInputStream s) throws IOException, ClassNotFoundException {
+    protected void readTemporalProposition(ObjectInputStream s)
+            throws IOException, ClassNotFoundException {
         setInterval(INTERVAL_FACTORY.getInstance((Long) s.readObject(),
                 (Long) s.readObject(), (Granularity) s.readObject(),
                 (Long) s.readObject(), (Long) s.readObject(),

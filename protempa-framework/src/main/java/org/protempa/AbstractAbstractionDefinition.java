@@ -7,18 +7,16 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * 
  * @author Andrew Post
  */
-public abstract class AbstractAbstractionDefinition extends
-        AbstractPropositionDefinition implements AbstractionDefinition {
+public abstract class AbstractAbstractionDefinition extends AbstractPropositionDefinition implements AbstractionDefinition {
 
     private static final long serialVersionUID = 8075373039175465215L;
     private GapFunction gapFunction = GapFunction.DEFAULT;
-    
 
     protected AbstractAbstractionDefinition(KnowledgeBase kb, String id) {
         super(kb, id);
         kb.addAbstractionDefinition(this);
     }
-    
+
     @Override
     public GapFunction getGapFunction() {
         return gapFunction;
@@ -30,7 +28,9 @@ public abstract class AbstractAbstractionDefinition extends
         }
         GapFunction old = this.gapFunction;
         this.gapFunction = gapFunction;
-        this.changes.firePropertyChange("gapFunction", old, this.gapFunction);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("gapFunction", old, this.gapFunction);
+        }
     }
 
     @Override
@@ -41,10 +41,6 @@ public abstract class AbstractAbstractionDefinition extends
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("gapFunction", this.gapFunction)
-                .toString();
+        return new ToStringBuilder(this).appendSuper(super.toString()).append("gapFunction", this.gapFunction).toString();
     }
-
 }

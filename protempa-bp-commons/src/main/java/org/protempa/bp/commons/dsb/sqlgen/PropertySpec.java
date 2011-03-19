@@ -42,7 +42,7 @@ public final class PropertySpec implements Serializable {
             throw new IllegalArgumentException("codeSpec cannot be null");
         if (valueType == null)
             throw new IllegalArgumentException("valueType cannot be null");
-        this.name = name;
+        this.name = name.intern();
         if (codeToPropIdMap != null) {
             this.codeToPropIdMap = new HashMap<String,String>(codeToPropIdMap);
         } else {

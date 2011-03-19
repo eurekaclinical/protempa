@@ -60,7 +60,7 @@ public class PropertyValueFilter extends AbstractFilter {
                 }
             }
         }
-        this.property = property;
+        this.property = property.intern();
         this.valueComparator = valueComparator;
         this.value = value;
     }

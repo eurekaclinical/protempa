@@ -1,5 +1,6 @@
 package org.protempa;
 
+import org.protempa.proposition.UniqueIdentifier;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,6 +17,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.arp.javautil.collections.Iterators;
+import org.drools.ObjectFilter;
 
 import org.drools.RuleBase;
 import org.drools.RuleBaseConfiguration;
@@ -29,7 +32,6 @@ import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Sequence;
-import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.query.And;
 import org.protempa.query.handler.QueryResultsHandler;
 
@@ -223,16 +225,20 @@ final class AbstractionFinder implements Module {
         return sequenceList;
     }
 
-    private void addToCache(QuerySession qs, List<Proposition> propositions, Map<Proposition, List<Proposition>> derivations) {
+    private static void addToCache(QuerySession qs, List<Proposition> propositions, Map<Proposition, List<Proposition>> derivations) {
         qs.addPropositionsToCache(propositions);
         for (Map.Entry<Proposition, List<Proposition>> me : derivations.entrySet()) {
             qs.addDerivationsToCache(me.getKey(), me.getValue());
         }
     }
 
-    private List<Proposition> extractRequestedPropositions(List<Proposition> propositions, Set<String> propositionIds) {
+    private static List<Proposition> extractRequestedPropositions(
+            Iterator<Proposition> propositions, Set<String> propositionIds,
+            Map<UniqueIdentifier, Proposition> refs) {
         List<Proposition> result = new ArrayList<Proposition>();
-        for (Proposition prop : propositions) {
+        while (propositions.hasNext()) {
+            Proposition prop = propositions.next();
+            refs.put(prop.getUniqueIdentifier(), prop);
             if (propositionIds.contains(prop.getId())) {
                 result.add(prop);
             }
@@ -318,7 +324,7 @@ final class AbstractionFinder implements Module {
 
         void initialize();
 
-        List<Proposition> execute(
+        Iterator<Proposition> execute(
                 String keyIds, Set<String> propositionIds, List<?> objects)
                 throws ProtempaException;
 
@@ -475,10 +481,20 @@ final class AbstractionFinder implements Module {
         }
     }
 
+    private static class MyObjectFilter implements ObjectFilter {
+
+        @Override
+        public boolean accept(Object o) {
+            return !(o instanceof Sequence);
+        }
+
+    }
+
     private class StatelessExecutionStrategy
             extends AbstractExecutionStrategy {
 
         private StatelessSession statelessSession;
+        private final ObjectFilter objectFilter = new MyObjectFilter();
 
         @Override
         public void initialize() {
@@ -486,12 +502,13 @@ final class AbstractionFinder implements Module {
         }
 
         @Override
-        public List<Proposition> execute(
+        @SuppressWarnings("unchecked")
+        public Iterator<Proposition> execute(
                 String keyId, Set<String> propositionIds, List<?> objects)
                 throws ProtempaException {
             StatelessSessionResult result =
                     this.statelessSession.executeWithResults(objects);
-            return unpack(result.iterateObjects());
+            return result.iterateObjects(objectFilter);
         }
 
         @Override
@@ -507,19 +524,20 @@ final class AbstractionFinder implements Module {
             result.setSequential(true);
             return result;
         }
-
-
     }
 
     private class StatefulExecutionStrategy
             extends AbstractExecutionStrategy {
+
+        private final ObjectFilter objectFilter = new MyObjectFilter();
 
         @Override
         public void initialize() {
         }
 
         @Override
-        public List<Proposition> execute(
+        @SuppressWarnings("unchecked")
+        public Iterator<Proposition> execute(
                 String keyId, Set<String> propositionIds, List<?> objects)
                 throws ProtempaException {
             StatefulSession workingMemory =
@@ -528,9 +546,7 @@ final class AbstractionFinder implements Module {
                 workingMemory.insert(obj);
             }
             workingMemory.fireAllRules();
-            List<Proposition> resultList = unpack(
-                    workingMemory.iterateObjects());
-            return resultList;
+            return workingMemory.iterateObjects(objectFilter);
         }
 
         @Override
@@ -543,25 +559,22 @@ final class AbstractionFinder implements Module {
             QueryResultsHandler resultHandler, QuerySession qs,
             ExecutionStrategy strategy) throws ProtempaException {
         Logger logger = ProtempaUtil.logger();
-
+        logger.log(Level.FINE, "Now retrieving data");
+        ObjectIterator objectIterator = new ObjectIterator(keyIds,
+                propositionIds, filters, qs, false);
+        
         DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
         logger.log(Level.FINE, "Creating rule base");
         strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
         logger.log(Level.FINE, "Rule base is created");
-
-        logger.log(Level.FINE, "Now retrieving data");
         strategy.initialize();
-        ObjectIterator objectIterator = new ObjectIterator(keyIds,
-                propositionIds, filters, qs, false);
         logger.log(Level.FINE, "Now processing data");
         for (Iterator<ObjectEntry> itr = objectIterator; itr.hasNext();) {
             ObjectEntry entry = itr.next();
             logger.log(Level.FINER, "About to assert raw data {0}",
                     entry.propositions);
-            List<Proposition> propositions = strategy.execute(
+            Iterator<Proposition> propositions = strategy.execute(
                     entry.keyId, propositionIds, entry.propositions);
-            logger.log(Level.FINER, "Retrieved propositions: {0}",
-                    propositions);
             processResults(qs, propositions,
                     derivationsBuilder.toDerivations(),
                     propositionIds, resultHandler, entry.keyId);
@@ -572,22 +585,24 @@ final class AbstractionFinder implements Module {
     }
 
     private void processResults(QuerySession qs,
-            List<Proposition> propositions,
+            Iterator<Proposition> propositions,
             Map<Proposition, List<Proposition>> derivations,
             Set<String> propositionIds, QueryResultsHandler resultHandler,
             String keyId) throws FinderException {
         Logger logger = ProtempaUtil.logger();
 
         if (qs.isCachingEnabled()) {
-            addToCache(qs, Collections.unmodifiableList(propositions),
-                    derivations);
+            List<Proposition> props = Iterators.asList(propositions);
+            addToCache(qs, Collections.unmodifiableList(props), 
+                    Collections.unmodifiableMap(derivations));
+            propositions = props.iterator();
         }
 
         Map<UniqueIdentifier, Proposition> refs =
-                createReferences(propositions);
+                new HashMap<UniqueIdentifier, Proposition>();
         logger.log(Level.FINER, "References: {0}", refs);
         List<Proposition> filteredPropositions = //a newly created list
-                extractRequestedPropositions(propositions, propositionIds);
+                extractRequestedPropositions(propositions, propositionIds, refs);
         logger.log(Level.FINER, "Proposition ids: {0}", propositionIds);
         logger.log(Level.FINER, "Filtered propositions: {0}",
                 filteredPropositions);
@@ -604,24 +619,6 @@ final class AbstractionFinder implements Module {
             refs.put(proposition.getUniqueIdentifier(), proposition);
         }
         return refs;
-    }
-
-    /**
-     * Copies the results of rules engine processing into a
-     * list of propositions.
-     */
-    private static List<Proposition> unpack(Iterator<?> objects) {
-        List<Proposition> result = new ArrayList<Proposition>(500);
-        for (; objects.hasNext();) {
-            Object obj = objects.next();
-            if (obj instanceof Sequence<?>) {
-                result.addAll((Sequence<?>) obj);
-            } else {
-                result.add((Proposition) obj);
-            }
-        }
-
-        return result;
     }
 
     private static class ObjectEntry {
@@ -729,7 +726,7 @@ final class AbstractionFinder implements Module {
         public ObjectEntry next() {
             ObjectEntry result = new ObjectEntry();
             result.keyId = this.keyIdItr.next();
-            result.propositions = new ArrayList<Object>(500);
+            result.propositions = new ArrayList<Object>(100);
             try {
                 List<PrimitiveParameter> primParams =
                         this.primitiveParameters.get(result.keyId);

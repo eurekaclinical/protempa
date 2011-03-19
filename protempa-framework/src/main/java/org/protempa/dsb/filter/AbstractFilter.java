@@ -23,12 +23,14 @@ public abstract class AbstractFilter implements Filter {
      */
     public AbstractFilter(String[] propositionIds) {
         ProtempaUtil.checkArray(propositionIds, "propositionIds");
+        propositionIds = propositionIds.clone();
+        ProtempaUtil.internAll(propositionIds);
         this.propositionIds = propositionIds;
     }
     
     @Override
     public String[] getPropositionIds() {
-        return propositionIds;
+        return propositionIds.clone();
     }
 
     public void setAnd(Filter and) {

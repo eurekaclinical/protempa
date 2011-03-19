@@ -1,5 +1,7 @@
 package org.protempa;
 
+import org.protempa.proposition.DerivedSourceId;
+import org.protempa.proposition.UniqueIdentifier;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,7 +11,6 @@ import org.protempa.proposition.Interval;
 import org.protempa.proposition.IntervalFactory;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.TemporalProposition;
-import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Value;
 

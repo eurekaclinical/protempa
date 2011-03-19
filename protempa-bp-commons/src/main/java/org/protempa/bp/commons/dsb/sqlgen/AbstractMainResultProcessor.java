@@ -22,12 +22,12 @@ abstract class AbstractMainResultProcessor<P extends Proposition> extends Abstra
         this.results = resultCache;
     }
 
-    protected final String sqlCodeToPropositionId(ColumnSpec codeSpec,
+    protected static String sqlCodeToPropositionId(ColumnSpec codeSpec,
             String code) throws SQLException {
         return codeSpec.propositionIdFor(code);
     }
 
-    protected final int extractPropertyValues(PropertySpec[] propertySpecs,
+    protected static int extractPropertyValues(PropertySpec[] propertySpecs,
             ResultSet resultSet, int i, Value[] propertyValues)
             throws SQLException {
         for (int j = 0; j < propertySpecs.length; j++) {

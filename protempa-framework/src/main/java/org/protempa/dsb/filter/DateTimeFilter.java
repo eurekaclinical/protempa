@@ -11,30 +11,32 @@ import org.protempa.proposition.value.Granularity;
 public class DateTimeFilter extends PositionFilter {
 
     /**
-     * Initializes a filter with a date/time range.
+     * Creates a filter with a date/time range.
      *
      * @param propIds a {@link String[]} of proposition ids on which to filter.
-     * @param start the start {@link Date}.
+     * @param start the start {@link Date} (<code>null</code> for unspecified).
      * @param startGran the {@link Granularity} with which to interpret the
      * start date.
-     * @param finish the finish {@link Date}.
+     * @param finish the finish {@link Date} (<code>null</code> for
+     * unspecified).
      * @param finishGran the {@link Granularity with which to interpret the
      * finish date.
      */
     public DateTimeFilter(String[] propIds, Date start,
             Granularity startGran, Date finish, Granularity finishGran) {
-        super(propIds, start.getTime(), startGran, finish.getTime(),
-                finishGran);
+        super(propIds, start != null ? start.getTime() : null, startGran,
+                finish != null ? finish.getTime() : null, finishGran);
     }
 
     /**
-     * Initializes a filter with a date/time range.
+     * Creates a filter with a date/time range.
      *
      * @param propIds a {@link String[]} of proposition ids on which to filter.
-     * @param start the start {@link Date}.
+     * @param start the start {@link Date} (<code>null</code> for unspecified).
      * @param startGran the {@link Granularity} with which to interpret the
      * start date.
-     * @param finish the finish {@link Date}.
+     * @param finish the finish {@link Date} (<code>null</code> for
+     * unspecified).
      * @param finishGran the {@link Granularity with which to interpret the
      * finish date.
      * @param startSide the {@link Side} of the proposition to which to apply
@@ -47,7 +49,8 @@ public class DateTimeFilter extends PositionFilter {
     public DateTimeFilter(String[] propIds, Date start,
             Granularity startGran, Date finish, Granularity finishGran,
             Side startSide, Side finishSide) {
-        super(propIds, start.getTime(), startGran, finish.getTime(),
-                finishGran, startSide, finishSide);
+        super(propIds, start != null ? start.getTime() : null, startGran,
+                finish != null ? finish.getTime() : null, finishGran,
+                startSide, finishSide);
     }
 }

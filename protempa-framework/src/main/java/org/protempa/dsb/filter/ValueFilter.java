@@ -3,26 +3,20 @@ package org.protempa.dsb.filter;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 
-public final class ValueFilter
-        extends AbstractFilter {
+public final class ValueFilter extends AbstractFilter {
 
-    private ValueComparator comparator;
-    private Value value;
+    private final ValueComparator comparator;
+    private final Value value;
 
-    public ValueFilter(String[] propIds) {
+    public ValueFilter(String[] propIds, ValueComparator comparator,
+            Value value) {
         super(propIds);
-    }
-
-    public void setComparator(ValueComparator comparator) {
         this.comparator = comparator;
+        this.value = value;
     }
 
     public ValueComparator getComparator() {
         return comparator;
-    }
-
-    public void setValue(Value value) {
-        this.value = value;
     }
 
     public Value getValue() {

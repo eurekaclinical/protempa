@@ -3,9 +3,9 @@ package org.protempa.proposition;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,7 +27,7 @@ import org.protempa.proposition.value.ValueType;
  * @author Andrew Post
  */
 public abstract class AbstractProposition implements Proposition {
-    
+
     private static final int DEFAULT_REFERENCE_LIST_SIZE = 100;
     /**
      * An identification <code>String</code> for this proposition.
@@ -35,7 +35,7 @@ public abstract class AbstractProposition implements Proposition {
     private String id;
     private static volatile int nextHashCode = 17;
     protected volatile int hashCode;
-    protected PropertyChangeSupport changes;
+    private PropertyChangeSupport changes;
     private Map<String, Value> properties;
     private Map<String, List<UniqueIdentifier>> references;
     private UniqueIdentifier key;
@@ -52,18 +52,30 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     protected AbstractProposition() {
-        
     }
 
     protected void initializeAbstractProposition(String id) {
-        this.changes = new PropertyChangeSupport(this);
-        this.properties = new HashMap<String, Value>();
-        this.references = new HashMap<String, List<UniqueIdentifier>>();
         if (id == null) {
             this.id = "";
         } else {
             this.id = id.intern();
         }
+    }
+
+    protected void initializeProperties() {
+        if (this.properties == null) {
+            this.properties = new HashMap<String, Value>();
+        }
+    }
+
+    protected void initializeReferences() {
+        if (this.references == null) {
+            this.references = new HashMap<String, List<UniqueIdentifier>>();
+        }
+    }
+
+    protected void initializePropertyChangeSupport() {
+        this.changes = new PropertyChangeSupport(this);
     }
 
     @Override
@@ -75,17 +87,26 @@ public abstract class AbstractProposition implements Proposition {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
         }
+        initializeProperties();
         this.properties.put(name.intern(), value);
     }
 
     @Override
     public final Value getProperty(String name) {
-        return this.properties.get(name);
+        if (this.properties == null) {
+            return null;
+        } else {
+            return this.properties.get(name);
+        }
     }
 
     @Override
     public final Set<String> getPropertyNames() {
-        return this.properties.keySet();
+        if (this.properties == null) {
+            return Collections.emptySet();
+        } else {
+            return this.properties.keySet();
+        }
     }
 
     public final void setUniqueIdentifier(UniqueIdentifier o) {
@@ -106,13 +127,11 @@ public abstract class AbstractProposition implements Proposition {
         return this.key;
     }
 
-    public final void setReferences(String name, List<UniqueIdentifier> refs) {
+    private void setReferences(String name, List<UniqueIdentifier> refs) {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
         }
-        if (refs != null) {
-            refs = new ArrayList<UniqueIdentifier>(refs);
-        }
+        initializeReferences();
         this.references.put(name.intern(), refs);
     }
 
@@ -123,6 +142,7 @@ public abstract class AbstractProposition implements Proposition {
         if (ref == null) {
             throw new IllegalArgumentException("ref cannot be null");
         }
+        initializeReferences();
         List<UniqueIdentifier> refs = this.references.get(name);
         if (refs == null) {
             refs =
@@ -136,27 +156,38 @@ public abstract class AbstractProposition implements Proposition {
 
     @Override
     public final List<UniqueIdentifier> getReferences(String name) {
-        List<UniqueIdentifier> result = this.references.get(name);
-        if (result != null) {
-            return Collections.unmodifiableList(result);
-        } else {
+        if (this.references == null) {
             return Collections.emptyList();
+        } else {
+            List<UniqueIdentifier> result = this.references.get(name);
+            if (result != null) {
+                return Collections.unmodifiableList(result);
+            } else {
+                return Collections.emptyList();
+            }
         }
     }
 
     @Override
     public final Set<String> getReferenceNames() {
-        return this.references.keySet();
+        if (this.references == null) {
+            return Collections.emptySet();
+        } else {
+            return this.references.keySet();
+        }
     }
 
     @Override
     public final void addPropertyChangeListener(PropertyChangeListener l) {
+        initializePropertyChangeSupport();
         this.changes.addPropertyChangeListener(l);
     }
 
     @Override
     public final void removePropertyChangeListener(PropertyChangeListener l) {
-        this.changes.removePropertyChangeListener(l);
+        if (this.changes != null) {
+            this.changes.removePropertyChangeListener(l);
+        }
     }
 
     @Override
@@ -179,7 +210,8 @@ public abstract class AbstractProposition implements Proposition {
 
         AbstractProposition p = (AbstractProposition) other;
         return (id == p.id || id.equals(p.id))
-                && this.properties.equals(p.properties);
+                && this.properties == p.properties ||
+                (this.properties != null && this.properties.equals(p.properties));
 
     }
 
@@ -239,27 +271,39 @@ public abstract class AbstractProposition implements Proposition {
             throws IOException {
         s.writeObject(this.id);
 
-        Set<String> propertyNames = getPropertyNames();
-        String[] propertyNamesArr = 
-                propertyNames.toArray(new String[propertyNames.size()]);
-        s.writeObject(propertyNamesArr);
-        for (String propertyName : propertyNamesArr) {
-            Value val = getProperty(propertyName);
-            if (val != null) {
-                s.writeObject(val.getType());
-                s.writeObject(val.getRepr());
-            } else {
-                s.writeObject(null);
+        if (this.properties == null) {
+            s.writeInt(0);
+        } else {
+            Set<String> propertyNames = this.properties.keySet();
+            s.writeInt(propertyNames.size());
+            for (String propertyName : propertyNames) {
+                s.writeObject(propertyName);
+                Value val = this.properties.get(propertyName);
+                if (val != null) {
+                    s.writeObject(val.getType());
+                    s.writeObject(val.getRepr());
+                } else {
+                    s.writeObject(null);
+                }
             }
         }
 
-        Set<String> refNames = getReferenceNames();
-        String[] refNamesArr = refNames.toArray(new String[refNames.size()]);
-        s.writeObject(refNamesArr);
-        for (String refName : refNamesArr) {
-            List<UniqueIdentifier> val = getReferences(refName);
-            s.writeObject(val);
+        if (this.references == null) {
+            s.writeInt(0);
+        } else {
+            Set<String> refNames = this.references.keySet();
+            s.writeInt(refNames.size());
+            for (String refName : refNames) {
+                s.writeObject(refName);
+                List<UniqueIdentifier> val = this.references.get(refName);
+                int valSize = val.size();
+                s.writeInt(valSize);
+                for (int i = 0; i < valSize; i++) {
+                    s.writeObject(val.get(i));
+                }
+            }
         }
+
         s.writeObject(this.key);
         if (this.dataSourceType instanceof DerivedDataSourceType) {
             s.writeObject("DERIVED");
@@ -268,27 +312,54 @@ public abstract class AbstractProposition implements Proposition {
             s.writeObject(
                     ((DataSourceBackendDataSourceType) this.dataSourceType).getId());
         }
+        s.writeObject(this.changes);
     }
 
     protected void readAbstractProposition(ObjectInputStream s)
             throws IOException, ClassNotFoundException {
         String tempId = (String) s.readObject();
         initializeAbstractProposition(tempId);
-        String[] propertyNamesArr = (String[]) s.readObject();
-        for (String propertyName : propertyNamesArr) {
-            ValueType valueType = (ValueType) s.readObject();
-            String valAsString = valueType != null ? (String) s.readObject() : null;
-            Value val = valAsString != null ?
-                ValueFactory.get(valueType).parseRepr(valAsString) : null;
-            setProperty(propertyName, val);
+
+        int numProperties = s.readInt();
+        if (numProperties < 0) {
+            throw new InvalidObjectException(
+                    "Negative properties count. Can't restore");
         }
-        String[] refNamesArr = (String[]) s.readObject();
-        for (String refName : refNamesArr) {
-            @SuppressWarnings("unchecked")
-            List<UniqueIdentifier> uids =
-                    (List<UniqueIdentifier>) s.readObject();
-            setReferences(refName, uids);
+        if (numProperties > 0) {
+            initializeProperties();
+            for (int i = 0; i < numProperties; i++) {
+                String propertyName = (String) s.readObject();
+                ValueType valueType = (ValueType) s.readObject();
+                String valAsString = valueType != null ? (String) s.readObject() : null;
+                Value val = valAsString != null
+                        ? ValueFactory.get(valueType).parseRepr(valAsString) : null;
+                setProperty(propertyName, val);
+            }
         }
+
+        int numRefs = s.readInt();
+        if (numRefs < 0) {
+            throw new InvalidObjectException(
+                    "Negative reference count. Can't restore");
+        }
+        if (numRefs > 0) {
+            initializeReferences();
+            for (int i = 0; i < numRefs; i++) {
+                String refName = (String) s.readObject();
+                int numUids = s.readInt();
+                if (numUids < 0) {
+                    throw new InvalidObjectException(
+                            "Negative unique identifier count. Can't restore");
+                }
+                List<UniqueIdentifier> uids =
+                        new ArrayList<UniqueIdentifier>(numUids);
+                for (int j = 0; j < numUids; j++) {
+                    uids.add((UniqueIdentifier) s.readObject());
+                }
+                setReferences(refName, uids);
+            }
+        }
+
         setUniqueIdentifier((UniqueIdentifier) s.readObject());
         String dsType = (String) s.readObject();
         if ("DERIVED".equals(dsType)) {
@@ -297,5 +368,6 @@ public abstract class AbstractProposition implements Proposition {
             setDataSourceType(DataSourceBackendDataSourceType.getInstance(
                     (String) s.readObject()));
         }
+        this.changes = (PropertyChangeSupport) s.readObject();
     }
 }

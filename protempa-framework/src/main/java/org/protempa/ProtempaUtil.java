@@ -135,19 +135,51 @@ public final class ProtempaUtil {
         }
     }
 
+    /**
+     * Checks an array for duplicates as checked with the <code>equals</code>
+     * method.
+     *
+     * @param array an {@link Object[]}. Cannot be <code>null</code>.
+     * @param arrayName the name {@link String} of the array to use in the
+     * error message if a duplicate is found.
+     * @throws IllegalArgumentException if a duplicate is found.
+     */
     static void checkArrayForDuplicates(Object[] array, String arrayName) {
-        Set<Object> set = new HashSet<Object>();
-        for (Object obj : array) {
-            if (!set.add(obj))
-                throw new IllegalArgumentException(arrayName +
-                        " cannot contain duplicate elements: " + 
-                        Arrays.toString(array) + "; " + obj);
+        if (array.length > 1) {
+            if (array.length == 2) {
+                if (array[0] == array[1] || 
+                        (array[0] != null && array[0].equals(array[1]))) {
+                    throw new IllegalArgumentException(arrayName
+                            + " cannot contain duplicate elements: "
+                            + Arrays.toString(array) + "; " + array[0]);
+                }
+            } else {
+                Set<Object> set = new HashSet<Object>();
+                for (Object obj : array) {
+                    if (!set.add(obj)) {
+                        throw new IllegalArgumentException(arrayName
+                                + " cannot contain duplicate elements: "
+                                + Arrays.toString(array) + "; " + obj);
+                    }
+                }
+            }
         }
     }
 
+    /**
+     * Replaces every element of the supplied string array with an interned
+     * copy as created by {@link String#intern()}.
+     *
+     * @param strings a {@link String[]}. Cannot be <code>null</code>.
+     */
+    public static void internAll(String[] strings) {
+        for (int i = 0; i < strings.length; i++) {
+            strings[i] = strings[i].intern();
+        }
+    }
+    
     static final Comparator<TemporalProposition> TEMP_PROP_COMP =
             new TemporalPropositionIntervalComparator();
-
-    static final Comparator<TemporalProposition>
-            REVERSE_TEMP_PROP_COMP = Collections.reverseOrder(TEMP_PROP_COMP);
+    static final Comparator<TemporalProposition> REVERSE_TEMP_PROP_COMP =
+            Collections.reverseOrder(TEMP_PROP_COMP);
 }

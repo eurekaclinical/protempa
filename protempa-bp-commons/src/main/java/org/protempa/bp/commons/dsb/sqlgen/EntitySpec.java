@@ -18,6 +18,13 @@ import org.protempa.proposition.value.ValueType;
 public final class EntitySpec implements Serializable {
     private static final long serialVersionUID = -1935588032831088001L;
 
+    private static final PropertySpec[] EMPTY_PROPERTY_SPEC_ARRAY =
+            new PropertySpec[0];
+    private static final ReferenceSpec[] EMPTY_REFERENCE_SPEC_ARRAY =
+            new ReferenceSpec[0];
+    private static final ColumnSpec[] EMPTY_COLUMN_SPEC_ARRAY =
+            new ColumnSpec[0];
+
     private final String name;
     private final String description;
     private final String[] propositionIds;
@@ -114,6 +121,7 @@ public final class EntitySpec implements Serializable {
 
         if (propositionIds != null) {
             this.propositionIds = propositionIds.clone();
+            ProtempaUtil.internAll(this.propositionIds);
             ProtempaUtil.checkArrayForNullElement(this.propositionIds,
                     "propositionIds");
             if (this.propositionIds.length == 0) {
@@ -150,7 +158,7 @@ public final class EntitySpec implements Serializable {
             ProtempaUtil.checkArrayForNullElement(this.propertySpecs,
                     "propertySpecs");
         } else {
-            this.propertySpecs = new PropertySpec[0];
+            this.propertySpecs = EMPTY_PROPERTY_SPEC_ARRAY;
         }
 
         if (referenceSpecs != null) {
@@ -158,7 +166,7 @@ public final class EntitySpec implements Serializable {
             ProtempaUtil.checkArrayForNullElement(this.referenceSpecs,
                     "referenceSpecs");
         } else {
-            this.referenceSpecs = new ReferenceSpec[0];
+            this.referenceSpecs = EMPTY_REFERENCE_SPEC_ARRAY;
         }
 
         if (codeToPropIdMap != null) {
@@ -176,7 +184,7 @@ public final class EntitySpec implements Serializable {
             ProtempaUtil.checkArrayForNullElement(this.constraintSpecs,
                     "constraintSpecs");
         } else {
-            this.constraintSpecs = new ColumnSpec[0];
+            this.constraintSpecs = EMPTY_COLUMN_SPEC_ARRAY;
         }
 
         if (valueType != null && valueSpec == null) {

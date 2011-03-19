@@ -12,8 +12,7 @@ import org.protempa.proposition.value.ValueType;
  * 
  * @author Andrew Post
  */
-public final class PrimitiveParameterDefinition extends 
-        AbstractPropositionDefinition implements
+public final class PrimitiveParameterDefinition extends AbstractPropositionDefinition implements
         TemporalPropositionDefinition {
 
     private static final long serialVersionUID = 4469613843480322419L;
@@ -60,7 +59,9 @@ public final class PrimitiveParameterDefinition extends
         }
         ValueType old = this.valueType;
         this.valueType = vf;
-        this.changes.firePropertyChange("valueType", old, this.valueType);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("valueType", old, this.valueType);
+        }
     }
 
     /**
@@ -81,7 +82,9 @@ public final class PrimitiveParameterDefinition extends
     public void setUnits(String units) {
         String old = this.units;
         this.units = units;
-        this.changes.firePropertyChange("units", old, this.units);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("units", old, this.units);
+        }
     }
 
     @Override
@@ -140,18 +143,14 @@ public final class PrimitiveParameterDefinition extends
             }
         }
         this.directChildren = c.toArray(new String[c.size()]);
-        this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
-                this.directChildren);
+        if (this.changes != null) {
+            this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+                    this.directChildren);
+        }
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("valueType", this.valueType)
-                .append("units", this.units)
-                .toString();
+        return new ToStringBuilder(this).appendSuper(super.toString()).append("valueType", this.valueType).append("units", this.units).toString();
     }
-
-
 }

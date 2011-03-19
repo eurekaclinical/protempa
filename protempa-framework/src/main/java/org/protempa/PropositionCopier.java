@@ -1,5 +1,7 @@
 package org.protempa;
 
+import org.protempa.proposition.DerivedSourceId;
+import org.protempa.proposition.UniqueIdentifier;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -11,7 +13,6 @@ import org.protempa.proposition.Context;
 import org.protempa.proposition.DerivedUniqueIdentifier;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
-import org.protempa.proposition.UniqueIdentifier;
 
 /**
  * TODO We should delegate the copying to another copying class.

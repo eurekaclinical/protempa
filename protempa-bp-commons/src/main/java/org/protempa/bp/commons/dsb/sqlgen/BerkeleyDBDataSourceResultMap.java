@@ -7,6 +7,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import com.sleepycat.collections.StoredIterator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -53,16 +54,24 @@ public class BerkeleyDBDataSourceResultMap<P> extends DataSourceResultMap<P> {
 
     @Override
     public Set<Entry<String, List<P>>> entrySet() {
+        Map<String, DataSourceResultMapEntry> keys =
+                new HashMap<String, DataSourceResultMapEntry>();
         Set<Entry<String, List<P>>> result =
                 new HashSet<Entry<String, List<P>>>();
         for (Map<String, List<P>> map : getMaps()) {
             Iterator<Map.Entry<String, List<P>>> itr =
                     map.entrySet().iterator();
             while(itr.hasNext()) {
-                Map.Entry<String, List<P>> entry = itr.next();
+                Map.Entry<String, List<P>> me = itr.next();
+                DataSourceResultMapEntry existingMe = keys.get(me.getKey());
                 DataSourceResultMapEntry newMe = new DataSourceResultMapEntry(
-                        entry.getKey(), entry.getValue());
-                result.add(newMe);
+                        me);
+                if (existingMe == null) {
+                    result.add(newMe);
+                    keys.put(me.getKey(), newMe);
+                } else {
+                    existingMe.add(me);
+                }
             }
             StoredIterator.close(itr);
         }

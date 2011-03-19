@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import org.apache.commons.lang.ArrayUtils;
 
 import org.apache.commons.lang.StringUtils;
 import org.protempa.KnowledgeSource;
@@ -25,6 +26,8 @@ import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueSet;
 
 public class PropositionColumnSpec extends AbstractTableColumnSpec {
+
+    private static final Link[] EMPTY_LINK_ARRAY = new Link[0];
 
     private final Link[] links;
     private final String[] propertyNames;
@@ -60,11 +63,12 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             String[] propertyNames, OutputConfig outputConfig,
             ValueOutputConfig valueOutputConfig, Link[] links, int numInstances) {
         if (propertyNames == null) {
-            this.propertyNames = new String[0];
+            this.propertyNames = ArrayUtils.EMPTY_STRING_ARRAY;
         } else {
             ProtempaUtil.checkArrayForNullElement(propertyNames,
                     "propertyNames");
             this.propertyNames = propertyNames.clone();
+            ProtempaUtil.internAll(this.propertyNames);
         }
 
         if (outputConfig == null) {
@@ -80,7 +84,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         }
 
         if (links == null) {
-            this.links = new Link[0];
+            this.links = EMPTY_LINK_ARRAY;
         } else {
             ProtempaUtil.checkArrayForNullElement(links, "links");
             this.links = links.clone();

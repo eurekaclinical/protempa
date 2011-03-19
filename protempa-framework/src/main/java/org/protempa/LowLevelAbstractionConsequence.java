@@ -48,5 +48,6 @@ final class LowLevelAbstractionConsequence implements Consequence {
         objAsserter.workingMemory = arg1;
         LowLevelAbstractionFinder.process(seq, this.def, this.algorithm,
                 objAsserter, this.derivationsBuilder);
+        objAsserter.workingMemory = null;
     }
 }

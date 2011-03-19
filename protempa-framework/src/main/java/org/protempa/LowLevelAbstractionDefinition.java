@@ -397,7 +397,9 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
         }
         ValueType old = this.valueType;
         this.valueType = c;
-        this.changes.firePropertyChange("valueType", old, this.valueType);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("valueType", old, this.valueType);
+        }
     }
 
     public ValueType getValueType() {
@@ -470,7 +472,9 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
     public void setAlgorithmId(String algorithmId) {
         String old = this.algorithmId;
         this.algorithmId = algorithmId;
-        this.changes.firePropertyChange("algorithmId", old, algorithmId);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("algorithmId", old, algorithmId);
+        }
     }
 
     @Override
@@ -583,36 +587,18 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
     protected void recalculateDirectChildren() {
         String[] old = this.directChildren;
         this.directChildren = this.paramIds.toArray(new String[this.paramIds.size()]);
-        this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
-                this.directChildren);
+        if (this.changes != null) {
+            this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+                    this.directChildren);
+        }
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("algorithmId", this.algorithmId)
-                .append("paramIds", this.paramIds)
-                .append("minimumDuration", this.minimumDuration)
-                .append("minimumDurationUnits", this.minimumDurationUnits)
-                .append("maximumDuration", this.maximumDuration)
-                .append("maximumDurationUnits", this.maximumDurationUnits)
-                .append("valueType", this.valueType)
-                .append("minimumPatternLength", this.minimumNumberOfValues)
-                .append("maximumPatternLength", this.maximumNumberOfValues)
-                .append("minGapBetweenValues",
-                    this.gapBtwValues.getMinimumGapBetweenValues())
-                .append("minGapBetweenValuesUnits",
-                    this.gapBtwValues.getMinimumGapBetweenValuesUnits())
-                .append("maxGapBetweenValues",
-                    this.gapBtwValues.getMaximumGapBetweenValues())
-                .append("maxGapBetweenValuesUnits",
-                    this.gapBtwValues.getMaximumGapBetweenValuesUnits())
-                .append("maxOverlapping", maxOverlapping)
-                .append("skip", skip)
-                .append("skipStart", skipStart)
-                .append("skipEnd", skipEnd)
-                .append("valueDefinitions", this.valueDefinitions)
-                .toString();
+        return new ToStringBuilder(this).appendSuper(super.toString()).append("algorithmId", this.algorithmId).append("paramIds", this.paramIds).append("minimumDuration", this.minimumDuration).append("minimumDurationUnits", this.minimumDurationUnits).append("maximumDuration", this.maximumDuration).append("maximumDurationUnits", this.maximumDurationUnits).append("valueType", this.valueType).append("minimumPatternLength", this.minimumNumberOfValues).append("maximumPatternLength", this.maximumNumberOfValues).append("minGapBetweenValues",
+                this.gapBtwValues.getMinimumGapBetweenValues()).append("minGapBetweenValuesUnits",
+                this.gapBtwValues.getMinimumGapBetweenValuesUnits()).append("maxGapBetweenValues",
+                this.gapBtwValues.getMaximumGapBetweenValues()).append("maxGapBetweenValuesUnits",
+                this.gapBtwValues.getMaximumGapBetweenValuesUnits()).append("maxOverlapping", maxOverlapping).append("skip", skip).append("skipStart", skipStart).append("skipEnd", skipEnd).append("valueDefinitions", this.valueDefinitions).toString();
     }
 }

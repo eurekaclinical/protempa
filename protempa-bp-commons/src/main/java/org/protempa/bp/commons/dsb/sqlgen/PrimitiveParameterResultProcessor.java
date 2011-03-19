@@ -17,12 +17,13 @@ import org.protempa.proposition.value.ValueType;
 class PrimitiveParameterResultProcessor extends
         AbstractMainResultProcessor<PrimitiveParameter> {
 
-    private static final int FLUSH_SIZE = 250000;
+    private static final int FLUSH_SIZE = 100000;
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
         ResultCache<PrimitiveParameter> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
+        boolean hasRefs = entitySpec.getReferenceSpecs().length > 0;
         String[] propIds = entitySpec.getPropositionIds();
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
         if (codeSpec != null) {
@@ -101,10 +102,10 @@ class PrimitiveParameterResultProcessor extends
             logger.log(Level.FINEST, "Created primitive parameter {0}", p);
             results.add(keyId, p);
             if (++count % FLUSH_SIZE == 0) {
-                results.flush();
+                results.flush(hasRefs);
             }
         }
-        results.flush();
+        results.flush(hasRefs);
     }
 
     

@@ -33,6 +33,7 @@ final class SliceConsequence implements Consequence {
 
     @Override
     public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1) {
+        @SuppressWarnings("unchecked")
         List<PropositionVisitable> l =
                 (List<PropositionVisitable>) arg0.get(
                 arg0.getDeclaration("result"));
@@ -47,11 +48,12 @@ final class SliceConsequence implements Consequence {
             Collections.sort(pl, ProtempaUtil.TEMP_PROP_COMP);
         }
         
-        copier.setWorkingMemory(arg1);
+        this.copier.setWorkingMemory(arg1);
         for (ListIterator<TemporalProposition> itr = pl.listIterator(minIndex);
                 itr.hasNext() && itr.nextIndex() < maxIndex;) {
             TemporalProposition o = itr.next();
             o.accept(copier);
         }
+        this.copier.setWorkingMemory(null);
     }
 }

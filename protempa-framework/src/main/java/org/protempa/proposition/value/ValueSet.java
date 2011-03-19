@@ -13,6 +13,9 @@ import org.protempa.ProtempaUtil;
  */
 public final class ValueSet {
 
+    private static final ValueSetElement[] EMPTY_VALUE_SET_ELT_ARRAY =
+            new ValueSetElement[0];
+
     /**
      * For specifying the values of a value set.
      */
@@ -40,9 +43,13 @@ public final class ValueSet {
             }
             if (displayName == null) {
                 displayName = "";
+            } else {
+                displayName = displayName.intern();
             }
             if (abbrevDisplayName == null) {
                 abbrevDisplayName = "";
+            } else {
+                abbrevDisplayName = abbrevDisplayName.intern();
             }
             this.value = value;
             this.displayName = displayName;
@@ -94,10 +101,10 @@ public final class ValueSet {
             OrderedValue upperBound) {
         if (id == null)
             throw new IllegalArgumentException("id cannot be null");
-        this.id = id;
+        this.id = id.intern();
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
-        this.valueSetElements = new ValueSetElement[0];
+        this.valueSetElements = EMPTY_VALUE_SET_ELT_ARRAY;
         this.values = new HashMap<Value, ValueSetElement>();
         this.valuesKeySet = this.values.keySet();
     }
@@ -114,7 +121,7 @@ public final class ValueSet {
             throw new IllegalArgumentException("id cannot be null");
         ProtempaUtil.checkArray(valueSetElements, "valueSetElements");
 
-        this.id = id;
+        this.id = id.intern();
         this.valueSetElements = valueSetElements.clone();
 
         this.values = new HashMap<Value, ValueSetElement>();

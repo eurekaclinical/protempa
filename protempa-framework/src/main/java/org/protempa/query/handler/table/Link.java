@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +25,10 @@ import org.protempa.proposition.value.ValueComparator;
  * @author Andrew Post
  */
 public abstract class Link {
+
+    private static final PropertyConstraint[] EMPTY_PROPERTY_CONSTRAINT_ARR =
+            new PropertyConstraint[0];
+
     private final Set<String> propIdsAsSet;
     private final PropertyConstraint[] constraints;
     private final Comparator<Proposition> comparator;
@@ -50,10 +55,13 @@ public abstract class Link {
         } else {
             ProtempaUtil.checkArrayForNullElement(propositionIds,
                     "propositionIds");
-            this.propIdsAsSet = Arrays.asSet(propositionIds);
+            this.propIdsAsSet = new HashSet<String>();
+            for (String propId : propositionIds) {
+                this.propIdsAsSet.add(propId.intern());
+            }
         }
         if (constraints == null) {
-            this.constraints = new PropertyConstraint[0];
+            this.constraints = EMPTY_PROPERTY_CONSTRAINT_ARR;
         } else {
             ProtempaUtil.checkArrayForNullElement(constraints, "constraints");
             this.constraints = constraints.clone();

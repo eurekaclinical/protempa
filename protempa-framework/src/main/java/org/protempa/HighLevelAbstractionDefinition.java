@@ -270,8 +270,10 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
     public void setTemporalOffset(Offsets temporalOffset) {
         Offsets old = temporalOffset;
         this.temporalOffset = temporalOffset;
-        this.changes.firePropertyChange("temporalOffset", old,
-                this.temporalOffset);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("temporalOffset", old,
+                    this.temporalOffset);
+        }
     }
 
     @Override
@@ -330,18 +332,15 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
         }
         this.directChildren = abstractedFrom.toArray(
                 new String[abstractedFrom.size()]);
-        this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
-                this.directChildren);
+        if (this.changes != null) {
+            this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+                    this.directChildren);
+        }
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
-                .append("temporalOffset", this.temporalOffset)
-                .append("abstractedFrom", getAbstractedFrom())
-                .append("temporalExtendedPropositionDefinitionPairs",
-                    this.defPairsMap.keySet())
-                .toString();
+        return new ToStringBuilder(this).appendSuper(super.toString()).append("temporalOffset", this.temporalOffset).append("abstractedFrom", getAbstractedFrom()).append("temporalExtendedPropositionDefinitionPairs",
+                this.defPairsMap.keySet()).toString();
     }
 }

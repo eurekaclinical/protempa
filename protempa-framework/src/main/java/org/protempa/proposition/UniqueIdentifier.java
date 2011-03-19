@@ -4,10 +4,13 @@
  */
 package org.protempa.proposition;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import org.protempa.SourceId;
 
 /**
  * A global unique identifier for {@link Proposition}s. It
@@ -19,8 +22,8 @@ import org.protempa.SourceId;
 public final class UniqueIdentifier implements Serializable {
 
     private static final long serialVersionUID = 396847781133676191L;
-    private final SourceId sourceId;
-    private final LocalUniqueIdentifier localUniqueId;
+    private SourceId sourceId;
+    private LocalUniqueIdentifier localUniqueId;
     private transient volatile int hashCode;
 
     /**
@@ -94,5 +97,32 @@ public final class UniqueIdentifier implements Serializable {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        boolean derived = (this.sourceId instanceof DerivedSourceId);
+        if (derived) {
+            s.writeObject("DERIVED");
+        } else {
+            s.writeObject("DATASOURCEBACKEND");
+        }
+        if (!derived) {
+            s.writeObject(this.sourceId.getId());
+        }
+        s.writeObject(this.localUniqueId);
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        String type = (String) s.readObject();
+        if ("DERIVED".equals(type)) {
+            this.sourceId = DerivedSourceId.getInstance();
+        } else if ("DATASOURCEBACKEND".equals(type)) {
+            String id = (String) s.readObject();
+            this.sourceId = DataSourceBackendId.getInstance(id);
+        } else {
+            throw new InvalidObjectException("Invalid source id type " + type +
+                    ". Can't restore");
+        }
+        this.localUniqueId = (LocalUniqueIdentifier) s.readObject();
     }
 }

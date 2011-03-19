@@ -201,32 +201,41 @@ public final class KnowledgeSource
             if (id == null) {
                 throw new IllegalArgumentException("id cannot be null");
             }
+            try {
+                initializeIfNeeded();
+            } catch (BackendInitializationException ex) {
+                throw new KnowledgeSourceReadException(
+                        "An error occurred reading the proposition definition" + id,
+                        ex);
+            } catch (BackendNewInstanceException ex) {
+                throw new KnowledgeSourceReadException(
+                        "An error occurred reading the proposition definition" + id,
+                        ex);
+            }
+            
             P result = null;
             if (!isInNotFound(id)) {
+                boolean lookInBackend = false;
                 if (protempaKnowledgeBase != null) {
                     result = readFromKnowledgeBase(id);
+                    if (result == null) {
+                        if (protempaKnowledgeBase.getPropositionDefinition(id) != null) {
+                            putInNotFound(id);
+                        } else {
+                            lookInBackend = true;
+                        }
+                    }
                 }
 
-                if (result == null) {
-                    try {
-                        initializeIfNeeded();
-                        if (backendManager.getBackends() != null) {
-                            for (KnowledgeSourceBackend backend : backendManager.getBackends()) {
-                                result = readFromBackend(id, backend);
-                                if (result != null) {
-                                    return result;
-                                }
+                if (lookInBackend) {
+                    if (backendManager.getBackends() != null) {
+                        for (KnowledgeSourceBackend backend : backendManager.getBackends()) {
+                            result = readFromBackend(id, backend);
+                            if (result != null) {
+                                return result;
                             }
-                            putInNotFound(id);
                         }
-                    } catch (BackendInitializationException ex) {
-                        throw new KnowledgeSourceReadException(
-                                "An error occurred reading the proposition definition" + id,
-                                ex);
-                    } catch (BackendNewInstanceException ex) {
-                        throw new KnowledgeSourceReadException(
-                                "An error occurred reading the proposition definition" + id,
-                                ex);
+                        putInNotFound(id);
                     }
                 }
             }
@@ -238,34 +247,40 @@ public final class KnowledgeSource
             if (id == null) {
                 throw new IllegalArgumentException("id cannot be null");
             }
+            try {
+                initializeIfNeeded();
+            } catch (BackendInitializationException ex) {
+                throw new KnowledgeSourceReadException(
+                        "An error occurred reading the proposition definition" + id,
+                        ex);
+            } catch (BackendNewInstanceException ex) {
+                throw new KnowledgeSourceReadException(
+                        "An error occurred reading the proposition definition" + id,
+                        ex);
+            }
             boolean result = false;
             if (!isInNotFound(id)) {
+                boolean lookInBackend = false;
                 if (protempaKnowledgeBase != null) {
-                    if (readFromKnowledgeBase(id) != null) {
-                        result = true;
+                    result = (readFromKnowledgeBase(id) != null);
+                    if (!result) {
+                        if (protempaKnowledgeBase.getPropositionDefinition(id) != null) {
+                            putInNotFound(id);
+                        } else {
+                            lookInBackend = true;
+                        }
                     }
                 }
 
-                if (!result) {
-                    try {
-                        initializeIfNeeded();
-                        if (backendManager.getBackends() != null) {
-                            for (KnowledgeSourceBackend backend : backendManager.getBackends()) {
-                                result = readFromBackend(id, backend) != null;
-                                if (result) {
-                                    return result;
-                                }
+                if (lookInBackend) {
+                    if (backendManager.getBackends() != null) {
+                        for (KnowledgeSourceBackend backend : backendManager.getBackends()) {
+                            result = readFromBackend(id, backend) != null;
+                            if (result) {
+                                return result;
                             }
-                            putInNotFound(id);
                         }
-                    } catch (BackendInitializationException ex) {
-                        throw new KnowledgeSourceReadException(
-                                "An error occurred reading the proposition definition" + id,
-                                ex);
-                    } catch (BackendNewInstanceException ex) {
-                        throw new KnowledgeSourceReadException(
-                                "An error occurred reading the proposition definition" + id,
-                                ex);
+                        putInNotFound(id);
                     }
                 }
             }

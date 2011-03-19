@@ -18,13 +18,15 @@ import org.protempa.proposition.value.Value;
 
 class EventResultProcessor extends AbstractMainResultProcessor<Event> {
 
-    private static final IntervalFactory intervalFactory = new IntervalFactory();
-    private static final int FLUSH_SIZE = 250000;
+    private static final IntervalFactory intervalFactory =
+            new IntervalFactory();
+    private static final int FLUSH_SIZE = 100000;
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
         ResultCache<Event> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
+        boolean hasRefs = entitySpec.getReferenceSpecs().length > 0;
         String[] propIds = entitySpec.getPropositionIds();
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
         if (codeSpec != null) {
@@ -146,9 +148,9 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
             logger.log(Level.FINEST, "Created event {0}", event);
             results.add(keyId, event);
             if (++count % FLUSH_SIZE == 0) {
-                results.flush();
+                results.flush(hasRefs);
             }
         }
-        results.flush();
+        results.flush(hasRefs);
     }
 }

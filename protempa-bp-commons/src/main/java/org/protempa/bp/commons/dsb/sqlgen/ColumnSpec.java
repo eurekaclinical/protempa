@@ -19,6 +19,9 @@ public final class ColumnSpec implements Serializable {
 
     private static final long serialVersionUID = 2254623617064935923L;
 
+    private static KnowledgeSourceIdToSqlCode[] EMPTY_KNOWLEDGE_SOURCE_ID_TO_SQL_CODE_ARRAY =
+            new KnowledgeSourceIdToSqlCode[0];
+
     public static enum ColumnOp {
 
         UPPER
@@ -75,7 +78,7 @@ public final class ColumnSpec implements Serializable {
             if (sqlCode == null) {
                 throw new IllegalArgumentException("sqlCode cannot be null");
             }
-            this.propositionId = propositionId;
+            this.propositionId = propositionId.intern();
             this.sqlCode = sqlCode;
         }
 
@@ -269,8 +272,8 @@ public final class ColumnSpec implements Serializable {
         if (table == null) {
             throw new IllegalArgumentException("table cannot be null");
         }
-        this.schema = schema;
-        this.table = table;
+        this.schema = schema.intern();
+        this.table = table.intern();
         this.column = column;
         this.joinSpec = joinSpec;
         this.constraint = constraint;
@@ -287,7 +290,7 @@ public final class ColumnSpec implements Serializable {
             ProtempaUtil.checkArrayForNullElement(this.propIdToSqlCodes,
                     "propIdToSqlCodes");
         } else {
-            this.propIdToSqlCodes = new KnowledgeSourceIdToSqlCode[0];
+            this.propIdToSqlCodes = EMPTY_KNOWLEDGE_SOURCE_ID_TO_SQL_CODE_ARRAY;
         }
         this.propIdForSqlCode = new HashMap<Object, String>();
         for (KnowledgeSourceIdToSqlCode k : this.propIdToSqlCodes) {

@@ -9,7 +9,6 @@ import org.protempa.proposition.Relation;
 public class PairDefinition extends AbstractAbstractionDefinition {
 
     private static final long serialVersionUID = 456697454379224533L;
-
     private boolean solid;
     private Relation relation;
     private GapFunction gapFunction;
@@ -35,10 +34,12 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     @Override
     public Set<String> getAbstractedFrom() {
         HashSet<String> set = new HashSet<String>();
-        if (this.leftHandProposition != null)
+        if (this.leftHandProposition != null) {
             set.add(this.leftHandProposition.getPropositionId());
-        if (this.rightHandProposition != null)
+        }
+        if (this.rightHandProposition != null) {
             set.add(this.rightHandProposition.getPropositionId());
+        }
         return set;
     }
 
@@ -88,8 +89,10 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     public void setTemporalOffset(Offsets temporalOffset) {
         Offsets old = temporalOffset;
         this.temporalOffset = temporalOffset;
-        this.changes.firePropertyChange("temporalOffset", old,
-                this.temporalOffset);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("temporalOffset", old,
+                    this.temporalOffset);
+        }
     }
 
     @Override
@@ -113,21 +116,17 @@ public class PairDefinition extends AbstractAbstractionDefinition {
                 abstractedFrom.add(propId);
             }
         }
-        this.directChildren = abstractedFrom.toArray(new String[abstractedFrom
-                .size()]);
-        this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
-                this.directChildren);
+        this.directChildren = abstractedFrom.toArray(new String[abstractedFrom.size()]);
+        if (this.changes != null) {
+            this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+                    this.directChildren);
+        }
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString())
-                .append("temporalOffset", this.temporalOffset)
-                .append("abstractedFrom", getAbstractedFrom())
-                .append("left temporal proposition", this.leftHandProposition)
-                .append("right temporal proposition",
-                this.rightHandProposition)
-                .append("relation", this.relation).toString();
+        return new ToStringBuilder(this).appendSuper(super.toString()).append("temporalOffset", this.temporalOffset).append("abstractedFrom", getAbstractedFrom()).append("left temporal proposition", this.leftHandProposition).append("right temporal proposition",
+                this.rightHandProposition).append("relation", this.relation).toString();
     }
 
     @Override
@@ -142,7 +141,9 @@ public class PairDefinition extends AbstractAbstractionDefinition {
         }
         GapFunction old = this.gapFunction;
         this.gapFunction = gapFunction;
-        this.changes.firePropertyChange("gapFunction", old, this.gapFunction);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("gapFunction", old, this.gapFunction);
+        }
     }
 
     public TemporalExtendedPropositionDefinition getLeftHandProposition() {
@@ -154,8 +155,10 @@ public class PairDefinition extends AbstractAbstractionDefinition {
         TemporalExtendedPropositionDefinition old = this.leftHandProposition;
         this.leftHandProposition = proposition;
         recalculateDirectChildren();
-        this.changes.firePropertyChange("leftHandProposition", old,
-                this.leftHandProposition);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("leftHandProposition", old,
+                    this.leftHandProposition);
+        }
     }
 
     public TemporalExtendedPropositionDefinition getRightHandProposition() {
@@ -167,7 +170,9 @@ public class PairDefinition extends AbstractAbstractionDefinition {
         TemporalExtendedPropositionDefinition old = this.rightHandProposition;
         this.rightHandProposition = rightHandProposition;
         recalculateDirectChildren();
-        this.changes.firePropertyChange("rightHandProposition", old,
-                this.rightHandProposition);
+        if (this.changes != null) {
+            this.changes.firePropertyChange("rightHandProposition", old,
+                    this.rightHandProposition);
+        }
     }
 }
