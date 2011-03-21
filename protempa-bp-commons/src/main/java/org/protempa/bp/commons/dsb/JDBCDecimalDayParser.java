@@ -17,13 +17,13 @@ public class JDBCDecimalDayParser implements PositionFormat {
     private static final DateFormat DATE_FORMAT =
             new SimpleDateFormat("yyyyMMdd");
 
-    public JDBCDecimalDayParser() {
-    }
-
     @Override
     public Long toLong(ResultSet resultSet, int columnIndex, int colType)
             throws SQLException {
         int date = resultSet.getInt(columnIndex);
+        if (date < 10000000) {
+            return null;
+        }
         int year = date / 10000;
         int monthDay = date - year * 10000;
         int month = monthDay / 100;
@@ -33,7 +33,6 @@ public class JDBCDecimalDayParser implements PositionFormat {
             calendar.set(year, month, day);
             return calendar.getTimeInMillis();
         }
-
     }
 
     @Override

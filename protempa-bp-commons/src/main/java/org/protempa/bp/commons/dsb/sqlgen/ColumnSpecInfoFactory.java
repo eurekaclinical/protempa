@@ -3,7 +3,6 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.protempa.dsb.filter.Filter;
@@ -40,9 +39,9 @@ final class ColumnSpecInfoFactory {
                     columnSpecs, i, columnSpecInfo, referenceSpec);
             i = processFinishTimeSpec(entitySpec, entitySpec2, columnSpecs,
                     i, columnSpecInfo, referenceSpec);
-            if (entitySpec2 == entitySpec) {
+            if (entitySpec2 == entitySpec && referenceSpec == null) {
                 i = processPropertyAndValueSpecs(entitySpec2, columnSpecs, i,
-                        columnSpecInfo, referenceSpec);
+                        columnSpecInfo);
             }
             i = processCodeSpec(entitySpec, entitySpec2, columnSpecs, i,
                     columnSpecInfo, referenceSpec);
@@ -124,16 +123,12 @@ final class ColumnSpecInfoFactory {
     private static int processFilters(EntitySpec entitySpec,
             Collection<Filter> filters,
             List<ColumnSpec> columnSpecs, int i) {
-        for (Iterator<Filter> itr = filters.iterator();
-                itr.hasNext();) {
-            Filter filter = itr.next();
+        for (Filter filter : filters) {
             if (filter instanceof PropertyValueFilter) {
-                PropertyValueFilter pvf =
-                        (PropertyValueFilter) filter;
+                PropertyValueFilter pvf = (PropertyValueFilter) filter;
                 for (PropertySpec propertySpec :
                         entitySpec.getPropertySpecs()) {
-                    if (propertySpec.getName().equals(
-                            pvf.getProperty())) {
+                    if (propertySpec.getName().equals(pvf.getProperty())) {
                         List<ColumnSpec> specAsList =
                                 propertySpec.getSpec().asList();
                         columnSpecs.addAll(specAsList);
@@ -157,7 +152,7 @@ final class ColumnSpecInfoFactory {
 
     private static int processPropertyAndValueSpecs(EntitySpec entitySpec,
             List<ColumnSpec> columnSpecs, int i,
-            ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
+            ColumnSpecInfo columnSpecInfo) {
         PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
         Map<String, Integer> propertyIndices =
                 new HashMap<String, Integer>();
@@ -170,7 +165,7 @@ final class ColumnSpecInfoFactory {
                 propertyIndices.put(propertySpec.getName(), i - 1);
             }
         }
-        if (propertySpecs.length > 0 && referenceSpec == null) {
+        if (propertySpecs.length > 0) {
             columnSpecInfo.setPropertyIndices(propertyIndices);
         }
 

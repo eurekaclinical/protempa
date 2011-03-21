@@ -2,16 +2,15 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
 
-abstract class RefResultProcessor<P extends Proposition> extends
-        AbstractResultProcessor {
+abstract class RefResultProcessor<P extends Proposition> extends AbstractResultProcessor {
 
     private static final int FLUSH_SIZE = 25000;
-
     private ReferenceSpec referenceSpec;
     private ResultCache<P> cache;
 
@@ -23,19 +22,27 @@ abstract class RefResultProcessor<P extends Proposition> extends
         EntitySpec entitySpec = getEntitySpec();
         int count = 0;
         String[] uniqueIds = new String[entitySpec.getUniqueIdSpecs().length];
-        String[] refUniqueIds = new String[this.referenceSpec
-                    .getUniqueIdSpecs().length];
+        String[] refUniqueIds =
+                new String[this.referenceSpec.getUniqueIdSpecs().length];
+        UniqueIdentifier uniqueIdentifier = null;
+        String[] uniqueIdsCopy = new String[uniqueIds.length];
+        String entitySpecName = entitySpec.getName();
+        String refSpecEntityName = this.referenceSpec.getEntityName();
         while (resultSet.next()) {
             int i = 1;
-            
+
             i = readUniqueIds(uniqueIds, resultSet, i);
-            UniqueIdentifier uniqueIdentifier = generateUniqueIdentifier(
-                    entitySpec.getName(), uniqueIds);
-            
+            if (uniqueIdentifier == null ||
+                    !Arrays.equals(uniqueIds, uniqueIdsCopy)) {
+                uniqueIdentifier = generateUniqueIdentifier(
+                        entitySpecName, uniqueIds);
+                System.arraycopy(uniqueIds, 0, uniqueIdsCopy, 0,
+                        uniqueIds.length);
+            }
+
             i = readUniqueIds(refUniqueIds, resultSet, i);
             UniqueIdentifier refUniqueIdentifier = generateUniqueIdentifier(
-                    this.referenceSpec.getEntityName(), refUniqueIds);
-            //addToReferences(uniqueIdentifier, refUniqueIdentifier);
+                    refSpecEntityName, refUniqueIds);
             cache.addReference(uniqueIdentifier, refUniqueIdentifier);
             if (++count % FLUSH_SIZE == 0) {
                 this.cache.flushReferences();
@@ -44,16 +51,6 @@ abstract class RefResultProcessor<P extends Proposition> extends
         this.cache.flushReferences();
         this.cache.flushReferencesFull(this);
     }
-
-//    private final void addToReferences(UniqueIdentifier uniqueIdentifier,
-//            UniqueIdentifier refUniqueIdentifier) {
-//        P proposition =
-//                this.cache.uidToProposition(uniqueIdentifier);
-//        assert proposition != null : "No proposition for unique identifier "
-//                + uniqueIdentifier;
-//        addReference(proposition, this.referenceSpec.getReferenceName(),
-//                refUniqueIdentifier);
-//    }
 
     abstract void addReferences(P proposition, List<UniqueIdentifier> uids);
 

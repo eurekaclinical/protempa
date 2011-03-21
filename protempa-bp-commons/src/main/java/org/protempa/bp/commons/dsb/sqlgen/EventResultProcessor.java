@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.DataSourceType;
+import org.protempa.bp.commons.dsb.PositionFormat;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.Interval;
 import org.protempa.proposition.IntervalFactory;
@@ -44,6 +45,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                 new String[entitySpec.getUniqueIdSpecs().length];
         DataSourceType dsType =
                 DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
+        PositionFormat positionParser = entitySpec.getPositionParser();
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
@@ -78,8 +80,7 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                 }
                 Long d = null;
                 try {
-                    d = entitySpec.getPositionParser().toLong(resultSet, i,
-                            finishColumnType);
+                    d = positionParser.toLong(resultSet, i, finishColumnType);
                     i++;
                 } catch (SQLException e) {
                     logger.log(
@@ -94,8 +95,8 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                 }
                 Long start = null;
                 try {
-                    start = entitySpec.getPositionParser().toLong(resultSet,
-                            i, startColumnType);
+                    start = positionParser.toLong(resultSet, i,
+                            startColumnType);
                 } catch (SQLException e) {
                     logger.log(
                             Level.WARNING,
@@ -109,8 +110,8 @@ class EventResultProcessor extends AbstractMainResultProcessor<Event> {
                 }
                 Long finish = null;
                 try {
-                    finish = entitySpec.getPositionParser().toLong(resultSet,
-                            i, finishColumnType);
+                    finish = positionParser.toLong(resultSet, i,
+                            finishColumnType);
                 } catch (SQLException e) {
                     logger.log(
                             Level.WARNING,
