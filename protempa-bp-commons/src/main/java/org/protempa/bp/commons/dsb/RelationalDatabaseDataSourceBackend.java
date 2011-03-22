@@ -69,6 +69,16 @@ public abstract class RelationalDatabaseDataSourceBackend
         this.databaseAPI = databaseAPI;
     }
 
+    public abstract String getSchemaName();
+
+    public abstract String getKeyIdSchema();
+
+    public abstract String getKeyIdTable();
+
+    public abstract String getKeyIdColumn();
+
+    public abstract String getKeyIdJoinKey();
+
     /**
      * Collects the database connection information specified in this backend's
      * configuration, and uses it to try and get a SQL generator with which to
