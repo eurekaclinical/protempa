@@ -30,7 +30,7 @@ public class JDBCDecimalDayParser implements PositionFormat {
         int day = monthDay - month * 100;
         synchronized (calendar) {
             calendar.clear();
-            calendar.set(year, month, day);
+            calendar.set(year, month - 1, day);
             return calendar.getTimeInMillis();
         }
     }
