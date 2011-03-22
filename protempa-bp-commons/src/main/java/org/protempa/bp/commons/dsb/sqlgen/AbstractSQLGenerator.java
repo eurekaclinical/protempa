@@ -460,12 +460,12 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return readPropositions(eventIds, filters, keyIds, order, factory);
     }
 
-    private final String generateSelect(EntitySpec entitySpec,
+    private String generateSelect(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, Set<String> propIds,
             Set<Filter> filtersCopy, Collection<EntitySpec> entitySpecsCopy,
             Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor) {
-        ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(
+        ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(propIds,
                 entitySpec, entitySpecsCopy, filtersCopy, referenceSpec);
         Map<ColumnSpec, Integer> referenceIndices =
                 computeReferenceIndices(info.getColumnSpecs());
@@ -1019,7 +1019,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
      * @param entitySpecPropIds
      * @return
      */
-    private static boolean completeOrNoOverlap(Set<String> propIds,
+    static boolean completeOrNoOverlap(Set<String> propIds,
             String[] entitySpecPropIds) {
 
         //Everything known to the data source that is not in the query.

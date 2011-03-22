@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.protempa.dsb.filter.Filter;
 import org.protempa.dsb.filter.PropertyValueFilter;
 
@@ -15,7 +16,7 @@ import org.protempa.dsb.filter.PropertyValueFilter;
  */
 final class ColumnSpecInfoFactory {
 
-    ColumnSpecInfo newInstance(EntitySpec entitySpec,
+    ColumnSpecInfo newInstance(Set<String> propIds, EntitySpec entitySpec,
             Collection<EntitySpec> entitySpecs,
             Collection<Filter> filters, ReferenceSpec referenceSpec) {
         ColumnSpecInfo columnSpecInfo = new ColumnSpecInfo();
@@ -43,7 +44,7 @@ final class ColumnSpecInfoFactory {
                 i = processPropertyAndValueSpecs(entitySpec2, columnSpecs, i,
                         columnSpecInfo);
             }
-            i = processCodeSpec(entitySpec, entitySpec2, columnSpecs, i,
+            i = processCodeSpec(propIds, entitySpec, entitySpec2, columnSpecs, i,
                     columnSpecInfo, referenceSpec);
             i = processConstraintSpecs(entitySpec2, columnSpecs, i);
             i = processFilters(entitySpec2, filters, columnSpecs,
@@ -99,11 +100,23 @@ final class ColumnSpecInfoFactory {
         return i;
     }
 
-    private static int processCodeSpec(EntitySpec entitySpec,
+    private static int processCodeSpec(Set<String> propIds, EntitySpec entitySpec,
             EntitySpec entitySpec2, List<ColumnSpec> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
         ColumnSpec codeSpec = entitySpec2.getCodeSpec();
-        i = processColumnSpec(codeSpec, columnSpecs, i);
+        if (codeSpec != null) {
+            List<ColumnSpec> specAsList = codeSpec.asList();
+            int specAsListSize = specAsList.size();
+            if (referenceSpec == null
+                    || !(specAsList.get(specAsListSize - 1).isPropositionIdsComplete()
+                    && AbstractSQLGenerator.completeOrNoOverlap(propIds,
+                    entitySpec2.getPropositionIds()))) {
+                columnSpecs.addAll(specAsList);
+                i += specAsListSize;
+            } else {
+                codeSpec = null;
+            }
+        }
         if (codeSpec != null && entitySpec == entitySpec2
                 && referenceSpec == null) {
             columnSpecInfo.setCodeIndex(i - 1);
@@ -214,8 +227,19 @@ final class ColumnSpecInfoFactory {
             List<ColumnSpec> columnSpecs, int i) {
         ColumnSpec spec = entitySpec.getBaseSpec();
         List<ColumnSpec> specAsList = spec.asList();
-        columnSpecs.addAll(specAsList);
-        i += specAsList.size();
+        /*
+         * We assume that the first column spec of the base spec is the
+         * patient id/key.
+         */
+        int specAsListSize = specAsList.size();
+        //if (referenceSpec == null || !keyIds.isEmpty()) {
+            columnSpecs.addAll(specAsList);
+            i += specAsListSize;
+        //} //else {
+        //    columnSpecs.addAll(specAsList.subList(1, specAsListSize));
+        //    i += specAsListSize - 1;
+        //}
+        
         return i;
     }
 }

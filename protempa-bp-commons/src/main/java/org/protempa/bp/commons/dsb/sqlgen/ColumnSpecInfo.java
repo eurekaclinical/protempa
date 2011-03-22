@@ -11,7 +11,6 @@ final class ColumnSpecInfo {
     private Map<String, Integer> propertyIndices = null;
     private int valueIndex = -1;
     private int codeIndex = -1;
-    private Map<String, List<ReferenceSpec>> references;
     private int[] uniqueIdIndices;
     private boolean usingKeyIdIndex;
 
@@ -25,14 +24,6 @@ final class ColumnSpecInfo {
 
     void setUnique(boolean unique) {
         this.unique = unique;
-    }
-
-    Map<String, List<ReferenceSpec>> getReferences() {
-        return references;
-    }
-
-    void setReferences(Map<String, List<ReferenceSpec>> references) {
-        this.references = references;
     }
 
     int getCodeIndex() {
