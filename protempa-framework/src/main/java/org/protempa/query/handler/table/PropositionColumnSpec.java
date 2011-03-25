@@ -100,6 +100,11 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
     protected String[] columnNames(String prefix) {
         List<String> results = new ArrayList<String>();
+        if (this.outputConfig.showId()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getIdHeading(),
+                    this.columnNamePrefixOverride + "_id"));
+        }
         if (this.outputConfig.showValue()) {
             results.add(StringUtils.defaultIfEmpty(
                     outputConfig.getValueHeading(),
@@ -157,6 +162,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         @Override
         public void visit(AbstractParameter abstractParameter)
                 throws KnowledgeSourceReadException {
+            if (outputConfig.showId()) {
+                resultList.add(abstractParameter.getId());
+            }
             if (outputConfig.showValue()) {
                 resultList.add(abstractParameter.getValueFormatted());
             }
@@ -175,6 +183,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
         @Override
         public void visit(Event event) throws KnowledgeSourceReadException {
+            if (outputConfig.showId()) {
+                resultList.add(event.getId());
+            }
             if (outputConfig.showValue()) {
                 resultList.add(null);
             }
@@ -194,6 +205,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         @Override
         public void visit(PrimitiveParameter primitiveParameter)
                 throws KnowledgeSourceReadException {
+            if (outputConfig.showId()) {
+                resultList.add(primitiveParameter.getId());
+            }
             if (outputConfig.showValue()) {
                 resultList.add(primitiveParameter.getValueFormatted());
             }
@@ -211,12 +225,15 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         }
 
         @Override
-        public void visit(Constant constantParameter)
+        public void visit(Constant constant)
                 throws KnowledgeSourceReadException {
+            if (outputConfig.showId()) {
+                resultList.add(constant.getId());
+            }
             if (outputConfig.showValue()) {
                 resultList.add(null);
             }
-            displayNames(constantParameter);
+            displayNames(constant);
             if (outputConfig.showStartOrTimestamp()) {
                 resultList.add(null);
             }
@@ -226,7 +243,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             if (outputConfig.showLength()) {
                 resultList.add(null);
             }
-            processProperties(constantParameter);
+            processProperties(constant);
         }
 
         @Override

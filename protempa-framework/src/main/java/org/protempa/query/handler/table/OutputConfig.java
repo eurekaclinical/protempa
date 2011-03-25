@@ -12,12 +12,14 @@ public class OutputConfig {
     private final boolean showStartOrTimestamp;
     private final boolean showFinish;
     private final boolean showLength;
+    private final boolean showId;
     private final String valueHeading;
     private final String displayNameHeading;
     private final String abbrevDisplayNameHeading;
     private final String startOrTimestampHeading;
     private final String finishHeading;
     private final String lengthHeading;
+    private final String idHeading;
 
     public OutputConfig() {
         this.showValue = false;
@@ -26,27 +28,34 @@ public class OutputConfig {
         this.showStartOrTimestamp = false;
         this.showFinish = false;
         this.showLength = false;
+        this.showId = false;
         this.valueHeading = "";
         this.displayNameHeading = "";
         this.abbrevDisplayNameHeading = "";
         this.startOrTimestampHeading = "";
         this.finishHeading = "";
         this.lengthHeading = "";
+        this.idHeading = "";
     }
 
-    public OutputConfig(boolean showValue, boolean showDisplayName,
+    public OutputConfig(boolean showId, boolean showValue, boolean showDisplayName,
             boolean showAbbrevDisplayName,
             boolean showStartOrTimestamp, boolean showFinish,
-            boolean showLength,
+            boolean showLength, String idHeading,
             String valueHeading, String displayNameHeading,
             String abbrevDisplayNameHeading, String startOrTimestampHeading,
             String finishHeading, String lengthHeading) {
+        this.showId = showId;
         this.showValue = showValue;
         this.showDisplayName = showDisplayName;
         this.showAbbrevDisplayName = showAbbrevDisplayName;
         this.showStartOrTimestamp = showStartOrTimestamp;
         this.showFinish = showFinish;
         this.showLength = showLength;
+        if (idHeading == null) {
+            idHeading = "";
+        }
+        this.idHeading = idHeading;
         if (valueHeading == null)
             valueHeading = "";
         this.valueHeading = valueHeading;
@@ -65,6 +74,10 @@ public class OutputConfig {
         if (lengthHeading == null)
             lengthHeading = "";
         this.lengthHeading = lengthHeading;
+    }
+
+    public String getIdHeading() {
+        return idHeading;
     }
 
     public String getValueHeading() {
@@ -89,6 +102,10 @@ public class OutputConfig {
 
     public String getLengthHeading() {
         return lengthHeading;
+    }
+
+    public boolean showId() {
+        return showId;
     }
 
     public boolean showValue() {
@@ -117,6 +134,9 @@ public class OutputConfig {
 
     public int numActiveColumns() {
         int i = 0;
+        if (this.showId) {
+            i++;
+        }
         if (this.showAbbrevDisplayName) {
             i++;
         }

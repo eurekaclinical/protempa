@@ -14,12 +14,14 @@ public class OutputConfigBuilder {
     private boolean showStartOrTimestamp;
     private boolean showFinish;
     private boolean showLength;
+    private boolean showId;
     private String valueHeading;
     private String displayNameHeading;
     private String abbrevDisplayNameHeading;
     private String startOrTimestampHeading;
     private String finishHeading;
     private String lengthHeading;
+    private String idHeading;
 
     public OutputConfigBuilder() {
         this.valueHeading = "";
@@ -28,6 +30,18 @@ public class OutputConfigBuilder {
         this.startOrTimestampHeading = "";
         this.finishHeading = "";
         this.lengthHeading = "";
+        this.idHeading = "";
+    }
+
+    public String getIdHeading() {
+        return this.idHeading;
+    }
+
+    public void setIdHeading(String idHeading) {
+        if (idHeading == null) {
+            idHeading = "";
+        }
+        this.idHeading = idHeading;
     }
 
     public String getValueHeading() {
@@ -90,6 +104,14 @@ public class OutputConfigBuilder {
         this.lengthHeading = lengthHeading;
     }
 
+    public boolean showId() {
+        return this.showId;
+    }
+
+    public void setShowId(boolean showId) {
+        this.showId = showId;
+    }
+
     public boolean showValue() {
         return showValue;
     }
@@ -143,9 +165,9 @@ public class OutputConfigBuilder {
      * @return a {@link OutputConfig}.
      */
     public OutputConfig build() {
-        return new OutputConfig(this.showValue, this.showDisplayName,
+        return new OutputConfig(this.showId, this.showValue, this.showDisplayName,
                 this.showAbbrevDisplayName, this.showStartOrTimestamp,
-                this.showFinish, this.showLength, this.valueHeading,
+                this.showFinish, this.showLength, this.idHeading, this.valueHeading,
                 this.displayNameHeading, this.abbrevDisplayNameHeading,
                 this.startOrTimestampHeading, this.finishHeading,
                 this.lengthHeading);
