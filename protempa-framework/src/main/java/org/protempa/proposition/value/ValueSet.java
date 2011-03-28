@@ -3,6 +3,8 @@ package org.protempa.proposition.value;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
 
@@ -127,8 +129,11 @@ public final class ValueSet {
         this.values = new HashMap<Value, ValueSetElement>();
         for (ValueSetElement vse : this.valueSetElements) {
             if (this.values.containsKey(vse.value)) {
-                throw new IllegalArgumentException(
-                        "No duplicate values allowed");
+                Util.logger().log(Level.WARNING, 
+                        "Ignoring duplicate value {0} for id {1}", 
+                        new Object[] {vse.value.getFormatted(), id});
+//                throw new IllegalArgumentException(
+//                        "No duplicate values allowed: " + vse.value.getFormatted());
             } else {
                 this.values.put(vse.value, vse);
             }
