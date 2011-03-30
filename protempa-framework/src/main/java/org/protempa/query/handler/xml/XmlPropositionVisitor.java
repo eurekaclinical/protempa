@@ -6,6 +6,7 @@ import java.util.logging.Level;
 
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.AbstractPropositionCheckedVisitor;
@@ -16,6 +17,7 @@ import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueSet;
 
 public class XmlPropositionVisitor extends AbstractPropositionCheckedVisitor {
 
@@ -90,6 +92,10 @@ public class XmlPropositionVisitor extends AbstractPropositionCheckedVisitor {
                             + "</valueType>");
                     this.writer.write("<value>" + value.getFormatted()
                             + "</value>");
+                    this.writer.write("<valueDisplayName>");
+                    this.writer.write(getOutputPropertyValue(proposition,
+                            propName, value));
+                    this.writer.write("</valueDisplayName>");
                 } else {
                     this.writer.write("(null)");
                 }
@@ -162,5 +168,30 @@ public class XmlPropositionVisitor extends AbstractPropositionCheckedVisitor {
                             proposition.getId());
         }
         return name;
+    }
+
+    private String getOutputPropertyValue(Proposition proposition,
+            String propertyName, Value propertyValue) {
+        String outputValue = propertyValue.getFormatted();
+        Util.logger().log(Level.FINE, "Getting property display name for {0}",
+                propertyValue.getFormatted());
+        try {
+            PropositionDefinition propositionDef = this.knowledgeSource
+                    .readPropositionDefinition(proposition.getId());
+            if (propositionDef != null) {
+                PropertyDefinition propertyDef = propositionDef
+                        .propertyDefinition(propertyName);
+                if (propertyDef != null) {
+                    ValueSet valueSet = this.knowledgeSource
+                            .readValueSet(propertyDef.getValueSetId());
+                    if (valueSet != null) {
+                        outputValue = valueSet.displayName(propertyValue);
+                    }
+                }
+            }
+        } catch (KnowledgeSourceReadException e) {
+            Util.logger().log(Level.SEVERE, e.getMessage(), e);
+        }
+        return outputValue;
     }
 }

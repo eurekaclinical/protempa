@@ -61,18 +61,27 @@ public class XmlQueryResultsHandler extends WriterQueryResultsHandler {
         }
     }
 
-    private void addDerived(List<Proposition> propositions,
-            Map<Proposition, List<Proposition>> derivations,
-            Set<Proposition> propositionsAsSet) {
-        for (Proposition prop : propositions) {
-            boolean added = propositionsAsSet.add(prop);
-            if (added) {
-                List<Proposition> derivedProps = derivations.get(prop);
-                if (derivedProps != null) {
-                    addDerived(derivedProps, derivations, propositionsAsSet);
-                }
+    private List<Proposition> createReferenceList(List<UniqueIdentifier> uids,
+            Map<UniqueIdentifier, Proposition> references) {
+        List<Proposition> propositions = new ArrayList<Proposition>();
+        for (UniqueIdentifier uid : uids) {
+            Proposition refProp = references.get(uid);
+            if (refProp != null) {
+                propositions.add(refProp);
             }
         }
+        return propositions;
+    }
+
+    private List<Proposition> filterHandled(List<Proposition> propositions,
+            Set<Proposition> handled) {
+        List<Proposition> filtered = new ArrayList<Proposition>();
+        for (Proposition proposition : propositions) {
+            if (!handled.contains(proposition)) {
+                filtered.add(proposition);
+            }
+        }
+        return filtered;
     }
 
     private void handleProposition(Set<Proposition> handled,
@@ -87,16 +96,24 @@ public class XmlQueryResultsHandler extends WriterQueryResultsHandler {
                 proposition.acceptChecked(visitor);
 
                 Set<String> refNames = proposition.getReferenceNames();
-                if (refNames != null) {
+                if (refNames != null && (!refNames.isEmpty())) {
                     this.write("<references>");
                     for (String refName : refNames) {
                         List<UniqueIdentifier> uids = proposition
                                 .getReferences(refName);
-                        for (UniqueIdentifier uid : uids) {
-                            Proposition refProp = references.get(uid);
-                            if (refProp != null) {
-                                handleProposition(handled, derivations,
-                                        references, refProp, visitor);
+                        List<Proposition> refProps = createReferenceList(uids,
+                                references);
+                        if (!refProps.isEmpty()) {
+                            List<Proposition> filteredReferences = filterHandled(
+                                    refProps, handled);
+                            if (!filteredReferences.isEmpty()) {
+                                this.write("<reference type=\"" + refName
+                                        + "\">");
+                                for (Proposition refProp : filteredReferences) {
+                                    handleProposition(handled, derivations,
+                                            references, refProp, visitor);
+                                }
+                                this.write("</reference>");
                             }
                         }
                     }
@@ -129,7 +146,6 @@ public class XmlQueryResultsHandler extends WriterQueryResultsHandler {
         try {
             Set<Proposition> handled = new HashSet<Proposition>();
             Set<Proposition> propositionsAsSet = new HashSet<Proposition>();
-            addDerived(propositions, derivations, propositionsAsSet);
             List<Proposition> propositionsCopy = new ArrayList<Proposition>(
                     propositionsAsSet);
 
