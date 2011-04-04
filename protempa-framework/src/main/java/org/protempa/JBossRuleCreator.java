@@ -20,6 +20,7 @@ import org.drools.rule.Rule;
 import org.drools.spi.Constraint;
 import org.drools.spi.PredicateExpression;
 import org.drools.spi.Tuple;
+import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
@@ -47,6 +48,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             ArrayList.class);
     private static final ClassObjectType TEMP_PROP_OT = new ClassObjectType(
             TemporalProposition.class);
+    private static final ClassObjectType ABSTRACT_PARAM_OT =
+            new ClassObjectType(AbstractParameter.class);
     private static final SalienceInteger ONE_SALIENCE = new SalienceInteger(1);
     private static final SalienceInteger MINUS_TWO_SALIENCE =
             new SalienceInteger(-2);
@@ -89,7 +92,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             rule.setSalience(ONE_SALIENCE);
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
-            addInverseIsARule(def, SEQUENCE_OBJECT_TYPE);
+            addInverseIsARule(def, ABSTRACT_PARAM_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -174,7 +177,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
             AbstractionCombiner.toRules(def, rules);
-            addInverseIsARule(def, TEMP_PROP_OT);
+            addInverseIsARule(def, ABSTRACT_PARAM_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -201,7 +204,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             rule.setSalience(MINUS_TWO_SALIENCE);
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
-            addInverseIsARule(def, TEMP_PROP_OT);
+            addInverseIsARule(def, ABSTRACT_PARAM_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -236,6 +239,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             rule.setSalience(MINUS_TWO_SALIENCE);
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
+            addInverseIsARule(def, ABSTRACT_PARAM_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -287,7 +291,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         String[] inverseIsA = def.getInverseIsA();
         if (inverseIsA.length > 0) {
             String propId = def.getId();
-            ProtempaUtil.logger().log(Level.FINER, 
+            ProtempaUtil.logger().log(Level.FINER,
                     "Creating inverseIsA rule for {0}", def);
             Constraint c = new PredicateConstraint(
                     new PropositionPredicateExpression(inverseIsA));

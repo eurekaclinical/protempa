@@ -12,7 +12,6 @@ import org.protempa.proposition.TemporalProposition;
  */
 public class AllPropositionIntervalComparator 
         implements Comparator<Proposition> {
-    private static final long serialVersionUID = 4658706559636599406L;
 
     /**
      * If comparing {@link TemporalProposition}s, compares their intervals;

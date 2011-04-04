@@ -515,15 +515,6 @@ final class AbstractionFinder implements Module {
         public void cleanup() {
             clear();
         }
-
-        @Override
-        protected RuleBaseConfiguration createRuleBaseConfiguration(
-                JBossRuleCreator ruleCreator) throws PropositionDefinitionInstantiationException {
-            RuleBaseConfiguration result =
-                    super.createRuleBaseConfiguration(ruleCreator);
-            result.setSequential(true);
-            return result;
-        }
     }
 
     private class StatefulExecutionStrategy

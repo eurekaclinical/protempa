@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.dsb.sqlgen.ConnectorJ5MySQL415Generator;
-import org.protempa.bp.commons.dsb.sqlgen.Ojdbc14Oracle10gSQLGenerator;
+import org.protempa.bp.commons.dsb.sqlgen.Ojdbc6Oracle10gSQLGenerator;
 import org.protempa.bp.commons.dsb.sqlgen.ResultCache;
 import org.protempa.bp.commons.dsb.sqlgen.SQLOrderBy;
 import org.protempa.dsb.filter.Filter;

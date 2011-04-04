@@ -9,7 +9,7 @@ import java.text.MessageFormat;
  *
  * @author Andrew Post
  */
-public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
+public class Ojdbc6Oracle10gSQLGenerator extends AbstractSQLGenerator {
 
     private static final String readPropositionsSQL =
             "select {0} from {1} {2}";
@@ -121,7 +121,8 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
         if (!name.equals("Oracle JDBC driver")) {
             return false;
         }
-        if (metaData.getDriverMajorVersion() != 10) {
+        int majorVersion = metaData.getDriverMajorVersion();
+        if (majorVersion != 11) {
             return false;
         }
 
@@ -194,6 +195,6 @@ public class Ojdbc14Oracle10gSQLGenerator extends AbstractSQLGenerator {
 
     @Override
     protected String getDriverClassNameToLoad() {
-        return "oracle.jdbc.driver.OracleDriver";
+        return "oracle.jdbc.OracleDriver";
     }
 }

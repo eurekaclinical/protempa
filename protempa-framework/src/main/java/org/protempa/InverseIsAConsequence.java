@@ -4,7 +4,7 @@ package org.protempa;
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
-import org.protempa.proposition.PropositionVisitable;
+import org.protempa.proposition.Proposition;
 
 /**
  * Creates a new proposition that has an isA relationship with an existing
@@ -29,8 +29,7 @@ class InverseIsAConsequence implements Consequence {
     public void evaluate(KnowledgeHelper knowledgeHelper,
             WorkingMemory workingMemory)
             throws Exception {
-        PropositionVisitable o =
-                (PropositionVisitable) workingMemory.getObject(
+        Proposition o = (Proposition) workingMemory.getObject(
                 knowledgeHelper.getTuple().get(0));
         this.copier.setWorkingMemory(workingMemory);
         o.accept(this.copier);

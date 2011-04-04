@@ -1,6 +1,5 @@
 package org.protempa.proposition.comparator;
 
-import java.io.Serializable;
 import java.util.Comparator;
 import org.protempa.proposition.TemporalProposition;
 
@@ -12,9 +11,7 @@ import org.protempa.proposition.TemporalProposition;
  * @author Andrew Post
  */
 public class TemporalPropositionIntervalComparator
-        implements Comparator<TemporalProposition>, Serializable {
-
-    private static final long serialVersionUID = -6827741153860737954L;
+        implements Comparator<TemporalProposition> {
 
     @Override
     public int compare(TemporalProposition o1, TemporalProposition o2) {

@@ -1,17 +1,22 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
@@ -48,35 +53,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
     private static final String SYSTEM_PROPERTY_SKIP_EXECUTION =
             "protempa.dsb.relationaldatabase.skipexecution";
-    private static final int FETCH_SIZE = 1000;
-
-    private static Set<EntitySpec> applicableEntitySpecs(
-            Collection<EntitySpec> entitySpecs, Filter f) {
-        Set<EntitySpec> entitySpecsSet = new HashSet<EntitySpec>();
-        for (EntitySpec es : entitySpecs) {
-            PROPIDS:
-            for (String propId : es.getPropositionIds()) {
-                for (String propId2 : f.getPropositionIds()) {
-                    if (propId.equals(propId2)) {
-                        entitySpecsSet.add(es);
-                        break PROPIDS;
-                    }
-                }
-            }
-        }
-        return entitySpecsSet;
-    }
-
-    private static boolean isInInboundReference(Set<EntitySpec> entitySpecsSet,
-            EntitySpec entitySpec) {
-        for (EntitySpec es : entitySpecsSet) {
-            if (SQLGenUtil.isInReferences(entitySpec,
-                    es.getReferenceSpecs())) {
-                return true;
-            }
-        }
-        return false;
-    }
+    private static final int FETCH_SIZE = 10000;
     private ConnectionSpec connectionSpec;
     private final Map<String, EntitySpec> primitiveParameterSpecs;
     private final Map<String, EntitySpec> eventSpecs;
@@ -167,6 +144,29 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return builder.toString();
     }
 
+    private List<EntitySpec> copyEntitySpecsForRefs(EntitySpec entitySpec, Collection<EntitySpec> allEntitySpecs) {
+        List<EntitySpec> allEntitySpecsCopyForRefs = new LinkedList<EntitySpec>();
+        allEntitySpecsCopyForRefs.add(entitySpec);
+        for (EntitySpec es : allEntitySpecs) {
+            if (es != entitySpec) {
+                allEntitySpecsCopyForRefs.add(es);
+            }
+        }
+        return allEntitySpecsCopyForRefs;
+    }
+
+    private EntitySpec entitySpecForName(Collection<EntitySpec> entitySpecs,
+            String entitySpecName) {
+        EntitySpec referredToEntitySpec = null;
+        for (EntitySpec reffedToSpec : entitySpecs) {
+            if (entitySpecName.equals(reffedToSpec.getName())) {
+                referredToEntitySpec = reffedToSpec;
+                break;
+            }
+        }
+        return referredToEntitySpec;
+    }
+
     private void executeSelect(Logger logger, String backendNameForMessages,
             String entitySpecName, String query,
             SQLGenResultProcessor resultProcessor)
@@ -185,8 +185,33 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             }
 
             try {
-                SQLExecutor.executeSQL(getConnectionSpec(), query,
-                        resultProcessor, true, FETCH_SIZE);
+                Connection con = getConnectionSpec().getOrCreate();
+                con.setReadOnly(true);
+                try {
+                    Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                    stmt.setFetchSize(FETCH_SIZE);
+                    try {
+                        SQLExecutor.executeSQL(con, stmt, query, resultProcessor);
+                        stmt.close();
+                        stmt = null;
+                    } finally {
+                        if (stmt != null) {
+                            try {
+                                stmt.close();
+                            } catch (SQLException e) {
+                            }
+                        }
+                    }
+                    con.close();
+                    con = null;
+                } finally {
+                    if (con != null) {
+                        try {
+                            con.close();
+                        } catch (SQLException e) {
+                        }
+                    }
+                }
             } catch (SQLException ex) {
                 throw new DataSourceReadException(
                         "Error executing query in data source backend "
@@ -222,25 +247,14 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         Logger logger = SQLGenUtil.logger();
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
             if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE,
-                        "Data source backend {0} is processing entity spec {1}",
-                        new Object[]{backendNameForMessages(),
-                            entitySpec.getName()});
+                logProcessingEntitySpec(logger, entitySpec);
             }
             List<EntitySpec> allEntitySpecsCopy =
                     new ArrayList<EntitySpec>(allEntitySpecs);
             removeNonApplicableEntitySpecs(entitySpec, allEntitySpecsCopy);
 
             if (logger.isLoggable(Level.FINER)) {
-                String[] allEntitySpecsCopyNames =
-                        new String[allEntitySpecsCopy.size()];
-                int i = 0;
-                for (EntitySpec aesc : allEntitySpecsCopy) {
-                    allEntitySpecsCopyNames[i++] = aesc.getName();
-                }
-                logger.log(Level.FINER,
-                        "Applicable entity specs are {0}",
-                        StringUtils.join(allEntitySpecsCopyNames, ", "));
+                logApplicableEntitySpecs(allEntitySpecsCopy, logger);
             }
 
             Set<Filter> filtersCopy = copyFilters(filters);
@@ -267,72 +281,116 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                             factory.getRefInstance(dataSourceBackendId,
                             entitySpec, referenceSpec, results);
                     if (logger.isLoggable(Level.FINE)) {
-                        logger.log(Level.FINE,
-                                "Data source backend {0} is processing reference {1} for entity spec {2}",
-                                new Object[]{backendNameForMessages(),
-                                    referenceSpec.getReferenceName(), entitySpec.getName()});
+                        logProcessingRef(logger, referenceSpec, entitySpec);
                     }
                     List<EntitySpec> allEntitySpecsCopyForRefs =
-                            new ArrayList<EntitySpec>(allEntitySpecs.size());
-                    allEntitySpecsCopyForRefs.add(entitySpec);
-                    for (EntitySpec es : allEntitySpecs) {
-                        if (es != entitySpec) {
-                            allEntitySpecsCopyForRefs.add(es);
-                        }
-                    }
+                            copyEntitySpecsForRefs(entitySpec, allEntitySpecs);
                     Set<Filter> refFiltersCopy = copyFilters(filters);
-                    EntitySpec referredToEntitySpec = null;
-                    for (EntitySpec reffedToSpec : allEntitySpecsCopyForRefs) {
-                        if (referenceSpec.getEntityName().equals(
-                                reffedToSpec.getName())) {
-                            referredToEntitySpec = reffedToSpec;
-                            break;
-                        }
-                    }
+                    EntitySpec referredToEntitySpec =
+                            entitySpecForName(allEntitySpecsCopyForRefs,
+                            referenceSpec.getEntityName());
                     assert referredToEntitySpec != null :
                             "refferedToEntitySpec should not be null";
-
-                    for (Iterator<EntitySpec> itr =
-                            allEntitySpecsCopyForRefs.iterator();
-                            itr.hasNext();) {
-                        EntitySpec es = itr.next();
-                        if (es != entitySpec
-                                && !referenceSpec.getEntityName().equals(
-                                es.getName())
-                                && !SQLGenUtil.isInReferences(entitySpec,
-                                es.getReferenceSpecs())) {
-                            itr.remove();
-                        }
-                    }
+                    retainEntitySpecsWithInboundRefs(allEntitySpecsCopyForRefs,
+                            entitySpec, referenceSpec);
                     removeNonApplicableFilters(allEntitySpecsCopyForRefs,
                             refFiltersCopy, referredToEntitySpec);
+                    retainEntitySpecsWithFiltersOrConstraints(entitySpec,
+                            referredToEntitySpec, allEntitySpecsCopyForRefs,
+                            refFiltersCopy, propIds);
                     generateAndExecuteSelect(entitySpec, referenceSpec, propIds,
                             refFiltersCopy, allEntitySpecsCopyForRefs, keyIds,
                             order, refResultProcessor);
                     if (logger.isLoggable(Level.FINE)) {
-                        logger.log(Level.FINE, "Data source backend {0} is done processing reference {1} for entity spec {2}",
-                                new Object[]{backendNameForMessages(),
-                                    referenceSpec.getReferenceName(), entitySpec.getName()});
+                        logDoneProcessingRef(logger, referenceSpec, entitySpec);
                     }
                 }
                 if (logger.isLoggable(Level.FINE)) {
-                    logger.log(Level.FINE,
-                            "Data source backend {0} is done processing entity spec {1}",
-                            new Object[]{backendNameForMessages(),
-                                entitySpec.getName()});
+                    logDoneProcessingEntitySpec(logger, entitySpec);
                 }
             }
 
             results.clear();
             if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE,
-                        "Results of query for {0} in data source backend {1} "
-                        + "have been processed",
-                        new Object[]{entitySpec.getName(),
-                            backendNameForMessages()});
+                logDoneProcessing(logger, entitySpec);
             }
         }
         return results;
+    }
+
+    private static void retainEntitySpecsWithFiltersOrConstraints(
+            EntitySpec entitySpec, EntitySpec referredToEntitySpec,
+            Collection<EntitySpec> allEntitySpecsCopyForRefs,
+            Collection<Filter> refFiltersCopy, Set<String> propIds) {
+        for (Iterator<EntitySpec> itr = allEntitySpecsCopyForRefs.iterator();
+                itr.hasNext();) {
+            EntitySpec es = itr.next();
+            if (es != entitySpec && es != referredToEntitySpec) {
+                Set<String> esPropIds = Arrays.asSet(es.getPropositionIds());
+                ColumnSpec codeSpec = es.getCodeSpec();
+                if (codeSpec != null) {
+                    List<ColumnSpec> codeSpecL = codeSpec.asList();
+                    ColumnSpec last = codeSpecL.get(codeSpecL.size() - 1);
+                    if (last.getConstraint() != null &&
+                            (!last.isPropositionIdsComplete() ||
+                            !completeOrNoOverlap(propIds,
+                            es.getPropositionIds()))) {
+                        return;
+                    }
+                }
+                for (Filter filter : refFiltersCopy) {
+                    if (Collections.containsAny(esPropIds,
+                            filter.getPropositionIds())) {
+                        return;
+                    }
+                }
+                itr.remove();
+            }
+        }
+    }
+
+    private void logDoneProcessing(Logger logger, EntitySpec entitySpec) {
+        logger.log(Level.FINE, "Results of query for {0} in data source backend {1} " + "have been processed", new Object[]{entitySpec.getName(), backendNameForMessages()});
+    }
+
+    private void logDoneProcessingEntitySpec(Logger logger, EntitySpec entitySpec) {
+        logger.log(Level.FINE, "Data source backend {0} is done processing entity spec {1}", new Object[]{backendNameForMessages(), entitySpec.getName()});
+    }
+
+    private void logDoneProcessingRef(Logger logger, ReferenceSpec referenceSpec, EntitySpec entitySpec) {
+        logger.log(Level.FINE, "Data source backend {0} is done processing reference {1} for entity spec {2}", new Object[]{backendNameForMessages(), referenceSpec.getReferenceName(), entitySpec.getName()});
+    }
+
+    private void logProcessingRef(Logger logger, ReferenceSpec referenceSpec, EntitySpec entitySpec) {
+        logger.log(Level.FINE, "Data source backend {0} is processing reference {1} for entity spec {2}", new Object[]{backendNameForMessages(), referenceSpec.getReferenceName(), entitySpec.getName()});
+    }
+
+    private void logProcessingEntitySpec(Logger logger, EntitySpec entitySpec) {
+        logger.log(Level.FINE, "Data source backend {0} is processing entity spec {1}", new Object[]{backendNameForMessages(), entitySpec.getName()});
+    }
+
+    private void logApplicableEntitySpecs(List<EntitySpec> allEntitySpecsCopy, Logger logger) {
+        String[] allEntitySpecsCopyNames = new String[allEntitySpecsCopy.size()];
+        int i = 0;
+        for (EntitySpec aesc : allEntitySpecsCopy) {
+            allEntitySpecsCopyNames[i++] = aesc.getName();
+        }
+        logger.log(Level.FINER, "Applicable entity specs are {0}", StringUtils.join(allEntitySpecsCopyNames, ", "));
+    }
+
+    private static void retainEntitySpecsWithInboundRefs(
+            Collection<EntitySpec> allEntitySpecsCopyForRefs,
+            EntitySpec entitySpec, ReferenceSpec referenceSpec) {
+        for (Iterator<EntitySpec> itr = allEntitySpecsCopyForRefs.iterator();
+                itr.hasNext();) {
+            EntitySpec es = itr.next();
+            if (es != entitySpec
+                    && !referenceSpec.getEntityName().equals(es.getName())
+                    && !SQLGenUtil.isInReferences(entitySpec,
+                    es.getReferenceSpecs())) {
+                itr.remove();
+            }
+        }
     }
 
     private List<EntitySpec> allEntitySpecs() {
@@ -410,21 +468,40 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     private static void removeNonApplicableFilters(
             Collection<EntitySpec> entitySpecs, Set<Filter> filtersCopy,
             EntitySpec entitySpec) {
+        Set<EntitySpec> entitySpecsSet = new HashSet<EntitySpec>();
+        Set<String> filterPropIds = new HashSet<String>();
+        String[] entitySpecPropIds = entitySpec.getPropositionIds();
         for (Iterator<Filter> itr = filtersCopy.iterator(); itr.hasNext();) {
             Filter f = itr.next();
-            Set<EntitySpec> entitySpecsSet =
-                    applicableEntitySpecs(entitySpecs, f);
-            for (String propId : f.getPropositionIds()) {
-                for (String propId2 : entitySpec.getPropositionIds()) {
-                    if (propId.equals(propId2)) {
-                        return;
-                    }
+            for (String filterPropId : f.getPropositionIds()) {
+                filterPropIds.add(filterPropId);
+            }
+            for (EntitySpec es : entitySpecs) {
+                if (Collections.containsAny(filterPropIds,
+                        es.getPropositionIds())) {
+                    entitySpecsSet.add(es);
                 }
+            }
+            if (Collections.containsAny(filterPropIds, entitySpecPropIds)) {
+                return;
             }
             if (!isInInboundReference(entitySpecsSet, entitySpec)) {
                 itr.remove();
             }
+            entitySpecsSet.clear();
+            filterPropIds.clear();
         }
+    }
+
+    private static boolean isInInboundReference(Set<EntitySpec> entitySpecsSet,
+            EntitySpec entitySpec) {
+        for (EntitySpec es : entitySpecsSet) {
+            if (SQLGenUtil.isInReferences(entitySpec,
+                    es.getReferenceSpecs())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected abstract boolean isLimitingSupported();
@@ -1335,14 +1412,19 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             StringBuilder wherePart, SQLOrderBy sQLOrderBy);
 
     @Override
-    public final void loadDriverIfNeeded() {
+    public final boolean loadDriverIfNeeded() {
         String className = getDriverClassNameToLoad();
+        if (className == null) {
+            return true;
+        }
         try {
             Class.forName(className);
+            return true;
         } catch (ClassNotFoundException ex) {
             SQLGenUtil.logger().log(Level.WARNING,
                     "{0} when trying to load {1}.",
                     new Object[]{ex.getClass().getName(), className});
+            return false;
         }
     }
 

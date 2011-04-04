@@ -49,5 +49,5 @@ public interface ProtempaSQLGenerator extends SQLGenerator {
      * generator supports. Call this method before other methods of this
      * class.
      */
-    void loadDriverIfNeeded();
+    boolean loadDriverIfNeeded();
 }

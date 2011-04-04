@@ -232,14 +232,9 @@ final class ColumnSpecInfoFactory {
          * patient id/key.
          */
         int specAsListSize = specAsList.size();
-        //if (referenceSpec == null || !keyIds.isEmpty()) {
-            columnSpecs.addAll(specAsList);
-            i += specAsListSize;
-        //} //else {
-        //    columnSpecs.addAll(specAsList.subList(1, specAsListSize));
-        //    i += specAsListSize - 1;
-        //}
-        
+        columnSpecs.addAll(specAsList);
+        i += specAsListSize;
+
         return i;
     }
 }

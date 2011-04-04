@@ -78,7 +78,9 @@ public class SQLGeneratorFactory {
                         "Could not create a new instance of SQL generator "
                         + candidate.getName(), ex);
             }
-            candidateInstance.loadDriverIfNeeded();
+            if (!candidateInstance.loadDriverIfNeeded()) {
+                continue;
+            }
             /*
              * We get a new connection for each compatibility check so that
              * no state (or a closed connection!) is carried over.
