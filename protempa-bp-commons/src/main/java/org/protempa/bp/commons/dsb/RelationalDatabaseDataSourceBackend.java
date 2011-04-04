@@ -259,41 +259,6 @@ public abstract class RelationalDatabaseDataSourceBackend
         return this.sqlGenerator.getUnits();
     }
 
-    
-
-//    private Map<EntitySpec, Map<PropertySpec, List<String>>> generateBatches(
-//            Map<PropertySpec, List<String>> propertySpecToPropIdMap) {
-//        Map<EntitySpec, Map<PropertySpec, List<String>>> batchMap =
-//                new HashMap<EntitySpec, Map<PropertySpec, List<String>>>();
-//        for (Map.Entry<PropertySpec, List<String>> me :
-//                propertySpecToPropIdMap.entrySet()) {
-//            EntitySpec entitySpec = me.getKey().getEntitySpec();
-//            Map<PropertySpec, List<String>> m = batchMap.get(entitySpec);
-//            if (m == null) {
-//                m = new HashMap<PropertySpec, List<String>>();
-//                batchMap.put(entitySpec, m);
-//            }
-//            m.put(me.getKey(), me.getValue());
-//        }
-//        return batchMap;
-//    }
-//    private Collection<Map<PropertySpec, List<String>>> generateBatches(
-//            Map<PropertySpec, List<String>> propertySpecToPropIdMap) {
-//        Map<EntitySpec, Map<PropertySpec, List<String>>> batchMap =
-//                new HashMap<EntitySpec, Map<PropertySpec, List<String>>>();
-//        for (Map.Entry<PropertySpec, List<String>> me :
-//                propertySpecToPropIdMap.entrySet()) {
-//            EntitySpec entitySpec = me.getKey().getEntitySpec();
-//            Map<PropertySpec, List<String>> m = batchMap.get(entitySpec);
-//            if (m == null) {
-//                m = new HashMap<PropertySpec, List<String>>();
-//                batchMap.put(entitySpec, m);
-//            }
-//            m.put(me.getKey(), me.getValue());
-//        }
-//        return batchMap.values();
-//    }
-
     @Override
     public Map<String, List<Constant>> getConstantPropositions(
             Set<String> keyIds, Set<String> paramIds,

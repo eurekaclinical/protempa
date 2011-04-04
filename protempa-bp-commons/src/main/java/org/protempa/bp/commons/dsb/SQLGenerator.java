@@ -21,7 +21,7 @@ import org.protempa.proposition.value.UnitFactory;
  * The following database-specific SQL generators are provided:
  * <ul>
  * <li>{@link ConnectorJ5MySQL415Generator}
- * <li>{@link Ojdbc14Oracle10gSQLGenerator}
+ * <li>{@link Ojdbc6Oracle10gSQLGenerator}
  * </ul>
  * 
  * The user may specify additional SQL generators by implementing this interface
