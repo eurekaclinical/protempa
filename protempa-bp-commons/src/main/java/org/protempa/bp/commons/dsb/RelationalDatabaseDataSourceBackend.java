@@ -107,7 +107,7 @@ public abstract class RelationalDatabaseDataSourceBackend
                     this.databaseAPI.newConnectionSpecInstance(
                     this.databaseId, this.username, this.password);
             this.sqlGenerator = new SQLGeneratorFactory(connectionSpecInstance,
-                    this.relationalDatabaseSpec, this).newInstance();
+                    this).newInstance();
         } catch (InvalidConnectionSpecArguments ex) {
             throw new DataSourceBackendInitializationException(
                     "Could not initialize data source backend " +

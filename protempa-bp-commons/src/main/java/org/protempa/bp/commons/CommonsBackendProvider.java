@@ -1,8 +1,8 @@
 package org.protempa.bp.commons;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.ServiceConfigurationError;
 import java.util.Set;
 import org.apache.commons.discovery.DiscoveryException;
 import org.apache.commons.discovery.tools.DiscoverClass;
@@ -72,10 +72,7 @@ public final class CommonsBackendProvider
         }
         try {
             classNamesL.addAll(ServiceLoader.load(clazz));
-        } catch (IOException ex) {
-            throw new BackendProviderSpecLoaderException(
-                    "Error loading backend", ex);
-        } catch (ClassNotFoundException ex) {
+        } catch (ServiceConfigurationError ex) {
             throw new BackendProviderSpecLoaderException(
                     "Error loading backend", ex);
         }
