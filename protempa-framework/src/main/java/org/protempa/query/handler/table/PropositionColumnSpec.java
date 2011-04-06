@@ -41,6 +41,11 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         this(propertyNames, null, null);
     }
 
+    public PropositionColumnSpec(String columnNamePrefixOverride,
+            String[] propertyNames) {
+        this(columnNamePrefixOverride, propertyNames, null, null, null, 1);
+    }
+
     public PropositionColumnSpec(String[] propertyNames,
             OutputConfig outputConfig, ValueOutputConfig valueOutputConfig) {
         this(propertyNames, outputConfig, valueOutputConfig, null);
