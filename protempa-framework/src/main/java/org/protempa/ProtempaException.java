@@ -8,20 +8,19 @@ package org.protempa;
  */
 public abstract class ProtempaException extends Exception {
 
-	protected ProtempaException() {
-		super();
-	}
+    protected ProtempaException() {
+        super();
+    }
 
-	protected ProtempaException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    protected ProtempaException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	protected ProtempaException(String message) {
-		super(message);
-	}
+    protected ProtempaException(String message) {
+        super(message);
+    }
 
-	protected ProtempaException(Throwable cause) {
-		super(cause);
-	}
-
+    protected ProtempaException(Throwable cause) {
+        super(cause);
+    }
 }
