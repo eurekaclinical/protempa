@@ -1,8 +1,10 @@
 package org.protempa.query.handler.xml;
 
-import java.io.IOException;
-import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
@@ -21,136 +23,109 @@ import org.protempa.proposition.value.ValueSet;
 
 public class XmlPropositionVisitor extends AbstractPropositionCheckedVisitor {
 
-    private final Writer writer;
     private final KnowledgeSource knowledgeSource;
+    private final Map<String, Map<String, String>> properties;
+    private final Map<String, String> propositionValues;
 
-    public XmlPropositionVisitor(KnowledgeSource ks, Writer newWriter) {
-        this.writer = newWriter;
+    public XmlPropositionVisitor(KnowledgeSource ks)
+            throws ParserConfigurationException {
         this.knowledgeSource = ks;
+        this.propositionValues = new HashMap<String, String>();
+        this.properties = new HashMap<String, Map<String, String>>();
+    }
+
+    public void clear() {
+        this.properties.clear();
+        this.propositionValues.clear();
+    }
+
+    public Map<String, String> getPropositionValues() {
+        return this.propositionValues;
+    }
+
+    public Map<String, Map<String, String>> getPropositionProperties() {
+        return this.properties;
     }
 
     @Override
     public void visit(AbstractParameter abstractParameter)
             throws XmlQueryResultsHandlerException {
-        try {
-            doWriteName(abstractParameter);
-            doWriteValue(abstractParameter);
-            doWriteTime(abstractParameter);
-            doWriteProperties(abstractParameter);
-            this.writer.flush();
-        } catch (IOException ioe) {
-            throw new XmlQueryResultsHandlerException(ioe);
-        }
+        doName(abstractParameter);
+        doValue(abstractParameter);
+        doTime(abstractParameter);
+        doProperties(abstractParameter);
     }
 
     @Override
     public void visit(Event event) throws XmlQueryResultsHandlerException {
-        try {
-            doWriteName(event);
-            doWriteTime(event);
-            doWriteProperties(event);
-            this.writer.flush();
-        } catch (IOException ioe) {
-            throw new XmlQueryResultsHandlerException(ioe);
-        }
+        doName(event);
+        doTime(event);
+        doProperties(event);
     }
 
     @Override
     public void visit(PrimitiveParameter primitiveParameter)
             throws XmlQueryResultsHandlerException {
-        try {
-            doWriteName(primitiveParameter);
-            doWriteValue(primitiveParameter);
-            doWriteTime(primitiveParameter);
-            doWriteProperties(primitiveParameter);
-            this.writer.flush();
-        } catch (IOException ioe) {
-            throw new XmlQueryResultsHandlerException(ioe);
-        }
+        doName(primitiveParameter);
+        doValue(primitiveParameter);
+        doTime(primitiveParameter);
+        doProperties(primitiveParameter);
     }
 
     @Override
     public void visit(Constant constant) throws XmlQueryResultsHandlerException {
-        try {
-            doWriteName(constant);
-            doWriteProperties(constant);
-            this.writer.flush();
-        } catch (IOException ioe) {
-            throw new XmlQueryResultsHandlerException(ioe);
-        }
+        doName(constant);
+        doProperties(constant);
     }
 
-    private void doWriteProperties(Proposition proposition)
+    private void doProperties(Proposition proposition)
             throws XmlQueryResultsHandlerException {
-        try {
-            for (String propName : proposition.getPropertyNames()) {
-                Value value = proposition.getProperty(propName);
-                this.writer.write("<" + propName + ">");
-                if (value != null) {
-                    String valueType = value.getType().toString();
-                    this.writer.write("<valueType>" + valueType
-                            + "</valueType>");
-                    this.writer.write("<value>" + value.getFormatted()
-                            + "</value>");
-                    this.writer.write("<valueDisplayName>");
-                    this.writer.write(getOutputPropertyValue(proposition,
-                            propName, value));
-                    this.writer.write("</valueDisplayName>");
-                } else {
-                    this.writer.write("(null)");
-                }
-                this.writer.write("</" + propName + ">");
+        for (String propName : proposition.getPropertyNames()) {
+            Map<String, String> propMap = new HashMap<String, String>();
+            Value value = proposition.getProperty(propName);
+            if (value != null) {
+                String valueType = value.getType().toString();
+                propMap.put("valueType", valueType);
+                propMap.put("value", value.getFormatted());
+                propMap.put("valueDisplayName",
+                        getOutputPropertyValue(proposition, propName, value));
+            } else {
+                propMap.put("value", "(null)");
             }
-        } catch (IOException ioe) {
-            throw new XmlQueryResultsHandlerException(ioe);
+            this.properties.put(propName, propMap);
         }
     }
 
-    private void doWriteName(Proposition proposition)
+    private void doName(Proposition proposition)
             throws XmlQueryResultsHandlerException {
         try {
-            String name = getDisplayName(proposition);
-            this.writer.write("<displayName>" + name + "</displayName>");
-            this.writer.flush();
-        } catch (IOException ioe) {
-            throw new XmlQueryResultsHandlerException(ioe);
+            this.propositionValues.put("displayName",
+                    getDisplayName(proposition));
         } catch (KnowledgeSourceReadException e) {
             throw new XmlQueryResultsHandlerException(e);
         }
     }
 
-    private void doWriteValue(Parameter parameter)
-            throws XmlQueryResultsHandlerException {
-        try {
-            Value value = parameter.getValue();
-            String valueType = "(null)";
-            String valueFormatted = "(null)";
-            if (value != null) {
-                valueType = value.getType().toString();
-                valueFormatted = value.getFormatted();
-            }
-            this.writer.write("<valueType>" + valueType + "</valueType>");
-            this.writer.write("<value>" + valueFormatted + "</value>");
-        } catch (IOException ioe) {
-            throw new XmlQueryResultsHandlerException(ioe);
+    private void doValue(Parameter parameter) {
+        Value value = parameter.getValue();
+        String valueType = "(null)";
+        String valueFormatted = "(null)";
+        if (value != null) {
+            valueType = value.getType().toString();
+            valueFormatted = value.getFormatted();
         }
+        this.propositionValues.put("valueType", valueType);
+        this.propositionValues.put("value", valueFormatted);
     }
 
-    private void doWriteTime(TemporalProposition proposition)
-            throws XmlQueryResultsHandlerException {
-        try {
-            String start = proposition.getStartFormattedShort();
-            String finish = proposition.getFinishFormattedShort();
-            if (finish.isEmpty()) {
-                this.writer.write("<date>" + start + "</date>");
-            } else {
-                this.writer.write("<start>"
-                        + proposition.getStartFormattedShort() + "</start>");
-                this.writer.write("<end>"
-                        + proposition.getStartFormattedShort() + "</end>");
-            }
-        } catch (IOException ioe) {
-            throw new XmlQueryResultsHandlerException(ioe);
+    private void doTime(TemporalProposition proposition) {
+        String start = proposition.getStartFormattedShort();
+        String finish = proposition.getFinishFormattedShort();
+        if (finish.isEmpty()) {
+            this.propositionValues.put("date", start);
+        } else {
+            this.propositionValues.put("start", start);
+            this.propositionValues.put("end", finish);
         }
     }
 
@@ -173,8 +148,6 @@ public class XmlPropositionVisitor extends AbstractPropositionCheckedVisitor {
     private String getOutputPropertyValue(Proposition proposition,
             String propertyName, Value propertyValue) {
         String outputValue = propertyValue.getFormatted();
-        Util.logger().log(Level.FINE, "Getting property display name for {0}",
-                propertyValue.getFormatted());
         try {
             PropositionDefinition propositionDef = this.knowledgeSource
                     .readPropositionDefinition(proposition.getId());
