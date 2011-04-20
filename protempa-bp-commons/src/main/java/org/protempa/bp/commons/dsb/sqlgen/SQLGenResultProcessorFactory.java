@@ -7,7 +7,7 @@ import org.protempa.proposition.Proposition;
  * @author Andrew Post
  */
 abstract class SQLGenResultProcessorFactory<P extends Proposition> {
-    abstract AbstractMainResultProcessor<P> getInstance(
+    abstract MainResultProcessor<P> getInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             ResultCache<P> cache);
 

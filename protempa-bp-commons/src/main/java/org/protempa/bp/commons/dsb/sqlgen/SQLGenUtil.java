@@ -8,6 +8,12 @@ import java.util.logging.Logger;
  */
 class SQLGenUtil {
 
+    static final String SYSTEM_PROPERTY_SKIP_EXECUTION =
+            "protempa.dsb.relationaldatabase.skipexecution";
+
+    static final String SYSTEM_PROPERTY_FORCE_SQL_GENERATOR =
+            "protempa.dsb.relationaldatabase.sqlgenerator";
+
     private SQLGenUtil() {
     }
 

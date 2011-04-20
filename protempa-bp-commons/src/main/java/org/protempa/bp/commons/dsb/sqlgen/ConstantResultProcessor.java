@@ -12,7 +12,7 @@ import org.protempa.proposition.Constant;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Value;
 
-class ConstantResultProcessor extends AbstractMainResultProcessor<Constant> {
+class ConstantResultProcessor extends MainResultProcessor<Constant> {
 
     private static final int FLUSH_SIZE = 100000;
 

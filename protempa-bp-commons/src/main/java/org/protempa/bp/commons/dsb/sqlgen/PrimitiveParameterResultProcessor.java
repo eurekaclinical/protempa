@@ -15,7 +15,7 @@ import org.protempa.proposition.value.ValueFormat;
 import org.protempa.proposition.value.ValueType;
 
 class PrimitiveParameterResultProcessor extends
-        AbstractMainResultProcessor<PrimitiveParameter> {
+        MainResultProcessor<PrimitiveParameter> {
 
     private static final int FLUSH_SIZE = 100000;
 

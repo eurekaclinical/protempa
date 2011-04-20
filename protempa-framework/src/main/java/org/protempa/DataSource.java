@@ -1,47 +1,25 @@
 package org.protempa;
 
 import java.util.ArrayList;
-import java.util.logging.Level;
 import org.protempa.dsb.filter.Filter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.protempa.backend.BackendNewInstanceException;
-import org.protempa.proposition.Constant;
-import org.protempa.proposition.Event;
-import org.protempa.proposition.PrimitiveParameter;
+import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 
 /**
  * Read-only access to a database. Data source backends are specified in the
  * constructor that implement the actual database connection(s).
- *
- * If you have multiple data source backends, parameters are resorted before
- * being returned using {@link Collections.sort}. With only one backend, we
- * just use the data as sorted and returned by the backend to take advantage
- * of a potentially optimized sorting algorithm. This may result in a
- * different sort order when the backends are used separately than if they
- * are used together if the backend's sorting algorithm is different from
- * Java's. If you want the sort order to be consistent always with Java, set
- * the system property <code>protempa.datasource.alwaysresort</code> to
- * <code>true</code>.
  * 
  * @author Andrew Post
  * @see DataSourceBackend
  */
 public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, DataSourceBackendUpdatedEvent> {
-
-    private static final String ALWAYS_RESORT_SYSTEM_PROPERTY =
-            "protempa.datasource.alwaysresort";
-    private static final boolean ALWAYS_RESORT =
-            Boolean.getBoolean(ALWAYS_RESORT_SYSTEM_PROPERTY);
-
-    static {
-        ProtempaUtil.logger().log(Level.FINE,
-                "Will the data source always resort? {0}", ALWAYS_RESORT);
-    }
+    
     private final BackendManager<DataSourceBackendUpdatedEvent, DataSource, DataSourceBackend> backendManager;
 
     public DataSource(DataSourceBackend[] backends) {
@@ -181,8 +159,8 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
     }
 
     /**
-     * Queries for primitive parameters.
-     * 
+     * Queries for propositions.
+     *
      * @param keyIds the key id {@link String}s to query.
      * @param propIds the proposition id {@link String}s of the primitive
      * parameters of interest.
@@ -191,125 +169,29 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
      * @return an immutable {@link Map<String, List<PrimitiveParameter>>}.
      * @throws DataSourceReadException
      */
-    public Map<String, List<PrimitiveParameter>> getPrimitiveParameters(
+    public Map<String, List<Proposition>> readPropositions(
             Set<String> keyIds, Set<String> propIds,
             Filter filters, QuerySession qs)
             throws DataSourceReadException {
-        return PRIMPARAM_QUERY.execute(this, keyIds, propIds, filters, qs);
-    }
+        Set<String> notNullKeyIds = handleKeyIdSetArgument(keyIds);
+        Set<String> notNullPropIds = handlePropIdSetArgument(propIds);
 
-    /**
-     * Queries for constants.
-     *
-     * @param keyIds the key id {@link String}s to query.
-     * @param propIds the proposition id {@link String}s of the primitive
-     * parameters of interest.
-     * @param filters {@link Filter}s to constraint the query.
-     * @param qs
-     * @return an immutable {@link Map<String, List<Constant>>}.
-     * 
-     * @throws DataSourceReadException
-     */
-    public Map<String, List<Constant>> getConstantPropositions(
-            Set<String> keyIds, Set<String> propIds, Filter filters,
-            QuerySession qs)
-            throws DataSourceReadException {
-        return CONST_QUERY.execute(this, keyIds, propIds, filters, qs);
-    }
+        initializeIfNeeded();
+        List<DataSourceBackend> backends =
+                this.backendManager.getBackends();
+        List<Map<String, List<Proposition>>> resultMaps =
+                new ArrayList<Map<String, List<Proposition>>>(backends.size());
+        for (DataSourceBackend backend : backends) {
+            resultMaps.add(backend.readPropositions(
+                    notNullKeyIds, notNullPropIds, filters, qs));
 
-    /**
-     * Queries for events.
-     *
-     * @param keyIds the key id {@link String}s to query.
-     * @param propIds the proposition id {@link String}s of the primitive
-     * parameters of interest.
-     * @param filters {@link Filter}s to constraint the query.
-     * @param qs
-     * @return an immutable {@link Map<String, List<Event>>}.
-     * @throws DataSourceReadException
-     */
-    public Map<String, List<Event>> getEvents(Set<String> keyIds,
-            Set<String> propIds, Filter filters, QuerySession qs)
-            throws DataSourceReadException {
-        return EVENTS_QUERY.execute(this, keyIds, propIds, filters, qs);
-    }
-
-    private static abstract class ProcessQuery<P> {
-
-        ProcessQuery() {
         }
 
-        Map<String, List<P>> execute(DataSource dataSource,
-                Set<String> keyIds, Set<String> propIds,
-                Filter filters,
-                QuerySession qs)
-                throws DataSourceReadException {
-            Set<String> notNullKeyIds = handleKeyIdSetArgument(keyIds);
-            Set<String> notNullPropIds = handlePropIdSetArgument(propIds);
+        Map<String, List<Proposition>> result =
+                new DataSourceResultMap<Proposition>(resultMaps);
 
-            dataSource.initializeIfNeeded();
-            List<DataSourceBackend> backends =
-                    dataSource.backendManager.getBackends();
-            List<Map<String, List<P>>> resultMaps = 
-                    new ArrayList<Map<String, List<P>>>(backends.size());
-            for (DataSourceBackend backend : backends) {
-                resultMaps.add(executeBackend(backend,
-                        notNullKeyIds,
-                        notNullPropIds, filters, qs));
-
-            }
-
-            Map<String, List<P>> result =
-                    new DataSourceResultMap<P>(resultMaps);
-
-            return result;
-        }
-
-        protected abstract Map<String, List<P>> executeBackend(
-                DataSourceBackend backend,
-                Set<String> keyIds, Set<String> propIds,
-                Filter filters,
-                QuerySession qs)
-                throws DataSourceReadException;
+        return result;
     }
-    private static ProcessQuery<Event> EVENTS_QUERY =
-            new ProcessQuery<Event>() {
-
-                @Override
-                protected Map<String, List<Event>> executeBackend(
-                        DataSourceBackend backend, Set<String> keyIds,
-                        Set<String> propIds, Filter filters, QuerySession qs)
-                        throws DataSourceReadException {
-                    return backend.getEvents(keyIds, propIds, filters, qs);
-                }
-            };
-    private static ProcessQuery<PrimitiveParameter> PRIMPARAM_QUERY =
-            new ProcessQuery<PrimitiveParameter>() {
-
-                @Override
-                protected Map<String, List<PrimitiveParameter>> executeBackend(
-                        DataSourceBackend backend,
-                        Set<String> keyIds, Set<String> propIds, Filter filters,
-                        QuerySession qs)
-                        throws DataSourceReadException {
-                    return backend.getPrimitiveParameters(
-                            keyIds, propIds, filters, qs);
-                }
-            };
-    private static ProcessQuery<Constant> CONST_QUERY =
-            new ProcessQuery<Constant>() {
-
-                @Override
-                protected Map<String, List<Constant>> executeBackend(
-                        DataSourceBackend backend,
-                        Set<String> keyIds, Set<String> propIds,
-                        Filter filters,
-                        QuerySession qs)
-                        throws DataSourceReadException {
-                    return backend.getConstantPropositions(
-                            keyIds, propIds, filters, qs);
-                }
-            };
 
     @Override
     public void backendUpdated(DataSourceBackendUpdatedEvent evt) {

@@ -3,17 +3,13 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 
 /**
  *
  * @author Andrew Post
  */
 public class Ojdbc6Oracle10gSQLGenerator extends AbstractSQLGenerator {
-
-    private static final String readPropositionsSQL =
-            "select {0} from {1} {2}";
-
+    
     @Override
     public boolean checkCompatibility(Connection connection)
             throws SQLException {
@@ -28,38 +24,6 @@ public class Ojdbc6Oracle10gSQLGenerator extends AbstractSQLGenerator {
     }
 
     @Override
-    public boolean isLimitingSupported() {
-        return true;
-    }
-
-    @Override
-    public void generateSelectColumn(boolean distinctRequested,
-            StringBuilder selectPart, int index, String column, String name,
-            boolean hasNext) {
-        if (distinctRequested) {
-            selectPart.append("distinct ");
-        }
-        selectPart.append("a").append(index).append('.').append(column);
-        selectPart.append(" as ");
-        selectPart.append(name);
-        if (hasNext) {
-            selectPart.append(',');
-        }
-    }
-
-    @Override
-    public void generateOn(StringBuilder fromPart, int fromIndex,
-            int toIndex, String fromKey,
-            String toKey) {
-        fromPart.append("on (");
-        fromPart.append('a').append(fromIndex).append('.');
-        fromPart.append(fromKey);
-        fromPart.append(" = a");
-        fromPart.append(toIndex).append('.').append(toKey);
-        fromPart.append(") ");
-    }
-
-    @Override
     public void generateFromTable(String schema, String table,
             StringBuilder fromPart, int i) {
         if (schema != null) {
@@ -68,37 +32,7 @@ public class Ojdbc6Oracle10gSQLGenerator extends AbstractSQLGenerator {
         }
 
         fromPart.append(table);
-        generateFromTableReference(i, fromPart);
-    }
-
-    @Override
-    public void generateFromTableReference(int i, StringBuilder fromPart) {
-        fromPart.append(" a").append(i);
-        fromPart.append(' ');
-    }
-
-    @Override
-    public void appendValue(Object val, StringBuilder wherePart) {
-        boolean numberOrBoolean;
-        if (!(val instanceof Number) && !(val instanceof Boolean)) {
-            numberOrBoolean = false;
-            wherePart.append("'");
-        } else {
-            numberOrBoolean = true;
-        }
-        if (val instanceof Boolean) {
-            Boolean boolVal = (Boolean) val;
-            if (boolVal.equals(Boolean.TRUE)) {
-                wherePart.append(1);
-            } else {
-                wherePart.append(0);
-            }
-        } else {
-            wherePart.append(val);
-        }
-        if (!numberOrBoolean) {
-            wherePart.append("'");
-        }
+        generateTableReference(i, fromPart);
     }
 
     private boolean checkDatabaseCompatibility(Connection connection)
@@ -129,60 +63,33 @@ public class Ojdbc6Oracle10gSQLGenerator extends AbstractSQLGenerator {
         return true;
     }
 
-    @Override
-    public String assembleReadPropositionsQuery(StringBuilder selectClause,
-            StringBuilder fromClause, StringBuilder whereClause) {
-        return MessageFormat.format(readPropositionsSQL,
-                selectClause, fromClause, whereClause);
-    }
-
-    @Override
-    public void generateFromSeparator(StringBuilder fromPart) {
-        fromPart.append(',');
-    }
-
-    @Override
-    public void processOrderBy(int startReferenceIndex, String startColumn,
-            int finishReferenceIndex, String finishColumn,
-            StringBuilder wherePart, SQLOrderBy order) {
-        wherePart.append(" order by ");
-        wherePart.append('a').append(startReferenceIndex);
-        wherePart.append('.').append(startColumn);
-        if (finishReferenceIndex > 0) {
-            wherePart.append(",a").append(finishReferenceIndex);
-            wherePart.append('.').append(finishColumn);
-        }
-        wherePart.append(' ');
-        if (order == SQLOrderBy.ASCENDING) {
-            wherePart.append("ASC");
-        } else {
-            wherePart.append("DESC");
-        }
-    }
-
+    /**
+     * Oracle doesn't allow more than 1000 elements in an IN clause, so if
+     * we want more than 1000 we create multiple IN clauses chained together
+     * by OR.
+     * 
+     * @param wherePart the SQL statement {@link StringBuilder}.
+     * @param tableNumber the table number.
+     * @param columnName the column name {@link String}.
+     * @param elements the elements of the IN clause.
+     * @param not set to <code>true</code> to generate <code>NOT IN</code>.
+     */
     @Override
     public void generateInClause(StringBuilder wherePart,
-            int referenceIndex, String column, Object[] sqlCodes,
+            int tableNumber, String columnName, Object[] elements,
             boolean not) {
-        wherePart.append('(');
-        wherePart.append('a');
-        wherePart.append(referenceIndex);
-        wherePart.append('.');
-        wherePart.append(column);
+        generateColumnReference(tableNumber, columnName, wherePart);
         if (not) {
             wherePart.append(" NOT");
         }
         wherePart.append(" IN (");
-        for (int k = 0; k < sqlCodes.length; k++) {
-            Object val = sqlCodes[k];
+        for (int k = 0; k < elements.length; k++) {
+            Object val = elements[k];
             appendValue(val, wherePart);
-            if (k + 1 < sqlCodes.length) {
+            if (k + 1 < elements.length) {
                 if ((k + 1) % 1000 == 0) {
                     wherePart.append(") OR ");
-                    wherePart.append("a");
-                    wherePart.append(referenceIndex);
-                    wherePart.append(".");
-                    wherePart.append(column);
+                    generateColumnReference(tableNumber, columnName, wherePart);
                     wherePart.append(" IN (");
                 } else {
                     wherePart.append(',');
@@ -190,7 +97,6 @@ public class Ojdbc6Oracle10gSQLGenerator extends AbstractSQLGenerator {
             }
         }
         wherePart.append(')');
-        wherePart.append(") ");
     }
 
     @Override

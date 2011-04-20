@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.Constraint;
 import org.protempa.dsb.filter.Filter;
 import org.protempa.dsb.filter.PropertyValueFilter;
 
@@ -107,8 +108,10 @@ final class ColumnSpecInfoFactory {
         if (codeSpec != null) {
             List<ColumnSpec> specAsList = codeSpec.asList();
             int specAsListSize = specAsList.size();
+            ColumnSpec lastColumnSpec = specAsList.get(specAsListSize - 1);
             if (referenceSpec == null
-                    || !(specAsList.get(specAsListSize - 1).isPropositionIdsComplete()
+                    || !(lastColumnSpec.getConstraint() == Constraint.EQUAL_TO
+                    && lastColumnSpec.isPropositionIdsComplete()
                     && AbstractSQLGenerator.completeOrNoOverlap(propIds,
                     entitySpec2.getPropositionIds()))) {
                 columnSpecs.addAll(specAsList);
@@ -171,12 +174,10 @@ final class ColumnSpecInfoFactory {
                 new HashMap<String, Integer>();
         for (PropertySpec propertySpec : propertySpecs) {
             ColumnSpec spec = propertySpec.getSpec();
-            if (spec != null) {
-                List<ColumnSpec> specAsList = spec.asList();
-                columnSpecs.addAll(specAsList);
-                i += specAsList.size();
-                propertyIndices.put(propertySpec.getName(), i - 1);
-            }
+            List<ColumnSpec> specAsList = spec.asList();
+            columnSpecs.addAll(specAsList);
+            i += specAsList.size();
+            propertyIndices.put(propertySpec.getName(), i - 1);
         }
         if (propertySpecs.length > 0) {
             columnSpecInfo.setPropertyIndices(propertyIndices);

@@ -14,7 +14,7 @@ public class PropertyValueFilter extends AbstractFilter {
 
     private final String property;
     private final ValueComparator valueComparator;
-    private final Value value;
+    private final Value[] values;
 
     /**
      * Instantiate with the proposition ids to which this filter applies,
@@ -32,7 +32,7 @@ public class PropertyValueFilter extends AbstractFilter {
      */
     public PropertyValueFilter(String[] propositionIds,
             String property, ValueComparator valueComparator,
-            Value value) {
+            Value... values) {
         super(propositionIds);
         if (property == null)
             throw new IllegalArgumentException("property cannot be null");
@@ -44,25 +44,20 @@ public class PropertyValueFilter extends AbstractFilter {
             throw new IllegalArgumentException(
                     "Cannot use UNKNOWN value comparator here");
         }
-        if (value == null)
-            throw new IllegalArgumentException("value cannot be null");
-        if (value instanceof ListValue) {
+        if (values.length > 1) {
             if (valueComparator != ValueComparator.IN && valueComparator != ValueComparator.NOT_IN) {
                 throw new IllegalArgumentException(
-                        "ListValue value arguments are only allowed if the value comparator is IN or NOT_IN");
+                        "Multiple value arguments are only allowed if the value comparator is IN or NOT_IN");
             }
-            ListValue<Value> lv = (ListValue<Value>) value;
-            for (Value v : lv) {
-                if (v instanceof ListValue) {
-                    throw new IllegalArgumentException(
-                            "ListValue value arguments cannot contain nested "
-                            + "lists");
-                }
+        }
+        for (Value val : values) {
+            if (val instanceof ListValue) {
+                throw new IllegalArgumentException("values connnot contain any ListValues");
             }
         }
         this.property = property.intern();
         this.valueComparator = valueComparator;
-        this.value = value;
+        this.values = values.clone();
     }
 
     /**
@@ -79,8 +74,8 @@ public class PropertyValueFilter extends AbstractFilter {
      *
      * @return a {@link Value}. Cannot be <code>null</code>.
      */
-    public Value getValue() {
-        return this.value;
+    public Value[] getValues() {
+        return this.values.clone();
     }
 
     /**

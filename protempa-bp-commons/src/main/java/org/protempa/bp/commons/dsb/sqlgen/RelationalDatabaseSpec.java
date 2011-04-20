@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.DataSourceBackendFailedValidationException;
@@ -21,11 +22,10 @@ import org.protempa.proposition.value.UnitFactory;
  * 
  * @author Andrew Post
  */
-public class RelationalDatabaseSpec implements Serializable {
+public final class RelationalDatabaseSpec implements Serializable {
+
     private static final long serialVersionUID = -7404642542962229266L;
-
     private static final EntitySpec[] EMPTY_ARR = new EntitySpec[0];
-
     private EntitySpec[] primitiveParameterSpecs = EMPTY_ARR;
     private EntitySpec[] eventSpecs = EMPTY_ARR;
     private EntitySpec[] constantSpecs = EMPTY_ARR;
@@ -42,6 +42,13 @@ public class RelationalDatabaseSpec implements Serializable {
      * Instantiates this class with the specified mappings from primitive
      * parameters, events and constant parameters to relational database
      * tables, and unit and granularity types.
+     *
+     * You can specify alternative versions of the same entity by creating
+     * sequential entity specs with the same name, different column specs for
+     * one or more properties or references, and mutually exclusive
+     * constraint specs. One example of where this is useful is inpatient
+     * versus clinic hospital encounters, for which dates might be stored
+     * differently.
      * 
      * @param primitiveParameterSpecs a {@link PropertySpec[]} containing
      * mappings from primitive parameters to relational database tables.
@@ -96,38 +103,71 @@ public class RelationalDatabaseSpec implements Serializable {
         return constantSpecs.clone();
     }
 
+    /**
+     * You can specify alternative versions of the same entity by creating
+     * sequential entity specs with the same name, different column specs for
+     * one or more properties or references, and mutually exclusive
+     * constraint specs. One example of where this is useful is inpatient
+     * versus clinic hospital encounters, for which dates might be stored
+     * differently.
+     *
+     * @param constantParameterSpecs
+     */
     public void setConstantSpecs(
             EntitySpec[] constantParameterSpecs) {
-        if (constantParameterSpecs == null)
+        if (constantParameterSpecs == null) {
             this.constantSpecs = EMPTY_ARR;
-        else
+        } else {
             this.constantSpecs = constantParameterSpecs.clone();
+        }
     }
 
     public EntitySpec[] getEventSpecs() {
         return eventSpecs.clone();
     }
 
+    /**
+     * You can specify alternative versions of the same entity by creating
+     * sequential entity specs with the same name, different column specs for
+     * one or more properties or references, and mutually exclusive
+     * constraint specs. One example of where this is useful is inpatient
+     * versus clinic hospital encounters, for which dates might be stored
+     * differently.
+     *
+     * @param eventSpecs
+     */
     public void setEventSpecs(EntitySpec[] eventSpecs) {
-        if (eventSpecs == null)
+        if (eventSpecs == null) {
             this.eventSpecs = EMPTY_ARR;
-        else
+        } else {
             this.eventSpecs = eventSpecs.clone();
+        }
     }
 
     public EntitySpec[] getPrimitiveParameterSpecs() {
         return primitiveParameterSpecs.clone();
     }
 
+    /**
+     * You can specify alternative versions of the same entity by creating
+     * sequential entity specs with the same name, different column specs for
+     * one or more properties or references, and mutually exclusive
+     * constraint specs. One example of where this is useful is inpatient
+     * versus clinic hospital encounters, for which dates might be stored
+     * differently.
+     * 
+     * @param primitiveParameterSpecs
+     */
     public void setPrimitiveParameterSpecs(
             EntitySpec[] primitiveParameterSpecs) {
-        if (primitiveParameterSpecs == null)
+        if (primitiveParameterSpecs == null) {
             this.primitiveParameterSpecs = EMPTY_ARR;
-        else
+        } else {
             this.primitiveParameterSpecs = primitiveParameterSpecs.clone();
+        }
     }
 
-    public void validate(KnowledgeSource knowledgeSource) 
+    public void validate(KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException,
             DataSourceBackendFailedValidationException {
         List<EntitySpec> allSpecs = Arrays.asList(this.eventSpecs,
@@ -136,17 +176,19 @@ public class RelationalDatabaseSpec implements Serializable {
         Logger logger = SQLGenUtil.logger();
         for (EntitySpec entitySpec : allSpecs) {
             String entitySpecName = entitySpec.getName();
-            logger.finer("Validating entity spec " + entitySpecName);
+            logger.log(Level.FINER, "Validating entity spec {0}",
+                    entitySpecName);
             String[] propIds = entitySpec.getPropositionIds();
             Set<String> propNames = new HashSet<String>();
             PropertySpec[] propSpecs = entitySpec.getPropertySpecs();
             logger.finer("Checking for duplicate properties");
             for (PropertySpec propSpec : propSpecs) {
                 String propSpecName = propSpec.getName();
-                if (!propNames.add(propSpecName))
+                if (!propNames.add(propSpecName)) {
                     throw new DataSourceBackendFailedValidationException(
-                            "Duplicate property name " + propSpecName +
-                            " in entity spec " + entitySpecName);
+                            "Duplicate property name " + propSpecName
+                            + " in entity spec " + entitySpecName);
+                }
             }
             logger.finer("No duplicate properties found");
             logger.finer(
@@ -165,8 +207,8 @@ public class RelationalDatabaseSpec implements Serializable {
                     String propName = propertyDef.getName();
                     if (!propNames.contains(propName)) {
                         throw new DataSourceBackendFailedValidationException(
-                                "Required property " + propName +
-                                " missing from entity spec " + entitySpecName);
+                                "Required property " + propName
+                                + " missing from entity spec " + entitySpecName);
                     }
 
                 }

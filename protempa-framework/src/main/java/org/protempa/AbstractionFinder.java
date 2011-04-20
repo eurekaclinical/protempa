@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,8 +26,6 @@ import org.drools.StatefulSession;
 import org.drools.StatelessSession;
 import org.drools.StatelessSessionResult;
 import org.protempa.dsb.filter.Filter;
-import org.protempa.proposition.Constant;
-import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Sequence;
@@ -50,7 +47,7 @@ final class AbstractionFinder implements Module {
     private final AlgorithmSource algorithmSource;
     // private final Map<String, List<String>> termToPropDefMap;
     private boolean clearNeeded;
-    private final Map<String, Map<Set<String>, Sequence<PrimitiveParameter>>> sequences;
+    //private final Map<String, Map<Set<String>, Sequence<PrimitiveParameter>>> sequences;
     private boolean closed;
 
     AbstractionFinder(DataSource dataSource, KnowledgeSource knowledgeSource,
@@ -131,7 +128,7 @@ final class AbstractionFinder implements Module {
 //        } else {
 //            this.propIdCache = null;
 //        }
-        this.sequences = new HashMap<String, Map<Set<String>, Sequence<PrimitiveParameter>>>();
+        //this.sequences = new HashMap<String, Map<Set<String>, Sequence<PrimitiveParameter>>>();
     }
 
     DataSource getDataSource() {
@@ -193,7 +190,7 @@ final class AbstractionFinder implements Module {
     public void clear() {
         if (clearNeeded) {
             clearWorkingMemoryCache();
-            this.sequences.clear();
+            //this.sequences.clear();
             clearNeeded = false;
         }
     }
@@ -487,7 +484,6 @@ final class AbstractionFinder implements Module {
         public boolean accept(Object o) {
             return !(o instanceof Sequence);
         }
-
     }
 
     private class StatelessExecutionStrategy
@@ -553,13 +549,15 @@ final class AbstractionFinder implements Module {
         logger.log(Level.FINE, "Now retrieving data");
         ObjectIterator objectIterator = new ObjectIterator(keyIds,
                 propositionIds, filters, qs, false);
-        
+
         DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
         logger.log(Level.FINE, "Creating rule base");
         strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
         logger.log(Level.FINE, "Rule base is created");
         strategy.initialize();
         logger.log(Level.FINE, "Now processing data");
+        int numProcessed = 0;
+        
         for (Iterator<ObjectEntry> itr = objectIterator; itr.hasNext();) {
             ObjectEntry entry = itr.next();
             logger.log(Level.FINER, "About to assert raw data {0}",
@@ -570,9 +568,22 @@ final class AbstractionFinder implements Module {
                     derivationsBuilder.toDerivations(),
                     propositionIds, resultHandler, entry.keyId);
             derivationsBuilder.reset();
+            if (++numProcessed % 1000 == 0) {
+                logNumProcessed(numProcessed, logger);
+            }
         }
         strategy.cleanup();
         logger.log(Level.FINE, "Processing is complete");
+    }
+
+    private void logNumProcessed(int numProcessed, Logger logger)
+            throws DataSourceReadException {
+        if (logger.isLoggable(Level.FINE)) {
+            String keyTypePluralDisplayName =
+                this.dataSource.getKeyTypePluralDisplayName();
+            logger.log(Level.FINE, "Processed {0} {0}",
+                    new Object[]{numProcessed, keyTypePluralDisplayName});
+        }
     }
 
     private void processResults(QuerySession qs,
@@ -584,7 +595,7 @@ final class AbstractionFinder implements Module {
 
         if (qs.isCachingEnabled()) {
             List<Proposition> props = Iterators.asList(propositions);
-            addToCache(qs, Collections.unmodifiableList(props), 
+            addToCache(qs, Collections.unmodifiableList(props),
                     Collections.unmodifiableMap(derivations));
             propositions = props.iterator();
         }
@@ -601,84 +612,18 @@ final class AbstractionFinder implements Module {
         resultHandler.handleQueryResult(keyId, filteredPropositions,
                 derivations, refs);
     }
-
-    private Map<UniqueIdentifier, Proposition> createReferences(
-            List<Proposition> propositions) {
-        Map<UniqueIdentifier, Proposition> refs =
-                new HashMap<UniqueIdentifier, Proposition>();
-        for (Proposition proposition : propositions) {
-            refs.put(proposition.getUniqueIdentifier(), proposition);
-        }
-        return refs;
-    }
-
+    
     private static class ObjectEntry {
 
         String keyId;
-        List<Object> propositions;
+        List<Proposition> propositions;
     }
-
-    private static class SeparatePropositionDefinitionVisitor extends AbstractPropositionDefinitionVisitor {
-
-        final List<EventDefinition> eventDefinitions;
-        final List<AbstractionDefinition> abstractionDefinitions;
-        final List<PrimitiveParameterDefinition> primitiveParameterDefinitions;
-        final List<ConstantDefinition> constantDefinitions;
-
-        SeparatePropositionDefinitionVisitor() {
-            this.eventDefinitions = new ArrayList<EventDefinition>();
-            this.abstractionDefinitions = new ArrayList<AbstractionDefinition>();
-            this.primitiveParameterDefinitions =
-                    new ArrayList<PrimitiveParameterDefinition>();
-            this.constantDefinitions = new ArrayList<ConstantDefinition>();
-        }
-
-        @Override
-        public void visit(EventDefinition eventDefinition) {
-            this.eventDefinitions.add(eventDefinition);
-        }
-
-        @Override
-        public void visit(HighLevelAbstractionDefinition highLevelAbstractionDefinition) {
-            this.abstractionDefinitions.add(highLevelAbstractionDefinition);
-        }
-
-        @Override
-        public void visit(LowLevelAbstractionDefinition lowLevelAbstractionDefinition) {
-            this.abstractionDefinitions.add(lowLevelAbstractionDefinition);
-        }
-
-        @Override
-        public void visit(PrimitiveParameterDefinition primitiveParameterDefinition) {
-            this.primitiveParameterDefinitions.add(primitiveParameterDefinition);
-        }
-
-        @Override
-        public void visit(SliceDefinition sliceAbstractionDefinition) {
-            this.abstractionDefinitions.add(sliceAbstractionDefinition);
-        }
-
-        @Override
-        public void visit(ConstantDefinition constantDefinition) {
-            this.constantDefinitions.add(constantDefinition);
-        }
-
-        @Override
-        public void visit(PairDefinition pairDefinition) {
-            this.abstractionDefinitions.add(pairDefinition);
-        }
-    }
-
+    
     private class ObjectIterator implements Iterator<ObjectEntry> {
 
-        private Map<String, List<Event>> events;
-        private Map<String, List<Constant>> constants;
-        private Map<String, List<PrimitiveParameter>> primitiveParameters;
+        private Map<String, List<Proposition>> propositions;
         private Iterator<String> keyIdItr;
-        private final Set<String> propositionIds;
-        private final boolean stateful;
         private final Logger logger;
-        private Set<Set<String>> sequenceResultCache;
 
         ObjectIterator(Set<String> keyIds,
                 Set<String> propIds, Filter filters, QuerySession qs,
@@ -686,26 +631,18 @@ final class AbstractionFinder implements Module {
                 throws KnowledgeSourceReadException, DataSourceReadException {
             this.logger = ProtempaUtil.logger();
 
-            this.propositionIds = propIds;
-            this.stateful = stateful;
-
             this.logger.log(Level.FINE, "Starting data retrieval");
 
-            Set<PropositionDefinition> leaves =
-                    knowledgeSource.leafPropositionDefinitions(propIds);
-
-            SeparatePropositionDefinitionVisitor visitor =
-                    new SeparatePropositionDefinitionVisitor();
-            visitor.visit(leaves);
-
-            this.events = retrieveEvents(visitor.eventDefinitions, keyIds, filters, qs);
-            this.constants = retrieveConstants(visitor.constantDefinitions, keyIds,
+            Set<String> leafPropIds = knowledgeSource.leafPropositionIds(
+                    propIds.toArray(new String[propIds.size()]));
+            this.logger.log(Level.FINE, "Proposition ids: {0}", leafPropIds);
+            this.propositions = dataSource.readPropositions(keyIds, leafPropIds,
                     filters, qs);
-            this.primitiveParameters = retrievePrimitiveParameters(
-                    visitor.primitiveParameterDefinitions, keyIds, filters, qs, stateful);
-            this.keyIdItr = aggregateKeyIds();
+            Set<String> keySet = this.propositions.keySet();
+            this.keyIdItr = keySet.iterator();
 
             this.logger.log(Level.FINE, "Data retrieval is complete");
+            this.logger.log(Level.FINE, "{0} keys to process", keySet.size());
         }
 
         @Override
@@ -717,159 +654,13 @@ final class AbstractionFinder implements Module {
         public ObjectEntry next() {
             ObjectEntry result = new ObjectEntry();
             result.keyId = this.keyIdItr.next();
-            result.propositions = new ArrayList<Object>(100);
-            try {
-                List<PrimitiveParameter> primParams =
-                        this.primitiveParameters.get(result.keyId);
-                List<Sequence<PrimitiveParameter>> sequences =
-                        createSequencesFromPrimitiveParameters(result.keyId,
-                        primParams,
-                        this.propositionIds, this.stateful);
-
-                this.logger.log(Level.FINEST, "SEQUENCES: {0}", sequences);
-                result.propositions.addAll(this.events.get(result.keyId));
-                result.propositions.addAll(this.constants.get(result.keyId));
-                result.propositions.addAll(sequences);
-                result.propositions.addAll(primParams);
-            } catch (KnowledgeSourceReadException ex) {
-                throw new IllegalStateException(ex);
-            }
+            result.propositions = this.propositions.get(result.keyId);
             return result;
         }
 
         @Override
         public void remove() {
             throw new UnsupportedOperationException();
-        }
-
-        private Iterator<String> aggregateKeyIds() {
-            Set<String> keyIds = new HashSet<String>();
-            keyIds.addAll(this.events.keySet());
-            keyIds.addAll(this.constants.keySet());
-            keyIds.addAll(this.primitiveParameters.keySet());
-            return keyIds.iterator();
-        }
-
-        private Map<String, List<PrimitiveParameter>> retrievePrimitiveParameters(
-                Collection<PrimitiveParameterDefinition> primParamDefs,
-                Set<String> keyIds, Filter filters,
-                QuerySession qs, boolean stateful)
-                throws KnowledgeSourceReadException, DataSourceReadException {
-            Map<String, List<PrimitiveParameter>> result;
-            Set<String> propIds = new HashSet<String>();
-            for (PropositionDefinition propDef : primParamDefs) {
-                propIds.add(propDef.getId());
-            }
-            this.logger.log(Level.FINE, "Primitive parameter ids: {0}",
-                    propIds);
-            result = dataSource.getPrimitiveParameters(keyIds,
-                    propIds, filters, qs);
-            if (this.logger.isLoggable(Level.FINEST)) {
-                for (Map.Entry<String, List<PrimitiveParameter>> e :
-                        result.entrySet()) {
-                    this.logger.log(Level.FINEST,
-                            "RETURNED PRIMITIVE PARAMETERS: {0}", e);
-                }
-            }
-            return result;
-
-        }
-
-        private Map<String, List<Constant>> retrieveConstants(
-                Collection<ConstantDefinition> constantDefinitions,
-                Set<String> keyIds, Filter filters, QuerySession qs)
-                throws KnowledgeSourceReadException, DataSourceReadException {
-            Map<String, List<Constant>> result;
-            Set<String> propIds = new HashSet<String>();
-            for (PropositionDefinition propDef : constantDefinitions) {
-                propIds.add(propDef.getId());
-            }
-            this.logger.log(Level.FINE, "Constant ids: {0}", propIds);
-            result = dataSource.getConstantPropositions(keyIds,
-                    propIds, filters, qs);
-            return result;
-        }
-
-        private Map<String, List<Event>> retrieveEvents(
-                Collection<EventDefinition> eventDefinitions,
-                Set<String> keyIds, Filter filters, QuerySession qs)
-                throws DataSourceReadException, KnowledgeSourceReadException {
-            Map<String, List<Event>> result;
-            Set<String> propIds = new HashSet<String>();
-            for (PropositionDefinition propDef : eventDefinitions) {
-                propIds.add(propDef.getId());
-            }
-            this.logger.log(Level.FINE, "Event ids: {0}", propIds);
-            result = dataSource.getEvents(keyIds, propIds,
-                    filters, qs);
-            return result;
-        }
-
-        private List<Sequence<PrimitiveParameter>> createSequencesFromPrimitiveParameters(
-                String keyId, List<PrimitiveParameter> primParams,
-                Set<String> propIds, boolean stateful)
-                throws KnowledgeSourceReadException {
-            Map<Set<String>, Sequence<PrimitiveParameter>> seqKey =
-                    getOrCreateEmptySequenceKeyMap(keyId, propIds,
-                    stateful);
-            List<Sequence<PrimitiveParameter>> paramSeqs =
-                    createSequenceList(seqKey, primParams);
-            return paramSeqs;
-        }
-
-        private Map<Set<String>, Sequence<PrimitiveParameter>> getOrCreateEmptySequenceKeyMap(String keyId,
-                Set<String> propIds,
-                boolean stateful) throws KnowledgeSourceReadException {
-            Map<Set<String>, Sequence<PrimitiveParameter>> seqKeyMap =
-                    sequences.get(keyId);
-            if (seqKeyMap == null) {
-                seqKeyMap =
-                        new HashMap<Set<String>, Sequence<PrimitiveParameter>>();
-            }
-            if (this.sequenceResultCache == null) {
-                this.sequenceResultCache = extractSequenceParamIds(propIds);
-            }
-            for (Set<String> paramIds : this.sequenceResultCache) {
-                if (!seqKeyMap.containsKey(paramIds)) {
-                    seqKeyMap.put(paramIds,
-                            new Sequence<PrimitiveParameter>(paramIds));
-                }
-            }
-            if (stateful) {
-                sequences.put(keyId, seqKeyMap);
-            }
-            return seqKeyMap;
-        }
-
-        private void extractSequenceParamIdsHelper(String[] propIds,
-                Set<Set<String>> sequenceParamIds)
-                throws KnowledgeSourceReadException {
-            for (String propId : propIds) {
-                AbstractionDefinition def =
-                        knowledgeSource.readAbstractionDefinition(propId);
-                if (def != null) {
-                    if (def instanceof LowLevelAbstractionDefinition) {
-                        Set<String> abstractedFrom =
-                                knowledgeSource.leafPrimitiveParameterIds(
-                                propId);
-                        assert !abstractedFrom.isEmpty() :
-                                "abstractedFrom should not be empty";
-                        sequenceParamIds.add(abstractedFrom);
-                    } else {
-                        extractSequenceParamIdsHelper(def.getDirectChildren(),
-                                sequenceParamIds);
-                    }
-                }
-            }
-        }
-
-        private Set<Set<String>> extractSequenceParamIds(Set<String> propIds)
-                throws KnowledgeSourceReadException {
-            Set<Set<String>> result = new HashSet<Set<String>>();
-            extractSequenceParamIdsHelper(
-                    propIds.toArray(new String[propIds.size()]), result);
-            return result;
-
         }
     }
 

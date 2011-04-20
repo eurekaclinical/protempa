@@ -14,6 +14,11 @@ import org.protempa.bp.commons.dsb.RelationalDatabaseDataSourceBackend;
 /**
  * Factory for obtaining a {@link SQLGenerator} given the database and
  * JDBC driver that are in use.
+ *
+ * The system property
+ * <code>protempa.dsb.relationaldatabase.sqlgenerator</code> can be set with
+ * the full class name of an implementation of {@link SQLGenerator} to force
+ * the use of a particular SQL generator.
  * 
  * @author Andrew Post
  */
@@ -56,32 +61,36 @@ public final class SQLGeneratorFactory {
             SQLGeneratorLoadException {
         Logger logger = SQLGenUtil.logger();
         logger.fine("Loading a compatible SQL generator");
-        ServiceLoader<ProtempaSQLGenerator> candidates =
-                ServiceLoader.load(ProtempaSQLGenerator.class);
+        ServiceLoader<SQLGenerator> candidates =
+                ServiceLoader.load(SQLGenerator.class);
         /*
          * candidates will never be null, even if we mess up and forget to
          * create a provider-configuration file for ProtempaSQLGenerator.
          */
         try {
-            for (ProtempaSQLGenerator candidateInstance : candidates) {
-                if (!candidateInstance.loadDriverIfNeeded()) {
-                    /*
-                     * The necessary JDBC driver is not in the classpath, so 
-                     * skip this SQL generator.
-                     */
-                    continue;
+            for (SQLGenerator candidateInstance : candidates) {
+                String forcedSQLGenerator =
+                        System.getProperty(
+                        SQLGenUtil.SYSTEM_PROPERTY_FORCE_SQL_GENERATOR);
+
+                if (forcedSQLGenerator != null && Boolean.getBoolean(
+                        SQLGenUtil.SYSTEM_PROPERTY_SKIP_EXECUTION)) {
+                    if (!candidateInstance.loadDriverIfNeeded()) {
+                        /*
+                         * The necessary JDBC driver is not in the classpath,
+                         * so skip this SQL generator.
+                         */
+                        continue;
+                    }
                 }
-                /*
-                 * We get a new connection for each compatibility check so that
-                 * no state (or a closed connection!) is carried over.
-                 */
-                Connection con = this.connectionSpec.getOrCreate();
-                try {
-                    if (candidateInstance.checkCompatibility(con)) {
-                        DatabaseMetaData metaData = con.getMetaData();
-                        if (logger.isLoggable(Level.FINER)) {
-                            logCompatibility(logger, candidateInstance,
-                                    metaData);
+
+                if (forcedSQLGenerator != null) {
+                    if (forcedSQLGenerator.equals(
+                            candidateInstance.getClass().getName())) {
+                        if (forcedSQLGenerator != null) {
+                            logger.log(Level.INFO,
+                                    "Forcing use of SQL generator {0}",
+                                    candidateInstance.getClass().getName());
                         }
                         candidateInstance.initialize(
                                 this.backend.getRelationalDatabaseSpec(),
@@ -90,13 +99,32 @@ public final class SQLGeneratorFactory {
                                 candidateInstance.getClass().getName());
                         return candidateInstance;
                     }
-                    con.close();
-                    con = null;
-                } finally {
-                    if (con != null) {
-                        try {
-                            con.close();
-                        } catch (SQLException ex) {
+                } else {
+                    /*
+                     * We get a new connection for each compatibility check so that
+                     * no state (or a closed connection!) is carried over.
+                     */
+                    Connection con = this.connectionSpec.getOrCreate();
+                    try {
+                        if (candidateInstance.checkCompatibility(con)) {
+                            DatabaseMetaData metaData = con.getMetaData();
+                            logCompatibility(logger, candidateInstance,
+                                    metaData);
+                            candidateInstance.initialize(
+                                    this.backend.getRelationalDatabaseSpec(),
+                                    this.connectionSpec, this.backend);
+                            logger.log(Level.FINE, "SQL generator {0} is loaded",
+                                    candidateInstance.getClass().getName());
+                            return candidateInstance;
+                        }
+                        con.close();
+                        con = null;
+                    } finally {
+                        if (con != null) {
+                            try {
+                                con.close();
+                            } catch (SQLException ex) {
+                            }
                         }
                     }
                 }
@@ -110,14 +138,18 @@ public final class SQLGeneratorFactory {
     }
 
     private static void logCompatibility(Logger logger,
-            ProtempaSQLGenerator candidateInstance, DatabaseMetaData metaData)
+            SQLGenerator candidateInstance, DatabaseMetaData metaData)
             throws SQLException {
-        logger.log(Level.FINER, "{0} is compatible with database {1} ({2})",
-                new Object[]{candidateInstance.getClass().getName(),
-                metaData.getDatabaseProductName(),
-                metaData.getDatabaseProductVersion()});
-        logger.log(Level.FINER, "{0} is compatible with driver {1} ({2})", 
-                new Object[]{candidateInstance.getClass().getName(),
-                metaData.getDriverName(), metaData.getDriverVersion()});
+        if (logger.isLoggable(Level.FINER)) {
+            logger.log(Level.FINER,
+                    "{0} is compatible with database {1} ({2})",
+                    new Object[]{candidateInstance.getClass().getName(),
+                        metaData.getDatabaseProductName(),
+                        metaData.getDatabaseProductVersion()});
+            logger.log(Level.FINER, "{0} is compatible with driver {1} ({2})",
+                    new Object[]{candidateInstance.getClass().getName(),
+                        metaData.getDriverName(),
+                        metaData.getDriverVersion()});
+        }
     }
 }

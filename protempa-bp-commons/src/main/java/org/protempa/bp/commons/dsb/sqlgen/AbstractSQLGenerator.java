@@ -4,11 +4,13 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,15 +24,13 @@ import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
 import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.dsb.RelationalDatabaseDataSourceBackend;
+import org.protempa.bp.commons.dsb.SQLGenerator;
 import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.Constraint;
 import org.protempa.bp.commons.dsb.sqlgen.ColumnSpec.KnowledgeSourceIdToSqlCode;
 import org.protempa.dsb.filter.Filter;
 import org.protempa.dsb.filter.PositionFilter;
 import org.protempa.dsb.filter.PositionFilter.Side;
 import org.protempa.dsb.filter.PropertyValueFilter;
-import org.protempa.proposition.Constant;
-import org.protempa.proposition.Event;
-import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.BooleanValue;
 import org.protempa.proposition.value.GranularityFactory;
@@ -49,23 +49,26 @@ import org.protempa.proposition.value.ValueVisitor;
  * 
  * @author Andrew Post
  */
-public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
+public abstract class AbstractSQLGenerator implements SQLGenerator {
 
-    private static final String SYSTEM_PROPERTY_SKIP_EXECUTION =
-            "protempa.dsb.relationaldatabase.skipexecution";
     private static final int FETCH_SIZE = 10000;
+    private static final String readPropositionsSQL =
+            "select {0} from {1} {2}";
     private ConnectionSpec connectionSpec;
-    private final Map<String, EntitySpec> primitiveParameterSpecs;
-    private final Map<String, EntitySpec> eventSpecs;
-    private final Map<String, EntitySpec> constantSpecs;
+    private final Map<String, List<EntitySpec>> primitiveParameterSpecs;
+    private EntitySpec[] primitiveParameterEntitySpecs;
+    private final Map<String, List<EntitySpec>> eventSpecs;
+    private EntitySpec[] eventEntitySpecs;
+    private final Map<String, List<EntitySpec>> constantSpecs;
+    private EntitySpec[] constantEntitySpecs;
     private GranularityFactory granularities;
     private UnitFactory units;
     private RelationalDatabaseDataSourceBackend backend;
 
     public AbstractSQLGenerator() {
-        this.primitiveParameterSpecs = new HashMap<String, EntitySpec>();
-        this.eventSpecs = new HashMap<String, EntitySpec>();
-        this.constantSpecs = new HashMap<String, EntitySpec>();
+        this.primitiveParameterSpecs = new HashMap<String, List<EntitySpec>>();
+        this.eventSpecs = new HashMap<String, List<EntitySpec>>();
+        this.constantSpecs = new HashMap<String, List<EntitySpec>>();
     }
 
     @Override
@@ -73,12 +76,14 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             ConnectionSpec connectionSpec,
             RelationalDatabaseDataSourceBackend backend) {
         if (relationalDatabaseSpec != null) {
+            this.primitiveParameterEntitySpecs = relationalDatabaseSpec.getPrimitiveParameterSpecs();
             populatePropositionMap(this.primitiveParameterSpecs,
-                    relationalDatabaseSpec.getPrimitiveParameterSpecs());
-            populatePropositionMap(this.eventSpecs,
-                    relationalDatabaseSpec.getEventSpecs());
+                    this.primitiveParameterEntitySpecs);
+            this.eventEntitySpecs = relationalDatabaseSpec.getEventSpecs();
+            populatePropositionMap(this.eventSpecs, this.eventEntitySpecs);
+            this.constantEntitySpecs = relationalDatabaseSpec.getConstantSpecs();
             populatePropositionMap(this.constantSpecs,
-                    relationalDatabaseSpec.getConstantSpecs());
+                    this.constantEntitySpecs);
             this.granularities = relationalDatabaseSpec.getGranularities();
             this.units = relationalDatabaseSpec.getUnits();
             this.connectionSpec = connectionSpec;
@@ -107,44 +112,43 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     private void appendColumnRef(StringBuilder wherePart,
             Map<ColumnSpec, Integer> referenceIndices, ColumnSpec columnSpec) {
         if (columnSpec.getColumnOp() != null) {
-            wherePart.append(introduceOp(columnSpec.getColumnOp(),
-                    appendColumnReference(referenceIndices, columnSpec)));
+            Integer tableNumber = referenceIndices.get(columnSpec);
+            assert tableNumber != null : "tableNumber is null";
+            generateColumnReference(columnSpec.getColumnOp(), tableNumber,
+                    columnSpec, wherePart);
         } else {
-            wherePart.append(appendColumnReference(referenceIndices,
-                    columnSpec));
+            appendColumnReference(referenceIndices, columnSpec, wherePart);
         }
     }
 
-    public String introduceOp(ColumnSpec.ColumnOp columnOp,
-            String columnRef) {
-        StringBuilder builder = new StringBuilder();
-        switch (columnOp) {
-            case UPPER:
-                builder.append("upper");
-                break;
-            default:
-                throw new AssertionError("invalid column op: " + columnOp);
+    public void generateColumnReference(ColumnSpec.ColumnOp columnOp,
+            int tableNumber, ColumnSpec columnSpec, StringBuilder stmt) {
+        if (columnOp != null) {
+            switch (columnOp) {
+                case UPPER:
+                    stmt.append("upper");
+                    break;
+                default:
+                    throw new AssertionError("invalid column op: " + columnOp);
+            }
+            stmt.append('(');
         }
-        builder.append('(');
-        builder.append(columnRef);
-        builder.append(')');
-        return builder.toString();
+        generateColumnReference(tableNumber, columnSpec.getColumn(), stmt);
+        if (columnOp != null) {
+            stmt.append(')');
+        }
     }
 
-    public String appendColumnReference(
+    private void appendColumnReference(
             Map<ColumnSpec, Integer> referenceIndices,
-            ColumnSpec columnSpec) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("a");
+            ColumnSpec columnSpec, StringBuilder stmt) {
         Integer tableNumber = referenceIndices.get(columnSpec);
         assert tableNumber != null : "tableNumber is null";
-        builder.append(tableNumber);
-        builder.append(".");
-        builder.append(columnSpec.getColumn());
-        return builder.toString();
+        generateColumnReference(tableNumber, columnSpec.getColumn(), stmt);
     }
 
-    private List<EntitySpec> copyEntitySpecsForRefs(EntitySpec entitySpec, Collection<EntitySpec> allEntitySpecs) {
+    private List<EntitySpec> copyEntitySpecsForRefs(EntitySpec entitySpec,
+            Collection<EntitySpec> allEntitySpecs) {
         List<EntitySpec> allEntitySpecsCopyForRefs = new LinkedList<EntitySpec>();
         allEntitySpecsCopyForRefs.add(entitySpec);
         for (EntitySpec es : allEntitySpecs) {
@@ -171,7 +175,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             String entitySpecName, String query,
             SQLGenResultProcessor resultProcessor)
             throws DataSourceReadException {
-        if (Boolean.getBoolean(SYSTEM_PROPERTY_SKIP_EXECUTION)) {
+        if (Boolean.getBoolean(SQLGenUtil.SYSTEM_PROPERTY_SKIP_EXECUTION)) {
             if (logger.isLoggable(Level.INFO)) {
                 logger.log(Level.INFO,
                         "Data source backend {0} is skipping query for {1}",
@@ -233,29 +237,100 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return sqlCodes;
     }
 
-    private <P extends Proposition> ResultCache<P> readPropositions(
-            Set<String> propIds, Filter filters,
-            Set<String> keyIds, SQLOrderBy order,
-            SQLGenResultProcessorFactory<P> factory)
+    private void logSkippingReference(Logger logger, ReferenceSpec referenceSpec) {
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Skipping reference {0}", referenceSpec.getReferenceName());
+        }
+    }
+
+    private void logSkippingRefs(Logger logger, EntitySpec entitySpec) {
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Skipping reference queries for entity spec {0} because the query for {0} returned no data", entitySpec.getName());
+        }
+    }
+
+    private int processForWhereClause(EntitySpec prevEntitySpec, int i,
+            Set<Filter> filtersCopy, StringBuilder wherePart,
+            Map<ColumnSpec, Integer> referenceIndices, Set<String> propIds,
+            StringBuilder selectPart, SQLGenResultProcessor resultProcessor,
+            boolean first) {
+        i = processKeySpecForWhereClause(prevEntitySpec, i);
+        int wherePartLength = wherePart.length();
+        i = processStartTimeSpecForWhereClause(prevEntitySpec, i, filtersCopy,
+                wherePart, referenceIndices, first);
+        if (wherePart.length() > wherePartLength) {
+            first = false;
+        }
+        wherePartLength = wherePart.length();
+        i = processFinishTimeSpecForWhereClause(prevEntitySpec, i, filtersCopy,
+                wherePart, referenceIndices, first);
+        if (wherePart.length() > wherePartLength) {
+            first = false;
+        }
+        wherePartLength = wherePart.length();
+        i = processPropertyValueSpecsForWhereClause(prevEntitySpec, i);
+        if (wherePart.length() > wherePartLength) {
+            first = false;
+        }
+        wherePartLength = wherePart.length();
+        i = processConstraintSpecsForWhereClause(propIds, prevEntitySpec, i,
+                wherePart, selectPart, referenceIndices, filtersCopy,
+                resultProcessor, first);
+        return i;
+    }
+
+    private void processOrder(SQLOrderBy order, ColumnSpecInfo info,
+            Map<ColumnSpec, Integer> referenceIndices,
+            StringBuilder wherePart) {
+        if (order != null && info.getStartTimeIndex() >= 0) {
+            ColumnSpec startColSpec = info.getColumnSpecs().get(
+                    info.getStartTimeIndex());
+            int start = referenceIndices.get(startColSpec);
+            String startCol = startColSpec.getColumn();
+            ColumnSpec finishColSpec;
+            String finishCol;
+            if (info.getFinishTimeIndex() >= 0) {
+                finishColSpec = info.getColumnSpecs().get(
+                        info.getFinishTimeIndex());
+                finishCol = finishColSpec.getColumn();
+            } else {
+                finishColSpec = null;
+                finishCol = null;
+            }
+            int finish;
+            if (info.getFinishTimeIndex() >= 0) {
+                finish = referenceIndices.get(info.getColumnSpecs().get(
+                        info.getFinishTimeIndex()));
+            } else {
+                finish = -1;
+            }
+            processOrderBy(start, startCol, finish, finishCol, wherePart,
+                    order);
+        }
+    }
+
+    public ResultCache<Proposition> readPropositions(Set<String> keyIds,
+            Set<String> propIds, Filter filters, SQLOrderBy order)
             throws DataSourceReadException {
         Map<EntitySpec, List<String>> entitySpecMapFromPropIds =
                 entitySpecMapForPropIds(propIds);
 
-        ResultCache<P> results = new ResultCache<P>();
-
-        Collection<EntitySpec> allEntitySpecs = allEntitySpecs();
+        ResultCache<Proposition> results = new ResultCache<Proposition>();
+        Map<EntitySpec, SQLGenResultProcessorFactory> entitySpecToResultProcessorMap =
+                allEntitySpecs();
+        Collection<EntitySpec> allEntitySpecs = entitySpecToResultProcessorMap.keySet();
         Logger logger = SQLGenUtil.logger();
+
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
-            if (logger.isLoggable(Level.FINE)) {
-                logProcessingEntitySpec(logger, entitySpec);
-            }
+            logProcessingEntitySpec(logger, entitySpec);
+            SQLGenResultProcessorFactory factory =
+                    entitySpecToResultProcessorMap.get(entitySpec);
+            assert factory != null : "factory should never be null";
             List<EntitySpec> allEntitySpecsCopy =
-                    new ArrayList<EntitySpec>(allEntitySpecs);
+                    new LinkedList<EntitySpec>(allEntitySpecs);
             removeNonApplicableEntitySpecs(entitySpec, allEntitySpecsCopy);
 
-            if (logger.isLoggable(Level.FINER)) {
-                logApplicableEntitySpecs(allEntitySpecsCopy, logger);
-            }
+            logApplicableEntitySpecs(allEntitySpecsCopy, logger);
 
             Set<Filter> filtersCopy = copyFilters(filters);
             removeNonApplicableFilters(allEntitySpecs, filtersCopy,
@@ -264,56 +339,58 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     "allEntitySpecsCopy should have at least one element";
             String dataSourceBackendId =
                     this.backend.getDataSourceBackendId();
-            AbstractMainResultProcessor<P> resultProcessor =
+            MainResultProcessor<Proposition> resultProcessor =
                     factory.getInstance(dataSourceBackendId, entitySpec, results);
             generateAndExecuteSelect(entitySpec, null, propIds, filtersCopy,
                     allEntitySpecsCopy, keyIds, order, resultProcessor);
+            if (results.anyAdded()) {
+                ReferenceSpec[] refSpecs = entitySpec.getReferenceSpecs();
+                if (refSpecs != null) {
+                    /*
+                     * Create a copy of allEntitySpecs with the current entitySpec
+                     * the first item of the list. This is to make sure that
+                     * its joins make it into the list of column specs.
+                     */
+                    for (ReferenceSpec referenceSpec : refSpecs) {
+                        RefResultProcessor<Proposition> refResultProcessor =
+                                factory.getRefInstance(dataSourceBackendId,
+                                entitySpec, referenceSpec, results);
+                        List<EntitySpec> allEntitySpecsCopyForRefs =
+                                copyEntitySpecsForRefs(entitySpec, allEntitySpecs);
+                        Set<Filter> refFiltersCopy = copyFilters(filters);
+                        EntitySpec referredToEntitySpec =
+                                entitySpecForName(allEntitySpecsCopyForRefs,
+                                referenceSpec.getEntityName());
+                        assert referredToEntitySpec != null :
+                                "refferedToEntitySpec should not be null";
+                        if (Collections.containsAny(propIds,
+                                referredToEntitySpec.getPropositionIds())) {
+                            logProcessingRef(logger, referenceSpec, entitySpec);
+                            retainEntitySpecsWithInboundRefs(allEntitySpecsCopyForRefs,
+                                    entitySpec, referenceSpec);
+                            removeNonApplicableFilters(allEntitySpecsCopyForRefs,
+                                    refFiltersCopy, referredToEntitySpec);
+                            retainEntitySpecsWithFiltersOrConstraints(entitySpec,
+                                    referredToEntitySpec, allEntitySpecsCopyForRefs,
+                                    refFiltersCopy, propIds);
+                            generateAndExecuteSelect(entitySpec, referenceSpec, propIds,
+                                    refFiltersCopy, allEntitySpecsCopyForRefs, keyIds,
+                                    order, refResultProcessor);
+                            logDoneProcessingRef(logger, referenceSpec, entitySpec);
+                        } else {
+                            logSkippingReference(logger, referenceSpec);
+                        }
 
-            ReferenceSpec[] refSpecs = entitySpec.getReferenceSpecs();
-            if (refSpecs != null) {
-                /*
-                 * Create a copy of allEntitySpecs with the current entitySpec
-                 * the first item of the list. This is to make sure that
-                 * its joins make it into the list of column specs.
-                 */
-                for (ReferenceSpec referenceSpec : refSpecs) {
-                    RefResultProcessor<P> refResultProcessor =
-                            factory.getRefInstance(dataSourceBackendId,
-                            entitySpec, referenceSpec, results);
-                    if (logger.isLoggable(Level.FINE)) {
-                        logProcessingRef(logger, referenceSpec, entitySpec);
                     }
-                    List<EntitySpec> allEntitySpecsCopyForRefs =
-                            copyEntitySpecsForRefs(entitySpec, allEntitySpecs);
-                    Set<Filter> refFiltersCopy = copyFilters(filters);
-                    EntitySpec referredToEntitySpec =
-                            entitySpecForName(allEntitySpecsCopyForRefs,
-                            referenceSpec.getEntityName());
-                    assert referredToEntitySpec != null :
-                            "refferedToEntitySpec should not be null";
-                    retainEntitySpecsWithInboundRefs(allEntitySpecsCopyForRefs,
-                            entitySpec, referenceSpec);
-                    removeNonApplicableFilters(allEntitySpecsCopyForRefs,
-                            refFiltersCopy, referredToEntitySpec);
-                    retainEntitySpecsWithFiltersOrConstraints(entitySpec,
-                            referredToEntitySpec, allEntitySpecsCopyForRefs,
-                            refFiltersCopy, propIds);
-                    generateAndExecuteSelect(entitySpec, referenceSpec, propIds,
-                            refFiltersCopy, allEntitySpecsCopyForRefs, keyIds,
-                            order, refResultProcessor);
-                    if (logger.isLoggable(Level.FINE)) {
-                        logDoneProcessingRef(logger, referenceSpec, entitySpec);
-                    }
-                }
-                if (logger.isLoggable(Level.FINE)) {
                     logDoneProcessingEntitySpec(logger, entitySpec);
                 }
+            } else {
+                logSkippingRefs(logger, entitySpec);
             }
 
-            results.clear();
-            if (logger.isLoggable(Level.FINE)) {
-                logDoneProcessing(logger, entitySpec);
-            }
+            results.clearTmp();
+
+            logDoneProcessing(logger, entitySpec);
         }
         return results;
     }
@@ -331,9 +408,10 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 if (codeSpec != null) {
                     List<ColumnSpec> codeSpecL = codeSpec.asList();
                     ColumnSpec last = codeSpecL.get(codeSpecL.size() - 1);
-                    if (last.getConstraint() != null &&
-                            (!last.isPropositionIdsComplete() ||
-                            !completeOrNoOverlap(propIds,
+                    if (last.getConstraint() != null
+                            && (last.getConstraint() != Constraint.EQUAL_TO
+                            || !last.isPropositionIdsComplete()
+                            || !completeOrNoOverlap(propIds,
                             es.getPropositionIds()))) {
                         return;
                     }
@@ -350,32 +428,44 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     }
 
     private void logDoneProcessing(Logger logger, EntitySpec entitySpec) {
-        logger.log(Level.FINE, "Results of query for {0} in data source backend {1} " + "have been processed", new Object[]{entitySpec.getName(), backendNameForMessages()});
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Results of query for {0} in data source backend {1} " + "have been processed", new Object[]{entitySpec.getName(), backendNameForMessages()});
+        }
     }
 
     private void logDoneProcessingEntitySpec(Logger logger, EntitySpec entitySpec) {
-        logger.log(Level.FINE, "Data source backend {0} is done processing entity spec {1}", new Object[]{backendNameForMessages(), entitySpec.getName()});
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Data source backend {0} is done processing entity spec {1}", new Object[]{backendNameForMessages(), entitySpec.getName()});
+        }
     }
 
     private void logDoneProcessingRef(Logger logger, ReferenceSpec referenceSpec, EntitySpec entitySpec) {
-        logger.log(Level.FINE, "Data source backend {0} is done processing reference {1} for entity spec {2}", new Object[]{backendNameForMessages(), referenceSpec.getReferenceName(), entitySpec.getName()});
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Data source backend {0} is done processing reference {1} for entity spec {2}", new Object[]{backendNameForMessages(), referenceSpec.getReferenceName(), entitySpec.getName()});
+        }
     }
 
     private void logProcessingRef(Logger logger, ReferenceSpec referenceSpec, EntitySpec entitySpec) {
-        logger.log(Level.FINE, "Data source backend {0} is processing reference {1} for entity spec {2}", new Object[]{backendNameForMessages(), referenceSpec.getReferenceName(), entitySpec.getName()});
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Data source backend {0} is processing reference {1} for entity spec {2}", new Object[]{backendNameForMessages(), referenceSpec.getReferenceName(), entitySpec.getName()});
+        }
     }
 
     private void logProcessingEntitySpec(Logger logger, EntitySpec entitySpec) {
-        logger.log(Level.FINE, "Data source backend {0} is processing entity spec {1}", new Object[]{backendNameForMessages(), entitySpec.getName()});
+        if (logger.isLoggable(Level.FINE)) {
+            logger.log(Level.FINE, "Data source backend {0} is processing entity spec {1}", new Object[]{backendNameForMessages(), entitySpec.getName()});
+        }
     }
 
     private void logApplicableEntitySpecs(List<EntitySpec> allEntitySpecsCopy, Logger logger) {
-        String[] allEntitySpecsCopyNames = new String[allEntitySpecsCopy.size()];
-        int i = 0;
-        for (EntitySpec aesc : allEntitySpecsCopy) {
-            allEntitySpecsCopyNames[i++] = aesc.getName();
+        if (logger.isLoggable(Level.FINER)) {
+            String[] allEntitySpecsCopyNames = new String[allEntitySpecsCopy.size()];
+            int i = 0;
+            for (EntitySpec aesc : allEntitySpecsCopy) {
+                allEntitySpecsCopyNames[i++] = aesc.getName();
+            }
+            logger.log(Level.FINER, "Applicable entity specs are {0}", StringUtils.join(allEntitySpecsCopyNames, ", "));
         }
-        logger.log(Level.FINER, "Applicable entity specs are {0}", StringUtils.join(allEntitySpecsCopyNames, ", "));
     }
 
     private static void retainEntitySpecsWithInboundRefs(
@@ -393,12 +483,29 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         }
     }
 
-    private List<EntitySpec> allEntitySpecs() {
-        Set<EntitySpec> entitySpecs = new HashSet<EntitySpec>();
-        entitySpecs.addAll(this.eventSpecs.values());
-        entitySpecs.addAll(this.primitiveParameterSpecs.values());
-        entitySpecs.addAll(this.constantSpecs.values());
-        return new ArrayList<EntitySpec>(entitySpecs);
+    private Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecs() {
+        /*
+         * The order of the entity specs matters for multiple with the same
+         * name. Thus, we use a LinkedHashMap.
+         */
+        Map<EntitySpec, SQLGenResultProcessorFactory> result =
+                new LinkedHashMap<EntitySpec, SQLGenResultProcessorFactory>();
+        PrimitiveParameterResultProcessorFactory ppFactory =
+                new PrimitiveParameterResultProcessorFactory();
+        for (EntitySpec es : this.primitiveParameterEntitySpecs) {
+            result.put(es, ppFactory);
+        }
+        EventResultProcessorFactory eFactory =
+                new EventResultProcessorFactory();
+        for (EntitySpec es : this.eventEntitySpecs) {
+            result.put(es, eFactory);
+        }
+        ConstantResultProcessorFactory cFactory =
+                new ConstantResultProcessorFactory();
+        for (EntitySpec es : this.constantEntitySpecs) {
+            result.put(es, cFactory);
+        }
+        return result;
     }
 
     private static Set<Filter> copyFilters(Filter filters) {
@@ -415,7 +522,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     private <P extends Proposition> void generateAndExecuteSelect(
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
             Set<String> propIds,
-            Set<Filter> filtersCopy, Collection<EntitySpec> entitySpecsCopy,
+            Set<Filter> filtersCopy, List<EntitySpec> entitySpecsCopy,
             Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor)
             throws DataSourceReadException {
@@ -504,42 +611,9 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return false;
     }
 
-    protected abstract boolean isLimitingSupported();
-
-    @Override
-    public ResultCache<Constant> readConstants(
-            Set<String> keyIds, Set<String> paramIds, Filter filters)
-            throws DataSourceReadException {
-        ConstantResultProcessorFactory factory =
-                new ConstantResultProcessorFactory();
-
-        return readPropositions(paramIds, filters, keyIds, null, factory);
-    }
-
-    @Override
-    public ResultCache<PrimitiveParameter> readPrimitiveParameters(
-            Set<String> keyIds, Set<String> paramIds, Filter filters,
-            SQLOrderBy order)
-            throws DataSourceReadException {
-        PrimitiveParameterResultProcessorFactory factory =
-                new PrimitiveParameterResultProcessorFactory();
-
-        return readPropositions(paramIds, filters, keyIds, order, factory);
-    }
-
-    @Override
-    public ResultCache<Event> readEvents(Set<String> keyIds,
-            Set<String> eventIds, Filter filters,
-            SQLOrderBy order) throws DataSourceReadException {
-        EventResultProcessorFactory factory =
-                new EventResultProcessorFactory();
-
-        return readPropositions(eventIds, filters, keyIds, order, factory);
-    }
-
     private String generateSelect(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, Set<String> propIds,
-            Set<Filter> filtersCopy, Collection<EntitySpec> entitySpecsCopy,
+            Set<Filter> filtersCopy, List<EntitySpec> entitySpecsCopy,
             Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor) {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(propIds,
@@ -558,9 +632,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return result;
     }
 
-    public abstract String assembleReadPropositionsQuery(
-            StringBuilder selectClause, StringBuilder fromClause,
-            StringBuilder whereClause);
+    public String assembleReadPropositionsQuery(StringBuilder selectClause,
+            StringBuilder fromClause, StringBuilder whereClause) {
+        return MessageFormat.format(readPropositionsSQL,
+                selectClause, fromClause, whereClause);
+    }
 
     private static KnowledgeSourceIdToSqlCode[] filterKnowledgeSourceIdToSqlCodesById(
             Set<?> propIds, KnowledgeSourceIdToSqlCode[] constraintValues) {
@@ -686,18 +762,61 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return selectClause;
     }
 
-    public abstract void generateSelectColumn(boolean distinctRequested,
+    public void generateSelectColumn(boolean distinctRequested,
             StringBuilder selectPart, int index, String column, String name,
-            boolean hasNext);
+            boolean hasNext) {
+        if (distinctRequested) {
+            selectPart.append("distinct ");
+        }
+        generateColumnReference(index, column, selectPart);
+        selectPart.append(" as ");
+        selectPart.append(name);
+        if (hasNext) {
+            selectPart.append(',');
+        }
+    }
+
+    public void processOrderBy(int startReferenceIndex, String startColumn,
+            int finishReferenceIndex, String finishColumn,
+            StringBuilder wherePart, SQLOrderBy order) {
+        wherePart.append(" order by ");
+        generateColumnReference(startReferenceIndex, startColumn, wherePart);
+        if (finishReferenceIndex > 0) {
+            wherePart.append(',');
+            generateColumnReference(finishReferenceIndex, finishColumn,
+                    wherePart);
+        }
+        wherePart.append(' ');
+        if (order == SQLOrderBy.ASCENDING) {
+            wherePart.append("ASC");
+        } else {
+            wherePart.append("DESC");
+        }
+    }
 
     public abstract void generateFromTable(String schema, String table,
             StringBuilder fromPart, int index);
 
-    public abstract void generateFromTableReference(
-            int i, StringBuilder fromPart);
+    public void generateTableReference(int tableNumber, StringBuilder stmt) {
+        stmt.append(" a").append(tableNumber);
+    }
 
-    public abstract void generateOn(StringBuilder fromPart, int fromIndex,
-            int toIndex, String fromKey, String toKey);
+    public void generateColumnReference(int tableNumber, String columnName,
+            StringBuilder stmt) {
+        generateTableReference(tableNumber, stmt);
+        stmt.append('.');
+        stmt.append(columnName);
+    }
+
+    public void generateOn(StringBuilder fromPart, int fromIndex,
+            int toIndex, String fromKey,
+            String toKey) {
+        fromPart.append("on (");
+        generateColumnReference(fromIndex, fromKey, fromPart);
+        fromPart.append(" = ");
+        generateColumnReference(toIndex, toKey, fromPart);
+        fromPart.append(") ");
+    }
 
     public void generateJoin(JoinSpec.JoinType joinType,
             StringBuilder fromPart) {
@@ -713,17 +832,47 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         }
     }
 
+    /**
+     * Generate an IN clause.
+     *
+     * @param wherePart the SQL statement {@link StringBuilder}.
+     * @param tableNumber the table number.
+     * @param columnName the column name {@link String}.
+     * @param elements the elements of the IN clause.
+     * @param not set to <code>true</code> to generate <code>NOT IN</code>.
+     */
+    public void generateInClause(StringBuilder wherePart, int tableNumber,
+            String columnName, Object[] elements, boolean not) {
+        generateColumnReference(tableNumber, columnName, wherePart);
+        if (not) {
+            wherePart.append(" NOT");
+        }
+        wherePart.append(" IN (");
+        for (int k = 0; k < elements.length; k++) {
+            Object sqlCode = elements[k];
+            appendValue(sqlCode, wherePart);
+            if (k + 1 < elements.length) {
+                wherePart.append(',');
+            }
+        }
+        wherePart.append(')');
+    }
+
     private StringBuilder generateFromClause(List<ColumnSpec> columnSpecs,
             Map<ColumnSpec, Integer> referenceIndices) {
         Map<Integer, ColumnSpec> columnSpecCache =
                 new HashMap<Integer, ColumnSpec>();
         StringBuilder fromPart = new StringBuilder();
-        JoinSpec currentJoin = null;
         boolean begin = true;
         for (int j = 0, n = columnSpecs.size(); j < n; j++) {
             ColumnSpec columnSpec = columnSpecs.get(j);
 
-            currentJoin = null;
+            JoinSpec currentJoin = null;
+
+            /*
+             * To find something to join to, first we see if there is a join to
+             * it.
+             */
             for (int k = j - 1; k >= 0; k--) {
                 ColumnSpec prevColumnSpec = columnSpecs.get(k);
                 JoinSpec js = prevColumnSpec.getJoin();
@@ -733,6 +882,11 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 }
             }
 
+            /*
+             * Next, if there is not a join, we see if there is a
+             * join specified to another column spec with the same schema and
+             * table as this one.
+             */
             if (currentJoin == null) {
                 for (int k = 0; k < j; k++) {
                     ColumnSpec prevColumnSpec = columnSpecs.get(k);
@@ -756,6 +910,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     generateJoin(currentJoin.getJoinType(), fromPart);
                 }
                 generateFromTable(schema, table, fromPart, i);
+                fromPart.append(' ');
                 columnSpecCache.put(i, columnSpec);
 
                 if (currentJoin != null) {
@@ -774,57 +929,88 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     }
 
     private StringBuilder generateWhereClause(Set<String> propIds,
-            ColumnSpecInfo info, Collection<EntitySpec> entitySpecs,
+            ColumnSpecInfo info, List<EntitySpec> entitySpecs,
             Set<Filter> filtersCopy, StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
             Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor) {
         StringBuilder wherePart = new StringBuilder();
+
         int i = 1;
-        for (EntitySpec entitySpec : entitySpecs) {
-            i = processKeySpecForWhereClause(entitySpec, i);
-            i = processStartTimeSpecForWhereClause(entitySpec, i,
-                    filtersCopy, wherePart, referenceIndices);
-            i = processFinishTimeSpecForWhereClause(entitySpec, i,
-                    filtersCopy, wherePart, referenceIndices);
-            i = processPropertyValueSpecsForWhereClause(entitySpec, i);
-            i = processConstraintSpecsForWhereClause(propIds, entitySpec,
-                    i, wherePart, selectPart, referenceIndices, filtersCopy,
-                    resultProcessor);
+
+        EntitySpec prevEntitySpec = null;
+        boolean inGroup = false;
+        boolean first = true;
+        for (int j = 0, n = entitySpecs.size(); j < n; j++) {
+            EntitySpec entitySpec = entitySpecs.get(j);
+            if (n > 1 && j > 0) {
+                if (prevEntitySpec.getName().equals(entitySpec.getName())) {
+                    if (!inGroup) {
+                        if (!first) {
+                            wherePart.append(" and ");
+                            first = true;
+                        }
+                        wherePart.append(" ((");
+                        inGroup = true;
+                    } else {
+                        wherePart.append(") or (");
+                        first = true;
+                    }
+                    int wherePartLength = wherePart.length();
+                    i = processForWhereClause(prevEntitySpec, i,
+                            filtersCopy, wherePart, referenceIndices, propIds,
+                            selectPart, resultProcessor, first);
+                    if (wherePart.length() > wherePartLength) {
+                        first = false;
+                    }
+                } else {
+                    if (inGroup) {
+                        first = true;
+                        int wherePartLength = wherePart.length();
+                        wherePart.append(") or (");
+                        i = processForWhereClause(prevEntitySpec, i,
+                                filtersCopy, wherePart, referenceIndices, propIds,
+                                selectPart, resultProcessor, first);
+                        wherePart.append(")) ");
+                        if (wherePart.length() > wherePartLength) {
+                            first = false;
+                        }
+                        inGroup = false;
+                    } else {
+                        int wherePartLength = wherePart.length();
+                        i = processForWhereClause(prevEntitySpec, i,
+                                filtersCopy, wherePart, referenceIndices, propIds,
+                                selectPart, resultProcessor, first);
+                        if (wherePart.length() > wherePartLength) {
+                            first = false;
+                        }
+                    }
+
+                }
+
+            }
+            prevEntitySpec = entitySpec;
         }
+        if (inGroup) {
+            first = true;
+            wherePart.append(") or (");
+            i = processForWhereClause(prevEntitySpec, i,
+                    filtersCopy, wherePart, referenceIndices, propIds,
+                    selectPart, resultProcessor, first);
+            wherePart.append(")) ");
+        } else {
+            i = processForWhereClause(prevEntitySpec, i,
+                    filtersCopy, wherePart, referenceIndices, propIds,
+                    selectPart, resultProcessor, first);
+        }
+
         processKeyIdConstraintsForWhereClause(info, wherePart, keyIds);
 
         if (wherePart.length() > 0) {
             wherePart.insert(0, "where ");
         }
 
-        if (order != null && info.getStartTimeIndex() >= 0) {
-            ColumnSpec startColSpec =
-                    info.getColumnSpecs().get(info.getStartTimeIndex());
-            int start = referenceIndices.get(startColSpec);
-            String startCol = startColSpec.getColumn();
-
-            ColumnSpec finishColSpec;
-            String finishCol;
-            if (info.getFinishTimeIndex() >= 0) {
-                finishColSpec =
-                        info.getColumnSpecs().get(info.getFinishTimeIndex());
-                finishCol = finishColSpec.getColumn();
-            } else {
-                finishColSpec = null;
-                finishCol = null;
-            }
-
-            int finish;
-            if (info.getFinishTimeIndex() >= 0) {
-                finish = referenceIndices.get(
-                        info.getColumnSpecs().get(info.getFinishTimeIndex()));
-            } else {
-                finish = -1;
-            }
-            processOrderBy(start, startCol, finish, finishCol, wherePart,
-                    order);
-        }
+        processOrder(order, info, referenceIndices, wherePart);
 
         return wherePart;
     }
@@ -842,7 +1028,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     private void processConstraint(ColumnSpec columnSpec,
             Set<?> propIds,
             StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
-            StringBuilder selectPart, Constraint constraintOverride) {
+            StringBuilder selectPart, Constraint constraintOverride,
+            boolean first) {
         Constraint constraint = columnSpec.getConstraint();
         if (constraintOverride != null) {
             constraint = constraintOverride;
@@ -853,7 +1040,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             KnowledgeSourceIdToSqlCode[] filteredConstraintValues =
                     filterKnowledgeSourceIdToSqlCodesById(propIds, propIdToSqlCodes);
             if (wherePart != null) {
-                if (wherePart.length() > 0) {
+                if (!first) {
                     wherePart.append(" and ");
                 }
                 wherePart.append('(');
@@ -1003,17 +1190,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         }
     }
 
-    private void processAdditionalConstraints(ColumnSpec columnSpec,
-            StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
-            Constraint constraint, Value value) {
-        if (constraint != null && value != null) {
-            ValueExtractor ve = new ValueExtractor();
-            value.accept(ve);
-            processConstraint(columnSpec, ve.values, wherePart,
-                    referenceIndices, null, constraint);
-        }
-    }
-
     private static int processPropertyValueSpecsForWhereClause(
             EntitySpec entitySpec, int i) {
         PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
@@ -1033,7 +1209,8 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             EntitySpec entitySpec,
             int i, StringBuilder wherePart, StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
-            Set<Filter> filtersCopy, SQLGenResultProcessor resultProcessor) {
+            Set<Filter> filtersCopy, SQLGenResultProcessor resultProcessor,
+            boolean first) {
         Logger logger = SQLGenUtil.logger();
         logger.log(Level.FINER,
                 "Processing constraint specs for entity spec {0}",
@@ -1042,24 +1219,30 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                 "Details of entity spec {0}", entitySpec);
         ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
         for (ColumnSpec constraintSpec : constraintSpecs) {
+            int wherePartLength = wherePart.length();
             i = processConstraintSpecForWhereClause(null, constraintSpec,
                     i, wherePart,
-                    selectPart, referenceIndices, resultProcessor);
+                    null, referenceIndices, null, first);
+            if (wherePart.length() > wherePartLength) {
+                first = false;
+            }
         }
-        for (Iterator<Filter> itr = filtersCopy.iterator(); itr.hasNext();) {
-            Filter filter = itr.next();
+
+        for (Filter filter : filtersCopy) {
             for (PropertySpec ps : entitySpec.getPropertySpecs()) {
                 if (filter instanceof PropertyValueFilter) {
                     PropertyValueFilter pvf =
                             (PropertyValueFilter) filter;
+
                     if (pvf.getProperty().equals(ps.getName())) {
                         ColumnSpec colSpec = ps.getSpec();
-                        Constraint constraint =
-                                valueComparatorToSqlOp(
-                                pvf.getValueComparator());
-                        processPropertyValueFilter(colSpec, i, wherePart,
+                        int wherePartLength = wherePart.length();
+                        processPropertyValueFilter(colSpec, wherePart,
                                 referenceIndices,
-                                constraint, pvf.getValue());
+                                pvf.getValueComparator(), pvf.getValues(), first);
+                        if (wherePart.length() > wherePartLength) {
+                            first = false;
+                        }
 
                         break;
                     }
@@ -1076,11 +1259,16 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                     && completeOrNoOverlap(propIds,
                     entitySpec.getPropositionIds())) {
                 i = processConstraintSpecForWhereClause(propIds, codeSpec, i,
-                        null, selectPart, referenceIndices, resultProcessor);
+                        null, selectPart, referenceIndices, resultProcessor,
+                        first);
             } else {
+                int wherePartLength = wherePart.length();
                 i = processConstraintSpecForWhereClause(propIds, codeSpec, i,
                         wherePart, selectPart, referenceIndices,
-                        resultProcessor);
+                        resultProcessor, first);
+                if (wherePart.length() > wherePartLength) {
+                    first = false;
+                }
             }
         }
 
@@ -1144,63 +1332,52 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return constraint;
     }
 
-    private static class ColumnSpecLooper {
-
-        ColumnSpec lastColumnSpec;
-        int i;
-
-        ColumnSpecLooper(ColumnSpec columnSpec, int i) {
-            if (columnSpec != null) {
-                while (columnSpec.getJoin() != null) {
-                    columnSpec = columnSpec.getJoin().getNextColumnSpec();
-                    i++;
-                }
-            }
-            this.lastColumnSpec = columnSpec;
-            this.i = i;
-        }
-    }
-
     private int processConstraintSpecForWhereClause(Set<String> propIds,
             ColumnSpec columnSpec, int i, StringBuilder wherePart,
             StringBuilder selectPart,
             Map<ColumnSpec, Integer> referenceIndices,
-            SQLGenResultProcessor resultProcessor) {
-        ColumnSpecLooper csl = new ColumnSpecLooper(columnSpec, i);
-        if (columnSpec != null) {
-            columnSpec = csl.lastColumnSpec;
+            SQLGenResultProcessor resultProcessor, boolean first) {
 
-            resultProcessor.setCasePresent(columnSpec.getConstraint()
-                    == ColumnSpec.Constraint.LIKE);
-            processConstraint(columnSpec, propIds, wherePart,
-                    referenceIndices, selectPart, null);
+        if (columnSpec != null) {
+            List<ColumnSpec> columnSpecL = columnSpec.asList();
+            columnSpec = columnSpecL.get(columnSpecL.size() - 1);
+            if (columnSpec.getConstraint() != null) {
+                i += columnSpecL.size();
+                if (resultProcessor != null) {
+                    resultProcessor.setCasePresent(columnSpec.getConstraint()
+                            == ColumnSpec.Constraint.LIKE);
+                }
+                processConstraint(columnSpec, propIds, wherePart,
+                        referenceIndices, selectPart, null, first);
+            }
         }
-        return csl.i;
+        return i;
     }
 
-    private int processPropertyValueFilter(ColumnSpec columnSpec, int i,
+    private void processPropertyValueFilter(ColumnSpec columnSpec,
             StringBuilder wherePart,
             Map<ColumnSpec, Integer> referenceIndices,
-            ColumnSpec.Constraint constraint,
-            Value value) {
+            ValueComparator comparator, Value[] values, boolean first) {
 
-        ColumnSpecLooper csl = new ColumnSpecLooper(columnSpec, i);
+        List<ColumnSpec> columnSpecL = columnSpec.asList();
+        ColumnSpec lastColumnSpec = columnSpecL.get(columnSpecL.size() - 1);
 
-        if (columnSpec != null && constraint != null
-                && value != null) {
+        Constraint constraint = valueComparatorToSqlOp(comparator);
 
-            processAdditionalConstraints(csl.lastColumnSpec, wherePart,
-                    referenceIndices, constraint,
-                    value);
+        if (columnSpec != null && constraint != null) {
+            ValueExtractor ve = new ValueExtractor();
+            for (Value value : values) {
+                value.accept(ve);
+            }
+            processConstraint(lastColumnSpec, ve.values, wherePart,
+                    referenceIndices, null, constraint, first);
         }
-
-        return csl.i;
     }
 
     private int processFinishTimeSpecForWhereClause(
             EntitySpec entitySpec, int i, Set<Filter> filtersCopy,
             StringBuilder wherePart,
-            Map<ColumnSpec, Integer> referenceIndices) {
+            Map<ColumnSpec, Integer> referenceIndices, boolean first) {
         ColumnSpec finishTimeSpec = entitySpec.getFinishTimeSpec();
         if (finishTimeSpec != null) {
             while (true) {
@@ -1228,7 +1405,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                         && pdsc2.getFinishSide() == Side.FINISH;
 
                                 if (outputStart) {
-                                    if (wherePart.length() > 0) {
+                                    if (!first) {
                                         wherePart.append(" and ");
                                     }
 
@@ -1239,7 +1416,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                 }
 
                                 if (outputFinish) {
-                                    if (wherePart.length() > 0) {
+                                    if (!first || outputStart) {
                                         wherePart.append(" and ");
                                     }
 
@@ -1261,7 +1438,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
     private int processStartTimeSpecForWhereClause(
             EntitySpec entitySpec, int i, Set<Filter> filtersCopy,
             StringBuilder wherePart,
-            Map<ColumnSpec, Integer> referenceIndices) {
+            Map<ColumnSpec, Integer> referenceIndices, boolean first) {
         ColumnSpec startTimeSpec = entitySpec.getStartTimeSpec();
         if (startTimeSpec != null) {
             while (true) {
@@ -1291,7 +1468,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                         || entitySpec.getFinishTimeSpec() == null);
 
                                 if (outputStart) {
-                                    if (wherePart.length() > 0) {
+                                    if (!first) {
                                         wherePart.append(" and ");
                                     }
                                     appendColumnRef(wherePart,
@@ -1300,7 +1477,7 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                                     wherePart.append(entitySpec.getPositionParser().format(pdsc2.getMinimumStart()));
                                 }
                                 if (outputFinish) {
-                                    if (wherePart.length() > 0) {
+                                    if (!first || outputStart) {
                                         wherePart.append(" and ");
                                     }
                                     appendColumnRef(wherePart,
@@ -1326,12 +1503,28 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         return i;
     }
 
-    public abstract void generateInClause(StringBuilder wherePart,
-            int referenceIndex, String column, Object[] sqlCodes, boolean not);
-
-    public abstract void appendValue(Object val, StringBuilder wherePart);
-
-    public abstract void generateFromSeparator(StringBuilder fromPart);
+    public void appendValue(Object val, StringBuilder wherePart) {
+        boolean numberOrBoolean;
+        if (!(val instanceof Number) && !(val instanceof Boolean)) {
+            numberOrBoolean = false;
+            wherePart.append("'");
+        } else {
+            numberOrBoolean = true;
+        }
+        if (val instanceof Boolean) {
+            Boolean boolVal = (Boolean) val;
+            if (boolVal.equals(Boolean.TRUE)) {
+                wherePart.append(1);
+            } else {
+                wherePart.append(0);
+            }
+        } else {
+            wherePart.append(val);
+        }
+        if (!numberOrBoolean) {
+            wherePart.append("'");
+        }
+    }
 
     private static Map<ColumnSpec, Integer> computeReferenceIndices(
             List<ColumnSpec> columnSpecs) {
@@ -1407,10 +1600,6 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
         }
     }
 
-    public abstract void processOrderBy(int startReferenceIndex,
-            String startColumn, int finishReferenceIndex, String finishColumn,
-            StringBuilder wherePart, SQLOrderBy sQLOrderBy);
-
     @Override
     public final boolean loadDriverIfNeeded() {
         String className = getDriverClassNameToLoad();
@@ -1455,12 +1644,12 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
 
     private Map<EntitySpec, List<String>> entitySpecMapForPropIds(
             Set<String> propIds) throws AssertionError {
-        Map<EntitySpec, List<String>> entitySpecToPropIdMapFromPropIds =
+        Map<EntitySpec, List<String>> result =
                 new HashMap<EntitySpec, List<String>>();
         for (String propId : propIds) {
             boolean inDataSource =
                     populateEntitySpecToPropIdMap(new String[]{propId},
-                    entitySpecToPropIdMapFromPropIds);
+                    result);
             Logger logger = SQLGenUtil.logger();
             if (!inDataSource && logger.isLoggable(Level.FINER)) {
                 logger.log(Level.FINER,
@@ -1468,10 +1657,10 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
                         new Object[]{backendNameForMessages(), propId});
             }
         }
-        return entitySpecToPropIdMapFromPropIds;
+        return result;
     }
 
-    private EntitySpec entitySpec(String propId) {
+    private List<EntitySpec> entitySpecs(String propId) {
         if (this.primitiveParameterSpecs.containsKey(propId)) {
             return this.primitiveParameterSpecs.get(propId);
         } else if (this.eventSpecs.containsKey(propId)) {
@@ -1488,21 +1677,24 @@ public abstract class AbstractSQLGenerator implements ProtempaSQLGenerator {
             throws AssertionError {
         boolean result = false;
         for (String propId : propIds) {
-            EntitySpec entitySpec = entitySpec(propId);
-            if (entitySpec != null) {
-                Collections.putList(entitySpecToPropIdMap, entitySpec, propId);
-                result = true;
+            List<EntitySpec> entitySpecs = entitySpecs(propId);
+            if (entitySpecs != null) {
+                for (EntitySpec entitySpec : entitySpecs) {
+                    Collections.putList(entitySpecToPropIdMap, entitySpec,
+                            propId);
+                    result = true;
+                }
             }
         }
         return result;
     }
 
-    private static void populatePropositionMap(Map<String, EntitySpec> map,
-            EntitySpec[] entitySpecs) {
+    private static void populatePropositionMap(
+            Map<String, List<EntitySpec>> map, EntitySpec[] entitySpecs) {
         if (entitySpecs != null) {
             for (EntitySpec entitySpec : entitySpecs) {
                 for (String code : entitySpec.getPropositionIds()) {
-                    map.put(code, entitySpec);
+                    Collections.putList(map, code, entitySpec);
                 }
             }
         }

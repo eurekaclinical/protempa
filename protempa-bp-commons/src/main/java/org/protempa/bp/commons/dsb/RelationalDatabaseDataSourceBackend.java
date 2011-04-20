@@ -22,14 +22,34 @@ import org.protempa.bp.commons.dsb.sqlgen.SQLGeneratorFactory;
 import org.protempa.bp.commons.dsb.sqlgen.SQLGeneratorLoadException;
 import org.protempa.bp.commons.dsb.sqlgen.SQLGeneratorNotFoundException;
 import org.protempa.dsb.filter.Filter;
-import org.protempa.proposition.Constant;
-import org.protempa.proposition.Event;
-import org.protempa.proposition.PrimitiveParameter;
+import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 
 /**
- * Implements access to relational databases.
+ * Implements access to relational databases. Backend properties set the
+ * database connection information. It uses a {@link SQLGenerator} service
+ * loadable using Java's {@link java.util.ServiceLoader} for generating SQL
+ * that is appropriate for your database and JDBC driver. Service providers are
+ * built-in for MySQL 4.1 and 5 using version 5 of the Connector/J JDBC driver,
+ * and Oracle 10g using the ojdbc6 driver.
+ *
+ * Two system properties control the behavior of the backend and are
+ * useful for debugging. The
+ * <code>protempa.dsb.relationaldatabase.sqlgenerator</code> property can be
+ * set with the full class name of a {@link SQLGenerator} service provider to
+ * force its use. This circumvents the built-in algorithm for picking a
+ * service provider to use. The
+ * <code>protempa.dsb.relationaldatabase.skipexecution</code> property can be
+ * set to <code>true</code> to cause the backend to generate SQL queries but
+ * not execute them. Together with turning on logging to see the SQL queries,
+ * this can be useful for debugging the generated SQL without having to wait
+ * for them to execute.
+ *
+ * The backend and various classes that it invokes support extensive logging.
+ * Logging at the FINE level on the
+ * <code>org.protempa.bp.commons.dsb.sqlgen</code> package will activate
+ * logging of the generated SQL queries.
  * 
  * @author Andrew Post
  */
@@ -260,31 +280,13 @@ public abstract class RelationalDatabaseDataSourceBackend
     }
 
     @Override
-    public Map<String, List<Constant>> getConstantPropositions(
+    public Map<String, List<Proposition>> readPropositions(
             Set<String> keyIds, Set<String> paramIds,
             Filter dataSourceConstraints,
             QuerySession qs)
             throws DataSourceReadException {
-        return this.sqlGenerator.readConstants(keyIds, paramIds,
-                dataSourceConstraints).getPatientCache();
-    }
-
-    @Override
-    public Map<String, List<PrimitiveParameter>> getPrimitiveParameters(
-            Set<String> keyIds, Set<String> paramIds,
-            Filter dataSourceConstraints,
-            QuerySession qs)
-            throws DataSourceReadException {
-        return this.sqlGenerator.readPrimitiveParameters(keyIds, paramIds,
+        return this.sqlGenerator.readPropositions(keyIds, paramIds,
                 dataSourceConstraints, null).getPatientCache();
-    }
-
-    @Override
-    public Map<String, List<Event>> getEvents(Set<String> keyIds,
-            Set<String> eventIds, Filter filters, QuerySession qs)
-            throws DataSourceReadException {
-        return this.sqlGenerator.readEvents(keyIds, eventIds,
-                filters, null).getPatientCache();
     }
 
     @Override

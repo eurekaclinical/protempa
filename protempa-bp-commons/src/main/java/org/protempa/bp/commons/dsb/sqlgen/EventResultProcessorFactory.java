@@ -9,7 +9,7 @@ import org.protempa.proposition.Event;
 class EventResultProcessorFactory extends SQLGenResultProcessorFactory<Event> {
 
     @Override
-    AbstractMainResultProcessor<Event> getInstance(String dataSourceBackendId,
+    MainResultProcessor<Event> getInstance(String dataSourceBackendId,
             EntitySpec entitySpec, ResultCache<Event> cache) {
 
         EventResultProcessor resultProcessor = new EventResultProcessor();

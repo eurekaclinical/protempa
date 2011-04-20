@@ -17,7 +17,7 @@ import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Value;
 
-class EventResultProcessor extends AbstractMainResultProcessor<Event> {
+class EventResultProcessor extends MainResultProcessor<Event> {
 
     private static final IntervalFactory intervalFactory =
             new IntervalFactory();

@@ -1,12 +1,13 @@
 package org.protempa;
 
+import java.util.List;
 import java.util.logging.Level;
 
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
-import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Sequence;
+import org.protempa.proposition.TemporalProposition;
 
 /**
  * @author Andrew Post
@@ -43,8 +44,13 @@ final class LowLevelAbstractionConsequence implements Consequence {
     @Override
     public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
             throws Exception {
-        Sequence<PrimitiveParameter> seq = (Sequence<PrimitiveParameter>) arg1.getObject(arg0.getTuple().get(0));
-        
+        @SuppressWarnings("unchecked")
+        List<TemporalProposition> pl =
+                (List<TemporalProposition>) arg0.get(
+                arg0.getDeclaration("result"));
+
+        Sequence seq = new Sequence(this.def.getAbstractedFrom(), pl);
+
         objAsserter.workingMemory = arg1;
         LowLevelAbstractionFinder.process(seq, this.def, this.algorithm,
                 objAsserter, this.derivationsBuilder);

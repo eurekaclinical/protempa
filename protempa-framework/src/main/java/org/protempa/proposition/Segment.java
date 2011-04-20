@@ -23,7 +23,6 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
 
     private static final IntervalFactory intervalFactory =
             new IntervalFactory();
-
     private Sequence<T> ts;
     private int x = -1;
     private int y = -1;
@@ -87,7 +86,7 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
         }
         return y;
     }
-    
+
     @Override
     public int indexOf(Object o) {
         if (!(o instanceof TemporalProposition)) {
@@ -97,7 +96,7 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
                     PropositionUtil.TEMP_PROP_COMP);
         }
     }
-    
+
     @Override
     public int lastIndexOf(Object o) {
         return indexOf(o);
@@ -137,8 +136,16 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
 
     private void calcMaxFinishParam() {
         if (maxFinishParam == null) {
-            maxFinishParam = Collections.max(this, 
+            maxFinishParam = Collections.max(this,
                     PropositionUtil.MAX_FINISH_COMP);
+        }
+    }
+
+    public Segment<T> resetState(Sequence<T> sequence) {
+        if (sequence == null) {
+            return null;
+        } else {
+            return resetState(sequence, 0, sequence.size() - 1);
         }
     }
 
@@ -197,16 +204,15 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
          */
         return segment.first().getInterval().getMinStart();
     }
-
     private Comparator<TemporalProposition> MAX_START_COMP =
             new Comparator<TemporalProposition>() {
 
-        @Override
-        public int compare(TemporalProposition p0, TemporalProposition p1) {
-            return p0.getInterval().getMaximumStart().compareTo(
-                    p1.getInterval().getMaximumStart());
-        }
-    };
+                @Override
+                public int compare(TemporalProposition p0, TemporalProposition p1) {
+                    return p0.getInterval().getMaximumStart().compareTo(
+                            p1.getInterval().getMaximumStart());
+                }
+            };
 
     private Long maximumStart(
             Segment<T> segment) {
@@ -215,13 +221,13 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
     private Comparator<TemporalProposition> MIN_FINISH_COMP =
             new Comparator<TemporalProposition>() {
 
-        @Override
-        public int compare(TemporalProposition p0, TemporalProposition p1) {
+                @Override
+                public int compare(TemporalProposition p0, TemporalProposition p1) {
 
-            return p0.getInterval().getMinimumFinish().compareTo(
-                    p1.getInterval().getMinimumFinish());
-        }
-    };
+                    return p0.getInterval().getMinimumFinish().compareTo(
+                            p1.getInterval().getMinimumFinish());
+                }
+            };
 
     private Long minimumFinish(
             Segment<T> segment) {

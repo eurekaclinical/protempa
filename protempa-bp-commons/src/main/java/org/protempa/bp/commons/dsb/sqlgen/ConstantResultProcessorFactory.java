@@ -14,7 +14,7 @@ class ConstantResultProcessorFactory
         extends SQLGenResultProcessorFactory<Constant> {
 
     @Override
-    AbstractMainResultProcessor<Constant> getInstance(
+    MainResultProcessor<Constant> getInstance(
             String dataSourceBackendId, EntitySpec entitySpec, ResultCache<Constant> cache) {
 
         ConstantResultProcessor resultProcessor =

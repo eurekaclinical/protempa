@@ -19,4 +19,6 @@ public class Util {
         private static Logger instance =
                 Logger.getLogger(Util.class.getPackage().getName());
     }
+
+    static final Link[] EMPTY_LINK_ARRAY = new Link[0];
 }

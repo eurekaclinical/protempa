@@ -226,6 +226,28 @@ public final class ColumnSpec implements Serializable {
     }
 
     /**
+     * Specifies part of path in which the column has one or more constraints
+     * on its value. This constructor may only used for the last part of a
+     * path.
+     *
+     * @param schema a schema {@link String}, if the underlying database
+     * requires it (e.g., Oracle).
+     * @param table a table {@link String}. Cannot be <code>null</code>.
+     * @param column a column {@link String}. Cannot be <code>null</code>
+     * unless <code>constraint</code> is also <code>null</code>.
+     * @param constraint a {@link Constraint}.
+     * @param propIdToSqlCodes a {@link PropositionIdToSqlCode...}. If
+     * <code>constraint</code> is not <code>null</code>, then this argument
+     * cannot be <code>null</code> either.
+     */
+    public ColumnSpec(String schema, String table, String column,
+            Constraint constraint,
+            KnowledgeSourceIdToSqlCode[] propIdToSqlCodes) {
+        this(schema, table, column, null, constraint, propIdToSqlCodes,
+                null, false);
+    }
+
+    /**
      * Instantiates part of a path using a schema, table and column. This spec
      * ends a path as it has no join.
      *

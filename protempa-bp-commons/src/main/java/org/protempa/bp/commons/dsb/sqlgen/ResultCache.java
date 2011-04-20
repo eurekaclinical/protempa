@@ -21,6 +21,7 @@ public class ResultCache<P extends Proposition> {
     private DatabaseMap<UniqueIdentifier, Location> conversionMap;
     private int patientCacheNumber;
     private int tmpReferenceCacheNumber = -1;
+    private int indexForAnyAdded;
 
     ResultCache() {
         this.inMemoryPatientCache = new HashMap<String, List<P>>();
@@ -39,6 +40,10 @@ public class ResultCache<P extends Proposition> {
         this.tmpInMemoryRefCache = null;
         this.tmpReferenceCache = null;
         return new BerkeleyDBDataSourceResultMap<P>(this.patientCache);
+    }
+
+    boolean anyAdded() {
+        return !this.patientCache.get(indexForAnyAdded).isEmpty();
     }
 
     void addReference(UniqueIdentifier uid, UniqueIdentifier refUid) {
@@ -106,8 +111,9 @@ public class ResultCache<P extends Proposition> {
         this.patientCacheNumber++;
     }
 
-    void clear() {
+    void clearTmp() {
         this.conversionMap.clear();
+        this.indexForAnyAdded = this.patientCacheNumber;
     }
 
     private void put(String key, List<P> propList, boolean hasRefs) {

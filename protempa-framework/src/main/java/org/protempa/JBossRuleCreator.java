@@ -25,7 +25,6 @@ import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalProposition;
 
 /**
@@ -36,13 +35,13 @@ import org.protempa.proposition.TemporalProposition;
  */
 class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
-    private static final ClassObjectType SEQUENCE_OBJECT_TYPE = new ClassObjectType(
-            Sequence.class);
-    private static final ClassObjectType EVENT_OBJECT_TYPE = new ClassObjectType(
+//    private static final ClassObjectType SEQUENCE_OBJECT_TYPE = new ClassObjectType(
+//            Sequence.class);
+    private static final ClassObjectType EVENT_OT = new ClassObjectType(
             Event.class);
-    private static final ClassObjectType CONSTANT_OBJECT_TYPE = new ClassObjectType(
+    private static final ClassObjectType CONSTANT_OT = new ClassObjectType(
             Constant.class);
-    private static final ClassObjectType PRIMITIVE_PARAMETER_OBJECT_TYPE =
+    private static final ClassObjectType PRIM_PARAM_OT =
             new ClassObjectType(PrimitiveParameter.class);
     private static final ClassObjectType ARRAY_LIST_OT = new ClassObjectType(
             ArrayList.class);
@@ -78,13 +77,24 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         try {
             Rule rule = new Rule(def.getId());
-            Pattern p = new Pattern(0, SEQUENCE_OBJECT_TYPE);
+            Pattern sourceP = new Pattern(2, 1, PRIM_PARAM_OT, "");
+            sourceP.addConstraint(new PredicateConstraint(
+                    new PropositionPredicateExpression(
+                    def.getAbstractedFrom())));
 
-            Set<String> propIds = def.getAbstractedFrom();
-            Constraint c = new PredicateConstraint(
-                    new SequencePredicateExpression(propIds));
-            p.addConstraint(c);
-            rule.addPattern(p);
+            Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
+            resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
+                    ARRAY_LIST_OT, "result")));
+            resultP.addConstraint(new PredicateConstraint(
+                    new CollectionSizeExpression(1)));
+            rule.addPattern(resultP);
+//            Pattern p = new Pattern(0, SEQUENCE_OBJECT_TYPE);
+//
+//            Set<String> propIds = def.getAbstractedFrom();
+//            Constraint c = new PredicateConstraint(
+//                    new SequencePredicateExpression(propIds));
+//            p.addConstraint(c);
+//            rule.addPattern(p);
             Algorithm algo = this.algorithms.get(def);
 
             rule.setConsequence(new LowLevelAbstractionConsequence(def, algo,
@@ -249,7 +259,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(EventDefinition def) {
         try {
-            addInverseIsARule(def, EVENT_OBJECT_TYPE);
+            addInverseIsARule(def, EVENT_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -260,7 +270,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(ConstantDefinition def) {
         try {
-            addInverseIsARule(def, CONSTANT_OBJECT_TYPE);
+            addInverseIsARule(def, CONSTANT_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -270,7 +280,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(PrimitiveParameterDefinition def) {
         try {
-            addInverseIsARule(def, PRIMITIVE_PARAMETER_OBJECT_TYPE);
+            addInverseIsARule(def, PRIM_PARAM_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());

@@ -9,7 +9,8 @@ import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueFormat;
 import org.protempa.proposition.value.ValueType;
 
-abstract class AbstractMainResultProcessor<P extends Proposition> extends AbstractResultProcessor implements SQLGenResultProcessor {
+abstract class MainResultProcessor<P extends Proposition>
+        extends AbstractResultProcessor implements SQLGenResultProcessor {
 
     private ResultCache<P> results;
 

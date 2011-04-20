@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.protempa.proposition.Constant;
-import org.protempa.proposition.Event;
-import org.protempa.proposition.PrimitiveParameter;
+import org.protempa.proposition.Proposition;
 
 
 /**
@@ -35,30 +33,9 @@ public abstract class AbstractDataSourceBackend extends
 		DataSourceBackend {
 
     @Override
-    public Map<String, List<PrimitiveParameter>>
-            getPrimitiveParameters(Set<String> keyIds, Set<String> paramIds,
-			Filter filters, QuerySession qs)
-			throws DataSourceReadException {
-		return null;
-    }
-
-    public List<String> getAllKeyIds(int start, int count, Filter filters,
-            QuerySession qs)
-            throws DataSourceReadException {
-        return null;
-    }
-
-    @Override
-    public Map<String, List<Constant>> getConstantPropositions(
+    public Map<String, List<Proposition>> readPropositions(
             Set<String> keyIds, Set<String> paramIds, Filter filters,
             QuerySession qs)
-            throws DataSourceReadException {
-        return null;
-    }
-
-    @Override
-    public Map<String, List<Event>> getEvents(Set<String> keyIds,
-            Set<String> eventIds, Filter filters, QuerySession qs)
             throws DataSourceReadException {
         return null;
     }
@@ -79,11 +56,11 @@ public abstract class AbstractDataSourceBackend extends
 
     @Override
     public String getKeyTypeDisplayName() {
-        return null;
+        return getKeyType();
     }
 
     @Override
     public String getKeyTypePluralDisplayName() {
-        return null;
+        return getKeyTypeDisplayName() + "s";
     }
 }

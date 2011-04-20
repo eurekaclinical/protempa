@@ -27,8 +27,6 @@ import org.protempa.proposition.value.ValueSet;
 
 public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
-    private static final Link[] EMPTY_LINK_ARRAY = new Link[0];
-
     private final Link[] links;
     private final String[] propertyNames;
     private final int numInstances;
@@ -89,7 +87,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         }
 
         if (links == null) {
-            this.links = EMPTY_LINK_ARRAY;
+            this.links = Util.EMPTY_LINK_ARRAY;
         } else {
             ProtempaUtil.checkArrayForNullElement(links, "links");
             this.links = links.clone();

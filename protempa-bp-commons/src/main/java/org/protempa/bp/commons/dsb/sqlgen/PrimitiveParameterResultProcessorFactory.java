@@ -10,7 +10,7 @@ class PrimitiveParameterResultProcessorFactory extends
         SQLGenResultProcessorFactory<PrimitiveParameter> {
 
     @Override
-    AbstractMainResultProcessor<PrimitiveParameter> getInstance(
+    MainResultProcessor<PrimitiveParameter> getInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             ResultCache<PrimitiveParameter> cache) {
 
