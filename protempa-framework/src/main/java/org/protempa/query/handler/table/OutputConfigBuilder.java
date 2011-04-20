@@ -6,7 +6,7 @@ package org.protempa.query.handler.table;
  *
  * @author Andrew Post
  */
-public class OutputConfigBuilder {
+public final class OutputConfigBuilder {
 
     private boolean showValue;
     private boolean showDisplayName;
@@ -24,6 +24,10 @@ public class OutputConfigBuilder {
     private String idHeading;
 
     public OutputConfigBuilder() {
+        reset();
+    }
+
+    public void reset() {
         this.valueHeading = "";
         this.displayNameHeading = "";
         this.abbrevDisplayNameHeading = "";
@@ -31,6 +35,13 @@ public class OutputConfigBuilder {
         this.finishHeading = "";
         this.lengthHeading = "";
         this.idHeading = "";
+        this.showValue = false;
+        this.showDisplayName = false;
+        this.showAbbrevDisplayName = false;
+        this.showStartOrTimestamp = false;
+        this.showFinish = false;
+        this.showLength = false;
+        this.showId = false;
     }
 
     public String getIdHeading() {
