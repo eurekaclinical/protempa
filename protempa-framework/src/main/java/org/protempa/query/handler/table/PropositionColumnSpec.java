@@ -278,7 +278,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                                 propositionDefinition.getAbbreviatedDisplayName());
                     }
                 } else {
-                    resultList.add("(null-name)");
+                    resultList.add(null);
                     Util.logger().log(Level.WARNING,
                             "Cannot write display name for {0} because it is not in the knowledge source", proposition.getId());
                 }
