@@ -28,6 +28,7 @@ class PrimitiveParameterConverter implements PropositionConverter {
                 protempaKnowledgeBase, instance.getName());
         ConnectionManager cm = backend.getConnectionManager();
         Util.setNames(instance, result, cm);
+        Util.setInDataSource(instance, result, cm);
         Util.setInverseIsAs(instance, result, cm);
         Util.setProperties(instance, result, cm);
         Util.setTerms(instance, result, cm);

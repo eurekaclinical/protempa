@@ -38,6 +38,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
                 complexAbstractionInstance.getName());
         ConnectionManager cm = backend.getConnectionManager();
         Util.setNames(complexAbstractionInstance, result, cm);
+        Util.setInDataSource(complexAbstractionInstance, result, cm);
         Util.setProperties(complexAbstractionInstance, result, cm);
         Util.setTerms(complexAbstractionInstance, result, cm);
         Util.setGap(complexAbstractionInstance, result, backend, cm);

@@ -25,6 +25,7 @@ final class SliceConverter implements
                 protempaKnowledgeBase, protegeParameter.getName());
         ConnectionManager cm = backend.getConnectionManager();
         Util.setNames(protegeParameter, ad, cm);
+        Util.setInDataSource(protegeParameter, ad, cm);
         Util.setInverseIsAs(protegeParameter, ad, cm);
         Util.setProperties(protegeParameter, ad, cm);
         Util.setTerms(protegeParameter, ad, cm);

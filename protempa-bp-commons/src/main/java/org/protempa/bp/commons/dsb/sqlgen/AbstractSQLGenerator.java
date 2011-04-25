@@ -663,9 +663,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         return filteredConstraintValues;
     }
 
-    private static int findPreviousInstance(int j,
+    private static int findPreviousInstance(int i, int j,
             List<ColumnSpec> columnSpecs, ColumnSpec columnSpec) {
-        for (int i = 0; i < j; i++) {
+        for (; i < j; i++) {
             ColumnSpec columnSpec2 = columnSpecs.get(i);
             if (columnSpec.isSameSchemaAndTable(columnSpec2)) {
                 return i;
@@ -1544,24 +1544,32 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 int previousInstanceIndex = -1;
                 //if there's no inbound join, then don't try to reuse an earlier instance.
                 if (currentJoin == null/* || columnSpec.getJoin() != null*/) {
-                    previousInstanceIndex = findPreviousInstance(j,
+                    previousInstanceIndex = findPreviousInstance(0, j,
                             columnSpecs, columnSpec);
+                    //System.out.println("previousInstanceIndex 1: " + previousInstanceIndex);
                 } else {
                     //If there's an inbound join and an earlier instance, then
                     //use an earlier version only if the inbound join of the earlier
                     //instance is the same
-                    int cs2i = findPreviousInstance(j, columnSpecs,
-                            columnSpec);
-                    if (cs2i > 0) {
-                        for (int k = 0; k < cs2i; k++) {
-                            ColumnSpec csPrev = columnSpecs.get(k);
-                            JoinSpec prevJoin = csPrev.getJoin();
-                            if (currentJoin.isSameJoin(prevJoin)) {
-                                previousInstanceIndex = cs2i;
+                    int startIndex = 0;
+                    int cs2i = -1;
+                    do {
+                        cs2i = findPreviousInstance(startIndex, j, columnSpecs,
+                                columnSpec);
+                        startIndex = cs2i + 1;
+                        if (cs2i >= 0) {
+                            //System.out.println("found previous instance at " + cs2i);
+                            for (int k = 0; k < cs2i; k++) {
+                                ColumnSpec csPrev = columnSpecs.get(k);
+                                JoinSpec prevJoin = csPrev.getJoin();
+                                if (currentJoin.isSameJoin(prevJoin)) {
+                                    previousInstanceIndex = cs2i;
+                                    //System.out.println("setting previousIstanceIndex=" + previousInstanceIndex);
+                                }
                             }
                         }
-
-                    }
+                    } while (cs2i >= 0);
+                    //System.out.println("previousInstanceIndex 2: " + previousInstanceIndex);
                 }
                 //If we found an earlier instance, then use its index otherwise
                 //assign it a new index.
@@ -1570,9 +1578,12 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                             columnSpecs.get(previousInstanceIndex);
                     assert result.containsKey(previousInstance) :
                             "doesn't contain columnSpec " + previousInstance;
-                    result.put(columnSpec, result.get(previousInstance));
+                    int prevIndex = result.get(previousInstance);
+                    result.put(columnSpec, prevIndex);
+                    //System.err.println("assigning " + columnSpec.getTable() + " to  previous index " + prevIndex);
                 } else {
                     result.put(columnSpec, index++);
+                    //System.err.println("assigning " + columnSpec.getTable() + " to " + (index - 1));
                 }
                 begin = false;
             }

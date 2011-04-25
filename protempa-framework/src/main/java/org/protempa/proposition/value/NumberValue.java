@@ -12,11 +12,7 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
         Comparable<NumberValue> {
 
     private static final long serialVersionUID = 266750924747111671L;
-    private static final NumberFormat REPR_FORMAT = NumberFormat.getInstance();
 
-    static {
-        REPR_FORMAT.setGroupingUsed(false);
-    }
     private final BigDecimal num;
     private transient volatile int hashCode;
     
@@ -111,7 +107,11 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
      */
     @Override
     public String getRepr() {
-        return reprType() + REPR_FORMAT.format(num);
+        return reprType() + num.toString();
+    }
+
+    String getReprForInequalityNumberValue() {
+        return num.toString();
     }
 
     @Override

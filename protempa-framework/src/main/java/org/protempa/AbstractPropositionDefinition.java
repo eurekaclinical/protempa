@@ -47,6 +47,7 @@ public abstract class AbstractPropositionDefinition implements
     private String description;
     private PropertyDefinition[] propertyDefinitions;
     private ReferenceDefinition[] referenceDefinitions;
+    private boolean inDataSource;
     protected PropertyChangeSupport changes;
 
     /**
@@ -294,6 +295,21 @@ public abstract class AbstractPropositionDefinition implements
                     this.referenceDefinitions);
         }
     }
+    
+    @Override
+    public boolean getInDataSource() {
+        return this.inDataSource;
+    }
+
+    @Override
+    public void setInDataSource(boolean inDataSource) {
+        boolean old = this.inDataSource;
+        this.inDataSource = inDataSource;
+        if (this.changes != null) {
+            this.changes.firePropertyChange("inDataSource", old,
+                    this.inDataSource);
+        }
+    }
 
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -340,6 +356,7 @@ public abstract class AbstractPropositionDefinition implements
         setTermIds(null);
         setPropertyDefinitions(null);
         setReferenceDefinitions(null);
+        setInDataSource(false);
     }
 
     protected abstract void recalculateDirectChildren();

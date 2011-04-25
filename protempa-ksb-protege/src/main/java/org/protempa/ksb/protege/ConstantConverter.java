@@ -17,6 +17,7 @@ class ConstantConverter implements PropositionConverter {
                 protempaKnowledgeBase, protegeProposition.getName());
         ConnectionManager cm = backend.getConnectionManager();
         Util.setNames(protegeProposition, result, cm);
+        Util.setInDataSource(protegeProposition, result, cm);
         Util.setProperties(protegeProposition, result, cm);
         Util.setTerms(protegeProposition, result, cm);
         Util.setInverseIsAs(protegeProposition, result, cm);

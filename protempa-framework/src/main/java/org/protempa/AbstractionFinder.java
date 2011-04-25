@@ -633,7 +633,7 @@ final class AbstractionFinder implements Module {
 
             this.logger.log(Level.FINE, "Starting data retrieval");
 
-            Set<String> leafPropIds = knowledgeSource.leafPropositionIds(
+            Set<String> leafPropIds = knowledgeSource.inDataSourcePropositionIds(
                     propIds.toArray(new String[propIds.size()]));
             this.logger.log(Level.FINE, "Proposition ids: {0}", leafPropIds);
             this.propositions = dataSource.readPropositions(keyIds, leafPropIds,

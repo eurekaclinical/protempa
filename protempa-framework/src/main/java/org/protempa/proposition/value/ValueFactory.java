@@ -85,7 +85,7 @@ public class ValueFactory implements Serializable {
      *         string could not be parsed.
      */
     public Value parseValue(String val) {
-        return ValueFormat.parse(val, this.type);
+        return ValueFormat.parse(val);
     }
 
     /**
@@ -97,19 +97,15 @@ public class ValueFactory implements Serializable {
      *             if the repr string is invalid.
      * @return a {@link Value}.
      */
-    public final Value parseRepr(String repr) {
+    public static Value parseRepr(String repr) {
         if (repr == null) {
             return null;
         }
         String[] reprSplit = repr.split(":", 2);
         ValueFactory vf = VALUE_TYPE_TO_VALUE_FACTORY.get(
                 ValueType.valueOf(reprSplit[0]));
-        if (getClass().isInstance(vf)) {
-            return vf.parseValue(reprSplit[1]);
-        } else {
-            throw new IllegalArgumentException("invalid repr for "
-                    + this.getClass());
-        }
+
+        return vf.parseValue(reprSplit[1]);
     }
 
     /**

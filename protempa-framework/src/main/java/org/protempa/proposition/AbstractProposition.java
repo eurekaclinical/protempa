@@ -332,7 +332,10 @@ public abstract class AbstractProposition implements Proposition {
                 ValueType valueType = (ValueType) s.readObject();
                 String valAsString = valueType != null ? (String) s.readObject() : null;
                 Value val = valAsString != null
-                        ? ValueFactory.get(valueType).parseRepr(valAsString) : null;
+                        ? ValueFactory.parseRepr(valAsString) : null;
+                if (val != null && !valueType.isInstance(val)) {
+                    throw new InvalidObjectException("Inconsistent value type and value. Can't restore");
+                }
                 setProperty(propertyName, val);
             }
         }

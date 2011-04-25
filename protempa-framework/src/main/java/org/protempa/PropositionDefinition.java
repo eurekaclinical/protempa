@@ -85,6 +85,10 @@ public interface PropositionDefinition extends Serializable,
 
     ReferenceDefinition referenceDefinition(String name);
 
+    void setInDataSource(boolean inDataSource);
+
+    boolean getInDataSource();
+
     void addPropertyChangeListener(PropertyChangeListener listener);
 
     void removePropertyChangeListener(PropertyChangeListener listener);

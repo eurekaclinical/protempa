@@ -79,7 +79,7 @@ public final class InequalityNumberValue extends ValueImpl implements
 
     @Override
     public String getRepr() {
-        return reprType() + comp.getComparatorString() + " " + val.getRepr();
+        return reprType() + comp.getComparatorString() + " " + val.getReprForInequalityNumberValue();
     }
 
     public ValueComparator getComparator() {

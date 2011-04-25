@@ -80,8 +80,8 @@ class PrimitiveParameterResultProcessor extends
             }
 
             ValueType valueType = entitySpec.getValueType();
-            Value cpVal = ValueFormat.parse(resultSet.getString(i++), 
-                    valueType);
+            String cpValStr = resultSet.getString(i++);
+            Value cpVal = ValueFormat.parse(cpValStr, valueType);
             i = extractPropertyValues(propertySpecs, resultSet, i,
                     propertyValues);
 
@@ -99,6 +99,7 @@ class PrimitiveParameterResultProcessor extends
                 p.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             p.setDataSourceType(dsType);
+
             logger.log(Level.FINEST, "Created primitive parameter {0}", p);
             results.add(keyId, p);
             if (++count % FLUSH_SIZE == 0) {

@@ -1,6 +1,5 @@
 package org.protempa.cli;
 
-import java.util.Collections;
 import java.util.Set;
 import org.apache.commons.cli.CommandLine;
 import org.protempa.KnowledgeSource;

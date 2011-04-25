@@ -226,6 +226,21 @@ class Util {
                 complexAbstractionInstance, cm.getSlot("abbrevDisplayName")));
     }
 
+    static void setInDataSource(Instance protegeProposition,
+            AbstractPropositionDefinition result, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        Boolean bool =
+                (Boolean) protegeProposition.getDirectOwnSlotValue(
+                cm.getSlot("inDataSource"));
+        if (bool == null) {
+            bool = Boolean.FALSE;
+            Util.logger().log(Level.WARNING,
+                    "{0} has no value for the 'inDataSource' property: setting FALSE",
+                    protegeProposition.getName());
+        }
+        result.setInDataSource(bool.booleanValue());
+    }
+
     /**
      * Sets inverseIsA on the given proposition definition. Automatically
      * resolves duplicate entries but logs a warning.

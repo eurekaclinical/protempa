@@ -75,8 +75,7 @@ public abstract class TemporalParameter extends TemporalProposition
     protected void readTemporalParameter(ObjectInputStream s) throws IOException, ClassNotFoundException {
         ValueType valueType = (ValueType) s.readObject();
         if (valueType != null) {
-            this.value =
-                    ValueFactory.get(valueType).parseRepr((String) s.readObject());
+            this.value = ValueFactory.parseRepr((String) s.readObject());
         }
     }
 

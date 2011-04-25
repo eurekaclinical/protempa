@@ -27,6 +27,19 @@ public class ValueFormatTest extends TestCase {
         super.tearDown();
     }
 
+    public void testPointZero() {
+        assertEquals(new NumberValue(6.0), ValueFactory.VALUE.parseValue("6.0"));
+        assertEquals("6.0", ValueFactory.VALUE.parseValue("6.0").getFormatted());
+        assertEquals(new NumberValue(6.0), ValueFormat.parse("6.0", ValueType.VALUE));
+        assertEquals("6.0", ValueFormat.parse("6.0", ValueType.VALUE).getFormatted());
+    }
+
+    public void testValueParseInequalityValue() {
+        assertEquals(new InequalityNumberValue(ValueComparator.LESS_THAN,
+                new BigDecimal("0.1")),
+                ValueFactory.VALUE.parseValue("<0.1"));
+    }
+
     public void testInequalityDoubleParseValue() {
         assertEquals(new InequalityNumberValue(ValueComparator.LESS_THAN,
                 new BigDecimal("0.1")),

@@ -30,6 +30,8 @@ public final class KnowledgeSource
      */
     private KnowledgeBase protempaKnowledgeBase;
     private final BackendManager<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource, KnowledgeSourceBackend> backendManager;
+    private final Map<Set<String>, Set<String>> propIdInDataSourceCache;
+    private final Map<Set<String>, Set<PropositionDefinition>> propIdPropInDataSourceCache;
     private final Map<Set<String>, Set<String>> propIdCache;
     private final Map<Set<String>, Set<PropositionDefinition>> propIdPropCache;
     private final Map<String, Object> notFoundPrimitiveParameterDefinitionRequests;
@@ -51,6 +53,8 @@ public final class KnowledgeSource
         super(backends);
         this.backendManager = new BackendManager<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource, KnowledgeSourceBackend>(
                 this, backends);
+        this.propIdPropInDataSourceCache = new ReferenceMap();
+        this.propIdInDataSourceCache = new ReferenceMap();
         this.propIdCache = new ReferenceMap();
         this.propIdPropCache = new ReferenceMap();
         this.inverseIsACache = new ReferenceMap();
@@ -212,7 +216,7 @@ public final class KnowledgeSource
                         "An error occurred reading the proposition definition" + id,
                         ex);
             }
-            
+
             P result = null;
             if (!isInNotFound(id)) {
                 boolean lookInBackend = false;
@@ -604,6 +608,8 @@ public final class KnowledgeSource
     public void clear() {
         if (this.protempaKnowledgeBase != null) {
             this.protempaKnowledgeBase.clear();
+            this.propIdInDataSourceCache.clear();
+            this.propIdPropInDataSourceCache.clear();
             this.propIdCache.clear();
             this.propIdPropCache.clear();
             this.inverseIsACache.clear();
@@ -615,6 +621,100 @@ public final class KnowledgeSource
             this.notFoundValueSetRequests.clear();
             this.notFoundPropositionDefinitionRequests.clear();
 
+        }
+    }
+
+    public Set<String> inDataSourcePropositionIds(String... propIds) throws KnowledgeSourceReadException {
+        Set<String> propIdsAsSet = Arrays.asSet(propIds);
+        return inDataSourcePropositionIds(propIdsAsSet, this.propIdInDataSourceCache);
+    }
+
+    public Set<PropositionDefinition> inDataSourcePropositionDefinitions(
+            String... propIds) throws KnowledgeSourceReadException {
+        return inDataSourcePropositionDefinitions(Arrays.asSet(propIds));
+    }
+
+
+    Set<PropositionDefinition> inDataSourcePropositionDefinitions(
+            Set<String> propIds) throws KnowledgeSourceReadException {
+        assert propIds != null : "propIds cannot be null";
+        return inDataSourcePropositionDefinitions(propIds, this.propIdPropInDataSourceCache);
+    }
+
+    private Set<PropositionDefinition> inDataSourcePropositionDefinitions(Set<String> propIds,
+            Map<Set<String>, Set<PropositionDefinition>> cache)
+            throws KnowledgeSourceReadException {
+        if (propIds.contains(null)) {
+            throw new IllegalArgumentException("propIds cannot contain a null element");
+        }
+
+        Set<PropositionDefinition> cachedResult = cache.get(propIds);
+        if (cachedResult != null) {
+            return cachedResult;
+        } else {
+            Set<PropositionDefinition> propResult =
+                    new HashSet<PropositionDefinition>();
+            if (propIds != null) {
+                inDataSourcePropositionIdsHelper(propIds, null, propResult);
+                propResult = Collections.unmodifiableSet(propResult);
+                cache.put(propIds, propResult);
+            }
+            return propResult;
+        }
+    }
+
+    private Set<String> inDataSourcePropositionIds(Set<String> propIds,
+            Map<Set<String>, Set<String>> cache) throws KnowledgeSourceReadException {
+        if (propIds.contains(null)) {
+            throw new IllegalArgumentException("propIds cannot contain a null element");
+        }
+
+        Set<String> cachedResult = cache.get(propIds);
+        if (cachedResult != null) {
+            return cachedResult;
+        } else {
+            Set<String> result = new HashSet<String>();
+            if (propIds != null) {
+                inDataSourcePropositionIdsHelper(propIds, result, null);
+                result = Collections.unmodifiableSet(result);
+                cache.put(propIds, result);
+            }
+            return result;
+        }
+    }
+
+    private void inDataSourcePropositionIdsHelper(Collection<String> propIds,
+            Set<String> result, Set<PropositionDefinition> propResult)
+            throws KnowledgeSourceReadException {
+        List<PropositionDefinition> propDefs = new ArrayList<PropositionDefinition>();
+        for (String propId : propIds) {
+            PropositionDefinition propDef = readPropositionDefinition(propId);
+            if (propDef != null) {
+                propDefs.add(propDef);
+            }
+        }
+        inDataSourcePropositionIdsHelper(propDefs, result, propResult);
+    }
+
+    private void inDataSourcePropositionIdsHelper(List<PropositionDefinition> propDefs,
+            Set<String> result, Set<PropositionDefinition> propResult)
+            throws KnowledgeSourceReadException {
+        for (PropositionDefinition propDef : propDefs) {
+            String propDefId = propDef.getId();
+            List<PropositionDefinition> children =
+                    new ArrayList<PropositionDefinition>(
+                    readAbstractedFrom(propDefId));
+            children.addAll(readInverseIsA(propDefId));
+
+            if (propDef.getInDataSource()) {
+                if (result != null) {
+                    result.add(propDefId);
+                }
+                if (propResult != null) {
+                    propResult.add(propDef);
+                }
+            }
+            inDataSourcePropositionIdsHelper(children, result, propResult);
         }
     }
 
@@ -687,71 +787,6 @@ public final class KnowledgeSource
             }
             return propResult;
         }
-    }
-
-    public Set<String> leafPrimitiveParameterIds(String... propIds)
-            throws KnowledgeSourceReadException {
-        Set<String> propIdsAsSet = Arrays.asSet(propIds);
-        return leafPrimitiveParameterIds(propIdsAsSet);
-    }
-
-    /**
-     * Returns the set of primitive parameter ids needed to find the given
-     * propositions. If a primitive parameter id is passed in, it is included in
-     * the returned set.
-     * 
-     * @param propIds
-     *            a <code>Set</code> of proposition id <code>String</code>s.
-     *            Cannot be <code>null</code>.
-     * @return an unmodifiable <code>Set</code> of primitive parameter id
-     *         <code>String</code>s. Guaranteed not to return <code>null</code>.
-     */
-    private Set<String> leafPrimitiveParameterIds(Set<String> propIds)
-            throws KnowledgeSourceReadException {
-        Set<String> pids = leafPropositionIds(propIds, this.propIdCache);
-        Set<String> result = new HashSet<String>();
-        for (String pid : pids) {
-            if (hasPrimitiveParameterDefinition(pid)) {
-                result.add(pid);
-            }
-        }
-        return Collections.unmodifiableSet(result);
-    }
-
-    public Set<String> leafEventIds(String... propIds)
-            throws KnowledgeSourceReadException {
-        Set<String> propIdsAsSet = Arrays.asSet(propIds);
-        return leafEventIds(propIdsAsSet);
-    }
-
-    private Set<String> leafEventIds(Set<String> propIds)
-            throws KnowledgeSourceReadException {
-        Set<String> pids = leafPropositionIds(propIds, this.propIdCache);
-        Set<String> result = new HashSet<String>();
-        for (String pid : pids) {
-            if (hasEventDefinition(pid)) {
-                result.add(pid);
-            }
-        }
-        return result;
-    }
-
-    public Set<String> leafConstantIds(String... propIds)
-            throws KnowledgeSourceReadException {
-        Set<String> propIdsAsSet = Arrays.asSet(propIds);
-        return leafConstantIds(propIdsAsSet);
-    }
-
-    private Set<String> leafConstantIds(Set<String> propIds)
-            throws KnowledgeSourceReadException {
-        Set<String> pids = leafPropositionIds(propIds, this.propIdCache);
-        Set<String> result = new HashSet<String>();
-        for (String pid : pids) {
-            if (hasConstantDefinition(pid)) {
-                result.add(pid);
-            }
-        }
-        return result;
     }
 
     /**

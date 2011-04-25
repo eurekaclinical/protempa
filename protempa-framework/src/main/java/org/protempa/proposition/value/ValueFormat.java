@@ -43,7 +43,6 @@ public class ValueFormat {
      *         parameter cannot be parsed, it is returned in a
      *         <code>NominalValue</code> object.
      */
-    @Deprecated
     public static Value parse(String str) {
         Value result = null;
 
