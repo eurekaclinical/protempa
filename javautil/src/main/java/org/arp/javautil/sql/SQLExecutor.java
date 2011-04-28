@@ -61,6 +61,7 @@ public final class SQLExecutor {
         if (connection == null) {
             throw new IllegalArgumentException("connection cannot be null");
         }
+        SQLUtil.logger().log(Level.FINE, "Executing SQL: {0}", query);
         ResultSet resultSet = null;
         if (resultProcessor != null) {
             resultSet = stmt.executeQuery(query);
