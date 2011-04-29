@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.protempa.proposition.value.ValueSet;
 
 /**
  * A collection of primitive parameter definitions, abstract parameter
@@ -68,6 +67,7 @@ public final class KnowledgeBase implements Serializable {
         s.writeObject(this.idToAbstractionDefinitionMap.values());
         s.writeObject(this.idToEventDefinitionMap.values());
         s.writeObject(this.idToConstantDefinitionMap.values());
+        s.writeObject(this.idtoValueSetMap.values());
     }
 
     /**
@@ -89,6 +89,7 @@ public final class KnowledgeBase implements Serializable {
         Collection<AbstractionDefinition> abstractionDefinitions = (Collection<AbstractionDefinition>) s.readObject();
         Collection<EventDefinition> eventDefinitions = (Collection<EventDefinition>) s.readObject();
         Collection<ConstantDefinition> constantDefinitions = (Collection<ConstantDefinition>) s.readObject();
+        Collection<ValueSet> valueSets = (Collection<ValueSet>) s.readObject();
 
         if (primitiveParameterDefinitions != null) {
             for (PrimitiveParameterDefinition def : primitiveParameterDefinitions) {
@@ -125,7 +126,14 @@ public final class KnowledgeBase implements Serializable {
                 }
             }
         }
-
+        if (valueSets != null) {
+            for (ValueSet valueSet : valueSets) {
+                if (valueSet != null && !addValueSet(valueSet)) {
+                    System.err.println("Could not add de-serialized value set "
+                            + valueSet + ".");
+                }
+            }
+        }
     }
 
     String getNextKnowledgeDefinitionObjectId() {
@@ -260,6 +268,17 @@ public final class KnowledgeBase implements Serializable {
             idToPrimitiveParameterDefinitionMap.put(
                     id,
                     def);
+            return true;
+        }
+    }
+
+    boolean addValueSet(ValueSet valueSet) {
+        assert valueSet != null : "valueSet cannot be null";
+        String id = valueSet.getId();
+        if (this.idtoValueSetMap.containsKey(id)) {
+            return false;
+        } else {
+            this.idtoValueSetMap.put(id, valueSet);
             return true;
         }
     }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.protempa.proposition.value.ValueSet;
 import org.protempa.query.And;
 
 /**

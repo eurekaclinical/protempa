@@ -12,7 +12,6 @@ import org.apache.commons.collections.map.ReferenceMap;
 import org.arp.javautil.arrays.Arrays;
 
 import org.protempa.backend.BackendNewInstanceException;
-import org.protempa.proposition.value.ValueSet;
 import org.protempa.query.And;
 
 /**

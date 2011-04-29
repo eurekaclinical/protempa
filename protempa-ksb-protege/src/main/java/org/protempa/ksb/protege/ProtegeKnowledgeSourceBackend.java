@@ -21,7 +21,7 @@ import org.protempa.bp.commons.AbstractCommonsKnowledgeSourceBackend;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
-import org.protempa.proposition.value.ValueSet;
+import org.protempa.ValueSet;
 import org.protempa.proposition.value.ValueType;
 import org.protempa.query.And;
 
@@ -368,7 +368,7 @@ public abstract class ProtegeKnowledgeSourceBackend
         } else {
             ValueType valueType = Util.parseValueSet(cls);
             assert valueType != null : "Could not find value type for " + id;
-            return Util.parseValueSet(cls, valueType, cm);
+            return Util.parseValueSet(cls, valueType, cm, kb);
         }
     }
 

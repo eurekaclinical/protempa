@@ -1,6 +1,7 @@
 package org.protempa.query.handler.xml;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -19,7 +20,7 @@ import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueSet;
+import org.protempa.ValueSet;
 
 public class XmlPropositionVisitor extends AbstractPropositionCheckedVisitor {
 
@@ -30,7 +31,11 @@ public class XmlPropositionVisitor extends AbstractPropositionCheckedVisitor {
     public XmlPropositionVisitor(KnowledgeSource ks)
             throws ParserConfigurationException {
         this.knowledgeSource = ks;
-        this.propositionValues = new HashMap<String, String>();
+        /*
+         * XML schemas define a tag order, so iterators over proposition
+         * values should return values in the order that they were added.
+         */
+        this.propositionValues = new LinkedHashMap<String, String>();
         this.properties = new HashMap<String, Map<String, String>>();
     }
 

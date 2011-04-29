@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -23,44 +24,42 @@ import org.protempa.KnowledgeSource;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
-import org.protempa.query.handler.QueryResultsHandler;
+import org.protempa.query.handler.WriterQueryResultsHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
-public class XmlQueryResultsHandler implements QueryResultsHandler {
+public class XmlQueryResultsHandler extends WriterQueryResultsHandler {
 
-    private final Writer out;
     private final Map<String, String> order;
     private KnowledgeSource knowledgeSource;
     private final String initialProposition;
+    private final Writer out;
 
     public XmlQueryResultsHandler(Writer writer, Map<String, String> propOrder,
             String initialProp) {
+        super(writer);
         this.out = writer;
         this.order = propOrder;
         this.initialProposition = initialProp;
     }
 
-    public XmlQueryResultsHandler(Writer writer) {
-        this(writer, null, null);
-    }
-
     @Override
     public void finish() throws FinderException {
         try {
-            this.out.write("</patients>");
-            this.out.flush();
+            write("</patients>");
+            flush();
         } catch (IOException ioe) {
             throw new FinderException(ioe);
         }
     }
 
+    @Override
     public void init(KnowledgeSource knowledgeSource) throws FinderException {
         this.knowledgeSource = knowledgeSource;
         try {
-            this.out.write("<patients>");
-            this.out.flush();
+            write("<patients>");
+            flush();
         } catch (IOException ioe) {
             throw new FinderException(ioe);
         }
@@ -81,11 +80,11 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
     }
 
     private List<Proposition> filterHandled(List<Proposition> propositions,
-            Set<Proposition> handled) {
+            Set<UniqueIdentifier> handled) {
         List<Proposition> filtered = new ArrayList<Proposition>();
         if (propositions != null) {
             for (Proposition proposition : propositions) {
-                if (!handled.contains(proposition)) {
+                if (!handled.contains(proposition.getUniqueIdentifier())) {
                     filtered.add(proposition);
                 }
             }
@@ -136,37 +135,39 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
         return orderedRefs;
     }
 
-    private Element handleReferences(Set<Proposition> handled,
+    private Element handleReferences(Set<UniqueIdentifier> handled,
             Map<Proposition, List<Proposition>> derivations,
             Map<UniqueIdentifier, Proposition> references,
             Proposition proposition, XmlPropositionVisitor visitor,
             Document document) throws ProtempaException {
         Element referencesElem = document.createElement("references");
         List<String> orderedReferences = orderReferences(proposition);
-        Util.logger().log(
-                Level.FINEST,
-                "Ordered References for proposition " + proposition.getId()
-                        + ": " + orderedReferences);
-        if (orderedReferences != null && (!orderedReferences.isEmpty())) {
+        Logger logger = Util.logger();
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(
+                Level.FINEST, "Ordered References for proposition {0}: {1}",
+                new Object[]{proposition.getId(), orderedReferences});
+        }
+        if (orderedReferences != null) {
             for (String refName : orderedReferences) {
-                Util.logger().log(Level.FINEST,
-                        "Processing reference " + refName);
+                logger.log(Level.FINEST, "Processing reference {0}",
+                        refName);
                 List<UniqueIdentifier> uids = proposition
                         .getReferences(refName);
-                Util.logger().log(Level.FINEST,
-                        "Total unique identifiers: " + uids.size());
-                Util.logger().log(Level.FINEST, "UniqueIdentifiers: " + uids);
+                logger.log(Level.FINEST,
+                        "Total unique identifiers: {0}", uids.size());
+                logger.log(Level.FINEST, "UniqueIdentifiers: {0}",
+                        uids);
                 List<Proposition> refProps = createReferenceList(uids,
                         references);
-                Util.logger().log(Level.FINEST,
-                        "Total referred propositions:  " + refProps.size());
+                logger.log(Level.FINEST,
+                        "Total referred propositions:  {0}", refProps.size());
                 if (!refProps.isEmpty()) {
                     List<Proposition> filteredReferences = filterHandled(
                             refProps, handled);
-                    Util.logger().log(
-                            Level.FINEST,
-                            "Total filtered referred propositions: "
-                                    + filteredReferences.size());
+                    logger.log(Level.FINEST,
+                            "Total filtered referred propositions: {0}",
+                            filteredReferences.size());
                     if (!filteredReferences.isEmpty()) {
                         Element refElem = document.createElement("reference");
                         refElem.setAttribute("name", refName);
@@ -179,11 +180,10 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
                         }
                         referencesElem.appendChild(refElem);
                     } else {
-                        Util.logger().log(
-                                Level.FINEST,
-                                "Skipping reference " + refName
-                                        + " because all propositions "
-                                        + "were handled");
+                        logger.log(
+                            Level.FINEST,
+                            "Skipping reference {0} because all propositions were handled",
+                                refName);
                     }
                 }
             }
@@ -191,7 +191,7 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
         return referencesElem;
     }
 
-    private Element handleDerivations(Set<Proposition> handled,
+    private Element handleDerivations(Set<UniqueIdentifier> handled,
             Map<Proposition, List<Proposition>> derivations,
             Map<UniqueIdentifier, Proposition> references,
             Proposition proposition, XmlPropositionVisitor visitor,
@@ -211,16 +211,16 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
         return derivationsElem;
     }
 
-    private Element handleProposition(Set<Proposition> handled,
+    private Element handleProposition(Set<UniqueIdentifier> handled,
             Map<Proposition, List<Proposition>> derivations,
             Map<UniqueIdentifier, Proposition> references,
             Proposition proposition, XmlPropositionVisitor visitor,
             Document document) throws ProtempaException {
 
-        if (!handled.contains(proposition)) {
-            Util.logger().log(Level.FINEST,
-                    "Processing proposition " + proposition.getId());
-            handled.add(proposition);
+        if (!handled.contains(proposition.getUniqueIdentifier())) {
+            Util.logger().log(Level.FINEST, "Processing proposition {0}",
+                    proposition.getId());
+            handled.add(proposition.getUniqueIdentifier());
             Element propElem = document.createElement("proposition");
             propElem.setAttribute("id", proposition.getId());
             proposition.acceptChecked(visitor);
@@ -257,7 +257,7 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
                 "{http://xml.apache.org/xslt}indent-amount", "4");
 
         transformer.transform(new DOMSource(doc), new StreamResult(this.out));
-        this.out.flush();
+        flush();
     }
 
     private Proposition findInitialProposition(String propName,
@@ -276,7 +276,7 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
             Map<UniqueIdentifier, Proposition> references)
             throws FinderException {
         try {
-            Set<Proposition> handled = new HashSet<Proposition>();
+            Set<UniqueIdentifier> handled = new HashSet<UniqueIdentifier>();
             XmlPropositionVisitor visitor = new XmlPropositionVisitor(
                     this.knowledgeSource);
             Document document = DocumentBuilderFactory.newInstance()

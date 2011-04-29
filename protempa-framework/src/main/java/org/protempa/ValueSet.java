@@ -1,12 +1,15 @@
-package org.protempa.proposition.value;
+package org.protempa;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.protempa.ProtempaUtil;
+import org.protempa.proposition.value.OrderedValue;
+import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueComparator;
 
 /**
  * For specifying value sets.
@@ -91,7 +94,6 @@ public final class ValueSet {
             return ToStringBuilder.reflectionToString(this);
         }
     }
-
     private final String id;
     private final ValueSetElement[] valueSetElements;
     private final Map<Value, ValueSetElement> values;
@@ -100,9 +102,10 @@ public final class ValueSet {
     private final OrderedValue upperBound;
 
     public ValueSet(String id, OrderedValue lowerBound,
-            OrderedValue upperBound) {
-        if (id == null)
+            OrderedValue upperBound, KnowledgeBase kb) {
+        if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
+        }
         this.id = id.intern();
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
@@ -118,9 +121,16 @@ public final class ValueSet {
      * @param valueSetElements a {@link ValueSetElement[]}. No duplicate
      * {@link ValueSetElement}s are allowed.
      */
-    public ValueSet(String id, ValueSetElement[] valueSetElements) {
-        if (id == null)
+    public ValueSet(KnowledgeBase kb, String id,
+            ValueSetElement[] valueSetElements) {
+        if (kb == null) {
+            throw new IllegalArgumentException(
+                    "A knowledge base must be specified");
+        }
+        if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
+        }
+        Logger logger = ProtempaUtil.logger();
         ProtempaUtil.checkArray(valueSetElements, "valueSetElements");
 
         this.id = id.intern();
@@ -129,9 +139,11 @@ public final class ValueSet {
         this.values = new HashMap<Value, ValueSetElement>();
         for (ValueSetElement vse : this.valueSetElements) {
             if (this.values.containsKey(vse.value)) {
-                Util.logger().log(Level.WARNING, 
-                        "Ignoring duplicate value {0} for id {1}", 
-                        new Object[] {vse.value.getFormatted(), id});
+                if (logger.isLoggable(Level.WARNING)) {
+                    logger.log(Level.WARNING,
+                            "Ignoring duplicate value {0} for id {1}",
+                            new Object[]{vse.value.getFormatted(), id});
+                }
 //                throw new IllegalArgumentException(
 //                        "No duplicate values allowed: " + vse.value.getFormatted());
             } else {
@@ -141,6 +153,7 @@ public final class ValueSet {
         this.valuesKeySet = this.values.keySet();
         this.lowerBound = null;
         this.upperBound = null;
+        kb.addValueSet(this);
     }
 
     /**
@@ -194,8 +207,8 @@ public final class ValueSet {
         if (!this.valuesKeySet.isEmpty()) {
             result = this.valuesKeySet.contains(value);
         } else if (this.lowerBound != null || this.upperBound != null) {
-            if (this.lowerBound != null && 
-                    !ValueComparator.GREATER_THAN_OR_EQUAL_TO.is(
+            if (this.lowerBound != null
+                    && !ValueComparator.GREATER_THAN_OR_EQUAL_TO.is(
                     value.compare(this.lowerBound))) {
                 result = false;
             }

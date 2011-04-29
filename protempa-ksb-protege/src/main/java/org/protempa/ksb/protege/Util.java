@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import org.protempa.AbstractAbstractionDefinition;
 import org.protempa.AbstractPropositionDefinition;
+import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropertyDefinition;
 import org.protempa.SimpleGapFunction;
@@ -20,13 +21,13 @@ import org.protempa.TemporalExtendedParameterDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.proposition.Relation;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
-import org.protempa.proposition.value.ValueSet.ValueSetElement;
+import org.protempa.ValueSet.ValueSetElement;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueFactory;
-import org.protempa.proposition.value.ValueSet;
+import org.protempa.ValueSet;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -83,8 +84,8 @@ class Util {
     }
 
     static ValueSet parseValueSet(Cls valueTypeCls,
-            ValueType valueType,
-            ConnectionManager cm) throws KnowledgeSourceReadException {
+            ValueType valueType, ConnectionManager cm, KnowledgeBase kb)
+            throws KnowledgeSourceReadException {
         Slot valueSetSlot = cm.getSlot("valueSet");
         Collection objs =
                 valueTypeCls.getDirectTemplateSlotValues(valueSetSlot);
@@ -95,7 +96,7 @@ class Util {
         if (!objs.isEmpty()) {
             valueSet = parseEnumeratedValueSet(valueTypeCls, objs, cm,
                     displayNameSlot,
-                    abbrevDisplayNameSlot, valueSlot, valueType);
+                    abbrevDisplayNameSlot, valueSlot, valueType, kb);
         }
         return valueSet;
     }
@@ -103,7 +104,8 @@ class Util {
     private static ValueSet parseEnumeratedValueSet(Cls valueSetCls,
             Collection objs,
             ConnectionManager cm, Slot displayNameSlot,
-            Slot abbrevDisplayNameSlot, Slot valueSlot, ValueType valueType)
+            Slot abbrevDisplayNameSlot, Slot valueSlot, ValueType valueType,
+            KnowledgeBase kb)
             throws KnowledgeSourceReadException {
         ValueSetElement[] vses = new ValueSetElement[objs.size()];
         int i = 0;
@@ -119,7 +121,7 @@ class Util {
             vses[i] = new ValueSetElement(val, displayName, abbrevDisplayName);
             i++;
         }
-        return new ValueSet(valueSetCls.getName(), vses);
+        return new ValueSet(kb, valueSetCls.getName(), vses);
     }
 
     static ValueType parseValueType(Cls valueTypeCls) {

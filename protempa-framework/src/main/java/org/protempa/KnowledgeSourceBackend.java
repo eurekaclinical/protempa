@@ -2,7 +2,6 @@ package org.protempa;
 
 import java.util.List;
 
-import org.protempa.proposition.value.ValueSet;
 import org.protempa.query.And;
 
 /**
