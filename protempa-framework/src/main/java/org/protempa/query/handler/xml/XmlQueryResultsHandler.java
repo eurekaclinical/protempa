@@ -24,12 +24,12 @@ import org.protempa.KnowledgeSource;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
-import org.protempa.query.handler.WriterQueryResultsHandler;
+import org.protempa.query.handler.QueryResultsHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
-public class XmlQueryResultsHandler extends WriterQueryResultsHandler {
+public class XmlQueryResultsHandler implements QueryResultsHandler {
 
     private final Map<String, String> order;
     private KnowledgeSource knowledgeSource;
@@ -38,7 +38,6 @@ public class XmlQueryResultsHandler extends WriterQueryResultsHandler {
 
     public XmlQueryResultsHandler(Writer writer, Map<String, String> propOrder,
             String initialProp) {
-        super(writer);
         this.out = writer;
         this.order = propOrder;
         this.initialProposition = initialProp;
@@ -47,8 +46,8 @@ public class XmlQueryResultsHandler extends WriterQueryResultsHandler {
     @Override
     public void finish() throws FinderException {
         try {
-            write("</patients>");
-            flush();
+            this.out.write("</patients>");
+            this.out.flush();
         } catch (IOException ioe) {
             throw new FinderException(ioe);
         }
@@ -58,8 +57,8 @@ public class XmlQueryResultsHandler extends WriterQueryResultsHandler {
     public void init(KnowledgeSource knowledgeSource) throws FinderException {
         this.knowledgeSource = knowledgeSource;
         try {
-            write("<patients>");
-            flush();
+            this.out.write("<patients>");
+            this.out.flush();
         } catch (IOException ioe) {
             throw new FinderException(ioe);
         }
@@ -144,24 +143,22 @@ public class XmlQueryResultsHandler extends WriterQueryResultsHandler {
         List<String> orderedReferences = orderReferences(proposition);
         Logger logger = Util.logger();
         if (logger.isLoggable(Level.FINEST)) {
-            logger.log(
-                Level.FINEST, "Ordered References for proposition {0}: {1}",
-                new Object[]{proposition.getId(), orderedReferences});
+            logger.log(Level.FINEST,
+                    "Ordered References for proposition {0}: {1}",
+                    new Object[] { proposition.getId(), orderedReferences });
         }
         if (orderedReferences != null) {
             for (String refName : orderedReferences) {
-                logger.log(Level.FINEST, "Processing reference {0}",
-                        refName);
+                logger.log(Level.FINEST, "Processing reference {0}", refName);
                 List<UniqueIdentifier> uids = proposition
                         .getReferences(refName);
-                logger.log(Level.FINEST,
-                        "Total unique identifiers: {0}", uids.size());
-                logger.log(Level.FINEST, "UniqueIdentifiers: {0}",
-                        uids);
+                logger.log(Level.FINEST, "Total unique identifiers: {0}",
+                        uids.size());
+                logger.log(Level.FINEST, "UniqueIdentifiers: {0}", uids);
                 List<Proposition> refProps = createReferenceList(uids,
                         references);
-                logger.log(Level.FINEST,
-                        "Total referred propositions:  {0}", refProps.size());
+                logger.log(Level.FINEST, "Total referred propositions:  {0}",
+                        refProps.size());
                 if (!refProps.isEmpty()) {
                     List<Proposition> filteredReferences = filterHandled(
                             refProps, handled);
@@ -181,8 +178,8 @@ public class XmlQueryResultsHandler extends WriterQueryResultsHandler {
                         referencesElem.appendChild(refElem);
                     } else {
                         logger.log(
-                            Level.FINEST,
-                            "Skipping reference {0} because all propositions were handled",
+                                Level.FINEST,
+                                "Skipping reference {0} because all propositions were handled",
                                 refName);
                     }
                 }
@@ -257,7 +254,7 @@ public class XmlQueryResultsHandler extends WriterQueryResultsHandler {
                 "{http://xml.apache.org/xslt}indent-amount", "4");
 
         transformer.transform(new DOMSource(doc), new StreamResult(this.out));
-        flush();
+        this.out.flush();
     }
 
     private Proposition findInitialProposition(String propName,
