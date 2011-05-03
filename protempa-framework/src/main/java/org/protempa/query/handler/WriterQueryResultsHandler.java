@@ -22,8 +22,9 @@ import org.protempa.proposition.UniqueIdentifier;
  * @author Michel Mansour
  *
  */
-public abstract class WriterQueryResultsHandler extends BufferedWriter
-        implements QueryResultsHandler {
+public abstract class WriterQueryResultsHandler implements QueryResultsHandler {
+    
+    protected final BufferedWriter writer;
 
     /**
      * Instantiates this handler to write to a file.
@@ -34,8 +35,7 @@ public abstract class WriterQueryResultsHandler extends BufferedWriter
      */
     public WriterQueryResultsHandler(File file)
             throws IOException {
-        super(new FileWriter(file));
-
+        this(new FileWriter(file));
     }
 
     /**
@@ -47,7 +47,7 @@ public abstract class WriterQueryResultsHandler extends BufferedWriter
      */
     public WriterQueryResultsHandler(String fileName)
             throws IOException {
-        super(new FileWriter(fileName));
+        this(new FileWriter(fileName));
     }
 
     /**
@@ -56,7 +56,7 @@ public abstract class WriterQueryResultsHandler extends BufferedWriter
      * @param out an {@link OutputStream}.
      */
     public WriterQueryResultsHandler(OutputStream out) {
-        super(new OutputStreamWriter(out));
+        this(new OutputStreamWriter(out));
     }
 
     /**
@@ -65,7 +65,16 @@ public abstract class WriterQueryResultsHandler extends BufferedWriter
      * @param out a {@link Writer}.
      */
     public WriterQueryResultsHandler(Writer out) {
-        super(out);
+        this.writer = new BufferedWriter(out);
+    }
+    
+    /**
+     * Instantiates this handler to write to a buffered character stream
+     * 
+     * @param out a {@link BufferedWriter}.
+     */
+    public WriterQueryResultsHandler(BufferedWriter out) {
+        this.writer = out;
     }
 
     /**

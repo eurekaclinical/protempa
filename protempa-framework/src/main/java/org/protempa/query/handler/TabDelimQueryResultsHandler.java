@@ -1,5 +1,6 @@
 package org.protempa.query.handler;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,8 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.arp.javautil.string.StringUtil;
 
+import org.arp.javautil.string.StringUtil;
 import org.protempa.FinderException;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.AbstractParameter;
@@ -78,7 +79,7 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
             this.comparator =
                     new ArrayList<Comparator<Proposition>>(comparator);
         }
-        this.visitor = new TabDelimHandlerPropositionVisitor(this);
+        this.visitor = new TabDelimHandlerPropositionVisitor(this.writer);
         this.includeDerived = includeDerived;
     }
 
@@ -121,7 +122,7 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
             this.comparator =
                     new ArrayList<Comparator<Proposition>>(comparator);
         }
-        this.visitor = new TabDelimHandlerPropositionVisitor(this);
+        this.visitor = new TabDelimHandlerPropositionVisitor(this.writer);
         this.includeDerived = includeDerived;
     }
 
@@ -168,7 +169,7 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
             this.comparator =
                     new ArrayList<Comparator<Proposition>>(comparator);
         }
-        this.visitor = new TabDelimHandlerPropositionVisitor(this);
+        this.visitor = new TabDelimHandlerPropositionVisitor(this.writer);
         this.includeDerived = includeDerived;
     }
 
@@ -215,7 +216,7 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
             this.comparator =
                     new ArrayList<Comparator<Proposition>>(comparator);
         }
-        this.visitor = new TabDelimHandlerPropositionVisitor(this);
+        this.visitor = new TabDelimHandlerPropositionVisitor(this.writer);
         this.includeDerived = includeDerived;
     }
 
@@ -290,10 +291,10 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
             extends AbstractPropositionCheckedVisitor {
 
         private String keyId;
-        private final TabDelimQueryResultsHandler writer;
+        private final BufferedWriter writer;
 
         TabDelimHandlerPropositionVisitor(
-                TabDelimQueryResultsHandler writer) {
+                BufferedWriter writer) {
             this.writer = writer;
         }
 

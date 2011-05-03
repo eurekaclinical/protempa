@@ -140,8 +140,8 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
                     }
                 }
                 StringUtil.escapeAndWriteDelimitedColumns(columnNames,
-                        this.columnDelimiter, this);
-                newLine();
+                        this.columnDelimiter, this.writer);
+                this.writer.newLine();
             } catch (KnowledgeSourceReadException ex1) {
                 throw new FinderException("Error reading knowledge source", ex1);
             } catch (IOException ex) {
@@ -189,15 +189,15 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
 
                     for (int index = 0; index < columnValues.length; index++) {
                         StringUtil.escapeDelimitedColumn(columnValues[index],
-                                this.columnDelimiter, this);
+                                this.columnDelimiter, this.writer);
                         if (index < columnValues.length - 1) {
-                            write(this.columnDelimiter);
+                            this.writer.write(this.columnDelimiter);
                         }
                     }
                     if (i < n - 1) {
-                        write(this.columnDelimiter);
+                        this.writer.write(this.columnDelimiter);
                     } else {
-                        newLine();
+                        this.writer.newLine();
                     }
                 } catch (KnowledgeSourceReadException ex1) {
                     throw new FinderException(
