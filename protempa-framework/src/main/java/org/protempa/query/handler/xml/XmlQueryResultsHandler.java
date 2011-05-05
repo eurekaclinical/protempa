@@ -215,9 +215,17 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
             Document document) throws ProtempaException {
 
         if (!handled.contains(proposition.getUniqueIdentifier())) {
-            Util.logger().log(Level.FINEST, "Processing proposition {0}",
-                    proposition.getId());
-            handled.add(proposition.getUniqueIdentifier());
+            Util.logger().log(
+                    Level.FINEST,
+                    "Processing proposition {0} with unique id {1}",
+                    new Object[] { proposition.getId(),
+                            proposition.getUniqueIdentifier() });
+
+            // create a new set to pass down to the "children" (references and
+            // derivations) of this proposition
+            Set<UniqueIdentifier> tempHandled = new HashSet<UniqueIdentifier>(
+                    handled);
+            tempHandled.add(proposition.getUniqueIdentifier());
             Element propElem = document.createElement("proposition");
             propElem.setAttribute("id", proposition.getId());
             proposition.acceptChecked(visitor);
@@ -231,15 +239,18 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
 
             visitor.clear();
 
-            propElem.appendChild(handleReferences(handled, derivations,
+            propElem.appendChild(handleReferences(tempHandled, derivations,
                     references, proposition, visitor, document));
 
-            propElem.appendChild(handleDerivations(handled, derivations,
+            propElem.appendChild(handleDerivations(tempHandled, derivations,
                     references, proposition, visitor, document));
 
             return propElem;
+        } else {
+            Util.logger().log(Level.FINEST, "Skipping proposition {0}",
+                    proposition.getId());
+            return null;
         }
-        return null;
     }
 
     private void printDocument(Document doc) throws IOException,
@@ -291,13 +302,22 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
                     if (null != elem) {
                         rootNode.appendChild(elem);
                     }
+                } else {
+                    Util.logger()
+                            .log(Level.SEVERE,
+                                    "Initial proposition {0} not found in proposition list",
+                                    this.initialProposition);
                 }
-            }
-            for (Proposition proposition : propositions) {
-                Element elem = handleProposition(handled, derivations,
-                        references, proposition, visitor, document);
-                if (null != elem) {
-                    rootNode.appendChild(elem);
+            } else {
+                Util.logger()
+                        .log(Level.WARNING,
+                                "No initial proposition defined, printing all propositions");
+                for (Proposition proposition : propositions) {
+                    Element elem = handleProposition(handled, derivations,
+                            references, proposition, visitor, document);
+                    if (null != elem) {
+                        rootNode.appendChild(elem);
+                    }
                 }
             }
 
