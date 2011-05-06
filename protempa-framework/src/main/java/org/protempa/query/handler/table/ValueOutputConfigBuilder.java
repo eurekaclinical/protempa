@@ -1,14 +1,13 @@
 package org.protempa.query.handler.table;
 
-public class ValueOutputConfigBuilder {
+public final class ValueOutputConfigBuilder {
     private String propertyValueDisplayName;
     private String propertyValueAbbrevDisplayName;
     private boolean showPropertyValueDisplayName;
     private boolean showPropertyValueAbbrevDisplayName;
 
     public ValueOutputConfigBuilder() {
-        this.propertyValueAbbrevDisplayName = "";
-        this.propertyValueDisplayName = "";
+        reset();
     }
 
     public String getPropertyValueDisplayName() {
@@ -62,5 +61,12 @@ public class ValueOutputConfigBuilder {
                 this.showPropertyValueAbbrevDisplayName,
                 this.propertyValueDisplayName,
                 this.propertyValueAbbrevDisplayName);
+    }
+
+    public void reset() {
+        this.propertyValueAbbrevDisplayName = "";
+        this.propertyValueDisplayName = "";
+        this.showPropertyValueAbbrevDisplayName = false;
+        this.showPropertyValueDisplayName = false;
     }
 }

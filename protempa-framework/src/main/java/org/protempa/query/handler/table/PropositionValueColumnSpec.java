@@ -1,6 +1,8 @@
 package org.protempa.query.handler.table;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +11,9 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.TemporalParameter;
 import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
 import org.protempa.proposition.value.NumericalValue;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
@@ -25,23 +29,24 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
 
     
 
-    public enum AggregationType {
+    public enum Type {
 
         MAX,
-        MIN
+        MIN,
+        FIRST,
+        LAST
     }
     private final Link[] links;
     private final String columnNamePrefixOverride;
-    private AggregationType aggregationType;
+    private Type type;
 
-    public PropositionValueColumnSpec(Link[] links,
-            AggregationType aggregationType) {
+    public PropositionValueColumnSpec(Link[] links, Type aggregationType) {
         this(null, links, aggregationType);
     }
 
     public PropositionValueColumnSpec(String columnNamePrefixOverride,
             Link[] links,
-            AggregationType aggregationType) {
+            Type aggregationType) {
 
         if (links == null) {
             this.links = Util.EMPTY_LINK_ARRAY;
@@ -56,7 +61,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
         if (aggregationType == null) {
             throw new IllegalArgumentException("aggregationType cannot be null");
         }
-        this.aggregationType = aggregationType;
+        this.type = aggregationType;
         this.columnNamePrefixOverride = columnNamePrefixOverride;
     }
 
@@ -68,32 +73,44 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             throws KnowledgeSourceReadException {
         Collection<Proposition> propositions = traverseLinks(this.links,
                 proposition, derivations, references, knowledgeSource);
-        NumericalValue value = null;
+        Value value = null;
+        if (type == Type.FIRST) {
+            propositions = new ArrayList(propositions);
+            Collections.sort((List) propositions,
+                    new AllPropositionIntervalComparator());
+        } else if (type == Type.LAST) {
+            propositions = new ArrayList(propositions);
+            Collections.sort((List) propositions,
+                    Collections.reverseOrder(
+                    new AllPropositionIntervalComparator()));
+        }
         for (Proposition prop : propositions) {
-            if (prop instanceof PrimitiveParameter) {
-                PrimitiveParameter pp = (PrimitiveParameter) prop;
+            if (prop instanceof TemporalParameter) {
+                TemporalParameter pp = (TemporalParameter) prop;
                 Value val = pp.getValue();
                 if (val != null) {
-                    if (!ValueType.NUMERICALVALUE.isInstance(val)) {
+                    if ((type == Type.MAX || type == Type.MIN) && !ValueType.NUMERICALVALUE.isInstance(val)) {
                         throw new IllegalStateException("only numerical values allowed");
                     } else {
-                        NumericalValue nv = (NumericalValue) val;
                         if (value == null) {
-                            value = nv;
+                            value = val;
+                            if (type == Type.FIRST || type == Type.LAST) {
+                                break;
+                            }
                         } else {
-                            switch (aggregationType) {
+                            switch (type) {
                                 case MAX:
-                                    if (nv.compare(value).is(ValueComparator.GREATER_THAN)) {
-                                        value = nv;
+                                    if (val.compare(value).is(ValueComparator.GREATER_THAN)) {
+                                        value = val;
                                     }
                                     break;
                                 case MIN:
-                                    if (nv.compare(value).is(ValueComparator.LESS_THAN)) {
-                                        value = nv;
+                                    if (val.compare(value).is(ValueComparator.LESS_THAN)) {
+                                        value = val;
                                     }
                                     break;
                                 default:
-                                    throw new AssertionError("invalid aggregation type: " + aggregationType);
+                                    throw new AssertionError("invalid aggregation type: " + type);
 
                             }
                         }
@@ -117,7 +134,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                 this.columnNamePrefixOverride != null
                 ? this.columnNamePrefixOverride
                 : generateLinksHeaderString(this.links)
-                + (this.aggregationType == AggregationType.MIN ? "_min"
+                + (this.type == Type.MIN ? "_min"
                 : "_max");
         return new String[]{headerString};
     }

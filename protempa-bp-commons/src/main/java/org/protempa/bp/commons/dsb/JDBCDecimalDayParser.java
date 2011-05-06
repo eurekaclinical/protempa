@@ -5,10 +5,13 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
- *
+ * Translates between a date string with format <code>yyyyMMdd</code> and a
+ * position with a granularity of
+ * {@link org.protempa.proposition.value.AbsoluteTimeGranularity} with a
+ * granularity of DAY.
+ * 
  * @author Andrew Post
  */
 public class JDBCDecimalDayParser implements PositionFormat {
@@ -17,6 +20,21 @@ public class JDBCDecimalDayParser implements PositionFormat {
     private static final DateFormat DATE_FORMAT =
             new SimpleDateFormat("yyyyMMdd");
 
+    /**
+     * Parses strings with format <code>yyyyMMdd</code> into a position with a
+     * granularity of
+     * {@link org.protempa.proposition.value.AbsoluteTimeGranularity} with a
+     * granularity of DAY.
+     *
+     * @param resultSet a {@link ResultSet}.
+     * @param columnIndex the column to parse.
+     * @param colType the type of the column as a {@link java.sql.Types}.
+     * @return a position with a granularity of
+     * {@link org.protempa.proposition.value.AbsoluteTimeGranularity} with a
+     * granularity of DAY.
+     * @throws SQLException if an error occurred retrieving the value from
+     * the result set.
+     */
     @Override
     public Long toLong(ResultSet resultSet, int columnIndex, int colType)
             throws SQLException {
@@ -35,9 +53,18 @@ public class JDBCDecimalDayParser implements PositionFormat {
         }
     }
 
+    /**
+     * Formats positions with a granularity of
+     * {@link org.protempa.proposition.value.AbsoluteTimeGranularity} with at 
+     * least a granularity of DAY into an number with format
+     * <code>yyyyMMdd</code>.
+     * 
+     * @param position a position {@link Long} with a granularity of
+     * {@link org.protempa.proposition.value.AbsoluteTimeGranularity}.
+     * @return a {@link String} with format <code>yyyyMMdd</code>.
+     */
     @Override
     public String format(Long position) {
-        Date date = new Date(position);
-        return DATE_FORMAT.format(date);
+        return DATE_FORMAT.format(position);
     }
 }

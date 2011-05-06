@@ -35,8 +35,6 @@ import org.protempa.proposition.TemporalProposition;
  */
 class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
-//    private static final ClassObjectType SEQUENCE_OBJECT_TYPE = new ClassObjectType(
-//            Sequence.class);
     private static final ClassObjectType EVENT_OT = new ClassObjectType(
             Event.class);
     private static final ClassObjectType CONSTANT_OT = new ClassObjectType(
@@ -52,14 +50,13 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     private static final SalienceInteger ONE_SALIENCE = new SalienceInteger(1);
     private static final SalienceInteger MINUS_TWO_SALIENCE =
             new SalienceInteger(-2);
-
     private final Map<LowLevelAbstractionDefinition, Algorithm> algorithms;
     private final List<Rule> rules;
     private final Map<Rule, AbstractionDefinition> ruleToAbstractionDefinition;
     private final DerivationsBuilder derivationsBuilder;
 
     JBossRuleCreator(Map<LowLevelAbstractionDefinition, Algorithm> algorithms,
-                DerivationsBuilder derivationsBuilder) {
+            DerivationsBuilder derivationsBuilder) {
         this.algorithms = algorithms;
         this.rules = new ArrayList<Rule>();
         this.ruleToAbstractionDefinition =
@@ -76,32 +73,33 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             throws KnowledgeSourceReadException {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         try {
-            Rule rule = new Rule(def.getId());
-            Pattern sourceP = new Pattern(2, 1, PRIM_PARAM_OT, "");
-            sourceP.addConstraint(new PredicateConstraint(
-                    new PropositionPredicateExpression(
-                    def.getAbstractedFrom())));
+            /*
+             * If there are no value definitions defined, we
+             * might still have an inverseIsA relationship with another
+             * low-level abstraction definition.
+             */
+            if (!def.getValueDefinitions().isEmpty()) {
+                Rule rule = new Rule(def.getId());
+                Pattern sourceP = new Pattern(2, 1, PRIM_PARAM_OT, "");
+                sourceP.addConstraint(new PredicateConstraint(
+                        new PropositionPredicateExpression(
+                        def.getAbstractedFrom())));
 
-            Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
-            resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
-                    ARRAY_LIST_OT, "result")));
-            resultP.addConstraint(new PredicateConstraint(
-                    new CollectionSizeExpression(1)));
-            rule.addPattern(resultP);
-//            Pattern p = new Pattern(0, SEQUENCE_OBJECT_TYPE);
-//
-//            Set<String> propIds = def.getAbstractedFrom();
-//            Constraint c = new PredicateConstraint(
-//                    new SequencePredicateExpression(propIds));
-//            p.addConstraint(c);
-//            rule.addPattern(p);
-            Algorithm algo = this.algorithms.get(def);
+                Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
+                resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
+                        ARRAY_LIST_OT, "result")));
+                resultP.addConstraint(new PredicateConstraint(
+                        new CollectionSizeExpression(1)));
+                rule.addPattern(resultP);
+                
+                Algorithm algo = this.algorithms.get(def);
 
-            rule.setConsequence(new LowLevelAbstractionConsequence(def, algo,
-                    this.derivationsBuilder));
-            rule.setSalience(ONE_SALIENCE);
-            this.ruleToAbstractionDefinition.put(rule, def);
-            rules.add(rule);
+                rule.setConsequence(new LowLevelAbstractionConsequence(def,
+                        algo, this.derivationsBuilder));
+                rule.setSalience(ONE_SALIENCE);
+                this.ruleToAbstractionDefinition.put(rule, def);
+                rules.add(rule);
+            }
             addInverseIsARule(def, ABSTRACT_PARAM_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
@@ -166,27 +164,32 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     public void visit(HighLevelAbstractionDefinition def) {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         try {
-            Rule rule = new Rule(def.getId());
-            rule.setSalience(ONE_SALIENCE);
-            Set<ExtendedPropositionDefinition> epdsC = def
-                    .getExtendedPropositionDefinitions();
-            TemporalExtendedPropositionDefinition[] epds = epdsC
-                    .toArray(new TemporalExtendedPropositionDefinition[epdsC
-                            .size()]);
-            for (int i = 0; i < epds.length; i++) {
-                Pattern p = new Pattern(i, TEMP_PROP_OT);
-                Constraint c = new PredicateConstraint(
-                        new GetMatchesPredicateExpression(epds[i]));
-                p.addConstraint(c);
-                rule.addPattern(p);
+            Set<ExtendedPropositionDefinition> epdsC = def.getExtendedPropositionDefinitions();
+            /*
+             * If there are no extended proposition definitions defined, we
+             * might still have an inverseIsA relationship with another
+             * high-level abstraction definition.
+             */
+            if (!epdsC.isEmpty()) {
+                Rule rule = new Rule(def.getId());
+                rule.setSalience(ONE_SALIENCE);
+                TemporalExtendedPropositionDefinition[] epds =
+                        epdsC.toArray(new TemporalExtendedPropositionDefinition[epdsC.size()]);
+                for (int i = 0; i < epds.length; i++) {
+                    Pattern p = new Pattern(i, TEMP_PROP_OT);
+                    Constraint c = new PredicateConstraint(
+                            new GetMatchesPredicateExpression(epds[i]));
+                    p.addConstraint(c);
+                    rule.addPattern(p);
+                }
+                rule.addPattern(new EvalCondition(
+                        new HighLevelAbstractionCondition(def, epds), null));
+                rule.setConsequence(new HighLevelAbstractionConsequence(def, epds,
+                        this.derivationsBuilder));
+                this.ruleToAbstractionDefinition.put(rule, def);
+                rules.add(rule);
+                AbstractionCombiner.toRules(def, rules);
             }
-            rule.addPattern(new EvalCondition(
-                    new HighLevelAbstractionCondition(def, epds), null));
-            rule.setConsequence(new HighLevelAbstractionConsequence(def, epds,
-                    this.derivationsBuilder));
-            this.ruleToAbstractionDefinition.put(rule, def);
-            rules.add(rule);
-            AbstractionCombiner.toRules(def, rules);
             addInverseIsARule(def, ABSTRACT_PARAM_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
@@ -225,30 +228,39 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     public void visit(PairDefinition def) throws ProtempaException {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         try {
-            Rule rule = new Rule("PAIR_" + def.getId());
-            Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
-            sourceP.addConstraint(new PredicateConstraint(
-                    new PropositionPredicateExpression(
-                    def.getAbstractedFrom())));
             TemporalExtendedPropositionDefinition lhProp =
                     def.getLeftHandProposition();
-            assert lhProp != null : "lhProp should not be null";
             TemporalExtendedPropositionDefinition rhProp =
                     def.getRightHandProposition();
-            assert rhProp != null : "rhProp should not be null";
-            sourceP.addConstraint(new PredicateConstraint(
-                    new GetMatchesPredicateExpressionPair(lhProp, rhProp)));
+            /*
+             * If there are no extended proposition definitions defined, we
+             * might still have an inverseIsA relationship with another
+             * pair abstraction definition.
+             */
+            if (lhProp != null && rhProp != null) {
+                Rule rule = new Rule("PAIR_" + def.getId());
+                Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
+                sourceP.addConstraint(new PredicateConstraint(
+                        new PropositionPredicateExpression(
+                        def.getAbstractedFrom())));
+                
+                sourceP.addConstraint(new PredicateConstraint(
+                        new GetMatchesPredicateExpressionPair(lhProp, rhProp)));
 
-            Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
-            resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
-                    ARRAY_LIST_OT, "result")));
-            resultP.addConstraint(new PredicateConstraint(
-                    new CollectionSizeExpression(2)));
-            rule.addPattern(resultP);
-            rule.setConsequence(new PairConsequence(def, this.derivationsBuilder));
-            rule.setSalience(MINUS_TWO_SALIENCE);
-            this.ruleToAbstractionDefinition.put(rule, def);
-            rules.add(rule);
+                Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
+                resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
+                        ARRAY_LIST_OT, "result")));
+                resultP.addConstraint(new PredicateConstraint(
+                        new CollectionSizeExpression(2)));
+                rule.addPattern(resultP);
+                rule.setConsequence(new PairConsequence(def, this.derivationsBuilder));
+                rule.setSalience(MINUS_TWO_SALIENCE);
+                this.ruleToAbstractionDefinition.put(rule, def);
+                rules.add(rule);
+            } else {
+                assert lhProp != null : "lhProp should not be null";
+                assert rhProp != null : "rhProp should not be null";
+            }
             addInverseIsARule(def, ABSTRACT_PARAM_OT);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "

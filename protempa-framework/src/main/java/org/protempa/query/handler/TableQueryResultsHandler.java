@@ -1,10 +1,7 @@
 package org.protempa.query.handler;
 
-import java.io.File;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +9,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
@@ -26,8 +22,7 @@ import org.protempa.query.handler.table.TableColumnSpec;
  * 
  * @author Andrew Post
  */
-public final class TableQueryResultsHandler extends WriterQueryResultsHandler
-        implements Serializable {
+public final class TableQueryResultsHandler implements QueryResultsHandler {
 
     private static final long serialVersionUID = -1503401944818776787L;
     private final char columnDelimiter;
@@ -35,53 +30,18 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
     private final TableColumnSpec[] columnSpecs;
     private final boolean headerWritten;
     private KnowledgeSource knowledgeSource;
+    private final BufferedWriter out;
 
-    public TableQueryResultsHandler(Writer out, char columnDelimiter,
+    public TableQueryResultsHandler(BufferedWriter out, char columnDelimiter,
             String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
             boolean headerWritten) {
-        super(out);
         checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
         this.rowPropositionIds = rowPropositionIds.clone();
         ProtempaUtil.internAll(this.rowPropositionIds);
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
-    }
-
-    public TableQueryResultsHandler(OutputStream out, char columnDelimiter,
-            String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
-            boolean headerWritten) {
-        super(out);
-        checkConstructorArgs(rowPropositionIds, columnSpecs);
-        this.columnDelimiter = columnDelimiter;
-        this.rowPropositionIds = rowPropositionIds.clone();
-        ProtempaUtil.internAll(this.rowPropositionIds);
-        this.columnSpecs = columnSpecs.clone();
-        this.headerWritten = headerWritten;
-    }
-
-    public TableQueryResultsHandler(String fileName, char columnDelimiter,
-            String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
-            boolean headerWritten) throws IOException {
-        super(fileName);
-        checkConstructorArgs(rowPropositionIds, columnSpecs);
-        this.columnDelimiter = columnDelimiter;
-        this.rowPropositionIds = rowPropositionIds.clone();
-        ProtempaUtil.internAll(this.rowPropositionIds);
-        this.columnSpecs = columnSpecs.clone();
-        this.headerWritten = headerWritten;
-    }
-
-    public TableQueryResultsHandler(File file, char columnDelimiter,
-            String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
-            boolean headerWritten) throws IOException {
-        super(file);
-        checkConstructorArgs(rowPropositionIds, columnSpecs);
-        this.columnDelimiter = columnDelimiter;
-        this.rowPropositionIds = rowPropositionIds.clone();
-        ProtempaUtil.internAll(this.rowPropositionIds);
-        this.columnSpecs = columnSpecs.clone();
-        this.headerWritten = headerWritten;
+        this.out = out;
     }
 
     private void checkConstructorArgs(String[] rowPropositionIds,
@@ -140,8 +100,8 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
                     }
                 }
                 StringUtil.escapeAndWriteDelimitedColumns(columnNames,
-                        this.columnDelimiter, this.writer);
-                this.writer.newLine();
+                        this.columnDelimiter, this.out);
+                this.out.newLine();
             } catch (KnowledgeSourceReadException ex1) {
                 throw new FinderException("Error reading knowledge source", ex1);
             } catch (IOException ex) {
@@ -149,6 +109,10 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
             }
         }
 
+    }
+
+    @Override
+    public void finish() throws FinderException {
     }
 
     @Override
@@ -189,15 +153,15 @@ public final class TableQueryResultsHandler extends WriterQueryResultsHandler
 
                     for (int index = 0; index < columnValues.length; index++) {
                         StringUtil.escapeDelimitedColumn(columnValues[index],
-                                this.columnDelimiter, this.writer);
+                                this.columnDelimiter, this.out);
                         if (index < columnValues.length - 1) {
-                            this.writer.write(this.columnDelimiter);
+                            this.out.write(this.columnDelimiter);
                         }
                     }
                     if (i < n - 1) {
-                        this.writer.write(this.columnDelimiter);
+                        this.out.write(this.columnDelimiter);
                     } else {
-                        this.writer.newLine();
+                        this.out.newLine();
                     }
                 } catch (KnowledgeSourceReadException ex1) {
                     throw new FinderException(

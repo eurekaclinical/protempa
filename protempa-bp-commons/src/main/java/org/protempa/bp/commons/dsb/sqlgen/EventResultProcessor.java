@@ -39,7 +39,9 @@ class EventResultProcessor extends MainResultProcessor<Event> {
         Value[] propertyValues = new Value[propertySpecs.length];
         int count = 0;
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+        boolean startColumnTypeSet = false;
         int startColumnType = -1;
+        boolean finishColumnTypeSet = false;
         int finishColumnType = -1;
         String[] uniqueIds =
                 new String[entitySpec.getUniqueIdSpecs().length];
@@ -75,8 +77,9 @@ class EventResultProcessor extends MainResultProcessor<Event> {
             Granularity gran = entitySpec.getGranularity();
             Interval interval = null;
             if (finishTimeSpec == null) {
-                if (finishColumnType == -1) {
+                if (!finishColumnTypeSet) {
                     finishColumnType = resultSetMetaData.getColumnType(i);
+                    finishColumnTypeSet = true;
                 }
                 Long d = null;
                 try {
@@ -90,8 +93,9 @@ class EventResultProcessor extends MainResultProcessor<Event> {
                 }
                 interval = intervalFactory.getInstance(d, gran);
             } else {
-                if (startColumnType == -1) {
+                if (!startColumnTypeSet) {
                     startColumnType = resultSetMetaData.getColumnType(i);
+                    startColumnTypeSet = true;
                 }
                 Long start = null;
                 try {

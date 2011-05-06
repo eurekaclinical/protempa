@@ -33,12 +33,14 @@ import org.protempa.dsb.filter.PositionFilter.Side;
 import org.protempa.dsb.filter.PropertyValueFilter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.BooleanValue;
+import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.InequalityNumberValue;
 import org.protempa.proposition.value.ListValue;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
 import org.protempa.proposition.value.OrdinalValue;
+import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.UnitFactory;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
@@ -147,9 +149,66 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         generateColumnReference(tableNumber, columnSpec.getColumn(), stmt);
     }
 
+    /*
+     * Partitions position filters according to the data source backend's
+     * configuration. This has the effect of splitting up one query into
+     * multiple queries to improve performance. Currently this only works when
+     * upper and lower bounds are provided on the same side of the specified
+     * proposition's intervals. If there are multiple position filters
+     * specified, which one gets chosen to partition is non-deterministic.
+     */
+    private List<Set<Filter>> constructFilterSets(EntitySpec entitySpec,
+            Set<Filter> filtersCopy) {
+        PositionFilter positionFilter = null;
+        for (Filter filter : filtersCopy) {
+            if (filter instanceof PositionFilter) {
+                positionFilter = (PositionFilter) filter;
+                break;
+            }
+        }
+        Unit partitionBy = entitySpec.getPartitionBy();
+        List<Set<Filter>> filterList = new ArrayList<Set<Filter>>();
+        if (partitionBy == null || positionFilter == null 
+                || positionFilter.getStart() == null
+                || positionFilter.getFinish() == null
+                || !positionFilter.getStartSide().equals(
+                    positionFilter.getFinishSide())) {
+            filterList.add(filtersCopy);
+        } else {
+            Long start = positionFilter.getStart();
+            Long actualFinish = positionFilter.getFinish();
+            Granularity startGran = positionFilter.getStartGranularity();
+            Granularity finishGran = positionFilter.getFinishGranularity();
+            Unit finishUnit = finishGran != null ?
+                finishGran.getCorrespondingUnit() : null;
+            boolean doLoop = true;
+            while (doLoop) {
+                Set<Filter> newFiltersCopy = new HashSet<Filter>(filtersCopy);
+                newFiltersCopy.remove(positionFilter);
+                Long nextStart = partitionBy.addToPosition(start, 1);
+                Long finish = finishUnit != null ?
+                    finishUnit.addToPosition(nextStart, -1) : -1;
+                if (finish.compareTo(actualFinish) >= 0) {
+                    finish = actualFinish;
+                    doLoop = false;
+                }
+                PositionFilter newPositionFilter = new PositionFilter(
+                        positionFilter.getPropositionIds(),
+                        start, startGran, finish, finishGran,
+                        positionFilter.getStartSide(),
+                        positionFilter.getFinishSide());
+                newFiltersCopy.add(newPositionFilter);
+                filterList.add(newFiltersCopy);
+                start = nextStart;
+            }
+        }
+        return filterList;
+    }
+
     private List<EntitySpec> copyEntitySpecsForRefs(EntitySpec entitySpec,
             Collection<EntitySpec> allEntitySpecs) {
-        List<EntitySpec> allEntitySpecsCopyForRefs = new LinkedList<EntitySpec>();
+        List<EntitySpec> allEntitySpecsCopyForRefs =
+                new LinkedList<EntitySpec>();
         allEntitySpecsCopyForRefs.add(entitySpec);
         for (EntitySpec es : allEntitySpecs) {
             if (es != entitySpec) {
@@ -309,6 +368,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
     }
 
+    @Override
     public ResultCache<Proposition> readPropositions(Set<String> keyIds,
             Set<String> propIds, Filter filters, SQLOrderBy order)
             throws DataSourceReadException {
@@ -341,8 +401,14 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     this.backend.getDataSourceBackendId();
             MainResultProcessor<Proposition> resultProcessor =
                     factory.getInstance(dataSourceBackendId, entitySpec, results);
-            generateAndExecuteSelect(entitySpec, null, propIds, filtersCopy,
-                    allEntitySpecsCopy, keyIds, order, resultProcessor);
+
+
+            List<Set<Filter>> filterList = constructFilterSets(entitySpec,
+                    filtersCopy);
+            for (Set<Filter> filterSet : filterList) {
+                generateAndExecuteSelect(entitySpec, null, propIds, filterSet,
+                        allEntitySpecsCopy, keyIds, order, resultProcessor);
+            }
             if (results.anyAdded()) {
                 ReferenceSpec[] refSpecs = entitySpec.getReferenceSpecs();
                 if (refSpecs != null) {
@@ -373,9 +439,14 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                             retainEntitySpecsWithFiltersOrConstraints(entitySpec,
                                     referredToEntitySpec, allEntitySpecsCopyForRefs,
                                     refFiltersCopy, propIds);
-                            generateAndExecuteSelect(entitySpec, referenceSpec, propIds,
-                                    refFiltersCopy, allEntitySpecsCopyForRefs, keyIds,
-                                    order, refResultProcessor);
+                            List<Set<Filter>> refFilterList =
+                                    constructFilterSets(referredToEntitySpec,
+                                    refFiltersCopy);
+                            for (Set<Filter> filterSet : refFilterList) {
+                                generateAndExecuteSelect(entitySpec, referenceSpec, propIds,
+                                        filterSet, allEntitySpecsCopyForRefs, keyIds,
+                                        order, refResultProcessor);
+                            }
                             logDoneProcessingRef(logger, referenceSpec, entitySpec);
                         } else {
                             logSkippingReference(logger, referenceSpec);

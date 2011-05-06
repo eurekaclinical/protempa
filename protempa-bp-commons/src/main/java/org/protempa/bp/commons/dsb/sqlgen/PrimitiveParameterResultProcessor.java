@@ -39,10 +39,12 @@ class PrimitiveParameterResultProcessor extends
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
 
         int timestampColumnType = -1;
+        boolean timestampColumnTypeSet = false;
         DataSourceType dsType =
                 DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
         while (resultSet.next()) {
             int i = 1;
+
             String keyId = resultSet.getString(i++);
             
             i = readUniqueIds(uniqueIds, resultSet, i);
@@ -65,8 +67,9 @@ class PrimitiveParameterResultProcessor extends
                 i++;
             }
 
-            if (timestampColumnType == -1) {
+            if (!timestampColumnTypeSet) {
                 timestampColumnType = resultSetMetaData.getColumnType(i);
+                timestampColumnTypeSet = true;
             }
 
             Long timestamp = null;
@@ -78,10 +81,11 @@ class PrimitiveParameterResultProcessor extends
                 logger.log(Level.WARNING,
                         "Could not parse timestamp. Leaving timestamp unset.", e);
             }
-
+            
             ValueType valueType = entitySpec.getValueType();
             String cpValStr = resultSet.getString(i++);
             Value cpVal = ValueFormat.parse(cpValStr, valueType);
+            
             i = extractPropertyValues(propertySpecs, resultSet, i,
                     propertyValues);
 

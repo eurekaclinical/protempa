@@ -141,6 +141,24 @@ public class PositionFilter extends AbstractFilter {
     }
 
     /**
+     * Returns the start position supplied in the constructor.
+     *
+     * @return a {@link Long}.
+     */
+    public Long getStart() {
+        return this.ival.getMinStart();
+    }
+
+    /**
+     * Returns the finish position supplied in the constructor.
+     *
+     * @return a {@link Long}.
+     */
+    public Long getFinish() {
+        return this.ival.getMinFinish();
+    }
+
+    /**
      * Returns the side of the proposition to which to apply the lower bound.
      *
      * @return a {@link Side}.

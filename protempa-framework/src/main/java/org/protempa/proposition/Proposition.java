@@ -2,7 +2,6 @@ package org.protempa.proposition;
 
 import java.beans.PropertyChangeListener;
 import java.util.List;
-import java.util.Set;
 
 import org.protempa.DataSourceType;
 import org.protempa.QuerySession;
@@ -93,18 +92,18 @@ public interface Proposition extends PropositionVisitable,
     List<UniqueIdentifier> getReferences(String name);
 
     /**
-     * Get a set of property names from the proposition
+     * Get the property names for the proposition
      * 
-     * @return a set containing the names of all the properties contained
+     * @return an array containing the names of all the properties contained
      */
-    Set<String> getPropertyNames();
+    String[] getPropertyNames();
 
     /**
-     * Get a set of reference names from the proposition
+     * Get the reference names for the proposition
      * 
-     * @return a set containing the names of all the references contained
+     * @return an array containing the names of all the references contained
      */
-    Set<String> getReferenceNames();
+    String[] getReferenceNames();
 
     /**
      * Gets this proposition's global unique identifier.

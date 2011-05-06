@@ -8,6 +8,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
 import org.protempa.bp.commons.dsb.PositionFormat;
 import org.protempa.proposition.value.Granularity;
+import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -42,6 +43,7 @@ public final class EntitySpec implements Serializable {
     private final ColumnSpec valueSpec;
     private final Granularity granularity;
     private final PositionFormat positionParser;
+    private final Unit partitionBy;
 
     /**
      * Creates an entity spec instance.
@@ -90,6 +92,15 @@ public final class EntitySpec implements Serializable {
      * and finish times.
      * @param positionParser a parser for dates/times/timestamps for this
      * entity's start and finish times. Cannot be <code>null</code>.
+     * @param partitionBy a hint to the relational data source backend to
+     * partition queries for this entity spec by the given {@link Unit}. For
+     * example, if a time unit of MONTH is specified, the backend may only
+     * query data one month at a time. In order for this to work, at least one
+     * {@link org.protempa.dsb.filter.PositionFilter} must be specified that
+     * defines both upper and lower bounds on the same side of a
+     * proposition's intervals. If multiple position filters are specified,
+     * then one of these will be used to partition queries (which one is
+     * undefined!). If <code>null</code>, no partitioning will occur.
      */
     public EntitySpec(String name,
             String description,
@@ -107,7 +118,8 @@ public final class EntitySpec implements Serializable {
             ColumnSpec valueSpec,
             ValueType valueType,
             Granularity granularity,
-            PositionFormat positionParser) {
+            PositionFormat positionParser,
+            Unit partitionBy) {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
         }
@@ -199,6 +211,7 @@ public final class EntitySpec implements Serializable {
         this.valueSpec = valueSpec;
         this.granularity = granularity;
         this.positionParser = positionParser;
+        this.partitionBy = partitionBy;
     }
 
     /**
@@ -380,6 +393,24 @@ public final class EntitySpec implements Serializable {
         return this.positionParser;
     }
 
+    /**
+     * Returns a hint to the relational data source backend to partition
+     * queries for this entity spec by the given units. For example, if a
+     * time unit of MONTH is specified, the backend may only query data one
+     * month at a time. In order for this to work, at least one
+     * {@link org.protempa.dsb.filter.PositionFilter} must be specified that
+     * defines both upper and lower bounds on the same side of a
+     * proposition's intervals. If multiple position filters are specified,
+     * then one of these will be used to partition queries (which one is
+     * undefined!).
+     * 
+     * @return a {@link Unit} to partition by. If <code>null</code>, no
+     * partitioning will occur.
+     */
+    public Unit getPartitionBy() {
+        return this.partitionBy;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -400,6 +431,7 @@ public final class EntitySpec implements Serializable {
                 .append("valueSpec", this.valueSpec)
                 .append("granularity", this.granularity)
                 .append("positionParser", this.positionParser)
+                .append("partitionBy", this.partitionBy)
                 .toString();
     }
 }

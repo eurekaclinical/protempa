@@ -8,7 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +29,7 @@ import org.protempa.proposition.value.ValueType;
 public abstract class AbstractProposition implements Proposition {
 
     private static final int DEFAULT_REFERENCE_LIST_SIZE = 100;
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
     /**
      * An identification <code>String</code> for this proposition.
      */
@@ -64,13 +65,14 @@ public abstract class AbstractProposition implements Proposition {
 
     protected void initializeProperties() {
         if (this.properties == null) {
-            this.properties = new HashMap<String, Value>();
+            this.properties = new LinkedHashMap<String, Value>();
         }
     }
 
     protected void initializeReferences() {
         if (this.references == null) {
-            this.references = new HashMap<String, List<UniqueIdentifier>>();
+            this.references = new LinkedHashMap<String,
+                    List<UniqueIdentifier>>();
         }
     }
 
@@ -101,11 +103,12 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     @Override
-    public final Set<String> getPropertyNames() {
+    public final String[] getPropertyNames() {
         if (this.properties == null) {
-            return Collections.emptySet();
+            return EMPTY_STRING_ARRAY;
         } else {
-            return this.properties.keySet();
+            Set<String> propNames = this.properties.keySet();
+            return propNames.toArray(new String[propNames.size()]);
         }
     }
 
@@ -169,11 +172,12 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     @Override
-    public final Set<String> getReferenceNames() {
+    public final String[] getReferenceNames() {
         if (this.references == null) {
-            return Collections.emptySet();
+            return EMPTY_STRING_ARRAY;
         } else {
-            return this.references.keySet();
+            Set<String> refNames = this.references.keySet();
+            return refNames.toArray(new String[refNames.size()]);
         }
     }
 

@@ -1,8 +1,11 @@
-package org.protempa.query.handler.xml;
+    package org.protempa.query.handler.xml;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +21,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.protempa.DerivedDataSourceType;
 
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
@@ -35,12 +39,23 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
     private KnowledgeSource knowledgeSource;
     private final String initialProposition;
     private final Writer out;
+    private final String[] propIds;
 
     public XmlQueryResultsHandler(Writer writer, Map<String, String> propOrder,
             String initialProp) {
+        this(writer, propOrder, initialProp, null);
+    }
+
+    public XmlQueryResultsHandler(Writer writer, Map<String, String> propOrder,
+            String initialProp, String[] propIds) {
         this.out = writer;
         this.order = propOrder;
         this.initialProposition = initialProp;
+        if (propIds == null) {
+            this.propIds = new String[0];
+        } else {
+            this.propIds = propIds.clone();
+        }
     }
 
     @Override
@@ -121,16 +136,15 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
         return valueElems;
     }
 
-    private List<String> orderReferences(Proposition proposition) {
-        List<String> orderedRefs = new ArrayList<String>();
+    private Collection<String> orderReferences(Proposition proposition) {
+        Collection<String> orderedRefs = null;
         String firstReference = this.order.get(proposition.getId());
-        for (String refName : proposition.getReferenceNames()) {
-            if (refName.equals(firstReference)) {
-                orderedRefs.add(0, refName);
-            } else {
-                orderedRefs.add(refName);
-            }
+        if (firstReference != null) {
+            orderedRefs = Collections.singletonList(firstReference);
+        } else {
+            orderedRefs = Arrays.asList(proposition.getReferenceNames());
         }
+        
         return orderedRefs;
     }
 
@@ -140,7 +154,7 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
             Proposition proposition, XmlPropositionVisitor visitor,
             Document document) throws ProtempaException {
         Element referencesElem = document.createElement("references");
-        List<String> orderedReferences = orderReferences(proposition);
+        Collection<String> orderedReferences = orderReferences(proposition);
         Logger logger = Util.logger();
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST,
@@ -292,6 +306,22 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
 
             Element rootNode = document.createElement("patient");
             rootNode.setAttribute("id", key);
+
+            Element abstractionNode = document.createElement("derived");
+            Set<String> propIdsAsSet =
+                    org.arp.javautil.arrays.Arrays.asSet(this.propIds);
+            DerivedDataSourceType ddst = DerivedDataSourceType.getInstance();
+            for (Proposition prop : propositions) {
+                if (prop.getDataSourceType().equals(ddst)
+                        && propIdsAsSet.contains(prop.getId())) {
+                    Element elem = handleProposition(handled, derivations,
+                            references, prop, visitor, document);
+                    if (elem != null) {
+                        abstractionNode.appendChild(elem);
+                    }
+                }
+            }
+            rootNode.appendChild(abstractionNode);
 
             if (this.initialProposition != null) {
                 Proposition firstProp = findInitialProposition(

@@ -311,6 +311,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                         } else {
                             Util.logger().log(Level.WARNING,
                                     "Cannot write value set display name because value set {0} is not in the knowledge source", propertyDef.getValueSetId());
+                            outputValue = propertyValue.getFormatted();
                         }
                     } else {
                         Util.logger().log(Level.WARNING,

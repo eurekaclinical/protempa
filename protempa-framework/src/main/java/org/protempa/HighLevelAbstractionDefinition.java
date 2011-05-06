@@ -324,14 +324,13 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
     protected void recalculateDirectChildren() {
         String[] old = this.directChildren;
         Set<String> abstractedFrom = getAbstractedFrom();
+        Set<String> directChildrenLocal = new HashSet(abstractedFrom);
         String[] inverseIsA = getInverseIsA();
-        if (inverseIsA != null) {
-            for (String propId : inverseIsA) {
-                abstractedFrom.add(propId);
-            }
+        for (String propId : inverseIsA) {
+            directChildrenLocal.add(propId);
         }
-        this.directChildren = abstractedFrom.toArray(
-                new String[abstractedFrom.size()]);
+        this.directChildren = directChildrenLocal.toArray(
+                new String[directChildrenLocal.size()]);
         if (this.changes != null) {
             this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
                     this.directChildren);

@@ -78,7 +78,7 @@ class LowLevelAbstractionConverter implements PropositionConverter {
                     protempaKnowledgeBase, lowLevelAbstractionInstance.getName());
             ConnectionManager cm = backend.getConnectionManager();
             Util.setNames(lowLevelAbstractionInstance, d, cm);
-            Util.setInDataSource(lowLevelAbstractionInstance, result, cm);
+            Util.setInDataSource(lowLevelAbstractionInstance, d, cm);
             Util.setInverseIsAs(lowLevelAbstractionInstance, d, cm);
             Util.setGap(lowLevelAbstractionInstance, d, backend, cm);
             Util.setProperties(lowLevelAbstractionInstance, d, cm);

@@ -1,9 +1,7 @@
 package org.protempa.query.handler;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +13,7 @@ import java.util.Set;
 
 import org.arp.javautil.string.StringUtil;
 import org.protempa.FinderException;
+import org.protempa.KnowledgeSource;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.AbstractPropositionCheckedVisitor;
@@ -33,12 +32,13 @@ import org.protempa.proposition.UniqueIdentifier;
  * @author Michel Mansour
  *
  */
-public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
+public class TabDelimQueryResultsHandler implements QueryResultsHandler {
 
     private static final char COLUMN_DELIMITER = '\t';
     private final List<Comparator<Proposition>> comparator;
     private final TabDelimHandlerPropositionVisitor visitor;
     private final boolean includeDerived;
+    private final BufferedWriter writer;
 
     /**
      * Instantiates this handler to write to a {@link Writer}. No sorting
@@ -46,11 +46,11 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
      * 
      * @param out a {@link Writer}.
      */
-    public TabDelimQueryResultsHandler(Writer out) {
+    public TabDelimQueryResultsHandler(BufferedWriter out) {
         this(out, null);
     }
 
-    public TabDelimQueryResultsHandler(Writer out, boolean includeDerived) {
+    public TabDelimQueryResultsHandler(BufferedWriter out, boolean includeDerived) {
         this(out, null, includeDerived);
     }
 
@@ -64,15 +64,15 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
      * they are given. A value of <code>null</code> or an empty array means no
      * sorting will be performed.
      */
-    public TabDelimQueryResultsHandler(Writer out,
+    public TabDelimQueryResultsHandler(BufferedWriter out,
             List<? extends Comparator<Proposition>> comparator) {
         this(out, comparator, false);
     }
 
-    public TabDelimQueryResultsHandler(Writer out,
+    public TabDelimQueryResultsHandler(BufferedWriter out,
             List<? extends Comparator<Proposition>> comparator,
             boolean includeDerived) {
-        super(out);
+        this.writer = out;
         if (comparator == null) {
             this.comparator = Collections.emptyList();
         } else {
@@ -83,142 +83,7 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
         this.includeDerived = includeDerived;
     }
 
-    /**
-     * Instantiates this handler to write to an {@link OutputStream}.
-     * No sorting will be performed.
-     *
-     * @param out an {@link OutputStream}.
-     */
-    public TabDelimQueryResultsHandler(OutputStream out) {
-        this(out, null);
-    }
 
-    public TabDelimQueryResultsHandler(OutputStream out, boolean includeDerived) {
-        this(out, null, includeDerived);
-    }
-
-    /**
-     * Instantiates this handler to write to an {@link OutputStream) with
-     * optional sorting of propositions.
-     *
-     * @param out a {@link OutputStream}.
-     * @param comparator a {@link List<? extends Comparator<Proposition>>}. Every key's
-     * propositions will be sorted by the provided comparators in the order
-     * they are given. A value of <code>null</code> or an empty array means no
-     * sorting will be performed.
-     */
-    public TabDelimQueryResultsHandler(OutputStream out,
-            List<? extends Comparator<Proposition>> comparator) {
-        this(out, comparator, false);
-    }
-
-    public TabDelimQueryResultsHandler(OutputStream out,
-            List<? extends Comparator<Proposition>> comparator,
-            boolean includeDerived) {
-        super(out);
-        if (comparator == null) {
-            this.comparator = Collections.emptyList();
-        } else {
-            this.comparator =
-                    new ArrayList<Comparator<Proposition>>(comparator);
-        }
-        this.visitor = new TabDelimHandlerPropositionVisitor(this.writer);
-        this.includeDerived = includeDerived;
-    }
-
-    /**
-     * Instantiates this handler to write to a file. No sorting will be
-     * performed.
-     *
-     * @param fileName a file name {@link String}.
-     * @throws IOException if an error occurred opening/creating the file.
-     */
-    public TabDelimQueryResultsHandler(String fileName) throws IOException {
-        this(fileName, null);
-    }
-
-    public TabDelimQueryResultsHandler(String fileName, boolean includeDerived) throws IOException {
-        this(fileName, null, includeDerived);
-    }
-
-    /**
-     * Instantiates this handler to write to a file with optional sorting
-     * of propositions. If the file already exists, its contents will be
-     * overwritten.
-     *
-     * @param fileName a file name {@link String}.
-     * @param comparator a {@link List<? extends Comparator<Proposition>>}. Every key's
-     * propositions will be sorted by the provided comparators in the order
-     * they are given. A value of <code>null</code> or an empty array means no
-     * sorting will be performed.
-     * @throws IOException if an error occurred opening/creating the file.
-     */
-    public TabDelimQueryResultsHandler(String fileName,
-            List<? extends Comparator<Proposition>> comparator)
-            throws IOException {
-        this(fileName, comparator, false);
-    }
-
-    public TabDelimQueryResultsHandler(String fileName,
-            List<? extends Comparator<Proposition>> comparator,
-            boolean includeDerived) throws IOException {
-        super(fileName);
-        if (comparator == null) {
-            this.comparator = Collections.emptyList();
-        } else {
-            this.comparator =
-                    new ArrayList<Comparator<Proposition>>(comparator);
-        }
-        this.visitor = new TabDelimHandlerPropositionVisitor(this.writer);
-        this.includeDerived = includeDerived;
-    }
-
-    /**
-     * Instantiates this handler to write to a file. No sorting will be
-     * performed. If the file already exists, its contents will be
-     * overwritten.
-     *
-     * @param file a {@link File}.
-     * @throws IOException if an error occurred opening/creating the file.
-     */
-    public TabDelimQueryResultsHandler(File file) throws IOException {
-        this(file, null);
-    }
-
-    public TabDelimQueryResultsHandler(File file, boolean includeDerived) throws IOException {
-        this(file, null, includeDerived);
-    }
-
-    /**
-     * Instantiates this handler to write to a file with optional sorting.
-     * If the file already exists, its contents will be overwritten.
-     *
-     * @param file a {@link File}.
-     * @param comparator a {@link List<? extends Comparator<Proposition>>}. Every key's
-     * propositions will be sorted by the provided comparators in the order
-     * they are given. A value of <code>null</code> or an empty array means no
-     * sorting will be performed.
-     * @throws IOException if an error occurred opening/creating the file.
-     */
-    public TabDelimQueryResultsHandler(File file,
-            List<? extends Comparator<Proposition>> comparator)
-            throws IOException {
-        this(file, comparator, false);
-    }
-
-    public TabDelimQueryResultsHandler(File file,
-            List<? extends Comparator<Proposition>> comparator,
-            boolean includeDerived) throws IOException {
-        super(file);
-        if (comparator == null) {
-            this.comparator = Collections.emptyList();
-        } else {
-            this.comparator =
-                    new ArrayList<Comparator<Proposition>>(comparator);
-        }
-        this.visitor = new TabDelimHandlerPropositionVisitor(this.writer);
-        this.includeDerived = includeDerived;
-    }
 
     /**
      * Writes a keys worth of data in tab delimited format optionally sorted.
@@ -262,6 +127,14 @@ public class TabDelimQueryResultsHandler extends WriterQueryResultsHandler {
                 }
             }
         }
+    }
+
+    @Override
+    public void init(KnowledgeSource knowledgeSource) throws FinderException {
+    }
+
+    @Override
+    public void finish() throws FinderException {
     }
 
     private final static class TabDelimHandlerProtempaException
