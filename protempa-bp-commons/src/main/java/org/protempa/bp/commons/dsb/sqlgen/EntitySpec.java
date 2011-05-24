@@ -1,8 +1,10 @@
 package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
@@ -17,15 +19,14 @@ import org.protempa.proposition.value.ValueType;
  * @author Andrew Post
  */
 public final class EntitySpec implements Serializable {
-    private static final long serialVersionUID = -1935588032831088001L;
 
+    private static final long serialVersionUID = -1935588032831088001L;
     private static final PropertySpec[] EMPTY_PROPERTY_SPEC_ARRAY =
             new PropertySpec[0];
     private static final ReferenceSpec[] EMPTY_REFERENCE_SPEC_ARRAY =
             new ReferenceSpec[0];
     private static final ColumnSpec[] EMPTY_COLUMN_SPEC_ARRAY =
             new ColumnSpec[0];
-
     private final String name;
     private final String description;
     private final String[] propositionIds;
@@ -125,8 +126,8 @@ public final class EntitySpec implements Serializable {
         }
         this.name = name;
 
-        if (positionParser == null &&
-                (startTimeOrTimestampSpec != null || finishTimeSpec != null)) {
+        if (positionParser == null
+                && (startTimeOrTimestampSpec != null || finishTimeSpec != null)) {
             throw new IllegalArgumentException(
                     "positionParser cannot be null for entities with a start time and/or finish time");
         }
@@ -151,12 +152,12 @@ public final class EntitySpec implements Serializable {
         }
         this.baseSpec = baseSpec;
 
-        
+
         if (description == null) {
             description = "";
         }
         this.description = description;
-        
+
         this.unique = unique;
 
         ProtempaUtil.checkArray(uniqueIdSpecs, "uniqueIdSpecs");
@@ -319,6 +320,47 @@ public final class EntitySpec implements Serializable {
     }
 
     /**
+     * Returns whether this entity spec has a reference to another entity spec.
+     * 
+     * @param entitySpec another entity spec.
+     * @return <code>true</code> or <code>false</code>.
+     */
+    public boolean hasReferenceTo(EntitySpec entitySpec) {
+        if (entitySpec == null) {
+            throw new IllegalArgumentException("entitySpec cannot be null");
+        }
+
+        boolean found = false;
+        for (ReferenceSpec refSpec : this.referenceSpecs) {
+            if (refSpec.getEntityName().equals(entitySpec.getName())) {
+                found = true;
+                continue;
+            }
+        }
+        return found;
+    }
+
+    /**
+     * Returns the reference specs that point to the given entity spec.
+     *
+     * @param entitySpec another entity spec.
+     * @return a {@link ReferenceSpec[]}.
+     */
+    public ReferenceSpec[] referencesTo(EntitySpec entitySpec) {
+        if (entitySpec == null) {
+            throw new IllegalArgumentException("entitySpec cannot be null");
+        }
+
+        List<ReferenceSpec> result = new ArrayList<ReferenceSpec>();
+        for (ReferenceSpec refSpec : this.referenceSpecs) {
+            if (refSpec.getEntityName().equals(entitySpec.getName())) {
+                result.add(refSpec);
+            }
+        }
+        return result.toArray(new ReferenceSpec[result.size()]);
+    }
+
+    /**
      * Returns a one-to-one mapping from code to proposition id. If
      * <code>null</code> or a mapping for a code is not defined, it is assumed
      * that the code in the database is the same as the proposition id.
@@ -413,25 +455,6 @@ public final class EntitySpec implements Serializable {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("name", this.name)
-                .append("description", this.description)
-                .append("propositionIds", this.propositionIds)
-                .append("unique", this.unique)
-                .append("baseSpec", this.baseSpec)
-                .append("uniqueIdSpecs", this.uniqueIdSpecs)
-                .append("startTimeOrTimestampSpec", this.startTimeOrTimestampSpec)
-                .append("finishTimeSpec", this.finishTimeSpec)
-                .append("propertySpecs", this.propertySpecs)
-                .append("referenceSpecs", this.referenceSpecs)
-                .append("codeToPropIdMap", this.codeToPropIdMap)
-                .append("codeSpec", this.codeSpec)
-                .append("constraintSpecs", this.constraintSpecs)
-                .append("valueType", this.valueType)
-                .append("valueSpec", this.valueSpec)
-                .append("granularity", this.granularity)
-                .append("positionParser", this.positionParser)
-                .append("partitionBy", this.partitionBy)
-                .toString();
+        return new ToStringBuilder(this).append("name", this.name).append("description", this.description).append("propositionIds", this.propositionIds).append("unique", this.unique).append("baseSpec", this.baseSpec).append("uniqueIdSpecs", this.uniqueIdSpecs).append("startTimeOrTimestampSpec", this.startTimeOrTimestampSpec).append("finishTimeSpec", this.finishTimeSpec).append("propertySpecs", this.propertySpecs).append("referenceSpecs", this.referenceSpecs).append("codeToPropIdMap", this.codeToPropIdMap).append("codeSpec", this.codeSpec).append("constraintSpecs", this.constraintSpecs).append("valueType", this.valueType).append("valueSpec", this.valueSpec).append("granularity", this.granularity).append("positionParser", this.positionParser).append("partitionBy", this.partitionBy).toString();
     }
 }

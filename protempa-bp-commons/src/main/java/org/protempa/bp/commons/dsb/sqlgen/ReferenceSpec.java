@@ -11,9 +11,16 @@ import org.protempa.ProtempaUtil;
  */
 public class ReferenceSpec implements Serializable {
     private static final long serialVersionUID = -2223863541098753792L;
+
+    public static enum Type {
+        ONE,
+        MANY
+    }
+
     private final String referenceName;
     private final String entityName;
     private final ColumnSpec[] uniqueIdSpecs;
+    private final Type type;
 
     /**
      * Instantiates a reference instance with the reference's name, the 
@@ -28,17 +35,20 @@ public class ReferenceSpec implements Serializable {
      * an unique identifier of the entities being referenced.
      */
     public ReferenceSpec(String referenceName, String entityName,
-            ColumnSpec[] uniqueIdSpecs) {
+            ColumnSpec[] uniqueIdSpecs, Type type) {
         if (referenceName == null)
             throw new IllegalArgumentException("referenceName cannot be null");
         if (entityName == null)
             throw new IllegalArgumentException("entityName cannot be null");
         if (uniqueIdSpecs == null)
             throw new IllegalArgumentException("uniqueIdSpecs cannot be null");
+        if (type == null)
+            throw new IllegalArgumentException("type cannot be null");
         this.uniqueIdSpecs = uniqueIdSpecs.clone();
         ProtempaUtil.checkArray(this.uniqueIdSpecs, "uniqueIdSpecs");
         this.referenceName = referenceName.intern();
         this.entityName = entityName;
+        this.type = type;
     }
 
     /**
@@ -49,7 +59,7 @@ public class ReferenceSpec implements Serializable {
      * @return a {@link ColumnSpec[]} representing those paths.
      */
     public ColumnSpec[] getUniqueIdSpecs() {
-        return uniqueIdSpecs.clone();
+        return this.uniqueIdSpecs.clone();
     }
 
     /**
@@ -67,7 +77,11 @@ public class ReferenceSpec implements Serializable {
      * @return an entity name {@link String}.
      */
     public String getEntityName() {
-        return entityName;
+        return this.entityName;
+    }
+
+    public Type getType() {
+        return this.type;
     }
 
     @Override
@@ -76,6 +90,7 @@ public class ReferenceSpec implements Serializable {
                 .append("referenceName", this.referenceName)
                 .append("entityName", this.entityName)
                 .append("uniqueIdSpecs", this.uniqueIdSpecs)
+                .append("type", this.type)
                 .toString();
     }
 }

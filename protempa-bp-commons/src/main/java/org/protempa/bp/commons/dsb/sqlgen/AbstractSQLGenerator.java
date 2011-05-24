@@ -540,15 +540,14 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     private static void retainEntitySpecsWithInboundRefs(
-            Collection<EntitySpec> allEntitySpecsCopyForRefs,
-            EntitySpec entitySpec, ReferenceSpec referenceSpec) {
-        for (Iterator<EntitySpec> itr = allEntitySpecsCopyForRefs.iterator();
+            Collection<EntitySpec> entitySpecs, EntitySpec entitySpec,
+            ReferenceSpec referenceSpec) {
+        for (Iterator<EntitySpec> itr = entitySpecs.iterator();
                 itr.hasNext();) {
             EntitySpec es = itr.next();
             if (es != entitySpec
                     && !referenceSpec.getEntityName().equals(es.getName())
-                    && !SQLGenUtil.isInReferences(entitySpec,
-                    es.getReferenceSpecs())) {
+                    && !es.hasReferenceTo(entitySpec)) {
                 itr.remove();
             }
         }
@@ -626,8 +625,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 itr.hasNext();) {
             EntitySpec es = itr.next();
             if (es != entitySpec
-                    && !SQLGenUtil.isInReferences(entitySpec,
-                    es.getReferenceSpecs())) {
+                    && !es.hasReferenceTo(entitySpec)) {
                 itr.remove();
             }
         }
@@ -663,7 +661,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             if (Collections.containsAny(filterPropIds, entitySpecPropIds)) {
                 return;
             }
-            if (!isInInboundReference(entitySpecsSet, entitySpec)) {
+            if (!atLeastOneInInboundReferences(entitySpecsSet, entitySpec)) {
                 itr.remove();
             }
             entitySpecsSet.clear();
@@ -671,11 +669,10 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
     }
 
-    private static boolean isInInboundReference(Set<EntitySpec> entitySpecsSet,
+    private static boolean atLeastOneInInboundReferences(Set<EntitySpec> entitySpecsSet,
             EntitySpec entitySpec) {
         for (EntitySpec es : entitySpecsSet) {
-            if (SQLGenUtil.isInReferences(entitySpec,
-                    es.getReferenceSpecs())) {
+            if (es.hasReferenceTo(entitySpec)) {
                 return true;
             }
         }

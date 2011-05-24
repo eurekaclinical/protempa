@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang.ArrayUtils;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.DataSourceType;
@@ -29,7 +30,6 @@ import org.protempa.proposition.value.ValueType;
 public abstract class AbstractProposition implements Proposition {
 
     private static final int DEFAULT_REFERENCE_LIST_SIZE = 100;
-    private static final String[] EMPTY_STRING_ARRAY = new String[0];
     /**
      * An identification <code>String</code> for this proposition.
      */
@@ -105,7 +105,7 @@ public abstract class AbstractProposition implements Proposition {
     @Override
     public final String[] getPropertyNames() {
         if (this.properties == null) {
-            return EMPTY_STRING_ARRAY;
+            return ArrayUtils.EMPTY_STRING_ARRAY;
         } else {
             Set<String> propNames = this.properties.keySet();
             return propNames.toArray(new String[propNames.size()]);
@@ -174,7 +174,7 @@ public abstract class AbstractProposition implements Proposition {
     @Override
     public final String[] getReferenceNames() {
         if (this.references == null) {
-            return EMPTY_STRING_ARRAY;
+            return ArrayUtils.EMPTY_STRING_ARRAY;
         } else {
             Set<String> refNames = this.references.keySet();
             return refNames.toArray(new String[refNames.size()]);

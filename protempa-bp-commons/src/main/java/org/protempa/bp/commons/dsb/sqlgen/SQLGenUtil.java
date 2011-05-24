@@ -32,18 +32,5 @@ class SQLGenUtil {
         return LazyLoggerHolder.instance;
     }
 
-    static boolean isInReferences(EntitySpec entitySpec,
-            ReferenceSpec[] referenceSpecs) {
-        assert entitySpec != null : "entitySpec cannot be null";
-        assert referenceSpecs != null : "referenceSpecs cannot be null";
-        
-        boolean found = false;
-        for (ReferenceSpec refSpec : referenceSpecs) {
-            if (refSpec.getEntityName().equals(entitySpec.getName())) {
-                found = true;
-                continue;
-            }
-        }
-        return found;
-    }
+    
 }

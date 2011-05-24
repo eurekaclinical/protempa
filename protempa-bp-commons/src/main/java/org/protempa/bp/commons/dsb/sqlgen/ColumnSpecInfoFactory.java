@@ -27,9 +27,12 @@ final class ColumnSpecInfoFactory {
         EntitySpec refEntitySpec = null;
         if (referenceSpec != null) {
             refEntitySpec = findRefEntitySpec(entitySpecs, referenceSpec);
-            columnSpecInfo.setUnique(refEntitySpec.isUnique());
+            columnSpecInfo.setUnique(refEntitySpec.isUnique()
+                    && entitySpec.isUnique()
+                    && hasNoXToManyReferences(entitySpecs, entitySpec));
         } else {
-            columnSpecInfo.setUnique(entitySpec.isUnique());
+            columnSpecInfo.setUnique(entitySpec.isUnique()
+                    && hasNoXToManyReferences(entitySpecs, entitySpec));
         }
         List<ColumnSpec> columnSpecs = new ArrayList<ColumnSpec>();
         int i = 0;
@@ -45,14 +48,29 @@ final class ColumnSpecInfoFactory {
                 i = processPropertyAndValueSpecs(entitySpec2, columnSpecs, i,
                         columnSpecInfo);
             }
-            i = processCodeSpec(propIds, entitySpec, entitySpec2, columnSpecs, i,
-                    columnSpecInfo, referenceSpec);
+            i = processCodeSpec(propIds, entitySpec, entitySpec2, columnSpecs,
+                    i, columnSpecInfo, referenceSpec);
             i = processConstraintSpecs(entitySpec2, columnSpecs, i);
             i = processFilters(entitySpec2, filters, columnSpecs,
                     i);
         }
         columnSpecInfo.setColumnSpecs(columnSpecs);
         return columnSpecInfo;
+    }
+
+    private static boolean hasNoXToManyReferences(
+            Collection<EntitySpec> entitySpecs, EntitySpec entitySpec) {
+        for (EntitySpec es : entitySpecs) {
+            if (es.hasReferenceTo(entitySpec)) {
+                for (ReferenceSpec refSpec : entitySpec.referencesTo(es)) {
+                    if (refSpec.getType() == ReferenceSpec.Type.MANY) {
+                        return false;
+                    }
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
     private static EntitySpec findRefEntitySpec(
