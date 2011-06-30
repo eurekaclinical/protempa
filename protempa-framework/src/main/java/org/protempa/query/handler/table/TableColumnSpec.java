@@ -40,7 +40,8 @@ public interface TableColumnSpec {
      * the knowledge source failed.
      */
     String[] columnValues(String key, Proposition proposition, 
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException;

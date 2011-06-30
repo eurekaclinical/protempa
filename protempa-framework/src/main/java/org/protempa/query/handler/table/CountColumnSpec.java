@@ -50,12 +50,14 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
 
     @Override
     public String[] columnValues(String key, Proposition proposition,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource) {
         List<String> result = new ArrayList<String>();
         Collection<Proposition> props = traverseLinks(this.links, proposition,
-                derivations, references, knowledgeSource);
+                forwardDerivations, backwardDerivations, references, 
+                knowledgeSource);
         if (this.countUnique) {
             for (Proposition p : props) {
                 Util.logger().log(Level.FINEST,

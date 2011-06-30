@@ -16,6 +16,7 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     private boolean concatenable;
     private TemporalExtendedPropositionDefinition rightHandProposition;
     private TemporalExtendedPropositionDefinition leftHandProposition;
+    private boolean secondRequired;
 
     public PairDefinition(KnowledgeBase kb, String id) {
         super(kb, id);
@@ -29,6 +30,14 @@ public class PairDefinition extends AbstractAbstractionDefinition {
 
     public void setRelation(Relation relation) {
         this.relation = relation;
+    }
+    
+    public boolean isSecondRequired() {
+        return this.secondRequired;
+    }
+    
+    public void setSecondRequired(boolean secondRequired) {
+        this.secondRequired = secondRequired;
     }
 
     @Override

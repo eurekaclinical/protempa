@@ -25,8 +25,9 @@ public class PairAbstractionConverter implements PropositionConverter {
         Util.setProperties(protegeProposition, result, cm);
         Util.setTerms(protegeProposition, result, cm);
         addComponentAbstractionDefinitions(protegeProposition, result,
-                backend);
-        setRelation(protegeProposition, result, backend);
+                backend, cm);
+        setRelation(protegeProposition, result, backend, cm);
+        setRequireSecond(protegeProposition, result, cm);
         Util.setInverseIsAs(protegeProposition, result, cm);
 
         return result;
@@ -41,9 +42,8 @@ public class PairAbstractionConverter implements PropositionConverter {
 
     private void setRelation(
             Instance protegeProposition, PairDefinition pd,
-            ProtegeKnowledgeSourceBackend backend)
+            ProtegeKnowledgeSourceBackend backend, ConnectionManager cm)
             throws KnowledgeSourceReadException {
-        ConnectionManager cm = backend.getConnectionManager();
         Slot slot = cm.getSlot("withRelation");
         Instance relationInstance = (Instance) cm.getOwnSlotValue(
                 protegeProposition, slot);
@@ -52,7 +52,17 @@ public class PairAbstractionConverter implements PropositionConverter {
                 cm, backend);
 
         pd.setRelation(relation);
-
+    }
+    
+    private void setRequireSecond(
+            Instance protegeProposition, PairDefinition pd,
+            ConnectionManager cm) 
+            throws KnowledgeSourceReadException {
+        Slot slot = cm.getSlot("requireSecond");
+        Boolean requireSecond = 
+                (Boolean) cm.getOwnSlotValue(protegeProposition, slot);
+        assert requireSecond != null : "requireSecond cannot be null!";
+        pd.setSecondRequired(requireSecond);
     }
 
     /**
@@ -67,11 +77,9 @@ public class PairAbstractionConverter implements PropositionConverter {
      *            instance.
      */
     private static void addComponentAbstractionDefinitions(
-            Instance pairAbstractionInstance,
-            PairDefinition pd,
-            ProtegeKnowledgeSourceBackend backend)
+            Instance pairAbstractionInstance, PairDefinition pd,
+            ProtegeKnowledgeSourceBackend backend, ConnectionManager cm)
             throws KnowledgeSourceReadException {
-        ConnectionManager cm = backend.getConnectionManager();
         Instance relation = (Instance) cm.getOwnSlotValue(
                 pairAbstractionInstance, cm.getSlot("withRelation"));
         Instance lhs = (Instance) cm.getOwnSlotValue(relation,
@@ -81,9 +89,11 @@ public class PairAbstractionConverter implements PropositionConverter {
                 cm.getSlot("rhs"));
         assert rhs != null : "rhs cannot be null";
         TemporalExtendedPropositionDefinition lhsDefinition =
-                Util.instanceToTemporalExtendedPropositionDefinition(lhs, backend);
+                Util.instanceToTemporalExtendedPropositionDefinition(lhs, 
+                backend);
         TemporalExtendedPropositionDefinition rhsDefinition =
-                Util.instanceToTemporalExtendedPropositionDefinition(rhs, backend);
+                Util.instanceToTemporalExtendedPropositionDefinition(rhs, 
+                backend);
         pd.setLeftHandProposition(lhsDefinition);
         pd.setRightHandProposition(rhsDefinition);
     }

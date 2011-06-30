@@ -2,6 +2,7 @@ package org.protempa;
 
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.drools.WorkingMemory;
 import org.drools.base.ClassObjectType;
@@ -19,6 +20,7 @@ import org.drools.spi.EvalExpression;
 import org.drools.spi.KnowledgeHelper;
 import org.drools.spi.Tuple;
 import org.protempa.proposition.AbstractParameter;
+import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 
@@ -76,8 +78,12 @@ final class AbstractionCombiner {
             implements Consequence {
 
         private static final long serialVersionUID = -7984448674528718012L;
+        
+        private final DerivationsBuilder derivationsBuilder;
 
-        public AbstractionCombinerConsequence() {
+        public AbstractionCombinerConsequence(
+                DerivationsBuilder derivationsBuilder) {
+            this.derivationsBuilder = derivationsBuilder;
         }
 
         @SuppressWarnings("unchecked")
@@ -102,18 +108,46 @@ final class AbstractionCombiner {
             result.setInterval(segment.getInterval());
             result.setValue(a1.getValue());
 
-            if (ProtempaUtil.logger().isLoggable(Level.FINE)) {
-                ProtempaUtil.logger().fine(
-                        "Created: " + result + " from " + a1 + " " + a2);
+            Logger logger = ProtempaUtil.logger();
+            if (logger.isLoggable(Level.FINEST)) {
+                logger.log(Level.FINEST,
+                        "Created {0} from {1} and {2}", 
+                        new Object[] {result, a1, a2});
             }
 
             arg1.retract(a1f);
             arg1.retract(a2f);
             arg1.insert(result);
+            //There should not be any forward derivations yet.
+            //List<Proposition> a1PropForward = 
+            //        this.derivationsBuilder.propositionRetractedForward(a1);
+            List<Proposition> a1PropBackward =
+                    this.derivationsBuilder.propositionRetractedBackward(a1);
+            //There should not be any forward derivations yet.
+            //List<Proposition> a2PropForward = 
+            //        this.derivationsBuilder.propositionRetractedForward(a2);
+            List<Proposition> a2PropBackward =
+                    this.derivationsBuilder.propositionRetractedBackward(a2);
+            for (Proposition prop : a1PropBackward) {
+                this.derivationsBuilder.propositionReplaceForward(prop, a1, 
+                        result);
+                this.derivationsBuilder.propositionAssertedBackward(prop, 
+                        result);
+            }
+            for (Proposition prop : a2PropBackward) {
+                this.derivationsBuilder.propositionReplaceForward(prop, a2, 
+                        result);
+                this.derivationsBuilder.propositionAssertedBackward(prop, 
+                        result);
+            }
+            
+            logger.log(Level.FINER, "Asserted derived proposition {0}", 
+                    result);
         }
     }
 
-    static void toRules(AbstractionDefinition d, List<Rule> rules) {
+    static void toRules(AbstractionDefinition d, List<Rule> rules,
+            DerivationsBuilder derivationsBuilder) {
         try {
             Rule rule = new Rule("ABSTRACTION_COMBINER_" + d.getId());
             rule.setSalience(new SalienceInteger(3));
@@ -129,7 +163,8 @@ final class AbstractionCombiner {
             rule.addPattern(p1);
             rule.addPattern(new EvalCondition(new AbstractionCombinerCondition(
                     d), null));
-            rule.setConsequence(new AbstractionCombinerConsequence());
+            rule.setConsequence(new AbstractionCombinerConsequence(
+                    derivationsBuilder));
             rules.add(rule);
         } catch (InvalidRuleException e) {
             ProtempaUtil.logger().log(Level.SEVERE,

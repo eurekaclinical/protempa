@@ -95,11 +95,13 @@ public class TabDelimQueryResultsHandler implements QueryResultsHandler {
      */
     @Override
     public void handleQueryResult(String key, List<Proposition> propositions,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references)
             throws FinderException {
         Set<Proposition> propositionsAsSet = new HashSet<Proposition>();
-        addDerived(propositions, derivations, propositionsAsSet);
+        addDerived(propositions, forwardDerivations, 
+                backwardDerivations, propositionsAsSet);
         List<Proposition> propositionsCopy =
                 new ArrayList<Proposition>(propositionsAsSet);
         for (Comparator<Proposition> c : this.comparator) {
@@ -116,15 +118,20 @@ public class TabDelimQueryResultsHandler implements QueryResultsHandler {
     }
 
     private void addDerived(List<Proposition> propositions,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Set<Proposition> propositionsAsSet) {
+        List<Proposition> derivedProps = new ArrayList<Proposition>();
         for (Proposition prop : propositions) {
             boolean added = propositionsAsSet.add(prop);
             if (added && this.includeDerived) {
-                List<Proposition> derivedProps = derivations.get(prop);
+                derivedProps.addAll(forwardDerivations.get(prop));
+                derivedProps.addAll(backwardDerivations.get(prop));
                 if (derivedProps != null) {
-                    addDerived(derivedProps, derivations, propositionsAsSet);
+                    addDerived(derivedProps, forwardDerivations, 
+                            backwardDerivations, propositionsAsSet);
                 }
+                derivedProps.clear();
             }
         }
     }

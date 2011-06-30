@@ -171,7 +171,8 @@ public abstract class Link {
      *
      * @return a {@link List<Proposition>}.
      */
-    protected final List<Proposition> createResults(Collection<Proposition> propositions) {
+    protected final List<Proposition> createResults(
+            Collection<Proposition> propositions) {
         List<Proposition> result = new ArrayList<Proposition>();
         if (propositions != null) {
             for (Proposition derivedProp : propositions) {
@@ -265,7 +266,8 @@ public abstract class Link {
      * step.
      */
     public abstract Collection<Proposition> traverse(Proposition proposition,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource);
 

@@ -21,27 +21,29 @@ public final class PairConsequence implements Consequence {
     private final String propId;
     private final Offsets temporalOffset;
     private final Relation relation;
+    private final boolean secondRequired;
 
     PairConsequence(PairDefinition def,
             DerivationsBuilder derivationsBuilder) {
         assert def != null : "def cannot be null";
         this.derivationsBuilder = derivationsBuilder;
-        this.leftAndRightHandSide = 
-                new TemporalExtendedPropositionDefinition[] {
-                    def.getLeftHandProposition(),
-                    def.getRightHandProposition()};
+        this.leftAndRightHandSide =
+                new TemporalExtendedPropositionDefinition[]{
+            def.getLeftHandProposition(),
+            def.getRightHandProposition()};
         this.propId = def.getId();
         this.temporalOffset = def.getTemporalOffset();
         this.relation = def.getRelation();
+        this.secondRequired = def.isSecondRequired();
     }
 
     @Override
     public void evaluate(KnowledgeHelper knowledgeHelper,
             WorkingMemory workingMemory) throws Exception {
         Logger logger = ProtempaUtil.logger();
-        List<TemporalProposition> pl = 
+        List<TemporalProposition> pl =
                 (List<TemporalProposition>) knowledgeHelper.get(
-                    knowledgeHelper.getDeclaration("result"));
+                knowledgeHelper.getDeclaration("result"));
         java.util.Collections.sort(pl, ProtempaUtil.TEMP_PROP_COMP);
 
         TemporalExtendedPropositionDefinition leftProp =
@@ -50,8 +52,9 @@ public final class PairConsequence implements Consequence {
                 this.leftAndRightHandSide[1];
         Segment<TemporalProposition> segment = null;
         Sequence<TemporalProposition> seq =
-                            new Sequence<TemporalProposition>(this.propId);
-        for (int i = 0, n = pl.size() - 1; i < n; i++) {
+                new Sequence<TemporalProposition>(this.propId);
+        int i = 0;
+        for (int n = pl.size() - 1; i < n; i++) {
             TemporalProposition left = pl.get(i);
             TemporalProposition right = pl.get(i + 1);
             if (leftProp.getMatches(left) && rightProp.getMatches(right)) {
@@ -82,6 +85,30 @@ public final class PairConsequence implements Consequence {
                     logger.log(Level.FINER, "Asserted derived proposition {0}",
                             result);
                 }
+            }
+        }
+        if (!this.secondRequired) {
+            TemporalProposition left = pl.get(i);
+            if (leftProp.getMatches(left)) {
+                seq.add(left);
+                if (segment == null) {
+                    segment = new Segment<TemporalProposition>(seq);
+                } else {
+                    segment.resetState(seq);
+                }
+                AbstractParameter result =
+                        AbstractParameterFactory.getFromAbstraction(
+                        this.propId,
+                        segment,
+                        seq,
+                        null,
+                        this.temporalOffset,
+                        this.leftAndRightHandSide);
+                knowledgeHelper.getWorkingMemory().insert(result);
+                derivationsBuilder.propositionAsserted(left, result);
+                seq.clear();
+                logger.log(Level.FINER, "Asserted derived proposition {0}",
+                        result);
             }
         }
     }

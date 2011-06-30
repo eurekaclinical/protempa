@@ -201,30 +201,17 @@ final class AbstractionFinder implements Module {
         this.closed = true;
     }
 
-    private static List<Sequence<PrimitiveParameter>> createSequenceList(
-            Map<Set<String>, Sequence<PrimitiveParameter>> seqKey,
-            List<PrimitiveParameter> primParams) {
-        List<Sequence<PrimitiveParameter>> sequenceList =
-                new ArrayList<Sequence<PrimitiveParameter>>();
-        for (Map.Entry<Set<String>, Sequence<PrimitiveParameter>> entry :
-                seqKey.entrySet()) {
-            Set<String> paramIds = entry.getKey();
-            Sequence<PrimitiveParameter> seq = entry.getValue();
-            if (seq.isEmpty()) {
-                for (PrimitiveParameter parameter : primParams) {
-                    if (paramIds.contains(parameter.getId())) {
-                        seq.add(parameter);
-                    }
-                }
-            }
-            sequenceList.add(seq);
-        }
-        return sequenceList;
-    }
-
-    private static void addToCache(QuerySession qs, List<Proposition> propositions, Map<Proposition, List<Proposition>> derivations) {
+    private static void addToCache(QuerySession qs, 
+            List<Proposition> propositions, 
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations) {
         qs.addPropositionsToCache(propositions);
-        for (Map.Entry<Proposition, List<Proposition>> me : derivations.entrySet()) {
+        for (Map.Entry<Proposition, List<Proposition>> me : 
+                forwardDerivations.entrySet()) {
+            qs.addDerivationsToCache(me.getKey(), me.getValue());
+        }
+        for (Map.Entry<Proposition, List<Proposition>> me : 
+                backwardDerivations.entrySet()) {
             qs.addDerivationsToCache(me.getKey(), me.getValue());
         }
     }
@@ -565,7 +552,8 @@ final class AbstractionFinder implements Module {
             Iterator<Proposition> propositions = strategy.execute(
                     entry.keyId, propositionIds, entry.propositions);
             processResults(qs, propositions,
-                    derivationsBuilder.toDerivations(),
+                    derivationsBuilder.toForwardDerivations(),
+                    derivationsBuilder.toBackwardDerivations(),
                     propositionIds, resultHandler, entry.keyId);
             derivationsBuilder.reset();
             if (++numProcessed % 1000 == 0) {
@@ -588,7 +576,8 @@ final class AbstractionFinder implements Module {
 
     private void processResults(QuerySession qs,
             Iterator<Proposition> propositions,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Set<String> propositionIds, QueryResultsHandler resultHandler,
             String keyId) throws FinderException {
         Logger logger = ProtempaUtil.logger();
@@ -596,7 +585,8 @@ final class AbstractionFinder implements Module {
         if (qs.isCachingEnabled()) {
             List<Proposition> props = Iterators.asList(propositions);
             addToCache(qs, Collections.unmodifiableList(props),
-                    Collections.unmodifiableMap(derivations));
+                    Collections.unmodifiableMap(forwardDerivations),
+                    Collections.unmodifiableMap(backwardDerivations));
             propositions = props.iterator();
         }
 
@@ -610,7 +600,7 @@ final class AbstractionFinder implements Module {
                 filteredPropositions);
 
         resultHandler.handleQueryResult(keyId, filteredPropositions,
-                derivations, refs);
+                forwardDerivations, backwardDerivations, refs);
     }
     
     private static class ObjectEntry {

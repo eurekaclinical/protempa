@@ -25,13 +25,14 @@ import org.protempa.proposition.value.Value;
  * @author Andrew Post
  */
 public final class AbstractParameterFactory {
-    private static final IntervalFactory intervalFactory = new IntervalFactory();
+
+    private static final IntervalFactory intervalFactory = 
+            new IntervalFactory();
 
     /**
      * Private constructor.
      */
     private AbstractParameterFactory() {
-
     }
 
     /**
@@ -55,12 +56,14 @@ public final class AbstractParameterFactory {
         Long maxStart = null;
         Long minFinish = null;
         Long maxFinish = null;
+        Granularity startGran;
+        Granularity finishGran = null;
 
         Interval segmentIval = segment.getInterval();
-        Granularity startGran;
+        
         if (temporalOffset == null
                 || temporalOffset
-                        .getStartTemporalExtendedPropositionDefinition() == null) {
+                .getStartTemporalExtendedPropositionDefinition() == null) {
             if (temporalOffset != null) {
                 minStart = segmentIval.getMinStart()
                         + temporalOffset.getStartOffset();
@@ -70,17 +73,18 @@ public final class AbstractParameterFactory {
             startGran = segment.getStartGranularity();
         } else {
             TemporalProposition param = matchingTemporalProposition(tps,
-                    temporalOffset
-                            .getStartTemporalExtendedPropositionDefinition(),
-                    epds);
+                temporalOffset.getStartTemporalExtendedPropositionDefinition(),
+                epds);
 
             if (param != null) {
-                minStart = temporalOffset.getStartIntervalSide() == IntervalSide.START ? param
-                        .getInterval().getMinStart() : param.getInterval()
-                        .getMinFinish();
-                maxStart = temporalOffset.getStartIntervalSide() == IntervalSide.START ? param
-                        .getInterval().getMaxStart() : param.getInterval()
-                        .getMaxFinish();
+                minStart = temporalOffset.getStartIntervalSide() 
+                        == IntervalSide.START 
+                        ? param.getInterval().getMinStart() 
+                        : param.getInterval().getMinFinish();
+                maxStart = temporalOffset.getStartIntervalSide() 
+                        == IntervalSide.START 
+                        ? param.getInterval().getMaxStart() 
+                        : param.getInterval().getMaxFinish();
             } else {
                 minStart = segmentIval.getMinStart();
                 maxStart = segmentIval.getMaxStart();
@@ -93,31 +97,31 @@ public final class AbstractParameterFactory {
             }
             startGran = param.getInterval().getStartGranularity();
         }
-
-        Granularity finishGran;
+        
         if (temporalOffset == null
                 || temporalOffset
-                        .getFinishTemporalExtendedPropositionDefinition() == null) {
-            if (temporalOffset != null) {
+                .getFinishTemporalExtendedPropositionDefinition() == null) {
+            if (temporalOffset != null
+                    && temporalOffset.getFinishIntervalSide()
+                    == IntervalSide.START) {
                 minFinish = segmentIval.getMinFinish()
                         + temporalOffset.getFinishOffset();
                 maxFinish = segmentIval.getMaxFinish()
                         + temporalOffset.getFinishOffset();
+                finishGran = segment.getFinishGranularity();
             }
-            finishGran = segment.getFinishGranularity();
         } else {
             TemporalProposition param = matchingTemporalProposition(tps,
                     temporalOffset
-                            .getFinishTemporalExtendedPropositionDefinition(),
-                    epds);
+                    .getFinishTemporalExtendedPropositionDefinition(), epds);
 
             if (param != null) {
-                minFinish = temporalOffset.getFinishIntervalSide() == IntervalSide.START ? param
-                        .getInterval().getMinStart() : param.getInterval()
-                        .getMinFinish();
-                maxFinish = temporalOffset.getFinishIntervalSide() == IntervalSide.START ? param
-                        .getInterval().getMaxStart() : param.getInterval()
-                        .getMaxFinish();
+                minFinish = temporalOffset.getFinishIntervalSide() == 
+                        IntervalSide.START ? param.getInterval().getMinStart() 
+                        : param.getInterval().getMinFinish();
+                maxFinish = temporalOffset.getFinishIntervalSide() == 
+                        IntervalSide.START ? param.getInterval().getMaxStart() 
+                        : param.getInterval().getMaxFinish();
             } else {
                 minFinish = segmentIval.getMinFinish();
                 maxFinish = segmentIval.getMaxFinish();

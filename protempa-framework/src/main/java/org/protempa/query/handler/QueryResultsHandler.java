@@ -51,7 +51,8 @@ public interface QueryResultsHandler {
      */
     public void handleQueryResult(String keyId,
             List<Proposition> propositions, 
-            Map<Proposition,List<Proposition>> derivations,
+            Map<Proposition,List<Proposition>> forwardDerivations,
+            Map<Proposition,List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier,Proposition> references)
             throws FinderException;
 }

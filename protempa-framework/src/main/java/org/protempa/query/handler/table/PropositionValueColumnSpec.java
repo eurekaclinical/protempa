@@ -9,12 +9,10 @@ import java.util.Map;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
-import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalParameter;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
-import org.protempa.proposition.value.NumericalValue;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.value.ValueType;
@@ -67,12 +65,14 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
 
     @Override
     public String[] columnValues(String key, Proposition proposition,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
         Collection<Proposition> propositions = traverseLinks(this.links,
-                proposition, derivations, references, knowledgeSource);
+                proposition, forwardDerivations, backwardDerivations, 
+                references, knowledgeSource);
         Value value = null;
         if (type == Type.FIRST) {
             propositions = new ArrayList(propositions);
@@ -90,7 +90,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                 Value val = pp.getValue();
                 if (val != null) {
                     if ((type == Type.MAX || type == Type.MIN) && !ValueType.NUMERICALVALUE.isInstance(val)) {
-                        throw new IllegalStateException("only numerical values allowed");
+                        continue;
                     } else {
                         if (value == null) {
                             value = val;

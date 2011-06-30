@@ -41,7 +41,8 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
 
     Collection<Proposition> traverseLinks(Link[] links,
             Proposition proposition,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource) {
         Queue<Proposition> result = new LinkedList<Proposition>();
@@ -53,7 +54,8 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
             int j = 0;
             while (j < num) {
                 Proposition prop = result.poll();
-                Collection<Proposition> c = link.traverse(prop, derivations,
+                Collection<Proposition> c = link.traverse(prop, 
+                        forwardDerivations, backwardDerivations,
                         references, knowledgeSource);
                 for (Proposition p : c) {
                     if (cache.add(p)) {

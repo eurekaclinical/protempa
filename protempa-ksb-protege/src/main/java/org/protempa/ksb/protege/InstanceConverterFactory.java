@@ -2,13 +2,13 @@ package org.protempa.ksb.protege;
 
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
-import edu.stanford.smi.protege.model.KnowledgeBase;
 import java.util.Collection;
+import org.apache.commons.lang.StringUtils;
 import org.protempa.KnowledgeSourceReadException;
 
 /**
- * Factory for constructing a PROTEMPA abstraction definition from a Protege
- * parameter.
+ * Factory for constructing a PROTEMPA proposition definition from a Protege
+ * proposition.
  * 
  * @author Andrew Post
  */
@@ -44,21 +44,22 @@ final class InstanceConverterFactory {
     }
 
     /**
-     * Gets an appropriate <code>ProtegeParameterConverter</code> for
-     * constructing a PROTEMPA abstraction definition from the given Protege
-     * parameter instance.
+     * Gets an appropriate {@link PropositionConverter} for
+     * constructing a PROTEMPA proposition definition from the given Protege
+     * proposition instance.
      *
-     * @param parameter
-     *            a Protege parameter <code>Instance</code> object.
-     * @param config
-     *            configuration properties.
-     * @return an appropriate <code>ProtegeParameterConverter</code> object,
-     *         or <code>null</code> if the given <code>instance</code> is
-     *         <code>null</code> or not a Protege parameter instance.
+     * @param proposition
+     *            a Protege proposition {@link Proposition} instance.
+     * 
+     * @return an appropriate {@link PropositionConverter} object,
+     *         or <code>null</code> if the given <code>proposition</code> is
+     *         <code>null</code>.
+     * @throws AssertionError if the given <code>proposition</code> does not
+     * have a type in the Protege <code>Proposition</code> class hierarchy.
      */
-    PropositionConverter getInstance(Instance parameter)
+    PropositionConverter getInstance(Instance proposition)
             throws KnowledgeSourceReadException {
-        if (parameter == null) {
+        if (proposition == null) {
             return null;
         } else {
             if (this.primitiveParameterCls == null) {
@@ -89,28 +90,32 @@ final class InstanceConverterFactory {
                 this.pairAbstractionCls =
                         this.connectionManager.getCls("PairAbstraction");
             }
-            if (this.connectionManager.hasType(parameter, this.eventCls)) {
+            if (this.connectionManager.hasType(proposition, this.eventCls)) {
                 return this.eventConverter;
-            } else if (this.connectionManager.hasType(parameter,
+            } else if (this.connectionManager.hasType(proposition,
                     this.primitiveParameterCls)) {
                 return this.primitiveParameterConverter;
-            } else if (this.connectionManager.hasType(parameter,
+            } else if (this.connectionManager.hasType(proposition,
                     this.constantCls)) {
                 return this.constantConverter;
-            } else if (this.connectionManager.hasType(parameter,
+            } else if (this.connectionManager.hasType(proposition,
                     this.simpleAbstractionCls)) {
                 return this.lowLevelAbstractionConverter;
-            } else if (this.connectionManager.hasType(parameter,
+            } else if (this.connectionManager.hasType(proposition,
                     this.sliceAbstractionCls)) {
                 return this.sliceConverter;
-            } else if (this.connectionManager.hasType(parameter,
+            } else if (this.connectionManager.hasType(proposition,
                     this.complexAbstractionCls)) {
                 return this.highLevelAbstractionConverter;
-            } else if (this.connectionManager.hasType(parameter,
+            } else if (this.connectionManager.hasType(proposition,
                     this.pairAbstractionCls)) {
                 return this.pairAbstractionConverter;
             } else {
-                throw new AssertionError("Invalid type ");
+                String name = proposition.getName();
+                Collection directTypes = proposition.getDirectTypes();
+                String directTypesStr = StringUtils.join(directTypes, ", ");
+                throw new AssertionError("Proposition " + name + 
+                        " has invalid types: " + directTypesStr);
             }
         }
     }

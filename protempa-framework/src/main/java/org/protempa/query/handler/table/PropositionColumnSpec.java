@@ -343,12 +343,14 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
     @Override
     public String[] columnValues(String key, Proposition proposition,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references,
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
         Collection<Proposition> propositions = this.traverseLinks(this.links,
-                proposition, derivations, references, knowledgeSource);
+                proposition, forwardDerivations, backwardDerivations, 
+                references, knowledgeSource);
         propositionVisitor.setKnowledgeSource(knowledgeSource);
         List<String> result = new ArrayList<String>();
         int i = 0;

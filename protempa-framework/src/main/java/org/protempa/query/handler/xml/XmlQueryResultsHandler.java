@@ -93,7 +93,8 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
         return propositions;
     }
 
-    private List<Proposition> filterHandled(List<Proposition> propositions,
+    private List<Proposition> filterHandled(
+            Collection<Proposition> propositions,
             Set<UniqueIdentifier> handled) {
         List<Proposition> filtered = new ArrayList<Proposition>();
         if (propositions != null) {
@@ -149,7 +150,8 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
     }
 
     private Element handleReferences(Set<UniqueIdentifier> handled,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references,
             Proposition proposition, XmlPropositionVisitor visitor,
             Document document) throws ProtempaException {
@@ -183,7 +185,8 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
                         Element refElem = document.createElement("reference");
                         refElem.setAttribute("name", refName);
                         for (Proposition refProp : filteredReferences) {
-                            Element e = handleProposition(handled, derivations,
+                            Element e = handleProposition(handled, 
+                                    forwardDerivations, backwardDerivations,
                                     references, refProp, visitor, document);
                             if (e != null) {
                                 refElem.appendChild(e);
@@ -203,16 +206,21 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
     }
 
     private Element handleDerivations(Set<UniqueIdentifier> handled,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references,
             Proposition proposition, XmlPropositionVisitor visitor,
             Document document) throws ProtempaException {
         Element derivationsElem = document.createElement("derivations");
+        List<Proposition> derived = new ArrayList<Proposition>();
+        derived.addAll(forwardDerivations.get(proposition));
+        derived.addAll(backwardDerivations.get(proposition));
         List<Proposition> derivedPropositions = filterHandled(
-                derivations.get(proposition), handled);
+                derived, handled);
         if (derivedPropositions != null) {
             for (Proposition derivedProposition : derivedPropositions) {
-                Element derivedElem = handleProposition(handled, derivations,
+                Element derivedElem = handleProposition(handled, 
+                        forwardDerivations, backwardDerivations,
                         references, derivedProposition, visitor, document);
                 if (derivedElem != null) {
                     derivationsElem.appendChild(derivedElem);
@@ -223,7 +231,8 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
     }
 
     private Element handleProposition(Set<UniqueIdentifier> handled,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references,
             Proposition proposition, XmlPropositionVisitor visitor,
             Document document) throws ProtempaException {
@@ -253,10 +262,12 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
 
             visitor.clear();
 
-            propElem.appendChild(handleReferences(tempHandled, derivations,
+            propElem.appendChild(handleReferences(tempHandled, 
+                    forwardDerivations, backwardDerivations,
                     references, proposition, visitor, document));
 
-            propElem.appendChild(handleDerivations(tempHandled, derivations,
+            propElem.appendChild(handleDerivations(tempHandled, 
+                    forwardDerivations, backwardDerivations,
                     references, proposition, visitor, document));
 
             return propElem;
@@ -294,7 +305,8 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
 
     @Override
     public void handleQueryResult(String key, List<Proposition> propositions,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references)
             throws FinderException {
         try {
@@ -314,7 +326,8 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
             for (Proposition prop : propositions) {
                 if (prop.getDataSourceType().equals(ddst)
                         && propIdsAsSet.contains(prop.getId())) {
-                    Element elem = handleProposition(handled, derivations,
+                    Element elem = handleProposition(handled, 
+                            forwardDerivations, backwardDerivations,
                             references, prop, visitor, document);
                     if (elem != null) {
                         abstractionNode.appendChild(elem);
@@ -327,7 +340,8 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
                 Proposition firstProp = findInitialProposition(
                         this.initialProposition, propositions);
                 if (firstProp != null) {
-                    Element elem = handleProposition(handled, derivations,
+                    Element elem = handleProposition(handled, 
+                            forwardDerivations, backwardDerivations,
                             references, firstProp, visitor, document);
                     if (null != elem) {
                         rootNode.appendChild(elem);
@@ -343,7 +357,8 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
                         .log(Level.WARNING,
                                 "No initial proposition defined, printing all propositions");
                 for (Proposition proposition : propositions) {
-                    Element elem = handleProposition(handled, derivations,
+                    Element elem = handleProposition(handled, 
+                            forwardDerivations, backwardDerivations,
                             references, proposition, visitor, document);
                     if (null != elem) {
                         rootNode.appendChild(elem);

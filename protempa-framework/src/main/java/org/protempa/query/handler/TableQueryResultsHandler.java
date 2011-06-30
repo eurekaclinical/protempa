@@ -117,7 +117,8 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
 
     @Override
     public void handleQueryResult(String key, List<Proposition> propositions,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references)
             throws FinderException {
         int n = this.columnSpecs.length;
@@ -130,7 +131,8 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
                 TableColumnSpec columnSpec = this.columnSpecs[i];
                 try {
                     String[] colValues = columnSpec.columnValues(key, prop,
-                            derivations, references, this.knowledgeSource);
+                            forwardDerivations, backwardDerivations, 
+                            references, this.knowledgeSource);
                     String[] columnValues;
                     if (i == 0) {
                         columnValues = new String[colValues.length + 1];

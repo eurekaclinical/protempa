@@ -54,12 +54,13 @@ public final class DeidentifyQueryResultsHandler
 
     @Override
     public void handleQueryResult(String keyId, List<Proposition> propositions,
-            Map<Proposition, List<Proposition>> derivations,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueIdentifier, Proposition> references)
             throws FinderException {
         keyId = disguiseKeyIds(keyId);
-        this.handler.handleQueryResult(keyId, propositions, derivations,
-                references);
+        this.handler.handleQueryResult(keyId, propositions, forwardDerivations,
+                backwardDerivations, references);
     }
 
     @Override

@@ -91,7 +91,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 resultP.addConstraint(new PredicateConstraint(
                         new CollectionSizeExpression(1)));
                 rule.addPattern(resultP);
-                
+
                 Algorithm algo = this.algorithms.get(def);
 
                 rule.setConsequence(new LowLevelAbstractionConsequence(def,
@@ -136,13 +136,13 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             PredicateExpression {
 
         private static final long serialVersionUID = -6225160728904051528L;
-        private TemporalExtendedPropositionDefinition tepd;
+        private TemporalExtendedPropositionDefinition leftHandSide;
         private TemporalExtendedPropositionDefinition rightHandSide;
 
         private GetMatchesPredicateExpressionPair(
                 TemporalExtendedPropositionDefinition leftHandSide,
                 TemporalExtendedPropositionDefinition rightHandSide) {
-            this.tepd = leftHandSide;
+            this.leftHandSide = leftHandSide;
             this.rightHandSide = rightHandSide;
         }
 
@@ -150,8 +150,9 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
                 Declaration[] arg3, WorkingMemory arg4, Object context)
                 throws Exception {
-            return this.tepd.getMatches((Proposition) arg0)
-                    || this.rightHandSide.getMatches((Proposition) arg0);
+            return this.leftHandSide.getMatches((Proposition) arg0)
+                    || (this.rightHandSide != null 
+                    && this.rightHandSide.getMatches((Proposition) arg0));
         }
 
         @Override
@@ -188,7 +189,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                         this.derivationsBuilder));
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
-                AbstractionCombiner.toRules(def, rules);
+                AbstractionCombiner.toRules(def, rules,
+                        this.derivationsBuilder);
             }
             addInverseIsARule(def, ABSTRACT_PARAM_OT);
         } catch (InvalidRuleException e) {
@@ -232,26 +234,29 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                     def.getLeftHandProposition();
             TemporalExtendedPropositionDefinition rhProp =
                     def.getRightHandProposition();
+            boolean secondRequired = def.isSecondRequired();
             /*
              * If there are no extended proposition definitions defined, we
              * might still have an inverseIsA relationship with another
              * pair abstraction definition.
              */
-            if (lhProp != null && rhProp != null) {
+            if (lhProp != null && (!secondRequired || rhProp != null)) {
                 Rule rule = new Rule("PAIR_" + def.getId());
                 Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
                 sourceP.addConstraint(new PredicateConstraint(
                         new PropositionPredicateExpression(
                         def.getAbstractedFrom())));
-                
+
                 sourceP.addConstraint(new PredicateConstraint(
                         new GetMatchesPredicateExpressionPair(lhProp, rhProp)));
 
                 Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
                 resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
                         ARRAY_LIST_OT, "result")));
-                resultP.addConstraint(new PredicateConstraint(
-                        new CollectionSizeExpression(2)));
+                if (secondRequired) {
+                    resultP.addConstraint(new PredicateConstraint(
+                            new CollectionSizeExpression(2)));
+                }
                 rule.addPattern(resultP);
                 rule.setConsequence(new PairConsequence(def, this.derivationsBuilder));
                 rule.setSalience(MINUS_TWO_SALIENCE);
