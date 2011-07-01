@@ -9,6 +9,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
@@ -19,12 +20,18 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
 
     boolean checkCompatible(Proposition proposition,
             PropertyConstraint[] constraints) {
-        for (int i = 0; i < constraints.length; i++) {
-            PropertyConstraint ccc = constraints[i];
+        for (PropertyConstraint ccc : constraints) {
             String propName = ccc.getPropertyName();
             Value value = proposition.getProperty(propName);
             ValueComparator vc = ccc.getValueComparator();
-            if (!vc.is(value.compare(ccc.getValue()))) {
+            boolean constraintMatches = false;
+            for (Value v : ccc.getValues()) {
+                if (vc.is(value.compare(v))) {
+                    constraintMatches = true;
+                    break;
+                }
+            }
+            if (!constraintMatches) {
                 return false;
             }
         }
