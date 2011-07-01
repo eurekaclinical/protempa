@@ -3,6 +3,7 @@ package org.protempa.query.handler.table;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
@@ -13,16 +14,24 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
     private final int n;
     private final Link[] links;
     private final String columnNameOverride;
+    private final String trueOutput;
+    private final String falseOutput;
 
     public AtLeastNColumnSpec(int n, Link[] links) {
         this(null, n, links);
     }
 
     public AtLeastNColumnSpec(String columnNameOverride, int n, Link[] links) {
+        this(columnNameOverride, n, links, "true", "false");
+    }
+    
+    public AtLeastNColumnSpec(String columnNameOverride, int n, Link[] links, String trueOutput, String falseOutput) {
         this.n = n;
         ProtempaUtil.checkArray(links, "links");
         this.links = links.clone();
-        this.columnNameOverride = columnNameOverride;
+        this.columnNameOverride = columnNameOverride;        
+        this.trueOutput = trueOutput;
+        this.falseOutput = falseOutput;
     }
 
     @Override
@@ -50,6 +59,6 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
         Collection<Proposition> props = traverseLinks(this.links, proposition,
                 forwardDerivations, backwardDerivations, references, 
                 knowledgeSource);
-        return new String[]{props.size() >= this.n ? "true" : "false"};
+        return new String[]{props.size() >= this.n ? this.trueOutput : this.falseOutput};
     }
 }
