@@ -1,5 +1,6 @@
 package org.protempa.query.handler.table;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,6 +14,7 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalParameter;
 import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
+import org.protempa.proposition.value.NumberValue;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.value.ValueType;
@@ -20,20 +22,16 @@ import org.protempa.proposition.value.ValueType;
 /**
  * Creates a column with an aggregation of primitive parameters with numerical
  * values.
- *
+ * 
  * @author Andrew Post
  */
 public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
 
-    
-
     public enum Type {
 
-        MAX,
-        MIN,
-        FIRST,
-        LAST
+        MAX, MIN, FIRST, LAST, SUM
     }
+
     private final Link[] links;
     private final String columnNamePrefixOverride;
     private Type type;
@@ -43,8 +41,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
     }
 
     public PropositionValueColumnSpec(String columnNamePrefixOverride,
-            Link[] links,
-            Type aggregationType) {
+            Link[] links, Type aggregationType) {
 
         if (links == null) {
             this.links = Util.EMPTY_LINK_ARRAY;
@@ -53,8 +50,8 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             this.links = links.clone();
         }
 
-        //check metadata for compatibility (at the end of the links are all
-        //primitive parameters with numerical values).
+        // check metadata for compatibility (at the end of the links are all
+        // primitive parameters with numerical values).
 
         if (aggregationType == null) {
             throw new IllegalArgumentException("aggregationType cannot be null");
@@ -74,6 +71,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                 proposition, forwardDerivations, backwardDerivations, 
                 references, knowledgeSource);
         Value value = null;
+        BigDecimal sumTotal = new BigDecimal(0.0);
         if (type == Type.FIRST) {
             propositions = new ArrayList(propositions);
             Collections.sort((List) propositions,
@@ -89,6 +87,13 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                 TemporalParameter pp = (TemporalParameter) prop;
                 Value val = pp.getValue();
                 if (val != null) {
+                    if ((type == Type.MAX || type == Type.MIN)
+                            && !ValueType.NUMERICALVALUE.isInstance(val)) {
+                        continue;
+                    } else if (type == Type.SUM
+                            && !ValueType.NUMBERVALUE.isInstance(val)) {
+                        continue;
+                    }
                     if ((type == Type.MAX || type == Type.MIN) && !ValueType.NUMERICALVALUE.isInstance(val)) {
                         continue;
                     } else {
@@ -109,6 +114,21 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                                         value = val;
                                     }
                                     break;
+                                case SUM:
+                                    try {
+                                        sumTotal = sumTotal.add(new BigDecimal(Double
+                                                .parseDouble(val.getRepr())));
+                                        value = NumberValue
+                                                .getInstance(sumTotal);
+                                    } catch (NumberFormatException ex) {
+                                        throw new IllegalStateException(
+                                                "only number values allowed for SUM aggregation type; got "
+                                                        + val.getRepr()
+                                                        + " for proposition "
+                                                        + pp.getId()
+                                                        + " instead");
+                                    }
+                                    break;
                                 default:
                                     throw new AssertionError("invalid aggregation type: " + type);
 
@@ -121,7 +141,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             }
         }
         if (value != null) {
-            return new String[]{value.getFormatted()};
+            return new String[] { value.getFormatted() };
         } else {
             return new String[]{null};
         }
@@ -130,12 +150,9 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
     @Override
     public String[] columnNames(KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
-        String headerString =
-                this.columnNamePrefixOverride != null
-                ? this.columnNamePrefixOverride
+        String headerString = this.columnNamePrefixOverride != null ? this.columnNamePrefixOverride
                 : generateLinksHeaderString(this.links)
-                + (this.type == Type.MIN ? "_min"
-                : "_max");
-        return new String[]{headerString};
+                        + (this.type == Type.MIN ? "_min" : "_max");
+        return new String[] { headerString };
     }
 }
