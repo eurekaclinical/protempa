@@ -256,6 +256,9 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 if (secondRequired) {
                     resultP.addConstraint(new PredicateConstraint(
                             new CollectionSizeExpression(2)));
+                } else {
+                    resultP.addConstraint(new PredicateConstraint(
+                            new CollectionSizeExpression(1)));
                 }
                 rule.addPattern(resultP);
                 rule.setConsequence(new PairConsequence(def, this.derivationsBuilder));
