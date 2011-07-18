@@ -54,7 +54,7 @@
         <dependency>
             <groupId>edu.stanford</groupId>
             <artifactId>protege</artifactId>
-            <version>3.4.4</version>
+            <version>3.4.7</version>
             <scope>compile</scope>
         </dependency>
         <!--<dependency>
