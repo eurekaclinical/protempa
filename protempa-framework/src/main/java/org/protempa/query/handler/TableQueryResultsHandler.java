@@ -122,6 +122,7 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
             Map<UniqueIdentifier, Proposition> references)
             throws FinderException {
         int n = this.columnSpecs.length;
+        Util.logger().log(Level.FINE, "Processing patient {0}", key);
         for (Proposition prop : propositions) {
             if (!org.arp.javautil.arrays.Arrays.contains(
                     this.rowPropositionIds, prop.getId())) {
