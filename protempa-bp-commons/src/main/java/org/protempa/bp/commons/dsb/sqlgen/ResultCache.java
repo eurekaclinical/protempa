@@ -91,7 +91,11 @@ public class ResultCache<P extends Proposition> {
     }
 
     void add(String keyId, P proposition) {
-        keyId = keyId.intern();
+        assert keyId != null : "keyId cannot be null";
+        /*
+         * We used to intern the keyId here, but that in retrospect was a bad 
+         * idea because there could be millions of them.
+         */
         Collections.putList(this.inMemoryPatientCache, keyId, proposition);
     }
 
@@ -100,7 +104,14 @@ public class ResultCache<P extends Proposition> {
                 this.inMemoryPatientCache.entrySet()) {
             List<P> propList = me.getValue();
             String keyId = me.getKey();
-            if (propList != null) {
+            /**
+             * After inMemoryPatientCache is cleared, all values will be an
+             * empty list. Thus, we need to check if the list is not empty,
+             * or addAll will remove values from the cache, add nothing to 
+             * them, and add them back... The absence of the isEmpty check
+             * caused massive performance degradation.
+             */
+            if (propList != null && !propList.isEmpty()) {
                 addAll(keyId, propList, hasRefs);
             }
         }
