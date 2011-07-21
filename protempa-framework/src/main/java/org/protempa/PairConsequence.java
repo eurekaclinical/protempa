@@ -53,6 +53,9 @@ public final class PairConsequence implements Consequence {
         Segment<TemporalProposition> segment = null;
         Sequence<TemporalProposition> seq =
                 new Sequence<TemporalProposition>(this.propId);
+
+        logger.log(Level.FINE, "Proposition list size: {0}; secondRequired: {1}", new Object[] {pl.size(), this.secondRequired});
+        
         int i = 0;
         for (int n = pl.size() - 1; i < n; i++) {
             TemporalProposition left = pl.get(i);
