@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -225,9 +226,11 @@ public abstract class Link {
                 Collections.sort(result, this.comparator);
             }
             if (this.fromIndex >= 0 || this.toIndex >= 0) {
-                
-                return result.subList(this.fromIndex >= 0 ? this.fromIndex : 0,
-                        this.toIndex >= 0 ? Math.min(this.toIndex, result.size()) : result.size());
+
+                return result.subList(
+                        this.fromIndex >= 0 ? this.fromIndex : 0,
+                        this.toIndex >= 0 ? Math.min(this.toIndex,
+                                result.size()) : result.size());
             }
         }
         return result;
@@ -252,14 +255,23 @@ public abstract class Link {
             boolean constraintMatches = false;
             String propName = ccc.getPropertyName();
             Value value = proposition.getProperty(propName);
-            ValueComparator vc = ccc.getValueComparator();
-            for (Value v : ccc.getValues()) {
-                if (vc.is(value.compare(v))) {
-                    constraintMatches = true;
-                    break;
+            if (value != null) {
+                ValueComparator vc = ccc.getValueComparator();
+                Util.logger()
+                        .log(Level.FINE,
+                                "Proposition is {0}; Property is {1}; Value is {2}; Comparator: {3}",
+                                new Object[] { proposition.getId(), propName,
+                                        value, vc });
+                for (Value v : ccc.getValues()) {
+                    if (vc.is(value.compare(v))) {
+                        constraintMatches = true;
+                        break;
+                    }
                 }
-            }
-            if (!constraintMatches) {
+                if (!constraintMatches) {
+                    return false;
+                }
+            } else {
                 return false;
             }
         }
