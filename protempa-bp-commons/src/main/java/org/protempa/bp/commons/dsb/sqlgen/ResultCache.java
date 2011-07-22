@@ -8,7 +8,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.arp.javautil.collections.Collections;
-import org.arp.javautil.map.DatabaseMap;
+import org.arp.javautil.datastore.DataStore;
+import org.arp.javautil.datastore.DataStoreFactory;
+import org.protempa.datastore.PropositionStoreCreator;
+import org.protempa.datastore.ProtempaDataStoreCreator;
+import org.protempa.datastore.UniqueIdUniqueIdStoreCreator;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueIdentifier;
 
@@ -17,8 +21,8 @@ public class ResultCache<P extends Proposition> {
     private Map<String, List<P>> inMemoryPatientCache;
     private final List<Map<String, List<P>>> patientCache;
     private Map<UniqueIdentifier, List<UniqueIdentifier>> tmpInMemoryRefCache;
-    private List<DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>>> tmpReferenceCache;
-    private DatabaseMap<UniqueIdentifier, Location> conversionMap;
+    private List<DataStore<UniqueIdentifier, List<UniqueIdentifier>>> tmpReferenceCache;
+    private DataStore<UniqueIdentifier, Location> conversionMap;
     private int patientCacheNumber;
     private int tmpReferenceCacheNumber = -1;
     private int indexForAnyAdded;
@@ -26,10 +30,11 @@ public class ResultCache<P extends Proposition> {
     ResultCache() {
         this.inMemoryPatientCache = new HashMap<String, List<P>>();
         this.patientCache = new ArrayList<Map<String, List<P>>>();
-        this.patientCache.add(new DatabaseMap<String, List<P>>());
-        this.conversionMap = new DatabaseMap<UniqueIdentifier, Location>();
-        this.tmpReferenceCache =
-                new ArrayList<DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>>>();
+        this.patientCache.add(PropositionStoreCreator.<P> getInstance()
+                .newCacheStore());
+        this.conversionMap = UniqueIdLocationStoreCreator.getInstance()
+                .newCacheStore();
+        this.tmpReferenceCache = new ArrayList<DataStore<UniqueIdentifier, List<UniqueIdentifier>>>();
         this.tmpInMemoryRefCache = new HashMap<UniqueIdentifier, List<UniqueIdentifier>>();
     }
 
@@ -51,13 +56,13 @@ public class ResultCache<P extends Proposition> {
     }
 
     void flushReferences() {
-        this.tmpReferenceCache.add(new DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>>());
+        this.tmpReferenceCache.add(UniqueIdUniqueIdStoreCreator.getInstance()
+                .newCacheStore());
         this.tmpReferenceCacheNumber++;
-        DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>> dm =
-                this.tmpReferenceCache.get(this.tmpReferenceCacheNumber);
-        for (Iterator<Map.Entry<UniqueIdentifier, List<UniqueIdentifier>>> itr =
-                this.tmpInMemoryRefCache.entrySet().iterator();
-                itr.hasNext();) {
+        DataStore<UniqueIdentifier, List<UniqueIdentifier>> dm = this.tmpReferenceCache
+                .get(this.tmpReferenceCacheNumber);
+        for (Iterator<Map.Entry<UniqueIdentifier, List<UniqueIdentifier>>> itr = this.tmpInMemoryRefCache
+                .entrySet().iterator(); itr.hasNext();) {
             Map.Entry<UniqueIdentifier, List<UniqueIdentifier>> me = itr.next();
             dm.put(me.getKey(), me.getValue());
             itr.remove();
@@ -65,18 +70,22 @@ public class ResultCache<P extends Proposition> {
     }
 
     void flushReferencesFull(RefResultProcessor<P> resultProcessor) {
-        for (Iterator<DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>>> itr = this.tmpReferenceCache.iterator(); itr.hasNext();) {
-            DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>> dm = itr.next();
+        for (Iterator<DataStore<UniqueIdentifier, List<UniqueIdentifier>>> itr = this.tmpReferenceCache
+                .iterator(); itr.hasNext();) {
+            DataStore<UniqueIdentifier, List<UniqueIdentifier>> dm = itr.next();
             for (UniqueIdentifier uid : dm.keySet()) {
                 Location loc = this.conversionMap.get(uid);
                 if (loc != null) {
-                    Map<String, List<P>> pc = this.patientCache.get(loc.cacheNumber);
+                    Map<String, List<P>> pc = this.patientCache
+                            .get(loc.cacheNumber);
                     List<P> propositions = pc.remove(loc.patientKey);
                     for (P proposition : propositions) {
-                        for (DatabaseMap<UniqueIdentifier, List<UniqueIdentifier>> dm2 : this.tmpReferenceCache) {
-                            List<UniqueIdentifier> uids = dm2.remove(proposition.getUniqueIdentifier());
+                        for (DataStore<UniqueIdentifier, List<UniqueIdentifier>> dm2 : this.tmpReferenceCache) {
+                            List<UniqueIdentifier> uids = dm2
+                                    .remove(proposition.getUniqueIdentifier());
                             if (uids != null) {
-                                resultProcessor.addReferences(proposition, uids);
+                                resultProcessor
+                                        .addReferences(proposition, uids);
                             }
                         }
                     }
@@ -93,23 +102,23 @@ public class ResultCache<P extends Proposition> {
     void add(String keyId, P proposition) {
         assert keyId != null : "keyId cannot be null";
         /*
-         * We used to intern the keyId here, but that in retrospect was a bad 
+         * We used to intern the keyId here, but that in retrospect was a bad
          * idea because there could be millions of them.
          */
         Collections.putList(this.inMemoryPatientCache, keyId, proposition);
     }
 
     void flush(boolean hasRefs) {
-        for (Map.Entry<String, List<P>> me :
-                this.inMemoryPatientCache.entrySet()) {
+        for (Map.Entry<String, List<P>> me : this.inMemoryPatientCache
+                .entrySet()) {
             List<P> propList = me.getValue();
             String keyId = me.getKey();
             /**
              * After inMemoryPatientCache is cleared, all values will be an
-             * empty list. Thus, we need to check if the list is not empty,
-             * or addAll will remove values from the cache, add nothing to 
-             * them, and add them back... The absence of the isEmpty check
-             * caused massive performance degradation.
+             * empty list. Thus, we need to check if the list is not empty, or
+             * addAll will remove values from the cache, add nothing to them,
+             * and add them back... The absence of the isEmpty check caused
+             * massive performance degradation.
              */
             if (propList != null && !propList.isEmpty()) {
                 addAll(keyId, propList, hasRefs);
@@ -118,7 +127,8 @@ public class ResultCache<P extends Proposition> {
         for (List<P> value : this.inMemoryPatientCache.values()) {
             value.clear();
         }
-        this.patientCache.add(new DatabaseMap<String, List<P>>());
+        this.patientCache.add(PropositionStoreCreator.<P> getInstance()
+                .newCacheStore());
         this.patientCacheNumber++;
     }
 
@@ -141,8 +151,7 @@ public class ResultCache<P extends Proposition> {
                 // we add a conversion from the UID to a location in the
                 // patients cache if it doesn't already exist
                 if (!this.conversionMap.containsKey(uid)) {
-                    Location loc =
-                            new Location(key, i, this.patientCacheNumber);
+                    Location loc = new Location(key, i, this.patientCacheNumber);
                     this.conversionMap.put(uid, loc);
                 }
             }
@@ -150,22 +159,22 @@ public class ResultCache<P extends Proposition> {
     }
 
     private void addAll(String keyId, List<P> propositions, boolean hasRefs) {
-        List<P> propList =
-                this.patientCache.get(this.patientCacheNumber).remove(keyId);
+        List<P> propList = this.patientCache.get(this.patientCacheNumber)
+                .remove(keyId);
         if (propList == null) {
             propList = new ArrayList<P>();
         }
         propList.addAll(propositions);
         put(keyId, propList, hasRefs);
     }
-    
+
     /**
      * Stores an index to a proposition for a key.
-     *
+     * 
      * This class has to be static or CacheMap will try to pull the ResultCache
      * into the cache, and ResultCache is not serializable.
      */
-    static class Location implements Serializable {
+    private static class Location implements Serializable {
 
         private static final long serialVersionUID = 5829710457303104633L;
         String patientKey;
@@ -177,5 +186,39 @@ public class ResultCache<P extends Proposition> {
             this.index = idx;
             this.cacheNumber = cacheNumber;
         }
+    }
+
+    private static class UniqueIdLocationStoreCreator implements
+            ProtempaDataStoreCreator<UniqueIdentifier, Location> {
+
+        private UniqueIdLocationStoreCreator() {
+        }
+
+        private final static UniqueIdLocationStoreCreator INSTANCE = new UniqueIdLocationStoreCreator();
+        private static Map<String, DataStore<UniqueIdentifier, Location>> stores = new HashMap<String, DataStore<UniqueIdentifier, Location>>();
+
+        public static UniqueIdLocationStoreCreator getInstance() {
+            return INSTANCE;
+        }
+
+        @Override
+        public DataStore<UniqueIdentifier, Location> getPersistentStore(
+                String name) {
+            if (stores.containsKey(name)) {
+                return stores.get(name);
+            } else {
+                DataStore<UniqueIdentifier, Location> store = DataStoreFactory
+                        .getPersistentStore(name);
+                stores.put(name, store);
+                return store;
+            }
+        }
+
+        @Override
+        public DataStore<UniqueIdentifier, Location> newCacheStore() {
+            return DataStoreFactory
+                    .<UniqueIdentifier, Location> newCacheStore();
+        }
+
     }
 }
