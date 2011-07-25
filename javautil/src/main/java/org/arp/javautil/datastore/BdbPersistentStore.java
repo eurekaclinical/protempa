@@ -30,7 +30,7 @@ class BdbPersistentStore<K, V> extends BdbMap<K, V> {
 
     static {
         Runtime.getRuntime().addShutdownHook(
-                new Thread("BdbPermStoreShutdownHook") {
+                new Thread("BdbPersistentStoreShutdownHook") {
                     @Override
                     public void run() {
                         if (env != null) {
@@ -66,8 +66,11 @@ class BdbPersistentStore<K, V> extends BdbMap<K, V> {
 
     Database getDatabase(String dbName) {
         if (stores.containsKey(dbName)) {
-            DataStoreUtil.logger().log(Level.INFO,
-                    "Permanent BerkeleyDB store {0} already exists, returning it", dbName);
+            DataStoreUtil
+                    .logger()
+                    .log(Level.INFO,
+                            "BerkeleyDB persistent store {0} already exists: returning it",
+                            dbName);
             return stores.get(dbName);
         }
         createEnvironmentIfNeeded();
@@ -78,14 +81,21 @@ class BdbPersistentStore<K, V> extends BdbMap<K, V> {
 
         Database result = env.openDatabase(null, dbName, dbConfig);
         if (result == null) {
-            throw new AssertionError("Failed to create BerkeleyDB database: "
-                    + dbName);
+            throw new AssertionError("Failed to create BerkeleyDB database "
+                    + dbName + " in environment "
+                    + env.getHome().getAbsolutePath());
         }
         stores.put(dbName, result);
 
-        DataStoreUtil.logger().log(Level.INFO,
-                "Created BerkeleyDB permanent store with name {0}",
-                new Object[] { dbName });
+        DataStoreUtil
+                .logger()
+                .log(Level.INFO,
+                        "Created BerkeleyDB persistent store with name {0} at: {1}",
+                        new Object[] {
+                                dbName,
+                                env.getHome().getAbsolutePath()
+                                        + System.getProperty("file.separator")
+                                        + dbName });
 
         return result;
     }
@@ -120,13 +130,24 @@ class BdbPersistentStore<K, V> extends BdbMap<K, V> {
                     + System.getProperty("file.separator")
                     + System.getProperty("store.env.name"));
             if (!envFile.exists()) {
+                DataStoreUtil
+                        .logger()
+                        .log(Level.INFO,
+                                "Environment path {0} does not exist: creating directories",
+                                envFile.getAbsolutePath());
                 envFile.mkdirs();
+            } else {
+                DataStoreUtil
+                        .logger()
+                        .log(Level.INFO,
+                                "Environment path {0} already exists: using existing environment",
+                                envFile.getAbsolutePath());
             }
 
             DataStoreUtil
                     .logger()
                     .log(Level.INFO,
-                            "Initialized BerkeleyDB permanent store environment at {0}",
+                            "Initialized BerkeleyDB persistent store environment at {0}",
                             envFile.getAbsolutePath());
             env = new Environment(envFile, envConf);
         }
