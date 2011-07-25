@@ -1,8 +1,10 @@
 package org.protempa;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.arp.javautil.collections.Collections;
 import org.protempa.proposition.Proposition;
 
@@ -10,7 +12,9 @@ import org.protempa.proposition.Proposition;
  *
  * @author Andrew Post
  */
-final class DerivationsBuilder {
+final class DerivationsBuilder implements Serializable {
+
+    private static final long serialVersionUID = -2064122362760283390L;
 
     private Map<Proposition, List<Proposition>> forwardDerivations;
     private Map<Proposition, List<Proposition>> backwardDerivations;
