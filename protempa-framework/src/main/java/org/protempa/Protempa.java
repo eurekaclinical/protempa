@@ -1,6 +1,7 @@
 package org.protempa;
 
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.arp.javautil.arrays.Arrays;
@@ -20,8 +21,7 @@ import org.protempa.query.handler.QueryResultsHandler;
  */
 public final class Protempa {
 
-    private static final String PROTEMPA_STARTUP_FAILURE_MSG =
-            "PROTEMPA could not start up";
+    private static final String PROTEMPA_STARTUP_FAILURE_MSG = "PROTEMPA could not start up";
     private final AbstractionFinder abstractionFinder;
 
     public static Protempa newInstance(String configurationId)
@@ -29,14 +29,11 @@ public final class Protempa {
         try {
             return newInstance(new SourceFactory(configurationId));
         } catch (ConfigurationsLoadException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
         } catch (BackendProviderSpecLoaderException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
         } catch (InvalidConfigurationException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
         }
     }
 
@@ -48,27 +45,22 @@ public final class Protempa {
                     sourceFactory.newAlgorithmSourceInstance(),
                     sourceFactory.newTermSourceInstance(), false);
         } catch (BackendInitializationException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
         } catch (BackendNewInstanceException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
         }
     }
 
-    public static Protempa newInstance(String configurationsId,
-            boolean useCache) throws ProtempaStartupException {
+    public static Protempa newInstance(String configurationsId, boolean useCache)
+            throws ProtempaStartupException {
         try {
             return newInstance(new SourceFactory(configurationsId), useCache);
         } catch (ConfigurationsLoadException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
         } catch (BackendProviderSpecLoaderException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
         } catch (InvalidConfigurationException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
         }
     }
 
@@ -80,11 +72,9 @@ public final class Protempa {
                     sourceFactory.newAlgorithmSourceInstance(),
                     sourceFactory.newTermSourceInstance(), useCache);
         } catch (BackendInitializationException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
         } catch (BackendNewInstanceException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
         }
     }
 
@@ -144,8 +134,7 @@ public final class Protempa {
             throws ProtempaStartupException {
         try {
             if (dataSource == null) {
-                throw new IllegalArgumentException(
-                        "dataSource cannot be null");
+                throw new IllegalArgumentException("dataSource cannot be null");
             }
             if (knowledgeSource == null) {
                 throw new IllegalArgumentException(
@@ -155,13 +144,12 @@ public final class Protempa {
                 throw new IllegalArgumentException(
                         "algorithmSource cannot be null");
             }
-            
+
             this.abstractionFinder = new AbstractionFinder(dataSource,
                     knowledgeSource, algorithmSource, termSource,
                     cacheFoundAbstractParameters);
         } catch (KnowledgeSourceReadException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG,
-                    ex);
+            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
         }
     }
 
@@ -265,15 +253,85 @@ public final class Protempa {
         logger.fine("Query execution complete");
     }
 
+    public void retrieveDataAndPersist(Query query, String persistentStoreName)
+            throws FinderException {
+        if (query == null) {
+            throw new IllegalArgumentException("query cannot be null");
+        }
+        if (query.getTermIds().length > 0) {
+            throw new UnsupportedOperationException(
+                    "term id support has not been implemented yet.");
+        }
+        Logger logger = ProtempaUtil.logger();
+        logger.log(Level.FINE, "Retrieving and persisting data");
+        logger.log(Level.INFO,
+                "Retrieved data will be persisted in store named: {0}",
+                persistentStoreName);
+        Set<String> keyIdsSet = Arrays.asSet(query.getKeyIds());
+        Set<String> propIds = Arrays.asSet(query.getPropIds());
+        Set<And<String>> termIds = Arrays.asSet(query.getTermIds());
+        Filter filters = query.getFilters();
+        QuerySession qs = new QuerySession(query, this.abstractionFinder);
+        this.abstractionFinder.retrieveData(keyIdsSet, propIds, termIds,
+                filters, qs, persistentStoreName);
+        logger.log(Level.FINE, "Data retrieval complete");
+    }
+
+    public void processResultsAndPersist(Query origQuery, Query newQuery,
+            String propositionStoreName, String workingMemoryStoreName)
+            throws FinderException {
+        if (origQuery == null) {
+            throw new IllegalArgumentException("query cannot be null");
+        }
+        if (origQuery.getTermIds().length > 0) {
+            throw new UnsupportedOperationException(
+                    "term id support has not been implemented yet.");
+        }
+        Logger logger = ProtempaUtil.logger();
+        logger.log(Level.FINE, "Processing and persisting results");
+        logger.log(Level.INFO,
+                "Processed results will be persisted in store named: {0}",
+                workingMemoryStoreName);
+        logger.log(Level.INFO,
+                "Pulling previously retrieved data from store named: {0}",
+                propositionStoreName);
+        Set<String> propIds = Arrays.asSet(origQuery.getPropIds());
+        QuerySession qs = new QuerySession(origQuery, this.abstractionFinder);
+
+        this.abstractionFinder.processStoredResults(propIds, qs,
+                propositionStoreName, workingMemoryStoreName);
+        logger.log(Level.FINE, "Data processing complete");
+    }
+
+    public void outputResults(Query query, Set<String> propositionIds,
+            QueryResultsHandler resultHandler, String workingMemoryStoreName)
+            throws FinderException {
+        if (query == null) {
+            throw new IllegalArgumentException("query cannot be null");
+        }
+        if (query.getTermIds().length > 0) {
+            throw new UnsupportedOperationException("term id support has not been implemented yet.");
+        }
+        Logger logger = ProtempaUtil.logger();
+        logger.log(Level.FINE, "Outputting results");
+        logger.log(Level.INFO, "Retrieving processed results from store named: {0}", workingMemoryStoreName);
+        Set<String> propIds = Arrays.asSet(query.getPropIds());
+        QuerySession qs = new QuerySession(query, this.abstractionFinder);
+        this.abstractionFinder.outputStoredResults(propIds, resultHandler, qs, workingMemoryStoreName);
+        logger.log(Level.FINE, "Output complete");
+    }
+
     /**
      * Runs each data source backend's validation routine.
-     *
-     * @throws DataSourceFailedValidationException if validation failed.
-     * @throws DataSourceValidationIncompleteException if an error occurred
-     * during validation that prevented its completion.
+     * 
+     * @throws DataSourceFailedValidationException
+     *             if validation failed.
+     * @throws DataSourceValidationIncompleteException
+     *             if an error occurred during validation that prevented its
+     *             completion.
      */
-    public void validateDataSource() throws
-            DataSourceFailedValidationException,
+    public void validateDataSource()
+            throws DataSourceFailedValidationException,
             DataSourceValidationIncompleteException {
         DataSource dataSource = getDataSource();
         dataSource.validate(getKnowledgeSource());

@@ -1,6 +1,5 @@
 package org.protempa;
 
-import org.protempa.proposition.UniqueIdentifier;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,22 +12,27 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.arp.javautil.collections.Iterators;
-import org.drools.ObjectFilter;
 
+import org.arp.javautil.collections.Iterators;
+import org.arp.javautil.datastore.DataStore;
+import org.drools.ObjectFilter;
 import org.drools.RuleBase;
 import org.drools.RuleBaseConfiguration;
 import org.drools.RuleBaseConfiguration.AssertBehaviour;
 import org.drools.StatefulSession;
 import org.drools.StatelessSession;
 import org.drools.StatelessSessionResult;
+import org.drools.WorkingMemory;
+import org.protempa.datastore.PropositionStoreCreator;
+import org.protempa.datastore.WorkingMemoryStoreCreator;
 import org.protempa.dsb.filter.Filter;
-import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Sequence;
+import org.protempa.proposition.UniqueIdentifier;
 import org.protempa.query.And;
 import org.protempa.query.handler.QueryResultsHandler;
 
@@ -40,14 +44,15 @@ import org.protempa.query.handler.QueryResultsHandler;
 final class AbstractionFinder implements Module {
 
     private final Map<String, StatefulSession> workingMemoryCache;
-    //private final Map<String, Set<String>> propIdCache;
+    // private final Map<String, Set<String>> propIdCache;
     private final DataSource dataSource;
     private final KnowledgeSource knowledgeSource;
     private final TermSource termSource;
     private final AlgorithmSource algorithmSource;
     // private final Map<String, List<String>> termToPropDefMap;
     private boolean clearNeeded;
-    //private final Map<String, Map<Set<String>, Sequence<PrimitiveParameter>>> sequences;
+    // private final Map<String, Map<Set<String>, Sequence<PrimitiveParameter>>>
+    // sequences;
     private boolean closed;
 
     AbstractionFinder(DataSource dataSource, KnowledgeSource knowledgeSource,
@@ -62,73 +67,78 @@ final class AbstractionFinder implements Module {
         this.termSource = termSource;
         this.algorithmSource = algorithmSource;
 
-        this.dataSource.addSourceListener(new SourceListener<DataSourceUpdatedEvent>() {
+        this.dataSource
+                .addSourceListener(new SourceListener<DataSourceUpdatedEvent>() {
 
-            @Override
-            public void sourceUpdated(DataSourceUpdatedEvent event) {
-            }
+                    @Override
+                    public void sourceUpdated(DataSourceUpdatedEvent event) {
+                    }
 
-            @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
-                throw new UnsupportedOperationException(
-                        "Not supported yet.");
-            }
-        });
+                    @Override
+                    public void closedUnexpectedly(
+                            SourceClosedUnexpectedlyEvent e) {
+                        throw new UnsupportedOperationException(
+                                "Not supported yet.");
+                    }
+                });
 
-        this.knowledgeSource.addSourceListener(new SourceListener<KnowledgeSourceUpdatedEvent>() {
+        this.knowledgeSource
+                .addSourceListener(new SourceListener<KnowledgeSourceUpdatedEvent>() {
 
-            @Override
-            public void sourceUpdated(KnowledgeSourceUpdatedEvent event) {
-            }
+                    @Override
+                    public void sourceUpdated(KnowledgeSourceUpdatedEvent event) {
+                    }
 
-            @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
-                throw new UnsupportedOperationException(
-                        "Not supported yet.");
-            }
-        });
+                    @Override
+                    public void closedUnexpectedly(
+                            SourceClosedUnexpectedlyEvent e) {
+                        throw new UnsupportedOperationException(
+                                "Not supported yet.");
+                    }
+                });
 
-        this.termSource.addSourceListener(new SourceListener<TermSourceUpdatedEvent>() {
+        this.termSource
+                .addSourceListener(new SourceListener<TermSourceUpdatedEvent>() {
 
-            @Override
-            public void sourceUpdated(TermSourceUpdatedEvent event) {
-            }
+                    @Override
+                    public void sourceUpdated(TermSourceUpdatedEvent event) {
+                    }
 
-            @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
-                throw new UnsupportedOperationException(
-                        "Not supported yet");
-            }
-        });
+                    @Override
+                    public void closedUnexpectedly(
+                            SourceClosedUnexpectedlyEvent e) {
+                        throw new UnsupportedOperationException(
+                                "Not supported yet");
+                    }
+                });
 
-        this.algorithmSource.addSourceListener(new SourceListener<AlgorithmSourceUpdatedEvent>() {
+        this.algorithmSource
+                .addSourceListener(new SourceListener<AlgorithmSourceUpdatedEvent>() {
 
-            @Override
-            public void sourceUpdated(AlgorithmSourceUpdatedEvent event) {
-            }
+                    @Override
+                    public void sourceUpdated(AlgorithmSourceUpdatedEvent event) {
+                    }
 
-            @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
-                throw new UnsupportedOperationException(
-                        "Not supported yet.");
-            }
-        });
+                    @Override
+                    public void closedUnexpectedly(
+                            SourceClosedUnexpectedlyEvent e) {
+                        throw new UnsupportedOperationException(
+                                "Not supported yet.");
+                    }
+                });
 
         if (cacheFoundAbstractParameters) {
             this.workingMemoryCache = new HashMap<String, StatefulSession>();
         } else {
             this.workingMemoryCache = null;
         }
-//        if (cacheFoundAbstractParameters) {
-//            this.propIdCache = new HashMap<String, Set<String>>();
-//        } else {
-//            this.propIdCache = null;
-//        }
-        //this.sequences = new HashMap<String, Map<Set<String>, Sequence<PrimitiveParameter>>>();
+        // if (cacheFoundAbstractParameters) {
+        // this.propIdCache = new HashMap<String, Set<String>>();
+        // } else {
+        // this.propIdCache = null;
+        // }
+        // this.sequences = new HashMap<String, Map<Set<String>,
+        // Sequence<PrimitiveParameter>>>();
     }
 
     DataSource getDataSource() {
@@ -164,10 +174,11 @@ final class AbstractionFinder implements Module {
         }
         try {
             resultHandler.init(this.knowledgeSource);
-//            List<String> termPropIds = getPropIdsFromTerms(explodeTerms(termIds));
-//            List<String> allPropIds = new ArrayList<String>();
-//            allPropIds.addAll(propIds);
-//            allPropIds.addAll(termPropIds);
+            // List<String> termPropIds =
+            // getPropIdsFromTerms(explodeTerms(termIds));
+            // List<String> allPropIds = new ArrayList<String>();
+            // allPropIds.addAll(propIds);
+            // allPropIds.addAll(termPropIds);
 
             if (workingMemoryCache != null) {
                 doFindExecute(keyIds, propIds, filters, resultHandler, qs,
@@ -190,7 +201,7 @@ final class AbstractionFinder implements Module {
     public void clear() {
         if (clearNeeded) {
             clearWorkingMemoryCache();
-            //this.sequences.clear();
+            // this.sequences.clear();
             clearNeeded = false;
         }
     }
@@ -201,17 +212,17 @@ final class AbstractionFinder implements Module {
         this.closed = true;
     }
 
-    private static void addToCache(QuerySession qs, 
-            List<Proposition> propositions, 
+    private static void addToCache(QuerySession qs,
+            List<Proposition> propositions,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations) {
         qs.addPropositionsToCache(propositions);
-        for (Map.Entry<Proposition, List<Proposition>> me : 
-                forwardDerivations.entrySet()) {
+        for (Map.Entry<Proposition, List<Proposition>> me : forwardDerivations
+                .entrySet()) {
             qs.addDerivationsToCache(me.getKey(), me.getValue());
         }
-        for (Map.Entry<Proposition, List<Proposition>> me : 
-                backwardDerivations.entrySet()) {
+        for (Map.Entry<Proposition, List<Proposition>> me : backwardDerivations
+                .entrySet()) {
             qs.addDerivationsToCache(me.getKey(), me.getValue());
         }
     }
@@ -236,7 +247,8 @@ final class AbstractionFinder implements Module {
         List<String> result = new ArrayList<String>();
 
         for (And<TermSubsumption> subsumpClause : termSubsumptionClauses) {
-            result.addAll(this.knowledgeSource.getPropositionDefinitionsByTerm(subsumpClause));
+            result.addAll(this.knowledgeSource
+                    .getPropositionDefinitionsByTerm(subsumpClause));
         }
 
         return result;
@@ -250,7 +262,8 @@ final class AbstractionFinder implements Module {
             And<TermSubsumption> subsumpClause = new And<TermSubsumption>();
             List<TermSubsumption> tss = new ArrayList<TermSubsumption>();
             for (String termId : termClause.getAnded()) {
-                tss.add(TermSubsumption.fromTerms(this.termSource.getTermSubsumption(termId)));
+                tss.add(TermSubsumption.fromTerms(this.termSource
+                        .getTermSubsumption(termId)));
             }
             subsumpClause.setAnded(tss);
             result.add(subsumpClause);
@@ -292,7 +305,8 @@ final class AbstractionFinder implements Module {
 
     private void clearWorkingMemoryCache() {
         if (workingMemoryCache != null) {
-            for (Iterator<StatefulSession> itr = workingMemoryCache.values().iterator(); itr.hasNext();) {
+            for (Iterator<StatefulSession> itr = workingMemoryCache.values()
+                    .iterator(); itr.hasNext();) {
                 try {
                     itr.next().dispose();
                     itr.remove();
@@ -308,59 +322,60 @@ final class AbstractionFinder implements Module {
 
         void initialize();
 
-        Iterator<Proposition> execute(
-                String keyIds, Set<String> propositionIds, List<?> objects)
-                throws ProtempaException;
+        Iterator<Proposition> execute(String keyIds,
+                Set<String> propositionIds, List<?> objects,
+                DataStore<String, WorkingMemory> wm) throws ProtempaException;
 
         void cleanup();
 
-        void createRuleBase(Set<String> propIds,
-                DerivationsBuilder listener, QuerySession qs)
-                throws ProtempaException;
+        void createRuleBase(Set<String> propIds, DerivationsBuilder listener,
+                QuerySession qs) throws ProtempaException;
     }
 
-    private abstract class AbstractExecutionStrategy
-            implements ExecutionStrategy {
+    private abstract class AbstractExecutionStrategy implements
+            ExecutionStrategy {
 
         protected RuleBase ruleBase;
 
         @Override
         public void createRuleBase(Set<String> propIds,
-                DerivationsBuilder listener,
-                QuerySession qs) throws ProtempaException {
-            ValidateAlgorithmCheckedVisitor visitor =
-                    new ValidateAlgorithmCheckedVisitor(algorithmSource);
+                DerivationsBuilder listener, QuerySession qs)
+                throws ProtempaException {
+            ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
+                    algorithmSource);
             JBossRuleCreator ruleCreator = new JBossRuleCreator(
                     visitor.getAlgorithms(), listener);
-            List<PropositionDefinition> propDefs =
-                    new ArrayList<PropositionDefinition>(propIds.size());
+            List<PropositionDefinition> propDefs = new ArrayList<PropositionDefinition>(
+                    propIds.size());
             for (String propId : propIds) {
-                PropositionDefinition propDef =
-                        knowledgeSource.readPropositionDefinition(propId);
+                PropositionDefinition propDef = knowledgeSource
+                        .readPropositionDefinition(propId);
                 if (propDef != null) {
                     propDefs.add(propDef);
                 } else {
-                    throw new FinderException("Invalid proposition id: " + propId);
+                    throw new FinderException("Invalid proposition id: "
+                            + propId);
                 }
             }
             if (propIds != null) {
-                Set<PropositionDefinition> result =
-                        new HashSet<PropositionDefinition>();
+                Set<PropositionDefinition> result = new HashSet<PropositionDefinition>();
                 aggregateChildren(visitor, result, propDefs);
                 ruleCreator.visit(result);
             }
-            this.ruleBase =
-                    new JBossRuleBaseFactory(ruleCreator, createRuleBaseConfiguration(ruleCreator)).newInstance();
+            this.ruleBase = new JBossRuleBaseFactory(ruleCreator,
+                    createRuleBaseConfiguration(ruleCreator)).newInstance();
             clearNeeded = true;
         }
 
-        protected RuleBaseConfiguration createRuleBaseConfiguration(JBossRuleCreator ruleCreator) throws PropositionDefinitionInstantiationException {
+        protected RuleBaseConfiguration createRuleBaseConfiguration(
+                JBossRuleCreator ruleCreator)
+                throws PropositionDefinitionInstantiationException {
             RuleBaseConfiguration config = new RuleBaseConfiguration();
             config.setShadowProxy(false);
             try {
                 config.setConflictResolver(new PROTEMPAConflictResolver(
-                        knowledgeSource,
-                        ruleCreator.getRuleToAbstractionDefinitionMap()));
+                        knowledgeSource, ruleCreator
+                                .getRuleToAbstractionDefinitionMap()));
             } catch (KnowledgeSourceReadException ex) {
                 throw new PropositionDefinitionInstantiationException(
                         "Could not instantiate proposition definitions", ex);
@@ -369,8 +384,8 @@ final class AbstractionFinder implements Module {
             return config;
         }
 
-        private class ValidateAlgorithmCheckedVisitor
-                extends AbstractPropositionDefinitionCheckedVisitor {
+        private class ValidateAlgorithmCheckedVisitor extends
+                AbstractPropositionDefinitionCheckedVisitor {
 
             private final Map<LowLevelAbstractionDefinition, Algorithm> algorithms;
             private final AlgorithmSource algorithmSource;
@@ -388,14 +403,16 @@ final class AbstractionFinder implements Module {
             public void visit(
                     LowLevelAbstractionDefinition lowLevelAbstractionDefinition)
                     throws ProtempaException {
-                String algorithmId = lowLevelAbstractionDefinition.getAlgorithmId();
-                Algorithm algorithm = algorithmSource.readAlgorithm(algorithmId);
+                String algorithmId = lowLevelAbstractionDefinition
+                        .getAlgorithmId();
+                Algorithm algorithm = algorithmSource
+                        .readAlgorithm(algorithmId);
                 if (algorithm == null && algorithmId != null) {
                     throw new NoSuchAlgorithmException(
                             "Low level abstraction definition "
-                            + lowLevelAbstractionDefinition.getId()
-                            + " wants the algorithm " + algorithmId
-                            + ", but no such algorithm is available.");
+                                    + lowLevelAbstractionDefinition.getId()
+                                    + " wants the algorithm " + algorithmId
+                                    + ", but no such algorithm is available.");
                 }
                 this.algorithms.put(lowLevelAbstractionDefinition, algorithm);
 
@@ -435,11 +452,11 @@ final class AbstractionFinder implements Module {
 
         /**
          * Collect all of the propositions for which we need to create rules.
-         *
+         * 
          * @param algorithms
-         *            an empty {@link Map} that will be populated with algorithms
-         *            for each proposition definition for which a rule will be
-         *            created.
+         *            an empty {@link Map} that will be populated with
+         *            algorithms for each proposition definition for which a
+         *            rule will be created.
          * @param result
          *            an empty {@link Set} that will be populated with the
          *            proposition definitions for which rules will be created.
@@ -451,9 +468,10 @@ final class AbstractionFinder implements Module {
          */
         private void aggregateChildren(
                 ValidateAlgorithmCheckedVisitor validatorVisitor,
-                Set<PropositionDefinition> result, List<PropositionDefinition> propDefs)
-                throws ProtempaException {
-            DirectChildrenVisitor dcVisitor = new DirectChildrenVisitor(knowledgeSource);
+                Set<PropositionDefinition> result,
+                List<PropositionDefinition> propDefs) throws ProtempaException {
+            DirectChildrenVisitor dcVisitor = new DirectChildrenVisitor(
+                    knowledgeSource);
             for (PropositionDefinition propDef : propDefs) {
                 propDef.acceptChecked(validatorVisitor);
                 propDef.acceptChecked(dcVisitor);
@@ -473,8 +491,7 @@ final class AbstractionFinder implements Module {
         }
     }
 
-    private class StatelessExecutionStrategy
-            extends AbstractExecutionStrategy {
+    private class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
         private StatelessSession statelessSession;
         private final ObjectFilter objectFilter = new MyObjectFilter();
@@ -486,11 +503,11 @@ final class AbstractionFinder implements Module {
 
         @Override
         @SuppressWarnings("unchecked")
-        public Iterator<Proposition> execute(
-                String keyId, Set<String> propositionIds, List<?> objects)
-                throws ProtempaException {
-            StatelessSessionResult result =
-                    this.statelessSession.executeWithResults(objects);
+        public Iterator<Proposition> execute(String keyId,
+                Set<String> propositionIds, List<?> objects,
+                DataStore<String, WorkingMemory> wm) throws ProtempaException {
+            StatelessSessionResult result = this.statelessSession
+                    .executeWithResults(objects);
             return result.iterateObjects(objectFilter);
         }
 
@@ -498,10 +515,10 @@ final class AbstractionFinder implements Module {
         public void cleanup() {
             clear();
         }
+
     }
 
-    private class StatefulExecutionStrategy
-            extends AbstractExecutionStrategy {
+    private class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
         private final ObjectFilter objectFilter = new MyObjectFilter();
 
@@ -509,18 +526,34 @@ final class AbstractionFinder implements Module {
         public void initialize() {
         }
 
-        @Override
-        @SuppressWarnings("unchecked")
-        public Iterator<Proposition> execute(
-                String keyId, Set<String> propositionIds, List<?> objects)
+        private StatefulSession applyRules(String keyId, List<?> objects)
                 throws ProtempaException {
-            StatefulSession workingMemory =
-                    statefulWorkingMemory(ruleBase, keyId);
+            StatefulSession workingMemory = statefulWorkingMemory(ruleBase,
+                    keyId);
             for (Object obj : objects) {
                 workingMemory.insert(obj);
             }
             workingMemory.fireAllRules();
-            return workingMemory.iterateObjects(objectFilter);
+
+            return workingMemory;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        // public Iterator<Proposition> execute(String keyId,
+        // Set<String> propositionIds, List<?> objects)
+        // throws ProtempaException {
+        //
+        // return applyRules(keyId, objects).iterateObjects(objectFilter);
+        // }
+        public Iterator<Proposition> execute(String keyId,
+                Set<String> propositionIds, List<?> objects,
+                DataStore<String, WorkingMemory> wmStore)
+                throws ProtempaException {
+            StatefulSession workingMemory = applyRules(keyId, objects);
+            wmStore.put(keyId, workingMemory);
+
+            return null;
         }
 
         @Override
@@ -528,9 +561,126 @@ final class AbstractionFinder implements Module {
         }
     }
 
-    private void doFindExecute(Set<String> keyIds,
-            Set<String> propositionIds, Filter filters,
+    void retrieveData(Set<String> keyIds, Set<String> propositionIds,
+            Set<And<String>> termIds, Filter filters, QuerySession qs,
+            String persistentStoreName) throws FinderException {
+        try {
+            ObjectIterator oi = new ObjectIterator(keyIds, propositionIds,
+                    filters, qs, false);
+            DataStore<String, List<Proposition>> store = PropositionStoreCreator
+                    .<Proposition> getInstance().getPersistentStore(
+                            persistentStoreName);
+
+            for (Iterator<ObjectEntry> itr = oi; itr.hasNext();) {
+                ObjectEntry entry = itr.next();
+                String keyId = entry.keyId;
+                List<Proposition> props = entry.propositions;
+
+                store.put(keyId, props);
+            }
+            store.shutdown();
+        } catch (ProtempaException ex) {
+            throw new FinderException(ex);
+        }
+    }
+
+    void processStoredResults(Set<String> propositionIds, QuerySession qs,
+            String propositionStoreName, String workingMemoryStoreName)
+            throws FinderException {
+        try {
+            DataStore<String, List<Proposition>> propStore = PropositionStoreCreator
+                    .<Proposition> getInstance().getPersistentStore(
+                            propositionStoreName);
+            DataStore<String, WorkingMemory> wmStore = WorkingMemoryStoreCreator
+                    .getInstance().getPersistentStore(workingMemoryStoreName);
+            DataStore<String, DerivationsBuilder> dbStore = DerivationsBuilderStoreCreator
+                    .getInstance().getPersistentStore(workingMemoryStoreName);
+
+            DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
+            StatefulExecutionStrategy strategy = new StatefulExecutionStrategy();
+            strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
+            strategy.initialize();
+            for (Entry<String, List<Proposition>> e : propStore.entrySet()) {
+                // ignore the return value, which is just null for
+                // stateful executions anyway
+                // the key here is that the working memory produced by
+                // the rules engine is being persisted
+                strategy.execute(e.getKey(), propositionIds, e.getValue(),
+                        wmStore);
+            }
+
+            dbStore.put(workingMemoryStoreName, derivationsBuilder);
+
+            strategy.cleanup();
+            propStore.shutdown();
+            wmStore.shutdown();
+            dbStore.shutdown();
+        } catch (ProtempaException ex) {
+            throw new FinderException(ex);
+        }
+    }
+
+    private void processStoredResult(QuerySession qs,
+            Iterator<Proposition> propositions,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
+            Set<String> propositionIds, QueryResultsHandler resultHandler,
+            String keyId) throws FinderException {
+
+        if (qs.isCachingEnabled()) {
+            List<Proposition> props = Iterators.asList(propositions);
+            addToCache(qs, Collections.unmodifiableList(props),
+                    Collections.unmodifiableMap(forwardDerivations),
+                    Collections.unmodifiableMap(backwardDerivations));
+            propositions = props.iterator();
+        }
+
+        Map<UniqueIdentifier, Proposition> refs = new HashMap<UniqueIdentifier, Proposition>();
+        List<Proposition> filteredPropositions = extractRequestedPropositions(
+                propositions, propositionIds, refs);
+
+        resultHandler.handleQueryResult(keyId, filteredPropositions,
+                forwardDerivations, backwardDerivations, refs);
+    }
+
+    void outputStoredResults(Set<String> propositionIds,
             QueryResultsHandler resultHandler, QuerySession qs,
+            String workingMemoryStoreName) throws FinderException {
+        try {
+            DataStore<String, WorkingMemory> wmStore = WorkingMemoryStoreCreator
+                    .getInstance().getPersistentStore(workingMemoryStoreName);
+            DataStore<String, DerivationsBuilder> dbStore = DerivationsBuilderStoreCreator
+                    .getInstance().getPersistentStore(workingMemoryStoreName);
+
+            DerivationsBuilder derivationsBuilder = dbStore
+                    .get(workingMemoryStoreName);
+
+            for (Entry<String, WorkingMemory> entry : wmStore.entrySet()) {
+                String keyId = entry.getKey();
+                WorkingMemory wm = entry.getValue();
+                @SuppressWarnings("unchecked")
+                Iterator<Proposition> propositions = wm
+                        .iterateObjects(new MyObjectFilter());
+                processStoredResult(qs, propositions,
+                        derivationsBuilder.toForwardDerivations(),
+                        derivationsBuilder.toBackwardDerivations(),
+                        propositionIds, resultHandler, keyId);
+            }
+            wmStore.shutdown();
+            dbStore.shutdown();
+        } catch (ProtempaException ex) {
+            throw new FinderException(ex);
+        }
+    }
+
+    void processAndOutputStoredResults(Set<String> propositionIds,
+            QueryResultsHandler resultHandler, QuerySession qs,
+            String propositionStoreName) {
+
+    }
+
+    private void doFindExecute(Set<String> keyIds, Set<String> propositionIds,
+            Filter filters, QueryResultsHandler resultHandler, QuerySession qs,
             ExecutionStrategy strategy) throws ProtempaException {
         Logger logger = ProtempaUtil.logger();
         logger.log(Level.FINE, "Now retrieving data");
@@ -544,17 +694,17 @@ final class AbstractionFinder implements Module {
         strategy.initialize();
         logger.log(Level.FINE, "Now processing data");
         int numProcessed = 0;
-        
+
         for (Iterator<ObjectEntry> itr = objectIterator; itr.hasNext();) {
             ObjectEntry entry = itr.next();
             logger.log(Level.FINER, "About to assert raw data {0}",
                     entry.propositions);
-            Iterator<Proposition> propositions = strategy.execute(
-                    entry.keyId, propositionIds, entry.propositions);
+            Iterator<Proposition> propositions = strategy.execute(entry.keyId,
+                    propositionIds, entry.propositions, null);
             processResults(qs, propositions,
                     derivationsBuilder.toForwardDerivations(),
-                    derivationsBuilder.toBackwardDerivations(),
-                    propositionIds, resultHandler, entry.keyId);
+                    derivationsBuilder.toBackwardDerivations(), propositionIds,
+                    resultHandler, entry.keyId);
             derivationsBuilder.reset();
             if (++numProcessed % 1000 == 0) {
                 logNumProcessed(numProcessed, logger);
@@ -567,10 +717,10 @@ final class AbstractionFinder implements Module {
     private void logNumProcessed(int numProcessed, Logger logger)
             throws DataSourceReadException {
         if (logger.isLoggable(Level.FINE)) {
-            String keyTypePluralDisplayName =
-                this.dataSource.getKeyTypePluralDisplayName();
-            logger.log(Level.FINE, "Processed {0} {0}",
-                    new Object[]{numProcessed, keyTypePluralDisplayName});
+            String keyTypePluralDisplayName = this.dataSource
+                    .getKeyTypePluralDisplayName();
+            logger.log(Level.FINE, "Processed {0} {0}", new Object[] {
+                    numProcessed, keyTypePluralDisplayName });
         }
     }
 
@@ -590,11 +740,10 @@ final class AbstractionFinder implements Module {
             propositions = props.iterator();
         }
 
-        Map<UniqueIdentifier, Proposition> refs =
-                new HashMap<UniqueIdentifier, Proposition>();
+        Map<UniqueIdentifier, Proposition> refs = new HashMap<UniqueIdentifier, Proposition>();
         logger.log(Level.FINER, "References: {0}", refs);
-        List<Proposition> filteredPropositions = //a newly created list
-                extractRequestedPropositions(propositions, propositionIds, refs);
+        List<Proposition> filteredPropositions = // a newly created list
+        extractRequestedPropositions(propositions, propositionIds, refs);
         logger.log(Level.FINER, "Proposition ids: {0}", propositionIds);
         logger.log(Level.FINER, "Filtered propositions: {0}",
                 filteredPropositions);
@@ -602,32 +751,32 @@ final class AbstractionFinder implements Module {
         resultHandler.handleQueryResult(keyId, filteredPropositions,
                 forwardDerivations, backwardDerivations, refs);
     }
-    
+
     private static class ObjectEntry {
 
         String keyId;
         List<Proposition> propositions;
     }
-    
+
     private class ObjectIterator implements Iterator<ObjectEntry> {
 
         private Map<String, List<Proposition>> propositions;
         private Iterator<String> keyIdItr;
         private final Logger logger;
 
-        ObjectIterator(Set<String> keyIds,
-                Set<String> propIds, Filter filters, QuerySession qs,
-                boolean stateful)
+        ObjectIterator(Set<String> keyIds, Set<String> propIds, Filter filters,
+                QuerySession qs, boolean stateful)
                 throws KnowledgeSourceReadException, DataSourceReadException {
             this.logger = ProtempaUtil.logger();
 
             this.logger.log(Level.FINE, "Starting data retrieval");
 
-            Set<String> leafPropIds = knowledgeSource.inDataSourcePropositionIds(
-                    propIds.toArray(new String[propIds.size()]));
+            Set<String> leafPropIds = knowledgeSource
+                    .inDataSourcePropositionIds(propIds
+                            .toArray(new String[propIds.size()]));
             this.logger.log(Level.FINE, "Proposition ids: {0}", leafPropIds);
-            this.propositions = dataSource.readPropositions(keyIds, leafPropIds,
-                    filters, qs);
+            this.propositions = dataSource.readPropositions(keyIds,
+                    leafPropIds, filters, qs);
             Set<String> keySet = this.propositions.keySet();
             this.keyIdItr = keySet.iterator();
 
@@ -662,43 +811,45 @@ final class AbstractionFinder implements Module {
      * @return a <code>StatefulRuleSession</code>, or null if the given key is
      *         <code>null</code>.
      */
-    private StatefulSession statefulWorkingMemory(RuleBase ruleBase, String key) throws ProtempaException {
+    private StatefulSession statefulWorkingMemory(RuleBase ruleBase, String key)
+            throws ProtempaException {
         StatefulSession workingMemory = null;
         if (key != null) {
-            //we have not cached a working memory for this key yet.
+            // we have not cached a working memory for this key yet.
             if ((workingMemory = this.workingMemoryCache.get(key)) == null) {
                 // TODO: change the last null parameter to an actual derivations
                 // cache
                 workingMemory = ruleBase.newStatefulSession(false);
                 this.workingMemoryCache.put(key, workingMemory);
-                //we have cached a working memory for this key.
-            } //else {
-                /*
-             * There apparently is no way to assign an existing working
-             * memory to a knowledge base without serializing it and passing
-             * the serialized object to a new rule base... This could
-             * actually come in handy for transparently saving the working
-             * memories out to disk...
+                // we have cached a working memory for this key.
+            } // else {
+            /*
+             * There apparently is no way to assign an existing working memory
+             * to a knowledge base without serializing it and passing the
+             * serialized object to a new rule base... This could actually come
+             * in handy for transparently saving the working memories out to
+             * disk...
              */
-            //try {
-            //byte[] wmSerialized = detachWorkingMemory(workingMemory);
-            //Set<String> propIdCacheForKey = this.propIdCache.get(key);
-            //assert propIdCacheForKey != null : "the proposition id cache was not set";
-                    /*
-             * We construct the rule base of proposition definitions
-             * that have not been looked for previously.
+            // try {
+            // byte[] wmSerialized = detachWorkingMemory(workingMemory);
+            // Set<String> propIdCacheForKey = this.propIdCache.get(key);
+            // assert propIdCacheForKey != null :
+            // "the proposition id cache was not set";
+            /*
+             * We construct the rule base of proposition definitions that have
+             * not been looked for previously.
              */
             // TODO: change the last null parameter to an actual
             // derivations cache
-//                    workingMemory = reattachWorkingMemory(wmSerialized,
-//                            ruleBase);
-            //this.workingMemoryCache.put(key, workingMemory);
-//                } catch (IOException ex) {
-//                    throw new AssertionError(ex);
-//                } catch (ClassNotFoundException cnfe) {
-//                    throw new AssertionError(cnfe);
-//                }
-            //}
+            // workingMemory = reattachWorkingMemory(wmSerialized,
+            // ruleBase);
+            // this.workingMemoryCache.put(key, workingMemory);
+            // } catch (IOException ex) {
+            // throw new AssertionError(ex);
+            // } catch (ClassNotFoundException cnfe) {
+            // throw new AssertionError(cnfe);
+            // }
+            // }
         }
         return workingMemory;
     }
