@@ -3,6 +3,8 @@ package org.protempa.datastore;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.datastore.DataStoreFactory;
@@ -34,10 +36,23 @@ public final class PropositionStoreCreator<P extends Proposition> implements
     @SuppressWarnings("unchecked")
     @Override
     public DataStore<String, List<P>> getPersistentStore(String name) {
+        Logger logger = DataStoreUtil.logger();
+        logger.log(Level.FINE, "Getting persistent store {0}", name);
         if (stores.containsKey(name)) {
+            logger.log(
+                    Level.FINEST,
+                    "Persistent store {0} has been accessed during this run: using it",
+                    name);
             return (DataStore<String, List<P>>) stores.get(name);
         } else {
-            DataStore<String, List<P>> store = DataStoreFactory.getPersistentStore(name);
+            logger.log(
+                    Level.FINEST,
+                    "Persistent store {0} has not been accessed during this" +
+                    " run or does not exist: attempting to get it from the underlying store",
+                    name);
+            DataStore<String, List<P>> store = DataStoreFactory
+                    .getPersistentStore(name);
+            logger.log(Level.FINEST, "Got persistent store {0}", name);
             stores.put(name, store);
             return store;
         }
