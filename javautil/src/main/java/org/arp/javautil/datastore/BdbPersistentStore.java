@@ -78,7 +78,13 @@ class BdbPersistentStore<K, V> extends BdbMap<K, V> {
         DatabaseConfig dbConfig = new DatabaseConfig();
         dbConfig.setAllowCreate(true);
         dbConfig.setTemporary(false);
-
+        
+        boolean dbExists = false;
+        for (String name : env.getDatabaseNames()) {
+            if (name.equals(dbName)) {
+                dbExists = true;
+            }
+        }
         Database result = env.openDatabase(null, dbName, dbConfig);
         if (result == null) {
             throw new AssertionError("Failed to create BerkeleyDB database "
@@ -90,8 +96,9 @@ class BdbPersistentStore<K, V> extends BdbMap<K, V> {
         DataStoreUtil
                 .logger()
                 .log(Level.INFO,
-                        "Created BerkeleyDB persistent store with name {0} at: {1}",
+                        "{0} BerkeleyDB persistent store with name {1} at: {2}",
                         new Object[] {
+                                dbExists ? "Opened" : "Created",
                                 dbName,
                                 env.getHome().getAbsolutePath()
                                         + System.getProperty("file.separator")
