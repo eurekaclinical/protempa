@@ -15,7 +15,7 @@ abstract class BdbMap<K, V> implements DataStore<K, V> {
     private final Database db;
     private final StoredMap<K,V> storedMap;
 
-    BdbMap(String dbName) throws DatabaseError {
+    BdbMap(String dbName) throws DataStoreError {
         try {
             this.db = getDatabase(dbName);
 
