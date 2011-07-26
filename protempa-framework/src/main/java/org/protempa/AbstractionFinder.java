@@ -540,20 +540,16 @@ final class AbstractionFinder implements Module {
 
         @Override
         @SuppressWarnings("unchecked")
-        // public Iterator<Proposition> execute(String keyId,
-        // Set<String> propositionIds, List<?> objects)
-        // throws ProtempaException {
-        //
-        // return applyRules(keyId, objects).iterateObjects(objectFilter);
-        // }
         public Iterator<Proposition> execute(String keyId,
                 Set<String> propositionIds, List<?> objects,
                 DataStore<String, WorkingMemory> wmStore)
                 throws ProtempaException {
             StatefulSession workingMemory = applyRules(keyId, objects);
+            ProtempaUtil.logger().log(Level.FINEST,
+                    "Persisting working memory for key ID {0}", keyId);
             wmStore.put(keyId, workingMemory);
 
-            return null;
+            return workingMemory.iterateObjects();
         }
 
         @Override
@@ -564,12 +560,13 @@ final class AbstractionFinder implements Module {
     void retrieveData(Set<String> keyIds, Set<String> propositionIds,
             Set<And<String>> termIds, Filter filters, QuerySession qs,
             String persistentStoreName) throws FinderException {
+        DataStore<String, List<Proposition>> store = PropositionStoreCreator
+                .<Proposition> getInstance().getPersistentStore(
+                        persistentStoreName);
+        int numWritten = 0;
         try {
             ObjectIterator oi = new ObjectIterator(keyIds, propositionIds,
                     filters, qs, false);
-            DataStore<String, List<Proposition>> store = PropositionStoreCreator
-                    .<Proposition> getInstance().getPersistentStore(
-                            persistentStoreName);
 
             for (Iterator<ObjectEntry> itr = oi; itr.hasNext();) {
                 ObjectEntry entry = itr.next();
@@ -577,46 +574,65 @@ final class AbstractionFinder implements Module {
                 List<Proposition> props = entry.propositions;
 
                 store.put(keyId, props);
+                numWritten++;
             }
-            store.shutdown();
+            ProtempaUtil.logger().log(Level.FINEST,
+                    "Wrote {0} records into store {1}",
+                    new Object[] { numWritten, persistentStoreName });
         } catch (ProtempaException ex) {
             throw new FinderException(ex);
+        } finally {
+            store.shutdown();
+
         }
     }
 
     void processStoredResults(Set<String> propositionIds, QuerySession qs,
             String propositionStoreName, String workingMemoryStoreName)
             throws FinderException {
+
+        Logger logger = ProtempaUtil.logger();
+
+        DataStore<String, List<Proposition>> propStore = PropositionStoreCreator
+                .<Proposition> getInstance().getPersistentStore(
+                        propositionStoreName);
+        DataStore<String, WorkingMemory> wmStore = WorkingMemoryStoreCreator
+                .getInstance().getPersistentStore(workingMemoryStoreName);
+        DataStore<String, DerivationsBuilder> dbStore = DerivationsBuilderStoreCreator
+                .getInstance().getPersistentStore(workingMemoryStoreName);
+
+        logger.log(Level.FINEST, "Found {0} records in store {1}",
+                new Object[] { propStore.size(), propositionStoreName });
+
         try {
-            DataStore<String, List<Proposition>> propStore = PropositionStoreCreator
-                    .<Proposition> getInstance().getPersistentStore(
-                            propositionStoreName);
-            DataStore<String, WorkingMemory> wmStore = WorkingMemoryStoreCreator
-                    .getInstance().getPersistentStore(workingMemoryStoreName);
-            DataStore<String, DerivationsBuilder> dbStore = DerivationsBuilderStoreCreator
-                    .getInstance().getPersistentStore(workingMemoryStoreName);
 
             DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
             StatefulExecutionStrategy strategy = new StatefulExecutionStrategy();
             strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
             strategy.initialize();
             for (Entry<String, List<Proposition>> e : propStore.entrySet()) {
-                // ignore the return value, which is just null for
-                // stateful executions anyway
                 // the key here is that the working memory produced by
-                // the rules engine is being persisted
-                strategy.execute(e.getKey(), propositionIds, e.getValue(),
-                        wmStore);
+                // the rules engine is being persisted by
+                // StatefulExecutionStrategy.execute()
+
+                int rulesMatched = 0;
+                for (Iterator<Proposition> itr = strategy.execute(e.getKey(),
+                        propositionIds, e.getValue(), wmStore); itr.hasNext();) {
+                    rulesMatched++;
+                }
+                logger.log(Level.FINEST, "Matched {0} rules for key ID: {1}",
+                        new Object[] { rulesMatched, e.getKey() });
             }
 
             dbStore.put(workingMemoryStoreName, derivationsBuilder);
 
             strategy.cleanup();
+        } catch (ProtempaException ex) {
+            throw new FinderException(ex);
+        } finally {
             propStore.shutdown();
             wmStore.shutdown();
             dbStore.shutdown();
-        } catch (ProtempaException ex) {
-            throw new FinderException(ex);
         }
     }
 
@@ -627,6 +643,7 @@ final class AbstractionFinder implements Module {
             Set<String> propositionIds, QueryResultsHandler resultHandler,
             String keyId) throws FinderException {
 
+        Logger logger = ProtempaUtil.logger();
         if (qs.isCachingEnabled()) {
             List<Proposition> props = Iterators.asList(propositions);
             addToCache(qs, Collections.unmodifiableList(props),
@@ -635,9 +652,12 @@ final class AbstractionFinder implements Module {
             propositions = props.iterator();
         }
 
+        logger.log(Level.FINEST, "Processing key ID: {0}", keyId);
         Map<UniqueIdentifier, Proposition> refs = new HashMap<UniqueIdentifier, Proposition>();
         List<Proposition> filteredPropositions = extractRequestedPropositions(
                 propositions, propositionIds, refs);
+        logger.log(Level.FINEST, "Filtered propositions: {0}",
+                filteredPropositions);
 
         resultHandler.handleQueryResult(keyId, filteredPropositions,
                 forwardDerivations, backwardDerivations, refs);
@@ -646,18 +666,23 @@ final class AbstractionFinder implements Module {
     void outputStoredResults(Set<String> propositionIds,
             QueryResultsHandler resultHandler, QuerySession qs,
             String workingMemoryStoreName) throws FinderException {
+        Logger logger = ProtempaUtil.logger();
+        DataStore<String, WorkingMemory> wmStore = WorkingMemoryStoreCreator
+                .getInstance().getPersistentStore(workingMemoryStoreName);
+        DataStore<String, DerivationsBuilder> dbStore = DerivationsBuilderStoreCreator
+                .getInstance().getPersistentStore(workingMemoryStoreName);
         try {
-            DataStore<String, WorkingMemory> wmStore = WorkingMemoryStoreCreator
-                    .getInstance().getPersistentStore(workingMemoryStoreName);
-            DataStore<String, DerivationsBuilder> dbStore = DerivationsBuilderStoreCreator
-                    .getInstance().getPersistentStore(workingMemoryStoreName);
 
             DerivationsBuilder derivationsBuilder = dbStore
                     .get(workingMemoryStoreName);
 
-            for (Entry<String, WorkingMemory> entry : wmStore.entrySet()) {
-                String keyId = entry.getKey();
-                WorkingMemory wm = entry.getValue();
+            resultHandler.init(knowledgeSource);
+            logger.log(Level.FINE, "Found {0} elements in the store",
+                    wmStore.size());
+            for (Entry<String, WorkingMemory> e : wmStore.entrySet()) {
+                String keyId = e.getKey();
+                logger.log(Level.FINE, "Determining output for key {0}", keyId);
+                WorkingMemory wm = e.getValue();
                 @SuppressWarnings("unchecked")
                 Iterator<Proposition> propositions = wm
                         .iterateObjects(new MyObjectFilter());
@@ -666,17 +691,42 @@ final class AbstractionFinder implements Module {
                         derivationsBuilder.toBackwardDerivations(),
                         propositionIds, resultHandler, keyId);
             }
-            wmStore.shutdown();
-            dbStore.shutdown();
+            resultHandler.finish();
         } catch (ProtempaException ex) {
             throw new FinderException(ex);
+        } finally {
+            dbStore.shutdown();
+            wmStore.shutdown();
         }
     }
 
     void processAndOutputStoredResults(Set<String> propositionIds,
             QueryResultsHandler resultHandler, QuerySession qs,
-            String propositionStoreName) {
+            String propositionStoreName) throws FinderException {
+        DataStore<String, List<Proposition>> propStore = PropositionStoreCreator
+                .<Proposition> getInstance().getPersistentStore(
+                        propositionStoreName);
+        try {
+            DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
+            StatelessExecutionStrategy strategy = new StatelessExecutionStrategy();
+            strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
+            strategy.initialize();
+            resultHandler.init(knowledgeSource);
+            for (Entry<String, List<Proposition>> e : propStore.entrySet()) {
+                Iterator<Proposition> propositions = strategy.execute(
+                        e.getKey(), propositionIds, e.getValue(), null);
+                processStoredResult(qs, propositions,
+                        derivationsBuilder.toForwardDerivations(),
+                        derivationsBuilder.toBackwardDerivations(),
+                        propositionIds, resultHandler, e.getKey());
+            }
+            resultHandler.finish();
 
+        } catch (ProtempaException ex) {
+            throw new FinderException(ex);
+        } finally {
+            propStore.shutdown();
+        }
     }
 
     private void doFindExecute(Set<String> keyIds, Set<String> propositionIds,

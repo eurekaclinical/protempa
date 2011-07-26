@@ -277,13 +277,13 @@ public final class Protempa {
         logger.log(Level.FINE, "Data retrieval complete");
     }
 
-    public void processResultsAndPersist(Query origQuery, Query newQuery,
+    public void processResultsAndPersist(Query query,
             String propositionStoreName, String workingMemoryStoreName)
             throws FinderException {
-        if (origQuery == null) {
+        if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
         }
-        if (origQuery.getTermIds().length > 0) {
+        if (query.getTermIds().length > 0) {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
@@ -295,12 +295,18 @@ public final class Protempa {
         logger.log(Level.INFO,
                 "Pulling previously retrieved data from store named: {0}",
                 propositionStoreName);
-        Set<String> propIds = Arrays.asSet(origQuery.getPropIds());
-        QuerySession qs = new QuerySession(origQuery, this.abstractionFinder);
+        Set<String> propIds = Arrays.asSet(query.getPropIds());
+        QuerySession qs = new QuerySession(query, this.abstractionFinder);
 
         this.abstractionFinder.processStoredResults(propIds, qs,
                 propositionStoreName, workingMemoryStoreName);
         logger.log(Level.FINE, "Data processing complete");
+    }
+
+    public void outputResults(Query query, QueryResultsHandler resultHandler,
+            String workingMemoryStoreName) throws FinderException {
+        outputResults(query, Arrays.asSet(query.getPropIds()), resultHandler,
+                workingMemoryStoreName);
     }
 
     public void outputResults(Query query, Set<String> propositionIds,
@@ -310,15 +316,27 @@ public final class Protempa {
             throw new IllegalArgumentException("query cannot be null");
         }
         if (query.getTermIds().length > 0) {
-            throw new UnsupportedOperationException("term id support has not been implemented yet.");
+            throw new UnsupportedOperationException(
+                    "term id support has not been implemented yet.");
         }
         Logger logger = ProtempaUtil.logger();
         logger.log(Level.FINE, "Outputting results");
-        logger.log(Level.INFO, "Retrieving processed results from store named: {0}", workingMemoryStoreName);
-        Set<String> propIds = Arrays.asSet(query.getPropIds());
+        logger.log(Level.INFO,
+                "Retrieving processed results from store named: {0}",
+                workingMemoryStoreName);
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
-        this.abstractionFinder.outputStoredResults(propIds, resultHandler, qs, workingMemoryStoreName);
+        this.abstractionFinder.outputStoredResults(propositionIds,
+                resultHandler, qs, workingMemoryStoreName);
         logger.log(Level.FINE, "Output complete");
+    }
+
+    public void processResultsAndOutput(Query origQuery, Query newQuery,
+            QueryResultsHandler resultHandler, String propositionStoreName)
+            throws FinderException {
+        QuerySession qs = new QuerySession(origQuery, this.abstractionFinder);
+        this.abstractionFinder.processAndOutputStoredResults(
+                Arrays.asSet(origQuery.getPropIds()), resultHandler, qs,
+                propositionStoreName);
     }
 
     /**
