@@ -528,8 +528,7 @@ final class AbstractionFinder implements Module {
 
         private StatefulSession applyRules(String keyId, List<?> objects)
                 throws ProtempaException {
-            StatefulSession workingMemory = statefulWorkingMemory(ruleBase,
-                    keyId);
+            StatefulSession workingMemory = ruleBase.newStatefulSession(false);
             for (Object obj : objects) {
                 workingMemory.insert(obj);
             }
@@ -539,7 +538,6 @@ final class AbstractionFinder implements Module {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public Iterator<Proposition> execute(String keyId,
                 Set<String> propositionIds, List<?> objects,
                 DataStore<String, WorkingMemory> wmStore)
@@ -548,8 +546,10 @@ final class AbstractionFinder implements Module {
             ProtempaUtil.logger().log(Level.FINEST,
                     "Persisting working memory for key ID {0}", keyId);
             wmStore.put(keyId, workingMemory);
+            ProtempaUtil.logger().log(Level.FINEST,
+                    "Persisted working memory for key ID {0}", keyId);
 
-            return workingMemory.iterateObjects();
+            return null;
         }
 
         @Override
@@ -597,7 +597,7 @@ final class AbstractionFinder implements Module {
                 .<Proposition> getInstance().getPersistentStore(
                         propositionStoreName);
         DataStore<String, WorkingMemory> wmStore = WorkingMemoryStoreCreator
-                .getInstance().getPersistentStore(workingMemoryStoreName);
+                .getInstance(null).getPersistentStore(workingMemoryStoreName);
         DataStore<String, DerivationsBuilder> dbStore = DerivationsBuilderStoreCreator
                 .getInstance().getPersistentStore(workingMemoryStoreName);
 
@@ -615,13 +615,8 @@ final class AbstractionFinder implements Module {
                 // the rules engine is being persisted by
                 // StatefulExecutionStrategy.execute()
 
-                int rulesMatched = 0;
-                for (Iterator<Proposition> itr = strategy.execute(e.getKey(),
-                        propositionIds, e.getValue(), wmStore); itr.hasNext();) {
-                    rulesMatched++;
-                }
-                logger.log(Level.FINEST, "Matched {0} rules for key ID: {1}",
-                        new Object[] { rulesMatched, e.getKey() });
+                strategy.execute(e.getKey(), propositionIds, e.getValue(),
+                        wmStore);
             }
 
             dbStore.put(workingMemoryStoreName, derivationsBuilder);
@@ -667,14 +662,17 @@ final class AbstractionFinder implements Module {
             QueryResultsHandler resultHandler, QuerySession qs,
             String workingMemoryStoreName) throws FinderException {
         Logger logger = ProtempaUtil.logger();
-        DataStore<String, WorkingMemory> wmStore = WorkingMemoryStoreCreator
-                .getInstance().getPersistentStore(workingMemoryStoreName);
+        DataStore<String, WorkingMemory> wmStore = null;
         DataStore<String, DerivationsBuilder> dbStore = DerivationsBuilderStoreCreator
                 .getInstance().getPersistentStore(workingMemoryStoreName);
         try {
 
             DerivationsBuilder derivationsBuilder = dbStore
                     .get(workingMemoryStoreName);
+            StatefulExecutionStrategy strategy = new StatefulExecutionStrategy();
+            strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
+            wmStore = WorkingMemoryStoreCreator.getInstance(strategy.ruleBase)
+                    .getPersistentStore(workingMemoryStoreName);
 
             resultHandler.init(knowledgeSource);
             logger.log(Level.FINE, "Found {0} elements in the store",
