@@ -13,7 +13,7 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 
-class BdbPersistentStore<K, V> extends BdbMap<K, V> {
+public class BdbPersistentStore<K, V> extends BdbMap<K, V> {
 
     private static final String CLASS_CATALOG = "java_class_catalog";
     private static Environment env;
@@ -45,7 +45,7 @@ class BdbPersistentStore<K, V> extends BdbMap<K, V> {
                 });
     }
 
-    BdbPersistentStore(String dbName) {
+    protected BdbPersistentStore(String dbName) {
         super(dbName);
         this.dbName = dbName;
     }
