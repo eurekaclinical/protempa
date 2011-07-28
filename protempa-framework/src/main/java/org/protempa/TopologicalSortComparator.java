@@ -1,5 +1,6 @@
 package org.protempa;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,7 +17,9 @@ import java.util.Set;
  *
  * @author Nora Sovarel
  */
-class TopologicalSortComparator implements Comparator<AbstractionDefinition> {
+class TopologicalSortComparator implements Comparator<AbstractionDefinition>, Serializable {
+
+    private static final long serialVersionUID = 924247928684751479L;
 
     private final Map<String, Integer> rule2Index =
             new HashMap<String, Integer>();
