@@ -18,7 +18,7 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 
-final class BdbCache<K, V> extends BdbMap<K, V> {
+public final class BdbCache<K, V> extends BdbMap<K, V> {
 
     private static final String CLASS_CATALOG = "java_class_catalog";
 
