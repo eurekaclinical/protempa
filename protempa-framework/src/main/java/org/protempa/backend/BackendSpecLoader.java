@@ -36,6 +36,7 @@ public final class BackendSpecLoader<B extends Backend>
         return false;
     }
 
+    @Override
     public Iterator<BackendSpec<B>> iterator() {
         return backendSpecs.iterator();
     }
