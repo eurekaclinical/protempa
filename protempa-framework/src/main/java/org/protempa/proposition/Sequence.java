@@ -264,6 +264,7 @@ public final class Sequence<T extends TemporalProposition> implements List<T>,
         return result;
     }
 
+    @Override
     public void accept(PropositionVisitor propositionVisitor) {
         for (Proposition prop : this) {
             prop.accept(propositionVisitor);

@@ -531,6 +531,7 @@ public abstract class Interval implements Comparable<Interval> {
         return this.hashCode;
     }
 
+    @Override
     public final int compareTo(Interval o) {
         if (this == o) {
             return 0;
