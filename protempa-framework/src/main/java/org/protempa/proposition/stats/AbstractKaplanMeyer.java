@@ -219,7 +219,8 @@ public abstract class AbstractKaplanMeyer extends AbstractPropositionVisitor {
 			this.count = count;
 		}
 
-		public int compareTo(LengthCountPair o) {
+		@Override
+        public int compareTo(LengthCountPair o) {
 			if (this.length > o.length)
 				return 1;
 			else if (this.length < o.length)
