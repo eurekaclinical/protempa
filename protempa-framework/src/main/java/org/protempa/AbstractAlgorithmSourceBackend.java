@@ -15,6 +15,7 @@ public abstract class AbstractAlgorithmSourceBackend extends
      *
      * @see org.protempa.AlgorithmSourceBackend#close()
      */
+    @Override
     public void close() {
     }
 
