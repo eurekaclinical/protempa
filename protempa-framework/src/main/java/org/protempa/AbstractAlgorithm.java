@@ -64,7 +64,8 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * 
 	 * @see org.protempa.Algorithm#getId()
 	 */
-	public final String getId() {
+	@Override
+    public final String getId() {
 		return id;
 	}
 
@@ -88,7 +89,8 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * 
 	 * @see org.protempa.Algorithm#getMinimumNumberOfValues()
 	 */
-	public final int getMinimumNumberOfValues() {
+	@Override
+    public final int getMinimumNumberOfValues() {
 		return this.minNumVal;
 	}
 
@@ -113,7 +115,8 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * 
 	 * @see org.protempa.Algorithm#getMaximumNumberOfValues()
 	 */
-	public final int getMaximumNumberOfValues() {
+	@Override
+    public final int getMaximumNumberOfValues() {
 		return this.maxNumVal;
 	}
 
@@ -122,7 +125,8 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * 
 	 * @see org.protempa.Algorithm#close()
 	 */
-	public void close() {
+	@Override
+    public void close() {
 
 	}
 
@@ -141,7 +145,8 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * 
 	 * @see org.protempa.Algorithm#getInValueType()
 	 */
-	public final ValueFactory getInValueType() {
+	@Override
+    public final ValueFactory getInValueType() {
 		return inValueType;
 	}
 
@@ -164,7 +169,8 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * 
 	 * @see org.protempa.Algorithm#getParameters()
 	 */
-	public AlgorithmParameter[] getParameters() {
+	@Override
+    public AlgorithmParameter[] getParameters() {
 		return this.parameters;
 	}
 
@@ -173,7 +179,8 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * 
 	 * @see org.protempa.Algorithm#parameter(java.lang.String)
 	 */
-	public AlgorithmParameter parameter(String name) {
+	@Override
+    public AlgorithmParameter parameter(String name) {
 		return parametersMap.get(name);
 	}
 
@@ -182,7 +189,8 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * 
 	 * @see org.protempa.Algorithm#createDataSourceConstraint()
 	 */
-	public Filter createDataSourceConstraint() {
+	@Override
+    public Filter createDataSourceConstraint() {
 		return null;
 	}
 
@@ -195,7 +203,8 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * 
 	 * @see org.protempa.Algorithm#getAdvanceRowSkipEnd()
 	 */
-	public int getAdvanceRowSkipEnd() {
+	@Override
+    public int getAdvanceRowSkipEnd() {
 		return advanceRowSkipEnd;
 	}
 
@@ -204,11 +213,13 @@ public abstract class AbstractAlgorithm implements Algorithm {
 		return "Algorithm " + getId();
 	}
 
-	public void initialize(AlgorithmArguments arguments)
+	@Override
+    public void initialize(AlgorithmArguments arguments)
 			throws AlgorithmInitializationException {
 
 	}
 
-	public abstract Value compute(Segment<PrimitiveParameter> segment,
+	@Override
+    public abstract Value compute(Segment<PrimitiveParameter> segment,
 			AlgorithmArguments arguments) throws AlgorithmProcessingException;
 }
