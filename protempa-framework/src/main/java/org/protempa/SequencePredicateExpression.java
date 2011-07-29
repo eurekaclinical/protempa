@@ -19,14 +19,16 @@ class SequencePredicateExpression implements PredicateExpression {
 		this.dataTypes = dataTypes;
 	}
 
-	public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
+	@Override
+    public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
 			Declaration[] arg3, WorkingMemory arg4, Object context)
 			throws Exception {
 		Sequence<?> other = (Sequence<?>) arg0;
 		return dataTypes == null || dataTypes.equals(other.getPropositionIds());
 	}
 
-	public Object createContext() {
+	@Override
+    public Object createContext() {
 		return null;
 	}
 
