@@ -50,7 +50,8 @@ public abstract class AbstractJavaAlgorithmBackend
 	/**
 	 * Reads the properties file containing the list of algorithm classes.
 	 */
-	public final void initialize(BackendInstanceSpec config)
+	@Override
+    public final void initialize(BackendInstanceSpec config)
         throws BackendInitializationException {
 		try {
 			IOUtil.readPropertiesFromResource(algorithmClasses, getClass(),
@@ -61,7 +62,8 @@ public abstract class AbstractJavaAlgorithmBackend
 		}
 	}
 
-	public final Algorithm readAlgorithm(String id, Algorithms algorithms) 
+	@Override
+    public final Algorithm readAlgorithm(String id, Algorithms algorithms) 
             throws AlgorithmSourceReadException {
 		String className = algorithmClasses.getProperty(id);
 		if (className != null) {
@@ -108,7 +110,8 @@ public abstract class AbstractJavaAlgorithmBackend
 		return result;
 	}
 
-	public final void readAlgorithms(Algorithms algorithms) 
+	@Override
+    public final void readAlgorithms(Algorithms algorithms) 
             throws AlgorithmSourceReadException {
 		for (Map.Entry<Object, Object> e : algorithmClasses.entrySet()) {
 			String algoId = (String) e.getKey();
