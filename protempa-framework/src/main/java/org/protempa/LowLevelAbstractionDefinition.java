@@ -387,6 +387,7 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
         return result;
     }
 
+    @Override
     public Set<String> getAbstractedFrom() {
         return java.util.Collections.unmodifiableSet(this.paramIds);
     }
@@ -406,6 +407,7 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
         return this.valueType;
     }
 
+    @Override
     public void accept(PropositionDefinitionVisitor processor) {
         if (processor == null) {
             throw new IllegalArgumentException("processor cannot be null.");
@@ -413,6 +415,7 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
         processor.visit(this);
     }
 
+    @Override
     public void acceptChecked(PropositionDefinitionCheckedVisitor processor)
             throws ProtempaException {
         if (processor == null) {
