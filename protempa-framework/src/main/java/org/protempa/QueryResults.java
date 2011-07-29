@@ -42,15 +42,18 @@ public final class QueryResults implements Iterable<QueryResultsEntry> {
             this.itr = results.entrySet().iterator();
         }
 
+        @Override
         public boolean hasNext() {
             return this.itr.hasNext();
         }
 
+        @Override
         public QueryResultsEntry next() {
             Map.Entry<String, List<Proposition>> me = this.itr.next();
             return new QueryResultsEntry(me.getKey(), me.getValue());
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
@@ -71,6 +74,7 @@ public final class QueryResults implements Iterable<QueryResultsEntry> {
         return this.results.keySet();
     }
 
+    @Override
     public Iterator<QueryResultsEntry> iterator() {
         return new QueryResultsIterator(this.results);
     }
