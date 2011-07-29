@@ -23,14 +23,16 @@ public class CollectionSizeExpression implements PredicateExpression {
 		this.minSize = minSize;
 	}
 
-	public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
+	@Override
+    public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
 			Declaration[] arg3, WorkingMemory arg4, Object context)
 			throws Exception {
 		boolean result = ((Collection<?>) arg0).size() >= this.minSize;
 		return result;
 	}
 
-	public Object createContext() {
+	@Override
+    public Object createContext() {
 		return null;
 	}
 
