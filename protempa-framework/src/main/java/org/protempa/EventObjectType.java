@@ -61,7 +61,8 @@ final class EventObjectType extends ClassObjectType {
 	 *         has a different event id.
 	 * @see org.drools.spi.ObjectType#matches(java.lang.Object)
 	 */
-	public boolean matches(Object arg0) {
+	@Override
+    public boolean matches(Object arg0) {
 		if (!super.matches(arg0)) {
 			return false;
 		}
