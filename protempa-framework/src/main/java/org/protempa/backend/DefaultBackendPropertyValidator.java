@@ -7,6 +7,7 @@ package org.protempa.backend;
 public class DefaultBackendPropertyValidator 
         implements BackendPropertyValidator {
 
+    @Override
     public void validate(String name, Object value)
             throws InvalidPropertyValueException {
         // Do nothing.
