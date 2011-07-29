@@ -19,7 +19,8 @@ final class ParameterPredicateExpression implements PredicateExpression {
 		this.value = value;
 	}
 
-	public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
+	@Override
+    public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
 			Declaration[] arg3, WorkingMemory arg4, Object context)
 			throws Exception {
 		Parameter p = (Parameter) arg0;
@@ -29,7 +30,8 @@ final class ParameterPredicateExpression implements PredicateExpression {
 						.getValue()));
 	}
 
-	public Object createContext() {
+	@Override
+    public Object createContext() {
 		return null;
 	}
 
