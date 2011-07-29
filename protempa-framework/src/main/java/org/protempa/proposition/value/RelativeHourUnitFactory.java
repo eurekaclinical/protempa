@@ -8,7 +8,8 @@ package org.protempa.proposition.value;
  */
 public final class RelativeHourUnitFactory implements UnitFactory {
 
-	public Unit toUnit(String name) {
+	@Override
+    public Unit toUnit(String name) {
 		if (RelativeHourUnit.HOUR.getName().equals(name)) {
 			return RelativeHourUnit.HOUR;
 		} else {

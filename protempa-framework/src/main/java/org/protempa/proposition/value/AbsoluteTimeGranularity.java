@@ -247,6 +247,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
      *
      * @see org.virginia.pbhs.parameters.Unit#getPluralName()
      */
+    @Override
     public String getPluralName() {
         return this.pluralName;
     }
@@ -256,6 +257,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
      *
      * @see org.virginia.pbhs.parameters.Unit#getName()
      */
+    @Override
     public String getName() {
         return this.name;
     }
@@ -265,6 +267,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
      *
      * @see org.virginia.pbhs.parameters.Unit#getAbbrevation()
      */
+    @Override
     public String getAbbrevatedName() {
         return this.abbrev;
     }
@@ -283,6 +286,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
      *
      * @see org.virginia.pbhs.parameters.Unit#getLongFormat()
      */
+    @Override
     public DateFormat getLongFormat() {
         return this.longDateFormat;
     }
@@ -296,6 +300,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
      *
      * @see org.virginia.pbhs.parameters.Unit#getMediumFormat()
      */
+    @Override
     public DateFormat getMediumFormat() {
         return this.mediumDateFormat;
     }
@@ -309,6 +314,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
      *
      * @see org.virginia.pbhs.parameters.Unit#getShortFormat()
      */
+    @Override
     public DateFormat getShortFormat() {
         return this.shortDateFormat;
     }

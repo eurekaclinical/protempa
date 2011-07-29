@@ -114,35 +114,42 @@ public class RelativeDayGranularity implements Granularity {
         return VALUES[ordinal];
     }
 
+    @Override
     public long earliest(long pos) {
         return pos;
     }
 
+    @Override
     public long latest(long pos) {
         return pos + this.length - 1;
     }
 
+    @Override
     public long maximumDistance(long position, long distance, Unit distanceUnit) {
         long d = distance * this.length;
         return distance == 0 ? 0 : d + this.length - 1;
     }
 
+    @Override
     public long minimumDistance(long position, long distance, Unit distanceUnit) {
         long d = distance * this.length;
         return distance == 0 ? 0 : d - this.length + 1;
     }
 
+    @Override
     public long distance(long start, long finish,
             Granularity finishGranularity, Unit distanceUnit) {
         return (finish - start) / this.length;
     }
 
+    @Override
     public int compareTo(Granularity o) {
         @SuppressWarnings("unused")
         RelativeDayGranularity rdg = (RelativeDayGranularity) o;
         return 0;
     }
 
+    @Override
     public Unit getCorrespondingUnit() {
         return RelativeDayUnit.DAY;
     }

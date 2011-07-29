@@ -8,7 +8,8 @@ package org.protempa.proposition.value;
  */
 public final class AbsoluteTimeUnitFactory implements UnitFactory {
 
-	public Unit toUnit(String name) {
+	@Override
+    public Unit toUnit(String name) {
 		return AbsoluteTimeUnit.nameToUnit(name);
 	}
 

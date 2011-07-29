@@ -13,7 +13,8 @@ public final class RelativeDayGranularityFactory implements GranularityFactory {
 	 * 
 	 * @see org.protempa.proposition.value.GranularityFactory#toGranularity(java.lang.String)
 	 */
-	public RelativeDayGranularity toGranularity(String name) {
+	@Override
+    public RelativeDayGranularity toGranularity(String name) {
 		if (RelativeDayGranularity.DAY.getName().equals(name)) {
 			return RelativeDayGranularity.DAY;
 		} else {

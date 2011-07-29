@@ -8,7 +8,8 @@ package org.protempa.proposition.value;
  */
 public final class AbsoluteTimeGranularityFactory implements GranularityFactory {
 	
-	public AbsoluteTimeGranularity toGranularity(String name) {
+	@Override
+    public AbsoluteTimeGranularity toGranularity(String name) {
 		return AbsoluteTimeGranularity.nameToGranularity(name);
 	}
 
