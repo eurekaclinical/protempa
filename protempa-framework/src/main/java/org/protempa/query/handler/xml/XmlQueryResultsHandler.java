@@ -213,8 +213,15 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
             Document document) throws ProtempaException {
         Element derivationsElem = document.createElement("derivations");
         List<Proposition> derived = new ArrayList<Proposition>();
-        derived.addAll(forwardDerivations.get(proposition));
-        derived.addAll(backwardDerivations.get(proposition));
+        
+        List<Proposition> fd = forwardDerivations.get(proposition);
+        if( fd != null )
+        	derived.addAll(fd);
+        
+        List<Proposition> bd = backwardDerivations.get(proposition);
+        if( bd != null )
+        	derived.addAll(bd);
+        
         List<Proposition> derivedPropositions = filterHandled(
                 derived, handled);
         if (derivedPropositions != null) {
