@@ -19,4 +19,13 @@
     <module>protempa-ksb-protege</module>
     <module>protempa-tsb-umls</module>
   </modules>
+  
+  <profiles>
+        <profile>
+            <id>test-tier1</id>
+        </profile>
+        <profile>
+            <id>test-tier2</id>
+        </profile>
+    </profiles>
 </project>
