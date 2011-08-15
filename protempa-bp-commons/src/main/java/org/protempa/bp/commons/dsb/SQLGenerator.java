@@ -7,7 +7,7 @@ import org.arp.javautil.sql.ConnectionSpec;
 
 import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.dsb.sqlgen.ConnectorJ5MySQL415Generator;
-import org.protempa.bp.commons.dsb.sqlgen.Ojdbc6Oracle10gSQLGenerator;
+import org.protempa.bp.commons.dsb.sqlgen.Ojdbc6OracleSQLGenerator;
 import org.protempa.bp.commons.dsb.sqlgen.RelationalDatabaseSpec;
 import org.protempa.bp.commons.dsb.sqlgen.ResultCache;
 import org.protempa.bp.commons.dsb.sqlgen.SQLOrderBy;
@@ -23,7 +23,7 @@ import org.protempa.proposition.value.UnitFactory;
  * The following database-specific SQL generators are provided:
  * <ul>
  * <li>{@link ConnectorJ5MySQL415Generator}
- * <li>{@link Ojdbc6Oracle10gSQLGenerator}
+ * <li>{@link Ojdbc6OracleSQLGenerator}
  * </ul>
  * 
  * The user may specify additional SQL generators by implementing this interface
