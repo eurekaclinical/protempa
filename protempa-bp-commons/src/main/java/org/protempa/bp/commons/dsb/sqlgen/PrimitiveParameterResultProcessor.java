@@ -3,13 +3,17 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang.StringUtils;
+import org.arp.javautil.arrays.Arrays;
+import org.arp.javautil.log.Logging;
 import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.DataSourceType;
 import org.protempa.proposition.PrimitiveParameter;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueFormat;
 import org.protempa.proposition.value.ValueType;
@@ -17,13 +21,14 @@ import org.protempa.proposition.value.ValueType;
 class PrimitiveParameterResultProcessor extends
         MainResultProcessor<PrimitiveParameter> {
 
-    private static final int FLUSH_SIZE = 100000;
+    private static final int FLUSH_SIZE = 1000000;
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
         ResultCache<PrimitiveParameter> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
-        boolean hasRefs = entitySpec.getReferenceSpecs().length > 0;
+        String entitySpecName = entitySpec.getName();
+        //boolean hasRefs = entitySpec.getReferenceSpecs().length > 0;
         String[] propIds = entitySpec.getPropositionIds();
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
         if (codeSpec != null) {
@@ -42,14 +47,27 @@ class PrimitiveParameterResultProcessor extends
         boolean timestampColumnTypeSet = false;
         DataSourceType dsType =
                 DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
+        
         while (resultSet.next()) {
             int i = 1;
 
             String keyId = resultSet.getString(i++);
+            if (keyId == null) {
+                logger.log(Level.WARNING, "A keyId is null. Skipping record.");
+                continue;
+            }
             
             i = readUniqueIds(uniqueIds, resultSet, i);
-            UniqueIdentifier uniqueIdentifer = generateUniqueIdentifier(
-                    entitySpec.getName(), uniqueIds);
+            if (Arrays.contains(uniqueIds, null)) {
+                if (logger.isLoggable(Level.WARNING)) {
+                    logger.log(Level.WARNING, 
+                        "Unique ids contain null ({0}). Skipping record.", 
+                        StringUtils.join(uniqueIds, ", "));
+                    continue;
+                }
+            }
+            UniqueId uniqueIdentifer = generateUniqueIdentifier(entitySpecName,
+                    uniqueIds);
 
             String propId = null;
             if (!isCasePresent()) {
@@ -107,10 +125,20 @@ class PrimitiveParameterResultProcessor extends
             logger.log(Level.FINEST, "Created primitive parameter {0}", p);
             results.add(keyId, p);
             if (++count % FLUSH_SIZE == 0) {
-                results.flush(hasRefs);
+                results.flush(this);
+                if (logger.isLoggable(Level.FINE)) {
+                    Logging.logCount(logger, Level.FINE, count, 
+                        "Retrieved {0} record",
+                        "Retrieved {0} records");
+                }
             }
         }
-        results.flush(hasRefs);
+        results.flush(this);
+        if (logger.isLoggable(Level.FINE)) {
+            Logging.logCount(logger, Level.FINE, count, 
+                "Retrieved {0} record total",
+                "Retrieved {0} records total");
+        }
     }
 
     

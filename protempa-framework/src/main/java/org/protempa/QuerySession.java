@@ -215,7 +215,7 @@ public class QuerySession {
         if (!this.cachingEnabled)
             throw new UnsupportedOperationException("Caching is disabled.");
         assert proposition != null : "proposition cannot be null";
-        this.propositionCache.put(proposition.getUniqueIdentifier(),
+        this.propositionCache.put(proposition.getUniqueId(),
                 proposition);
     }
 

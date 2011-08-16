@@ -27,7 +27,7 @@ import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 import org.protempa.query.handler.QueryResultsHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -79,11 +79,11 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
         }
     }
 
-    private List<Proposition> createReferenceList(List<UniqueIdentifier> uids,
-            Map<UniqueIdentifier, Proposition> references) {
+    private List<Proposition> createReferenceList(List<UniqueId> uids,
+            Map<UniqueId, Proposition> references) {
         List<Proposition> propositions = new ArrayList<Proposition>();
         if (uids != null) {
-            for (UniqueIdentifier uid : uids) {
+            for (UniqueId uid : uids) {
                 Proposition refProp = references.get(uid);
                 if (refProp != null) {
                     propositions.add(refProp);
@@ -95,11 +95,11 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
 
     private List<Proposition> filterHandled(
             Collection<Proposition> propositions,
-            Set<UniqueIdentifier> handled) {
+            Set<UniqueId> handled) {
         List<Proposition> filtered = new ArrayList<Proposition>();
         if (propositions != null) {
             for (Proposition proposition : propositions) {
-                if (!handled.contains(proposition.getUniqueIdentifier())) {
+                if (!handled.contains(proposition.getUniqueId())) {
                     filtered.add(proposition);
                 }
             }
@@ -149,10 +149,10 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
         return orderedRefs;
     }
 
-    private Element handleReferences(Set<UniqueIdentifier> handled,
+    private Element handleReferences(Set<UniqueId> handled,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references,
+            Map<UniqueId, Proposition> references,
             Proposition proposition, XmlPropositionVisitor visitor,
             Document document) throws ProtempaException {
         Element referencesElem = document.createElement("references");
@@ -166,7 +166,7 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
         if (orderedReferences != null) {
             for (String refName : orderedReferences) {
                 logger.log(Level.FINEST, "Processing reference {0}", refName);
-                List<UniqueIdentifier> uids = proposition
+                List<UniqueId> uids = proposition
                         .getReferences(refName);
                 logger.log(Level.FINEST, "Total unique identifiers: {0}",
                         uids.size());
@@ -205,10 +205,10 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
         return referencesElem;
     }
 
-    private Element handleDerivations(Set<UniqueIdentifier> handled,
+    private Element handleDerivations(Set<UniqueId> handled,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references,
+            Map<UniqueId, Proposition> references,
             Proposition proposition, XmlPropositionVisitor visitor,
             Document document) throws ProtempaException {
         Element derivationsElem = document.createElement("derivations");
@@ -237,25 +237,25 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
         return derivationsElem;
     }
 
-    private Element handleProposition(Set<UniqueIdentifier> handled,
+    private Element handleProposition(Set<UniqueId> handled,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references,
+            Map<UniqueId, Proposition> references,
             Proposition proposition, XmlPropositionVisitor visitor,
             Document document) throws ProtempaException {
 
-        if (!handled.contains(proposition.getUniqueIdentifier())) {
+        if (!handled.contains(proposition.getUniqueId())) {
             Util.logger().log(
                     Level.FINEST,
                     "Processing proposition {0} with unique id {1}",
                     new Object[] { proposition.getId(),
-                            proposition.getUniqueIdentifier() });
+                            proposition.getUniqueId() });
 
             // create a new set to pass down to the "children" (references and
             // derivations) of this proposition
-            Set<UniqueIdentifier> tempHandled = new HashSet<UniqueIdentifier>(
+            Set<UniqueId> tempHandled = new HashSet<UniqueId>(
                     handled);
-            tempHandled.add(proposition.getUniqueIdentifier());
+            tempHandled.add(proposition.getUniqueId());
             Element propElem = document.createElement("proposition");
             propElem.setAttribute("id", proposition.getId());
             proposition.acceptChecked(visitor);
@@ -314,10 +314,10 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
     public void handleQueryResult(String key, List<Proposition> propositions,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references)
+            Map<UniqueId, Proposition> references)
             throws FinderException {
         try {
-            Set<UniqueIdentifier> handled = new HashSet<UniqueIdentifier>();
+            Set<UniqueId> handled = new HashSet<UniqueId>();
             XmlPropositionVisitor visitor = new XmlPropositionVisitor(
                     this.knowledgeSource);
             Document document = DocumentBuilderFactory.newInstance()

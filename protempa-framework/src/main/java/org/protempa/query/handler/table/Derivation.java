@@ -12,21 +12,27 @@ import java.util.Set;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
 
 /**
- *
+ * Traverses traversals from a proposition to/from a derived proposition.
+ * 
  * @author Andrew Post
  */
 public final class Derivation extends Link {
 
+    /**
+     * For configuring the direction of the traversal and how many derivation
+     * steps to traverse.
+     */
     public static enum Behavior {
 
         /**
-         * Forward chaining, toward abstractions.
+         * Forward chaining, toward derived propositions.
          */
         SINGLE_FORWARD,
         /**
@@ -34,7 +40,7 @@ public final class Derivation extends Link {
          */
         SINGLE_BACKWARD,
         /**
-         * Forward chaining, toward abstractions.
+         * Forward chaining, toward derived propositions.
          */
         MULT_FORWARD,
         /**
@@ -44,6 +50,7 @@ public final class Derivation extends Link {
     }
     private final Behavior behavior;
     private Value[] allowedValues;
+    private Set<String> knowledgeTree;
 
     public Derivation(String[] propositionIds, Behavior behavior) {
         this(propositionIds, null, null, behavior);
@@ -108,74 +115,104 @@ public final class Derivation extends Link {
         return createHeaderFragment("derived");
     }
 
+    /**
+     * Traverses a derivation.
+     * 
+     * @param proposition
+     *            a {@link Proposition} at which to start the traversal.
+     * @param forwardDerivations
+     *            a {@link Map<Proposition,List<Proposition>>} of derived
+     *            propositions.
+     * @param backwardDerivations 
+     *            a {@link Map<Proposition,List<Proposition>>} of derived
+     *            propositions.
+     * @param references
+     *            a {@link Map<Proposition,Proposition>} of unique identifiers
+     *            to {@link Proposition}s, used to resolve references.
+     * @param knowledgeSource
+     *            the {@link KnowledgeSource}.
+     * @param cache
+     *            a {@link Set<Proposition>} for convenience in checking if
+     *            duplicate propositions are traversed to. It is cleared 
+     *            in between calls to this method.
+     * @return the {@link Collection<Proposition>} at the end of the traversal
+     *            step.
+     */
     @Override
-    public Collection<Proposition> traverse(Proposition proposition,
+    Collection<Proposition> traverse(Proposition proposition,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references,
-            KnowledgeSource knowledgeSource) {
+            Map<UniqueId, Proposition> references,
+            KnowledgeSource knowledgeSource, final Set<Proposition> cache) 
+            throws KnowledgeSourceReadException {
         //First, aggregate derived values according to the specified behavior.
-        List<Proposition> derived;
+        List<Proposition> derived = null;
         switch (this.behavior) {
             case SINGLE_FORWARD:
-                derived = forwardDerivations.get(proposition);
+                derived = filterMatches(forwardDerivations.get(proposition),
+                        cache);
                 break;
             case SINGLE_BACKWARD:
-                derived = backwardDerivations.get(proposition);
+                derived = filterMatches(backwardDerivations.get(proposition),
+                        cache);
                 break;
             case MULT_FORWARD:
-                derived = new ArrayList<Proposition>();
-                Set<Proposition> cache = new HashSet<Proposition>();
-                derived.add(proposition);
-                int startPos = 0;
-                boolean added = true;
-                while (added) {
-                    added = false;
-                    int j = 0;
-                    int size = derived.size();
-                    while (startPos + j < size) {
-                        Proposition prop = derived.get(startPos + j);
-                        Collection<Proposition> c =
+                populateKnowledgeTree(knowledgeSource);
+                if (this.knowledgeTree.contains(proposition.getId())) {
+                    /*
+                     * For performance, pull the specified proposition ids,
+                     * cache the hierarchy, and check to see if each 
+                     * traversed-to proposition's id is in the hierarchy. This 
+                     * is much faster than traversing the whole hierarchy in 
+                     * most cases.
+                     */
+                    derived = new ArrayList<Proposition>();
+                    Queue<Proposition> internalDerived =
+                            new LinkedList<Proposition>();
+                    internalDerived.add(proposition);
+                    while (!internalDerived.isEmpty()) {
+                        Proposition prop = internalDerived.remove();
+                        /*
+                         * If (in hierarchy or ???) and not in cache, then add 
+                         * to derived.
+                         */
+                        Collection<Proposition> c = 
                                 forwardDerivations.get(prop);
                         if (c != null) {
                             for (Proposition p : c) {
                                 if (cache.add(p)) {
-                                    derived.add(p);
-                                    added = true;
+                                    internalDerived.add(p);
+                                    if (isMatch(p) && hasAllowedValue(p)) {
+                                        derived.add(p);
+                                    }
                                 }
                             }
                         }
-                        j++;
                     }
-                    startPos += j;
                 }
-                //System.out.println("derived: " + derived);
                 break;
             case MULT_BACKWARD:
-                derived = new ArrayList<Proposition>();
-                cache = new HashSet<Proposition>();
-                derived.add(proposition);
-                startPos = 0;
-                added = true;
-                while (added) {
-                    added = false;
-                    int j = 0;
-                    int size = derived.size();
-                    while (startPos + j < size) {
-                        Proposition prop = derived.get(startPos + j);
-                        Collection<Proposition> c =
+                populateKnowledgeTree(knowledgeSource);
+                if (this.knowledgeTree.contains(proposition.getId())) {
+                    derived = new ArrayList<Proposition>();
+                    Queue<Proposition> internalDerived2 =
+                            new LinkedList<Proposition>();
+                    internalDerived2.add(proposition);
+                    while (!internalDerived2.isEmpty()) {
+                        Proposition prop = internalDerived2.remove();
+                        Collection<Proposition> c = 
                                 backwardDerivations.get(prop);
                         if (c != null) {
                             for (Proposition p : c) {
                                 if (cache.add(p)) {
-                                    derived.add(p);
-                                    added = true;
+                                    internalDerived2.add(p);
+                                    if (isMatch(p) && hasAllowedValue(p)) {
+                                        derived.add(p);
+                                    }
                                 }
                             }
                         }
-                        j++;
                     }
-                    startPos += j;
                 }
                 break;
             default:
@@ -183,32 +220,61 @@ public final class Derivation extends Link {
                         + this.behavior);
         }
 
-        //Second, after filtering by allowed values, filter by proposition id.
-        return createResults(filterAllowedValues(derived));
+        return createResults(derived);
     }
 
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
+    
+    private void populateKnowledgeTree(KnowledgeSource knowledgeSource) 
+            throws KnowledgeSourceReadException {
+        if (this.knowledgeTree == null) {
+            this.knowledgeTree = new HashSet<String>();
+            for (String propId : getPropositionIds()) {
+                this.knowledgeTree.addAll(
+                        knowledgeSource.inDataSourcePropositionIds(propId));
+            }
+        }
+    }
 
-    private Collection<Proposition> filterAllowedValues(
-            List<Proposition> propositions) {
-        if (propositions == null) {
-            return null;
-        } else if (this.allowedValues.length == 0) {
-            return propositions;
+    private boolean hasAllowedValue(Proposition proposition) {
+        if (this.allowedValues.length == 0) {
+            return true;
         } else {
-            List<Proposition> result =
-                    new ArrayList<Proposition>(propositions.size());
-            for (Proposition prop : propositions) {
-                if (prop instanceof Parameter
-                        && Arrays.contains(this.allowedValues,
-                        ((Parameter) prop).getValue())) {
-                    result.add(prop);
+            if (proposition instanceof Parameter
+                    && Arrays.contains(this.allowedValues,
+                    ((Parameter) proposition).getValue())) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Filters <code>propositions</code>. Removes duplicates, propositions not
+     * in the proposition id list, and parameters that do not meet any value
+     * constraints set.
+     * @param propositions the {@link Collection<Proposition>} to filter.
+     * @param cache a {@link Set<Proposition>} that is used to find 
+     * duplicates.
+     * 
+     * @return a newly-created {@link List<Proposition>}.
+     */
+    private List<Proposition> filterMatches(
+            Collection<Proposition> propositions, Set<Proposition> cache) {
+        List<Proposition> result = new ArrayList<Proposition>();
+        if (propositions != null) {
+            for (Proposition proposition : propositions) {
+                if (cache.add(proposition)
+                        && isMatch(proposition)
+                        && hasAllowedValue(proposition)) {
+                    result.add(proposition);
                 }
             }
-            return result;
         }
+        return result;
     }
 }

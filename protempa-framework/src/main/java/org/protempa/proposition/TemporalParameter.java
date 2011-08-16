@@ -5,8 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueFactory;
-import org.protempa.proposition.value.ValueType;
 
 /**
  * @author Andrew Post
@@ -60,23 +58,18 @@ public abstract class TemporalParameter extends TemporalProposition
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString()).append("value", this.value).toString();
+        return new ToStringBuilder(this).appendSuper(super.toString())
+                .append("value", this.value).toString();
     }
 
-    protected void writeTemporalParameter(ObjectOutputStream s) throws IOException {
-        if (this.value != null) {
-            s.writeObject(this.value.getType());
-            s.writeObject(this.value.getRepr());
-        } else {
-            s.writeObject(null);
-        }
+    protected void writeTemporalParameter(ObjectOutputStream s) 
+            throws IOException {
+        s.writeObject(this.value);
     }
 
-    protected void readTemporalParameter(ObjectInputStream s) throws IOException, ClassNotFoundException {
-        ValueType valueType = (ValueType) s.readObject();
-        if (valueType != null) {
-            this.value = ValueFactory.parseRepr((String) s.readObject());
-        }
+    protected void readTemporalParameter(ObjectInputStream s) 
+            throws IOException, ClassNotFoundException {
+        this.value = ((Value) s.readObject()).replace();
     }
 
 

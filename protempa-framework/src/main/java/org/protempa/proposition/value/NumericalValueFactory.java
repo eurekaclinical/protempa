@@ -23,10 +23,10 @@ public class NumericalValueFactory extends ValueFactory {
      * @see org.virginia.pbhs.parameters.value.ValueFactory#getInstance(java.lang.String)
      */
     @Override
-    public Value parseValue(String val) {
-        Value result = NUMBER.parseValue(val);
+    public Value parse(String val) {
+        Value result = NUMBER.parse(val);
         if (result == null) {
-            return INEQUALITY.parseValue(val);
+            return INEQUALITY.parse(val);
         } else {
             return result;
         }

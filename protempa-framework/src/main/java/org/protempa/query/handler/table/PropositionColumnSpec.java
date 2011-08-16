@@ -21,7 +21,7 @@ import org.protempa.proposition.Context;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
 import org.protempa.ValueSet;
 
@@ -345,7 +345,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     public String[] columnValues(String key, Proposition proposition,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references,
+            Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
         Collection<Proposition> propositions = this.traverseLinks(this.links,

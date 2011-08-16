@@ -23,7 +23,7 @@ public final class NominalValueFactory extends ValueFactory {
      * @see org.virginia.pbhs.parameters.value.ValueFactory#getInstance(java.lang.String)
      */
     @Override
-    public NominalValue parseValue(String val) {
+    public NominalValue parse(String val) {
         return NominalValue.getInstance(val);
     }
 }

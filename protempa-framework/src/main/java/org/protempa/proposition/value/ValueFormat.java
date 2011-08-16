@@ -47,7 +47,7 @@ public class ValueFormat {
         Value result = null;
 
         for (int i = 0; i < PARSE_FACTORY_ORDER.length; i++) {
-            if ((result = PARSE_FACTORY_ORDER[i].parseValue(str)) != null) {
+            if ((result = PARSE_FACTORY_ORDER[i].parse(str)) != null) {
                 break;
             }
         }
@@ -70,7 +70,7 @@ public class ValueFormat {
             throw new IllegalArgumentException("valueType cannot be null");
         }
         if (value != null) {
-            return ValueFactory.get(valueType).parseValue(value);
+            return ValueFactory.get(valueType).parse(value);
         } else {
             return null;
         }

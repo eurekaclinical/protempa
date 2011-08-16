@@ -1,6 +1,7 @@
 package org.protempa.proposition.value;
 
 import java.math.BigDecimal;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * @author Andrew Post
@@ -51,10 +52,20 @@ public final class InequalityNumberValue extends ValueImpl implements
             comp = comparator;
         }
     }
+    
+    @Override
+    public InequalityNumberValue replace() {
+        return this;
+    }
 
     @Override
     public Number getNumber() {
         return val.getNumber();
+    }
+    
+    @Override
+    public BigDecimal getBigDecimal() {
+        return val.getBigDecimal();
     }
 
     @Override
@@ -78,8 +89,8 @@ public final class InequalityNumberValue extends ValueImpl implements
     }
 
     @Override
-    public String getRepr() {
-        return reprType() + comp.getComparatorString() + " " + val.getReprForInequalityNumberValue();
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 
     public ValueComparator getComparator() {

@@ -10,24 +10,31 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
+import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 
 /**
- * Convenience class for creating {@link Link} implementations. It is only
- * intended for internal use.
+ * Representation of links between propositions in the PROTEMPA virtual data
+ * model. Links may be derivations or references. This class represents a link
+ * as being from one proposition to a collection of propositions. The 
+ * collection of propositions may be filtered by proposition id, the values of 
+ * its properties, and then by index (according to some specified ordering of 
+ * the propositions).
  * 
  * @author Andrew Post
  */
 public abstract class Link {
 
-    private static final PropertyConstraint[] EMPTY_PROPERTY_CONSTRAINT_ARR = new PropertyConstraint[0];
+    private static final PropertyConstraint[] EMPTY_PROPERTY_CONSTRAINT_ARR = 
+            new PropertyConstraint[0];
 
     private final Set<String> propIdsAsSet;
     private final PropertyConstraint[] constraints;
@@ -36,9 +43,10 @@ public abstract class Link {
     private final int toIndex;
 
     /**
-     * Instantiates a link with proposition ids, constraints, a comparator, and
-     * an index range for selecting from the list of propositions that match the
-     * proposition ids and constraints.
+     * Specifies a link with proposition ids, constraints, 
+     * an index range for selecting from the list of propositions that match 
+     * the proposition ids and constraints, and a comparator for ordering the 
+     * list.
      * 
      * @param propositionIds
      *            a {@link String[]} of proposition ids.
@@ -82,18 +90,31 @@ public abstract class Link {
     }
 
     /**
-     * The propositions of interest at the end of a traversal step. An empty
-     * array indicates that all propositions are of interest.
+     * The ids of the propositions to traverse to. An empty array indicates 
+     * that all propositions are of interest.
      * 
-     * @return a proposition id {@link String[]} specifying the propositions of
-     *         interest. Guaranteed not <code>null</code>.
+     * @return a proposition id {@link String[]} Guaranteed not 
+     * <code>null</code>.
      */
     public final String[] getPropositionIds() {
         return this.propIdsAsSet.toArray(new String[this.propIdsAsSet.size()]);
     }
+    
+    /**
+     * Returns whether a proposition has one of the proposition ids specified
+     * by the link.
+     * 
+     * @param proposition a {@link Proposition}. Cannot be <code>null</code>.
+     * @return <code>true</code> or <code>false</code>.
+     */
+    protected boolean isMatch(Proposition proposition) {
+        return this.propIdsAsSet.isEmpty() || 
+                this.propIdsAsSet.contains(proposition.getId());
+    }
 
     /**
-     * Constraints on properties of the propositions of interest.
+     * Constraints on properties of the propositions at the end of the 
+     * traversal.
      * 
      * @return a {@link PropertyConstraint[]}. Guaranteed not <code>null</code>.
      */
@@ -102,8 +123,8 @@ public abstract class Link {
     }
 
     /**
-     * A comparator for ordering the propositions at the end of the traversal
-     * step. If <code>null</code>, the propositions will not be provided in any
+     * A comparator for ordering the propositions at the end of the traversal. 
+     * If <code>null</code>, the propositions will not be provided in any
      * particular order.
      * 
      * @return a {@link Comparator<Proposition>}.
@@ -113,8 +134,9 @@ public abstract class Link {
     }
 
     /**
-     * The start index of the propositions of interest, after applying the
-     * proposition ids, constraints and comparator.
+     * The start index of the propositions of interest at the end of the 
+     * traversal step, after applying the proposition id constraints, property 
+     * constraints and a comparator.
      * 
      * @return an <code>int</code>, with zero or a negative number indicating
      *         the beginning of the list.
@@ -124,8 +146,9 @@ public abstract class Link {
     }
 
     /**
-     * The last index of the propositions of interest exclusive, after applying
-     * the proposition ids, constraints and comparator.
+     * The last index of the propositions of interest at the end of the
+     * traversal step exclusive, after applying the proposition id constraints, 
+     * property constraints and a comparator.
      * 
      * @return an <code>int</code>, with a negative number indicating the end of
      *         the list. Must be greater than the <code>fromIndex</code>.
@@ -135,7 +158,9 @@ public abstract class Link {
     }
 
     /**
-     * Generates a string for query results handler field headers.
+     * Generates a string for 
+     * {@link org.protempa.query.handler.TableQueryResultsHandler} column 
+     * headers.
      * 
      * @return a {@link String}.
      */
@@ -147,6 +172,7 @@ public abstract class Link {
      * @param ref
      *            the name {@link String} of the reference of this link.
      * @return a header fragment {@link String}.
+     * @see #headerFragment() 
      */
     final String createHeaderFragment(String ref) {
         int size = this.propIdsAsSet.size();
@@ -169,23 +195,31 @@ public abstract class Link {
     }
 
     /**
-     * Returns the list of propositions matching the proposition ids and
-     * constraints within the specified index range.
+     * Filters out propositions by applying the property constraint and index
+     * constraints. Modifies <code>propositions</code> in-place!
      * 
      * @param propositions
-     *            a {@link Collection<Proposition>}.
+     *            a {@link Collection<Proposition>}. If <code>null</code>, an
+     *            empty list is returned.
      * 
-     * @return a {@link List<Proposition>}.
+     * @return a {@link List<Proposition>}. Not guaranteed to be modifiable.
      */
     protected final List<Proposition> createResults(
-            Collection<Proposition> propositions) {
-        List<Proposition> result = new ArrayList<Proposition>();
+            List<Proposition> propositions) {
+        List<Proposition> result;
         if (propositions != null) {
-            for (Proposition derivedProp : propositions) {
-                addToResults(derivedProp, result);
+            if (this.constraints.length > 0) {
+                result = new ArrayList<Proposition>();
+                for (Proposition prop : propositions) {
+                    applyPropertyConstraints(prop, result);
+                }
+            } else {
+                result = propositions;
             }
 
-            result = filterResults(result);
+            result = applyComparatorAndIndices(result);
+        } else {
+            result = Collections.emptyList();
         }
 
         return result;
@@ -219,49 +253,50 @@ public abstract class Link {
         return range;
     }
 
-    private List<Proposition> filterResults(List<Proposition> result) {
+    private List<Proposition> applyComparatorAndIndices(
+            List<Proposition> result) {
         assert result != null : "result should not be null in sliceResults";
         if (!result.isEmpty()) {
             if (this.comparator != null) {
                 Collections.sort(result, this.comparator);
             }
             if (this.fromIndex >= 0 || this.toIndex >= 0) {
-
+                int resultSize = result.size();
                 return result.subList(
                         this.fromIndex >= 0 ? this.fromIndex : 0,
-                        this.toIndex >= 0 ? Math.min(this.toIndex,
-                                result.size()) : result.size());
+                        this.toIndex >= 0 ? Math.min(this.toIndex, resultSize) 
+                            : resultSize);
             }
         }
         return result;
     }
 
-    private void addToResults(Proposition prop, Collection<Proposition> result) {
+    private void applyPropertyConstraints(Proposition prop, 
+            Collection<Proposition> result) {
         assert prop != null : "prop cannot be null";
         assert result != null : "result cannot be null";
-        if (this.propIdsAsSet.isEmpty()
-                || this.propIdsAsSet.contains(prop.getId())) {
-            boolean compatible = constraintsCheckCompatible(prop,
-                    this.constraints);
-            if (compatible) {
-                result.add(prop);
-            }
+
+        boolean compatible = constraintsCheckCompatible(prop,this.constraints);
+        if (compatible) {
+            result.add(prop);
         }
     }
 
     private boolean constraintsCheckCompatible(Proposition proposition,
             PropertyConstraint[] constraints) {
+        Logger logger = Util.logger();
         for (PropertyConstraint ccc : constraints) {
             boolean constraintMatches = false;
             String propName = ccc.getPropertyName();
             Value value = proposition.getProperty(propName);
             if (value != null) {
                 ValueComparator vc = ccc.getValueComparator();
-                Util.logger()
-                        .log(Level.FINE,
+                if (logger.isLoggable(Level.FINER)) {
+                    logger.log(Level.FINER,
                                 "Proposition is {0}; Property is {1}; Value is {2}; Comparator: {3}",
                                 new Object[] { proposition.getId(), propName,
                                         value, vc });
+                }
                 for (Value v : ccc.getValues()) {
                     if (vc.is(value.compare(v))) {
                         constraintMatches = true;
@@ -279,11 +314,15 @@ public abstract class Link {
     }
 
     /**
-     * Traverses this step.
+     * Traverses the specified link from a proposition to a collection of 
+     * propositions.
      * 
      * @param proposition
      *            a {@link Proposition} at which to start the traversal.
-     * @param derivations
+     * @param forwardDerivations
+     *            a {@link Map<Proposition,List<Proposition>>} of derived
+     *            propositions.
+     * @param backwardDerivations 
      *            a {@link Map<Proposition,List<Proposition>>} of derived
      *            propositions.
      * @param references
@@ -291,14 +330,19 @@ public abstract class Link {
      *            to {@link Proposition}s, used to resolve references.
      * @param knowledgeSource
      *            the {@link KnowledgeSource}.
+     * @param cache
+     *            a {@link Set<Proposition>} for convenience in checking if
+     *            duplicate propositions are traversed to. It is cleared 
+     *            in between calls to this method.
      * @return the {@link Collection<Proposition>} at the end of the traversal
-     *         step.
+     *            step. Not guaranteed to be modifiable.
      */
-    public abstract Collection<Proposition> traverse(Proposition proposition,
+    abstract Collection<Proposition> traverse(Proposition proposition,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references,
-            KnowledgeSource knowledgeSource);
+            Map<UniqueId, Proposition> references,
+            KnowledgeSource knowledgeSource, Set<Proposition> cache)
+            throws KnowledgeSourceReadException;
 
     @Override
     public String toString() {

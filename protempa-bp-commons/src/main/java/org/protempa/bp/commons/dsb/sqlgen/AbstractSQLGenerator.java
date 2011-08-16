@@ -482,7 +482,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     if (last.getConstraint() != null
                             && (last.getConstraint() != Constraint.EQUAL_TO
                             || !last.isPropositionIdsComplete()
-                            || !completeOrNoOverlap(propIds,
+                            || needsPropIdInClause(propIds,
                             es.getPropositionIds()))) {
                         return;
                     }
@@ -1318,13 +1318,13 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             }
         }
 
-        //If entity spec's proposition ids are all in propIds, then
+        //If propIds are all in the entity spec's prop ids, then
         //skip the code part of the where clause.
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
         if (codeSpec != null) {
             List<ColumnSpec> codeSpecL = codeSpec.asList();
             if (codeSpecL.get(codeSpecL.size() - 1).isPropositionIdsComplete()
-                    && completeOrNoOverlap(propIds,
+                    && !needsPropIdInClause(propIds,
                     entitySpec.getPropositionIds())) {
                 i = processConstraintSpecForWhereClause(propIds, codeSpec, i,
                         null, selectPart, referenceIndices, resultProcessor,
@@ -1344,28 +1344,29 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     /**
-     * Returns <code>true</code> if the query contains >= 85% of the
+     * Returns <code>true</code> if the query contains < 85% of the
      * proposition ids that are known to the data source or if the where
-     * clause would contain more than 4000 codes.
+     * clause would contain more than 2000 codes.
      *
-     * @param propIds
+     * @param queryPropIds
      * @param entitySpecPropIds
      * @return
      */
-    static boolean completeOrNoOverlap(Set<String> propIds,
+    static boolean needsPropIdInClause(Set<String> queryPropIds,
             String[] entitySpecPropIds) {
-
-        //Everything known to the data source that is not in the query.
-        List<String> entitySpecPropIdsL =
+        
+        Set<String> entitySpecPropIdsSet = Arrays.asSet(entitySpecPropIds);
+        
+        //Filter propIds that are not in the entitySpecPropIds array.
+        List<String> filteredPropIds =
                 new ArrayList<String>(entitySpecPropIds.length);
-        for (String entitySpecPropId : entitySpecPropIds) {
-            if (!propIds.contains(entitySpecPropId)) {
-                entitySpecPropIdsL.add(entitySpecPropId);
+        for (String propId : queryPropIds) {
+            if (entitySpecPropIdsSet.contains(propId)) {
+                filteredPropIds.add(propId);
             }
         }
-        boolean result = entitySpecPropIdsL.size()
-                < entitySpecPropIds.length * 0.15f || entitySpecPropIdsL.size() > 2000;
-        return result;
+        return (filteredPropIds.size() < entitySpecPropIds.length * 0.85f) || 
+                (filteredPropIds.size() > 2000);
     }
 
     private static Constraint valueComparatorToSqlOp(

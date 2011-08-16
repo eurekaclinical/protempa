@@ -79,7 +79,7 @@ public class StringUtil {
             char delimiter, Writer writer) throws IOException {
         for (int i = 0; i < columnValues.length; i++) {
             String columnValue = columnValues[i];
-            escapeDelimitedColumn(columnValue, delimiter, writer);
+            escapeAndWriteDelimitedColumn(columnValue, delimiter, writer);
             if (i < columnValues.length - 1) {
                 writer.write(delimiter);
             }
@@ -91,7 +91,7 @@ public class StringUtil {
             char delimiter, Writer writer) throws IOException {
         for (int i = 0, n = columnValues.size(); i < n; i++) {
             String columnValue = columnValues.get(i);
-            escapeDelimitedColumn(columnValue, delimiter, writer);
+            escapeAndWriteDelimitedColumn(columnValue, delimiter, writer);
             if (i < n - 1) {
                 writer.write(delimiter);
             }
@@ -110,8 +110,8 @@ public class StringUtil {
      * @param writer the {@link Writer} to which to write the escaped column.
      * @throws IOException if an error writing to <code>writer</code> occurs.
      */
-    public static void escapeDelimitedColumn(String str, char delimiter,
-            Writer writer) throws IOException {
+    public static void escapeAndWriteDelimitedColumn(String str, 
+            char delimiter, Writer writer) throws IOException {
         if (str == null) {
             throw new IllegalArgumentException("str cannot be null");
         }

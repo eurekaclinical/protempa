@@ -65,6 +65,20 @@ public abstract class Interval implements Comparable<Interval> {
     Interval(Long minStart, Long maxStart, Granularity startGranularity,
             Long minFinish, Long maxFinish, Granularity finishGranularity,
             Long minLength, Long maxLength, Unit lengthUnit) {
+        init(minStart, maxStart, startGranularity, minFinish, maxFinish, 
+                finishGranularity, minLength, maxLength, lengthUnit);
+    }
+    
+    protected void init(Long start, Granularity startGranularity, Long finish,
+            Granularity finishGranularity, Long length, Unit lengthUnit) {
+        init(start, start, startGranularity, finish, finish, finishGranularity,
+                length, length, lengthUnit);
+    }
+    
+    protected void init(Long minStart, Long maxStart, 
+            Granularity startGranularity,
+            Long minFinish, Long maxFinish, Granularity finishGranularity,
+            Long minLength, Long maxLength, Unit lengthUnit) {
         if (minStart != null && maxFinish != null && minStart > maxFinish) {
             throw new IllegalArgumentException(
                     "maxFinish cannot be before minStart; maxFinish="
@@ -89,10 +103,10 @@ public abstract class Interval implements Comparable<Interval> {
         this.maxLength = maxLength;
         this.lengthUnit = lengthUnit;
         
-        init();
+        initComputed();
     }
 
-    private void init() throws IllegalArgumentException {
+    protected void initComputed() throws IllegalArgumentException {
         this.start = new Start(this);
         this.finish = new Finish(this);
 
@@ -720,7 +734,7 @@ public abstract class Interval implements Comparable<Interval> {
         }
 
         try {
-            init();
+            initComputed();
         } catch (IllegalArgumentException iae) {
             throw new InvalidObjectException(iae.getMessage());
         }

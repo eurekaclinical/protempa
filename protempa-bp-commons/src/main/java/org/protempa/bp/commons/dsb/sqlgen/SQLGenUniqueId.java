@@ -7,21 +7,24 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.protempa.proposition.LocalUniqueIdentifier;
+import org.protempa.proposition.LocalUniqueId;
 
-final class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
+final class SQLGenUniqueId implements LocalUniqueId {
 
     private static final long serialVersionUID = 3956023315666447630L;
-    private String name;
+    private String entitySpecName;
     private String[] dbIds;
     private volatile int hashCode;
 
-    SQLGenUniqueIdentifier(String name, String[] dbIds) {
-        assert name != null : "name cannot be null";
+    SQLGenUniqueId(String entitySpecName, String[] dbIds) {
+        assert entitySpecName != null : "entitySpecName cannot be null";
         assert dbIds != null : "dbIds cannot be null";
         assert !ArrayUtils.contains(dbIds, null) :
             "dbIds cannot contain a null element";
-        this.name = name;
+        
+        //The entity spec name is already interned, so don't bother redoing it.
+        this.entitySpecName = entitySpecName;
+        
         this.dbIds = dbIds.clone();
     }
 
@@ -33,8 +36,8 @@ final class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final SQLGenUniqueIdentifier other = (SQLGenUniqueIdentifier) obj;
-        if (!this.name.equals(other.name)) {
+        final SQLGenUniqueId other = (SQLGenUniqueId) obj;
+        if (!this.entitySpecName.equals(other.entitySpecName)) {
             return false;
         }
         if (!Arrays.equals(this.dbIds, other.dbIds)) {
@@ -47,7 +50,7 @@ final class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
     public int hashCode() {
         if (this.hashCode == 0) {
             int hash = 3;
-            hash = 53 * hash + this.name.hashCode();
+            hash = 53 * hash + this.entitySpecName.hashCode();
             hash = 53 * hash + Arrays.hashCode(this.dbIds);
             this.hashCode = hash;
         }
@@ -55,12 +58,9 @@ final class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
     }
 
     @Override
-    public LocalUniqueIdentifier clone() {
-        SQLGenUniqueIdentifier result;
+    public LocalUniqueId clone() {
         try {
-            result = (SQLGenUniqueIdentifier) super.clone();
-            result.dbIds = this.dbIds;
-            return result;
+            return (SQLGenUniqueId) super.clone();
         } catch (CloneNotSupportedException ex) {
             throw new AssertionError("Never reached!");
         }
@@ -72,7 +72,7 @@ final class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {
-        s.writeObject(this.name);
+        s.writeObject(this.entitySpecName);
         s.writeInt(this.dbIds.length);
         for (String dbId : this.dbIds) {
             s.writeObject(dbId);
@@ -81,11 +81,15 @@ final class SQLGenUniqueIdentifier implements LocalUniqueIdentifier {
 
     private void readObject(ObjectInputStream s) throws IOException,
             ClassNotFoundException {
-        this.name = (String) s.readObject();
-        if (this.name == null) {
+        this.entitySpecName = (String) s.readObject();
+        if (this.entitySpecName == null) {
             throw new InvalidObjectException(
                     "name cannot be null. Can't restore");
         }
+        
+        // We intern entity spec names elsewhere, so let's do it here too.
+        this.entitySpecName = this.entitySpecName.intern();
+        
         int dbIdsLen = s.readInt();
         if (dbIdsLen < 0) {
             throw new InvalidObjectException("dbIds length invalid (" +

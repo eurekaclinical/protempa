@@ -19,8 +19,6 @@ import org.protempa.DataSourceType;
 import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueFactory;
-import org.protempa.proposition.value.ValueType;
 
 /**
  * Abstract class for implementing the various kinds of propositions.
@@ -38,8 +36,8 @@ public abstract class AbstractProposition implements Proposition {
     protected volatile int hashCode;
     private PropertyChangeSupport changes;
     private Map<String, Value> properties;
-    private Map<String, List<UniqueIdentifier>> references;
-    private UniqueIdentifier key;
+    private Map<String, List<UniqueId>> references;
+    private UniqueId key;
     private DataSourceType dataSourceType;
 
     /**
@@ -72,7 +70,7 @@ public abstract class AbstractProposition implements Proposition {
     protected void initializeReferences() {
         if (this.references == null) {
             this.references = new LinkedHashMap<String,
-                    List<UniqueIdentifier>>();
+                    List<UniqueId>>();
         }
     }
 
@@ -112,7 +110,7 @@ public abstract class AbstractProposition implements Proposition {
         }
     }
 
-    public final void setUniqueIdentifier(UniqueIdentifier o) {
+    public final void setUniqueIdentifier(UniqueId o) {
         this.key = o;
     }
 
@@ -126,19 +124,19 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     @Override
-    public final UniqueIdentifier getUniqueIdentifier() {
+    public final UniqueId getUniqueId() {
         return this.key;
     }
 
-    private void setReferences(String name, List<UniqueIdentifier> refs) {
+    public final void setReferences(String name, List<UniqueId> refs) {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
         }
         initializeReferences();
-        this.references.put(name.intern(), refs);
+        this.references.put(name.intern(), new ArrayList<UniqueId>(refs));
     }
 
-    public final void addReference(String name, UniqueIdentifier ref) {
+    public final void addReference(String name, UniqueId ref) {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
         }
@@ -146,10 +144,10 @@ public abstract class AbstractProposition implements Proposition {
             throw new IllegalArgumentException("ref cannot be null");
         }
         initializeReferences();
-        List<UniqueIdentifier> refs = this.references.get(name);
+        List<UniqueId> refs = this.references.get(name);
         if (refs == null) {
             refs =
-                    new ArrayList<UniqueIdentifier>(DEFAULT_REFERENCE_LIST_SIZE);
+                    new ArrayList<UniqueId>(DEFAULT_REFERENCE_LIST_SIZE);
             refs.add(ref);
             this.references.put(name.intern(), refs);
         } else {
@@ -158,11 +156,11 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     @Override
-    public final List<UniqueIdentifier> getReferences(String name) {
+    public final List<UniqueId> getReferences(String name) {
         if (this.references == null) {
             return Collections.emptyList();
         } else {
-            List<UniqueIdentifier> result = this.references.get(name);
+            List<UniqueId> result = this.references.get(name);
             if (result != null) {
                 return Collections.unmodifiableList(result);
             } else {
@@ -278,41 +276,38 @@ public abstract class AbstractProposition implements Proposition {
         if (this.properties == null) {
             s.writeInt(0);
         } else {
-            Set<String> propertyNames = this.properties.keySet();
-            s.writeInt(propertyNames.size());
-            for (String propertyName : propertyNames) {
+            s.writeInt(this.properties.size());
+            for (Map.Entry<String, Value> me : this.properties.entrySet()) {
+                String propertyName = me.getKey();
+                Value val = me.getValue();
                 s.writeObject(propertyName);
-                Value val = this.properties.get(propertyName);
-                if (val != null) {
-                    s.writeObject(val.getType());
-                    s.writeObject(val.getRepr());
-                } else {
-                    s.writeObject(null);
-                }
+                s.writeObject(val);
             }
         }
 
         if (this.references == null) {
             s.writeInt(0);
         } else {
-            Set<String> refNames = this.references.keySet();
-            s.writeInt(refNames.size());
-            for (String refName : refNames) {
-                s.writeObject(refName);
-                List<UniqueIdentifier> val = this.references.get(refName);
-                int valSize = val.size();
-                s.writeInt(valSize);
-                for (int i = 0; i < valSize; i++) {
-                    s.writeObject(val.get(i));
+            s.writeInt(this.references.size());
+            for (Map.Entry<String, List<UniqueId>> me : this.references.entrySet()) {
+                s.writeObject(me.getKey());
+                List<UniqueId> val = me.getValue();
+                if (val == null) {
+                    s.writeInt(0);
+                } else {
+                    s.writeInt(val.size());
+                    for (UniqueId uid : val) {
+                        s.writeObject(uid);
+                    }
                 }
             }
         }
 
         s.writeObject(this.key);
         if (this.dataSourceType instanceof DerivedDataSourceType) {
-            s.writeObject("DERIVED");
+            s.writeBoolean(true);
         } else {
-            s.writeObject("DATABASE");
+            s.writeBoolean(false);
             s.writeObject(
                     ((DataSourceBackendDataSourceType) this.dataSourceType).getId());
         }
@@ -330,27 +325,22 @@ public abstract class AbstractProposition implements Proposition {
                     "Negative properties count. Can't restore");
         }
         if (numProperties > 0) {
-            initializeProperties();
             for (int i = 0; i < numProperties; i++) {
                 String propertyName = (String) s.readObject();
-                ValueType valueType = (ValueType) s.readObject();
-                String valAsString = valueType != null ? (String) s.readObject() : null;
-                Value val = valAsString != null
-                        ? ValueFactory.parseRepr(valAsString) : null;
-                if (val != null && !valueType.isInstance(val)) {
-                    throw new InvalidObjectException("Inconsistent value type and value. Can't restore");
+                Value val = (Value) s.readObject();
+                if (val != null) {
+                    val = val.replace();
                 }
                 setProperty(propertyName, val);
             }
         }
-
+        
         int numRefs = s.readInt();
         if (numRefs < 0) {
             throw new InvalidObjectException(
                     "Negative reference count. Can't restore");
         }
         if (numRefs > 0) {
-            initializeReferences();
             for (int i = 0; i < numRefs; i++) {
                 String refName = (String) s.readObject();
                 int numUids = s.readInt();
@@ -358,18 +348,17 @@ public abstract class AbstractProposition implements Proposition {
                     throw new InvalidObjectException(
                             "Negative unique identifier count. Can't restore");
                 }
-                List<UniqueIdentifier> uids =
-                        new ArrayList<UniqueIdentifier>(numUids);
+                List<UniqueId> uids =
+                        new ArrayList<UniqueId>(numUids);
                 for (int j = 0; j < numUids; j++) {
-                    uids.add((UniqueIdentifier) s.readObject());
+                    uids.add((UniqueId) s.readObject());
                 }
                 setReferences(refName, uids);
             }
         }
 
-        setUniqueIdentifier((UniqueIdentifier) s.readObject());
-        String dsType = (String) s.readObject();
-        if ("DERIVED".equals(dsType)) {
+        setUniqueIdentifier((UniqueId) s.readObject());
+        if (s.readBoolean()) {
             setDataSourceType(DerivedDataSourceType.getInstance());
         } else {
             setDataSourceType(DataSourceBackendDataSourceType.getInstance(

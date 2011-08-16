@@ -2,6 +2,7 @@ package org.protempa.proposition.value;
 
 import java.util.Map;
 import org.apache.commons.collections.map.ReferenceMap;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * A {@link String} value.
@@ -30,7 +31,6 @@ public final class NominalValue extends ValueImpl {
         if (val != null && val.length() < 20) {
             NominalValue result = cache.get(val);
             if (result == null) {
-                val = val.intern();
                 result = new NominalValue(val);
                 cache.put(val, result);
             }
@@ -54,6 +54,16 @@ public final class NominalValue extends ValueImpl {
             this.val = val;
         } else {
             this.val = "";
+        }
+    }
+    
+    @Override
+    public NominalValue replace() {
+        NominalValue result = cache.get(this.val);
+        if (result != null) {
+            return result;
+        } else {
+            return this;
         }
     }
     
@@ -105,19 +115,6 @@ public final class NominalValue extends ValueImpl {
     }
 
     /**
-     * Returns the canonical string representing this value. Returns
-     * "NOMINAL_VALUE:the string as-is".
-     *
-     * @return a {@link String}.
-     *
-     * @see org.protempa.proposition.value.Value#getRepr()
-     */
-    @Override
-    public String getRepr() {
-        return reprType() + val;
-    }
-
-    /**
      * Compares this nominal value and another lexically.
      * 
      * @param d2 another {@link NominalValue}.
@@ -140,5 +137,10 @@ public final class NominalValue extends ValueImpl {
             throw new IllegalArgumentException("valueVisitor cannot be null");
         }
         valueVisitor.visit(this);
+    }
+    
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

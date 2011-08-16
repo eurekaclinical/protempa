@@ -11,8 +11,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 
@@ -50,8 +51,8 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
             Proposition proposition,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references,
-            KnowledgeSource knowledgeSource) {
+            Map<UniqueId, Proposition> references,
+            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
         Queue<Proposition> result = new LinkedList<Proposition>();
         Set<Proposition> cache = new HashSet<Proposition>();
         Logger logger = Util.logger();
@@ -60,14 +61,12 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
         for (Link link : links) {
             int j = 0;
             while (j < num) {
-                Proposition prop = result.poll();
+                Proposition prop = result.remove();
                 Collection<Proposition> c = link.traverse(prop, 
                         forwardDerivations, backwardDerivations,
-                        references, knowledgeSource);
+                        references, knowledgeSource, cache);
                 for (Proposition p : c) {
-                    if (cache.add(p)) {
-                        result.add(p);
-                    }
+                    result.add(p);
                 }
                 j++;
             }
@@ -76,6 +75,7 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
                         new Object[]{getClass().getName(), result, link});
             }
             num = result.size();
+            cache.clear();
         }
         if (logger.isLoggable(Level.FINER)) {
             logger.log(Level.FINER, "{0} traversed to {1}",

@@ -1,12 +1,12 @@
 package org.protempa;
 
 import org.protempa.proposition.DerivedSourceId;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 import java.util.List;
 import java.util.UUID;
 
 import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.DerivedUniqueIdentifier;
+import org.protempa.proposition.DerivedUniqueId;
 import org.protempa.proposition.Interval;
 import org.protempa.proposition.IntervalFactory;
 import org.protempa.proposition.Segment;
@@ -48,9 +48,9 @@ public final class AbstractParameterFactory {
             TemporalExtendedPropositionDefinition[] epds) {
         AbstractParameter result = new AbstractParameter(propId);
         result.setDataSourceType(DerivedDataSourceType.getInstance());
-        result.setUniqueIdentifier(new UniqueIdentifier(
+        result.setUniqueIdentifier(new UniqueId(
                 DerivedSourceId.getInstance(),
-                new DerivedUniqueIdentifier(UUID.randomUUID().toString())));
+                new DerivedUniqueId(UUID.randomUUID().toString())));
 
         Long minStart = null;
         Long maxStart = null;

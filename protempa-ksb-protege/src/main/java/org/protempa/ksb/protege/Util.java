@@ -117,7 +117,7 @@ class Util {
                     valueSetEltInst, abbrevDisplayNameSlot);
             String value = (String) cm.getOwnSlotValue(valueSetEltInst,
                     valueSlot);
-            Value val = ValueFactory.get(valueType).parseValue(value);
+            Value val = ValueFactory.get(valueType).parse(value);
             vses[i] = new ValueSetElement(val, displayName, abbrevDisplayName);
             i++;
         }

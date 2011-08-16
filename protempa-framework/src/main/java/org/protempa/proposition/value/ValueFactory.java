@@ -47,11 +47,6 @@ public class ValueFactory implements Serializable {
         VALUE_TYPE_TO_VALUE_FACTORY.put(ValueType.LISTVALUE, LIST);
     }
 
-    public static ValueType[] creatableTypes() {
-        return VALUE_TYPE_TO_VALUE_FACTORY.keySet().toArray(
-                new ValueType[VALUE_TYPE_TO_VALUE_FACTORY.size()]);
-    }
-
     /**
      * Returns the value factory with the given id.
      *
@@ -64,6 +59,7 @@ public class ValueFactory implements Serializable {
     public static ValueFactory get(ValueType valueType) {
         return VALUE_TYPE_TO_VALUE_FACTORY.get(valueType);
     }
+    
     private int ordinal = nextOrdinal++;
     private ValueType type;
 
@@ -84,28 +80,8 @@ public class ValueFactory implements Serializable {
      * @return a <code>Value</code>, or <code>null</code> if the given
      *         string could not be parsed.
      */
-    public Value parseValue(String val) {
+    public Value parse(String val) {
         return ValueFormat.parse(val);
-    }
-
-    /**
-     * Parses strings obtained from {@link Value#getRepr()}.
-     *
-     * @param repr
-     *            a {@link String}.
-     * @throws IllegalArgumentException
-     *             if the repr string is invalid.
-     * @return a {@link Value}.
-     */
-    public static Value parseRepr(String repr) {
-        if (repr == null) {
-            return null;
-        }
-        String[] reprSplit = repr.split(":", 2);
-        ValueFactory vf = VALUE_TYPE_TO_VALUE_FACTORY.get(
-                ValueType.valueOf(reprSplit[0]));
-
-        return vf.parseValue(reprSplit[1]);
     }
 
     /**

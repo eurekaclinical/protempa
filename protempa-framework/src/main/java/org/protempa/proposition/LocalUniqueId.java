@@ -11,12 +11,12 @@ import java.io.Serializable;
  *
  * @author Andrew Post
  */
-public interface LocalUniqueIdentifier extends Cloneable, Serializable {
+public interface LocalUniqueId extends Cloneable, Serializable {
 
     /**
      * Makes a shallow copy of this instance.
      *
      * @return a {@link LocalUniqueIdentifier} that is equal to this instance.
      */
-    LocalUniqueIdentifier clone();
+    LocalUniqueId clone();
 }

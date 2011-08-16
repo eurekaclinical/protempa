@@ -22,7 +22,7 @@ public final class OrdinalValueFactory extends ValueFactory {
     }
 
     @Override
-    public Value parseValue(String val) {
+    public Value parse(String val) {
         return new OrdinalValue(val, allowedValues);
     }
 }

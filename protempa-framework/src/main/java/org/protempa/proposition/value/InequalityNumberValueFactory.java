@@ -25,7 +25,7 @@ public class InequalityNumberValueFactory extends NumericalValueFactory {
      * @see org.virginia.pbhs.parameters.value.ValueFactory#getInstance(java.lang.String)
      */
     @Override
-    public Value parseValue(String s) {
+    public Value parse(String s) {
         InequalityNumberValue result = null;
         try {
             s = s.trim();

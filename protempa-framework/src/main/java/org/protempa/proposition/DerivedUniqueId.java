@@ -1,14 +1,18 @@
 package org.protempa.proposition;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-public final class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
+public final class DerivedUniqueId implements LocalUniqueId {
 
     private static final long serialVersionUID = -7548400029812453768L;
-    private final String id;
+    private String id;
     private transient volatile int hashCode;
 
-    public DerivedUniqueIdentifier(String newId) {
+    public DerivedUniqueId(String newId) {
         if (newId == null) {
             throw new IllegalArgumentException("newId cannot be null");
         }
@@ -30,7 +34,7 @@ public final class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final DerivedUniqueIdentifier other = (DerivedUniqueIdentifier) obj;
+        final DerivedUniqueId other = (DerivedUniqueId) obj;
         if (!this.id.equals(other.id)) {
             return false;
         }
@@ -53,15 +57,27 @@ public final class DerivedUniqueIdentifier implements LocalUniqueIdentifier {
     }
 
     @Override
-    public LocalUniqueIdentifier clone() {
+    public LocalUniqueId clone() {
         try {
-            DerivedUniqueIdentifier clone = (DerivedUniqueIdentifier) super.clone();
+            DerivedUniqueId clone = (DerivedUniqueId) super.clone();
             // TODO:  Do we need to copy the ID?  Or is the cloned object 
             // a new object without a proper ID?
             // clone.id = this.id;
             return clone;
         } catch (CloneNotSupportedException cnse) {
             throw new AssertionError(cnse);
+        }
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.writeObject(this.id);
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException,
+            ClassNotFoundException {
+        this.id = (String) s.readObject();
+        if (this.id == null) {
+            throw new InvalidObjectException("Can't restore. Null id");
         }
     }
 }

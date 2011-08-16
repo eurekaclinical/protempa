@@ -10,7 +10,7 @@ import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 
 public final class CountColumnSpec extends AbstractTableColumnSpec {
 
@@ -52,8 +52,8 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
     public String[] columnValues(String key, Proposition proposition,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references,
-            KnowledgeSource knowledgeSource) {
+            Map<UniqueId, Proposition> references,
+            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
         List<String> result = new ArrayList<String>();
         Collection<Proposition> props = traverseLinks(this.links, proposition,
                 forwardDerivations, backwardDerivations, references, 

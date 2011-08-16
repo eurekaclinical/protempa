@@ -12,7 +12,7 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalParameter;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
 import org.protempa.proposition.value.NumberValue;
 import org.protempa.proposition.value.Value;
@@ -64,7 +64,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
     public String[] columnValues(String key, Proposition proposition,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references,
+            Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
         Collection<Proposition> propositions = traverseLinks(this.links,
@@ -116,14 +116,13 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                                     break;
                                 case SUM:
                                     try {
-                                        sumTotal = sumTotal.add(new BigDecimal(Double
-                                                .parseDouble(val.getRepr())));
+                                        sumTotal = sumTotal.add(((NumberValue) val).getBigDecimal());
                                         value = NumberValue
                                                 .getInstance(sumTotal);
                                     } catch (NumberFormatException ex) {
                                         throw new IllegalStateException(
                                                 "only number values allowed for SUM aggregation type; got "
-                                                        + val.getRepr()
+                                                        + val
                                                         + " for proposition "
                                                         + pp.getId()
                                                         + " instead");

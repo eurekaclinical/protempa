@@ -19,11 +19,11 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  *
  * @author Andrew Post
  */
-public final class UniqueIdentifier implements Serializable {
+public final class UniqueId implements Serializable {
 
     private static final long serialVersionUID = 396847781133676191L;
     private SourceId sourceId;
-    private LocalUniqueIdentifier localUniqueId;
+    private LocalUniqueId localUniqueId;
     private transient volatile int hashCode;
 
     /**
@@ -31,7 +31,7 @@ public final class UniqueIdentifier implements Serializable {
      *
      * @param other another {@link UniqueIdentifier}.
      */
-    public UniqueIdentifier(UniqueIdentifier other) {
+    public UniqueId(UniqueId other) {
         if (other == null) {
             throw new IllegalArgumentException("other cannot be null");
         }
@@ -47,8 +47,8 @@ public final class UniqueIdentifier implements Serializable {
      * @param localUniqueId the {@link LocalUniqueIdentifier}, a data source
      * backend-specific unique id for a {@link Proposition}.
      */
-    public UniqueIdentifier(SourceId newSourceId,
-            LocalUniqueIdentifier localUniqueId) {
+    public UniqueId(SourceId newSourceId,
+            LocalUniqueId localUniqueId) {
         if (newSourceId == null) {
             throw new IllegalArgumentException(
                     "dataSourceBackendId cannot be null");
@@ -68,7 +68,7 @@ public final class UniqueIdentifier implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final UniqueIdentifier other = (UniqueIdentifier) obj;
+        final UniqueId other = (UniqueId) obj;
         if (!this.sourceId.equals(other.sourceId)) {
             return false;
         }
@@ -101,28 +101,24 @@ public final class UniqueIdentifier implements Serializable {
 
     private void writeObject(ObjectOutputStream s) throws IOException {
         boolean derived = (this.sourceId instanceof DerivedSourceId);
-        if (derived) {
-            s.writeObject("DERIVED");
-        } else {
-            s.writeObject("DATASOURCEBACKEND");
-        }
+        s.writeBoolean(derived);
         if (!derived) {
             s.writeObject(this.sourceId.getId());
         }
         s.writeObject(this.localUniqueId);
     }
 
-    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
-        String type = (String) s.readObject();
-        if ("DERIVED".equals(type)) {
+    private void readObject(ObjectInputStream s) throws IOException, 
+            ClassNotFoundException {
+        if (s.readBoolean()) {
             this.sourceId = DerivedSourceId.getInstance();
-        } else if ("DATASOURCEBACKEND".equals(type)) {
-            String id = (String) s.readObject();
-            this.sourceId = DataSourceBackendId.getInstance(id);
         } else {
-            throw new InvalidObjectException("Invalid source id type " + type +
-                    ". Can't restore");
+            String id = (String) s.readObject();
+            if (id == null) {
+                throw new InvalidObjectException("Can't restore. Null id");
+            }
+            this.sourceId = DataSourceBackendId.getInstance(id);
         }
-        this.localUniqueId = (LocalUniqueIdentifier) s.readObject();
+        this.localUniqueId = (LocalUniqueId) s.readObject();
     }
 }

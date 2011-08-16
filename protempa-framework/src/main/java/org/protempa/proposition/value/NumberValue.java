@@ -1,9 +1,9 @@
 package org.protempa.proposition.value;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.util.Map;
 import org.apache.commons.collections.map.ReferenceMap;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * @author Andrew Post
@@ -56,6 +56,16 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
             this.num = num;
         }
     }
+    
+    @Override
+    public NumberValue replace() {
+        NumberValue result = cache.get(this.num);
+        if (result != null) {
+            return result;
+        } else {
+            return this;
+        }
+    }
 
     @Override
     public int hashCode() {
@@ -98,22 +108,6 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
         return num.toString();
     }
 
-    /**
-     * Returns the canonical string representing this value. Returns
-     * "NUMBER_VALUE:the number formatted without grouping".
-     *
-     * @return a {@link String}.
-     * @see org.protempa.proposition.value.Value#getRepr()
-     */
-    @Override
-    public String getRepr() {
-        return reprType() + num.toString();
-    }
-
-    String getReprForInequalityNumberValue() {
-        return num.toString();
-    }
-
     @Override
     public double doubleValue() {
         return num.doubleValue();
@@ -121,6 +115,11 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
 
     public long longValue() {
         return num.longValue();
+    }
+    
+    @Override
+    public BigDecimal getBigDecimal() {
+        return num;
     }
 
     @Override
@@ -159,5 +158,10 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
             throw new IllegalArgumentException("valueVisitor cannot be null");
         }
         valueVisitor.visit(this);
+    }
+    
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

@@ -1,6 +1,7 @@
 package org.protempa.proposition;
 
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.Format;
@@ -249,20 +250,78 @@ public abstract class TemporalProposition extends AbstractProposition {
                 .append("interval", this.interval).toString();
     }
 
-    protected void writeTemporalProposition(ObjectOutputStream s) throws IOException {
-        s.writeObject(this.interval.getMinStart());
-        s.writeObject(this.interval.getMaxStart());
-        s.writeObject(this.interval.getStartGranularity());
-        s.writeObject(this.interval.getMinFinish());
-        s.writeObject(this.interval.getMaxFinish());
-        s.writeObject(this.interval.getFinishGranularity());
+    /**
+     * Called while serializing a temporal proposition. It optimizes for when
+     * the temporal proposition's interval is a {@link SimpleInterval}.
+     * 
+     * @param s an {@link ObjectOutputStream}.
+     * @throws IOException when an error occurs during serialization.
+     */
+    protected void writeTemporalProposition(ObjectOutputStream s) 
+            throws IOException {
+        if (this.interval instanceof SimpleInterval) {
+            long start = this.interval.getMinStart();
+            long finish = this.interval.getMinFinish();
+            Granularity startGran = this.interval.getStartGranularity();
+            Granularity finishGran = this.interval.getFinishGranularity();
+            if (start == finish && startGran == finishGran) {
+                s.writeChar(0);
+                s.writeLong(start);
+                s.writeObject(startGran);
+            } else {
+                s.writeChar(1);
+                s.writeLong(start);
+                s.writeObject(startGran);
+                s.writeLong(finish);
+                s.writeObject(finishGran);
+            }
+        } else {
+            s.writeChar(2);
+            s.writeObject(this.interval.getMinStart());
+            s.writeObject(this.interval.getMaxStart());
+            s.writeObject(this.interval.getStartGranularity());
+            s.writeObject(this.interval.getMinFinish());
+            s.writeObject(this.interval.getMaxFinish());
+            s.writeObject(this.interval.getFinishGranularity());
+        }
+        
     }
 
+    /**
+     * Called while deserializing a temporal proposition. 
+     * @param s an {@link ObjectInputStream}.
+     * @throws IOException input/output error during deserialization.
+     * @throws ClassNotFoundException class of a serialized object cannot be 
+     * found.
+     */
     protected void readTemporalProposition(ObjectInputStream s)
             throws IOException, ClassNotFoundException {
-        setInterval(INTERVAL_FACTORY.getInstance((Long) s.readObject(),
-                (Long) s.readObject(), (Granularity) s.readObject(),
-                (Long) s.readObject(), (Long) s.readObject(),
-                (Granularity) s.readObject()));
+        int mode = s.readChar();
+        try {
+            switch (mode) {
+                case 0:
+                    setInterval(INTERVAL_FACTORY.getInstance(s.readLong(), 
+                            (Granularity) s.readObject()));
+                    break;
+                case 1:
+                    setInterval(INTERVAL_FACTORY.getInstance(s.readLong(), 
+                        (Granularity) s.readObject(), s.readLong(), 
+                        (Granularity) s.readObject()));
+                    break;
+                case 2:
+                    setInterval(INTERVAL_FACTORY.getInstance(
+                            (Long) s.readObject(),
+                        (Long) s.readObject(), (Granularity) s.readObject(),
+                        (Long) s.readObject(), (Long) s.readObject(),
+                        (Granularity) s.readObject()));
+                    break;
+                default:
+                    throw new InvalidObjectException(
+                            "Can't restore. Invalid mode: " + mode);
+            }
+        } catch (IllegalArgumentException iae) {
+            throw new InvalidObjectException("Can't restore: " + 
+                    iae.getMessage());
+        }
     }
 }

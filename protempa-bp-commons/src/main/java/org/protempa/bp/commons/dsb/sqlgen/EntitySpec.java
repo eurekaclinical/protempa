@@ -63,7 +63,10 @@ public final class EntitySpec implements Serializable {
      * @param uniqueIdSpec a {@link ColumnSpec[]} representing the paths
      * through the database from this entity's main table to
      * the tables and columns that together form an unique identifier for this
-     * entity.
+     * entity. The columns comprising the unique identifier cannot have null 
+     * values with one exception: if the column is also used for the PROTEMPA 
+     * keyId, then it can have a null value (because records with a null keyId
+     * are discarded with just a logged warning).
      * @param startTimeOrTimestampSpec a {@link ColumnSpec} representing
      * the path through the database from this entity's main table to
      * the table and column where the entity's start time (or timestamp, if

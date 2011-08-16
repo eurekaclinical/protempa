@@ -2,7 +2,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.util.List;
 import org.protempa.proposition.PrimitiveParameter;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 
 /**
  *
@@ -20,9 +20,9 @@ final class PrimitiveParameterRefResultProcessor extends
 
     @Override
     void addReferences(PrimitiveParameter primitiveParameter,
-            List<UniqueIdentifier> uids) {
+            List<UniqueId> uids) {
         String referenceName = getReferenceSpec().getReferenceName();
-        for (UniqueIdentifier uid : uids) {
+        for (UniqueId uid : uids) {
             primitiveParameter.addReference(referenceName, uid);
         }
     }

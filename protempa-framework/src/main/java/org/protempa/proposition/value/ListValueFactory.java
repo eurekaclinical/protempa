@@ -24,7 +24,7 @@ public class ListValueFactory extends ValueFactory {
      * @see org.virginia.pbhs.parameters.value.ValueFactory#getInstance(java.lang.String)
      */
     @Override
-    public Value parseValue(String val) {
+    public Value parse(String val) {
         if (val == null) {
             return null;
         }
@@ -60,7 +60,7 @@ public class ListValueFactory extends ValueFactory {
             for (String s : mergedInnerLists) {
                 if ((s.startsWith("'") && s.endsWith("'"))
                         || (s.startsWith("\"") && s.endsWith("\""))) {
-                    l.add(ValueFactory.NOMINAL.parseValue(s.substring(1, s.length() - 1)));
+                    l.add(ValueFactory.NOMINAL.parse(s.substring(1, s.length() - 1)));
                 } else {
                     l.add(ValueFormat.parse(s));
                 }

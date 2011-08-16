@@ -10,7 +10,7 @@ import org.protempa.proposition.value.ValueFormat;
 import org.protempa.proposition.value.ValueType;
 
 abstract class MainResultProcessor<P extends Proposition>
-        extends AbstractResultProcessor implements SQLGenResultProcessor {
+        extends AbstractResultProcessor {
 
     private ResultCache<P> results;
 

@@ -23,7 +23,7 @@ public final class BooleanValueFactory extends ValueFactory {
      * @see org.virginia.pbhs.parameters.value.ValueFactory#getInstance(java.lang.String)
      */
     @Override
-    public Value parseValue(String val) {
+    public Value parse(String val) {
         if ("true".equalsIgnoreCase(val) || "false".equalsIgnoreCase(val)) {
             return Boolean.valueOf(val).booleanValue() ? BooleanValue.TRUE
                     : BooleanValue.FALSE;

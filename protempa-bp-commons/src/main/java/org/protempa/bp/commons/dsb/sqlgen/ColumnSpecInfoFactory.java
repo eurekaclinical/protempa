@@ -130,7 +130,7 @@ final class ColumnSpecInfoFactory {
             if (referenceSpec == null
                     || !(lastColumnSpec.getConstraint() == Constraint.EQUAL_TO
                     && lastColumnSpec.isPropositionIdsComplete()
-                    && AbstractSQLGenerator.completeOrNoOverlap(propIds,
+                    && !AbstractSQLGenerator.needsPropIdInClause(propIds,
                     entitySpec2.getPropositionIds()))) {
                 columnSpecs.addAll(specAsList);
                 i += specAsListSize;

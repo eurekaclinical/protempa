@@ -89,7 +89,7 @@ public interface Proposition extends PropositionVisitable,
      * java.lang.String) to get the propositions with the specified
      * relationship.
      */
-    List<UniqueIdentifier> getReferences(String name);
+    List<UniqueId> getReferences(String name);
 
     /**
      * Get the property names for the proposition
@@ -110,5 +110,5 @@ public interface Proposition extends PropositionVisitable,
      *
      * @return a {@link UniqueIdentifier}.
      */
-    UniqueIdentifier getUniqueIdentifier();
+    UniqueId getUniqueId();
 }

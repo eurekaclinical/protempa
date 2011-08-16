@@ -24,7 +24,7 @@ public final class NumberValueFactory extends NumericalValueFactory {
     }
     
     @Override
-    public Value parseValue(String val) {
+    public Value parse(String val) {
         if (val != null) {
             try {
                 /*

@@ -121,6 +121,7 @@ public final class BdbCache<K, V> extends BdbMap<K, V> {
             DatabaseConfig dbConfig = new DatabaseConfig();
             dbConfig.setTemporary(true);
             dbConfig.setAllowCreate(true);
+            dbConfig.setTransactional(false);
             Database catalogDb = env
                     .openDatabase(null, CLASS_CATALOG, dbConfig);
             classCatalog = new StoredClassCatalog(catalogDb);
@@ -131,13 +132,15 @@ public final class BdbCache<K, V> extends BdbMap<K, V> {
         if (env == null) {
             EnvironmentConfig envConf = new EnvironmentConfig();
             envConf.setAllowCreate(true);
-            envConf.setTransactional(true);
+            envConf.setTransactional(false);
+            envConf.setConfigParam(EnvironmentConfig.EVICTOR_LRU_ONLY, "false");
+            envConf.setConfigParam(EnvironmentConfig.EVICTOR_NODES_PER_SCAN, "100");
             MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
             MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
             long max = memoryUsage.getMax();
             long used = memoryUsage.getUsed();
             long available = max - used;
-            long cacheSize = Math.round(available / 2.0);
+            long cacheSize = Math.round(available / 4.0);
             envConf.setCacheSize(cacheSize);
 
             File envFile = new File(location);

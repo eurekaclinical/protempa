@@ -23,7 +23,7 @@ import org.protempa.proposition.Parameter;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 
 /**
  * An implementation of QueryResultsHandler providing functionality for
@@ -97,7 +97,7 @@ public class TabDelimQueryResultsHandler implements QueryResultsHandler {
     public void handleQueryResult(String key, List<Proposition> propositions,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references)
+            Map<UniqueId, Proposition> references)
             throws FinderException {
         Set<Proposition> propositionsAsSet = new HashSet<Proposition>();
         addDerived(propositions, forwardDerivations, 
@@ -242,20 +242,20 @@ public class TabDelimQueryResultsHandler implements QueryResultsHandler {
         }
 
         private void doWriteKeyId() throws IOException {
-            StringUtil.escapeDelimitedColumn(this.keyId,
+            StringUtil.escapeAndWriteDelimitedColumn(this.keyId,
                     COLUMN_DELIMITER, this.writer);
             this.writer.write(COLUMN_DELIMITER);
         }
 
         private void doWritePropId(Proposition proposition)
                 throws IOException {
-            StringUtil.escapeDelimitedColumn(proposition.getId(),
+            StringUtil.escapeAndWriteDelimitedColumn(proposition.getId(),
                     COLUMN_DELIMITER, this.writer);
             this.writer.write(COLUMN_DELIMITER);
         }
 
         private void doWriteValue(Parameter parameter) throws IOException {
-            StringUtil.escapeDelimitedColumn(
+            StringUtil.escapeAndWriteDelimitedColumn(
                     parameter.getValueFormatted(), COLUMN_DELIMITER,
                     this.writer);
             this.writer.write(COLUMN_DELIMITER);
@@ -263,13 +263,13 @@ public class TabDelimQueryResultsHandler implements QueryResultsHandler {
 
         private void doWriteTime(TemporalProposition proposition)
                 throws IOException {
-            StringUtil.escapeDelimitedColumn(
+            StringUtil.escapeAndWriteDelimitedColumn(
                     proposition.getStartFormattedShort(),
                     COLUMN_DELIMITER, this.writer);
             this.writer.write(COLUMN_DELIMITER);
             String finish = proposition.getFinishFormattedShort();
             if (!finish.isEmpty()) {
-                StringUtil.escapeDelimitedColumn(finish, COLUMN_DELIMITER,
+                StringUtil.escapeAndWriteDelimitedColumn(finish, COLUMN_DELIMITER,
                         this.writer);
             }
         }

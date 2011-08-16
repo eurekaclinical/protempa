@@ -17,7 +17,7 @@ import junit.framework.TestCase;
 public class ListValueTest extends TestCase {
 	public void testParse() {
 		List<?> l = Arrays.asList(new Long[] { 1L, 2L, 3L, 4L });
-		ListValue v = (ListValue) ValueFactory.LIST.parseValue("[1,2,3,4]");
+		ListValue v = (ListValue) ValueFactory.LIST.parse("[1,2,3,4]");
 		Assert.assertEquals(l.size(), v.size());
 		for (int i = 0, n = l.size(); i < n; i++) {
 			Assert.assertEquals(l.get(i), ((NumberValue) v.get(i)).longValue());

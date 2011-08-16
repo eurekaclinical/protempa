@@ -2,6 +2,7 @@ package org.protempa.proposition.value;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * Ordinal string values.
@@ -28,6 +29,11 @@ public final class OrdinalValue extends ValueImpl implements OrderedValue {
         this.val = value;
         this.allowedValues = new ArrayList<String>(sortedAllowedValues);
     }
+    
+    @Override
+    public OrdinalValue replace() {
+        return this;
+    }
 
     /*
      * (non-Javadoc)
@@ -46,19 +52,6 @@ public final class OrdinalValue extends ValueImpl implements OrderedValue {
      */
     public String getValue() {
         return val;
-    }
-
-    /**
-     * Returns the canonical string representing this value. Returns
-     * "ORDINAL_VALUE:string to [comma-separated allowed values]".
-     *
-     * @return a {@link String}.
-     *
-     * @see org.protempa.proposition.value.Value#getRepr()
-     */
-    @Override
-    public String getRepr() {
-        return reprType() + val + " of " + this.allowedValues;
     }
 
     /*
@@ -134,5 +127,10 @@ public final class OrdinalValue extends ValueImpl implements OrderedValue {
             throw new IllegalArgumentException("valueVisitor cannot be null");
         }
         valueVisitor.visit(this);
+    }
+    
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

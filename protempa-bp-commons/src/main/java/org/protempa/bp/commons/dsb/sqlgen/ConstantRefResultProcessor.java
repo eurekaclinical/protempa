@@ -2,7 +2,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.util.List;
 import org.protempa.proposition.Constant;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 
 /**
  *
@@ -18,9 +18,9 @@ final class ConstantRefResultProcessor extends
 //    }
 
     @Override
-    void addReferences(Constant constant, List<UniqueIdentifier> uids) {
+    void addReferences(Constant constant, List<UniqueId> uids) {
         String referenceName = getReferenceSpec().getReferenceName();
-        for (UniqueIdentifier uid : uids) {
+        for (UniqueId uid : uids) {
             constant.addReference(referenceName, uid);
         }
     }

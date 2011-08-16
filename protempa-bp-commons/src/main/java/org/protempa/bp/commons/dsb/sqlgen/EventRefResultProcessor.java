@@ -2,7 +2,7 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.util.List;
 import org.protempa.proposition.Event;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 
 /**
  *
@@ -17,9 +17,9 @@ final class EventRefResultProcessor extends RefResultProcessor<Event> {
 //    }
 
     @Override
-    void addReferences(Event event, List<UniqueIdentifier> uids) {
+    void addReferences(Event event, List<UniqueId> uids) {
         String referenceName = getReferenceSpec().getReferenceName();
-        for (UniqueIdentifier uid : uids) {
+        for (UniqueId uid : uids) {
             event.addReference(referenceName, uid);
         }
     }

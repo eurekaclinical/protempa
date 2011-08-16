@@ -37,7 +37,6 @@ public class Query implements Serializable {
         ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
         ProtempaUtil.checkArrayForNullElement(termIds, "termIds");
         this.keyIds = keyIds.clone();
-        ProtempaUtil.internAll(this.keyIds);
         this.filters = filters;
         this.propIds = propIds.clone();
         ProtempaUtil.internAll(this.propIds);

@@ -8,7 +8,7 @@ package org.protempa.proposition.value;
 public enum ValueType {
 
     VALUE {
-
+        
         @Override
         public boolean isInstance(Value value) {
             if (value == null) {

@@ -3,6 +3,7 @@ package org.protempa.proposition.value;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 
 /**
@@ -29,6 +30,11 @@ public class ListValue<V extends Value> extends ArrayList<V> implements Value {
     public ListValue(List<V> values) {
         super(values);
     }
+    
+    @Override
+    public ListValue<V> replace() {
+        return this;
+    }
 
     @Override
     public ValueComparator compare(Value val) {
@@ -50,27 +56,12 @@ public class ListValue<V extends Value> extends ArrayList<V> implements Value {
 
     @Override
     public String toString() {
-        return ValueImpl.toString(this);
+        return ToStringBuilder.reflectionToString(this);
     }
 
     @Override
     public ValueType getType() {
         return ValueType.LISTVALUE;
-    }
-
-    @Override
-    public String getRepr() {
-        StringBuilder b = new StringBuilder();
-        b.append(ValueImpl.reprType(ValueType.LISTVALUE));
-        b.append('[');
-        for (int i = 0, n = size(); i < n; i++) {
-            b.append(get(i).getRepr());
-            if (i < n - 1) {
-                b.append(',');
-            }
-        }
-        b.append(']');
-        return b.toString();
     }
 
     @Override

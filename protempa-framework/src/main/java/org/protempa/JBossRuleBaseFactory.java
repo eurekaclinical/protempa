@@ -3,7 +3,6 @@ package org.protempa;
 import org.drools.RuleBase;
 import org.drools.RuleBaseConfiguration;
 import org.drools.RuleBaseFactory;
-import org.drools.RuleBaseConfiguration.AssertBehaviour;
 import org.drools.rule.Package;
 import org.drools.rule.Rule;
 

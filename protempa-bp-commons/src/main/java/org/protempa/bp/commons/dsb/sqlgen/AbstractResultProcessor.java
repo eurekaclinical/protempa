@@ -2,17 +2,28 @@ package org.protempa.bp.commons.dsb.sqlgen;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.NumberFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.protempa.proposition.DataSourceBackendId;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 
 /**
  *
  * @author Andrew Post
  */
 abstract class AbstractResultProcessor implements SQLGenResultProcessor {
+
     private String dataSourceBackendId;
     private EntitySpec entitySpec;
     private boolean casePresent;
+    
+    private NumberFormat numberFormat;
+    private Logger logger;
+    
+    protected AbstractResultProcessor() {
+        
+    }
 
     final String getDataSourceBackendId() {
         return dataSourceBackendId;
@@ -20,7 +31,7 @@ abstract class AbstractResultProcessor implements SQLGenResultProcessor {
 
     final void setDataSourceBackendId(String dataSourceBackendId) {
         assert dataSourceBackendId != null :
-            "dataSourceBackendId cannot be null";
+                "dataSourceBackendId cannot be null";
         this.dataSourceBackendId = dataSourceBackendId;
     }
 
@@ -29,7 +40,8 @@ abstract class AbstractResultProcessor implements SQLGenResultProcessor {
         this.entitySpec = entitySpec;
     }
 
-    final EntitySpec getEntitySpec() {
+    @Override
+    public final EntitySpec getEntitySpec() {
         return this.entitySpec;
     }
 
@@ -50,13 +62,11 @@ abstract class AbstractResultProcessor implements SQLGenResultProcessor {
         }
         return i;
     }
-    
-    protected final UniqueIdentifier generateUniqueIdentifier(
-            String entitySpecName, String[] uniqueIds)
-            throws SQLException {
-        
-        return new UniqueIdentifier(
+
+    protected final UniqueId generateUniqueIdentifier(String name,
+            String[] uniqueIds) {
+        return new UniqueId(
                 DataSourceBackendId.getInstance(this.dataSourceBackendId),
-                new SQLGenUniqueIdentifier(entitySpecName, uniqueIds));
+                new SQLGenUniqueId(name, uniqueIds));
     }
 }

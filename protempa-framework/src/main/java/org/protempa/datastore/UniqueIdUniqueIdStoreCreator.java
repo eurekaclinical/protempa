@@ -1,33 +1,34 @@
 package org.protempa.datastore;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.datastore.DataStoreFactory;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 
 public final class UniqueIdUniqueIdStoreCreator implements
-        ProtempaDataStoreCreator<UniqueIdentifier, List<UniqueIdentifier>> {
+        ProtempaDataStoreCreator<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>> {
 
     private UniqueIdUniqueIdStoreCreator() {
     }
 
     private final static UniqueIdUniqueIdStoreCreator INSTANCE = new UniqueIdUniqueIdStoreCreator();
-    private static Map<String, DataStore<UniqueIdentifier, List<UniqueIdentifier>>> stores = new HashMap<String, DataStore<UniqueIdentifier, List<UniqueIdentifier>>>();
+    private static Map<String, DataStore<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>>> stores = new HashMap<String, DataStore<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>>>();
 
     public static UniqueIdUniqueIdStoreCreator getInstance() {
         return INSTANCE;
     }
 
     @Override
-    public DataStore<UniqueIdentifier, List<UniqueIdentifier>> getPersistentStore(
+    public DataStore<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>> getPersistentStore(
             String name) {
         if (stores.containsKey(name)) {
             return stores.get(name);
         } else {
-            DataStore<UniqueIdentifier, List<UniqueIdentifier>> store = DataStoreFactory
+            DataStore<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>> store = DataStoreFactory
                     .getPersistentStore(name);
             stores.put(name, store);
             return store;
@@ -35,9 +36,31 @@ public final class UniqueIdUniqueIdStoreCreator implements
     }
 
     @Override
-    public DataStore<UniqueIdentifier, List<UniqueIdentifier>> newCacheStore() {
+    public DataStore<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>> newCacheStore() {
         return DataStoreFactory
-                .<UniqueIdentifier, List<UniqueIdentifier>> newCacheStore();
+                .<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>> newCacheStore();
+    }
+    
+    public static class Reference implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final String name;
+        private final UniqueId uniqueId;
+
+        public Reference(String name, UniqueId uniqueId) {
+            assert name != null : "name cannot be null";
+            assert uniqueId != null : "uniqueId cannot be null";
+            
+            this.name = name;
+            this.uniqueId = uniqueId;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public UniqueId getUniqueId() {
+            return uniqueId;
+        }
     }
 
 }

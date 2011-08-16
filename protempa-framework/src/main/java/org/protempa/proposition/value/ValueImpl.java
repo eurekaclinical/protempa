@@ -109,34 +109,9 @@ abstract class ValueImpl implements Value {
             return classSpecificCompares.get(val.getClass()).compare(this, val);
         }
     }
-
-    protected String reprType() {
-        return reprType(this.type);
-    }
     
     @Override
     public final ValueType getType() {
         return this.type;
-    }
-
-    /**
-     * Returns the same string as {@link #getRepr()}.
-     *
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public final String toString() {
-        return toString(this);
-    }
-
-    static String reprType(ValueType valueType) {
-        if (valueType == null) {
-            throw new IllegalArgumentException("valueType cannot be null!");
-        }
-        return valueType + ":";
-    }
-
-    static String toString(Value value) {
-        return value.getRepr();
     }
 }

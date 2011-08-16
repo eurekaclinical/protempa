@@ -1,5 +1,9 @@
 package org.protempa.proposition;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import org.protempa.proposition.value.Granularity;
 
 /**
@@ -44,6 +48,64 @@ final class SimpleInterval extends Interval {
         super(timestamp, granularity, timestamp, granularity, null, null);
         if (timestamp == null) {
             throw new IllegalArgumentException("timestamp cannot be null");
+        }
+    }
+    
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        long start = getMinStart();
+        long finish = getMinFinish();
+        Granularity startGran = getStartGranularity();
+        Granularity finishGran = getFinishGranularity();
+        if (start == finish && startGran == finishGran) {
+            s.writeChar(0);
+            s.writeLong(start);
+            s.writeObject(startGran);
+        } else {
+            s.writeChar(1);
+            s.writeLong(start);
+            s.writeLong(finish);
+            s.writeObject(startGran);
+            s.writeObject(finishGran);
+        }
+        
+    }
+    
+    private void readObject(ObjectInputStream s) throws IOException, 
+            ClassNotFoundException {
+        int mode = s.readChar();
+        try {
+            switch (mode) {
+                case 0:
+                    long tstamp = s.readLong();
+                    Granularity gran = (Granularity) s.readObject();
+                    try {
+                        init(tstamp, gran, tstamp, gran, null, null);
+                    } catch (IllegalArgumentException iae) {
+                        throw new InvalidObjectException(
+                                "Can't restore. Invalid interval arguments: " + 
+                                iae.getMessage());
+                    }
+                    break;
+                case 1:
+                    long start = s.readLong();
+                    long finish = s.readLong();
+                    Granularity startGran = (Granularity) s.readObject();
+                    Granularity finishGran = (Granularity) s.readObject();
+                    try {
+                        init(start, startGran, finish, finishGran, null, null);
+                    } catch (IllegalArgumentException iae) {
+                        throw new InvalidObjectException(
+                                "Can't restore. Invalid interval arguments: " + 
+                                iae.getMessage());
+                    }
+                    break;
+                default:
+                    throw new InvalidObjectException(
+                            "Can't restore. Invalid mode: " + mode);
+            }
+        } catch (IllegalArgumentException iae) {
+            throw new InvalidObjectException("Can't restore: " + 
+                    iae.getMessage());
         }
     }
 }

@@ -42,12 +42,12 @@ final class SliceConsequence implements Consequence {
             Collections.sort(pl, ProtempaUtil.TEMP_PROP_COMP);
         }
         
-        this.copier.setWorkingMemory(arg1);
+        this.copier.grab(arg1);
         for (ListIterator<TemporalProposition> itr = pl.listIterator(minIndex);
                 itr.hasNext() && itr.nextIndex() < maxIndex;) {
             TemporalProposition o = itr.next();
             o.accept(copier);
         }
-        this.copier.setWorkingMemory(null);
+        this.copier.release();
     }
 }

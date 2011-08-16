@@ -8,7 +8,7 @@ import java.util.Map;
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 
 /**
  * An implementation of QueryResultsHandler that stores the results in a map
@@ -75,7 +75,7 @@ public class MappingQueryResultsHandler implements QueryResultsHandler {
     public void handleQueryResult(String key, List<Proposition> propositions,
             Map<Proposition,List<Proposition>> forwardDerivations,
             Map<Proposition,List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references)
+            Map<UniqueId, Proposition> references)
             throws FinderException {
         resultMap.put(key, propositions);
     }

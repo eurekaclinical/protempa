@@ -9,4 +9,5 @@ import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
 interface SQLGenResultProcessor extends ResultProcessor {
     void setCasePresent(boolean casePresent);
     boolean isCasePresent();
+    EntitySpec getEntitySpec();
 }

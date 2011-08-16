@@ -5,7 +5,7 @@ import java.util.Map;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 
 /**
  * Specification of a column or sequence of columns in a delimited file
@@ -42,7 +42,7 @@ public interface TableColumnSpec {
     String[] columnValues(String key, Proposition proposition, 
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier, Proposition> references,
+            Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException;
 }

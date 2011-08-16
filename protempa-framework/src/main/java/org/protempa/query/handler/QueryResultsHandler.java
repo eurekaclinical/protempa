@@ -6,7 +6,7 @@ import java.util.Map;
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.UniqueIdentifier;
+import org.protempa.proposition.UniqueId;
 
 /**
  * Interface defining the operations for handling a single result from a
@@ -53,6 +53,6 @@ public interface QueryResultsHandler {
             List<Proposition> propositions, 
             Map<Proposition,List<Proposition>> forwardDerivations,
             Map<Proposition,List<Proposition>> backwardDerivations,
-            Map<UniqueIdentifier,Proposition> references)
+            Map<UniqueId,Proposition> references)
             throws FinderException;
 }
