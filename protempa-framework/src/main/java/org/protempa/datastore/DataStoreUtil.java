@@ -7,7 +7,7 @@ final class DataStoreUtil {
     }
 
     private static class LazyLoggerHolder {
-        private static Logger instance = Logger.getLogger(DataStoreUtil.class
+        private static final Logger instance = Logger.getLogger(DataStoreUtil.class
                 .getPackage().getName());
     }
 
