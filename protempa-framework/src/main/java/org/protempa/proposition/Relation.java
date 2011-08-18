@@ -1,5 +1,6 @@
 package org.protempa.proposition;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import org.protempa.proposition.value.Unit;
@@ -14,7 +15,7 @@ import org.protempa.proposition.value.Unit;
  * 
  * @author Andrew Post
  */
-public final class Relation {
+public final class Relation implements Serializable {
 
 	private static final long serialVersionUID = -7813328179876098366L;
 
