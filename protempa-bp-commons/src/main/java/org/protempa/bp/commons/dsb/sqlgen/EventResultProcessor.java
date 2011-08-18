@@ -3,13 +3,12 @@ package org.protempa.bp.commons.dsb.sqlgen;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.text.NumberFormat;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
-
 import org.arp.javautil.log.Logging;
 import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.DataSourceType;
@@ -17,14 +16,12 @@ import org.protempa.bp.commons.dsb.PositionFormat;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.Interval;
 import org.protempa.proposition.IntervalFactory;
-import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Value;
 
 class EventResultProcessor extends MainResultProcessor<Event> {
 
-    private static final IntervalFactory intervalFactory =
-            new IntervalFactory();
+    private static final IntervalFactory intervalFactory = new IntervalFactory();
     private static final int FLUSH_SIZE = 1000000;
 
     @Override
@@ -32,7 +29,7 @@ class EventResultProcessor extends MainResultProcessor<Event> {
         ResultCache<Event> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
         String entitySpecName = entitySpec.getName();
-        //boolean hasRefs = entitySpec.getReferenceSpecs().length > 0;
+        // boolean hasRefs = entitySpec.getReferenceSpecs().length > 0;
         String[] propIds = entitySpec.getPropositionIds();
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
         if (codeSpec != null) {
@@ -48,12 +45,11 @@ class EventResultProcessor extends MainResultProcessor<Event> {
         int startColumnType = -1;
         boolean finishColumnTypeSet = false;
         int finishColumnType = -1;
-        String[] uniqueIds =
-                new String[entitySpec.getUniqueIdSpecs().length];
-        DataSourceType dsType =
-                DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
+        String[] uniqueIds = new String[entitySpec.getUniqueIdSpecs().length];
+        DataSourceType dsType = DataSourceBackendDataSourceType
+                .getInstance(getDataSourceBackendId());
         PositionFormat positionParser = entitySpec.getPositionParser();
-        
+
         while (resultSet.next()) {
             int i = 1;
             String keyId = resultSet.getString(i++);
@@ -65,19 +61,17 @@ class EventResultProcessor extends MainResultProcessor<Event> {
             i = readUniqueIds(uniqueIds, resultSet, i);
             if (Arrays.contains(uniqueIds, null)) {
                 if (logger.isLoggable(Level.WARNING)) {
-                    logger.log(Level.WARNING, 
-                        "Unique ids contain null ({0}). Skipping record.", 
-                        StringUtils.join(uniqueIds, ", "));
+                    logger.log(Level.WARNING,
+                            "Unique ids contain null ({0}). Skipping record.",
+                            StringUtils.join(uniqueIds, ", "));
                     continue;
                 }
             }
-            UniqueId uniqueIdentifier = 
-                    generateUniqueIdentifier(entitySpecName, uniqueIds);
 
             String propId = null;
             if (!isCasePresent()) {
                 if (codeSpec == null) {
-                    assert propIds.length == 1: "Don't know which proposition id to assign to";
+                    assert propIds.length == 1 : "Don't know which proposition id to assign to";
                     propId = propIds[0];
                 } else {
                     String code = resultSet.getString(i++);
@@ -116,8 +110,8 @@ class EventResultProcessor extends MainResultProcessor<Event> {
                 }
                 Long start = null;
                 try {
-                    start = positionParser.toLong(resultSet, i,
-                            startColumnType);
+                    start = positionParser
+                            .toLong(resultSet, i, startColumnType);
                 } catch (SQLException e) {
                     logger.log(
                             Level.WARNING,
@@ -141,9 +135,12 @@ class EventResultProcessor extends MainResultProcessor<Event> {
                 } finally {
                     i++;
                 }
-                if (finish != null && start != null && finish.compareTo(start) < 0) {
-                    logger.log(Level.WARNING, "Finish {0} is before start {1}: Leaving time unset",
-                            new Object[]{finish, start});
+                if (finish != null && start != null
+                        && finish.compareTo(start) < 0) {
+                    logger.log(
+                            Level.WARNING,
+                            "Finish {0} is before start {1}: Leaving time unset",
+                            new Object[] { finish, start });
                     interval = intervalFactory.getInstance(null, gran, null,
                             gran);
                 } else {
@@ -152,16 +149,16 @@ class EventResultProcessor extends MainResultProcessor<Event> {
                 }
             }
 
-            i = extractPropertyValues(propertySpecs, resultSet, i, 
+            i = extractPropertyValues(propertySpecs, resultSet, i,
                     propertyValues);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
             }
 
-            Event event = new Event(propId);
+            Event event = new Event(propId, generateUniqueIdentifier(
+                    entitySpecName, uniqueIds));
             event.setDataSourceType(dsType);
-            event.setUniqueIdentifier(uniqueIdentifier);
             event.setInterval(interval);
             for (int j = 0; j < propertySpecs.length; j++) {
                 PropertySpec propertySpec = propertySpecs[j];
@@ -172,17 +169,15 @@ class EventResultProcessor extends MainResultProcessor<Event> {
             if (++count % FLUSH_SIZE == 0) {
                 results.flush(this);
                 if (logger.isLoggable(Level.FINE)) {
-                    Logging.logCount(logger, Level.FINE, count, 
-                        "Retrieved {0} record",
-                        "Retrieved {0} records");
+                    Logging.logCount(logger, Level.FINE, count,
+                            "Retrieved {0} record", "Retrieved {0} records");
                 }
             }
         }
         results.flush(this);
         if (logger.isLoggable(Level.FINE)) {
-            Logging.logCount(logger, Level.FINE, count, 
-                "Retrieved {0} record total",
-                "Retrieved {0} records total");
+            Logging.logCount(logger, Level.FINE, count,
+                    "Retrieved {0} record total", "Retrieved {0} records total");
         }
     }
 }

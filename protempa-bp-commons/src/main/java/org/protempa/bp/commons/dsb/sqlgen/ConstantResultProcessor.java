@@ -58,8 +58,6 @@ class ConstantResultProcessor extends MainResultProcessor<Constant> {
                     continue;
                 }
             }
-            UniqueId uniqueIdentifer = generateUniqueIdentifier(entitySpecName, 
-                    uniqueIds);
 
             String propId = null;
             if (!isCasePresent()) {
@@ -84,8 +82,8 @@ class ConstantResultProcessor extends MainResultProcessor<Constant> {
                 propId = resultSet.getString(i++);
             }
 
-            Constant cp = new Constant(propId);
-            cp.setUniqueIdentifier(uniqueIdentifer);
+            Constant cp = new Constant(propId, generateUniqueIdentifier(entitySpecName, 
+                    uniqueIds));
             for (int j = 0; j < propertySpecs.length; j++) {
                 PropertySpec propertySpec = propertySpecs[j];
                 cp.setProperty(propertySpec.getName(), propertyValues[j]);

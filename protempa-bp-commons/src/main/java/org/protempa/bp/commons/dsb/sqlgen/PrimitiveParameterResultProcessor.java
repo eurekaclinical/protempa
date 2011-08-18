@@ -66,8 +66,6 @@ class PrimitiveParameterResultProcessor extends
                     continue;
                 }
             }
-            UniqueId uniqueIdentifer = generateUniqueIdentifier(entitySpecName,
-                    uniqueIds);
 
             String propId = null;
             if (!isCasePresent()) {
@@ -111,9 +109,9 @@ class PrimitiveParameterResultProcessor extends
                 propId = resultSet.getString(i++);
             }
 
-            PrimitiveParameter p = new PrimitiveParameter(propId);
+            PrimitiveParameter p = new PrimitiveParameter(propId, generateUniqueIdentifier(entitySpecName,
+                    uniqueIds));
             p.setTimestamp(timestamp);
-            p.setUniqueIdentifier(uniqueIdentifer);
             p.setGranularity(entitySpec.getGranularity());
             p.setValue(cpVal);
             for (int j = 0; j < propertySpecs.length; j++) {
