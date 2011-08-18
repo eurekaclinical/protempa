@@ -4,22 +4,19 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOError;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.datastore.DataStoreFactory;
 import org.drools.RuleBase;
-import org.drools.RuleBaseFactory;
 import org.drools.WorkingMemory;
-import org.drools.common.DroolsObjectInputStream;
 
 /**
  * A data store mapping key IDs to Drools working memory objects. This
@@ -89,6 +86,8 @@ final class DroolsWorkingMemoryStore implements
             byte[] result = baos.toByteArray();
             oos.close();
             baos.close();
+            DataStoreUtil.logger().log(Level.FINEST,
+                    "Working memory size: {0}", result.length);
             return result;
         } catch (IOException ex) {
             throw new IOError(ex);
@@ -97,11 +96,13 @@ final class DroolsWorkingMemoryStore implements
 
     @Override
     public WorkingMemory get(Object key) {
+        WorkingMemory retval;
         if (key instanceof String) {
-            return readWorkingMemory(this.store.get(key));
+            retval = readWorkingMemory(this.store.get(key));
         } else {
-            return null;
+            retval = null;
         }
+        return retval;
     }
 
     @Override
@@ -132,8 +133,7 @@ final class DroolsWorkingMemoryStore implements
 
     @Override
     public WorkingMemory remove(Object key) {
-        WorkingMemory old = readWorkingMemory(this.store.remove(key));
-        return old;
+        return readWorkingMemory(this.store.remove(key));
     }
 
     @Override
@@ -167,14 +167,36 @@ final class DroolsWorkingMemoryStore implements
     public Set<java.util.Map.Entry<String, WorkingMemory>> entrySet() {
         Set<java.util.Map.Entry<String, WorkingMemory>> entrySet = new HashSet<java.util.Map.Entry<String, WorkingMemory>>();
 
-        for (Entry<String, byte[]> e : this.store.entrySet()) {
-            String key = e.getKey();
-            WorkingMemory value = readWorkingMemory(e.getValue());
-            entrySet.add(new AbstractMap.SimpleEntry<String, WorkingMemory>(
-                    key, value));
+        for (String key : this.store.keySet()) {
+            entrySet.add(new LazyEntry(key));
         }
 
         return entrySet;
+    }
+    
+    private class LazyEntry implements Map.Entry<String, WorkingMemory> {
+
+        private final String key; 
+        
+        public LazyEntry(String key) {
+            this.key = key;
+        }
+        
+        @Override
+        public String getKey() {
+            return this.key;
+        }
+
+        @Override
+        public WorkingMemory getValue() {
+            return readWorkingMemory(store.get(this.key)); 
+        }
+
+        @Override
+        public WorkingMemory setValue(WorkingMemory value) {
+            throw new UnsupportedOperationException("setValue not supported");
+        }
+        
     }
 
 }
