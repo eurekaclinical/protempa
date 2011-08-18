@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sleepycat.bind.serial.ClassCatalog;
 import com.sleepycat.bind.serial.StoredClassCatalog;
@@ -13,6 +14,13 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 
+/**
+ * A BerkeleyDB implementation of a persistent store. Implements the
+ * {@link java.util.Map} interface for interoperability with pre-existing code
+ * that uses <code>Map</code>s.
+ * 
+ * @author Michel Mansour
+ */
 public class BdbPersistentStore<K, V> extends BdbMap<K, V> {
 
     private static final String CLASS_CATALOG = "java_class_catalog";
@@ -78,7 +86,7 @@ public class BdbPersistentStore<K, V> extends BdbMap<K, V> {
         DatabaseConfig dbConfig = new DatabaseConfig();
         dbConfig.setAllowCreate(true);
         dbConfig.setTemporary(false);
-        
+
         boolean dbExists = false;
         for (String name : env.getDatabaseNames()) {
             if (name.equals(dbName)) {
@@ -129,6 +137,7 @@ public class BdbPersistentStore<K, V> extends BdbMap<K, V> {
     private synchronized void createEnvironmentIfNeeded()
             throws DatabaseException {
         if (env == null) {
+            Logger logger = DataStoreUtil.logger();
             EnvironmentConfig envConf = new EnvironmentConfig();
             envConf.setAllowCreate(true);
             envConf.setTransactional(true);
@@ -137,26 +146,24 @@ public class BdbPersistentStore<K, V> extends BdbMap<K, V> {
                     + System.getProperty("file.separator")
                     + System.getProperty("store.env.name"));
             if (!envFile.exists()) {
-                DataStoreUtil
-                        .logger()
-                        .log(Level.INFO,
-                                "Environment path {0} does not exist: creating directories",
-                                envFile.getAbsolutePath());
+                logger.log(
+                        Level.INFO,
+                        "Environment path {0} does not exist: creating directories",
+                        envFile.getAbsolutePath());
                 envFile.mkdirs();
             } else {
-                DataStoreUtil
-                        .logger()
-                        .log(Level.INFO,
-                                "Environment path {0} already exists: using existing environment",
-                                envFile.getAbsolutePath());
+                logger.log(
+                        Level.INFO,
+                        "Environment path {0} already exists: using existing environment",
+                        envFile.getAbsolutePath());
             }
 
-            DataStoreUtil
-                    .logger()
-                    .log(Level.INFO,
-                            "Initialized BerkeleyDB persistent store environment at {0}",
-                            envFile.getAbsolutePath());
             env = new Environment(envFile, envConf);
+            logger.log(
+                    Level.INFO,
+                    "Initialized BerkeleyDB persistent store environment at {0} with cache size {1}",
+                    new Object[] { envFile.getAbsolutePath(),
+                            env.getConfig().getCacheSize() });
         }
     }
 }
