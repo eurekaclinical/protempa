@@ -77,8 +77,7 @@ abstract class BdbMap<K, V> implements DataStore<K, V> {
 
     @Override
     public V put(K arg0, V arg1) {
-        V old = this.storedMap.put(arg0, arg1);
-        return old;
+        return this.storedMap.put(arg0, arg1);
     }
 
     @Override
@@ -88,8 +87,7 @@ abstract class BdbMap<K, V> implements DataStore<K, V> {
 
     @Override
     public V remove(Object arg0) {
-        V old = this.storedMap.remove(arg0);
-        return old;
+        return this.storedMap.remove(arg0);
     }
 
     @Override
