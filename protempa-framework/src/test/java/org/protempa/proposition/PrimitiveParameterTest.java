@@ -1,12 +1,13 @@
 package org.protempa.proposition;
 
 import java.util.Calendar;
+import java.util.UUID;
+
+import junit.framework.TestCase;
 
 import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.NumberValue;
-
-import junit.framework.TestCase;
 
 /**
  * @author Andrew Post
@@ -27,11 +28,17 @@ public class PrimitiveParameterTest extends TestCase {
         cal.clear();
         cal.set(2007, Calendar.MARCH, 1, 15, 11);
 
-        p = new PrimitiveParameter("TEST");
+        p = new PrimitiveParameter("TEST", uid());
         p.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
         p.setValue(new NumberValue(13));
         p.setTimestamp(cal.getTimeInMillis());
         p.setGranularity(AbsoluteTimeGranularity.MINUTE);
+    }
+    
+    private static UniqueId uid() {
+        return new UniqueId(
+                DerivedSourceId.getInstance(),
+                new DerivedUniqueId(UUID.randomUUID().toString()));
     }
 
     /*
@@ -76,7 +83,7 @@ public class PrimitiveParameterTest extends TestCase {
     }
 
     public void testEqualAll() {
-        PrimitiveParameter p2 = new PrimitiveParameter("TEST");
+        PrimitiveParameter p2 = new PrimitiveParameter("TEST", uid());
         p2.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();
@@ -88,7 +95,7 @@ public class PrimitiveParameterTest extends TestCase {
     }
 
     public void testIdsNotEqual() {
-        PrimitiveParameter p2 = new PrimitiveParameter("TEST2");
+        PrimitiveParameter p2 = new PrimitiveParameter("TEST2", uid());
         p2.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();
@@ -100,7 +107,7 @@ public class PrimitiveParameterTest extends TestCase {
     }
 
     public void testTimestampsNotEqual() {
-        PrimitiveParameter p2 = new PrimitiveParameter("TEST2");
+        PrimitiveParameter p2 = new PrimitiveParameter("TEST2", uid());
         p2.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();
@@ -112,7 +119,7 @@ public class PrimitiveParameterTest extends TestCase {
     }
 
     public void testGranularitiesNotEqual() {
-        PrimitiveParameter p2 = new PrimitiveParameter("TEST2");
+        PrimitiveParameter p2 = new PrimitiveParameter("TEST2", uid());
         p2.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();

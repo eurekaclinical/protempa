@@ -2,12 +2,11 @@ package org.protempa.proposition;
 
 import java.util.Arrays;
 import java.util.List;
-
-import org.protempa.DataSourceBackendDataSourceType;
-import org.protempa.proposition.PrimitiveParameter;
-
+import java.util.UUID;
 
 import junit.framework.TestCase;
+
+import org.protempa.DataSourceBackendDataSourceType;
 
 /**
  * JUnit tests for the <code>ParametersUtil</code> class.
@@ -20,21 +19,27 @@ public class ParametersUtilTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		PrimitiveParameter[] paramsArr = new PrimitiveParameter[4];
-		paramsArr[3] = new PrimitiveParameter("TEST");
+		paramsArr[3] = new PrimitiveParameter("TEST", uid());
 		paramsArr[3].setTimestamp(6L);
 		paramsArr[3].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
-		paramsArr[2] = new PrimitiveParameter("TEST");
+		paramsArr[2] = new PrimitiveParameter("TEST", uid());
 		paramsArr[2].setTimestamp(4L);
 		paramsArr[2].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
-		paramsArr[1] = new PrimitiveParameter("TEST");
+		paramsArr[1] = new PrimitiveParameter("TEST", uid());
 		paramsArr[1].setTimestamp(2L);
 		paramsArr[1].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
-		paramsArr[0] = new PrimitiveParameter("TEST");
+		paramsArr[0] = new PrimitiveParameter("TEST", uid());
 		paramsArr[0].setTimestamp(0L);
 		paramsArr[0].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
 
 		params = Arrays.asList(paramsArr);
 	}
+	
+    private static UniqueId uid() {
+        return new UniqueId(
+                DerivedSourceId.getInstance(),
+                new DerivedUniqueId(UUID.randomUUID().toString()));
+    }
 
 	@Override
 	protected void tearDown() throws Exception {

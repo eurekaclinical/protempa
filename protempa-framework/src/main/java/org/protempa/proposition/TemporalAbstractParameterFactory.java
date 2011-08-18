@@ -3,6 +3,7 @@ package org.protempa.proposition;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.UUID;
 
 import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.value.Granularity;
@@ -38,7 +39,9 @@ public final class TemporalAbstractParameterFactory {
     }
 
     public AbstractParameter getInstance(String id, Long start, Long finish) {
-        AbstractParameter e = new AbstractParameter(id);
+        AbstractParameter e = new AbstractParameter(id, new UniqueId(
+                DerivedSourceId.getInstance(),
+                new DerivedUniqueId(UUID.randomUUID().toString())) );
         e.setDataSourceType(DerivedDataSourceType.getInstance());
         e.setInterval(intervalFactory.getInstance(start,
                 this.granularity, finish, this.granularity));

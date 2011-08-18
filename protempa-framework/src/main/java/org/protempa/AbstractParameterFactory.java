@@ -46,11 +46,10 @@ public final class AbstractParameterFactory {
             Segment<? extends TemporalProposition> segment,
             List<TemporalProposition> tps, Value value, Offsets temporalOffset,
             TemporalExtendedPropositionDefinition[] epds) {
-        AbstractParameter result = new AbstractParameter(propId);
-        result.setDataSourceType(DerivedDataSourceType.getInstance());
-        result.setUniqueIdentifier(new UniqueId(
+        AbstractParameter result = new AbstractParameter(propId,new UniqueId(
                 DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString())));
+                new DerivedUniqueId(UUID.randomUUID().toString())) );
+        result.setDataSourceType(DerivedDataSourceType.getInstance());
 
         Long minStart = null;
         Long maxStart = null;

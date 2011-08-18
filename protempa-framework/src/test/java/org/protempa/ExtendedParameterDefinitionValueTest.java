@@ -1,10 +1,15 @@
 package org.protempa;
 
-import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.value.NumberValue;
+import java.util.UUID;
 
 import junit.framework.TestCase;
+
+import org.protempa.proposition.AbstractParameter;
+import org.protempa.proposition.DerivedSourceId;
+import org.protempa.proposition.DerivedUniqueId;
 import org.protempa.proposition.IntervalFactory;
+import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.value.NumberValue;
 
 /**
  * @author Andrew Post
@@ -35,7 +40,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         completeDef.setDisplayName("test");
         completeDef.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter("TEST");
+        AbstractParameter param = new AbstractParameter("TEST", uid());
         param.setDataSourceType(DerivedDataSourceType.getInstance());
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
@@ -50,7 +55,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         completeDef.setDisplayName("test");
         completeDef.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter("TEST");
+        AbstractParameter param = new AbstractParameter("TEST", uid());
         param.setDataSourceType(DerivedDataSourceType.getInstance());
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
@@ -64,7 +69,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         nullValueDef.setAbbreviatedDisplayName("t");
         nullValueDef.setDisplayName("test");
 
-        AbstractParameter param = new AbstractParameter("TEST");
+        AbstractParameter param = new AbstractParameter("TEST", uid());
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
         param.setDataSourceType(DerivedDataSourceType.getInstance());
@@ -78,11 +83,17 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         def1.setDisplayName("test");
         def1.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter("TEST");
+        AbstractParameter param = new AbstractParameter("TEST", uid());
         param.setDataSourceType(DerivedDataSourceType.getInstance());
         param.setValue(new NumberValue(12));
         param.setInterval(intervalFactory.getInstance());
 
         assertFalse(def1.getMatches(param));
+    }
+    
+    private static UniqueId uid() {
+        return new UniqueId(
+                DerivedSourceId.getInstance(),
+                new DerivedUniqueId(UUID.randomUUID().toString()));
     }
 }

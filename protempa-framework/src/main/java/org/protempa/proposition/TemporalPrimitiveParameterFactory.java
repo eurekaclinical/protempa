@@ -3,6 +3,7 @@ package org.protempa.proposition;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.UUID;
 
 import org.protempa.DataSourceType;
 import org.protempa.proposition.value.Granularity;
@@ -43,7 +44,9 @@ public final class TemporalPrimitiveParameterFactory {
 
     public PrimitiveParameter getInstance(String id, Long timestamp,
             DataSourceType dataSourceType) {
-        PrimitiveParameter pp = new PrimitiveParameter(id);
+        PrimitiveParameter pp = new PrimitiveParameter(id, new UniqueId(
+                DerivedSourceId.getInstance(),
+                new DerivedUniqueId(UUID.randomUUID().toString())));
         pp.setDataSourceType(dataSourceType);
         if (timestamp != null)
             pp.setTimestamp(timestamp);

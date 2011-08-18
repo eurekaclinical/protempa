@@ -3,6 +3,7 @@ package org.protempa.proposition;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.UUID;
 
 import org.protempa.DataSourceType;
 import org.protempa.proposition.value.Granularity;
@@ -38,7 +39,9 @@ public final class TemporalEventFactory {
 
     public Event getInstance(String id, Long timestamp,
             DataSourceType dataSourceType) {
-        Event pp = new Event(id);
+        Event pp = new Event(id, new UniqueId(
+                DerivedSourceId.getInstance(),
+                new DerivedUniqueId(UUID.randomUUID().toString())));
         pp.setDataSourceType(dataSourceType);
         pp.setInterval(intervalFactory.getInstance(timestamp, this.granularity,
                 timestamp, this.granularity));
@@ -62,7 +65,9 @@ public final class TemporalEventFactory {
 
     public Event getInstance(String id, Long start, Long finish,
             DataSourceType dataSourceType) {
-        Event e = new Event(id);
+        Event e = new Event(id, new UniqueId(
+                DerivedSourceId.getInstance(),
+                new DerivedUniqueId(UUID.randomUUID().toString())));
         e.setDataSourceType(dataSourceType);
         e.setInterval(intervalFactory.getInstance(start,
                 this.granularity, finish, this.granularity));
