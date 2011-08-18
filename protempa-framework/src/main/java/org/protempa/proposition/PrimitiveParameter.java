@@ -36,10 +36,6 @@ public final class PrimitiveParameter extends TemporalParameter implements
         super(id, uniqueId);
     }
 
-    protected PrimitiveParameter(UniqueId uniqueId) {
-        this("", uniqueId);
-    }
-
     /**
      * Returns this parameter's timestamp (or other kind of position value). A
      * <code>null</code> value means the timestamp is unknown.

@@ -11,21 +11,21 @@ import org.protempa.proposition.value.Value;
  */
 public interface Parameter extends Proposition {
 
-	/**
-	 * Gets the value of this parameter.
-	 * 
-	 * @return the <code>Value</code> of this parameter.
-	 */
-	Value getValue();
+    /**
+     * Gets the value of this parameter.
+     * 
+     * @return the <code>Value</code> of this parameter.
+     */
+    Value getValue();
 
-	/**
-	 * Returns this parameter's value formatted as a string. This is equivalent
-	 * to calling <code>getValue().getFormatted()</code>, but it handles the
-	 * case where <code>getValue()</code> returns <code>null</code>.
-	 * 
-	 * @return a <code>String</code> object, or an empty string if this
-	 *         parameter's value is <code>null</code>.
-	 */
-	String getValueFormatted();
+    /**
+     * Returns this parameter's value formatted as a string. This is equivalent
+     * to calling <code>getValue().getFormatted()</code>, but it handles the
+     * case where <code>getValue()</code> returns <code>null</code>.
+     * 
+     * @return a <code>String</code> object, or an empty string if this
+     *         parameter's value is <code>null</code>.
+     */
+    String getValueFormatted();
 
 }

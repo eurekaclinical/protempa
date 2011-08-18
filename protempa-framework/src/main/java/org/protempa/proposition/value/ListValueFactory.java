@@ -57,12 +57,13 @@ public class ListValueFactory extends ValueFactory {
                 }
             }
             List<Value> l = new ArrayList<Value>(vals.length);
+            ValueFactory valueFactory = ValueType.VALUE.getValueFactory();
             for (String s : mergedInnerLists) {
                 if ((s.startsWith("'") && s.endsWith("'"))
                         || (s.startsWith("\"") && s.endsWith("\""))) {
                     l.add(ValueFactory.NOMINAL.parse(s.substring(1, s.length() - 1)));
                 } else {
-                    l.add(ValueFormat.parse(s));
+                    l.add(valueFactory.parse(s));
                 }
             }
             return new ListValue(l);

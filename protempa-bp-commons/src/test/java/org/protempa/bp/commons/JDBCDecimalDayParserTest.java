@@ -23,8 +23,8 @@ import java.sql.Types;
 import java.util.Calendar;
 import java.util.Map;
 import org.junit.Test;
-import org.protempa.bp.commons.dsb.JDBCDecimalDayParser;
-import org.protempa.bp.commons.dsb.PositionFormat;
+import org.protempa.bp.commons.dsb.relationaldb.JDBCDecimalDayParser;
+import org.protempa.bp.commons.dsb.relationaldb.JDBCPositionFormat;
 import org.junit.Assert;
 
 /**
@@ -42,7 +42,7 @@ public class JDBCDecimalDayParserTest {
     @Test
     public void testDate() throws SQLException {
         ResultSet resultSet = new MockResultSet(20100723);
-        PositionFormat pf = new JDBCDecimalDayParser();
+        JDBCPositionFormat pf = new JDBCDecimalDayParser();
         Assert.assertEquals(1279857600000L, pf.toLong(resultSet, 1,
                 Types.INTEGER));
     }
@@ -55,7 +55,7 @@ public class JDBCDecimalDayParserTest {
     @Test
     public void testDateAtYearBoundary() throws SQLException {
         ResultSet resultSet = new MockResultSet(20101223);
-        PositionFormat pf = new JDBCDecimalDayParser();
+        JDBCPositionFormat pf = new JDBCDecimalDayParser();
         Assert.assertEquals(1293080400000L, pf.toLong(resultSet, 1,
                 Types.INTEGER));
     }

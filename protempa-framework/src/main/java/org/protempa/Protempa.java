@@ -20,8 +20,8 @@ import org.protempa.query.handler.QueryResultsHandler;
  * @author Andrew Post
  */
 public final class Protempa {
-
-    private static final String PROTEMPA_STARTUP_FAILURE_MSG = "PROTEMPA could not start up";
+    private static final String STARTUP_FAILURE_MSG = 
+            "PROTEMPA could not start up";
     private final AbstractionFinder abstractionFinder;
 
     public static Protempa newInstance(String configurationId)
@@ -29,11 +29,11 @@ public final class Protempa {
         try {
             return newInstance(new SourceFactory(configurationId));
         } catch (ConfigurationsLoadException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (BackendProviderSpecLoaderException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (InvalidConfigurationException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
     }
 
@@ -45,9 +45,9 @@ public final class Protempa {
                     sourceFactory.newAlgorithmSourceInstance(),
                     sourceFactory.newTermSourceInstance(), false);
         } catch (BackendInitializationException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (BackendNewInstanceException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
     }
 
@@ -56,11 +56,11 @@ public final class Protempa {
         try {
             return newInstance(new SourceFactory(configurationsId), useCache);
         } catch (ConfigurationsLoadException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (BackendProviderSpecLoaderException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (InvalidConfigurationException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
     }
 
@@ -72,9 +72,9 @@ public final class Protempa {
                     sourceFactory.newAlgorithmSourceInstance(),
                     sourceFactory.newTermSourceInstance(), useCache);
         } catch (BackendInitializationException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (BackendNewInstanceException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
     }
 
@@ -149,7 +149,7 @@ public final class Protempa {
                     knowledgeSource, algorithmSource, termSource,
                     cacheFoundAbstractParameters);
         } catch (KnowledgeSourceReadException ex) {
-            throw new ProtempaStartupException(PROTEMPA_STARTUP_FAILURE_MSG, ex);
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
     }
 
@@ -242,7 +242,7 @@ public final class Protempa {
                     "term id support has not been implemented yet.");
         }
         Logger logger = ProtempaUtil.logger();
-        logger.fine("Executing query");
+        logger.info("Executing query");
         Set<String> keyIdsSet = Arrays.asSet(query.getKeyIds());
         Set<String> propIds = Arrays.asSet(query.getPropIds());
         Set<And<String>> termIds = Arrays.asSet(query.getTermIds());
@@ -250,7 +250,7 @@ public final class Protempa {
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
         this.abstractionFinder.doFind(keyIdsSet, propIds, termIds, filters,
                 resultHandler, qs);
-        logger.fine("Query execution complete");
+        logger.info("Query execution complete");
     }
 
     public void retrieveDataAndPersist(Query query, String persistentStoreName)
@@ -365,7 +365,7 @@ public final class Protempa {
         this.abstractionFinder.getDataSource().close();
         this.abstractionFinder.getKnowledgeSource().close();
         this.abstractionFinder.getTermSource().close();
-        ProtempaUtil.logger().fine("Protempa closed");
+        ProtempaUtil.logger().info("Protempa closed");
     }
 
     /**

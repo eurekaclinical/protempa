@@ -2,11 +2,9 @@ package org.protempa.proposition.value;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.util.EnumMap;
-import java.util.Map;
 
 /**
- * An abstract class for factories that create <code>Value</code>s.
+ * An abstract class for factories that create {@link Value}s.
  * 
  * @author Andrew Post
  */
@@ -30,35 +28,15 @@ public class ValueFactory implements Serializable {
             ValueType.NUMBERVALUE);
     public static final ValueFactory LIST = new ListValueFactory(
             ValueType.LISTVALUE);
+    public static final ValueFactory DATE = new DateValueFactory(
+            ValueType.DATEVALUE);
     private static int nextOrdinal = 0;
     private static final ValueFactory[] VALUES = {VALUE, NOMINAL, BOOLEAN,
-        INEQUALITY, NUMERICAL, ORDINAL, NUMBER, LIST};
-    private static final Map<ValueType, ValueFactory> VALUE_TYPE_TO_VALUE_FACTORY =
-            new EnumMap<ValueType, ValueFactory>(ValueType.class);
-
-    static {
-        VALUE_TYPE_TO_VALUE_FACTORY.put(ValueType.VALUE, VALUE);
-        VALUE_TYPE_TO_VALUE_FACTORY.put(ValueType.NOMINALVALUE, NOMINAL);
-        VALUE_TYPE_TO_VALUE_FACTORY.put(ValueType.BOOLEANVALUE, BOOLEAN);
-        VALUE_TYPE_TO_VALUE_FACTORY.put(ValueType.INEQUALITYNUMBERVALUE, INEQUALITY);
-        VALUE_TYPE_TO_VALUE_FACTORY.put(ValueType.NUMERICALVALUE, NUMERICAL);
-        VALUE_TYPE_TO_VALUE_FACTORY.put(ValueType.ORDINALVALUE, ORDINAL);
-        VALUE_TYPE_TO_VALUE_FACTORY.put(ValueType.NUMBERVALUE, NUMBER);
-        VALUE_TYPE_TO_VALUE_FACTORY.put(ValueType.LISTVALUE, LIST);
-    }
-
-    /**
-     * Returns the value factory with the given id.
-     *
-     * @param valueFactoryStr
-     *            a {@link ValueFactory} id {@link String}.
-     * @return a {@link ValueFactory}, or <code>null</code> if
-     *         <code>valueFactoryStr</code> is <code>null</code> or is not a
-     *         value factory id.
-     */
-    public static ValueFactory get(ValueType valueType) {
-        return VALUE_TYPE_TO_VALUE_FACTORY.get(valueType);
-    }
+        INEQUALITY, NUMERICAL, ORDINAL, NUMBER, LIST, DATE};
+    
+    private static final ValueFactory[] PARSE_FACTORY_ORDER = {
+        ValueFactory.BOOLEAN, ValueFactory.NUMBER, ValueFactory.INEQUALITY,
+        ValueFactory.DATE, ValueFactory.LIST, ValueFactory.NOMINAL};
     
     private int ordinal = nextOrdinal++;
     private ValueType type;
@@ -76,12 +54,20 @@ public class ValueFactory implements Serializable {
      * Creates a <code>Value</code> instance by parsing the given string.
      *
      * @param val
-     *            a <code>String</code>.
-     * @return a <code>Value</code>, or <code>null</code> if the given
-     *         string could not be parsed.
+     *            a <code>String</code>. May be <code>null</code>.
+     * @return a <code>Value</code>, or <code>null</code> if the supplied
+     *         string is <code>null</code> or has an invalid format.
      */
     public Value parse(String val) {
-        return ValueFormat.parse(val);
+        Value result = null;
+
+        for (int i = 0; i < PARSE_FACTORY_ORDER.length; i++) {
+            if ((result = PARSE_FACTORY_ORDER[i].parse(val)) != null) {
+                break;
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -93,12 +79,7 @@ public class ValueFactory implements Serializable {
     private Object readResolve() throws ObjectStreamException {
         return VALUES[ordinal];
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
+    
     @Override
     public final String toString() {
         return this.type.name();

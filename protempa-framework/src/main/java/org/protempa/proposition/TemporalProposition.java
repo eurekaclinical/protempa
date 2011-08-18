@@ -45,8 +45,11 @@ public abstract class TemporalProposition extends AbstractProposition {
         this.interval = INTERVAL_FACTORY.getInstance();
     }
 
-    protected TemporalProposition(UniqueId uniqueId) {
-        this(null, uniqueId);
+    /**
+     * Here only for use by deserialization. Do not use this for any other
+     * reason!
+     */
+    protected TemporalProposition() {
     }
 
     /**

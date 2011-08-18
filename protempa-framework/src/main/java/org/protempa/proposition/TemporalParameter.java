@@ -19,8 +19,11 @@ public abstract class TemporalParameter extends TemporalProposition
         super(id, uniqueId);
     }
 
-    protected TemporalParameter(UniqueId uniqueId) {
-        this("", uniqueId);
+    /**
+     * Here only for use by deserialization. Do not use this for any other
+     * reason!
+     */
+    protected TemporalParameter() {
     }
 
     @Override
@@ -70,7 +73,10 @@ public abstract class TemporalParameter extends TemporalProposition
 
     protected void readTemporalParameter(ObjectInputStream s) 
             throws IOException, ClassNotFoundException {
-        this.value = ((Value) s.readObject()).replace();
+        Object obj = s.readObject();
+        if (obj != null) {
+            setValue(((Value) obj).replace());
+        }
     }
 
 

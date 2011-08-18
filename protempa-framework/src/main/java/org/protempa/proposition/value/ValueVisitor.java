@@ -56,4 +56,13 @@ public interface ValueVisitor {
      *            Cannot be <code>null</code>.
      */
     void visit(InequalityNumberValue inequalityNumberValue);
+    
+    /**
+     * Processes a date value.
+     *
+     * @param dateValue
+     *            an {@link DateValue}.
+     *            Cannot be <code>null</code>.
+     */
+    void visit(DateValue dateValue);
 }

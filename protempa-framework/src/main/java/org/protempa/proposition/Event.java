@@ -31,10 +31,6 @@ public final class Event extends TemporalProposition implements Serializable {
         super(id, uniqueId);
     }
 
-    protected Event(UniqueId uniqueId) {
-        this("", uniqueId);
-    }
-
     @Override
     public void setInterval(Interval interval) {
         super.setInterval(interval);

@@ -16,6 +16,11 @@ public enum ValueType {
             }
             return true;
         }
+        
+        @Override
+        public ValueFactory getValueFactory() {
+            return ValueFactory.VALUE;
+        }
     },
     NOMINALVALUE {
 
@@ -26,6 +31,11 @@ public enum ValueType {
             }
             return value.getType() == ValueType.NOMINALVALUE;
         }
+        
+        @Override
+        public ValueFactory getValueFactory() {
+            return ValueFactory.NOMINAL;
+        }
     },
     BOOLEANVALUE {
 
@@ -35,6 +45,11 @@ public enum ValueType {
                 throw new IllegalArgumentException("value cannot be null");
             }
             return value.getType() == ValueType.BOOLEANVALUE;
+        }
+        
+        @Override
+        public ValueFactory getValueFactory() {
+            return ValueFactory.BOOLEAN;
         }
     },
     ORDEREDVALUE {
@@ -48,6 +63,11 @@ public enum ValueType {
             return valueType == ValueType.NUMERICALVALUE
                     || valueType == ValueType.ORDINALVALUE;
         }
+        
+        @Override
+        public ValueFactory getValueFactory() {
+            throw new UnsupportedOperationException("Not implemented");
+        }
     },
     INEQUALITYNUMBERVALUE {
 
@@ -57,6 +77,11 @@ public enum ValueType {
                 throw new IllegalArgumentException("value cannot be null");
             }
             return value.getType() == ValueType.INEQUALITYNUMBERVALUE;
+        }
+        
+        @Override
+        public ValueFactory getValueFactory() {
+            return ValueFactory.INEQUALITY;
         }
     },
     NUMERICALVALUE {
@@ -70,6 +95,11 @@ public enum ValueType {
             return valueType == ValueType.NUMBERVALUE
                     || valueType == ValueType.INEQUALITYNUMBERVALUE;
         }
+        
+        @Override
+        public ValueFactory getValueFactory() {
+            return ValueFactory.NUMERICAL;
+        }
     },
     NUMBERVALUE {
 
@@ -79,6 +109,11 @@ public enum ValueType {
                 throw new IllegalArgumentException("value cannot be null");
             }
             return value.getType() == ValueType.NUMBERVALUE;
+        }
+        
+        @Override
+        public ValueFactory getValueFactory() {
+            return ValueFactory.NUMBER;
         }
     },
     ORDINALVALUE {
@@ -90,6 +125,11 @@ public enum ValueType {
             }
             return value.getType() == ValueType.ORDINALVALUE;
         }
+        
+        @Override
+        public ValueFactory getValueFactory() {
+            return ValueFactory.ORDINAL;
+        }
     },
     LISTVALUE {
 
@@ -100,6 +140,26 @@ public enum ValueType {
             }
             return value.getType() == ValueType.LISTVALUE;
         }
+        
+        @Override
+        public ValueFactory getValueFactory() {
+            return ValueFactory.LIST;
+        }
+    },
+    DATEVALUE {
+        
+        @Override
+        public boolean isInstance(Value value) {
+            if (value == null) {
+                throw new IllegalArgumentException("value cannot be null");
+            }
+            return value.getType() == ValueType.DATEVALUE;
+        }
+        
+        @Override
+        public ValueFactory getValueFactory() {
+            return ValueFactory.DATE;
+        }
     };
 
     /**
@@ -109,4 +169,11 @@ public enum ValueType {
      * @return <code>true</code> or <code>false</code>.
      */
     public abstract boolean isInstance(Value value);
+    
+    /**
+     * Returns a value factory for creating values of this type.
+     * 
+     * @return a {@link ValueFactory}. Guaranteed not <code>null</code>.
+     */
+    public abstract ValueFactory getValueFactory();
 }

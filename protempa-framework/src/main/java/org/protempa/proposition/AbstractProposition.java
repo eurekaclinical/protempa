@@ -54,8 +54,14 @@ public abstract class AbstractProposition implements Proposition {
         initializeAbstractProposition(id);
     }
 
-    protected AbstractProposition(UniqueId uniqueId) {
-        this("", uniqueId);
+    /**
+     * Here only for use by deserialization of {@link java.util.Serializable} 
+     * subclasses of this class. Do not call this for any other
+     * reason because id and uniqueId are left uninitialized! Subclasses that
+     * are serializable should implement a <code>readObject</code> method that
+     * calls {@link #readAbstractProposition(java.io.ObjectInputStream) }.
+     */
+    protected AbstractProposition() {
     }
 
     protected void initializeAbstractProposition(String id) {

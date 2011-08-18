@@ -188,7 +188,7 @@ final class AbstractionFinder implements Module {
             }
             resultHandler.finish();
         } catch (ProtempaException e) {
-            String msg = "Query could not complete";
+            String msg = "Query did not complete";
             throw new FinderException(msg, e);
         }
     }
@@ -769,36 +769,41 @@ final class AbstractionFinder implements Module {
             Filter filters, QueryResultsHandler resultHandler, QuerySession qs,
             ExecutionStrategy strategy) throws ProtempaException {
         Logger logger = ProtempaUtil.logger();
-        logger.log(Level.FINE, "Now retrieving data");
+        logger.info("Retrieving data");
         ObjectIterator objectIterator = new ObjectIterator(keyIds,
                 propositionIds, filters, qs, false);
+        logger.info("Data retrieval complete");
+        if (objectIterator.hasNext()) {
+            logger.info("Processing data");
+            DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
+            logger.log(Level.FINE, "Creating rule base");
+            strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
+            logger.log(Level.FINE, "Rule base is created");
+            strategy.initialize();
+            logger.log(Level.FINE, "Now processing data");
+            int numProcessed = 0;
 
-        DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
-        logger.log(Level.FINE, "Creating rule base");
-        strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
-        logger.log(Level.FINE, "Rule base is created");
-        strategy.initialize();
-        logger.log(Level.FINE, "Now processing data");
-        int numProcessed = 0;
-
-        for (Iterator<ObjectEntry> itr = objectIterator; itr.hasNext();) {
-            ObjectEntry entry = itr.next();
-            String keyId = entry.keyId;
-            List<Proposition> props = entry.propositions;
-            logger.log(Level.FINER, "About to assert raw data {0}", props);
-            Iterator<Proposition> propositions = strategy.execute(entry.keyId,
-                    propositionIds, entry.propositions, null);
-            processResults(qs, propositions,
-                    derivationsBuilder.toForwardDerivations(),
-                    derivationsBuilder.toBackwardDerivations(),
-                    propositionIds, resultHandler, keyId);
-            derivationsBuilder.reset();
-            if (++numProcessed % 1000 == 0) {
-                logNumProcessed(numProcessed, logger);
+            for (Iterator<ObjectEntry> itr = objectIterator; itr.hasNext();) {
+                ObjectEntry entry = itr.next();
+                String keyId = entry.keyId;
+                List<Proposition> props = entry.propositions;
+                logger.log(Level.FINER, "About to assert raw data {0}", props);
+                Iterator<Proposition> propositions = strategy.execute(
+                        entry.keyId, propositionIds, entry.propositions, null);
+                processResults(qs, propositions,
+                        derivationsBuilder.toForwardDerivations(),
+                        derivationsBuilder.toBackwardDerivations(),
+                        propositionIds, resultHandler, keyId);
+                derivationsBuilder.reset();
+                if (++numProcessed % 1000 == 0) {
+                    logNumProcessed(numProcessed, logger);
+                }
             }
+            strategy.cleanup();
+            logger.info("Processing data is complete");
+        } else {
+            logger.info("No data to process");
         }
-        strategy.cleanup();
-        logger.log(Level.FINE, "Processing is complete");
     }
 
     private void logNumProcessed(int numProcessed, Logger logger)

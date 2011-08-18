@@ -13,7 +13,8 @@ import org.protempa.ProtempaException;
  * 
  * @author Andrew Post
  */
-public final class Constant extends AbstractProposition implements Serializable {
+public final class Constant extends AbstractProposition 
+        implements Serializable {
 
     private static final long serialVersionUID = 7205801414947324421L;
 
@@ -28,10 +29,6 @@ public final class Constant extends AbstractProposition implements Serializable 
      */
     public Constant(String id, UniqueId uniqueId) {
         super(id, uniqueId);
-    }
-
-    protected Constant(UniqueId uniqueId) {
-        this("", uniqueId);
     }
 
     @Override
