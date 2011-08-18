@@ -16,23 +16,28 @@ import org.protempa.proposition.value.Granularity;
  * 
  * @author Andrew Post
  */
-public final class AbstractParameter extends TemporalParameter
-        implements Serializable {
+public final class AbstractParameter extends TemporalParameter implements
+        Serializable {
 
     private static final long serialVersionUID = -137441242472941229L;
 
     /**
      * Creates an abstract parameter with an id.
-     *
+     * 
      * @param id
      *            an identification <code>String</code> for this parameter. If
      *            <code>null</code>, the default is used (<code>""</code>).
+     * @param uniqueId
+     *            a <code>UniqueId</code> that uniquely identifies this
+     *            parameter.
      */
-    public AbstractParameter(String id) {
-        super(id);
+    public AbstractParameter(String id, UniqueId uniqueId) {
+        super(id, uniqueId);
     }
 
-    protected AbstractParameter() {}
+    protected AbstractParameter(UniqueId uniqueId) {
+        this("", uniqueId);
+    }
 
     @Override
     public void setInterval(Interval interval) {
@@ -41,7 +46,7 @@ public final class AbstractParameter extends TemporalParameter
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see org.protempa.proposition.Proposition#isEqual(java.lang.Object)
      */
     @Override
@@ -57,15 +62,12 @@ public final class AbstractParameter extends TemporalParameter
         Granularity startGranularity = getInterval().getStartGranularity();
         Granularity aStartGranularity = a.getInterval().getStartGranularity();
         Granularity finishGranularity = getInterval().getFinishGranularity();
-        Granularity aFinishGranularity = 
-                a.getInterval().getFinishGranularity();
+        Granularity aFinishGranularity = a.getInterval().getFinishGranularity();
         return super.isEqual(a)
-                && (startGranularity == aStartGranularity ||
-                (startGranularity != null &&
-                startGranularity.equals(aStartGranularity)))
-                && (finishGranularity == aFinishGranularity ||
-                (finishGranularity != null &&
-                finishGranularity.equals(aFinishGranularity)));
+                && (startGranularity == aStartGranularity || (startGranularity != null && startGranularity
+                        .equals(aStartGranularity)))
+                && (finishGranularity == aFinishGranularity || (finishGranularity != null && finishGranularity
+                        .equals(aFinishGranularity)));
     }
 
     @Override
@@ -74,15 +76,15 @@ public final class AbstractParameter extends TemporalParameter
     }
 
     @Override
-    public void acceptChecked(PropositionCheckedVisitor
-            propositionCheckedVisitor) throws ProtempaException {
+    public void acceptChecked(
+            PropositionCheckedVisitor propositionCheckedVisitor)
+            throws ProtempaException {
         propositionCheckedVisitor.visit(this);
     }
-    
+
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
+        return new ToStringBuilder(this).appendSuper(super.toString())
                 .toString();
     }
 
@@ -92,7 +94,8 @@ public final class AbstractParameter extends TemporalParameter
         writeTemporalParameter(s);
     }
 
-    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream s) throws IOException,
+            ClassNotFoundException {
         readAbstractProposition(s);
         readTemporalProposition(s);
         readTemporalParameter(s);

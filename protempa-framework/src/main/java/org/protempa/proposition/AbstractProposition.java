@@ -32,25 +32,30 @@ public abstract class AbstractProposition implements Proposition {
      * An identification <code>String</code> for this proposition.
      */
     private String id;
-    private static volatile int nextHashCode = 17;
-    protected volatile int hashCode;
     private PropertyChangeSupport changes;
     private Map<String, Value> properties;
     private Map<String, List<UniqueId>> references;
-    private UniqueId key;
+    private UniqueId key; // not final because of custom deserialization
+                          // but there is no public modification access
     private DataSourceType dataSourceType;
 
     /**
-     * Creates a proposition with an id.
-     *
+     * Creates a proposition with an id and unique identifier. The unique
+     * identifier cannot be null.
+     * 
      * @param id
      *            an identification <code>String</code> for this proposition.
      */
-    AbstractProposition(String id) {
+    AbstractProposition(String id, UniqueId uniqueId) {
+        if (uniqueId == null) {
+            throw new IllegalArgumentException("The unique ID cannot be null");
+        }
+        this.key = uniqueId;
         initializeAbstractProposition(id);
     }
 
-    protected AbstractProposition() {
+    protected AbstractProposition(UniqueId uniqueId) {
+        this("", uniqueId);
     }
 
     protected void initializeAbstractProposition(String id) {
@@ -69,8 +74,7 @@ public abstract class AbstractProposition implements Proposition {
 
     protected void initializeReferences() {
         if (this.references == null) {
-            this.references = new LinkedHashMap<String,
-                    List<UniqueId>>();
+            this.references = new LinkedHashMap<String, List<UniqueId>>();
         }
     }
 
@@ -110,10 +114,6 @@ public abstract class AbstractProposition implements Proposition {
         }
     }
 
-    public final void setUniqueIdentifier(UniqueId o) {
-        this.key = o;
-    }
-
     @Override
     public DataSourceType getDataSourceType() {
         return this.dataSourceType;
@@ -146,8 +146,7 @@ public abstract class AbstractProposition implements Proposition {
         initializeReferences();
         List<UniqueId> refs = this.references.get(name);
         if (refs == null) {
-            refs =
-                    new ArrayList<UniqueId>(DEFAULT_REFERENCE_LIST_SIZE);
+            refs = new ArrayList<UniqueId>(DEFAULT_REFERENCE_LIST_SIZE);
             refs.add(ref);
             this.references.put(name.intern(), refs);
         } else {
@@ -194,11 +193,21 @@ public abstract class AbstractProposition implements Proposition {
 
     @Override
     public int hashCode() {
-        if (this.hashCode == 0) {
-            this.hashCode = nextHashCode;
-            nextHashCode *= 37;
+        return this.key.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
+        if (o == this)
+            return true;
+        if (o instanceof AbstractProposition) {
+            AbstractProposition other = (AbstractProposition) o;
+            return this.key.equals(other.key);
+        } else {
+            return false;
         }
-        return this.hashCode;
     }
 
     @Override
@@ -212,17 +221,23 @@ public abstract class AbstractProposition implements Proposition {
 
         AbstractProposition p = (AbstractProposition) other;
         return (id == p.id || id.equals(p.id))
-                && this.properties == p.properties ||
-                (this.properties != null && this.properties.equals(p.properties));
+                && this.properties == p.properties
+                || (this.properties != null && this.properties
+                        .equals(p.properties));
 
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("id", this.id).append("properties", this.properties).append("references", this.references).append("uniqueIdentifier", this.key).append("dataSourceType", this.dataSourceType).toString();
+        return new ToStringBuilder(this).append("id", this.id)
+                .append("properties", this.properties)
+                .append("references", this.references)
+                .append("uniqueIdentifier", this.key)
+                .append("dataSourceType", this.dataSourceType).toString();
 
     }
-    // The following code implements hashCode() and equals() using unique 
+
+    // The following code implements hashCode() and equals() using unique
     // identifiers, as well as the datasource backend identifiers.
     /*
      * (non-Javadoc)
@@ -230,48 +245,25 @@ public abstract class AbstractProposition implements Proposition {
      * @see java.lang.Object#hashCode()
      */
     /*
-    @Override
-    public int hashCode() {
-    if (this.hashCode == 0) {
-    if (this.key == null
-    || this.datasourceBackendId == null) {
-    this.hashCode = super.hashCode();
-    } else {
-    this.hashCode = 17;
-    this.hashCode += 37 * this.key.hashCode();
-    this.hashCode += 37 * this.datasourceBackendId.hashCode();
-    }
-    }
-    return this.hashCode;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-    if (this == obj) {
-    return true;
-    } else {
-    if (!(obj instanceof Proposition)) {
-    return false;
-    }
-    Proposition prop = (Proposition) obj;
-    if (prop.getUniqueIdentifier() == null
-    || this.key == null
-    || prop.getDataSourceBackendId() == null
-    || this.datasourceBackendId == null) {
-    return false;
-    } else {
-    return prop.getUniqueIdentifier().equals(
-    this.key)
-    && prop.getDataSourceBackendId().equals(
-    this.datasourceBackendId);
-    }
-    }
-    }
+     * @Override public int hashCode() { if (this.hashCode == 0) { if (this.key
+     * == null || this.datasourceBackendId == null) { this.hashCode =
+     * super.hashCode(); } else { this.hashCode = 17; this.hashCode += 37 *
+     * this.key.hashCode(); this.hashCode += 37 *
+     * this.datasourceBackendId.hashCode(); } } return this.hashCode; }
+     * 
+     * @Override public boolean equals(Object obj) { if (this == obj) { return
+     * true; } else { if (!(obj instanceof Proposition)) { return false; }
+     * Proposition prop = (Proposition) obj; if (prop.getUniqueIdentifier() ==
+     * null || this.key == null || prop.getDataSourceBackendId() == null ||
+     * this.datasourceBackendId == null) { return false; } else { return
+     * prop.getUniqueIdentifier().equals( this.key) &&
+     * prop.getDataSourceBackendId().equals( this.datasourceBackendId); } } }
      */
 
     protected void writeAbstractProposition(ObjectOutputStream s)
             throws IOException {
         s.writeObject(this.id);
+        s.writeObject(this.key);
 
         if (this.properties == null) {
             s.writeInt(0);
@@ -289,7 +281,8 @@ public abstract class AbstractProposition implements Proposition {
             s.writeInt(0);
         } else {
             s.writeInt(this.references.size());
-            for (Map.Entry<String, List<UniqueId>> me : this.references.entrySet()) {
+            for (Map.Entry<String, List<UniqueId>> me : this.references
+                    .entrySet()) {
                 s.writeObject(me.getKey());
                 List<UniqueId> val = me.getValue();
                 if (val == null) {
@@ -303,13 +296,12 @@ public abstract class AbstractProposition implements Proposition {
             }
         }
 
-        s.writeObject(this.key);
         if (this.dataSourceType instanceof DerivedDataSourceType) {
             s.writeBoolean(true);
         } else {
             s.writeBoolean(false);
-            s.writeObject(
-                    ((DataSourceBackendDataSourceType) this.dataSourceType).getId());
+            s.writeObject(((DataSourceBackendDataSourceType) this.dataSourceType)
+                    .getId());
         }
         s.writeObject(this.changes);
     }
@@ -317,6 +309,7 @@ public abstract class AbstractProposition implements Proposition {
     protected void readAbstractProposition(ObjectInputStream s)
             throws IOException, ClassNotFoundException {
         String tempId = (String) s.readObject();
+        this.key = (UniqueId) s.readObject();
         initializeAbstractProposition(tempId);
 
         int numProperties = s.readInt();
@@ -334,7 +327,7 @@ public abstract class AbstractProposition implements Proposition {
                 setProperty(propertyName, val);
             }
         }
-        
+
         int numRefs = s.readInt();
         if (numRefs < 0) {
             throw new InvalidObjectException(
@@ -348,8 +341,7 @@ public abstract class AbstractProposition implements Proposition {
                     throw new InvalidObjectException(
                             "Negative unique identifier count. Can't restore");
                 }
-                List<UniqueId> uids =
-                        new ArrayList<UniqueId>(numUids);
+                List<UniqueId> uids = new ArrayList<UniqueId>(numUids);
                 for (int j = 0; j < numUids; j++) {
                     uids.add((UniqueId) s.readObject());
                 }
@@ -357,12 +349,11 @@ public abstract class AbstractProposition implements Proposition {
             }
         }
 
-        setUniqueIdentifier((UniqueId) s.readObject());
         if (s.readBoolean()) {
             setDataSourceType(DerivedDataSourceType.getInstance());
         } else {
-            setDataSourceType(DataSourceBackendDataSourceType.getInstance(
-                    (String) s.readObject()));
+            setDataSourceType(DataSourceBackendDataSourceType
+                    .getInstance((String) s.readObject()));
         }
         this.changes = (PropertyChangeSupport) s.readObject();
     }

@@ -19,14 +19,12 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     private static final long serialVersionUID = 3263217702318065414L;
 
-    private static final NumberFormat numberFormat =
-            NumberFormat.getInstance();
+    private static final NumberFormat numberFormat = NumberFormat.getInstance();
     static {
         numberFormat.setGroupingUsed(true);
     }
 
-    protected static final IntervalFactory INTERVAL_FACTORY =
-            new IntervalFactory();
+    protected static final IntervalFactory INTERVAL_FACTORY = new IntervalFactory();
 
     /**
      * The interval over which the proposition is valid.
@@ -35,20 +33,25 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     /**
      * Creates a proposition with an id.
-     *
+     * 
      * @param id
      *            an identification <code>String</code> for this proposition.
+     * @param uniqueId
+     *            a <code>UniqueId</code> that uniquely identifies this
+     *            proposition.
      */
-    TemporalProposition(String id) {
-        super(id);
+    TemporalProposition(String id, UniqueId uniqueId) {
+        super(id, uniqueId);
         this.interval = INTERVAL_FACTORY.getInstance();
     }
 
-    protected TemporalProposition() {}
+    protected TemporalProposition(UniqueId uniqueId) {
+        this(null, uniqueId);
+    }
 
     /**
      * The range of time over which this parameter's value is true.
-     *
+     * 
      * @return an <code>Interval</code>.
      */
     public final Interval getInterval() {
@@ -57,7 +60,7 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     /**
      * Sets the valid interval.
-     *
+     * 
      * @param interval
      *            an <code>Interval</code>.
      */
@@ -66,12 +69,11 @@ public abstract class TemporalProposition extends AbstractProposition {
             interval = INTERVAL_FACTORY.getInstance();
         }
         this.interval = interval;
-        this.hashCode = 0;
     }
 
     /**
      * Returns the earliest valid time of this proposition as a long string.
-     *
+     * 
      * @return a <code>String</code>.
      */
     public final String getStartFormattedLong() {
@@ -81,25 +83,25 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     public final String getLengthFormattedLong() {
         Unit lengthUnit = this.interval.getLengthUnit();
-        return formatLength(lengthUnit != null
-                ? lengthUnit.getLongFormat() : null);
+        return formatLength(lengthUnit != null ? lengthUnit.getLongFormat()
+                : null);
     }
 
     public final String getLengthFormattedMedium() {
         Unit lengthUnit = this.interval.getLengthUnit();
-        return formatLength(lengthUnit != null
-                ? lengthUnit.getMediumFormat() : null);
+        return formatLength(lengthUnit != null ? lengthUnit.getMediumFormat()
+                : null);
     }
 
     public final String getLengthFormattedShort() {
         Unit lengthUnit = this.interval.getLengthUnit();
-        return formatLength(lengthUnit != null
-                ? lengthUnit.getShortFormat() : null);
+        return formatLength(lengthUnit != null ? lengthUnit.getShortFormat()
+                : null);
     }
 
     /**
      * Returns the latest valid time of this proposition as a long string.
-     *
+     * 
      * @return a <code>String</code>.
      */
     public final String getFinishFormattedLong() {
@@ -111,7 +113,7 @@ public abstract class TemporalProposition extends AbstractProposition {
     /**
      * Returns the earliest valid time of this proposition as a medium-length
      * string.
-     *
+     * 
      * @return a <code>String</code>.
      */
     public final String getStartFormattedMedium() {
@@ -123,7 +125,7 @@ public abstract class TemporalProposition extends AbstractProposition {
     /**
      * Returns the earliest valid time of this proposition as a medium-length
      * string.
-     *
+     * 
      * @return a <code>String</code>.
      */
     public final String getFinishFormattedMedium() {
@@ -134,7 +136,7 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     /**
      * Returns the earliest valid time of this proposition as a short string.
-     *
+     * 
      * @return a <code>String</code>.
      */
     public final String getStartFormattedShort() {
@@ -145,7 +147,7 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     /**
      * Returns the earliest valid time of this proposition as a short string.
-     *
+     * 
      * @return a <code>String</code>.
      */
     public final String getFinishFormattedShort() {
@@ -157,7 +159,7 @@ public abstract class TemporalProposition extends AbstractProposition {
     /**
      * Uses the given <code>Format</code> to format the start of this
      * parameter's interval.
-     *
+     * 
      * @param format
      *            a <code>Format</code> object.
      * @return the start of this parameter's interval as a formatted
@@ -184,7 +186,7 @@ public abstract class TemporalProposition extends AbstractProposition {
     /**
      * Uses the given <code>Format</code> to format the finish of this
      * parameter's interval.
-     *
+     * 
      * @param format
      *            a <code>Format</code> object.
      * @return the finish of this parameter's interval as a formatted
@@ -238,15 +240,14 @@ public abstract class TemporalProposition extends AbstractProposition {
 
         TemporalProposition p = (TemporalProposition) other;
         return super.isEqual(p)
-                && (this.interval == p.interval
-                || this.interval.equals(p.interval));
+                && (this.interval == p.interval || this.interval
+                        .equals(p.interval));
 
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
+        return new ToStringBuilder(this).appendSuper(super.toString())
                 .append("interval", this.interval).toString();
     }
 
@@ -254,10 +255,12 @@ public abstract class TemporalProposition extends AbstractProposition {
      * Called while serializing a temporal proposition. It optimizes for when
      * the temporal proposition's interval is a {@link SimpleInterval}.
      * 
-     * @param s an {@link ObjectOutputStream}.
-     * @throws IOException when an error occurs during serialization.
+     * @param s
+     *            an {@link ObjectOutputStream}.
+     * @throws IOException
+     *             when an error occurs during serialization.
      */
-    protected void writeTemporalProposition(ObjectOutputStream s) 
+    protected void writeTemporalProposition(ObjectOutputStream s)
             throws IOException {
         if (this.interval instanceof SimpleInterval) {
             long start = this.interval.getMinStart();
@@ -284,15 +287,18 @@ public abstract class TemporalProposition extends AbstractProposition {
             s.writeObject(this.interval.getMaxFinish());
             s.writeObject(this.interval.getFinishGranularity());
         }
-        
+
     }
 
     /**
-     * Called while deserializing a temporal proposition. 
-     * @param s an {@link ObjectInputStream}.
-     * @throws IOException input/output error during deserialization.
-     * @throws ClassNotFoundException class of a serialized object cannot be 
-     * found.
+     * Called while deserializing a temporal proposition.
+     * 
+     * @param s
+     *            an {@link ObjectInputStream}.
+     * @throws IOException
+     *             input/output error during deserialization.
+     * @throws ClassNotFoundException
+     *             class of a serialized object cannot be found.
      */
     protected void readTemporalProposition(ObjectInputStream s)
             throws IOException, ClassNotFoundException {
@@ -300,28 +306,28 @@ public abstract class TemporalProposition extends AbstractProposition {
         try {
             switch (mode) {
                 case 0:
-                    setInterval(INTERVAL_FACTORY.getInstance(s.readLong(), 
+                    setInterval(INTERVAL_FACTORY.getInstance(s.readLong(),
                             (Granularity) s.readObject()));
                     break;
                 case 1:
-                    setInterval(INTERVAL_FACTORY.getInstance(s.readLong(), 
-                        (Granularity) s.readObject(), s.readLong(), 
-                        (Granularity) s.readObject()));
+                    setInterval(INTERVAL_FACTORY.getInstance(s.readLong(),
+                            (Granularity) s.readObject(), s.readLong(),
+                            (Granularity) s.readObject()));
                     break;
                 case 2:
                     setInterval(INTERVAL_FACTORY.getInstance(
-                            (Long) s.readObject(),
-                        (Long) s.readObject(), (Granularity) s.readObject(),
-                        (Long) s.readObject(), (Long) s.readObject(),
-                        (Granularity) s.readObject()));
+                            (Long) s.readObject(), (Long) s.readObject(),
+                            (Granularity) s.readObject(),
+                            (Long) s.readObject(), (Long) s.readObject(),
+                            (Granularity) s.readObject()));
                     break;
                 default:
                     throw new InvalidObjectException(
                             "Can't restore. Invalid mode: " + mode);
             }
         } catch (IllegalArgumentException iae) {
-            throw new InvalidObjectException("Can't restore: " + 
-                    iae.getMessage());
+            throw new InvalidObjectException("Can't restore: "
+                    + iae.getMessage());
         }
     }
 }

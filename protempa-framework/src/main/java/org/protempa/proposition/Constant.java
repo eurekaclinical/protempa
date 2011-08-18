@@ -13,23 +13,27 @@ import org.protempa.ProtempaException;
  * 
  * @author Andrew Post
  */
-public final class Constant extends AbstractProposition
-        implements Serializable {
+public final class Constant extends AbstractProposition implements Serializable {
 
     private static final long serialVersionUID = 7205801414947324421L;
 
     /**
      * Creates a constant with an identifier <code>String</code>.
-     *
+     * 
      * @param id
      *            an identifier <code>String</code>.
+     * @param uniqueId
+     *            a <code>UniqueId</code> that uniquely identifies this
+     *            propositions.
      */
-    public Constant(String id) {
-        super(id);
+    public Constant(String id, UniqueId uniqueId) {
+        super(id, uniqueId);
     }
 
-    protected Constant() {}
-    
+    protected Constant(UniqueId uniqueId) {
+        this("", uniqueId);
+    }
+
     @Override
     public boolean isEqual(Object o) {
         if (o == this) {
@@ -57,8 +61,7 @@ public final class Constant extends AbstractProposition
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
+        return new ToStringBuilder(this).appendSuper(super.toString())
                 .toString();
     }
 
@@ -66,7 +69,8 @@ public final class Constant extends AbstractProposition
         writeAbstractProposition(s);
     }
 
-    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream s) throws IOException,
+            ClassNotFoundException {
         readAbstractProposition(s);
     }
 }

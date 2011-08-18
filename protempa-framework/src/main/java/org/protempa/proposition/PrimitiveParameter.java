@@ -17,28 +17,33 @@ import org.protempa.proposition.value.Granularity;
  * 
  * @author Andrew Post
  */
-public final class PrimitiveParameter extends TemporalParameter
-        implements Serializable {
+public final class PrimitiveParameter extends TemporalParameter implements
+        Serializable {
 
     private static final long serialVersionUID = 693807976086426915L;
 
     /**
      * Creates a parameter with an identification string.
-     *
+     * 
      * @param id
-     *            an identification string. If passed <code>null</code>, an
-     *            id string of <code>""</code> will be used.
+     *            an identification string. If passed <code>null</code>, an id
+     *            string of <code>""</code> will be used.
+     * @param uniqueId
+     *            a <code>UniqueId</code> that uniquely identifies this
+     *            parameter.
      */
-    public PrimitiveParameter(String id) {
-        super(id);
+    public PrimitiveParameter(String id, UniqueId uniqueId) {
+        super(id, uniqueId);
     }
 
-    protected PrimitiveParameter() {}
+    protected PrimitiveParameter(UniqueId uniqueId) {
+        this("", uniqueId);
+    }
 
     /**
-     * Returns this parameter's timestamp (or other kind of position value).
-     * A <code>null</code> value means the timestamp is unknown.
-     *
+     * Returns this parameter's timestamp (or other kind of position value). A
+     * <code>null</code> value means the timestamp is unknown.
+     * 
      * @return a {@link Long}.
      */
     public Long getTimestamp() {
@@ -52,7 +57,7 @@ public final class PrimitiveParameter extends TemporalParameter
 
     /**
      * Sets this parameter's timestamp (or other kind of position value).
-     *
+     * 
      * @param timestamp
      *            a <code>long</code>.
      */
@@ -67,7 +72,7 @@ public final class PrimitiveParameter extends TemporalParameter
 
     /**
      * Returns the granularity of this parameter's timestamp.
-     *
+     * 
      * @return a {@link Granularity} object.
      */
     public Granularity getGranularity() {
@@ -81,7 +86,7 @@ public final class PrimitiveParameter extends TemporalParameter
 
     /**
      * Sets the granularity of this parameter's timestamp.
-     *
+     * 
      * @param granularity
      *            a {@link Granularity} object.
      */
@@ -98,13 +103,13 @@ public final class PrimitiveParameter extends TemporalParameter
         /*
          * As per Combi et al. Methods Inf. Med. 1995;34:458-74.
          */
-        setInterval(INTERVAL_FACTORY.getInstance(
-                timestamp, granularity, timestamp, granularity));
+        setInterval(INTERVAL_FACTORY.getInstance(timestamp, granularity,
+                timestamp, granularity));
     }
 
     /**
      * Returns this parameter's timestamp as a long formatted string.
-     *
+     * 
      * @return a <code>String</code>.
      */
     public String getTimestampFormattedLong() {
@@ -113,7 +118,7 @@ public final class PrimitiveParameter extends TemporalParameter
 
     /**
      * Returns this parameter's timestamp as a medium-length formatted string.
-     *
+     * 
      * @return a <code>String</code>.
      */
     public String getTimestampFormattedMedium() {
@@ -122,7 +127,7 @@ public final class PrimitiveParameter extends TemporalParameter
 
     /**
      * Returns this parameter's timestamp as a short formatted string.
-     *
+     * 
      * @return a <code>String</code>.
      */
     public String getTimestampFormattedShort() {
@@ -131,7 +136,8 @@ public final class PrimitiveParameter extends TemporalParameter
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString()).toString();
+        return new ToStringBuilder(this).appendSuper(super.toString())
+                .toString();
     }
 
     @Override
@@ -166,9 +172,8 @@ public final class PrimitiveParameter extends TemporalParameter
         writeTemporalParameter(s);
     }
 
-    
-
-    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream s) throws IOException,
+            ClassNotFoundException {
         readAbstractProposition(s);
         setTimestamp((Long) s.readObject());
         setGranularity((Granularity) s.readObject());

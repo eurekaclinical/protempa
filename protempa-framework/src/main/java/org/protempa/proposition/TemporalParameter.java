@@ -15,11 +15,13 @@ public abstract class TemporalParameter extends TemporalProposition
     private static final long serialVersionUID = 1553031842442677948L;
     private Value value;
 
-    TemporalParameter(String id) {
-        super(id);
+    TemporalParameter(String id, UniqueId uniqueId) {
+        super(id, uniqueId);
     }
 
-    protected TemporalParameter() {}
+    protected TemporalParameter(UniqueId uniqueId) {
+        this("", uniqueId);
+    }
 
     @Override
     public Value getValue() {
@@ -33,7 +35,6 @@ public abstract class TemporalParameter extends TemporalProposition
 
     public void setValue(Value value) {
         this.value = value;
-        this.hashCode = 0;
     }
 
     /*

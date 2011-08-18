@@ -17,8 +17,8 @@ public final class Context extends TemporalProposition implements Serializable {
 
     private static final long serialVersionUID = -836727551420756824L;
 
-    Context(String id) {
-        super(id);
+    Context(String id, UniqueId uniqueId) {
+        super(id, uniqueId);
     }
 
     @Override

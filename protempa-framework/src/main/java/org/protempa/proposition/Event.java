@@ -21,15 +21,19 @@ public final class Event extends TemporalProposition implements Serializable {
 
     /**
      * Creates an event with an id and no attribute id.
-     *
+     * 
      * @param id
      *            an identification <code>String</code> for this event.
+     * @param uniqueId
+     *            a <code>UniqueId</code> that uniquely identifies this event.
      */
-    public Event(String id) {
-        super(id);
+    public Event(String id, UniqueId uniqueId) {
+        super(id, uniqueId);
     }
 
-    protected Event() {}
+    protected Event(UniqueId uniqueId) {
+        this("", uniqueId);
+    }
 
     @Override
     public void setInterval(Interval interval) {
@@ -38,8 +42,9 @@ public final class Event extends TemporalProposition implements Serializable {
 
     /*
      * (non-Javadoc)
-     *
-     * @see org.protempa.proposition.TemporalProposition#isEqual(java.lang.Object)
+     * 
+     * @see
+     * org.protempa.proposition.TemporalProposition#isEqual(java.lang.Object)
      */
     @Override
     public boolean isEqual(Object o) {
@@ -68,8 +73,7 @@ public final class Event extends TemporalProposition implements Serializable {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .appendSuper(super.toString())
+        return new ToStringBuilder(this).appendSuper(super.toString())
                 .toString();
     }
 
@@ -78,7 +82,8 @@ public final class Event extends TemporalProposition implements Serializable {
         writeTemporalProposition(s);
     }
 
-    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream s) throws IOException,
+            ClassNotFoundException {
         readAbstractProposition(s);
         readTemporalProposition(s);
     }
