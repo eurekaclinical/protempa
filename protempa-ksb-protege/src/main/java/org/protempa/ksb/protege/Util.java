@@ -26,7 +26,6 @@ import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueFactory;
 import org.protempa.ValueSet;
 import org.protempa.proposition.value.ValueType;
 
@@ -81,6 +80,8 @@ class Util {
                 ValueType.NUMBERVALUE);
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("InequalityDoubleValue",
                 ValueType.INEQUALITYNUMBERVALUE);
+        VALUE_CLASS_NAME_TO_VALUE_TYPE.put("DateValue", 
+                ValueType.DATEVALUE);
     }
 
     static ValueSet parseValueSet(Cls valueTypeCls,
@@ -117,7 +118,7 @@ class Util {
                     valueSetEltInst, abbrevDisplayNameSlot);
             String value = (String) cm.getOwnSlotValue(valueSetEltInst,
                     valueSlot);
-            Value val = ValueFactory.get(valueType).parse(value);
+            Value val = valueType.getValueFactory().parse(value);
             vses[i] = new ValueSetElement(val, displayName, abbrevDisplayName);
             i++;
         }

@@ -1,26 +1,15 @@
 package org.protempa.ksb.protege;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.DatabaseAPI;
 import org.arp.javautil.sql.InvalidConnectionSpecArguments;
-import org.arp.javautil.sql.SQLExecutor;
-import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
-import org.arp.javautil.sql.SQLExecutor.StatementPreparer;
 import org.protempa.DataSourceBackendFailedValidationException;
 import org.protempa.DataSourceBackendInitializationException;
 import org.protempa.DataSourceReadException;
-import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.KnowledgeSource;
 import org.protempa.QuerySession;
 import org.protempa.backend.BackendInstanceSpec;
@@ -28,18 +17,12 @@ import org.protempa.bp.commons.AbstractCommonsDataSourceBackend;
 import org.protempa.bp.commons.BackendInfo;
 import org.protempa.bp.commons.BackendProperty;
 import org.protempa.dsb.filter.Filter;
-import org.protempa.proposition.Constant;
-import org.protempa.proposition.Event;
 import org.protempa.proposition.IntervalFactory;
-import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
-import org.protempa.proposition.value.RelativeHourGranularity;
 import org.protempa.proposition.value.RelativeHourGranularityFactory;
 import org.protempa.proposition.value.RelativeHourUnitFactory;
 import org.protempa.proposition.value.UnitFactory;
-import org.protempa.proposition.value.ValueFormat;
-import org.protempa.proposition.value.ValueType;
 
 /**
  *
