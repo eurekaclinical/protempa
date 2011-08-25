@@ -4,6 +4,7 @@
  */
 package org.arp.javautil.collections;
 
+import java.io.Serializable;
 import java.util.AbstractSequentialList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +15,7 @@ import java.util.ListIterator;
  *
  * @author Andrew Post
  */
-public class CompositeList<E> extends AbstractSequentialList<E> {
+public class CompositeList<E> extends AbstractSequentialList<E> implements Serializable {
 
     private final Collection<List<E>> collOfLists;
 
