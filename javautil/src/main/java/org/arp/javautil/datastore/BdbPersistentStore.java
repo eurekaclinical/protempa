@@ -1,6 +1,9 @@
 package org.arp.javautil.datastore;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -15,15 +18,21 @@ import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 
 /**
- * A BerkeleyDB implementation of a persistent store. Implements the
+ * A BerkeleyDB implementation of a persistent key-value store. Implements the
  * {@link java.util.Map} interface for interoperability with pre-existing code
  * that uses <code>Map</code>s.
  * 
  * @author Michel Mansour
+ * 
+ * @param <K>
+ *            the key type of the store
+ * @param <V>
+ *            the value type of the store
  */
 public class BdbPersistentStore<K, V> extends BdbMap<K, V> {
 
     private static final String CLASS_CATALOG = "java_class_catalog";
+    private static final String ENV_PROPERTY = "store.env.name";
     private static Environment env;
     private static StoredClassCatalog classCatalog;
 
@@ -137,14 +146,29 @@ public class BdbPersistentStore<K, V> extends BdbMap<K, V> {
     private synchronized void createEnvironmentIfNeeded()
             throws DatabaseException {
         if (env == null) {
+            if (!System.getProperties().containsKey(ENV_PROPERTY)) {
+                throw new DataStoreError(
+                        "Persistent store requested but failed to specify environment name. Environment name should be specified using system property "
+                                + ENV_PROPERTY);
+            }
             Logger logger = DataStoreUtil.logger();
             EnvironmentConfig envConf = new EnvironmentConfig();
             envConf.setAllowCreate(true);
             envConf.setTransactional(true);
 
+            logger.log(Level.FINE, "Calculating cache size");
+            MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+            MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
+            long max = memoryUsage.getMax();
+            long used = memoryUsage.getUsed();
+            long available = max - used;
+            long cacheSize = Math.round(available / 6.0);
+            envConf.setCacheSize(cacheSize);
+            logger.log(Level.FINE, "Cache size set to {0}", cacheSize);
+
             File envFile = new File(System.getProperty("java.io.tmpdir")
                     + System.getProperty("file.separator")
-                    + System.getProperty("store.env.name"));
+                    + System.getProperty(ENV_PROPERTY));
             if (!envFile.exists()) {
                 logger.log(
                         Level.INFO,
