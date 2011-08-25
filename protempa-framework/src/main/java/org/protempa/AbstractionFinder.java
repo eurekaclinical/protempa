@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Iterators;
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.log.Logging;
@@ -517,7 +516,7 @@ final class AbstractionFinder implements Module {
         private StatefulSession applyRules(String keyId, List<?> objects)
                 throws ProtempaException {
             StatefulSession workingMemory = ruleBase.newStatefulSession(false);
-            ProtempaUtil.logger().log(Level.INFO,
+            ProtempaUtil.logger().log(Level.FINEST,
                     "Adding {0} objects for key ID {1}",
                     new Object[] { objects.size(), keyId });
             for (Object obj : objects) {
@@ -529,8 +528,8 @@ final class AbstractionFinder implements Module {
                 Object o = itr.next();
                 wmCount++;
             }
-            ProtempaUtil.logger().log(Level.INFO, "Iterated over {0} objects",
-                    new Object[] { wmCount });
+            ProtempaUtil.logger().log(Level.FINEST,
+                    "Iterated over {0} objects", new Object[] { wmCount });
             return workingMemory;
         }
 
@@ -566,6 +565,7 @@ final class AbstractionFinder implements Module {
             ObjectIterator oi = new ObjectIterator(keyIds, propositionIds,
                     filters, qs, false);
 
+            ProtempaUtil.logger().log(Level.INFO, "Storing propositions");
             for (Iterator<ObjectEntry> itr = oi; itr.hasNext();) {
                 ObjectEntry entry = itr.next();
                 String keyId = entry.keyId;
@@ -581,13 +581,12 @@ final class AbstractionFinder implements Module {
             throw new FinderException(ex);
         } finally {
             store.shutdown();
-
         }
     }
 
-    void processStoredResults(Set<String> propositionIds, QuerySession qs,
-            String propositionStoreName, String workingMemoryStoreName)
-            throws FinderException {
+    void processStoredResults(Set<String> keyIds, Set<String> propositionIds,
+            QuerySession qs, String propositionStoreName,
+            String workingMemoryStoreName) throws FinderException {
 
         Logger logger = ProtempaUtil.logger();
 
@@ -608,9 +607,9 @@ final class AbstractionFinder implements Module {
             strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
             strategy.initialize();
             int count = 0;
-            for (String keyId : keysToProcess(qs, propStore)) {
-                // the key here is that the working memory produced by
-                // the rules engine is being persisted by
+            for (String keyId : keysToProcess(keyIds, propStore)) {
+                // the important part here is that the working memory produced
+                // by the rules engine is being persisted by
                 // StatefulExecutionStrategy.execute()
                 if (propStore.containsKey(keyId)) {
                     strategy.execute(keyId, propositionIds,
@@ -634,18 +633,18 @@ final class AbstractionFinder implements Module {
         }
     }
 
-    private Set<String> keysToProcess(QuerySession qs,
+    private Set<String> keysToProcess(Set<String> keyIds,
             DataStore<String, ?> propStore) {
-        Set<String> keyIds;
-        if (qs.getQuery().getKeyIds().length > 0) {
-            keyIds = Arrays.asSet(qs.getQuery().getKeyIds());
+        Set<String> result;
+        if (keyIds != null && !keyIds.isEmpty()) {
+            result = keyIds;
         } else {
-            keyIds = propStore.keySet();
+            result = propStore.keySet();
         }
-        return keyIds;
+        return result;
     }
 
-    private void processStoredResult(QuerySession qs,
+    private void outputResult(QuerySession qs,
             Iterator<Proposition> propositions,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
@@ -672,14 +671,14 @@ final class AbstractionFinder implements Module {
                 forwardDerivations, backwardDerivations, refs);
     }
 
-    void outputStoredResults(Set<String> propositionIds,
+    void outputStoredResults(Set<String> keyIds, Set<String> propositionIds,
             QueryResultsHandler resultHandler, QuerySession qs,
             String workingMemoryStoreName) throws FinderException {
         Logger logger = ProtempaUtil.logger();
         DataStore<String, WorkingMemory> wmStore = null;
         DataStore<String, DerivationsBuilder> dbStore = DerivationsBuilderStoreCreator
                 .getInstance().getPersistentStore(workingMemoryStoreName);
-        
+
         try {
 
             StatefulExecutionStrategy strategy = new StatefulExecutionStrategy();
@@ -691,29 +690,16 @@ final class AbstractionFinder implements Module {
             resultHandler.init(knowledgeSource);
             logger.log(Level.INFO, "Found {0} elements in the store",
                     wmStore.size());
-            for (String keyId : keysToProcess(qs, wmStore)) {
-                logger.log(Level.FINE, "Determining output for key {0}", keyId);
+            for (String keyId : keysToProcess(keyIds, wmStore)) {
+                logger.log(Level.FINEST, "Determining output for key {0}",
+                        keyId);
                 if (wmStore.containsKey(keyId)) {
                     WorkingMemory wm = wmStore.get(keyId);
-                    logger.log(Level.FINE, "Got working memory for key {0}",
-                            keyId);
                     DerivationsBuilder derivationsBuilder = dbStore.get(keyId);
-                    logger.log(Level.FINE,
-                            "Got derivations builder for key {0}", keyId);
-                    logger.log(
-                            Level.INFO,
-                            "Pulled derivations builder for key {0}: FD: {1}, BD: {2}",
-                            new Object[] {
-                                    keyId,
-                                    derivationsBuilder.toForwardDerivations()
-                                            .size(),
-                                    derivationsBuilder.toBackwardDerivations()
-                                            .size() });
 
                     @SuppressWarnings("unchecked")
-                    Iterator<Proposition> propositions = wm
-                            .iterateObjects();
-                    processStoredResult(qs, propositions,
+                    Iterator<Proposition> propositions = wm.iterateObjects();
+                    outputResult(qs, propositions,
                             derivationsBuilder.toForwardDerivations(),
                             derivationsBuilder.toBackwardDerivations(),
                             propositionIds, resultHandler, keyId);
@@ -728,10 +714,11 @@ final class AbstractionFinder implements Module {
         }
     }
 
-    void processAndOutputStoredResults(Set<String> propositionIds,
-            QueryResultsHandler resultHandler, QuerySession qs,
-            String propositionStoreName) throws FinderException {
-        
+    void processAndOutputStoredResults(Set<String> keyIds,
+            Set<String> propositionIds, QueryResultsHandler resultHandler,
+            QuerySession qs, String propositionStoreName)
+            throws FinderException {
+
         Logger logger = ProtempaUtil.logger();
         DataStore<String, List<Proposition>> propStore = PropositionStoreCreator
                 .<Proposition> getInstance().getPersistentStore(
@@ -745,11 +732,11 @@ final class AbstractionFinder implements Module {
             logger.log(Level.FINEST, "Rule base initialized");
             resultHandler.init(knowledgeSource);
             logger.log(Level.FINEST, "Result handler initialized");
-            for (String keyId : keysToProcess(qs, propStore)) {
+            for (String keyId : keysToProcess(keyIds, propStore)) {
                 if (propStore.containsKey(keyId)) {
                     Iterator<Proposition> propositions = strategy.execute(
                             keyId, propositionIds, propStore.get(keyId), null);
-                    processStoredResult(qs, propositions,
+                    outputResult(qs, propositions,
                             derivationsBuilder.toForwardDerivations(),
                             derivationsBuilder.toBackwardDerivations(),
                             propositionIds, resultHandler, keyId);
@@ -809,14 +796,14 @@ final class AbstractionFinder implements Module {
     private void logNumProcessed(int numProcessed, Logger logger)
             throws DataSourceReadException {
         if (logger.isLoggable(Level.FINE)) {
-            String keyTypeSingDisplayName = 
-                    this.dataSource.getKeyTypeDisplayName();
-            String keyTypePluralDisplayName =
-                this.dataSource.getKeyTypePluralDisplayName();
-            Logging.logCount(logger, Level.FINE, numProcessed, 
-                    "Processed {0} {1}", "Processed {0} {1}", 
-                    new Object[]{keyTypeSingDisplayName}, 
-                    new Object[]{keyTypePluralDisplayName});
+            String keyTypeSingDisplayName = this.dataSource
+                    .getKeyTypeDisplayName();
+            String keyTypePluralDisplayName = this.dataSource
+                    .getKeyTypePluralDisplayName();
+            Logging.logCount(logger, Level.FINE, numProcessed,
+                    "Processed {0} {1}", "Processed {0} {1}",
+                    new Object[] { keyTypeSingDisplayName },
+                    new Object[] { keyTypePluralDisplayName });
         }
     }
 
@@ -836,19 +823,17 @@ final class AbstractionFinder implements Module {
             propositions = props.iterator();
         }
 
-        Map<UniqueId, Proposition> refs =
-                new HashMap<UniqueId, Proposition>();
+        Map<UniqueId, Proposition> refs = new HashMap<UniqueId, Proposition>();
         logger.log(Level.FINER, "References: {0}", refs);
-        List<Proposition> filteredPropositions = //a newly created list
-                extractRequestedPropositions(propositions, propositionIds, 
-                refs);
+        List<Proposition> filteredPropositions = // a newly created list
+        extractRequestedPropositions(propositions, propositionIds, refs);
         if (logger.isLoggable(Level.FINER)) {
             logger.log(Level.FINER, "Proposition ids: {0}", propositionIds);
             logger.log(Level.FINER, "Filtered propositions: {0}",
                     filteredPropositions);
-            logger.log(Level.FINER, "Forward derivations: {0}", 
+            logger.log(Level.FINER, "Forward derivations: {0}",
                     forwardDerivations);
-            logger.log(Level.FINER, "Backward derivations: {0}", 
+            logger.log(Level.FINER, "Backward derivations: {0}",
                     backwardDerivations);
         }
 
@@ -873,7 +858,7 @@ final class AbstractionFinder implements Module {
                 throws KnowledgeSourceReadException, DataSourceReadException {
             this.logger = ProtempaUtil.logger();
 
-            this.logger.log(Level.FINE, "Starting data retrieval");
+            this.logger.log(Level.INFO, "Starting data retrieval");
 
             Set<String> leafPropIds = knowledgeSource
                     .inDataSourcePropositionIds(propIds
@@ -882,17 +867,19 @@ final class AbstractionFinder implements Module {
             this.propositions = dataSource.readPropositions(keyIds,
                     leafPropIds, filters, qs);
             Set<String> keySet = this.propositions.keySet();
-            
+
             this.keySetItr = keySet.iterator();
 
-            this.logger.log(Level.FINE, "Data retrieval is complete");
-            if (this.logger.isLoggable(Level.FINE)) {
-                Logging.logCount(this.logger, Level.FINE, 
-                    this.propositions.size(), 
-                    "There is {0} {1} to process", 
-                    "There are {0} {1} to process",
-                    new Object[]{dataSource.getKeyTypeDisplayName()},
-                    new Object[]{dataSource.getKeyTypePluralDisplayName()});
+            this.logger.log(Level.INFO, "Data retrieval is complete");
+            if (this.logger.isLoggable(Level.INFO)) {
+                Logging.logCount(
+                        this.logger,
+                        Level.INFO,
+                        this.propositions.size(),
+                        "There is {0} {1} to process",
+                        "There are {0} {1} to process",
+                        new Object[] { dataSource.getKeyTypeDisplayName() },
+                        new Object[] { dataSource.getKeyTypePluralDisplayName() });
             }
         }
 
