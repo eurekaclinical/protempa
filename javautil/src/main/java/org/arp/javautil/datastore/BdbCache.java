@@ -18,6 +18,18 @@ import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 
+/**
+ * BerkeleyDB implementation of a temporary key-value store, which can be used
+ * as an on-disk cache. Implements the {@link java.util.Map} interface for
+ * interoperability with pre-existing code that uses <code>Map</code>s.
+ * 
+ * @author Michel Mansour
+ * 
+ * @param <K>
+ *            the key type of the store
+ * @param <V>
+ *            the value type of the store
+ */
 public final class BdbCache<K, V> extends BdbMap<K, V> {
 
     private static final String CLASS_CATALOG = "java_class_catalog";
@@ -134,7 +146,8 @@ public final class BdbCache<K, V> extends BdbMap<K, V> {
             envConf.setAllowCreate(true);
             envConf.setTransactional(false);
             envConf.setConfigParam(EnvironmentConfig.EVICTOR_LRU_ONLY, "false");
-            envConf.setConfigParam(EnvironmentConfig.EVICTOR_NODES_PER_SCAN, "100");
+            envConf.setConfigParam(EnvironmentConfig.EVICTOR_NODES_PER_SCAN,
+                    "100");
             MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
             MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
             long max = memoryUsage.getMax();
