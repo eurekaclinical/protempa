@@ -44,6 +44,7 @@ public class BdbPersistentStore<K, V> extends BdbMap<K, V> {
     private static Map<String, Database> stores = new HashMap<String, Database>();
 
     private final String dbName;
+    private boolean isClosed;
 
     static {
         Runtime.getRuntime().addShutdownHook(
@@ -65,6 +66,7 @@ public class BdbPersistentStore<K, V> extends BdbMap<K, V> {
     protected BdbPersistentStore(String dbName) {
         super(dbName);
         this.dbName = dbName;
+        this.isClosed = false;
     }
 
     @Override
@@ -74,11 +76,19 @@ public class BdbPersistentStore<K, V> extends BdbMap<K, V> {
             stores.remove(dbName);
             if (stores.isEmpty()) {
                 classCatalog.close();
+                classCatalog = null;
                 env.close();
+                env = null;
             }
+            this.isClosed = true;
         } catch (DatabaseException ex) {
             throw new DataStoreError(ex);
         }
+    }
+    
+    @Override
+    public boolean isClosed() {
+        return isClosed;
     }
 
     Database getDatabase(String dbName) {
@@ -145,7 +155,7 @@ public class BdbPersistentStore<K, V> extends BdbMap<K, V> {
 
     private synchronized void createEnvironmentIfNeeded()
             throws DatabaseException {
-        if (env == null) {
+        if (env == null || !env.isValid()) {
             if (!System.getProperties().containsKey(ENV_PROPERTY)) {
                 throw new DataStoreError(
                         "Persistent store requested but failed to specify environment name. Environment name should be specified using system property "
