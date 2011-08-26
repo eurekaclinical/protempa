@@ -680,13 +680,11 @@ final class AbstractionFinder implements Module {
                 .getInstance().getPersistentStore(workingMemoryStoreName);
 
         try {
-
             StatefulExecutionStrategy strategy = new StatefulExecutionStrategy();
             strategy.createRuleBase(propositionIds, new DerivationsBuilder(),
                     qs);
             wmStore = WorkingMemoryStoreCreator.getInstance(strategy.ruleBase)
                     .getPersistentStore(workingMemoryStoreName);
-
             resultHandler.init(knowledgeSource);
             logger.log(Level.INFO, "Found {0} elements in the store",
                     wmStore.size());

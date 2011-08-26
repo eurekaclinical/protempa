@@ -253,7 +253,7 @@ public final class Protempa {
     }
 
     /**
-     * Executes all three phases of the PROTEMPA life cycle (data retrieval,
+     * Executes all three phases of the PROTEMPA lifecycle (data retrieval,
      * processing, and output) while also persisting intermediate results,
      * specifically the results of the proposition retrieval and processing.
      * 
@@ -307,7 +307,7 @@ public final class Protempa {
     }
 
     /**
-     * Executes the first stage in PROTEMPA's life cycle. Executes a PROTEMPA
+     * Executes the first stage in PROTEMPA's lifecycle. Executes a PROTEMPA
      * query in the data source and persistently stores the resulting
      * propositions.
      * 
@@ -346,7 +346,7 @@ public final class Protempa {
     }
 
     /**
-     * Executes the second stage in PROTEMPA's life cycle. Processes the results
+     * Executes the second stage in PROTEMPA's lifecycle. Processes the results
      * of a data retrieval with respect the given query. The results of the
      * processing are persisted for later use.
      * 
