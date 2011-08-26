@@ -20,4 +20,12 @@ public interface DataStore<K, V> extends Map<K, V> {
      * Performs any clean up of the store and shuts it down.
      */
     void shutdown();
+
+    /**
+     * Checks whether the store has already been shutdown
+     * 
+     * @return <code>true</code> if the store has been shutdown;
+     *         <code>false</code> otherwise
+     */
+    boolean isClosed();
 }
