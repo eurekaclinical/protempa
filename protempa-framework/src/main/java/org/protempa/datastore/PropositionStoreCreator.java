@@ -28,7 +28,7 @@ public final class PropositionStoreCreator<P extends Proposition> implements
     // to be raw. But the only place this map is manipulated is within this
     // class, so it's safe.
     @SuppressWarnings("rawtypes")
-    private static Map stores = new HashMap();
+    private static Map<String, DataStore> stores = new HashMap<String, DataStore>();
 
     // The map of instances isn't generic, so we have to cast to the correct
     // parameterized type. This is safe because this method is the only place
@@ -38,7 +38,7 @@ public final class PropositionStoreCreator<P extends Proposition> implements
     public DataStore<String, List<P>> getPersistentStore(String name) {
         Logger logger = DataStoreUtil.logger();
         logger.log(Level.FINE, "Getting persistent store {0}", name);
-        if (stores.containsKey(name)) {
+        if (stores.containsKey(name) && !stores.get(name).isClosed()) {
             logger.log(
                     Level.FINEST,
                     "Persistent store {0} has been accessed during this run: using it",

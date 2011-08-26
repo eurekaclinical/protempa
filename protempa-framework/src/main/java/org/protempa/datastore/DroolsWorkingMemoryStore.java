@@ -34,6 +34,7 @@ final class DroolsWorkingMemoryStore implements
         DataStore<String, WorkingMemory> {
 
     private final DataStore<String, byte[]> store;
+    private boolean isClosed;
 
     /*
      * Drools rule base. Required to recreate the original working memory from a
@@ -43,12 +44,19 @@ final class DroolsWorkingMemoryStore implements
 
     DroolsWorkingMemoryStore(String dbName, RuleBase ruleBase) {
         store = DataStoreFactory.getPersistentStore(dbName);
+        this.isClosed = false;
         this.ruleBase = ruleBase;
     }
 
     @Override
     public void shutdown() {
         this.store.shutdown();
+        this.isClosed = true;
+    }
+    
+    @Override
+    public boolean isClosed() {
+        return isClosed;
     }
 
     /**

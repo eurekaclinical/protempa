@@ -25,7 +25,7 @@ public final class UniqueIdUniqueIdStoreCreator implements
     @Override
     public DataStore<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>> getPersistentStore(
             String name) {
-        if (stores.containsKey(name)) {
+        if (stores.containsKey(name) && !stores.get(name).isClosed()) {
             return stores.get(name);
         } else {
             DataStore<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>> store = DataStoreFactory

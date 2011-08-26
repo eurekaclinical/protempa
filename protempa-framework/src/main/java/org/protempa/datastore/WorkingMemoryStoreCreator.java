@@ -2,6 +2,8 @@ package org.protempa.datastore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.datastore.DataStoreFactory;
@@ -46,9 +48,19 @@ public final class WorkingMemoryStoreCreator implements
 
     @Override
     public DataStore<String, WorkingMemory> getPersistentStore(String name) {
-        if (stores.containsKey(name)) {
+        Logger logger = DataStoreUtil.logger();
+        if (stores.containsKey(name) && !stores.get(name).isClosed()) {
+            logger.log(
+                    Level.FINEST,
+                    "Persistent store {0} has been accessed during this run: using it",
+                    name);
             return stores.get(name);
         } else {
+            logger.log(
+                    Level.FINEST,
+                    "Persistent store {0} has not been accessed during this" +
+                    " run or does not exist: attempting to get it from the underlying store",
+                    name);
             DataStore<String, WorkingMemory> store = new DroolsWorkingMemoryStore(
                     name, this.ruleBase);
             stores.put(name, store);
