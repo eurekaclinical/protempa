@@ -37,6 +37,7 @@ public final class BdbCache<K, V> extends BdbMap<K, V> {
     private static StoredClassCatalog classCatalog;
     private static Environment env;
     private static String location;
+    
 
     /*
      * to keep track of the caches created so that we can properly close the
@@ -46,6 +47,7 @@ public final class BdbCache<K, V> extends BdbMap<K, V> {
             .synchronizedMap(new HashMap<String, Database>());
 
     private final String dbName;
+    private boolean isClosed;
 
     static {
         location = System.getProperty("java.io.tmpdir")
@@ -83,6 +85,7 @@ public final class BdbCache<K, V> extends BdbMap<K, V> {
     BdbCache(String dbName) {
         super(dbName);
         this.dbName = dbName;
+        this.isClosed = false;
     }
 
     BdbCache() {
@@ -93,6 +96,7 @@ public final class BdbCache<K, V> extends BdbMap<K, V> {
     public synchronized void shutdown() {
         try {
             super.shutdown();
+            this.isClosed = true;
             caches.remove(dbName);
             if (caches.isEmpty()) {
                 classCatalog.close();
@@ -101,6 +105,11 @@ public final class BdbCache<K, V> extends BdbMap<K, V> {
         } catch (DatabaseException ex) {
             throw new DataStoreError(ex);
         }
+    }
+    
+    @Override
+    public boolean isClosed() {
+        return isClosed;
     }
 
     @Override
@@ -116,6 +125,7 @@ public final class BdbCache<K, V> extends BdbMap<K, V> {
             throw new AssertionError("Failed to open BerkeleyDB cache: "
                     + dbName);
         }
+        
         return result;
     }
 
