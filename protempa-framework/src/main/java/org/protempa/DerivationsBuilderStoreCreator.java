@@ -24,7 +24,7 @@ final class DerivationsBuilderStoreCreator implements
 
     @Override
     public DataStore<String, DerivationsBuilder> getPersistentStore(String name) {
-        if (stores.containsKey(name)) {
+        if (stores.containsKey(name) && !stores.get(name).isClosed()) {
             return stores.get(name);
         } else {
             DataStore<String, DerivationsBuilder> store = DataStoreFactory
