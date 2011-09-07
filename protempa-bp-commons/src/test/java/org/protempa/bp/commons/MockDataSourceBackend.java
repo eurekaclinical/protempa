@@ -1,7 +1,7 @@
 package org.protempa.bp.commons;
 
-import org.protempa.DataSourceBackendFailedValidationException;
-import org.protempa.DataSourceBackendInitializationException;
+import org.protempa.backend.DataSourceBackendFailedValidationException;
+import org.protempa.backend.DataSourceBackendInitializationException;
 import org.protempa.KnowledgeSource;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.*;

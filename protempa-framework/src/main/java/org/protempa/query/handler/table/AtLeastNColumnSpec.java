@@ -25,7 +25,8 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
         this(columnNameOverride, n, links, "true", "false");
     }
     
-    public AtLeastNColumnSpec(String columnNameOverride, int n, Link[] links, String trueOutput, String falseOutput) {
+    public AtLeastNColumnSpec(String columnNameOverride, int n, Link[] links, 
+            String trueOutput, String falseOutput) {
         this.n = n;
         ProtempaUtil.checkArray(links, "links");
         this.links = links.clone();
@@ -60,5 +61,21 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
                 forwardDerivations, backwardDerivations, references, 
                 knowledgeSource);
         return new String[]{props.size() >= this.n ? this.trueOutput : this.falseOutput};
+    }
+
+    @Override
+    public void validate(KnowledgeSource knowledgeSource) throws 
+            TableColumnSpecValidationFailedException, 
+            KnowledgeSourceReadException {
+        int i = 1;
+        for (Link link : this.links) {
+            try {
+                link.validate(knowledgeSource);
+            } catch (LinkValidationFailedException ex) {
+                throw new TableColumnSpecValidationFailedException(
+                        "Validation of link " + i + " failed", ex);
+            }
+            i++;
+        }
     }
 }

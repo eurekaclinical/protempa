@@ -101,7 +101,7 @@ class PrimitiveParameterResultProcessor extends
             
             ValueType valueType = entitySpec.getValueType();
             String cpValStr = resultSet.getString(i++);
-            Value cpVal = valueType.getValueFactory().parse(cpValStr);
+            Value cpVal = valueType.parse(cpValStr);
             
             i = extractPropertyValues(resultSet, i,
                     propertyValues, columnTypes);

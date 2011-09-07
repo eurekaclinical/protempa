@@ -1,5 +1,6 @@
 package org.protempa.ksb;
 
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.*;
 import junit.framework.TestCase;
 

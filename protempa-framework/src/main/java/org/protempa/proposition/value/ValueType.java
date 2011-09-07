@@ -1,13 +1,43 @@
 package org.protempa.proposition.value;
 
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import org.apache.commons.collections.map.ReferenceMap;
+
 /**
- * Represents types of values of propositions and properties.
+ * Represents types of values of propositions and properties, and provides
+ * a method for parsing them from strings.
  * 
  * @author Andrew Post
  */
 public enum ValueType {
 
     VALUE {
+        private ValueType[] parseOrder;
+        
+        @Override
+        public Value parse(String val) {
+            if (parseOrder == null) {
+                parseOrder = new ValueType[] {
+                    BOOLEANVALUE, NUMBERVALUE, INEQUALITYNUMBERVALUE, 
+                    DATEVALUE, VALUELIST, NOMINALVALUE
+                };
+            }
+            Value result = null;
+
+            for (int i = 0; i < parseOrder.length; i++) {
+                if ((result = parseOrder[i].parse(val)) != null) {
+                    break;
+                }
+            }
+
+            return result;
+        }
         
         @Override
         public boolean isInstance(Value value) {
@@ -16,13 +46,12 @@ public enum ValueType {
             }
             return true;
         }
-        
-        @Override
-        public ValueFactory getValueFactory() {
-            return ValueFactory.VALUE;
-        }
     },
     NOMINALVALUE {
+        @Override
+        public NominalValue parse(String val) {
+            return NominalValue.getInstance(val);
+        }
 
         @Override
         public boolean isInstance(Value value) {
@@ -31,13 +60,17 @@ public enum ValueType {
             }
             return value.getType() == ValueType.NOMINALVALUE;
         }
-        
-        @Override
-        public ValueFactory getValueFactory() {
-            return ValueFactory.NOMINAL;
-        }
     },
     BOOLEANVALUE {
+        @Override
+        public Value parse(String val) {
+            if ("true".equalsIgnoreCase(val) 
+                    || "false".equalsIgnoreCase(val)) {
+                return Boolean.valueOf(val).booleanValue() ? BooleanValue.TRUE
+                        : BooleanValue.FALSE;
+            }
+            return null;
+        }
 
         @Override
         public boolean isInstance(Value value) {
@@ -46,13 +79,16 @@ public enum ValueType {
             }
             return value.getType() == ValueType.BOOLEANVALUE;
         }
-        
-        @Override
-        public ValueFactory getValueFactory() {
-            return ValueFactory.BOOLEAN;
-        }
     },
     ORDEREDVALUE {
+        @Override
+        public Value parse(String val) {
+            Value result = NUMERICALVALUE.parse(val);
+            if (result == null) {
+                result = DATEVALUE.parse(val);
+            }
+            return result;
+        }
 
         @Override
         public boolean isInstance(Value value) {
@@ -63,13 +99,21 @@ public enum ValueType {
             return valueType == ValueType.NUMERICALVALUE
                     || valueType == ValueType.ORDINALVALUE;
         }
-        
-        @Override
-        public ValueFactory getValueFactory() {
-            throw new UnsupportedOperationException("Not implemented");
-        }
     },
     INEQUALITYNUMBERVALUE {
+        @Override
+        public Value parse(String s) {
+            InequalityNumberValue result = null;
+            try {
+                s = s.trim();
+                ValueComparator comparator = 
+                        ValueComparator.parse(s.substring(0, 1));
+                BigDecimal val = new BigDecimal(s.substring(1).trim());
+                result = new InequalityNumberValue(comparator, val);
+            } catch (Exception ex) {
+            }
+            return result;
+        }
 
         @Override
         public boolean isInstance(Value value) {
@@ -78,13 +122,17 @@ public enum ValueType {
             }
             return value.getType() == ValueType.INEQUALITYNUMBERVALUE;
         }
-        
-        @Override
-        public ValueFactory getValueFactory() {
-            return ValueFactory.INEQUALITY;
-        }
     },
     NUMERICALVALUE {
+        @Override
+        public Value parse(String val) {
+            Value result = NUMBERVALUE.parse(val);
+            if (result == null) {
+                return INEQUALITYNUMBERVALUE.parse(val);
+            } else {
+                return result;
+            }
+        }
 
         @Override
         public boolean isInstance(Value value) {
@@ -95,13 +143,36 @@ public enum ValueType {
             return valueType == ValueType.NUMBERVALUE
                     || valueType == ValueType.INEQUALITYNUMBERVALUE;
         }
-        
-        @Override
-        public ValueFactory getValueFactory() {
-            return ValueFactory.NUMERICAL;
-        }
     },
     NUMBERVALUE {
+        @SuppressWarnings("unchecked")
+        private Map<String, BigDecimal> cache = new ReferenceMap();
+        
+        @Override
+        public Value parse(String val) {
+            if (val != null) {
+                try {
+                    /*
+                     * BigDecimal constructor returns a NumberFormatException
+                     * if there are spaces before or after the number in val.
+                     */
+                    String valTrimmed = val.trim();
+                    BigDecimal bd = this.cache.get(valTrimmed);
+                    if (bd == null) {
+                        bd = new BigDecimal(valTrimmed);
+                        this.cache.put(valTrimmed, bd);
+                    }
+                    return NumberValue.getInstance(bd);
+                } catch (NumberFormatException e) {
+                    /**
+                     * NumericalValueFactory relies on this returning null.
+                     */
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
 
         @Override
         public boolean isInstance(Value value) {
@@ -110,13 +181,14 @@ public enum ValueType {
             }
             return value.getType() == ValueType.NUMBERVALUE;
         }
-        
-        @Override
-        public ValueFactory getValueFactory() {
-            return ValueFactory.NUMBER;
-        }
     },
     ORDINALVALUE {
+        private final List<String> allowedValues = new ArrayList<String>();
+        
+        @Override
+        public Value parse(String val) {
+            return new OrdinalValue(val, allowedValues);
+        }
 
         @Override
         public boolean isInstance(Value value) {
@@ -125,28 +197,86 @@ public enum ValueType {
             }
             return value.getType() == ValueType.ORDINALVALUE;
         }
-        
-        @Override
-        public ValueFactory getValueFactory() {
-            return ValueFactory.ORDINAL;
-        }
     },
-    LISTVALUE {
+    VALUELIST {
+        @Override
+        public Value parse(String val) {
+            if (val == null) {
+                return null;
+            }
+            if (val.startsWith("[") && val.endsWith("]")) {
+                String[] vals = val.substring(1, val.length() - 1).split(",");
+                List<String> mergedInnerLists = 
+                        new ArrayList<String>(vals.length);
+                StringBuilder b = new StringBuilder();
+                int refCount = 0;
+                for (String str : vals) {
+                    String strTrimmed = str.trim();
+                    boolean startsWithOpenBracket = strTrimmed.startsWith("[");
+                    boolean endsWithCloseBracket = strTrimmed.endsWith("]");
+                    if (startsWithOpenBracket && endsWithCloseBracket) {
+                        mergedInnerLists.add(strTrimmed);
+                    } else if (startsWithOpenBracket) {
+                        b.append(strTrimmed);
+                        refCount++;
+                    } else if (endsWithCloseBracket) {
+                        b.append(',');
+                        b.append(strTrimmed);
+                        if (refCount-- == 1) {
+                            mergedInnerLists.add(b.toString());
+                            b.setLength(0);
+                        }
+                    } else if (refCount > 0) {
+                        b.append(',');
+                        b.append(strTrimmed);
+                    } else {
+                        mergedInnerLists.add(strTrimmed);
+                    }
+                }
+                List<Value> l = new ArrayList<Value>(vals.length);
+                for (String s : mergedInnerLists) {
+                    if ((s.startsWith("'") && s.endsWith("'"))
+                            || (s.startsWith("\"") && s.endsWith("\""))) {
+                        l.add(ValueType.NOMINALVALUE.parse(
+                                s.substring(1, s.length() - 1)));
+                    } else {
+                        l.add(ValueType.VALUE.parse(s));
+                    }
+                }
+                return new ValueList(l);
+            } else {
+                return null;
+            }
+        }
 
         @Override
         public boolean isInstance(Value value) {
             if (value == null) {
                 throw new IllegalArgumentException("value cannot be null");
             }
-            return value.getType() == ValueType.LISTVALUE;
-        }
-        
-        @Override
-        public ValueFactory getValueFactory() {
-            return ValueFactory.LIST;
+            return value.getType() == ValueType.VALUELIST;
         }
     },
     DATEVALUE {
+        @Override
+        public DateValue parse(String string) {
+            DateValue result;
+            if (string != null) {
+                DateFormat dateFormat = 
+                        AbsoluteTimeGranularity.DAY.getShortFormat();
+                try {
+                    result = DateValue.getInstance(dateFormat.parse(string));
+                    ValueUtil.logger().log(Level.WARNING, 
+                            "String {0} could not be parsed into a date", 
+                            string);
+                } catch (ParseException ex) {
+                    result = null;
+                }
+            } else {
+                result = null;
+            }
+            return result;
+        }
         
         @Override
         public boolean isInstance(Value value) {
@@ -154,11 +284,6 @@ public enum ValueType {
                 throw new IllegalArgumentException("value cannot be null");
             }
             return value.getType() == ValueType.DATEVALUE;
-        }
-        
-        @Override
-        public ValueFactory getValueFactory() {
-            return ValueFactory.DATE;
         }
     };
 
@@ -171,9 +296,12 @@ public enum ValueType {
     public abstract boolean isInstance(Value value);
     
     /**
-     * Returns a value factory for creating values of this type.
-     * 
-     * @return a {@link ValueFactory}. Guaranteed not <code>null</code>.
+     * Creates a {@link Value} instance by parsing the given string.
+     *
+     * @param val
+     *            a <code>String</code>. May be <code>null</code>.
+     * @return a <code>Value</code>, or <code>null</code> if the supplied
+     *         string is <code>null</code> or has an invalid format.
      */
-    public abstract ValueFactory getValueFactory();
+    public abstract Value parse(String val);
 }

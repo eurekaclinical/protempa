@@ -1,6 +1,6 @@
 package org.protempa.bp.commons.asb;
 
-import org.protempa.asb.java.AbstractJavaAlgorithmBackend;
+import org.protempa.backend.asb.java.AbstractJavaAlgorithmBackend;
 import org.protempa.bp.commons.BackendInfo;
 import org.protempa.bp.commons.BackendProperty;
 import org.protempa.bp.commons.CommonsBackend;

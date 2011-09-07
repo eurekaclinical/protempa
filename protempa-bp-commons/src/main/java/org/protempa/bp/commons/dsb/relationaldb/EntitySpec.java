@@ -333,8 +333,9 @@ public final class EntitySpec implements Serializable {
         }
 
         boolean found = false;
+        String entitySpecName = entitySpec.name;
         for (ReferenceSpec refSpec : this.referenceSpecs) {
-            if (refSpec.getEntityName().equals(entitySpec.getName())) {
+            if (refSpec.getEntityName().equals(entitySpecName)) {
                 found = true;
                 continue;
             }
@@ -354,8 +355,9 @@ public final class EntitySpec implements Serializable {
         }
 
         List<ReferenceSpec> result = new ArrayList<ReferenceSpec>();
+        String entitySpecName = entitySpec.name;
         for (ReferenceSpec refSpec : this.referenceSpecs) {
-            if (refSpec.getEntityName().equals(entitySpec.getName())) {
+            if (refSpec.getEntityName().equals(entitySpecName)) {
                 result.add(refSpec);
             }
         }

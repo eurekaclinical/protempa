@@ -31,7 +31,6 @@ public class ImnuMapTest extends TestCase {
     
     @Override
     protected void setUp() throws Exception {
-        // TODO Auto-generated method stub
         super.setUp();
         nullMap = new ImnuMap<Integer, String>();
         customMap = new ImnuMap<Integer, String>(new IntegerParityDefaultValue());
@@ -39,7 +38,6 @@ public class ImnuMapTest extends TestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        // TODO Auto-generated method stub
         super.tearDown();
     }
     

@@ -3,10 +3,10 @@ package org.protempa.backend;
 import java.util.logging.Level;
 import org.apache.commons.discovery.DiscoveryException;
 import org.apache.commons.discovery.tools.DiscoverSingleton;
-import org.protempa.AlgorithmSourceBackend;
-import org.protempa.DataSourceBackend;
-import org.protempa.KnowledgeSourceBackend;
-import org.protempa.TermSourceBackend;
+import org.protempa.backend.asb.AlgorithmSourceBackend;
+import org.protempa.backend.dsb.DataSourceBackend;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
+import org.protempa.backend.tsb.TermSourceBackend;
 
 /**
  * A service for managing PROTEMPA's backend provider.

@@ -1,5 +1,6 @@
 package org.protempa;
 
+import org.protempa.backend.BackendInitializationException;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,9 +10,11 @@ import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.InvalidConfigurationException;
-import org.protempa.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.query.And;
 import org.protempa.query.Query;
+import org.protempa.query.QueryBuildException;
+import org.protempa.query.QueryBuilder;
 import org.protempa.query.handler.QueryResultsHandler;
 
 /**
@@ -191,6 +194,19 @@ public final class Protempa {
     public TermSource getTermSource() {
         return this.abstractionFinder.getTermSource();
     }
+    
+    /**
+     * Convenience method for calling {@link QueryBuilder#build(org.protempa.KnowledgeSource, org.protempa.AlgorithmSource) }
+     * with this Protempa instance's knowledge source and algorithm source.
+     * @param queryBuilder a query specification.
+     * @return the query.
+     * @throws QueryBuildException if the query specification failed validation
+     * or some other error occurred.
+     */
+    public Query buildQuery(QueryBuilder queryBuilder) 
+            throws QueryBuildException {
+        return this.abstractionFinder.buildQuery(queryBuilder);
+    }
 
     public void detachSession(QuerySession querySession) {
         // TODO: implement me.
@@ -225,13 +241,13 @@ public final class Protempa {
      * Executes a query.
      * 
      * @param query
-     *            a {@link Query}.
-     * @param resultHandler
-     *            a {@link QueryResultsHandler}.
+     *            a {@link Query}. Cannot be <code>null</code>.
+     * @param resultsHandler
+     *            a {@link QueryResultsHandler}. Cannot be <code>null</code>.
      * @throws FinderException
      *             if an error occurred during query.
      */
-    public void execute(Query query, QueryResultsHandler resultHandler)
+    public void execute(Query query, QueryResultsHandler resultsHandler)
             throws FinderException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
@@ -239,6 +255,10 @@ public final class Protempa {
         if (query.getTermIds().length > 0) {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
+        }
+        if (resultsHandler == null) {
+            throw new IllegalArgumentException(
+                    "resultsHandler cannot be null");
         }
         Logger logger = ProtempaUtil.logger();
         logger.info("Executing query");
@@ -248,7 +268,7 @@ public final class Protempa {
         Filter filters = query.getFilters();
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
         this.abstractionFinder.doFind(keyIdsSet, propIds, termIds, filters,
-                resultHandler, qs);
+                resultsHandler, qs);
         logger.info("Query execution complete");
     }
 

@@ -17,10 +17,10 @@ public enum ValueComparator {
             ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean is(ValueComparator comparator) {
+        public boolean test(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
-            return GREATER_THAN.equals(comparator);
+            return GREATER_THAN == comparator;
         }
     },
     /**
@@ -30,10 +30,10 @@ public enum ValueComparator {
             ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean is(ValueComparator comparator) {
+        public boolean test(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
-            return LESS_THAN.equals(comparator);
+            return LESS_THAN == comparator;
         }
     },
     /**
@@ -42,10 +42,10 @@ public enum ValueComparator {
     EQUAL_TO("=", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
 
         @Override
-        public boolean is(ValueComparator comparator) {
+        public boolean test(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
-            return EQUAL_TO.equals(comparator);
+            return EQUAL_TO == comparator;
         }
     },
     /**
@@ -54,10 +54,10 @@ public enum ValueComparator {
     NOT_EQUAL_TO("!=", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
 
         @Override
-        public boolean is(ValueComparator comparator) {
+        public boolean test(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
-            return !EQUAL_TO.equals(comparator);
+            return EQUAL_TO != comparator;
         }
     },
     /**
@@ -67,10 +67,10 @@ public enum ValueComparator {
     UNKNOWN("?", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
 
         @Override
-        public boolean is(ValueComparator comparator) {
+        public boolean test(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
-            return UNKNOWN.equals(comparator);
+            return UNKNOWN == comparator;
         }
     },
     /**
@@ -80,12 +80,12 @@ public enum ValueComparator {
             ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean is(ValueComparator comparator) {
+        public boolean test(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
-            return EQUAL_TO.equals(comparator)
-                    || GREATER_THAN.equals(comparator)
-                    || GREATER_THAN_OR_EQUAL_TO.equals(comparator);
+            return EQUAL_TO == comparator
+                    || GREATER_THAN == comparator
+                    || GREATER_THAN_OR_EQUAL_TO == comparator;
         }
     },
     /**
@@ -95,36 +95,40 @@ public enum ValueComparator {
             ValueType.ORDEREDVALUE)) {
 
         @Override
-        public boolean is(ValueComparator comparator) {
+        public boolean test(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
-            return EQUAL_TO.equals(comparator) || LESS_THAN.equals(comparator)
-                    || LESS_THAN_OR_EQUAL_TO.equals(comparator);
+            return EQUAL_TO == comparator || LESS_THAN == comparator
+                    || LESS_THAN_OR_EQUAL_TO == comparator;
         }
     },
     /**
-     * The first value is in the second list.
+     * The value is in the list.
      */
-    IN("IN", new CompatibleTypes(ValueType.VALUE, ValueType.LISTVALUE)) {
+    IN("IN", new CompatibleTypes(ValueType.VALUE, ValueType.VALUELIST)) {
 
         @Override
-        public boolean is(ValueComparator comparator) {
+        public boolean test(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
-            return IN.equals(comparator);
+            return IN == comparator;
         }
     },
-    NOT_IN("NOT_IN", new CompatibleTypes(ValueType.VALUE, ValueType.LISTVALUE)) {
+    /**
+     * The value is not in the list.
+     */
+    NOT_IN("NOT_IN", new CompatibleTypes(ValueType.VALUE, ValueType.VALUELIST)) {
 
         @Override
-        public boolean is(ValueComparator comparator) {
+        public boolean test(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
-            return NOT_IN.equals(comparator);
+            return NOT_IN == comparator;
         }
     };
 
-    private static final Map<String, ValueComparator> compStringToComp = new HashMap<String, ValueComparator>();
+    private static final Map<String, ValueComparator> compStringToComp = 
+            new HashMap<String, ValueComparator>();
 
     static {
         compStringToComp.put(LESS_THAN.getComparatorString(), LESS_THAN);
@@ -141,7 +145,8 @@ public enum ValueComparator {
     }
 
     /**
-     * Gets the comparison object corresponding to the given string.
+     * Gets the comparison object corresponding to the given mathematical 
+     * comparison symbol.
      * <ul>
      * <li>"&lt;" corresponds to <code>LESS_THAN</code>.</li>
      * <li>"&gt;" corresponds to <code>GREATER_THAN</code>.</li>
@@ -211,8 +216,8 @@ public enum ValueComparator {
      *         the specified {@link ValueComparator}, <code>false</code>
      *         otherwise.
      */
-    public abstract boolean is(ValueComparator comparator);
-
+    public abstract boolean test(ValueComparator comparator);
+    
     /**
      * Returns whether this {@link ValueComparator} is compatible with the
      * specified values.
@@ -224,7 +229,7 @@ public enum ValueComparator {
      * @return <code>true</code> if this {@link ValueComparator} is compatible
      *         with the specified values, <code>false</code> if not.
      */
-    public final boolean isCompatible(Value value1, Value value2) {
+    public boolean isCompatible(Value value1, Value value2) {
         if (value1 == null)
             throw new IllegalArgumentException("value1 cannot be null");
         if (value2 == null)

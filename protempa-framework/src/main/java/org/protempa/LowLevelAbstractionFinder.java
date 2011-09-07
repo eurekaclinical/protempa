@@ -1,7 +1,7 @@
 package org.protempa;
 
 
-import org.protempa.proposition.Interval;
+import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Segment;

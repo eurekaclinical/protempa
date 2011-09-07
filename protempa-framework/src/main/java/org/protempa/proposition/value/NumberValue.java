@@ -1,25 +1,50 @@
 package org.protempa.proposition.value;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Map;
 import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
+ * Represents a number, either integral or floating point, with unbounded
+ * upper and lower limit (subject to available memory). Significant digits are
+ * preserved.
+ * 
  * @author Andrew Post
  */
-public final class NumberValue extends ValueImpl implements NumericalValue,
-        Comparable<NumberValue> {
+public final class NumberValue implements NumericalValue,
+        Comparable<NumberValue>, Serializable {
 
     private static final long serialVersionUID = 266750924747111671L;
-
-    private final BigDecimal num;
+    @SuppressWarnings("unchecked")
+    private static final Map<BigDecimal, NumberValue> cache =
+            new ReferenceMap();
+    private BigDecimal num;
     private transient volatile int hashCode;
     
-    @SuppressWarnings("unchecked")
-    private static final Map<BigDecimal,NumberValue> cache =
-            new ReferenceMap();
+    /**
+     * Parses a number from a string. The parser expects a string of the format
+     * described in the javadoc for {@link BigDecimal}'s string constructor.
+     * 
+     * @param str a string representing a number.
+     * @return a {@link NumberValue}, or <code>null</code> if no number was 
+     * found in the string.
+     */
+    public static NumberValue parse(String str) {
+        return (NumberValue) ValueType.NUMBERVALUE.parse(str);
+    }
 
+    /**
+     * Gets an instance of {@link NumberValue} representing a 
+     * <code>double</code>.
+     * 
+     * @param num a double.
+     * @return a {@link NumberValue}. Guaranteed not <code>null</code>.
+     */
     public static NumberValue getInstance(double num) {
         return getInstance(BigDecimal.valueOf(num));
     }
@@ -29,13 +54,15 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
     }
 
     public static NumberValue getInstance(BigDecimal num) {
-        if (num == null) {
-            throw new IllegalArgumentException("num cannot be null");
-        }
-        NumberValue result = cache.get(num);
-        if (result == null) {
-            result = new NumberValue(num);
-            cache.put(num, result);
+        NumberValue result;
+        if (num != null) {
+            result = cache.get(num);
+            if (result == null) {
+                result = new NumberValue(num);
+                cache.put(num, result);
+            }
+        } else {
+            result = getInstance(BigDecimal.ZERO);
         }
         return result;
     }
@@ -49,14 +76,17 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
     }
 
     public NumberValue(BigDecimal num) {
-        super(ValueType.NUMBERVALUE);
+        init(num);
+    }
+
+    private void init(BigDecimal num) {
         if (num == null) {
             this.num = BigDecimal.ZERO;
         } else {
             this.num = num;
         }
     }
-    
+
     @Override
     public NumberValue replace() {
         NumberValue result = cache.get(this.num);
@@ -109,6 +139,11 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
     }
 
     @Override
+    public ValueType getType() {
+        return ValueType.NUMBERVALUE;
+    }
+
+    @Override
     public double doubleValue() {
         return num.doubleValue();
     }
@@ -116,35 +151,61 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
     public long longValue() {
         return num.longValue();
     }
-    
+
     @Override
     public BigDecimal getBigDecimal() {
         return num;
     }
 
+    /**
+     * Compares this value and another numerically, or checks this number value
+     * for membership in a value list.
+     * 
+     * @param o a {@link Value}.
+     * @return If the provided value is a {@link NumericalValue}, returns
+     * {@link ValueComparator#GREATER_THAN},
+     * {@link ValueComparator#LESS_THAN} or {@link ValueComparator#EQUAL_TO}
+     * depending on whether this value is numerically greater than,
+     * less than or equal to the value provided as argument. If the provided
+     * value is a {@link ValueList}, returns 
+     * {@link ValueComparator#IN} if this object is a member of the list, or
+     * {@link ValueComparator#NOT_IN} if not. Otherwise, returns
+     * {@link ValueComparator#UNKNOWN}.
+     */
     @Override
-    protected ValueComparator compareNumberValue(NumberValue d2) {
-        int comp = compareTo(d2);
-        return comp > 0 ? ValueComparator.GREATER_THAN
-                : (comp < 0 ? ValueComparator.LESS_THAN
-                : ValueComparator.EQUAL_TO);
-    }
-
-    @Override
-    protected ValueComparator compareInequalityNumberValue(
-            InequalityNumberValue d2) {
-        int comp = num.compareTo((BigDecimal) d2.getNumber());
-        if (d2.getComparator() == ValueComparator.EQUAL_TO) {
-            return comp > 0 ? ValueComparator.GREATER_THAN
-                    : (comp < 0 ? ValueComparator.LESS_THAN
-                    : ValueComparator.EQUAL_TO);
-        } else if (d2.getComparator() == ValueComparator.GREATER_THAN) {
-            return comp <= 0 ? ValueComparator.LESS_THAN
-                    : ValueComparator.UNKNOWN;
-        } else {
-            return comp >= 0 ? ValueComparator.GREATER_THAN
-                    : ValueComparator.UNKNOWN;
+    public ValueComparator compare(Value o) {
+        if (o == null) {
+            return ValueComparator.UNKNOWN;
         }
+        switch (o.getType()) {
+            case NUMBERVALUE:
+                NumberValue other = (NumberValue) o;
+                int comp = compareTo(other);
+                return comp > 0 ? ValueComparator.GREATER_THAN
+                        : (comp < 0 ? ValueComparator.LESS_THAN
+                        : ValueComparator.EQUAL_TO);
+            case INEQUALITYNUMBERVALUE:
+                InequalityNumberValue other2 = (InequalityNumberValue) o;
+                int comp2 = num.compareTo((BigDecimal) other2.getNumber());
+                switch (other2.getComparator()) {
+                    case EQUAL_TO:
+                        return comp2 > 0 ? ValueComparator.GREATER_THAN
+                            : (comp2 < 0 ? ValueComparator.LESS_THAN
+                            : ValueComparator.EQUAL_TO);
+                    case GREATER_THAN:
+                        return comp2 <= 0 ? ValueComparator.LESS_THAN
+                            : ValueComparator.UNKNOWN;
+                    default:
+                        return comp2 >= 0 ? ValueComparator.GREATER_THAN
+                            : ValueComparator.UNKNOWN;
+                }
+            case VALUELIST:
+                ValueList vl = (ValueList) o;
+                return equals(vl) ? ValueComparator.EQUAL_TO 
+                        : ValueComparator.NOT_EQUAL_TO;
+            default:
+                return ValueComparator.UNKNOWN;
+}
     }
 
     @Override
@@ -159,9 +220,22 @@ public final class NumberValue extends ValueImpl implements NumericalValue,
         }
         valueVisitor.visit(this);
     }
-    
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.writeObject(this.num);
+    }
+
+    private void readObject(ObjectInputStream s) throws IOException,
+            ClassNotFoundException {
+        BigDecimal tmpNum = (BigDecimal) s.readObject();
+        init(tmpNum);
+        if (!cache.containsKey(tmpNum)) {
+            cache.put(tmpNum, this);
+        }
     }
 }

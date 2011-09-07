@@ -1,5 +1,6 @@
 package org.protempa.proposition;
 
+import org.protempa.proposition.visitor.AbstractPropositionVisitor;
 import java.util.Collections;
 import java.util.UUID;
 

@@ -3,9 +3,6 @@ package org.protempa.proposition.value;
 import java.util.Arrays;
 import java.util.List;
 
-import org.protempa.proposition.value.ListValue;
-import org.protempa.proposition.value.NumberValue;
-import org.protempa.proposition.value.ValueFactory;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -15,12 +12,125 @@ import junit.framework.TestCase;
  * 
  */
 public class ListValueTest extends TestCase {
-	public void testParse() {
-		List<?> l = Arrays.asList(new Long[] { 1L, 2L, 3L, 4L });
-		ListValue v = (ListValue) ValueFactory.LIST.parse("[1,2,3,4]");
-		Assert.assertEquals(l.size(), v.size());
-		for (int i = 0, n = l.size(); i < n; i++) {
-			Assert.assertEquals(l.get(i), ((NumberValue) v.get(i)).longValue());
-		}
-	}
+
+    public void testParse() {
+        List<?> l = Arrays.asList(new Long[]{1L, 2L, 3L, 4L});
+        ValueList v = (ValueList) ValueType.VALUELIST.parse("[1,2,3,4]");
+        Assert.assertEquals(l.size(), v.size());
+        for (int i = 0, n = l.size(); i < n; i++) {
+            Assert.assertEquals(l.get(i), ((NumberValue) v.get(i)).longValue());
+        }
+    }
+    
+    public void testInEquals() {
+        ValueList<NominalValue> l = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("bar"),
+                NominalValue.getInstance("baz")
+        );
+        NominalValue bar = NominalValue.getInstance("bar");
+        assertEquals(ValueComparator.IN, bar.compare(l));
+    }
+    
+    public void testInIs() {
+        ValueList<NominalValue> l = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("bar"),
+                NominalValue.getInstance("baz")
+        );
+        NominalValue bar = NominalValue.getInstance("bar");
+        assertTrue(ValueComparator.IN.test(bar.compare(l)));
+    }
+    
+    public void testNotInEquals() {
+        ValueList<NominalValue> l = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("bar"),
+                NominalValue.getInstance("baz")
+        );
+        NominalValue foo2 = NominalValue.getInstance("foo2");
+        assertEquals(ValueComparator.NOT_IN, foo2.compare(l));
+    }
+    
+    public void testNotInIs() {
+        ValueList<NominalValue> l = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("bar"),
+                NominalValue.getInstance("baz")
+        );
+        NominalValue foo2 = NominalValue.getInstance("foo2");
+        assertTrue(ValueComparator.NOT_IN.test(foo2.compare(l)));
+    }
+    
+    public void testListEquals() {
+        ValueList<NominalValue> l1 = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("bar"),
+                NominalValue.getInstance("baz")
+        );
+        ValueList<NominalValue> l2 = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("bar"),
+                NominalValue.getInstance("baz")
+        );
+        assertTrue(ValueComparator.NOT_IN.test(l1.compare(l2)));
+    }
+    
+    public void testListNotEqualDifferentOrder() {
+        ValueList<NominalValue> l1 = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("bar"),
+                NominalValue.getInstance("baz")
+        );
+        ValueList<NominalValue> l2 = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("baz"),
+                NominalValue.getInstance("bar")
+        );
+        assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
+    }
+    
+    public void testListNotEqualDifferentSize1() {
+        ValueList<NominalValue> l1 = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("bar"),
+                NominalValue.getInstance("baz")
+        );
+        ValueList<NominalValue> l2 = ValueList.getInstance(
+                NominalValue.getInstance("foo")
+        );
+        assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
+    }
+    
+    public void testListNotEqualDifferentSize2() {
+        ValueList<NominalValue> l2 = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("bar"),
+                NominalValue.getInstance("baz")
+        );
+        ValueList<NominalValue> l1 = ValueList.getInstance(
+                NominalValue.getInstance("foo")
+        );
+        assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
+    }
+    
+    public void testListNotEqualDifferentSize3() {
+        ValueList<NominalValue> l2 = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("bar"),
+                NominalValue.getInstance("baz")
+        );
+        ValueList<NominalValue> l1 = ValueList.getInstance(
+        );
+        assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
+    }
+    
+    public void testListCompareToNull() {
+        ValueList<NominalValue> l1 = ValueList.getInstance(
+                NominalValue.getInstance("foo"),
+                NominalValue.getInstance("bar"),
+                NominalValue.getInstance("baz")
+        );
+        assertTrue(ValueComparator.UNKNOWN.test(l1.compare(null)));
+    }
 }

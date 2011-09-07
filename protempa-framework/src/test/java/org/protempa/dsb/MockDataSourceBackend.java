@@ -1,8 +1,8 @@
 package org.protempa.dsb;
 
-import org.protempa.AbstractDataSourceBackend;
-import org.protempa.BackendInitializationException;
-import org.protempa.DataSourceBackendFailedValidationException;
+import org.protempa.backend.dsb.AbstractDataSourceBackend;
+import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.DataSourceBackendFailedValidationException;
 import org.protempa.KnowledgeSource;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.proposition.value.GranularityFactory;

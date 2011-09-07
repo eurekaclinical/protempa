@@ -1,5 +1,7 @@
 package org.protempa;
 
+import org.protempa.backend.UnrecoverableBackendErrorEvent;
+import org.protempa.backend.BackendUpdatedEvent;
 import java.util.EventListener;
 import java.util.EventObject;
 

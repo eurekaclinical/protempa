@@ -7,10 +7,10 @@ import java.util.Set;
 import org.apache.commons.discovery.DiscoveryException;
 import org.apache.commons.discovery.tools.DiscoverClass;
 import org.arp.javautil.serviceloader.ServiceLoader;
-import org.protempa.AlgorithmSourceBackend;
-import org.protempa.DataSourceBackend;
-import org.protempa.KnowledgeSourceBackend;
-import org.protempa.TermSourceBackend;
+import org.protempa.backend.asb.AlgorithmSourceBackend;
+import org.protempa.backend.dsb.DataSourceBackend;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
+import org.protempa.backend.tsb.TermSourceBackend;
 import org.protempa.backend.BackendProvider;
 import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
@@ -57,7 +57,7 @@ public final class CommonsBackendProvider
         return getBackendSpecLoader(TermSourceBackend.class);
     }
 
-    private <B extends org.protempa.Backend> BackendSpecLoader<B>
+    private <B extends org.protempa.backend.Backend> BackendSpecLoader<B>
             getBackendSpecLoader(Class<B> clazz) 
             throws BackendProviderSpecLoaderException {
         ArrayList<BackendSpec<B>> backendSpecs =

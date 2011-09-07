@@ -1,5 +1,6 @@
 package org.protempa;
 
-public interface ObjectAsserter {
-	void assertObject(Object obj);
+interface ObjectAsserter {
+
+    void assertObject(Object obj);
 }

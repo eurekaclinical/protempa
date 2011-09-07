@@ -3,7 +3,6 @@ package org.protempa;
 import java.io.Serializable;
 
 import org.protempa.proposition.value.ValueComparator;
-import org.protempa.proposition.value.ValueFactory;
 
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.proposition.value.ValueType;

@@ -9,6 +9,25 @@ import java.util.UUID;
 import junit.framework.TestCase;
 
 public class PropositionTest extends TestCase {
+    
+    public void testEqualsSameUid() {
+        UniqueId uid = uid();
+        Event e1 = new Event("foo", uid);
+        Event e2 = new Event("bar", uid);
+        assertTrue(e1.equals(e2));
+    }
+    
+    public void testEqualsDifferentUid() {
+        Event e1 = new Event("foo", uid());
+        Event e2 = new Event("foo", uid());
+        assertFalse(e1.equals(e2));
+    }
+    
+    public void testEqualsNull() {
+        Event e1 = new Event("foo", uid());
+        assertFalse(e1.equals(null));
+    }
+    
     public void testHashCode() {
         Set<Proposition> ps = new HashSet<Proposition>();
         
@@ -51,7 +70,7 @@ public class PropositionTest extends TestCase {
         return false;
     }
     
-    private static UniqueId uid() {
+    public static UniqueId uid() {
         return new UniqueId(
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString()));

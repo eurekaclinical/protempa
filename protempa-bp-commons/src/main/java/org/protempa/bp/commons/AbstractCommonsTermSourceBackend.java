@@ -1,7 +1,7 @@
 package org.protempa.bp.commons;
 
-import org.protempa.AbstractTermSourceBackend;
-import org.protempa.TermSourceBackendInitializationException;
+import org.protempa.backend.tsb.AbstractTermSourceBackend;
+import org.protempa.backend.TermSourceBackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 
 public abstract class AbstractCommonsTermSourceBackend extends

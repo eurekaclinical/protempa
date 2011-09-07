@@ -3,9 +3,14 @@ package org.protempa.query;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang.ArrayUtils;
+import org.protempa.AlgorithmSource;
+import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
-import org.protempa.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.Filter;
 
 /**
  *
@@ -181,7 +186,20 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     }
 
     @Override
-    public Query build() {
+    public Query build(KnowledgeSource knowledgeSource, 
+                AlgorithmSource algorithmSource)
+            throws QueryBuildException {
+        for (String propId : propIds) {
+            try {
+                if (!knowledgeSource.hasPropositionDefinition(propId)) {
+                    throw new QueryBuildException(
+                            "Invalid proposition id: " + propId);
+
+                }
+            } catch (KnowledgeSourceReadException ex) {
+                throw new QueryBuildException("Could not build query", ex);
+            }
+        }
         return new Query(this.keyIds, this.filters, this.propIds,
                 this.termIds);
     }

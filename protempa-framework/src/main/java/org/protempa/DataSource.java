@@ -1,7 +1,11 @@
 package org.protempa;
 
+import org.protempa.backend.DataSourceBackendFailedValidationException;
+import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.DataSourceBackendUpdatedEvent;
+import org.protempa.backend.dsb.DataSourceBackend;
 import java.util.ArrayList;
-import org.protempa.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.Filter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;

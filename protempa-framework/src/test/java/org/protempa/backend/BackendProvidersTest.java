@@ -7,9 +7,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.protempa.AlgorithmSourceBackend;
-import org.protempa.DataSourceBackend;
-import org.protempa.KnowledgeSourceBackend;
+import org.protempa.backend.asb.AlgorithmSourceBackend;
+import org.protempa.backend.dsb.DataSourceBackend;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
 
 /**
  *

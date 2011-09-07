@@ -7,63 +7,60 @@ package org.arp.javautil.stat;
  * 
  * @author Andrew Post
  */
-public class UpdatingCovarCalc extends Object {
-	private double sumsq = 0.0;
+public class UpdatingCovarCalc {
 
-	private double meanx = 0.0;
+    private double sumsq = 0.0;
+    private double meanx = 0.0;
+    private double meany = 0.0;
+    private int numItems = 1;
 
-	private double meany = 0.0;
+    /**
+     * Creates new UpdatingCovarianceCalculator. At least one point is necessary
+     * for calculated a covariance, and it should be specified in this
+     * constructor.
+     * 
+     * @param x
+     *            first x value
+     * @param y
+     *            first y value
+     */
+    public UpdatingCovarCalc(double x, double y) {
+        meanx = x;
+        meany = y;
+    }
 
-	private int numItems = 1;
+    /**
+     * Update the covariance with another point.
+     * 
+     * @param x
+     *            x value
+     * @param y
+     *            y value
+     */
+    public void addPoint(double x, double y) {
+        numItems++;
+        double xMinusMeanX = x - meanx;
+        double yMinusMeanY = y - meany;
+        sumsq += xMinusMeanX * yMinusMeanY * (numItems - 1) / numItems;
+        meanx += xMinusMeanX / numItems;
+        meany += yMinusMeanY / numItems;
+    }
 
-	/**
-	 * Creates new UpdatingCovarianceCalculator. At least one point is necessary
-	 * for calculated a covariance, and it should be specified in this
-	 * constructor.
-	 * 
-	 * @param x
-	 *            first x value
-	 * @param y
-	 *            first y value
-	 */
-	public UpdatingCovarCalc(double x, double y) {
-		meanx = x;
-		meany = y;
-	}
+    /**
+     * Return the covariance of the list of points specified to this object.
+     * 
+     * @return the covariance of the list of points specified to this object.
+     */
+    public double getCovariance() {
+        return sumsq / (numItems - 1);
+    }
 
-	/**
-	 * Update the covariance with another point.
-	 * 
-	 * @param x
-	 *            x value
-	 * @param y
-	 *            y value
-	 */
-	public void addPoint(double x, double y) {
-		numItems++;
-		double xMinusMeanX = x - meanx;
-		double yMinusMeanY = y - meany;
-		sumsq += xMinusMeanX * yMinusMeanY * (numItems - 1) / numItems;
-		meanx += xMinusMeanX / numItems;
-		meany += yMinusMeanY / numItems;
-	}
-
-	/**
-	 * Return the covariance of the list of points specified to this object.
-	 * 
-	 * @return the covariance of the list of points specified to this object.
-	 */
-	public double getCovariance() {
-		return sumsq / (numItems - 1);
-	}
-
-	/**
-	 * Return the sum squared of the list of points specified to this object.
-	 * 
-	 * @return the sum squared of the list of points specified to this object.
-	 */
-	public double getSumSquaredDeviations() {
-		return sumsq;
-	}
-
+    /**
+     * Return the sum squared of the list of points specified to this object.
+     * 
+     * @return the sum squared of the list of points specified to this object.
+     */
+    public double getSumSquaredDeviations() {
+        return sumsq;
+    }
 }

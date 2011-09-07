@@ -1,5 +1,7 @@
 package org.protempa.proposition;
 
+import org.protempa.proposition.visitor.PropositionVisitable;
+import org.protempa.proposition.visitor.PropositionCheckedVisitable;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 

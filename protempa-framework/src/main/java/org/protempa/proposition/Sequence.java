@@ -1,5 +1,7 @@
 package org.protempa.proposition;
 
+import org.protempa.proposition.visitor.PropositionVisitable;
+import org.protempa.proposition.visitor.PropositionVisitor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

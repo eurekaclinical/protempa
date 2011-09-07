@@ -2,8 +2,8 @@ package org.protempa;
 
 import java.beans.PropertyChangeSupport;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.protempa.proposition.Interval;
-import org.protempa.proposition.Relation;
+import org.protempa.proposition.interval.Interval;
+import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.Unit;
 
 /**

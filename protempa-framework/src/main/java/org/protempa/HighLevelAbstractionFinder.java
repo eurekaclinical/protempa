@@ -3,7 +3,7 @@ package org.protempa;
 import java.util.List;
 import java.util.Map;
 
-import org.protempa.proposition.Relation;
+import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.TemporalProposition;
 
 /**

@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import org.protempa.proposition.Relation;
+import org.protempa.proposition.interval.Relation;
 
 /**
  * Definition of an extended parameter that's a high-level abstraction.

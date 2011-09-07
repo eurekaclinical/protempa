@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import org.protempa.proposition.value.ValueFactory;
 import org.protempa.proposition.value.ValueType;
 
 /**

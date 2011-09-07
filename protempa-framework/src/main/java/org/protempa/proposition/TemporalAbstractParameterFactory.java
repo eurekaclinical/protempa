@@ -1,5 +1,6 @@
 package org.protempa.proposition;
 
+import org.protempa.proposition.interval.IntervalFactory;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;

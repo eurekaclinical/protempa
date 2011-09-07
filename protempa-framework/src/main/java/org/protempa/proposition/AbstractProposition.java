@@ -35,7 +35,7 @@ public abstract class AbstractProposition implements Proposition {
     private PropertyChangeSupport changes;
     private Map<String, Value> properties;
     private Map<String, List<UniqueId>> references;
-    private UniqueId key; // not final because of custom deserialization
+    private UniqueId uniqueId; // not final because of custom deserialization
                           // but there is no public modification access
     private DataSourceType dataSourceType;
 
@@ -50,8 +50,7 @@ public abstract class AbstractProposition implements Proposition {
         if (uniqueId == null) {
             throw new IllegalArgumentException("The unique ID cannot be null");
         }
-        this.key = uniqueId;
-        initializeAbstractProposition(id);
+        initializeAbstractProposition(id, uniqueId);
     }
 
     /**
@@ -64,7 +63,17 @@ public abstract class AbstractProposition implements Proposition {
     protected AbstractProposition() {
     }
 
-    protected void initializeAbstractProposition(String id) {
+    /**
+     * Assigns fields specified in the constructor. This is pulled into a
+     * method so that deserialization can initialize those fields 
+     * correctly.
+     * 
+     * @param id the proposition id.
+     * @param uniqueId the proposition's unique id.
+     */
+    protected final void initializeAbstractProposition(String id, 
+            UniqueId uniqueId) {
+        this.uniqueId = uniqueId;
         if (id == null) {
             this.id = "";
         } else {
@@ -131,7 +140,7 @@ public abstract class AbstractProposition implements Proposition {
 
     @Override
     public final UniqueId getUniqueId() {
-        return this.key;
+        return this.uniqueId;
     }
 
     public final void setReferences(String name, List<UniqueId> refs) {
@@ -199,18 +208,16 @@ public abstract class AbstractProposition implements Proposition {
 
     @Override
     public int hashCode() {
-        return this.key.hashCode();
+        return this.uniqueId.hashCode();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o == null)
-            return false;
         if (o == this)
             return true;
         if (o instanceof AbstractProposition) {
             AbstractProposition other = (AbstractProposition) o;
-            return this.key.equals(other.key);
+            return this.uniqueId.equals(other.uniqueId);
         } else {
             return false;
         }
@@ -238,7 +245,7 @@ public abstract class AbstractProposition implements Proposition {
         return new ToStringBuilder(this).append("id", this.id)
                 .append("properties", this.properties)
                 .append("references", this.references)
-                .append("uniqueIdentifier", this.key)
+                .append("uniqueId", this.uniqueId)
                 .append("dataSourceType", this.dataSourceType).toString();
 
     }
@@ -269,7 +276,7 @@ public abstract class AbstractProposition implements Proposition {
     protected void writeAbstractProposition(ObjectOutputStream s)
             throws IOException {
         s.writeObject(this.id);
-        s.writeObject(this.key);
+        s.writeObject(this.uniqueId);
 
         if (this.properties == null) {
             s.writeInt(0);
@@ -315,8 +322,12 @@ public abstract class AbstractProposition implements Proposition {
     protected void readAbstractProposition(ObjectInputStream s)
             throws IOException, ClassNotFoundException {
         String tempId = (String) s.readObject();
-        this.key = (UniqueId) s.readObject();
-        initializeAbstractProposition(tempId);
+        UniqueId tempUniqueId = (UniqueId) s.readObject();
+        if (tempUniqueId == null) {
+            throw new InvalidObjectException(
+                    "Can't restore. All propositions must have an unique id");
+        }
+        initializeAbstractProposition(tempId, tempUniqueId);
 
         int numProperties = s.readInt();
         if (numProperties < 0) {

@@ -1,7 +1,7 @@
 package org.protempa.bp.commons;
 
-import org.protempa.AbstractAlgorithmSourceBackend;
-import org.protempa.AlgorithmSourceBackendInitializationException;
+import org.protempa.backend.asb.AbstractAlgorithmSourceBackend;
+import org.protempa.backend.AlgorithmSourceBackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 
 /**

@@ -2,8 +2,8 @@ package org.protempa.query.handler.table;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +26,11 @@ import org.protempa.proposition.value.ValueType;
  * @author Andrew Post
  */
 public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
+    
+    private static final Comparator<? super Proposition> comp =
+            new AllPropositionIntervalComparator();
+    private static final Comparator<? super Proposition> reverseComp =
+            Collections.reverseOrder(comp);
 
     public enum Type {
 
@@ -67,20 +72,17 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
-        Collection<Proposition> propositions = traverseLinks(this.links,
+        List<Proposition> propositions = traverseLinks(this.links,
                 proposition, forwardDerivations, backwardDerivations, 
                 references, knowledgeSource);
         Value value = null;
         BigDecimal sumTotal = new BigDecimal(0.0);
         if (type == Type.FIRST) {
-            propositions = new ArrayList(propositions);
-            Collections.sort((List) propositions,
-                    new AllPropositionIntervalComparator());
+            propositions = new ArrayList<Proposition>(propositions);
+            Collections.sort(propositions, comp);
         } else if (type == Type.LAST) {
-            propositions = new ArrayList(propositions);
-            Collections.sort((List) propositions,
-                    Collections.reverseOrder(
-                    new AllPropositionIntervalComparator()));
+            propositions = new ArrayList<Proposition>(propositions);
+            Collections.sort(propositions, reverseComp);
         }
         for (Proposition prop : propositions) {
             if (prop instanceof TemporalParameter) {
@@ -105,12 +107,12 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                         } else {
                             switch (type) {
                                 case MAX:
-                                    if (val.compare(value).is(ValueComparator.GREATER_THAN)) {
+                                    if (val.compare(value).test(ValueComparator.GREATER_THAN)) {
                                         value = val;
                                     }
                                     break;
                                 case MIN:
-                                    if (val.compare(value).is(ValueComparator.LESS_THAN)) {
+                                    if (val.compare(value).test(ValueComparator.LESS_THAN)) {
                                         value = val;
                                     }
                                     break;
@@ -153,5 +155,21 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                 : generateLinksHeaderString(this.links)
                         + (this.type == Type.MIN ? "_min" : "_max");
         return new String[] { headerString };
+    }
+    
+    @Override
+    public void validate(KnowledgeSource knowledgeSource) throws 
+            TableColumnSpecValidationFailedException, 
+            KnowledgeSourceReadException {
+        int i = 1;
+        for (Link link : this.links) {
+            try {
+                link.validate(knowledgeSource);
+            } catch (LinkValidationFailedException ex) {
+                throw new TableColumnSpecValidationFailedException(
+                        "Validation of link " + i + " failed", ex);
+            }
+            i++;
+        }
     }
 }

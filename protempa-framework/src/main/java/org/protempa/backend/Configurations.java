@@ -1,7 +1,6 @@
 package org.protempa.backend;
 
 import java.util.List;
-import org.protempa.Backend;
 
 /**
  *

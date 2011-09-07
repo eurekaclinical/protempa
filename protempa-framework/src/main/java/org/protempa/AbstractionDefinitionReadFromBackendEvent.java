@@ -4,8 +4,7 @@ import java.util.EventObject;
 
 public final class AbstractionDefinitionReadFromBackendEvent extends EventObject {
 
-	public AbstractionDefinitionReadFromBackendEvent(Object arg0) {
-		super(arg0);
-	}
-
+    public AbstractionDefinitionReadFromBackendEvent(Object arg0) {
+        super(arg0);
+    }
 }

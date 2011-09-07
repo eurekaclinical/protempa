@@ -8,7 +8,7 @@ import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
 import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.Relation;
+import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalProposition;
@@ -65,7 +65,7 @@ public final class PairConsequence implements Consequence {
             TemporalProposition left = pl.get(i);
             TemporalProposition right = pl.get(i + 1);
             if (leftProp.getMatches(left) && rightProp.getMatches(right)) {
-                if (relation.hasRelation(left.getInterval(),
+                if (this.relation.hasRelation(left.getInterval(),
                         right.getInterval())) {
                     seq.add(left);
                     seq.add(right);

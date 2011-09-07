@@ -10,7 +10,7 @@ import org.drools.WorkingMemory;
 import org.drools.rule.Declaration;
 import org.drools.spi.EvalExpression;
 import org.drools.spi.Tuple;
-import org.protempa.proposition.Relation;
+import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.TemporalProposition;
 
 /**

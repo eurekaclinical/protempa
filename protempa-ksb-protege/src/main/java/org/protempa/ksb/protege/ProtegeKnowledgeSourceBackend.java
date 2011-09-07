@@ -11,7 +11,7 @@ import org.protempa.AbstractionDefinition;
 import org.protempa.ConstantDefinition;
 import org.protempa.EventDefinition;
 import org.protempa.KnowledgeBase;
-import org.protempa.KnowledgeSourceBackendInitializationException;
+import org.protempa.backend.KnowledgeSourceBackendInitializationException;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PrimitiveParameterDefinition;
 import org.protempa.PropositionDefinition;

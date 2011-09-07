@@ -1,20 +1,29 @@
 package org.protempa.proposition.value;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
- * Ordinal string values.
+ * Represents ordinal string values. This currently is non-functional.
  * 
  * @author Andrew Post
  */
-public final class OrdinalValue extends ValueImpl implements OrderedValue {
+public final class OrdinalValue implements OrderedValue, Serializable {
 
     private static final long serialVersionUID = -1605459658420554439L;
-    private final String val;
-    private final List<String> allowedValues;
+    private String val;
+    private List<String> allowedValues;
     private transient volatile int hashCode;
+    
+    public static OrdinalValue parse(String str) {
+        return (OrdinalValue) ValueType.ORDINALVALUE.parse(str);
+    }
 
     /**
      * Creates an ordinal value of a type with allowed values.
@@ -25,9 +34,9 @@ public final class OrdinalValue extends ValueImpl implements OrderedValue {
      *            the allowed values {@link List<String}.
      */
     OrdinalValue(String value, List<String> sortedAllowedValues) {
-        super(ValueType.ORDINALVALUE);
-        this.val = value;
-        this.allowedValues = new ArrayList<String>(sortedAllowedValues);
+        throw new UnsupportedOperationException("Not implemented");
+//        this.val = value;
+//        this.allowedValues = new ArrayList<String>(sortedAllowedValues);
     }
     
     @Override
@@ -44,6 +53,11 @@ public final class OrdinalValue extends ValueImpl implements OrderedValue {
     public String getFormatted() {
         return val;
     }
+    
+    @Override
+    public ValueType getType() {
+        return ValueType.ORDINALVALUE;
+    }
 
     /**
      * Returns the value.
@@ -53,37 +67,55 @@ public final class OrdinalValue extends ValueImpl implements OrderedValue {
     public String getValue() {
         return val;
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.protempa.proposition.value.ValueImpl#compareOrdinalValue(org.protempa.proposition.value.OrdinalValue)
+    
+    /**
+     * Compares this value and another according to the defined order, or 
+     * checks this number value for membership in a value list.
+     * 
+     * @param o a {@link Value}.
+     * @return If the provided value is an {@link OrdinalValue}, returns
+     * {@link ValueComparator#GREATER_THAN},
+     * {@link ValueComparator#LESS_THAN} or {@link ValueComparator#EQUAL_TO}
+     * depending on whether this value is numerically greater than,
+     * less than or equal to the value provided as argument. If the provided
+     * value is a {@link ValueList}, returns 
+     * {@link ValueComparator#IN} if this object is a member of the list, or
+     * {@link ValueComparator#NOT_IN} if not. Otherwise, returns
+     * {@link ValueComparator#UNKNOWN}.
      */
     @Override
-    protected ValueComparator compareOrdinalValue(OrdinalValue ordVal) {
-        if (allowedValues == null
-                || val == null
-                || ordVal.allowedValues == null
-                || ordVal.val == null
-                || !(allowedValues == ordVal.allowedValues || allowedValues.equals(ordVal.allowedValues))) {
+    public ValueComparator compare(Value o) {
+        if (o == null) {
             return ValueComparator.UNKNOWN;
         }
+        switch (o.getType()) {
+            case ORDINALVALUE:
+                OrdinalValue other = (OrdinalValue) o;
+                if (allowedValues == null
+                        || val == null
+                        || other.allowedValues == null
+                        || other.val == null
+                        || !(allowedValues == other.allowedValues || allowedValues.equals(other.allowedValues))) {
+                    return ValueComparator.UNKNOWN;
+                }
 
-        int c = allowedValues.indexOf(val) - allowedValues.indexOf(ordVal.val);
-        if (c == 0) {
-            return ValueComparator.EQUAL_TO;
-        } else if (c > 0) {
-            return ValueComparator.GREATER_THAN;
-        } else {
-            return ValueComparator.LESS_THAN;
+                int c = allowedValues.indexOf(val) - allowedValues.indexOf(other.val);
+                if (c == 0) {
+                    return ValueComparator.EQUAL_TO;
+                } else if (c > 0) {
+                    return ValueComparator.GREATER_THAN;
+                } else {
+                    return ValueComparator.LESS_THAN;
+                }
+            case VALUELIST:
+                ValueList vl = (ValueList) o;
+                return equals(vl) ? ValueComparator.EQUAL_TO 
+                        : ValueComparator.NOT_EQUAL_TO;
+            default:
+                return ValueComparator.UNKNOWN;
         }
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
+    
     @Override
     public int hashCode() {
         if (hashCode == 0) {
@@ -132,5 +164,16 @@ public final class OrdinalValue extends ValueImpl implements OrderedValue {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+    
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        //s.writeObject(this.val);
+        throw new UnsupportedOperationException("Not implemented");
+    }
+    
+    private void readObject(ObjectInputStream s) throws IOException,
+            ClassNotFoundException {
+        //String tmpVal = (String) s.readObject();
+        throw new InvalidObjectException("Can't restore. Not implemented");
     }
 }

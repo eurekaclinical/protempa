@@ -1,5 +1,8 @@
 package org.protempa;
 
+import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.TermSourceBackendUpdatedEvent;
+import org.protempa.backend.tsb.TermSourceBackend;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -120,15 +123,9 @@ public final class TermSource extends
         clear();
         fireTermSourceUpdated();
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.protempa.Module#clear()
-     */
+    
     @Override
     public void clear() {
-        // TODO Auto-generated method stub
 
     }
 

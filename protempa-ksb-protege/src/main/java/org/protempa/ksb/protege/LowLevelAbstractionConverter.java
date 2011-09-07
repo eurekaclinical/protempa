@@ -127,8 +127,8 @@ class LowLevelAbstractionConverter implements PropositionConverter {
                     llad, allowedValue.getName());
             d.setValue(NominalValue.getInstance((String) cm.getOwnSlotValue(allowedValue, cm.getSlot(
                     "displayName"))));
-            d.setParameterValue("minThreshold", ValueType.VALUE.getValueFactory().parse((String) cm.getOwnSlotValue(allowedValue, cm.getSlot("minValThreshold"))));
-            d.setParameterValue("maxThreshold", ValueType.VALUE.getValueFactory().parse((String) cm.getOwnSlotValue(allowedValue, cm.getSlot("maxValThreshold"))));
+            d.setParameterValue("minThreshold", ValueType.VALUE.parse((String) cm.getOwnSlotValue(allowedValue, cm.getSlot("minValThreshold"))));
+            d.setParameterValue("maxThreshold", ValueType.VALUE.parse((String) cm.getOwnSlotValue(allowedValue, cm.getSlot("maxValThreshold"))));
             setThresholdComps(d, allowedValue);
         }
     }

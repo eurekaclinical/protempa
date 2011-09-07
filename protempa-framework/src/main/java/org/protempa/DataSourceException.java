@@ -9,19 +9,18 @@ package org.protempa;
  */
 public abstract class DataSourceException extends ProtempaException {
 
-	DataSourceException() {
-	}
+    DataSourceException() {
+    }
 
-	DataSourceException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    DataSourceException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	DataSourceException(String message) {
-		super(message);
-	}
+    DataSourceException(String message) {
+        super(message);
+    }
 
-	DataSourceException(Throwable cause) {
-		super(cause);
-	}
-
+    DataSourceException(Throwable cause) {
+        super(cause);
+    }
 }

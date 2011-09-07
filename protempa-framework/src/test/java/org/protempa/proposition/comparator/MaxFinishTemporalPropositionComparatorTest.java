@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 import org.protempa.proposition.DerivedSourceId;
 import org.protempa.proposition.DerivedUniqueId;
 import org.protempa.proposition.Event;
-import org.protempa.proposition.IntervalFactory;
+import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;

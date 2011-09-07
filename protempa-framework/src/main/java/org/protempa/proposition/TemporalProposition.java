@@ -1,5 +1,8 @@
 package org.protempa.proposition;
 
+import org.protempa.proposition.interval.IntervalFactory;
+import org.protempa.proposition.interval.Interval;
+import org.protempa.proposition.interval.SimpleInterval;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;

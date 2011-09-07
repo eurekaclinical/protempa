@@ -4,198 +4,197 @@ import org.protempa.proposition.value.Unit;
 
 interface PatternFinderUser {
 
-	/**
-	 * @return Returns the minimumGap.
-	 */
-	Integer getMinimumGapBetweenValues();
+    /**
+     * @return Returns the minimumGap.
+     */
+    Integer getMinimumGapBetweenValues();
 
-	Unit getMinimumGapBetweenValuesUnits();
+    Unit getMinimumGapBetweenValuesUnits();
 
-	/**
-	 * Sets the minimum distance between instances of this
-	 * <code>AbstractionDefinition</code> that are concatenable. The default
-	 * value is <code>Weight.ZERO</code>.
-	 * 
-	 * @param maximumGap
-	 *            The <code>Weight</code> to set. If <code>null</code>, the
-	 *            <code>minimumGap</code> is set to the default value.
-	 */
-	void setMinimumGapBetweenValues(Integer minimumGapBetweenValues);
+    /**
+     * Sets the minimum distance between instances of this
+     * <code>AbstractionDefinition</code> that are concatenable. The default
+     * value is <code>Weight.ZERO</code>.
+     * 
+     * @param maximumGap
+     *            The <code>Weight</code> to set. If <code>null</code>, the
+     *            <code>minimumGap</code> is set to the default value.
+     */
+    void setMinimumGapBetweenValues(Integer minimumGapBetweenValues);
 
-	void setMinimumGapBetweenValuesUnits(Unit minimumGapBetweenValuesUnits);
+    void setMinimumGapBetweenValuesUnits(Unit minimumGapBetweenValuesUnits);
 
-	/**
-	 * Returns the minimum distance between instances of this
-	 * <code>AbstractionDefinition</code> that are concatenable. The default
-	 * value is <code>Weight.ZERO</code>.
-	 * 
-	 * @return a <code>Weight</code> object.
-	 */
-	Integer getMaximumGapBetweenValues();
+    /**
+     * Returns the minimum distance between instances of this
+     * <code>AbstractionDefinition</code> that are concatenable. The default
+     * value is <code>Weight.ZERO</code>.
+     * 
+     * @return a <code>Weight</code> object.
+     */
+    Integer getMaximumGapBetweenValues();
 
-	Unit getMaximumGapBetweenValuesUnits();
+    Unit getMaximumGapBetweenValuesUnits();
 
-	/**
-	 * Sets the maximum distance between instances of this
-	 * <code>AbstractionDefinition</code> that are contatenable. The default
-	 * value is <code>Weight.POS_INFINITY</code>.
-	 * 
-	 * @param maximumGap
-	 *            The <code>Weight</code> to set. If <code>null</code>, the
-	 *            <code>maximumGap</code> is set to the default value.
-	 */
-	void setMaximumGapBetweenValues(Integer maximumGapBetweenValues);
+    /**
+     * Sets the maximum distance between instances of this
+     * <code>AbstractionDefinition</code> that are contatenable. The default
+     * value is <code>Weight.POS_INFINITY</code>.
+     * 
+     * @param maximumGap
+     *            The <code>Weight</code> to set. If <code>null</code>, the
+     *            <code>maximumGap</code> is set to the default value.
+     */
+    void setMaximumGapBetweenValues(Integer maximumGapBetweenValues);
 
-	void setMaximumGapBetweenValuesUnits(Unit maximumGapBetweenValuesUnits);
+    void setMaximumGapBetweenValuesUnits(Unit maximumGapBetweenValuesUnits);
 
-	/**
-	 * Sets the maximum number of sequential values to process.
-	 * 
-	 * @param maximumNumberOfValues
-	 *            an <code>int</code>. If < 0, use the equivalent field in
-	 *            the algorithm.
-	 * @see org.protempa.Algorithm#getMaximumNumberOfValues()
-	 */
-	void setMaximumNumberOfValues(int maximumNumberOfValues);
+    /**
+     * Sets the maximum number of sequential values to process.
+     * 
+     * @param maximumNumberOfValues
+     *            an <code>int</code>. If < 0, use the equivalent field in
+     *            the algorithm.
+     * @see org.protempa.Algorithm#getMaximumNumberOfValues()
+     */
+    void setMaximumNumberOfValues(int maximumNumberOfValues);
 
-	/**
-	 * Sets the maximum number of sequential values to process.
-	 * 
-	 * @return an <code>int</code> if < 0, use the equivalent field in the
-	 *         algorithm.
-	 * @see org.protempa.Algorithm#getMaximumNumberOfValues()
-	 */
-	int getMaximumNumberOfValues();
+    /**
+     * Sets the maximum number of sequential values to process.
+     * 
+     * @return an <code>int</code> if < 0, use the equivalent field in the
+     *         algorithm.
+     * @see org.protempa.Algorithm#getMaximumNumberOfValues()
+     */
+    int getMaximumNumberOfValues();
 
-	/**
-	 * Sets the minimum number of sequential values to process.
-	 * 
-	 * @param minimumNumberOfValues
-	 *            an <code>int</code>. If < 0, use the equivalent field in
-	 *            the algorithm.
-	 * @see org.protempa.Algorithm#getMinimumNumberOfValues()
-	 */
-	void setMinimumNumberOfValues(int l);
+    /**
+     * Sets the minimum number of sequential values to process.
+     * 
+     * @param minimumNumberOfValues
+     *            an <code>int</code>. If < 0, use the equivalent field in
+     *            the algorithm.
+     * @see org.protempa.Algorithm#getMinimumNumberOfValues()
+     */
+    void setMinimumNumberOfValues(int l);
 
-	/**
-	 * Gets the minimum number of sequential values to process.
-	 * 
-	 * @return an <code>int</code> if < 0, use the equivalent field in the
-	 *         algorithm.
-	 * @see org.protempa.Algorithm#getMinimumNumberOfValues()
-	 */
-	int getMinimumNumberOfValues();
+    /**
+     * Gets the minimum number of sequential values to process.
+     * 
+     * @return an <code>int</code> if < 0, use the equivalent field in the
+     *         algorithm.
+     * @see org.protempa.Algorithm#getMinimumNumberOfValues()
+     */
+    int getMinimumNumberOfValues();
 
-	/**
-	 * Enable the skip-start restart search directive. After a match, all future
-	 * segments will have a starting value of at least <code>arg</code> more
-	 * than the starting value of the matched segment.
-	 * 
-	 * @param arg
-	 *            the value of the skip-start search directive, must be > 0.
-	 */
-	void setSkipStart(int arg);
+    /**
+     * Enable the skip-start restart search directive. After a match, all future
+     * segments will have a starting value of at least <code>arg</code> more
+     * than the starting value of the matched segment.
+     * 
+     * @param arg
+     *            the value of the skip-start search directive, must be > 0.
+     */
+    void setSkipStart(int arg);
 
-	/**
-	 * Disable the skip-start restart search directive.
-	 */
-	void unsetSkipStart();
+    /**
+     * Disable the skip-start restart search directive.
+     */
+    void unsetSkipStart();
 
-	/**
-	 * Return the value of the skip-start restart search directive.
-	 * 
-	 * @return the value of the skip-start restart search directive, -1 if it is
-	 *         disabled.
-	 */
-	int getSkipStart();
+    /**
+     * Return the value of the skip-start restart search directive.
+     * 
+     * @return the value of the skip-start restart search directive, -1 if it is
+     *         disabled.
+     */
+    int getSkipStart();
 
-	/**
-	 * Enable the skip-end restart search directive. After a match, the next
-	 * segment will have an ending value of <code>arg</code> more than the
-	 * ending value of the matched segment.
-	 * 
-	 * @param arg
-	 *            the value of the skip-end search directive, must be > 0.
-	 */
-	void setSkipEnd(int arg);
+    /**
+     * Enable the skip-end restart search directive. After a match, the next
+     * segment will have an ending value of <code>arg</code> more than the
+     * ending value of the matched segment.
+     * 
+     * @param arg
+     *            the value of the skip-end search directive, must be > 0.
+     */
+    void setSkipEnd(int arg);
 
-	/**
-	 * Disable the skip-end restart search directive.
-	 */
-	void unsetSkipEnd();
+    /**
+     * Disable the skip-end restart search directive.
+     */
+    void unsetSkipEnd();
 
-	/**
-	 * Return the value of the skip-end restart search directive.
-	 * 
-	 * @return the value of the skip-end restart search directive, -1 if it is
-	 *         disabled.
-	 */
-	int getSkipEnd();
+    /**
+     * Return the value of the skip-end restart search directive.
+     * 
+     * @return the value of the skip-end restart search directive, -1 if it is
+     *         disabled.
+     */
+    int getSkipEnd();
 
-	/**
-	 * Enable the skip restart search directive. After a match, the next segment
-	 * will have a starting and ending value of <code>arg</code> more than the
-	 * ending value of the matched segment.
-	 * 
-	 * @param arg
-	 *            the value of the skip restart search directive, must be > 0.
-	 */
-	void setSkip(int arg);
+    /**
+     * Enable the skip restart search directive. After a match, the next segment
+     * will have a starting and ending value of <code>arg</code> more than the
+     * ending value of the matched segment.
+     * 
+     * @param arg
+     *            the value of the skip restart search directive, must be > 0.
+     */
+    void setSkip(int arg);
 
-	/**
-	 * Disable the skip restart search directive.
-	 */
-	void unsetSkip();
+    /**
+     * Disable the skip restart search directive.
+     */
+    void unsetSkip();
 
-	/**
-	 * Return the value of the skip restart search directive.
-	 * 
-	 * @return the value of the skip restart search directive, -1 if it is
-	 *         disabled.
-	 */
-	int getSkip();
+    /**
+     * Return the value of the skip restart search directive.
+     * 
+     * @return the value of the skip restart search directive, -1 if it is
+     *         disabled.
+     */
+    int getSkip();
 
-	/**
-	 * Enable the max-overlapping restart search directive. After a match, the
-	 * next segment will have a starting and ending value of
-	 * <code>arg - 1</code> less than the ending value of the matched segment.
-	 * 
-	 * @param arg
-	 *            the value of the max-overlapping restart search directive,
-	 *            must be > 0.
-	 */
-	void setMaxOverlapping(int arg);
+    /**
+     * Enable the max-overlapping restart search directive. After a match, the
+     * next segment will have a starting and ending value of
+     * <code>arg - 1</code> less than the ending value of the matched segment.
+     * 
+     * @param arg
+     *            the value of the max-overlapping restart search directive,
+     *            must be > 0.
+     */
+    void setMaxOverlapping(int arg);
 
-	/**
-	 * Disable the max-overlapping restart search directive.
-	 */
-	void unsetMaxOverlapping();
+    /**
+     * Disable the max-overlapping restart search directive.
+     */
+    void unsetMaxOverlapping();
 
-	/**
-	 * Return the value of the max-overlapping restart search directive.
-	 * 
-	 * @return the value of the max-overlapping restart serach directive, -1 if
-	 *         it is disabled.
-	 */
-	int getMaxOverlapping();
+    /**
+     * Return the value of the max-overlapping restart search directive.
+     * 
+     * @return the value of the max-overlapping restart serach directive, -1 if
+     *         it is disabled.
+     */
+    int getMaxOverlapping();
 
-	Integer getMinimumDuration();
+    Integer getMinimumDuration();
 
-	Unit getMinimumDurationUnits();
+    Unit getMinimumDurationUnits();
 
-	Integer getMaximumDuration();
+    Integer getMaximumDuration();
 
-	Unit getMaximumDurationUnits();
+    Unit getMaximumDurationUnits();
 
-	String getId();
+    String getId();
 
-	/**
-	 * Gets the sliding window width mode. The default value is
-	 * {@link SlidingWindowWidthMode.DEFAULT}.
-	 * 
-	 * @return a {@link SlidingWindowWidthMode} object (will never be
-	 *         <code>null</code>).
-	 */
-	SlidingWindowWidthMode getSlidingWindowWidthMode();
-
+    /**
+     * Gets the sliding window width mode. The default value is
+     * {@link SlidingWindowWidthMode.DEFAULT}.
+     * 
+     * @return a {@link SlidingWindowWidthMode} object (will never be
+     *         <code>null</code>).
+     */
+    SlidingWindowWidthMode getSlidingWindowWidthMode();
 }

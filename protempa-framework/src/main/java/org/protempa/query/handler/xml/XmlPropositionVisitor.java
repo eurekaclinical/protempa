@@ -12,7 +12,7 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.AbstractPropositionCheckedVisitor;
+import org.protempa.proposition.visitor.AbstractPropositionCheckedVisitor;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.Parameter;

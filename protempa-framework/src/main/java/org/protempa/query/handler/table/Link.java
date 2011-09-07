@@ -20,6 +20,7 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
+import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
 
 /**
  * Representation of links between propositions in the PROTEMPA virtual data
@@ -35,7 +36,7 @@ public abstract class Link {
 
     private static final PropertyConstraint[] EMPTY_PROPERTY_CONSTRAINT_ARR = 
             new PropertyConstraint[0];
-
+    
     private final Set<String> propIdsAsSet;
     private final PropertyConstraint[] constraints;
     private final Comparator<Proposition> comparator;
@@ -155,6 +156,33 @@ public abstract class Link {
      */
     public final int getToIndex() {
         return this.toIndex;
+    }
+    
+    /**
+     * Validates the fields of this link specification against the
+     * knowledge source.
+     * 
+     * @param knowledgeSource a {@link KnowledgeSource}. Guaranteed not
+     * <code>null</code>.
+     * 
+     * @throws QueryResultsHandlerValidationFailedException if validation
+     * failed.
+     * @throws KnowledgeSourceReadException if the knowledge source could
+     * not be read.
+     */
+    void validate(KnowledgeSource knowledgeSource) throws 
+            LinkValidationFailedException, KnowledgeSourceReadException {
+        List<String> invalidPropIds = new ArrayList<String>();
+        for (String propId : this.propIdsAsSet) {
+            if (!knowledgeSource.hasPropositionDefinition(propId)) {
+                invalidPropIds.add(propId);
+            }
+        }
+        if (!invalidPropIds.isEmpty()) {
+            throw new LinkValidationFailedException(
+                    "Invalid proposition id(s): " + 
+                    StringUtils.join(invalidPropIds, ", "));
+        }
     }
 
     /**
@@ -286,7 +314,6 @@ public abstract class Link {
             PropertyConstraint[] constraints) {
         Logger logger = Util.logger();
         for (PropertyConstraint ccc : constraints) {
-            boolean constraintMatches = false;
             String propName = ccc.getPropertyName();
             Value value = proposition.getProperty(propName);
             if (value != null) {
@@ -297,13 +324,7 @@ public abstract class Link {
                                 new Object[] { proposition.getId(), propName,
                                         value, vc });
                 }
-                for (Value v : ccc.getValues()) {
-                    if (vc.is(value.compare(v))) {
-                        constraintMatches = true;
-                        break;
-                    }
-                }
-                if (!constraintMatches) {
+                if (!vc.test(value.compare(ccc.getValue()))) {
                     return false;
                 }
             } else {

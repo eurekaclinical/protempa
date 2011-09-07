@@ -6,6 +6,7 @@ import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
 
 /**
  * Specification of a column or sequence of columns in a delimited file
@@ -45,4 +46,20 @@ public interface TableColumnSpec {
             Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException;
+    
+    /**
+     * Validates the fields of this column specification against the
+     * knowledge source.
+     * 
+     * @param knowledgeSource a {@link KnowledgeSource}. Guaranteed not
+     * <code>null</code>.
+     * 
+     * @throws QueryResultsHandlerValidationFailedException if validation
+     * failed.
+     * @throws KnowledgeSourceReadException if the knowledge source could
+     * not be read.
+     */
+    void validate(KnowledgeSource knowledgeSource) throws
+                TableColumnSpecValidationFailedException,
+                KnowledgeSourceReadException;
 }

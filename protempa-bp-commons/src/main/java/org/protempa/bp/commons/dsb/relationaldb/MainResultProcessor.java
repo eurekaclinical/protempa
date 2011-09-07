@@ -55,7 +55,7 @@ abstract class MainResultProcessor<P extends Proposition>
                 if (propId != null) {
                     valAsString = propId;
                 }
-                value = valueType.getValueFactory().parse(valAsString);
+                value = valueType.parse(valAsString);
             }
             i++;
             propertyValues[j] = value;

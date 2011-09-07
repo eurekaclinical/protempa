@@ -1,5 +1,7 @@
 package org.protempa;
 
+import org.protempa.proposition.interval.ConstraintNetworkSegmentComparer;
+
 /**
  * Compares the output of <code>Segment</code> with that of
  * <code>ConstraintNetwork</code>.

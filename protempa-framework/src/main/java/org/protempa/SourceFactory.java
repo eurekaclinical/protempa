@@ -1,5 +1,10 @@
 package org.protempa;
 
+import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.tsb.TermSourceBackend;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
+import org.protempa.backend.asb.AlgorithmSourceBackend;
+import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.InvalidConfigurationException;
 import java.util.ArrayList;
 import java.util.List;

@@ -167,7 +167,7 @@ public final class Weight implements Comparable<Weight>, Serializable {
      * @return true if this weight has the same value, false otherwise. Always
      *         returns false if the value of this weight is infinity.
      */
-    public boolean equalTo(long val) {
+    public boolean isEqual(long val) {
         if (isInfinity) {
             return false;
         } else {

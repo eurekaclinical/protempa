@@ -1,7 +1,7 @@
 package org.protempa.bp.commons;
 
-import org.protempa.AbstractDataSourceBackend;
-import org.protempa.DataSourceBackendInitializationException;
+import org.protempa.backend.dsb.AbstractDataSourceBackend;
+import org.protempa.backend.DataSourceBackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 
 /**

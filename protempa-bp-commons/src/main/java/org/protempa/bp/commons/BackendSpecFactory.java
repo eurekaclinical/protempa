@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import org.protempa.Backend;
+import org.protempa.backend.Backend;
 
 /**
  *

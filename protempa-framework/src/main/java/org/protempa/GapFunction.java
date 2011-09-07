@@ -2,7 +2,7 @@ package org.protempa;
 
 import java.io.Serializable;
 import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.Interval;
+import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.Segment;
 
 public abstract class GapFunction implements Serializable {

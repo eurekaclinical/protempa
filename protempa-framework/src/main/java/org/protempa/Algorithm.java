@@ -1,10 +1,10 @@
 package org.protempa;
 
-import org.protempa.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueFactory;
+import org.protempa.proposition.value.ValueType;
 
 /**
  * Interface to algorithms for processing primitive parameters.
@@ -43,7 +43,7 @@ public interface Algorithm {
 
 	void close();
 
-	ValueFactory getInValueType();
+	ValueType getInValueType();
 
 	AlgorithmParameter[] getParameters();
 

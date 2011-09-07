@@ -6,7 +6,6 @@ import java.text.DateFormat;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.ResourceBundle;
 
 /**
@@ -20,14 +19,14 @@ public final class AbsoluteTimeGranularity implements Granularity {
 
     private static final long serialVersionUID = -4868042711375950931L;
     private static final ResourceBundle resourceBundle = ValueUtil.resourceBundle();
-    private static String[] ABBREV_NAMES = {
+    private static final String[] ABBREV_NAMES = {
         resourceBundle.getString("time_field_abbrev_sec"),
         resourceBundle.getString("time_field_abbrev_min"),
         resourceBundle.getString("time_field_abbrev_hr"),
         resourceBundle.getString("time_field_abbrev_day"),
         resourceBundle.getString("time_field_abbrev_month"),
         resourceBundle.getString("time_field_abbrev_yr")};
-    private static String[] NAMES = {
+    private static final String[] NAMES = {
         resourceBundle.getString("time_field_singular_sec"),
         resourceBundle.getString("time_field_singular_min"),
         resourceBundle.getString("time_field_singular_hr"),
@@ -76,21 +75,21 @@ public final class AbsoluteTimeGranularity implements Granularity {
         new SimpleDateFormat(resourceBundle.getString("med_date_format_gran_day_no_yr")),
         new SimpleDateFormat(resourceBundle.getString("med_date_format_gran_month_no_yr")),
         new SimpleDateFormat(resourceBundle.getString("med_date_format_gran_yr_no_yr"))};
-    private static DateFormat[] shortDateFormats = {
+    private static final DateFormat[] shortDateFormats = {
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_sec")),
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_min")),
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_hr")),
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_day")),
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_month")),
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_yr"))};
-    private static DateFormat[] shortDateFormatsNoYear = {
+    private static final DateFormat[] shortDateFormatsNoYear = {
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_sec_no_yr")),
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_min_no_yr")),
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_hr_no_yr")),
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_day_no_yr")),
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_month_no_yr")),
         new SimpleDateFormat(resourceBundle.getString("short_date_format_gran_yr_no_yr"))};
-    private static DateFormat[] timeFormats = {
+    private static final DateFormat[] timeFormats = {
         new SimpleDateFormat(resourceBundle.getString("time_format_gran_sec")),
         new SimpleDateFormat(resourceBundle.getString("time_format_gran_min")),
         new SimpleDateFormat(resourceBundle.getString("time_format_gran_hr")),

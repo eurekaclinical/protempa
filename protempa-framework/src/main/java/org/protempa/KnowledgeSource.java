@@ -1,5 +1,8 @@
 package org.protempa;
 
+import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

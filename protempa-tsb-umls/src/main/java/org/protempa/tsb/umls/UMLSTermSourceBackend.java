@@ -10,7 +10,7 @@ import java.util.Queue;
 import org.arp.javautil.sql.DatabaseAPI;
 import org.protempa.MalformedTermIdException;
 import org.protempa.Term;
-import org.protempa.TermSourceBackendInitializationException;
+import org.protempa.backend.TermSourceBackendInitializationException;
 import org.protempa.TermSourceReadException;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.AbstractCommonsTermSourceBackend;

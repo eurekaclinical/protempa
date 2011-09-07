@@ -2,7 +2,6 @@ package org.protempa.backend;
 
 import java.util.List;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.protempa.Backend;
 
 /**
  *

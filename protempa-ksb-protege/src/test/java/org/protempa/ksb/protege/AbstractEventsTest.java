@@ -17,28 +17,28 @@ import org.protempa.FinderException;
 public class AbstractEventsTest extends AbstractHELLPAllKeysOneParameterTest {
 
 	@Test
-	public void testICD9_630() throws IOException, FinderException {
+	public void testICD9_630() throws Exception {
 		TestProtempaRunner protempaRunner = new TestProtempaRunner("ICD-9_630");
 		protempaRunner.run();
 		assertEquals(22, protempaRunner.getNumberOfIntervalsFound());
 	}
 
 	@Test
-	public void testICD9_631() throws IOException, FinderException {
+	public void testICD9_631() throws Exception {
 		TestProtempaRunner protempaRunner = new TestProtempaRunner("ICD-9_631");
 		protempaRunner.run();
 		assertEquals(3, protempaRunner.getNumberOfIntervalsFound());
 	}
 
 	@Test
-	public void testICD9_632() throws IOException, FinderException {
+	public void testICD9_632() throws Exception {
 		TestProtempaRunner protempaRunner = new TestProtempaRunner("ICD-9_632");
 		protempaRunner.run();
 		assertEquals(10, protempaRunner.getNumberOfIntervalsFound());
 	}
 
 	@Test
-	public void testICD9_633_1() throws IOException, FinderException {
+	public void testICD9_633_1() throws Exception {
 		TestProtempaRunner protempaRunner = new TestProtempaRunner(
 				"ICD-9_633.1");
 		protempaRunner.run();
@@ -46,7 +46,7 @@ public class AbstractEventsTest extends AbstractHELLPAllKeysOneParameterTest {
 	}
 
 	@Test
-	public void testICD9_633_9() throws IOException, FinderException {
+	public void testICD9_633_9() throws Exception {
 		TestProtempaRunner protempaRunner = new TestProtempaRunner(
 				"ICD-9_633.9");
 		protempaRunner.run();
@@ -54,7 +54,7 @@ public class AbstractEventsTest extends AbstractHELLPAllKeysOneParameterTest {
 	}
 
 	@Test
-	public void testICD9s_Pregnancy() throws IOException, FinderException {
+	public void testICD9s_Pregnancy() throws Exception {
 		TestProtempaRunner protempaRunner = new TestProtempaRunner(
 				"ICD-9s_Pregnancy");
 		protempaRunner.run();
@@ -62,8 +62,7 @@ public class AbstractEventsTest extends AbstractHELLPAllKeysOneParameterTest {
 	}
 
 	@Test
-	public void testICD9_EctopicAndMolarPregnancy() throws IOException,
-			FinderException {
+	public void testICD9_EctopicAndMolarPregnancy() throws Exception {
 		TestProtempaRunner protempaRunner = new TestProtempaRunner(
 				"ICD-9_EctopicAndMolarPregnancy");
 		protempaRunner.run();
@@ -71,7 +70,7 @@ public class AbstractEventsTest extends AbstractHELLPAllKeysOneParameterTest {
 	}
 
 	@Test
-	public void testICD9_Group11() throws IOException, FinderException {
+	public void testICD9_Group11() throws Exception {
 		TestProtempaRunner protempaRunner = new TestProtempaRunner(
 				"ICD-9_Group11");
 		protempaRunner.run();
@@ -79,7 +78,7 @@ public class AbstractEventsTest extends AbstractHELLPAllKeysOneParameterTest {
 	}
 	
 	@Test
-	public void testICD9_SeverePreeclampsia() throws IOException, FinderException {
+	public void testICD9_SeverePreeclampsia() throws Exception {
 		TestProtempaRunner protempaRunner = new TestProtempaRunner("ICD-9_642.5_codes");
 		protempaRunner.run();
 		assertEquals(172, protempaRunner.getNumberOfKeysFound());

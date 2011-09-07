@@ -3,7 +3,7 @@ package org.protempa.backend.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.protempa.Backend;
+import org.protempa.backend.Backend;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendPropertySpec;
 import org.protempa.backend.BackendSpec;

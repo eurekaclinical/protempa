@@ -10,8 +10,8 @@ import java.util.Set;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.DatabaseAPI;
 import org.arp.javautil.sql.InvalidConnectionSpecArguments;
-import org.protempa.DataSourceBackendFailedValidationException;
-import org.protempa.DataSourceBackendInitializationException;
+import org.protempa.backend.DataSourceBackendFailedValidationException;
+import org.protempa.backend.DataSourceBackendInitializationException;
 import org.protempa.DataSourceReadException;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
@@ -24,7 +24,7 @@ import org.protempa.bp.commons.dsb.relationaldb.RelationalDatabaseSpec;
 import org.protempa.bp.commons.dsb.relationaldb.SQLGeneratorFactory;
 import org.protempa.bp.commons.dsb.relationaldb.SQLGeneratorLoadException;
 import org.protempa.bp.commons.dsb.relationaldb.NoCompatibleSQLGeneratorException;
-import org.protempa.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.proposition.Proposition;
 
 /**

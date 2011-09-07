@@ -38,7 +38,7 @@ public interface ValueVisitor {
      * @param listValue
      *            a {@link ListValue}. Cannot be <code>null</code>.
      */
-    void visit(ListValue<? extends Value> listValue);
+    void visit(ValueList<? extends Value> listValue);
 
     /**
      * Processes a number value.

@@ -16,7 +16,7 @@ public class AbsoluteTimeUnit extends AbstractTimeUnit {
     private static final long serialVersionUID = -6754830065091052862L;
     private static final ResourceBundle resourceBundle =
             ValueUtil.resourceBundle();
-    private static String[] ABBREV_NAMES = {
+    private static final String[] ABBREV_NAMES = {
         resourceBundle.getString("rel_time_field_abbrev_sec"),
         resourceBundle.getString("rel_time_field_abbrev_min"),
         resourceBundle.getString("rel_time_field_abbrev_hr"),
@@ -24,7 +24,7 @@ public class AbsoluteTimeUnit extends AbstractTimeUnit {
         resourceBundle.getString("rel_time_field_abbrev_wk"),
         resourceBundle.getString("rel_time_field_abbrev_month"),
         resourceBundle.getString("rel_time_field_abbrev_yr")};
-    private static String[] NAMES = {
+    private static final String[] NAMES = {
         resourceBundle.getString("rel_time_field_singular_sec"),
         resourceBundle.getString("rel_time_field_singular_min"),
         resourceBundle.getString("rel_time_field_singular_hr"),
@@ -56,7 +56,7 @@ public class AbsoluteTimeUnit extends AbstractTimeUnit {
         resourceBundle.getString("med_rel_time_format_gran_wk"),
         resourceBundle.getString("med_rel_time_format_gran_month"),
         resourceBundle.getString("med_rel_time_format_gran_yr")};
-    private static String[] shortRelativeTimeFormats = {
+    private static final String[] shortRelativeTimeFormats = {
         resourceBundle.getString("short_rel_time_format_gran_sec"),
         resourceBundle.getString("short_rel_time_format_gran_min"),
         resourceBundle.getString("short_rel_time_format_gran_hr"),
@@ -109,7 +109,7 @@ public class AbsoluteTimeUnit extends AbstractTimeUnit {
     private static final AbsoluteTimeUnit[] VALUES = new AbsoluteTimeUnit[]{
         SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR};
     private static int nextOrdinal = 0;
-    private static Calendar testLeapSecondCal = Calendar.getInstance();
+    private static final Calendar testLeapSecondCal = Calendar.getInstance();
     private static boolean fastDurationCalcsEnabled;
 
     static {

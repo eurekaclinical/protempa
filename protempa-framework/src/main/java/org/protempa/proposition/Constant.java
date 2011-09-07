@@ -1,5 +1,7 @@
 package org.protempa.proposition;
 
+import org.protempa.proposition.visitor.PropositionCheckedVisitor;
+import org.protempa.proposition.visitor.PropositionVisitor;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

@@ -1,18 +1,24 @@
 package org.protempa.proposition.value;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Map;
 import org.apache.commons.collections.map.ReferenceMap;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
- * A {@link String} value.
+ * Represents a {@link String} value.
  * 
  * @author Andrew Post
  */
-public final class NominalValue extends ValueImpl {
+public final class NominalValue implements Value, Comparable<NominalValue>,
+        Serializable {
 
     private static final long serialVersionUID = 440118249272295573L;
-    private final String val;
+    
+    private String val;
     private transient volatile int hashCode;
 
     @SuppressWarnings("unchecked")
@@ -49,7 +55,6 @@ public final class NominalValue extends ValueImpl {
      *            string is used (<code>""</code>).
      */
     public NominalValue(String val) {
-        super(ValueType.NOMINALVALUE);
         if (val != null) {
             this.val = val;
         } else {
@@ -113,22 +118,46 @@ public final class NominalValue extends ValueImpl {
     public String getFormatted() {
         return val;
     }
+    
+    @Override
+    public ValueType getType() {
+        return ValueType.NOMINALVALUE;
+    }
 
     /**
-     * Compares this nominal value and another lexically.
+     * Compares this nominal value and another lexically. If the argument is
+     * a {@link ListValue}, it checks this string for membership in the list.
      * 
-     * @param d2 another {@link NominalValue}.
-     * @return {@link ValueComparator.GREATER_THAN},
-     * {@link ValueComparator.LESS_THAN} or {@link ValueComparator.EQUAL_TO}
+     * @param o another {@link Value}.
+     * @return If the provided value is a {@link NominalValue}, returns
+     * {@link ValueComparator#GREATER_THAN},
+     * {@link ValueComparator#LESS_THAN} or {@link ValueComparator#EQUAL_TO}
      * depending on whether this nominal value is lexically greater than,
-     * less than or equal to the nominal value provided as argument.
+     * less than or equal to the nominal value provided as argument. If the
+     * provided value is a {@link ValueList}, returns 
+     * {@link ValueComparator#IN} if this object is a member of the list, or
+     * {@link ValueComparator#NOT_IN} if not. Otherwise, returns
+     * {@link ValueComparator#UNKNOWN}.
      */
     @Override
-    protected ValueComparator compareNominalValue(NominalValue d2) {
-        int comp = val.compareTo(d2.val);
-        return comp > 0 ? ValueComparator.GREATER_THAN
-                : (comp < 0 ? ValueComparator.LESS_THAN
-                : ValueComparator.EQUAL_TO);
+    public ValueComparator compare(Value o) {
+        if (o == null) {
+            return ValueComparator.UNKNOWN;
+        }
+        switch (o.getType()) {
+            case NOMINALVALUE:
+                NominalValue other = (NominalValue) o;
+                int comp = compareTo(other);
+                return comp > 0 ? ValueComparator.GREATER_THAN
+                        : (comp < 0 ? ValueComparator.LESS_THAN
+                        : ValueComparator.EQUAL_TO);
+            case VALUELIST:
+                ValueList vl = (ValueList) o;
+                return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;
+            default:
+                return ValueComparator.UNKNOWN;
+        }
+        
     }
 
     @Override
@@ -142,5 +171,25 @@ public final class NominalValue extends ValueImpl {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+    
+    private void writeObject(ObjectOutputStream s) throws IOException {
+        s.writeObject(this.val);
+    }
+    
+    private void readObject(ObjectInputStream s) throws IOException,
+            ClassNotFoundException {
+        String tmpVal = (String) s.readObject();
+        this.val = tmpVal != null ? tmpVal : "";
+        if (tmpVal != null && tmpVal.length() < 20) {
+            if (!cache.containsKey(tmpVal)) {
+                cache.put(tmpVal, this);
+            }
+        }
+    }
+
+    @Override
+    public int compareTo(NominalValue t) {
+        return this.val.compareTo(t.val);
     }
 }

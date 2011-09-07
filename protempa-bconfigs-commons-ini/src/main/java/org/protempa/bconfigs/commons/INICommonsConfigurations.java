@@ -6,11 +6,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.apache.commons.configuration.tree.DefaultExpressionEngine;
-import org.protempa.Backend;
+import org.protempa.backend.Backend;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendPropertySpec;
 import org.protempa.backend.BackendSpec;
@@ -48,7 +49,8 @@ public class INICommonsConfigurations implements Configurations {
             this.pathname += File.separator;
         if (this.pathname == null)
             this.pathname = DEFAULT_PATHNAME;
-        CommonsUtil.logger().fine("Using configurations path " + this.pathname);
+        CommonsUtil.logger().log(Level.FINE, "Using configurations path {0}", 
+                this.pathname);
     }
 
     @Override

@@ -12,7 +12,7 @@ import org.protempa.bp.commons.dsb.relationaldb.Ojdbc6OracleSQLGenerator;
 import org.protempa.bp.commons.dsb.relationaldb.RelationalDatabaseSpec;
 import org.protempa.bp.commons.dsb.relationaldb.ResultCache;
 import org.protempa.bp.commons.dsb.relationaldb.SQLOrderBy;
-import org.protempa.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;

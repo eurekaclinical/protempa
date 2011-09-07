@@ -19,7 +19,7 @@ import org.protempa.PropertyDefinition;
 import org.protempa.SimpleGapFunction;
 import org.protempa.TemporalExtendedParameterDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
-import org.protempa.proposition.Relation;
+import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.ValueSet.ValueSetElement;
 import org.protempa.proposition.value.NominalValue;
@@ -118,7 +118,7 @@ class Util {
                     valueSetEltInst, abbrevDisplayNameSlot);
             String value = (String) cm.getOwnSlotValue(valueSetEltInst,
                     valueSlot);
-            Value val = valueType.getValueFactory().parse(value);
+            Value val = valueType.parse(value);
             vses[i] = new ValueSetElement(val, displayName, abbrevDisplayName);
             i++;
         }

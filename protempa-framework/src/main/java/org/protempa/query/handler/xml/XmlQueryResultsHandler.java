@@ -21,14 +21,17 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.apache.commons.lang.StringUtils;
 import org.protempa.DerivedDataSourceType;
 
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.handler.QueryResultsHandler;
+import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -37,7 +40,7 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
 
     private final Map<String, String> order;
     private KnowledgeSource knowledgeSource;
-    private final String initialProposition;
+    private final String initialPropId;
     private final Writer out;
     private final String[] propIds;
 
@@ -47,10 +50,10 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
     }
 
     public XmlQueryResultsHandler(Writer writer, Map<String, String> propOrder,
-            String initialProp, String[] propIds) {
+            String initialPropId, String[] propIds) {
         this.out = writer;
         this.order = propOrder;
-        this.initialProposition = initialProp;
+        this.initialPropId = initialPropId;
         if (propIds == null) {
             this.propIds = new String[0];
         } else {
@@ -343,9 +346,9 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
             }
             rootNode.appendChild(abstractionNode);
 
-            if (this.initialProposition != null) {
+            if (this.initialPropId != null) {
                 Proposition firstProp = findInitialProposition(
-                        this.initialProposition, propositions);
+                        this.initialPropId, propositions);
                 if (firstProp != null) {
                     Element elem = handleProposition(handled, 
                             forwardDerivations, backwardDerivations,
@@ -357,7 +360,7 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
                     Util.logger()
                             .log(Level.SEVERE,
                                     "Initial proposition {0} not found in proposition list",
-                                    this.initialProposition);
+                                    this.initialPropId);
                 }
             } else {
                 Util.logger()
@@ -388,6 +391,29 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
         } catch (TransformerException e) {
             Util.logger().log(Level.SEVERE, e.getMessage(), e);
             throw new FinderException(e);
+        }
+    }
+
+    @Override
+    public void validate(KnowledgeSource knowledgeSource) throws 
+            QueryResultsHandlerValidationFailedException, 
+            KnowledgeSourceReadException {
+        if (this.initialPropId != null && 
+                !knowledgeSource.hasPropositionDefinition(
+                this.initialPropId)) {
+            throw new QueryResultsHandlerValidationFailedException(
+                    "initialPropId is invalid: " + this.initialPropId);
+        }
+        List<String> invalidPropIds = new ArrayList<String>();
+        for (String propId : this.propIds) {
+            if (!knowledgeSource.hasPropositionDefinition(propId)) {
+                invalidPropIds.add(propId);
+            }
+        }
+        if (!invalidPropIds.isEmpty()) {
+            throw new QueryResultsHandlerValidationFailedException(
+                    "propIds is invalid: " + 
+                    StringUtils.join(invalidPropIds, ", "));
         }
     }
 }

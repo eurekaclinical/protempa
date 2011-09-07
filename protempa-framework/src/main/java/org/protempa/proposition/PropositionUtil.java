@@ -10,6 +10,7 @@ import java.util.RandomAccess;
 import org.protempa.proposition.comparator.MaxFinishTemporalPropositionComparator;
 import org.protempa.proposition.comparator.TemporalPropositionIntervalComparator;
 
+import org.protempa.proposition.interval.IntervalUtil;
 import org.protempa.proposition.value.Unit;
 
 /**
@@ -428,6 +429,77 @@ public class PropositionUtil {
         } else {
             return iteratorBinarySearch(params, timestamp);
         }
+    }
+    
+    public static long distanceBetween(TemporalProposition firstProp,
+            TemporalProposition secondProp) {
+        return distanceBetween(firstProp, secondProp, null);
+    }
+    
+    public static long distanceBetween(TemporalProposition firstProp,
+            TemporalProposition secondProp, Unit units) {
+        if (firstProp == null) {
+            throw new IllegalArgumentException("firstProp cannot be null");
+        }
+        if (secondProp == null) {
+            throw new IllegalArgumentException("secondProp cannot be null");
+        }
+        return IntervalUtil.distanceBetween(firstProp.getInterval(), 
+                secondProp.getInterval(), units);
+    }
+    
+    public static String distanceBetweenFormattedShort(
+            TemporalProposition firstProp, TemporalProposition secondProp) {
+        return distanceBetweenFormattedShort(firstProp, secondProp, null);
+    }
+    
+    public static String distanceBetweenFormattedShort(
+            TemporalProposition firstProp, TemporalProposition secondProp, 
+            Unit units) {
+        if (firstProp == null) {
+            throw new IllegalArgumentException("firstProp cannot be null");
+        }
+        if (secondProp == null) {
+            throw new IllegalArgumentException("secondProp cannot be null");
+        }
+        return IntervalUtil.distanceBetweenFormattedShort(firstProp.getInterval(), 
+                secondProp.getInterval(), units);
+    }
+    
+    public static String distanceBetweenFormattedMedium(
+            TemporalProposition firstProp, TemporalProposition secondProp) {
+        return distanceBetweenFormattedMedium(firstProp, secondProp, null);
+    }
+    
+    public static String distanceBetweenFormattedMedium(
+            TemporalProposition firstProp, TemporalProposition secondProp, 
+            Unit units) {
+        if (firstProp == null) {
+            throw new IllegalArgumentException("firstProp cannot be null");
+        }
+        if (secondProp == null) {
+            throw new IllegalArgumentException("secondProp cannot be null");
+        }
+        return IntervalUtil.distanceBetweenFormattedMedium(
+                firstProp.getInterval(), secondProp.getInterval(), units);
+    }
+    
+    public static String distanceBetweenFormattedLong(
+            TemporalProposition firstProp, TemporalProposition secondProp) {
+        return distanceBetweenFormattedLong(firstProp, secondProp, null);
+    }
+    
+    public static String distanceBetweenFormattedLong(
+            TemporalProposition firstProp, TemporalProposition secondProp, 
+            Unit units) {
+        if (firstProp == null) {
+            throw new IllegalArgumentException("firstProp cannot be null");
+        }
+        if (secondProp == null) {
+            throw new IllegalArgumentException("secondProp cannot be null");
+        }
+        return IntervalUtil.distanceBetweenFormattedLong(
+                firstProp.getInterval(), secondProp.getInterval(), units);
     }
 
     static final Comparator<TemporalProposition> TEMP_PROP_COMP =

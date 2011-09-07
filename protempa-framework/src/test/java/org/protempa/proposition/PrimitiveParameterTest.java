@@ -1,5 +1,6 @@
 package org.protempa.proposition;
 
+import org.protempa.proposition.interval.Interval;
 import java.util.Calendar;
 import java.util.UUID;
 

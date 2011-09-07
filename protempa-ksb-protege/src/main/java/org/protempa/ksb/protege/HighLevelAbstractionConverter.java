@@ -14,7 +14,7 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.Offsets;
 import org.protempa.PropositionDefinition;
-import org.protempa.proposition.Relation;
+import org.protempa.proposition.interval.Relation;
 
 /**
  * Converts and adds Protege complex abstraction instances to a PROTEMPA

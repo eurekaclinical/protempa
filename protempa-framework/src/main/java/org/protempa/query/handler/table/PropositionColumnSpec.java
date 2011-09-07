@@ -15,7 +15,7 @@ import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaException;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.AbstractPropositionCheckedVisitor;
+import org.protempa.proposition.visitor.AbstractPropositionCheckedVisitor;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Context;
 import org.protempa.proposition.Event;
@@ -147,10 +147,10 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     private class ValuesPropositionVisitor extends AbstractPropositionCheckedVisitor {
 
         private KnowledgeSource knowledgeSource;
-        private List<String> resultList;
+        private String[] result;
+        private int i = 0;
 
         ValuesPropositionVisitor() {
-            this.resultList = new ArrayList<String>();
         }
         
         void setKnowledgeSource(KnowledgeSource knowledgeSource) {
@@ -161,25 +161,28 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             return this.knowledgeSource;
         }
 
+        void setResult(String[] result) {
+            this.result = result;
+        }
 
         @Override
         public void visit(AbstractParameter abstractParameter)
                 throws KnowledgeSourceReadException {
             if (outputConfig.showId()) {
-                resultList.add(abstractParameter.getId());
+                result[i++] = abstractParameter.getId();
             }
             if (outputConfig.showValue()) {
-                resultList.add(abstractParameter.getValueFormatted());
+                result[i++] = abstractParameter.getValueFormatted();
             }
             displayNames(abstractParameter);
             if (outputConfig.showStartOrTimestamp()) {
-                resultList.add(abstractParameter.getStartFormattedShort());
+                result[i++] = abstractParameter.getStartFormattedShort();
             }
             if (outputConfig.showFinish()) {
-                resultList.add(abstractParameter.getFinishFormattedShort());
+                result[i++] = abstractParameter.getFinishFormattedShort();
             }
             if (outputConfig.showLength()) {
-                resultList.add(abstractParameter.getLengthFormattedShort());
+                result[i++] = abstractParameter.getLengthFormattedShort();
             }
             processProperties(abstractParameter);
         }
@@ -187,20 +190,20 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         @Override
         public void visit(Event event) throws KnowledgeSourceReadException {
             if (outputConfig.showId()) {
-                resultList.add(event.getId());
+                result[i++] = event.getId();
             }
             if (outputConfig.showValue()) {
-                resultList.add(null);
+                result[i++] = null;
             }
             displayNames(event);
             if (outputConfig.showStartOrTimestamp()) {
-                resultList.add(event.getStartFormattedShort());
+                result[i++] = event.getStartFormattedShort();
             }
             if (outputConfig.showFinish()) {
-                resultList.add(event.getFinishFormattedShort());
+                result[i++] = event.getFinishFormattedShort();
             }
             if (outputConfig.showLength()) {
-                resultList.add(event.getLengthFormattedShort());
+                result[i++] = event.getLengthFormattedShort();
             }
             processProperties(event);
         }
@@ -209,20 +212,20 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         public void visit(PrimitiveParameter primitiveParameter)
                 throws KnowledgeSourceReadException {
             if (outputConfig.showId()) {
-                resultList.add(primitiveParameter.getId());
+                result[i++] = primitiveParameter.getId();
             }
             if (outputConfig.showValue()) {
-                resultList.add(primitiveParameter.getValueFormatted());
+                result[i++] = primitiveParameter.getValueFormatted();
             }
             displayNames(primitiveParameter);
             if (outputConfig.showStartOrTimestamp()) {
-                resultList.add(primitiveParameter.getStartFormattedShort());
+                result[i++] = primitiveParameter.getStartFormattedShort();
             }
             if (outputConfig.showFinish()) {
-                resultList.add(primitiveParameter.getFinishFormattedShort());
+                result[i++] = primitiveParameter.getFinishFormattedShort();
             }
             if (outputConfig.showLength()) {
-                resultList.add(primitiveParameter.getLengthFormattedShort());
+                result[i++] = primitiveParameter.getLengthFormattedShort();
             }
             processProperties(primitiveParameter);
         }
@@ -231,20 +234,20 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         public void visit(Constant constant)
                 throws KnowledgeSourceReadException {
             if (outputConfig.showId()) {
-                resultList.add(constant.getId());
+                result[i++] = constant.getId();
             }
             if (outputConfig.showValue()) {
-                resultList.add(null);
+                result[i++] = null;
             }
             displayNames(constant);
             if (outputConfig.showStartOrTimestamp()) {
-                resultList.add(null);
+                result[i++] = null;
             }
             if (outputConfig.showFinish()) {
-                resultList.add(null);
+                result[i++] = null;
             }
             if (outputConfig.showLength()) {
-                resultList.add(null);
+                result[i++] = null;
             }
             processProperties(constant);
         }
@@ -255,12 +258,14 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                     "Contexts not supported yet");
         }
 
-        List<String> getResult() {
-            return this.resultList;
+        String[] getResult() {
+            return this.result;
         }
 
         void clear() {
-            this.resultList.clear();
+            this.result = null;
+            this.knowledgeSource = null;
+            this.i = 0;
         }
 
         private void displayNames(Proposition proposition) throws KnowledgeSourceReadException {
@@ -271,14 +276,14 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                         knowledgeSource.readPropositionDefinition(proposition.getId());
                 if (propositionDefinition != null) {
                     if (showDisplayName) {
-                        resultList.add(propositionDefinition.getDisplayName());
+                        result[i++] = propositionDefinition.getDisplayName();
                     }
                     if (showAbbrevDisplayName) {
-                        resultList.add(
-                                propositionDefinition.getAbbreviatedDisplayName());
+                        result[i++] = 
+                                propositionDefinition.getAbbreviatedDisplayName();
                     }
                 } else {
-                    resultList.add(null);
+                    result[i++] = null;
                     Util.logger().log(Level.WARNING,
                             "Cannot write display name for {0} because it is not in the knowledge source", proposition.getId());
                 }
@@ -332,10 +337,10 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             for (String propertyName : propertyNames) {
                 Value value = proposition.getProperty(propertyName);
                 if (value != null) {
-                    resultList.add(getOutputPropertyValue(proposition,
-                            propertyName, value));
+                    result[i++] = getOutputPropertyValue(proposition,
+                            propertyName, value);
                 } else {
-                    resultList.add(null);
+                    result[i++] = null;
                 }
             }
         }
@@ -352,7 +357,10 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 proposition, forwardDerivations, backwardDerivations, 
                 references, knowledgeSource);
         propositionVisitor.setKnowledgeSource(knowledgeSource);
-        List<String> result = new ArrayList<String>();
+        String[] result = new String[
+                (this.outputConfig.numActiveColumns() + 
+                this.propertyNames.length) * this.numInstances];
+        propositionVisitor.setResult(result);
         int i = 0;
         for (Proposition prop : propositions) {
             if (i < this.numInstances) {
@@ -367,17 +375,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 break;
             }
         }
-        result.addAll(propositionVisitor.getResult());
         propositionVisitor.clear();
-        while (i < this.numInstances) {
-            int j = 0;
-            while (j < (this.outputConfig.numActiveColumns() + this.propertyNames.length)) {
-                result.add(null);
-                j++;
-            }
-            i++;
-        }
-        return result.toArray(new String[result.size()]);
+        
+        return result;
     }
 
     @Override
@@ -391,5 +391,21 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             result[i] = one[i % one.length];
         }
         return result;
+    }
+    
+    @Override
+    public void validate(KnowledgeSource knowledgeSource) throws 
+            TableColumnSpecValidationFailedException, 
+            KnowledgeSourceReadException {
+        int i = 1;
+        for (Link link : this.links) {
+            try {
+                link.validate(knowledgeSource);
+            } catch (LinkValidationFailedException ex) {
+                throw new TableColumnSpecValidationFailedException(
+                        "Validation of link " + i + " failed", ex);
+            }
+            i++;
+        }
     }
 }

@@ -1,5 +1,7 @@
 package org.protempa.ksb;
 
+import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.ksb.AbstractKnowledgeSourceBackend;
 import org.protempa.*;
 import org.protempa.backend.BackendInstanceSpec;
 

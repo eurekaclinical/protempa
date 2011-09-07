@@ -12,7 +12,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.protempa.AlgorithmSourceBackend;
+import org.protempa.backend.asb.AlgorithmSourceBackend;
 import static org.junit.Assert.*;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendProviderSpecLoaderException;

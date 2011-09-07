@@ -1,8 +1,8 @@
 package org.protempa.ksb.protege;
 
 import edu.stanford.smi.protege.event.ProjectEvent;
-import org.protempa.UnrecoverableBackendErrorEvent;
-import org.protempa.KnowledgeSourceBackendInitializationException;
+import org.protempa.backend.UnrecoverableBackendErrorEvent;
+import org.protempa.backend.KnowledgeSourceBackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.BackendInfo;
 import org.protempa.bp.commons.BackendProperty;

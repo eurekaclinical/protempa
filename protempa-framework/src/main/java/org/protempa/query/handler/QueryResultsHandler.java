@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 
@@ -55,4 +56,21 @@ public interface QueryResultsHandler {
             Map<Proposition,List<Proposition>> backwardDerivations,
             Map<UniqueId,Proposition> references)
             throws FinderException;
+    
+    /**
+     * Validates this query results handler's specification against the
+     * knowledge source. Probably will get replaced by a builder pattern like
+     * queries in the future.
+     * 
+     * @param knowledgeSource a {@link KnowledgeSource}. Guaranteed not
+     * <code>null</code>.
+     * 
+     * @throws QueryResultsHandlerValidationFailedException if validation
+     * failed.
+     * @throws KnowledgeSourceReadException if the knowledge source could
+     * not be read.
+     */
+    public void validate(KnowledgeSource knowledgeSource) 
+            throws QueryResultsHandlerValidationFailedException,
+            KnowledgeSourceReadException;
 }

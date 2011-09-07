@@ -9,7 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 
 import org.arp.javautil.collections.Collections;
-import org.protempa.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
 import org.protempa.query.handler.QueryResultsHandler;

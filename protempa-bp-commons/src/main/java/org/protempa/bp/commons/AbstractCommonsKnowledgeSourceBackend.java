@@ -1,7 +1,7 @@
 package org.protempa.bp.commons;
 
-import org.protempa.AbstractKnowledgeSourceBackend;
-import org.protempa.KnowledgeSourceBackendInitializationException;
+import org.protempa.backend.ksb.AbstractKnowledgeSourceBackend;
+import org.protempa.backend.KnowledgeSourceBackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 
 /**

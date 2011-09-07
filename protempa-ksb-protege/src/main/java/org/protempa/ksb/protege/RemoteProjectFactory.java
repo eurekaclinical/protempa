@@ -3,7 +3,7 @@ package org.protempa.ksb.protege;
 import edu.stanford.smi.protege.model.Project;
 import edu.stanford.smi.protege.server.RemoteProjectManager;
 import java.util.List;
-import org.protempa.KnowledgeSourceBackend;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendProviderManager;
 import org.protempa.backend.BackendProviderSpecLoaderException;

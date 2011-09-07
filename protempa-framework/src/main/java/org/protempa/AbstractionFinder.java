@@ -28,10 +28,13 @@ import org.drools.StatelessSessionResult;
 import org.drools.WorkingMemory;
 import org.protempa.datastore.PropositionStoreCreator;
 import org.protempa.datastore.WorkingMemoryStoreCreator;
-import org.protempa.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.And;
+import org.protempa.query.Query;
+import org.protempa.query.QueryBuildException;
+import org.protempa.query.QueryBuilder;
 import org.protempa.query.handler.QueryResultsHandler;
 
 /**
@@ -165,31 +168,49 @@ final class AbstractionFinder implements Module {
 
     void doFind(Set<String> keyIds, Set<String> propIds,
             Set<And<String>> termIds, Filter filters,
-            QueryResultsHandler resultHandler, QuerySession qs)
+            QueryResultsHandler resultsHandler, QuerySession qs)
             throws FinderException {
+        assert resultsHandler != null : "resultsHandler cannot be null";
         if (this.closed) {
             throw new FinderException("Protempa already closed!");
         }
         try {
-            resultHandler.init(this.knowledgeSource);
+            resultsHandler.init(this.knowledgeSource);
             // List<String> termPropIds =
             // getPropIdsFromTerms(explodeTerms(termIds));
             // List<String> allPropIds = new ArrayList<String>();
             // allPropIds.addAll(propIds);
             // allPropIds.addAll(termPropIds);
+            Logger logger = ProtempaUtil.logger();
+            logger.log(Level.FINE, "Checking query...");
+            for (String propId : propIds) {
+                if (!this.knowledgeSource.hasPropositionDefinition(propId)) {
+                    throw new FinderException(
+                            "Invalid proposition id in query: " + propId);
+                }
+            }
+            logger.log(Level.FINE, "Query checks out");
+            logger.log(Level.FINE, "Validating query results handler...");
+            resultsHandler.validate(this.knowledgeSource);
+            logger.log(Level.FINE, 
+                    "Query results handler validated successfully");
 
             if (workingMemoryCache != null) {
-                doFindExecute(keyIds, propIds, filters, resultHandler, qs,
+                doFindExecute(keyIds, propIds, filters, resultsHandler, qs,
                         new StatefulExecutionStrategy());
             } else {
-                doFindExecute(keyIds, propIds, filters, resultHandler, qs,
+                doFindExecute(keyIds, propIds, filters, resultsHandler, qs,
                         new StatelessExecutionStrategy());
             }
-            resultHandler.finish();
+            resultsHandler.finish();
         } catch (ProtempaException e) {
             String msg = "Query did not complete";
             throw new FinderException(msg, e);
         }
+    }
+    
+    Query buildQuery(QueryBuilder queryBuilder) throws QueryBuildException {
+        return queryBuilder.build(this.knowledgeSource, this.algorithmSource);
     }
 
     /**

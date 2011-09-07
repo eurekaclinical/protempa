@@ -1,11 +1,13 @@
 package org.protempa.query.handler.table;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 
+import java.util.logging.Logger;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
@@ -54,23 +56,40 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
-        List<String> result = new ArrayList<String>();
+        Logger logger = Util.logger();
+        Set<String> result = new HashSet<String>();
         Collection<Proposition> props = traverseLinks(this.links, proposition,
                 forwardDerivations, backwardDerivations, references, 
                 knowledgeSource);
         if (this.countUnique) {
             for (Proposition p : props) {
-                Util.logger().log(Level.FINEST,
-                        "Looking at proposition id " + p.getId());
-                if (!result.contains(p.getId())) {
-                    Util.logger().log(Level.FINEST,
-                            "Adding to count: " + p.getId());
-                    result.add(p.getId());
+                String pId = p.getId();
+                logger.log(Level.FINEST,
+                        "Looking at proposition id {0}", pId);
+                if (result.add(pId)) {
+                    logger.log(Level.FINEST,
+                            "Adding to count: {0}", pId);
                 }
             }
             return new String[] { "" + result.size() };
         } else {
             return new String[] { "" + props.size() };
+        }
+    }
+    
+    @Override
+    public void validate(KnowledgeSource knowledgeSource) throws 
+            TableColumnSpecValidationFailedException, 
+            KnowledgeSourceReadException {
+        int i = 1;
+        for (Link link : this.links) {
+            try {
+                link.validate(knowledgeSource);
+            } catch (LinkValidationFailedException ex) {
+                throw new TableColumnSpecValidationFailedException(
+                        "Validation of link " + i + " failed", ex);
+            }
+            i++;
         }
     }
 }

@@ -4,7 +4,7 @@ import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PairDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
-import org.protempa.proposition.Relation;
+import org.protempa.proposition.interval.Relation;
 
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;

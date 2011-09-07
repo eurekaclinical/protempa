@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.Constraint;
-import org.protempa.dsb.filter.Filter;
-import org.protempa.dsb.filter.PropertyValueFilter;
+import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.PropertyValueFilter;
 
 /**
  * Aggregates info for generating the SQL statement.
@@ -75,8 +75,9 @@ final class ColumnSpecInfoFactory {
 
     private static EntitySpec findRefEntitySpec(
             Collection<EntitySpec> entitySpecs, ReferenceSpec referenceSpec) {
+        String referenceSpecEntityName = referenceSpec.getEntityName();
         for (EntitySpec es : entitySpecs) {
-            if (es.getName().equals(referenceSpec.getEntityName())) {
+            if (es.getName().equals(referenceSpecEntityName)) {
                 return es;
             }
         }

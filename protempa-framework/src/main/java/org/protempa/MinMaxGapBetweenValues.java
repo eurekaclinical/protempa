@@ -4,76 +4,73 @@ import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.value.Unit;
 
 final class MinMaxGapBetweenValues {
-	private int minimumGapBetweenValues;
 
-	private Unit minimumGapBetweenValuesUnits;
+    private int minimumGapBetweenValues;
+    private Unit minimumGapBetweenValuesUnits;
+    private Integer maximumGapBetweenValues;
+    private Unit maximumGapBetweenValuesUnits;
+    private MinMaxGapFunction gapFunction;
 
-	private Integer maximumGapBetweenValues;
+    Integer getMinimumGapBetweenValues() {
+        return this.minimumGapBetweenValues;
+    }
 
-	private Unit maximumGapBetweenValuesUnits;
+    Unit getMinimumGapBetweenValuesUnits() {
+        return this.minimumGapBetweenValuesUnits;
+    }
 
-	private MinMaxGapFunction gapFunction;
+    void setMinimumGapBetweenValues(Integer minimumGapBetweenValues) {
+        if (minimumGapBetweenValues == null
+                || minimumGapBetweenValues.compareTo(0) < 0) {
+            this.minimumGapBetweenValues = 0;
+        } else {
+            this.minimumGapBetweenValues = minimumGapBetweenValues;
+        }
+    }
 
-	Integer getMinimumGapBetweenValues() {
-		return this.minimumGapBetweenValues;
-	}
+    void setMinimumGapBetweenValuesUnits(Unit units) {
+        this.minimumGapBetweenValuesUnits = units;
+    }
 
-	Unit getMinimumGapBetweenValuesUnits() {
-		return this.minimumGapBetweenValuesUnits;
-	}
+    Integer getMaximumGapBetweenValues() {
+        return this.maximumGapBetweenValues;
+    }
 
-	void setMinimumGapBetweenValues(Integer minimumGapBetweenValues) {
-		if (minimumGapBetweenValues == null
-				|| minimumGapBetweenValues.compareTo(0) < 0) {
-			this.minimumGapBetweenValues = 0;
-		} else {
-			this.minimumGapBetweenValues = minimumGapBetweenValues;
-		}
-	}
+    Unit getMaximumGapBetweenValuesUnits() {
+        return this.maximumGapBetweenValuesUnits;
+    }
 
-	void setMinimumGapBetweenValuesUnits(Unit units) {
-		this.minimumGapBetweenValuesUnits = units;
-	}
+    void setMaximumGapBetweenValues(Integer maximumGapBetweenValues) {
+        if (maximumGapBetweenValues == null) {
+            this.maximumGapBetweenValues = null;
+        } else if (maximumGapBetweenValues.compareTo(0) < 0) {
+            this.maximumGapBetweenValues = 0;
+        } else {
+            this.maximumGapBetweenValues = maximumGapBetweenValues;
+        }
+    }
 
-	Integer getMaximumGapBetweenValues() {
-		return this.maximumGapBetweenValues;
-	}
+    void setMaximumGapBetweenValuesUnits(Unit units) {
+        this.maximumGapBetweenValuesUnits = units;
+    }
 
-	Unit getMaximumGapBetweenValuesUnits() {
-		return this.maximumGapBetweenValuesUnits;
-	}
+    boolean satisfiesGap(PrimitiveParameter pp1, PrimitiveParameter pp2) {
+        if (this.gapFunction == null) {
+            this.gapFunction = new MinMaxGapFunction(
+                    this.minimumGapBetweenValues,
+                    this.minimumGapBetweenValuesUnits,
+                    this.maximumGapBetweenValues,
+                    this.maximumGapBetweenValuesUnits);
+        }
+        return this.gapFunction.execute(pp1.getInterval(), pp2.getInterval());
+    }
 
-	void setMaximumGapBetweenValues(Integer maximumGapBetweenValues) {
-		if (maximumGapBetweenValues == null) {
-			this.maximumGapBetweenValues = null;
-		} else if (maximumGapBetweenValues.compareTo(0) < 0) {
-			this.maximumGapBetweenValues = 0;
-		} else {
-			this.maximumGapBetweenValues = maximumGapBetweenValues;
-		}
-	}
-
-	void setMaximumGapBetweenValuesUnits(Unit units) {
-		this.maximumGapBetweenValuesUnits = units;
-	}
-
-	boolean satisfiesGap(PrimitiveParameter pp1, PrimitiveParameter pp2) {
-		if (this.gapFunction == null) {
-			this.gapFunction = new MinMaxGapFunction(
-					this.minimumGapBetweenValues,
-					this.minimumGapBetweenValuesUnits,
-					this.maximumGapBetweenValues,
-					this.maximumGapBetweenValuesUnits);
-		}
-		return this.gapFunction.execute(pp1.getInterval(), pp2.getInterval());
-	}
-
-	protected String debugMessage() {
-		StringBuilder buffer = new StringBuilder();
-		buffer.append("minimumGapBetweenValues=" + this.minimumGapBetweenValues
-				+ " " + this.minimumGapBetweenValuesUnits + ", ");
-		buffer.append("maximumGapBetweenValues=" + this.maximumGapBetweenValues
-				+ this.maximumGapBetweenValuesUnits + ", ");
-		return buffer.toString();
-	}
+    protected String debugMessage() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("minimumGapBetweenValues=" + this.minimumGapBetweenValues
+                + " " + this.minimumGapBetweenValuesUnits + ", ");
+        buffer.append("maximumGapBetweenValues=" + this.maximumGapBetweenValues
+                + this.maximumGapBetweenValuesUnits + ", ");
+        return buffer.toString();
+    }
 }

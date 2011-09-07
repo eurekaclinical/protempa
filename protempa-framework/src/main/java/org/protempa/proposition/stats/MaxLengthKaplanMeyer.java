@@ -11,18 +11,17 @@ import org.protempa.proposition.value.Unit;
  */
 public final class MaxLengthKaplanMeyer extends AbstractKaplanMeyer {
 
-	public MaxLengthKaplanMeyer() {
-		super();
-	}
+    public MaxLengthKaplanMeyer() {
+        super();
+    }
 
-	public MaxLengthKaplanMeyer(Unit targetLengthUnit) {
-		super(targetLengthUnit);
-	}
+    public MaxLengthKaplanMeyer(Unit targetLengthUnit) {
+        super(targetLengthUnit);
+    }
 
-	@Override
-	protected Long length(TemporalProposition temporalProposition,
-			Unit targetLengthUnit) {
-		return temporalProposition.getInterval().maxLengthIn(targetLengthUnit);
-	}
-
+    @Override
+    protected Long length(TemporalProposition temporalProposition,
+            Unit targetLengthUnit) {
+        return temporalProposition.getInterval().maxLengthIn(targetLengthUnit);
+    }
 }

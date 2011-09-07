@@ -79,4 +79,8 @@ public class MappingQueryResultsHandler implements QueryResultsHandler {
             throws FinderException {
         resultMap.put(key, propositions);
     }
+
+    @Override
+    public void validate(KnowledgeSource knowledgeSource) {
+    }
 }

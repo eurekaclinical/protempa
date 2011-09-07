@@ -26,17 +26,17 @@ import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend;
 import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.Constraint;
 import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
-import org.protempa.dsb.filter.Filter;
-import org.protempa.dsb.filter.PositionFilter;
-import org.protempa.dsb.filter.PositionFilter.Side;
-import org.protempa.dsb.filter.PropertyValueFilter;
+import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.PositionFilter;
+import org.protempa.backend.dsb.filter.PositionFilter.Side;
+import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.BooleanValue;
 import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.InequalityNumberValue;
-import org.protempa.proposition.value.ListValue;
+import org.protempa.proposition.value.ValueList;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
 import org.protempa.proposition.value.OrdinalValue;
@@ -1241,7 +1241,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
 
         @Override
-        public void visit(ListValue<? extends Value> listValue) {
+        public void visit(ValueList<? extends Value> listValue) {
             for (Value val : listValue) {
                 val.accept(this);
             }

@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.arp.javautil.arrays.Arrays;
-import org.protempa.DataSourceBackendFailedValidationException;
+import org.protempa.backend.DataSourceBackendFailedValidationException;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropertyDefinition;

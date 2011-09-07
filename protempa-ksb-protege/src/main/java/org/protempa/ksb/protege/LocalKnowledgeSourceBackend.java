@@ -4,7 +4,7 @@ import edu.stanford.smi.protege.event.ProjectEvent;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import org.protempa.KnowledgeSourceBackendInitializationException;
+import org.protempa.backend.KnowledgeSourceBackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.BackendInfo;
 import org.protempa.bp.commons.BackendProperty;

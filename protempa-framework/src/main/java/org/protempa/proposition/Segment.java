@@ -1,5 +1,7 @@
 package org.protempa.proposition;
 
+import org.protempa.proposition.interval.IntervalFactory;
+import org.protempa.proposition.interval.Interval;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.Collections;

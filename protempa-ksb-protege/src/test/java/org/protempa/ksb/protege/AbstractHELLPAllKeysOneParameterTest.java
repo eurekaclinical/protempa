@@ -31,25 +31,19 @@ public abstract class AbstractHELLPAllKeysOneParameterTest
             this.propId = propId;
         }
 
-        public void run() throws FinderException {
+        public void run() throws Exception {
             this.numberOfIntervalsFound = 0;
             this.numberOfKeysFound = 0;
 
-            try {
-                MappingQueryResultsHandler mqrh =
-                        new MappingQueryResultsHandler();
-                DefaultQueryBuilder q = new DefaultQueryBuilder();
-                q.setPropIds(new String[] {propId});
-                protempa.execute(q.build(), mqrh);
-                Map<String, List<Proposition>> results = mqrh.getResultMap();
-                this.numberOfKeysFound = results.size();
-                for (List<Proposition> vals : results.values()) {
-                    this.numberOfIntervalsFound += vals.size();
-                }
-            } catch (FinderException fe) {
-                throw fe;
-            } catch (Exception e) {
-                throw new FinderException("An error occurred", e);
+            MappingQueryResultsHandler mqrh =
+                    new MappingQueryResultsHandler();
+            DefaultQueryBuilder q = new DefaultQueryBuilder();
+            q.setPropIds(new String[]{propId});
+            protempa.execute(protempa.buildQuery(q), mqrh);
+            Map<String, List<Proposition>> results = mqrh.getResultMap();
+            this.numberOfKeysFound = results.size();
+            for (List<Proposition> vals : results.values()) {
+                this.numberOfIntervalsFound += vals.size();
             }
         }
 

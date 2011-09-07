@@ -3,7 +3,6 @@ package org.protempa.backend;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.protempa.Backend;
 
 /**
  * Loads 

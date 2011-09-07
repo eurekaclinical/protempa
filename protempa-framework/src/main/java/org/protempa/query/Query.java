@@ -4,8 +4,7 @@ import java.io.Serializable;
 import org.apache.commons.lang.ArrayUtils;
 
 import org.protempa.ProtempaUtil;
-import org.protempa.TermSubsumption;
-import org.protempa.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.Filter;
 
 /**
  * Base query implementation.

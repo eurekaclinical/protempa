@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.protempa.Backend;
-import org.protempa.BackendInitializationException;
 
 /**
  *

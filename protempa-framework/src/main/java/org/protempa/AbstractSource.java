@@ -1,5 +1,8 @@
 package org.protempa;
 
+import org.protempa.backend.UnrecoverableBackendErrorEvent;
+import org.protempa.backend.BackendUpdatedEvent;
+import org.protempa.backend.Backend;
 import java.util.ArrayList;
 import java.util.List;
 

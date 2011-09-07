@@ -14,7 +14,7 @@ import org.arp.javautil.datastore.DataStore;
 import org.protempa.DataSourceResultMap;
 import org.protempa.datastore.UniqueIdUniqueIdStoreCreator;
 import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.AbstractPropositionVisitor;
+import org.protempa.proposition.visitor.AbstractPropositionVisitor;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Context;
 import org.protempa.proposition.Event;

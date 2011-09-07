@@ -1,5 +1,6 @@
 package org.protempa.proposition;
 
+import org.protempa.proposition.interval.IntervalFactory;
 import java.util.UUID;
 
 import junit.framework.TestCase;

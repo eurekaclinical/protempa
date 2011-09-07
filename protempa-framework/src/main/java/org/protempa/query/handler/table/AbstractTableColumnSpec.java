@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,21 +17,14 @@ import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 
 public abstract class AbstractTableColumnSpec implements TableColumnSpec {
-
+    
     boolean checkCompatible(Proposition proposition,
             PropertyConstraint[] constraints) {
         for (PropertyConstraint ccc : constraints) {
             String propName = ccc.getPropertyName();
             Value value = proposition.getProperty(propName);
             ValueComparator vc = ccc.getValueComparator();
-            boolean constraintMatches = false;
-            for (Value v : ccc.getValues()) {
-                if (vc.is(value.compare(v))) {
-                    constraintMatches = true;
-                    break;
-                }
-            }
-            if (!constraintMatches) {
+            if (!vc.test(value.compare(ccc.getValue()))) {
                 return false;
             }
         }
@@ -47,13 +39,28 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
         return result.toString();
     }
 
-    Collection<Proposition> traverseLinks(Link[] links,
+    /**
+     * Traverses links from a proposition to a list of propositions.
+     * 
+     * @param links the {@link Link}s to traverse.
+     * @param proposition the {@link Proposition} from which to start.
+     * @param forwardDerivations map of propositions from raw data toward derived propositions.
+     * @param backwardDerivations map of propositions from derived propositions 
+     * toward raw data.
+     * @param references a map of unique id to the corresponding proposition
+     * for propositions that are referred to by other propositions.
+     * @param knowledgeSource the {@link KnowledgeSource}.
+     * @return the list of {@link Propositions} at the end of the traversals.
+     * @throws KnowledgeSourceReadException if an error occurred reading from
+     * the knowledge source.
+     */
+    List<Proposition> traverseLinks(Link[] links,
             Proposition proposition,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
-        Queue<Proposition> result = new LinkedList<Proposition>();
+        LinkedList<Proposition> result = new LinkedList<Proposition>();
         Set<Proposition> cache = new HashSet<Proposition>();
         Logger logger = Util.logger();
         result.add(proposition);
@@ -65,9 +72,7 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
                 Collection<Proposition> c = link.traverse(prop, 
                         forwardDerivations, backwardDerivations,
                         references, knowledgeSource, cache);
-                for (Proposition p : c) {
-                    result.add(p);
-                }
+                result.addAll(c);
                 j++;
             }
             if (logger.isLoggable(Level.FINEST)) {

@@ -15,7 +15,9 @@ import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.Value;
 
 /**
@@ -49,24 +51,32 @@ public final class Derivation extends Link {
         MULT_BACKWARD
     }
     private final Behavior behavior;
-    private Value[] allowedValues;
+    private final Value[] allowedValues;
     private Set<String> knowledgeTree;
+    private final Relation relation;
 
     public Derivation(String[] propositionIds, Behavior behavior) {
-        this(propositionIds, null, null, behavior);
+        this(propositionIds, null, null, behavior, null);
     }
 
     public Derivation(String[] propositionIds,
             PropertyConstraint[] constraints, Behavior behavior) {
         this(propositionIds, constraints, null, -1, -1, null,
-                behavior);
+                behavior, null);
     }
-
+    
     public Derivation(String[] propositionIds,
             PropertyConstraint[] constraints, Value[] allowedValues,
             Behavior behavior) {
         this(propositionIds, constraints, null, -1, -1, allowedValues,
-                behavior);
+                behavior, null);
+    }
+
+    public Derivation(String[] propositionIds,
+            PropertyConstraint[] constraints, Value[] allowedValues,
+            Behavior behavior, Relation relation) {
+        this(propositionIds, constraints, null, -1, -1, allowedValues,
+                behavior, relation);
     }
 
     public Derivation(String[] propositionIds,
@@ -74,7 +84,7 @@ public final class Derivation extends Link {
             Comparator<Proposition> comparator, int index,
             Behavior behavior) {
         this(propositionIds, constraints, comparator, index,
-                index >= 0 ? index + 1 : -1, null, behavior);
+                index >= 0 ? index + 1 : -1, null, behavior, null);
     }
 
     public Derivation(String[] propositionIds,
@@ -82,7 +92,7 @@ public final class Derivation extends Link {
             Comparator<Proposition> comparator, int index,
             Value[] allowedValues, Behavior behavior) {
         this(propositionIds, constraints, comparator, index,
-                index >= 0 ? index + 1 : -1, allowedValues, behavior);
+                index >= 0 ? index + 1 : -1, allowedValues, behavior, null);
     }
 
     public Derivation(String[] propositionIds,
@@ -90,14 +100,14 @@ public final class Derivation extends Link {
             Comparator<Proposition> comparator, int fromIndex, int toIndex,
             Behavior behavior) {
         this(propositionIds, constraints, comparator, fromIndex, toIndex,
-                null, behavior);
+                null, behavior, null);
 
     }
 
     public Derivation(String[] propositionIds,
             PropertyConstraint[] constraints,
             Comparator<Proposition> comparator, int fromIndex, int toIndex,
-            Value[] allowedValues, Behavior behavior) {
+            Value[] allowedValues, Behavior behavior, Relation relation) {
         super(propositionIds, constraints, comparator, fromIndex, toIndex);
         if (allowedValues == null) {
             this.allowedValues = new Value[0];
@@ -108,6 +118,7 @@ public final class Derivation extends Link {
             throw new IllegalArgumentException("behavior cannot be null");
         }
         this.behavior = behavior;
+        this.relation = relation;
     }
 
     @Override
@@ -149,11 +160,11 @@ public final class Derivation extends Link {
         List<Proposition> derived = null;
         switch (this.behavior) {
             case SINGLE_FORWARD:
-                derived = filterMatches(forwardDerivations.get(proposition),
+                derived = filterMatches(proposition, forwardDerivations.get(proposition),
                         cache);
                 break;
             case SINGLE_BACKWARD:
-                derived = filterMatches(backwardDerivations.get(proposition),
+                derived = filterMatches(proposition, backwardDerivations.get(proposition),
                         cache);
                 break;
             case MULT_FORWARD:
@@ -263,14 +274,26 @@ public final class Derivation extends Link {
      * 
      * @return a newly-created {@link List<Proposition>}.
      */
-    private List<Proposition> filterMatches(
+    private List<Proposition> filterMatches(Proposition inProposition,
             Collection<Proposition> propositions, Set<Proposition> cache) {
+        TemporalProposition inTp = null;
+        if (this.relation != null) {
+            if (inProposition instanceof TemporalProposition) {
+                inTp = (TemporalProposition) inProposition;
+            }
+        }
         List<Proposition> result = new ArrayList<Proposition>();
         if (propositions != null) {
             for (Proposition proposition : propositions) {
                 if (cache.add(proposition)
                         && isMatch(proposition)
                         && hasAllowedValue(proposition)) {
+                    if (inTp != null && proposition instanceof TemporalProposition) {
+                        TemporalProposition tp = (TemporalProposition) proposition;
+                        if (!this.relation.hasRelation(tp.getInterval(), inTp.getInterval())) {
+                            continue;
+                        }
+                    }
                     result.add(proposition);
                 }
             }

@@ -1,6 +1,6 @@
 package org.protempa;
 
-import org.protempa.proposition.Interval;
+import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.TemporalProposition;
 

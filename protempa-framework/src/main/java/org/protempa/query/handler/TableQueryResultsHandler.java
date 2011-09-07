@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
@@ -17,6 +18,7 @@ import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.handler.table.TableColumnSpec;
+import org.protempa.query.handler.table.TableColumnSpecValidationFailedException;
 
 /**
  * 
@@ -170,6 +172,33 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
             } catch (IOException ex) {
                 throw new FinderException("Could not write row" + ex);
             }
+        }
+    }
+
+    @Override
+    public void validate(KnowledgeSource knowledgeSource) 
+            throws QueryResultsHandlerValidationFailedException,
+            KnowledgeSourceReadException {
+        List<String> invalidPropIds = new ArrayList<String>();
+        for (String propId : this.rowPropositionIds) {
+            if (!knowledgeSource.hasPropositionDefinition(propId)) {
+                invalidPropIds.add(propId);
+            }
+        }
+        if (!invalidPropIds.isEmpty()) {
+            throw new QueryResultsHandlerValidationFailedException(
+                        "Invalid row proposition id(s): " + 
+                    StringUtils.join(invalidPropIds, ", "));
+        }
+        int i = 1;
+        for (TableColumnSpec columnSpec : this.columnSpecs) {
+            try {
+                columnSpec.validate(knowledgeSource);
+            } catch (TableColumnSpecValidationFailedException ex) {
+                throw new QueryResultsHandlerValidationFailedException(
+                        "Validation of column spec " + i + " failed", ex);
+            }
+            i++;
         }
     }
 }

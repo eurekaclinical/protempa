@@ -85,4 +85,8 @@ public final class DeidentifyQueryResultsHandler
         }
         return keyId;
     }
+
+    @Override
+    public void validate(KnowledgeSource knowledgeSource) {
+    }
 }

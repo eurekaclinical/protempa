@@ -1,5 +1,6 @@
 package org.protempa.asb;
 
+import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.*;
 
 import junit.framework.TestCase;

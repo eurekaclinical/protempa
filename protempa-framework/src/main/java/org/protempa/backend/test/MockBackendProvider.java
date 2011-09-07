@@ -3,10 +3,10 @@ package org.protempa.backend.test;
 import org.protempa.backend.*;
 
 import java.util.Collections;
-import org.protempa.AlgorithmSourceBackend;
-import org.protempa.DataSourceBackend;
-import org.protempa.KnowledgeSourceBackend;
-import org.protempa.TermSourceBackend;
+import org.protempa.backend.asb.AlgorithmSourceBackend;
+import org.protempa.backend.dsb.DataSourceBackend;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
+import org.protempa.backend.tsb.TermSourceBackend;
 
 public final class MockBackendProvider implements BackendProvider {
 

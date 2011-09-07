@@ -13,7 +13,7 @@ import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.KnowledgeBase;
 import edu.stanford.smi.protege.model.Project;
 import edu.stanford.smi.protege.model.Slot;
-import org.protempa.KnowledgeSourceBackendInitializationException;
+import org.protempa.backend.KnowledgeSourceBackendInitializationException;
 import org.protempa.KnowledgeSourceReadException;
 
 /**

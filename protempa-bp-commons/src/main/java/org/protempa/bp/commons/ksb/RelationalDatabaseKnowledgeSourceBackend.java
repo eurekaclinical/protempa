@@ -3,7 +3,7 @@ package org.protempa.bp.commons.ksb;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.EventDefinition;
 import org.protempa.KnowledgeBase;
-import org.protempa.KnowledgeSourceBackendInitializationException;
+import org.protempa.backend.KnowledgeSourceBackendInitializationException;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.AbstractCommonsKnowledgeSourceBackend;
