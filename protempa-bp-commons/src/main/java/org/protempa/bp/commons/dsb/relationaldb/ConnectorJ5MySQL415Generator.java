@@ -3,6 +3,10 @@ package org.protempa.bp.commons.dsb.relationaldb;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
+
+import org.protempa.backend.dsb.filter.Filter;
 
 /**
  * A SQL generator that is compatible with Connector/J 5.x and MySQL 4.1 and
@@ -39,8 +43,7 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
     private boolean checkDatabaseCompatibility(Connection connection)
             throws SQLException {
         DatabaseMetaData metaData = connection.getMetaData();
-        if (!metaData.getDatabaseProductName().toUpperCase()
-                .contains("MYSQL"))
+        if (!metaData.getDatabaseProductName().toUpperCase().contains("MYSQL"))
             return false;
         int dbMajorVersion = metaData.getDatabaseMajorVersion();
         if (dbMajorVersion != 4 && dbMajorVersion != 5)
@@ -50,7 +53,7 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
 
     @Override
     public void generateFromTable(String schema, String table,
-        StringBuilder fromPart, int i) {
+            StringBuilder fromPart, int i) {
         if (schema != null)
             throw new IllegalArgumentException("schema is not supported");
         fromPart.append(table);
@@ -60,5 +63,14 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
     @Override
     protected String getDriverClassNameToLoad() {
         return driverName;
+    }
+
+    @Override
+    protected SelectStatement getSelectStatement(EntitySpec entitySpec,
+            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+        return new ConnectorJ5MySQLSelectStatement(entitySpec, referenceSpec, entitySpecs,
+                filters, propIds, keyIds, order, resultProcessor);
     }
 }

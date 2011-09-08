@@ -3,13 +3,17 @@ package org.protempa.bp.commons.dsb.relationaldb;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
+
+import org.protempa.backend.dsb.filter.Filter;
 
 /**
- *
+ * 
  * @author Andrew Post
  */
 public class Ojdbc6OracleSQLGenerator extends AbstractSQLGenerator {
-    
+
     @Override
     public boolean checkCompatibility(Connection connection)
             throws SQLException {
@@ -65,20 +69,23 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGenerator {
     }
 
     /**
-     * Oracle doesn't allow more than 1000 elements in an IN clause, so if
-     * we want more than 1000 we create multiple IN clauses chained together
-     * by OR.
+     * Oracle doesn't allow more than 1000 elements in an IN clause, so if we
+     * want more than 1000 we create multiple IN clauses chained together by OR.
      * 
-     * @param wherePart the SQL statement {@link StringBuilder}.
-     * @param tableNumber the table number.
-     * @param columnName the column name {@link String}.
-     * @param elements the elements of the IN clause.
-     * @param not set to <code>true</code> to generate <code>NOT IN</code>.
+     * @param wherePart
+     *            the SQL statement {@link StringBuilder}.
+     * @param tableNumber
+     *            the table number.
+     * @param columnName
+     *            the column name {@link String}.
+     * @param elements
+     *            the elements of the IN clause.
+     * @param not
+     *            set to <code>true</code> to generate <code>NOT IN</code>.
      */
     @Override
-    public void generateInClause(StringBuilder wherePart,
-            int tableNumber, String columnName, Object[] elements,
-            boolean not) {
+    public void generateInClause(StringBuilder wherePart, int tableNumber,
+            String columnName, Object[] elements, boolean not) {
         generateColumnReference(tableNumber, columnName, wherePart);
         if (not) {
             wherePart.append(" NOT");
@@ -103,5 +110,14 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGenerator {
     @Override
     protected String getDriverClassNameToLoad() {
         return "oracle.jdbc.OracleDriver";
+    }
+
+    @Override
+    protected SelectStatement getSelectStatement(EntitySpec entitySpec,
+            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+        return new Ojdbc6OracleSelectStatement(entitySpec, referenceSpec, entitySpecs,
+                filters, propIds, keyIds, order, resultProcessor);
     }
 }

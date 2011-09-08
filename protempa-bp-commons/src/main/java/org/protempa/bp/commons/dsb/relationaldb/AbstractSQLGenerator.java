@@ -725,6 +725,11 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         return false;
     }
 
+    protected abstract SelectStatement getSelectStatement(EntitySpec entitySpec, ReferenceSpec referenceSpec,
+            List<EntitySpec> entitySpecs, Set<Filter> filters,
+            Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
+            SQLGenResultProcessor resultProcessor);
+    
     private String generateSelect(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, Set<String> propIds,
             Set<Filter> filtersCopy, List<EntitySpec> entitySpecsCopy,
