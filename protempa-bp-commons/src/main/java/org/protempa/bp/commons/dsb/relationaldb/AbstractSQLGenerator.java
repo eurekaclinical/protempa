@@ -20,8 +20,11 @@ import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
+import org.arp.javautil.io.Retryable;
+import org.arp.javautil.io.Retryer;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
+import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
 import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend;
 import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.Constraint;
@@ -168,26 +171,26 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
         Unit partitionBy = entitySpec.getPartitionBy();
         List<Set<Filter>> filterList = new ArrayList<Set<Filter>>();
-        if (partitionBy == null || positionFilter == null 
+        if (partitionBy == null || positionFilter == null
                 || positionFilter.getStart() == null
                 || positionFilter.getFinish() == null
                 || !positionFilter.getStartSide().equals(
-                    positionFilter.getFinishSide())) {
+                positionFilter.getFinishSide())) {
             filterList.add(filtersCopy);
         } else {
             Long start = positionFilter.getStart();
             Long actualFinish = positionFilter.getFinish();
             Granularity startGran = positionFilter.getStartGranularity();
             Granularity finishGran = positionFilter.getFinishGranularity();
-            Unit finishUnit = finishGran != null ?
-                finishGran.getCorrespondingUnit() : null;
+            Unit finishUnit = finishGran != null
+                    ? finishGran.getCorrespondingUnit() : null;
             boolean doLoop = true;
             while (doLoop) {
                 Set<Filter> newFiltersCopy = new HashSet<Filter>(filtersCopy);
                 newFiltersCopy.remove(positionFilter);
                 Long nextStart = partitionBy.addToPosition(start, 1);
-                Long finish = finishUnit != null ?
-                    finishUnit.addToPosition(nextStart, -1) : -1;
+                Long finish = finishUnit != null
+                        ? finishUnit.addToPosition(nextStart, -1) : -1;
                 if (finish.compareTo(actualFinish) >= 0) {
                     finish = actualFinish;
                     doLoop = false;
@@ -247,14 +250,54 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                         new Object[]{backendNameForMessages, entitySpecName});
             }
 
+            RetryableSQLExecutor operation = new RetryableSQLExecutor(
+                    getConnectionSpec(), query, resultProcessor);
+            Retryer<SQLException> retryer = new Retryer<SQLException>(3);
+            if (!retryer.execute(operation)) {
+                SQLException ex = 
+                        SQLExecutor.assembleSQLException(retryer.getErrors());
+                throw new DataSourceReadException(
+                        "Error retrieving " + entitySpecName
+                        + " from data source backend " 
+                        + backendNameForMessages,
+                        ex);
+            }
+
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE,
+                        "Query for {0} in data source backend {1} is complete",
+                        new Object[]{entitySpecName, backendNameForMessages});
+            }
+        }
+    }
+
+    private static class RetryableSQLExecutor 
+            implements Retryable<SQLException> {
+
+        private final ConnectionSpec connectionSpec;
+        private final String query;
+        private final ResultProcessor resultProcessor;
+
+        RetryableSQLExecutor(ConnectionSpec connectionSpec, String query,
+                ResultProcessor resultProcessor) {
+            this.connectionSpec = connectionSpec;
+            this.query = query;
+            this.resultProcessor = resultProcessor;
+        }
+
+        @Override
+        public SQLException attempt() {
             try {
-                Connection con = getConnectionSpec().getOrCreate();
+                Connection con = this.connectionSpec.getOrCreate();
                 con.setReadOnly(true);
                 try {
-                    Statement stmt = con.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                    Statement stmt = con.createStatement(
+                            ResultSet.TYPE_FORWARD_ONLY,
+                            ResultSet.CONCUR_READ_ONLY);
                     stmt.setFetchSize(FETCH_SIZE);
                     try {
-                        SQLExecutor.executeSQL(con, stmt, query, resultProcessor);
+                        SQLExecutor.executeSQL(con, stmt, this.query,
+                                this.resultProcessor);
                         stmt.close();
                         stmt = null;
                     } finally {
@@ -275,16 +318,18 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                         }
                     }
                 }
+                return null;
             } catch (SQLException ex) {
-                throw new DataSourceReadException(
-                        "Error retrieving " + entitySpecName + 
-                        " from data source backend " + backendNameForMessages, 
-                        ex);
+                return ex;
             }
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE,
-                        "Query for {0} in data source backend {1} is complete",
-                        new Object[]{entitySpecName, backendNameForMessages});
+        }
+
+        @Override
+        public void recover() {
+            try {
+                Thread.sleep(3);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
             }
         }
     }
@@ -1257,7 +1302,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             throw new UnsupportedOperationException(
                     "inequalityNumberValue not supported");
         }
-        
+
         @Override
         public void visit(DateValue dateValue) {
             values.add(dateValue.getDate());
@@ -1362,9 +1407,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
      */
     static boolean needsPropIdInClause(Set<String> queryPropIds,
             String[] entitySpecPropIds) {
-        
+
         Set<String> entitySpecPropIdsSet = Arrays.asSet(entitySpecPropIds);
-        
+
         //Filter propIds that are not in the entitySpecPropIds array.
         List<String> filteredPropIds =
                 new ArrayList<String>(entitySpecPropIds.length);
@@ -1373,8 +1418,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 filteredPropIds.add(propId);
             }
         }
-        return (filteredPropIds.size() < entitySpecPropIds.length * 0.85f) && 
-                (filteredPropIds.size() <= 2000);
+        return (filteredPropIds.size() < entitySpecPropIds.length * 0.85f)
+                && (filteredPropIds.size() <= 2000);
     }
 
     private static Constraint valueComparatorToSqlOp(

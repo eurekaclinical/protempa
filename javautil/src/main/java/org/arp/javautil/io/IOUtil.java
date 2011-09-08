@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Convenience routines for reading files, resources, readers, and input
@@ -16,6 +17,12 @@ import java.util.Properties;
  * @author Andrew Post
  */
 public final class IOUtil {
+    
+    private static class LazyLoggerHolder {
+
+        private static Logger instance = 
+                Logger.getLogger(IOUtil.class.getPackage().getName());
+    }
 
     private IOUtil() {
     }
@@ -235,5 +242,14 @@ public final class IOUtil {
                     " using " + cls.getName() + "'s class loader");
         }
         return result;
+    }
+    
+    /**
+     * Gets the logger for this package.
+     * 
+     * @return a <code>Logger</code> object.
+     */
+    static Logger logger() {
+        return LazyLoggerHolder.instance;
     }
 }

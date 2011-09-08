@@ -5,7 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.logging.Level;
+import org.arp.javautil.io.Retryable;
+import org.arp.javautil.io.Retryer;
 
 /**
  * Convenience class for executing SQL queries.
@@ -13,6 +16,8 @@ import java.util.logging.Level;
  * @author Andrew Post
  */
 public final class SQLExecutor {
+    
+    private static final int RETRIES = 3;
 
     public static interface StatementPreparer {
 
@@ -156,44 +161,150 @@ public final class SQLExecutor {
 
     public static void executeSQL(ConnectionSpec connectionCreator, String sql,
             ResultProcessor resultProcessor) throws SQLException {
+        executeSQL(connectionCreator, sql, resultProcessor, 0);
+    }
+    
+    private static abstract class RetryableExecutor implements 
+            Retryable<SQLException> {
+        private static final long THREE_SECONDS = 3 * 1000L;
+        
+        @Override
+        public void recover() {
+            try {
+                Thread.sleep(THREE_SECONDS);
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+    
+    private static class RetryableStatementExecutor extends RetryableExecutor {
+        private final ConnectionSpec connectionSpec;
+        private final String sql;
+        private final ResultProcessor resultProcessor;
+        
+        RetryableStatementExecutor(ConnectionSpec connectionCreator, 
+                String sql, ResultProcessor resultProcessor) {
+            this.connectionSpec = connectionCreator;
+            this.sql = sql;
+            this.resultProcessor = resultProcessor;
+        }
+
+        @Override
+        public SQLException attempt() {
+            try {
+                Connection con = this.connectionSpec.getOrCreate();
+                try {
+                    executeSQL(con, this.sql, this.resultProcessor);
+                    con.close();
+                    con = null;
+                } finally {
+                    if (con != null) {
+                        try {
+                            con.close();
+                        } catch (SQLException ex) {
+                        }
+                    }
+                }
+                return null;
+            } catch (SQLException sqle) {
+                return sqle;
+            }
+        }
+    }
+    
+    public static void executeSQL(ConnectionSpec connectionCreator, String sql,
+            ResultProcessor resultProcessor, int retries) throws SQLException {
         if (connectionCreator == null) {
             throw new IllegalArgumentException(
                     "connectionCreator cannot be null");
         }
-        Connection con = connectionCreator.getOrCreate();
-        try {
-            executeSQL(con, sql, resultProcessor);
-            con.close();
-            con = null;
-        } finally {
-            if (con != null) {
+        RetryableStatementExecutor executor = 
+                new RetryableStatementExecutor(connectionCreator, sql,
+                        resultProcessor);
+        Retryer<SQLException> retryer = new Retryer<SQLException>(RETRIES);
+        if (!retryer.execute(executor)) {
+            throw assembleSQLException(retryer.getErrors());
+        }
+    }
+    
+    public static void executeSQL(ConnectionSpec connectionCreator, String sql,
+            StatementPreparer stmtPreparer, ResultProcessor resultProcessor) 
+            throws SQLException {
+        executeSQL(connectionCreator, sql, stmtPreparer, resultProcessor, 0);
+    }
+    
+    private static class RetryablePreparedStatementExecutor 
+            extends RetryableExecutor {
+        private final ConnectionSpec connectionSpec;
+        private final String sql;
+        private final StatementPreparer stmtPreparer;
+        private final ResultProcessor resultProcessor;
+        
+        RetryablePreparedStatementExecutor(ConnectionSpec connectionCreator, 
+                String sql, StatementPreparer stmtPreparer,
+                ResultProcessor resultProcessor) {
+            this.connectionSpec = connectionCreator;
+            this.sql = sql;
+            this.resultProcessor = resultProcessor;
+            this.stmtPreparer = stmtPreparer;
+        }
+
+        @Override
+        public SQLException attempt() {
+            try {
+                Connection con = this.connectionSpec.getOrCreate();
                 try {
+                    executeSQL(con, sql, stmtPreparer, resultProcessor);
                     con.close();
-                } catch (SQLException ex) {
+                    con = null;
+                } finally {
+                    if (con != null) {
+                        try {
+                            con.close();
+                        } catch (SQLException ex) {
+                        }
+                    }
                 }
+                return null;
+            } catch (SQLException sqle) {
+                return sqle;
             }
         }
     }
 
     public static void executeSQL(ConnectionSpec connectionCreator, String sql,
-            StatementPreparer stmtPreparer, ResultProcessor resultProcessor)
-            throws SQLException {
+            StatementPreparer stmtPreparer, ResultProcessor resultProcessor,
+            int retries) throws SQLException {
         if (connectionCreator == null) {
             throw new IllegalArgumentException(
                     "connectionCreator cannot be null");
         }
-        Connection con = connectionCreator.getOrCreate();
-        try {
-            executeSQL(con, sql, stmtPreparer, resultProcessor);
-            con.close();
-            con = null;
-        } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException ex) {
-                }
+        RetryableExecutor executor = 
+                new RetryablePreparedStatementExecutor(connectionCreator, sql,
+                        stmtPreparer, resultProcessor);
+        Retryer<SQLException> retryer = new Retryer<SQLException>(RETRIES);
+        if (!retryer.execute(executor)) {
+            throw assembleSQLException(retryer.getErrors());
+        }
+    }
+    
+    public static SQLException assembleSQLException(
+            List<SQLException> exceptions) {
+        if (exceptions == null) {
+            throw new IllegalArgumentException("exceptions cannot be null");
+        }
+        SQLException exceptionChain = null;
+        SQLException currentException = null;
+        for (SQLException sqle : exceptions) {
+            if (exceptionChain == null) {
+                exceptionChain = sqle;
+                currentException = sqle;
+            } else {
+                currentException.setNextException(sqle);
+                currentException = sqle;
             }
         }
+        return exceptionChain;
     }
 }
