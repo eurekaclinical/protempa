@@ -1,31 +1,31 @@
 package org.protempa.query.handler.table;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 
 /**
+ * Specifies a constraint on the value of a proposition property.
  * 
  * @author mmansou
- * @param <V>
- *            The type of values the constraint applies to. Must be a subtype of
- *            {@link org.protempa.proposition.value.Value}
  */
-public final class PropertyConstraint<V extends Value> {
+public final class PropertyConstraint {
 
     private final String propertyName;
     private final ValueComparator valueComparator;
-    private final V value;
+    private final Value value;
 
     /**
      * Constructs a property constraint with a property name, comparator and
      * one or more values.
      * 
-     * @param propertyName the name of the property.
-     * @param valueComparator the comparator.
+     * @param propertyName the name of the property. Cannot be 
+     * <code>null</code>.
+     * @param valueComparator the comparator. Cannot be <code>null</code>.
      * @param values the values to compare against.
      */
     public PropertyConstraint(String propertyName,
-            ValueComparator valueComparator, V value) {
+            ValueComparator valueComparator, Value value) {
         if (propertyName == null) {
             throw new IllegalArgumentException("propertyName cannot be null");
         }
@@ -38,26 +38,57 @@ public final class PropertyConstraint<V extends Value> {
         this.value = value;
     }
 
+    /**
+     * Returns the name of the property.
+     * 
+     * @return a property name {@link String}. Guaranteed not 
+     * <code>null</code>.
+     */
     public String getPropertyName() {
         return this.propertyName;
     }
 
-    public V getValue() {
+    /**
+     * Gets the value of the constraint. Use a 
+     * {@link org.protempa.proposition.value.ValueList} to specify a multi-
+     * valued constraint.
+     * 
+     * @return a {@link Value}.
+     */
+    public Value getValue() {
         return this.value;
     }
 
+    /**
+     * Gets the comparator of the constraint.
+     * 
+     * @return a {@link ValueComparator}. Guaranteed not <code>null</code>.
+     */
     public ValueComparator getValueComparator() {
         return this.valueComparator;
     }
-
-    public String getFormatted() {
-        StringBuilder vStr = new StringBuilder();
+    
+    /**
+     * Gets the constraint expressed in a string. This is for use by
+     * {@link Link}s for the table header.
+     * 
+     * @return the constraint as a {@link String}. Guaranteed not 
+     * <code>null</code>.
+     */
+    String getFormatted() {
+        StringBuilder str = new StringBuilder();
+        str.append(this.propertyName);
+        str.append(this.valueComparator.getComparatorString());
         if (this.value != null) {
-            vStr.append(this.value.getFormatted());
+            str.append(this.value.getFormatted());
         } else {
-            vStr.append("null");
+            str.append("null");
         }
-        return this.propertyName + this.valueComparator.getComparatorString()
-                + vStr;
+        return str.toString();
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }
