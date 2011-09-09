@@ -22,4 +22,26 @@ final class ConnectorJ5MySQLSelectStatement extends SelectStatement {
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see org.protempa.bp.commons.dsb.relationaldb.SelectStatement#getFromClause(java.util.List, java.util.Map)
+     */
+    @Override
+    protected FromClause getFromClause(List<ColumnSpec> columnSpecs,
+            Map<ColumnSpec, Integer> referenceIndices) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.protempa.bp.commons.dsb.relationaldb.SelectStatement#getWhereClause(org.protempa.bp.commons.dsb.relationaldb.ColumnSpecInfo, java.util.List, java.util.Set, java.util.Map, java.util.Set, org.protempa.bp.commons.dsb.relationaldb.SQLOrderBy, org.protempa.bp.commons.dsb.relationaldb.SQLGenResultProcessor)
+     */
+    @Override
+    protected WhereClause getWhereClause(ColumnSpecInfo info,
+            List<EntitySpec> entitySpecs, Set<Filter> filters,
+            Map<ColumnSpec, Integer> referenceIndices, Set<String> keyIds,
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

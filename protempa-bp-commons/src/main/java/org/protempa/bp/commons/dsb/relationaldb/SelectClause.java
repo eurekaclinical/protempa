@@ -3,16 +3,18 @@ package org.protempa.bp.commons.dsb.relationaldb;
 import java.util.Collections;
 import java.util.Map;
 
-class SelectClause extends AbstractSQLClause {
+abstract class SelectClause extends AbstractSQLClause {
     
     private final ColumnSpecInfo info;
     private final Map<ColumnSpec, Integer> referenceIndices;
     private final EntitySpec entitySpec;
+    private final SqlStatement stmt;
     
-    SelectClause(ColumnSpecInfo info, Map<ColumnSpec, Integer> referenceIndices, EntitySpec entitySpec) {
+    SelectClause(ColumnSpecInfo info, Map<ColumnSpec, Integer> referenceIndices, EntitySpec entitySpec, SqlStatement stmt) {
         this.info = info;
         this.referenceIndices = Collections.unmodifiableMap(referenceIndices);
         this.entitySpec = entitySpec;
+        this.stmt = stmt;
     }
     
     public String generateClause() {

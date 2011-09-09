@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
 
-final class WhereClause implements SQLClause {
+class WhereClause extends AbstractSQLClause {
     private final ColumnSpecInfo info;
     private final List<EntitySpec> entitySpecs;
     private final Set<Filter> filters;
@@ -14,12 +14,12 @@ final class WhereClause implements SQLClause {
     private final Set<String> keyIds;
     private final SQLOrderBy order;
     private final SQLGenResultProcessor resultProcessor;
+    private final SqlStatement stmt;
 
-    
-    WhereClause(ColumnSpecInfo info, List<EntitySpec> entitySpecs,
+    protected WhereClause(ColumnSpecInfo info, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Map<ColumnSpec, Integer> referenceIndices,
             Set<String> keyIds, SQLOrderBy order,
-            SQLGenResultProcessor resultProcessor) {
+            SQLGenResultProcessor resultProcessor, SqlStatement stmt) {
         this.info = info;
         this.entitySpecs = entitySpecs;
         this.filters = filters;
@@ -27,6 +27,7 @@ final class WhereClause implements SQLClause {
         this.keyIds = keyIds;
         this.order = order;
         this.resultProcessor = resultProcessor;
+        this.stmt = stmt;
     }
 
 

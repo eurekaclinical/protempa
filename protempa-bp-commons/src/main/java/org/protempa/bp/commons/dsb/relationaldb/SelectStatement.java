@@ -8,10 +8,7 @@ import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
 
-abstract class SelectStatement {
-    private SelectClause select;
-    private FromClause from;
-    private WhereClause where;
+abstract class SelectStatement extends SqlStatement {
 
     private final EntitySpec entitySpec;
     private final ReferenceSpec referenceSpec;
@@ -22,10 +19,10 @@ abstract class SelectStatement {
     private final SQLOrderBy order;
     private final SQLGenResultProcessor resultProcessor;
 
-    protected SelectStatement(EntitySpec entitySpec, ReferenceSpec referenceSpec,
-            List<EntitySpec> entitySpecs, Set<Filter> filters,
-            Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
-            SQLGenResultProcessor resultProcessor) {
+    protected SelectStatement(EntitySpec entitySpec,
+            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
         this.entitySpec = entitySpec;
         this.referenceSpec = referenceSpec;
         this.entitySpecs = Collections.unmodifiableList(entitySpecs);
@@ -39,17 +36,25 @@ abstract class SelectStatement {
     protected abstract SelectClause getSelectClause(ColumnSpecInfo info,
             Map<ColumnSpec, Integer> referenceIndices, EntitySpec entitySpec);
 
+    protected abstract FromClause getFromClause(List<ColumnSpec> columnSpecs,
+            Map<ColumnSpec, Integer> referenceIndices);
+
+    protected abstract WhereClause getWhereClause(ColumnSpecInfo info,
+            List<EntitySpec> entitySpecs, Set<Filter> filters,
+            Map<ColumnSpec, Integer> referenceIndices, Set<String> keyIds,
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor);
+
     public String generate() {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(propIds,
                 entitySpec, entitySpecs, filters, referenceSpec);
         Map<ColumnSpec, Integer> referenceIndices = computeReferenceIndices(info
                 .getColumnSpecs());
 
-        SelectClause select = new SelectClause(info, referenceIndices,
+        SelectClause select = getSelectClause(info, referenceIndices,
                 this.entitySpec);
-        FromClause from = new FromClause(info.getColumnSpecs(),
+        FromClause from = getFromClause(info.getColumnSpecs(),
                 referenceIndices);
-        WhereClause where = new WhereClause(info, this.entitySpecs,
+        WhereClause where = getWhereClause(info, this.entitySpecs,
                 this.filters, referenceIndices, this.keyIds, this.order,
                 this.resultProcessor);
 
