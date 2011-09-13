@@ -273,6 +273,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     private static class RetryableSQLExecutor 
             implements Retryable<SQLException> {
+        
+        private static final long THREE_SECONDS = 3 * 1000L;
 
         private final ConnectionSpec connectionSpec;
         private final String query;
@@ -327,7 +329,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         @Override
         public void recover() {
             try {
-                Thread.sleep(3);
+                Thread.sleep(THREE_SECONDS);
             } catch (InterruptedException ex) {
                 throw new RuntimeException(ex);
             }
