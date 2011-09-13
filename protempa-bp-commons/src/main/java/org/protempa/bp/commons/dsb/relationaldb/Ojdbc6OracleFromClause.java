@@ -5,12 +5,12 @@ import java.util.Map;
 
 import org.protempa.bp.commons.dsb.relationaldb.JoinSpec.JoinType;
 
-final class Ojdbc6OracleFromClause extends FromClause {
+final class Ojdbc6OracleFromClause extends AbstractFromClause {
 
-    private final SqlStatement stmt;
+    private final AbstractSqlStatement stmt;
 
     Ojdbc6OracleFromClause(List<ColumnSpec> columnSpecs,
-            Map<ColumnSpec, Integer> referenceIndices, SqlStatement stmt) {
+            Map<ColumnSpec, Integer> referenceIndices, AbstractSqlStatement stmt) {
         super(columnSpecs, referenceIndices, stmt);
         this.stmt = stmt;
     }
@@ -44,7 +44,7 @@ final class Ojdbc6OracleFromClause extends FromClause {
      * .protempa.bp.commons.dsb.relationaldb.JoinSpec.JoinType)
      */
     @Override
-    protected JoinClause getJoinClause(JoinType joinType) {
+    protected AbstractJoinClause getJoinClause(JoinType joinType) {
         return new DefaultJoinClause(joinType);
     }
 
@@ -55,7 +55,7 @@ final class Ojdbc6OracleFromClause extends FromClause {
      * int, java.lang.String, java.lang.String)
      */
     @Override
-    protected OnClause getOnClause(int fromIndex, int toIndex, String fromKey,
+    protected AbstractOnClause getOnClause(int fromIndex, int toIndex, String fromKey,
             String toKey) {
         return new DefaultOnClause(fromIndex, toIndex, fromKey, toKey,
                 this.stmt);

@@ -66,7 +66,7 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
     }
 
     @Override
-    protected SelectStatement getSelectStatement(EntitySpec entitySpec,
+    protected AbstractSelectStatement getSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor) {

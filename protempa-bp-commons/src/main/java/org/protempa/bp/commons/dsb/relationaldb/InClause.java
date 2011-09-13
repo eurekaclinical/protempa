@@ -1,5 +1,5 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
-interface JoinClause extends SqlClause {
+interface InClause extends SqlClause {
 
 }
