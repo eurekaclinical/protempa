@@ -17,7 +17,7 @@ final class ConnectorJ5MySQLSelectStatement extends AbstractSelectStatement {
     }
     
     @Override
-    protected AbstractSelectClause getSelectClause(ColumnSpecInfo info,
+    public AbstractSelectClause getSelectClause(ColumnSpecInfo info,
             Map<ColumnSpec, Integer> referenceIndices, EntitySpec entitySpec) {
         return null;
     }
@@ -26,7 +26,7 @@ final class ConnectorJ5MySQLSelectStatement extends AbstractSelectStatement {
      * @see org.protempa.bp.commons.dsb.relationaldb.SelectStatement#getFromClause(java.util.List, java.util.Map)
      */
     @Override
-    protected AbstractFromClause getFromClause(List<ColumnSpec> columnSpecs,
+    public AbstractFromClause getFromClause(List<ColumnSpec> columnSpecs,
             Map<ColumnSpec, Integer> referenceIndices) {
         // TODO Auto-generated method stub
         return null;
@@ -36,10 +36,10 @@ final class ConnectorJ5MySQLSelectStatement extends AbstractSelectStatement {
      * @see org.protempa.bp.commons.dsb.relationaldb.SelectStatement#getWhereClause(org.protempa.bp.commons.dsb.relationaldb.ColumnSpecInfo, java.util.List, java.util.Set, java.util.Map, java.util.Set, org.protempa.bp.commons.dsb.relationaldb.SQLOrderBy, org.protempa.bp.commons.dsb.relationaldb.SQLGenResultProcessor)
      */
     @Override
-    protected AbstractWhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
+    public AbstractWhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             Map<ColumnSpec, Integer> referenceIndices, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor, SelectClause selectClause) {
         // TODO Auto-generated method stub
         return null;
     }

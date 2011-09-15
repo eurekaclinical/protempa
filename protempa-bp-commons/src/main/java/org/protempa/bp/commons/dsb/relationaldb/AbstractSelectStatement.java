@@ -33,16 +33,16 @@ abstract class AbstractSelectStatement extends AbstractSqlStatement implements S
         this.resultProcessor = resultProcessor;
     }
 
-    protected abstract SelectClause getSelectClause(ColumnSpecInfo info,
+    public abstract SelectClause getSelectClause(ColumnSpecInfo info,
             Map<ColumnSpec, Integer> referenceIndices, EntitySpec entitySpec);
 
-    protected abstract FromClause getFromClause(List<ColumnSpec> columnSpecs,
+    public abstract FromClause getFromClause(List<ColumnSpec> columnSpecs,
             Map<ColumnSpec, Integer> referenceIndices);
 
-    protected abstract WhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
+    public abstract WhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             Map<ColumnSpec, Integer> referenceIndices, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor);
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor, SelectClause selectClause);
 
     public String generateStatement() {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(propIds,
@@ -56,7 +56,7 @@ abstract class AbstractSelectStatement extends AbstractSqlStatement implements S
                 referenceIndices);
         WhereClause where = getWhereClause(propIds, info, this.entitySpecs,
                 this.filters, referenceIndices, this.keyIds, this.order,
-                this.resultProcessor);
+                this.resultProcessor, select);
 
         StringBuilder result = new StringBuilder(select.generateClause())
                 .append(" ").append(from.generateClause()).append(" ")

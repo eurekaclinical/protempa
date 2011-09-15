@@ -24,7 +24,7 @@ abstract class AbstractFromClause implements FromClause {
 
     public String generateClause() {
         Map<Integer, ColumnSpec> columnSpecCache = new HashMap<Integer, ColumnSpec>();
-        StringBuilder fromPart = new StringBuilder();
+        StringBuilder fromPart = new StringBuilder("from ");
         boolean begin = true;
         for (int j = 0, n = columnSpecs.size(); j < n; j++) {
             ColumnSpec columnSpec = columnSpecs.get(j);

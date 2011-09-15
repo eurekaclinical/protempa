@@ -17,7 +17,7 @@ final class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
     }
 
     @Override
-    protected AbstractSelectClause getSelectClause(ColumnSpecInfo info,
+    public AbstractSelectClause getSelectClause(ColumnSpecInfo info,
             Map<ColumnSpec, Integer> referenceIndices, EntitySpec entitySpec) {
         return new Ojdbc6OracleSelectClause(info, referenceIndices, entitySpec, this);
     }
@@ -30,7 +30,7 @@ final class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
      * (java.util.List, java.util.Map)
      */
     @Override
-    protected AbstractFromClause getFromClause(List<ColumnSpec> columnSpecs,
+    public AbstractFromClause getFromClause(List<ColumnSpec> columnSpecs,
             Map<ColumnSpec, Integer> referenceIndices) {
         return new Ojdbc6OracleFromClause(columnSpecs, referenceIndices, this);
     }
@@ -46,12 +46,12 @@ final class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
      * org.protempa.bp.commons.dsb.relationaldb.SQLGenResultProcessor)
      */
     @Override
-    protected AbstractWhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
+    public AbstractWhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             Map<ColumnSpec, Integer> referenceIndices, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor, SelectClause selectClause) {
         return new Ojdbc6OracleWhereClause(propIds, info, entitySpecs, filters,
-                referenceIndices, keyIds, order, resultProcessor, this);
+                referenceIndices, keyIds, order, resultProcessor, selectClause, this);
     }
 
 }

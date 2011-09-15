@@ -10,6 +10,8 @@ abstract class AbstractSelectClause implements
     private final Map<ColumnSpec, Integer> referenceIndices;
     private final EntitySpec entitySpec;
     private final SqlStatement stmt;
+    private CaseClause caseClause;
+    
 
     AbstractSelectClause(ColumnSpecInfo info,
             Map<ColumnSpec, Integer> referenceIndices, EntitySpec entitySpec,
@@ -18,10 +20,11 @@ abstract class AbstractSelectClause implements
         this.referenceIndices = Collections.unmodifiableMap(referenceIndices);
         this.entitySpec = entitySpec;
         this.stmt = stmt;
+        this.caseClause = null;
     }
 
     public String generateClause() {
-        StringBuilder selectClause = new StringBuilder();
+        StringBuilder selectClause = new StringBuilder("select ");
         int i = 0;
         if (info.getFinishTimeIndex() > 0) {
             i++;
@@ -103,6 +106,10 @@ abstract class AbstractSelectClause implements
             selectClause.append(generateColumn(distinctRequested, index,
                     column, name, hasNext));
         }
+        
+        if (caseClause != null) {
+            selectClause.append(caseClause.generateClause());
+        }
 
         return selectClause.toString();
     }
@@ -122,5 +129,11 @@ abstract class AbstractSelectClause implements
         }
 
         return result;
+    }
+
+    @Override
+    public void setCaseClause(CaseClause caseClause) {
+        this.caseClause = caseClause;
+        
     }
 }

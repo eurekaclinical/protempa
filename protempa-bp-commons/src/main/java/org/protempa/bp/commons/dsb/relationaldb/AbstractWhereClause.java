@@ -42,12 +42,13 @@ abstract class AbstractWhereClause implements WhereClause {
     private final Set<String> keyIds;
     private final SQLOrderBy order;
     private final SQLGenResultProcessor resultProcessor;
+    private final SelectClause selectClause;
     private final SqlStatement stmt;
 
     protected AbstractWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             Map<ColumnSpec, Integer> referenceIndices, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor,
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor, SelectClause selectClause,
             SqlStatement stmt) {
         this.propIds = propIds;
         this.info = info;
@@ -57,6 +58,7 @@ abstract class AbstractWhereClause implements WhereClause {
         this.keyIds = Collections.unmodifiableSet(keyIds);
         this.order = order;
         this.resultProcessor = resultProcessor;
+        this.selectClause = selectClause;
         this.stmt = stmt;
     }
 
@@ -73,8 +75,6 @@ abstract class AbstractWhereClause implements WhereClause {
 
     public String generateClause() {
         StringBuilder wherePart = new StringBuilder();
-        StringBuilder selectPart = new StringBuilder();
-        int i = 1;
 
         EntitySpec prevEntitySpec = null;
         boolean inGroup = false;
@@ -95,9 +95,9 @@ abstract class AbstractWhereClause implements WhereClause {
                         first = true;
                     }
                     int wherePartLength = wherePart.length();
-                    i = processForWhereClause(prevEntitySpec, i, filters,
-                            wherePart, referenceIndices, propIds, selectPart,
-                            resultProcessor, first);
+                    wherePart.append(processForWhereClause(prevEntitySpec,
+                            filters, referenceIndices, propIds,
+                            resultProcessor, first));
                     if (wherePart.length() > wherePartLength) {
                         first = false;
                     }
@@ -106,9 +106,9 @@ abstract class AbstractWhereClause implements WhereClause {
                         first = true;
                         int wherePartLength = wherePart.length();
                         wherePart.append(") or (");
-                        i = processForWhereClause(prevEntitySpec, i, filters,
-                                wherePart, referenceIndices, propIds,
-                                selectPart, resultProcessor, first);
+                        wherePart.append(processForWhereClause(prevEntitySpec,
+                                filters, referenceIndices, propIds,
+                                resultProcessor, first));
                         wherePart.append(")) ");
                         if (wherePart.length() > wherePartLength) {
                             first = false;
@@ -116,9 +116,9 @@ abstract class AbstractWhereClause implements WhereClause {
                         inGroup = false;
                     } else {
                         int wherePartLength = wherePart.length();
-                        i = processForWhereClause(prevEntitySpec, i, filters,
-                                wherePart, referenceIndices, propIds,
-                                selectPart, resultProcessor, first);
+                        wherePart.append(processForWhereClause(prevEntitySpec,
+                                filters, referenceIndices, propIds,
+                                resultProcessor, first));
                         if (wherePart.length() > wherePartLength) {
                             first = false;
                         }
@@ -132,14 +132,14 @@ abstract class AbstractWhereClause implements WhereClause {
         if (inGroup) {
             first = true;
             wherePart.append(") or (");
-            i = processForWhereClause(prevEntitySpec, i, filters, wherePart,
-                    referenceIndices, propIds, selectPart, resultProcessor,
-                    first);
+            wherePart.append(processForWhereClause(prevEntitySpec, filters,
+                    referenceIndices, propIds, resultProcessor,
+                    first));
             wherePart.append(")) ");
         } else {
-            i = processForWhereClause(prevEntitySpec, i, filters, wherePart,
-                    referenceIndices, propIds, selectPart, resultProcessor,
-                    first);
+            wherePart.append(processForWhereClause(prevEntitySpec, filters,
+                    referenceIndices, propIds, resultProcessor,
+                    first));
         }
 
         processKeyIdConstraintsForWhereClause(info, wherePart, keyIds);
@@ -166,34 +166,33 @@ abstract class AbstractWhereClause implements WhereClause {
         }
     }
 
-    private int processForWhereClause(EntitySpec prevEntitySpec, int i,
-            Set<Filter> filtersCopy, StringBuilder wherePart,
-            Map<ColumnSpec, Integer> referenceIndices, Set<String> propIds,
-            StringBuilder selectPart, SQLGenResultProcessor resultProcessor,
-            boolean first) {
-        i = processKeySpecForWhereClause(prevEntitySpec, i);
+    private String processForWhereClause(EntitySpec prevEntitySpec,
+            Set<Filter> filtersCopy, Map<ColumnSpec, Integer> referenceIndices,
+            Set<String> propIds,
+            SQLGenResultProcessor resultProcessor, boolean first) {
+        StringBuilder wherePart = new StringBuilder();
         int wherePartLength = wherePart.length();
-        i = processStartTimeSpecForWhereClause(prevEntitySpec, i, filtersCopy,
-                wherePart, referenceIndices, first);
+        wherePart.append(processStartTimeSpecForWhereClause(prevEntitySpec,
+                filtersCopy, referenceIndices, first));
         if (wherePart.length() > wherePartLength) {
             first = false;
         }
         wherePartLength = wherePart.length();
-        i = processFinishTimeSpecForWhereClause(prevEntitySpec, i, filtersCopy,
-                wherePart, referenceIndices, first);
+        wherePart.append(processFinishTimeSpecForWhereClause(prevEntitySpec,
+                filtersCopy, referenceIndices, first));
         if (wherePart.length() > wherePartLength) {
             first = false;
         }
         wherePartLength = wherePart.length();
-        i = processPropertyValueSpecsForWhereClause(prevEntitySpec, i);
         if (wherePart.length() > wherePartLength) {
             first = false;
         }
         wherePartLength = wherePart.length();
-        i = processConstraintSpecsForWhereClause(propIds, prevEntitySpec, i,
-                wherePart, selectPart, referenceIndices, filtersCopy,
-                resultProcessor, first);
-        return i;
+        wherePart.append(processConstraintSpecsForWhereClause(propIds,
+                prevEntitySpec, referenceIndices, filtersCopy,
+                resultProcessor, first));
+
+        return wherePart.toString();
     }
 
     private int processKeySpecForWhereClause(EntitySpec propositionSpec, int i) {
@@ -216,21 +215,23 @@ abstract class AbstractWhereClause implements WhereClause {
         return i;
     }
 
-    private int processConstraintSpecsForWhereClause(Set<String> propIds,
-            EntitySpec entitySpec, int i, StringBuilder wherePart,
-            StringBuilder selectPart,
+    private String processConstraintSpecsForWhereClause(Set<String> propIds,
+            EntitySpec entitySpec,
             Map<ColumnSpec, Integer> referenceIndices, Set<Filter> filtersCopy,
             SQLGenResultProcessor resultProcessor, boolean first) {
+
         Logger logger = SQLGenUtil.logger();
         logger.log(Level.FINER,
                 "Processing constraint specs for entity spec {0}",
                 entitySpec.getName());
         logger.log(Level.FINEST, "Details of entity spec {0}", entitySpec);
+
+        StringBuilder wherePart = new StringBuilder();
         ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
         for (ColumnSpec constraintSpec : constraintSpecs) {
             int wherePartLength = wherePart.length();
-            i = processConstraintSpecForWhereClause(null, constraintSpec, i,
-                    wherePart, null, referenceIndices, null, first);
+            wherePart.append(processConstraintSpecForWhereClause(null,
+                    constraintSpec, referenceIndices, null, first));
             if (wherePart.length() > wherePartLength) {
                 first = false;
             }
@@ -265,46 +266,46 @@ abstract class AbstractWhereClause implements WhereClause {
             if (codeSpecL.get(codeSpecL.size() - 1).isPropositionIdsComplete()
                     && !needsPropIdInClause(propIds,
                             entitySpec.getPropositionIds())) {
-                i = processConstraintSpecForWhereClause(propIds, codeSpec, i,
-                        null, selectPart, referenceIndices, resultProcessor,
-                        first);
+                wherePart.append(processConstraintSpecForWhereClause(propIds,
+                        codeSpec, referenceIndices,
+                        resultProcessor, first));
             } else {
                 int wherePartLength = wherePart.length();
-                i = processConstraintSpecForWhereClause(propIds, codeSpec, i,
-                        wherePart, selectPart, referenceIndices,
-                        resultProcessor, first);
+                wherePart.append(processConstraintSpecForWhereClause(propIds,
+                        codeSpec, referenceIndices,
+                        resultProcessor, first));
                 if (wherePart.length() > wherePartLength) {
                     first = false;
                 }
             }
         }
 
-        return i;
+        return wherePart.toString();
     }
 
-    private int processConstraintSpecForWhereClause(Set<String> propIds,
-            ColumnSpec columnSpec, int i, StringBuilder wherePart,
-            StringBuilder selectPart,
+    private String processConstraintSpecForWhereClause(Set<String> propIds,
+            ColumnSpec columnSpec,
             Map<ColumnSpec, Integer> referenceIndices,
             SQLGenResultProcessor resultProcessor, boolean first) {
 
+        StringBuilder wherePart = new StringBuilder();
         if (columnSpec != null) {
             List<ColumnSpec> columnSpecL = columnSpec.asList();
             columnSpec = columnSpecL.get(columnSpecL.size() - 1);
             if (columnSpec.getConstraint() != null) {
-                i += columnSpecL.size();
                 if (resultProcessor != null) {
                     resultProcessor
                             .setCasePresent(columnSpec.getConstraint() == ColumnSpec.Constraint.LIKE);
                 }
-                wherePart.append(processConstraint(columnSpec, propIds, 
-                        referenceIndices, selectPart, null, first));
+                wherePart.append(processConstraint(columnSpec, propIds,
+                        referenceIndices, null, first));
             }
         }
-        return i;
+        return wherePart.toString();
     }
 
-    private String processPropertyValueFilter(ColumnSpec columnSpec, Map<ColumnSpec, Integer> referenceIndices,
+    private String processPropertyValueFilter(ColumnSpec columnSpec,
+            Map<ColumnSpec, Integer> referenceIndices,
             ValueComparator comparator, Value[] values, boolean first) {
 
         StringBuilder wherePart = new StringBuilder();
@@ -319,9 +320,9 @@ abstract class AbstractWhereClause implements WhereClause {
                 value.accept(ve);
             }
             wherePart.append(processConstraint(lastColumnSpec, ve.values,
-                    referenceIndices, null, constraint, first));
+                    referenceIndices, constraint, first));
         }
-        
+
         return wherePart.toString();
     }
 
@@ -380,8 +381,8 @@ abstract class AbstractWhereClause implements WhereClause {
         return filteredConstraintValues;
     }
 
-    private String processConstraint(ColumnSpec columnSpec, Set<?> propIds, Map<ColumnSpec, Integer> referenceIndices,
-            StringBuilder selectPart, Constraint constraintOverride,
+    private String processConstraint(ColumnSpec columnSpec, Set<?> propIds,
+            Map<ColumnSpec, Integer> referenceIndices, Constraint constraintOverride,
             boolean first) {
         StringBuilder wherePart = new StringBuilder();
         Constraint constraint = columnSpec.getConstraint();
@@ -393,12 +394,10 @@ abstract class AbstractWhereClause implements WhereClause {
         if (constraint != null) {
             KnowledgeSourceIdToSqlCode[] filteredConstraintValues = filterKnowledgeSourceIdToSqlCodesById(
                     propIds, propIdToSqlCodes);
-            if (wherePart != null) {
-                if (!first) {
-                    wherePart.append(" and ");
-                }
-                wherePart.append('(');
+            if (!first) {
+                wherePart.append(" and ");
             }
+            wherePart.append('(');
             Object[] sqlCodes = null;
             if (filteredConstraintValues.length > 0) {
                 sqlCodes = extractSqlCodes(filteredConstraintValues);
@@ -408,71 +407,61 @@ abstract class AbstractWhereClause implements WhereClause {
 
             switch (constraint) {
                 case EQUAL_TO:
-                    if (wherePart != null) {
-                        if (sqlCodes.length > 1) {
-                            wherePart.append(getInClause(
-                                    referenceIndices.get(columnSpec),
-                                    columnSpec.getColumn(), sqlCodes, false)
-                                    .generateClause());
-                        } else {
-                            assert sqlCodes.length == 1 : "invalid sqlCodes length";
-                            wherePart.append(appendColumnRef(stmt, 
-                                    referenceIndices, columnSpec));
-                            wherePart.append(constraint.getSqlOperator());
-                            wherePart
-                                    .append(SqlGeneratorUtil.appendValue(sqlCodes[0]));
-                        }
+                    if (sqlCodes.length > 1) {
+                        wherePart.append(getInClause(
+                                referenceIndices.get(columnSpec),
+                                columnSpec.getColumn(), sqlCodes, false)
+                                .generateClause());
+                    } else {
+                        assert sqlCodes.length == 1 : "invalid sqlCodes length";
+                        wherePart.append(appendColumnRef(stmt,
+                                referenceIndices, columnSpec));
+                        wherePart.append(constraint.getSqlOperator());
+                        wherePart.append(SqlGeneratorUtil
+                                .appendValue(sqlCodes[0]));
                     }
                     break;
                 case LESS_THAN:
                 case LESS_THAN_OR_EQUAL_TO:
                 case GREATER_THAN:
                 case GREATER_THAN_OR_EQUAL_TO:
-                    if (wherePart != null) {
-                        wherePart.append(appendColumnRef(stmt, 
+                    wherePart.append(appendColumnRef(stmt, referenceIndices,
+                            columnSpec));
+                    wherePart.append(constraint.getSqlOperator());
+                    wherePart.append(appendValue(sqlCodes[0]));
+                    break;
+                case NOT_EQUAL_TO:
+                    if (sqlCodes.length > 1) {
+                        wherePart.append(getInClause(
+                                referenceIndices.get(columnSpec),
+                                columnSpec.getColumn(), sqlCodes, true)
+                                .generateClause());
+                    } else {
+                        wherePart.append(appendColumnRef(stmt,
                                 referenceIndices, columnSpec));
                         wherePart.append(constraint.getSqlOperator());
                         wherePart.append(appendValue(sqlCodes[0]));
                     }
                     break;
-                case NOT_EQUAL_TO:
-                    if (wherePart != null) {
-                        if (sqlCodes.length > 1) {
-                            wherePart.append(getInClause(
-                                    referenceIndices.get(columnSpec),
-                                    columnSpec.getColumn(), sqlCodes, true)
-                                    .generateClause());
-                        } else {
-                            wherePart.append(appendColumnRef(stmt, 
-                                    referenceIndices, columnSpec));
-                            wherePart.append(constraint.getSqlOperator());
-                            wherePart
-                                    .append(appendValue(sqlCodes[0]));
-                        }
-                    }
-                    break;
                 case LIKE:
-                    if (selectPart != null) {
-                        selectPart.append(getCaseClause(sqlCodes,
+                    if (this.selectClause != null) {
+                        this.selectClause.setCaseClause(getCaseClause(sqlCodes,
                                 referenceIndices, columnSpec,
-                                filteredConstraintValues).toString());
+                                filteredConstraintValues));
                     }
-                    if (wherePart != null && sqlCodes.length > 1) {
+                    if (sqlCodes.length > 1) {
                         wherePart.append('(');
                     }
                     for (int k = 0; k < sqlCodes.length; k++) {
-                        if (wherePart != null) {
-                            wherePart.append(appendColumnRef(stmt, 
-                                    referenceIndices, columnSpec));
-                            wherePart.append(" LIKE ");
-                            wherePart
-                                    .append(appendValue(sqlCodes[k]));
-                            if (k + 1 < sqlCodes.length) {
-                                wherePart.append(" or ");
-                            }
+                        wherePart.append(appendColumnRef(stmt,
+                                referenceIndices, columnSpec));
+                        wherePart.append(" LIKE ");
+                        wherePart.append(appendValue(sqlCodes[k]));
+                        if (k + 1 < sqlCodes.length) {
+                            wherePart.append(" or ");
                         }
                     }
-                    if (wherePart != null && sqlCodes.length > 1) {
+                    if (sqlCodes.length > 1) {
                         wherePart.append(')');
                     }
 
@@ -480,11 +469,9 @@ abstract class AbstractWhereClause implements WhereClause {
                 default:
                     throw new AssertionError("should not happen");
             }
-            if (wherePart != null) {
-                wherePart.append(')');
-            }
+            wherePart.append(')');
         }
-        
+
         return wherePart.toString();
     }
 
@@ -526,15 +513,15 @@ abstract class AbstractWhereClause implements WhereClause {
                 && (filteredPropIds.size() <= 2000);
     }
 
-    private int processStartTimeSpecForWhereClause(EntitySpec entitySpec,
-            int i, Set<Filter> filtersCopy, StringBuilder wherePart,
-            Map<ColumnSpec, Integer> referenceIndices, boolean first) {
+    private String processStartTimeSpecForWhereClause(EntitySpec entitySpec,
+            Set<Filter> filtersCopy, Map<ColumnSpec, Integer> referenceIndices,
+            boolean first) {
+        StringBuilder wherePart = new StringBuilder();
         ColumnSpec startTimeSpec = entitySpec.getStartTimeSpec();
         if (startTimeSpec != null) {
             while (true) {
                 if (startTimeSpec.getJoin() != null) {
                     startTimeSpec = startTimeSpec.getJoin().getNextColumnSpec();
-                    i++;
                 } else {
                     for (Iterator<Filter> itr = filtersCopy.iterator(); itr
                             .hasNext();) {
@@ -557,7 +544,7 @@ abstract class AbstractWhereClause implements WhereClause {
                                     if (!first) {
                                         wherePart.append(" and ");
                                     }
-                                    wherePart.append(appendColumnRef(stmt, 
+                                    wherePart.append(appendColumnRef(stmt,
                                             referenceIndices, startTimeSpec));
                                     wherePart.append(" >= ");
                                     wherePart.append(entitySpec
@@ -568,7 +555,7 @@ abstract class AbstractWhereClause implements WhereClause {
                                     if (!first || outputStart) {
                                         wherePart.append(" and ");
                                     }
-                                    wherePart.append(appendColumnRef(stmt, 
+                                    wherePart.append(appendColumnRef(stmt,
                                             referenceIndices, startTimeSpec));
                                     wherePart.append(" <= ");
                                     wherePart.append(entitySpec
@@ -582,19 +569,19 @@ abstract class AbstractWhereClause implements WhereClause {
                 }
             }
         }
-        return i;
+        return wherePart.toString();
     }
 
-    private int processFinishTimeSpecForWhereClause(EntitySpec entitySpec,
-            int i, Set<Filter> filtersCopy, StringBuilder wherePart,
-            Map<ColumnSpec, Integer> referenceIndices, boolean first) {
+    private String processFinishTimeSpecForWhereClause(EntitySpec entitySpec,
+            Set<Filter> filtersCopy, Map<ColumnSpec, Integer> referenceIndices,
+            boolean first) {
+        StringBuilder wherePart = new StringBuilder();
         ColumnSpec finishTimeSpec = entitySpec.getFinishTimeSpec();
         if (finishTimeSpec != null) {
             while (true) {
                 if (finishTimeSpec.getJoin() != null) {
                     finishTimeSpec = finishTimeSpec.getJoin()
                             .getNextColumnSpec();
-                    i++;
                 } else {
                     for (Filter filter : filtersCopy) {
                         if (filter instanceof PositionFilter) {
@@ -615,7 +602,7 @@ abstract class AbstractWhereClause implements WhereClause {
                                         wherePart.append(" and ");
                                     }
 
-                                    wherePart.append(appendColumnRef(stmt, 
+                                    wherePart.append(appendColumnRef(stmt,
                                             referenceIndices, finishTimeSpec));
                                     wherePart.append(" >= ");
                                     wherePart.append(entitySpec
@@ -628,7 +615,7 @@ abstract class AbstractWhereClause implements WhereClause {
                                         wherePart.append(" and ");
                                     }
 
-                                    wherePart.append(appendColumnRef(stmt, 
+                                    wherePart.append(appendColumnRef(stmt,
                                             referenceIndices, finishTimeSpec));
                                     wherePart.append(" <= ");
                                     wherePart.append(entitySpec
@@ -642,7 +629,8 @@ abstract class AbstractWhereClause implements WhereClause {
                 }
             }
         }
-        return i;
+
+        return wherePart.toString();
     }
 
     private String processOrder(SQLOrderBy order, ColumnSpecInfo info,

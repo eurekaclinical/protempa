@@ -14,10 +14,10 @@ final class Ojdbc6OracleWhereClause extends AbstractWhereClause {
     Ojdbc6OracleWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             Map<ColumnSpec, Integer> referenceIndices, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor,
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor, SelectClause selectClause,
             AbstractSqlStatement stmt) {
         super(propIds, info, entitySpecs, filters, referenceIndices, keyIds,
-                order, resultProcessor, stmt);
+                order, resultProcessor, selectClause, stmt);
         this.stmt = stmt;
     }
 
