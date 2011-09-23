@@ -1,18 +1,17 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
 import java.util.List;
-import java.util.Map;
 
 import org.protempa.bp.commons.dsb.relationaldb.JoinSpec.JoinType;
 
 final class Ojdbc6OracleFromClause extends AbstractFromClause {
 
-    private final AbstractSqlStatement stmt;
+    private final TableAliaser referenceIndices;
 
     Ojdbc6OracleFromClause(List<ColumnSpec> columnSpecs,
-            Map<ColumnSpec, Integer> referenceIndices, AbstractSqlStatement stmt) {
-        super(columnSpecs, referenceIndices, stmt);
-        this.stmt = stmt;
+            TableAliaser referenceIndices) {
+        super(columnSpecs, referenceIndices);
+        this.referenceIndices = referenceIndices;
     }
 
     /*
@@ -23,15 +22,17 @@ final class Ojdbc6OracleFromClause extends AbstractFromClause {
      * (java.lang.String, java.lang.String, int)
      */
     @Override
-    protected String generateFromTable(String schema, String table, int i) {
+    protected String generateFromTable(ColumnSpec columnSpec) {
         StringBuilder fromPart = new StringBuilder();
 
-        if (schema != null) {
-            fromPart.append(schema);
+        if (columnSpec.getSchema() != null) {
+            fromPart.append(columnSpec.getSchema());
             fromPart.append('.');
         }
 
-        fromPart.append(table).append(" a").append(i);
+        fromPart.append(columnSpec.getTable());
+        fromPart.append(" ");
+        fromPart.append(referenceIndices.generateTableReference(columnSpec));
 
         return fromPart.toString();
     }
@@ -55,10 +56,8 @@ final class Ojdbc6OracleFromClause extends AbstractFromClause {
      * int, java.lang.String, java.lang.String)
      */
     @Override
-    protected AbstractOnClause getOnClause(int fromIndex, int toIndex, String fromKey,
-            String toKey) {
-        return new DefaultOnClause(fromIndex, toIndex, fromKey, toKey,
-                this.stmt);
+    protected AbstractOnClause getOnClause(JoinSpec joinSpec, TableAliaser referenceIndices) {
+        return new DefaultOnClause(joinSpec, referenceIndices);
     }
 
 }

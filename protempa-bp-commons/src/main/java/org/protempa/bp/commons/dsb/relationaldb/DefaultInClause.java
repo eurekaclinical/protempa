@@ -2,9 +2,9 @@ package org.protempa.bp.commons.dsb.relationaldb;
 
 class DefaultInClause extends AbstractInClause {
 
-    public DefaultInClause(int tableNumber, String columnName,
-            Object[] elements, boolean not, AbstractSqlStatement stmt) {
-        super(tableNumber, columnName, elements, not, stmt);
+    public DefaultInClause(ColumnSpec columnSpec, Object[] elements,
+            boolean not, TableAliaser referenceIndices) {
+        super(columnSpec, elements, not, referenceIndices);
     }
 
 }
