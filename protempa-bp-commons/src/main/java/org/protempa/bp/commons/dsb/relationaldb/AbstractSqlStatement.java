@@ -1,6 +1,5 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
-import java.util.Map;
 
 abstract class AbstractSqlStatement implements SqlStatement {
     
