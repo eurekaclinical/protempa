@@ -7,24 +7,23 @@ import java.util.Map;
 
 abstract class AbstractFromClause implements FromClause {
     private final List<ColumnSpec> columnSpecs;
-    private final Map<ColumnSpec, Integer> referenceIndices;
-    private final AbstractSqlStatement stmt;
+    private final TableAliaser referenceIndices;
 
     protected AbstractFromClause(List<ColumnSpec> columnSpecs,
-            Map<ColumnSpec, Integer> referenceIndices, AbstractSqlStatement stmt) {
+            TableAliaser referenceIndices) {
         this.columnSpecs = Collections.unmodifiableList(columnSpecs);
-        this.referenceIndices = Collections.unmodifiableMap(referenceIndices);
-        this.stmt = stmt;
+        this.referenceIndices = referenceIndices;
     }
 
-    protected abstract AbstractJoinClause getJoinClause(JoinSpec.JoinType joinType);
+    protected abstract AbstractJoinClause getJoinClause(
+            JoinSpec.JoinType joinType);
 
-    protected abstract AbstractOnClause getOnClause(int fromIndex, int toIndex,
-            String fromKey, String toKey);
+    protected abstract AbstractOnClause getOnClause(JoinSpec joinSpec,
+            TableAliaser referenceIndices);
 
     public String generateClause() {
         Map<Integer, ColumnSpec> columnSpecCache = new HashMap<Integer, ColumnSpec>();
-        StringBuilder fromPart = new StringBuilder("from ");
+        StringBuilder fromPart = new StringBuilder("FROM ");
         boolean begin = true;
         for (int j = 0, n = columnSpecs.size(); j < n; j++) {
             ColumnSpec columnSpec = columnSpecs.get(j);
@@ -62,27 +61,28 @@ abstract class AbstractFromClause implements FromClause {
                 }
             }
 
-            Integer i = referenceIndices.get(columnSpec);
-            if (i != null && !columnSpecCache.containsKey(i)) {
+            Integer i = referenceIndices.getIndex(columnSpec);
+            if (i >= 0 && !columnSpecCache.containsKey(i)) {
                 assert begin || currentJoin != null : "No 'on' clause can be generated for "
                         + columnSpec + " because there is no incoming join.";
-                String schema = columnSpec.getSchema();
-                String table = columnSpec.getTable();
+//                String schema = columnSpec.getSchema();
+//                String table = columnSpec.getTable();
                 if (!begin) {
                     fromPart.append(getJoinClause(currentJoin.getJoinType())
                             .generateClause());
                 }
-                fromPart.append(generateFromTable(schema, table, i));
+                fromPart.append(generateFromTable(columnSpec));
                 fromPart.append(' ');
                 columnSpecCache.put(i, columnSpec);
 
                 if (currentJoin != null) {
-                    int fromIndex = referenceIndices.get(currentJoin
-                            .getPrevColumnSpec());
-                    int toIndex = referenceIndices.get(currentJoin
-                            .getNextColumnSpec());
-                    fromPart.append(getOnClause(fromIndex, toIndex,
-                            currentJoin.getFromKey(), currentJoin.getToKey()).generateClause());
+//                    int fromIndex = referenceIndices.getIndex(currentJoin
+//                            .getPrevColumnSpec());
+//                    int toIndex = referenceIndices.getIndex(currentJoin
+//                            .getNextColumnSpec());
+//                    fromPart.append(getOnClause(fromIndex, toIndex,
+//                            currentJoin.getFromKey(), currentJoin.getToKey()).generateClause());
+                    fromPart.append(getOnClause(currentJoin, referenceIndices).generateClause());
                 }
                 begin = false;
             }
@@ -90,7 +90,6 @@ abstract class AbstractFromClause implements FromClause {
         return fromPart.toString();
     }
 
-    protected abstract String generateFromTable(String schema, String table,
-            int i);
+    protected abstract String generateFromTable(ColumnSpec columnSpec);
 
 }

@@ -1,30 +1,24 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
-import java.util.Collections;
-import java.util.Map;
+import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
 
-abstract class AbstractSelectClause implements
-        SelectClause {
+abstract class AbstractSelectClause implements SelectClause {
 
     private final ColumnSpecInfo info;
-    private final Map<ColumnSpec, Integer> referenceIndices;
+    private final TableAliaser referenceIndices;
     private final EntitySpec entitySpec;
-    private final SqlStatement stmt;
     private CaseClause caseClause;
-    
 
-    AbstractSelectClause(ColumnSpecInfo info,
-            Map<ColumnSpec, Integer> referenceIndices, EntitySpec entitySpec,
-            SqlStatement stmt) {
+    AbstractSelectClause(ColumnSpecInfo info, TableAliaser referenceIndices,
+            EntitySpec entitySpec) {
         this.info = info;
-        this.referenceIndices = Collections.unmodifiableMap(referenceIndices);
+        this.referenceIndices = referenceIndices;
         this.entitySpec = entitySpec;
-        this.stmt = stmt;
         this.caseClause = null;
     }
 
     public String generateClause() {
-        StringBuilder selectClause = new StringBuilder("select ");
+        StringBuilder selectClause = new StringBuilder("SELECT ");
         int i = 0;
         if (info.getFinishTimeIndex() > 0) {
             i++;
@@ -90,23 +84,23 @@ abstract class AbstractSelectClause implements
         boolean unique = info.isUnique();
         for (int j = 0; j < indices.length; j++) {
             ColumnSpec cs = info.getColumnSpecs().get(indices[j]);
-            Integer index = referenceIndices.get(cs);
-            assert index != null : "index is null for " + cs;
-            String column = cs.getColumn();
+            // Integer index = referenceIndices.getIndex(cs);
+            // assert index != null : "index is null for " + cs;
+            // String column = cs.getColumn();
             String name = names[j];
             boolean distinctRequested = (j == 0 && !unique);
             boolean hasNext = j < indices.length - 1;
-            if (column == null) {
-                throw new AssertionError("column cannot be null: " + "index="
-                        + index + "; name=" + name + "; cs=" + cs);
-            }
+            // if (column == null) {
+            // throw new AssertionError("column cannot be null: " + "index="
+            // + index + "; name=" + name + "; cs=" + cs);
+            // }
             if (name == null) {
                 throw new AssertionError("name cannot be null");
             }
-            selectClause.append(generateColumn(distinctRequested, index,
-                    column, name, hasNext));
+            selectClause.append(generateColumn(distinctRequested, cs, name,
+                    hasNext));
         }
-        
+
         if (caseClause != null) {
             selectClause.append(caseClause.generateClause());
         }
@@ -114,16 +108,18 @@ abstract class AbstractSelectClause implements
         return selectClause.toString();
     }
 
-    StringBuilder generateColumn(boolean distinctRequested, int index,
-            String column, String name, boolean hasNext) {
+    StringBuilder generateColumn(boolean distinctRequested,
+            ColumnSpec columnSpec, String name, boolean hasNext) {
         StringBuilder result = new StringBuilder();
         if (distinctRequested) {
-            result.append("distinct ");
+            result.append("DISTINCT ");
         }
 
-        result.append(
-                SqlGeneratorUtil.generateColumnReference(this.stmt, index,
-                        column)).append(" as ").append(name);
+        // result.append(
+        // SqlGeneratorUtil.generateColumnReference(this.stmt, index,
+        // column)).append(" as ").append(name);
+        result.append(referenceIndices.generateColumnReference(columnSpec))
+                .append(" AS ").append(name);
         if (hasNext) {
             result.append(',');
         }
@@ -131,9 +127,20 @@ abstract class AbstractSelectClause implements
         return result;
     }
 
-    @Override
-    public void setCaseClause(CaseClause caseClause) {
+    protected abstract CaseClause getCaseClause(Object[] sqlCodes,
+            TableAliaser referenceIndices, ColumnSpec columnSpec,
+            KnowledgeSourceIdToSqlCode[] filteredConstraintValues);
+
+    private void setCaseClause(CaseClause caseClause) {
         this.caseClause = caseClause;
-        
+    }
+
+    @Override
+    public void setCaseClause(Object[] sqlCodes, TableAliaser referenceIndices,
+            ColumnSpec columnSpec,
+            KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
+        setCaseClause(getCaseClause(sqlCodes, referenceIndices, columnSpec,
+                filteredConstraintValues));
+
     }
 }

@@ -12,9 +12,9 @@ abstract class AbstractJoinClause implements JoinClause {
     public String generateClause() {
         switch (joinType) {
             case INNER:
-                return " join ";
+                return " JOIN ";
             case LEFT_OUTER:
-                return" left outer join ";
+                return" LEFT OUTER JOIN ";
             default:
                 throw new AssertionError("invalid join type: " + joinType);
         }

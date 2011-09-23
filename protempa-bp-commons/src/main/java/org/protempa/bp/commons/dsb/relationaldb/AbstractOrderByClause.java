@@ -2,33 +2,33 @@ package org.protempa.bp.commons.dsb.relationaldb;
 
 abstract class AbstractOrderByClause implements OrderByClause {
 
-    private final int startReferenceIndex;
-    private final int finishReferenceIndex;
-    private final String startColumn;
-    private final String finishColumn;
+    private final ColumnSpec startColumnSpec;
+    private final ColumnSpec finishColumnSpec;
     private final SQLOrderBy order;
-    private final AbstractSqlStatement stmt;
+    private final TableAliaser referenceIndices;
 
-    AbstractOrderByClause(int startReferenceIndex, String startColumn,
-            int finishReferenceIndex, String finishColumn, SQLOrderBy order,
-            AbstractSqlStatement stmt) {
-        this.startReferenceIndex = startReferenceIndex;
-        this.finishReferenceIndex = finishReferenceIndex;
-        this.startColumn = startColumn;
-        this.finishColumn = finishColumn;
+    AbstractOrderByClause(ColumnSpec startColumnSpec,
+            ColumnSpec finishColumnSpec, SQLOrderBy order,
+            TableAliaser referenceIndices) {
+        this.startColumnSpec = startColumnSpec;
+        this.finishColumnSpec = finishColumnSpec;
         this.order = order;
-        this.stmt = stmt;
+        this.referenceIndices = referenceIndices;
     }
 
     @Override
     public String generateClause() {
         StringBuilder clause = new StringBuilder(" order by ");
-        clause.append(SqlGeneratorUtil.generateColumnReference(stmt, startReferenceIndex,
-                startColumn));
-        if (finishReferenceIndex > 0) {
+        // clause.append(SqlGeneratorUtil.generateColumnReference(stmt,
+        // startReferenceIndex,
+        // startColumn));
+        clause.append(referenceIndices.generateColumnReference(startColumnSpec));
+        if (referenceIndices.getIndex(finishColumnSpec) > 0) {
             clause.append(',');
-            clause.append(SqlGeneratorUtil.generateColumnReference(stmt, 
-                    finishReferenceIndex, finishColumn));
+            // clause.append(SqlGeneratorUtil.generateColumnReference(stmt,
+            // finishReferenceIndex, finishColumn));
+            clause.append(referenceIndices
+                    .generateColumnReference(finishColumnSpec));
         }
         clause.append(' ');
         if (order == SQLOrderBy.ASCENDING) {
