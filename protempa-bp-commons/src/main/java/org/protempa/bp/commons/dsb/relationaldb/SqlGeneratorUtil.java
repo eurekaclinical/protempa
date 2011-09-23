@@ -1,6 +1,5 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
-import java.util.Map;
 
 /**
  * Utility class for SQL generation
@@ -12,57 +11,13 @@ public final class SqlGeneratorUtil {
     private SqlGeneratorUtil() {
     }
 
-    static String generateColumnReference(SqlStatement statement,
-            int tableNumber, String columnName) {
-        return statement.generateTableReference(tableNumber) + "." + columnName;
-    }
-    
-    static String generateColumnReference(SqlStatement statement, ColumnSpec.ColumnOp columnOp,
-            int tableNumber, ColumnSpec columnSpec) {
-        StringBuilder result = new StringBuilder();
-        if (columnOp != null) {
-            switch (columnOp) {
-                case UPPER:
-                    result.append("upper");
-                    break;
-                default:
-                    throw new AssertionError("invalid column op: " + columnOp);
-            }
-            result.append('(');
-        }
-        generateColumnReference(statement, tableNumber, columnSpec.getColumn());
-        if (columnOp != null) {
-            result.append(')');
-        }
-        
-        return result.toString();
-    }
-
-    static String appendColumnReference(SqlStatement statement,
-            Map<ColumnSpec, Integer> referenceIndices, ColumnSpec columnSpec) {
-        StringBuilder result = new StringBuilder();
-        Integer tableNumber = referenceIndices.get(columnSpec);
-        assert tableNumber != null : "tableNumber is null";
-        result.append(generateColumnReference(statement, tableNumber, columnSpec.getColumn()));
-        
-        return result.toString();
-    }
-    
-    static String appendColumnRef(SqlStatement statement, Map<ColumnSpec, Integer> referenceIndices, ColumnSpec columnSpec) {
-        StringBuilder result = new StringBuilder();
-        if (columnSpec.getColumnOp() != null) {
-            Integer tableNumber = referenceIndices.get(columnSpec);
-            assert tableNumber != null : "tableNumber is null";
-            result.append(generateColumnReference(statement, columnSpec.getColumnOp(), tableNumber,
-                    columnSpec));
-        } else {
-            result.append(appendColumnReference(statement, referenceIndices, columnSpec));
-        }
-        
-        return result.toString();
-    }
-    
-    public static String appendValue(Object val) {
+    /**
+     * Generates an SQL-ready string for the given value based on its type.
+     * 
+     * @param val the value to prepare
+     * @return a <tt>String</tt> ready to be appended to an SQL statement
+     */
+    public static String prepareValue(Object val) {
         StringBuilder result = new StringBuilder();
         
         boolean numberOrBoolean;
