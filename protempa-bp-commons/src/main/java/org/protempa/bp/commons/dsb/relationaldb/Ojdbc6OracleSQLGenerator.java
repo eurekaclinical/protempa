@@ -113,7 +113,7 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGenerator {
     }
 
     @Override
-    protected AbstractSelectStatement getSelectStatement(EntitySpec entitySpec,
+    protected SelectStatement getSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor) {

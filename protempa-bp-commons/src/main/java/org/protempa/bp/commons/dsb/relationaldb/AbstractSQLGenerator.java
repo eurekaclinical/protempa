@@ -755,32 +755,48 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Set<Filter> filtersCopy, List<EntitySpec> entitySpecsCopy,
             Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor) {
+//        SQLGenUtil.logger().log(
+//                Level.INFO,
+//                "ColSpecInfo args: {0}, {1}, {2}, {3}, {4}",
+//                new Object[] { propIds.size(), entitySpec.getName(),
+//                        entitySpecsCopy.size(), filtersCopy.size(),
+//                        referenceSpec.getReferenceName() });
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(propIds,
                 entitySpec, entitySpecsCopy, filtersCopy, referenceSpec);
-        Map<ColumnSpec, Integer> referenceIndices = computeReferenceIndices(info
-                .getColumnSpecs());
+        // for (ColumnSpec cs : info.getColumnSpecs()) {
+        // SQLGenUtil.logger().log(
+        // Level.INFO,
+        // "CS: {0}.{1}.{2}",
+        // new Object[] { cs.getSchema(), cs.getTable(),
+        // cs.getColumn() });
+        // }
+         Map<ColumnSpec, Integer> referenceIndices =
+         computeReferenceIndices(info
+         .getColumnSpecs());
         SelectStatement myStmt = getSelectStatement(entitySpec, referenceSpec,
                 entitySpecsCopy, filtersCopy, propIds, keyIds, order,
                 resultProcessor);
-        String result = myStmt.generateStatement();
 
-//        SelectClause sc = myStmt.getSelectClause(
-//                info, referenceIndices, entitySpec);
-//        StringBuilder selectClause = new StringBuilder(sc.generateClause());
-        // generateSelectClause(info,
-        // referenceIndices, entitySpec);
-//        StringBuilder fromClause = new StringBuilder(myStmt.getFromClause(
-//                info.getColumnSpecs(), referenceIndices).generateClause());
-        // generateFromClause(info.getColumnSpecs(),
-        // referenceIndices);
-//        StringBuilder whereClause = new StringBuilder(myStmt.getWhereClause(
-//                propIds, info, entitySpecsCopy, filtersCopy, referenceIndices,
-//                keyIds, order, resultProcessor, sc).generateClause());
-        // generateWhereClause(propIds, info,
-        // entitySpecsCopy, filtersCopy, selectClause, referenceIndices,
-        // keyIds, order, resultProcessor);
-//        String result = assembleReadPropositionsQuery(selectClause, fromClause,
-//                whereClause);
+        // SelectClause sc = myStmt.getSelectClause(
+        // info, referenceIndices, entitySpec);
+         StringBuilder selectClause =
+        // new StringBuilder(sc.generateClause());
+         generateSelectClause(info, referenceIndices, entitySpec);
+         StringBuilder fromClause =
+        // new StringBuilder(myStmt.getFromClause(
+        // info.getColumnSpecs(), referenceIndices).generateClause());
+         generateFromClause(info.getColumnSpecs(), referenceIndices);
+         StringBuilder whereClause =
+        // new StringBuilder(myStmt.getWhereClause(
+        // propIds, info, entitySpecsCopy, filtersCopy, referenceIndices,
+        // keyIds, order, resultProcessor, sc).generateClause());
+         generateWhereClause(propIds, info, entitySpecsCopy, filtersCopy,
+         selectClause, referenceIndices, keyIds, order, resultProcessor);
+//         String result = 
+         SQLGenUtil.logger().log(Level.INFO, "Old query: {0}", assembleReadPropositionsQuery(selectClause,
+         fromClause,
+         whereClause));
+         String result = myStmt.generateStatement();
         return result;
     }
 
@@ -1364,6 +1380,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         logger.log(Level.FINEST, "Details of entity spec {0}", entitySpec);
         ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
         for (ColumnSpec constraintSpec : constraintSpecs) {
+            SQLGenUtil.logger().log(Level.INFO, "Processing constraint: {0}", constraintSpec.getColumn());
             int wherePartLength = wherePart.length();
             i = processConstraintSpecForWhereClause(null, constraintSpec, i,
                     wherePart, null, referenceIndices, null, first);

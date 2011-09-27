@@ -10,8 +10,7 @@ import java.util.logging.Logger;
 
 import org.protempa.backend.dsb.filter.Filter;
 
-abstract class AbstractSelectStatement extends AbstractSqlStatement implements
-        SelectStatement {
+abstract class AbstractSelectStatement implements SelectStatement {
 
     private final EntitySpec entitySpec;
     private final ReferenceSpec referenceSpec;

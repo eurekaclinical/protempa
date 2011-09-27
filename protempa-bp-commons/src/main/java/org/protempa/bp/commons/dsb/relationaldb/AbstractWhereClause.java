@@ -1,7 +1,5 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
-import static org.protempa.bp.commons.dsb.relationaldb.SqlGeneratorUtil.prepareValue;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -64,8 +62,8 @@ abstract class AbstractWhereClause implements WhereClause {
         StringBuilder wherePart = new StringBuilder();
 
         EntitySpec prevEntitySpec = null;
-        boolean inGroup = false;
         boolean first = true;
+        boolean inGroup = false;
         for (int j = 0, n = entitySpecs.size(); j < n; j++) {
             EntitySpec entitySpec = entitySpecs.get(j);
             SQLGenUtil.logger().log(Level.INFO,
@@ -174,18 +172,12 @@ abstract class AbstractWhereClause implements WhereClause {
         return wherePart.toString();
     }
 
-    private String processConstraintSpecsForWhereClause(EntitySpec entitySpec,
+    private StringBuilder processConstraintSpecs(EntitySpec entitySpec,
             boolean first) {
-
-        Logger logger = SQLGenUtil.logger();
-        logger.log(Level.FINER,
-                "Processing constraint specs for entity spec {0}",
-                entitySpec.getName());
-        logger.log(Level.FINEST, "Details of entity spec {0}", entitySpec);
-
         StringBuilder wherePart = new StringBuilder();
-        ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
-        for (ColumnSpec constraintSpec : constraintSpecs) {
+
+        for (ColumnSpec constraintSpec : entitySpec.getConstraintSpecs()) {
+            SQLGenUtil.logger().log(Level.INFO, "Processing constraint: {0} {1} {2}", new Object[]{constraintSpec.getSchema(), constraintSpec.getTable(), constraintSpec.getColumn()});
             int wherePartLength = wherePart.length();
             wherePart.append(processConstraintSpecForWhereClause(
                     constraintSpec, first));
@@ -194,8 +186,15 @@ abstract class AbstractWhereClause implements WhereClause {
             }
         }
 
+        return wherePart;
+    }
+
+    private StringBuilder processPropertySpecs(PropertySpec[] propertySpecs,
+            boolean first) {
+        StringBuilder wherePart = new StringBuilder();
+
         for (Filter filter : filters) {
-            for (PropertySpec ps : entitySpec.getPropertySpecs()) {
+            for (PropertySpec ps : propertySpecs) {
                 if (filter instanceof PropertyValueFilter) {
                     PropertyValueFilter pvf = (PropertyValueFilter) filter;
 
@@ -215,15 +214,18 @@ abstract class AbstractWhereClause implements WhereClause {
             }
         }
 
-        // If propIds are all in the entity spec's prop ids, then
-        // skip the code part of the where clause.
+        return wherePart;
+    }
+
+    private StringBuilder processCodeSpec(EntitySpec entitySpec, boolean first) {
+        StringBuilder wherePart = new StringBuilder();
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
+
         if (codeSpec != null) {
             List<ColumnSpec> codeSpecL = codeSpec.asList();
             if (codeSpecL.get(codeSpecL.size() - 1).isPropositionIdsComplete()
                     && !needsPropIdInClause(entitySpec.getPropositionIds())) {
-                wherePart.append(processConstraintSpecForWhereClause(codeSpec,
-                        first));
+                setCaseClauseIfNeeded(codeSpec);
             } else {
                 int wherePartLength = wherePart.length();
                 wherePart.append(processConstraintSpecForWhereClause(codeSpec,
@@ -234,24 +236,66 @@ abstract class AbstractWhereClause implements WhereClause {
             }
         }
 
+        return wherePart;
+    }
+
+    private String processConstraintSpecsForWhereClause(EntitySpec entitySpec,
+            boolean first) {
+
+        Logger logger = SQLGenUtil.logger();
+        logger.log(Level.FINER,
+                "Processing constraint specs for entity spec {0}",
+                entitySpec.getName());
+        logger.log(Level.FINEST, "Details of entity spec {0}", entitySpec);
+
+        StringBuilder wherePart = new StringBuilder();
+
+        wherePart.append(processConstraintSpecs(entitySpec, first));
+        wherePart.append(processPropertySpecs(entitySpec.getPropertySpecs(),
+                first));
+        wherePart.append(processCodeSpec(entitySpec, first));
+
         return wherePart.toString();
+    }
+
+    private void setCaseClauseIfNeeded(ColumnSpec columnSpec) {
+        if (hasConstraint(columnSpec)) {
+            if (resultProcessor != null) {
+                resultProcessor
+                        .setCasePresent(columnSpec.getConstraint() == ColumnSpec.Constraint.LIKE);
+                KnowledgeSourceIdToSqlCode[] filteredConstraintValues = filterKnowledgeSourceIdToSqlCodesById(
+                        propIds, columnSpec.getPropositionIdToSqlCodes());
+                ;
+                selectClause.setCaseClause(
+                        filteredSqlCodes(
+                                propIds,
+                                filterConstraintValues(propIds,
+                                        filteredConstraintValues)),
+                        referenceIndices, columnSpec, filteredConstraintValues);
+            }
+        }
+    }
+
+    private boolean hasConstraint(ColumnSpec columnSpec) {
+        if (columnSpec != null) {
+            List<ColumnSpec> columnSpecL = columnSpec.asList();
+            columnSpec = columnSpecL.get(columnSpecL.size() - 1);
+            return columnSpec.getConstraint() != null;
+        }
+
+        return false;
     }
 
     private String processConstraintSpecForWhereClause(ColumnSpec columnSpec,
             boolean first) {
 
         StringBuilder wherePart = new StringBuilder();
-        if (columnSpec != null) {
+        if (hasConstraint(columnSpec)) {
+            setCaseClauseIfNeeded(columnSpec);
             List<ColumnSpec> columnSpecL = columnSpec.asList();
-            columnSpec = columnSpecL.get(columnSpecL.size() - 1);
-            if (columnSpec.getConstraint() != null) {
-                if (resultProcessor != null) {
-                    resultProcessor
-                            .setCasePresent(columnSpec.getConstraint() == ColumnSpec.Constraint.LIKE);
-                }
-                wherePart.append(processConstraint(columnSpec, propIds, null,
-                        first));
-            }
+            ColumnSpec tmpColSpec = columnSpecL.get(columnSpecL.size() - 1);
+            wherePart
+                    .append(processConstraint(tmpColSpec, propIds, null, first));
         }
         return wherePart.toString();
     }
@@ -342,26 +386,40 @@ abstract class AbstractWhereClause implements WhereClause {
         ColumnSpec.KnowledgeSourceIdToSqlCode[] propIdToSqlCodes = columnSpec
                 .getPropositionIdToSqlCodes();
         if (constraint != null) {
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues = filterKnowledgeSourceIdToSqlCodesById(
+            KnowledgeSourceIdToSqlCode[] filteredConstraintValues = filterConstraintValues(
                     propIds, propIdToSqlCodes);
             if (!first) {
                 wherePart.append(" AND ");
             }
             wherePart.append('(');
-            Object[] sqlCodes = null;
-            if (filteredConstraintValues.length > 0) {
-                sqlCodes = extractSqlCodes(filteredConstraintValues);
-            } else {
-                sqlCodes = propIds.toArray();
-            }
+            Object[] sqlCodes = filteredSqlCodes(propIds,
+                    filteredConstraintValues);
 
-            wherePart.append(WhereConstraintProcessor.getInstance(columnSpec,
-                    constraint, this, sqlCodes, selectClause,
-                    filteredConstraintValues, referenceIndices)
-                    .processConstraint()).append(')');
+            wherePart.append(
+                    WhereConstraintProcessor.getInstance(columnSpec,
+                            constraint, this, sqlCodes, referenceIndices)
+                            .processConstraint()).append(')');
         }
 
         return wherePart.toString();
+    }
+
+    private Object[] filteredSqlCodes(Set<?> propIds,
+            KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
+        Object[] sqlCodes = null;
+        if (filteredConstraintValues.length > 0) {
+            sqlCodes = extractSqlCodes(filteredConstraintValues);
+        } else {
+            sqlCodes = propIds.toArray();
+        }
+        return sqlCodes;
+    }
+
+    private KnowledgeSourceIdToSqlCode[] filterConstraintValues(Set<?> propIds,
+            ColumnSpec.KnowledgeSourceIdToSqlCode[] propIdToSqlCodes) {
+        KnowledgeSourceIdToSqlCode[] filteredConstraintValues = filterKnowledgeSourceIdToSqlCodesById(
+                propIds, propIdToSqlCodes);
+        return filteredConstraintValues;
     }
 
     private Object[] extractSqlCodes(
@@ -385,7 +443,7 @@ abstract class AbstractWhereClause implements WhereClause {
      *         ids that are known to the data source and if the where clause
      *         would contain less than or equal to 2000 codes.
      */
-    boolean needsPropIdInClause(String[] entitySpecPropIds) {
+    private boolean needsPropIdInClause(String[] entitySpecPropIds) {
 
         Set<String> entitySpecPropIdsSet = Arrays.asSet(entitySpecPropIds);
 

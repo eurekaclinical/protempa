@@ -23,8 +23,6 @@ abstract class WhereConstraintProcessor {
 
     static WhereConstraintProcessor getInstance(ColumnSpec columnSpec,
             Constraint constraint, WhereClause whereClause, Object[] sqlCodes,
-            SelectClause selectClause,
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues,
             TableAliaser referenceIndices) {
         switch (constraint) {
             case EQUAL_TO:
@@ -41,8 +39,7 @@ abstract class WhereConstraintProcessor {
                         constraint, whereClause, sqlCodes, referenceIndices);
             case LIKE:
                 return new LikeWhereConstraintProcessor(columnSpec, constraint,
-                        whereClause, sqlCodes, selectClause,
-                        filteredConstraintValues, referenceIndices);
+                        whereClause, sqlCodes, referenceIndices);
             default:
                 throw new AssertionError("Invalid constraint: " + constraint);
         }
