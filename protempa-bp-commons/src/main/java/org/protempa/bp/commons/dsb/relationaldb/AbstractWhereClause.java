@@ -250,9 +250,18 @@ abstract class AbstractWhereClause implements WhereClause {
 
         StringBuilder wherePart = new StringBuilder();
 
+        int wherePartLength = wherePart.length();
         wherePart.append(processConstraintSpecs(entitySpec, first));
+        if (first && wherePart.length() > wherePartLength) {
+            first = false;
+            wherePartLength = wherePart.length();
+        }
         wherePart.append(processPropertySpecs(entitySpec.getPropertySpecs(),
                 first));
+        if (first && wherePart.length() > wherePartLength) {
+            first = false;
+            wherePartLength = wherePart.length();
+        }
         wherePart.append(processCodeSpec(entitySpec, first));
 
         return wherePart.toString();
