@@ -15,10 +15,10 @@ abstract class AbstractFromClause implements FromClause {
         this.referenceIndices = referenceIndices;
     }
 
-    protected abstract AbstractJoinClause getJoinClause(
+    protected abstract JoinClause getJoinClause(
             JoinSpec.JoinType joinType);
 
-    protected abstract AbstractOnClause getOnClause(JoinSpec joinSpec,
+    protected abstract OnClause getOnClause(JoinSpec joinSpec,
             TableAliaser referenceIndices);
 
     public String generateClause() {
