@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
@@ -26,28 +27,15 @@ import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
 import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
 import org.protempa.DataSourceReadException;
-import org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend;
-import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.Constraint;
-import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.dsb.filter.PositionFilter;
-import org.protempa.backend.dsb.filter.PositionFilter.Side;
-import org.protempa.backend.dsb.filter.PropertyValueFilter;
+import org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend;
+import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.Constraint;
 import org.protempa.proposition.Proposition;
-import org.protempa.proposition.value.BooleanValue;
-import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.GranularityFactory;
-import org.protempa.proposition.value.InequalityNumberValue;
-import org.protempa.proposition.value.ValueList;
-import org.protempa.proposition.value.NominalValue;
-import org.protempa.proposition.value.NumberValue;
-import org.protempa.proposition.value.OrdinalValue;
 import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.UnitFactory;
-import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueComparator;
-import org.protempa.proposition.value.ValueVisitor;
 
 /**
  * Abstract class for implement database and driver-specific SQL generators.
@@ -69,7 +57,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private UnitFactory units;
     private RelationalDbDataSourceBackend backend;
 
-    public AbstractSQLGenerator() {
+    protected AbstractSQLGenerator() {
         this.primitiveParameterSpecs = new HashMap<String, List<EntitySpec>>();
         this.eventSpecs = new HashMap<String, List<EntitySpec>>();
         this.constantSpecs = new HashMap<String, List<EntitySpec>>();
@@ -99,6 +87,10 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         this.backend = backend;
     }
 
+    /**
+     * 
+     * @return the connection spec
+     */
     public ConnectionSpec getConnectionSpec() {
         return this.connectionSpec;
     }
@@ -111,44 +103,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     @Override
     public UnitFactory getUnits() {
         return this.units;
-    }
-
-    private void appendColumnRef(StringBuilder wherePart,
-            Map<ColumnSpec, Integer> referenceIndices, ColumnSpec columnSpec) {
-        if (columnSpec.getColumnOp() != null) {
-            Integer tableNumber = referenceIndices.get(columnSpec);
-            assert tableNumber != null : "tableNumber is null";
-            generateColumnReference(columnSpec.getColumnOp(), tableNumber,
-                    columnSpec, wherePart);
-        } else {
-            appendColumnReference(referenceIndices, columnSpec, wherePart);
-        }
-    }
-
-    public void generateColumnReference(ColumnSpec.ColumnOp columnOp,
-            int tableNumber, ColumnSpec columnSpec, StringBuilder stmt) {
-        if (columnOp != null) {
-            switch (columnOp) {
-                case UPPER:
-                    stmt.append("upper");
-                    break;
-                default:
-                    throw new AssertionError("invalid column op: " + columnOp);
-            }
-            stmt.append('(');
-        }
-        generateColumnReference(tableNumber, columnSpec.getColumn(), stmt);
-        if (columnOp != null) {
-            stmt.append(')');
-        }
-    }
-
-    private void appendColumnReference(
-            Map<ColumnSpec, Integer> referenceIndices, ColumnSpec columnSpec,
-            StringBuilder stmt) {
-        Integer tableNumber = referenceIndices.get(columnSpec);
-        assert tableNumber != null : "tableNumber is null";
-        generateColumnReference(tableNumber, columnSpec.getColumn(), stmt);
     }
 
     /*
@@ -332,15 +286,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
     }
 
-    private Object[] extractSqlCodes(
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
-        Object[] sqlCodes = new Object[filteredConstraintValues.length];
-        for (int i = 0; i < sqlCodes.length; i++) {
-            sqlCodes[i] = filteredConstraintValues[i].getSqlCode();
-        }
-        return sqlCodes;
-    }
-
     private void logSkippingReference(Logger logger, ReferenceSpec referenceSpec) {
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, "Skipping reference {0}",
@@ -357,64 +302,12 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
     }
 
-    private int processForWhereClause(EntitySpec prevEntitySpec, int i,
-            Set<Filter> filtersCopy, StringBuilder wherePart,
-            Map<ColumnSpec, Integer> referenceIndices, Set<String> propIds,
-            StringBuilder selectPart, SQLGenResultProcessor resultProcessor,
-            boolean first) {
-        i = processKeySpecForWhereClause(prevEntitySpec, i);
-        int wherePartLength = wherePart.length();
-        i = processStartTimeSpecForWhereClause(prevEntitySpec, i, filtersCopy,
-                wherePart, referenceIndices, first);
-        if (wherePart.length() > wherePartLength) {
-            first = false;
-        }
-        wherePartLength = wherePart.length();
-        i = processFinishTimeSpecForWhereClause(prevEntitySpec, i, filtersCopy,
-                wherePart, referenceIndices, first);
-        if (wherePart.length() > wherePartLength) {
-            first = false;
-        }
-        wherePartLength = wherePart.length();
-        i = processPropertyValueSpecsForWhereClause(prevEntitySpec, i);
-        if (wherePart.length() > wherePartLength) {
-            first = false;
-        }
-        wherePartLength = wherePart.length();
-        i = processConstraintSpecsForWhereClause(propIds, prevEntitySpec, i,
-                wherePart, selectPart, referenceIndices, filtersCopy,
-                resultProcessor, first);
-        return i;
-    }
-
-    private void processOrder(SQLOrderBy order, ColumnSpecInfo info,
-            Map<ColumnSpec, Integer> referenceIndices, StringBuilder wherePart) {
-        if (order != null && info.getStartTimeIndex() >= 0) {
-            ColumnSpec startColSpec = info.getColumnSpecs().get(
-                    info.getStartTimeIndex());
-            int start = referenceIndices.get(startColSpec);
-            String startCol = startColSpec.getColumn();
-            ColumnSpec finishColSpec;
-            String finishCol;
-            if (info.getFinishTimeIndex() >= 0) {
-                finishColSpec = info.getColumnSpecs().get(
-                        info.getFinishTimeIndex());
-                finishCol = finishColSpec.getColumn();
-            } else {
-                finishColSpec = null;
-                finishCol = null;
-            }
-            int finish;
-            if (info.getFinishTimeIndex() >= 0) {
-                finish = referenceIndices.get(info.getColumnSpecs().get(
-                        info.getFinishTimeIndex()));
-            } else {
-                finish = -1;
-            }
-            processOrderBy(start, startCol, finish, finishCol, wherePart, order);
-        }
-    }
-
+    /*
+     * allEntitySpecs() returns a map of non-parameterized
+     * SQLGenResultProcessorFactory objects, therefore the resulting map here
+     * cannot be parameterized either.
+     */
+    @SuppressWarnings("rawtypes")
     @Override
     public ResultCache<Proposition> readPropositions(Set<String> keyIds,
             Set<String> propIds, Filter filters, SQLOrderBy order)
@@ -429,7 +322,11 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
             logProcessingEntitySpec(logger, entitySpec);
-            SQLGenResultProcessorFactory factory = entitySpecToResultProcessorMap
+
+            // we know that the map contains only factory instances that are
+            // parameterized by implementations of Proposition
+            @SuppressWarnings("unchecked")
+            SQLGenResultProcessorFactory<Proposition> factory = entitySpecToResultProcessorMap
                     .get(entitySpec);
             assert factory != null : "factory should never be null";
             List<EntitySpec> allEntitySpecsCopy = new LinkedList<EntitySpec>(
@@ -528,7 +425,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     if (last.getConstraint() != null
                             && (last.getConstraint() != Constraint.EQUAL_TO
                                     || !last.isPropositionIdsComplete() || needsPropIdInClause(
-                                    propIds, es.getPropositionIds()))) {
+                                        propIds, es.getPropositionIds()))) {
                         return;
                     }
                 }
@@ -625,6 +522,11 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
     }
 
+    /*
+     * We need to store multiple types of result processor factories in the same
+     * map
+     */
+    @SuppressWarnings("rawtypes")
     private Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecs() {
         /*
          * The order of the entity specs matters for multiple with the same
@@ -703,7 +605,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
      * and are not applicable to other entity specs that refer to it.
      * 
      * @param entitySpecs
-     * @param filters
+     * @param filtersCopy
      * @param entitySpec
      */
     private static void removeNonApplicableFilters(
@@ -755,684 +657,16 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Set<Filter> filtersCopy, List<EntitySpec> entitySpecsCopy,
             Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor) {
-//        SQLGenUtil.logger().log(
-//                Level.INFO,
-//                "ColSpecInfo args: {0}, {1}, {2}, {3}, {4}",
-//                new Object[] { propIds.size(), entitySpec.getName(),
-//                        entitySpecsCopy.size(), filtersCopy.size(),
-//                        referenceSpec.getReferenceName() });
-        ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(propIds,
-                entitySpec, entitySpecsCopy, filtersCopy, referenceSpec);
-        // for (ColumnSpec cs : info.getColumnSpecs()) {
-        // SQLGenUtil.logger().log(
-        // Level.INFO,
-        // "CS: {0}.{1}.{2}",
-        // new Object[] { cs.getSchema(), cs.getTable(),
-        // cs.getColumn() });
-        // }
-         Map<ColumnSpec, Integer> referenceIndices =
-         computeReferenceIndices(info
-         .getColumnSpecs());
-        SelectStatement myStmt = getSelectStatement(entitySpec, referenceSpec,
-                entitySpecsCopy, filtersCopy, propIds, keyIds, order,
-                resultProcessor);
 
-        // SelectClause sc = myStmt.getSelectClause(
-        // info, referenceIndices, entitySpec);
-         StringBuilder selectClause =
-        // new StringBuilder(sc.generateClause());
-         generateSelectClause(info, referenceIndices, entitySpec);
-         StringBuilder fromClause =
-        // new StringBuilder(myStmt.getFromClause(
-        // info.getColumnSpecs(), referenceIndices).generateClause());
-         generateFromClause(info.getColumnSpecs(), referenceIndices);
-         StringBuilder whereClause =
-        // new StringBuilder(myStmt.getWhereClause(
-        // propIds, info, entitySpecsCopy, filtersCopy, referenceIndices,
-        // keyIds, order, resultProcessor, sc).generateClause());
-         generateWhereClause(propIds, info, entitySpecsCopy, filtersCopy,
-         selectClause, referenceIndices, keyIds, order, resultProcessor);
-//         String result = 
-         SQLGenUtil.logger().log(Level.INFO, "Old query: {0}", assembleReadPropositionsQuery(selectClause,
-         fromClause,
-         whereClause));
-         String result = myStmt.generateStatement();
-        return result;
+        return getSelectStatement(entitySpec, referenceSpec,
+                entitySpecsCopy, filtersCopy, propIds, keyIds, order,
+                resultProcessor).generateStatement();
     }
 
-    public String assembleReadPropositionsQuery(StringBuilder selectClause,
+    protected String assembleReadPropositionsQuery(StringBuilder selectClause,
             StringBuilder fromClause, StringBuilder whereClause) {
         return MessageFormat.format(readPropositionsSQL, selectClause,
                 fromClause, whereClause);
-    }
-
-    private static KnowledgeSourceIdToSqlCode[] filterKnowledgeSourceIdToSqlCodesById(
-            Set<?> propIds, KnowledgeSourceIdToSqlCode[] constraintValues) {
-        ColumnSpec.KnowledgeSourceIdToSqlCode[] filteredConstraintValues;
-        if (propIds != null) {
-            List<ColumnSpec.KnowledgeSourceIdToSqlCode> constraintValueList = new ArrayList<ColumnSpec.KnowledgeSourceIdToSqlCode>();
-            for (ColumnSpec.KnowledgeSourceIdToSqlCode constraintValue : constraintValues) {
-                if (propIds.contains(constraintValue.getPropositionId())) {
-                    constraintValueList.add(constraintValue);
-                }
-            }
-            if (constraintValueList.isEmpty()) {
-                filteredConstraintValues = constraintValues;
-            } else {
-                filteredConstraintValues = constraintValueList
-                        .toArray(new ColumnSpec.KnowledgeSourceIdToSqlCode[constraintValueList
-                                .size()]);
-            }
-        } else {
-            filteredConstraintValues = constraintValues;
-        }
-        return filteredConstraintValues;
-    }
-
-    private static int findPreviousInstance(int i, int j,
-            List<ColumnSpec> columnSpecs, ColumnSpec columnSpec) {
-        for (; i < j; i++) {
-            ColumnSpec columnSpec2 = columnSpecs.get(i);
-            if (columnSpec.isSameSchemaAndTable(columnSpec2)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private StringBuilder generateSelectClause(ColumnSpecInfo info,
-            Map<ColumnSpec, Integer> referenceIndices, EntitySpec entitySpec) {
-        StringBuilder selectClause = new StringBuilder();
-        int i = 0;
-        if (info.getFinishTimeIndex() > 0) {
-            i++;
-        }
-        if (info.getPropertyIndices() != null) {
-            i += info.getPropertyIndices().size();
-        }
-        if (info.getCodeIndex() > 0) {
-            i++;
-        }
-        if (info.getStartTimeIndex() > 0) {
-            i++;
-        }
-        int[] uniqueIdIndices = info.getUniqueIdIndices();
-        if (uniqueIdIndices != null) {
-            i += uniqueIdIndices.length;
-        }
-        if (info.isUsingKeyIdIndex()) {
-            i++;
-        }
-        if (info.getValueIndex() > 0) {
-            i++;
-        }
-        int[] indices = new int[i];
-        String[] names = new String[i];
-        int k = 0;
-        indices[k] = 0;
-        if (info.isUsingKeyIdIndex()) {
-            names[k++] = "keyid";
-        }
-        if (uniqueIdIndices != null) {
-            for (int m = 0; m < uniqueIdIndices.length; m++) {
-                indices[k] = uniqueIdIndices[m];
-                names[k++] = "uniqueid" + m;
-            }
-        }
-        if (info.getCodeIndex() > 0) {
-            indices[k] = info.getCodeIndex();
-            names[k++] = "code";
-        }
-        if (info.getStartTimeIndex() > 0) {
-            indices[k] = info.getStartTimeIndex();
-            names[k++] = "starttime";
-        }
-        if (info.getFinishTimeIndex() > 0) {
-            indices[k] = info.getFinishTimeIndex();
-            names[k++] = "finishtime";
-        }
-        if (info.getValueIndex() > 0) {
-            indices[k] = info.getValueIndex();
-            names[k++] = "value";
-        }
-        if (info.getPropertyIndices() != null) {
-            PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
-            for (PropertySpec propertySpec : propertySpecs) {
-                String propertyName = propertySpec.getName();
-                int propertyIndex = info.getPropertyIndices().get(propertyName);
-                indices[k] = propertyIndex;
-                names[k++] = propertyName + "_value";
-            }
-        }
-
-        boolean unique = info.isUnique();
-        for (int j = 0; j < indices.length; j++) {
-            ColumnSpec cs = info.getColumnSpecs().get(indices[j]);
-            Integer index = referenceIndices.get(cs);
-            assert index != null : "index is null for " + cs;
-            String column = cs.getColumn();
-            String name = names[j];
-            boolean distinctRequested = (j == 0 && !unique);
-            boolean hasNext = j < indices.length - 1;
-            if (column == null) {
-                throw new AssertionError("column cannot be null: " + "index="
-                        + index + "; name=" + name + "; cs=" + cs);
-            }
-            if (name == null) {
-                throw new AssertionError("name cannot be null");
-            }
-            generateSelectColumn(distinctRequested, selectClause, index,
-                    column, name, hasNext);
-        }
-        return selectClause;
-    }
-
-    public void generateSelectColumn(boolean distinctRequested,
-            StringBuilder selectPart, int index, String column, String name,
-            boolean hasNext) {
-        if (distinctRequested) {
-            selectPart.append("distinct ");
-        }
-        generateColumnReference(index, column, selectPart);
-        selectPart.append(" as ");
-        selectPart.append(name);
-        if (hasNext) {
-            selectPart.append(',');
-        }
-    }
-
-    public void processOrderBy(int startReferenceIndex, String startColumn,
-            int finishReferenceIndex, String finishColumn,
-            StringBuilder wherePart, SQLOrderBy order) {
-        wherePart.append(" order by ");
-        generateColumnReference(startReferenceIndex, startColumn, wherePart);
-        if (finishReferenceIndex > 0) {
-            wherePart.append(',');
-            generateColumnReference(finishReferenceIndex, finishColumn,
-                    wherePart);
-        }
-        wherePart.append(' ');
-        if (order == SQLOrderBy.ASCENDING) {
-            wherePart.append("ASC");
-        } else {
-            wherePart.append("DESC");
-        }
-    }
-
-    public abstract void generateFromTable(String schema, String table,
-            StringBuilder fromPart, int index);
-
-    public void generateTableReference(int tableNumber, StringBuilder stmt) {
-        stmt.append(" a").append(tableNumber);
-    }
-
-    public void generateColumnReference(int tableNumber, String columnName,
-            StringBuilder stmt) {
-        generateTableReference(tableNumber, stmt);
-        stmt.append('.');
-        stmt.append(columnName);
-    }
-
-    public void generateOn(StringBuilder fromPart, int fromIndex, int toIndex,
-            String fromKey, String toKey) {
-        fromPart.append("on (");
-        generateColumnReference(fromIndex, fromKey, fromPart);
-        fromPart.append(" = ");
-        generateColumnReference(toIndex, toKey, fromPart);
-        fromPart.append(") ");
-    }
-
-    public void generateJoin(JoinSpec.JoinType joinType, StringBuilder fromPart) {
-        switch (joinType) {
-            case INNER:
-                fromPart.append(" join ");
-                break;
-            case LEFT_OUTER:
-                fromPart.append(" left outer join ");
-                break;
-            default:
-                throw new AssertionError("invalid join type: " + joinType);
-        }
-    }
-
-    /**
-     * Generate an IN clause.
-     * 
-     * @param wherePart
-     *            the SQL statement {@link StringBuilder}.
-     * @param tableNumber
-     *            the table number.
-     * @param columnName
-     *            the column name {@link String}.
-     * @param elements
-     *            the elements of the IN clause.
-     * @param not
-     *            set to <code>true</code> to generate <code>NOT IN</code>.
-     */
-    public void generateInClause(StringBuilder wherePart, int tableNumber,
-            String columnName, Object[] elements, boolean not) {
-        generateColumnReference(tableNumber, columnName, wherePart);
-        if (not) {
-            wherePart.append(" NOT");
-        }
-        wherePart.append(" IN (");
-        for (int k = 0; k < elements.length; k++) {
-            Object sqlCode = elements[k];
-            appendValue(sqlCode, wherePart);
-            if (k + 1 < elements.length) {
-                wherePart.append(',');
-            }
-        }
-        wherePart.append(')');
-    }
-
-    private StringBuilder generateFromClause(List<ColumnSpec> columnSpecs,
-            Map<ColumnSpec, Integer> referenceIndices) {
-        Map<Integer, ColumnSpec> columnSpecCache = new HashMap<Integer, ColumnSpec>();
-        StringBuilder fromPart = new StringBuilder();
-        boolean begin = true;
-        for (int j = 0, n = columnSpecs.size(); j < n; j++) {
-            ColumnSpec columnSpec = columnSpecs.get(j);
-
-            JoinSpec currentJoin = null;
-
-            /*
-             * To find something to join to, first we see if there is a join to
-             * it.
-             */
-            for (int k = j - 1; k >= 0; k--) {
-                ColumnSpec prevColumnSpec = columnSpecs.get(k);
-                JoinSpec js = prevColumnSpec.getJoin();
-                if (js != null && js.getNextColumnSpec() == columnSpec) {
-                    currentJoin = js;
-                    break;
-                }
-            }
-
-            /*
-             * Next, if there is not a join, we see if there is a join specified
-             * to another column spec with the same schema and table as this
-             * one.
-             */
-            if (currentJoin == null) {
-                for (int k = 0; k < j; k++) {
-                    ColumnSpec prevColumnSpec = columnSpecs.get(k);
-                    JoinSpec js = prevColumnSpec.getJoin();
-                    if (js != null
-                            && js.getNextColumnSpec().isSameSchemaAndTable(
-                                    columnSpec)) {
-                        currentJoin = js;
-                        break;
-                    }
-                }
-            }
-
-            Integer i = referenceIndices.get(columnSpec);
-            if (i != null && !columnSpecCache.containsKey(i)) {
-                assert begin || currentJoin != null : "No 'on' clause can be generated for "
-                        + columnSpec + " because there is no incoming join.";
-                String schema = columnSpec.getSchema();
-                String table = columnSpec.getTable();
-                if (!begin) {
-                    generateJoin(currentJoin.getJoinType(), fromPart);
-                }
-                generateFromTable(schema, table, fromPart, i);
-                fromPart.append(' ');
-                columnSpecCache.put(i, columnSpec);
-
-                if (currentJoin != null) {
-                    int fromIndex = referenceIndices.get(currentJoin
-                            .getPrevColumnSpec());
-                    int toIndex = referenceIndices.get(currentJoin
-                            .getNextColumnSpec());
-                    generateOn(fromPart, fromIndex, toIndex,
-                            currentJoin.getFromKey(), currentJoin.getToKey());
-                }
-                begin = false;
-            }
-        }
-        return fromPart;
-    }
-
-    private StringBuilder generateWhereClause(Set<String> propIds,
-            ColumnSpecInfo info, List<EntitySpec> entitySpecs,
-            Set<Filter> filtersCopy, StringBuilder selectPart,
-            Map<ColumnSpec, Integer> referenceIndices, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
-        StringBuilder wherePart = new StringBuilder();
-
-        int i = 1;
-
-        EntitySpec prevEntitySpec = null;
-        boolean inGroup = false;
-        boolean first = true;
-        for (int j = 0, n = entitySpecs.size(); j < n; j++) {
-            EntitySpec entitySpec = entitySpecs.get(j);
-            if (n > 1 && j > 0) {
-                if (prevEntitySpec.getName().equals(entitySpec.getName())) {
-                    if (!inGroup) {
-                        if (!first) {
-                            wherePart.append(" and ");
-                            first = true;
-                        }
-                        wherePart.append(" ((");
-                        inGroup = true;
-                    } else {
-                        wherePart.append(") or (");
-                        first = true;
-                    }
-                    int wherePartLength = wherePart.length();
-                    i = processForWhereClause(prevEntitySpec, i, filtersCopy,
-                            wherePart, referenceIndices, propIds, selectPart,
-                            resultProcessor, first);
-                    if (wherePart.length() > wherePartLength) {
-                        first = false;
-                    }
-                } else {
-                    if (inGroup) {
-                        first = true;
-                        int wherePartLength = wherePart.length();
-                        wherePart.append(") or (");
-                        i = processForWhereClause(prevEntitySpec, i,
-                                filtersCopy, wherePart, referenceIndices,
-                                propIds, selectPart, resultProcessor, first);
-                        wherePart.append(")) ");
-                        if (wherePart.length() > wherePartLength) {
-                            first = false;
-                        }
-                        inGroup = false;
-                    } else {
-                        int wherePartLength = wherePart.length();
-                        i = processForWhereClause(prevEntitySpec, i,
-                                filtersCopy, wherePart, referenceIndices,
-                                propIds, selectPart, resultProcessor, first);
-                        if (wherePart.length() > wherePartLength) {
-                            first = false;
-                        }
-                    }
-
-                }
-
-            }
-            prevEntitySpec = entitySpec;
-        }
-        if (inGroup) {
-            first = true;
-            wherePart.append(") or (");
-            i = processForWhereClause(prevEntitySpec, i, filtersCopy,
-                    wherePart, referenceIndices, propIds, selectPart,
-                    resultProcessor, first);
-            wherePart.append(")) ");
-        } else {
-            i = processForWhereClause(prevEntitySpec, i, filtersCopy,
-                    wherePart, referenceIndices, propIds, selectPart,
-                    resultProcessor, first);
-        }
-
-        processKeyIdConstraintsForWhereClause(info, wherePart, keyIds);
-
-        if (wherePart.length() > 0) {
-            wherePart.insert(0, "where ");
-        }
-
-        processOrder(order, info, referenceIndices, wherePart);
-
-        return wherePart;
-    }
-
-    /**
-     * If wherePart is null, it skips creating the where clause part.
-     * 
-     * @param columnSpec
-     * @param propIds
-     * @param wherePart
-     * @param referenceIndices
-     * @param selectPartHasCaseStmt
-     * @param selectPart
-     */
-    private void processConstraint(ColumnSpec columnSpec, Set<?> propIds,
-            StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
-            StringBuilder selectPart, Constraint constraintOverride,
-            boolean first) {
-        Constraint constraint = columnSpec.getConstraint();
-        if (constraintOverride != null) {
-            constraint = constraintOverride;
-        }
-        ColumnSpec.KnowledgeSourceIdToSqlCode[] propIdToSqlCodes = columnSpec
-                .getPropositionIdToSqlCodes();
-        if (constraint != null) {
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues = filterKnowledgeSourceIdToSqlCodesById(
-                    propIds, propIdToSqlCodes);
-            if (wherePart != null) {
-                if (!first) {
-                    wherePart.append(" and ");
-                }
-                wherePart.append('(');
-            }
-            Object[] sqlCodes = null;
-            if (filteredConstraintValues.length > 0) {
-                sqlCodes = extractSqlCodes(filteredConstraintValues);
-            } else {
-                sqlCodes = propIds.toArray();
-            }
-
-            switch (constraint) {
-                case EQUAL_TO:
-                    if (wherePart != null) {
-                        if (sqlCodes.length > 1) {
-                            generateInClause(wherePart,
-                                    referenceIndices.get(columnSpec),
-                                    columnSpec.getColumn(), sqlCodes, false);
-                        } else {
-                            assert sqlCodes.length == 1 : "invalid sqlCodes length";
-                            appendColumnRef(wherePart, referenceIndices,
-                                    columnSpec);
-                            wherePart.append(constraint.getSqlOperator());
-                            appendValue(sqlCodes[0], wherePart);
-                        }
-                    }
-                    break;
-                case LESS_THAN:
-                case LESS_THAN_OR_EQUAL_TO:
-                case GREATER_THAN:
-                case GREATER_THAN_OR_EQUAL_TO:
-                    if (wherePart != null) {
-                        appendColumnRef(wherePart, referenceIndices, columnSpec);
-                        wherePart.append(constraint.getSqlOperator());
-                        appendValue(sqlCodes[0], wherePart);
-                    }
-                    break;
-                case NOT_EQUAL_TO:
-                    if (wherePart != null) {
-                        if (sqlCodes.length > 1) {
-                            generateInClause(wherePart,
-                                    referenceIndices.get(columnSpec),
-                                    columnSpec.getColumn(), sqlCodes, true);
-                        } else {
-                            appendColumnRef(wherePart, referenceIndices,
-                                    columnSpec);
-                            wherePart.append(constraint.getSqlOperator());
-                            appendValue(sqlCodes[0], wherePart);
-                        }
-                    }
-                    break;
-                case LIKE:
-                    if (selectPart != null) {
-                        generateCaseClause(selectPart, sqlCodes,
-                                referenceIndices, columnSpec,
-                                filteredConstraintValues);
-                    }
-                    if (wherePart != null && sqlCodes.length > 1) {
-                        wherePart.append('(');
-                    }
-                    for (int k = 0; k < sqlCodes.length; k++) {
-                        if (wherePart != null) {
-                            appendColumnRef(wherePart, referenceIndices,
-                                    columnSpec);
-                            wherePart.append(" LIKE ");
-                            appendValue(sqlCodes[k], wherePart);
-                            if (k + 1 < sqlCodes.length) {
-                                wherePart.append(" or ");
-                            }
-                        }
-                    }
-                    if (wherePart != null && sqlCodes.length > 1) {
-                        wherePart.append(')');
-                    }
-
-                    break;
-                default:
-                    throw new AssertionError("should not happen");
-            }
-            if (wherePart != null) {
-                wherePart.append(')');
-            }
-        }
-
-    }
-
-    private void generateCaseClause(StringBuilder selectPart,
-            Object[] sqlCodes, Map<ColumnSpec, Integer> referenceIndices,
-            ColumnSpec columnSpec,
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
-        selectPart.append(", case ");
-        for (int k = 0; k < sqlCodes.length; k++) {
-            selectPart.append("when ");
-            appendColumnRef(selectPart, referenceIndices, columnSpec);
-            selectPart.append(" like ");
-            appendValue(sqlCodes[k], selectPart);
-            selectPart.append(" then ");
-            appendValue(filteredConstraintValues[k].getPropositionId(),
-                    selectPart);
-            if (k < sqlCodes.length - 1) {
-                selectPart.append(" ");
-            }
-        }
-        selectPart.append(" end ");
-    }
-
-    private static class ValueExtractor implements ValueVisitor {
-
-        Set<Object> values = new HashSet<Object>();
-
-        @Override
-        public void visit(NominalValue nominalValue) {
-            values.add(nominalValue.getString());
-        }
-
-        @Override
-        public void visit(OrdinalValue ordinalValue) {
-            values.add(ordinalValue.getValue());
-        }
-
-        @Override
-        public void visit(BooleanValue booleanValue) {
-            values.add(booleanValue.getBoolean());
-        }
-
-        @Override
-        public void visit(ValueList<? extends Value> listValue) {
-            for (Value val : listValue) {
-                val.accept(this);
-            }
-        }
-
-        @Override
-        public void visit(NumberValue numberValue) {
-            values.add(numberValue.getNumber());
-        }
-
-        @Override
-        public void visit(InequalityNumberValue inequalityNumberValue) {
-            throw new UnsupportedOperationException(
-                    "inequalityNumberValue not supported");
-        }
-
-        @Override
-        public void visit(DateValue dateValue) {
-            values.add(dateValue.getDate());
-        }
-    }
-
-    private static int processPropertyValueSpecsForWhereClause(
-            EntitySpec entitySpec, int i) {
-        PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
-        Map<String, Integer> propertyValueIndices = new HashMap<String, Integer>();
-        for (PropertySpec propertySpec : propertySpecs) {
-            ColumnSpec spec = propertySpec.getSpec();
-            if (spec != null) {
-                i += spec.asList().size();
-                propertyValueIndices.put(propertySpec.getName(), i);
-            }
-        }
-        return i;
-    }
-
-    private int processConstraintSpecsForWhereClause(Set<String> propIds,
-            EntitySpec entitySpec, int i, StringBuilder wherePart,
-            StringBuilder selectPart,
-            Map<ColumnSpec, Integer> referenceIndices, Set<Filter> filtersCopy,
-            SQLGenResultProcessor resultProcessor, boolean first) {
-        Logger logger = SQLGenUtil.logger();
-        logger.log(Level.FINER,
-                "Processing constraint specs for entity spec {0}",
-                entitySpec.getName());
-        logger.log(Level.FINEST, "Details of entity spec {0}", entitySpec);
-        ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
-        for (ColumnSpec constraintSpec : constraintSpecs) {
-            SQLGenUtil.logger().log(Level.INFO, "Processing constraint: {0}", constraintSpec.getColumn());
-            int wherePartLength = wherePart.length();
-            i = processConstraintSpecForWhereClause(null, constraintSpec, i,
-                    wherePart, null, referenceIndices, null, first);
-            if (wherePart.length() > wherePartLength) {
-                first = false;
-            }
-        }
-
-        for (Filter filter : filtersCopy) {
-            for (PropertySpec ps : entitySpec.getPropertySpecs()) {
-                if (filter instanceof PropertyValueFilter) {
-                    PropertyValueFilter pvf = (PropertyValueFilter) filter;
-
-                    if (pvf.getProperty().equals(ps.getName())) {
-                        ColumnSpec colSpec = ps.getSpec();
-                        int wherePartLength = wherePart.length();
-                        processPropertyValueFilter(colSpec, wherePart,
-                                referenceIndices, pvf.getValueComparator(),
-                                pvf.getValues(), first);
-                        if (wherePart.length() > wherePartLength) {
-                            first = false;
-                        }
-
-                        break;
-                    }
-                }
-            }
-        }
-
-        // If propIds are all in the entity spec's prop ids, then
-        // skip the code part of the where clause.
-        ColumnSpec codeSpec = entitySpec.getCodeSpec();
-        if (codeSpec != null) {
-            List<ColumnSpec> codeSpecL = codeSpec.asList();
-            if (codeSpecL.get(codeSpecL.size() - 1).isPropositionIdsComplete()
-                    && !needsPropIdInClause(propIds,
-                            entitySpec.getPropositionIds())) {
-                i = processConstraintSpecForWhereClause(propIds, codeSpec, i,
-                        null, selectPart, referenceIndices, resultProcessor,
-                        first);
-            } else {
-                int wherePartLength = wherePart.length();
-                i = processConstraintSpecForWhereClause(propIds, codeSpec, i,
-                        wherePart, selectPart, referenceIndices,
-                        resultProcessor, first);
-                if (wherePart.length() > wherePartLength) {
-                    first = false;
-                }
-            }
-        }
-
-        return i;
     }
 
     /**
@@ -1462,320 +696,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
         return (filteredPropIds.size() < entitySpecPropIds.length * 0.85f)
                 && (filteredPropIds.size() <= 2000);
-    }
-
-    private static Constraint valueComparatorToSqlOp(
-            ValueComparator valueComparator) throws IllegalStateException {
-        ColumnSpec.Constraint constraint = null;
-        switch (valueComparator) {
-            case GREATER_THAN:
-                constraint = ColumnSpec.Constraint.GREATER_THAN;
-                break;
-            case LESS_THAN:
-                constraint = ColumnSpec.Constraint.LESS_THAN;
-                break;
-            case EQUAL_TO:
-                constraint = ColumnSpec.Constraint.EQUAL_TO;
-                break;
-            case GREATER_THAN_OR_EQUAL_TO:
-                constraint = ColumnSpec.Constraint.GREATER_THAN_OR_EQUAL_TO;
-                break;
-            case LESS_THAN_OR_EQUAL_TO:
-                constraint = ColumnSpec.Constraint.LESS_THAN_OR_EQUAL_TO;
-                break;
-            case IN:
-                constraint = ColumnSpec.Constraint.EQUAL_TO;
-                break;
-            case NOT_IN:
-                constraint = ColumnSpec.Constraint.NOT_EQUAL_TO;
-                break;
-            default:
-                throw new AssertionError("invalid valueComparator: "
-                        + valueComparator);
-        }
-        return constraint;
-    }
-
-    private int processConstraintSpecForWhereClause(Set<String> propIds,
-            ColumnSpec columnSpec, int i, StringBuilder wherePart,
-            StringBuilder selectPart,
-            Map<ColumnSpec, Integer> referenceIndices,
-            SQLGenResultProcessor resultProcessor, boolean first) {
-
-        if (columnSpec != null) {
-            List<ColumnSpec> columnSpecL = columnSpec.asList();
-            columnSpec = columnSpecL.get(columnSpecL.size() - 1);
-            if (columnSpec.getConstraint() != null) {
-                i += columnSpecL.size();
-                if (resultProcessor != null) {
-                    resultProcessor
-                            .setCasePresent(columnSpec.getConstraint() == ColumnSpec.Constraint.LIKE);
-                }
-                processConstraint(columnSpec, propIds, wherePart,
-                        referenceIndices, selectPart, null, first);
-            }
-        }
-        return i;
-    }
-
-    private void processPropertyValueFilter(ColumnSpec columnSpec,
-            StringBuilder wherePart, Map<ColumnSpec, Integer> referenceIndices,
-            ValueComparator comparator, Value[] values, boolean first) {
-
-        List<ColumnSpec> columnSpecL = columnSpec.asList();
-        ColumnSpec lastColumnSpec = columnSpecL.get(columnSpecL.size() - 1);
-
-        Constraint constraint = valueComparatorToSqlOp(comparator);
-
-        if (columnSpec != null && constraint != null) {
-            ValueExtractor ve = new ValueExtractor();
-            for (Value value : values) {
-                value.accept(ve);
-            }
-            processConstraint(lastColumnSpec, ve.values, wherePart,
-                    referenceIndices, null, constraint, first);
-        }
-    }
-
-    private int processFinishTimeSpecForWhereClause(EntitySpec entitySpec,
-            int i, Set<Filter> filtersCopy, StringBuilder wherePart,
-            Map<ColumnSpec, Integer> referenceIndices, boolean first) {
-        ColumnSpec finishTimeSpec = entitySpec.getFinishTimeSpec();
-        if (finishTimeSpec != null) {
-            while (true) {
-                if (finishTimeSpec.getJoin() != null) {
-                    finishTimeSpec = finishTimeSpec.getJoin()
-                            .getNextColumnSpec();
-                    i++;
-                } else {
-                    for (Filter filter : filtersCopy) {
-                        if (filter instanceof PositionFilter) {
-                            Set<String> entitySpecPropIds = org.arp.javautil.arrays.Arrays
-                                    .asSet(entitySpec.getPropositionIds());
-                            if (Collections.containsAny(entitySpecPropIds,
-                                    filter.getPropositionIds())) {
-                                PositionFilter pdsc2 = (PositionFilter) filter;
-
-                                boolean outputStart = pdsc2.getMinimumStart() != null
-                                        && pdsc2.getStartSide() == Side.FINISH;
-
-                                boolean outputFinish = pdsc2.getMaximumFinish() != null
-                                        && pdsc2.getFinishSide() == Side.FINISH;
-
-                                if (outputStart) {
-                                    if (!first) {
-                                        wherePart.append(" and ");
-                                    }
-
-                                    appendColumnRef(wherePart,
-                                            referenceIndices, finishTimeSpec);
-                                    wherePart.append(" >= ");
-                                    wherePart.append(entitySpec
-                                            .getPositionParser().format(
-                                                    pdsc2.getMinimumStart()));
-                                }
-
-                                if (outputFinish) {
-                                    if (!first || outputStart) {
-                                        wherePart.append(" and ");
-                                    }
-
-                                    appendColumnRef(wherePart,
-                                            referenceIndices, finishTimeSpec);
-                                    wherePart.append(" <= ");
-                                    wherePart.append(entitySpec
-                                            .getPositionParser().format(
-                                                    pdsc2.getMaximumFinish()));
-                                }
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-        return i;
-    }
-
-    private int processStartTimeSpecForWhereClause(EntitySpec entitySpec,
-            int i, Set<Filter> filtersCopy, StringBuilder wherePart,
-            Map<ColumnSpec, Integer> referenceIndices, boolean first) {
-        ColumnSpec startTimeSpec = entitySpec.getStartTimeSpec();
-        if (startTimeSpec != null) {
-            while (true) {
-                if (startTimeSpec.getJoin() != null) {
-                    startTimeSpec = startTimeSpec.getJoin().getNextColumnSpec();
-                    i++;
-                } else {
-                    for (Iterator<Filter> itr = filtersCopy.iterator(); itr
-                            .hasNext();) {
-                        Filter filter = itr.next();
-                        if (filter instanceof PositionFilter) {
-                            Set<String> entitySpecPropIds = org.arp.javautil.arrays.Arrays
-                                    .asSet(entitySpec.getPropositionIds());
-                            if (Collections.containsAny(entitySpecPropIds,
-                                    filter.getPropositionIds())) {
-                                PositionFilter pdsc2 = (PositionFilter) filter;
-
-                                boolean outputStart = pdsc2.getMinimumStart() != null
-                                        && (pdsc2.getStartSide() == Side.START || entitySpec
-                                                .getFinishTimeSpec() == null);
-                                boolean outputFinish = pdsc2.getMaximumFinish() != null
-                                        && (pdsc2.getFinishSide() == Side.START || entitySpec
-                                                .getFinishTimeSpec() == null);
-
-                                if (outputStart) {
-                                    if (!first) {
-                                        wherePart.append(" and ");
-                                    }
-                                    appendColumnRef(wherePart,
-                                            referenceIndices, startTimeSpec);
-                                    wherePart.append(" >= ");
-                                    wherePart.append(entitySpec
-                                            .getPositionParser().format(
-                                                    pdsc2.getMinimumStart()));
-                                }
-                                if (outputFinish) {
-                                    if (!first || outputStart) {
-                                        wherePart.append(" and ");
-                                    }
-                                    appendColumnRef(wherePart,
-                                            referenceIndices, startTimeSpec);
-                                    wherePart.append(" <= ");
-                                    wherePart.append(entitySpec
-                                            .getPositionParser().format(
-                                                    pdsc2.getMaximumFinish()));
-                                }
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-        return i;
-    }
-
-    private int processKeySpecForWhereClause(EntitySpec propositionSpec, int i) {
-        ColumnSpec baseSpec = propositionSpec.getBaseSpec();
-        i += baseSpec.asList().size();
-        return i;
-    }
-
-    public void appendValue(Object val, StringBuilder wherePart) {
-        boolean numberOrBoolean;
-        if (!(val instanceof Number) && !(val instanceof Boolean)) {
-            numberOrBoolean = false;
-            wherePart.append("'");
-        } else {
-            numberOrBoolean = true;
-        }
-        if (val instanceof Boolean) {
-            Boolean boolVal = (Boolean) val;
-            if (boolVal.equals(Boolean.TRUE)) {
-                wherePart.append(1);
-            } else {
-                wherePart.append(0);
-            }
-        } else {
-            wherePart.append(val);
-        }
-        if (!numberOrBoolean) {
-            wherePart.append("'");
-        }
-    }
-
-    private static Map<ColumnSpec, Integer> computeReferenceIndices(
-            List<ColumnSpec> columnSpecs) {
-        Map<ColumnSpec, Integer> result = new HashMap<ColumnSpec, Integer>();
-
-        int index = 1;
-        JoinSpec currentJoin = null;
-        boolean begin = true;
-        for (int j = 0, n = columnSpecs.size(); j < n; j++) {
-            ColumnSpec columnSpec = columnSpecs.get(j);
-            /*
-             * Only generate a table if we're the first table or there is an
-             * inbound join.
-             */
-            boolean shouldGenerateTable = begin || currentJoin != null;
-            if (shouldGenerateTable) {
-                int previousInstanceIndex = -1;
-                // if there's no inbound join, then don't try to reuse an
-                // earlier instance.
-                if (currentJoin == null/* || columnSpec.getJoin() != null */) {
-                    previousInstanceIndex = findPreviousInstance(0, j,
-                            columnSpecs, columnSpec);
-                    // System.out.println("previousInstanceIndex 1: " +
-                    // previousInstanceIndex);
-                } else {
-                    // If there's an inbound join and an earlier instance, then
-                    // use an earlier version only if the inbound join of the
-                    // earlier
-                    // instance is the same
-                    int startIndex = 0;
-                    int cs2i = -1;
-                    do {
-                        cs2i = findPreviousInstance(startIndex, j, columnSpecs,
-                                columnSpec);
-                        startIndex = cs2i + 1;
-                        if (cs2i >= 0) {
-                            // System.out.println("found previous instance at "
-                            // + cs2i);
-                            for (int k = 0; k < cs2i; k++) {
-                                ColumnSpec csPrev = columnSpecs.get(k);
-                                JoinSpec prevJoin = csPrev.getJoin();
-                                if (currentJoin.isSameJoin(prevJoin)) {
-                                    previousInstanceIndex = cs2i;
-                                    // System.out.println("setting previousIstanceIndex="
-                                    // + previousInstanceIndex);
-                                }
-                            }
-                        }
-                    } while (cs2i >= 0);
-                    // System.out.println("previousInstanceIndex 2: " +
-                    // previousInstanceIndex);
-                }
-                // If we found an earlier instance, then use its index otherwise
-                // assign it a new index.
-                if (previousInstanceIndex >= 0) {
-                    ColumnSpec previousInstance = columnSpecs
-                            .get(previousInstanceIndex);
-                    assert result.containsKey(previousInstance) : "doesn't contain columnSpec "
-                            + previousInstance;
-                    int prevIndex = result.get(previousInstance);
-                    result.put(columnSpec, prevIndex);
-                    // System.err.println("assigning " + columnSpec.getTable() +
-                    // " to  previous index " + prevIndex);
-                } else {
-                    result.put(columnSpec, index++);
-                    // System.err.println("assigning " + columnSpec.getTable() +
-                    // " to " + (index - 1));
-                }
-                begin = false;
-            }
-
-            if (columnSpec.getJoin() != null) {
-                currentJoin = columnSpec.getJoin();
-            } else {
-                currentJoin = null;
-                begin = true;
-            }
-        }
-        return result;
-    }
-
-    private void processKeyIdConstraintsForWhereClause(ColumnSpecInfo info,
-            StringBuilder wherePart, Set<String> keyIds) {
-        if (keyIds != null && !keyIds.isEmpty()) {
-            if (wherePart.length() > 0) {
-                wherePart.append(" and ");
-            }
-            ColumnSpec keySpec = info.getColumnSpecs().get(0);
-
-            generateInClause(wherePart, 1, keySpec.getColumn(),
-                    keyIds.toArray(), false);
-        }
     }
 
     @Override
