@@ -41,7 +41,7 @@ abstract class AbstractCreateStatement implements CreateStatement {
     public String generateStatement() {
         return "CREATE TABLE " + schema + "." + table + " AS "
                 + getSelectStatement(entitySpec, referenceSpec, entitySpecs,
-                        filters, propIds, keyIds, order, resultProcessor);
+                        filters, propIds, keyIds, order, resultProcessor).generateStatement();
     }
 
     @Override
