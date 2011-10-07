@@ -473,25 +473,13 @@ abstract class AbstractWhereClause implements WhereClause {
         if (order != null && info.getStartTimeIndex() >= 0) {
             ColumnSpec startColSpec = info.getColumnSpecs().get(
                     info.getStartTimeIndex());
-            // int start = referenceIndices.getIndex(startColSpec);
-            // String startCol = startColSpec.getColumn();
             ColumnSpec finishColSpec;
-            // String finishCol;
             if (info.getFinishTimeIndex() >= 0) {
                 finishColSpec = info.getColumnSpecs().get(
                         info.getFinishTimeIndex());
-                // finishCol = finishColSpec.getColumn();
             } else {
                 finishColSpec = null;
-                // finishCol = null;
             }
-            // int finish;
-            // if (info.getFinishTimeIndex() >= 0) {
-            // finish = referenceIndices.getIndex(info.getColumnSpecs().get(
-            // info.getFinishTimeIndex()));
-            // } else {
-            // finish = -1;
-            // }
             wherePart.append(getOrderByClause(startColSpec, finishColSpec,
                     order, referenceIndices).generateClause());
         }
