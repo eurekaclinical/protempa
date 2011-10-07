@@ -65,8 +65,6 @@ abstract class AbstractFromClause implements FromClause {
             if (i >= 0 && !columnSpecCache.containsKey(i)) {
                 assert begin || currentJoin != null : "No 'on' clause can be generated for "
                         + columnSpec + " because there is no incoming join.";
-//                String schema = columnSpec.getSchema();
-//                String table = columnSpec.getTable();
                 if (!begin) {
                     fromPart.append(getJoinClause(currentJoin.getJoinType())
                             .generateClause());
@@ -76,13 +74,8 @@ abstract class AbstractFromClause implements FromClause {
                 columnSpecCache.put(i, columnSpec);
 
                 if (currentJoin != null) {
-//                    int fromIndex = referenceIndices.getIndex(currentJoin
-//                            .getPrevColumnSpec());
-//                    int toIndex = referenceIndices.getIndex(currentJoin
-//                            .getNextColumnSpec());
-//                    fromPart.append(getOnClause(fromIndex, toIndex,
-//                            currentJoin.getFromKey(), currentJoin.getToKey()).generateClause());
-                    fromPart.append(getOnClause(currentJoin, referenceIndices).generateClause());
+                    fromPart.append(getOnClause(currentJoin, referenceIndices)
+                            .generateClause());
                 }
                 begin = false;
             }
