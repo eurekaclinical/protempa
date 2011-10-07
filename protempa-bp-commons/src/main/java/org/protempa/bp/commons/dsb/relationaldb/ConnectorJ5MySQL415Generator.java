@@ -52,15 +52,6 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
     }
 
     @Override
-    public void generateFromTable(String schema, String table,
-            StringBuilder fromPart, int i) {
-        if (schema != null)
-            throw new IllegalArgumentException("schema is not supported");
-        fromPart.append(table);
-        generateTableReference(i, fromPart);
-    }
-
-    @Override
     protected String getDriverClassNameToLoad() {
         return driverName;
     }
@@ -70,7 +61,7 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
-        return new ConnectorJ5MySQLSelectStatement(entitySpec, referenceSpec, entitySpecs,
+        return new ConnectorJ5MySQL415SelectStatement(entitySpec, referenceSpec, entitySpecs,
                 filters, propIds, keyIds, order, resultProcessor);
     }
 }
