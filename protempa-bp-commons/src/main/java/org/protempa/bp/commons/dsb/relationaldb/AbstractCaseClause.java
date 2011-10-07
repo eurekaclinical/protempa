@@ -27,8 +27,6 @@ abstract class AbstractCaseClause implements CaseClause {
         selectPart.append(", case ");
         for (int k = 0; k < sqlCodes.length; k++) {
             selectPart.append("when ");
-            // selectPart.append(SqlGeneratorUtil.appendColumnRef(stmt,
-            // referenceIndices, columnSpec));
             selectPart.append(referenceIndices
                     .generateColumnReferenceWithOp(columnSpec));
             selectPart.append(" like ");
