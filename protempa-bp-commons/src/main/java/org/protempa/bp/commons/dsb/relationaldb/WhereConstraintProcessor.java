@@ -1,7 +1,6 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
 import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.Constraint;
-import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
 
 abstract class WhereConstraintProcessor {
 
