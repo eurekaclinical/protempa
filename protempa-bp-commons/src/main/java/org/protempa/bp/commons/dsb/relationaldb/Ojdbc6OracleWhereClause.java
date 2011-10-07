@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
-import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
 
 final class Ojdbc6OracleWhereClause extends AbstractWhereClause {
 
