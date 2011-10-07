@@ -1,5 +1,6 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
+
 final class Ojdbc6OracleInClause extends AbstractInClause {
     
     private final ColumnSpec columnSpec;
@@ -24,7 +25,6 @@ final class Ojdbc6OracleInClause extends AbstractInClause {
     @Override
     public String generateClause() {
         StringBuilder wherePart = new StringBuilder();
-//        wherePart.append(SqlGeneratorUtil.generateColumnReference(stmt, tableNumber, columnName));
         wherePart.append(referenceIndices.generateColumnReference(columnSpec));
         if (not) {
             wherePart.append(" NOT");
@@ -36,7 +36,6 @@ final class Ojdbc6OracleInClause extends AbstractInClause {
             if (k + 1 < elements.length) {
                 if ((k + 1) % 1000 == 0) {
                     wherePart.append(") OR ");
-//                    wherePart.append(SqlGeneratorUtil.generateColumnReference(stmt, tableNumber, columnName));
                     wherePart.append(referenceIndices.generateColumnReference(columnSpec));
                     wherePart.append(" IN (");
                 } else {
