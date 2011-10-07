@@ -6,19 +6,19 @@ abstract class AbstractInClause implements InClause {
     private final Object[] elements;
     private final boolean not;
     private final TableAliaser referenceIndices;
-    
-    AbstractInClause(ColumnSpec columnSpec, Object[] elements, boolean not, TableAliaser referenceIndices) {
+
+    AbstractInClause(ColumnSpec columnSpec, Object[] elements, boolean not,
+            TableAliaser referenceIndices) {
         this.columnSpec = columnSpec;
         this.elements = elements;
         this.not = not;
         this.referenceIndices = referenceIndices;
     }
-    
+
     @Override
     public String generateClause() {
         StringBuilder result = new StringBuilder();
-        
-//        result.append(SqlGeneratorUtil.generateColumnReference(stmt, tableNumber, columnName));
+
         result.append(referenceIndices.generateColumnReference(columnSpec));
         if (not) {
             result.append(" NOT");
@@ -32,7 +32,7 @@ abstract class AbstractInClause implements InClause {
             }
         }
         result.append(')');
-        
+
         return result.toString();
     }
 
