@@ -84,16 +84,9 @@ abstract class AbstractSelectClause implements SelectClause {
         boolean unique = info.isUnique();
         for (int j = 0; j < indices.length; j++) {
             ColumnSpec cs = info.getColumnSpecs().get(indices[j]);
-            // Integer index = referenceIndices.getIndex(cs);
-            // assert index != null : "index is null for " + cs;
-            // String column = cs.getColumn();
             String name = names[j];
             boolean distinctRequested = (j == 0 && !unique);
             boolean hasNext = j < indices.length - 1;
-            // if (column == null) {
-            // throw new AssertionError("column cannot be null: " + "index="
-            // + index + "; name=" + name + "; cs=" + cs);
-            // }
             if (name == null) {
                 throw new AssertionError("name cannot be null");
             }
@@ -115,9 +108,6 @@ abstract class AbstractSelectClause implements SelectClause {
             result.append("DISTINCT ");
         }
 
-        // result.append(
-        // SqlGeneratorUtil.generateColumnReference(this.stmt, index,
-        // column)).append(" as ").append(name);
         result.append(referenceIndices.generateColumnReference(columnSpec))
                 .append(" AS ").append(name);
         if (hasNext) {
