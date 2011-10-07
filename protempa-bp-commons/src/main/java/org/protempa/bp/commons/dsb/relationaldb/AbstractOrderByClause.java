@@ -18,26 +18,21 @@ abstract class AbstractOrderByClause implements OrderByClause {
 
     @Override
     public String generateClause() {
-        StringBuilder clause = new StringBuilder(" order by ");
-        // clause.append(SqlGeneratorUtil.generateColumnReference(stmt,
-        // startReferenceIndex,
-        // startColumn));
-        clause.append(referenceIndices.generateColumnReference(startColumnSpec));
+        StringBuilder result = new StringBuilder(" order by ");
+        result.append(referenceIndices.generateColumnReference(startColumnSpec));
         if (referenceIndices.getIndex(finishColumnSpec) > 0) {
-            clause.append(',');
-            // clause.append(SqlGeneratorUtil.generateColumnReference(stmt,
-            // finishReferenceIndex, finishColumn));
-            clause.append(referenceIndices
+            result.append(',');
+            result.append(referenceIndices
                     .generateColumnReference(finishColumnSpec));
         }
-        clause.append(' ');
+        result.append(' ');
         if (order == SQLOrderBy.ASCENDING) {
-            clause.append("ASC");
+            result.append("ASC");
         } else {
-            clause.append("DESC");
+            result.append("DESC");
         }
 
-        return clause.toString();
+        return result.toString();
     }
 
 }
