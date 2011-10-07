@@ -8,7 +8,6 @@ import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.DataSourceReadException;
 import org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend;
 import org.protempa.bp.commons.dsb.relationaldb.ConnectorJ5MySQL415Generator;
-import org.protempa.bp.commons.dsb.relationaldb.Ojdbc6OracleSQLGenerator;
 import org.protempa.bp.commons.dsb.relationaldb.RelationalDatabaseSpec;
 import org.protempa.bp.commons.dsb.relationaldb.ResultCache;
 import org.protempa.bp.commons.dsb.relationaldb.SQLOrderBy;
