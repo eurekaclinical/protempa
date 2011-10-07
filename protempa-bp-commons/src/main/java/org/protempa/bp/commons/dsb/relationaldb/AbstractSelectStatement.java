@@ -1,12 +1,8 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.protempa.backend.dsb.filter.Filter;
 
@@ -35,13 +31,13 @@ abstract class AbstractSelectStatement implements SelectStatement {
         this.resultProcessor = resultProcessor;
     }
 
-    public abstract SelectClause getSelectClause(ColumnSpecInfo info,
+    abstract SelectClause getSelectClause(ColumnSpecInfo info,
             TableAliaser referenceIndices, EntitySpec entitySpec);
 
-    public abstract FromClause getFromClause(List<ColumnSpec> columnSpecs,
+    abstract FromClause getFromClause(List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices);
 
-    public abstract WhereClause getWhereClause(Set<String> propIds,
+    abstract WhereClause getWhereClause(Set<String> propIds,
             ColumnSpecInfo info, List<EntitySpec> entitySpecs,
             Set<Filter> filters, TableAliaser referenceIndices,
             Set<String> keyIds, SQLOrderBy order,
