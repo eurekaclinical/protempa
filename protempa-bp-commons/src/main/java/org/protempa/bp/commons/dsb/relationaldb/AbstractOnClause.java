@@ -12,7 +12,7 @@ abstract class AbstractOnClause implements OnClause {
 
     @Override
     public String generateClause() {
-        return new StringBuilder("on (")
+        return new StringBuilder("ON (")
                 .append(referenceIndices.generateTableReference(joinSpec
                         .getPrevColumnSpec()))
                 .append("." + joinSpec.getFromKey())
