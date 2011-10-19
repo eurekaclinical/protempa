@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.backend.dsb.filter.Filter;
@@ -66,8 +64,6 @@ abstract class AbstractWhereClause implements WhereClause {
         boolean inGroup = false;
         for (int j = 0, n = entitySpecs.size(); j < n; j++) {
             EntitySpec entitySpec = entitySpecs.get(j);
-            SQLGenUtil.logger().log(Level.INFO,
-                    "Processing WHERE entity spec {0}", entitySpec.getName());
             if (n > 1 && j > 0) {
                 if (prevEntitySpec.getName().equals(entitySpec.getName())) {
                     if (!inGroup) {
@@ -177,7 +173,6 @@ abstract class AbstractWhereClause implements WhereClause {
         StringBuilder wherePart = new StringBuilder();
 
         for (ColumnSpec constraintSpec : entitySpec.getConstraintSpecs()) {
-            SQLGenUtil.logger().log(Level.INFO, "Processing constraint: {0} {1} {2}", new Object[]{constraintSpec.getSchema(), constraintSpec.getTable(), constraintSpec.getColumn()});
             int wherePartLength = wherePart.length();
             wherePart.append(processConstraintSpecForWhereClause(
                     constraintSpec, first));
@@ -241,12 +236,6 @@ abstract class AbstractWhereClause implements WhereClause {
 
     private String processConstraintSpecsForWhereClause(EntitySpec entitySpec,
             boolean first) {
-
-        Logger logger = SQLGenUtil.logger();
-        logger.log(Level.FINER,
-                "Processing constraint specs for entity spec {0}",
-                entitySpec.getName());
-        logger.log(Level.FINEST, "Details of entity spec {0}", entitySpec);
 
         StringBuilder wherePart = new StringBuilder();
 
@@ -444,8 +433,6 @@ abstract class AbstractWhereClause implements WhereClause {
      * Returns whether an IN clause containing the proposition ids of interest
      * should be added to the WHERE clause.
      * 
-     * @param propIds
-     *            the proposition ids to query.
      * @param entitySpecPropIds
      *            the proposition ids corresponding to the current entity spec.
      * @return <code>true</code> if the query contains < 85% of the proposition
