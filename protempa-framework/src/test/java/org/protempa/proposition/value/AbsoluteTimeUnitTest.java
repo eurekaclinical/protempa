@@ -20,9 +20,9 @@ import junit.framework.TestCase;
  */
 public class AbsoluteTimeUnitTest extends TestCase {
 
-    private static final DateFormat DATE_TIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.US);
-    private static final DateFormat DATE_FORMAT = DateFormat.getDateInstance(
-            DateFormat.SHORT, Locale.US);
+//    private static final DateFormat DATE_TIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.US);
+//    private static final DateFormat DATE_FORMAT = DateFormat.getDateInstance(
+//            DateFormat.SHORT, Locale.US);
 
     @Override
     protected void setUp() throws Exception {
