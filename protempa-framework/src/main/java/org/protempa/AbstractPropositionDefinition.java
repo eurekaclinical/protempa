@@ -21,7 +21,11 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 public abstract class AbstractPropositionDefinition implements
         PropositionDefinition {
 
-    private static final PropertyDefinition[] EMPTY_PROPERTIES =
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2754387751719003721L;
+	private static final PropertyDefinition[] EMPTY_PROPERTIES =
             new PropertyDefinition[0];
     private static final ReferenceDefinition[] EMPTY_REFERENCES =
             new ReferenceDefinition[0];

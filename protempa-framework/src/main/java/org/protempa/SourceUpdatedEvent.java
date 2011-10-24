@@ -10,6 +10,10 @@ import java.util.EventObject;
  * @param <S>
  */
 public abstract class SourceUpdatedEvent extends EventObject {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7105747666448825906L;
 	private final Source<?> source;
 
 	SourceUpdatedEvent(Source<?> protempaSource) {

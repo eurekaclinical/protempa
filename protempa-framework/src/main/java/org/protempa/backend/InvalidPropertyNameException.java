@@ -8,7 +8,12 @@ import org.protempa.ProtempaException;
  * @author Andrew Post
  */
 public class InvalidPropertyNameException extends ProtempaException {
-    public InvalidPropertyNameException(String name) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -8759461647512501542L;
+
+	public InvalidPropertyNameException(String name) {
         super("Invalid property name in configuration: " + name);
     }
 }

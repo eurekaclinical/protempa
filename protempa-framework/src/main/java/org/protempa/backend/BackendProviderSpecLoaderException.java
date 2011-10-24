@@ -8,7 +8,12 @@ import org.protempa.ProtempaException;
  */
 public class BackendProviderSpecLoaderException extends ProtempaException {
 
-    public BackendProviderSpecLoaderException(Throwable cause) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5734542815931371751L;
+
+	public BackendProviderSpecLoaderException(Throwable cause) {
         super(cause);
     }
 

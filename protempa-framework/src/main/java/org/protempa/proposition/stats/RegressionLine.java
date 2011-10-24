@@ -21,7 +21,11 @@ public class RegressionLine extends Line {
 
     public static class NullValueException extends Exception {
 
-        private PrimitiveParameter point;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = -4392403268217798814L;
+		private PrimitiveParameter point;
 
         NullValueException(PrimitiveParameter point) {
             this.point = point;

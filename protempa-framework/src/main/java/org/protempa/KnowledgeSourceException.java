@@ -6,7 +6,12 @@ package org.protempa;
  */
 public abstract class KnowledgeSourceException extends ProtempaException {
 
-    KnowledgeSourceException(Throwable cause) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1706807632675532093L;
+
+	KnowledgeSourceException(Throwable cause) {
         super(cause);
     }
 

@@ -2,7 +2,12 @@ package org.protempa;
 
 public abstract class TermSourceException extends ProtempaException {
 
-    public TermSourceException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8483966301758608297L;
+
+	public TermSourceException() {
     }
 
     public TermSourceException(String message, Throwable cause) {

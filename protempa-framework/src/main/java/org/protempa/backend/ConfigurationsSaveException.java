@@ -8,7 +8,12 @@ import org.protempa.ProtempaException;
  */
 public final class ConfigurationsSaveException extends ProtempaException {
 
-    public ConfigurationsSaveException(Throwable cause) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6725271561537801373L;
+
+	public ConfigurationsSaveException(Throwable cause) {
         super(cause);
     }
 

@@ -6,7 +6,12 @@ package org.protempa.backend;
  */
 public class KnowledgeSourceBackendInitializationException 
         extends BackendInitializationException {
-    public KnowledgeSourceBackendInitializationException(String message) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6992398463459710254L;
+
+	public KnowledgeSourceBackendInitializationException(String message) {
         super(message);
     }
 

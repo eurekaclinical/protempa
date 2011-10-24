@@ -59,7 +59,11 @@ public class TabDelimQueryResultsWriter extends QueryResultsWriter {
 
     private final static class TabDelimWriterProtempaException
             extends ProtempaException {
-        private IOException ioe;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 2989876076560172439L;
+		private IOException ioe;
 
         TabDelimWriterProtempaException(IOException cause) {
             super(cause);

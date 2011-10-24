@@ -7,7 +7,11 @@ import org.protempa.proposition.Segment;
 
 public abstract class GapFunction implements Serializable {
 
-    public static final GapFunction DEFAULT = new SimpleGapFunction();
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2463785054444632104L;
+	public static final GapFunction DEFAULT = new SimpleGapFunction();
 
     public final boolean execute(AbstractParameter lhs, AbstractParameter rhs) {
         if (lhs == null || rhs == null) {

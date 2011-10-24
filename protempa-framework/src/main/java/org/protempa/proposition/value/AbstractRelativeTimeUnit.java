@@ -7,7 +7,12 @@ package org.protempa.proposition.value;
  */
 public abstract class AbstractRelativeTimeUnit extends AbstractTimeUnit {
 
-    AbstractRelativeTimeUnit(String name, String pluralName,
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 4125851501045482152L;
+
+	AbstractRelativeTimeUnit(String name, String pluralName,
             String abbreviation, String shortFormat, String mediumFormat,
             String longFormat, long length, int calUnits) {
         super(name, pluralName, abbreviation, shortFormat,

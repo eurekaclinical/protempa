@@ -8,7 +8,12 @@ package org.protempa;
  */
 public abstract class ProtempaException extends Exception {
 
-    protected ProtempaException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5229759417046161519L;
+
+	protected ProtempaException() {
         super();
     }
 

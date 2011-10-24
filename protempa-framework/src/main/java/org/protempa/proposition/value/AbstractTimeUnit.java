@@ -9,7 +9,11 @@ import java.text.Format;
  */
 public abstract class AbstractTimeUnit implements Unit {
 
-    private transient String name;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1592143864041255117L;
+	private transient String name;
     private transient String pluralName;
     private transient String abbreviation;
     private transient long length;

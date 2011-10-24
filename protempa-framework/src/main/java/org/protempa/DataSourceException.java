@@ -9,7 +9,12 @@ package org.protempa;
  */
 public abstract class DataSourceException extends ProtempaException {
 
-    DataSourceException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5020355459893749878L;
+
+	DataSourceException() {
     }
 
     DataSourceException(String message, Throwable cause) {

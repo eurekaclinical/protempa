@@ -6,7 +6,12 @@ package org.protempa;
  */
 public class NoSuchAlgorithmException extends AlgorithmSourceException {
 
-    public NoSuchAlgorithmException(Throwable cause) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 3429985263421730125L;
+
+	public NoSuchAlgorithmException(Throwable cause) {
         super(cause);
     }
 

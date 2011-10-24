@@ -10,7 +10,11 @@ import java.util.EventObject;
  */
 public abstract class BackendUpdatedEvent extends EventObject {
 
-    private final Backend<?, ?> backend;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6550773926231495491L;
+	private final Backend<?, ?> backend;
 
     BackendUpdatedEvent(Backend<?, ?> source) {
         super(source);

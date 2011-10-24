@@ -6,7 +6,12 @@ package org.protempa;
  * @author Andrew Post
  */
 public abstract class RuleCreationException extends ProtempaException {
-    protected RuleCreationException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2627168079306834270L;
+
+	protected RuleCreationException() {
 		super();
 	}
 

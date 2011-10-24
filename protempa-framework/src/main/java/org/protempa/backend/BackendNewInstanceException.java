@@ -7,7 +7,12 @@ import org.protempa.ProtempaException;
  * @author Andrew Post
  */
 public class BackendNewInstanceException extends ProtempaException {
-    public BackendNewInstanceException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1798629706550588890L;
+
+	public BackendNewInstanceException() {
         super();
     }
 
