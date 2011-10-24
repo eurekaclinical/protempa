@@ -24,14 +24,17 @@ public class Query implements Serializable {
     /**
      * Creates new Query instance.
      */
-    public Query(String[] keyIds, Filter filters, String[] propIds,
-            And[] termIds) {
+	@SuppressWarnings("unchecked")
+	public Query(String[] keyIds, Filter filters, String[] propIds,
+            And<String>[] termIds) {
         if (keyIds == null)
             keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         if (propIds == null)
             propIds = ArrayUtils.EMPTY_STRING_ARRAY;
-        if (termIds == null)
+        if (termIds == null) {
+        	// Type safety: The expression of type And[] needs unchecked conversion to conform to And<String>[]
             termIds = new And[0];
+        }
         ProtempaUtil.checkArrayForNullElement(keyIds, "keyIds");
         ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
         ProtempaUtil.checkArrayForNullElement(termIds, "termIds");
