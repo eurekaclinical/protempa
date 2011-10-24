@@ -4,7 +4,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,7 +33,6 @@ public final class And<E> implements Serializable, Cloneable {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void setAnded(List<E> anded) {
         if (anded == null)
             anded = new ArrayList<E>();
@@ -69,10 +67,11 @@ public final class And<E> implements Serializable, Cloneable {
     }
 
     @Override
-    public And clone() {
+    public And<E> clone() {
         try {
             Object o = super.clone();
-            And copy = (And) o;
+            @SuppressWarnings("unchecked") // needed because of type erasure in casts
+			And<E> copy = (And<E>) o;
             copy.setAnded(this.anded);
             return copy;
         } catch (CloneNotSupportedException ex) {
