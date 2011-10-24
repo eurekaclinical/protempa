@@ -3,8 +3,7 @@ package org.protempa.query;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.protempa.AlgorithmSource;
 import org.protempa.KnowledgeSource;
@@ -22,7 +21,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     private String[] keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
     private Filter filters;
     private String[] propIds = ArrayUtils.EMPTY_STRING_ARRAY;
-    private And[] termIds = new And[0];
+    private And<?>[] termIds = new And[0];
     private final PropertyChangeSupport changes;
 
     public DefaultQueryBuilder() {
@@ -117,7 +116,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * @return a {@link String[]} of term ids representing disjunctive
      * normal form.
      */
-    public final And[] getTermIds() {
+    public final And<?>[] getTermIds() {
         return this.termIds.clone();
     }
 
@@ -133,11 +132,11 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * @param termIds a {@link And[]} term ids representing disjunctive
      * normal form.
      */
-    public final void setTermIds(And[] termIds) {
+    public final void setTermIds(And<?>[] termIds) {
         if (termIds == null) {
             termIds = new And[0];
         }
-        And[] old = this.termIds;
+        And<?>[] old = this.termIds;
         this.termIds = termIds.clone();
         this.changes.firePropertyChange("termIds", old, this.termIds);
     }
