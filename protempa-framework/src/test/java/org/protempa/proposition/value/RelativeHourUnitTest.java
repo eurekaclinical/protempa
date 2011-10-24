@@ -5,18 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.text.DateFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
-import java.text.ParsePosition;
-import java.util.Date;
-import java.util.Locale;
-
-import org.protempa.proposition.value.AbsoluteTimeGranularity;
-import org.protempa.proposition.value.AbsoluteTimeUnit;
-import org.protempa.proposition.value.RelativeHourGranularity;
-import org.protempa.proposition.value.RelativeHourUnit;
-import org.protempa.proposition.value.Unit;
 
 import junit.framework.TestCase;
 
