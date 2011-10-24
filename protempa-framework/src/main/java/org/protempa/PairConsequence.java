@@ -41,7 +41,8 @@ public final class PairConsequence implements Consequence {
     public void evaluate(KnowledgeHelper knowledgeHelper,
             WorkingMemory workingMemory) throws Exception {
         Logger logger = ProtempaUtil.logger();
-        List<TemporalProposition> pl =
+        @SuppressWarnings("unchecked")
+		List<TemporalProposition> pl =
                 (List<TemporalProposition>) knowledgeHelper.get(
                 knowledgeHelper.getDeclaration("result"));
         java.util.Collections.sort(pl, ProtempaUtil.TEMP_PROP_COMP);

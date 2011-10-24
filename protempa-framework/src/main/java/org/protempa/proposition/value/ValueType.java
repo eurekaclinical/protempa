@@ -243,7 +243,7 @@ public enum ValueType {
                         l.add(ValueType.VALUE.parse(s));
                     }
                 }
-                return new ValueList(l);
+                return new ValueList<Value>(l);
             } else {
                 return null;
             }

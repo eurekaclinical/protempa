@@ -54,7 +54,7 @@ class HighLevelAbstractionConsequence implements Consequence {
         List<TemporalProposition> tps = parameters(arg0.getTuple(), arg1);
         Segment<TemporalProposition> segment =
                 new Segment<TemporalProposition>(
-                new Sequence(cad.getId(), tps));
+                new Sequence<TemporalProposition>(cad.getId(), tps));
         Offsets temporalOffset = cad.getTemporalOffset();
         AbstractParameter result =
                 AbstractParameterFactory.getFromAbstraction(cad.getId(),
@@ -66,7 +66,6 @@ class HighLevelAbstractionConsequence implements Consequence {
         logger.log(Level.FINER, "Asserted derived proposition {0}", result);
     }
 
-    @SuppressWarnings("unchecked")
     private List<TemporalProposition> parameters(Tuple arg0,
             WorkingMemory arg1) {
         List<TemporalProposition> sequences =

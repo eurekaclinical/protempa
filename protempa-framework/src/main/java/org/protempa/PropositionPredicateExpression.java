@@ -28,7 +28,7 @@ class PropositionPredicateExpression implements PredicateExpression {
 
     PropositionPredicateExpression(Set<String> propositionIds) {
         assert propositionIds != null : "propositionIds cannot be null";
-        this.propIds = new HashSet(propositionIds);
+        this.propIds = new HashSet<String>(propositionIds);
     }
 
     @Override
