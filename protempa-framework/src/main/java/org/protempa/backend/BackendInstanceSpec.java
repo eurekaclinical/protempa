@@ -39,7 +39,7 @@ public final class BackendInstanceSpec<B extends Backend> {
             throws InvalidPropertyNameException, InvalidPropertyValueException {
         for (BackendPropertySpec spec : this.propertySpecs) {
             if (spec.getName().equals(name)) {
-                Class cls = spec.getType();
+                Class<?> cls = spec.getType();
                 if (String.class.equals(cls))
                     setProperty(name, valueStr);
                 else if (Double.class.equals(cls))
