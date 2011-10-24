@@ -1,6 +1,5 @@
 package org.protempa;
 
-import java.io.ObjectStreamException;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 public final class DerivedDataSourceType extends DataSourceType {

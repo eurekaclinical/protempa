@@ -1,7 +1,6 @@
 package org.protempa.cli;
 
 import org.protempa.ProtempaException;
-import org.protempa.ProtempaException;
 
 /**
  *

@@ -3,14 +3,12 @@ package org.protempa.proposition.interval;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.util.Arrays;
-
-import org.protempa.proposition.value.Granularity;
-import org.protempa.proposition.value.Unit;
 
 import org.arp.javautil.graph.Weight;
 import org.arp.javautil.graph.WeightFactory;
+import org.protempa.proposition.value.Granularity;
+import org.protempa.proposition.value.Unit;
 
 /**
  * A representation of an interval, designed according to the definition of an

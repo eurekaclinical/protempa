@@ -7,7 +7,6 @@ import org.protempa.backend.Backend;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendPropertySpec;
 import org.protempa.backend.BackendSpec;
-import org.protempa.backend.DefaultBackendPropertyValidator;
 
 public final class MockBackendInstanceSpec<B extends Backend> {
     private BackendInstanceSpec<B> backendInstSpec;

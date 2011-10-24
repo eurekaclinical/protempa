@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+
 import junit.framework.TestCase;
-import org.apache.commons.lang.builder.ToStringBuilder;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

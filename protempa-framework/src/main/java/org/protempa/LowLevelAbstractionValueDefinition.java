@@ -10,7 +10,6 @@ import java.util.Set;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.value.BooleanValue;
-import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 

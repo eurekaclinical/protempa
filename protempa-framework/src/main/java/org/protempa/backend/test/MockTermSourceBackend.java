@@ -1,12 +1,8 @@
 package org.protempa.backend.test;
 
-import org.protempa.backend.tsb.AbstractTermSourceBackend;
 import org.protempa.backend.BackendInitializationException;
-import org.protempa.Term;
-import org.protempa.backend.tsb.TermSourceBackend;
-import org.protempa.TermSourceReadException;
-import org.protempa.Terminology;
 import org.protempa.backend.BackendInstanceSpec;
+import org.protempa.backend.tsb.AbstractTermSourceBackend;
 
 public final class MockTermSourceBackend extends AbstractTermSourceBackend {
 

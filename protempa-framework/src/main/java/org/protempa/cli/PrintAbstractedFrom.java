@@ -1,8 +1,7 @@
 package org.protempa.cli;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+
 import org.apache.commons.cli.CommandLine;
 import org.protempa.AbstractionDefinition;
 import org.protempa.KnowledgeSource;
