@@ -21,7 +21,8 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     private String[] keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
     private Filter filters;
     private String[] propIds = ArrayUtils.EMPTY_STRING_ARRAY;
-    private And<?>[] termIds = new And[0];
+    @SuppressWarnings("unchecked")
+	private And<String>[] termIds = new And[0];
     private final PropertyChangeSupport changes;
 
     public DefaultQueryBuilder() {
@@ -132,12 +133,13 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * @param termIds a {@link And[]} term ids representing disjunctive
      * normal form.
      */
-    public final void setTermIds(And<?>[] termIds) {
+    @SuppressWarnings("unchecked")
+	public final void setTermIds(And<?>[] termIds) {
         if (termIds == null) {
             termIds = new And[0];
         }
         And<?>[] old = this.termIds;
-        this.termIds = termIds.clone();
+        this.termIds = (And<String>[])termIds.clone();
         this.changes.firePropertyChange("termIds", old, this.termIds);
     }
 
