@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+
 import org.arp.javautil.collections.CompositeList;
 
 /**
@@ -24,10 +24,9 @@ import org.arp.javautil.collections.CompositeList;
 public class DataSourceResultMap<P> implements Map<String, List<P>> {
     private final List<Map<String, List<P>>> maps;
 
-    @SuppressWarnings("unchecked")
     public DataSourceResultMap(List<Map<String, List<P>>> maps) {
         if (maps != null) {
-           this.maps = new ArrayList(maps);
+           this.maps = new ArrayList<Map<String, List<P>>>(maps);
         } else {
             this.maps = Collections.emptyList();
         }
@@ -81,7 +80,6 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
     
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<P> get(Object o) {
         Collection<List<P>> lists = null;
         for (Map<String, List<P>> map : this.maps) {
@@ -121,7 +119,6 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Set<String> keySet() {
         Set<String> result = new HashSet<String>();
         for (Map<String, List<P>> map : this.maps) {
@@ -131,7 +128,6 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Set<Entry<String, List<P>>> entrySet() {
         Map<String, List<P>> result = new HashMap<String, List<P>>();
         if (!this.maps.isEmpty()) {
@@ -139,7 +135,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
             for (int i = 0; i < n; i++) {
                 for (Map.Entry<String, List<P>> me : this.maps.get(i).entrySet()) {
                     String key = me.getKey();
-                    CompositeList<P> vals = (CompositeList) result.get(key);
+                    CompositeList<P> vals = (CompositeList<P>) result.get(key);
                     if (vals == null) {
                         vals = new CompositeList<P>();
                         result.put(key, vals);
@@ -152,7 +148,6 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Collection<List<P>> values() {
         Map<String, List<P>> result = new HashMap<String, List<P>>();
         if (!this.maps.isEmpty()) {
@@ -160,7 +155,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
             for (int i = 0; i < n; i++) {
                 for (Map.Entry<String, List<P>> me : this.maps.get(i).entrySet()) {
                     String key = me.getKey();
-                    CompositeList<P> vals = (CompositeList) result.get(key);
+                    CompositeList<P> vals = (CompositeList<P>) result.get(key);
                     if (vals == null) {
                         vals = new CompositeList<P>();
                         result.put(key, vals);
