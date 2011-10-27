@@ -14,6 +14,11 @@ import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 
+/**
+ * Counts the number of instances of a proposition.
+ * 
+ * @author arpost
+ */
 public final class CountColumnSpec extends AbstractTableColumnSpec {
 
     private final String columnNameOverride;
@@ -24,6 +29,17 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
         this(null, links, false);
     }
 
+    /**
+     * Constructs a count column spec with an optional header name, the links
+     * to traverse and whether to count the number of unique proposition ids
+     * rather than the number of propositions.
+     * 
+     * @param columnNameOverride an optional header name. Will use a default
+     * that is computed from the specified links (below).
+     * @param links the links to traverse.
+     * @param countUnique if <code>true</code>, count the unique ids of the 
+     * propositions at the end of the link traversal.
+     */
     public CountColumnSpec(String columnNameOverride, Link[] links,
             boolean countUnique) {
         ProtempaUtil.checkArray(links, "links");
@@ -57,11 +73,11 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
             Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
         Logger logger = Util.logger();
-        Set<String> result = new HashSet<String>();
         Collection<Proposition> props = traverseLinks(this.links, proposition,
                 forwardDerivations, backwardDerivations, references, 
                 knowledgeSource);
         if (this.countUnique) {
+            Set<String> result = new HashSet<String>();
             for (Proposition p : props) {
                 String pId = p.getId();
                 logger.log(Level.FINEST,

@@ -1,5 +1,6 @@
 package org.protempa.query.handler.table;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -26,6 +27,9 @@ import org.protempa.proposition.value.Value;
 import org.protempa.ValueSet;
 
 public class PropositionColumnSpec extends AbstractTableColumnSpec {
+    
+    private static final NumberFormat numberFormat = 
+            NumberFormat.getInstance();
 
     private final Link[] links;
     private final String[] propertyNames;
@@ -182,7 +186,13 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 result[i++] = abstractParameter.getFinishFormattedShort();
             }
             if (outputConfig.showLength()) {
-                result[i++] = abstractParameter.getLengthFormattedShort();
+                //result[i++] = abstractParameter.getLengthFormattedShort();
+                /*
+                 * This is a hack until we have an API in PROTEMPA to get a 
+                 * length string without units.
+                 */
+                result[i++] = numberFormat.format(
+                        abstractParameter.getInterval().getMinLength());
             }
             processProperties(abstractParameter);
         }
@@ -203,7 +213,17 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 result[i++] = event.getFinishFormattedShort();
             }
             if (outputConfig.showLength()) {
-                result[i++] = event.getLengthFormattedShort();
+                //result[i++] = event.getLengthFormattedShort();
+                /*
+                 * This is a hack until we have an API in PROTEMPA to get a 
+                 * length string without units.
+                 */
+                Long minLength = event.getInterval().getMinLength();
+                if (minLength != null) {
+                    result[i++] = numberFormat.format(minLength);
+                } else {
+                    result[i++] = "";
+                }
             }
             processProperties(event);
         }
@@ -225,7 +245,18 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 result[i++] = primitiveParameter.getFinishFormattedShort();
             }
             if (outputConfig.showLength()) {
-                result[i++] = primitiveParameter.getLengthFormattedShort();
+                //result[i++] = primitiveParameter.getLengthFormattedShort();
+                /*
+                 * This is a hack until we have an API in PROTEMPA to get a 
+                 * length string without units.
+                 */
+                Long minLength = 
+                        primitiveParameter.getInterval().getMinLength();
+                if (minLength != null) {
+                    result[i++] = numberFormat.format(minLength);
+                } else {
+                    result[i++] = "";
+                }
             }
             processProperties(primitiveParameter);
         }
