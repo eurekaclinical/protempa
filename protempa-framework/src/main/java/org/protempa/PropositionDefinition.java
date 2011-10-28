@@ -62,10 +62,11 @@ public interface PropositionDefinition extends Serializable,
     boolean isConcatenable();
 
     /**
-     * Returns whether instances of this proposition definition are solid, that
-     * is, they cannot properly overlap.
-     * 
-     * @return <code>true</code> if solid, <code>false</code> if not.
+     * Returns whether intervals of this type are solid, i.e., never hold over
+     * properly overlapping intervals. By definition, low-level abstraction 
+     * intervals are solid.
+     *
+     * @return <code>true</code> or <code>false</code>.
      */
     boolean isSolid();
 

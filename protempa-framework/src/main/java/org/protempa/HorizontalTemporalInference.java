@@ -48,7 +48,7 @@ final class HorizontalTemporalInference {
                 return true;
             }
         }
-
+        
         if (propDef.isSolid()) {
             if (tp1Ival == null) {
                 tp1Ival = tp1.getInterval();

@@ -293,6 +293,16 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
     public void setConcatenable(boolean concatenable) {
         this.concatenable = concatenable;
     }
+    
+    /**
+     * Sets whether intervals of this type are solid, i.e., never hold over
+     * properly overlapping intervals.
+     * 
+     * @param solid <code>true</code> or <code>false</code>.
+     */
+    public void setSolid(boolean solid) {
+        this.solid = solid;
+    }
 
     /**
      * Returns whether this type of high-level abstraction is concatenable.
@@ -308,12 +318,11 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
     }
 
     /**
-     * Returns whether this type of high-level abstraction is solid.
+     * Returns whether intervals of this type are solid, i.e., never hold over
+     * properly overlapping intervals. By default, high-level abstraction 
+     * intervals are solid.
      *
-     * The default for high-level abstractions is solid.
-     *
-     * @return <code>true</code> if solid, <code>false</code> if not.
-     * @see org.protempa.PropositionDefinition#isSolid()
+     * @return <code>true</code> or <code>false</code>.
      */
     @Override
     public boolean isSolid() {

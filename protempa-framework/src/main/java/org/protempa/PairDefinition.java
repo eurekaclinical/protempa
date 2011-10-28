@@ -67,9 +67,26 @@ public class PairDefinition extends AbstractAbstractionDefinition {
         this.concatenable = concatenable;
     }
 
+    /**
+     * Returns whether intervals of this type are solid, i.e., never hold over
+     * properly overlapping intervals. By default, pair abstraction intervals 
+     * are solid.
+     *
+     * @return <code>true</code> or <code>false</code>.
+     */
     @Override
     public boolean isSolid() {
         return this.solid;
+    }
+    
+    /**
+     * Sets whether intervals of this type are solid, i.e., never hold over
+     * properly overlapping intervals.
+     * 
+     * @param solid <code>true</code> or <code>false</code>.
+     */
+    public void setSolid(boolean solid) {
+        this.solid = solid;
     }
 
     @Override

@@ -568,7 +568,6 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
      * The default for low-level abstractions is concatenable.
      *
      * @return <code>true</code> if concatenable, <code>false</code> if not.
-     * @see org.protempa.PropositionDefinition#isConcatenable()
      */
     @Override
     public boolean isConcatenable() {
@@ -576,10 +575,11 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
     }
 
     /**
-     * By definition, low-level abstractions are solid.
+     * Returns whether intervals of this type are solid, i.e., never hold over
+     * properly overlapping intervals. By definition, low-level abstraction 
+     * intervals are solid.
      *
      * @return <code>true</code>.
-     * @see org.protempa.PropositionDefinition#isSolid()
      */
     @Override
     public boolean isSolid() {

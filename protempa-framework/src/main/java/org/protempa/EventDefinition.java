@@ -184,7 +184,9 @@ public final class EventDefinition extends AbstractPropositionDefinition
     }
 
     /**
-     * By definition, events with the same id can overlap.
+     * Returns whether intervals of this type are solid, i.e., never hold over
+     * properly overlapping intervals. By definition, event intervals are not 
+     * solid because events of the same type can and do overlap in time.
      *
      * @return <code>false</code>.
      */

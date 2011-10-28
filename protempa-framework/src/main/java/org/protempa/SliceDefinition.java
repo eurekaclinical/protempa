@@ -134,14 +134,15 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
     }
 
     /**
-     * By definition, slice abstractions are solid.
+     * Returns whether intervals of this type are solid, i.e., never hold over
+     * properly overlapping intervals. By definition, slice abstraction 
+     * intervals are not solid.
      *
-     * @return <code>true</code>.
-     * @see org.protempa.PropositionDefinition#isSolid()
+     * @return <code>false</code>.
      */
     @Override
     public boolean isSolid() {
-        return true;
+        return false;
     }
 
     @Override
