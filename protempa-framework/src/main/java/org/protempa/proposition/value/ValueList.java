@@ -73,7 +73,7 @@ public class ValueList<V extends Value> extends ArrayList<V> implements Value {
         if (val == null || val.getType() != ValueType.VALUELIST) {
             return ValueComparator.UNKNOWN;
         }
-        ValueList vl = (ValueList) val;
+        ValueList<?> vl = (ValueList<?>) val;
         return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;
     }
 
