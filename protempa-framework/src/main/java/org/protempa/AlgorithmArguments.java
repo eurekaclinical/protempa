@@ -1,5 +1,6 @@
 package org.protempa;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,12 +13,13 @@ import org.protempa.proposition.value.ValueComparator;
  * 
  * @author Andrew Post
  */
-public final class AlgorithmArguments {
+public final class AlgorithmArguments implements Serializable {
+
+    private static final long serialVersionUID = 3993361731381010295L;
 
     private final Algorithm algorithm;
     private final Map<String, Value> parameterValues;
     private final Map<String, ValueComparator> parameterValueComps;
-    private final Map<String, Object> attributes;
 
     AlgorithmArguments(Algorithm algorithm,
             LowLevelAbstractionValueDefinition def) {
@@ -27,7 +29,6 @@ public final class AlgorithmArguments {
         this.algorithm = algorithm;
         this.parameterValues = new HashMap<String, Value>();
         this.parameterValueComps = new HashMap<String, ValueComparator>();
-        this.attributes = new HashMap<String, Object>();
         for (AlgorithmParameter d : algorithm.getParameters()) {
             String name = d.getName();
             setArgument(name, def.getParameterComp(name), def.getParameterValue(name));
@@ -54,11 +55,4 @@ public final class AlgorithmArguments {
         return this.parameterValueComps.get(name);
     }
 
-    public Object putAttribute(String name, Object value) {
-        return this.attributes.put(name, value);
-    }
-
-    public Object getAttribute(String name) {
-        return this.attributes.get(name);
-    }
 }
