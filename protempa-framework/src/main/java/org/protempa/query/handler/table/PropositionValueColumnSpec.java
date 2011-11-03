@@ -15,13 +15,19 @@ import org.protempa.proposition.TemporalParameter;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
 import org.protempa.proposition.value.NumberValue;
+import org.protempa.proposition.value.NumericalValue;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.value.ValueType;
 
 /**
  * Creates a column with an aggregation of primitive parameters with numerical
- * values.
+ * values. For MAX and MIN on data with {@link InequalityNumberValue}s for
+ * which a comparison between the inequality number and another number is
+ * not possible, we convert to {@link NumberValue}s before comparison. For 
+ * example, given two numbers <code>< 4</code> and <code>3</code>, we convert 
+ * <code>< 4</code> to <code>4</code> before aggregation because otherwise the 
+ * two numbers are not comparable.
  * 
  * @author Andrew Post
  */
@@ -75,7 +81,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
         List<Proposition> propositions = traverseLinks(this.links,
                 proposition, forwardDerivations, backwardDerivations, 
                 references, knowledgeSource);
-        Value value = null;
+        NumericalValue value = null;
         BigDecimal sumTotal = new BigDecimal(0.0);
         if (type == Type.FIRST) {
             propositions = new ArrayList<Proposition>(propositions);
@@ -87,38 +93,45 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
         for (Proposition prop : propositions) {
             if (prop instanceof TemporalParameter) {
                 TemporalParameter pp = (TemporalParameter) prop;
-                Value val = pp.getValue();
-                if (val != null) {
+                Value v = pp.getValue();
+                if (v != null) {
                     if ((type == Type.MAX || type == Type.MIN)
-                            && !ValueType.NUMERICALVALUE.isInstance(val)) {
+                            && !ValueType.NUMERICALVALUE.isInstance(v)) {
                         continue;
                     } else if (type == Type.SUM
-                            && !ValueType.NUMBERVALUE.isInstance(val)) {
+                            && !ValueType.NUMBERVALUE.isInstance(v)) {
                         continue;
                     }
-                    if ((type == Type.MAX || type == Type.MIN) && !ValueType.NUMERICALVALUE.isInstance(val)) {
+                    if ((type == Type.MAX || type == Type.MIN) && !ValueType.NUMERICALVALUE.isInstance(v)) {
                         continue;
                     } else {
+                        NumericalValue val = (NumericalValue) v;
                         if (value == null) {
                             value = val;
                             if (type == Type.FIRST || type == Type.LAST) {
                                 break;
                             }
                         } else {
+                            ValueComparator c = val.compare(value);
+                            boolean unknown = c.test(ValueComparator.UNKNOWN);
+                            if (unknown) {
+                                c = val.getNumberValue().compare(
+                                        value.getNumberValue());
+                            }
                             switch (type) {
                                 case MAX:
-                                    if (val.compare(value).test(ValueComparator.GREATER_THAN)) {
+                                    if (c.test(ValueComparator.GREATER_THAN)) {
                                         value = val;
                                     }
                                     break;
                                 case MIN:
-                                    if (val.compare(value).test(ValueComparator.LESS_THAN)) {
+                                    if (c.test(ValueComparator.LESS_THAN)) {
                                         value = val;
                                     }
                                     break;
                                 case SUM:
                                     try {
-                                        sumTotal = sumTotal.add(((NumberValue) val).getBigDecimal());
+                                        sumTotal = sumTotal.add(val.getBigDecimal());
                                         value = NumberValue
                                                 .getInstance(sumTotal);
                                     } catch (NumberFormatException ex) {

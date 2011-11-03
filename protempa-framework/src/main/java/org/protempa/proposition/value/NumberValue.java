@@ -238,4 +238,9 @@ public final class NumberValue implements NumericalValue,
             cache.put(tmpNum, this);
         }
     }
+
+    @Override
+    public NumberValue getNumberValue() {
+        return this;
+    }
 }

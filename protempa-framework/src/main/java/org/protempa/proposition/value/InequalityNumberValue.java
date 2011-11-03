@@ -243,4 +243,9 @@ public final class InequalityNumberValue implements
         ValueComparator tmpComp = (ValueComparator) s.readObject();
         init(tmpComp, tmpVal);
     }
+
+    @Override
+    public NumberValue getNumberValue() {
+        return this.val;
+    }
 }

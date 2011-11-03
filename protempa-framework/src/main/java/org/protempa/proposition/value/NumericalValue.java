@@ -29,4 +29,11 @@ public interface NumericalValue extends OrderedValue {
      * @return a {@link double}.
      */
     double doubleValue();
+    
+    /**
+     * Gets the number value component of this numerical value.
+     * 
+     * @return a {@link NumberValue}.
+     */
+    NumberValue getNumberValue();
 }
