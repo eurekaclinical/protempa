@@ -13,8 +13,11 @@ import java.util.Set;
 import java.util.logging.Level;
 import org.protempa.AbstractAbstractionDefinition;
 import org.protempa.AbstractPropositionDefinition;
+import org.protempa.HighLevelAbstractionDefinition;
 import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PairDefinition;
+import org.protempa.PrimitiveParameterDefinition;
 import org.protempa.PropertyDefinition;
 import org.protempa.SimpleGapFunction;
 import org.protempa.TemporalExtendedParameterDefinition;
@@ -217,6 +220,7 @@ class Util {
                 (Integer) cm.getOwnSlotValue(instance, cm.getSlot("maxGap"));
         Unit maxGapUnits = Util.parseUnitsConstraint(instance, "maxGapUnits",
                 backend, cm);
+        System.err.println(d.getId() + ": Setting gap function to " + maxGap + "; " + maxGapUnits);
         d.setGapFunction(new SimpleGapFunction(maxGap, maxGapUnits));
     }
 
@@ -227,6 +231,35 @@ class Util {
                 complexAbstractionInstance, cm.getSlot("displayName")));
         cad.setAbbreviatedDisplayName((String) cm.getOwnSlotValue(
                 complexAbstractionInstance, cm.getSlot("abbrevDisplayName")));
+    }
+    
+    static void setSolid(Instance protegeProposition,
+            HighLevelAbstractionDefinition result, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        boolean bool = parseSolid(protegeProposition, cm);
+        result.setSolid(bool);
+    }
+    
+    static void setSolid(Instance protegeProposition,
+            PairDefinition result, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        boolean bool = parseSolid(protegeProposition, cm);
+        result.setSolid(bool);
+    }
+    
+    private static boolean parseSolid(Instance protegeProposition, 
+            ConnectionManager cm) throws KnowledgeSourceReadException {
+        Boolean bool =
+                (Boolean) protegeProposition.getDirectOwnSlotValue(
+                cm.getSlot("solid"));
+        if (bool == null) {
+            Util.logger().log(Level.WARNING,
+                    "{0} has no value for the 'solid' property: setting FALSE",
+                    protegeProposition.getName());
+            return false;
+        } else {
+            return bool.booleanValue();
+        }
     }
 
     static void setInDataSource(Instance protegeProposition,

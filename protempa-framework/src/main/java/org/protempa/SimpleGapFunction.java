@@ -12,6 +12,7 @@ import org.protempa.proposition.value.Unit;
 public final class SimpleGapFunction extends GapFunction {
 
     private static final long serialVersionUID = -6154012083447646091L;
+    private static final Integer ZERO = Integer.valueOf(0);
     private Integer maximumGap;
     private Unit maximumGapUnits;
     private Relation relation;
@@ -27,16 +28,13 @@ public final class SimpleGapFunction extends GapFunction {
     /**
      * Initializes a gap function with a maximum gap and units.
      * 
-     * @param maximumGap an {@link Integer} >= 0. A <code>null</code> value is
-     * interpreted as <code>0</code>.
+     * @param maximumGap an {@link Integer} >= 0 or <code>null</code>.
      * @param maximumGapUnit a {@link Unit}.
      */
     public SimpleGapFunction(Integer maximumGap, Unit maximumGapUnit) {
-        if (maximumGap == null) {
-            maximumGap = 0;
-        }
-        if (maximumGap < 0) {
-            throw new IllegalArgumentException("maximumGap must be >= 0");
+        if (maximumGap != null && maximumGap.compareTo(ZERO) < 0) {
+            throw new IllegalArgumentException(
+                    "maximumGap must be null or >= 0");
         }
         this.maximumGapUnits = maximumGapUnit;
         this.maximumGap = maximumGap;
@@ -75,10 +73,10 @@ public final class SimpleGapFunction extends GapFunction {
      *            <code>maximumGap</code> is set to <code>0</code>.
      */
     public void setMaximumGap(Integer maximumGap) {
-        if (maximumGap == null) {
-            maximumGap = 0;
+        if (maximumGap != null && maximumGap.compareTo(ZERO) < 0) {
+            throw new IllegalArgumentException(
+                    "maximumGap must be null or >= 0");
         }
-        //TODO veto maximumGaps < 0.
         Integer old = this.maximumGap;
         this.maximumGap = maximumGap;
         setRelation();

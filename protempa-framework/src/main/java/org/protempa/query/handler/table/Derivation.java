@@ -203,23 +203,20 @@ public final class Derivation extends Link {
                 }
                 break;
             case MULT_BACKWARD:
-                populateKnowledgeTree(knowledgeSource);
-                if (this.knowledgeTree.contains(proposition.getId())) {
-                    derived = new ArrayList<Proposition>();
-                    Queue<Proposition> internalDerived2 =
-                            new LinkedList<Proposition>();
-                    internalDerived2.add(proposition);
-                    while (!internalDerived2.isEmpty()) {
-                        Proposition prop = internalDerived2.remove();
-                        Collection<Proposition> c = 
-                                backwardDerivations.get(prop);
-                        if (c != null) {
-                            for (Proposition p : c) {
-                                if (cache.add(p)) {
-                                    internalDerived2.add(p);
-                                    if (isMatch(p) && hasAllowedValue(p)) {
-                                        derived.add(p);
-                                    }
+                derived = new ArrayList<Proposition>();
+                Queue<Proposition> internalDerived2 =
+                        new LinkedList<Proposition>();
+                internalDerived2.add(proposition);
+                while (!internalDerived2.isEmpty()) {
+                    Proposition prop = internalDerived2.remove();
+                    Collection<Proposition> c = 
+                            backwardDerivations.get(prop);
+                    if (c != null) {
+                        for (Proposition p : c) {
+                            if (cache.add(p)) {
+                                internalDerived2.add(p);
+                                if (isMatch(p) && hasAllowedValue(p)) {
+                                    derived.add(p);
                                 }
                             }
                         }

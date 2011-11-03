@@ -23,23 +23,13 @@ public class SimpleGapFunctionTest extends TestCase {
             new IntervalFactory();
 
     private SimpleGapFunction gapFunction;
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see junit.framework.TestCase#setUp()
-     */
+    
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         gapFunction = new SimpleGapFunction();
     }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see junit.framework.TestCase#tearDown()
-     */
+    
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
@@ -75,6 +65,48 @@ public class SimpleGapFunctionTest extends TestCase {
                 240L * 60 * 60 * 1000, RelativeHourGranularity.HOUR,
                 250L * 60 * 60 * 1000, RelativeHourGranularity.HOUR));
         return p2;
+    }
+    
+    public void testGapOverlapping() {
+        AbstractParameter p1 = new AbstractParameter("TEST", uid());
+        p1.setDataSourceType(DerivedDataSourceType.getInstance());
+        p1.setInterval(intervalFactory.getInstance(0L,
+                RelativeHourGranularity.HOUR, 12L * 60 * 60 * 1000,
+                RelativeHourGranularity.HOUR));
+        AbstractParameter p2 = new AbstractParameter("TEST", uid());
+        p2.setDataSourceType(DerivedDataSourceType.getInstance());
+        p2.setInterval(intervalFactory.getInstance(
+                6L * 60 * 60 * 1000, RelativeHourGranularity.HOUR,
+                18L * 60 * 60 * 1000, RelativeHourGranularity.HOUR));
+        assertFalse(gapFunction.execute(p1, p2));
+    }
+    
+    public void testGapDuring() {
+        AbstractParameter p1 = new AbstractParameter("TEST", uid());
+        p1.setDataSourceType(DerivedDataSourceType.getInstance());
+        p1.setInterval(intervalFactory.getInstance(8L * 60 * 60 * 1000,
+                RelativeHourGranularity.HOUR, 16L * 60 * 60 * 1000,
+                RelativeHourGranularity.HOUR));
+        AbstractParameter p2 = new AbstractParameter("TEST", uid());
+        p2.setDataSourceType(DerivedDataSourceType.getInstance());
+        p2.setInterval(intervalFactory.getInstance(
+                6L * 60 * 60 * 1000, RelativeHourGranularity.HOUR,
+                18L * 60 * 60 * 1000, RelativeHourGranularity.HOUR));
+        assertFalse(gapFunction.execute(p1, p2));
+    }
+    
+    public void testGapContains() {
+        AbstractParameter p1 = new AbstractParameter("TEST", uid());
+        p1.setDataSourceType(DerivedDataSourceType.getInstance());
+        p1.setInterval(intervalFactory.getInstance(8L * 60 * 60 * 1000,
+                RelativeHourGranularity.HOUR, 16L * 60 * 60 * 1000,
+                RelativeHourGranularity.HOUR));
+        AbstractParameter p2 = new AbstractParameter("TEST", uid());
+        p2.setDataSourceType(DerivedDataSourceType.getInstance());
+        p2.setInterval(intervalFactory.getInstance(
+                6L * 60 * 60 * 1000, RelativeHourGranularity.HOUR,
+                18L * 60 * 60 * 1000, RelativeHourGranularity.HOUR));
+        assertFalse(gapFunction.execute(p2, p1));
     }
 
     public void testGap12Hours() {

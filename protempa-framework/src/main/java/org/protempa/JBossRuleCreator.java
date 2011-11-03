@@ -181,7 +181,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 Declaration[] arg3, WorkingMemory arg4, Object context)
                 throws Exception {
             return this.leftHandSide.getMatches((Proposition) arg0)
-                    || (this.rightHandSide != null 
+                    || (this.rightHandSide != null
                     && this.rightHandSide.getMatches((Proposition) arg0));
         }
 
@@ -228,10 +228,10 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                         this.derivationsBuilder));
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
-                AbstractionCombiner.toRules(def, rules,
-                        this.derivationsBuilder);
             }
             addInverseIsARule(def);
+            AbstractionCombiner.toRules(def, rules,
+                        this.derivationsBuilder);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -285,43 +285,50 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
-            TemporalExtendedPropositionDefinition lhProp =
-                    def.getLeftHandProposition();
-            TemporalExtendedPropositionDefinition rhProp =
-                    def.getRightHandProposition();
-            boolean secondRequired = def.isSecondRequired();
+
             /*
              * If there are no extended proposition definitions defined, we
              * might still have an inverseIsA relationship with another
              * pair abstraction definition.
              */
-            if (lhProp != null && (!secondRequired || rhProp != null)) {
-                Rule rule = new Rule("PAIR_" + def.getId());
-                Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
+            if (def.getRelation() != null) {
+                TemporalExtendedPropositionDefinition lhProp =
+                        def.getLeftHandProposition();
+                TemporalExtendedPropositionDefinition rhProp =
+                        def.getRightHandProposition();
+                boolean secondRequired = def.isSecondRequired();
+                if (lhProp != null && (!secondRequired || rhProp != null)) {
+                    Rule rule = new Rule("PAIR_" + def.getId());
+                    Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
 
-                sourceP.addConstraint(new PredicateConstraint(
-                        new GetMatchesPredicateExpressionPair(lhProp, rhProp)));
+                    sourceP.addConstraint(new PredicateConstraint(
+                            new GetMatchesPredicateExpressionPair(lhProp, rhProp)));
 
-                Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
-                resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
-                        ARRAY_LIST_OT, "result")));
-                if (secondRequired) {
-                    resultP.addConstraint(new PredicateConstraint(
-                            new CollectionSizeExpression(2)));
+                    Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
+                    resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
+                            ARRAY_LIST_OT, "result")));
+                    if (secondRequired) {
+                        resultP.addConstraint(new PredicateConstraint(
+                                new CollectionSizeExpression(2)));
+                    } else {
+                        resultP.addConstraint(new PredicateConstraint(
+                                new CollectionSizeExpression(1)));
+                    }
+                    rule.addPattern(resultP);
+                    rule.setConsequence(new PairConsequence(def, this.derivationsBuilder));
+                    rule.setSalience(MINUS_TWO_SALIENCE);
+                    this.ruleToAbstractionDefinition.put(rule, def);
+                    rules.add(rule);
                 } else {
-                    resultP.addConstraint(new PredicateConstraint(
-                            new CollectionSizeExpression(1)));
+                    assert lhProp != null : "lhProp should not be null in "
+                            + def.getId();
+                    assert rhProp != null : "rhProp should not be null in "
+                            + def.getId();
                 }
-                rule.addPattern(resultP);
-                rule.setConsequence(new PairConsequence(def, this.derivationsBuilder));
-                rule.setSalience(MINUS_TWO_SALIENCE);
-                this.ruleToAbstractionDefinition.put(rule, def);
-                rules.add(rule);
-            } else {
-                assert lhProp != null : "lhProp should not be null";
-                assert rhProp != null : "rhProp should not be null";
             }
             addInverseIsARule(def);
+            AbstractionCombiner.toRules(def, rules,
+                    this.derivationsBuilder);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -410,7 +417,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             Collections.putList(this.inverseIsAPropIdMap, propId, def.getId());
         }
     }
-    
+
     /**
      * Constructs a Drools rule for deriving propositions based on inverseIsA
      * relationships. There is one rule that computes all such derived
@@ -428,7 +435,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 logCreatingInverseIsA(logger);
             }
             Constraint c = new PredicateConstraint(
-                new PropositionPredicateExpression(
+                    new PropositionPredicateExpression(
                     this.inverseIsAPropIdMap.keySet()));
             Pattern p = new Pattern(0, PROP_OT);
             p.addConstraint(c);
@@ -449,7 +456,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         for (List<String> pIds : this.inverseIsAPropIdMap.values()) {
             propIds.addAll(pIds);
         }
-        logger.log(Level.FINER, "Creating inverseIsA rule for {0}", 
-            StringUtils.join(propIds, ", "));
+        logger.log(Level.FINER, "Creating inverseIsA rule for {0}",
+                StringUtils.join(propIds, ", "));
     }
 }

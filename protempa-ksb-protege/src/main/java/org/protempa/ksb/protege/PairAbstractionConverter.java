@@ -24,6 +24,8 @@ public class PairAbstractionConverter implements PropositionConverter {
         Util.setInDataSource(protegeProposition, result, cm);
         Util.setProperties(protegeProposition, result, cm);
         Util.setTerms(protegeProposition, result, cm);
+        Util.setSolid(protegeProposition, result, cm);
+        Util.setGap(protegeProposition, result, backend, cm);
         addComponentAbstractionDefinitions(protegeProposition, result,
                 backend, cm);
         setRelation(protegeProposition, result, backend, cm);
@@ -48,10 +50,11 @@ public class PairAbstractionConverter implements PropositionConverter {
         Instance relationInstance = (Instance) cm.getOwnSlotValue(
                 protegeProposition, slot);
 
-        Relation relation = Util.instanceToRelation(relationInstance,
-                cm, backend);
-
-        pd.setRelation(relation);
+        if (relationInstance != null) {
+            Relation relation = Util.instanceToRelation(relationInstance,
+                    cm, backend);
+            pd.setRelation(relation);
+        }
     }
     
     private void setRequireSecond(
@@ -82,19 +85,21 @@ public class PairAbstractionConverter implements PropositionConverter {
             throws KnowledgeSourceReadException {
         Instance relation = (Instance) cm.getOwnSlotValue(
                 pairAbstractionInstance, cm.getSlot("withRelation"));
-        Instance lhs = (Instance) cm.getOwnSlotValue(relation,
-                cm.getSlot("lhs"));
-        assert lhs != null : "lhs cannot be null";
-        Instance rhs = (Instance) cm.getOwnSlotValue(relation,
-                cm.getSlot("rhs"));
-        assert rhs != null : "rhs cannot be null";
-        TemporalExtendedPropositionDefinition lhsDefinition =
-                Util.instanceToTemporalExtendedPropositionDefinition(lhs, 
-                backend);
-        TemporalExtendedPropositionDefinition rhsDefinition =
-                Util.instanceToTemporalExtendedPropositionDefinition(rhs, 
-                backend);
-        pd.setLeftHandProposition(lhsDefinition);
-        pd.setRightHandProposition(rhsDefinition);
+        if (relation != null) {
+            Instance lhs = (Instance) cm.getOwnSlotValue(relation,
+                    cm.getSlot("lhs"));
+            assert lhs != null : "lhs cannot be null";
+            Instance rhs = (Instance) cm.getOwnSlotValue(relation,
+                    cm.getSlot("rhs"));
+            assert rhs != null : "rhs cannot be null";
+            TemporalExtendedPropositionDefinition lhsDefinition =
+                    Util.instanceToTemporalExtendedPropositionDefinition(lhs, 
+                    backend);
+            TemporalExtendedPropositionDefinition rhsDefinition =
+                    Util.instanceToTemporalExtendedPropositionDefinition(rhs, 
+                    backend);
+            pd.setLeftHandProposition(lhsDefinition);
+            pd.setRightHandProposition(rhsDefinition);
+        }
     }
 }

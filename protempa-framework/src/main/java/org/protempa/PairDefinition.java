@@ -11,7 +11,6 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     private static final long serialVersionUID = 456697454379224533L;
     private boolean solid;
     private Relation relation;
-    private GapFunction gapFunction;
     private Offsets temporalOffset;
     private boolean concatenable;
     private TemporalExtendedPropositionDefinition rightHandProposition;
@@ -153,23 +152,6 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     public String toString() {
         return new ToStringBuilder(this).appendSuper(super.toString()).append("temporalOffset", this.temporalOffset).append("abstractedFrom", getAbstractedFrom()).append("left temporal proposition", this.leftHandProposition).append("right temporal proposition",
                 this.rightHandProposition).append("relation", this.relation).toString();
-    }
-
-    @Override
-    public GapFunction getGapFunction() {
-        return gapFunction;
-    }
-
-    @Override
-    public void setGapFunction(GapFunction gapFunction) {
-        if (gapFunction == null) {
-            gapFunction = GapFunction.DEFAULT;
-        }
-        GapFunction old = this.gapFunction;
-        this.gapFunction = gapFunction;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("gapFunction", old, this.gapFunction);
-        }
     }
 
     public TemporalExtendedPropositionDefinition getLeftHandProposition() {
