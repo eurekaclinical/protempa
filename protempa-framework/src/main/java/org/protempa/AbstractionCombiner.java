@@ -62,9 +62,6 @@ final class AbstractionCombiner {
             AbstractParameter a2 = (AbstractParameter) arg2.getObject(arg0
                     .get(1));
             
-            System.err.println("Gap function for " + a1 + "; " + a2 + "; " + abstractionDefinition
-                            .getGapFunction().execute(a1, a2));
-            
             return a1 != a2
                     && (a1.getValue() == a2.getValue() || (a1.getValue() != null && a1
                             .getValue().equals(a2.getValue())))

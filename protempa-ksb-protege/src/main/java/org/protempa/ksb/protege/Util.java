@@ -220,7 +220,6 @@ class Util {
                 (Integer) cm.getOwnSlotValue(instance, cm.getSlot("maxGap"));
         Unit maxGapUnits = Util.parseUnitsConstraint(instance, "maxGapUnits",
                 backend, cm);
-        System.err.println(d.getId() + ": Setting gap function to " + maxGap + "; " + maxGapUnits);
         d.setGapFunction(new SimpleGapFunction(maxGap, maxGapUnits));
     }
 
@@ -245,6 +244,35 @@ class Util {
             throws KnowledgeSourceReadException {
         boolean bool = parseSolid(protegeProposition, cm);
         result.setSolid(bool);
+    }
+    
+    static void setConcatenable(Instance protegeProposition,
+            PairDefinition result, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        boolean bool = parseConcatenable(protegeProposition, cm);
+        result.setConcatenable(bool);
+    }
+    
+    static void setConcatenable(Instance protegeProposition,
+            HighLevelAbstractionDefinition result, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        boolean bool = parseConcatenable(protegeProposition, cm);
+        result.setConcatenable(bool);
+    }
+    
+    private static boolean parseConcatenable(Instance protegeProposition, 
+            ConnectionManager cm) throws KnowledgeSourceReadException {
+        Boolean bool =
+                (Boolean) protegeProposition.getDirectOwnSlotValue(
+                cm.getSlot("concatenable"));
+        if (bool == null) {
+            Util.logger().log(Level.WARNING,
+                    "{0} has no value for the 'concatenable' property: setting FALSE",
+                    protegeProposition.getName());
+            return false;
+        } else {
+            return bool.booleanValue();
+        }
     }
     
     private static boolean parseSolid(Instance protegeProposition, 

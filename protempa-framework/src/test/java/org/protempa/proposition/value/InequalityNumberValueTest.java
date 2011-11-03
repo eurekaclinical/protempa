@@ -1,8 +1,5 @@
 package org.protempa.proposition.value;
 
-import org.protempa.proposition.value.InequalityNumberValue;
-import org.protempa.proposition.value.NumberValue;
-import org.protempa.proposition.value.ValueComparator;
 
 import junit.framework.TestCase;
 
@@ -10,12 +7,7 @@ import junit.framework.TestCase;
  * @author Andrew Post
  */
 public class InequalityNumberValueTest extends TestCase {
-
-    /**
-     * Constructor for InequalityDoubleValueTest.
-     * 
-     * @param arg0
-     */
+    
     public InequalityNumberValueTest(String arg0) {
         super(arg0);
     }
@@ -31,39 +23,52 @@ public class InequalityNumberValueTest extends TestCase {
     public void testLessThanGreaterThan() {
         InequalityNumberValue val = new InequalityNumberValue(
                 ValueComparator.GREATER_THAN, 20);
-        assertTrue(val.compare(new InequalityNumberValue(
-                ValueComparator.LESS_THAN, 10)) == ValueComparator.GREATER_THAN);
+        assertEquals(ValueComparator.GREATER_THAN,
+                val.compare(new InequalityNumberValue(
+                ValueComparator.LESS_THAN, 10)));
     }
 
     public void testLessThanUnknown() {
         InequalityNumberValue val = new InequalityNumberValue(
                 ValueComparator.GREATER_THAN, 20);
-        assertTrue(val.compare(new InequalityNumberValue(
-                ValueComparator.LESS_THAN, 40)) == ValueComparator.UNKNOWN);
+        assertEquals(ValueComparator.UNKNOWN, 
+                val.compare(new InequalityNumberValue(
+                ValueComparator.LESS_THAN, 40)));
     }
 
     public void testLessThanGreaterThanSame() {
         InequalityNumberValue val = new InequalityNumberValue(
                 ValueComparator.GREATER_THAN, 20);
-        assertTrue(val.compare(new InequalityNumberValue(
-                ValueComparator.LESS_THAN, 20)) == ValueComparator.GREATER_THAN);
+        assertEquals(ValueComparator.GREATER_THAN,
+                val.compare(new InequalityNumberValue(
+                ValueComparator.LESS_THAN, 20)));
     }
 
     public void testLessThanSameDouble() {
         InequalityNumberValue val = new InequalityNumberValue(
                 ValueComparator.GREATER_THAN, 20);
-        assertTrue(val.compare(new NumberValue(20)) == ValueComparator.GREATER_THAN);
+        assertEquals(ValueComparator.GREATER_THAN,
+                val.compare(NumberValue.getInstance(20)));
     }
 
-    public void testLessThanDouble() {
+    public void testLessThanNumberValue() {
         InequalityNumberValue val = new InequalityNumberValue(
                 ValueComparator.LESS_THAN, .4);
-        assertTrue(val.compare(new NumberValue(.8)) == ValueComparator.LESS_THAN);
+        assertEquals(ValueComparator.LESS_THAN,
+                val.compare(NumberValue.getInstance(.8)));
     }
-    
+
+    public void testLessThanNumberValue2() {
+        InequalityNumberValue val =
+                new InequalityNumberValue(ValueComparator.LESS_THAN, 4);
+        NumberValue numberValue = NumberValue.getInstance(3);
+        assertEquals(ValueComparator.UNKNOWN, val.compare(numberValue));
+    }
+
     public void testCompareDateValue() {
         InequalityNumberValue val = new InequalityNumberValue(
                 ValueComparator.LESS_THAN, .4);
         DateValue dateValue = DateValue.getInstance();
+        assertEquals(ValueComparator.UNKNOWN, val.compare(dateValue));
     }
 }

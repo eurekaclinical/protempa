@@ -25,6 +25,7 @@ public class PairAbstractionConverter implements PropositionConverter {
         Util.setProperties(protegeProposition, result, cm);
         Util.setTerms(protegeProposition, result, cm);
         Util.setSolid(protegeProposition, result, cm);
+        Util.setConcatenable(protegeProposition, result, cm);
         Util.setGap(protegeProposition, result, backend, cm);
         addComponentAbstractionDefinitions(protegeProposition, result,
                 backend, cm);
