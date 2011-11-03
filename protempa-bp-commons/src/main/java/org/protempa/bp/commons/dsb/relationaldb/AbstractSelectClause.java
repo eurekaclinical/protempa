@@ -111,7 +111,7 @@ abstract class AbstractSelectClause implements SelectClause {
         result.append(referenceIndices.generateColumnReference(columnSpec))
                 .append(" AS ").append(name);
         if (hasNext) {
-            result.append(',');
+            result.append(", ");
         }
 
         return result;
