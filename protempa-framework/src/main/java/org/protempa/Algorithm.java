@@ -1,5 +1,7 @@
 package org.protempa;
 
+import java.io.Serializable;
+
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Segment;
@@ -12,7 +14,7 @@ import org.protempa.proposition.value.ValueType;
  * @author Andrew Post
  * 
  */
-public interface Algorithm {
+public interface Algorithm extends Serializable {
 
 	/**
 	 * The algorithm's unique id.

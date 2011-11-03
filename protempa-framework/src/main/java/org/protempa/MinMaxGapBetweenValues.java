@@ -1,10 +1,14 @@
 package org.protempa;
 
+import java.io.Serializable;
+
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.value.Unit;
 
-final class MinMaxGapBetweenValues {
+final class MinMaxGapBetweenValues implements Serializable {
 
+    private static final long serialVersionUID = -8071552755205112189L;
+    
     private int minimumGapBetweenValues;
     private Unit minimumGapBetweenValuesUnits;
     private Integer maximumGapBetweenValues;

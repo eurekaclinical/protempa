@@ -1,5 +1,7 @@
 package org.protempa;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -18,7 +20,7 @@ final class LowLevelAbstractionConsequence implements Consequence {
     private final LowLevelAbstractionDefinition def;
     private final Algorithm algorithm;
     private final DerivationsBuilder derivationsBuilder;
-    private final MyObjectAsserter objAsserter;
+    private transient MyObjectAsserter objAsserter;
 
     private static class MyObjectAsserter implements ObjectAsserter {
 
@@ -44,16 +46,21 @@ final class LowLevelAbstractionConsequence implements Consequence {
     @Override
     public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
             throws Exception {
-        @SuppressWarnings("unchecked")
         List<TemporalProposition> pl =
                 (List<TemporalProposition>) arg0.get(
                 arg0.getDeclaration("result"));
 
+        @SuppressWarnings("rawtypes")
         Sequence seq = new Sequence(this.def.getAbstractedFrom(), pl);
 
         objAsserter.workingMemory = arg1;
         LowLevelAbstractionFinder.process(seq, this.def, this.algorithm,
                 objAsserter, this.derivationsBuilder);
         objAsserter.workingMemory = null;
+    }
+    
+    private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
+        s.defaultReadObject();
+        this.objAsserter = new MyObjectAsserter();
     }
 }

@@ -17,6 +17,8 @@ import org.protempa.proposition.value.ValueType;
  */
 public abstract class AbstractAlgorithm implements Algorithm {
 
+    private static final long serialVersionUID = 6566132392629105106L;
+
     private ValueType inValueType;
     private String id;
     private AlgorithmParameter[] parameters;
