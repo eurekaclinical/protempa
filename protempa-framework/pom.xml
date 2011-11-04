@@ -23,6 +23,11 @@
             <id>drools.org</id>
             <url>https://repository.jboss.org/nexus/content/repositories/releases/</url>
         </repository>
+        <repository>
+            <id>codehaus</id>
+            <name>Maven Codehaus repository</name>
+            <url>http://repository.codehaus.org/</url>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -63,6 +68,11 @@
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.castor</groupId>
+            <artifactId>castor-xml</artifactId>
+            <version>1.3.2</version>
         </dependency>
     </dependencies>
     <build>
