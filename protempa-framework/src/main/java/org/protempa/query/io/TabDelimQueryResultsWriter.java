@@ -66,9 +66,7 @@ public class TabDelimQueryResultsWriter extends QueryResultsWriter {
 		private IOException ioe;
 
         TabDelimWriterProtempaException(IOException cause) {
-            super(cause);
-            assert cause != null : "cause cannot be null";
-            this.ioe = cause;
+            this(null, cause);
         }
 
         TabDelimWriterProtempaException(String message, IOException cause) {
