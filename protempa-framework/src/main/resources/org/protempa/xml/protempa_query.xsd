@@ -101,7 +101,8 @@
                                             <xs:documentation>The column header to use.  If not specified, a default computed from the specified links is used.</xs:documentation>
                                         </xs:annotation>
                                     </xs:attribute>
-                                    <xs:attribute name="countUnique" type="xs:boolean" use="required">
+                                    <xs:attribute name="countUnique" type="xs:boolean"
+                                        use="required">
                                         <xs:annotation>
                                             <xs:documentation>If the value of this attribute is false, then the count produced for the described column will be the total number of propositions found through the given links.
 
@@ -134,7 +135,8 @@ If the value of this attribute is true, then the count produced for te described
                                             </xs:annotation>
                                             <xs:complexType>
                                                 <xs:sequence>
-                                                    <xs:element maxOccurs="unbounded" name="propertyName" type="nameType"/>
+                                                  <xs:element maxOccurs="unbounded"
+                                                  name="propertyName" type="nameType"/>
                                                 </xs:sequence>
                                             </xs:complexType>
                                         </xs:element>
@@ -143,70 +145,83 @@ If the value of this attribute is true, then the count produced for te described
                                                 <xs:documentation>Specifies additional columns to be output related to propositions.</xs:documentation>
                                             </xs:annotation>
                                             <xs:complexType>
-                                                <xs:attribute default="false" name="showId" type="xs:boolean" use="optional">
-                                                    <xs:annotation>
-                                                        <xs:documentation>If true, output a column to show proposition IDs.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="false" name="showId"
+                                                  type="xs:boolean" use="optional">
+                                                  <xs:annotation>
+                                                  <xs:documentation>If true, output a column to show proposition IDs.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="false" name="showValue" type="xs:boolean">
-                                                    <xs:annotation>
-                                                        <xs:documentation>If true, output a column to show proposition values.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="false" name="showValue"
+                                                  type="xs:boolean">
+                                                  <xs:annotation>
+                                                  <xs:documentation>If true, output a column to show proposition values.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="false" name="showDisplayName" type="xs:boolean">
-                                                    <xs:annotation>
-                                                        <xs:documentation>If true, output a column to show proposition display names.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="false" name="showDisplayName"
+                                                  type="xs:boolean">
+                                                  <xs:annotation>
+                                                  <xs:documentation>If true, output a column to show proposition display names.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="false" name="showAbbrevDisplayName" type="xs:boolean">
-                                                    <xs:annotation>
-                                                        <xs:documentation>If true, output a column to show proposition abbreviated display names.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="false"
+                                                  name="showAbbrevDisplayName" type="xs:boolean">
+                                                  <xs:annotation>
+                                                  <xs:documentation>If true, output a column to show proposition abbreviated display names.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="false" name="showStartOrTimestamp" type="xs:boolean">
-                                                    <xs:annotation>
-                                                        <xs:documentation>If true, output a column to show proposition start time or timestamp.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="false"
+                                                  name="showStartOrTimestamp" type="xs:boolean">
+                                                  <xs:annotation>
+                                                  <xs:documentation>If true, output a column to show proposition start time or timestamp.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="false" name="showFinish" type="xs:boolean">
-                                                    <xs:annotation>
-                                                        <xs:documentation>If true, output a column to show proposition finish time.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="false" name="showFinish"
+                                                  type="xs:boolean">
+                                                  <xs:annotation>
+                                                  <xs:documentation>If true, output a column to show proposition finish time.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="false" name="showLength" type="xs:boolean">
-                                                    <xs:annotation>
-                                                        <xs:documentation>If true, output a column to show proposition interval length.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="false" name="showLength"
+                                                  type="xs:boolean">
+                                                  <xs:annotation>
+                                                  <xs:documentation>If true, output a column to show proposition interval length.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="" name="valueHeading" type="xs:string">
-                                                    <xs:annotation>
-                                                        <xs:documentation>If true, output a column to show proposition value.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="" name="valueHeading"
+                                                  type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>If true, output a column to show proposition value.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="" name="displayNameHeading" type="xs:string">
-                                                    <xs:annotation>
-                                                        <xs:documentation>The string to use for the heading of the display name column.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="" name="displayNameHeading"
+                                                  type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>The string to use for the heading of the display name column.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="" name="abbrevDisplayNameHeading" type="xs:string">
-                                                    <xs:annotation>
-                                                        <xs:documentation>The string to use for the heading of the abbrev display name column.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default=""
+                                                  name="abbrevDisplayNameHeading" type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>The string to use for the heading of the abbrev display name column.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="" name="startOrTimestampHeading" type="xs:string">
-                                                    <xs:annotation>
-                                                        <xs:documentation>The string to use for the heading of the start time or timestamp column.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default=""
+                                                  name="startOrTimestampHeading" type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>The string to use for the heading of the start time or timestamp column.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="" name="finishHeading" type="xs:string">
-                                                    <xs:annotation>
-                                                        <xs:documentation>The string to use for the heading of the finish time column.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="" name="finishHeading"
+                                                  type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>The string to use for the heading of the finish time column.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="" name="lengthHeading" type="xs:string">
-                                                    <xs:annotation>
-                                                        <xs:documentation>The string to use for the heading of the length column.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="" name="lengthHeading"
+                                                  type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>The string to use for the heading of the length column.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
                                             </xs:complexType>
                                         </xs:element>
@@ -215,25 +230,32 @@ If the value of this attribute is true, then the count produced for te described
                                                 <xs:documentation>Specifies additional columns to output related to properties.</xs:documentation>
                                             </xs:annotation>
                                             <xs:complexType>
-                                                <xs:attribute default="false" name="showPropertyValueDisplayName" type="xs:boolean" use="optional">
-                                                    <xs:annotation>
-                                                        <xs:documentation>If true, output a column to show propery value display name.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="false"
+                                                  name="showPropertyValueDisplayName"
+                                                  type="xs:boolean" use="optional">
+                                                  <xs:annotation>
+                                                  <xs:documentation>If true, output a column to show propery value display name.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="false" name="showPropertyValueAbbrevDisplayName" type="xs:boolean" use="optional">
-                                                    <xs:annotation>
-                                                        <xs:documentation>If true, output a column to show propery value abbreviated display name.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default="false"
+                                                  name="showPropertyValueAbbrevDisplayName"
+                                                  type="xs:boolean" use="optional">
+                                                  <xs:annotation>
+                                                  <xs:documentation>If true, output a column to show propery value abbreviated display name.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="" name="propertyValueDisplayName" type="xs:string">
-                                                    <xs:annotation>
-                                                        <xs:documentation>The string to use for the heading of the property value display name column.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default=""
+                                                  name="propertyValueDisplayName" type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>The string to use for the heading of the property value display name column.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
-                                                <xs:attribute default="" name="propertyValueAbbrevDisplayName" type="xs:string">
-                                                    <xs:annotation>
-                                                        <xs:documentation>The string to use for the heading of the property value abbreviated display name column.</xs:documentation>
-                                                    </xs:annotation>
+                                                <xs:attribute default=""
+                                                  name="propertyValueAbbrevDisplayName"
+                                                  type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>The string to use for the heading of the property value abbreviated display name column.</xs:documentation>
+                                                  </xs:annotation>
                                                 </xs:attribute>
                                             </xs:complexType>
                                         </xs:element>
@@ -316,12 +338,14 @@ If the value of this attribute is true, then the count produced for te described
                                 </xs:annotation>
                                 <xs:complexType>
                                     <xs:sequence>
-                                        <xs:element minOccurs="0" name="minDistanceBetweenStarts" type="durationType">
+                                        <xs:element minOccurs="0" name="minDistanceBetweenStarts"
+                                            type="durationType">
                                             <xs:annotation>
                                                 <xs:documentation>The minimum distance between the starts of intervals.</xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
-                                        <xs:element minOccurs="0" name="maxDistanceBetweenStarts" type="durationType">
+                                        <xs:element minOccurs="0" name="maxDistanceBetweenStarts"
+                                            type="durationType">
                                             <xs:annotation>
                                                 <xs:documentation>The maximum distance between the starts of intervals.</xs:documentation>
                                             </xs:annotation>
@@ -336,22 +360,26 @@ If the value of this attribute is true, then the count produced for te described
                                                 <xs:documentation>The maximum distance between the start of interval 1 and the finish of interval 2.</xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
-                                        <xs:element minOccurs="0" name="minDistanceBetween" type="durationType">
+                                        <xs:element minOccurs="0" name="minDistanceBetween"
+                                            type="durationType">
                                             <xs:annotation>
                                                 <xs:documentation>The minimum distance between the finish of interval 1 and the start of interval 2.</xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
-                                        <xs:element minOccurs="0" name="maxDistanceBetween" type="durationType">
+                                        <xs:element minOccurs="0" name="maxDistanceBetween"
+                                            type="durationType">
                                             <xs:annotation>
                                                 <xs:documentation>The maximum distance between the finish of interval 1 and the start of interval 2.</xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
-                                        <xs:element minOccurs="0" name="minDistanceBetweenFinishes" type="durationType">
+                                        <xs:element minOccurs="0" name="minDistanceBetweenFinishes"
+                                            type="durationType">
                                             <xs:annotation>
                                                 <xs:documentation>The minimum distance between the finish of interval 1 and the finish of interval 2.</xs:documentation>
                                             </xs:annotation>
                                         </xs:element>
-                                        <xs:element minOccurs="0" name="maxDistanceBetweenFinishes" type="durationType">
+                                        <xs:element minOccurs="0" name="maxDistanceBetweenFinishes"
+                                            type="durationType">
                                             <xs:annotation>
                                                 <xs:documentation>The maximum distance between the finish of interval 1 and the finish of interval 2.</xs:documentation>
                                             </xs:annotation>
@@ -491,7 +519,8 @@ If the value of this attribute is true, then the count produced for te described
                         <xs:documentation>Represents the paths through the database from this entity's main table to the tables and columns that together form a unique identifier for this entity. The columns comprising the unique identifier cannot have null values.</xs:documentation>
                     </xs:annotation>
                 </xs:element>
-                <xs:element maxOccurs="1" minOccurs="0" name="startTimeOrTimestampSpec" type="columnSpecType">
+                <xs:element maxOccurs="1" minOccurs="0" name="startTimeOrTimestampSpec"
+                    type="columnSpecType">
                     <xs:annotation>
                         <xs:documentation>Represents the path through the database from the key's main table to the table and column where the entity's start time (or timestamp is no finishTimeSpec is specified) is located.</xs:documentation>
                     </xs:annotation>
@@ -547,7 +576,8 @@ If the value of this attribute is true, then the count produced for te described
                     </xs:annotation>
                     <xs:complexType>
                         <xs:sequence>
-                            <xs:element maxOccurs="unbounded" name="constraintSpec" type="columnSpecType"/>
+                            <xs:element maxOccurs="unbounded" name="constraintSpec"
+                                type="columnSpecType"/>
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>
@@ -673,7 +703,8 @@ If the value of this attribute is true, then the count produced for te described
                             <xs:element maxOccurs="unbounded" minOccurs="0" name="and">
                                 <xs:complexType>
                                     <xs:sequence>
-                                        <xs:element maxOccurs="unbounded" name="termID" type="nameType"/>
+                                        <xs:element maxOccurs="unbounded" name="termID"
+                                            type="nameType"/>
                                     </xs:sequence>
                                 </xs:complexType>
                             </xs:element>
@@ -924,7 +955,8 @@ A list of values
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>
-                <xs:element default="false" minOccurs="0" name="propositionIdsComplete" type="xs:boolean">
+                <xs:element default="false" minOccurs="0" name="propositionIdsComplete"
+                    type="xs:boolean">
                     <xs:annotation>
                         <xs:documentation>Indicates whether the codes in propositionIdToCodeMap represent all of the unique values of the specified column. This serves as an optimization hint to the SQL generator to avoid the need for a long IN clause when the list of values in the clause is known to be almost the same as the list of unique values in the column.</xs:documentation>
                     </xs:annotation>
@@ -1065,6 +1097,8 @@ A list of values
                         <xs:documentation>The granularity (year, month, ...) with which to interpret the finish date/time.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
+                <xs:attribute name="startSide" type="sideType"/>
+                <xs:attribute name="finishSide" type="sideType"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -1087,6 +1121,12 @@ A list of values
         <xs:attribute name="length" type="xs:int"/>
         <xs:attribute ref="unit"/>
     </xs:complexType>
+    <xs:simpleType name="sideType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="START"/>
+            <xs:enumeration value="FINISH"/>
+        </xs:restriction>
+    </xs:simpleType>
     <xs:attribute default="true" name="trueOutput" type="xs:string"/>
     <xs:attribute default="false" name="falseOutput" type="xs:string"/>
     <xs:element name="booleanValue" type="xs:boolean">
