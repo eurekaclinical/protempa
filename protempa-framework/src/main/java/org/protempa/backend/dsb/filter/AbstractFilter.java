@@ -7,87 +7,101 @@ import org.protempa.ProtempaUtil;
 
 /**
  * An abstract class that makes implementing filters relatively easy.
- *
+ * 
  * @author Andrew Post.
  */
 public abstract class AbstractFilter implements Filter {
 
-    private final String[] propositionIds;
-    private Filter and;
+	private final String[] propositionIds;
+	private Filter and;
 
-    /**
-     * Instantiates the filter with the proposition ids that it is valid for.
-     *
-     * @param propositionIds a proposition id {@link String[]}. Cannot be
-     * <code>null</code>, empty or contain <code>null</code> values.
-     */
-    public AbstractFilter(String[] propositionIds) {
-        ProtempaUtil.checkArray(propositionIds, "propositionIds");
-        propositionIds = propositionIds.clone();
-        ProtempaUtil.internAll(propositionIds);
-        this.propositionIds = propositionIds;
-    }
-    
-    @Override
-    public String[] getPropositionIds() {
-        return propositionIds.clone();
-    }
+	/**
+	 * Instantiates the filter with the proposition ids that it is valid for.
+	 * 
+	 * @param propositionIds
+	 *            a proposition id {@link String[]}. Cannot be <code>null</code>
+	 *            , empty or contain <code>null</code> values.
+	 */
+	public AbstractFilter(String[] propositionIds) {
+		ProtempaUtil.checkArray(propositionIds, "propositionIds");
+		propositionIds = propositionIds.clone();
+		ProtempaUtil.internAll(propositionIds);
+		this.propositionIds = propositionIds;
+	}
 
-    public void setAnd(Filter and) {
-        this.and = and;
-    }
+	@Override
+	public String[] getPropositionIds() {
+		return propositionIds.clone();
+	}
 
-    @Override
-    public Filter getAnd() {
-        return and;
-    }
+	public void setAnd(Filter and) {
+		this.and = and;
+	}
 
-    private static class DataSourceConstraintAndIterator
-            implements Iterator<Filter> {
+	@Override
+	public Filter getAnd() {
+		return and;
+	}
 
-        private Filter dataSourceConstraint;
+	private static class DataSourceConstraintAndIterator implements Iterator<Filter> {
 
-        private DataSourceConstraintAndIterator(Filter dataSourceConstraint) {
-            assert dataSourceConstraint != null :
-                    "dataSourceConstraint cannot be null";
-            this.dataSourceConstraint = dataSourceConstraint;
-        }
+		private Filter dataSourceConstraint;
 
-        @Override
-        public boolean hasNext() {
-            if (this.dataSourceConstraint != null) {
-                return true;
-            } else {
-                return false;
-            }
-        }
+		private DataSourceConstraintAndIterator(Filter dataSourceConstraint) {
+			assert dataSourceConstraint != null : "dataSourceConstraint cannot be null";
+			this.dataSourceConstraint = dataSourceConstraint;
+		}
 
-        @Override
-        public Filter next() {
-            if (this.dataSourceConstraint != null) {
-                Filter dsc = this.dataSourceConstraint;
-                this.dataSourceConstraint = this.dataSourceConstraint.getAnd();
-                return dsc;
-            } else {
-                throw new NoSuchElementException();
-            }
-        }
+		@Override
+		public boolean hasNext() {
+			if (this.dataSourceConstraint != null) {
+				return true;
+			} else {
+				return false;
+			}
+		}
 
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
+		@Override
+		public Filter next() {
+			if (this.dataSourceConstraint != null) {
+				Filter dsc = this.dataSourceConstraint;
+				this.dataSourceConstraint = this.dataSourceConstraint.getAnd();
+				return dsc;
+			} else {
+				throw new NoSuchElementException();
+			}
+		}
 
-    @Override
-    public Iterator<Filter> andIterator() {
-        return new DataSourceConstraintAndIterator(this);
-    }
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+	}
 
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
-    }
+	@Override
+	public Iterator<Filter> andIterator() {
+		return new DataSourceConstraintAndIterator(this);
+	}
 
-    
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
+	}
+
+	/**
+	 * Convert an array of <code>AbstractFilter</code> objects to a chain of
+	 * filters by calling the {@link #setAnd} the method of each filter object.
+	 * 
+	 * @param filterArray
+	 *            An array of AbstractFilter objects having length greater than
+	 *            zero.
+	 * @return The first filter in the chain which will be == to filterArray[0]
+	 */
+	public static Filter filterArrayToChain(AbstractFilter[] filterArray) {
+		for (int i = 0; i < (filterArray.length - 1); i++) {
+			filterArray[i].setAnd(filterArray[i + 1]);
+		}
+		filterArray[filterArray.length - 1].setAnd(null);
+		return filterArray[0];
+	}
 }
