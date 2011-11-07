@@ -32,7 +32,7 @@ import org.protempa.proposition.value.ValueType;
  * @author Andrew Post
  */
 public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
-    
+
     private static final Comparator<? super Proposition> comp =
             new AllPropositionIntervalComparator();
     private static final Comparator<? super Proposition> reverseComp =
@@ -42,7 +42,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
 
         MAX, MIN, FIRST, LAST, SUM
     }
-
+    
     private final Link[] links;
     private final String columnNamePrefixOverride;
     private Type type;
@@ -79,83 +79,115 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
         List<Proposition> propositions = traverseLinks(this.links,
-                proposition, forwardDerivations, backwardDerivations, 
+                proposition, forwardDerivations, backwardDerivations,
                 references, knowledgeSource);
-        NumericalValue value = null;
-        BigDecimal sumTotal = new BigDecimal(0.0);
-        if (type == Type.FIRST) {
-            propositions = new ArrayList<Proposition>(propositions);
-            Collections.sort(propositions, comp);
-        } else if (type == Type.LAST) {
-            propositions = new ArrayList<Proposition>(propositions);
-            Collections.sort(propositions, reverseComp);
+        Value value = null;
+        BigDecimal sumTotal = BigDecimal.ZERO;
+        
+        /*
+         * Sort if needed.
+         */
+        switch (type) {
+            case FIRST:
+                propositions = new ArrayList<Proposition>(propositions);
+                Collections.sort(propositions, comp);
+                break;
+            case LAST:
+                propositions = new ArrayList<Proposition>(propositions);
+                Collections.sort(propositions, reverseComp);
+                break;
         }
+        
+        LOOP_PROPOSITIONS:
         for (Proposition prop : propositions) {
             if (prop instanceof TemporalParameter) {
                 TemporalParameter pp = (TemporalParameter) prop;
-                Value v = pp.getValue();
-                if (v != null) {
-                    if ((type == Type.MAX || type == Type.MIN)
-                            && !ValueType.NUMERICALVALUE.isInstance(v)) {
-                        continue;
-                    } else if (type == Type.SUM
-                            && !ValueType.NUMBERVALUE.isInstance(v)) {
-                        continue;
+                Value val = pp.getValue();
+                if (val != null) {
+                    /*
+                     * Check type preconditions.
+                     */
+                    switch (type) {
+                        case MAX:
+                        case MIN:
+                            if (!ValueType.NUMERICALVALUE.isInstance(val)) {
+                                continue LOOP_PROPOSITIONS;
+                            }
+                            break;
+                        case SUM:
+                            if (!ValueType.NUMBERVALUE.isInstance(val)) {
+                                continue LOOP_PROPOSITIONS;
+                            }
+                            break;
                     }
-                    if ((type == Type.MAX || type == Type.MIN) && !ValueType.NUMERICALVALUE.isInstance(v)) {
-                        continue;
-                    } else {
-                        NumericalValue val = (NumericalValue) v;
-                        if (value == null) {
-                            value = val;
-                            if (type == Type.FIRST || type == Type.LAST) {
-                                break;
-                            }
-                        } else {
-                            ValueComparator c = val.compare(value);
-                            boolean unknown = c.test(ValueComparator.UNKNOWN);
-                            if (unknown) {
-                                c = val.getNumberValue().compare(
-                                        value.getNumberValue());
-                            }
-                            switch (type) {
-                                case MAX:
-                                    if (c.test(ValueComparator.GREATER_THAN)) {
-                                        value = val;
-                                    }
-                                    break;
-                                case MIN:
-                                    if (c.test(ValueComparator.LESS_THAN)) {
-                                        value = val;
-                                    }
-                                    break;
-                                case SUM:
-                                    try {
-                                        sumTotal = sumTotal.add(val.getBigDecimal());
-                                        value = NumberValue
-                                                .getInstance(sumTotal);
-                                    } catch (NumberFormatException ex) {
-                                        throw new IllegalStateException(
-                                                "only number values allowed for SUM aggregation type; got "
-                                                        + val
-                                                        + " for proposition "
-                                                        + pp.getId()
-                                                        + " instead");
-                                    }
-                                    break;
-                                default:
-                                    throw new AssertionError("invalid aggregation type: " + type);
 
-                            }
+                    /*
+                     * Process first value.
+                     */
+                    if (value == null) {
+                        switch (type) {
+                            case FIRST:
+                                value = val;
+                                break LOOP_PROPOSITIONS;
+                            case LAST:
+                                value = val;
+                                break LOOP_PROPOSITIONS;
+                            case SUM:
+                                value = val;
+                                sumTotal = ((NumberValue) val).getBigDecimal();
+                                break;
+                        }
+                        
+                    /*
+                     * Process subsequent values.
+                     */
+                    } else {
+                        switch (type) {
+                            case MAX:
+                                ValueComparator c = val.compare(value);
+                                if (c.test(ValueComparator.UNKNOWN)) {
+                                    c = ((NumericalValue) val).getNumberValue().compare(
+                                            ((NumericalValue) value).getNumberValue());
+                                }
+                                if (c.test(ValueComparator.GREATER_THAN)) {
+                                    value = val;
+                                }
+                                break;
+                            case MIN:
+                                c = val.compare(value);
+                                if (c.test(ValueComparator.UNKNOWN)) {
+                                    c = ((NumericalValue) val).getNumberValue().compare(
+                                            ((NumericalValue) value).getNumberValue());
+                                }
+                                if (c.test(ValueComparator.LESS_THAN)) {
+                                    value = val;
+                                }
+                                break;
+                            case SUM:
+                                try {
+                                    sumTotal = sumTotal.add(((NumberValue) val).getBigDecimal());
+                                    value = NumberValue.getInstance(sumTotal);
+                                } catch (NumberFormatException ex) {
+                                    throw new IllegalStateException(
+                                            "only number values allowed for SUM aggregation type; got "
+                                            + val
+                                            + " for proposition "
+                                            + pp.getId()
+                                            + " instead");
+                                }
+                                break;
+                            default:
+                                throw new AssertionError("invalid aggregation type: " + type);
+
                         }
                     }
                 }
             } else {
-                throw new IllegalStateException("only primitive parameters allowed");
+                throw new IllegalStateException("only temporal parameters allowed");
             }
         }
         if (value != null) {
-            return new String[] { value.getFormatted() };
+            return new String[]{value.getFormatted()};
         } else {
             return new String[]{null};
         }
@@ -166,13 +198,13 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             throws KnowledgeSourceReadException {
         String headerString = this.columnNamePrefixOverride != null ? this.columnNamePrefixOverride
                 : generateLinksHeaderString(this.links)
-                        + (this.type == Type.MIN ? "_min" : "_max");
-        return new String[] { headerString };
+                + (this.type == Type.MIN ? "_min" : "_max");
+        return new String[]{headerString};
     }
-    
+
     @Override
-    public void validate(KnowledgeSource knowledgeSource) throws 
-            TableColumnSpecValidationFailedException, 
+    public void validate(KnowledgeSource knowledgeSource) throws
+            TableColumnSpecValidationFailedException,
             KnowledgeSourceReadException {
         int i = 1;
         for (Link link : this.links) {
