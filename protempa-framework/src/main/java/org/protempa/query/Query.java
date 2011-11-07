@@ -122,4 +122,15 @@ public class Query implements Serializable {
 		return this.termIds.clone();
 	}
 
+	/**
+	 * @return an array that references all of the filters in the chain of
+	 *         filters. This is needed for Castor because it does not understand
+	 *         a chain of filters.
+	 */
+	public Filter[] getFiltersArray() {
+		if (filters == null) {
+			return new Filter[0];
+		}
+		return filters.filterChainToArray();
+	}
 }

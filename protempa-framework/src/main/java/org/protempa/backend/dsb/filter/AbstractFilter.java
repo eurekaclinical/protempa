@@ -104,4 +104,32 @@ public abstract class AbstractFilter implements Filter {
 		filterArray[filterArray.length - 1].setAnd(null);
 		return filterArray[0];
 	}
+
+	/**
+	 * @return the length of the filter chain that begins with this object.
+	 */
+	public int chainLength() {
+		AbstractFilter thisFilter = (AbstractFilter) this.and;
+		int length = 1;
+		while (thisFilter.and != null) {
+			length += 1;
+			thisFilter = (AbstractFilter) thisFilter.and;
+		}
+		return length;
+	}
+
+	/**
+	 * Return an array that contains all of the filters in the chain.
+	 */
+	@Override
+	public Filter[] filterChainToArray() {
+		int length = chainLength();
+		Filter[] array = new Filter[length];
+		Filter thisFilter = this;
+		for (int i = 0; i < length; i++) {
+			array[i] = thisFilter;
+			thisFilter = thisFilter.getAnd();
+		}
+		return array;
+	}
 }

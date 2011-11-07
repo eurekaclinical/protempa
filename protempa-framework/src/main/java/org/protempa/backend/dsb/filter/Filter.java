@@ -47,4 +47,9 @@ public interface Filter {
      * @return an {@link Iterator<Filter>}.
      */
     Iterator<Filter> andIterator();
+    
+    /**
+     * Return an array that contains all of the filters in the chain.
+     */
+    Filter[] filterChainToArray() ;
 }
