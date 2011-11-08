@@ -145,7 +145,7 @@ public final class BooleanValue implements Value, Serializable {
         if (val == null || val != ValueType.VALUELIST) {
             return ValueComparator.UNKNOWN;
         }
-        ValueList vl = (ValueList) val;
+        ValueList<?> vl = (ValueList<?>) val;
         return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;
     }
     
