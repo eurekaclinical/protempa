@@ -10,26 +10,26 @@
             unless the unmarshaller is configured with appropriate handlers.</description>
         <map-to xml="protempaQuery" element-definition="true"/>
         <field name="dataSourceBackend" type="other" required="false" handler="org.protempa.xml.DataSourceBackendHandler">
-            <description>When marshaling this field, the class name of the curently configured back end will be obtains by the field handler consulting the
-                appropriate factory class. When unmarshalling, this field is ignored unelss the unmarshaller is configured with an appropriate handler. In this
+            <description>When marshaling this field, the class name of the currently configured back end will be obtains by the field handler consulting the
+                appropriate factory class. When unmarshalling, this field is ignored unless the unmarshaller is configured with an appropriate handler. In this
                 case, an instance of the named class is created and passed to the handler.</description>
             <bind-xml name="dataSourceBackend" type="string" node="element"></bind-xml>
         </field>
         <field name="knowledgeSourceBackend" type="other" required="false" handler="org.protempa.xml.KnowledgeSourceBackendHandler">
-            <description>When marshaling this field, the class name of the curently configured back end will be obtains by the field handler consulting the
-                appropriate factory class. When unmarshalling, this field is ignored unelss the unmarshaller is configured with an appropriate handler. In this
+            <description>When marshaling this field, the class name of the currently configured back end will be obtains by the field handler consulting the
+                appropriate factory class. When unmarshalling, this field is ignored unless the unmarshaller is configured with an appropriate handler. In this
                 case, an instance of the named class is created and passed to the handler.</description>
             <bind-xml name="knowledgeSourceBackend" type="string" node="element"></bind-xml>
         </field>
         <field name="algorithmSourceBackend" type="other" required="false" handler="org.protempa.xml.AlgorithmSourceBackendBackendHandler">
-            <description>When marshaling this field, the class name of the curently configured back end will be obtains by the field handler consulting the
-                appropriate factory class. When unmarshalling, this field is ignored unelss the unmarshaller is configured with an appropriate handler. In this
+            <description>When marshaling this field, the class name of the currently configured back end will be obtains by the field handler consulting the
+                appropriate factory class. When unmarshalling, this field is ignored unless the unmarshaller is configured with an appropriate handler. In this
                 case, an instance of the named class is created and passed to the handler.</description>
             <bind-xml name="algorithmSourceBackend" type="string" node="element"></bind-xml>
         </field>
         <field name="termSourceBackend" type="other" required="false" handler="org.protempa.xml.TermSourceBackendHandler">
-            <description>When marshaling this field, the class name of the curently configured back end will be obtains by the field handler consulting the
-                appropriate factory class. When unmarshalling, this field is ignored unelss the unmarshaller is configured with an appropriate handler. In this
+            <description>When marshaling this field, the class name of the currently configured back end will be obtains by the field handler consulting the
+                appropriate factory class. When unmarshalling, this field is ignored unless the unmarshaller is configured with an appropriate handler. In this
                 case, an instance of the named class is created and passed to the handler.</description>
             <bind-xml name="termSourceBackend" type="string" node="element"></bind-xml>
         </field>
@@ -39,11 +39,33 @@
         <field name="propIds" type="string" collection="array" required="true" get-method="getPropIds" set-method="%3">
             <bind-xml name="propositionID" node="element" location="propositionIDs"/>
         </field>
-        <field name="filters" type="org.protempa.backend.dsb.filter.Filter" collection="array" required="false" handler="org.protempa.xml.FiltersHandler">
+        <field name="filters" type="org.protempa.backend.dsb.filter.Filter" collection="array" required="false" get-method="getFiltersArray" set-method="%2">
             <description>Filters are organized into collections by being chained to each other. Since Castor has no direct support for this kind of collection,
-                we will make it look to Castor like it is collected into an array by using a field handler.</description>
+                we access filters through methods that make them appear to be collected into an array.</description>
             <bind-xml auto-naming="deriveByClass" node="element" location="filters"/>
         </field>
+        <field name="termIds" type="org.protempa.query.And" collection="array" required="false" get-method="getTermIds" set-method="%4">
+            <bind-xml name="and" node="element" location="termIDs"/>
+        </field>
     </class>
-    <class name="org.protempa.backend.dsb.filter.Filter"></class>
+    <class name="org.protempa.query.And">
+        <map-to xml="and" element-definition="true"/>
+        <field name="anded" type="string" collection="arraylist" required="false">
+            <bind-xml name="termID" node="element"/>
+        </field>
+    </class>
+    <class name="org.protempa.backend.dsb.filter.PositionFilter">
+        <map-to xml="dateTimeFilter" element-definition="true"/>
+        <field name="propositionIds" type="string" collection="array" required="true" get-method="getPropositionIds" set-method="%1">
+            <bind-xml name="propositionID" node="element" location="propositionIDs"/>
+        </field>
+        <field name="start" type="long" required="true" get-method="getStart" set-method="%2">
+            <bind-xml name="start" node="attribute" />
+        </field>
+        <field name="startGranularity" type="string" required="true" get-method="getStartGranularityName" set-method="%3">
+            <bind-xml name="startGranularity" node="attribute"/>
+        </field>
+    </class>
+    <class name="org.protempa.backend.dsb.filter.PropertyValueFilter"></class>
+    <class name="org.protempa.backend.dsb.filter.ValueFilter"></class>
 </mapping>
