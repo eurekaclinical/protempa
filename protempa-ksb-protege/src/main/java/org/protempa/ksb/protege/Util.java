@@ -14,8 +14,10 @@ import java.util.logging.Level;
 import org.protempa.AbstractAbstractionDefinition;
 import org.protempa.AbstractPropositionDefinition;
 import org.protempa.HighLevelAbstractionDefinition;
+import org.protempa.IntervalSide;
 import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.Offsets;
 import org.protempa.PairDefinition;
 import org.protempa.PrimitiveParameterDefinition;
 import org.protempa.PropertyDefinition;
@@ -473,6 +475,64 @@ class Util {
         }
         return result;
     }
+    
+    static Offsets temporalOffsets(Instance abstractionInstance,
+            ProtegeKnowledgeSourceBackend backend,
+            Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache)
+            throws KnowledgeSourceReadException {
+        ConnectionManager cm = backend.getConnectionManager();
+        Instance temporalOffsetInstance =
+                (Instance) cm.getOwnSlotValue(abstractionInstance,
+                cm.getSlot("temporalOffsets"));
+        if (temporalOffsetInstance != null) {
+            Offsets temporalOffsets = new Offsets();
+            Instance startExtendedParamInstance =
+                    (Instance) cm.getOwnSlotValue(temporalOffsetInstance,
+                    cm.getSlot("startExtendedProposition"));
+            Instance finishExtendedParamInstance =
+                    (Instance) cm.getOwnSlotValue(temporalOffsetInstance,
+                    cm.getSlot("finishExtendedProposition"));
+            if (startExtendedParamInstance != null) {
+                temporalOffsets.setStartTemporalExtendedPropositionDefinition(
+                        extendedParameterCache.get(
+                        startExtendedParamInstance));
+                temporalOffsets.setStartAbstractParamValue(
+                        Util.extendedParameterValue(startExtendedParamInstance,
+                        cm));
+            }
+
+            if (finishExtendedParamInstance != null) {
+                temporalOffsets.setFinishTemporalExtendedPropositionDefinition(
+                        extendedParameterCache.get(
+                        finishExtendedParamInstance));
+                temporalOffsets.setFinishAbstractParamValue(
+                        Util.extendedParameterValue(finishExtendedParamInstance,
+                        cm));
+            }
+
+            temporalOffsets.setStartIntervalSide(IntervalSide.intervalSide(
+                    (String) cm.getOwnSlotValue(temporalOffsetInstance,
+                    cm.getSlot("startSide"))));
+            temporalOffsets.setFinishIntervalSide(IntervalSide.intervalSide(
+                    (String) cm.getOwnSlotValue(temporalOffsetInstance,
+                    cm.getSlot("finishSide"))));
+            Integer startOffset = Util.parseTimeConstraint(
+                    temporalOffsetInstance, "startOffset", cm);
+            temporalOffsets.setStartOffset(startOffset);
+
+            temporalOffsets.setStartOffsetUnits(Util.parseUnitsConstraint(
+                    temporalOffsetInstance, "startOffsetUnits", backend, cm));
+            Integer finishOffset = Util.parseTimeConstraint(
+                    temporalOffsetInstance, "finishOffset", cm);
+            temporalOffsets.setFinishOffset(finishOffset);
+            temporalOffsets.setFinishOffsetUnits(Util.parseUnitsConstraint(
+                    temporalOffsetInstance, "finishOffsetUnits", backend, cm));
+            return temporalOffsets;
+        } else {
+            return null;
+        }
+    }
+
 
     /**
      * Returns whether a Protege instance is a Parameter.

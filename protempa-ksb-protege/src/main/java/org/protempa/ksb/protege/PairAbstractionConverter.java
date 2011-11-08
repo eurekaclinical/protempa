@@ -8,6 +8,8 @@ import org.protempa.proposition.interval.Relation;
 
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
+import java.util.HashMap;
+import java.util.Map;
 import org.protempa.PropositionDefinition;
 
 public class PairAbstractionConverter implements PropositionConverter {
@@ -27,12 +29,15 @@ public class PairAbstractionConverter implements PropositionConverter {
         Util.setSolid(protegeProposition, result, cm);
         Util.setConcatenable(protegeProposition, result, cm);
         Util.setGap(protegeProposition, result, backend, cm);
+        Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache =
+                new HashMap<Instance, TemporalExtendedPropositionDefinition>();
         addComponentAbstractionDefinitions(protegeProposition, result,
-                backend, cm);
+                extendedParameterCache, backend);
         setRelation(protegeProposition, result, backend, cm);
         setRequireSecond(protegeProposition, result, cm);
         Util.setInverseIsAs(protegeProposition, result, cm);
-
+        result.setTemporalOffset(Util.temporalOffsets(protegeProposition, 
+                backend, extendedParameterCache));
         return result;
     }
 
@@ -82,8 +87,10 @@ public class PairAbstractionConverter implements PropositionConverter {
      */
     private static void addComponentAbstractionDefinitions(
             Instance pairAbstractionInstance, PairDefinition pd,
-            ProtegeKnowledgeSourceBackend backend, ConnectionManager cm)
+            Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache,
+            ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
+        ConnectionManager cm = backend.getConnectionManager();
         Instance relation = (Instance) cm.getOwnSlotValue(
                 pairAbstractionInstance, cm.getSlot("withRelation"));
         if (relation != null) {
@@ -96,9 +103,11 @@ public class PairAbstractionConverter implements PropositionConverter {
             TemporalExtendedPropositionDefinition lhsDefinition =
                     Util.instanceToTemporalExtendedPropositionDefinition(lhs, 
                     backend);
+            extendedParameterCache.put(lhs, lhsDefinition);
             TemporalExtendedPropositionDefinition rhsDefinition =
                     Util.instanceToTemporalExtendedPropositionDefinition(rhs, 
                     backend);
+            extendedParameterCache.put(rhs, rhsDefinition);
             pd.setLeftHandProposition(lhsDefinition);
             pd.setRightHandProposition(rhsDefinition);
         }

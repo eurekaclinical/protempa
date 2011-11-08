@@ -51,8 +51,8 @@ class HighLevelAbstractionConverter implements PropositionConverter {
         addRelationships(extendedParameterCache,
                 complexAbstractionInstance, result, backend);
         Util.setInverseIsAs(complexAbstractionInstance, result, cm);
-        setTemporalOffsets(complexAbstractionInstance, result, backend,
-                extendedParameterCache);
+        result.setTemporalOffset(Util.temporalOffsets(
+                complexAbstractionInstance, backend, extendedParameterCache));
         return result;
     }
 
@@ -61,62 +61,6 @@ class HighLevelAbstractionConverter implements PropositionConverter {
             Instance protegeProposition, KnowledgeBase protempaKnowledgeBase) {
         return protempaKnowledgeBase.getAbstractionDefinition(
                 protegeProposition.getName());
-    }
-
-    private static void setTemporalOffsets(Instance complexAbstractionInstance,
-            HighLevelAbstractionDefinition cad,
-            ProtegeKnowledgeSourceBackend backend,
-            Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache)
-            throws KnowledgeSourceReadException {
-        ConnectionManager cm = backend.getConnectionManager();
-        Instance temporalOffsetInstance =
-                (Instance) cm.getOwnSlotValue(complexAbstractionInstance,
-                cm.getSlot("temporalOffsets"));
-        if (temporalOffsetInstance != null) {
-            Offsets temporalOffsets = new Offsets();
-            Instance startExtendedParamInstance =
-                    (Instance) cm.getOwnSlotValue(temporalOffsetInstance,
-                    cm.getSlot("startExtendedProposition"));
-            Instance finishExtendedParamInstance =
-                    (Instance) cm.getOwnSlotValue(temporalOffsetInstance,
-                    cm.getSlot("finishExtendedProposition"));
-            if (startExtendedParamInstance != null) {
-                temporalOffsets.setStartTemporalExtendedPropositionDefinition(
-                        extendedParameterCache.get(
-                        startExtendedParamInstance));
-                temporalOffsets.setStartAbstractParamValue(
-                        Util.extendedParameterValue(startExtendedParamInstance,
-                        cm));
-            }
-
-            if (finishExtendedParamInstance != null) {
-                temporalOffsets.setFinishTemporalExtendedPropositionDefinition(
-                        extendedParameterCache.get(
-                        finishExtendedParamInstance));
-                temporalOffsets.setFinishAbstractParamValue(
-                        Util.extendedParameterValue(finishExtendedParamInstance,
-                        cm));
-            }
-
-            temporalOffsets.setStartIntervalSide(IntervalSide.intervalSide(
-                    (String) cm.getOwnSlotValue(temporalOffsetInstance,
-                    cm.getSlot("startSide"))));
-            temporalOffsets.setFinishIntervalSide(IntervalSide.intervalSide(
-                    (String) cm.getOwnSlotValue(temporalOffsetInstance,
-                    cm.getSlot("finishSide"))));
-            Integer startOffset = Util.parseTimeConstraint(
-                    temporalOffsetInstance, "startOffset", cm);
-            temporalOffsets.setStartOffset(startOffset);
-
-            temporalOffsets.setStartOffsetUnits(Util.parseUnitsConstraint(
-                    temporalOffsetInstance, "startOffsetUnits", backend, cm));
-            Integer finishOffset = Util.parseTimeConstraint(
-                    temporalOffsetInstance, "finishOffset", cm);
-            temporalOffsets.setFinishOffset(finishOffset);
-            temporalOffsets.setFinishOffsetUnits(Util.parseUnitsConstraint(
-                    temporalOffsetInstance, "finishOffsetUnits", backend, cm));
-            cad.setTemporalOffset(temporalOffsets);
-        }
     }
 
     /**

@@ -1230,6 +1230,16 @@ public class RelationTest extends TestCase {
                 null, null, null);
         assertTrue(relation.hasRelation(earlier, later));
     }
+    
+    public void testBefore() {
+        Relation rel = new Relation(null, null, null, null, 
+                                        null, null, null, null, 
+                                        1, AbsoluteTimeUnit.DAY, null, null,
+                                        null, null, null, null);
+        Interval i1 = intervalFactory.getInstance(1285992000000L, AbsoluteTimeGranularity.DAY, 1286424000000L, AbsoluteTimeGranularity.DAY);
+        Interval i2 = intervalFactory.getInstance(1285992000000L, AbsoluteTimeGranularity.DAY, 1286424000000L, AbsoluteTimeGranularity.DAY);
+        assertFalse(rel.hasRelation(i1, i2));
+    }
 
     private static boolean testBetweenDatesDay(String first, String second,
             int distanceBetween, Unit unitsBetween) throws ParseException {

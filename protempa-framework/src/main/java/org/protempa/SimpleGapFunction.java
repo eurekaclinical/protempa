@@ -7,6 +7,11 @@ import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.Unit;
 
 /**
+ * Implements a gap function with a simple max range: if one interval is before
+ * the second and the distance between them is less than or equal to the
+ * supplied maximum gap, then the function returns <code>true</code>, 
+ * otherwise it returns <code>false</code>.
+ * 
  * @author Andrew Post
  */
 public final class SimpleGapFunction extends GapFunction {
@@ -19,7 +24,11 @@ public final class SimpleGapFunction extends GapFunction {
     protected final PropertyChangeSupport changes;
 
     /**
-     * Instantiates an instance with the default maximum gap and units.
+     * Instantiates an instance with the default maximum gap and units. The
+     * default maximum gap value is <code>null</code>, which means any gap will
+     * cause the gap function to return <code>true</code>. The default units
+     * is <code>null</code>, the meaning of which is defined by the 
+     * {@link Granularity} of the data.
      */
     public SimpleGapFunction() {
         this(null, null);
@@ -28,8 +37,10 @@ public final class SimpleGapFunction extends GapFunction {
     /**
      * Initializes a gap function with a maximum gap and units.
      * 
-     * @param maximumGap an {@link Integer} >= 0 or <code>null</code>.
-     * @param maximumGapUnit a {@link Unit}.
+     * @param maximumGap the maximum gap {@link Integer}. Must be non-negative.
+     * If set to zero, the gap function always will return <code>false</code>.
+     * @param maximumGapUnit a {@link Unit}. A value of <code>null</code> is
+     * defined by the {@link Granularity} of the data.
      */
     public SimpleGapFunction(Integer maximumGap, Unit maximumGapUnit) {
         if (maximumGap != null && maximumGap.compareTo(ZERO) < 0) {
@@ -38,20 +49,34 @@ public final class SimpleGapFunction extends GapFunction {
         }
         this.maximumGapUnits = maximumGapUnit;
         this.maximumGap = maximumGap;
-        setRelation();
+        initRelation();
         this.changes = new PropertyChangeSupport(this);
 
     }
 
+    /**
+     * Executes the gap function. If the first interval (<code>lhs</code>) is 
+     * before the second (<code>rhs</code>) and the distance between them is
+     * less than or equal to the <code>maximumGap</code>, then
+     * this method returns <code>true</code>, otherwise it returns 
+     * <code>false</code>.
+     * 
+     * @param lhs the first {@link Interval}.
+     * @param rhs the second {@link Interval}.
+     * @return <code>true</code> or <code>false</code>.
+     */
     @Override
     public boolean execute(Interval lhs, Interval rhs) {
-        return this.relation.hasRelation(lhs, rhs);
+        if (this.relation == null) {
+            return false;
+        } else {
+            return this.relation.hasRelation(lhs, rhs);
+        }
     }
 
     /**
-     * Returns the minimum distance between instances of an
-     * <code>AbstractionDefinition</code> that are concatenable. The default
-     * value is <code>null</code>.
+     * Returns the gap function's maximum gap value. The default value is 
+     * <code>null</code>, which means any gap.
      *
      * @return an {@link Integer}.
      */
@@ -59,18 +84,22 @@ public final class SimpleGapFunction extends GapFunction {
         return maximumGap;
     }
 
+    /**
+     * Returns the units of the maximum gap value. The default value is
+     * <code>null</code>, which means milliseconds.
+     * 
+     * @return a {@link Unit}.
+     */
     public Unit getMaximumGapUnit() {
         return maximumGapUnits;
     }
 
     /**
-     * Sets the maximum distance between instances of this
-     * <code>AbstractionDefinition</code> that are concatenable. The default
-     * value is <code>null</code>.
+     * Sets the the gap function's maximum gap value. A value of 
+     * <code>null</code> means any gap.
      *
-     * @param maximumGap
-     *            The {@link Integer} to set. If <code>< 0</code>, the
-     *            <code>maximumGap</code> is set to <code>0</code>.
+     * @param maximumGap the maximum gap {@link Integer}. Must be non-negative.
+     * If set to zero, the gap function always will return <code>false</code>.
      */
     public void setMaximumGap(Integer maximumGap) {
         if (maximumGap != null && maximumGap.compareTo(ZERO) < 0) {
@@ -79,22 +108,37 @@ public final class SimpleGapFunction extends GapFunction {
         }
         Integer old = this.maximumGap;
         this.maximumGap = maximumGap;
-        setRelation();
+        initRelation();
         this.changes.firePropertyChange("maximumGap", old, this.maximumGap);
     }
 
+    /**
+     * Sets the maximum gap value's units. A value of <code>null</code> means
+     * milliseconds.
+     * 
+     * @param unit a {@link Unit} value.
+     */
     public void setMaximumGapUnit(Unit unit) {
         Unit old = this.maximumGapUnits;
         this.maximumGapUnits = unit;
-        setRelation();
+        initRelation();
         this.changes.firePropertyChange("maximumGapUnit", old,
                 this.maximumGapUnits);
     }
 
-    private void setRelation() {
-        this.relation = new Relation(null, null, null, null, null, null, null,
-                null, 0, this.maximumGapUnits, this.maximumGap,
-                this.maximumGapUnits, null, null, null, null);
+    private void initRelation() {
+        if (ZERO.equals(this.maximumGap)) {
+            this.relation = null;
+        } else {
+            this.relation = new Relation(null, null, 
+                    null, null, 
+                    null, null, 
+                    null, null, 
+                    0, this.maximumGapUnits, 
+                    this.maximumGap, this.maximumGapUnits, 
+                    null, null, 
+                    null, null);
+        }
     }
 
     @Override
