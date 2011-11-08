@@ -143,7 +143,7 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
                         : (comp < 0 ? ValueComparator.LESS_THAN
                         : ValueComparator.EQUAL_TO);
             case VALUELIST:
-                ValueList vl = (ValueList) o;
+                ValueList<?> vl = (ValueList<?>) o;
                 return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;
             default:
                 return ValueComparator.UNKNOWN;
