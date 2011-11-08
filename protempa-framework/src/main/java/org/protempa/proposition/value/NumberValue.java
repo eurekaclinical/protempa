@@ -200,7 +200,7 @@ public final class NumberValue implements NumericalValue,
                             : ValueComparator.UNKNOWN;
                 }
             case VALUELIST:
-                ValueList vl = (ValueList) o;
+                ValueList<?> vl = (ValueList<?>) o;
                 return equals(vl) ? ValueComparator.EQUAL_TO 
                         : ValueComparator.NOT_EQUAL_TO;
             default:
