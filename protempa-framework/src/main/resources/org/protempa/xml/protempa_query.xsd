@@ -1082,7 +1082,7 @@ A list of values
                         <xs:documentation>The start time for the interval that will be accepted by the described filter.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="startGranularity">
+                <xs:attribute name="startGranularity" type="granularityType">
                     <xs:annotation>
                         <xs:documentation>The granularity (year, month, ...) with which to interpret the start date/time.</xs:documentation>
                     </xs:annotation>
@@ -1092,7 +1092,7 @@ A list of values
                         <xs:documentation>The finish time for the interval that will be accepted by the described filter.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="finishGranularity">
+                <xs:attribute name="finishGranularity" type="granularityType">
                     <xs:annotation>
                         <xs:documentation>The granularity (year, month, ...) with which to interpret the finish date/time.</xs:documentation>
                     </xs:annotation>
