@@ -217,7 +217,7 @@ public final class InequalityNumberValue implements
                     }
                 }
             case VALUELIST:
-                ValueList vl = (ValueList) d2;
+                ValueList<?> vl = (ValueList<?>) d2;
                 return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;
             default:
                 return ValueComparator.UNKNOWN;
