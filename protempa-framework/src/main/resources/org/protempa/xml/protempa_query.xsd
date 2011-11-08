@@ -1061,6 +1061,8 @@ A list of values
             <xs:enumeration value="day"/>
             <xs:enumeration value="month"/>
             <xs:enumeration value="year"/>
+            <xs:enumeration value="relativeDay"/>
+            <xs:enumeration value="relativeHour"/>
         </xs:restriction>
     </xs:simpleType>
     <xs:simpleType name="filePathType">
