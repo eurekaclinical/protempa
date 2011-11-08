@@ -108,7 +108,7 @@ public final class OrdinalValue implements OrderedValue, Serializable {
                     return ValueComparator.LESS_THAN;
                 }
             case VALUELIST:
-                ValueList vl = (ValueList) o;
+                ValueList<?> vl = (ValueList<?>) o;
                 return equals(vl) ? ValueComparator.EQUAL_TO 
                         : ValueComparator.NOT_EQUAL_TO;
             default:
