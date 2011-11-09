@@ -12,7 +12,7 @@ public abstract class AbstractCommonsAlgorithmSourceBackend
         extends AbstractAlgorithmSourceBackend {
 
     @Override
-    public void initialize(BackendInstanceSpec backendInstanceSpec)
+    public void initialize(BackendInstanceSpec<?> backendInstanceSpec)
             throws AlgorithmSourceBackendInitializationException {
         CommonsBackend.initialize(this, backendInstanceSpec);
     }
