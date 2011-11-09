@@ -740,27 +740,7 @@ If the value of this attribute is true, then the count produced for te described
                     </xs:annotation>
                 </xs:element>
                 <xs:element name="propertyValueFilter" type="propertyValueFilterType"> </xs:element>
-                <xs:element name="propertyValuesFilter">
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:element ref="propositionIDs">
-                                <xs:annotation>
-                                    <xs:documentation xml:lang="en">The properties to which the filer is applied.</xs:documentation>
-                                </xs:annotation>
-                            </xs:element>
-                            <xs:group ref="valueListGroup"/>
-                        </xs:sequence>
-                        <xs:attribute ref="propertyName" use="required">
-                            <xs:annotation>
-                                <xs:documentation xml:lang="en">The name of the property whose value is to be compared.</xs:documentation>
-                            </xs:annotation>
-                        </xs:attribute>
-                        <xs:attribute use="required" ref="listComparitor">
-                            <xs:annotation>
-                                <xs:documentation>The comparison to make between the named property in the specified propositions and the given values.</xs:documentation>
-                            </xs:annotation>
-                        </xs:attribute>
-                    </xs:complexType>
+                <xs:element name="propertyValuesFilter" type="propertyValuesFilterType">
                 </xs:element>
             </xs:choice>
         </xs:complexType>
@@ -779,6 +759,41 @@ If the value of this attribute is true, then the count produced for te described
         <xs:annotation>
             <xs:documentation>The value of this element is a string that identifies a proposition in the ontology.</xs:documentation>
         </xs:annotation>
+    </xs:element>
+    <xs:element name="propertyConstraints">
+        <xs:annotation>
+            <xs:documentation>Contains one or more elements that use the values of proposition's properties to constrain which properties can be found through the enclosing deriviation or reference.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="propertyConstraint">
+                    <xs:annotation>
+                        <xs:documentation>This element describe a constraint on which propositions are found by the enclosing derivation or reference by comparing a property of the propositions to a single value.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:group ref="valueGroup"/>
+                        </xs:sequence>
+                        <xs:attribute ref="propertyName" use="required">
+                            <xs:annotation>
+                                <xs:documentation>The name of the property to be compared.</xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
+                        <xs:attribute ref="comparitor"/>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="propertyConstraintValueList">
+                    <xs:annotation>
+                        <xs:documentation>This element describe a constraint on which propositions are found by the enclosing derivation or reference by comparing a property of the propositions to a list of values.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:group ref="valueListGroup"/>
+                        <xs:attribute ref="propertyName"/>
+                        <xs:attribute ref="listComparitor"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
     </xs:element>
     <xs:element name="codeSpec" type="columnSpecType">
         <xs:annotation>
@@ -811,18 +826,37 @@ If the value of this attribute is true, then the count produced for te described
             </xs:sequence>
         </xs:complexType>
     </xs:element>
-    <xs:group name="valueGroup">
+    <xs:element name="booleanValue" type="xs:boolean">
         <xs:annotation>
-            <xs:documentation>Elements that represent specific types of literal values.</xs:documentation>
+            <xs:documentation>The value of this element is a literal boolean value.</xs:documentation>
         </xs:annotation>
-        <xs:choice>
-            <xs:element ref="booleanValue"/>
-            <xs:element ref="dateValue"/>
-            <xs:element ref="nominalValue"/>
-            <xs:element ref="numberValue"/>
-            <xs:element ref="incomparableNumberValue"/>
-        </xs:choice>
-    </xs:group>
+    </xs:element>
+    <xs:element name="dateValue" type="xs:date">
+        <xs:annotation>
+            <xs:documentation>The value of this element is a literal date value.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="nominalValue" type="nameType">
+        <xs:annotation>
+            <xs:documentation>The value of this element is a literal nominal value.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="numberValue" nillable="false" type="xs:decimal">
+        <xs:annotation>
+            <xs:documentation>The value fo this element is a literal number value.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="incomparableNumberValue">
+        <xs:annotation>
+            <xs:documentation>The value of this element represents a test result outside of the reportable range of the test and thus is reported prefixed with a greater than or less than sign.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:minLength value="1"/>
+                <xs:pattern value="[&lt;>][+-]?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
     <xs:attribute name="typeOfValue">
         <xs:annotation>
             <xs:documentation>Indicates the type of value associated with something. Possible values are
@@ -899,6 +933,68 @@ A list of values
     </xs:attribute>
     <xs:attribute name="columnNameOverride" type="nameType"/>
     <xs:attribute name="columnNamePrefixOverride" type="nameType"/>
+    <xs:attribute name="startSide" type="sideType"/>
+    <xs:attribute name="finishSide" type="sideType"/>
+    <xs:attribute name="listComparitor">
+        <xs:annotation>
+            <xs:documentation>The comparison to make between the named property in the specified propositions and a list of values.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:Name">
+                <xs:enumeration value="in"/>
+                <xs:enumeration value="notIn"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="unit">
+        <xs:simpleType>
+            <xs:restriction base="xs:token">
+                <xs:enumeration value="absoluteSecond"/>
+                <xs:enumeration value="absoluteMinute"/>
+                <xs:enumeration value="absoluteHour"/>
+                <xs:enumeration value="absoluteDay"/>
+                <xs:enumeration value="absoluteWeek"/>
+                <xs:enumeration value="absoluteMonth"/>
+                <xs:enumeration value="absoluteYear"/>
+                <xs:enumeration value="relativeDay"/>
+                <xs:enumeration value="relativeHour"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="comparitor">
+        <xs:annotation>
+            <xs:documentation>The comparison to make between the named property in the specified propositions and the given value.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:Name">
+                <xs:enumeration value="greater"/>
+                <xs:enumeration value="less"/>
+                <xs:enumeration value="equal"/>
+                <xs:enumeration value="notEqual"/>
+                <xs:enumeration value="greaterOrEqual"/>
+                <xs:enumeration value="lessOrEqual"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="propositionComparitor">
+        <xs:simpleType>
+            <xs:restriction base="xs:token">
+                <xs:enumeration value="AllPropositionIntervalComparator"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="finishGranularity" type="granularityType">
+        <xs:annotation>
+            <xs:documentation>The granularity (year, month, ...) with which to interpret the finish date/time.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="startGranularity" type="granularityType">
+        <xs:annotation>
+            <xs:documentation>The granularity (year, month, ...) with which to interpret the start.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute default="true" name="trueOutput" type="xs:string"/>
+    <xs:attribute default="false" name="falseOutput" type="xs:string"/>
     <xs:complexType name="columnSpecType">
         <xs:annotation>
             <xs:documentation>Describes a path from the main table (or a table specified in an enclosing element) to a column which may be in a different table.</xs:documentation>
@@ -1073,6 +1169,12 @@ A list of values
             <xs:minLength value="1"/>
         </xs:restriction>
     </xs:simpleType>
+    <xs:simpleType name="sideType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="START"/>
+            <xs:enumeration value="FINISH"/>
+        </xs:restriction>
+    </xs:simpleType>
     <xs:complexType name="dateTimeFilterType">
         <xs:annotation>
             <xs:documentation>Filter for a date/time range</xs:documentation>
@@ -1084,23 +1186,38 @@ A list of values
                         <xs:documentation>The start time for the interval that will be accepted by the described filter.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="startGranularity" type="granularityType">
-                    <xs:annotation>
-                        <xs:documentation>The granularity (year, month, ...) with which to interpret the start date/time.</xs:documentation>
-                    </xs:annotation>
-                </xs:attribute>
+                <xs:attribute ref="startGranularity"/>
                 <xs:attribute name="finish" type="xs:dateTime">
                     <xs:annotation>
                         <xs:documentation>The finish time for the interval that will be accepted by the described filter.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="finishGranularity" type="granularityType">
+                <xs:attribute ref="finishGranularity"/>
+                <xs:attribute ref="startSide"/>
+                <xs:attribute ref="finishSide"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="positionFilterType">
+        <xs:annotation>
+            <xs:documentation>A filter for a position range.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="filterType">
+                <xs:attribute name="start" type="xs:long">
                     <xs:annotation>
-                        <xs:documentation>The granularity (year, month, ...) with which to interpret the finish date/time.</xs:documentation>
+                        <xs:documentation>The start of the interval that will be accepted by the described filter.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="startSide" type="sideType"/>
-                <xs:attribute name="finishSide" type="sideType"/>
+                <xs:attribute ref="startGranularity"/>
+                <xs:attribute name="finish" type="xs:long">
+                    <xs:annotation>
+                        <xs:documentation>The finish of the interval that will be accepted by the described filter.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute ref="finishGranularity"/>
+                <xs:attribute ref="startSide"/>
+                <xs:attribute ref="finishSide"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -1123,137 +1240,6 @@ A list of values
         <xs:attribute name="length" type="xs:int"/>
         <xs:attribute ref="unit"/>
     </xs:complexType>
-    <xs:simpleType name="sideType">
-        <xs:restriction base="xs:token">
-            <xs:enumeration value="START"/>
-            <xs:enumeration value="FINISH"/>
-        </xs:restriction>
-    </xs:simpleType>
-    <xs:attribute default="true" name="trueOutput" type="xs:string"/>
-    <xs:attribute default="false" name="falseOutput" type="xs:string"/>
-    <xs:element name="booleanValue" type="xs:boolean">
-        <xs:annotation>
-            <xs:documentation>The value of this element is a literal boolean value.</xs:documentation>
-        </xs:annotation>
-    </xs:element>
-    <xs:element name="dateValue" type="xs:date">
-        <xs:annotation>
-            <xs:documentation>The value of this element is a literal date value.</xs:documentation>
-        </xs:annotation>
-    </xs:element>
-    <xs:element name="nominalValue" type="nameType">
-        <xs:annotation>
-            <xs:documentation>The value of this element is a literal nominal value.</xs:documentation>
-        </xs:annotation>
-    </xs:element>
-    <xs:element name="numberValue" nillable="false" type="xs:decimal">
-        <xs:annotation>
-            <xs:documentation>The value fo this element is a literal number value.</xs:documentation>
-        </xs:annotation>
-    </xs:element>
-    <xs:element name="incomparableNumberValue">
-        <xs:annotation>
-            <xs:documentation>The value of this element represents a test result outside of the reportable range of the test and thus is reported prefixed with a greater than or less than sign.</xs:documentation>
-        </xs:annotation>
-        <xs:simpleType>
-            <xs:restriction base="xs:string">
-                <xs:minLength value="1"/>
-                <xs:pattern value="[&lt;>][+-]?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))"/>
-            </xs:restriction>
-        </xs:simpleType>
-    </xs:element>
-    <xs:attribute name="comparitor">
-        <xs:annotation>
-            <xs:documentation>The comparison to make between the named property in the specified propositions and the given value.</xs:documentation>
-        </xs:annotation>
-        <xs:simpleType>
-            <xs:restriction base="xs:Name">
-                <xs:enumeration value="greater"/>
-                <xs:enumeration value="less"/>
-                <xs:enumeration value="equal"/>
-                <xs:enumeration value="notEqual"/>
-                <xs:enumeration value="greaterOrEqual"/>
-                <xs:enumeration value="lessOrEqual"/>
-            </xs:restriction>
-        </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="listComparitor">
-        <xs:annotation>
-            <xs:documentation>The comparison to make between the named property in the specified propositions and a list of values.</xs:documentation>
-        </xs:annotation>
-        <xs:simpleType>
-            <xs:restriction base="xs:Name">
-                <xs:enumeration value="in"/>
-                <xs:enumeration value="notIn"/>
-            </xs:restriction>
-        </xs:simpleType>
-    </xs:attribute>
-    <xs:group name="valueListGroup">
-        <xs:choice>
-            <xs:element maxOccurs="unbounded" minOccurs="1" ref="booleanValue"/>
-            <xs:element maxOccurs="unbounded" minOccurs="1" ref="dateValue"/>
-            <xs:element maxOccurs="unbounded" minOccurs="1" ref="nominalValue"/>
-            <xs:element maxOccurs="unbounded" ref="numberValue"/>
-            <xs:element maxOccurs="unbounded" ref="incomparableNumberValue"/>
-        </xs:choice>
-    </xs:group>
-    <xs:attribute name="unit">
-        <xs:simpleType>
-            <xs:restriction base="xs:token">
-                <xs:enumeration value="absoluteSecond"/>
-                <xs:enumeration value="absoluteMinute"/>
-                <xs:enumeration value="absoluteHour"/>
-                <xs:enumeration value="absoluteDay"/>
-                <xs:enumeration value="absoluteWeek"/>
-                <xs:enumeration value="absoluteMonth"/>
-                <xs:enumeration value="absoluteYear"/>
-                <xs:enumeration value="relativeDay"/>
-                <xs:enumeration value="relativeHour"/>
-            </xs:restriction>
-        </xs:simpleType>
-    </xs:attribute>
-    <xs:element name="propertyConstraints">
-        <xs:annotation>
-            <xs:documentation>Contains one or more elements that use the values of proposition's properties to constrain which properties can be found through the enclosing deriviation or reference.</xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element name="propertyConstraint">
-                    <xs:annotation>
-                        <xs:documentation>This element describe a constraint on which propositions are found by the enclosing derivation or reference by comparing a property of the propositions to a single value.</xs:documentation>
-                    </xs:annotation>
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:group ref="valueGroup"/>
-                        </xs:sequence>
-                        <xs:attribute ref="propertyName" use="required">
-                            <xs:annotation>
-                                <xs:documentation>The name of the property to be compared.</xs:documentation>
-                            </xs:annotation>
-                        </xs:attribute>
-                        <xs:attribute ref="comparitor"/>
-                    </xs:complexType>
-                </xs:element>
-                <xs:element name="propertyConstraintValueList">
-                    <xs:annotation>
-                        <xs:documentation>This element describe a constraint on which propositions are found by the enclosing derivation or reference by comparing a property of the propositions to a list of values.</xs:documentation>
-                    </xs:annotation>
-                    <xs:complexType>
-                        <xs:group ref="valueListGroup"/>
-                        <xs:attribute ref="propertyName"/>
-                        <xs:attribute ref="listComparitor"/>
-                    </xs:complexType>
-                </xs:element>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
-    <xs:attribute name="propositionComparitor">
-        <xs:simpleType>
-            <xs:restriction base="xs:token">
-                <xs:enumeration value="AllPropositionIntervalComparator"/>
-            </xs:restriction>
-        </xs:simpleType>
-    </xs:attribute>
     <xs:complexType name="propertyValueFilterType">
         <xs:complexContent>
             <xs:extension base="filterType">
@@ -1269,4 +1255,44 @@ A list of values
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
+    <xs:complexType name="propertyValuesFilterType">
+        <xs:complexContent>
+            <xs:extension base="filterType">
+                <xs:sequence>
+                    <xs:group ref="valueListGroup"/>
+                </xs:sequence>
+                <xs:attribute ref="propertyName" use="required">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">The name of the property whose value is to be compared.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute use="required" ref="listComparitor">
+                    <xs:annotation>
+                        <xs:documentation>The comparison to make between the named property in the specified propositions and the given values.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:group name="valueListGroup">
+        <xs:choice>
+            <xs:element maxOccurs="unbounded" minOccurs="1" ref="booleanValue"/>
+            <xs:element maxOccurs="unbounded" minOccurs="1" ref="dateValue"/>
+            <xs:element maxOccurs="unbounded" minOccurs="1" ref="nominalValue"/>
+            <xs:element maxOccurs="unbounded" ref="numberValue"/>
+            <xs:element maxOccurs="unbounded" ref="incomparableNumberValue"/>
+        </xs:choice>
+    </xs:group>
+    <xs:group name="valueGroup">
+        <xs:annotation>
+            <xs:documentation>Elements that represent specific types of literal values.</xs:documentation>
+        </xs:annotation>
+        <xs:choice>
+            <xs:element ref="booleanValue"/>
+            <xs:element ref="dateValue"/>
+            <xs:element ref="nominalValue"/>
+            <xs:element ref="numberValue"/>
+            <xs:element ref="incomparableNumberValue"/>
+        </xs:choice>
+    </xs:group>
 </xs:schema>
