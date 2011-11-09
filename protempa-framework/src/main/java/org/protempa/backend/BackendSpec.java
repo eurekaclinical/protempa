@@ -7,7 +7,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  *
  * @author Andrew Post
  */
-public final class BackendSpec<B extends Backend<?, ?>> {
+public final class BackendSpec<B extends Backend> {
     private BackendProvider backendProvider;
     private String id;
     private String displayName;
