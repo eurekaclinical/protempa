@@ -92,7 +92,7 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
         } else {
             logger.log(Level.WARNING, 
                     "The first proposition is not temporal: ", 
-                    first.getId());
+                    tmpFirst.getId());
         }
         Proposition tmpSecond = itr.next();
         if (tmpSecond instanceof TemporalProposition) {
@@ -100,7 +100,7 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
         } else {
             logger.log(Level.WARNING, 
                     "The second proposition is not temporal: ", 
-                    second.getId());
+                    tmpSecond.getId());
         }
         
         String distance = PropositionUtil
