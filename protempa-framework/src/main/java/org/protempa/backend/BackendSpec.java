@@ -7,7 +7,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  *
  * @author Andrew Post
  */
-public final class BackendSpec<B extends Backend> {
+public final class BackendSpec<B extends Backend<?, ?>> {
     private BackendProvider backendProvider;
     private String id;
     private String displayName;
@@ -51,7 +51,8 @@ public final class BackendSpec<B extends Backend> {
          return new BackendInstanceSpec<B>(this, propertySpecs);
     }
 
-    B newBackendInstance() throws BackendNewInstanceException {
+    @SuppressWarnings("unchecked")
+	B newBackendInstance() throws BackendNewInstanceException {
         return (B) this.backendProvider.newInstance(id);
     }
 
