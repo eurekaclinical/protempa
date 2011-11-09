@@ -4,6 +4,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.value.Granularity;
+import org.protempa.proposition.value.XMLGranularityFactory;
 
 /**
  * A filter for a position (e.g., date/time) range.
@@ -17,7 +18,17 @@ public class PositionFilter extends AbstractFilter {
      * bounds. For timestamped propositions, these are ignored.
      */
     public static enum Side {
-        START, FINISH
+        START("start"), FINISH("finish");
+        
+        private String xmlName;
+        
+        private Side(String xmlName) {
+        	this.xmlName = xmlName;
+        }
+        
+        public String getXmlName() {
+        	return xmlName;
+        }
     }
 
     private static final IntervalFactory intervalFactory =
@@ -80,6 +91,61 @@ public class PositionFilter extends AbstractFilter {
         this.finishSide = finishSide;
     }
 
+	/**
+	 * Initializes a filter with a position range.
+	 * <p>
+	 * This constructor is intended to be used by Castor when converting from
+	 * XML.
+	 * 
+	 * @param propIds
+	 *            a {@link String[]} of proposition ids on which to filter.
+	 * @param start
+	 *            the start position in Protempa's {@link Long} representation.
+	 * @param startGran
+	 *            the name of the {@link Granularity} with which to interpret
+	 *            the start position.
+	 * @param finish
+	 *            the finish position in Protempa's {@link Long} representation.
+	 * @param finishGran
+	 *            the name of the {@link Granularity} with which to interpret
+	 *            the finish position.
+	 * @param startSide
+	 *            the name of the {@link Side} of the proposition to which to
+	 *            apply the start bound. The default is {@link Side.START} (if
+	 *            <code>null</code> is specified). Ignored for timestamped
+	 *            propositions.
+	 * @param finishSide
+	 *            the name of the {@link Side} of the proposition to which to
+	 *            apply the finish bound. The default is {@link Side.FINISH} (if
+	 *            <code>null</code> is specified). Ignored for timestamped
+	 *            propositions.
+	 */
+    public PositionFilter(String[] propIds, Long start,
+            String startGran, Long finish, String finishGran,
+            String startSide, String finishSide) {
+        this(propIds, start, nameToGranularity(startGran), finish, nameToGranularity(finishGran), nameToSide(startSide), nameToSide(finishSide));
+    }
+    
+    private static Side nameToSide(String name) {
+    	if (Side.START.getXmlName().equals(name)) {
+    		return Side.START;
+    	}
+    	if (Side.FINISH.getXmlName().equals(name)) {
+    		return Side.FINISH;
+    	} else {
+    		return null;
+    	}
+    }
+    
+    private static Granularity nameToGranularity(String name) {
+    	Granularity g = XMLGranularityFactory.xmlToGranularity(name);
+    	if (g == null) {
+    		String msg = "Value passed to constructor of " + PositionFilter.class + " is not a valid name for a granularity";
+    		throw new IllegalArgumentException(msg);
+    	}
+    	return g;
+    }
+
     /**
      * Returns the {@link Granularity} with which to interpret the
      * start position.
@@ -91,6 +157,16 @@ public class PositionFilter extends AbstractFilter {
     }
 
     /**
+     * Returns the XML name of the {@link Granularity} with which to interpret the
+     * start position.
+     * 
+     * @return the startGranularity a {@link Granularity}.
+     */
+    public String getStartGranularityXMLName() {
+        return XMLGranularityFactory.granularityToXml(this.ival.getStartGranularity());
+    }
+
+    /**
      * Returns the {@link Granularity} with which to interpret the
      * finish position.
      *
@@ -98,6 +174,16 @@ public class PositionFilter extends AbstractFilter {
      */
     public Granularity getFinishGranularity() {
         return this.ival.getFinishGranularity();
+    }
+
+    /**
+     * Returns the name of the {@link Granularity} with which to interpret the
+     * finish position.
+     *
+     * @return the finishGranularity a {@link Granularity}.
+     */
+    public String getFinishGranularityXMLName() {
+        return XMLGranularityFactory.granularityToXml(this.ival.getFinishGranularity());
     }
 
     /**
@@ -168,12 +254,30 @@ public class PositionFilter extends AbstractFilter {
     }
 
     /**
+     * Returns the name of the side of the proposition to which to apply the lower bound.
+     *
+     * @return a {@link Side}.
+     */
+    public String getStartSideXMLName() {
+        return this.startSide.getXmlName();
+    }
+
+    /**
      * Returns the side of the proposition to which to apply the upper bound.
      *
      * @return a {@link Side}.
      */
     public Side getFinishSide() {
         return this.finishSide;
+    }
+
+    /**
+     * Returns the name of the side of the proposition to which to apply the upper bound.
+     *
+     * @return a {@link Side}.
+     */
+    public String getFinishSideXMLName() {
+        return this.finishSide.getXmlName();
     }
 
     @Override
