@@ -9,7 +9,7 @@ import org.arp.javautil.arrays.Arrays;
  * @author Andrew Post
  */
 public final class BackendPropertySpec {
-    static final Class[] ALLOWED_CLASSES = {
+    static final Class<?>[] ALLOWED_CLASSES = {
         String.class,
         Boolean.class,
         Integer.class,
@@ -28,12 +28,12 @@ public final class BackendPropertySpec {
     private final String name;
     private final String displayName;
     private final String description;
-    private final Class type;
+    private final Class<?> type;
     private final BackendPropertyValidator validator;
 
     public BackendPropertySpec(String name,
             String displayName,
-            String description, Class type,
+            String description, Class<?> type,
             BackendPropertyValidator validator) {
         if (name == null)
             throw new IllegalArgumentException("name cannot be null");
