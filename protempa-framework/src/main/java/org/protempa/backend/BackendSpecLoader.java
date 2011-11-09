@@ -8,7 +8,7 @@ import java.util.List;
  * Loads 
  * @author Andrew Post
  */
-public final class BackendSpecLoader<B extends Backend<?, ?>>
+public final class BackendSpecLoader<B extends Backend>
         implements Iterable<BackendSpec<B>> {
     private final List<BackendSpec<B>> backendSpecs;
 
