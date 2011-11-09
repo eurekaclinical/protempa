@@ -55,15 +55,51 @@
         </field>
     </class>
     <class name="org.protempa.backend.dsb.filter.PositionFilter">
-        <map-to xml="dateTimeFilter" element-definition="true"/>
+        <map-to xml="positionFilter" element-definition="true"/>
         <field name="propositionIds" type="string" collection="array" required="true" get-method="getPropositionIds" set-method="%1">
             <bind-xml name="propositionID" node="element" location="propositionIDs"/>
         </field>
         <field name="start" type="long" required="true" get-method="getStart" set-method="%2">
             <bind-xml name="start" node="attribute" />
         </field>
-        <field name="startGranularity" type="string" required="true" get-method="getStartGranularityName" set-method="%3">
+        <field name="startGranularity" type="string" required="true" get-method="getStartGranularityXMLName" set-method="%3">
             <bind-xml name="startGranularity" node="attribute"/>
+        </field>
+        <field name="finish" type="long" required="true" get-method="getFinish" set-method="%4">
+            <bind-xml name="finish" node="attribute" />
+        </field>
+        <field name="finishGranularity" type="string" required="true" get-method="getFinishGranularityXMLName" set-method="%5">
+            <bind-xml name="finishGranularity" node="attribute"/>
+        </field>
+        <field name="startSide" type="string" required="false" get-method="getStartSide" set-method="%6">
+            <bind-xml name="startSide" node="attribute"/>
+        </field>
+        <field name="finishSide" type="string" required="false" get-method="getFinishSide" set-method="%7">
+            <bind-xml name="finishSide" node="attribute"/>
+        </field>
+    </class>
+    <class name="org.protempa.backend.dsb.filter.DateTimeFilter">
+        <map-to xml="dateTimeFilter" element-definition="true"/>
+        <field name="propositionIds" type="string" collection="array" required="true" get-method="getPropositionIds" set-method="%1">
+            <bind-xml name="propositionID" node="element" location="propositionIDs"/>
+        </field>
+        <field name="start" type="date" required="true" get-method="getStart" set-method="%2">
+            <bind-xml name="start" node="attribute" />
+        </field>
+        <field name="startGranularity" type="string" required="true" get-method="getStartGranularityXMLName" set-method="%3">
+            <bind-xml name="startGranularity" node="attribute"/>
+        </field>
+        <field name="finish" type="date" required="true" get-method="getFinish" set-method="%4">
+            <bind-xml name="finish" node="attribute" />
+        </field>
+        <field name="finishGranularity" type="string" required="true" get-method="getFinishGranularityXMLName" set-method="%5">
+            <bind-xml name="finishGranularity" node="attribute"/>
+        </field>
+        <field name="startSide" type="string" required="false" get-method="getStartSide" set-method="%6">
+            <bind-xml name="startSide" node="attribute"/>
+        </field>
+        <field name="finishSide" type="string" required="false" get-method="getFinishSide" set-method="%7">
+            <bind-xml name="finishSide" node="attribute"/>
         </field>
     </class>
     <class name="org.protempa.backend.dsb.filter.PropertyValueFilter"></class>
