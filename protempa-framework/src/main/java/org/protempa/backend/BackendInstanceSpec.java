@@ -11,7 +11,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  *
  * @author Andrew Post
  */
-public final class BackendInstanceSpec<B extends Backend<?, ?>> {
+public final class BackendInstanceSpec<B extends Backend> {
     private final BackendSpec<B> backendSpec;
     private final Map<String, Object> properties;
     private final List<BackendPropertySpec> propertySpecs;
@@ -39,7 +39,7 @@ public final class BackendInstanceSpec<B extends Backend<?, ?>> {
             throws InvalidPropertyNameException, InvalidPropertyValueException {
         for (BackendPropertySpec spec : this.propertySpecs) {
             if (spec.getName().equals(name)) {
-                Class<?> cls = spec.getType();
+                Class cls = spec.getType();
                 if (String.class.equals(cls))
                     setProperty(name, valueStr);
                 else if (Double.class.equals(cls))
