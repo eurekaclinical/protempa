@@ -37,7 +37,7 @@ import javax.xml.parsers.ParserConfigurationException;
  * @author mgrand
  */
 class DocumentBuilderManager {
-	private static Logger myLogger = Logger.getLogger(QueryToXMLConverter.class.getName());
+	private static Logger myLogger = Logger.getLogger(XMLConfiguration.class.getName());
 
 	private static DocumentBuilder documentBuilder = null;
 
