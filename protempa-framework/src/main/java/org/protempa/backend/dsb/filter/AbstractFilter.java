@@ -97,11 +97,13 @@ public abstract class AbstractFilter implements Filter {
 	 *            zero.
 	 * @return The first filter in the chain which will be == to filterArray[0]
 	 */
-	public static Filter filterArrayToChain(AbstractFilter[] filterArray) {
+	public static Filter filterArrayToChain(Filter[] filterArray) {
 		for (int i = 0; i < (filterArray.length - 1); i++) {
-			filterArray[i].setAnd(filterArray[i + 1]);
+			AbstractFilter thisFilter = (AbstractFilter)filterArray[i];
+			thisFilter.setAnd(filterArray[i + 1]);
 		}
-		filterArray[filterArray.length - 1].setAnd(null);
+		AbstractFilter lastFilter = (AbstractFilter)filterArray[filterArray.length - 1];
+		lastFilter.setAnd(null);
 		return filterArray[0];
 	}
 
