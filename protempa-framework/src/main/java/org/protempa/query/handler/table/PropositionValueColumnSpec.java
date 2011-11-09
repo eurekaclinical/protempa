@@ -42,7 +42,6 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
 
         MAX, MIN, FIRST, LAST, SUM
     }
-    
     private final Link[] links;
     private final String columnNamePrefixOverride;
     private Type type;
@@ -82,22 +81,31 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                 proposition, forwardDerivations, backwardDerivations,
                 references, knowledgeSource);
         Value value = null;
-        BigDecimal sumTotal = BigDecimal.ZERO;
-        
+        BigDecimal sumTotal = null;
+
         /*
          * Sort if needed.
          */
-        switch (type) {
-            case FIRST:
-                propositions = new ArrayList<Proposition>(propositions);
-                Collections.sort(propositions, comp);
-                break;
-            case LAST:
-                propositions = new ArrayList<Proposition>(propositions);
-                Collections.sort(propositions, reverseComp);
-                break;
+        if (propositions.size() > 1) {
+            switch (this.type) {
+                case FIRST:
+                    propositions = new ArrayList<Proposition>(propositions);
+                    Collections.sort(propositions, comp);
+                    break;
+                case LAST:
+                    propositions = new ArrayList<Proposition>(propositions);
+                    Collections.sort(propositions, reverseComp);
+                    break;
+                case SUM:
+                case MIN:
+                case MAX:
+                    break;
+                default:
+                    throw new AssertionError("Invalid aggregation type "
+                        + this.type);
+            }
         }
-        
+
         LOOP_PROPOSITIONS:
         for (Proposition prop : propositions) {
             if (prop instanceof TemporalParameter) {
@@ -107,7 +115,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                     /*
                      * Check type preconditions.
                      */
-                    switch (type) {
+                    switch (this.type) {
                         case MAX:
                         case MIN:
                             if (!ValueType.NUMERICALVALUE.isInstance(val)) {
@@ -119,30 +127,41 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                                 continue LOOP_PROPOSITIONS;
                             }
                             break;
+                        case FIRST:
+                        case LAST:
+                            break;
+                        default:
+                            throw new AssertionError(
+                                        "Invalid aggregation type "
+                                        + this.type);
                     }
 
                     /*
                      * Process first value.
                      */
-                    if (value == null) {
-                        switch (type) {
+                    if (value == null && sumTotal == null) {
+                        switch (this.type) {
                             case FIRST:
-                                value = val;
-                                break LOOP_PROPOSITIONS;
                             case LAST:
                                 value = val;
                                 break LOOP_PROPOSITIONS;
                             case SUM:
-                                value = val;
                                 sumTotal = ((NumberValue) val).getBigDecimal();
                                 break;
+                            case MAX:
+                            case MIN:
+                                value = val;
+                                break;
+                            default:
+                                throw new AssertionError(
+                                        "Invalid aggregation type "
+                                        + this.type);
                         }
-                        
                     /*
                      * Process subsequent values.
                      */
                     } else {
-                        switch (type) {
+                        switch (this.type) {
                             case MAX:
                                 ValueComparator c = val.compare(value);
                                 if (c.test(ValueComparator.UNKNOWN)) {
@@ -166,7 +185,6 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                             case SUM:
                                 try {
                                     sumTotal = sumTotal.add(((NumberValue) val).getBigDecimal());
-                                    value = NumberValue.getInstance(sumTotal);
                                 } catch (NumberFormatException ex) {
                                     throw new IllegalStateException(
                                             "only number values allowed for SUM aggregation type; got "
@@ -176,17 +194,26 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                                             + " instead");
                                 }
                                 break;
+                            case FIRST:
+                            case LAST:
+                                break;
                             default:
-                                throw new AssertionError("invalid aggregation type: " + type);
-
+                                throw new AssertionError(
+                                        "Invalid aggregation type "
+                                        + this.type);
                         }
                     }
                 }
             } else {
-                throw new IllegalStateException("only temporal parameters allowed");
+                throw new IllegalStateException("Only temporal parameters allowed");
             }
         }
-        if (value != null) {
+
+        if (sumTotal != null) {
+            return new String[]{
+                        NumberValue.getInstance(sumTotal).getFormatted()
+                    };
+        } else if (value != null) {
             return new String[]{value.getFormatted()};
         } else {
             return new String[]{null};
