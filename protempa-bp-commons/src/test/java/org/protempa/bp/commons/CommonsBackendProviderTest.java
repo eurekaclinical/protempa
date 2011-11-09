@@ -74,7 +74,7 @@ public class CommonsBackendProviderTest {
     public void testEnumerateDataSourceBackends() 
             throws BackendProviderSpecLoaderException {
         Set<String> backendIds = new HashSet<String>();
-        for (BackendSpec spec :
+        for (BackendSpec<?> spec :
             backendProvider.getDataSourceBackendSpecLoader()) {
             backendIds.add(spec.getId());
         }
@@ -89,7 +89,7 @@ public class CommonsBackendProviderTest {
     @Test
     public void testGetDataSourceBackendLoader() 
             throws BackendProviderSpecLoaderException {
-        BackendSpecLoader result = 
+        BackendSpecLoader<?> result = 
                 backendProvider.getDataSourceBackendSpecLoader();
         assertNotNull(result);
     }
@@ -98,7 +98,7 @@ public class CommonsBackendProviderTest {
     public void testGetDataSourceBackendSpec()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader result =
+        BackendSpecLoader<?> result =
                 backendProvider.getDataSourceBackendSpecLoader();
         result.loadSpec(MockDataSourceBackend.class.getName());
     }
@@ -107,9 +107,9 @@ public class CommonsBackendProviderTest {
     public void testGetDataSourceBackendInfoDisplayName()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader loader =
+        BackendSpecLoader<?> loader =
                 backendProvider.getDataSourceBackendSpecLoader();
-        BackendSpec spec = 
+        BackendSpec<?> spec = 
                 loader.loadSpec(MockDataSourceBackend.class.getName());
         assertEquals("Mock Data Source Backend", spec.getDisplayName());
     }
@@ -118,9 +118,9 @@ public class CommonsBackendProviderTest {
     public void testGetDataSourceBackendInfoId()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader loader =
+        BackendSpecLoader<?> loader =
                 backendProvider.getDataSourceBackendSpecLoader();
-        BackendSpec spec = 
+        BackendSpec<?> spec = 
                 loader.loadSpec(MockDataSourceBackend.class.getName());
         assertEquals(MockDataSourceBackend.class.getName(), spec.getId());
     }
@@ -129,11 +129,11 @@ public class CommonsBackendProviderTest {
     public void testGetDataSourceBackendPropertySpecs()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader loader =
+        BackendSpecLoader<?> loader =
                 backendProvider.getDataSourceBackendSpecLoader();
-        BackendSpec spec = 
+        BackendSpec<?> spec = 
                 loader.loadSpec(MockDataSourceBackend.class.getName());
-        BackendInstanceSpec iSpec = spec.newBackendInstanceSpec();
+        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
         List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
         assertEquals(1, bps.size());
     }
@@ -144,7 +144,7 @@ public class CommonsBackendProviderTest {
     @Test
     public void testGetKnowledgeSourceBackendLoader() 
             throws BackendProviderSpecLoaderException {
-        BackendSpecLoader result = 
+        BackendSpecLoader<?> result = 
                 backendProvider.getKnowledgeSourceBackendSpecLoader();
         assertNotNull(result);
     }
@@ -153,11 +153,11 @@ public class CommonsBackendProviderTest {
     public void testEnumerateKnowledgeSourceBackends() 
             throws BackendProviderSpecLoaderException {
         Set<String> backendIds = new HashSet<String>();
-        for (BackendSpec spec :
+        for (BackendSpec<?> spec :
             backendProvider.getKnowledgeSourceBackendSpecLoader()) {
             backendIds.add(spec.getId());
         }
-        assertEquals(new HashSet(Arrays.asList(new String[] {
+        assertEquals(new HashSet<String>(Arrays.asList(new String[] {
                 MockKnowledgeSourceBackend.class.getName(),
                 PropertiesFileKnowledgeSourceBackend.class.getName()})),
                 backendIds);
@@ -167,7 +167,7 @@ public class CommonsBackendProviderTest {
     public void testGetKnowledgeSourceBackendSpec()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader result =
+        BackendSpecLoader<?> result =
                 backendProvider.getKnowledgeSourceBackendSpecLoader();
         result.loadSpec(MockKnowledgeSourceBackend.class.getName());
     }
@@ -176,9 +176,9 @@ public class CommonsBackendProviderTest {
     public void testGetKnowledgeSourceBackendInfoDisplayName()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader loader =
+        BackendSpecLoader<?> loader =
                 backendProvider.getKnowledgeSourceBackendSpecLoader();
-        BackendSpec spec = 
+        BackendSpec<?> spec = 
                 loader.loadSpec(MockKnowledgeSourceBackend.class.getName());
         assertEquals("Mock Knowledge Source Backend", spec.getDisplayName());
     }
@@ -187,9 +187,9 @@ public class CommonsBackendProviderTest {
     public void testGetKnowledgeSourceBackendInfoId()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader loader =
+        BackendSpecLoader<?> loader =
                 backendProvider.getKnowledgeSourceBackendSpecLoader();
-        BackendSpec spec = 
+        BackendSpec<?> spec = 
                 loader.loadSpec(MockKnowledgeSourceBackend.class.getName());
         assertEquals(MockKnowledgeSourceBackend.class.getName(), spec.getId());
     }
@@ -198,11 +198,11 @@ public class CommonsBackendProviderTest {
     public void testGetKnowledgeSourceBackendPropertySpecs()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader loader =
+        BackendSpecLoader<?> loader =
                 backendProvider.getKnowledgeSourceBackendSpecLoader();
-        BackendSpec spec = 
+        BackendSpec<?> spec = 
                 loader.loadSpec(MockKnowledgeSourceBackend.class.getName());
-        BackendInstanceSpec iSpec = spec.newBackendInstanceSpec();
+        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
         List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
         assertEquals(1, bps.size());
     }
@@ -211,11 +211,11 @@ public class CommonsBackendProviderTest {
     public void testEnumerateAlgorithmSourceBackends() 
             throws BackendProviderSpecLoaderException {
         Set<String> backendIds = new HashSet<String>();
-        for (BackendSpec spec :
+        for (BackendSpec<?> spec :
             backendProvider.getAlgorithmSourceBackendSpecLoader()) {
             backendIds.add(spec.getId());
         }
-        assertEquals(new HashSet(Arrays.asList(new String[] {
+        assertEquals(new HashSet<String>(Arrays.asList(new String[] {
                 MockAlgorithmSourceBackend.class.getName(),
                 JavaAlgorithmBackend.class.getName()})),
                 backendIds);
@@ -227,7 +227,7 @@ public class CommonsBackendProviderTest {
     @Test
     public void testGetAlgorithmSourceBackendSpecLoader() 
             throws BackendProviderSpecLoaderException {
-        BackendSpecLoader result =
+        BackendSpecLoader<?> result =
                 backendProvider.getAlgorithmSourceBackendSpecLoader();
         assertNotNull(result);
     }
@@ -236,7 +236,7 @@ public class CommonsBackendProviderTest {
     public void testGetAlgorithmSourceBackendSpec()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader result =
+        BackendSpecLoader<?> result =
                 backendProvider.getAlgorithmSourceBackendSpecLoader();
         result.loadSpec(MockAlgorithmSourceBackend.class.getName());
     }
@@ -245,9 +245,9 @@ public class CommonsBackendProviderTest {
     public void testGetAlgorithmSourceBackendInfoDisplayName()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader loader =
+        BackendSpecLoader<?> loader =
                 backendProvider.getAlgorithmSourceBackendSpecLoader();
-        BackendSpec spec = 
+        BackendSpec<?> spec = 
                 loader.loadSpec(MockAlgorithmSourceBackend.class.getName());
         assertEquals("Mock Algorithm Source Backend", spec.getDisplayName());
     }
@@ -256,9 +256,9 @@ public class CommonsBackendProviderTest {
     public void testGetAlgorithmSourceBackendInfoId()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader loader =
+        BackendSpecLoader<?> loader =
                 backendProvider.getAlgorithmSourceBackendSpecLoader();
-        BackendSpec spec = 
+        BackendSpec<?> spec = 
                 loader.loadSpec(MockAlgorithmSourceBackend.class.getName());
         assertEquals(MockAlgorithmSourceBackend.class.getName(), spec.getId());
     }
@@ -267,11 +267,11 @@ public class CommonsBackendProviderTest {
     public void testGetAlgorithmSourceBackendPropertySpecs()
             throws BackendSpecNotFoundException,
             BackendProviderSpecLoaderException {
-        BackendSpecLoader loader =
+        BackendSpecLoader<?> loader =
                 backendProvider.getAlgorithmSourceBackendSpecLoader();
-        BackendSpec spec = 
+        BackendSpec<?> spec = 
                 loader.loadSpec(MockAlgorithmSourceBackend.class.getName());
-        BackendInstanceSpec iSpec = spec.newBackendInstanceSpec();
+        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
         List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
         assertEquals(0, bps.size());
     }
