@@ -11,7 +11,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  *
  * @author Andrew Post
  */
-public final class BackendInstanceSpec<B extends Backend> {
+public final class BackendInstanceSpec<B extends Backend<?, ?>> {
     private final BackendSpec<B> backendSpec;
     private final Map<String, Object> properties;
     private final List<BackendPropertySpec> propertySpecs;
