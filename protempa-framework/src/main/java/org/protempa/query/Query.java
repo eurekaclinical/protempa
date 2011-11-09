@@ -19,11 +19,15 @@ import org.protempa.backend.dsb.filter.Filter;
  */
 public class Query implements Serializable {
 	private static final long serialVersionUID = -9007995369064299652L;
-	private final String[] keyIds;
-	private final Filter filters;
-	private final String[] propIds;
-	private final And<String>[] termIds;
-	
+	private String[] keyIds;
+	private Filter filters;
+	private String[] propIds;
+	private And<String>[] termIds;
+
+	/**
+	 * This no-arg constructor is intended to be called by Castor when
+	 * unmarshalling/deserializing a query.
+	 */
 	public Query() {
 		String msg = "The Query class's no-arg constructor should not be called.  It exists only to keep Castor happy";
 		throw new UnsupportedOperationException(msg);
@@ -102,6 +106,13 @@ public class Query implements Serializable {
 	}
 
 	/**
+	 * Setter for use by Castor.
+	 */
+	final void setKeyIds(String[] keyIds) {
+		this.keyIds = keyIds;
+	}
+
+	/**
 	 * Returns the proposition ids to be queried. An array of length 0 means
 	 * that all proposition ids will be queried.
 	 * 
@@ -110,6 +121,13 @@ public class Query implements Serializable {
 	 */
 	public final String[] getPropIds() {
 		return this.propIds.clone();
+	}
+
+	/**
+	 * Setter for use by Castor
+	 */
+	final void setPropIds(String[] propIds) {
+		this.propIds = propIds;
 	}
 
 	/**
@@ -128,14 +146,32 @@ public class Query implements Serializable {
 	}
 
 	/**
+	 * Setter for use by Castor
+	 */
+	final void setTermIds(And<String>[] termIds) {
+		this.termIds = termIds;
+	}
+
+	/**
 	 * @return an array that references all of the filters in the chain of
 	 *         filters. This is needed for Castor because it does not understand
 	 *         a chain of filters.
 	 */
-	public Filter[] getFiltersArray() {
+	Filter[] getFiltersArray() {
 		if (filters == null) {
 			return new Filter[0];
 		}
 		return filters.filterChainToArray();
 	}
+
+	/**
+	 * Setter for use by Castor.
+	 * 
+	 * @param filterArray
+	 *            the filters to be applied to this query.
+	 */
+	final void setFilterArray(Filter[] filterArray) {
+		this.filters = AbstractFilter.filterArrayToChain(filterArray);
+	}
 }
+
