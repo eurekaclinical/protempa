@@ -19,7 +19,7 @@ final class BackendSpecFactory {
         
     }
 
-    static <B extends Backend> BackendSpec<B> newInstance(
+    static <B extends Backend<?, ?>> BackendSpec<B> newInstance(
             BackendProvider backendProvider, Class<B> backendCls) 
             throws InvalidBackendException {
         BackendInfo backendAnnotation =
@@ -70,7 +70,7 @@ final class BackendSpecFactory {
                 name = String.valueOf(nameArr);
                 String displayName = backendPropertyAnnotation.displayName();
                 String description = backendPropertyAnnotation.description();
-                Class type = method.getParameterTypes()[0];
+                Class<?> type = method.getParameterTypes()[0];
                 try {
                     propSpecs.add(new BackendPropertySpec(
                             name,
