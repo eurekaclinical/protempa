@@ -7,11 +7,11 @@ import java.util.List;
  * @author Andrew Post
  */
 public interface Configurations {
-    <B extends Backend<?, ?>> List<BackendInstanceSpec<B>>
+    <B extends Backend> List<BackendInstanceSpec<B>>
             load(String configurationsId, BackendSpec<B> backendSpec)
             throws ConfigurationsLoadException;
     void save(String configurationsId, 
-            List<BackendInstanceSpec<?>> backendInstanceSpec)
+            List<BackendInstanceSpec> backendInstanceSpec)
             throws ConfigurationsSaveException;
     void remove(String configurationsId)
             throws ConfigurationRemoveException;
