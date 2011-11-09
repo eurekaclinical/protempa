@@ -23,6 +23,11 @@ public class Query implements Serializable {
 	private final Filter filters;
 	private final String[] propIds;
 	private final And<String>[] termIds;
+	
+	public Query() {
+		String msg = "The Query class's no-arg constructor should not be called.  It exists only to keep Castor happy";
+		throw new UnsupportedOperationException(msg);
+	}
 
 	/**
 	 * Creates new Query instance.
