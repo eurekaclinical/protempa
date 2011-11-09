@@ -29,7 +29,7 @@ public interface Backend<E extends BackendUpdatedEvent, S extends Source<E>> {
      * @return <code>true</code> if initialization was successful,
      *         <code>false</code> if initialization failed.
      */
-    void initialize(BackendInstanceSpec config)
+    void initialize(BackendInstanceSpec<?> config)
             throws BackendInitializationException;
 
     /**
