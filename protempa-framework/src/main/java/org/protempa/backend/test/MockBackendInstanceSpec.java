@@ -8,7 +8,7 @@ import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendPropertySpec;
 import org.protempa.backend.BackendSpec;
 
-public final class MockBackendInstanceSpec<B extends Backend> {
+public final class MockBackendInstanceSpec<B extends Backend<?, ?>> {
     private BackendInstanceSpec<B> backendInstSpec;
 
     public BackendInstanceSpec<B> getBackendInstanceSpec() {
@@ -19,7 +19,7 @@ public final class MockBackendInstanceSpec<B extends Backend> {
         BackendSpec<B> backendSpec = new BackendSpec<B>(
                 new MockBackendProvider(), "mockSpec", "Mock Spec",
                 new ArrayList<BackendPropertySpec>());
-        List<BackendPropertySpec> backendProps = new ArrayList<BackendPropertySpec>();
+//        List<BackendPropertySpec> backendProps = new ArrayList<BackendPropertySpec>();
                 
         backendInstSpec = new BackendInstanceSpec<B>(backendSpec, propSpecs);
     }
