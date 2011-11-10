@@ -109,7 +109,7 @@ final class HorizontalTemporalInference {
             if (tp2Ival == null) {
                 tp2Ival = tp2.getInterval();
             }
-            System.err.println("propDef: " + propDef.getId() + "; ival: " + tp1Ival + "; " + tp2Ival);
+            
             if (tp2Ival.getMinimumStart().compareTo(
                     tp1Ival.getMinimumFinish()) < 0
                     || tp2Ival.getMaximumStart().compareTo(
