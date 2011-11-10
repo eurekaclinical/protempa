@@ -25,8 +25,10 @@
 package org.protempa.xml;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
 import java.util.logging.Logger;
@@ -35,6 +37,7 @@ import org.exolab.castor.mapping.Mapping;
 import org.exolab.castor.mapping.MappingException;
 import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.Marshaller;
+import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.ValidationException;
 import org.exolab.castor.xml.XMLContext;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
@@ -71,6 +74,37 @@ public class XMLConfiguration {
 		}
 		return queryMappingUrl;
 	}
+	
+	/**
+	 * @return a Castor XMLContext that encapsulates XML mapping for Protempa queries.
+	 * @throws IOException
+	 */
+	private static XMLContext castorQueryXMLContext() throws IOException {
+		XMLContext context = new XMLContext();
+		Mapping mapping = new Mapping();
+		try {
+			mapping.loadMapping(getQueryMappingURL());
+			context.addMapping(mapping);
+		} catch (MappingException e) {
+			String msg = "Unable to perform XML mapping operation due to a misconfiguration in the Castor mapping file at " + getQueryMappingURL();
+			myLogger.severe(msg);
+			throw new RuntimeException(msg, e); 
+		}
+		return context;
+	}
+
+	public static Query readQueryAsXML(File file) throws IOException, MarshalException, ValidationException {
+		myLogger.entering(XMLConfiguration.class.getName(), "readQueryAsXML");
+		XMLContext context = castorQueryXMLContext();
+		Reader reader = new FileReader(file);
+		
+		Unmarshaller unmarshaller = context.createUnmarshaller();
+		unmarshaller.setClass(Query.class);
+		unmarshaller.setUnmarshalListener(new UnmarshalHandler());
+		
+		Query query = (Query)unmarshaller.unmarshal(reader);
+		return query;
+	}
 
 	/**
 	 * Write the given protempa query to the specified file.
@@ -95,31 +129,7 @@ public class XMLConfiguration {
 		myLogger.exiting(XMLConfiguration.class.getName(), "writeQueryAsXML");
 	}
 
-	/**
-	 * @return a Castor XMLContext that encapsulates XML mapping for Protempa queries.
-	 * @throws IOException
-	 */
-	private static XMLContext castorQueryXMLContext() throws IOException {
-		XMLContext context = new XMLContext();
-		Mapping mapping = new Mapping();
-		try {
-			mapping.loadMapping(getQueryMappingURL());
-			context.addMapping(mapping);
-		} catch (MappingException e) {
-			String msg = "Unable to perform XML mapping operation due to a misconfiguration in the Castor mapping file at " + getQueryMappingURL();
-			myLogger.severe(msg);
-			throw new RuntimeException(msg, e); 
-		}
-		return context;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////
-	//
-	// Everything below this is for testing
-	//
-	//////////////////////////////////////////////////////////////////////////////////
-	
-    private static final String[] PROP_IDS = {"Patient",
+	private static final String[] PROP_IDS = {"Patient",
         "Encounter", "30DayReadmission", "No30DayReadmission", "PatientAll",
         "DISEASEINDICATOR:EndStageRenalDisease",
         "DISEASEINDICATOR:UncontrolledDiabetes",
