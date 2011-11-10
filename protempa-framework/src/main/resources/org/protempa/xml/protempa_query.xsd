@@ -739,6 +739,7 @@ If the value of this attribute is true, then the count produced for te described
                         <xs:documentation>Filter for a date/time range</xs:documentation>
                     </xs:annotation>
                 </xs:element>
+                <xs:element name="positionFilter" type="positionFilterType"/>
                 <xs:element name="propertyValueFilter" type="propertyValueFilterType"> </xs:element>
                 <xs:element name="propertyValuesFilter" type="propertyValuesFilterType">
                 </xs:element>
