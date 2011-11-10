@@ -12,8 +12,15 @@ import org.protempa.ProtempaUtil;
  */
 public abstract class AbstractFilter implements Filter {
 
-	private final String[] propositionIds;
+	private String[] propositionIds;
 	private Filter and;
+
+	/**
+	 * Construct ror use by Castor.
+	 */
+	public AbstractFilter() {
+		// do nothing
+	}
 
 	/**
 	 * Instantiates the filter with the proposition ids that it is valid for.
@@ -23,6 +30,15 @@ public abstract class AbstractFilter implements Filter {
 	 *            , empty or contain <code>null</code> values.
 	 */
 	public AbstractFilter(String[] propositionIds) {
+		setPropositionIds(propositionIds);
+	}
+
+	/**
+	 * Setter for use by Castor.
+	 * 
+	 * @param propositionIds
+	 */
+	void setPropositionIds(String[] propositionIds) {
 		ProtempaUtil.checkArray(propositionIds, "propositionIds");
 		propositionIds = propositionIds.clone();
 		ProtempaUtil.internAll(propositionIds);
@@ -99,10 +115,10 @@ public abstract class AbstractFilter implements Filter {
 	 */
 	public static Filter filterArrayToChain(Filter[] filterArray) {
 		for (int i = 0; i < (filterArray.length - 1); i++) {
-			AbstractFilter thisFilter = (AbstractFilter)filterArray[i];
+			AbstractFilter thisFilter = (AbstractFilter) filterArray[i];
 			thisFilter.setAnd(filterArray[i + 1]);
 		}
-		AbstractFilter lastFilter = (AbstractFilter)filterArray[filterArray.length - 1];
+		AbstractFilter lastFilter = (AbstractFilter) filterArray[filterArray.length - 1];
 		lastFilter.setAnd(null);
 		return filterArray[0];
 	}
