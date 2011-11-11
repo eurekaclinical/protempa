@@ -63,7 +63,7 @@ public final class CommonsBackendProvider
         ArrayList<BackendSpec<B>> backendSpecs =
                 new ArrayList<BackendSpec<B>>();
         DiscoverClass discoverClass = new DiscoverClass();
-        Set<Class> classNamesL = new HashSet<Class>();
+        Set<Class<?>> classNamesL = new HashSet<Class<?>>();
         try {
             classNamesL.add(discoverClass.find(clazz));
         } catch (DiscoveryException de) {
