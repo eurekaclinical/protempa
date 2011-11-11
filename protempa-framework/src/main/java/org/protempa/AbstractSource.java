@@ -66,7 +66,7 @@ public abstract class AbstractSource<E extends SourceUpdatedEvent,
         }
     }
 
-    protected void fireClosedUnexpectedly(SourceClosedUnexpectedlyEvent e) {
+    protected void fireClosedUnexpectedly(SourceClosedUnexpectedlyEvent<T> e) {
         for (int i = 0, n = this.listenerList.size(); i < n; i++) {
             this.listenerList.get(i).closedUnexpectedly(e);
         }
@@ -96,6 +96,6 @@ public abstract class AbstractSource<E extends SourceUpdatedEvent,
     @Override
     public void unrecoverableErrorOccurred(UnrecoverableBackendErrorEvent e) {
         close();
-        this.fireClosedUnexpectedly(new SourceClosedUnexpectedlyEvent(this));
+        this.fireClosedUnexpectedly(new SourceClosedUnexpectedlyEvent<T>(this));
     }
 }
