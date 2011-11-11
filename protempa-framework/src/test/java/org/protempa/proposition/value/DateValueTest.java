@@ -36,7 +36,7 @@ public class DateValueTest extends TestCase {
     
     public void testCompareListValue() {
         DateValue now = DateValue.getInstance(this.nowDate);
-        Value list = new ValueList();
+        Value list = new ValueList<DateValue>();
         assertEquals(ValueComparator.NOT_IN, now.compare(list));
     }
     
