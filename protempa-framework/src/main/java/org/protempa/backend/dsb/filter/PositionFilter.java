@@ -279,7 +279,7 @@ public class PositionFilter extends AbstractFilter {
 	 * 
 	 * @param start
 	 */
-	void setStart(long start) {
+	void setStart(Long start) {
 		this.start = start;
 	}
 
