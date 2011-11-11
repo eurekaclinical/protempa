@@ -10,7 +10,7 @@ public class MockBackendPropertySpec {
         return propSpec;
     }
 
-    public MockBackendPropertySpec(String name, Class type) {
+    public MockBackendPropertySpec(String name, Class<?> type) {
         this.propSpec = new BackendPropertySpec(name, name, name, type,
                 new DefaultBackendPropertyValidator());
     }

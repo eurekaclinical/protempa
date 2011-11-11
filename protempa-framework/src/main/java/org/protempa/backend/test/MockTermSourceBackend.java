@@ -7,7 +7,7 @@ import org.protempa.backend.tsb.AbstractTermSourceBackend;
 public final class MockTermSourceBackend extends AbstractTermSourceBackend {
 
     @Override
-    public void initialize(BackendInstanceSpec config)
+    public void initialize(BackendInstanceSpec<?> config)
             throws BackendInitializationException {
     }
     

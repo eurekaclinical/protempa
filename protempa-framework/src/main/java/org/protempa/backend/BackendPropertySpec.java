@@ -33,7 +33,7 @@ public final class BackendPropertySpec {
 
     public BackendPropertySpec(String name,
             String displayName,
-            String description, Class type,
+            String description, Class<?> type,
             BackendPropertyValidator validator) {
         if (name == null)
             throw new IllegalArgumentException("name cannot be null");
