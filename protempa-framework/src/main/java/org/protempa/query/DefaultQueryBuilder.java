@@ -117,7 +117,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * @return a {@link String[]} of term ids representing disjunctive
      * normal form.
      */
-    public final And[] getTermIds() {
+    public final And<String>[] getTermIds() {
         return this.termIds.clone();
     }
 
@@ -134,11 +134,11 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * normal form.
      */
     @SuppressWarnings("unchecked")
-	public final void setTermIds(And[] termIds) {
+	public final void setTermIds(And<String>[] termIds) {
         if (termIds == null) {
             termIds = new And[0];
         }
-        And[] old = this.termIds;
+        And<String>[] old = this.termIds;
         this.termIds = (And<String>[])termIds.clone();
         this.changes.firePropertyChange("termIds", old, this.termIds);
     }
