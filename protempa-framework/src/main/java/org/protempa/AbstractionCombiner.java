@@ -87,7 +87,6 @@ final class AbstractionCombiner {
             this.derivationsBuilder = derivationsBuilder;
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
                 throws Exception {
