@@ -23,10 +23,10 @@ class BackendManager<E extends BackendUpdatedEvent, S extends Source<E>,
 
 	private B[] backendsToAdd;
 
-	private S source;
+//	private S source;
 
 	BackendManager(S source, B[] backends) {
-		this.source = source;
+//		this.source = source;
 		this.backendsToAdd = backends;
 	}
 
@@ -37,7 +37,6 @@ class BackendManager<E extends BackendUpdatedEvent, S extends Source<E>,
 	/**
 	 * Connect to the knowledge source backend.
 	 */
-	@SuppressWarnings("unchecked")
 	void initializeIfNeeded() throws BackendInitializationException,
             BackendNewInstanceException {
 		List<B> ksb = null;
