@@ -25,21 +25,11 @@
 package org.protempa.xml;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.Writer;
-import java.net.URL;
 import java.util.logging.Logger;
 
-import org.exolab.castor.mapping.Mapping;
-import org.exolab.castor.mapping.MappingException;
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.Marshaller;
-import org.exolab.castor.xml.Unmarshaller;
-import org.exolab.castor.xml.ValidationException;
-import org.exolab.castor.xml.XMLContext;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
@@ -58,51 +48,14 @@ public class XMLConfiguration {
 	private static Logger myLogger = Logger.getLogger(XMLConfiguration.class.getName());
 
 	/**
-	 * URL of Castor mapping for Protempa queries
-	 */
-	private static URL queryMappingUrl;
-
-	/**
 	 * private constructor as there is no reason to instantiate this class.
 	 */
 	private XMLConfiguration() {
 	}
 
-	private static URL getQueryMappingURL() {
-		if (queryMappingUrl == null) {
-			queryMappingUrl = XMLConfiguration.class.getResource("castor_query.xml");
-		}
-		return queryMappingUrl;
-	}
-	
-	/**
-	 * @return a Castor XMLContext that encapsulates XML mapping for Protempa queries.
-	 * @throws IOException
-	 */
-	private static XMLContext castorQueryXMLContext() throws IOException {
-		XMLContext context = new XMLContext();
-		Mapping mapping = new Mapping();
-		try {
-			mapping.loadMapping(getQueryMappingURL());
-			context.addMapping(mapping);
-		} catch (MappingException e) {
-			String msg = "Unable to perform XML mapping operation due to a misconfiguration in the Castor mapping file at " + getQueryMappingURL();
-			myLogger.severe(msg);
-			throw new RuntimeException(msg, e); 
-		}
-		return context;
-	}
-
-	public static Query readQueryAsXML(File file) throws IOException, MarshalException, ValidationException {
+	public static Query readQueryAsXML(File file) throws IOException {
 		myLogger.entering(XMLConfiguration.class.getName(), "readQueryAsXML");
-		XMLContext context = castorQueryXMLContext();
-		Reader reader = new FileReader(file);
-		
-		Unmarshaller unmarshaller = context.createUnmarshaller();
-		unmarshaller.setClass(Query.class);
-		unmarshaller.setUnmarshalListener(new UnmarshalHandler());
-		
-		Query query = (Query)unmarshaller.unmarshal(reader);
+		Query query = null;
 		return query;
 	}
 
@@ -115,16 +68,10 @@ public class XMLConfiguration {
 	 *            The file to write the XML to.
 	 * @throws IOException
 	 *             If there is a problem writing the file.
-	 * @throws ValidationException 
-	 * @throws MarshalException 
 	 */
-	public static void writeQueryAsXML(Query query, File file) throws IOException, MarshalException, ValidationException {
+	public static void writeQueryAsXML(Query query, File file) throws IOException {
 		myLogger.entering(XMLConfiguration.class.getName(), "writeQueryAsXML");
-		XMLContext context = castorQueryXMLContext();
-		Marshaller marshaller = context.createMarshaller();
 		Writer writer = new FileWriter(file);
-		marshaller.setWriter(writer);
-		marshaller.marshal(query);
 		writer.close();
 		myLogger.exiting(XMLConfiguration.class.getName(), "writeQueryAsXML");
 	}

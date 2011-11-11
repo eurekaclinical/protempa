@@ -1,12 +1,9 @@
 package org.protempa.query;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 import org.apache.commons.lang.ArrayUtils;
-
 import org.protempa.ProtempaUtil;
-import org.protempa.backend.dsb.filter.AbstractFilter;
 import org.protempa.backend.dsb.filter.Filter;
 
 /**
@@ -23,15 +20,6 @@ public class Query implements Serializable {
 	private Filter filters;
 	private String[] propIds;
 	private And<String>[] termIds;
-
-	/**
-	 * This no-arg constructor is intended to be called by Castor when
-	 * unmarshalling/deserializing a query.
-	 */
-	public Query() {
-		String msg = "The Query class's no-arg constructor should not be called.  It exists only to keep Castor happy";
-		throw new UnsupportedOperationException(msg);
-	}
 
 	/**
 	 * Creates new Query instance.
@@ -68,25 +56,6 @@ public class Query implements Serializable {
 	}
 
 	/**
-	 * This constructor is intended for use by Castor. It differs from the usual
-	 * constructor in that instead of taking a chain of filters it takes an
-	 * array of filters and converts them to a chain.
-	 * 
-	 * @param keyIds
-	 *            An array of key IDs. If this is null then the query will
-	 *            include all keyIDs.
-	 * @param filters
-	 *            A chain of filters. The first filter's getAnd method returns
-	 *            the second filter in the chain or null.
-	 * @param propIds
-	 *            The proposition IDs that the query will try to derive.
-	 * @param termIds
-	 */
-	public Query(String[] keyIds, Filter[] filters, String[] propIds, And<String>[] termIds) {
-		this(keyIds, AbstractFilter.filterArrayToChain(Arrays.copyOf(filters, filters.length, (new AbstractFilter[0]).getClass())), propIds, termIds);
-	}
-
-	/**
 	 * Gets the filters to be applied to this query.
 	 * 
 	 * @return a {@link Filter}.
@@ -106,13 +75,6 @@ public class Query implements Serializable {
 	}
 
 	/**
-	 * Setter for use by Castor.
-	 */
-	final void setKeyIds(String[] keyIds) {
-		this.keyIds = keyIds;
-	}
-
-	/**
 	 * Returns the proposition ids to be queried. An array of length 0 means
 	 * that all proposition ids will be queried.
 	 * 
@@ -121,13 +83,6 @@ public class Query implements Serializable {
 	 */
 	public final String[] getPropIds() {
 		return this.propIds.clone();
-	}
-
-	/**
-	 * Setter for use by Castor
-	 */
-	final void setPropIds(String[] propIds) {
-		this.propIds = propIds;
 	}
 
 	/**
@@ -146,16 +101,8 @@ public class Query implements Serializable {
 	}
 
 	/**
-	 * Setter for use by Castor
-	 */
-	final void setTermIds(And<String>[] termIds) {
-		this.termIds = termIds;
-	}
-
-	/**
 	 * @return an array that references all of the filters in the chain of
-	 *         filters. This is needed for Castor because it does not understand
-	 *         a chain of filters.
+	 *         filters.
 	 */
 	Filter[] getFiltersArray() {
 		if (filters == null) {
@@ -164,14 +111,5 @@ public class Query implements Serializable {
 		return filters.filterChainToArray();
 	}
 
-	/**
-	 * Setter for use by Castor.
-	 * 
-	 * @param filterArray
-	 *            the filters to be applied to this query.
-	 */
-	final void setFilterArray(Filter[] filterArray) {
-		this.filters = AbstractFilter.filterArrayToChain(filterArray);
-	}
 }
 

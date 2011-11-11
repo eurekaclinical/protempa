@@ -4,7 +4,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.value.Granularity;
-import org.protempa.proposition.value.XMLGranularityFactory;
 
 /**
  * A filter for a position (e.g., date/time) range.
@@ -43,13 +42,6 @@ public class PositionFilter extends AbstractFilter {
 	private Side startSide;
 
 	private Side finishSide;
-
-	/**
-	 * Constructor for use by Castor only.
-	 */
-	public PositionFilter() {
-		super();
-	}
 
 	/**
 	 * Creates a filter with a position range.
@@ -112,7 +104,7 @@ public class PositionFilter extends AbstractFilter {
 	 * Complete this object's initialization. This method should be called
 	 * externally only by Castor.
 	 */
-	public void init() {
+	private void init() {
 		if (ival == null) {
 			this.ival = intervalFactory.getInstance(start, startGran, finish, finishGran);
 			if (startSide == null)
@@ -120,26 +112,6 @@ public class PositionFilter extends AbstractFilter {
 			if (finishSide == null)
 				finishSide = Side.FINISH;
 		}
-	}
-
-	private static Side nameToSide(String name) {
-		if (Side.START.getXmlName().equals(name)) {
-			return Side.START;
-		}
-		if (Side.FINISH.getXmlName().equals(name)) {
-			return Side.FINISH;
-		} else {
-			return null;
-		}
-	}
-
-	private static Granularity nameToGranularity(String name) {
-		Granularity g = XMLGranularityFactory.xmlToGranularity(name);
-		if (g == null) {
-			String msg = name + " is not a valid name for a granularity";
-			throw new IllegalArgumentException(msg);
-		}
-		return g;
 	}
 
 	/**
@@ -153,25 +125,6 @@ public class PositionFilter extends AbstractFilter {
 	}
 
 	/**
-	 * Returns the XML name of the {@link Granularity} with which to interpret
-	 * the start position.
-	 * 
-	 * @return the startGranularity a {@link Granularity}.
-	 */
-	String getStartGranularityXMLName() {
-		return XMLGranularityFactory.granularityToXml(this.ival.getStartGranularity());
-	}
-
-	/**
-	 * Setter for Castor.
-	 * 
-	 * @param name
-	 */
-	void setStartGranularityXMLName(String name) {
-		startGran = nameToGranularity(name);
-	}
-
-	/**
 	 * Returns the {@link Granularity} with which to interpret the finish
 	 * position.
 	 * 
@@ -179,20 +132,6 @@ public class PositionFilter extends AbstractFilter {
 	 */
 	public Granularity getFinishGranularity() {
 		return finishGran;
-	}
-
-	/**
-	 * Returns the name of the {@link Granularity} with which to interpret the
-	 * finish position.
-	 * 
-	 * @return the finishGranularity a {@link Granularity}.
-	 */
-	String getFinishGranularityXMLName() {
-		return XMLGranularityFactory.granularityToXml(this.ival.getFinishGranularity());
-	}
-
-	void setFinishGranularityXMLName(String name) {
-		finishGran = nameToGranularity(name);
 	}
 
 	/**
@@ -245,25 +184,12 @@ public class PositionFilter extends AbstractFilter {
 	}
 
 	/**
-	 * Setter for Castor.
-	 * 
-	 * @param start
-	 */
-	void setStart(Long start) {
-		this.start = start;
-	}
-
-	/**
 	 * Returns the finish position supplied in the constructor.
 	 * 
 	 * @return a {@link Long}.
 	 */
 	public Long getFinish() {
 		return finish;
-	}
-
-	void setFinish(long finish) {
-		this.finish = finish;
 	}
 
 	/**
@@ -276,40 +202,12 @@ public class PositionFilter extends AbstractFilter {
 	}
 
 	/**
-	 * Returns the name of the side of the proposition to which to apply the
-	 * lower bound.
-	 * 
-	 * @return a {@link Side}.
-	 */
-	String getStartSideXMLName() {
-		return this.startSide.getXmlName();
-	}
-	
-	void setStartSideXMLName(String name) {
-		startSide = nameToSide(name);
-	}
-
-	/**
 	 * Returns the side of the proposition to which to apply the upper bound.
 	 * 
 	 * @return a {@link Side}.
 	 */
 	public Side getFinishSide() {
 		return this.finishSide;
-	}
-
-	/**
-	 * Returns the name of the side of the proposition to which to apply the
-	 * upper bound.
-	 * 
-	 * @return a {@link Side}.
-	 */
-	String getFinishSideXMLName() {
-		return this.finishSide.getXmlName();
-	}
-	
-	void setFinishSideXMLName(String name) {
-		finishSide = nameToSide(name);
 	}
 
 	@Override

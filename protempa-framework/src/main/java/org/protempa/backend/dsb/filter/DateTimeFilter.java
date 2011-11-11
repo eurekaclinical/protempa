@@ -9,14 +9,6 @@ import org.protempa.proposition.value.Granularity;
  * @author Andrew Post
  */
 public class DateTimeFilter extends PositionFilter {
-
-	/**
-	 * Constructor for use by Castor only.
-	 */
-	public DateTimeFilter() {
-		super();
-	}
-
 	/**
 	 * Creates a filter with a date/time range.
 	 * 
@@ -57,37 +49,5 @@ public class DateTimeFilter extends PositionFilter {
      */
 	public DateTimeFilter(String[] propIds, Date start, Granularity startGran, Date finish, Granularity finishGran, Side startSide, Side finishSide) {
 		super(propIds, start != null ? start.getTime() : null, startGran, finish != null ? finish.getTime() : null, finishGran, startSide, finishSide);
-	}
-
-	/**
-	 * @return the interval start as a date.
-	 */
-	public Date getStartDate() {
-		return new Date(getStart());
-	}
-
-	/**
-	 * Setter for Castor.
-	 * 
-	 * @param dt
-	 */
-	public void setStartDate(Date dt) {
-		setStart(dt.getTime());
-	}
-
-	/**
-	 * @return the interval finish as a date.
-	 */
-	public Date getFinishDate() {
-		return new Date(getFinish());
-	}
-
-	/**
-	 * Setter for Castor.
-	 * 
-	 * @param dt
-	 */
-	public void setFinishDate(Date dt) {
-		setFinish(dt.getTime());
 	}
 }

@@ -16,13 +16,6 @@ public abstract class AbstractFilter implements Filter {
 	private Filter and;
 
 	/**
-	 * Construct ror use by Castor.
-	 */
-	public AbstractFilter() {
-		// do nothing
-	}
-
-	/**
 	 * Instantiates the filter with the proposition ids that it is valid for.
 	 * 
 	 * @param propositionIds
@@ -30,15 +23,6 @@ public abstract class AbstractFilter implements Filter {
 	 *            , empty or contain <code>null</code> values.
 	 */
 	public AbstractFilter(String[] propositionIds) {
-		setPropositionIds(propositionIds);
-	}
-
-	/**
-	 * Setter for use by Castor.
-	 * 
-	 * @param propositionIds
-	 */
-	void setPropositionIds(String[] propositionIds) {
 		ProtempaUtil.checkArray(propositionIds, "propositionIds");
 		propositionIds = propositionIds.clone();
 		ProtempaUtil.internAll(propositionIds);
