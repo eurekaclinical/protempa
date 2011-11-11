@@ -161,9 +161,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             this.knowledgeSource = knowledgeSource;
         }
         
-        KnowledgeSource getKnowledgeSource() {
-            return this.knowledgeSource;
-        }
+//        KnowledgeSource getKnowledgeSource() {
+//            return this.knowledgeSource;
+//        }
 
         void setResult(String[] result) {
             this.result = result;
@@ -289,9 +289,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                     "Contexts not supported yet");
         }
 
-        String[] getResult() {
-            return this.result;
-        }
+//        String[] getResult() {
+//            return this.result;
+//        }
 
         void clear() {
             this.result = null;
