@@ -1,6 +1,5 @@
 package org.protempa.bp.commons;
 
-import org.protempa.bp.commons.*;
 import org.protempa.Algorithm;
 import org.protempa.AlgorithmSourceReadException;
 import org.protempa.Algorithms;
