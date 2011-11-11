@@ -30,7 +30,7 @@ public abstract class AbstractJavaAlgorithmBackend
 
     
 
-    private final BackendInstanceSpec configuration;
+//    private final BackendInstanceSpec configuration;
 
 	private final Properties algorithmClasses;
 
@@ -39,7 +39,7 @@ public abstract class AbstractJavaAlgorithmBackend
 	}
 
 	public AbstractJavaAlgorithmBackend(BackendInstanceSpec config) {
-		this.configuration = config;
+//		this.configuration = config;
         this.algorithmClasses = new Properties();
 	}
 
