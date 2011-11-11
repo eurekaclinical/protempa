@@ -69,7 +69,7 @@ final class DirectionalPathConsistency {
     static boolean getConsistent(DirectedGraph g) {
         Object[] vertexOrdering = new Object[g.size()];
         int voa = 0;
-        for (Iterator itr = g.iterator(); itr.hasNext(); voa++) {
+        for (Iterator<?> itr = g.iterator(); itr.hasNext(); voa++) {
             vertexOrdering[voa] = itr.next();
         }
         int vol = vertexOrdering.length;
