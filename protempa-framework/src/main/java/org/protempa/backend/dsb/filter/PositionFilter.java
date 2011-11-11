@@ -119,39 +119,6 @@ public class PositionFilter extends AbstractFilter {
 		}
 	}
 
-	/**
-	 * Initializes a filter with a position range.
-	 * <p>
-	 * This constructor is intended to be used by Castor when converting from
-	 * XML.
-	 * 
-	 * @param propIds
-	 *            a {@link String[]} of proposition ids on which to filter.
-	 * @param start
-	 *            the start position in Protempa's {@link Long} representation.
-	 * @param startGran
-	 *            the name of the {@link Granularity} with which to interpret
-	 *            the start position.
-	 * @param finish
-	 *            the finish position in Protempa's {@link Long} representation.
-	 * @param finishGran
-	 *            the name of the {@link Granularity} with which to interpret
-	 *            the finish position.
-	 * @param startSide
-	 *            the name of the {@link Side} of the proposition to which to
-	 *            apply the start bound. The default is {@link Side.START} (if
-	 *            <code>null</code> is specified). Ignored for timestamped
-	 *            propositions.
-	 * @param finishSide
-	 *            the name of the {@link Side} of the proposition to which to
-	 *            apply the finish bound. The default is {@link Side.FINISH} (if
-	 *            <code>null</code> is specified). Ignored for timestamped
-	 *            propositions.
-	 */
-	public PositionFilter(String[] propIds, Long start, String startGran, Long finish, String finishGran, String startSide, String finishSide) {
-		this(propIds, start, nameToGranularity(startGran), finish, nameToGranularity(finishGran), nameToSide(startSide), nameToSide(finishSide));
-	}
-
 	private static Side nameToSide(String name) {
 		if (Side.START.getXmlName().equals(name)) {
 			return Side.START;
@@ -188,7 +155,7 @@ public class PositionFilter extends AbstractFilter {
 	 * 
 	 * @return the startGranularity a {@link Granularity}.
 	 */
-	public String getStartGranularityXMLName() {
+	String getStartGranularityXMLName() {
 		return XMLGranularityFactory.granularityToXml(this.ival.getStartGranularity());
 	}
 
@@ -217,7 +184,7 @@ public class PositionFilter extends AbstractFilter {
 	 * 
 	 * @return the finishGranularity a {@link Granularity}.
 	 */
-	public String getFinishGranularityXMLName() {
+	String getFinishGranularityXMLName() {
 		return XMLGranularityFactory.granularityToXml(this.ival.getFinishGranularity());
 	}
 
@@ -311,8 +278,12 @@ public class PositionFilter extends AbstractFilter {
 	 * 
 	 * @return a {@link Side}.
 	 */
-	public String getStartSideXMLName() {
+	String getStartSideXMLName() {
 		return this.startSide.getXmlName();
+	}
+	
+	void setStartSideXMLName(String name) {
+		startSide = nameToSide(name);
 	}
 
 	/**
@@ -330,8 +301,12 @@ public class PositionFilter extends AbstractFilter {
 	 * 
 	 * @return a {@link Side}.
 	 */
-	public String getFinishSideXMLName() {
+	String getFinishSideXMLName() {
 		return this.finishSide.getXmlName();
+	}
+	
+	void setFinishSideXMLName(String name) {
+		finishSide = nameToSide(name);
 	}
 
 	@Override
