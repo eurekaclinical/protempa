@@ -2,9 +2,7 @@ package org.protempa.bp.commons.dsb.relationaldb;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.NumberFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.protempa.proposition.DataSourceBackendId;
 import org.protempa.proposition.UniqueId;
 
@@ -17,7 +15,6 @@ abstract class AbstractResultProcessor implements SQLGenResultProcessor {
     private String dataSourceBackendId;
     private EntitySpec entitySpec;
     private boolean casePresent;
-    private Logger logger;
     
     protected AbstractResultProcessor(EntitySpec entitySpec, 
             String dataSourceBackendId) {
