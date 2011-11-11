@@ -152,23 +152,23 @@ public class TabDelimQueryResultsHandler implements QueryResultsHandler {
             extends ProtempaException {
 
         private static final long serialVersionUID = 2008992530872178708L;
-        private IOException ioe;
+//        private IOException ioe;
 
         TabDelimHandlerProtempaException(IOException cause) {
             super(cause);
             assert cause != null : "cause cannot be null";
-            this.ioe = cause;
+//            this.ioe = cause;
         }
 
-        TabDelimHandlerProtempaException(String message, IOException cause) {
-            super(message, cause);
-            assert cause != null : "cause cannot be null";
-            this.ioe = cause;
-        }
-
-        IOException getIOException() {
-            return this.ioe;
-        }
+//        TabDelimHandlerProtempaException(String message, IOException cause) {
+//            super(message, cause);
+//            assert cause != null : "cause cannot be null";
+//            this.ioe = cause;
+//        }
+//
+//        IOException getIOException() {
+//            return this.ioe;
+//        }
     }
 
     private final static class TabDelimHandlerPropositionVisitor
@@ -186,9 +186,9 @@ public class TabDelimQueryResultsHandler implements QueryResultsHandler {
             this.keyId = keyId;
         }
 
-        String getKeyId() {
-            return this.keyId;
-        }
+//        String getKeyId() {
+//            return this.keyId;
+//        }
 
         @Override
         public void visit(AbstractParameter abstractParameter)
