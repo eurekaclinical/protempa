@@ -44,8 +44,11 @@ public class PositionFilter extends AbstractFilter {
 
 	private Side finishSide;
 
+	/**
+	 * Constructor for use by Castor only.
+	 */
 	public PositionFilter() {
-
+		super();
 	}
 
 	/**

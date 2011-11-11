@@ -11,6 +11,13 @@ import org.protempa.proposition.value.Granularity;
 public class DateTimeFilter extends PositionFilter {
 
 	/**
+	 * Constructor for use by Castor only.
+	 */
+	public DateTimeFilter() {
+		super();
+	}
+
+	/**
 	 * Creates a filter with a date/time range.
 	 * 
 	 * @param propIds
