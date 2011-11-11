@@ -1,10 +1,5 @@
 package org.protempa;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,9 +21,9 @@ import org.drools.StatefulSession;
 import org.drools.StatelessSession;
 import org.drools.StatelessSessionResult;
 import org.drools.WorkingMemory;
+import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.datastore.PropositionStoreCreator;
 import org.protempa.datastore.WorkingMemoryStoreCreator;
-import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.And;
@@ -260,67 +255,67 @@ final class AbstractionFinder implements Module {
         return result;
     }
 
-    private List<String> getPropIdsFromTerms(
-            Set<And<TermSubsumption>> termSubsumptionClauses)
-            throws KnowledgeSourceReadException {
-        List<String> result = new ArrayList<String>();
+//    private List<String> getPropIdsFromTerms(
+//            Set<And<TermSubsumption>> termSubsumptionClauses)
+//            throws KnowledgeSourceReadException {
+//        List<String> result = new ArrayList<String>();
+//
+//        for (And<TermSubsumption> subsumpClause : termSubsumptionClauses) {
+//            result.addAll(this.knowledgeSource
+//                    .getPropositionDefinitionsByTerm(subsumpClause));
+//        }
+//
+//        return result;
+//    }
 
-        for (And<TermSubsumption> subsumpClause : termSubsumptionClauses) {
-            result.addAll(this.knowledgeSource
-                    .getPropositionDefinitionsByTerm(subsumpClause));
-        }
+//    private Set<And<TermSubsumption>> explodeTerms(Set<And<String>> termClauses)
+//            throws TermSourceReadException {
+//        Set<And<TermSubsumption>> result = new HashSet<And<TermSubsumption>>();
+//
+//        for (And<String> termClause : termClauses) {
+//            And<TermSubsumption> subsumpClause = new And<TermSubsumption>();
+//            List<TermSubsumption> tss = new ArrayList<TermSubsumption>();
+//            for (String termId : termClause.getAnded()) {
+//                tss.add(TermSubsumption.fromTerms(this.termSource
+//                        .getTermSubsumption(termId)));
+//            }
+//            subsumpClause.setAnded(tss);
+//            result.add(subsumpClause);
+//        }
+//
+//        return result;
+//    }
 
-        return result;
-    }
+//    private static byte[] detachWorkingMemory(StatefulSession workingMemory)
+//            throws IOException {
+//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//        ObjectOutputStream oos = new ObjectOutputStream(baos);
+//        byte[] wmSerialized;
+//        try {
+//            oos.writeObject(workingMemory);
+//            wmSerialized = baos.toByteArray();
+//        } finally {
+//            oos.close();
+//        }
+//        return wmSerialized;
+//    }
 
-    private Set<And<TermSubsumption>> explodeTerms(Set<And<String>> termClauses)
-            throws TermSourceReadException {
-        Set<And<TermSubsumption>> result = new HashSet<And<TermSubsumption>>();
+//    private static StatefulSession reattachWorkingMemory(byte[] wmSerialized,
+//            RuleBase ruleBase) throws IOException, ClassNotFoundException {
+//        ByteArrayInputStream bais = new ByteArrayInputStream(wmSerialized);
+//        StatefulSession workingMemory;
+//        try {
+//            workingMemory = reattachWorkingMemory(bais, ruleBase);
+//        } finally {
+//            bais.close();
+//        }
+//        return workingMemory;
+//    }
 
-        for (And<String> termClause : termClauses) {
-            And<TermSubsumption> subsumpClause = new And<TermSubsumption>();
-            List<TermSubsumption> tss = new ArrayList<TermSubsumption>();
-            for (String termId : termClause.getAnded()) {
-                tss.add(TermSubsumption.fromTerms(this.termSource
-                        .getTermSubsumption(termId)));
-            }
-            subsumpClause.setAnded(tss);
-            result.add(subsumpClause);
-        }
-
-        return result;
-    }
-
-    private static byte[] detachWorkingMemory(StatefulSession workingMemory)
-            throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        byte[] wmSerialized;
-        try {
-            oos.writeObject(workingMemory);
-            wmSerialized = baos.toByteArray();
-        } finally {
-            oos.close();
-        }
-        return wmSerialized;
-    }
-
-    private static StatefulSession reattachWorkingMemory(byte[] wmSerialized,
-            RuleBase ruleBase) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(wmSerialized);
-        StatefulSession workingMemory;
-        try {
-            workingMemory = reattachWorkingMemory(bais, ruleBase);
-        } finally {
-            bais.close();
-        }
-        return workingMemory;
-    }
-
-    private static StatefulSession reattachWorkingMemory(InputStream wmIn,
-            RuleBase ruleBase) throws IOException, ClassNotFoundException {
-        return ruleBase.newStatefulSession(wmIn, false);
-    }
+//    private static StatefulSession reattachWorkingMemory(InputStream wmIn,
+//            RuleBase ruleBase) throws IOException, ClassNotFoundException {
+//        return ruleBase.newStatefulSession(wmIn, false);
+//    }
 
     private void clearWorkingMemoryCache() {
         if (workingMemoryCache != null) {
@@ -545,8 +540,7 @@ final class AbstractionFinder implements Module {
             }
             workingMemory.fireAllRules();
             int wmCount = 0;
-            for (Iterator itr = workingMemory.iterateObjects(); itr.hasNext();) {
-                Object o = itr.next();
+            for (Iterator<?> itr = workingMemory.iterateObjects(); itr.hasNext();itr.next()) {
                 wmCount++;
             }
             ProtempaUtil.logger().log(Level.FINEST,
@@ -921,54 +915,54 @@ final class AbstractionFinder implements Module {
         }
     }
 
-    /**
-     * Returns a stateful working memory instance for the given key.
-     * 
-     * @param key
-     *            a key <code>String</code>.
-     * @return a <code>StatefulRuleSession</code>, or null if the given key is
-     *         <code>null</code>.
-     */
-    private StatefulSession statefulWorkingMemory(RuleBase ruleBase, String key)
-            throws ProtempaException {
-        StatefulSession workingMemory = null;
-        if (key != null) {
-            // we have not cached a working memory for this key yet.
-            if ((workingMemory = this.workingMemoryCache.get(key)) == null) {
-                // TODO: change the last null parameter to an actual derivations
-                // cache
-                workingMemory = ruleBase.newStatefulSession(false);
-                this.workingMemoryCache.put(key, workingMemory);
-                // we have cached a working memory for this key.
-            } // else {
-            /*
-             * There apparently is no way to assign an existing working memory
-             * to a knowledge base without serializing it and passing the
-             * serialized object to a new rule base... This could actually come
-             * in handy for transparently saving the working memories out to
-             * disk...
-             */
-            // try {
-            // byte[] wmSerialized = detachWorkingMemory(workingMemory);
-            // Set<String> propIdCacheForKey = this.propIdCache.get(key);
-            // assert propIdCacheForKey != null :
-            // "the proposition id cache was not set";
-            /*
-             * We construct the rule base of proposition definitions that have
-             * not been looked for previously.
-             */
-            // TODO: change the last null parameter to an actual
-            // derivations cache
-            // workingMemory = reattachWorkingMemory(wmSerialized,
-            // ruleBase);
-            // this.workingMemoryCache.put(key, workingMemory);
-            // } catch (IOException ex) {
-            // throw new AssertionError(ex);
-            // } catch (ClassNotFoundException cnfe) {
-            // throw new AssertionError(cnfe);
-            // }
-            // }
-        }
-        return workingMemory;
-    }
+//    /**
+//     * Returns a stateful working memory instance for the given key.
+//     * 
+//     * @param key
+//     *            a key <code>String</code>.
+//     * @return a <code>StatefulRuleSession</code>, or null if the given key is
+//     *         <code>null</code>.
+//     */
+//    private StatefulSession statefulWorkingMemory(RuleBase ruleBase, String key)
+//            throws ProtempaException {
+//        StatefulSession workingMemory = null;
+//        if (key != null) {
+//            // we have not cached a working memory for this key yet.
+//            if ((workingMemory = this.workingMemoryCache.get(key)) == null) {
+//                // TODO: change the last null parameter to an actual derivations
+//                // cache
+//                workingMemory = ruleBase.newStatefulSession(false);
+//                this.workingMemoryCache.put(key, workingMemory);
+//                // we have cached a working memory for this key.
+//            } // else {
+//            /*
+//             * There apparently is no way to assign an existing working memory
+//             * to a knowledge base without serializing it and passing the
+//             * serialized object to a new rule base... This could actually come
+//             * in handy for transparently saving the working memories out to
+//             * disk...
+//             */
+//            // try {
+//            // byte[] wmSerialized = detachWorkingMemory(workingMemory);
+//            // Set<String> propIdCacheForKey = this.propIdCache.get(key);
+//            // assert propIdCacheForKey != null :
+//            // "the proposition id cache was not set";
+//            /*
+//             * We construct the rule base of proposition definitions that have
+//             * not been looked for previously.
+//             */
+//            // TODO: change the last null parameter to an actual
+//            // derivations cache
+//            // workingMemory = reattachWorkingMemory(wmSerialized,
+//            // ruleBase);
+//            // this.workingMemoryCache.put(key, workingMemory);
+//            // } catch (IOException ex) {
+//            // throw new AssertionError(ex);
+//            // } catch (ClassNotFoundException cnfe) {
+//            // throw new AssertionError(cnfe);
+//            // }
+//            // }
+//        }
+//        return workingMemory;
+//    }
 }
