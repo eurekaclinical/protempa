@@ -8,19 +8,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+
 import org.arp.javautil.datastore.DataStore;
 import org.protempa.DataSourceResultMap;
 import org.protempa.datastore.UniqueIdUniqueIdStoreCreator;
 import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.visitor.AbstractPropositionVisitor;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Context;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.visitor.AbstractPropositionVisitor;
 
 /**
  *
