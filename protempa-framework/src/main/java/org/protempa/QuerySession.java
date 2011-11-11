@@ -22,7 +22,7 @@ import org.protempa.query.handler.QueryResultsHandler;
 public class QuerySession {
     private final String id;
     private final Query query;
-    private final AbstractionFinder finder;
+//    private final AbstractionFinder finder;
     private final Map<Object, Proposition> propositionCache;
     private final Map<Proposition, List<Proposition>> derivationCache;
     private final boolean cachingEnabled;
@@ -42,7 +42,7 @@ public class QuerySession {
     QuerySession(Query initialQuery, AbstractionFinder abstractionFinder) {
         assert initialQuery != null : "initialQuery cannot be null";
         assert abstractionFinder != null : "abstractionFinder cannot be null";
-        this.finder = abstractionFinder;
+//        this.finder = abstractionFinder;
         this.id = this.generateId();
         this.query = initialQuery;
         this.propositionCache = new HashMap<Object, Proposition>();
