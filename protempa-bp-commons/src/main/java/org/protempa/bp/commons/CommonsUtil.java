@@ -1,11 +1,7 @@
 package org.protempa.bp.commons;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
-import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.backend.InvalidPropertyNameException;
 
 /**
  *
