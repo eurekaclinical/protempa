@@ -2,6 +2,7 @@ package org.protempa;
 
 import java.io.Serializable;
 import org.protempa.proposition.AbstractParameter;
+import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.Segment;
 
@@ -54,7 +55,7 @@ public abstract class GapFunction implements Serializable {
      * @param rhs the second {@link Segment}.
      * @return <code>true</code> or <code>false</code>.
      */
-    final boolean execute(Segment lhs, Segment rhs) {
+    final boolean execute(Segment<? extends TemporalProposition> lhs, Segment<? extends TemporalProposition> rhs) {
         if (lhs == null || rhs == null) {
             return false;
         } else {
