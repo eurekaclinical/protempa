@@ -140,8 +140,8 @@ public final class Sequence<T extends TemporalProposition> implements List<T>,
     }
 
     @Override
-    public boolean containsAll(Collection arg0) {
-        for (Iterator itr = arg0.iterator(); itr.hasNext();) {
+    public boolean containsAll(Collection<?> arg0) {
+        for (Iterator<?> itr = arg0.iterator(); itr.hasNext();) {
             if (!contains(itr.next())) {
                 return false;
             }
@@ -189,9 +189,9 @@ public final class Sequence<T extends TemporalProposition> implements List<T>,
     }
 
     @Override
-    public boolean removeAll(Collection c) {
+    public boolean removeAll(Collection<?> c) {
         boolean modified = false;
-        for (Iterator itr = iterator(); itr.hasNext();) {
+        for (Iterator<?> itr = iterator(); itr.hasNext();) {
             if (c.contains(itr.next())) {
                 itr.remove();
                 modified = true;
@@ -201,9 +201,9 @@ public final class Sequence<T extends TemporalProposition> implements List<T>,
     }
 
     @Override
-    public boolean retainAll(Collection c) {
+    public boolean retainAll(Collection<?> c) {
         boolean modified = false;
-        for (Iterator itr = iterator(); itr.hasNext();) {
+        for (Iterator<?> itr = iterator(); itr.hasNext();) {
             if (!c.contains(itr.next())) {
                 itr.remove();
                 modified = true;
