@@ -9,7 +9,7 @@ import org.arp.javautil.arrays.Arrays;
  * @author Andrew Post
  */
 public final class BackendPropertySpec {
-    static final Class[] ALLOWED_CLASSES = {
+    static final Class<?>[] ALLOWED_CLASSES = {
         String.class,
         Boolean.class,
         Integer.class,
@@ -26,9 +26,9 @@ public final class BackendPropertySpec {
     }
 
     private final String name;
-    private final String displayName;
+//    private final String displayName;
     private final String description;
-    private final Class type;
+    private final Class<?> type;
     private final BackendPropertyValidator validator;
 
     public BackendPropertySpec(String name,
@@ -43,7 +43,7 @@ public final class BackendPropertySpec {
             throw new IllegalArgumentException("type must be one of " +
                     allowedClassesPrettyPrint() + " but was " + type);
         this.name = name;
-        this.displayName = displayName;
+//        this.displayName = displayName;
         this.description = description;
         this.type = type;
         this.validator = validator;
@@ -57,7 +57,7 @@ public final class BackendPropertySpec {
         return this.name;
     }
 
-    public Class getType() {
+    public Class<?> getType() {
         return this.type;
     }
 
