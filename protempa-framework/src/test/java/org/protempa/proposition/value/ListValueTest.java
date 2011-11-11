@@ -1,9 +1,5 @@
 package org.protempa.proposition.value;
 
-import java.util.Arrays;
-import java.util.List;
-
-
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -14,11 +10,12 @@ import junit.framework.TestCase;
 public class ListValueTest extends TestCase {
 
     public void testParse() {
-        List<?> l = Arrays.asList(new Long[]{1L, 2L, 3L, 4L});
-        ValueList v = (ValueList) ValueType.VALUELIST.parse("[1,2,3,4]");
-        Assert.assertEquals(l.size(), v.size());
-        for (int i = 0, n = l.size(); i < n; i++) {
-            Assert.assertEquals(l.get(i), ((NumberValue) v.get(i)).longValue());
+        long[] l = {1L, 2L, 3L, 4L};
+        @SuppressWarnings("unchecked")
+		ValueList<NumberValue> v = (ValueList<NumberValue>) ValueType.VALUELIST.parse("[1,2,3,4]");
+        Assert.assertEquals(l.length, v.size());
+        for (int i = 0, n = l.length; i < n; i++) {
+            Assert.assertEquals(l[i], ((NumberValue) v.get(i)).longValue());
         }
     }
     
