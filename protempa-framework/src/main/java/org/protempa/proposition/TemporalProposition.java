@@ -234,7 +234,6 @@ public abstract class TemporalProposition extends AbstractProposition {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean isEqual(Object other) {
         if (other == this) {
