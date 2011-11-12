@@ -1252,7 +1252,7 @@ A list of values
                         <xs:documentation xml:lang="en">The name of the property whose value is to be compared.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute ref="listComparitor" use="required"/>
+                <xs:attribute ref="comparitor" use="required"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
