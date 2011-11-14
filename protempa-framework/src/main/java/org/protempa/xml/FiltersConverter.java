@@ -53,14 +53,12 @@ class FiltersConverter implements Converter {
 	@Override
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		Filter filter = (Filter) value;
-		writer.startNode("filters");
 		do {
 			writer.startNode(objectToXmlTag(filter));
 			context.convertAnother(filter);
 			writer.endNode();
 			filter = filter.getAnd();
 		} while (filter != null);
-		writer.endNode();
 	}
 
 	/*

@@ -51,22 +51,30 @@ public class QueryConverter implements Converter {
 		String[] keyIDs = query.getKeyIds();
 		if (keyIDs != null && keyIDs.length > 0) {
 			KeyIDsConverter keyIDsConverter = new KeyIDsConverter();
+			writer.startNode("keyIDs");
 			keyIDsConverter.marshal(keyIDs, writer, context);
+			writer.endNode();
 		}
 		String[] propIDs = query.getPropIds();
 		PropIDsConverter propIDsConverter = new PropIDsConverter();
+		writer.startNode("propositionIDs");
 		propIDsConverter.marshal(propIDs, writer, context);
+		writer.endNode();
 		
 		Filter filters = query.getFilters();
 		if (filters != null) {
 			FiltersConverter filtersConverter = new FiltersConverter();
+			writer.startNode("filters");
 			filtersConverter.marshal(filters, writer, context);
+			writer.endNode();
 		}
 		
 		And<String>[] termIds = query.getTermIds();
 		if (termIds != null && termIds.length > 0) {
 			TermIDsConverter termIDsConverter = new TermIDsConverter();
+			writer.startNode("termIDs");
 			termIDsConverter.marshal(termIds, writer, context);
+			writer.endNode();
 		}
 	}
 

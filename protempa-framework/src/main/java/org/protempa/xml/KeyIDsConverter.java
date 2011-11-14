@@ -43,13 +43,11 @@ class KeyIDsConverter implements Converter {
 	@Override
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		String[] keyIds = (String[]) value;
-		writer.startNode("keyIDs");
 		for (String keyId : keyIds) {
 			writer.startNode("keyId");
 			writer.setValue(keyId);
 			writer.endNode();
 		}
-		writer.endNode();
 	}
 
 	/*

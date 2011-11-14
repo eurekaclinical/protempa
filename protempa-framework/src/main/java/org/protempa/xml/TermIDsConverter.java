@@ -46,11 +46,9 @@ class TermIDsConverter implements Converter {
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		@SuppressWarnings("unchecked")
 		And<String>[] termIds = (And<String>[]) value;
-		writer.startNode("termIDs");
 		for (And<String> and : termIds) {
 			context.convertAnother(and);
 		}
-		writer.endNode();
 	}
 
 	/*

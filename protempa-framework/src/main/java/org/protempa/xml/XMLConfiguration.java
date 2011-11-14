@@ -66,6 +66,7 @@ public class XMLConfiguration {
 			xstream = new XStream(new StaxDriver());
 			
 			xstream.alias("and", And.class);
+			xstream.registerConverter(new AndConverter());
 			
 			xstream.alias("dateTimeFilter", DateTimeFilter.class);
 
@@ -123,12 +124,12 @@ public class XMLConfiguration {
 
 	private static final String[] PROP_IDS = { "Patient", "Encounter", "30DayReadmission", "No30DayReadmission", "PatientAll",
 			"DISEASEINDICATOR:EndStageRenalDisease", "DISEASEINDICATOR:UncontrolledDiabetes", "DISEASEINDICATOR:MetastasisEvent",
-			"PROCEDUREINDICATOR:BoneMarrowTransplantEvent", "DISEASEINDICATOR:Obesity", "DISEASEINDICATOR:MyocardialInfarction", "ERATCancer", "ERATCKD",
+			"PROCEDUREINDICATOR:BoneMarrowTransplantEvent", "DISEASEINDICATOR:Obesity", "ERATCancer", "ERATCKD",
 			"VitalSign",
 			"Geography",
-			"MSDRG:MSDRG", // "APRDRG:APRDRG",
+			"MSDRG:MSDRG",
 			"LAB:PlateletCountClassification",
-			"LAB:1000764", // Serum creatinine
+			"LAB:1000764", 
 			"MED:(LME87) inotropic agents" };
 
 	public static void main(String[] args) throws Exception {
