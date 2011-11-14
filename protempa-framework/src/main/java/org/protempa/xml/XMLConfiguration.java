@@ -30,13 +30,19 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.logging.Logger;
 
+import org.protempa.backend.dsb.filter.AbstractFilter;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
+import org.protempa.backend.dsb.filter.PositionFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.ValueComparator;
+import org.protempa.query.And;
 import org.protempa.query.Query;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 /**
  * This class takes a protempa configuration information such as a query and
@@ -47,15 +53,53 @@ import org.protempa.query.Query;
 public class XMLConfiguration {
 	private static Logger myLogger = Logger.getLogger(XMLConfiguration.class.getName());
 
+	private static XStream xstream = null;
+
 	/**
 	 * private constructor as there is no reason to instantiate this class.
 	 */
 	private XMLConfiguration() {
 	}
 
+	private static synchronized XStream getXStream() {
+		if (xstream == null) {
+			xstream = new XStream(new StaxDriver());
+			
+			xstream.alias("and", And.class);
+			
+			xstream.alias("dateTimeFilter", DateTimeFilter.class);
+
+			// filters
+			// We want to use custom logic to traverse the links between filters
+			// so tell XStream reflection to ignore the AbstractFilter class's
+			// "and" field.
+			xstream.omitField(AbstractFilter.class, "and");
+
+			// nominialValue
+			xstream.alias("nominalValue", NominalValue.class);
+			
+			xstream.alias("positionFilter", PositionFilter.class);
+
+			// property
+			xstream.useAttributeFor(PropertyValueFilter.class, "property");
+			xstream.aliasField("propertyName", PropertyValueFilter.class, "property");
+			
+			// propertyValueFilter
+			xstream.alias("propertyValueFilter", PropertyValueFilter.class);
+			
+			// propertyValueFilter
+			xstream.alias("propertyValuesFilter", PropertyValueFilter.class);
+
+			// protempaQuery
+			xstream.alias("protempaQuery", Query.class);
+			xstream.registerConverter(new QueryConverter());
+		}
+		return xstream;
+	}
+
 	public static Query readQueryAsXML(File file) throws IOException {
 		myLogger.entering(XMLConfiguration.class.getName(), "readQueryAsXML");
-		Query query = null;
+		Query query = (Query) getXStream().fromXML(file);
 		return query;
 	}
 
@@ -72,69 +116,41 @@ public class XMLConfiguration {
 	public static void writeQueryAsXML(Query query, File file) throws IOException {
 		myLogger.entering(XMLConfiguration.class.getName(), "writeQueryAsXML");
 		Writer writer = new FileWriter(file);
+		getXStream().toXML(query, writer);
 		writer.close();
 		myLogger.exiting(XMLConfiguration.class.getName(), "writeQueryAsXML");
 	}
 
-	private static final String[] PROP_IDS = {"Patient",
-        "Encounter", "30DayReadmission", "No30DayReadmission", "PatientAll",
-        "DISEASEINDICATOR:EndStageRenalDisease",
-        "DISEASEINDICATOR:UncontrolledDiabetes",
-        "DISEASEINDICATOR:MetastasisEvent",
-        "DISEASEINDICATOR:MethicillinResistantStaphAureusEvent",
-        "DISEASEINDICATOR:PressureUlcerEvent",
-        "PROCEDUREINDICATOR:AmputationEvent",
-        "PROCEDUREINDICATOR:BoneMarrowTransplantEvent",
-        "DISEASEINDICATOR:Obesity",
-        "DISEASEINDICATOR:MyocardialInfarction",
-        "ERATCancer",
-        "ERATCKD", "ERATCOPD", "ERATDiabetes", "ERATHF",
-        "ERATHxTransplant", "ERATMI", "ERATPulmHyp", "ERATStroke",
-        "DISEASEINDICATOR:SickleCellAnemiaEvent",
-        "DISEASEINDICATOR:SickleCellCrisisEvent",
-        "ICD9:Procedures", "ICD9:Diagnoses", "ERATMedicationOrders",
-        "VitalSign", "Geography", "MSDRG:MSDRG", //"APRDRG:APRDRG",
-        "HospitalChargeAmount",
-        "READMISSIONS:Chemotherapy180DaysBeforeSurgery",
-        "READMISSIONS:Chemotherapy365DaysBeforeSurgery",
-        "READMISSIONS:Encounter90DaysEarlier",
-        "READMISSIONS:Encounter180DaysEarlier",
-        "LAB:BNPClassificationHeartFailureDetailed",
-        "LAB:PlateletCountClassification",
-        "LAB:1000764", // Serum creatinine
-        "MED:(LME70) angiotensin converting enzyme inhibitors",
-        "MED:(LME77) beta-adrenergic blocking agents",
-        "MED:(LME81) diuretics",
-        "MED:(LME87) inotropic agents"
-        };
+	private static final String[] PROP_IDS = { "Patient", "Encounter", "30DayReadmission", "No30DayReadmission", "PatientAll",
+			"DISEASEINDICATOR:EndStageRenalDisease", "DISEASEINDICATOR:UncontrolledDiabetes", "DISEASEINDICATOR:MetastasisEvent",
+			"PROCEDUREINDICATOR:BoneMarrowTransplantEvent", "DISEASEINDICATOR:Obesity", "DISEASEINDICATOR:MyocardialInfarction", "ERATCancer", "ERATCKD",
+			"VitalSign",
+			"Geography",
+			"MSDRG:MSDRG", // "APRDRG:APRDRG",
+			"LAB:PlateletCountClassification",
+			"LAB:1000764", // Serum creatinine
+			"MED:(LME87) inotropic agents" };
 
 	public static void main(String[] args) throws Exception {
-        String[] keyIds = {"keyId1", "keyId2"};
-        
-        DateTimeFilter timeRange
-        = new DateTimeFilter(new String[]{"Encounter"}, 
-      		               AbsoluteTimeGranularity.DAY.getShortFormat().parse("12/1/2010"),
-                             AbsoluteTimeGranularity.DAY, 
-                             AbsoluteTimeGranularity.DAY.getShortFormat().parse("3/31/2011"),
-                             AbsoluteTimeGranularity.DAY, Side.START, Side.START);
-      /*
-       * Includes only inpatient visits.
-       */
-      PropertyValueFilter encType = new PropertyValueFilter(
-              new String[]{"Encounter"}, "type",
-              ValueComparator.EQUAL_TO, new NominalValue("INPATIENT"));
-      timeRange.setAnd(encType);
-      /*
-       * Includes only inpatient visits at EUH, EUHM and WW.
-       */
-      PropertyValueFilter healthcareEntity = new PropertyValueFilter(
-              new String[]{"Encounter"}, "healthcareEntity",
-              ValueComparator.IN,
-              NominalValue.getInstance("EUH"),
-              NominalValue.getInstance("CLH"),
-              NominalValue.getInstance("WW"));
-      encType.setAnd(healthcareEntity);
-      Query query = new Query(keyIds, timeRange, PROP_IDS, null);
-      writeQueryAsXML(query, new File("z.xml"));
+		String[] keyIds = { "keyId1", "keyId2" };
+
+		DateTimeFilter timeRange = new DateTimeFilter(new String[] { "Encounter" }, AbsoluteTimeGranularity.DAY.getShortFormat().parse("12/1/2010"),
+				AbsoluteTimeGranularity.DAY, AbsoluteTimeGranularity.DAY.getShortFormat().parse("3/31/2011"), AbsoluteTimeGranularity.DAY, Side.START,
+				Side.START);
+		/*
+		 * Includes only inpatient visits.
+		 */
+		PropertyValueFilter encType = new PropertyValueFilter(new String[] { "Encounter" }, "type", ValueComparator.EQUAL_TO, new NominalValue("INPATIENT"));
+		timeRange.setAnd(encType);
+		
+		/*
+		 * Includes only inpatient visits at EUH, EUHM and WW.
+		 */
+		PropertyValueFilter healthcareEntity = new PropertyValueFilter(new String[] { "Encounter" }, "healthcareEntity", ValueComparator.IN,
+				NominalValue.getInstance("EUH"), NominalValue.getInstance("CLH"), NominalValue.getInstance("WW"));
+		encType.setAnd(healthcareEntity);
+		
+		Query query = new Query(keyIds, timeRange, PROP_IDS, null);
+		writeQueryAsXML(query, new File("z.xml"));
 	}
 }
