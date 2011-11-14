@@ -76,9 +76,15 @@ public class XMLConfiguration {
 			// "and" field.
 			xstream.omitField(AbstractFilter.class, "and");
 			
+			// finish
+			xstream.useAttributeFor(PositionFilter.class, "finish");
+			
 			// finishGranularity
-			xstream.useAttributeFor(DateTimeFilter.class, "finishGran");
-			xstream.aliasField("finishGranularity", DateTimeFilter.class, "finishGran");
+			xstream.useAttributeFor(PositionFilter.class, "finishGran");
+			xstream.aliasField("finishGranularity", PositionFilter.class, "finishGran");
+			
+			// finishSide
+			xstream.useAttributeFor(PositionFilter.class, "finishSide");
 			
 			// granularityType
 			xstream.registerConverter(new GranularityValueConverter());
@@ -88,6 +94,9 @@ public class XMLConfiguration {
 			
 			xstream.alias("positionFilter", PositionFilter.class);
 
+			// positionFilter
+			xstream.omitField(PositionFilter.class, "ival");
+			
 			// property
 			xstream.useAttributeFor(PropertyValueFilter.class, "property");
 			xstream.aliasField("propertyName", PropertyValueFilter.class, "property");
@@ -97,14 +106,23 @@ public class XMLConfiguration {
 			
 			// propertyValueFilter
 			xstream.alias("propertyValuesFilter", PropertyValueFilter.class);
+			
+			// propositionIDs
+			xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new PropIDsConverter());
 
 			// protempaQuery
 			xstream.alias("protempaQuery", Query.class);
 			xstream.registerConverter(new QueryConverter());
 			
+			// start
+			xstream.useAttributeFor(PositionFilter.class, "start");
+			
 			// startGranularity
-			xstream.useAttributeFor(DateTimeFilter.class, "startGran");
-			xstream.aliasField("startGranularity", DateTimeFilter.class, "startGran");
+			xstream.useAttributeFor(PositionFilter.class, "startGran");
+			xstream.aliasField("startGranularity", PositionFilter.class, "startGran");
+			
+			// startSide
+			xstream.useAttributeFor(PositionFilter.class, "startSide");
 		}
 		return xstream;
 	}
@@ -147,7 +165,7 @@ public class XMLConfiguration {
 		String[] keyIds = { "keyId1", "keyId2" };
 
 		DateTimeFilter timeRange = new DateTimeFilter(new String[] { "Encounter" }, AbsoluteTimeGranularity.DAY.getShortFormat().parse("12/1/2010"),
-				AbsoluteTimeGranularity.DAY, AbsoluteTimeGranularity.DAY.getShortFormat().parse("3/31/2011"), AbsoluteTimeGranularity.DAY, Side.START,
+				AbsoluteTimeGranularity.DAY, AbsoluteTimeGranularity.DAY.getShortFormat().parse("3/31/2011"), AbsoluteTimeGranularity.DAY, Side.FINISH,
 				Side.START);
 		/*
 		 * Includes only inpatient visits.

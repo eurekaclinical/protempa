@@ -32,7 +32,7 @@ class PropIDsConverter implements Converter {
 	 */
 	@Override
 	public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) {
-		return false;
+		return String[].class.equals(clazz);
 	}
 
 	/**
