@@ -18,12 +18,17 @@ import java.util.List;
 public final class And<E> implements Serializable, Cloneable {
     private static final long serialVersionUID = -5176413026732863737L;
     private List<E> anded;
-    private PropertyChangeSupport changes;
+    private transient PropertyChangeSupport changes;
 
     public And() {
         this.anded = new ArrayList<E>();
         this.changes = new PropertyChangeSupport(this);
     }
+    
+    private Object readResolve() {
+        changes = new PropertyChangeSupport(this);
+        return this;
+      }
 
     public And(E... anded) {
 //        this.anded = anded.clone();
