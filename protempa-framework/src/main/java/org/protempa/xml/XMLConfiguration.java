@@ -75,6 +75,13 @@ public class XMLConfiguration {
 			// so tell XStream reflection to ignore the AbstractFilter class's
 			// "and" field.
 			xstream.omitField(AbstractFilter.class, "and");
+			
+			// finishGranularity
+			xstream.useAttributeFor(DateTimeFilter.class, "finishGran");
+			xstream.aliasField("finishGranularity", DateTimeFilter.class, "finishGran");
+			
+			// granularityType
+			xstream.registerConverter(new GranularityValueConverter());
 
 			// nominialValue
 			xstream.alias("nominalValue", NominalValue.class);
@@ -94,6 +101,10 @@ public class XMLConfiguration {
 			// protempaQuery
 			xstream.alias("protempaQuery", Query.class);
 			xstream.registerConverter(new QueryConverter());
+			
+			// startGranularity
+			xstream.useAttributeFor(DateTimeFilter.class, "startGran");
+			xstream.aliasField("startGranularity", DateTimeFilter.class, "startGran");
 		}
 		return xstream;
 	}
