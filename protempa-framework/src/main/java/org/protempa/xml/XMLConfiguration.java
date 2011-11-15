@@ -36,7 +36,10 @@ import org.protempa.backend.dsb.filter.PositionFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
+import org.protempa.proposition.value.BooleanValue;
+import org.protempa.proposition.value.InequalityNumberValue;
 import org.protempa.proposition.value.NominalValue;
+import org.protempa.proposition.value.NumberValue;
 import org.protempa.proposition.value.ValueComparator;
 import org.protempa.query.And;
 import org.protempa.query.Query;
@@ -65,8 +68,17 @@ public class XMLConfiguration {
 		if (xstream == null) {
 			xstream = new XStream(new StaxDriver());
 			
+			// and
 			xstream.alias("and", And.class);
 			xstream.registerConverter(new AndConverter());
+			
+			// booleanValue
+			xstream.alias("booleanValue", BooleanValue.class);
+			xstream.registerConverter(new BooleanValueObjectConverter());
+			
+			// comparator
+			xstream.useAttributeFor(PropertyValueFilter.class, "valueComparator");
+			xstream.aliasField("comparator", PropertyValueFilter.class, "valueComparator");
 			
 			// dateTimeFilter
 			xstream.alias("dateTimeFilter", DateTimeFilter.class);
@@ -108,6 +120,7 @@ public class XMLConfiguration {
 			
 			// propertyValueFilter
 			xstream.alias("propertyValuesFilter", PropertyValueFilter.class);
+			xstream.addImplicitArray(PropertyValueFilter.class, "values");
 			
 			// propositionIDs
 			xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new PropIDsConverter());
@@ -182,6 +195,28 @@ public class XMLConfiguration {
 				NominalValue.getInstance("EUH"), NominalValue.getInstance("CLH"), NominalValue.getInstance("WW"));
 		encType.setAnd(healthcareEntity);
 		
+		
+		/*
+		 * Nonsense filter for testing booleanValue
+		 */
+		PropertyValueFilter fubarEntity = new PropertyValueFilter(new String[] { "Encounter" }, "FUBAR", ValueComparator.EQUAL_TO,
+				BooleanValue.TRUE);
+		healthcareEntity.setAnd(fubarEntity);
+
+		/*
+		 * Nonsense filter for testing numberValue
+		 */
+		PropertyValueFilter numberEntity = new PropertyValueFilter(new String[] { "Encounter" }, "measure", ValueComparator.LESS_THAN_OR_EQUAL_TO,
+				NumberValue.getInstance(44));
+		fubarEntity.setAnd(numberEntity);
+
+		/*
+		 * Nonsense filter for testing numberValue
+		 */
+		PropertyValueFilter inequalityEntity = new PropertyValueFilter(new String[] { "Encounter" }, "measure", ValueComparator.GREATER_THAN_OR_EQUAL_TO,
+				InequalityNumberValue.parse("<44"));
+		numberEntity.setAnd(inequalityEntity);
+
 		Query query = new Query(keyIds, timeRange, PROP_IDS, null);
 		writeQueryAsXML(query, new File("z.xml"));
 	}
