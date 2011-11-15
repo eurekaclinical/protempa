@@ -16,7 +16,7 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
  * 
  * @author mgrand
  */
-public class GranularityValueConverter implements SingleValueConverter {
+class GranularityValueConverter implements SingleValueConverter {
 	private final static String SECOND = "second";
 	private final static String MINUTE = "minute";
 	private final static String HOUR = "hour";

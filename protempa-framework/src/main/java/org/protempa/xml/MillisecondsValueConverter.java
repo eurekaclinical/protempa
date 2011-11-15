@@ -12,7 +12,7 @@ import com.thoughtworks.xstream.converters.basic.DateConverter;
  * Convert between Java's time expressed as milliseconds and an XML data string.
  * @author mgrand
  */
-public class MillisecondsValueConverter extends DateConverter {
+class MillisecondsValueConverter extends DateConverter {
 
 	/**
 	 * 

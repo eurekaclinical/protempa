@@ -19,7 +19,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * 
  * @author mgrand
  */
-public class QueryConverter implements Converter {
+class QueryConverter implements Converter {
 
 	/**
 	 * Constructor
