@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Date;
 import java.util.logging.Logger;
 
 import org.protempa.backend.dsb.filter.AbstractFilter;
@@ -37,6 +38,7 @@ import org.protempa.backend.dsb.filter.PositionFilter.Side;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.BooleanValue;
+import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.InequalityNumberValue;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
@@ -83,6 +85,10 @@ public class XMLConfiguration {
 			// dateTimeFilter
 			xstream.alias("dateTimeFilter", DateTimeFilter.class);
 			xstream.registerConverter(new DateTimeFilterConverter());
+			
+			// dateValue
+			xstream.alias("dateValue", DateValue.class);
+			xstream.registerConverter(new DateValueObjectConverter());
 
 			// filters
 			// We want to use custom logic to traverse the links between filters
@@ -211,11 +217,18 @@ public class XMLConfiguration {
 		fubarEntity.setAnd(numberEntity);
 
 		/*
-		 * Nonsense filter for testing numberValue
+		 * Nonsense filter for testing inequalityValue
 		 */
 		PropertyValueFilter inequalityEntity = new PropertyValueFilter(new String[] { "Encounter" }, "measure", ValueComparator.GREATER_THAN_OR_EQUAL_TO,
 				InequalityNumberValue.parse("<44"));
 		numberEntity.setAnd(inequalityEntity);
+
+		/*
+		 * Nonsense filter for testing dateValue
+		 */
+		PropertyValueFilter dateEntity = new PropertyValueFilter(new String[] { "Encounter" }, "measure", ValueComparator.LESS_THAN,
+				DateValue.getInstance(new Date()));
+		inequalityEntity.setAnd(dateEntity);
 
 		Query query = new Query(keyIds, timeRange, PROP_IDS, null);
 		writeQueryAsXML(query, new File("z.xml"));
