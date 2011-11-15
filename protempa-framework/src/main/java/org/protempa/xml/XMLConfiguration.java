@@ -115,6 +115,7 @@ public class XMLConfiguration {
 
 			// nominialValue
 			xstream.alias("nominalValue", NominalValue.class);
+			xstream.registerConverter(new NominalValueObjectConverter());
 			
 			// numberValue
 			xstream.alias("numberValue", NumberValue.class);
