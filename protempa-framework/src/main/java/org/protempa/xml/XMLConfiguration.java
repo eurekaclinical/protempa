@@ -68,7 +68,9 @@ public class XMLConfiguration {
 			xstream.alias("and", And.class);
 			xstream.registerConverter(new AndConverter());
 			
+			// dateTimeFilter
 			xstream.alias("dateTimeFilter", DateTimeFilter.class);
+			xstream.registerConverter(new DateTimeFilterConverter());
 
 			// filters
 			// We want to use custom logic to traverse the links between filters
