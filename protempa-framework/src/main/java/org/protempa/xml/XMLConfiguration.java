@@ -116,10 +116,13 @@ public class XMLConfiguration {
 			// nominialValue
 			xstream.alias("nominalValue", NominalValue.class);
 			
-			xstream.alias("positionFilter", PositionFilter.class);
+			// numberValue
+			xstream.alias("numberValue", NumberValue.class);
+			xstream.registerConverter(new NumberValueObjectConverter());
 
 			// positionFilter
 			xstream.omitField(PositionFilter.class, "ival");
+			xstream.alias("positionFilter", PositionFilter.class);
 			
 			// property
 			xstream.useAttributeFor(PropertyValueFilter.class, "property");
