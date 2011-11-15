@@ -780,7 +780,7 @@ If the value of this attribute is true, then the count produced for te described
                                 <xs:documentation>The name of the property to be compared.</xs:documentation>
                             </xs:annotation>
                         </xs:attribute>
-                        <xs:attribute ref="comparitor"/>
+                        <xs:attribute name="comparitor" type="comparitorType"/>
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="propertyConstraintValueList">
@@ -790,7 +790,7 @@ If the value of this attribute is true, then the count produced for te described
                     <xs:complexType>
                         <xs:group ref="valueListGroup"/>
                         <xs:attribute ref="propertyName"/>
-                        <xs:attribute ref="listComparitor"/>
+                        <xs:attribute name="comparitor" type="listComparitorType"/>
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
@@ -936,17 +936,6 @@ A list of values
     <xs:attribute name="columnNamePrefixOverride" type="nameType"/>
     <xs:attribute name="startSide" type="sideType"/>
     <xs:attribute name="finishSide" type="sideType"/>
-    <xs:attribute name="listComparitor">
-        <xs:annotation>
-            <xs:documentation>The comparison to make between the named property in the specified propositions and a list of values.</xs:documentation>
-        </xs:annotation>
-        <xs:simpleType>
-            <xs:restriction base="xs:Name">
-                <xs:enumeration value="in"/>
-                <xs:enumeration value="notIn"/>
-            </xs:restriction>
-        </xs:simpleType>
-    </xs:attribute>
     <xs:attribute name="unit">
         <xs:simpleType>
             <xs:restriction base="xs:token">
@@ -959,21 +948,6 @@ A list of values
                 <xs:enumeration value="absoluteYear"/>
                 <xs:enumeration value="relativeDay"/>
                 <xs:enumeration value="relativeHour"/>
-            </xs:restriction>
-        </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="comparitor">
-        <xs:annotation>
-            <xs:documentation>The comparison to make between the named property in the specified propositions and the given value.</xs:documentation>
-        </xs:annotation>
-        <xs:simpleType>
-            <xs:restriction base="xs:Name">
-                <xs:enumeration value="greater"/>
-                <xs:enumeration value="less"/>
-                <xs:enumeration value="equal"/>
-                <xs:enumeration value="notEqual"/>
-                <xs:enumeration value="greaterOrEqual"/>
-                <xs:enumeration value="lessOrEqual"/>
             </xs:restriction>
         </xs:simpleType>
     </xs:attribute>
@@ -1252,7 +1226,7 @@ A list of values
                         <xs:documentation xml:lang="en">The name of the property whose value is to be compared.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute ref="comparitor" use="required"/>
+                <xs:attribute name="comparitor" use="required" type="comparitorType"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -1267,7 +1241,7 @@ A list of values
                         <xs:documentation xml:lang="en">The name of the property whose value is to be compared.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute use="required" ref="listComparitor">
+                <xs:attribute use="required" name="comparitor" type="listComparitorType">
                     <xs:annotation>
                         <xs:documentation>The comparison to make between the named property in the specified propositions and the given values.</xs:documentation>
                     </xs:annotation>
@@ -1296,4 +1270,20 @@ A list of values
             <xs:element ref="incomparableNumberValue"/>
         </xs:choice>
     </xs:group>
+    <xs:simpleType name="listComparitorType">
+        <xs:restriction base="xs:Name">
+            <xs:enumeration value="in"/>
+            <xs:enumeration value="notIn"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="comparitorType">
+        <xs:restriction base="xs:Name">
+            <xs:enumeration value="greater"/>
+            <xs:enumeration value="less"/>
+            <xs:enumeration value="equal"/>
+            <xs:enumeration value="notEqual"/>
+            <xs:enumeration value="greaterOrEqual"/>
+            <xs:enumeration value="lessOrEqual"/>
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>
