@@ -108,6 +108,10 @@ public class XMLConfiguration {
 			
 			// granularityType
 			xstream.registerConverter(new GranularityValueConverter());
+			
+			// incomparableNumberValue
+			xstream.alias("incomparableNumberValue", InequalityNumberValue.class);
+			xstream.registerConverter(new InequalityValueObjectConverter());
 
 			// nominialValue
 			xstream.alias("nominalValue", NominalValue.class);
