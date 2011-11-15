@@ -28,6 +28,14 @@ public class PositionFilter extends AbstractFilter {
 		public String getXmlName() {
 			return xmlName;
 		}
+		
+		public static Side fromXmlName(String xmlName) {
+			if (START.xmlName.equals(xmlName))
+				return START;
+			if (FINISH.xmlName.equals(xmlName))
+				return FINISH;
+			return null;
+		}
 	}
 
 	private static final IntervalFactory intervalFactory = new IntervalFactory();
