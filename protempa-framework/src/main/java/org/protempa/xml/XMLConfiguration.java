@@ -47,6 +47,7 @@ import org.protempa.query.And;
 import org.protempa.query.Query;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.basic.DateConverter;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 /**
@@ -69,6 +70,7 @@ public class XMLConfiguration {
 	private static synchronized XStream getXStream() {
 		if (xstream == null) {
 			xstream = new XStream(new StaxDriver());
+			xstream.registerConverter(new DateConverter("yyyy-MM-dd'T'HH:mm:ss.S", new String[0]), XStream.PRIORITY_VERY_HIGH);
 			
 			// and
 			xstream.alias("and", And.class);

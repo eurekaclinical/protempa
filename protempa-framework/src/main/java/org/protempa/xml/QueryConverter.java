@@ -3,6 +3,8 @@
  */
 package org.protempa.xml;
 
+import java.net.URL;
+
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.query.And;
 import org.protempa.query.Query;
@@ -43,6 +45,10 @@ class QueryConverter implements Converter {
 	 */
 	@Override
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
+		// Reference Schema
+		writer.addAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		writer.addAttribute("xsi:noNamespaceSchemaLocation", findSchemaFile());
+		
 		Query query = (Query) value;
 		// TODO marshal dataSourceBackend
 		// TODO marshal knowledgeSourceBackend
@@ -147,4 +153,8 @@ class QueryConverter implements Converter {
 		throw new ConversionException("Missing <propositionIDs> element");
 	}
 
+	private String findSchemaFile() {
+		URL url = getClass().getResource("/org/protempa/xml/protempa_query.xsd");
+		return url.toExternalForm();
+	}
 }
