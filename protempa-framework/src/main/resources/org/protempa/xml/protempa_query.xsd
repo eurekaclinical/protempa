@@ -400,7 +400,7 @@ If the value of this attribute is true, then the count produced for te described
                         </xs:attribute>
                         <xs:attribute default="-1" name="fromIndex" type="xs:int"/>
                         <xs:attribute default="-1" name="toIndex" type="xs:int"/>
-                        <xs:attribute ref="propositionComparitor"/>
+                        <xs:attribute ref="propositionComparator"/>
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="reference">
@@ -425,7 +425,7 @@ If the value of this attribute is true, then the count produced for te described
                         </xs:sequence>
                         <xs:attribute default="-1" name="fromIndex" type="xs:int"/>
                         <xs:attribute default="-1" name="toIndex" type="xs:int"/>
-                        <xs:attribute ref="propositionComparitor"/>
+                        <xs:attribute ref="propositionComparator"/>
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
@@ -780,7 +780,7 @@ If the value of this attribute is true, then the count produced for te described
                                 <xs:documentation>The name of the property to be compared.</xs:documentation>
                             </xs:annotation>
                         </xs:attribute>
-                        <xs:attribute name="comparitor" type="comparitorType"/>
+                        <xs:attribute name="comparator" type="comparatorType"/>
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="propertyConstraintValueList">
@@ -790,7 +790,7 @@ If the value of this attribute is true, then the count produced for te described
                     <xs:complexType>
                         <xs:group ref="valueListGroup"/>
                         <xs:attribute ref="propertyName"/>
-                        <xs:attribute name="comparitor" type="listComparitorType"/>
+                        <xs:attribute name="comparator" type="listComparatorType"/>
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
@@ -951,7 +951,7 @@ A list of values
             </xs:restriction>
         </xs:simpleType>
     </xs:attribute>
-    <xs:attribute name="propositionComparitor">
+    <xs:attribute name="propositionComparator">
         <xs:simpleType>
             <xs:restriction base="xs:token">
                 <xs:enumeration value="AllPropositionIntervalComparator"/>
@@ -1226,7 +1226,7 @@ A list of values
                         <xs:documentation xml:lang="en">The name of the property whose value is to be compared.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute name="comparitor" use="required" type="comparitorType"/>
+                <xs:attribute name="comparator" use="required" type="comparatorType"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>
@@ -1241,7 +1241,7 @@ A list of values
                         <xs:documentation xml:lang="en">The name of the property whose value is to be compared.</xs:documentation>
                     </xs:annotation>
                 </xs:attribute>
-                <xs:attribute use="required" name="comparitor" type="listComparitorType">
+                <xs:attribute use="required" name="comparator" type="listComparatorType">
                     <xs:annotation>
                         <xs:documentation>The comparison to make between the named property in the specified propositions and the given values.</xs:documentation>
                     </xs:annotation>
@@ -1270,13 +1270,13 @@ A list of values
             <xs:element ref="incomparableNumberValue"/>
         </xs:choice>
     </xs:group>
-    <xs:simpleType name="listComparitorType">
+    <xs:simpleType name="listComparatorType">
         <xs:restriction base="xs:Name">
             <xs:enumeration value="in"/>
             <xs:enumeration value="notIn"/>
         </xs:restriction>
     </xs:simpleType>
-    <xs:simpleType name="comparitorType">
+    <xs:simpleType name="comparatorType">
         <xs:restriction base="xs:Name">
             <xs:enumeration value="greater"/>
             <xs:enumeration value="less"/>
