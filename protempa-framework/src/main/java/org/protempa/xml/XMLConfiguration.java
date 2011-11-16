@@ -140,6 +140,7 @@ public class XMLConfiguration {
 			
 			// propositionIDs
 			xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new PropIDsConverter());
+			xstream.aliasField("propositionIDs", PropertyValueFilter.class, "propositionIds");
 
 			// protempaQuery
 			xstream.alias("protempaQuery", Query.class);
