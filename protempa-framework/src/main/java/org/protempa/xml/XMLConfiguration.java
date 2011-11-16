@@ -71,24 +71,24 @@ public class XMLConfiguration {
 		if (xstream == null) {
 			xstream = new XStream(new StaxDriver());
 			xstream.registerConverter(new DateConverter("yyyy-MM-dd'T'HH:mm:ss.S", new String[0]), XStream.PRIORITY_VERY_HIGH);
-			
+
 			// and
 			xstream.alias("and", And.class);
 			xstream.registerConverter(new AndConverter());
-			
+
 			// booleanValue
 			xstream.alias("booleanValue", BooleanValue.class);
 			xstream.registerConverter(new BooleanValueObjectConverter());
-			
+
 			// comparator
 			xstream.useAttributeFor(PropertyValueFilter.class, "valueComparator");
 			xstream.aliasField("comparator", PropertyValueFilter.class, "valueComparator");
 			xstream.registerConverter(new ValueComparatorValueConverter());
-			
+
 			// dateTimeFilter
 			xstream.alias("dateTimeFilter", DateTimeFilter.class);
 			xstream.registerConverter(new DateTimeFilterConverter());
-			
+
 			// dateValue
 			xstream.alias("dateValue", DateValue.class);
 			xstream.registerConverter(new DateValueObjectConverter());
@@ -98,20 +98,20 @@ public class XMLConfiguration {
 			// so tell XStream reflection to ignore the AbstractFilter class's
 			// "and" field.
 			xstream.omitField(AbstractFilter.class, "and");
-			
+
 			// finish
 			xstream.useAttributeFor(PositionFilter.class, "finish");
-			
+
 			// finishGranularity
 			xstream.useAttributeFor(PositionFilter.class, "finishGran");
 			xstream.aliasField("finishGranularity", PositionFilter.class, "finishGran");
-			
+
 			// finishSide
 			xstream.useAttributeFor(PositionFilter.class, "finishSide");
-			
+
 			// granularityType
 			xstream.registerConverter(new GranularityValueConverter());
-			
+
 			// incomparableNumberValue
 			xstream.alias("incomparableNumberValue", InequalityNumberValue.class);
 			xstream.registerConverter(new InequalityValueObjectConverter());
@@ -119,7 +119,7 @@ public class XMLConfiguration {
 			// nominialValue
 			xstream.alias("nominalValue", NominalValue.class);
 			xstream.registerConverter(new NominalValueObjectConverter());
-			
+
 			// numberValue
 			xstream.alias("numberValue", NumberValue.class);
 			xstream.registerConverter(new NumberValueObjectConverter());
@@ -127,18 +127,18 @@ public class XMLConfiguration {
 			// positionFilter
 			xstream.omitField(PositionFilter.class, "ival");
 			xstream.alias("positionFilter", PositionFilter.class);
-			
+
 			// property
 			xstream.useAttributeFor(PropertyValueFilter.class, "property");
 			xstream.aliasField("propertyName", PropertyValueFilter.class, "property");
-			
+
 			// propertyValueFilter
 			xstream.alias("propertyValueFilter", PropertyValueFilter.class);
-			
+
 			// propertyValueFilter
 			xstream.alias("propertyValuesFilter", PropertyValueFilter.class);
 			xstream.addImplicitArray(PropertyValueFilter.class, "values");
-			
+
 			// propositionIDs
 			xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new PropIDsConverter());
 			xstream.aliasField("propositionIDs", PropertyValueFilter.class, "propositionIds");
@@ -146,20 +146,32 @@ public class XMLConfiguration {
 			// protempaQuery
 			xstream.alias("protempaQuery", Query.class);
 			xstream.registerConverter(new QueryConverter());
-			
+
 			// start
 			xstream.useAttributeFor(PositionFilter.class, "start");
-			
+
 			// startGranularity
 			xstream.useAttributeFor(PositionFilter.class, "startGran");
 			xstream.aliasField("startGranularity", PositionFilter.class, "startGran");
-			
+
 			// startSide
 			xstream.useAttributeFor(PositionFilter.class, "startSide");
 		}
 		return xstream;
 	}
 
+	/**
+	 * Read XML from the specified file that describes a Protemp query and
+	 * create the query.
+	 * 
+	 * @param file
+	 *            The file to read. The top level element of the XML in the file
+	 *            must be "protempaQuery" and the XML must conform to the
+	 *            Protempa XML schema.
+	 * @return The described query.
+	 * @throws IOException
+	 *             If there is a problem.
+	 */
 	public static Query readQueryAsXML(File file) throws IOException {
 		myLogger.entering(XMLConfiguration.class.getName(), "readQueryAsXML");
 		Query query = (Query) getXStream().fromXML(file);
@@ -186,13 +198,8 @@ public class XMLConfiguration {
 
 	private static final String[] PROP_IDS = { "Patient", "Encounter", "30DayReadmission", "No30DayReadmission", "PatientAll",
 			"DISEASEINDICATOR:EndStageRenalDisease", "DISEASEINDICATOR:UncontrolledDiabetes", "DISEASEINDICATOR:MetastasisEvent",
-			"PROCEDUREINDICATOR:BoneMarrowTransplantEvent", "DISEASEINDICATOR:Obesity", "ERATCancer", "ERATCKD",
-			"VitalSign",
-			"Geography",
-			"MSDRG:MSDRG",
-			"LAB:PlateletCountClassification",
-			"LAB:1000764", 
-			"MED:(LME87) inotropic agents" };
+			"PROCEDUREINDICATOR:BoneMarrowTransplantEvent", "DISEASEINDICATOR:Obesity", "ERATCancer", "ERATCKD", "VitalSign", "Geography", "MSDRG:MSDRG",
+			"LAB:PlateletCountClassification", "LAB:1000764", "MED:(LME87) inotropic agents" };
 
 	public static void main(String[] args) throws Exception {
 		String[] keyIds = { "keyId1", "keyId2" };
@@ -205,20 +212,18 @@ public class XMLConfiguration {
 		 */
 		PropertyValueFilter encType = new PropertyValueFilter(new String[] { "Encounter" }, "type", ValueComparator.EQUAL_TO, new NominalValue("INPATIENT"));
 		timeRange.setAnd(encType);
-		
+
 		/*
 		 * Includes only inpatient visits at EUH, EUHM and WW.
 		 */
 		PropertyValueFilter healthcareEntity = new PropertyValueFilter(new String[] { "Encounter" }, "healthcareEntity", ValueComparator.IN,
 				NominalValue.getInstance("EUH"), NominalValue.getInstance("CLH"), NominalValue.getInstance("WW"));
 		encType.setAnd(healthcareEntity);
-		
-		
+
 		/*
 		 * Nonsense filter for testing booleanValue
 		 */
-		PropertyValueFilter fubarEntity = new PropertyValueFilter(new String[] { "Encounter" }, "FUBAR", ValueComparator.EQUAL_TO,
-				BooleanValue.TRUE);
+		PropertyValueFilter fubarEntity = new PropertyValueFilter(new String[] { "Encounter" }, "FUBAR", ValueComparator.EQUAL_TO, BooleanValue.TRUE);
 		healthcareEntity.setAnd(fubarEntity);
 
 		/*
