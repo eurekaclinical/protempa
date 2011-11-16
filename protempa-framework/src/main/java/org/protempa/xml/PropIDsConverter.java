@@ -44,7 +44,7 @@ class PropIDsConverter implements Converter {
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		String[] propIds = (String[]) value;
 		for (String propId : propIds) {
-			writer.startNode("propositionId");
+			writer.startNode("propositionID");
 			writer.setValue(propId);
 			writer.endNode();
 		}
