@@ -37,7 +37,7 @@ class InequalityValueObjectConverter implements Converter {
 	@Override
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		InequalityNumberValue ival = (InequalityNumberValue)value;
-		writer.setValue(ival.getFormatted());
+		writer.setValue(ival.getComparator().getComparatorString() + ival.getBigDecimal().toPlainString());
 	}
 	
 	/*
