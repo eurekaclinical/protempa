@@ -83,4 +83,26 @@ public final class And<E> implements Serializable, Cloneable {
             throw new AssertionError("should not happen");
         }
     }
+
+	@Override
+	public int hashCode() {
+		return (anded == null) ? 0 : anded.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		And<?> other = (And<?>) obj;
+		if (anded == null) {
+			if (other.anded != null)
+				return false;
+		} else if (!anded.equals(other.anded))
+			return false;
+		return true;
+	}
 }
