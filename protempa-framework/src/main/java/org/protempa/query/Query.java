@@ -1,6 +1,7 @@
 package org.protempa.query;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.protempa.ProtempaUtil;
@@ -109,6 +110,39 @@ public class Query implements Serializable {
 			return new Filter[0];
 		}
 		return filters.filterChainToArray();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = prime + ((filters == null) ? 0 : filters.hashCode());
+		result = prime * result + Arrays.hashCode(keyIds);
+		result = prime * result + Arrays.hashCode(propIds);
+		result = prime * result + Arrays.hashCode(termIds);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Query other = (Query) obj;
+		if (filters == null) {
+			if (other.filters != null)
+				return false;
+		} else if (!filters.equals(other.filters))
+			return false;
+		if (!Arrays.equals(keyIds, other.keyIds))
+			return false;
+		if (!Arrays.equals(propIds, other.propIds))
+			return false;
+		if (!Arrays.equals(termIds, other.termIds))
+			return false;
+		return true;
 	}
 
 }
