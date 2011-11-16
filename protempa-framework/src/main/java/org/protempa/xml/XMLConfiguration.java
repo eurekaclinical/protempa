@@ -83,6 +83,7 @@ public class XMLConfiguration {
 			// comparator
 			xstream.useAttributeFor(PropertyValueFilter.class, "valueComparator");
 			xstream.aliasField("comparator", PropertyValueFilter.class, "valueComparator");
+			xstream.registerConverter(new ValueComparatorValueConverter());
 			
 			// dateTimeFilter
 			xstream.alias("dateTimeFilter", DateTimeFilter.class);
