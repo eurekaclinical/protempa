@@ -153,4 +153,25 @@ public class RelativeDayGranularity implements Granularity {
     public Unit getCorrespondingUnit() {
         return RelativeDayUnit.DAY;
     }
+
+	@Override
+	public int hashCode() {
+		return ordinal;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RelativeDayGranularity other = (RelativeDayGranularity) obj;
+		if (ordinal != other.ordinal)
+			return false;
+		return true;
+	}
+    
+    
 }

@@ -227,4 +227,53 @@ public class PositionFilter extends AbstractFilter {
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = prime + ((finish == null) ? 0 : finish.hashCode());
+		result = prime * result + ((finishGran == null) ? 0 : finishGran.hashCode());
+		result = prime * result + ((finishSide == null) ? 0 : finishSide.hashCode());
+		result = prime * result + ((start == null) ? 0 : start.hashCode());
+		result = prime * result + ((startGran == null) ? 0 : startGran.hashCode());
+		result = prime * result + ((startSide == null) ? 0 : startSide.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PositionFilter other = (PositionFilter) obj;
+		if (finish == null) {
+			if (other.finish != null)
+				return false;
+		} else if (!finish.equals(other.finish))
+			return false;
+		if (finishGran == null) {
+			if (other.finishGran != null)
+				return false;
+		} else if (!finishGran.equals(other.finishGran))
+			return false;
+		if (finishSide != other.finishSide)
+			return false;
+		if (start == null) {
+			if (other.start != null)
+				return false;
+		} else if (!start.equals(other.start))
+			return false;
+		if (startGran == null) {
+			if (other.startGran != null)
+				return false;
+		} else if (!startGran.equals(other.startGran))
+			return false;
+		if (startSide != other.startSide)
+			return false;
+		return true;
+	}
+	
 }

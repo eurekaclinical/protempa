@@ -190,4 +190,27 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
             cache.put(tmpDate, this);
         }
     }
+
+	@Override
+	public int hashCode() {
+		return (date == null) ? 0 : date.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DateValue other = (DateValue) obj;
+		if (date == null) {
+			if (other.date != null)
+				return false;
+		} else if (!date.equals(other.date))
+			return false;
+		return true;
+	}
+    
 }

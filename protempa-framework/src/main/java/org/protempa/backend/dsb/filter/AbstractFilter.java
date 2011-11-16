@@ -134,4 +134,10 @@ public abstract class AbstractFilter implements Filter {
 		}
 		return array;
 	}
+	
+    
+	abstract public int hashCode();
+	
+	abstract public boolean equals(Object obj);
+
 }

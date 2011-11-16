@@ -1,5 +1,7 @@
 package org.protempa.backend.dsb.filter;
 
+import java.util.Arrays;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.ValueList;
 import org.protempa.proposition.value.Value;
@@ -96,4 +98,34 @@ public class PropertyValueFilter extends AbstractFilter {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = prime + ((property == null) ? 0 : property.hashCode());
+		result = prime * result + ((valueComparator == null) ? 0 : valueComparator.hashCode());
+		result = prime * result + Arrays.hashCode(values);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PropertyValueFilter other = (PropertyValueFilter) obj;
+		if (property == null) {
+			if (other.property != null)
+				return false;
+		} else if (!property.equals(other.property))
+			return false;
+		if (valueComparator != other.valueComparator)
+			return false;
+		if (!Arrays.equals(values, other.values))
+			return false;
+		return true;
+	}
 }

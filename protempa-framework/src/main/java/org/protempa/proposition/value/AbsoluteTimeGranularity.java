@@ -138,7 +138,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
             AbsoluteTimeUnit.YEAR);
     private static final AbsoluteTimeGranularity[] VALUES = {SECOND, MINUTE,
         HOUR, DAY, MONTH, YEAR};
-    private static int nextOrdinal = 0;
+    private static volatile int nextOrdinal = 0;
 
     /**
      * Convenience method to translate a timestamp into the format expected
@@ -446,4 +446,24 @@ public final class AbsoluteTimeGranularity implements Granularity {
     public Unit getCorrespondingUnit() {
         return this.correspondingUnit;
     }
+
+	@Override
+	public int hashCode() {
+		return ordinal;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AbsoluteTimeGranularity other = (AbsoluteTimeGranularity) obj;
+		if (ordinal != other.ordinal)
+			return false;
+		return true;
+	}
+    
 }

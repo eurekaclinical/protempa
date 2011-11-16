@@ -156,4 +156,24 @@ public class RelativeHourGranularity implements Granularity {
     public Unit getCorrespondingUnit() {
         return RelativeHourUnit.HOUR;
     }
+
+	@Override
+	public int hashCode() {
+		return ordinal;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RelativeHourGranularity other = (RelativeHourGranularity) obj;
+		if (ordinal != other.ordinal)
+			return false;
+		return true;
+	}
+    
 }
