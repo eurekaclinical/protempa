@@ -832,7 +832,7 @@ If the value of this attribute is true, then the count produced for te described
             <xs:documentation>The value of this element is a literal boolean value.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="dateValue" type="xs:date">
+    <xs:element name="dateValue" type="xs:dateTime">
         <xs:annotation>
             <xs:documentation>The value of this element is a literal date value.</xs:documentation>
         </xs:annotation>
