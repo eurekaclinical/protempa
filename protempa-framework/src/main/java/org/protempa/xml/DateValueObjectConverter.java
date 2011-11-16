@@ -19,7 +19,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  */
 class DateValueObjectConverter implements Converter {
-	private final DateConverter dconv = new DateConverter();
+	private final DateConverter dconv = new DateConverter("yyyy-MM-dd'T'HH:mm:ss.S", new String[0]);
 	
 	public DateValueObjectConverter() {
 		super();
