@@ -22,7 +22,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  */
 class QueryConverter implements Converter {
-
+	public static URL querySchemaUrl = null;
 	/**
 	 * Constructor
 	 */
@@ -47,8 +47,8 @@ class QueryConverter implements Converter {
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		// Reference Schema
 		writer.addAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-		writer.addAttribute("xsi:noNamespaceSchemaLocation", findSchemaFile());
-		
+		writer.addAttribute("xsi:noNamespaceSchemaLocation", getQuerySchemaUrl().toExternalForm());
+
 		Query query = (Query) value;
 		// TODO marshal dataSourceBackend
 		// TODO marshal knowledgeSourceBackend
@@ -66,7 +66,7 @@ class QueryConverter implements Converter {
 		writer.startNode("propositionIDs");
 		propIDsConverter.marshal(propIDs, writer, context);
 		writer.endNode();
-		
+
 		Filter filters = query.getFilters();
 		if (filters != null) {
 			FiltersConverter filtersConverter = new FiltersConverter();
@@ -74,7 +74,7 @@ class QueryConverter implements Converter {
 			filtersConverter.marshal(filters, writer, context);
 			writer.endNode();
 		}
-		
+
 		And<String>[] termIds = query.getTermIds();
 		if (termIds != null && termIds.length > 0) {
 			TermIDsConverter termIDsConverter = new TermIDsConverter();
@@ -128,7 +128,7 @@ class QueryConverter implements Converter {
 				reader.moveDown();
 				if (reader.getNodeName().equals("filters")) {
 					FiltersConverter filtersConverter = new FiltersConverter();
-					filters = (Filter)filtersConverter.unmarshal(reader, context);
+					filters = (Filter) filtersConverter.unmarshal(reader, context);
 					reader.moveUp();
 					if (!reader.hasMoreChildren()) {
 						break;
@@ -146,15 +146,21 @@ class QueryConverter implements Converter {
 	@SuppressWarnings("unchecked")
 	private And<String>[] unmarshalTermIds(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		TermIDsConverter termIDsConverter = new TermIDsConverter();
-		return (And<String>[])termIDsConverter.unmarshal(reader, context);
+		return (And<String>[]) termIDsConverter.unmarshal(reader, context);
 	}
 
 	private void missingPropIds() {
 		throw new ConversionException("Missing <propositionIDs> element");
 	}
 
-	private String findSchemaFile() {
-		URL url = getClass().getResource("/org/protempa/xml/protempa_query.xsd");
-		return url.toExternalForm();
+	/**
+	 * @return the URL of the schema to use for validating the XML
+	 *         representation of a query.
+	 */
+	static URL getQuerySchemaUrl() {
+		if (querySchemaUrl==null) {
+			querySchemaUrl = QueryConverter.class.getResource("/org/protempa/xml/protempa_query.xsd");
+		}
+		return querySchemaUrl;
 	}
 }
