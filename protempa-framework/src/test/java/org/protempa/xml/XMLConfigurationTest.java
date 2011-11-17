@@ -6,8 +6,10 @@ import java.text.ParseException;
 import java.util.Date;
 
 import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.stream.StreamSource;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
@@ -25,6 +27,7 @@ import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
 import org.protempa.proposition.value.ValueComparator;
 import org.protempa.query.Query;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
@@ -45,18 +48,20 @@ public class XMLConfigurationTest extends TestCase {
 	public void testQuery() throws Throwable {
 		Query query = createTestQuery();
 		File file = new File("z.xml");
-		XMLConfiguration.writeQueryAsXML(query, file);
+		XMLConfiguration.writeQueryAsXML(query, file, true);
 		checkXMLValid(file);
 		Query reconstitutedQuery = XMLConfiguration.readQueryAsXML(file);
 		assertTrue(reconstitutedQuery.equals(query));
 	}
 
 	private void checkXMLValid(File file) throws SAXException, ParserConfigurationException, IOException {
-		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+	    Document document = parser.parse(file);
+	    
+	    SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		Schema schema = schemaFactory.newSchema(XMLConfiguration.getQuerySchemaUrl());
 		Validator validator = schema.newValidator();
-		StreamSource source = new StreamSource(file);
-		validator.validate(source);
+		validator.validate(new DOMSource(document));
 	}
 
 	private Query createTestQuery() throws ParseException {

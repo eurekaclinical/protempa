@@ -3,6 +3,7 @@
  */
 package org.protempa.xml;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.protempa.backend.dsb.filter.Filter;
@@ -161,7 +162,12 @@ class QueryConverter implements Converter {
 	 */
 	static URL getQuerySchemaUrl() {
 		if (querySchemaUrl==null) {
-			querySchemaUrl = QueryConverter.class.getResource("/org/protempa/xml/protempa_query.xsd");
+//			querySchemaUrl = QueryConverter.class.getResource("/org/protempa/xml/protempa_query.xsd");
+			try {
+				querySchemaUrl = new URL("http://aiwdev02.eushc.org/protempa/schema/1.0/protempa_query.xsd");
+			} catch (MalformedURLException e) {
+				throw new RuntimeException("Unexpected problem constructing URL", e);
+			}
 		}
 		return querySchemaUrl;
 	}
