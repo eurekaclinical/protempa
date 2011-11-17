@@ -42,7 +42,7 @@ class FiltersConverter implements Converter {
 	 */
 	@Override
 	public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) {
-		return false;
+		return Filter.class.isAssignableFrom(clazz);
 	}
 
 	/**
@@ -73,7 +73,7 @@ class FiltersConverter implements Converter {
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		Filter firstFilter = null;
 		Filter lastFilter = null;
-		while(!reader.hasMoreChildren()) {
+		while(reader.hasMoreChildren()) {
 			reader.moveDown();
 			Class<? extends Filter> childClass = xmlTagToClass(reader.getNodeName());
 			Filter thisFilter = (Filter)context.convertAnother(null, childClass);

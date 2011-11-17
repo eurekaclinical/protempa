@@ -10,7 +10,6 @@ import org.protempa.proposition.value.DateValue;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.converters.basic.DateConverter;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
@@ -19,8 +18,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  */
 class DateValueObjectConverter implements Converter {
-	private final DateConverter dconv = new DateConverter("yyyy-MM-dd'T'HH:mm:ss.S", new String[0]);
-	
 	public DateValueObjectConverter() {
 		super();
 	}
@@ -41,7 +38,7 @@ class DateValueObjectConverter implements Converter {
 	@Override
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		DateValue dval = (DateValue)value;
-		writer.setValue(dconv.toString(dval.getDate()));
+		writer.setValue(XMLConfiguration.STANDARD_DATE_CONVERTER.toString(dval.getDate()));
 	}
 	
 	/*
@@ -54,7 +51,7 @@ class DateValueObjectConverter implements Converter {
 	 */
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		Date dt = (Date)dconv.fromString(reader.getValue());
+		Date dt = (Date)XMLConfiguration.STANDARD_DATE_CONVERTER.fromString(reader.getValue());
 		return new DateValue(dt);
 	}
 }

@@ -106,7 +106,7 @@ class QueryConverter implements Converter {
 		String[] keyIds = null;
 		if ("keyIDs".equals(reader.getNodeName())) {
 			KeyIDsConverter keyIDsConverter = new KeyIDsConverter();
-			keyIds = (String[]) keyIDsConverter.unmarshal(reader, context);
+			keyIds = (String[]) context.convertAnother(null, String[].class, keyIDsConverter);
 			reader.moveUp();
 		}
 		if (!reader.hasMoreChildren()) {
@@ -118,7 +118,7 @@ class QueryConverter implements Converter {
 			missingPropIds();
 		}
 		PropIDsConverter propIDsConverter = new PropIDsConverter();
-		propIds = (String[]) propIDsConverter.unmarshal(reader, context);
+		propIds = (String[]) context.convertAnother(null, String[].class, propIDsConverter);
 		reader.moveUp();
 
 		Filter filters = null;
@@ -128,7 +128,7 @@ class QueryConverter implements Converter {
 				reader.moveDown();
 				if (reader.getNodeName().equals("filters")) {
 					FiltersConverter filtersConverter = new FiltersConverter();
-					filters = (Filter) filtersConverter.unmarshal(reader, context);
+					filters = (Filter) context.convertAnother(null, Filter.class, filtersConverter);
 					reader.moveUp();
 					if (!reader.hasMoreChildren()) {
 						break;
@@ -146,7 +146,7 @@ class QueryConverter implements Converter {
 	@SuppressWarnings("unchecked")
 	private And<String>[] unmarshalTermIds(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		TermIDsConverter termIDsConverter = new TermIDsConverter();
-		return (And<String>[]) termIDsConverter.unmarshal(reader, context);
+		return (And<String>[]) context.convertAnother(null, And[].class, termIDsConverter);
 	}
 
 	private void missingPropIds() {

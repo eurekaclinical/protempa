@@ -34,7 +34,7 @@ class TermIDsConverter implements Converter {
 	 */
 	@Override
 	public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) {
-		return false;
+		return String[].class.equals(clazz);
 	}
 
 	/**
@@ -62,7 +62,7 @@ class TermIDsConverter implements Converter {
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		ArrayList<And<String>> keyIdList = new ArrayList<And<String>>();
-		while(!reader.hasMoreChildren()) {
+		while(reader.hasMoreChildren()) {
 			reader.moveDown();
 			if (!"and".equals(reader.getNodeName())) {
 				throw new ConversionException("termIDs has a child that is not <and>");

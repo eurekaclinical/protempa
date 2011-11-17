@@ -13,7 +13,6 @@ import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.converters.basic.DateConverter;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
@@ -88,14 +87,13 @@ class DateTimeFilterConverter implements Converter {
 	 */
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		DateConverter dconv = new DateConverter();
-		Date start = (Date)dconv.fromString(reader.getAttribute(START));
+		Date start = (Date)XMLConfiguration.STANDARD_DATE_CONVERTER.fromString(reader.getAttribute(START));
 		
 		GranularityValueConverter granularityConverter = new GranularityValueConverter();
 		String startGranularityString = reader.getAttribute(START_GRANULARITY);
 		Granularity startGranularity = (Granularity)granularityConverter.fromString(startGranularityString);
 		
-		Date finish = (Date)dconv.fromString(reader.getAttribute(FINISH));
+		Date finish = (Date)XMLConfiguration.STANDARD_DATE_CONVERTER.fromString(reader.getAttribute(FINISH));
 
 		String finishGranularityString = reader.getAttribute(FINISH_GRANULARITY);
 		Granularity finishGranularity = (Granularity)granularityConverter.fromString(finishGranularityString);

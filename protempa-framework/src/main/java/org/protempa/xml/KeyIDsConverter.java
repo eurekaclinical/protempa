@@ -32,7 +32,7 @@ class KeyIDsConverter implements Converter {
 	 */
 	@Override
 	public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) {
-		return false;
+		return String[].class.equals(clazz);
 	}
 
 	/**
@@ -61,7 +61,7 @@ class KeyIDsConverter implements Converter {
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		ArrayList<String> keyIdList = new ArrayList<String>();
-		while(!reader.hasMoreChildren()) {
+		while(reader.hasMoreChildren()) {
 			reader.moveDown();
 			if (!"keyId".equals(reader.getNodeName())) {
 				throw new ConversionException("keyIDs has a child that is not <keyId>");

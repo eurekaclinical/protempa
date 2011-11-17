@@ -19,6 +19,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  */
 class PropIDsConverter implements Converter {
 
+	private static final String PROPOSITION_ID = "propositionID";
+
 	/**
 	 * Constructor
 	 */
@@ -44,7 +46,7 @@ class PropIDsConverter implements Converter {
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		String[] propIds = (String[]) value;
 		for (String propId : propIds) {
-			writer.startNode("propositionID");
+			writer.startNode(PROPOSITION_ID);
 			writer.setValue(propId);
 			writer.endNode();
 		}
@@ -61,9 +63,9 @@ class PropIDsConverter implements Converter {
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		ArrayList<String> propIdList = new ArrayList<String>();
-		while(!reader.hasMoreChildren()) {
+		while(reader.hasMoreChildren()) {
 			reader.moveDown();
-			if (!"propositionId".equals(reader.getNodeName())) {
+			if (!PROPOSITION_ID.equals(reader.getNodeName())) {
 				throw new ConversionException("propositionIDs has a child that is not <propositionId>");
 			}
 			propIdList.add(reader.getValue());
