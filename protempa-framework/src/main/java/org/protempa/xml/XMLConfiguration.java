@@ -60,6 +60,8 @@ public class XMLConfiguration {
 
 	private static XStream xstream = null;
 
+	private static ThreadLocal<Boolean> surpressSchemaReference = new ThreadLocal<Boolean>();
+
 	/**
 	 * private constructor as there is no reason to instantiate this class.
 	 */
@@ -188,6 +190,24 @@ public class XMLConfiguration {
 	 *             If there is a problem writing the file.
 	 */
 	public static void writeQueryAsXML(Query query, File file) throws IOException {
+		writeQueryAsXML(query, file, false);
+	}
+
+	/**
+	 * Write the given protempa query to the specified file.
+	 * 
+	 * @param query
+	 *            The query to be written as XML.
+	 * @param file
+	 *            The file to write the XML to.
+	 * @param surpressSchemaReference
+	 *            If true, don't include a reference to the schema in the
+	 *            generated XML file.
+	 * @throws IOException
+	 *             If there is a problem writing the file.
+	 */
+	public static void writeQueryAsXML(Query query, File file, boolean surpressSchemaReference) throws IOException {
+		XMLConfiguration.surpressSchemaReference.set(Boolean.valueOf(surpressSchemaReference));
 		myLogger.entering(XMLConfiguration.class.getName(), "writeQueryAsXML");
 		Writer writer = new FileWriter(file);
 		getXStream().toXML(query, writer);
@@ -201,5 +221,9 @@ public class XMLConfiguration {
 	 */
 	static URL getQuerySchemaUrl() {
 		return QueryConverter.getQuerySchemaUrl();
+	}
+	
+	static boolean isSurpressSchemaReferenceRequested() {
+		return surpressSchemaReference.get().equals(Boolean.TRUE);
 	}
 }

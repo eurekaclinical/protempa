@@ -47,7 +47,9 @@ class QueryConverter implements Converter {
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		// Reference Schema
 		writer.addAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		if (!XMLConfiguration.isSurpressSchemaReferenceRequested()) {
 		writer.addAttribute("xsi:noNamespaceSchemaLocation", getQuerySchemaUrl().toExternalForm());
+		}
 
 		Query query = (Query) value;
 		// TODO marshal dataSourceBackend
