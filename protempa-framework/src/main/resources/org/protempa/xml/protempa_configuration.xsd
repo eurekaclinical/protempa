@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:include schemaLocation="protempa_query.xsd"/>
+    <xs:include schemaLocation="protempa_tableQueryResultsHandler.xsd"/>
+    <xs:include schemaLocation="protempa_relationalDBBackend.xsd"/>
+    <xs:element name="protempaConfiguration">
+        <xs:annotation>
+            <xs:documentation>Describes a configuration of Protempa</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="dataOutputFile" type="filePathType">
+                    <xs:annotation>
+                        <xs:documentation>Identifies the data file to be written by Protempa.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element minOccurs="0" name="explanationOutputFile" type="filePathType">
+                    <xs:annotation>
+                        <xs:documentation>Identifies a file to be output that explains why a protempa run did what it did.  The contents of the identified file should conform to this schema.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element ref="protempaQuery">
+                    <xs:annotation>
+                        <xs:documentation>The query that will drive drive a Protempa run.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element ref="relationalDBBackend">
+                    <xs:annotation>
+                        <xs:documentation>A description of the data source that Protempa should use.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element ref="tableQueryResultsHandler"> </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

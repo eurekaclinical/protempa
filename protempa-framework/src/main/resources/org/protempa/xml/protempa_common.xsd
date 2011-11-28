@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:complexType name="description_type">
+        <xs:annotation>
+            <xs:documentation>Contains a free-form textual description of something.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:string"/>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="propositionIDs_type">
+        <xs:annotation>
+            <xs:documentation>A collection of one or more propositionID elements.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element maxOccurs="unbounded" name="propositionID" type="propositionIdType">
+                <xs:annotation>
+                    <xs:documentation>The value of this element is a string that identifies a proposition in the ontology.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="booleanValue" type="xs:boolean">
+        <xs:annotation>
+            <xs:documentation>The value of this element is a literal boolean value.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="dateValue" type="xs:dateTime">
+        <xs:annotation>
+            <xs:documentation>The value of this element is a literal date value.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="nominalValue" type="nameType">
+        <xs:annotation>
+            <xs:documentation>The value of this element is a literal nominal value.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="numberValue" nillable="false" type="xs:decimal">
+        <xs:annotation>
+            <xs:documentation>The value fo this element is a literal number value.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="incomparableNumberValue">
+        <xs:annotation>
+            <xs:documentation>The value of this element represents a test result outside of the reportable range of the test and thus is reported prefixed with a greater than or less than sign.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:minLength value="1"/>
+                <xs:pattern value="[&lt;>][+-]?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:attribute name="typeOfValue">
+        <xs:annotation>
+            <xs:documentation>Indicates the type of value associated with something. Possible values are
+
+booleanValue
+A value that is either true or false
+
+dateValue
+A value that contains date and and time information.  A separate but related element may contian precision information to indicate the the precision of a date value is year, month, ..., minute, second.
+
+inequalityNumberValue
+The is an extension of numberValue. It allows numbers to be followed by a greater-than or less-than sign to indicate a measurement that was out of range and is just know to be greater or less than the stated value..
+
+nominalValue
+The name of an enumerated value
+
+numberValue
+an possibly signed decimal number.  The decimal point is optional for integral values.
+
+valueList
+A list of values
+</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+            <xs:restriction base="xs:token">
+                <xs:enumeration value="booleanValue"/>
+                <xs:enumeration value="dateValue"/>
+                <xs:enumeration value="inequalityNumberValue"/>
+                <xs:enumeration value="nominalValue"/>
+                <xs:enumeration value="numberValue"/>
+                <xs:enumeration value="valueList"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="name" type="nameType">
+        <xs:annotation>
+            <xs:documentation>The name of something</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="javaClass" type="javaClassNameType">
+        <xs:annotation>
+            <xs:documentation>The fully qualified name of a Java class.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="propertyName" type="nameType">
+        <xs:annotation>
+            <xs:documentation>The name of a property.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="schemaName" type="nameType">
+        <xs:annotation>
+            <xs:documentation>The name of a relational database schema.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="tableName" type="nameType">
+        <xs:annotation>
+            <xs:documentation>The name of a table in a relational database.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="columnName" type="javaClassNameType">
+        <xs:annotation>
+            <xs:documentation>The name of a column in a relational database table.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="code" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>A code in the database that may be equivalent to a proposition ID.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="propositionID" type="propositionIdType">
+        <xs:annotation>
+            <xs:documentation>A proposition ID.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="columnNameOverride" type="nameType"/>
+    <xs:attribute name="columnNamePrefixOverride" type="nameType"/>
+    <xs:attribute name="startSide" type="sideType"/>
+    <xs:attribute name="finishSide" type="sideType"/>
+    <xs:attribute name="unit">
+        <xs:simpleType>
+            <xs:restriction base="xs:token">
+                <xs:enumeration value="absoluteSecond"/>
+                <xs:enumeration value="absoluteMinute"/>
+                <xs:enumeration value="absoluteHour"/>
+                <xs:enumeration value="absoluteDay"/>
+                <xs:enumeration value="absoluteWeek"/>
+                <xs:enumeration value="absoluteMonth"/>
+                <xs:enumeration value="absoluteYear"/>
+                <xs:enumeration value="relativeDay"/>
+                <xs:enumeration value="relativeHour"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="propositionComparator">
+        <xs:simpleType>
+            <xs:restriction base="xs:token">
+                <xs:enumeration value="AllPropositionIntervalComparator"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="finishGranularity" type="granularityType">
+        <xs:annotation>
+            <xs:documentation>The granularity (year, month, ...) with which to interpret the finish date/time.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="startGranularity" type="granularityType">
+        <xs:annotation>
+            <xs:documentation>The granularity (year, month, ...) with which to interpret the start.</xs:documentation>
+        </xs:annotation>
+    </xs:attribute>
+    <xs:simpleType name="propositionIdType">
+        <xs:annotation>
+            <xs:documentation>The type for propositionID values.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="nameType"/>
+    </xs:simpleType>
+    <xs:simpleType name="nameType">
+        <xs:annotation>
+            <xs:documentation>A non-empty string that can be used to identify something.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:whiteSpace value="preserve"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="javaClassNameType">
+        <xs:annotation>
+            <xs:documentation>A string that is the fully qualified name of a Java class.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+            <xs:whiteSpace value="preserve"/>
+            <xs:pattern value="[$A-Za-z_][$A-Za-z_0-9]*(\.[$A-Za-z_][$A-Za-z_0-9]*)*"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="granularityType">
+        <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="second"/>
+            <xs:enumeration value="minute"/>
+            <xs:enumeration value="hour"/>
+            <xs:enumeration value="day"/>
+            <xs:enumeration value="month"/>
+            <xs:enumeration value="year"/>
+            <xs:enumeration value="relativeDay"/>
+            <xs:enumeration value="relativeHour"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="filePathType">
+        <xs:annotation>
+            <xs:documentation>A string that identifies a file.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="sideType">
+        <xs:restriction base="xs:token">
+            <xs:enumeration value="start"/>
+            <xs:enumeration value="finish"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="dateTimeFilterType">
+        <xs:annotation>
+            <xs:documentation>Filter for a date/time range</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="filterType">
+                <xs:attribute name="start" type="xs:dateTime">
+                    <xs:annotation>
+                        <xs:documentation>The start time for the interval that will be accepted by the described filter.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute ref="startGranularity"/>
+                <xs:attribute name="finish" type="xs:dateTime">
+                    <xs:annotation>
+                        <xs:documentation>The finish time for the interval that will be accepted by the described filter.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute ref="finishGranularity"/>
+                <xs:attribute ref="startSide"/>
+                <xs:attribute ref="finishSide"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="positionFilterType">
+        <xs:annotation>
+            <xs:documentation>A filter for a position range.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="filterType">
+                <xs:attribute name="start" type="xs:long">
+                    <xs:annotation>
+                        <xs:documentation>The start of the interval that will be accepted by the described filter.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute ref="startGranularity"/>
+                <xs:attribute name="finish" type="xs:long">
+                    <xs:annotation>
+                        <xs:documentation>The finish of the interval that will be accepted by the described filter.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute ref="finishGranularity"/>
+                <xs:attribute ref="startSide"/>
+                <xs:attribute ref="finishSide"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="filterType">
+        <xs:annotation>
+            <xs:documentation>Common structure for filters.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="propositionIDs" type="propositionIDs_type">
+                <xs:annotation>
+                    <xs:documentation>The proposition IDs that this filter applies to.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="durationType">
+        <xs:annotation>
+            <xs:documentation>The length of a time span.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="length" type="xs:int"/>
+        <xs:attribute ref="unit"/>
+    </xs:complexType>
+    <xs:complexType name="propertyValueFilterType">
+        <xs:complexContent>
+            <xs:extension base="filterType">
+                <xs:sequence>
+                    <xs:group ref="valueGroup"/>
+                </xs:sequence>
+                <xs:attribute ref="propertyName" use="required">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">The name of the property whose value is to be compared.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="comparator" use="required" type="comparatorType"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="propertyValuesFilterType">
+        <xs:complexContent>
+            <xs:extension base="filterType">
+                <xs:sequence>
+                    <xs:group ref="valueListGroup"/>
+                </xs:sequence>
+                <xs:attribute ref="propertyName" use="required">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">The name of the property whose value is to be compared.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute use="required" name="comparator" type="listComparatorType">
+                    <xs:annotation>
+                        <xs:documentation>The comparison to make between the named property in the specified propositions and the given values.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:group name="valueListGroup">
+        <xs:choice>
+            <xs:element maxOccurs="unbounded" minOccurs="1" ref="booleanValue"/>
+            <xs:element maxOccurs="unbounded" minOccurs="1" ref="dateValue"/>
+            <xs:element maxOccurs="unbounded" minOccurs="1" ref="nominalValue"/>
+            <xs:element maxOccurs="unbounded" ref="numberValue"/>
+            <xs:element maxOccurs="unbounded" ref="incomparableNumberValue"/>
+        </xs:choice>
+    </xs:group>
+    <xs:group name="valueGroup">
+        <xs:annotation>
+            <xs:documentation>Elements that represent specific types of literal values.</xs:documentation>
+        </xs:annotation>
+        <xs:choice>
+            <xs:element ref="booleanValue"/>
+            <xs:element ref="dateValue"/>
+            <xs:element ref="nominalValue"/>
+            <xs:element ref="numberValue"/>
+            <xs:element ref="incomparableNumberValue"/>
+        </xs:choice>
+    </xs:group>
+    <xs:simpleType name="listComparatorType">
+        <xs:restriction base="xs:Name">
+            <xs:enumeration value="in"/>
+            <xs:enumeration value="notIn"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="comparatorType">
+        <xs:restriction base="xs:Name">
+            <xs:enumeration value="greater"/>
+            <xs:enumeration value="less"/>
+            <xs:enumeration value="equal"/>
+            <xs:enumeration value="notEqual"/>
+            <xs:enumeration value="greaterOrEqual"/>
+            <xs:enumeration value="lessOrEqual"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>
