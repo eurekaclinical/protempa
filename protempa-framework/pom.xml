@@ -22,11 +22,6 @@
             <id>drools.org</id>
             <url>https://repository.jboss.org/nexus/content/repositories/releases/</url>
         </repository>
-        <repository>
-            <id>maven.org</id>
-            <name>Maven Central</name>
-            <url>http://repo2.maven.org/</url>
-        </repository>
     </repositories>
     <dependencies>
         <dependency>
