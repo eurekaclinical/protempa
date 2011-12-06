@@ -23,7 +23,8 @@ public class Query implements Serializable {
 	private And<String>[] termIds;
 
 	/**
-	 * Creates new Query instance.
+	 * Creates new Query instance.  This constructor is non-public at the request 
+	 * of Andrew, so that only query builders will construct Query objects. 
 	 * 
 	 * @param keyIds
 	 *            An array of key IDs. If this is null then the query will
@@ -36,7 +37,7 @@ public class Query implements Serializable {
 	 * @param termIds
 	 */
 	@SuppressWarnings("unchecked")
-	public Query(String[] keyIds, Filter filters, String[] propIds, And<String>[] termIds) {
+	Query(String[] keyIds, Filter filters, String[] propIds, And<String>[] termIds) {
 		if (keyIds == null)
 			keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
 		if (propIds == null)

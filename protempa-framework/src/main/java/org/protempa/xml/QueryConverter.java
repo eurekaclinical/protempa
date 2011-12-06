@@ -5,10 +5,16 @@ package org.protempa.xml;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.protempa.AlgorithmSource;
+import org.protempa.KnowledgeSource;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.query.And;
+import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
+import org.protempa.query.QueryBuildException;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
@@ -24,11 +30,18 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  */
 class QueryConverter implements Converter {
 	public static URL querySchemaUrl = null;
+	private static Logger myLogger = Logger.getLogger(QueryConverter.class.getName());
+	
+	private KnowledgeSource knowledgeSource;
+	private AlgorithmSource algorithmSource;
+	
 	/**
 	 * Constructor
 	 */
-	public QueryConverter() {
+	public QueryConverter(KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) {
 		super();
+		this.knowledgeSource = knowledgeSource;
+		this.algorithmSource = algorithmSource;
 	}
 
 	/**
@@ -106,32 +119,33 @@ class QueryConverter implements Converter {
 		// TODO unmarshal algorithmSourceBackend
 		// TODO unmarshal termSourceBackend
 
-		String[] keyIds = null;
+		DefaultQueryBuilder queryBuilder = new DefaultQueryBuilder();
+		
 		if ("keyIDs".equals(reader.getNodeName())) {
 			KeyIDsConverter keyIDsConverter = new KeyIDsConverter();
-			keyIds = (String[]) context.convertAnother(null, String[].class, keyIDsConverter);
+			String[] keyIds = (String[]) context.convertAnother(null, String[].class, keyIDsConverter);
+			queryBuilder.setKeyIds(keyIds);
 			reader.moveUp();
 		}
 		if (!reader.hasMoreChildren()) {
 			missingPropIds();
 		}
-		String[] propIds = null;
 		reader.moveDown();
 		if (!"propositionIDs".equals(reader.getNodeName())) {
 			missingPropIds();
 		}
 		PropIDsConverter propIDsConverter = new PropIDsConverter();
-		propIds = (String[]) context.convertAnother(null, String[].class, propIDsConverter);
+		String[] propIds = (String[]) context.convertAnother(null, String[].class, propIDsConverter);
+		queryBuilder.setPropIds(propIds);
 		reader.moveUp();
 
-		Filter filters = null;
-		And<String>[] termIds = null;
 		if (reader.hasMoreChildren()) {
 			do { // do loop to allow break; not for iteration
 				reader.moveDown();
 				if (reader.getNodeName().equals("filters")) {
 					FiltersConverter filtersConverter = new FiltersConverter();
-					filters = (Filter) context.convertAnother(null, Filter.class, filtersConverter);
+					Filter filters = (Filter) context.convertAnother(null, Filter.class, filtersConverter);
+					queryBuilder.setFilters(filters);
 					reader.moveUp();
 					if (!reader.hasMoreChildren()) {
 						break;
@@ -139,11 +153,17 @@ class QueryConverter implements Converter {
 					reader.moveDown();
 				}
 				if (reader.getNodeName().equals("termIDs")) {
-					termIds = unmarshalTermIds(reader, context);
+					And<String>[] termIds = unmarshalTermIds(reader, context);
+					queryBuilder.setTermIds(termIds);
 				}
 			} while (false);
 		}
-		return new Query(keyIds, filters, propIds, termIds);
+		try {
+			return queryBuilder.build(knowledgeSource, algorithmSource);
+		} catch (QueryBuildException e) {
+			myLogger.log(Level.SEVERE, "Error building query", e);
+			return null;
+		}
 	}
 
 	@SuppressWarnings("unchecked")

@@ -2,7 +2,6 @@ package org.protempa.xml;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Date;
 
 import javax.xml.XMLConstants;
@@ -16,9 +15,13 @@ import javax.xml.validation.Validator;
 
 import junit.framework.TestCase;
 
+import org.protempa.AlgorithmSource;
+import org.protempa.KnowledgeSource;
+import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.BooleanValue;
 import org.protempa.proposition.value.DateValue;
@@ -26,6 +29,7 @@ import org.protempa.proposition.value.InequalityNumberValue;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
 import org.protempa.proposition.value.ValueComparator;
+import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -64,7 +68,7 @@ public class XMLConfigurationTest extends TestCase {
 		validator.validate(new DOMSource(document));
 	}
 
-	private Query createTestQuery() throws ParseException {
+	private Query createTestQuery() throws Exception {
 		final String[] keyIds = { "keyId1", "keyId2" };
 
 		final String[] PROP_IDS = { "Patient", "Encounter", "30DayReadmission", "No30DayReadmission", "PatientAll",
@@ -116,7 +120,12 @@ public class XMLConfigurationTest extends TestCase {
 				DateValue.getInstance(new Date()));
 		inequalityEntity.setAnd(dateEntity);
 
-		Query query = new Query(keyIds, timeRange, PROP_IDS, null);
+		DefaultQueryBuilder queryBuilder = new DefaultQueryBuilder();
+		queryBuilder.setKeyIds(keyIds);
+		queryBuilder.setFilters(timeRange);
+		queryBuilder.setPropIds(PROP_IDS);
+		DefaultQueryBuilder.setValidatePropositionIds(false);
+		Query query = queryBuilder.build(new KnowledgeSource(new KnowledgeSourceBackend[0]), new AlgorithmSource(new AlgorithmSourceBackend[0]));
 		return query;
 	}
 }

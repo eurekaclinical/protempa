@@ -31,10 +31,14 @@ import java.io.Writer;
 import java.net.URL;
 import java.util.logging.Logger;
 
+import org.protempa.AlgorithmSource;
+import org.protempa.KnowledgeSource;
+import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.filter.AbstractFilter;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PositionFilter;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.proposition.value.BooleanValue;
 import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.InequalityNumberValue;
@@ -42,6 +46,8 @@ import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
 import org.protempa.query.And;
 import org.protempa.query.Query;
+import org.protempa.query.QueryBuildException;
+import org.protempa.query.QueryBuilder;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.basic.DateConverter;
@@ -51,113 +57,124 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
  * This class takes a protempa configuration information such as a query and
  * generates equivalent XML that conforms to the schema in protempa_query.xsd.
  * 
+ * There are two ways to use this class to create queries from XML.
+ * <ul>
+ * <li>You can create a query directly from an XML file by calling the static
+ * method {@link #readQueryAsXML(File)}.
+ * <li>You can instantiate this class and then use its
+ * {@link #build(KnowledgeSource, AlgorithmSource)} method to create a query.
+ * </ul>
+ * 
  * @author mgrand
  */
-public class XMLConfiguration {
+public class XMLConfiguration implements QueryBuilder {
 	static final DateConverter STANDARD_DATE_CONVERTER = new DateConverter("yyyy-MM-dd'T'HH:mm:ss.S", new String[0]);
 
 	private static Logger myLogger = Logger.getLogger(XMLConfiguration.class.getName());
 
-	private static XStream xstream = null;
-
 	private static ThreadLocal<Boolean> surpressSchemaReference = new ThreadLocal<Boolean>();
 
+	private File file;
+
 	/**
-	 * private constructor as there is no reason to instantiate this class.
+	 * Call this constructor to use this class as a QueryBuilder.
+	 * 
+	 * @param file The XML file that contains the query description.
 	 */
-	private XMLConfiguration() {
+	private XMLConfiguration(File file) {
+		super();
+		this.file = file;
 	}
 
-	private static synchronized XStream getXStream() {
-		if (xstream == null) {
-			xstream = new XStream(new StaxDriver());
-			xstream.registerConverter(STANDARD_DATE_CONVERTER, XStream.PRIORITY_VERY_HIGH);
+	private static synchronized XStream getXStream(KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) {
+		XStream xstream = null;
+		xstream = new XStream(new StaxDriver());
+		xstream.registerConverter(STANDARD_DATE_CONVERTER, XStream.PRIORITY_VERY_HIGH);
 
-			// and
-			xstream.alias("and", And.class);
-			xstream.registerConverter(new AndConverter());
+		// and
+		xstream.alias("and", And.class);
+		xstream.registerConverter(new AndConverter());
 
-			// booleanValue
-			xstream.alias("booleanValue", BooleanValue.class);
-			xstream.registerConverter(new BooleanValueObjectConverter());
+		// booleanValue
+		xstream.alias("booleanValue", BooleanValue.class);
+		xstream.registerConverter(new BooleanValueObjectConverter());
 
-			// comparator
-			xstream.useAttributeFor(PropertyValueFilter.class, "valueComparator");
-			xstream.aliasField("comparator", PropertyValueFilter.class, "valueComparator");
-			xstream.registerConverter(new ValueComparatorValueConverter());
+		// comparator
+		xstream.useAttributeFor(PropertyValueFilter.class, "valueComparator");
+		xstream.aliasField("comparator", PropertyValueFilter.class, "valueComparator");
+		xstream.registerConverter(new ValueComparatorValueConverter());
 
-			// dateTimeFilter
-			xstream.alias("dateTimeFilter", DateTimeFilter.class);
-			xstream.registerConverter(new DateTimeFilterConverter());
+		// dateTimeFilter
+		xstream.alias("dateTimeFilter", DateTimeFilter.class);
+		xstream.registerConverter(new DateTimeFilterConverter());
 
-			// dateValue
-			xstream.alias("dateValue", DateValue.class);
-			xstream.registerConverter(new DateValueObjectConverter());
+		// dateValue
+		xstream.alias("dateValue", DateValue.class);
+		xstream.registerConverter(new DateValueObjectConverter());
 
-			// filters
-			// We want to use custom logic to traverse the links between filters
-			// so tell XStream reflection to ignore the AbstractFilter class's
-			// "and" field.
-			xstream.omitField(AbstractFilter.class, "and");
+		// filters
+		// We want to use custom logic to traverse the links between filters
+		// so tell XStream reflection to ignore the AbstractFilter class's
+		// "and" field.
+		xstream.omitField(AbstractFilter.class, "and");
 
-			// finish
-			xstream.useAttributeFor(PositionFilter.class, "finish");
+		// finish
+		xstream.useAttributeFor(PositionFilter.class, "finish");
 
-			// finishGranularity
-			xstream.useAttributeFor(PositionFilter.class, "finishGran");
-			xstream.aliasField("finishGranularity", PositionFilter.class, "finishGran");
+		// finishGranularity
+		xstream.useAttributeFor(PositionFilter.class, "finishGran");
+		xstream.aliasField("finishGranularity", PositionFilter.class, "finishGran");
 
-			// finishSide
-			xstream.useAttributeFor(PositionFilter.class, "finishSide");
+		// finishSide
+		xstream.useAttributeFor(PositionFilter.class, "finishSide");
 
-			// granularityType
-			xstream.registerConverter(new GranularityValueConverter());
+		// granularityType
+		xstream.registerConverter(new GranularityValueConverter());
 
-			// incomparableNumberValue
-			xstream.alias("incomparableNumberValue", InequalityNumberValue.class);
-			xstream.registerConverter(new InequalityValueObjectConverter());
+		// incomparableNumberValue
+		xstream.alias("incomparableNumberValue", InequalityNumberValue.class);
+		xstream.registerConverter(new InequalityValueObjectConverter());
 
-			// nominialValue
-			xstream.alias("nominalValue", NominalValue.class);
-			xstream.registerConverter(new NominalValueObjectConverter());
+		// nominialValue
+		xstream.alias("nominalValue", NominalValue.class);
+		xstream.registerConverter(new NominalValueObjectConverter());
 
-			// numberValue
-			xstream.alias("numberValue", NumberValue.class);
-			xstream.registerConverter(new NumberValueObjectConverter());
+		// numberValue
+		xstream.alias("numberValue", NumberValue.class);
+		xstream.registerConverter(new NumberValueObjectConverter());
 
-			// positionFilter
-			xstream.omitField(PositionFilter.class, "ival");
-			xstream.alias("positionFilter", PositionFilter.class);
+		// positionFilter
+		xstream.omitField(PositionFilter.class, "ival");
+		xstream.alias("positionFilter", PositionFilter.class);
 
-			// property
-			xstream.useAttributeFor(PropertyValueFilter.class, "property");
-			xstream.aliasField("propertyName", PropertyValueFilter.class, "property");
+		// property
+		xstream.useAttributeFor(PropertyValueFilter.class, "property");
+		xstream.aliasField("propertyName", PropertyValueFilter.class, "property");
 
-			// propertyValueFilter
-			xstream.alias("propertyValueFilter", PropertyValueFilter.class);
+		// propertyValueFilter
+		xstream.alias("propertyValueFilter", PropertyValueFilter.class);
 
-			// propertyValueFilter
-			xstream.alias("propertyValuesFilter", PropertyValueFilter.class);
-			xstream.addImplicitArray(PropertyValueFilter.class, "values");
+		// propertyValueFilter
+		xstream.alias("propertyValuesFilter", PropertyValueFilter.class);
+		xstream.addImplicitArray(PropertyValueFilter.class, "values");
 
-			// propositionIDs
-			xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new PropIDsConverter());
-			xstream.aliasField("propositionIDs", PropertyValueFilter.class, "propositionIds");
+		// propositionIDs
+		xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new PropIDsConverter());
+		xstream.aliasField("propositionIDs", PropertyValueFilter.class, "propositionIds");
 
-			// protempaQuery
-			xstream.alias("protempaQuery", Query.class);
-			xstream.registerConverter(new QueryConverter());
+		// protempaQuery
+		xstream.alias("protempaQuery", Query.class);
+		xstream.registerConverter(new QueryConverter(knowledgeSource, algorithmSource));
 
-			// start
-			xstream.useAttributeFor(PositionFilter.class, "start");
+		// start
+		xstream.useAttributeFor(PositionFilter.class, "start");
 
-			// startGranularity
-			xstream.useAttributeFor(PositionFilter.class, "startGran");
-			xstream.aliasField("startGranularity", PositionFilter.class, "startGran");
+		// startGranularity
+		xstream.useAttributeFor(PositionFilter.class, "startGran");
+		xstream.aliasField("startGranularity", PositionFilter.class, "startGran");
 
-			// startSide
-			xstream.useAttributeFor(PositionFilter.class, "startSide");
-		}
+		// startSide
+		xstream.useAttributeFor(PositionFilter.class, "startSide");
 		return xstream;
 	}
 
@@ -174,8 +191,12 @@ public class XMLConfiguration {
 	 *             If there is a problem.
 	 */
 	public static Query readQueryAsXML(File file) throws IOException {
+		return readQueryAsXML(file, new KnowledgeSource(new KnowledgeSourceBackend[0]), new AlgorithmSource(new AlgorithmSourceBackend[0]));
+	}
+
+	public static Query readQueryAsXML(File file, KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) throws IOException {
 		myLogger.entering(XMLConfiguration.class.getName(), "readQueryAsXML");
-		Query query = (Query) getXStream().fromXML(file);
+		Query query = (Query) getXStream(knowledgeSource, algorithmSource).fromXML(file);
 		return query;
 	}
 
@@ -210,7 +231,7 @@ public class XMLConfiguration {
 		XMLConfiguration.surpressSchemaReference.set(Boolean.valueOf(surpressSchemaReference));
 		myLogger.entering(XMLConfiguration.class.getName(), "writeQueryAsXML");
 		Writer writer = new FileWriter(file);
-		getXStream().toXML(query, writer);
+		getXStream(new KnowledgeSource(new KnowledgeSourceBackend[0]), new AlgorithmSource(new AlgorithmSourceBackend[0])).toXML(query, writer);
 		writer.close();
 		myLogger.exiting(XMLConfiguration.class.getName(), "writeQueryAsXML");
 	}
@@ -222,8 +243,17 @@ public class XMLConfiguration {
 	static URL getQuerySchemaUrl() {
 		return QueryConverter.getQuerySchemaUrl();
 	}
-	
+
 	static boolean isSurpressSchemaReferenceRequested() {
 		return surpressSchemaReference.get().equals(Boolean.TRUE);
+	}
+
+	@Override
+	public Query build(KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) throws QueryBuildException {
+		try {
+			return readQueryAsXML(file, knowledgeSource, algorithmSource);
+		} catch (IOException e) {
+			throw new QueryBuildException("Error building query from XML", e);
+		}
 	}
 }
