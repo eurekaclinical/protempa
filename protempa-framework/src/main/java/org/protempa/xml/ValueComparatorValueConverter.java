@@ -4,13 +4,12 @@
 package org.protempa.xml;
 
 import org.mvel.ConversionException;
-import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.ValueComparator;
 
 import com.thoughtworks.xstream.converters.SingleValueConverter;
 
 /**
- * Convert {@link Granularity} objects to/from a string.
+ * Convert {@link ValueComparator} objects to/from a string.
  * 
  * @author mgrand
  */
