@@ -54,7 +54,9 @@ public class XMLConfigurationTest extends TestCase {
 		File file = new File("z.xml");
 		XMLConfiguration.writeQueryAsXML(query, file, true);
 		checkXMLValid(file);
-		Query reconstitutedQuery = XMLConfiguration.readQueryAsXML(file);
+		KnowledgeSource ks = new KnowledgeSource(new KnowledgeSourceBackend[0]);
+		AlgorithmSource as = new AlgorithmSource(new AlgorithmSourceBackend[0]);
+		Query reconstitutedQuery = XMLConfiguration.readQueryAsXML(file, ks, as);
 		assertTrue(reconstitutedQuery.equals(query));
 	}
 

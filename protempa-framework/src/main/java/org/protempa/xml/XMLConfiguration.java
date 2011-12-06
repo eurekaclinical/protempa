@@ -27,6 +27,8 @@ package org.protempa.xml;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
 import java.util.logging.Logger;
@@ -186,17 +188,95 @@ public class XMLConfiguration implements QueryBuilder {
 	 *            The file to read. The top level element of the XML in the file
 	 *            must be "protempaQuery" and the XML must conform to the
 	 *            Protempa XML schema.
+	 * @param knowledgeSource
+	 * @param algorithmSource
 	 * @return The described query.
 	 * @throws IOException
 	 *             If there is a problem.
 	 */
-	public static Query readQueryAsXML(File file) throws IOException {
-		return readQueryAsXML(file, new KnowledgeSource(new KnowledgeSourceBackend[0]), new AlgorithmSource(new AlgorithmSourceBackend[0]));
-	}
-
 	public static Query readQueryAsXML(File file, KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) throws IOException {
 		myLogger.entering(XMLConfiguration.class.getName(), "readQueryAsXML");
 		Query query = (Query) getXStream(knowledgeSource, algorithmSource).fromXML(file);
+		return query;
+	}
+
+	/**
+	 * Read XML from the specified file that describes a Protemp query and
+	 * create the query.
+	 * 
+	 * @param url
+	 *            The url to read. The top level element of the XML
+	 *            must be "protempaQuery" and the XML must conform to the
+	 *            Protempa XML schema.
+	 * @param knowledgeSource
+	 * @param algorithmSource
+	 * @return The described query.
+	 * @throws IOException
+	 *             If there is a problem.
+	 */
+	public static Query readQueryAsXML(URL url, KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) throws IOException {
+		myLogger.entering(XMLConfiguration.class.getName(), "readQueryAsXML");
+		Query query = (Query) getXStream(knowledgeSource, algorithmSource).fromXML(url);
+		return query;
+	}
+
+	/**
+	 * Read XML from the specified file that describes a Protemp query and
+	 * create the query.
+	 * 
+	 * @param reader
+	 *            The Reader to read. The top level element of the XML
+	 *            must be "protempaQuery" and the XML must conform to the
+	 *            Protempa XML schema.
+	 * @param knowledgeSource
+	 * @param algorithmSource
+	 * @return The described query.
+	 * @throws IOException
+	 *             If there is a problem.
+	 */
+	public static Query readQueryAsXML(Reader reader, KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) throws IOException {
+		myLogger.entering(XMLConfiguration.class.getName(), "readQueryAsXML");
+		Query query = (Query) getXStream(knowledgeSource, algorithmSource).fromXML(reader);
+		return query;
+	}
+
+	/**
+	 * Read XML from the specified file that describes a Protemp query and
+	 * create the query.
+	 * 
+	 * @param inputStream
+	 *            The InputStream to read. The top level element of the XML
+	 *            must be "protempaQuery" and the XML must conform to the
+	 *            Protempa XML schema.
+	 * @param knowledgeSource
+	 * @param algorithmSource
+	 * @return The described query.
+	 * @throws IOException
+	 *             If there is a problem.
+	 */
+	public static Query readQueryAsXML(InputStream inputStream, KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) throws IOException {
+		myLogger.entering(XMLConfiguration.class.getName(), "readQueryAsXML");
+		Query query = (Query) getXStream(knowledgeSource, algorithmSource).fromXML(inputStream);
+		return query;
+	}
+
+	/**
+	 * Read XML from the specified file that describes a Protemp query and
+	 * create the query.
+	 * 
+	 * @param str
+	 *            The string to read. The top level element of the XML
+	 *            must be "protempaQuery" and the XML must conform to the
+	 *            Protempa XML schema.
+	 * @param knowledgeSource
+	 * @param algorithmSource
+	 * @return The described query.
+	 * @throws IOException
+	 *             If there is a problem.
+	 */
+	public static Query readQueryAsXML(String str, KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) throws IOException {
+		myLogger.entering(XMLConfiguration.class.getName(), "readQueryAsXML");
+		Query query = (Query) getXStream(knowledgeSource, algorithmSource).fromXML(str);
 		return query;
 	}
 
