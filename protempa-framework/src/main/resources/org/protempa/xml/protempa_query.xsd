@@ -65,10 +65,19 @@
                         <xs:documentation xml:lang="en">The query will match each set of propositions that is returned by the back end and accepted by the filters against the propositions named by the elements contained by this element.</xs:documentation>
                     </xs:annotation>
                 </xs:element>
-                <xs:element minOccurs="0" name="filters" type="filterType">
+                <xs:element minOccurs="0" name="filters">
                     <xs:annotation>
                         <xs:documentation>If present, the filters that this element contains are used to filters that sets of propositions that are read from the back end.</xs:documentation>
                     </xs:annotation>
+                    <xs:complexType>
+                        <xs:choice maxOccurs="unbounded">
+                            <xs:element name="dateTimeFilter" type="dateTimeFilterType"/>
+                            <xs:element name="postionFilter" type="positionFilterType"/>
+                            <xs:element name="propertyValueFilter" type="propertyValueFilterType"/>
+                            <xs:element name="propertyValuesFilter" type="propertyValuesFilterType"
+                            />
+                        </xs:choice>
+                    </xs:complexType>
                 </xs:element>
                 <xs:element minOccurs="0" name="termIDs">
                     <xs:annotation>
