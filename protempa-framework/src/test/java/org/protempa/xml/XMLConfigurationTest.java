@@ -62,10 +62,12 @@ public class XMLConfigurationTest extends TestCase {
 
 	private void checkXMLValid(File file) throws SAXException, ParserConfigurationException, IOException {
 		DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-	    Document document = parser.parse(file);
-	    
-	    SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		Schema schema = schemaFactory.newSchema(XMLConfiguration.getQuerySchemaUrl());
+		Document document = parser.parse(file);
+
+		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		// Get schema from the local file since the correct schema may not yet
+		// be deployed to its URL when we run this test.
+		Schema schema = schemaFactory.newSchema(getClass().getResource("protempa_query.xsd"));
 		Validator validator = schema.newValidator();
 		validator.validate(new DOMSource(document));
 	}
@@ -73,11 +75,10 @@ public class XMLConfigurationTest extends TestCase {
 	private Query createTestQuery() throws Exception {
 		final String[] keyIds = { "keyId1", "keyId2" };
 
-		final String[] PROP_IDS = { "Patient", "Encounter", "30DayReadmission", "No30DayReadmission", "PatientAll",
-			"DISEASEINDICATOR:EndStageRenalDisease", "DISEASEINDICATOR:UncontrolledDiabetes", "DISEASEINDICATOR:MetastasisEvent",
-			"PROCEDUREINDICATOR:BoneMarrowTransplantEvent", "DISEASEINDICATOR:Obesity", "ERATCancer", "ERATCKD", "VitalSign", "Geography", "MSDRG:MSDRG",
-			"LAB:PlateletCountClassification", "LAB:1000764", "MED:(LME87) inotropic agents" };
-
+		final String[] PROP_IDS = { "Patient", "Encounter", "30DayReadmission", "No30DayReadmission", "PatientAll", "DISEASEINDICATOR:EndStageRenalDisease",
+				"DISEASEINDICATOR:UncontrolledDiabetes", "DISEASEINDICATOR:MetastasisEvent", "PROCEDUREINDICATOR:BoneMarrowTransplantEvent",
+				"DISEASEINDICATOR:Obesity", "ERATCancer", "ERATCKD", "VitalSign", "Geography", "MSDRG:MSDRG", "LAB:PlateletCountClassification", "LAB:1000764",
+				"MED:(LME87) inotropic agents" };
 
 		DateTimeFilter timeRange = new DateTimeFilter(new String[] { "Encounter" }, AbsoluteTimeGranularity.DAY.getShortFormat().parse("12/1/2010"),
 				AbsoluteTimeGranularity.DAY, AbsoluteTimeGranularity.DAY.getShortFormat().parse("3/31/2011"), AbsoluteTimeGranularity.DAY, Side.FINISH,
