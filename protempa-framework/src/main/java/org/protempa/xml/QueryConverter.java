@@ -3,8 +3,10 @@
  */
 package org.protempa.xml;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -182,11 +184,14 @@ class QueryConverter implements Converter {
 	 */
 	static URL getQuerySchemaUrl() {
 		if (querySchemaUrl==null) {
-//			querySchemaUrl = QueryConverter.class.getResource("/org/protempa/xml/protempa_query.xsd");
+			URL propertiesUrl = QueryConverter.class.getResource("urls.properties");
 			try {
-				querySchemaUrl = new URL("http://aiwdev02.eushc.org/protempa/schema/1.0/protempa_query.xsd");
-			} catch (MalformedURLException e) {
-				throw new RuntimeException("Unexpected problem constructing URL", e);
+				InputStream inStream = propertiesUrl.openStream();
+				Properties urlProperties = new Properties();
+				urlProperties.load(inStream);
+				querySchemaUrl = new URL(urlProperties.getProperty("query.url"));
+			} catch (IOException e) {
+				throw new RuntimeException("Unexpected problem reading URL " + propertiesUrl, e);
 			}
 		}
 		return querySchemaUrl;

@@ -1,6 +1,8 @@
 package org.protempa.xml;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
 
@@ -57,7 +59,14 @@ public class XMLConfigurationTest extends TestCase {
 		KnowledgeSource ks = new KnowledgeSource(new KnowledgeSourceBackend[0]);
 		AlgorithmSource as = new AlgorithmSource(new AlgorithmSourceBackend[0]);
 		Query reconstitutedQuery = XMLConfiguration.readQueryAsXML(file, ks, as);
-		assertTrue(reconstitutedQuery.equals(query));
+		assertTrue("Deserialized query is equal to the original query", reconstitutedQuery.equals(query));
+		
+		File z2 = new File("z2.xml");
+		XMLConfiguration.writeQueryAsXML(reconstitutedQuery, z2);
+		FileReader freader = new FileReader(z2);
+		String xml = new BufferedReader(freader).readLine();
+		assertTrue(xml.contains("xsi:noNamespaceSchemaLocation=\"http://aiwdev02.eusch.org/protempa/schema/1.1/protempa_query.xsd\""));
+		
 	}
 
 	private void checkXMLValid(File file) throws SAXException, ParserConfigurationException, IOException {
