@@ -305,16 +305,15 @@ abstract class ConnectionManager {
                  *         Guaranteed not to be <code>null</code>.
                  * @see ConnectionManager.ProtegeCommand#get(java.lang.Object)
                  */
-                @SuppressWarnings("unchecked")
                 @Override
                 Collection<Instance> get(Cls cls) {
-                    Collection result = protegeKnowledgeBase.getInstances(cls);
+                    Collection<Instance> result = protegeKnowledgeBase.getInstances(cls);
                     // Protect against Protege returning null (its API doesn't guarantee
                     // a non-null return value).
                     if (result != null) {
                         return result;
                     } else {
-                        return new ArrayList(0);
+                        return new ArrayList<Instance>(0);
                     }
                 }
             };
