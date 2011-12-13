@@ -308,9 +308,26 @@ public class XMLConfiguration implements QueryBuilder {
 	 *             If there is a problem writing the file.
 	 */
 	public static void writeQueryAsXML(Query query, File file, boolean surpressSchemaReference) throws IOException {
+		Writer writer = new FileWriter(file);
+		writeQueryAsXML(query, writer, surpressSchemaReference);
+	}
+
+		/**
+		 * Write the given protempa query to the specified file.
+		 * 
+		 * @param query
+		 *            The query to be written as XML.
+		 * @param writer
+		 *            The file to write the XML to.
+		 * @param surpressSchemaReference
+		 *            If true, don't include a reference to the schema in the
+		 *            generated XML file.
+		 * @throws IOException
+		 *             If there is a problem writing the file.
+		 */
+		public static void writeQueryAsXML(Query query, Writer writer, boolean surpressSchemaReference) throws IOException {
 		XMLConfiguration.surpressSchemaReference.set(Boolean.valueOf(surpressSchemaReference));
 		myLogger.entering(XMLConfiguration.class.getName(), "writeQueryAsXML");
-		Writer writer = new FileWriter(file);
 		getXStream(new KnowledgeSource(new KnowledgeSourceBackend[0]), new AlgorithmSource(new AlgorithmSourceBackend[0])).toXML(query, writer);
 		writer.close();
 		myLogger.exiting(XMLConfiguration.class.getName(), "writeQueryAsXML");
