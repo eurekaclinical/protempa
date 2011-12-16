@@ -106,6 +106,9 @@
             <directory>${basedir}/src/main/resources</directory>
             <includes>
               <include>org/protempa/xml/*.xsd</include>
+              <include>org/protempa/backend/**/*</include>
+              <include>org/protempa/proposition/**/*</include>
+              <include>org/protempa/asb/**/*</include>
             </includes>
           </resource>
           <resource>
