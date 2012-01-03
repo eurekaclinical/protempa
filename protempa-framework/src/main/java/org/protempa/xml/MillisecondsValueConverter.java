@@ -4,6 +4,7 @@
 package org.protempa.xml;
 
 import java.util.Date;
+import java.util.TimeZone;
 
 import com.thoughtworks.xstream.converters.basic.DateConverter;
 
@@ -17,7 +18,7 @@ class MillisecondsValueConverter extends DateConverter {
 	 * 
 	 */
 	public MillisecondsValueConverter() {
-		super("yyyy-MM-dd'T'HH:mm:ss.S", new String[0]);
+		super("yyyy-MM-dd'T'HH:mm:ss.S", new String[0], TimeZone.getDefault());
 	}
 
 	/**
