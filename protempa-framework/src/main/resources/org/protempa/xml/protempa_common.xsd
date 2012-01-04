@@ -12,34 +12,13 @@
         <xs:annotation>
             <xs:documentation>A collection of one or more propositionID elements.</xs:documentation>
         </xs:annotation>
-        <xs:choice>
-            <xs:annotation>
-                <xs:documentation>This can either contain one or more propositionID elements that enumerate the actual proposition IDs that will be in the enclosing element or it can contain a inDataSourcePropositionIds element.  The inDataSourcePropositionIds element contains propositionID elements that enumerate proposition IDs that are passed to the inDataSourcePropositionIds method of the knowledgesource being used by the current Protempa run. 
-
-The set of unique proposition IDs that are returned by the inDataSourcePropositionIds method are considered to be the proposition IDs that are contained by the enclosing element.</xs:documentation>
-            </xs:annotation>
-            <xs:sequence>
-                <xs:element maxOccurs="unbounded" name="propositionID" type="propositionIdType">
-                    <xs:annotation>
-                        <xs:documentation>The value of this element is a string that identifies a proposition in the ontology.</xs:documentation>
-                    </xs:annotation>
-                </xs:element>
-            </xs:sequence>
-            <xs:element name="inDataSourcePropositionIds">
+        <xs:sequence>
+            <xs:element maxOccurs="unbounded" name="propositionID" type="propositionIdType">
                 <xs:annotation>
-                    <xs:documentation>When this element is read, the Proposition ID values that are in the contained propositionID elements are passed to the Protempa run's knowledgesource's inDataSourcePropositionIds method. This element is then logically replaced with propositionID elements that contain the unique set of proposition ID values returned by the inDataSourcePropositionIds method.</xs:documentation>
+                    <xs:documentation>The value of this element is a string that identifies a proposition in the ontology.</xs:documentation>
                 </xs:annotation>
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" name="propositionID" type="propositionIdType">
-                            <xs:annotation>
-                                <xs:documentation xml:lang="en">The value of this element is a string that identifies a proposition in the ontology.</xs:documentation>
-                            </xs:annotation>
-                        </xs:element>
-                    </xs:sequence>
-                </xs:complexType>
             </xs:element>
-        </xs:choice>
+        </xs:sequence>
     </xs:complexType>
     <xs:element name="booleanValue" type="xs:boolean">
         <xs:annotation>
