@@ -83,7 +83,7 @@ public class XMLConfiguration implements QueryBuilder {
 	 * 
 	 * @param file The XML file that contains the query description.
 	 */
-	private XMLConfiguration(File file) {
+	public XMLConfiguration(File file) {
 		super();
 		this.file = file;
 	}
