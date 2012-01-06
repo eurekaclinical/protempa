@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -42,6 +43,10 @@ import org.xml.sax.SAXException;
  * @author Mark Grand
  */
 public class XMLConfigurationTest extends TestCase {
+
+	private DateTimeFilter timeRange = new DateTimeFilter(new String[] { "Encounter" }, new GregorianCalendar(2010, 11, 1).getTime(),
+			AbsoluteTimeGranularity.DAY, new GregorianCalendar(2011, 2, 31).getTime(), AbsoluteTimeGranularity.DAY, Side.FINISH,
+			Side.START);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -89,9 +94,6 @@ public class XMLConfigurationTest extends TestCase {
 				"DISEASEINDICATOR:Obesity", "ERATCancer", "ERATCKD", "VitalSign", "Geography", "MSDRG:MSDRG", "LAB:PlateletCountClassification", "LAB:1000764",
 				"MED:(LME87) inotropic agents" };
 
-		DateTimeFilter timeRange = new DateTimeFilter(new String[] { "Encounter" }, AbsoluteTimeGranularity.DAY.getShortFormat().parse("12/1/2010"),
-				AbsoluteTimeGranularity.DAY, AbsoluteTimeGranularity.DAY.getShortFormat().parse("3/31/2011"), AbsoluteTimeGranularity.DAY, Side.FINISH,
-				Side.START);
 		/*
 		 * Includes only inpatient visits.
 		 */
