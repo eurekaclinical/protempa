@@ -5,7 +5,6 @@ package org.protempa.xml;
 
 import org.protempa.proposition.value.BooleanValue;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.converters.basic.BooleanConverter;
@@ -16,7 +15,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * Convert a BooleanValue object to/from XML
  * @author mgrand
  */
-class BooleanValueObjectConverter implements Converter {
+class BooleanValueObjectConverter extends AbstractConverter {
 	private final BooleanConverter bconv = new BooleanConverter();
 	
 	public BooleanValueObjectConverter() {

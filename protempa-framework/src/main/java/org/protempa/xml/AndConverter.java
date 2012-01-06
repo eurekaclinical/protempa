@@ -5,8 +5,6 @@ package org.protempa.xml;
 
 import java.util.ArrayList;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -17,7 +15,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * 
  * @author mgrand
  */
-class AndConverter implements Converter {
+class AndConverter extends AbstractConverter {
 
 	/**
 	 * Constructor
@@ -63,9 +61,7 @@ class AndConverter implements Converter {
 		ArrayList<String> termIdList = new ArrayList<String>();
 		while(reader.hasMoreChildren()) {
 			reader.moveDown();
-			if (!"termId".equals(reader.getNodeName())) {
-				throw new ConversionException("keyIDs has a child that is not <keyId>");
-			}
+			expect(reader, "termId");
 			termIdList.add(reader.getValue());
 			reader.moveUp();
 		}

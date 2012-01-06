@@ -19,7 +19,6 @@ import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 
 import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -30,7 +29,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * 
  * @author mgrand
  */
-class QueryConverter implements Converter {
+class QueryConverter extends AbstractConverter {
 	public static URL querySchemaUrl = null;
 	private static Logger myLogger = Logger.getLogger(QueryConverter.class.getName());
 	
@@ -113,7 +112,7 @@ class QueryConverter implements Converter {
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		if (!reader.hasMoreChildren()) {
-			missingPropIds();
+			throw new ConversionException("protempaQuery element has no children.");
 		}
 		reader.moveDown();
 		// TODO unmarshal dataSourceBackend
@@ -128,14 +127,9 @@ class QueryConverter implements Converter {
 			String[] keyIds = (String[]) context.convertAnother(null, String[].class, keyIDsConverter);
 			queryBuilder.setKeyIds(keyIds);
 			reader.moveUp();
+			reader.moveDown();
 		}
-		if (!reader.hasMoreChildren()) {
-			missingPropIds();
-		}
-		reader.moveDown();
-		if (!"propositionIDs".equals(reader.getNodeName())) {
-			missingPropIds();
-		}
+		expect(reader, "propositionIDs");
 		PropIDsConverter propIDsConverter = new PropIDsConverter();
 		String[] propIds = (String[]) context.convertAnother(null, String[].class, propIDsConverter);
 		queryBuilder.setPropIds(propIds);
@@ -172,10 +166,6 @@ class QueryConverter implements Converter {
 	private And<String>[] unmarshalTermIds(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		TermIDsConverter termIDsConverter = new TermIDsConverter();
 		return (And<String>[]) context.convertAnother(null, And[].class, termIDsConverter);
-	}
-
-	private void missingPropIds() {
-		throw new ConversionException("Missing <propositionIDs> element");
 	}
 
 	/**

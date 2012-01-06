@@ -11,7 +11,6 @@ import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import org.protempa.proposition.value.ValueComparator;
 
 import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -22,7 +21,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * 
  * @author mgrand
  */
-class FiltersConverter implements Converter {
+class FiltersConverter extends AbstractConverter {
 
 	private static final String PROPERTY_VALUE_FILTER = "propertyValueFilter";
 	private static final String PROPERTY_VALUES_FILTER = "propertyValuesFilter";

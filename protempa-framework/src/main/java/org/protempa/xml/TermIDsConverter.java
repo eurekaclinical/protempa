@@ -7,8 +7,6 @@ import java.util.ArrayList;
 
 import org.protempa.query.And;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -19,7 +17,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * 
  * @author mgrand
  */
-class TermIDsConverter implements Converter {
+class TermIDsConverter extends AbstractConverter {
 
 	/**
 	 * Constructor
@@ -64,9 +62,7 @@ class TermIDsConverter implements Converter {
 		ArrayList<And<String>> keyIdList = new ArrayList<And<String>>();
 		while(reader.hasMoreChildren()) {
 			reader.moveDown();
-			if (!"and".equals(reader.getNodeName())) {
-				throw new ConversionException("termIDs has a child that is not <and>");
-			}
+			expect(reader, "and");
 			keyIdList.add(unmarshallAnd(context));
 			reader.moveUp();
 		}

@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
+import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import org.protempa.AlgorithmSource;
@@ -70,7 +71,7 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
  * @author mgrand
  */
 public class XMLConfiguration implements QueryBuilder {
-	static final DateConverter STANDARD_DATE_CONVERTER = new DateConverter("yyyy-MM-dd'T'HH:mm:ss.S", new String[0]);
+	static final DateConverter STANDARD_DATE_CONVERTER = new DateConverter("yyyy-MM-dd'T'HH:mm:ss.S", new String[0], TimeZone.getDefault());
 
 	private static Logger myLogger = Logger.getLogger(XMLConfiguration.class.getName());
 

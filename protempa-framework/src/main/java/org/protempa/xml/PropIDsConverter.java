@@ -6,7 +6,6 @@ package org.protempa.xml;
 import java.util.ArrayList;
 
 import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -17,7 +16,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * 
  * @author mgrand
  */
-class PropIDsConverter implements Converter {
+class PropIDsConverter extends AbstractConverter {
 
 	private static final String PROPOSITION_ID = "propositionID";
 

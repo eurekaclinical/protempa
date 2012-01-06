@@ -5,7 +5,6 @@ package org.protempa.xml;
 
 import org.protempa.proposition.value.InequalityNumberValue;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -15,7 +14,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * Convert a InequalityNumberValue object to/from XML
  * @author mgrand
  */
-class InequalityValueObjectConverter implements Converter {
+class InequalityValueObjectConverter extends AbstractConverter {
 	
 	public InequalityValueObjectConverter() {
 		super();

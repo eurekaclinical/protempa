@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 
 import org.protempa.proposition.value.NumberValue;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.converters.basic.BigDecimalConverter;
@@ -18,7 +17,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * Convert a NumberValue object to/from XML
  * @author mgrand
  */
-class NumberValueObjectConverter implements Converter {
+class NumberValueObjectConverter extends AbstractConverter {
 	private final BigDecimalConverter bdconv = new BigDecimalConverter();
 	
 	public NumberValueObjectConverter() {

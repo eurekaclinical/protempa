@@ -5,7 +5,6 @@ package org.protempa.xml;
 
 import org.protempa.proposition.value.NominalValue;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -15,7 +14,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * Convert a NominalValue object to/from XML
  * @author mgrand
  */
-class NominalValueObjectConverter implements Converter {
+class NominalValueObjectConverter extends AbstractConverter {
 	public NominalValueObjectConverter() {
 		super();
 	}

@@ -31,6 +31,8 @@ class DateTimeFilterConverter implements Converter {
 	private static final String FINISH = "finish";
 	private static final String START_GRANULARITY = "startGranularity";
 	private static final String START = "start";
+	
+	private MillisecondsValueConverter msConverter = new MillisecondsValueConverter();
 
 	/**
 	 * Constructor
@@ -57,7 +59,6 @@ class DateTimeFilterConverter implements Converter {
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		DateTimeFilter filter = (DateTimeFilter) value;
 		
-		MillisecondsValueConverter msConverter = new MillisecondsValueConverter();
 		writer.addAttribute(START, msConverter.toString(filter.getStart()));
 		
 		GranularityValueConverter granularityConverter = new GranularityValueConverter();
