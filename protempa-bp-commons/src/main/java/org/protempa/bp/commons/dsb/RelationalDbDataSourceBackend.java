@@ -1,7 +1,6 @@
 package org.protempa.bp.commons.dsb;
 
 import java.io.IOException;
-import org.protempa.bp.commons.dsb.relationaldb.SQLGenerator;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -10,21 +9,25 @@ import java.util.Set;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.DatabaseAPI;
 import org.arp.javautil.sql.InvalidConnectionSpecArguments;
-import org.protempa.backend.DataSourceBackendFailedValidationException;
-import org.protempa.backend.DataSourceBackendInitializationException;
 import org.protempa.DataSourceReadException;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.QuerySession;
 import org.protempa.backend.BackendInstanceSpec;
+import org.protempa.backend.DataSourceBackendFailedValidationException;
+import org.protempa.backend.DataSourceBackendInitializationException;
+import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.bp.commons.AbstractCommonsDataSourceBackend;
 import org.protempa.bp.commons.BackendProperty;
+import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec;
 import org.protempa.bp.commons.dsb.relationaldb.EntitySpec;
+import org.protempa.bp.commons.dsb.relationaldb.NoCompatibleSQLGeneratorException;
 import org.protempa.bp.commons.dsb.relationaldb.RelationalDatabaseSpec;
+import org.protempa.bp.commons.dsb.relationaldb.SQLGenerator;
 import org.protempa.bp.commons.dsb.relationaldb.SQLGeneratorFactory;
 import org.protempa.bp.commons.dsb.relationaldb.SQLGeneratorLoadException;
-import org.protempa.bp.commons.dsb.relationaldb.NoCompatibleSQLGeneratorException;
-import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.bp.commons.dsb.relationaldb.StagingSpec;
+import org.protempa.bp.commons.dsb.relationaldb.TableSpec;
 import org.protempa.proposition.Proposition;
 
 /**
@@ -295,6 +298,8 @@ public abstract class RelationalDbDataSourceBackend
     protected abstract EntitySpec[] eventSpecs() throws IOException;
     
     protected abstract EntitySpec[] primitiveParameterSpecs() throws IOException;
+    
+    protected abstract StagingSpec[] stagedSpecs() throws IOException;
 
     private RelationalDatabaseSpec createRelationalDatabaseSpec() {
         RelationalDatabaseSpec result = new RelationalDatabaseSpec();
@@ -309,6 +314,9 @@ public abstract class RelationalDbDataSourceBackend
 
             EntitySpec[] primParamSpecs = primitiveParameterSpecs();
             result.setPrimitiveParameterSpecs(primParamSpecs);
+            
+            StagingSpec[] stagedSpecs = stagedSpecs();
+            result.setStagedSpecs(stagedSpecs);
 
         } catch (IOException ex) {
             throw new RuntimeException(ex);

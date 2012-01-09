@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.arp.javautil.sql.DatabaseAPI;
 import org.protempa.bp.commons.dsb.relationaldb.EntitySpec;
 import org.protempa.bp.commons.dsb.relationaldb.RelationalDatabaseSpec;
+import org.protempa.bp.commons.dsb.relationaldb.StagingSpec;
 import org.protempa.proposition.value.AbsoluteTimeGranularityFactory;
 import org.protempa.proposition.value.AbsoluteTimeUnitFactory;
 import org.protempa.proposition.value.GranularityFactory;
@@ -31,6 +32,7 @@ public class RelationalDbDataSourceBackEndBean extends RelationalDbDataSourceBac
 	private EntitySpec[] myConstantSpecs = new EntitySpec[0];
 	private EntitySpec[] myEventSpecs = new EntitySpec[0];
 	private EntitySpec[] myPrimitiveParameterSpecs = new EntitySpec[0];
+	private StagingSpec[] myStagedSpecs = new StagingSpec[0];
 
 	/**
 	 * Constructor.
@@ -202,5 +204,19 @@ public class RelationalDbDataSourceBackEndBean extends RelationalDbDataSourceBac
 	public void setPrimitiveParameterSpecs(EntitySpec[] myPrimitiveParameterSpecs) {
 		this.myPrimitiveParameterSpecs = myPrimitiveParameterSpecs;
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend#stagedSpecs()
+	 */
+    @Override
+    protected StagingSpec[] stagedSpecs() {
+        return myStagedSpecs;
+    }
+    
+    public void setStagedSpecs(StagingSpec[] myStagedSpecs) {
+        this.myStagedSpecs = myStagedSpecs;
+    }
 
 }
