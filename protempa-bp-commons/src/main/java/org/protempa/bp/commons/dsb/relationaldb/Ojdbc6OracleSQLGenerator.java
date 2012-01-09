@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
@@ -65,8 +66,21 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGenerator {
     protected SelectStatement getSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
-        return new Ojdbc6OracleSelectStatement(entitySpec, referenceSpec, entitySpecs,
-                filters, propIds, keyIds, order, resultProcessor);
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor,
+            StagingSpec[] stagedTables) {
+        return new Ojdbc6OracleSelectStatement(entitySpec, referenceSpec,
+                entitySpecs, filters, propIds, keyIds, order, resultProcessor,
+                stagedTables);
     }
+
+    @Override
+    protected CreateStatement getStagingCreateStatement(StagingSpec stagingSpec, ReferenceSpec referenceSpec,
+            List<EntitySpec> entitySpecs, Set<Filter> filters,
+            Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
+            SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables) {
+        return new Ojdbc6OracleStagingCreateStatement(stagingSpec,
+                referenceSpec, entitySpecs, filters, propIds, keyIds, order,
+                resultProcessor, stagedTables);
+    }
+
 }

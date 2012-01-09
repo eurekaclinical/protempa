@@ -53,6 +53,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private EntitySpec[] eventEntitySpecs;
     private final Map<String, List<EntitySpec>> constantSpecs;
     private EntitySpec[] constantEntitySpecs;
+    private StagingSpec[] stagedTableSpecs;
     private GranularityFactory granularities;
     private UnitFactory units;
     private RelationalDbDataSourceBackend backend;
@@ -76,6 +77,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             this.constantEntitySpecs = relationalDatabaseSpec
                     .getConstantSpecs();
             populatePropositionMap(this.constantSpecs, this.constantEntitySpecs);
+            this.stagedTableSpecs = relationalDatabaseSpec.getStagedSpecs();
             this.granularities = relationalDatabaseSpec.getGranularities();
             this.units = relationalDatabaseSpec.getUnits();
             this.connectionSpec = connectionSpec;
@@ -302,6 +304,31 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
     }
 
+    private void stageTables(Set<String> keyIds, Set<String> propIds,
+            Collection<EntitySpec> allEntitySpecs, Filter filters,
+            SQLOrderBy order) {
+        Logger logger = SQLGenUtil.logger();
+        for (StagingSpec toStage : this.stagedTableSpecs) {
+            EntitySpec entitySpec = toStage.getEntitySpec();
+
+            List<EntitySpec> allEntitySpecsCopy = new LinkedList<EntitySpec>(
+                    allEntitySpecs);
+            removeNonApplicableEntitySpecs(entitySpec, allEntitySpecsCopy);
+
+            Set<Filter> filtersCopy = copyFilters(filters);
+            removeNonApplicableFilters(allEntitySpecs, filtersCopy, entitySpec);
+            assert !allEntitySpecsCopy.isEmpty() : "allEntitySpecsCopy should have at least one element";
+
+            String sql = getStagingCreateStatement(toStage, null, allEntitySpecsCopy,
+                    filtersCopy, propIds, keyIds, order, null,
+                    this.stagedTableSpecs).generateStatement();
+
+            logger.log(Level.FINE,
+                    "Creating staging area for entity spec {0}: {1}",
+                    new Object[] { entitySpec.getName(), sql });
+        }
+    }
+
     /*
      * allEntitySpecs() returns a map of non-parameterized
      * SQLGenResultProcessorFactory objects, therefore the resulting map here
@@ -319,6 +346,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         Collection<EntitySpec> allEntitySpecs = entitySpecToResultProcessorMap
                 .keySet();
         Logger logger = SQLGenUtil.logger();
+
+//        stageTables(keyIds, propIds, allEntitySpecs, filters, order);
 
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
             logProcessingEntitySpec(logger, entitySpec);
@@ -545,6 +574,11 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         for (EntitySpec es : this.constantEntitySpecs) {
             result.put(es, cFactory);
         }
+
+        // staging queries generate no results
+        for (StagingSpec ss : this.stagedTableSpecs) {
+            result.put(ss.getEntitySpec(), null);
+        }
         return result;
     }
 
@@ -585,8 +619,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                             query });
         }
 
-        executeSelect(logger, backendNameForMessages, entitySpecName, query,
-                resultProcessor);
+         executeSelect(logger, backendNameForMessages, entitySpecName, query,
+         resultProcessor);
     }
 
     private static void removeNonApplicableEntitySpecs(EntitySpec entitySpec,
@@ -650,7 +684,13 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
-            SQLGenResultProcessor resultProcessor);
+            SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables);
+
+    protected abstract CreateStatement getStagingCreateStatement(
+            StagingSpec stagingSpec, ReferenceSpec referenceSpec,
+            List<EntitySpec> entitySpecs, Set<Filter> filters,
+            Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
+            SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables);
 
     private String generateSelect(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, Set<String> propIds,
@@ -658,9 +698,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor) {
 
-        return getSelectStatement(entitySpec, referenceSpec,
-                entitySpecsCopy, filtersCopy, propIds, keyIds, order,
-                resultProcessor).generateStatement();
+        return getSelectStatement(entitySpec, referenceSpec, entitySpecsCopy,
+                filtersCopy, propIds, keyIds, order, resultProcessor,
+                this.stagedTableSpecs).generateStatement();
     }
 
     protected String assembleReadPropositionsQuery(StringBuilder selectClause,

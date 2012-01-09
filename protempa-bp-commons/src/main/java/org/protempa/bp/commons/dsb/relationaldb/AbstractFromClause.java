@@ -15,8 +15,7 @@ abstract class AbstractFromClause implements FromClause {
         this.referenceIndices = referenceIndices;
     }
 
-    protected abstract JoinClause getJoinClause(
-            JoinSpec.JoinType joinType);
+    protected abstract JoinClause getJoinClause(JoinSpec.JoinType joinType);
 
     protected abstract OnClause getOnClause(JoinSpec joinSpec,
             TableAliaser referenceIndices);

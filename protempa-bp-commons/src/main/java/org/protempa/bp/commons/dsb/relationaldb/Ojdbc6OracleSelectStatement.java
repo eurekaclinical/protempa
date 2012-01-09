@@ -5,14 +5,14 @@ import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
 
-final class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
+class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
 
     Ojdbc6OracleSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables) {
         super(entitySpec, referenceSpec, entitySpecs, filters, propIds, keyIds,
-                order, resultProcessor);
+                order, resultProcessor, stagedTables);
     }
 
     @Override
@@ -30,8 +30,8 @@ final class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
      */
     @Override
     FromClause getFromClause(List<ColumnSpec> columnSpecs,
-            TableAliaser referenceIndices) {
-        return new Ojdbc6OracleFromClause(columnSpecs, referenceIndices);
+            TableAliaser referenceIndices, StagingSpec[] stagedTables) {
+        return new Ojdbc6OracleFromClause(columnSpecs, referenceIndices, stagedTables);
     }
 
     /*

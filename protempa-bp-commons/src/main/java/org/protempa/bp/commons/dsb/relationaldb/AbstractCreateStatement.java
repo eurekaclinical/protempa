@@ -7,11 +7,9 @@ import org.protempa.backend.dsb.filter.Filter;
 
 abstract class AbstractCreateStatement implements CreateStatement {
 
-    private final String schema;
-    private final String table;
+    private final StagingSpec stagingSpec;
 
     // Fields required for select statement
-    private final EntitySpec entitySpec;
     private final ReferenceSpec referenceSpec;
     private final List<EntitySpec> entitySpecs;
     private final Set<Filter> filters;
@@ -19,15 +17,14 @@ abstract class AbstractCreateStatement implements CreateStatement {
     private final Set<String> keyIds;
     private final SQLOrderBy order;
     private final SQLGenResultProcessor resultProcessor;
+    private final StagingSpec[] stagedTables;
 
-    protected AbstractCreateStatement(String schema, String table,
-            EntitySpec entitySpec, ReferenceSpec referenceSpec,
-            List<EntitySpec> entitySpecs, Set<Filter> filters,
-            Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
-            SQLGenResultProcessor resultProcessor) {
-        this.schema = schema;
-        this.table = table;
-        this.entitySpec = entitySpec;
+    protected AbstractCreateStatement(StagingSpec stagingSpec,
+            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor,
+            StagingSpec[] stagedTables) {
+        this.stagingSpec = stagingSpec;
         this.referenceSpec = referenceSpec;
         this.entitySpecs = entitySpecs;
         this.filters = filters;
@@ -35,13 +32,19 @@ abstract class AbstractCreateStatement implements CreateStatement {
         this.keyIds = keyIds;
         this.order = order;
         this.resultProcessor = resultProcessor;
+        this.stagedTables = stagedTables;
     }
 
     @Override
     public String generateStatement() {
-        return "CREATE TABLE " + schema + "." + table + " AS "
-                + getSelectStatement(entitySpec, referenceSpec, entitySpecs,
-                        filters, propIds, keyIds, order, resultProcessor).generateStatement();
+        return "CREATE TABLE "
+                + stagingSpec.getStagingArea().getSchema()
+                + "."
+                + stagingSpec.getStagingArea().getTable()
+                + " AS "
+                + getSelectStatement(stagingSpec.getEntitySpec(),
+                        referenceSpec, entitySpecs, filters, propIds, keyIds,
+                        order, resultProcessor).generateStatement();
     }
 
     @Override

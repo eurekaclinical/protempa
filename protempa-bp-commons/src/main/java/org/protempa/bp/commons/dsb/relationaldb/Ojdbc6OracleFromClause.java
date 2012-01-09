@@ -1,17 +1,20 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
 import java.util.List;
+import java.util.Map;
 
 import org.protempa.bp.commons.dsb.relationaldb.JoinSpec.JoinType;
 
-final class Ojdbc6OracleFromClause extends AbstractFromClause {
+class Ojdbc6OracleFromClause extends AbstractFromClause {
 
     private final TableAliaser referenceIndices;
+    private final StagingSpec[] stagedTables;
 
     Ojdbc6OracleFromClause(List<ColumnSpec> columnSpecs,
-            TableAliaser referenceIndices) {
+            TableAliaser referenceIndices, StagingSpec[] stagedTables) {
         super(columnSpecs, referenceIndices);
         this.referenceIndices = referenceIndices;
+        this.stagedTables = stagedTables;
     }
 
     /*
@@ -26,11 +29,34 @@ final class Ojdbc6OracleFromClause extends AbstractFromClause {
         StringBuilder fromPart = new StringBuilder();
 
         if (columnSpec.getSchema() != null) {
-            fromPart.append(columnSpec.getSchema());
+            if (stagedTables != null) {
+                for (StagingSpec sspec : stagedTables) {
+                    for (TableSpec tspec : sspec.getReplacedTables()) {
+                        if (tspec.getSchema().equals(columnSpec.getSchema())
+                                && tspec.getTable().equals(
+                                        columnSpec.getTable())) {
+                            fromPart.append(sspec.getStagingArea().getSchema());
+                        }
+                    }
+                }
+            } else {
+                fromPart.append(columnSpec.getSchema());
+            }
             fromPart.append('.');
         }
 
-        fromPart.append(columnSpec.getTable());
+        if (stagedTables != null) {
+            for (StagingSpec sspec : stagedTables) {
+                for (TableSpec tspec : sspec.getReplacedTables()) {
+                    if (tspec.getSchema().equals(columnSpec.getSchema())
+                            && tspec.getTable().equals(columnSpec.getTable())) {
+                        fromPart.append(sspec.getStagingArea().getTable());
+                    }
+                }
+            }
+        } else {
+            fromPart.append(columnSpec.getTable());
+        }
         fromPart.append(" ");
         fromPart.append(referenceIndices.generateTableReference(columnSpec));
 
@@ -56,7 +82,8 @@ final class Ojdbc6OracleFromClause extends AbstractFromClause {
      * int, java.lang.String, java.lang.String)
      */
     @Override
-    protected AbstractOnClause getOnClause(JoinSpec joinSpec, TableAliaser referenceIndices) {
+    protected AbstractOnClause getOnClause(JoinSpec joinSpec,
+            TableAliaser referenceIndices) {
         return new DefaultOnClause(joinSpec, referenceIndices);
     }
 

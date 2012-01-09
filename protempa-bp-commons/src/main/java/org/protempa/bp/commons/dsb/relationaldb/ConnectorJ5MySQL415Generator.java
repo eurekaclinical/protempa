@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
@@ -55,13 +56,27 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
     protected String getDriverClassNameToLoad() {
         return driverName;
     }
-
+    
     @Override
+    /*
+     * MySQL SQL generator does not currently support staging data
+     * (non-Javadoc)
+     * @see org.protempa.bp.commons.dsb.relationaldb.AbstractSQLGenerator#getSelectStatement(org.protempa.bp.commons.dsb.relationaldb.EntitySpec, org.protempa.bp.commons.dsb.relationaldb.ReferenceSpec, java.util.List, java.util.Set, java.util.Set, java.util.Set, org.protempa.bp.commons.dsb.relationaldb.SQLOrderBy, org.protempa.bp.commons.dsb.relationaldb.SQLGenResultProcessor, java.util.Map)
+     */
     protected SelectStatement getSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables) {
         return new ConnectorJ5MySQL415SelectStatement(entitySpec, referenceSpec, entitySpecs,
                 filters, propIds, keyIds, order, resultProcessor);
+    }
+
+    @Override
+    protected CreateStatement getStagingCreateStatement(StagingSpec stagingSpec,
+            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor,
+            StagingSpec[] stagedTables) {
+        return null;
     }
 }

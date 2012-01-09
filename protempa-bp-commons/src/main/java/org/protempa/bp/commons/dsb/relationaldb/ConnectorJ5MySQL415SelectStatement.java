@@ -1,6 +1,7 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
@@ -12,7 +13,7 @@ final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
         super(entitySpec, referenceSpec, entitySpecs, filters, propIds, keyIds,
-                order, resultProcessor);
+                order, resultProcessor, null);
     }
 
     @Override
@@ -30,7 +31,7 @@ final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
      */
     @Override
     FromClause getFromClause(List<ColumnSpec> columnSpecs,
-            TableAliaser referenceIndices) {
+            TableAliaser referenceIndices, StagingSpec[] stagedTables) {
         return new ConnectorJ5MySQL415FromClause(columnSpecs, referenceIndices);
     }
 
