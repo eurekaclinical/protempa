@@ -32,7 +32,7 @@ public final class SQLGeneratorFactory {
      * @param connectionSpec a {@link ConnectionSpec}, cannot be
      * <code>null</code>.
      * @param backend an initialized
-     * {@link RelationalDatabaseDataSourceBackend}.
+     * {@link RelationalDbDataSourceBackend}.
      */
     public SQLGeneratorFactory(ConnectionSpec connectionSpec,
             RelationalDbDataSourceBackend backend) {
@@ -49,7 +49,7 @@ public final class SQLGeneratorFactory {
      * @return a {@link SQLGenerator}.
      * @throws SQLException if an attempt to query the database for
      * compatibility information failed.
-     * @throws SQLGeneratorNotFoundException if no compatible SQL generator
+     * @throws NoCompatibleSQLGeneratorException if no compatible SQL generator
      * could be found.
      * @throws SQLGeneratorLoadException if a ProtempaSQLGenerator class
      * specified in a {@link ServiceLoader}'s provider-configuration
