@@ -28,15 +28,20 @@ class Ojdbc6OracleFromClause extends AbstractFromClause {
     protected String generateFromTable(ColumnSpec columnSpec) {
         StringBuilder fromPart = new StringBuilder();
 
+        boolean foundStagedTable = false;
         if (columnSpec.getSchema() != null) {
             if (stagedTables != null) {
                 for (StagingSpec sspec : stagedTables) {
                     for (TableSpec tspec : sspec.getReplacedTables()) {
-                        if (tspec.getSchema().equals(columnSpec.getSchema())
+                        if (!foundStagedTable && tspec.getSchema().equals(columnSpec.getSchema())
                                 && tspec.getTable().equals(
                                         columnSpec.getTable())) {
                             fromPart.append(sspec.getStagingArea().getSchema());
+                            foundStagedTable = true;
                         }
+                    }
+                    if (!foundStagedTable) {
+                        fromPart.append(columnSpec.getSchema());
                     }
                 }
             } else {
@@ -45,13 +50,18 @@ class Ojdbc6OracleFromClause extends AbstractFromClause {
             fromPart.append('.');
         }
 
+        foundStagedTable = false;
         if (stagedTables != null) {
             for (StagingSpec sspec : stagedTables) {
                 for (TableSpec tspec : sspec.getReplacedTables()) {
-                    if (tspec.getSchema().equals(columnSpec.getSchema())
+                    if (!foundStagedTable && tspec.getSchema().equals(columnSpec.getSchema())
                             && tspec.getTable().equals(columnSpec.getTable())) {
                         fromPart.append(sspec.getStagingArea().getTable());
+                        foundStagedTable = true;
                     }
+                }
+                if (!foundStagedTable) {
+                    fromPart.append(columnSpec.getTable());
                 }
             }
         } else {
