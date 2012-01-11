@@ -1,20 +1,22 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
 import java.util.List;
-import java.util.Map;
 
 import org.protempa.bp.commons.dsb.relationaldb.JoinSpec.JoinType;
 
 class Ojdbc6OracleFromClause extends AbstractFromClause {
 
-    private final TableAliaser referenceIndices;
     private final StagingSpec[] stagedTables;
 
-    Ojdbc6OracleFromClause(List<ColumnSpec> columnSpecs,
-            TableAliaser referenceIndices, StagingSpec[] stagedTables) {
-        super(columnSpecs, referenceIndices);
-        this.referenceIndices = referenceIndices;
+    Ojdbc6OracleFromClause(EntitySpec currentSpec,
+            List<ColumnSpec> columnSpecs, TableAliaser referenceIndices,
+            StagingSpec[] stagedTables) {
+        super(currentSpec, columnSpecs, referenceIndices);
         this.stagedTables = stagedTables;
+    }
+
+    protected StagingSpec[] getStagedTables() {
+        return stagedTables;
     }
 
     /*
@@ -27,50 +29,43 @@ class Ojdbc6OracleFromClause extends AbstractFromClause {
     @Override
     protected String generateFromTable(ColumnSpec columnSpec) {
         StringBuilder fromPart = new StringBuilder();
-
         boolean foundStagedTable = false;
-        if (columnSpec.getSchema() != null) {
-            if (stagedTables != null) {
-                for (StagingSpec sspec : stagedTables) {
-                    for (TableSpec tspec : sspec.getReplacedTables()) {
-                        if (!foundStagedTable && tspec.getSchema().equals(columnSpec.getSchema())
-                                && tspec.getTable().equals(
-                                        columnSpec.getTable())) {
-                            fromPart.append(sspec.getStagingArea().getSchema());
-                            foundStagedTable = true;
-                        }
-                    }
-                    if (!foundStagedTable) {
-                        fromPart.append(columnSpec.getSchema());
-                    }
-                }
-            } else {
-                fromPart.append(columnSpec.getSchema());
-            }
-            fromPart.append('.');
-        }
+        String schemaToAppend = "";
+        String tableToAppend = "";
 
-        foundStagedTable = false;
         if (stagedTables != null) {
             for (StagingSpec sspec : stagedTables) {
-                for (TableSpec tspec : sspec.getReplacedTables()) {
-                    if (!foundStagedTable && tspec.getSchema().equals(columnSpec.getSchema())
-                            && tspec.getTable().equals(columnSpec.getTable())) {
-                        fromPart.append(sspec.getStagingArea().getTable());
-                        foundStagedTable = true;
+                if (!foundStagedTable
+                        && noPropIdsMatch(getCurrentSpec(), sspec.getEntitySpec())
+                        && columnSpec.isSameSchemaAndTable(sspec
+                                .getReplacedTable())) {
+                    foundStagedTable = true;
+                    if (sspec.getStagingArea().getSchema() != null) {
+                        schemaToAppend = sspec.getStagingArea().getSchema();
                     }
-                }
-                if (!foundStagedTable) {
-                    fromPart.append(columnSpec.getTable());
+                    tableToAppend = sspec.getStagingArea().getTable();
                 }
             }
-        } else {
-            fromPart.append(columnSpec.getTable());
         }
+        if (!foundStagedTable) {
+            if (columnSpec.getSchema() != null) {
+                schemaToAppend = columnSpec.getSchema();
+            }
+            tableToAppend = columnSpec.getTable();
+        }
+
+        fromPart.append(schemaToAppend);
+        fromPart.append('.');
+        fromPart.append(tableToAppend);
         fromPart.append(" ");
-        fromPart.append(referenceIndices.generateTableReference(columnSpec));
+        fromPart.append(getReferenceIndices()
+                .generateTableReference(columnSpec));
 
         return fromPart.toString();
+    }
+
+    private static boolean noPropIdsMatch(EntitySpec es1, EntitySpec es2) {
+        return !SQLGenUtil.somePropIdsMatch(es1, es2);
     }
 
     /*
