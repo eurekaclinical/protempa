@@ -73,7 +73,7 @@ class DateTimeFilterConverter implements Converter {
 		writer.addAttribute(FINISH_SIDE, filter.getFinishSide().getXmlName());
 		
 		writer.startNode(PROPOSITION_IDS);
-		PropIDsConverter propIdsConverter = new PropIDsConverter();
+		TableColumnSpecsConverter propIdsConverter = new TableColumnSpecsConverter();
 		context.convertAnother(filter.getPropositionIds(), propIdsConverter);
 		writer.endNode();
 	}
@@ -116,7 +116,7 @@ class DateTimeFilterConverter implements Converter {
 				+ "\". The only type of child element allowed for " + DATE_TIME_FILTER + " is " + PROPOSITION_IDS;
 			throw new ConversionException(msg);
 		}
-		String[] propostionsIds = (String[])context.convertAnother(null, String[].class, new PropIDsConverter());
+		String[] propostionsIds = (String[])context.convertAnother(null, String[].class, new TableColumnSpecsConverter());
 		reader.moveUp();
 		
 		return new DateTimeFilter(propostionsIds, start, startGranularity, finish, finishGranularity, startSide, finishSide);

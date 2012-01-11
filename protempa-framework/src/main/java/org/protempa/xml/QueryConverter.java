@@ -3,10 +3,7 @@
  */
 package org.protempa.xml;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,7 +28,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  */
 class QueryConverter extends AbstractConverter {
 	public static URL querySchemaUrl = null;
-	private static Logger myLogger = Logger.getLogger(QueryConverter.class.getName());
+	private static Logger myLogger = Logger.getLogger(TableQueryResultshandlerConverter.class.getName());
 	
 	private KnowledgeSource knowledgeSource;
 	private AlgorithmSource algorithmSource;
@@ -63,7 +60,7 @@ class QueryConverter extends AbstractConverter {
 		// Reference Schema
 		writer.addAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		if (!XMLConfiguration.isSurpressSchemaReferenceRequested()) {
-		writer.addAttribute("xsi:noNamespaceSchemaLocation", getQuerySchemaUrl().toExternalForm());
+		writer.addAttribute("xsi:noNamespaceSchemaLocation", getUrl("query.url").toExternalForm());
 		}
 
 		Query query = (Query) value;
@@ -79,7 +76,7 @@ class QueryConverter extends AbstractConverter {
 			writer.endNode();
 		}
 		String[] propIDs = query.getPropIds();
-		PropIDsConverter propIDsConverter = new PropIDsConverter();
+		TableColumnSpecsConverter propIDsConverter = new TableColumnSpecsConverter();
 		writer.startNode("propositionIDs");
 		propIDsConverter.marshal(propIDs, writer, context);
 		writer.endNode();
@@ -130,7 +127,7 @@ class QueryConverter extends AbstractConverter {
 			reader.moveDown();
 		}
 		expect(reader, "propositionIDs");
-		PropIDsConverter propIDsConverter = new PropIDsConverter();
+		TableColumnSpecsConverter propIDsConverter = new TableColumnSpecsConverter();
 		String[] propIds = (String[]) context.convertAnother(null, String[].class, propIDsConverter);
 		queryBuilder.setPropIds(propIds);
 		reader.moveUp();
@@ -173,17 +170,6 @@ class QueryConverter extends AbstractConverter {
 	 *         representation of a query.
 	 */
 	static URL getQuerySchemaUrl() {
-		if (querySchemaUrl==null) {
-			URL propertiesUrl = QueryConverter.class.getResource("urls.properties");
-			try {
-				InputStream inStream = propertiesUrl.openStream();
-				Properties urlProperties = new Properties();
-				urlProperties.load(inStream);
-				querySchemaUrl = new URL(urlProperties.getProperty("query.url"));
-			} catch (IOException e) {
-				throw new RuntimeException("Unexpected problem reading URL " + propertiesUrl, e);
-			}
-		}
-		return querySchemaUrl;
+		return getUrl("query.url");
 	}
 }
