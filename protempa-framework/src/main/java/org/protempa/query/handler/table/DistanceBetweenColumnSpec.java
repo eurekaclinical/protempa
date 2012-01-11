@@ -124,5 +124,17 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
             i++;
         }
     }
+
+	public Link[] getLinks() {
+		return links;
+	}
+
+	public String getColumnNamePrefixOverride() {
+		return columnNamePrefixOverride;
+	}
+
+	public Unit getUnits() {
+		return units;
+	}
     
 }
