@@ -9,7 +9,6 @@ final class Ojdbc6OracleStagingCreateStatement extends
         AbstractCreateStatement {
 
     private final StagingSpec stagingSpec;
-    private final StagingSpec[] stagedTables;
 
     public Ojdbc6OracleStagingCreateStatement(StagingSpec stagingSpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
@@ -19,7 +18,6 @@ final class Ojdbc6OracleStagingCreateStatement extends
         super(stagingSpec, referenceSpec, entitySpecs, filters, propIds,
                 keyIds, order, resultProcessor, stagedTables);
         this.stagingSpec = stagingSpec;
-        this.stagedTables = stagedTables;
     }
 
     @Override
@@ -29,7 +27,7 @@ final class Ojdbc6OracleStagingCreateStatement extends
             SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
         return new Ojdbc6OracleStagingSelectStatement(entitySpec,
                 referenceSpec, entitySpecs, filters, propIds, keyIds, order,
-                resultProcessor, this.stagedTables, this.stagingSpec);
+                resultProcessor, getStagedTables(), this.stagingSpec);
     }
 
 }
