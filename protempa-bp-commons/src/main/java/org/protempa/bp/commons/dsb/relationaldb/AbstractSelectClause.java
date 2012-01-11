@@ -16,6 +16,10 @@ abstract class AbstractSelectClause implements SelectClause {
         this.entitySpec = entitySpec;
         this.caseClause = null;
     }
+    
+    protected TableAliaser getReferenceIndices() {
+        return referenceIndices;
+    }
 
     public String generateClause() {
         StringBuilder selectClause = new StringBuilder("SELECT ");
@@ -118,7 +122,7 @@ abstract class AbstractSelectClause implements SelectClause {
     }
 
     protected abstract CaseClause getCaseClause(Object[] sqlCodes,
-            TableAliaser referenceIndices, ColumnSpec columnSpec,
+            ColumnSpec columnSpec,
             KnowledgeSourceIdToSqlCode[] filteredConstraintValues);
 
     private void setCaseClause(CaseClause caseClause) {
@@ -126,10 +130,9 @@ abstract class AbstractSelectClause implements SelectClause {
     }
 
     @Override
-    public void setCaseClause(Object[] sqlCodes, TableAliaser referenceIndices,
-            ColumnSpec columnSpec,
+    public void setCaseClause(Object[] sqlCodes, ColumnSpec columnSpec,
             KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
-        setCaseClause(getCaseClause(sqlCodes, referenceIndices, columnSpec,
+        setCaseClause(getCaseClause(sqlCodes, columnSpec,
                 filteredConstraintValues));
 
     }
