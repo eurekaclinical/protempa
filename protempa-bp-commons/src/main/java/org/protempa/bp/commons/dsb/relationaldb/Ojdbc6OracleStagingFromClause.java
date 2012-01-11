@@ -4,12 +4,10 @@ import java.util.List;
 
 final class Ojdbc6OracleStagingFromClause extends Ojdbc6OracleFromClause {
 
-    private final TableAliaser referenceIndices;
-    
-    public Ojdbc6OracleStagingFromClause(List<ColumnSpec> columnSpecs,
-            TableAliaser referenceIndices, StagingSpec[] stagedTables) {
-        super(columnSpecs, referenceIndices, stagedTables);
-        this.referenceIndices = referenceIndices;
+    public Ojdbc6OracleStagingFromClause(EntitySpec currentSpec,
+            List<ColumnSpec> columnSpecs, TableAliaser referenceIndices,
+            StagingSpec[] stagedTables) {
+        super(currentSpec, columnSpecs, referenceIndices, stagedTables);
     }
 
     @Override
@@ -23,7 +21,7 @@ final class Ojdbc6OracleStagingFromClause extends Ojdbc6OracleFromClause {
 
         fromPart.append(columnSpec.getTable());
         fromPart.append(" ");
-        fromPart.append(referenceIndices.generateTableReference(columnSpec));
+        fromPart.append(getReferenceIndices().generateTableReference(columnSpec));
 
         return fromPart.toString();
     }
