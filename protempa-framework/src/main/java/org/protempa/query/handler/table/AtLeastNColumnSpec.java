@@ -78,4 +78,24 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
             i++;
         }
     }
+
+	public int getN() {
+		return n;
+	}
+
+	public Link[] getLinks() {
+		return links;
+	}
+
+	public String getColumnNameOverride() {
+		return columnNameOverride;
+	}
+
+	public String getTrueOutput() {
+		return trueOutput;
+	}
+
+	public String getFalseOutput() {
+		return falseOutput;
+	}
 }
