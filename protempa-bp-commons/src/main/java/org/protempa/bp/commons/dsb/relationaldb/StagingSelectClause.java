@@ -32,7 +32,7 @@ final class StagingSelectClause implements SelectClause {
     }
 
     @Override
-    public void setCaseClause(Object[] sqlCodes, TableAliaser referenceIndices,
+    public void setCaseClause(Object[] sqlCodes,
             ColumnSpec columnSpec,
             KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
         throw new UnsupportedOperationException();
