@@ -16,7 +16,7 @@ final class EqualToWhereConstraintProcessor extends WhereConstraintProcessor {
 
         if (getSqlCodes().length > 1) {
             result.append(getWhereClause().getInClause(getColumnSpec(),
-                    getSqlCodes(), false, getReferenceIndices()).generateClause());
+                    getSqlCodes(), false).generateClause());
         } else {
             assert getSqlCodes().length == 1 : "invalid sqlCodes length";
             result.append(getReferenceIndices()
