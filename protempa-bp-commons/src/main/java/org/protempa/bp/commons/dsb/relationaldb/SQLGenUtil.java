@@ -2,6 +2,9 @@ package org.protempa.bp.commons.dsb.relationaldb;
 
 import java.util.logging.Logger;
 
+import org.arp.javautil.arrays.Arrays;
+import org.arp.javautil.collections.Collections;
+
 /**
  *
  * @author Andrew Post
@@ -32,5 +35,8 @@ class SQLGenUtil {
         return LazyLoggerHolder.instance;
     }
 
-    
+    static boolean somePropIdsMatch(EntitySpec es1, EntitySpec es2) {
+        return !Collections.containsAny(Arrays.asSet(es1.getPropositionIds()),
+                es2.getPropositionIds());
+    }
 }
