@@ -16,7 +16,7 @@ final class NotEqualToWhereConstraintProcessor extends WhereConstraintProcessor 
 
         if (getSqlCodes().length > 1) {
             result.append(getWhereClause().getInClause(getColumnSpec(),
-                    getSqlCodes(), true, getReferenceIndices()).generateClause());
+                    getSqlCodes(), true).generateClause());
 
         } else {
             result.append(getReferenceIndices().generateColumnReferenceWithOp(
