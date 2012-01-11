@@ -11,10 +11,9 @@ final class DefaultSelectClause extends AbstractSelectClause {
     }
 
     @Override
-    protected CaseClause getCaseClause(Object[] sqlCodes,
-            TableAliaser referenceIndices, ColumnSpec columnSpec,
+    protected CaseClause getCaseClause(Object[] sqlCodes, ColumnSpec columnSpec,
             KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
-        return new DefaultCaseClause(sqlCodes, referenceIndices, columnSpec,
+        return new DefaultCaseClause(sqlCodes, getReferenceIndices(), columnSpec,
                 filteredConstraintValues);
     }
 
