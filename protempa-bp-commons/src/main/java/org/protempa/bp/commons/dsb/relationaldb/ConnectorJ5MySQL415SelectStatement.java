@@ -32,7 +32,7 @@ final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
     @Override
     FromClause getFromClause(List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices, StagingSpec[] stagedTables) {
-        return new ConnectorJ5MySQL415FromClause(columnSpecs, referenceIndices);
+        return new ConnectorJ5MySQL415FromClause(getEntitySpec(), columnSpecs, referenceIndices);
     }
 
     /*
@@ -50,7 +50,7 @@ final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            SelectClause selectClause) {
+            SelectClause selectClause, StagingSpec[] stagedTables) {
         return new DefaultWhereClause(propIds, info, entitySpecs, filters,
                 referenceIndices, keyIds, order, resultProcessor, selectClause);
     }
