@@ -13,20 +13,21 @@ final class DefaultWhereClause extends AbstractWhereClause {
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             SelectClause selectClause) {
         super(propIds, info, entitySpecs, filters, referenceIndices, keyIds,
-                order, resultProcessor, selectClause);
+                order, resultProcessor, selectClause, new StagingSpec[0]);
     }
 
     @Override
     public InClause getInClause(ColumnSpec columnSpec, Object[] elements,
-            boolean not, TableAliaser referenceIndices) {
-        return new DefaultInClause(columnSpec, elements, not, referenceIndices);
+            boolean not) {
+        return new DefaultInClause(columnSpec, elements, not,
+                getReferenceIndices());
     }
 
     @Override
     public OrderByClause getOrderByClause(ColumnSpec startColumnSpec,
-            ColumnSpec finishColumnSpec, SQLOrderBy order,
-            TableAliaser referenceIndices) {
-        return new DefaultOrderByClause(startColumnSpec, finishColumnSpec, order, referenceIndices);
+            ColumnSpec finishColumnSpec) {
+        return new DefaultOrderByClause(startColumnSpec, finishColumnSpec,
+                getOrder(), getReferenceIndices());
     }
 
 }
