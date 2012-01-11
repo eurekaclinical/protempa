@@ -31,7 +31,7 @@ class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
     @Override
     FromClause getFromClause(List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices, StagingSpec[] stagedTables) {
-        return new Ojdbc6OracleFromClause(columnSpecs, referenceIndices, stagedTables);
+        return new Ojdbc6OracleFromClause(getEntitySpec(), columnSpecs, referenceIndices, stagedTables);
     }
 
     /*
@@ -48,9 +48,9 @@ class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
     WhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor, SelectClause selectClause) {
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor, SelectClause selectClause, StagingSpec[] stagedTables) {
         return new Ojdbc6OracleWhereClause(propIds, info, entitySpecs, filters,
-                referenceIndices, keyIds, order, resultProcessor, selectClause);
+                referenceIndices, keyIds, order, resultProcessor, selectClause, stagedTables);
     }
 
 }
