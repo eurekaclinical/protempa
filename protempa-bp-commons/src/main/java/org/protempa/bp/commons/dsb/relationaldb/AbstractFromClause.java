@@ -6,13 +6,28 @@ import java.util.List;
 import java.util.Map;
 
 abstract class AbstractFromClause implements FromClause {
+
+    private final EntitySpec currentSpec;
     private final List<ColumnSpec> columnSpecs;
     private final TableAliaser referenceIndices;
 
-    protected AbstractFromClause(List<ColumnSpec> columnSpecs,
-            TableAliaser referenceIndices) {
+    protected AbstractFromClause(EntitySpec currentSpec,
+            List<ColumnSpec> columnSpecs, TableAliaser referenceIndices) {
         this.columnSpecs = Collections.unmodifiableList(columnSpecs);
         this.referenceIndices = referenceIndices;
+        this.currentSpec = currentSpec;
+    }
+
+    protected EntitySpec getCurrentSpec() {
+        return currentSpec;
+    }
+
+    protected List<ColumnSpec> getColumnSpecs() {
+        return columnSpecs;
+    }
+
+    protected TableAliaser getReferenceIndices() {
+        return referenceIndices;
     }
 
     protected abstract JoinClause getJoinClause(JoinSpec.JoinType joinType);
