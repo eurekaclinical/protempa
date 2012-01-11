@@ -5,6 +5,9 @@ import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
 
+/**
+ * Class for creating staging areas
+ */
 abstract class AbstractCreateStatement implements CreateStatement {
 
     private final StagingSpec stagingSpec;
@@ -33,6 +36,42 @@ abstract class AbstractCreateStatement implements CreateStatement {
         this.order = order;
         this.resultProcessor = resultProcessor;
         this.stagedTables = stagedTables;
+    }
+
+    protected StagingSpec getStagingSpec() {
+        return stagingSpec;
+    }
+
+    protected ReferenceSpec getReferenceSpec() {
+        return referenceSpec;
+    }
+
+    protected List<EntitySpec> getEntitySpecs() {
+        return entitySpecs;
+    }
+
+    protected Set<Filter> getFilters() {
+        return filters;
+    }
+
+    protected Set<String> getPropIds() {
+        return propIds;
+    }
+
+    protected Set<String> getKeyIds() {
+        return keyIds;
+    }
+
+    protected SQLOrderBy getOrder() {
+        return order;
+    }
+
+    protected SQLGenResultProcessor getResultProcessor() {
+        return resultProcessor;
+    }
+
+    protected StagingSpec[] getStagedTables() {
+        return stagedTables;
     }
 
     @Override
