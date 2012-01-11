@@ -244,4 +244,20 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             i++;
         }
     }
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+	}
+
+	public Link[] getLinks() {
+		return links;
+	}
+
+	public String getColumnNamePrefixOverride() {
+		return columnNamePrefixOverride;
+	}
 }

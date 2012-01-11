@@ -439,4 +439,32 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             i++;
         }
     }
+
+	public Link[] getLinks() {
+		return links;
+	}
+
+	public String[] getPropertyNames() {
+		return propertyNames;
+	}
+
+	public int getNumInstances() {
+		return numInstances;
+	}
+
+	public String getColumnNamePrefixOverride() {
+		return columnNamePrefixOverride;
+	}
+
+	public OutputConfig getOutputConfig() {
+		return outputConfig;
+	}
+
+	public ValueOutputConfig getValueOutputConfig() {
+		return valueOutputConfig;
+	}
+
+	public ValuesPropositionVisitor getPropositionVisitor() {
+		return propositionVisitor;
+	}
 }
