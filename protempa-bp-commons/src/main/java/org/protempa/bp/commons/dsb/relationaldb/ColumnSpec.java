@@ -12,15 +12,14 @@ import org.protempa.ProtempaUtil;
 /**
  * Specifies part of a path through relational database tables via joins.
  * Instances of this class may be chained together to form a complete path.
- *
+ * 
  * @author Andrew Post
  */
 public final class ColumnSpec implements Serializable {
 
     private static final long serialVersionUID = 2254623617064935923L;
 
-    private static KnowledgeSourceIdToSqlCode[] EMPTY_KNOWLEDGE_SOURCE_ID_TO_SQL_CODE_ARRAY =
-            new KnowledgeSourceIdToSqlCode[0];
+    private static KnowledgeSourceIdToSqlCode[] EMPTY_KNOWLEDGE_SOURCE_ID_TO_SQL_CODE_ARRAY = new KnowledgeSourceIdToSqlCode[0];
 
     public static enum ColumnOp {
 
@@ -32,13 +31,9 @@ public final class ColumnSpec implements Serializable {
      */
     public static enum Constraint {
 
-        EQUAL_TO("="),
-        LIKE("LIKE"),
-        GREATER_THAN(">"),
-        GREATER_THAN_OR_EQUAL_TO(">="),
-        LESS_THAN("<"),
-        LESS_THAN_OR_EQUAL_TO("<="),
-        NOT_EQUAL_TO("<>");
+        EQUAL_TO("="), LIKE("LIKE"), GREATER_THAN(">"), GREATER_THAN_OR_EQUAL_TO(
+                ">="), LESS_THAN("<"), LESS_THAN_OR_EQUAL_TO("<="), NOT_EQUAL_TO(
+                "<>");
         private String sqlOperator;
 
         private Constraint(String sqlOperator) {
@@ -47,6 +42,7 @@ public final class ColumnSpec implements Serializable {
 
         /**
          * Gets the {@link String} operator.
+         * 
          * @return
          */
         public String getSqlOperator() {
@@ -55,9 +51,9 @@ public final class ColumnSpec implements Serializable {
     }
 
     /**
-     * Represents a mapping from a proposition id to a value of the column 
-     * specified by a column spec. Pass an array of instances of this class 
-     * into a {@link ColumnSpec}'s constructor.
+     * Represents a mapping from a proposition id to a value of the column
+     * specified by a column spec. Pass an array of instances of this class into
+     * a {@link ColumnSpec}'s constructor.
      */
     public static class KnowledgeSourceIdToSqlCode {
 
@@ -68,10 +64,12 @@ public final class ColumnSpec implements Serializable {
          * Instantiates a mapping between a proposition id and the value of the
          * column specified by a column spec.
          * 
-         * @param propositionId a proposition id {@link String}. Cannot be
-         * <code>null</code>.
-         * @param sqlCode a value {@link Object} in a column in a table in a
-         * database. Cannot be <code>null</code>.
+         * @param propositionId
+         *            a proposition id {@link String}. Cannot be
+         *            <code>null</code>.
+         * @param sqlCode
+         *            a value {@link Object} in a column in a table in a
+         *            database. Cannot be <code>null</code>.
          */
         public KnowledgeSourceIdToSqlCode(String propositionId, Object sqlCode) {
             if (propositionId == null) {
@@ -87,9 +85,9 @@ public final class ColumnSpec implements Serializable {
 
         /**
          * Returns the proposition id in the mapping.
-         *
-         * @return a proposition id {@link String}. Guaranteed not 
-         * <code>null</code>.
+         * 
+         * @return a proposition id {@link String}. Guaranteed not
+         *         <code>null</code>.
          */
         public String getPropositionId() {
             return this.propositionId;
@@ -97,9 +95,9 @@ public final class ColumnSpec implements Serializable {
 
         /**
          * Returns the value {@link Object} in the mapping.
-         *
+         * 
          * @return a code {@link Object} in a relational database. Guaranteed
-         * not <code>null</code>.
+         *         not <code>null</code>.
          */
         public Object getSqlCode() {
             return this.sqlCode;
@@ -107,10 +105,11 @@ public final class ColumnSpec implements Serializable {
 
         /**
          * Compares the proposition id and value for equality.
-         *
-         * @param obj another {@link Object}.
+         * 
+         * @param obj
+         *            another {@link Object}.
          * @return <code>true</code> if the proposition ids and values are
-         * equal, <code>false</code> otherwise.
+         *         equal, <code>false</code> otherwise.
          */
         @Override
         public boolean equals(Object obj) {
@@ -132,7 +131,7 @@ public final class ColumnSpec implements Serializable {
 
         /**
          * Generates a hash from the proposition id and value.
-         *
+         * 
          * @return an <code>int</code> hash.
          */
         @Override
@@ -148,6 +147,7 @@ public final class ColumnSpec implements Serializable {
             return ToStringBuilder.reflectionToString(this);
         }
     }
+
     private final String schema;
     private final String table;
     private final String column;
@@ -161,49 +161,60 @@ public final class ColumnSpec implements Serializable {
     /**
      * Instantiates part of a path using a schema, table and join.
      * 
-     * @param schema a schema {@link String}, if the underlying database
-     * requires it (e.g., Oracle).
-     * @param table a table {@link String}. Cannot be <code>null</code>.
-     * @param joinSpec a {@link JoinSpec}.
+     * @param schema
+     *            a schema {@link String}, if the underlying database requires
+     *            it (e.g., Oracle).
+     * @param table
+     *            a table {@link String}. Cannot be <code>null</code>.
+     * @param joinSpec
+     *            a {@link JoinSpec}.
      */
     public ColumnSpec(String schema, String table, JoinSpec joinSpec) {
         this(schema, table, null, joinSpec);
     }
 
     /**
-     * Instantiates part of a path using a schema and table. This spec
-     * ends a path as it has no join.
-     *
-     * @param schema a schema {@link String}, if the underlying database
-     * requires it (e.g., Oracle).
-     * @param table a table {@link String}. Cannot be <code>null</code>.
+     * Instantiates part of a path using a schema and table. This spec ends a
+     * path as it has no join.
+     * 
+     * @param schema
+     *            a schema {@link String}, if the underlying database requires
+     *            it (e.g., Oracle).
+     * @param table
+     *            a table {@link String}. Cannot be <code>null</code>.
      */
     public ColumnSpec(String schema, String table) {
         this(schema, table, null, null);
     }
 
     /**
-     * Specifies part of path in which the column has one or more constraints
-     * on its value. This constructor may only used for the last part of a
-     * path.
+     * Specifies part of path in which the column has one or more constraints on
+     * its value. This constructor may only used for the last part of a path.
      * 
-     * @param schema a schema {@link String}, if the underlying database
-     * requires it (e.g., Oracle).
-     * @param table a table {@link String}. Cannot be <code>null</code>.
-     * @param column a column {@link String}. Cannot be <code>null</code>
-     * unless <code>constraint</code> is also <code>null</code>.
-     * @param constraint a {@link Constraint}.
-     * @param propIdToSqlCodes a {@link KnowledgeSourceIdToSqlCode[]}. An array 
-     * of mappings from a proposition id to a value of the specified column. If
-     * <code>constraint</code> is not <code>null</code>, then this argument
-     * cannot be <code>null</code> either.
-     * @param columnOp a {@link ColumnOp} (optional).
-     * @param propositionIdsComplete whether the values in
-     * <code>propIdToSqlCodes</code> represent all of the unique values of the
-     * specified column. This serves as an optimization hint to the SQL
-     * generator to avoid the need for a long IN clause when the list of values
-     * in the clause is known to be almost the same as the list of unique 
-     * values in the column.
+     * @param schema
+     *            a schema {@link String}, if the underlying database requires
+     *            it (e.g., Oracle).
+     * @param table
+     *            a table {@link String}. Cannot be <code>null</code>.
+     * @param column
+     *            a column {@link String}. Cannot be <code>null</code> unless
+     *            <code>constraint</code> is also <code>null</code>.
+     * @param constraint
+     *            a {@link Constraint}.
+     * @param propIdToSqlCodes
+     *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
+     *            from a proposition id to a value of the specified column. If
+     *            <code>constraint</code> is not <code>null</code>, then this
+     *            argument cannot be <code>null</code> either.
+     * @param columnOp
+     *            a {@link ColumnOp} (optional).
+     * @param propositionIdsComplete
+     *            whether the values in <code>propIdToSqlCodes</code> represent
+     *            all of the unique values of the specified column. This serves
+     *            as an optimization hint to the SQL generator to avoid the need
+     *            for a long IN clause when the list of values in the clause is
+     *            known to be almost the same as the list of unique values in
+     *            the column.
      */
     public ColumnSpec(String schema, String table, String column,
             Constraint constraint,
@@ -214,60 +225,70 @@ public final class ColumnSpec implements Serializable {
     }
 
     /**
-     * Specifies part of path in which the column has one or more constraints
-     * on its value. This constructor may only used for the last part of a
-     * path.
-     *
-     * @param schema a schema {@link String}, if the underlying database
-     * requires it (e.g., Oracle).
-     * @param table a table {@link String}. Cannot be <code>null</code>.
-     * @param column a column {@link String}. Cannot be <code>null</code>
-     * unless <code>constraint</code> is also <code>null</code>.
-     * @param constraint a {@link Constraint}.
-     * @param propIdToSqlCodes a {@link KnowledgeSourceIdToSqlCode[]}. An array 
-     * of mappings from a proposition id to a value of the specified column. If
-     * <code>constraint</code> is not <code>null</code>, then this argument
-     * cannot be <code>null</code> either.
+     * Specifies part of path in which the column has one or more constraints on
+     * its value. This constructor may only used for the last part of a path.
+     * 
+     * @param schema
+     *            a schema {@link String}, if the underlying database requires
+     *            it (e.g., Oracle).
+     * @param table
+     *            a table {@link String}. Cannot be <code>null</code>.
+     * @param column
+     *            a column {@link String}. Cannot be <code>null</code> unless
+     *            <code>constraint</code> is also <code>null</code>.
+     * @param constraint
+     *            a {@link Constraint}.
+     * @param propIdToSqlCodes
+     *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
+     *            from a proposition id to a value of the specified column. If
+     *            <code>constraint</code> is not <code>null</code>, then this
+     *            argument cannot be <code>null</code> either.
      */
     public ColumnSpec(String schema, String table, String column,
             Constraint constraint,
             KnowledgeSourceIdToSqlCode[] propIdToSqlCodes,
             boolean propositionIdsComplete) {
-        this(schema, table, column, null, constraint, propIdToSqlCodes,
-                null, propositionIdsComplete);
+        this(schema, table, column, null, constraint, propIdToSqlCodes, null,
+                propositionIdsComplete);
     }
 
     /**
-     * Specifies part of path in which the column has one or more constraints
-     * on its value. This constructor may only used for the last part of a
-     * path.
-     *
-     * @param schema a schema {@link String}, if the underlying database
-     * requires it (e.g., Oracle).
-     * @param table a table {@link String}. Cannot be <code>null</code>.
-     * @param column a column {@link String}. Cannot be <code>null</code>
-     * unless <code>constraint</code> is also <code>null</code>.
-     * @param constraint a {@link Constraint}.
-     * @param propIdToSqlCodes a {@link KnowledgeSourceIdToSqlCode[]}. An array 
-     * of mappings from a proposition id to a value of the specified column. If
-     * <code>constraint</code> is not <code>null</code>, then this argument
-     * cannot be <code>null</code> either.
+     * Specifies part of path in which the column has one or more constraints on
+     * its value. This constructor may only used for the last part of a path.
+     * 
+     * @param schema
+     *            a schema {@link String}, if the underlying database requires
+     *            it (e.g., Oracle).
+     * @param table
+     *            a table {@link String}. Cannot be <code>null</code>.
+     * @param column
+     *            a column {@link String}. Cannot be <code>null</code> unless
+     *            <code>constraint</code> is also <code>null</code>.
+     * @param constraint
+     *            a {@link Constraint}.
+     * @param propIdToSqlCodes
+     *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
+     *            from a proposition id to a value of the specified column. If
+     *            <code>constraint</code> is not <code>null</code>, then this
+     *            argument cannot be <code>null</code> either.
      */
     public ColumnSpec(String schema, String table, String column,
-            Constraint constraint,
-            KnowledgeSourceIdToSqlCode[] propIdToSqlCodes) {
-        this(schema, table, column, null, constraint, propIdToSqlCodes,
-                null, false);
+            Constraint constraint, KnowledgeSourceIdToSqlCode[] propIdToSqlCodes) {
+        this(schema, table, column, null, constraint, propIdToSqlCodes, null,
+                false);
     }
 
     /**
      * Instantiates part of a path using a schema, table and column. This spec
      * ends a path as it has no join.
-     *
-     * @param schema a schema {@link String}, if the underlying database
-     * requires it (e.g., Oracle).
-     * @param table a table {@link String}. Cannot be <code>null</code>.
-     * @param column a column {@link String}. 
+     * 
+     * @param schema
+     *            a schema {@link String}, if the underlying database requires
+     *            it (e.g., Oracle).
+     * @param table
+     *            a table {@link String}. Cannot be <code>null</code>.
+     * @param column
+     *            a column {@link String}.
      */
     public ColumnSpec(String schema, String table, String column) {
         this(schema, table, column, null);
@@ -275,38 +296,47 @@ public final class ColumnSpec implements Serializable {
 
     /**
      * Instantiates part of a path using a schema table, column and join
-     * specification. The column will be ignored unless it is the first
-     * part of a base path specification, in which its values are used as
-     * key ids.
-     *
-     * @param schema a schema {@link String}.
-     * @param table a table {@link String}. Cannot be <code>null</code>.
-     * @param column a column {@link String}.
-     * @param joinSpec a {@link JoinSpec}.
+     * specification. The column will be ignored unless it is the first part of
+     * a base path specification, in which its values are used as key ids.
+     * 
+     * @param schema
+     *            a schema {@link String}.
+     * @param table
+     *            a table {@link String}. Cannot be <code>null</code>.
+     * @param column
+     *            a column {@link String}.
+     * @param joinSpec
+     *            a {@link JoinSpec}.
      */
-    public ColumnSpec(String schema, String table,
-            String column, JoinSpec joinSpec) {
+    public ColumnSpec(String schema, String table, String column,
+            JoinSpec joinSpec) {
         this(schema, table, column, joinSpec, null, null, null, false);
     }
 
     /**
      * Instantiates part of a path using a schema, table, column, join
      * specification, constraint and mappings from proposition ids to codes.
-     *
-     * @param schema a schema {@link String}, if the underlying database
-     * requires it (e.g., Oracle).
-     * @param table a table {@link String}. Cannot be <code>null</code>.
-     * @param column a column {@link String}. Cannot be <code>null</code>
-     * unless <code>constraint</code> is also <code>null</code>.
-     * @param joinSpec a {@link JoinSpec}.
-     * @param constraint a {@link Constraint}.
-     * @param propIdToSqlCodes a {@link KnowledgeSourceIdToSqlCode[]}. An array 
-     * of mappings from a proposition id to a value of the specified column. If
-     * <code>constraint</code> is not <code>null</code>, then this argument
-     * cannot be <code>null</code> either.
+     * 
+     * @param schema
+     *            a schema {@link String}, if the underlying database requires
+     *            it (e.g., Oracle).
+     * @param table
+     *            a table {@link String}. Cannot be <code>null</code>.
+     * @param column
+     *            a column {@link String}. Cannot be <code>null</code> unless
+     *            <code>constraint</code> is also <code>null</code>.
+     * @param joinSpec
+     *            a {@link JoinSpec}.
+     * @param constraint
+     *            a {@link Constraint}.
+     * @param propIdToSqlCodes
+     *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
+     *            from a proposition id to a value of the specified column. If
+     *            <code>constraint</code> is not <code>null</code>, then this
+     *            argument cannot be <code>null</code> either.
      */
-    private ColumnSpec(String schema, String table,
-            String column, JoinSpec joinSpec, Constraint constraint,
+    private ColumnSpec(String schema, String table, String column,
+            JoinSpec joinSpec, Constraint constraint,
             KnowledgeSourceIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp,
             boolean propositionIdsComplete) {
         if (table == null) {
@@ -346,7 +376,7 @@ public final class ColumnSpec implements Serializable {
 
     /**
      * Gets the schema name.
-     *
+     * 
      * @return a schema name {@link String}.
      */
     public String getSchema() {
@@ -355,7 +385,7 @@ public final class ColumnSpec implements Serializable {
 
     /**
      * Gets the table name.
-     *
+     * 
      * @return a table name {@link String}. Guaranteed not <code>null</code>.
      */
     public String getTable() {
@@ -364,7 +394,7 @@ public final class ColumnSpec implements Serializable {
 
     /**
      * Gets the column name if specified.
-     *
+     * 
      * @return a column name {@link String}.
      */
     public String getColumn() {
@@ -372,9 +402,9 @@ public final class ColumnSpec implements Serializable {
     }
 
     /**
-     * Returns a join specification from the this column spec's table to
-     * another table.
-     *
+     * Returns a join specification from the this column spec's table to another
+     * table.
+     * 
      * @return a {@link JoinSpec}.
      */
     public JoinSpec getJoin() {
@@ -383,7 +413,7 @@ public final class ColumnSpec implements Serializable {
 
     /**
      * Returns a constraint on this column spec's column.
-     *
+     * 
      * @return a {@link Constraint} or <code>null</code> if none is specified.
      */
     public Constraint getConstraint() {
@@ -394,10 +424,12 @@ public final class ColumnSpec implements Serializable {
      * Returns the proposition id corresponding to a specified value in this
      * column spec's column.
      * 
-     * @param sqlCode the value.
-     * @return a proposition id {@link String} or <code>null</code> if a
-     * value is specified that is not in this column spec's mappings from 
-     * proposition ids to values ({@link #getPropositionIdToSqlCodes() }).
+     * @param sqlCode
+     *            the value.
+     * @return a proposition id {@link String} or <code>null</code> if a value
+     *         is specified that is not in this column spec's mappings from
+     *         proposition ids to values ({@link #getPropositionIdToSqlCodes() }
+     *         ).
      */
     String propositionIdFor(String sqlCode) {
         return this.propIdForSqlCode.get(sqlCode);
@@ -406,7 +438,7 @@ public final class ColumnSpec implements Serializable {
     /**
      * Returns an array of mappings of proposition ids to values of the column
      * of the table of the database.
-     *
+     * 
      * @return a {@link PropositionIdToSqlCode[]}.
      */
     public KnowledgeSourceIdToSqlCode[] getPropositionIdToSqlCodes() {
@@ -414,9 +446,9 @@ public final class ColumnSpec implements Serializable {
     }
 
     /**
-     * Returns the name of a SQL function to apply to values of this column 
-     * spec's column prior to attempting to map a value to a proposition id
-     * (see {@link #getPropositionIdToSqlCodes() }).
+     * Returns the name of a SQL function to apply to values of this column
+     * spec's column prior to attempting to map a value to a proposition id (see
+     * {@link #getPropositionIdToSqlCodes() }).
      * 
      * @return a {@link ColumnOp}.
      */
@@ -425,9 +457,9 @@ public final class ColumnSpec implements Serializable {
     }
 
     /**
-     * Indicates whether the codes in the mappings of proposition ids
-     * to codes ({@link #getPropositionIdToSqlCodes() }) represent all of the
-     * unique codes in the database table.
+     * Indicates whether the codes in the mappings of proposition ids to codes (
+     * {@link #getPropositionIdToSqlCodes() }) represent all of the unique codes
+     * in the database table.
      * 
      * @return <code>true</code> or <code>false</code>.
      */
@@ -436,12 +468,13 @@ public final class ColumnSpec implements Serializable {
     }
 
     /**
-     * Returns whether the given column specification has the same schema
-     * and table as this one.
-     *
-     * @param columnSpec a {@link ColumnSpec}.
-     * @return <code>true</code> if the given column specification has the
-     * same schema and table as this one, <code>false</code> if not.
+     * Returns whether the given column specification has the same schema and
+     * table as this one.
+     * 
+     * @param columnSpec
+     *            a {@link ColumnSpec}.
+     * @return <code>true</code> if the given column specification has the same
+     *         schema and table as this one, <code>false</code> if not.
      */
     boolean isSameSchemaAndTable(ColumnSpec columnSpec) {
         return StringUtil.equals(columnSpec.schema, this.schema)
@@ -449,10 +482,25 @@ public final class ColumnSpec implements Serializable {
     }
 
     /**
-     * Returns whether the specified column spec has a join 
-     * {@link #getJoin() }) that uses the same columns as this one.
+     * Returns whether the given column specification has the same schema and
+     * table as this one.
      * 
-     * @param columnSpec the {@link ColumnSpec} to compare.
+     * @param tableSpec
+     *            a {@link TableSpec}.
+     * @return <code>true</code> if the given table specification has the same
+     *         schema and table as this one, <code>false</code> if not.
+     */
+    boolean isSameSchemaAndTable(TableSpec tableSpec) {
+        return StringUtil.equals(tableSpec.getSchema(), this.schema)
+                && StringUtil.equals(tableSpec.getTable(), this.table);
+    }
+
+    /**
+     * Returns whether the specified column spec has a join {@link #getJoin() })
+     * that uses the same columns as this one.
+     * 
+     * @param columnSpec
+     *            the {@link ColumnSpec} to compare.
      * @return <code>true</code> or <code>false</code>.
      */
     boolean isSameJoin(ColumnSpec columnSpec) {
@@ -469,15 +517,15 @@ public final class ColumnSpec implements Serializable {
             return joinSpecFromKey.equals(otherJoinSpecFromKey)
                     && joinSpecToKey.equals(otherJoinSpecToKey)
                     && this.joinSpec.getNextColumnSpec().isSameSchemaAndTable(
-                    otherJoinSpec.getNextColumnSpec());
+                            otherJoinSpec.getNextColumnSpec());
         }
     }
 
     /**
      * Returns a list of column specs that are chained to this one via joins
-     * (including this column spec).
-     * This is a convenience method for use with collections.
-     *
+     * (including this column spec). This is a convenience method for use with
+     * collections.
+     * 
      * @return a {@link List<ColumnSpec>}.
      */
     List<ColumnSpec> asList() {
@@ -493,6 +541,12 @@ public final class ColumnSpec implements Serializable {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+//        return ToStringBuilder.reflectionToString(this);
+        String result = "";
+        for (ColumnSpec spec : asList()) {
+            result += spec.getSchema() + "." + spec.getTable() + "." + spec.getColumn() + "->";
+        }
+        
+        return result;
     }
 }
