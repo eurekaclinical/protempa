@@ -9,16 +9,11 @@ import org.protempa.backend.dsb.filter.Filter;
 final class Ojdbc6OracleStagingSelectStatement extends
         Ojdbc6OracleSelectStatement {
 
-    private final EntitySpec entitySpec;
-    private final ReferenceSpec referenceSpec;
-    private final List<EntitySpec> entitySpecs;
-    private final Set<Filter> filters;
-    private final Set<String> propIds;
-    private final Set<String> keyIds;
-    private final SQLOrderBy order;
-    private final SQLGenResultProcessor resultProcessor;
-    private final StagingSpec[] stagedTables;
     private final StagingSpec stagingSpec;
+
+    // we are staging a table, so we don't want anything skipped based on what
+    // tables are staged
+    private static final StagingSpec[] EMPTY_SSPEC_ARR = new StagingSpec[0];
 
     Ojdbc6OracleStagingSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
@@ -27,22 +22,14 @@ final class Ojdbc6OracleStagingSelectStatement extends
             StagingSpec[] stagedTables, StagingSpec stagingSpec) {
         super(entitySpec, referenceSpec, entitySpecs, filters, propIds, keyIds,
                 order, resultProcessor, stagedTables);
-        this.entitySpec = entitySpec;
-        this.referenceSpec = referenceSpec;
-        this.entitySpecs = entitySpecs;
-        this.filters = filters;
-        this.propIds = propIds;
-        this.keyIds = keyIds;
-        this.order = order;
-        this.resultProcessor = resultProcessor;
-        this.stagedTables = stagedTables.clone();
         this.stagingSpec = stagingSpec;
     }
 
     @Override
     public String generateStatement() {
-        ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(propIds,
-                entitySpec, entitySpecs, filters, referenceSpec);
+        ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(
+                getPropIds(), getEntitySpec(), getEntitySpecs(), getFilters(),
+                getReferenceSpec());
 
         List<ColumnSpec> plusStagedSpecs = new ArrayList<ColumnSpec>(
                 info.getColumnSpecs());
@@ -52,12 +39,12 @@ final class Ojdbc6OracleStagingSelectStatement extends
         TableAliaser referenceIndices = new TableAliaser(plusStagedSpecs, "a");
 
         SelectClause select = getSelectClause(info, referenceIndices,
-                this.entitySpec);
+                getEntitySpec());
         FromClause from = getFromClause(info.getColumnSpecs(),
-                referenceIndices, this.stagedTables);
-        WhereClause where = getWhereClause(propIds, info, this.entitySpecs,
-                this.filters, referenceIndices, this.keyIds, this.order,
-                this.resultProcessor, select);
+                referenceIndices, EMPTY_SSPEC_ARR);
+        WhereClause where = getWhereClause(getPropIds(), info,
+                getEntitySpecs(), getFilters(), referenceIndices, getKeyIds(),
+                getOrder(), getResultProcessor(), select, EMPTY_SSPEC_ARR);
 
         StringBuilder result = new StringBuilder(select.generateClause())
                 .append(" ").append(from.generateClause()).append(" ")
@@ -75,7 +62,19 @@ final class Ojdbc6OracleStagingSelectStatement extends
     @Override
     FromClause getFromClause(List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices, StagingSpec[] stagedTables) {
-        return new Ojdbc6OracleStagingFromClause(columnSpecs, referenceIndices,
+        return new Ojdbc6OracleStagingFromClause(getEntitySpec(), columnSpecs,
+                referenceIndices, stagedTables);
+    }
+
+    @Override
+    WhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
+            List<EntitySpec> entitySpecs, Set<Filter> filters,
+            TableAliaser referenceIndices, Set<String> keyIds,
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor,
+            SelectClause selectClause, StagingSpec[] stagedTables) {
+        return super.getWhereClause(propIds, info, entitySpecs, filters,
+                referenceIndices, keyIds, order, resultProcessor, selectClause,
                 stagedTables);
     }
+
 }
