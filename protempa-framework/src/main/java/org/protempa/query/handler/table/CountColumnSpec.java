@@ -108,4 +108,16 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
             i++;
         }
     }
+
+	public String getColumnNameOverride() {
+		return columnNameOverride;
+	}
+
+	public Link[] getLinks() {
+		return links;
+	}
+
+	public boolean isCountUnique() {
+		return countUnique;
+	}
 }
