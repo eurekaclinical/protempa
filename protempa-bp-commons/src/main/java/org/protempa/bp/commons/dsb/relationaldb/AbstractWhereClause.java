@@ -32,12 +32,13 @@ abstract class AbstractWhereClause implements WhereClause {
     private final SQLOrderBy order;
     private final SQLGenResultProcessor resultProcessor;
     private final SelectClause selectClause;
+    private final StagingSpec[] stagedTables;
 
     protected AbstractWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            SelectClause selectClause) {
+            SelectClause selectClause, StagingSpec[] stagedTables) {
         this.propIds = propIds;
         this.info = info;
         this.entitySpecs = Collections.unmodifiableList(entitySpecs);
@@ -47,14 +48,54 @@ abstract class AbstractWhereClause implements WhereClause {
         this.order = order;
         this.resultProcessor = resultProcessor;
         this.selectClause = selectClause;
+        this.stagedTables = stagedTables;
+    }
+
+    protected Set<String> getPropIds() {
+        return propIds;
+    }
+
+    protected ColumnSpecInfo getInfo() {
+        return info;
+    }
+
+    protected List<EntitySpec> getEntitySpecs() {
+        return entitySpecs;
+    }
+
+    protected Set<Filter> getFilters() {
+        return filters;
+    }
+
+    protected TableAliaser getReferenceIndices() {
+        return referenceIndices;
+    }
+
+    protected Set<String> getKeyIds() {
+        return keyIds;
+    }
+
+    protected SQLOrderBy getOrder() {
+        return order;
+    }
+
+    protected SQLGenResultProcessor getResultProcessor() {
+        return resultProcessor;
+    }
+
+    protected SelectClause getSelectClause() {
+        return selectClause;
+    }
+
+    protected StagingSpec[] getStagedTables() {
+        return stagedTables;
     }
 
     public abstract InClause getInClause(ColumnSpec columnSpec,
-            Object[] elements, boolean not, TableAliaser referenceIndices);
+            Object[] elements, boolean not);
 
     public abstract OrderByClause getOrderByClause(ColumnSpec startColumnSpec,
-            ColumnSpec finishColumnSpec, SQLOrderBy order,
-            TableAliaser referenceIndices);
+            ColumnSpec finishColumnSpec);
 
     public String generateClause() {
         StringBuilder wherePart = new StringBuilder();
@@ -137,8 +178,8 @@ abstract class AbstractWhereClause implements WhereClause {
             }
             ColumnSpec keySpec = info.getColumnSpecs().get(0);
 
-            wherePart.append(getInClause(keySpec, keyIds.toArray(), false,
-                    this.referenceIndices).generateClause());
+            wherePart.append(getInClause(keySpec, keyIds.toArray(), false)
+                    .generateClause());
         }
     }
 
@@ -172,7 +213,16 @@ abstract class AbstractWhereClause implements WhereClause {
             boolean first) {
         StringBuilder wherePart = new StringBuilder();
 
-        for (ColumnSpec constraintSpec : entitySpec.getConstraintSpecs()) {
+        CONSTRAINT_LOOP: for (ColumnSpec constraintSpec : entitySpec
+                .getConstraintSpecs()) {
+            // Skip any constraints that were included in any staged data
+            // Joining against that data implicitly applies the constraint
+            for (StagingSpec stagingSpec : getStagedTables()) {
+                if (constraintSpec.isSameSchemaAndTable(stagingSpec
+                        .getReplacedTable())) {
+                    continue CONSTRAINT_LOOP;
+                }
+            }
             int wherePartLength = wherePart.length();
             wherePart.append(processConstraintSpecForWhereClause(
                     constraintSpec, first));
@@ -268,8 +318,8 @@ abstract class AbstractWhereClause implements WhereClause {
                         filteredSqlCodes(
                                 propIds,
                                 filterConstraintValues(propIds,
-                                        filteredConstraintValues)),
-                        referenceIndices, columnSpec, filteredConstraintValues);
+                                        filteredConstraintValues)), columnSpec,
+                        filteredConstraintValues);
             }
         }
     }
@@ -467,8 +517,8 @@ abstract class AbstractWhereClause implements WhereClause {
             } else {
                 finishColSpec = null;
             }
-            wherePart.append(getOrderByClause(startColSpec, finishColSpec,
-                    order, referenceIndices).generateClause());
+            wherePart.append(getOrderByClause(startColSpec, finishColSpec)
+                    .generateClause());
         }
         return wherePart.toString();
     }
