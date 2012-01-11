@@ -319,13 +319,43 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             removeNonApplicableFilters(allEntitySpecs, filtersCopy, entitySpec);
             assert !allEntitySpecsCopy.isEmpty() : "allEntitySpecsCopy should have at least one element";
 
-            String sql = getStagingCreateStatement(toStage, null, allEntitySpecsCopy,
-                    filtersCopy, propIds, keyIds, order, null,
-                    this.stagedTableSpecs).generateStatement();
+            String sql = getStagingCreateStatement(toStage, null,
+                    allEntitySpecsCopy, filtersCopy, propIds, keyIds, order,
+                    null, this.stagedTableSpecs).generateStatement();
 
             logger.log(Level.FINE,
                     "Creating staging area for entity spec {0}: {1}",
                     new Object[] { entitySpec.getName(), sql });
+        }
+    }
+
+    private void removeStagedFilters(Set<Filter> filtersCopy) {
+        for (StagingSpec staged : this.stagedTableSpecs) {
+            for (Iterator<Filter> itr = filtersCopy.iterator(); itr.hasNext();) {
+                Filter f = itr.next();
+                String[] propIds = f.getPropositionIds();
+                FILTER_LOOP: for (String propId : propIds) {
+                    List<EntitySpec> entitySpecs = new ArrayList<EntitySpec>();
+                    if (this.constantSpecs.containsKey(propId)) {
+                        entitySpecs.addAll(this.constantSpecs.get(propId));
+                    }
+                    if (this.eventSpecs.containsKey(propId)) {
+                        entitySpecs.addAll(this.eventSpecs.get(propId));
+                    }
+                    if (this.primitiveParameterSpecs.containsKey(propId)) {
+                        entitySpecs.addAll(this.primitiveParameterSpecs
+                                .get(propId));
+                    }
+
+                    for (EntitySpec es : entitySpecs) {
+                        if (SQLGenUtil.somePropIdsMatch(es,
+                                staged.getEntitySpec())) {
+                            itr.remove();
+                            break FILTER_LOOP;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -347,7 +377,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 .keySet();
         Logger logger = SQLGenUtil.logger();
 
-//        stageTables(keyIds, propIds, allEntitySpecs, filters, order);
+        // stageTables(keyIds, propIds, allEntitySpecs, filters, order);
 
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
             logProcessingEntitySpec(logger, entitySpec);
@@ -366,6 +396,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
             Set<Filter> filtersCopy = copyFilters(filters);
             removeNonApplicableFilters(allEntitySpecs, filtersCopy, entitySpec);
+            // removeStagedFilters(filtersCopy);
             assert !allEntitySpecsCopy.isEmpty() : "allEntitySpecsCopy should have at least one element";
             String dataSourceBackendId = this.backend.getDataSourceBackendId();
             MainResultProcessor<Proposition> resultProcessor = factory
@@ -619,8 +650,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                             query });
         }
 
-         executeSelect(logger, backendNameForMessages, entitySpecName, query,
-         resultProcessor);
+        executeSelect(logger, backendNameForMessages, entitySpecName, query,
+                resultProcessor);
     }
 
     private static void removeNonApplicableEntitySpecs(EntitySpec entitySpec,
