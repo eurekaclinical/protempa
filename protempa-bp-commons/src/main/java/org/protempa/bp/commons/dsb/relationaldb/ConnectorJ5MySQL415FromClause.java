@@ -7,12 +7,9 @@ import org.protempa.bp.commons.dsb.relationaldb.JoinSpec.JoinType;
 
 final class ConnectorJ5MySQL415FromClause extends AbstractFromClause {
 
-    TableAliaser referenceIndices;
-
-    ConnectorJ5MySQL415FromClause(List<ColumnSpec> columnSpecs,
+    ConnectorJ5MySQL415FromClause(EntitySpec currentSpec, List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices) {
-        super(columnSpecs, referenceIndices);
-        this.referenceIndices = referenceIndices;
+        super(currentSpec, columnSpecs, referenceIndices);
     }
 
     @Override
@@ -36,7 +33,7 @@ final class ConnectorJ5MySQL415FromClause extends AbstractFromClause {
 
         fromPart.append(columnSpec.getTable());
         fromPart.append(" ");
-        fromPart.append(referenceIndices.generateTableReference(columnSpec));
+        fromPart.append(getReferenceIndices().generateTableReference(columnSpec));
         
         return fromPart.toString();
     }
