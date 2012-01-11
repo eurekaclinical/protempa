@@ -5,6 +5,11 @@ package org.protempa.xml;
 
 import java.util.ArrayList;
 
+import org.protempa.query.handler.table.AtLeastNColumnSpec;
+import org.protempa.query.handler.table.CountColumnSpec;
+import org.protempa.query.handler.table.DistanceBetweenColumnSpec;
+import org.protempa.query.handler.table.PropositionColumnSpec;
+import org.protempa.query.handler.table.PropositionValueColumnSpec;
 import org.protempa.query.handler.table.TableColumnSpec;
 
 import com.thoughtworks.xstream.converters.ConversionException;
@@ -47,8 +52,20 @@ class TableColumnSpecsConverter extends AbstractConverter {
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		TableColumnSpec[] columnSpecs = (TableColumnSpec[]) value;
 		for (TableColumnSpec columnSpec : columnSpecs) {
-			writer.startNode(TABLE_COLUMN_SPECS);
-			//writer.setValue(propId);
+			if (columnSpec instanceof AtLeastNColumnSpec) {
+				writer.startNode("atLeastNColumnSpec");
+			} else if (columnSpec instanceof CountColumnSpec) {
+				writer.startNode("countColumnSpec");
+			} else if (columnSpec instanceof DistanceBetweenColumnSpec) {
+				writer.startNode("distanceBetweenColumnSpec");
+			} else if (columnSpec instanceof PropositionColumnSpec) {
+				writer.startNode("propositionColumnSpec");
+			} else if (columnSpec instanceof PropositionValueColumnSpec){
+				writer.startNode("propositionValueColumnSpec");
+			} else {
+				throw new ConversionException("TableColumnSpecs array contains instance of unsupported class: " + columnSpec.getClass().getName());
+			}
+			context.convertAnother(columnSpec);
 			writer.endNode();
 		}
 	}

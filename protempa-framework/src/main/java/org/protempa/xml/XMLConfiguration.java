@@ -79,6 +79,8 @@ import com.thoughtworks.xstream.io.xml.XppDriver;
  * @author mgrand
  */
 public class XMLConfiguration implements QueryBuilder {
+	private static final TableColumnSpecsConverter TABLE_COLUMN_SPECS_CONVERTER = new TableColumnSpecsConverter();
+
 	static final DateConverter STANDARD_DATE_CONVERTER = new DateConverter("yyyy-MM-dd'T'HH:mm:ss.S", new String[0], TimeZone.getDefault());
 
 	private static Logger myLogger = Logger.getLogger(XMLConfiguration.class.getName());
@@ -171,11 +173,11 @@ public class XMLConfiguration implements QueryBuilder {
 		xstream.addImplicitArray(PropertyValueFilter.class, "values");
 
 		// propositionIDs
-		xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new TableColumnSpecsConverter());
+		xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", TABLE_COLUMN_SPECS_CONVERTER);
 		xstream.aliasField("propositionIDs", PropertyValueFilter.class, "propositionIds");
 
 		// rowPropositionIDs
-		xstream.registerLocalConverter(AbstractFilter.class, "rowPropositionIds", new TableColumnSpecsConverter());
+		xstream.registerLocalConverter(AbstractFilter.class, "rowPropositionIds", TABLE_COLUMN_SPECS_CONVERTER);
 
 		// start
 		xstream.useAttributeFor(PositionFilter.class, "start");
