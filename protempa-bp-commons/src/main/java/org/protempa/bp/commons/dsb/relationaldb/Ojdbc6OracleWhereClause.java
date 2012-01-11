@@ -11,23 +11,21 @@ final class Ojdbc6OracleWhereClause extends AbstractWhereClause {
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            SelectClause selectClause) {
+            SelectClause selectClause, StagingSpec[] stagedTables) {
         super(propIds, info, entitySpecs, filters, referenceIndices, keyIds,
-                order, resultProcessor, selectClause);
+                order, resultProcessor, selectClause, stagedTables);
     }
 
     @Override
     public InClause getInClause(ColumnSpec columnSpec, Object[] elements,
-            boolean not, TableAliaser referenceIndices) {
-        return new Ojdbc6OracleInClause(columnSpec, elements, not,
-                referenceIndices);
+            boolean not) {
+        return new Ojdbc6OracleInClause(columnSpec, elements, not, getReferenceIndices());
     }
 
     @Override
     public OrderByClause getOrderByClause(ColumnSpec startColumnSpec,
-            ColumnSpec finishColumnSpec, SQLOrderBy order,
-            TableAliaser referenceIndices) {
+            ColumnSpec finishColumnSpec) {
         return new DefaultOrderByClause(startColumnSpec, finishColumnSpec,
-                order, referenceIndices);
+                getOrder(), getReferenceIndices());
     }
 }
