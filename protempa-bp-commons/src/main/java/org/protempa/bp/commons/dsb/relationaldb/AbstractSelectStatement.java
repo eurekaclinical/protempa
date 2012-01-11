@@ -1,6 +1,5 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +21,8 @@ abstract class AbstractSelectStatement implements SelectStatement {
     protected AbstractSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables) {
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor,
+            StagingSpec[] stagedTables) {
         this.entitySpec = entitySpec;
         this.referenceSpec = referenceSpec;
         this.entitySpecs = Collections.unmodifiableList(entitySpecs);
@@ -32,6 +32,42 @@ abstract class AbstractSelectStatement implements SelectStatement {
         this.order = order;
         this.resultProcessor = resultProcessor;
         this.stagedTables = stagedTables;
+    }
+
+    protected EntitySpec getEntitySpec() {
+        return entitySpec;
+    }
+
+    protected ReferenceSpec getReferenceSpec() {
+        return referenceSpec;
+    }
+
+    protected List<EntitySpec> getEntitySpecs() {
+        return entitySpecs;
+    }
+
+    protected Set<Filter> getFilters() {
+        return filters;
+    }
+
+    protected Set<String> getPropIds() {
+        return propIds;
+    }
+
+    protected Set<String> getKeyIds() {
+        return keyIds;
+    }
+
+    protected SQLOrderBy getOrder() {
+        return order;
+    }
+
+    protected SQLGenResultProcessor getResultProcessor() {
+        return resultProcessor;
+    }
+
+    protected StagingSpec[] getStagedTables() {
+        return stagedTables;
     }
 
     abstract SelectClause getSelectClause(ColumnSpecInfo info,
@@ -44,20 +80,23 @@ abstract class AbstractSelectStatement implements SelectStatement {
             ColumnSpecInfo info, List<EntitySpec> entitySpecs,
             Set<Filter> filters, TableAliaser referenceIndices,
             Set<String> keyIds, SQLOrderBy order,
-            SQLGenResultProcessor resultProcessor, SelectClause selectClause);
+            SQLGenResultProcessor resultProcessor, SelectClause selectClause,
+            StagingSpec[] stagedTables);
 
     @Override
     public String generateStatement() {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(propIds,
                 entitySpec, entitySpecs, filters, referenceSpec);
-        TableAliaser referenceIndices = new TableAliaser(info.getColumnSpecs(), "a");
-        
+        TableAliaser referenceIndices = new TableAliaser(info.getColumnSpecs(),
+                "a");
+
         SelectClause select = getSelectClause(info, referenceIndices,
                 this.entitySpec);
-        FromClause from = getFromClause(info.getColumnSpecs(), referenceIndices, this.stagedTables);
+        FromClause from = getFromClause(info.getColumnSpecs(),
+                referenceIndices, this.stagedTables);
         WhereClause where = getWhereClause(propIds, info, this.entitySpecs,
                 this.filters, referenceIndices, this.keyIds, this.order,
-                this.resultProcessor, select);
+                this.resultProcessor, select, this.stagedTables);
 
         StringBuilder result = new StringBuilder(select.generateClause())
                 .append(" ").append(from.generateClause()).append(" ")
