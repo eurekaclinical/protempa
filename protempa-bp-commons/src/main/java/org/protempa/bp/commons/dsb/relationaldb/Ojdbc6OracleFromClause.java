@@ -36,7 +36,7 @@ class Ojdbc6OracleFromClause extends AbstractFromClause {
         if (stagedTables != null) {
             for (StagingSpec sspec : stagedTables) {
                 if (!foundStagedTable
-                        && noPropIdsMatch(getCurrentSpec(), sspec.getEntitySpec())
+//                        && noPropIdsMatch(getCurrentSpec(), sspec.getEntitySpec())
                         && columnSpec.isSameSchemaAndTable(sspec
                                 .getReplacedTable())) {
                     foundStagedTable = true;

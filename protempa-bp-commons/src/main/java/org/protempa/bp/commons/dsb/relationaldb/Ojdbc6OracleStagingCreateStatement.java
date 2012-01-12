@@ -8,16 +8,12 @@ import org.protempa.backend.dsb.filter.Filter;
 final class Ojdbc6OracleStagingCreateStatement extends
         AbstractCreateStatement {
 
-    private final StagingSpec stagingSpec;
-
-    public Ojdbc6OracleStagingCreateStatement(StagingSpec stagingSpec,
+    public Ojdbc6OracleStagingCreateStatement(SimpleStagingSpec stagingSpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            StagingSpec[] stagedTables) {
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
         super(stagingSpec, referenceSpec, entitySpecs, filters, propIds,
-                keyIds, order, resultProcessor, stagedTables);
-        this.stagingSpec = stagingSpec;
+                keyIds, order, resultProcessor);
     }
 
     @Override
@@ -27,7 +23,7 @@ final class Ojdbc6OracleStagingCreateStatement extends
             SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
         return new Ojdbc6OracleStagingSelectStatement(entitySpec,
                 referenceSpec, entitySpecs, filters, propIds, keyIds, order,
-                resultProcessor, getStagedTables(), this.stagingSpec);
+                resultProcessor, getStagingSpec());
     }
 
 }

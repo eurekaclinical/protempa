@@ -74,13 +74,12 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGenerator {
     }
 
     @Override
-    protected CreateStatement getStagingCreateStatement(StagingSpec stagingSpec, ReferenceSpec referenceSpec,
-            List<EntitySpec> entitySpecs, Set<Filter> filters,
-            Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
-            SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables) {
-        return new Ojdbc6OracleStagingCreateStatement(stagingSpec,
-                referenceSpec, entitySpecs, filters, propIds, keyIds, order,
-                resultProcessor, stagedTables);
+    protected DataStager getDataStager(StagingSpec[] stagingSpecs,
+            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+        return new Ojdbc6OracleDataStager(stagingSpecs, referenceSpec,
+                entitySpecs, filters, propIds, keyIds, order, resultProcessor);
     }
 
 }
