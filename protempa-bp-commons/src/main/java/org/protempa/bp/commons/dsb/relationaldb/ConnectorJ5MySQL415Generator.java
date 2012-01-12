@@ -72,11 +72,11 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
     }
 
     @Override
-    protected CreateStatement getStagingCreateStatement(StagingSpec stagingSpec,
+    protected DataStager getDataStager(StagingSpec[] stagingSpecs,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            StagingSpec[] stagedTables) {
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
         return null;
     }
+
 }
