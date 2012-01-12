@@ -13,9 +13,10 @@ package org.protempa.bp.commons.dsb.relationaldb;
 public final class StagingSpec {
 
     private final TableSpec stagingArea;
+    private final String uniqueColumn;
     private final TableSpec replacedTable;
-    private final ColumnSpec[] stagedColumns;
-    private final EntitySpec entitySpec;
+    private final SimpleColumnSpec[] stagedColumns;
+    private final EntitySpec[] entitySpecs;
 
     /**
      * Creates a new staging spec for use in a relational database data source
@@ -23,13 +24,15 @@ public final class StagingSpec {
      * 
      * @param stagingArea
      *            a {@link TableSpec} defining where to stage the data
+     * @param uniqueColumn
+     *            the unique key of the table
      * @param replacedTable
-     *            a {@link TableSpec} defining which table is to be replaced in
+     *            a {@link TableSpec}s defining which table is to be replaced in
      *            queries
      * @param stagedColumns
      *            an array of {@link ColumnSpec}s specifying which columns from
      *            the table to stage
-     * @param entitySpec
+     * @param entitySpecs
      *            the {@link EntitySpec} the staged data will represent. This
      *            entity spec must map to the same proposition IDs as some other
      *            entity spec (constant, event, or primitive parameter) defined
@@ -38,12 +41,14 @@ public final class StagingSpec {
      *            the data to be staged. Otherwise, the <tt>EntitySpec</tt>
      *            should be identical to the original.
      */
-    public StagingSpec(TableSpec stagingArea, TableSpec replacedTable,
-            ColumnSpec[] stagedColumns, EntitySpec entitySpec) {
+    public StagingSpec(TableSpec stagingArea, String uniqueColumn,
+            TableSpec replacedTable, SimpleColumnSpec[] stagedColumns,
+            EntitySpec[] entitySpecs) {
         this.stagingArea = stagingArea;
+        this.uniqueColumn = uniqueColumn;
         this.replacedTable = replacedTable;
         this.stagedColumns = stagedColumns.clone();
-        this.entitySpec = entitySpec;
+        this.entitySpecs = entitySpecs;
     }
 
     /**
@@ -55,6 +60,15 @@ public final class StagingSpec {
         return stagingArea;
     }
 
+    /**
+     * Gets the unique column.
+     * 
+     * @return the unique column name
+     */
+    public String getUniqueColumn() {
+        return uniqueColumn;
+    }
+    
     /**
      * Gets the replaced table
      * 
@@ -70,7 +84,7 @@ public final class StagingSpec {
      * @return the array of {@link ColumnSpec}s which are the columns being
      *         staged
      */
-    public ColumnSpec[] getStagedColumns() {
+    public SimpleColumnSpec[] getStagedColumns() {
         return stagedColumns;
     }
 
@@ -79,8 +93,8 @@ public final class StagingSpec {
      * 
      * @return the {@link EntitySpec} being staged
      */
-    public EntitySpec getEntitySpec() {
-        return entitySpec;
+    public EntitySpec[] getEntitySpecs() {
+        return entitySpecs;
     }
 
 }
