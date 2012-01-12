@@ -36,7 +36,7 @@ class SQLGenUtil {
     }
 
     static boolean somePropIdsMatch(EntitySpec es1, EntitySpec es2) {
-        return !Collections.containsAny(Arrays.asSet(es1.getPropositionIds()),
+        return Collections.containsAny(Arrays.asSet(es1.getPropositionIds()),
                 es2.getPropositionIds());
     }
 }
