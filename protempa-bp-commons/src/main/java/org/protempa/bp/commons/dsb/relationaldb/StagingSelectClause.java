@@ -8,10 +8,10 @@ import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSq
 
 final class StagingSelectClause implements SelectClause {
 
-    private final StagingSpec stagingSpec;
+    private final SimpleStagingSpec stagingSpec;
     private final TableAliaser referenceIndices;
     
-    public StagingSelectClause(StagingSpec stagingSpec, TableAliaser referenceIndices) {
+    public StagingSelectClause(SimpleStagingSpec stagingSpec, TableAliaser referenceIndices) {
         this.stagingSpec = stagingSpec;
         this.referenceIndices = referenceIndices;
     }
@@ -23,8 +23,8 @@ final class StagingSelectClause implements SelectClause {
         result.append("SELECT ");
         
         List<String> cols = new ArrayList<String>();
-        for (ColumnSpec columnSpec : this.stagingSpec.getStagedColumns()) {
-            cols.add(referenceIndices.generateColumnReference(columnSpec));
+        for (SimpleColumnSpec columnSpec : this.stagingSpec.getStagedColumns()) {
+            cols.add(referenceIndices.generateColumnReference(columnSpec.toColumnSpec()));
         }
         result.append(StringUtils.join(cols, ','));
                 
