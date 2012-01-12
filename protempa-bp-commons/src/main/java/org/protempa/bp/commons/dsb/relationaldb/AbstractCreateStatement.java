@@ -10,7 +10,7 @@ import org.protempa.backend.dsb.filter.Filter;
  */
 abstract class AbstractCreateStatement implements CreateStatement {
 
-    private final StagingSpec stagingSpec;
+    private final SimpleStagingSpec stagingSpec;
 
     // Fields required for select statement
     private final ReferenceSpec referenceSpec;
@@ -20,13 +20,11 @@ abstract class AbstractCreateStatement implements CreateStatement {
     private final Set<String> keyIds;
     private final SQLOrderBy order;
     private final SQLGenResultProcessor resultProcessor;
-    private final StagingSpec[] stagedTables;
 
-    protected AbstractCreateStatement(StagingSpec stagingSpec,
+    protected AbstractCreateStatement(SimpleStagingSpec stagingSpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            StagingSpec[] stagedTables) {
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
         this.stagingSpec = stagingSpec;
         this.referenceSpec = referenceSpec;
         this.entitySpecs = entitySpecs;
@@ -35,10 +33,9 @@ abstract class AbstractCreateStatement implements CreateStatement {
         this.keyIds = keyIds;
         this.order = order;
         this.resultProcessor = resultProcessor;
-        this.stagedTables = stagedTables;
     }
 
-    protected StagingSpec getStagingSpec() {
+    protected SimpleStagingSpec getStagingSpec() {
         return stagingSpec;
     }
 
@@ -68,10 +65,6 @@ abstract class AbstractCreateStatement implements CreateStatement {
 
     protected SQLGenResultProcessor getResultProcessor() {
         return resultProcessor;
-    }
-
-    protected StagingSpec[] getStagedTables() {
-        return stagedTables;
     }
 
     @Override
