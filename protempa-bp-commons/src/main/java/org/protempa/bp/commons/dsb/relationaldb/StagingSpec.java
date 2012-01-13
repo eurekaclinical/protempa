@@ -13,6 +13,7 @@ package org.protempa.bp.commons.dsb.relationaldb;
 public final class StagingSpec {
 
     private final TableSpec stagingArea;
+    private final String indexTablespace;
     private final String uniqueColumn;
     private final TableSpec replacedTable;
     private final SimpleColumnSpec[] stagedColumns;
@@ -24,6 +25,8 @@ public final class StagingSpec {
      * 
      * @param stagingArea
      *            a {@link TableSpec} defining where to stage the data
+     * @param indexTablespace
+     *            the name of the tablespace where the indexes will be stored
      * @param uniqueColumn
      *            the unique key of the table
      * @param replacedTable
@@ -41,10 +44,11 @@ public final class StagingSpec {
      *            the data to be staged. Otherwise, the <tt>EntitySpec</tt>
      *            should be identical to the original.
      */
-    public StagingSpec(TableSpec stagingArea, String uniqueColumn,
-            TableSpec replacedTable, SimpleColumnSpec[] stagedColumns,
-            EntitySpec[] entitySpecs) {
+    public StagingSpec(TableSpec stagingArea, String indexTablespace,
+            String uniqueColumn, TableSpec replacedTable,
+            SimpleColumnSpec[] stagedColumns, EntitySpec[] entitySpecs) {
         this.stagingArea = stagingArea;
+        this.indexTablespace = indexTablespace;
         this.uniqueColumn = uniqueColumn;
         this.replacedTable = replacedTable;
         this.stagedColumns = stagedColumns.clone();
@@ -61,6 +65,15 @@ public final class StagingSpec {
     }
 
     /**
+     * Gets the tablespace where the indexes will live.
+     * 
+     * @return the index tablespace
+     */
+    public String getIndexTablespace() {
+        return indexTablespace;
+    }
+
+    /**
      * Gets the unique column.
      * 
      * @return the unique column name
@@ -68,7 +81,7 @@ public final class StagingSpec {
     public String getUniqueColumn() {
         return uniqueColumn;
     }
-    
+
     /**
      * Gets the replaced table
      * 

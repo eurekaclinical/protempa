@@ -7,7 +7,7 @@ final class SimpleStagingSpec {
     public SimpleStagingSpec(TableSpec stagingArea, String uniqueColumn,
             TableSpec replacedTable, SimpleColumnSpec[] stagedColumns,
             EntitySpec entitySpec) {
-        this.spec = new StagingSpec(stagingArea, uniqueColumn, replacedTable,
+        this.spec = new StagingSpec(stagingArea, "", uniqueColumn, replacedTable,
                 stagedColumns, new EntitySpec[] { entitySpec });
     }
     

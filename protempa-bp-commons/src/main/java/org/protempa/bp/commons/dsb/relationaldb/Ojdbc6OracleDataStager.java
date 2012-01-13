@@ -3,6 +3,7 @@ package org.protempa.bp.commons.dsb.relationaldb;
 import static org.arp.javautil.collections.Collections.containsAny;
 import static org.arp.javautil.collections.Collections.putList;
 
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +14,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.arp.javautil.io.Retryer;
+import org.arp.javautil.sql.ConnectionSpec;
+import org.arp.javautil.sql.SQLExecutor;
 import org.protempa.backend.dsb.filter.Filter;
 
 final class Ojdbc6OracleDataStager implements DataStager {
@@ -24,17 +28,19 @@ final class Ojdbc6OracleDataStager implements DataStager {
     private final Set<String> propIds;
     private final Set<String> keyIds;
     private final SQLOrderBy order;
-    private final SQLGenResultProcessor resultProcessor;
+    private final ConnectionSpec connectionSpec;
 
     private final Map<String, List<EntitySpec>> propIdToEntitySpecs;
     private final Map<StagingSpec, List<TableSpec>> tempTables = new HashMap<StagingSpec, List<TableSpec>>();
+
+    private final Map<TableSpec, Integer> indexIds = new HashMap<TableSpec, Integer>();
 
     private static final Logger logger = SQLGenUtil.logger();
 
     Ojdbc6OracleDataStager(StagingSpec[] stagingSpecs,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+            SQLOrderBy order, ConnectionSpec connectionSpec) {
         this.stagingSpecs = stagingSpecs;
         this.referenceSpec = referenceSpec;
         this.entitySpecs = entitySpecs;
@@ -42,7 +48,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
         this.propIds = propIds;
         this.keyIds = keyIds;
         this.order = order;
-        this.resultProcessor = resultProcessor;
+        this.connectionSpec = connectionSpec;
         this.propIdToEntitySpecs = new HashMap<String, List<EntitySpec>>();
         populatePropIdEntitySpecMap();
     }
@@ -56,7 +62,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
     }
 
     @Override
-    public void stageTables() {
+    public void stageTables() throws SQLException {
         createTables();
         analyzeTables();
         indexTables();
@@ -64,17 +70,44 @@ final class Ojdbc6OracleDataStager implements DataStager {
     }
 
     @Override
-    public void dropTables() {
+    public void cleanup() throws SQLException {
         for (StagingSpec ss : stagingSpecs) {
             dropTables(ss);
         }
     }
 
-    private void dropTables(StagingSpec stagingSpec) {
-
+    private void execute(String sql) throws SQLException {
+        RetryableSQLExecutor operation = new RetryableSQLExecutor(
+                this.connectionSpec, sql, null);
+        Retryer<SQLException> retryer = new Retryer<SQLException>(3);
+        if (!retryer.execute(operation)) {
+            SQLException ex = SQLExecutor.assembleSQLException(retryer.getErrors());
+            throw ex;
+        }
     }
 
-    private void createTables() {
+    private void dropTables(StagingSpec stagingSpec) throws SQLException {
+        String dropView = "DROP VIEW "
+                + stagingSpec.getStagingArea().getSchema() + "."
+                + stagingSpec.getStagingArea().getTable();
+
+        logger.log(Level.INFO, "Dropping view {0}: {1}", new Object[] {
+                stagingSpec.getStagingArea(), dropView });
+
+        execute(dropView);
+        
+        for (TableSpec table : this.tempTables.get(stagingSpec)) {
+            String dropTable = "DROP TABLE " + table.getSchema() + "."
+                    + table.getTable();
+
+            logger.log(Level.INFO, "Dropping table {0}: {1}", new Object[] {
+                    table, dropTable });
+            
+            execute(dropTable);
+        }
+    }
+
+    private void createTables() throws SQLException {
         for (StagingSpec stagingSpec : stagingSpecs) {
             int i = 0;
             for (EntitySpec es : stagingSpec.getEntitySpecs()) {
@@ -89,113 +122,122 @@ final class Ojdbc6OracleDataStager implements DataStager {
                         stagingSpec.getStagedColumns(), es);
                 CreateStatement stmt = new Ojdbc6OracleStagingCreateStatement(
                         sss, referenceSpec, Collections.singletonList(es),
-                        filters, propIds, keyIds, order, resultProcessor);
+                        filters, propIds, keyIds, order, null);
                 String sql = stmt.generateStatement();
-                logger.log(Level.FINE,
+                logger.log(Level.INFO,
                         "Creating staging area for entity spec {0}: {1}",
                         new Object[] { es.getName(), sql });
+                execute(sql);
                 putList(this.tempTables, stagingSpec, sss.getStagingArea());
+                this.indexIds.put(sss.getStagingArea(), 0);
                 i++;
             }
         }
     }
 
-    private void analyzeTables() {
+    private void analyzeTables() throws SQLException {
         for (StagingSpec stagingSpec : stagingSpecs) {
             for (TableSpec tableSpec : this.tempTables.get(stagingSpec)) {
                 String sql = "EXEC DMBS_STATS.gather_table_stats('"
                         + tableSpec.getSchema() + "', '" + tableSpec.getTable()
                         + "')";
-                logger.log(Level.FINE, "Analyzing staging table {0}: {1}",
+                logger.log(Level.INFO, "Analyzing staging table {0}: {1}",
                         new Object[] { tableSpec, sql });
+                execute(sql);
             }
         }
     }
 
-    private void indexTables() {
+    private void indexTables() throws SQLException {
         for (StagingSpec spec : stagingSpecs) {
             indexPrimaryKeys(spec);
             indexOtherColumns(spec);
         }
     }
 
-    private void indexPrimaryKeys(StagingSpec stagingSpec) {
-        // CREATE UNIQUE INDEX AIWSTG.FES_UIDX001 ON AIWSTG.FACT_ENCOUNTER_IN
-        // (ENCOUNTER_KEY) TABLESPACE AIWDEV_TMP_IL01 NOLOGGING;
+    private String generateUniqueIndex(TableSpec table) {
+        this.indexIds.put(table, this.indexIds.get(table) + 1);
+        return table.getTable().toUpperCase() + "_IDX"
+                + this.indexIds.get(table);
+    }
+
+    private void indexPrimaryKeys(StagingSpec stagingSpec) throws SQLException {
         for (TableSpec tableSpec : this.tempTables.get(stagingSpec)) {
             StringBuilder sql = new StringBuilder("CREATE UNIQUE INDEX ");
             sql.append(tableSpec.getSchema());
             sql.append(".");
-            sql.append("FES_UIDX001"); // replace with variable
+            sql.append(generateUniqueIndex(tableSpec));
             sql.append(" ON ");
             sql.append(tableSpec.getSchema());
             sql.append(".");
             sql.append(tableSpec.getTable());
-            sql.append("(");
+            sql.append(" (");
             sql.append(stagingSpec.getUniqueColumn());
             sql.append(")");
             sql.append(" TABLESPACE ");
-            sql.append("AIWDEV_TMP_IL01"); // replace with variable
+            sql.append(stagingSpec.getIndexTablespace());
             sql.append(" NOLOGGING ");
 
-            logger.log(Level.FINE,
+            logger.log(Level.INFO,
                     "Indexing primary key {0} for staging table {1}: {2}",
                     new Object[] { stagingSpec.getUniqueColumn(), tableSpec,
                             sql });
+            execute(sql.toString());
         }
     }
 
-    private void indexOtherColumns(StagingSpec spec) {
-        // CREATE BITMAP INDEX AIWSTG.FSE_BMIDX001 ON AIWSTG.FACT_ENCOUNTER_IN
-        // (ENTITY_HEALTHCARE_KEY) TABLESPACE AIWDEV_TMP_IL01 NOLOGGING;
-        for (TableSpec table : this.tempTables.get(spec)) {
-            for (SimpleColumnSpec column : spec.getStagedColumns()) {
-                if (!column.getColumn().equals(spec.getUniqueColumn())) {
-                    StringBuilder sql = new StringBuilder("CREATE BITAP INDEX ");
-                    sql.append(spec.getStagingArea().getSchema());
+    private void indexOtherColumns(StagingSpec stagingSpec) throws SQLException {
+        for (TableSpec table : this.tempTables.get(stagingSpec)) {
+            for (SimpleColumnSpec column : stagingSpec.getStagedColumns()) {
+                if (!column.getColumn().equals(stagingSpec.getUniqueColumn())) {
+                    StringBuilder sql = new StringBuilder("CREATE BITMAP INDEX ");
+                    sql.append(stagingSpec.getStagingArea().getSchema());
                     sql.append(".");
-                    sql.append("FES_BMIDX001");
+                    sql.append(generateUniqueIndex(table));
                     sql.append(" ON ");
                     sql.append(table.getSchema());
                     sql.append(".");
                     sql.append(table.getTable());
-                    sql.append("(");
+                    sql.append(" (");
                     sql.append(column.getColumn());
                     sql.append(")");
                     sql.append(" TABLESPACE ");
-                    sql.append("AIWDEV_TMP_IL01");
+                    sql.append(stagingSpec.getIndexTablespace());
                     sql.append(" NOLOGGING");
 
-                    logger.log(Level.FINE,
+                    logger.log(Level.INFO,
                             "Indexing column {0} for staging table {1}: {2}",
                             new Object[] { column.getColumn(),
                                     table.getTable(), sql });
+                    
+                    execute(sql.toString());
                 }
             }
         }
     }
 
-    private void mergeTables() {
+    private void mergeTables() throws SQLException {
         for (StagingSpec ss : stagingSpecs) {
-            StringBuilder result = new StringBuilder("CREATE OR REPLACE VIEW ");
-            result.append(ss.getStagingArea().getSchema());
-            result.append(".");
-            result.append(ss.getStagingArea().getTable());
-            result.append(" AS ");
+            StringBuilder sql = new StringBuilder("CREATE OR REPLACE VIEW ");
+            sql.append(ss.getStagingArea().getSchema());
+            sql.append(".");
+            sql.append(ss.getStagingArea().getTable());
+            sql.append(" AS ");
             List<TableSpec> ssTables = this.tempTables.get(ss);
             for (int i = 0; i < ssTables.size(); i++) {
-                result.append("SELECT * FROM ");
-                result.append(ssTables.get(i).getSchema());
-                result.append(".");
-                result.append(ssTables.get(i).getTable());
+                sql.append("SELECT * FROM ");
+                sql.append(ssTables.get(i).getSchema());
+                sql.append(".");
+                sql.append(ssTables.get(i).getTable());
                 if (i < ssTables.size() - 1) {
-                    result.append(" UNION ");
+                    sql.append(" UNION ");
                 }
             }
 
-            logger.log(Level.FINE,
+            logger.log(Level.INFO,
                     "Merging staging tables for staging area {0}: {1}",
-                    new Object[] { ss.getStagingArea(), result });
+                    new Object[] { ss.getStagingArea(), sql });
+            execute(sql.toString());
         }
     }
 

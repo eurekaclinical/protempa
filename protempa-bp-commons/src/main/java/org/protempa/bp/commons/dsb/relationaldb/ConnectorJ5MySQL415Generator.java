@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.backend.dsb.filter.Filter;
 
 /**
@@ -75,7 +76,7 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
     protected DataStager getDataStager(StagingSpec[] stagingSpecs,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+            SQLOrderBy order, ConnectionSpec connectionSpec) {
         return null;
     }
 

@@ -4,9 +4,9 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.backend.dsb.filter.Filter;
 
 /**
@@ -77,9 +77,9 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGenerator {
     protected DataStager getDataStager(StagingSpec[] stagingSpecs,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+            SQLOrderBy order, ConnectionSpec connectionSpec) {
         return new Ojdbc6OracleDataStager(stagingSpecs, referenceSpec,
-                entitySpecs, filters, propIds, keyIds, order, resultProcessor);
+                entitySpecs, filters, propIds, keyIds, order, connectionSpec);
     }
 
 }
