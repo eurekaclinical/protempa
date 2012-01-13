@@ -1,6 +1,7 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
 import static org.arp.javautil.collections.Collections.containsAny;
+import static org.arp.javautil.collections.Collections.putList;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
     private final SQLGenResultProcessor resultProcessor;
 
     private final Map<String, List<EntitySpec>> propIdToEntitySpecs;
+    private final Map<StagingSpec, List<TableSpec>> tempTables = new HashMap<StagingSpec, List<TableSpec>>();
 
     private static final Logger logger = SQLGenUtil.logger();
 
@@ -48,8 +50,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
     private void populatePropIdEntitySpecMap() {
         for (EntitySpec es : entitySpecs) {
             for (String propId : es.getPropositionIds()) {
-                org.arp.javautil.collections.Collections.putList(
-                        propIdToEntitySpecs, propId, es);
+                putList(propIdToEntitySpecs, propId, es);
             }
         }
     }
@@ -93,6 +94,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
                 logger.log(Level.FINE,
                         "Creating staging area for entity spec {0}: {1}",
                         new Object[] { es.getName(), sql });
+                putList(this.tempTables, stagingSpec, sss.getStagingArea());
                 i++;
             }
         }
@@ -100,22 +102,77 @@ final class Ojdbc6OracleDataStager implements DataStager {
 
     private void analyzeTables() {
         for (StagingSpec stagingSpec : stagingSpecs) {
-            for (int i = 0; i < stagingSpec.getEntitySpecs().length; i++) {
+            for (TableSpec tableSpec : this.tempTables.get(stagingSpec)) {
                 String sql = "EXEC DMBS_STATS.gather_table_stats('"
-                        + stagingSpec.getStagingArea().getSchema() + "', '"
-                        + stagingSpec.getStagingArea().getTable() + "_" + i
+                        + tableSpec.getSchema() + "', '" + tableSpec.getTable()
                         + "')";
-                logger.log(Level.FINE, "Analyzing staging table {0}.{1}: {2}",
-                        new Object[] {
-                                stagingSpec.getStagingArea().getSchema(),
-                                stagingSpec.getStagingArea().getTable() + "_"
-                                        + i, sql });
+                logger.log(Level.FINE, "Analyzing staging table {0}: {1}",
+                        new Object[] { tableSpec, sql });
             }
         }
     }
 
     private void indexTables() {
+        for (StagingSpec spec : stagingSpecs) {
+            indexPrimaryKeys(spec);
+            indexOtherColumns(spec);
+        }
+    }
 
+    private void indexPrimaryKeys(StagingSpec stagingSpec) {
+        // CREATE UNIQUE INDEX AIWSTG.FES_UIDX001 ON AIWSTG.FACT_ENCOUNTER_IN
+        // (ENCOUNTER_KEY) TABLESPACE AIWDEV_TMP_IL01 NOLOGGING;
+        for (TableSpec tableSpec : this.tempTables.get(stagingSpec)) {
+            StringBuilder sql = new StringBuilder("CREATE UNIQUE INDEX ");
+            sql.append(tableSpec.getSchema());
+            sql.append(".");
+            sql.append("FES_UIDX001"); // replace with variable
+            sql.append(" ON ");
+            sql.append(tableSpec.getSchema());
+            sql.append(".");
+            sql.append(tableSpec.getTable());
+            sql.append("(");
+            sql.append(stagingSpec.getUniqueColumn());
+            sql.append(")");
+            sql.append(" TABLESPACE ");
+            sql.append("AIWDEV_TMP_IL01"); // replace with variable
+            sql.append(" NOLOGGING ");
+
+            logger.log(Level.FINE,
+                    "Indexing primary key {0} for staging table {1}: {2}",
+                    new Object[] { stagingSpec.getUniqueColumn(), tableSpec,
+                            sql });
+        }
+    }
+
+    private void indexOtherColumns(StagingSpec spec) {
+        // CREATE BITMAP INDEX AIWSTG.FSE_BMIDX001 ON AIWSTG.FACT_ENCOUNTER_IN
+        // (ENTITY_HEALTHCARE_KEY) TABLESPACE AIWDEV_TMP_IL01 NOLOGGING;
+        for (TableSpec table : this.tempTables.get(spec)) {
+            for (SimpleColumnSpec column : spec.getStagedColumns()) {
+                if (!column.getColumn().equals(spec.getUniqueColumn())) {
+                    StringBuilder sql = new StringBuilder("CREATE BITAP INDEX ");
+                    sql.append(spec.getStagingArea().getSchema());
+                    sql.append(".");
+                    sql.append("FES_BMIDX001");
+                    sql.append(" ON ");
+                    sql.append(table.getSchema());
+                    sql.append(".");
+                    sql.append(table.getTable());
+                    sql.append("(");
+                    sql.append(column.getColumn());
+                    sql.append(")");
+                    sql.append(" TABLESPACE ");
+                    sql.append("AIWDEV_TMP_IL01");
+                    sql.append(" NOLOGGING");
+
+                    logger.log(Level.FINE,
+                            "Indexing column {0} for staging table {1}: {2}",
+                            new Object[] { column.getColumn(),
+                                    table.getTable(), sql });
+                }
+            }
+        }
     }
 
     private void mergeTables() {
@@ -125,13 +182,13 @@ final class Ojdbc6OracleDataStager implements DataStager {
             result.append(".");
             result.append(ss.getStagingArea().getTable());
             result.append(" AS ");
-            for (int i = 0; i < ss.getEntitySpecs().length; i++) {
+            List<TableSpec> ssTables = this.tempTables.get(ss);
+            for (int i = 0; i < ssTables.size(); i++) {
                 result.append("SELECT * FROM ");
-                result.append(ss.getStagingArea().getSchema());
+                result.append(ssTables.get(i).getSchema());
                 result.append(".");
-                result.append(ss.getStagingArea().getTable());
-                result.append("_" + i);
-                if (i < ss.getEntitySpecs().length - 1) {
+                result.append(ssTables.get(i).getTable());
+                if (i < ssTables.size() - 1) {
                     result.append(" UNION ");
                 }
             }
