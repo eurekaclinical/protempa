@@ -1,9 +1,6 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,11 +19,9 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
-import org.arp.javautil.io.Retryable;
 import org.arp.javautil.io.Retryer;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
-import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
 import org.protempa.DataSourceReadException;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.dsb.filter.PositionFilter;
@@ -45,7 +40,7 @@ import org.protempa.proposition.value.UnitFactory;
  */
 public abstract class AbstractSQLGenerator implements SQLGenerator {
 
-    private static final int FETCH_SIZE = 10000;
+    static final int FETCH_SIZE = 10000;
     private static final String readPropositionsSQL = "select {0} from {1} {2}";
     private ConnectionSpec connectionSpec;
     private final Map<String, List<EntitySpec>> primitiveParameterSpecs;
@@ -224,71 +219,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
     }
 
-    private static class RetryableSQLExecutor implements
-            Retryable<SQLException> {
-
-        private static final long THREE_SECONDS = 3 * 1000L;
-
-        private final ConnectionSpec connectionSpec;
-        private final String query;
-        private final ResultProcessor resultProcessor;
-
-        RetryableSQLExecutor(ConnectionSpec connectionSpec, String query,
-                ResultProcessor resultProcessor) {
-            this.connectionSpec = connectionSpec;
-            this.query = query;
-            this.resultProcessor = resultProcessor;
-        }
-
-        @Override
-        public SQLException attempt() {
-            try {
-                Connection con = this.connectionSpec.getOrCreate();
-                con.setReadOnly(true);
-                try {
-                    Statement stmt = con.createStatement(
-                            ResultSet.TYPE_FORWARD_ONLY,
-                            ResultSet.CONCUR_READ_ONLY);
-                    stmt.setFetchSize(FETCH_SIZE);
-                    try {
-                        SQLExecutor.executeSQL(con, stmt, this.query,
-                                this.resultProcessor);
-                        stmt.close();
-                        stmt = null;
-                    } finally {
-                        if (stmt != null) {
-                            try {
-                                stmt.close();
-                            } catch (SQLException e) {
-                            }
-                        }
-                    }
-                    con.close();
-                    con = null;
-                } finally {
-                    if (con != null) {
-                        try {
-                            con.close();
-                        } catch (SQLException e) {
-                        }
-                    }
-                }
-                return null;
-            } catch (SQLException ex) {
-                return ex;
-            }
-        }
-
-        @Override
-        public void recover() {
-            try {
-                Thread.sleep(THREE_SECONDS);
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-    }
-
     private void logSkippingReference(Logger logger, ReferenceSpec referenceSpec) {
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE, "Skipping reference {0}",
@@ -303,37 +233,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     "Skipping reference queries for entity spec {0} because the query for {0} returned no data",
                     entitySpec.getName());
         }
-    }
-
-    private void stageTables(Set<String> keyIds, Set<String> propIds,
-            Collection<EntitySpec> allEntitySpecs, Filter filters,
-            SQLOrderBy order) {
-        Logger logger = SQLGenUtil.logger();
-        // for (StagingSpec toStage : this.stagedTableSpecs) {
-        // EntitySpec entitySpec = toStage.getEntitySpec();
-        //
-        // List<EntitySpec> allEntitySpecsCopy = new LinkedList<EntitySpec>(
-        // allEntitySpecs);
-        // removeNonApplicableEntitySpecs(entitySpec, allEntitySpecsCopy);
-        //
-        // Set<Filter> filtersCopy = copyFilters(filters);
-        // removeNonApplicableFilters(allEntitySpecs, filtersCopy, entitySpec);
-        // assert !allEntitySpecsCopy.isEmpty() :
-        // "allEntitySpecsCopy should have at least one element";
-
-        DataStager stager = getDataStager(this.stagedTableSpecs, null,
-                new LinkedList<EntitySpec>(allEntitySpecs),
-                copyFilters(filters), propIds, keyIds, order, null);
-        stager.stageTables();
-
-        // String sql = getStagingCreateStatement(toStage, null,
-        // allEntitySpecsCopy, filtersCopy, propIds, keyIds, order,
-        // null).generateStatement();
-        //
-        // logger.log(Level.INFO,
-        // "Creating staging area for entity spec {0}: {1}",
-        // new Object[] { entitySpec.getName(), sql });
-        // }
     }
 
     private void removeStagedFilters(Set<Filter> filtersCopy) {
@@ -385,7 +284,17 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 .keySet();
         Logger logger = SQLGenUtil.logger();
 
-//        stageTables(keyIds, propIds, allEntitySpecs, filters, order);
+        // stageTables(keyIds, propIds, allEntitySpecs, filters, order);
+        DataStager stager = getDataStager(this.stagedTableSpecs, null,
+                new LinkedList<EntitySpec>(allEntitySpecs),
+                copyFilters(filters), propIds, keyIds, order, getConnectionSpec());
+        try {
+            stager.stageTables();
+        } catch (SQLException ex) {
+            logger.log(Level.SEVERE,
+                    "Failed to create staging area", ex);
+            throw new DataSourceReadException(ex);
+        }
 
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
             logProcessingEntitySpec(logger, entitySpec);
@@ -404,7 +313,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
             Set<Filter> filtersCopy = copyFilters(filters);
             removeNonApplicableFilters(allEntitySpecs, filtersCopy, entitySpec);
-//            removeStagedFilters(filtersCopy);
+            removeStagedFilters(filtersCopy);
             assert !allEntitySpecsCopy.isEmpty() : "allEntitySpecsCopy should have at least one element";
             String dataSourceBackendId = this.backend.getDataSourceBackendId();
             MainResultProcessor<Proposition> resultProcessor = factory
@@ -474,6 +383,16 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
             logDoneProcessing(logger, entitySpec);
         }
+
+        logger.log(Level.INFO, "Cleaning up staged data");
+        try {
+            stager.cleanup();
+        } catch (SQLException ex) {
+            logger.log(Level.WARNING,
+                    "Failed to clean up the staging area",
+                    ex);
+        }
+
         return results;
     }
 
@@ -660,8 +579,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                             query });
         }
 
-        // executeSelect(logger, backendNameForMessages, entitySpecName, query,
-        // resultProcessor);
+        executeSelect(logger, backendNameForMessages, entitySpecName, query,
+                resultProcessor);
     }
 
     private static void removeNonApplicableEntitySpecs(EntitySpec entitySpec,
@@ -730,7 +649,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     protected abstract DataStager getDataStager(StagingSpec[] stagingSpecs,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor);
+            SQLOrderBy order, ConnectionSpec connectionSpec);
 
     private String generateSelect(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, Set<String> propIds,
