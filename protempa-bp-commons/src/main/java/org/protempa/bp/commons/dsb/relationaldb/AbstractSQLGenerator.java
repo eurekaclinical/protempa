@@ -284,7 +284,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 .keySet();
         Logger logger = SQLGenUtil.logger();
 
-        // stageTables(keyIds, propIds, allEntitySpecs, filters, order);
         DataStager stager = getDataStager(this.stagedTableSpecs, null,
                 new LinkedList<EntitySpec>(allEntitySpecs),
                 copyFilters(filters), propIds, keyIds, order, getConnectionSpec());
