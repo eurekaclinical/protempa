@@ -22,8 +22,6 @@ public interface ProtempaDataStoreCreator<K, V> {
      * @param name
      *            the name of the store
      * @return a {@link DataStore} backed by a permanent store implementation
-     * @throws StoreError
-     *             if an error occurs while trying to retrieve the store
      */
     public DataStore<K, V> getPersistentStore(String name);
 
@@ -33,8 +31,6 @@ public interface ProtempaDataStoreCreator<K, V> {
      * store.
      * 
      * @return a {@link DataStore} backed by a temporary store implementation
-     * @throws StoreError
-     *             if an error occurs while trying to create the store
      */
     public DataStore<K, V> newCacheStore();
 }
