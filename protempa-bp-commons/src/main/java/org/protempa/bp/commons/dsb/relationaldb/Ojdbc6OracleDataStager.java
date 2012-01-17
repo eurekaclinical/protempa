@@ -138,9 +138,9 @@ final class Ojdbc6OracleDataStager implements DataStager {
     private void analyzeTables() throws SQLException {
         for (StagingSpec stagingSpec : stagingSpecs) {
             for (TableSpec tableSpec : this.tempTables.get(stagingSpec)) {
-                String sql = "EXEC DMBS_STATS.gather_table_stats('"
+                String sql = "begin DBMS_STATS.gather_table_stats('"
                         + tableSpec.getSchema() + "', '" + tableSpec.getTable()
-                        + "')";
+                        + "'); end;";
                 logger.log(Level.INFO, "Analyzing staging table {0}: {1}",
                         new Object[] { tableSpec, sql });
                 execute(sql);
