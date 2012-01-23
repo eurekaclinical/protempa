@@ -1,9 +1,11 @@
 package org.protempa.xml;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -25,15 +27,35 @@ import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
+import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
+import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
+import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.BooleanValue;
 import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.InequalityNumberValue;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
+import org.protempa.proposition.value.RelativeDayUnit;
+import org.protempa.proposition.value.RelativeHourUnit;
+import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
+import org.protempa.proposition.value.ValueList;
 import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
+import org.protempa.query.handler.TableQueryResultsHandler;
+import org.protempa.query.handler.table.AtLeastNColumnSpec;
+import org.protempa.query.handler.table.CountColumnSpec;
+import org.protempa.query.handler.table.Derivation;
+import org.protempa.query.handler.table.DistanceBetweenColumnSpec;
+import org.protempa.query.handler.table.Link;
+import org.protempa.query.handler.table.OutputConfig;
+import org.protempa.query.handler.table.PropertyConstraint;
+import org.protempa.query.handler.table.PropositionColumnSpec;
+import org.protempa.query.handler.table.PropositionValueColumnSpec;
+import org.protempa.query.handler.table.Reference;
+import org.protempa.query.handler.table.TableColumnSpec;
+import org.protempa.query.handler.table.ValueOutputConfig;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -141,5 +163,78 @@ public class XMLConfigurationTest extends TestCase {
 		DefaultQueryBuilder.setValidatePropositionIds(false);
 		Query query = queryBuilder.build(new KnowledgeSource(new KnowledgeSourceBackend[0]), new AlgorithmSource(new AlgorithmSourceBackend[0]));
 		return query;
+	}
+	
+	public void testTableResultsQueryHandler() throws Throwable {
+		BufferedWriter dataWriter = new BufferedWriter(new StringWriter());
+		TableQueryResultsHandler resultsHandler = createTestTableResultsQueryHandler(dataWriter);
+		File file = new File("testTableResultsQueryHandler.xml");
+		XMLConfiguration.writeTableQueryResultsHandlerAsXML(resultsHandler, file, true);
+		checkXMLValid(file);
+		TableQueryResultsHandler reconstitutedResultsHandler = XMLConfiguration.readTableQueryResultsHandlerAsXML(file, dataWriter);
+		assertTrue("Deserialized query is equal to the original query", reconstitutedResultsHandler.equals(resultsHandler));
+	}
+
+	private TableQueryResultsHandler createTestTableResultsQueryHandler(BufferedWriter dataWriter) {
+		String[] propIds1 = {"p1", "p2", "p3", "p4"};
+		String[] propIds2 = {"q1", "q2", "q3"};
+		PropertyConstraint constraint1 = new PropertyConstraint("foo", ValueComparator.EQUAL_TO, new BooleanValue(Boolean.FALSE));
+		PropertyConstraint constraint2 = new PropertyConstraint("bar", ValueComparator.GREATER_THAN, new DateValue(new Date()));
+		PropertyConstraint constraint3 = new PropertyConstraint("blech", ValueComparator.GREATER_THAN_OR_EQUAL_TO, new NominalValue("qwerty"));
+		ValueList<NominalValue> valueList1 = new ValueList<NominalValue>();
+		valueList1.add(new NominalValue("fx"));
+		valueList1.add(new NominalValue("a1"));
+		PropertyConstraint constraint4 = new PropertyConstraint("gobo", ValueComparator.IN, valueList1);
+		PropertyConstraint constraint5 = new PropertyConstraint("akwa", ValueComparator.LESS_THAN, new NumberValue(123));
+		PropertyConstraint constraint6 = new PropertyConstraint("coom", ValueComparator.LESS_THAN_OR_EQUAL_TO, new InequalityNumberValue(ValueComparator.GREATER_THAN_OR_EQUAL_TO, 34));
+		PropertyConstraint constraint7 = new PropertyConstraint("doga", ValueComparator.NOT_EQUAL_TO , new InequalityNumberValue(ValueComparator.LESS_THAN, 34));
+		ValueList<NumberValue> valueList2 = new ValueList<NumberValue>();
+		valueList2.add(new NumberValue(77));
+		valueList2.add(new NumberValue(86));
+		PropertyConstraint constraint8 = new PropertyConstraint("ekro", ValueComparator.NOT_IN , valueList2);
+		
+		PropertyConstraint[] constraints1 = {constraint1, constraint2, constraint3, constraint4};
+		PropertyConstraint[] constraints2 = {constraint5, constraint6, constraint7, constraint8};
+		Value[] valueArray1 = {new NumberValue(4), new NumberValue(5), new NumberValue(7.3)};
+		Value[] valueArray2 = {new NominalValue("asdf"), new NominalValue("opd")};
+		Relation relation1 = new Relation(6, RelativeDayUnit.DAY, 4, RelativeHourUnit.HOUR, 2, AbsoluteTimeUnit.SECOND, 44, AbsoluteTimeUnit.MINUTE, 33, AbsoluteTimeUnit.HOUR, 144, AbsoluteTimeUnit.DAY, 14, AbsoluteTimeUnit.WEEK, 3, AbsoluteTimeUnit.YEAR);
+		Relation relation2 = new Relation(6, RelativeDayUnit.DAY, 4, RelativeHourUnit.HOUR, 2, AbsoluteTimeUnit.MONTH, 44, AbsoluteTimeUnit.MINUTE, 33, AbsoluteTimeUnit.HOUR, 144, AbsoluteTimeUnit.DAY, 14, AbsoluteTimeUnit.WEEK, 3, AbsoluteTimeUnit.YEAR);
+		Derivation derivation1 = new Derivation(propIds1, constraints1, new AllPropositionIntervalComparator(),       1, 6,  null,        Derivation.Behavior.MULT_BACKWARD, relation1);
+		Derivation derivation2 = new Derivation(propIds2, constraints2, new AllPropositionIntervalComparator(), 3, 9,  valueArray1, Derivation.Behavior.SINGLE_FORWARD, relation2);
+		Derivation derivation3 = new Derivation(propIds1, constraints1, new AllPropositionIntervalComparator(),  8, 15, valueArray2, Derivation.Behavior.MULT_FORWARD, relation1);
+		Derivation derivation4 = new Derivation(propIds1, constraints1, new AllPropositionIntervalComparator(),  8, 15, valueArray2, Derivation.Behavior.SINGLE_FORWARD, relation2);
+		
+		String[] referenceNames = {"foo","bar","blech"};
+		Reference reference1 = new Reference(referenceNames, propIds1, constraints1, new AllPropositionIntervalComparator(), 1, 5);
+		Reference reference2 = new Reference(new String[0], propIds2, constraints2, new AllPropositionIntervalComparator(), -1, -1);
+		
+		Link[] links = {derivation1, reference1, reference2, derivation2, derivation3, derivation4};
+		AtLeastNColumnSpec atLeastN = new AtLeastNColumnSpec("An overridden name", 47, links, "ja", "nein");
+		CountColumnSpec countColumnSpec = new CountColumnSpec("Different Name", links, true);
+		DistanceBetweenColumnSpec secondsBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.SECOND);
+		DistanceBetweenColumnSpec minutesBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.MINUTE);
+		DistanceBetweenColumnSpec hoursBetweenColumnSpec   = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.HOUR);
+		DistanceBetweenColumnSpec daysBetweenColumnSpec    = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.DAY);
+		DistanceBetweenColumnSpec weeksBetweenColumnSpec   = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.WEEK);
+		DistanceBetweenColumnSpec monthsBetweenColumnSpec  = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.MONTH);
+		DistanceBetweenColumnSpec yearsBetweenColumnSpec   = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.YEAR);
+		OutputConfig outputConfig = new OutputConfig(true, true, true, true, true, true, true, 
+				"idHeading", "valueHeading", "displayNameHeading", "abbrevDisplayNameHeading", "startOrTimestampHeading", "finishHeading", "lengthHeading");
+		ValueOutputConfig valueOutputConfig = new ValueOutputConfig(true, true, "Display Name", "Disp. Nm.");
+		PropositionColumnSpec propositionColumnSpec = new PropositionColumnSpec("xPref", propIds1, outputConfig, valueOutputConfig, links, 5);
+		PropositionValueColumnSpec maxPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.MAX);
+		PropositionValueColumnSpec minPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.MIN);
+		PropositionValueColumnSpec firstPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.FIRST);
+		PropositionValueColumnSpec lastPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.LAST);
+		PropositionValueColumnSpec sumPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.SUM);
+		TableColumnSpec[] columnSpecs = new TableColumnSpec[]{
+				atLeastN, countColumnSpec, 
+				secondsBetweenColumnSpec, minutesBetweenColumnSpec, hoursBetweenColumnSpec, 
+				daysBetweenColumnSpec, weeksBetweenColumnSpec, monthsBetweenColumnSpec, yearsBetweenColumnSpec, 
+				propositionColumnSpec, firstPropositionValueColumnSpec, lastPropositionValueColumnSpec, 
+				maxPropositionValueColumnSpec, minPropositionValueColumnSpec, sumPropositionValueColumnSpec
+				};
+		String[] rowPropositionIds = {"alpha", "beta", "gamma"};
+		return new TableQueryResultsHandler(dataWriter, '\t', rowPropositionIds, columnSpecs, true);
 	}
 }
