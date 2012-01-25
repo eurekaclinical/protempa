@@ -76,7 +76,7 @@ class QueryConverter extends AbstractConverter {
 			writer.endNode();
 		}
 		String[] propIDs = query.getPropIds();
-		TableColumnSpecsConverter propIDsConverter = new TableColumnSpecsConverter();
+		PropIDsConverter propIDsConverter = new PropIDsConverter();
 		writer.startNode("propositionIDs");
 		propIDsConverter.marshal(propIDs, writer, context);
 		writer.endNode();
@@ -127,7 +127,7 @@ class QueryConverter extends AbstractConverter {
 			reader.moveDown();
 		}
 		expect(reader, "propositionIDs");
-		TableColumnSpecsConverter propIDsConverter = new TableColumnSpecsConverter();
+		PropIDsConverter propIDsConverter = new PropIDsConverter();
 		String[] propIds = (String[]) context.convertAnother(null, String[].class, propIDsConverter);
 		queryBuilder.setPropIds(propIds);
 		reader.moveUp();

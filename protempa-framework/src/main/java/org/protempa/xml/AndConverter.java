@@ -26,7 +26,7 @@ class AndConverter extends AbstractConverter {
 
 	/**
 	 * This converter is intended to be explicitly called from other converters
-	 * as it corresponds to nothing more specifiec than an array of strings..
+	 * as it corresponds to nothing more specific than an array of strings..
 	 */
 	@Override
 	public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) {
@@ -42,7 +42,7 @@ class AndConverter extends AbstractConverter {
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		String[] anded = (String[]) value;
 		for (String termId : anded) {
-			writer.startNode("termId");
+			writer.startNode("termID");
 			writer.setValue(termId);
 			writer.endNode();
 		}
@@ -61,7 +61,7 @@ class AndConverter extends AbstractConverter {
 		ArrayList<String> termIdList = new ArrayList<String>();
 		while(reader.hasMoreChildren()) {
 			reader.moveDown();
-			expect(reader, "termId");
+			expect(reader, "termID");
 			termIdList.add(reader.getValue());
 			reader.moveUp();
 		}

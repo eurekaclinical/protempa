@@ -40,10 +40,10 @@ class KeyIDsConverter extends AbstractConverter {
 	 */
 	@Override
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
-		String[] keyIds = (String[]) value;
-		for (String keyId : keyIds) {
-			writer.startNode("keyId");
-			writer.setValue(keyId);
+		String[] keyIDs = (String[]) value;
+		for (String keyID : keyIDs) {
+			writer.startNode("keyID");
+			writer.setValue(keyID);
 			writer.endNode();
 		}
 	}
@@ -62,7 +62,7 @@ class KeyIDsConverter extends AbstractConverter {
 		ArrayList<String> keyIdList = new ArrayList<String>();
 		while(reader.hasMoreChildren()) {
 			reader.moveDown();
-			expect(reader, "keyId");
+			expect(reader, "keyID");
 			keyIdList.add(reader.getValue());
 			reader.moveUp();
 		}

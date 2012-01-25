@@ -173,7 +173,7 @@ public class XMLConfiguration implements QueryBuilder {
 		xstream.addImplicitArray(PropertyValueFilter.class, "values");
 
 		// propositionIDs
-		xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", TABLE_COLUMN_SPECS_CONVERTER);
+		xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new PropIDsConverter());
 		xstream.aliasField("propositionIDs", PropertyValueFilter.class, "propositionIds");
 
 		// rowPropositionIDs
@@ -199,7 +199,7 @@ public class XMLConfiguration implements QueryBuilder {
 		XStream xstream = getXStream();
 		// protempaQuery
 		xstream.alias("protempaQuery", Query.class);
-		xstream.registerConverter(new TableQueryResultshandlerConverter());
+		xstream.registerConverter(new QueryConverter(knowledgeSource, algorithmSource));
 		return xstream;
 	}
 
