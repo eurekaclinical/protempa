@@ -101,10 +101,10 @@
     </xs:element>
     <xs:complexType name="keyIDs_type">
         <xs:annotation>
-            <xs:documentation>A collection of one or more keyIds.</xs:documentation>
+            <xs:documentation>A collection of one or more keyIDs.</xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="keyId" type="nameType">
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="keyID" type="nameType">
                 <xs:annotation>
                     <xs:documentation>This element contains a string that identifes the entity associated with a set of propositions.  For example, key IDs may identify the patient that is associated with a set of propositions.</xs:documentation>
                 </xs:annotation>
