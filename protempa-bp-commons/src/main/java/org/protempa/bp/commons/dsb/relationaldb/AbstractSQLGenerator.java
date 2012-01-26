@@ -353,6 +353,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                             removeNonApplicableFilters(
                                     allEntitySpecsCopyForRefs, refFiltersCopy,
                                     referredToEntitySpec);
+                            removeStagedFilters(refFiltersCopy);
                             retainEntitySpecsWithFiltersOrConstraints(
                                     entitySpec, referredToEntitySpec,
                                     allEntitySpecsCopyForRefs, refFiltersCopy,
