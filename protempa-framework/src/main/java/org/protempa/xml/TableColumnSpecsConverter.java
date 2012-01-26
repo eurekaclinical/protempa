@@ -4,6 +4,7 @@
 package org.protempa.xml;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.protempa.query.handler.table.AtLeastNColumnSpec;
 import org.protempa.query.handler.table.CountColumnSpec;
@@ -19,13 +20,18 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
- * Convert {@link TableColumnSpec} array object to/from XML <propositionIDs></propositionIDs>
+ * Convert {@link TableColumnSpec} array object to/from XML
+ * <propositionIDs></propositionIDs>
  * 
  * @author mgrand
  */
 class TableColumnSpecsConverter extends AbstractConverter {
 
-	private static final String TABLE_COLUMN_SPECS = "tableColumnSpecs";
+	private static final String PROPOSITION_VALUE_COLUMN_SPEC = "propositionValueColumnSpec";
+	private static final String PROPOSITION_COLUMN_SPEC = "propositionColumnSpec";
+	private static final String DISTANCE_BETWEEN_COLUMN_SPEC = "distanceBetweenColumnSpec";
+	private static final String COUNT_COLUMN_SPEC = "countColumnSpec";
+	private static final String AT_LEAST_N_COLUMN_SPEC = "atLeastNColumnSpec";
 
 	/**
 	 * Constructor
@@ -53,21 +59,30 @@ class TableColumnSpecsConverter extends AbstractConverter {
 		TableColumnSpec[] columnSpecs = (TableColumnSpec[]) value;
 		for (TableColumnSpec columnSpec : columnSpecs) {
 			if (columnSpec instanceof AtLeastNColumnSpec) {
-				writer.startNode("atLeastNColumnSpec");
+				writer.startNode(AT_LEAST_N_COLUMN_SPEC);
 			} else if (columnSpec instanceof CountColumnSpec) {
-				writer.startNode("countColumnSpec");
+				writer.startNode(COUNT_COLUMN_SPEC);
 			} else if (columnSpec instanceof DistanceBetweenColumnSpec) {
-				writer.startNode("distanceBetweenColumnSpec");
+				writer.startNode(DISTANCE_BETWEEN_COLUMN_SPEC);
 			} else if (columnSpec instanceof PropositionColumnSpec) {
-				writer.startNode("propositionColumnSpec");
-			} else if (columnSpec instanceof PropositionValueColumnSpec){
-				writer.startNode("propositionValueColumnSpec");
+				writer.startNode(PROPOSITION_COLUMN_SPEC);
+			} else if (columnSpec instanceof PropositionValueColumnSpec) {
+				writer.startNode(PROPOSITION_VALUE_COLUMN_SPEC);
 			} else {
 				throw new ConversionException("TableColumnSpecs array contains instance of unsupported class: " + columnSpec.getClass().getName());
 			}
 			context.convertAnother(columnSpec);
 			writer.endNode();
 		}
+	}
+
+	private static final HashMap<String, Class<?>> tagToClassMap = new HashMap<String, Class<?>>();
+	static {
+		tagToClassMap.put(AT_LEAST_N_COLUMN_SPEC, AtLeastNColumnSpec.class);
+		tagToClassMap.put(COUNT_COLUMN_SPEC, CountColumnSpec.class);
+		tagToClassMap.put(DISTANCE_BETWEEN_COLUMN_SPEC, DistanceBetweenColumnSpec.class);
+		tagToClassMap.put(PROPOSITION_COLUMN_SPEC, PropositionColumnSpec.class);
+		tagToClassMap.put(PROPOSITION_VALUE_COLUMN_SPEC, PropositionValueColumnSpec.class);
 	}
 
 	/*
@@ -81,16 +96,13 @@ class TableColumnSpecsConverter extends AbstractConverter {
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		expectChildren(reader);
-		ArrayList<String> propIdList = new ArrayList<String>();
+		ArrayList<TableColumnSpec> tablecolumnSpecList = new ArrayList<TableColumnSpec>();
 		while(reader.hasMoreChildren()) {
 			reader.moveDown();
-			if (!TABLE_COLUMN_SPECS.equals(reader.getNodeName())) {
-				throw new ConversionException("propositionIDs has a child that is not <propositionId>");
-			}
-			propIdList.add(reader.getValue());
+			expect(reader, tagToClassMap.keySet());
+			tablecolumnSpecList.add((TableColumnSpec)context.convertAnother(null, tagToClassMap.get(reader.getNodeName())));
 			reader.moveUp();
 		}
-		return propIdList.toArray(new String[propIdList.size()]);
+		return tablecolumnSpecList.toArray(new TableColumnSpec[tablecolumnSpecList.size()]);
 	}
-
 }

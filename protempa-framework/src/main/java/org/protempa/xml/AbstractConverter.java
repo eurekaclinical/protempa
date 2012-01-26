@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
+import java.util.Set;
 
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
@@ -35,7 +36,26 @@ public abstract class AbstractConverter implements Converter {
 	}
 
 	/**
-	 * Throw an exception if the current XML element has any unprocessed children.
+	 * Throw an exception if the current XML element does not have one of the
+	 * expected names.
+	 * 
+	 * @param reader
+	 *            The object used to inquire about the current XML element.
+	 * @param elementNames
+	 *            The expected element names.
+	 * @throws ConversionException
+	 *             if the current element does not have the expected name.
+	 */
+	protected void expect(HierarchicalStreamReader reader, Set<String> elementNames) {
+		if (!elementNames.contains(reader.getNodeName())) {
+			String msg = "Expected an element whose tag is one of " + elementNames + " but found " + reader.getNodeName();
+			throw new ConversionException(msg);
+		}
+	}
+
+	/**
+	 * Throw an exception if the current XML element has any unprocessed
+	 * children.
 	 * 
 	 * @param reader
 	 *            The object used to inquire about the current XML element.
@@ -50,7 +70,8 @@ public abstract class AbstractConverter implements Converter {
 	}
 
 	/**
-	 * Throw an exception if the current XML element has no unprocessed children.
+	 * Throw an exception if the current XML element has no unprocessed
+	 * children.
 	 * 
 	 * @param reader
 	 *            The object used to inquire about the current XML element.
@@ -62,6 +83,25 @@ public abstract class AbstractConverter implements Converter {
 			String msg = "Element contains no child elements but is required to contain at least one.";
 			throw new ConversionException(msg);
 		}
+	}
+
+	/**
+	 * Get the value of the named attribute from the given reader. If the named
+	 * attributes has no value, then throw a ConversionException.
+	 * 
+	 * @param reader
+	 *            The object used to inquire about the current XML element.
+	 * @param attributeName
+	 *            The name of the attribute to get a value for.
+	 * @return The value of the attribute.
+	 */
+	protected String requiredAttributeValue(HierarchicalStreamReader reader, String attributeName) {
+		String value = reader.getAttribute(attributeName);
+		if (value == null) {
+			String msg = "The current element does not specify a value for an attribute named \"" + attributeName + "\"";
+			throw new ConversionException(msg);
+		}
+		return value;
 	}
 
 	// Cached properties for URLS

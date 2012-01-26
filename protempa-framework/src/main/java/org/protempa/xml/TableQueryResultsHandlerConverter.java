@@ -40,7 +40,7 @@ class TableQueryResultshandlerConverter extends AbstractConverter {
 	 */
 	@Override
 	public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) {
-		return clazz == TableQueryResultsHandler.class;
+		return TableQueryResultsHandler.class.equals(clazz);
 	}
 
 	/**
@@ -61,14 +61,15 @@ class TableQueryResultshandlerConverter extends AbstractConverter {
 		writer.addAttribute("columnDelimiter", Character.toString(resultsHandler.getColumnDelimiter()));
 
 		String[] propIDs = resultsHandler.getRowPropositionIds();
-		TableColumnSpecsConverter propIDsConverter = new TableColumnSpecsConverter();
+		PropIDsConverter propIDsConverter = new PropIDsConverter();
 		writer.startNode("rowPropositionIDs");
+		context.convertAnother(propIDs, propIDsConverter);
 		propIDsConverter.marshal(propIDs, writer, context);
 		writer.endNode();
 
 		TableColumnSpec[] tableColumnSpecs = resultsHandler.getColumnSpecs();
 		writer.startNode(TABLE_COLUMN_SPECS);
-		columnSpecsConverter.marshal(tableColumnSpecs, writer, context);
+		context.convertAnother(tableColumnSpecs, columnSpecsConverter);
 		writer.endNode();
 	}
 
