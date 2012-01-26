@@ -33,7 +33,7 @@ public final class StagingSpec {
      *            a {@link TableSpec}s defining which table is to be replaced in
      *            queries
      * @param stagedColumns
-     *            an array of {@link ColumnSpec}s specifying which columns from
+     *            an array of {@link SimpleColumnSpec}s specifying which columns from
      *            the table to stage
      * @param entitySpecs
      *            the {@link EntitySpec} the staged data will represent. This
