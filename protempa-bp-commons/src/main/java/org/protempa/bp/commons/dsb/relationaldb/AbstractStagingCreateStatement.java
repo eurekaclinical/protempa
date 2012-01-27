@@ -1,5 +1,6 @@
 package org.protempa.bp.commons.dsb.relationaldb;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -8,11 +9,12 @@ import org.protempa.backend.dsb.filter.Filter;
 /**
  * Class for creating staging areas
  */
-abstract class AbstractCreateStatement implements CreateStatement {
+abstract class AbstractStagingCreateStatement implements CreateStatement {
 
-    private final SimpleStagingSpec stagingSpec;
+    private final StagingSpec stagingSpec;
 
     // Fields required for select statement
+    private final EntitySpec currentSpec;
     private final ReferenceSpec referenceSpec;
     private final List<EntitySpec> entitySpecs;
     private final Set<Filter> filters;
@@ -21,11 +23,13 @@ abstract class AbstractCreateStatement implements CreateStatement {
     private final SQLOrderBy order;
     private final SQLGenResultProcessor resultProcessor;
 
-    protected AbstractCreateStatement(SimpleStagingSpec stagingSpec,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
-            Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
+    protected AbstractStagingCreateStatement(StagingSpec stagingSpec,
+            EntitySpec currentSpec, ReferenceSpec referenceSpec,
+            List<EntitySpec> entitySpecs, Set<Filter> filters,
+            Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
+            SQLGenResultProcessor resultProcessor) {
         this.stagingSpec = stagingSpec;
+        this.currentSpec = currentSpec;
         this.referenceSpec = referenceSpec;
         this.entitySpecs = entitySpecs;
         this.filters = filters;
@@ -35,8 +39,12 @@ abstract class AbstractCreateStatement implements CreateStatement {
         this.resultProcessor = resultProcessor;
     }
 
-    protected SimpleStagingSpec getStagingSpec() {
+    protected StagingSpec getStagingSpec() {
         return stagingSpec;
+    }
+
+    protected EntitySpec getCurrentSpec() {
+        return currentSpec;
     }
 
     protected ReferenceSpec getReferenceSpec() {
@@ -74,9 +82,10 @@ abstract class AbstractCreateStatement implements CreateStatement {
                 + "."
                 + stagingSpec.getStagingArea().getTable()
                 + " AS "
-                + getSelectStatement(stagingSpec.getEntitySpec(),
-                        referenceSpec, entitySpecs, filters, propIds, keyIds,
-                        order, resultProcessor).generateStatement();
+                + getSelectStatement(currentSpec, referenceSpec,
+                        Collections.singletonList(currentSpec), filters,
+                        propIds, keyIds, order, resultProcessor)
+                        .generateStatement();
     }
 
     @Override

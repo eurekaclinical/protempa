@@ -4,6 +4,7 @@ import static org.arp.javautil.collections.Collections.containsAny;
 import static org.arp.javautil.collections.Collections.putList;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.io.Retryer;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
@@ -81,7 +83,8 @@ final class Ojdbc6OracleDataStager implements DataStager {
                 this.connectionSpec, sql, null);
         Retryer<SQLException> retryer = new Retryer<SQLException>(3);
         if (!retryer.execute(operation)) {
-            SQLException ex = SQLExecutor.assembleSQLException(retryer.getErrors());
+            SQLException ex = SQLExecutor.assembleSQLException(retryer
+                    .getErrors());
             throw ex;
         }
     }
@@ -95,14 +98,14 @@ final class Ojdbc6OracleDataStager implements DataStager {
                 stagingSpec.getStagingArea(), dropView });
 
         execute(dropView);
-        
+
         for (TableSpec table : this.tempTables.get(stagingSpec)) {
             String dropTable = "DROP TABLE " + table.getSchema() + "."
                     + table.getTable();
 
             logger.log(Level.INFO, "Dropping table {0}: {1}", new Object[] {
                     table, dropTable });
-            
+
             execute(dropTable);
         }
     }
@@ -113,23 +116,23 @@ final class Ojdbc6OracleDataStager implements DataStager {
             for (EntitySpec es : stagingSpec.getEntitySpecs()) {
                 Set<Filter> filtersCopy = new HashSet<Filter>(filters);
                 removeNonApplicableFilters(filtersCopy, es);
-                SimpleStagingSpec sss = new SimpleStagingSpec(
-                        TableSpec.withSchemaAndTable(stagingSpec
-                                .getStagingArea().getSchema(), stagingSpec
-                                .getStagingArea().getTable() + "_" + i),
-                        stagingSpec.getUniqueColumn(),
-                        stagingSpec.getReplacedTable(),
-                        stagingSpec.getStagedColumns(), es);
+                StagingSpec newTableSpec = StagingSpec.newTableName(
+                        stagingSpec, stagingSpec.getStagingArea().getTable()
+                                + "_" + i);
                 CreateStatement stmt = new Ojdbc6OracleStagingCreateStatement(
-                        sss, referenceSpec, Collections.singletonList(es),
+                        newTableSpec,
+                        es,
+                        referenceSpec,
+                        Arrays.<EntitySpec> asList(stagingSpec.getEntitySpecs()),
                         filters, propIds, keyIds, order, null);
                 String sql = stmt.generateStatement();
                 logger.log(Level.INFO,
                         "Creating staging area for entity spec {0}: {1}",
                         new Object[] { es.getName(), sql });
                 execute(sql);
-                putList(this.tempTables, stagingSpec, sss.getStagingArea());
-                this.indexIds.put(sss.getStagingArea(), 0);
+                putList(this.tempTables, stagingSpec,
+                        newTableSpec.getStagingArea());
+                this.indexIds.put(newTableSpec.getStagingArea(), 0);
                 i++;
             }
         }
@@ -188,9 +191,13 @@ final class Ojdbc6OracleDataStager implements DataStager {
 
     private void indexOtherColumns(StagingSpec stagingSpec) throws SQLException {
         for (TableSpec table : this.tempTables.get(stagingSpec)) {
-            for (SimpleColumnSpec column : stagingSpec.getStagedColumns()) {
-                if (!column.getColumn().equals(stagingSpec.getUniqueColumn())) {
-                    StringBuilder sql = new StringBuilder("CREATE BITMAP INDEX ");
+            HashSet<String> indexed = new HashSet<String>();
+            for (StagedColumnSpec column : stagingSpec.getStagedColumns()) {
+                String realColumn = getRealColumn(column);
+                if (!realColumn.equals(stagingSpec.getUniqueColumn())
+                        && !indexed.contains(realColumn)) {
+                    StringBuilder sql = new StringBuilder(
+                            "CREATE BITMAP INDEX ");
                     sql.append(stagingSpec.getStagingArea().getSchema());
                     sql.append(".");
                     sql.append(generateUniqueIndex(table));
@@ -199,20 +206,30 @@ final class Ojdbc6OracleDataStager implements DataStager {
                     sql.append(".");
                     sql.append(table.getTable());
                     sql.append(" (");
-                    sql.append(column.getColumn());
+                    sql.append(realColumn);
                     sql.append(")");
                     sql.append(" TABLESPACE ");
                     sql.append(stagingSpec.getIndexTablespace());
                     sql.append(" NOLOGGING");
 
-                    logger.log(Level.INFO,
-                            "Indexing column {0} for staging table {1}: {2}",
-                            new Object[] { column.getColumn(),
+                    logger.log(
+                            Level.INFO,
+                            "Indexing column {0} (as {1}) for staging table {2}: {3}",
+                            new Object[] { column.getColumn(), realColumn,
                                     table.getTable(), sql });
-                    
+
                     execute(sql.toString());
+                    indexed.add(realColumn);
                 }
             }
+        }
+    }
+
+    private static String getRealColumn(StagedColumnSpec spec) {
+        if (null != spec.getAsName() && !spec.getAsName().isEmpty()) {
+            return spec.getAsName();
+        } else {
+            return spec.getColumn();
         }
     }
 

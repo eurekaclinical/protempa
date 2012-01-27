@@ -16,7 +16,7 @@ public final class StagingSpec {
     private final String indexTablespace;
     private final String uniqueColumn;
     private final TableSpec replacedTable;
-    private final SimpleColumnSpec[] stagedColumns;
+    private final StagedColumnSpec[] stagedColumns;
     private final EntitySpec[] entitySpecs;
 
     /**
@@ -33,8 +33,8 @@ public final class StagingSpec {
      *            a {@link TableSpec}s defining which table is to be replaced in
      *            queries
      * @param stagedColumns
-     *            an array of {@link SimpleColumnSpec}s specifying which columns from
-     *            the table to stage
+     *            an array of {@link StagedColumnSpec}s specifying which columns
+     *            from the table to stage
      * @param entitySpecs
      *            the {@link EntitySpec} the staged data will represent. This
      *            entity spec must map to the same proposition IDs as some other
@@ -46,13 +46,49 @@ public final class StagingSpec {
      */
     public StagingSpec(TableSpec stagingArea, String indexTablespace,
             String uniqueColumn, TableSpec replacedTable,
-            SimpleColumnSpec[] stagedColumns, EntitySpec[] entitySpecs) {
+            StagedColumnSpec[] stagedColumns, EntitySpec[] entitySpecs) {
+        if (!validateStagedColumns(stagedColumns, entitySpecs)) {
+            throw new IllegalArgumentException(
+                    "All staging columns that specify substitute column names must apply only to entity specs that are specified in the staging spec.");
+        }
         this.stagingArea = stagingArea;
         this.indexTablespace = indexTablespace;
         this.uniqueColumn = uniqueColumn;
         this.replacedTable = replacedTable;
-        this.stagedColumns = stagedColumns.clone();
+        this.stagedColumns = stagedColumns;
         this.entitySpecs = entitySpecs;
+    }
+
+    static StagingSpec newTableName(StagingSpec stagingSpec, String newTableName) {
+        return new StagingSpec(TableSpec.withSchemaAndTable(stagingSpec
+                .getStagingArea().getSchema(), newTableName),
+                stagingSpec.getIndexTablespace(),
+                stagingSpec.getUniqueColumn(), stagingSpec.getReplacedTable(),
+                stagingSpec.getStagedColumns(), stagingSpec.getEntitySpecs());
+    }
+
+    /**
+     * If any staged columns specify substitute column names, then the entity
+     * specs the substitution applies to must be in the array of entity specs
+     */
+    private boolean validateStagedColumns(StagedColumnSpec[] stagedColumns,
+            EntitySpec[] entitySpecs) {
+        for (StagedColumnSpec cs : stagedColumns) {
+            if (cs.getForEntitySpecs() != null) {
+                for (String esName : cs.getForEntitySpecs()) {
+                    boolean match = false;
+                    for (EntitySpec es : entitySpecs) {
+                        if (esName.equals(es.getName())) {
+                            match = true;
+                        }
+                    }
+                    if (!match) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -97,8 +133,8 @@ public final class StagingSpec {
      * @return the array of {@link ColumnSpec}s which are the columns being
      *         staged
      */
-    public SimpleColumnSpec[] getStagedColumns() {
-        return stagedColumns;
+    public StagedColumnSpec[] getStagedColumns() {
+        return stagedColumns.clone();
     }
 
     /**

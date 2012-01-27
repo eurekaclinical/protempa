@@ -6,13 +6,13 @@ import java.util.Set;
 import org.protempa.backend.dsb.filter.Filter;
 
 final class Ojdbc6OracleStagingCreateStatement extends
-        AbstractCreateStatement {
+        AbstractStagingCreateStatement {
 
-    public Ojdbc6OracleStagingCreateStatement(SimpleStagingSpec stagingSpec,
+    public Ojdbc6OracleStagingCreateStatement(StagingSpec stagingSpec, EntitySpec currentSpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor) {
-        super(stagingSpec, referenceSpec, entitySpecs, filters, propIds,
+        super(stagingSpec, currentSpec, referenceSpec, entitySpecs, filters, propIds,
                 keyIds, order, resultProcessor);
     }
 

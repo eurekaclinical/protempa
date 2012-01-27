@@ -9,7 +9,7 @@ import org.protempa.backend.dsb.filter.Filter;
 final class Ojdbc6OracleStagingSelectStatement extends
         Ojdbc6OracleSelectStatement {
 
-    private final SimpleStagingSpec stagingSpec;
+    private final StagingSpec stagingSpec;
 
     // we are staging a table, so we don't want anything skipped based on what
     // tables are staged
@@ -19,7 +19,7 @@ final class Ojdbc6OracleStagingSelectStatement extends
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            SimpleStagingSpec stagingSpec) {
+            StagingSpec stagingSpec) {
         super(entitySpec, referenceSpec, entitySpecs, filters, propIds, keyIds,
                 order, resultProcessor, EMPTY_SSPEC_ARR);
         this.stagingSpec = stagingSpec;
@@ -33,7 +33,7 @@ final class Ojdbc6OracleStagingSelectStatement extends
 
         List<ColumnSpec> plusStagedSpecs = new ArrayList<ColumnSpec>(
                 info.getColumnSpecs());
-        for (SimpleColumnSpec spec : stagingSpec.getStagedColumns()) {
+        for (StagedColumnSpec spec : stagingSpec.getStagedColumns()) {
             plusStagedSpecs.add(spec.toColumnSpec());
         }
         TableAliaser referenceIndices = new TableAliaser(plusStagedSpecs, "a");
@@ -56,7 +56,7 @@ final class Ojdbc6OracleStagingSelectStatement extends
     @Override
     SelectClause getSelectClause(ColumnSpecInfo info,
             TableAliaser referenceIndices, EntitySpec entitySpec) {
-        return new StagingSelectClause(stagingSpec, referenceIndices);
+        return new StagingSelectClause(stagingSpec, entitySpec, referenceIndices);
     }
 
     @Override
