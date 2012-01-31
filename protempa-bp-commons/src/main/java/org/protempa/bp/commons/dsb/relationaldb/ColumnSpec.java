@@ -520,6 +520,20 @@ public final class ColumnSpec implements Serializable {
                             otherJoinSpec.getNextColumnSpec());
         }
     }
+    
+    /**
+     * Gets the last column spec in the chain of column specs and joins.
+     * 
+     * @return a {@link ColumnSpec}
+     */
+    ColumnSpec getLastSpec() {
+        if (this.joinSpec == null) {
+            return this;
+        } else {
+            List<ColumnSpec> l = asList();
+            return l.get(l.size() - 1);
+        }
+    }
 
     /**
      * Returns a list of column specs that are chained to this one via joins
@@ -544,7 +558,7 @@ public final class ColumnSpec implements Serializable {
 //        return ToStringBuilder.reflectionToString(this);
         String result = "";
         for (ColumnSpec spec : asList()) {
-            result += spec.getSchema() + "." + spec.getTable() + "." + spec.getColumn() + "->";
+            result += spec.getSchema() + "." + spec.getTable() + "." + spec.getColumn() + " -> ";
         }
         
         return result;
