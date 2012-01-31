@@ -218,8 +218,8 @@ abstract class AbstractWhereClause implements WhereClause {
             // Skip any constraints that were included in any staged data
             // Joining against that data implicitly applies the constraint
             for (StagingSpec stagingSpec : getStagedTables()) {
-                if (constraintSpec.isSameSchemaAndTable(stagingSpec
-                        .getReplacedTable())) {
+                if (constraintSpec.getLastSpec().isSameSchemaAndTable(
+                        stagingSpec.getReplacedTable())) {
                     continue CONSTRAINT_LOOP;
                 }
             }
