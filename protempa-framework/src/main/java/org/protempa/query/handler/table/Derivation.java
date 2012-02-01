@@ -297,4 +297,16 @@ public final class Derivation extends Link {
         }
         return result;
     }
+    
+    public Behavior getBehavior() {
+    	return behavior;
+    }
+    
+    public Value[] getAllowedValues() {
+    	return allowedValues;
+    }
+    
+    public Relation getRelation() {
+    	return relation;
+    }
 }
