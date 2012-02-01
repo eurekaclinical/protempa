@@ -3,7 +3,6 @@
  */
 package org.protempa.xml;
 
-import org.mvel.ConversionException;
 import org.protempa.query.handler.table.AtLeastNColumnSpec;
 import org.protempa.query.handler.table.Link;
 
@@ -61,14 +60,7 @@ class AtLeastNColumnSpecConverter extends AbstractConverter {
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		String columnNameOverride = reader.getAttribute(COLUMN_NAME_OVERRIDE);
 
-		String nString = requiredAttributeValue(reader, N);
-		int n;
-		try {
-			n = Integer.parseInt(nString);
-		} catch (Exception e) {
-			String msg = "Unable to parse value of attribute n: \"" + nString + "\"";
-			throw new ConversionException(msg, e);
-		}
+		int n = intAttributeValue(reader, N);
 		
 		String trueOutput = reader.getAttribute(TRUE_OUTPUT);
 		if (trueOutput == null) {

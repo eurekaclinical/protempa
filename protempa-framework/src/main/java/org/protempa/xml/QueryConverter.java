@@ -27,6 +27,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  */
 class QueryConverter extends AbstractConverter {
+	private static final String PROPOSITION_IDS = "propositionIDs";
+	private static final String KEY_IDS = "keyIDs";
 	public static URL querySchemaUrl = null;
 	private static Logger myLogger = Logger.getLogger(TableQueryResultshandlerConverter.class.getName());
 	
@@ -70,15 +72,15 @@ class QueryConverter extends AbstractConverter {
 		// TODO marshal termSourceBackend
 		String[] keyIDs = query.getKeyIds();
 		if (keyIDs != null && keyIDs.length > 0) {
-			KeyIDsConverter keyIDsConverter = new KeyIDsConverter();
-			writer.startNode("keyIDs");
-			keyIDsConverter.marshal(keyIDs, writer, context);
+			StringArrayConverter keyIDsConverter = new StringArrayConverter(KEY_IDS);
+			writer.startNode(KEY_IDS);
+			context.convertAnother(keyIDs, keyIDsConverter);
 			writer.endNode();
 		}
 		String[] propIDs = query.getPropIds();
 		PropIDsConverter propIDsConverter = new PropIDsConverter();
-		writer.startNode("propositionIDs");
-		propIDsConverter.marshal(propIDs, writer, context);
+		writer.startNode(PROPOSITION_IDS);
+		context.convertAnother(propIDs, propIDsConverter);
 		writer.endNode();
 
 		Filter filters = query.getFilters();
@@ -119,14 +121,14 @@ class QueryConverter extends AbstractConverter {
 
 		DefaultQueryBuilder queryBuilder = new DefaultQueryBuilder();
 		
-		if ("keyIDs".equals(reader.getNodeName())) {
-			KeyIDsConverter keyIDsConverter = new KeyIDsConverter();
+		if (KEY_IDS.equals(reader.getNodeName())) {
+			StringArrayConverter keyIDsConverter = new StringArrayConverter(KEY_IDS);
 			String[] keyIds = (String[]) context.convertAnother(null, String[].class, keyIDsConverter);
 			queryBuilder.setKeyIds(keyIds);
 			reader.moveUp();
 			reader.moveDown();
 		}
-		expect(reader, "propositionIDs");
+		expect(reader, PROPOSITION_IDS);
 		PropIDsConverter propIDsConverter = new PropIDsConverter();
 		String[] propIds = (String[]) context.convertAnother(null, String[].class, propIDsConverter);
 		queryBuilder.setPropIds(propIds);

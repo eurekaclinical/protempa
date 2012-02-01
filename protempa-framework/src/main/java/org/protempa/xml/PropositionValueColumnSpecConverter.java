@@ -1,7 +1,11 @@
+/**
+ * 
+ */
 package org.protempa.xml;
 
-import org.protempa.query.handler.table.CountColumnSpec;
 import org.protempa.query.handler.table.Link;
+import org.protempa.query.handler.table.PropositionValueColumnSpec;
+import org.protempa.query.handler.table.PropositionValueColumnSpec.Type;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -9,25 +13,24 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
- * Convert {@link CountColumnSpec} object to/from XML
- * <countColumnSpec></countColumnSpec>
- *
  * @author mgrand
+ * 
  */
-class CountColumnSpecConverter extends AbstractConverter {
-	private static final String COUNT_UNIQUE = "countUnique";
-	private static final String COLUMN_NAME_OVERRIDE = "columnNameOverride";
+public class PropositionValueColumnSpecConverter extends AbstractConverter {
+	private static final String AGGREGATION_TYPE = "aggregationType";
+	private static final String COLUMN_NAME_PREFIX_OVERRIDE = "columnNamePrefixOverride";
 	private static final String LINKS = "links";
 
 	/*
-	 * (non-Javadoc) Convert {@link CountColumnSpec} object to/from XML
-	 * <countColumnSpec></countColumnSpec>
+	 * (non-Javadoc)
 	 * 
-	 * @author mgrand
+	 * @see
+	 * com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.
+	 * lang.Class)
 	 */
 	@Override
 	public boolean canConvert(@SuppressWarnings("rawtypes") Class type) {
-		return CountColumnSpec.class.equals(type);
+		return PropositionValueColumnSpec.class.equals(type);
 	}
 
 	/*
@@ -40,13 +43,14 @@ class CountColumnSpecConverter extends AbstractConverter {
 	 */
 	@Override
 	public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-		CountColumnSpec columnSpec = (CountColumnSpec)source;
+		PropositionValueColumnSpec columnSpec = (PropositionValueColumnSpec) source;
 
-		String columnNameOverride = columnSpec.getColumnNameOverride();
+		String columnNameOverride = columnSpec.getColumnNamePrefixOverride();
 		if (columnNameOverride != null) {
-			writer.addAttribute(COLUMN_NAME_OVERRIDE, columnNameOverride);
+			writer.addAttribute(COLUMN_NAME_PREFIX_OVERRIDE, columnNameOverride);
 		}
-		writer.addAttribute(COUNT_UNIQUE, Boolean.toString(columnSpec.isCountUnique()));
+		AggregationTypeValueConverter aggregationConverter = new AggregationTypeValueConverter();
+		writer.addAttribute(AGGREGATION_TYPE, aggregationConverter.toString(columnSpec.getType()));
 
 		writer.startNode(LINKS);
 		context.convertAnother(columnSpec.getLinks());
@@ -63,18 +67,17 @@ class CountColumnSpecConverter extends AbstractConverter {
 	 */
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		String columnNameOverride = reader.getAttribute(COLUMN_NAME_OVERRIDE);
-		
-		String countUniqueString = requiredAttributeValue(reader, COUNT_UNIQUE);
-		boolean countUnique = Boolean.valueOf(countUniqueString);
-		
-		reader.moveDown();
+		String columnNameOverride = reader.getAttribute(COLUMN_NAME_PREFIX_OVERRIDE);
+
+		String aggregationTypeString = requiredAttributeValue(reader, AGGREGATION_TYPE);
+		Type aggregationType = (Type)new AggregationTypeValueConverter().fromString(aggregationTypeString);
+
 		expect(reader, LINKS);
-		Link[] links = (Link[])context.convertAnother(null, Link[].class);
+		Link[] links = (Link[]) context.convertAnother(null, Link[].class);
 		reader.moveUp();
 		expectNoMore(reader);
 
-		return new CountColumnSpec(columnNameOverride, links, countUnique);
+		return new PropositionValueColumnSpec(columnNameOverride, links, aggregationType);
 	}
 
 }

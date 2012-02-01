@@ -9,8 +9,6 @@ import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
 import org.protempa.proposition.value.Granularity;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -21,9 +19,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * 
  * @author mgrand
  */
-class DateTimeFilterConverter implements Converter {
+class DateTimeFilterConverter extends AbstractConverter {
 
-	private static final String DATE_TIME_FILTER = "dateTimeFilter";
 	private static final String PROPOSITION_IDS = "propositionIDs";
 	private static final String FINISH_SIDE = "finishSide";
 	private static final String START_SIDE = "startSide";
@@ -104,18 +101,10 @@ class DateTimeFilterConverter implements Converter {
 		
 		String finishSideString = reader.getAttribute(FINISH_SIDE);
 		Side finishSide = Side.fromXmlName(finishSideString);
-		
-		if (!reader.hasMoreChildren()) {
-			String msg = DATE_TIME_FILTER+" is required to have a " + PROPOSITION_IDS + " child element.";
-			throw new ConversionException(msg);
-		}
+		expectChildren(reader);
+
 		reader.moveDown();
-		String childNodeName = reader.getNodeName();
-		if (! PROPOSITION_IDS.equals(childNodeName)) {
-			String msg = "Found child element of " + DATE_TIME_FILTER + " with tag \"" + childNodeName
-				+ "\". The only type of child element allowed for " + DATE_TIME_FILTER + " is " + PROPOSITION_IDS;
-			throw new ConversionException(msg);
-		}
+		expect(reader, PROPOSITION_IDS);
 		String[] propostionsIds = (String[])context.convertAnother(null, String[].class, new PropIDsConverter());
 		reader.moveUp();
 		

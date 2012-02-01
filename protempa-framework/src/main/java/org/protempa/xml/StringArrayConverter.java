@@ -11,22 +11,31 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 /**
- * Convert String array object to/from XML <keyIDs></keyIDs>
+ * Convert String array object to/from XML. The tag for the nested elements is
+ * specified by the constructor. This converter is not specific to any one class
+ * and so it should be be registered as the converter for any specific class.
+ * Instead, its instances should be explicitly passed into the context's
+ * convertAnother method.
  * 
  * @author mgrand
  */
-class KeyIDsConverter extends AbstractConverter {
+class StringArrayConverter extends AbstractConverter {
+	private String elementName;
 
 	/**
 	 * Constructor
+	 * 
+	 * @param elementName
+	 *            The name of the elements that are nested elements
+	 *            corresponding to array elements.
 	 */
-	public KeyIDsConverter() {
+	public StringArrayConverter(String elementName) {
 		super();
 	}
 
 	/**
 	 * This converter is intended to be explicitly called from other converters
-	 * as it corresponds to nothing more specifiec than an array of strings..
+	 * as it corresponds to nothing more specific than an array of strings..
 	 */
 	@Override
 	public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) {
@@ -42,7 +51,7 @@ class KeyIDsConverter extends AbstractConverter {
 	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
 		String[] keyIDs = (String[]) value;
 		for (String keyID : keyIDs) {
-			writer.startNode("keyID");
+			writer.startNode(elementName);
 			writer.setValue(keyID);
 			writer.endNode();
 		}
@@ -58,11 +67,10 @@ class KeyIDsConverter extends AbstractConverter {
 	 */
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		expect(reader, "keyIDs");
 		ArrayList<String> keyIdList = new ArrayList<String>();
-		while(reader.hasMoreChildren()) {
+		while (reader.hasMoreChildren()) {
 			reader.moveDown();
-			expect(reader, "keyID");
+			expect(reader, elementName);
 			keyIdList.add(reader.getValue());
 			reader.moveUp();
 		}

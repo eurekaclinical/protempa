@@ -43,14 +43,17 @@ public abstract class AbstractConverter implements Converter {
 	 *            The object used to inquire about the current XML element.
 	 * @param elementNames
 	 *            The expected element names.
+	 * @return the tag of the current element.
 	 * @throws ConversionException
 	 *             if the current element does not have the expected name.
 	 */
-	protected void expect(HierarchicalStreamReader reader, Set<String> elementNames) {
-		if (!elementNames.contains(reader.getNodeName())) {
+	protected String expect(HierarchicalStreamReader reader, Set<String> elementNames) {
+		String tag = reader.getNodeName();
+		if (!elementNames.contains(tag)) {
 			String msg = "Expected an element whose tag is one of " + elementNames + " but found " + reader.getNodeName();
 			throw new ConversionException(msg);
 		}
+		return tag;
 	}
 
 	/**
@@ -87,7 +90,7 @@ public abstract class AbstractConverter implements Converter {
 
 	/**
 	 * Get the value of the named attribute from the given reader. If the named
-	 * attributes has no value, then throw a ConversionException.
+	 * attribute is not specified, then throw a ConversionException.
 	 * 
 	 * @param reader
 	 *            The object used to inquire about the current XML element.
@@ -98,8 +101,74 @@ public abstract class AbstractConverter implements Converter {
 	protected String requiredAttributeValue(HierarchicalStreamReader reader, String attributeName) {
 		String value = reader.getAttribute(attributeName);
 		if (value == null) {
-			String msg = "The current element does not specify a value for an attribute named \"" + attributeName + "\"";
-			throw new ConversionException(msg);
+			missingAttribute(attributeName);
+		}
+		return value;
+	}
+
+	private void missingAttribute(String attributeName) {
+		String msg = "The current element does not specify a value for an attribute named \"" + attributeName + "\"";
+		throw new ConversionException(msg);
+	}
+
+	/**
+	 * Get the int value of the named attribute from the given reader. If the
+	 * named attribute is not specified, then throw a ConversionException.
+	 * 
+	 * @param reader
+	 *            The object used to inquire about the current XML element.
+	 * @param attributeName
+	 *            The name of the attribute to get a value for.
+	 * @return The value of the attribute.
+	 * @throws ConversionException
+	 *             if the specified value of the attribute can not be parsed as
+	 *             an int.
+	 */
+	protected int intAttributeValue(HierarchicalStreamReader reader, String attributeName) {
+		String valueString = requiredAttributeValue(reader, attributeName);
+		int value;
+		if (valueString == null) {
+			missingAttribute(attributeName);
+			value = 0;
+		} else {
+			try {
+				value = Integer.parseInt(valueString);
+			} catch (Exception e) {
+				String msg = "Unable to parse value of attribute n: \"" + valueString + "\"";
+				throw new ConversionException(msg, e);
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * Get the int value of the named attribute from the given reader. If the
+	 * named attribute is not specified, then return the given default value.
+	 * 
+	 * @param reader
+	 *            The object used to inquire about the current XML element.
+	 * @param attributeName
+	 *            The name of the attribute to get a value for.
+	 * @param defaultValue
+	 *            The default value to use if the named attribute is not
+	 *            specified.
+	 * @return The value of the attribute.
+	 * @throws ConversionException
+	 *             if the specified value of the attribute can not be parsed as
+	 *             an int.
+	 */
+	protected int intAttributeValue(HierarchicalStreamReader reader, String attributeName, int defaultValue) {
+		String valueString = requiredAttributeValue(reader, attributeName);
+		int value;
+		if (valueString == null) {
+			value = 1;
+		} else {
+			try {
+				value = Integer.parseInt(valueString);
+			} catch (Exception e) {
+				String msg = "Unable to parse value of attribute n: \"" + valueString + "\"";
+				throw new ConversionException(msg, e);
+			}
 		}
 		return value;
 	}
@@ -139,6 +208,14 @@ public abstract class AbstractConverter implements Converter {
 			String msg = "Error parsing URL that was specified as the value of the " + propertyName + " property in " + propertiesUrl.toExternalForm();
 			msg += "\nThe problem URL is " + urlString;
 			throw new RuntimeException(msg, e);
+		}
+	}
+
+	protected static String nullAsEmptyString(String str) {
+		if (str == null) {
+			return "";
+		} else {
+			return str;
 		}
 	}
 }

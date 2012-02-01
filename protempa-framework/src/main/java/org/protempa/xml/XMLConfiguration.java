@@ -54,6 +54,16 @@ import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
 import org.protempa.query.handler.TableQueryResultsHandler;
+import org.protempa.query.handler.table.AtLeastNColumnSpec;
+import org.protempa.query.handler.table.CountColumnSpec;
+import org.protempa.query.handler.table.Derivation;
+import org.protempa.query.handler.table.DistanceBetweenColumnSpec;
+import org.protempa.query.handler.table.Link;
+import org.protempa.query.handler.table.OutputConfig;
+import org.protempa.query.handler.table.PropositionColumnSpec;
+import org.protempa.query.handler.table.PropositionValueColumnSpec;
+import org.protempa.query.handler.table.Reference;
+import org.protempa.query.handler.table.ValueOutputConfig;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.DataHolder;
@@ -104,10 +114,6 @@ public class XMLConfiguration implements QueryBuilder {
 		XStream xstream = null;
 		xstream = new XStream(new StaxDriver());
 		xstream.registerConverter(STANDARD_DATE_CONVERTER, XStream.PRIORITY_VERY_HIGH);
-
-		// and
-		xstream.alias("and", And.class);
-		xstream.registerConverter(new AndConverter());
 
 		// booleanValue
 		xstream.alias("booleanValue", BooleanValue.class);
@@ -172,13 +178,6 @@ public class XMLConfiguration implements QueryBuilder {
 		xstream.alias("propertyValuesFilter", PropertyValueFilter.class);
 		xstream.addImplicitArray(PropertyValueFilter.class, "values");
 
-		// propositionIDs
-		xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new PropIDsConverter());
-		xstream.aliasField("propositionIDs", PropertyValueFilter.class, "propositionIds");
-
-		// rowPropositionIDs
-		xstream.registerLocalConverter(AbstractFilter.class, "rowPropositionIds", TABLE_COLUMN_SPECS_CONVERTER);
-
 		// start
 		xstream.useAttributeFor(PositionFilter.class, "start");
 
@@ -190,7 +189,8 @@ public class XMLConfiguration implements QueryBuilder {
 		xstream.useAttributeFor(PositionFilter.class, "startSide");
 
 		// tableQueryResultsHandler
-		xstream.alias("tableQueryResultsHandler", TableQueryResultshandlerConverter.class);
+		xstream.alias("tableQueryResultsHandler", TableQueryResultsHandler.class);
+		xstream.registerConverter(new TableQueryResultshandlerConverter());
 
 		return xstream;
 	}
@@ -356,6 +356,44 @@ public class XMLConfiguration implements QueryBuilder {
 		myLogger.exiting(XMLConfiguration.class.getName(), "writeQueryAsXML");
 	}
 
+	private static XStream getTableQueryResultsHandlerXStream() {
+		XStream xstream = getXStream();
+
+		xstream.registerLocalConverter(AbstractFilter.class, "rowPropositionIds", TABLE_COLUMN_SPECS_CONVERTER);
+		
+		xstream.alias("atLeastNColumnSpec", AtLeastNColumnSpec.class);
+		xstream.registerConverter(new AtLeastNColumnSpecConverter());
+		
+		xstream.alias("countColumnSpec", CountColumnSpec.class);
+		xstream.registerConverter(new CountColumnSpecConverter());
+		
+		xstream.alias("distanceBetweenColumnSpec", DistanceBetweenColumnSpec.class);
+		xstream.registerConverter(new DistanceBetweenColumnSpecConverter());
+		
+		xstream.alias("propositionColumnSpec", PropositionColumnSpec.class);
+		xstream.registerConverter(new PropositionColumnSpecConverter());
+		
+		xstream.alias("propositionValueColumnSpec", PropositionValueColumnSpec.class);
+		xstream.registerConverter(new PropositionValueColumnSpecConverter());
+		
+		xstream.alias("links", Link[].class);
+		xstream.registerConverter(new LinksConverter());
+		
+		xstream.alias("outputConfig", OutputConfig.class);
+		xstream.registerConverter(new OutputConfigConverter());
+		
+		xstream.alias("valueOutputConfig", ValueOutputConfig.class);
+		xstream.registerConverter(new ValueOutputConfigConverter());
+		
+		xstream.alias("derivation", Derivation.class);
+		xstream.registerConverter(new DerivationConverter());
+		
+		xstream.alias("reference", Reference.class);
+//		xstream.registerConverter(new ReferenceConverter());
+
+		return xstream;
+	}
+
 	/**
 	 * Read XML from the specified file that describes a Protempa
 	 * TableQueryResultsHandler and create the {@link TableQueryResultsHandler}.
@@ -481,7 +519,7 @@ public class XMLConfiguration implements QueryBuilder {
 		myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
 		DataHolder dataHolder = new MapBackedDataHolder();
 		dataHolder.put("writer", dataWriter);
-		TableQueryResultsHandler resultsHandler = (TableQueryResultsHandler) getXStream().unmarshal(hsr, null, dataHolder);
+		TableQueryResultsHandler resultsHandler = (TableQueryResultsHandler) getTableQueryResultsHandlerXStream().unmarshal(hsr, null, dataHolder);
 		myLogger.exiting(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
 		return resultsHandler;
 	}
@@ -539,7 +577,9 @@ public class XMLConfiguration implements QueryBuilder {
 			throws IOException {
 		XMLConfiguration.surpressSchemaReference.set(Boolean.valueOf(surpressSchemaReference));
 		myLogger.entering(XMLConfiguration.class.getName(), "writeQueryAsXML");
-		getXStream().toXML(resultsHandler, writer);
+		XStream xstream = getTableQueryResultsHandlerXStream();
+
+		xstream.toXML(resultsHandler, writer);
 		writer.close();
 		myLogger.exiting(XMLConfiguration.class.getName(), "writeQueryAsXML");
 	}
