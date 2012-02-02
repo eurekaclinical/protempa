@@ -39,6 +39,21 @@ public final class Protempa {
         }
     }
 
+    public static Protempa newInstance(String configurationId , KnowledgeSource knowledgeSource)
+    	throws ProtempaStartupException {
+    	try {
+    		
+    		return newInstance(new SourceFactory(configurationId , knowledgeSource));
+    		
+    	} catch (ConfigurationsLoadException ex) {
+    		throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
+    	} catch (BackendProviderSpecLoaderException ex) {
+    		throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
+    	} catch (InvalidConfigurationException ex) {
+    		throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
+    	}
+    }
+
     public static Protempa newInstance(SourceFactory sourceFactory)
             throws ProtempaStartupException {
         try {
