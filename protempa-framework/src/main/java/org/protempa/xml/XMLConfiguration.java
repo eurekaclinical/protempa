@@ -356,7 +356,12 @@ public class XMLConfiguration implements QueryBuilder {
 		myLogger.exiting(XMLConfiguration.class.getName(), "writeQueryAsXML");
 	}
 
-	private static XStream getTableQueryResultsHandlerXStream() {
+	private static XStream tableQueryResultsHandlerXStream;
+	
+	static XStream getTableQueryResultsHandlerXStream() {
+		if (tableQueryResultsHandlerXStream != null) {
+			return tableQueryResultsHandlerXStream;
+		}
 		XStream xstream = getXStream();
 
 		xstream.registerLocalConverter(AbstractFilter.class, "rowPropositionIds", TABLE_COLUMN_SPECS_CONVERTER);
@@ -389,9 +394,10 @@ public class XMLConfiguration implements QueryBuilder {
 		xstream.registerConverter(new DerivationConverter());
 		
 		xstream.alias("reference", Reference.class);
-//		xstream.registerConverter(new ReferenceConverter());
+		xstream.registerConverter(new ReferenceConverter());
 
-		return xstream;
+		tableQueryResultsHandlerXStream = new XStreamWrapper(xstream);
+		return tableQueryResultsHandlerXStream;
 	}
 
 	/**

@@ -82,7 +82,7 @@ public class XMLConfigurationTest extends TestCase {
 		Query query = createTestQuery();
 		File file = new File("z.xml");
 		XMLConfiguration.writeQueryAsXML(query, file, true);
-		checkXMLValid(file);
+		checkXMLValid(file, "protempa_query.xsd");
 		KnowledgeSource ks = new KnowledgeSource(new KnowledgeSourceBackend[0]);
 		AlgorithmSource as = new AlgorithmSource(new AlgorithmSourceBackend[0]);
 		Query reconstitutedQuery = XMLConfiguration.readQueryAsXML(file, ks, as);
@@ -96,14 +96,14 @@ public class XMLConfigurationTest extends TestCase {
 		
 	}
 
-	private void checkXMLValid(File file) throws SAXException, ParserConfigurationException, IOException {
+	private void checkXMLValid(File file, String xsd) throws SAXException, ParserConfigurationException, IOException {
 		DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		Document document = parser.parse(file);
 
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		// Get schema from the local file since the correct schema may not yet
 		// be deployed to its URL when we run this test.
-		Schema schema = schemaFactory.newSchema(getClass().getResource("protempa_query.xsd"));
+		Schema schema = schemaFactory.newSchema(getClass().getResource(xsd));
 		Validator validator = schema.newValidator();
 		validator.validate(new DOMSource(document));
 	}
@@ -170,7 +170,7 @@ public class XMLConfigurationTest extends TestCase {
 		TableQueryResultsHandler resultsHandler = createTestTableResultsQueryHandler(dataWriter);
 		File file = new File("testTableResultsQueryHandler.xml");
 		XMLConfiguration.writeTableQueryResultsHandlerAsXML(resultsHandler, file, true);
-		checkXMLValid(file);
+		checkXMLValid(file, "protempa_tableQueryResultsHandler.xsd");
 		TableQueryResultsHandler reconstitutedResultsHandler = XMLConfiguration.readTableQueryResultsHandlerAsXML(file, dataWriter);
 		assertTrue("Deserialized query is equal to the original query", reconstitutedResultsHandler.equals(resultsHandler));
 	}

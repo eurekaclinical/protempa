@@ -6,9 +6,16 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.Set;
 
+import org.protempa.proposition.value.Unit;
+import org.protempa.proposition.value.Value;
+
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import com.thoughtworks.xstream.mapper.Mapper;
 
 /**
  * Base class for implementing XStream converters.
@@ -127,16 +134,11 @@ public abstract class AbstractConverter implements Converter {
 	protected int intAttributeValue(HierarchicalStreamReader reader, String attributeName) {
 		String valueString = requiredAttributeValue(reader, attributeName);
 		int value;
-		if (valueString == null) {
-			missingAttribute(attributeName);
-			value = 0;
-		} else {
-			try {
-				value = Integer.parseInt(valueString);
-			} catch (Exception e) {
-				String msg = "Unable to parse value of attribute n: \"" + valueString + "\"";
-				throw new ConversionException(msg, e);
-			}
+		try {
+			value = Integer.parseInt(valueString);
+		} catch (Exception e) {
+			String msg = "Unable to parse value of attribute n: \"" + valueString + "\"";
+			throw new ConversionException(msg, e);
 		}
 		return value;
 	}
@@ -158,7 +160,7 @@ public abstract class AbstractConverter implements Converter {
 	 *             an int.
 	 */
 	protected int intAttributeValue(HierarchicalStreamReader reader, String attributeName, int defaultValue) {
-		String valueString = requiredAttributeValue(reader, attributeName);
+		String valueString = reader.getAttribute(attributeName);
 		int value;
 		if (valueString == null) {
 			value = 1;
@@ -170,6 +172,108 @@ public abstract class AbstractConverter implements Converter {
 				throw new ConversionException(msg, e);
 			}
 		}
+		return value;
+	}
+
+	/**
+	 * Get the value of the named attribute from the given reader as an Integer
+	 * object. If the named attribute is not specified, then return null.
+	 * 
+	 * @param reader
+	 *            The object used to inquire about the current XML element.
+	 * @param attributeName
+	 *            The name of the attribute to get a value for.
+	 * @return The value of the attribute.
+	 * @throws ConversionException
+	 *             if the specified value of the attribute can not be parsed as
+	 *             an int.
+	 */
+	protected Integer integerAttributeValue(HierarchicalStreamReader reader, String attributeName) {
+		String valueString = reader.getAttribute(attributeName);
+		Integer value;
+		if (valueString == null) {
+			value = null;
+		} else {
+			try {
+				value = Integer.valueOf(valueString);
+			} catch (Exception e) {
+				String msg = "Unable to parse value of attribute n: \"" + valueString + "\"";
+				throw new ConversionException(msg, e);
+			}
+		}
+		return value;
+	}
+	
+	private static final UnitValueConverter unitConverter = new UnitValueConverter(); 
+
+	/**
+	 * Get the value of the named attribute from the given reader as a {@link Unit}
+	 * object. If the named attribute is not specified, then return null.
+	 * 
+	 * @param reader
+	 *            The object used to inquire about the current XML element.
+	 * @param attributeName
+	 *            The name of the attribute to get a value for.
+	 * @return The value of the attribute.
+	 * @throws ConversionException
+	 *             if the specified value of the attribute can not be recognized
+	 *             as a Unit.
+	 */
+	protected Unit unitAttributeValue(HierarchicalStreamReader reader, String attributeName) {
+		String valueString = reader.getAttribute(attributeName);
+		Unit value;
+		if (valueString == null) {
+			value = null;
+		} else {
+			try {
+				value = (Unit)unitConverter.fromString(valueString);
+			} catch (Exception e) {
+				String msg = "Unable to parse value of attribute n: \"" + valueString + "\"";
+				throw new ConversionException(msg, e);
+			}
+		}
+		return value;
+	}
+
+	/**
+	 * Write an entire Value XML element, including the element tag. This is
+	 * different than XStream's marshal that writes the attributes, child
+	 * elements and contents, but does not write the tag.
+	 * 
+	 * @param writer
+	 *            The {@link} HierarchicalStreamWriter} object that XStream
+	 *            passed into a marshal method.
+	 * @param context
+	 *            The {@link MarshallingContext} object that XStream passed into
+	 *            a marshal method.
+	 * @param value
+	 *            The {@link Value} object to be written as XML.
+	 */
+	protected void valueToXML(HierarchicalStreamWriter writer, MarshallingContext context, Value value) {
+		Mapper mapper = XMLConfiguration.getTableQueryResultsHandlerXStream().getMapper();
+		String valueElementTag = mapper.serializedClass(value.getClass());
+		writer.startNode(valueElementTag);
+		context.convertAnother(value);
+		writer.endNode();
+	}
+
+	/**
+	 * Read an entire Value XML element, including the element tag. This is
+	 * different than XStream's unmarshal that reads the attributes, child
+	 * elements and contents, but does not read the tag.
+	 * 
+	 * @param reader
+	 * @param context
+	 * @return
+	 */
+	protected Value valueFromXML(HierarchicalStreamReader reader, UnmarshallingContext context) {
+		Value value;
+		reader.moveDown();
+		Mapper mapper = XMLConfiguration.getTableQueryResultsHandlerXStream().getMapper();
+		@SuppressWarnings("unchecked")
+		Class<Value> type = (Class<Value>) mapper.realClass(reader.getNodeName());
+		value = (Value) context.convertAnother(null, type);
+		reader.moveUp();
 		return value;
 	}
 

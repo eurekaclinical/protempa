@@ -61,14 +61,7 @@ class DistanceBetweenColumnSpecConverter extends AbstractConverter {
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		String columnNameOverride = reader.getAttribute(COLUMN_NAME_PREFIX_OVERRIDE);
 		
-		String unitString = requiredAttributeValue(reader, UNIT);
-		Unit unit;
-		if (unitString != null) {
-			UnitValueConverter unitConverter = new UnitValueConverter();
-			unit = (Unit)unitConverter.fromString(unitString);
-		} else {
-			unit = null;
-		}
+		Unit unit = unitAttributeValue(reader, UNIT);
 		
 		reader.moveDown();
 		expect(reader, LINKS);
