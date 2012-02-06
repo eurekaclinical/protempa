@@ -30,7 +30,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
 import java.net.URL;
 import java.util.TimeZone;
@@ -49,7 +48,6 @@ import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.InequalityNumberValue;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
-import org.protempa.query.And;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
@@ -69,10 +67,8 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.DataHolder;
 import com.thoughtworks.xstream.converters.basic.DateConverter;
 import com.thoughtworks.xstream.core.MapBackedDataHolder;
-import com.thoughtworks.xstream.io.HierarchicalStreamDriver;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
-import com.thoughtworks.xstream.io.xml.XppDriver;
 
 /**
  * This class takes a Protempa configuration information such as a query and
@@ -113,6 +109,7 @@ public class XMLConfiguration implements QueryBuilder {
 	private static synchronized XStream getXStream() {
 		XStream xstream = null;
 		xstream = new XStream(new StaxDriver());
+		xstream.setMode(XStream.NO_REFERENCES);
 		xstream.registerConverter(STANDARD_DATE_CONVERTER, XStream.PRIORITY_VERY_HIGH);
 
 		// booleanValue
@@ -137,6 +134,8 @@ public class XMLConfiguration implements QueryBuilder {
 		// so tell XStream reflection to ignore the AbstractFilter class's
 		// "and" field.
 		xstream.omitField(AbstractFilter.class, "and");
+		xstream.aliasField("propositionIDs", AbstractFilter.class, "propositionIds");
+		xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new PropIDsConverter());
 
 		// finish
 		xstream.useAttributeFor(PositionFilter.class, "finish");
@@ -416,9 +415,8 @@ public class XMLConfiguration implements QueryBuilder {
 	 *             If there is a problem.
 	 */
 	public static TableQueryResultsHandler readTableQueryResultsHandlerAsXML(File file, BufferedWriter dataWriter) throws IOException {
-		HierarchicalStreamDriver driver = new XppDriver();
-		HierarchicalStreamReader hsr = driver.createReader(file);
-		return readTableQueryResultsHandlerAsXML(hsr, dataWriter);
+		myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
+		return (TableQueryResultsHandler)getTableQueryResultsHandlerXStream().fromXML(file);
 	}
 
 	/**
@@ -437,9 +435,8 @@ public class XMLConfiguration implements QueryBuilder {
 	 *             If there is a problem.
 	 */
 	public static TableQueryResultsHandler readTableQueryResultsHandlerAsXML(URL url, BufferedWriter dataWriter) throws IOException {
-		HierarchicalStreamDriver driver = new XppDriver();
-		HierarchicalStreamReader hsr = driver.createReader(url);
-		return readTableQueryResultsHandlerAsXML(hsr, dataWriter);
+		myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
+		return (TableQueryResultsHandler)getTableQueryResultsHandlerXStream().fromXML(url);
 	}
 
 	/**
@@ -458,9 +455,8 @@ public class XMLConfiguration implements QueryBuilder {
 	 *             If there is a problem.
 	 */
 	public static TableQueryResultsHandler readTableQueryResultsHandlerAsXML(Reader reader, BufferedWriter dataWriter) throws IOException {
-		HierarchicalStreamDriver driver = new XppDriver();
-		HierarchicalStreamReader hsr = driver.createReader(reader);
-		return readTableQueryResultsHandlerAsXML(hsr, dataWriter);
+		myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
+		return (TableQueryResultsHandler)getTableQueryResultsHandlerXStream().fromXML(reader);
 	}
 
 	/**
@@ -479,9 +475,8 @@ public class XMLConfiguration implements QueryBuilder {
 	 *             If there is a problem.
 	 */
 	public static TableQueryResultsHandler readTableQueryResultsHandlerAsXML(InputStream inputStream, BufferedWriter dataWriter) throws IOException {
-		HierarchicalStreamDriver driver = new XppDriver();
-		HierarchicalStreamReader hsr = driver.createReader(inputStream);
-		return readTableQueryResultsHandlerAsXML(hsr, dataWriter);
+		myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
+		return (TableQueryResultsHandler)getTableQueryResultsHandlerXStream().fromXML(inputStream);
 	}
 
 	/**
@@ -500,9 +495,8 @@ public class XMLConfiguration implements QueryBuilder {
 	 *             If there is a problem.
 	 */
 	public static TableQueryResultsHandler readTableQueryResultsHandlerAsXML(String str, BufferedWriter dataWriter) throws IOException {
-		HierarchicalStreamDriver driver = new XppDriver();
-		HierarchicalStreamReader hsr = driver.createReader(new StringReader(str));
-		return readTableQueryResultsHandlerAsXML(hsr, dataWriter);
+		myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
+		return (TableQueryResultsHandler)getTableQueryResultsHandlerXStream().fromXML(str);
 	}
 
 	/**
@@ -521,7 +515,7 @@ public class XMLConfiguration implements QueryBuilder {
 	 * @throws IOException
 	 *             If there is a problem.
 	 */
-	private static TableQueryResultsHandler readTableQueryResultsHandlerAsXML(HierarchicalStreamReader hsr, BufferedWriter dataWriter) {
+	static TableQueryResultsHandler readTableQueryResultsHandlerAsXML(HierarchicalStreamReader hsr, BufferedWriter dataWriter) {
 		myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
 		DataHolder dataHolder = new MapBackedDataHolder();
 		dataHolder.put("writer", dataWriter);

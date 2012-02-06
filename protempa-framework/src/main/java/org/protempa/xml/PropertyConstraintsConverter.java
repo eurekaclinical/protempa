@@ -72,6 +72,7 @@ public class PropertyConstraintsConverter extends AbstractConverter {
 			reader.moveDown();
 			expect(reader, propertyConstraintTags);
 			constraints.add((PropertyConstraint)context.convertAnother(null, PropertyConstraint.class, converter));
+			reader.moveUp();
 		}
 		return constraints.toArray(new PropertyConstraint[constraints.size()]);
 	}

@@ -81,7 +81,7 @@ public class LinksConverter extends AbstractConverter {
 			if (DERIVATION.equals(tag)) {
 				linkList.add((Derivation)context.convertAnother(null, Derivation.class));
 			} else {
-				linkList.add((Reference)context.convertAnother(null, Derivation.class));
+				linkList.add((Reference)context.convertAnother(null, Reference.class));
 			}
 			reader.moveUp();
 		}

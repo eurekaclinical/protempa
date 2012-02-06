@@ -30,7 +30,7 @@ class StringArrayConverter extends AbstractConverter {
 	 *            corresponding to array elements.
 	 */
 	public StringArrayConverter(String elementName) {
-		super();
+		this.elementName = elementName;
 	}
 
 	/**

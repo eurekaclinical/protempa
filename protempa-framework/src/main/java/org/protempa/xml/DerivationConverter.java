@@ -5,6 +5,7 @@ package org.protempa.xml;
 
 import java.util.Comparator;
 
+import org.mvel.ConversionException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.Value;
@@ -113,33 +114,38 @@ public class DerivationConverter extends AbstractConverter {
 		expect(reader, PROPOSITION_IDS);
 		String[] propositionIds = (String[]) context.convertAnother(null, String[].class, new PropIDsConverter());
 		reader.moveUp();
-		
-		reader.moveDown();
-		PropertyConstraint[] constraints;
-		if (PROPERTY_CONSTRAINTS.equals(reader.getNodeName())) {
-			PropertyConstraintsConverter converter = new PropertyConstraintsConverter();
-			constraints = (PropertyConstraint[])context.convertAnother(null, PropertyConstraint[].class, converter);
-			reader.moveUp();
+
+		PropertyConstraint[] constraints = null;
+		Value[] allowedValues = null;
+		Relation relation = null;
+
+		while (reader.hasMoreChildren()) {
 			reader.moveDown();
-		} else {
-			constraints = null;
+			if (PROPERTY_CONSTRAINTS.equals(reader.getNodeName())) {
+				if (constraints != null) {
+					throw new ConversionException("diversion contains multiple propertyConstraints elements");
+				}
+				PropertyConstraintsConverter converter = new PropertyConstraintsConverter();
+				constraints = (PropertyConstraint[]) context.convertAnother(null, PropertyConstraint[].class, converter);
+				reader.moveUp();
+			} else if (ALLOWED_VALUES.equals(reader.getNodeName())) {
+				if (allowedValues != null) {
+					throw new ConversionException("diversion contains multiple allowedValues elements");
+				}
+				AllowedValuesConverter converter = new AllowedValuesConverter();
+				allowedValues = (Value[]) context.convertAnother(null, Value[].class, converter);
+				reader.moveUp();
+			} else if (RELATION.equals(reader.getNodeName())) {
+				if (relation != null) {
+					throw new ConversionException("diversion contains multiple relation elements");
+				}
+				RelationConverter relationConverter = new RelationConverter();
+				relation = (Relation) context.convertAnother(null, Relation.class, relationConverter);
+				reader.moveUp();
+			} else {
+				throw new ConversionException("Encountered unexpected element: " + reader.getNodeName());
+			}
 		}
-		
-		Value[] allowedValues;
-		if (ALLOWED_VALUES.equals(reader.getNodeName())) {
-			AllowedValuesConverter converter = new AllowedValuesConverter();
-			allowedValues = (Value[])context.convertAnother(null, Value[].class, converter);
-			reader.moveUp();
-			reader.moveDown();
-		} else {
-			allowedValues = null;
-		}
-		
-		expect(reader, RELATION);
-		RelationConverter relationConverter = new RelationConverter();
-		Relation relation = (Relation)context.convertAnother(null, Relation.class, relationConverter);
-		reader.moveUp();
-		
 		return new Derivation(propositionIds, constraints, comparator, fromIndex, toIndex, allowedValues, behavior, relation);
 	}
 

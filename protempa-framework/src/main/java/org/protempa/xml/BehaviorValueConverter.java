@@ -51,12 +51,12 @@ class BehaviorValueConverter implements SingleValueConverter {
 	 */
 	@Override
 	public Object fromString(String str) {
-		Unit unit = (Unit)BehaviorToStringMap.getKey(str);
-		if (unit == null) {
+		Behavior behavior = (Behavior)BehaviorToStringMap.getKey(str);
+		if (behavior == null) {
 			String msg = "Unknown behavior type value string: " + str;
 			throw new ConversionException(msg);
 		}
-		return unit;
+		return behavior;
 	}
 
 }

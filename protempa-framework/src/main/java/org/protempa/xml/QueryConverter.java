@@ -29,6 +29,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 class QueryConverter extends AbstractConverter {
 	private static final String PROPOSITION_IDS = "propositionIDs";
 	private static final String KEY_IDS = "keyIDs";
+	private static final String KEY_ID = "keyID";
 	public static URL querySchemaUrl = null;
 	private static Logger myLogger = Logger.getLogger(TableQueryResultshandlerConverter.class.getName());
 	
@@ -72,7 +73,7 @@ class QueryConverter extends AbstractConverter {
 		// TODO marshal termSourceBackend
 		String[] keyIDs = query.getKeyIds();
 		if (keyIDs != null && keyIDs.length > 0) {
-			StringArrayConverter keyIDsConverter = new StringArrayConverter(KEY_IDS);
+			StringArrayConverter keyIDsConverter = new StringArrayConverter(KEY_ID);
 			writer.startNode(KEY_IDS);
 			context.convertAnother(keyIDs, keyIDsConverter);
 			writer.endNode();
@@ -122,7 +123,7 @@ class QueryConverter extends AbstractConverter {
 		DefaultQueryBuilder queryBuilder = new DefaultQueryBuilder();
 		
 		if (KEY_IDS.equals(reader.getNodeName())) {
-			StringArrayConverter keyIDsConverter = new StringArrayConverter(KEY_IDS);
+			StringArrayConverter keyIDsConverter = new StringArrayConverter(KEY_ID);
 			String[] keyIds = (String[]) context.convertAnother(null, String[].class, keyIDsConverter);
 			queryBuilder.setKeyIds(keyIds);
 			reader.moveUp();

@@ -19,8 +19,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  */
 public class AllowedValuesConverter extends AbstractConverter {
 
-	private static final String ALLOWED_VALUES = "allowedValues";
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -48,7 +46,6 @@ public class AllowedValuesConverter extends AbstractConverter {
 			return;
 		}
 		Class<?> valueClass = values[0].getClass();
-		writer.startNode(ALLOWED_VALUES);
 		for (Value value : values) {
 			if (value.getClass() != valueClass) {
 				String msg = "Cannot convert allowed values to XML for mixed types of values that include " //
@@ -57,7 +54,6 @@ public class AllowedValuesConverter extends AbstractConverter {
 			}
 			valueToXML(writer, context, value);
 		}
-		writer.endNode();
 	}
 
 	/*

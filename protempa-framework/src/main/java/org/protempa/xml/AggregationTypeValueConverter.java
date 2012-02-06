@@ -51,12 +51,12 @@ class AggregationTypeValueConverter implements SingleValueConverter {
 	 */
 	@Override
 	public Object fromString(String str) {
-		Unit unit = (Unit)aggregationTypeToStringMap.getKey(str);
-		if (unit == null) {
+		Type type = (Type)aggregationTypeToStringMap.getKey(str);
+		if (type == null) {
 			String msg = "Unknown aggregation type value string: " + str;
 			throw new ConversionException(msg);
 		}
-		return unit;
+		return type;
 	}
 
 }

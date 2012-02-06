@@ -54,14 +54,14 @@ public class ReferenceConverter extends AbstractConverter implements Converter {
 		if (propositionIDs != null && propositionIDs.length > 0) {
 			writer.startNode(PROPOSITION_IDS);
 			PropIDsConverter converter = new PropIDsConverter();
-			context.convertAnother(referenceNames, converter);
+			context.convertAnother(propositionIDs, converter);
 			writer.endNode();
 		}
 		PropertyConstraint[] constraints = reference.getConstraints();
 		if (constraints != null && constraints.length > 0) {
 			writer.startNode(PROPERTY_CONSTRAINTS);
 			PropertyConstraintsConverter converter = new PropertyConstraintsConverter();
-			context.convertAnother(referenceNames, converter);
+			context.convertAnother(constraints, converter);
 			writer.endNode();
 		}
 	}
@@ -110,7 +110,7 @@ public class ReferenceConverter extends AbstractConverter implements Converter {
 					throw new ConversionException(msg);
 				}
 				PropertyConstraintsConverter converter = new PropertyConstraintsConverter();
-				constraints = (PropertyConstraint[])context.convertAnother(null, String[].class, converter);
+				constraints = (PropertyConstraint[])context.convertAnother(null, PropertyConstraint[].class, converter);
 				
 			}
 			reader.moveUp();

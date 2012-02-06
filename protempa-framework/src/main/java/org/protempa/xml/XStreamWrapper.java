@@ -40,7 +40,11 @@ public class XStreamWrapper extends XStream {
 	}
 
 	private void unsupportedMutatorMethod() {
-		throw new UnsupportedOperationException("This is a read-only XStream.");
+		// If this is called with underlyingXStream being null, assume it is a
+		// call from the superclass's initializer and so safe to ignore.
+		if (underlyingXStream != null) {
+			throw new UnsupportedOperationException("This is a read-only XStream.");
+		}
 	}
 
 	public Object fromXML(String xml) {

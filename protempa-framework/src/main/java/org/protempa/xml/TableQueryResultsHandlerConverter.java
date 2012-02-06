@@ -6,7 +6,6 @@ package org.protempa.xml;
 import java.io.BufferedWriter;
 import java.net.URL;
 
-import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.query.handler.TableQueryResultsHandler;
 import org.protempa.query.handler.table.TableColumnSpec;
 
@@ -95,7 +94,7 @@ class TableQueryResultshandlerConverter extends AbstractConverter {
 
 		reader.moveDown();
 		expect(reader, TABLE_COLUMN_SPECS);
-		TableColumnSpec[] tableColumnSpecs = (TableColumnSpec[]) context.convertAnother(null, Filter.class, columnSpecsConverter);
+		TableColumnSpec[] tableColumnSpecs = (TableColumnSpec[]) context.convertAnother(null, TableColumnSpec[].class, columnSpecsConverter);
 		reader.moveUp();
 		
 		expectNoMore(reader);

@@ -11,10 +11,12 @@ package org.protempa.xml;
  */
 class AndConverter extends StringArrayConverter {
 
+	private static final String TERM_ID = "termID";
+
 	/**
 	 * Constructor
 	 */
 	public AndConverter() {
-		super("termID");
+		super(TERM_ID);
 	}
 }
