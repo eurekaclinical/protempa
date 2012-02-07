@@ -250,7 +250,7 @@ If the value of this attribute is true, then the count produced for te described
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
-            <xs:attribute name="columnDelimiter">
+            <xs:attribute name="columnDelimiter" use="required">
                 <xs:annotation>
                     <xs:documentation>The character to use to separate fields in records of the output file.</xs:documentation>
                 </xs:annotation>
@@ -386,7 +386,7 @@ If the value of this attribute is true, then the count produced for te described
             <xs:documentation>Contains one or more elements that use the values of proposition's properties to constrain which properties can be found through the enclosing deriviation or reference.</xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:sequence maxOccurs="unbounded">
+            <xs:choice maxOccurs="unbounded">
                 <xs:element name="propertyConstraint">
                     <xs:annotation>
                         <xs:documentation>This element describe a constraint on which propositions are found by the enclosing derivation or reference by comparing a property of the propositions to a single value.</xs:documentation>
@@ -413,7 +413,7 @@ If the value of this attribute is true, then the count produced for te described
                         <xs:attribute name="comparator" type="listComparatorType" use="required"/>
                     </xs:complexType>
                 </xs:element>
-            </xs:sequence>
+            </xs:choice>
         </xs:complexType>
     </xs:element>
     <xs:attribute default="true" name="trueOutput" type="xs:string"/>

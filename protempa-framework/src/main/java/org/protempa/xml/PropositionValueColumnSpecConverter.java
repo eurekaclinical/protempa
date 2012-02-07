@@ -72,6 +72,7 @@ public class PropositionValueColumnSpecConverter extends AbstractConverter {
 		String aggregationTypeString = requiredAttributeValue(reader, AGGREGATION_TYPE);
 		Type aggregationType = (Type)new AggregationTypeValueConverter().fromString(aggregationTypeString);
 
+		reader.moveDown();
 		expect(reader, LINKS);
 		Link[] links = (Link[]) context.convertAnother(null, Link[].class);
 		reader.moveUp();

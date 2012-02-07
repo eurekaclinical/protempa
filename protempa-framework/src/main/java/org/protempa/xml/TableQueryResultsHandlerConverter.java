@@ -6,6 +6,7 @@ package org.protempa.xml;
 import java.io.BufferedWriter;
 import java.net.URL;
 
+import org.mvel.ConversionException;
 import org.protempa.query.handler.TableQueryResultsHandler;
 import org.protempa.query.handler.table.TableColumnSpec;
 
@@ -20,6 +21,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  */
 class TableQueryResultshandlerConverter extends AbstractConverter {
+	private static final String TABLE_QUERY_RESULTS_HANDLER = "tableQueryResultsHandler";
+
 	public static URL querySchemaUrl = null;
 	//private static Logger myLogger = Logger.getLogger(TableQueryResultshandlerConverter.class.getName());
 	
@@ -82,9 +85,12 @@ class TableQueryResultshandlerConverter extends AbstractConverter {
 	 */
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+		if (!TABLE_QUERY_RESULTS_HANDLER.equals(reader.getNodeName())) {
+			String msg = "Current element tag is " + reader.getNodeName() + " but expected " + TABLE_QUERY_RESULTS_HANDLER;
+			throw new ConversionException(msg);
+		}
+		String columnDelimiter = requiredAttributeValue(reader, "columnDelimiter");
 		expectChildren(reader);
-		
-		String columnDelimiter = reader.getAttribute("columnDelimiter");
 
 		reader.moveDown();
 		expect(reader, "rowPropositionIDs");
