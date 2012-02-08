@@ -13,7 +13,7 @@
     <artifactId>protempa-tsb-umls</artifactId>
     <packaging>jar</packaging>
     <version>2.0-SNAPSHOT</version>
-    <name>UMLS Term Source Backend</name>
+    <name>Protempa UMLS Term Source Backend</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
