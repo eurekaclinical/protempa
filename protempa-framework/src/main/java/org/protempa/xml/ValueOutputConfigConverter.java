@@ -30,7 +30,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  * 
  */
-public class ValueOutputConfigConverter extends AbstractConverter {
+class ValueOutputConfigConverter extends AbstractConverter {
 
 	private static final String PROPERTY_VALUE_ABBREV_DISPLAY_NAME = "propertyValueAbbrevDisplayName";
 	private static final String PROPERTY_VALUE_DISPLAY_NAME = "propertyValueDisplayName";

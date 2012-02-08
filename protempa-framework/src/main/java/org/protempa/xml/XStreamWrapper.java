@@ -44,7 +44,7 @@ import com.thoughtworks.xstream.mapper.Mapper;
  * @author mgrand
  * 
  */
-public class XStreamWrapper extends XStream {
+class XStreamWrapper extends XStream {
 	private XStream underlyingXStream;
 
 	XStreamWrapper(XStream underlyXStream) {

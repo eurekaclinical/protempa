@@ -28,7 +28,7 @@ import java.io.Writer;
  * 
  * @author mgrand
  */
-public class CharacterToReferenceWriter extends Writer {
+class CharacterToReferenceWriter extends Writer {
 	private Writer underlyingWriter;
 
 	public CharacterToReferenceWriter(Writer underlyingWriter) {

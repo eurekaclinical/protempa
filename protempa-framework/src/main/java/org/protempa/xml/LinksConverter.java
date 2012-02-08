@@ -36,7 +36,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * 
  * @author mgrand
  */
-public class LinksConverter extends AbstractConverter {
+class LinksConverter extends AbstractConverter {
 
 	private static final String REFERENCE = "reference";
 	private static final String DERIVATION = "derivation";

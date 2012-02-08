@@ -35,7 +35,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  *
  */
-public class PropertyConstraintsConverter extends AbstractConverter {
+class PropertyConstraintsConverter extends AbstractConverter {
 
 	private static final String PROPERTY_CONSTRAINT_VALUE_LIST = "propertyConstraintValueList";
 	private static final String PROPERTY_CONSTRAINT = "propertyConstraint";

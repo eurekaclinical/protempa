@@ -33,7 +33,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  *
  */
-public class PropositionColumnSpecConverter extends AbstractConverter {
+class PropositionColumnSpecConverter extends AbstractConverter {
 	private static final String OUTPUT_CONFIG = "outputConfig";
 	private static final String VALUE_OUTPUT_CONFIG = "valueOutputConfig";
 	private static final String PROPERTY_NAMES = "propertyNames";

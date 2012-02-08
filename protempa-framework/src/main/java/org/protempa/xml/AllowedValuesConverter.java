@@ -33,7 +33,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  * 
  */
-public class AllowedValuesConverter extends AbstractConverter {
+class AllowedValuesConverter extends AbstractConverter {
 
 	/*
 	 * (non-Javadoc)

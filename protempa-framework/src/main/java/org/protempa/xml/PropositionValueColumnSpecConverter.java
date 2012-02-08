@@ -32,7 +32,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  * 
  */
-public class PropositionValueColumnSpecConverter extends AbstractConverter {
+class PropositionValueColumnSpecConverter extends AbstractConverter {
 	private static final String AGGREGATION_TYPE = "aggregationType";
 	private static final String COLUMN_NAME_PREFIX_OVERRIDE = "columnNamePrefixOverride";
 	private static final String LINKS = "links";

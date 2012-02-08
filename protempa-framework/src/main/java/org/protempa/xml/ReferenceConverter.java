@@ -33,7 +33,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class ReferenceConverter extends AbstractConverter implements Converter {
+class ReferenceConverter extends AbstractConverter implements Converter {
 
 	private static final String PROPERTY_CONSTRAINTS = "propertyConstraints";
 	private static final String PROPOSITION_IDS = "propositionIDs";

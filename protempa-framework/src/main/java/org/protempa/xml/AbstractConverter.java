@@ -41,7 +41,7 @@ import com.thoughtworks.xstream.mapper.Mapper;
  * 
  * @author mgrand
  */
-public abstract class AbstractConverter implements Converter {
+abstract class AbstractConverter implements Converter {
 
 	/**
 	 * Throw an exception if the current XML element does not have the expected

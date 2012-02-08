@@ -38,7 +38,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  *
  */
-public class DerivationConverter extends AbstractConverter {
+class DerivationConverter extends AbstractConverter {
 
 	private static final String RELATION = "relation";
 	private static final String ALLOWED_VALUES = "allowedValues";

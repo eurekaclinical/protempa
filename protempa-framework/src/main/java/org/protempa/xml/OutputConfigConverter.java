@@ -30,7 +30,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  * 
  */
-public class OutputConfigConverter extends AbstractConverter {
+class OutputConfigConverter extends AbstractConverter {
 
 	private static final String LENGTH_HEADING = "lengthHeading";
 	private static final String FINISH_HEADING = "finishHeading";

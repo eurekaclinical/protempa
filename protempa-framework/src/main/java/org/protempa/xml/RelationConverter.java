@@ -31,7 +31,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
  * @author mgrand
  * 
  */
-public class RelationConverter extends AbstractConverter {
+class RelationConverter extends AbstractConverter {
 
 	private static final String MAX_DISTANCE_BETWEEN_FINISHES = "maxDistanceBetweenFinishes";
 	private static final String MIN_DISTANCE_BETWEEN_FINISHES = "minDistanceBetweenFinishes";

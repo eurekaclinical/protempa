@@ -30,7 +30,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class PropertyConstraintConverter extends AbstractConverter {
+class PropertyConstraintConverter extends AbstractConverter {
 
 	private static final String COMPARATOR = "comparator";
 	private static final String PROPERTY_NAME = "propertyName";
