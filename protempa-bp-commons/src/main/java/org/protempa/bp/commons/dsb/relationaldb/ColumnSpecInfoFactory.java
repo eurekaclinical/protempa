@@ -31,8 +31,7 @@ final class ColumnSpecInfoFactory {
                     && entitySpec.isUnique()
                     && hasNoXToManyReferences(entitySpecs, entitySpec));
         } else {
-            columnSpecInfo.setUnique(entitySpec.isUnique()
-                    && hasNoXToManyReferences(entitySpecs, entitySpec));
+            columnSpecInfo.setUnique(entitySpec.isUnique());
         }
         List<ColumnSpec> columnSpecs = new ArrayList<ColumnSpec>();
         int i = 0;
@@ -67,7 +66,6 @@ final class ColumnSpecInfoFactory {
                         return false;
                     }
                 }
-                return false;
             }
         }
         return true;
