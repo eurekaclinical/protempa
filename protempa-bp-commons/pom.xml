@@ -13,7 +13,7 @@
     <artifactId>protempa-bp-commons</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>Commons Backend Provider</name>
+    <name>Protempa Commons Backend Provider</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
