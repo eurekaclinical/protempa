@@ -103,7 +103,7 @@ public class DerivationConverter extends AbstractConverter {
 		
 		Comparator<Proposition> comparator;
 		String comparatorString = reader.getAttribute(PROPOSITION_COMPARATOR);
-		if (comparatorString == null) {
+		if (comparatorString != null) {
 			comparator = convertComparatorString(comparatorString);
 		} else {
 			comparator = null;

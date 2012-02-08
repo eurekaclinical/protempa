@@ -1,6 +1,7 @@
 package org.protempa.query.handler.table;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -369,4 +370,44 @@ public abstract class Link {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((comparator == null) ? 0 : comparator.hashCode());
+		result = prime * result + Arrays.hashCode(constraints);
+		result = prime * result + fromIndex;
+		result = prime * result + ((propIdsAsSet == null) ? 0 : propIdsAsSet.hashCode());
+		result = prime * result + toIndex;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Link other = (Link) obj;
+		if (comparator == null) {
+			if (other.comparator != null)
+				return false;
+		} else if (!comparator.equals(other.comparator))
+			return false;
+		if (!Arrays.equals(constraints, other.constraints))
+			return false;
+		if (fromIndex != other.fromIndex)
+			return false;
+		if (propIdsAsSet == null) {
+			if (other.propIdsAsSet != null)
+				return false;
+		} else if (!propIdsAsSet.equals(other.propIdsAsSet))
+			return false;
+		if (toIndex != other.toIndex)
+			return false;
+		return true;
+	}
 }

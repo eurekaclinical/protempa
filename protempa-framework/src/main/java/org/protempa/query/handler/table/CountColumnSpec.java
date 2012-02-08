@@ -1,5 +1,6 @@
 package org.protempa.query.handler.table;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -119,5 +120,36 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
 
 	public boolean isCountUnique() {
 		return countUnique;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((columnNameOverride == null) ? 0 : columnNameOverride.hashCode());
+		result = prime * result + (countUnique ? 1231 : 1237);
+		result = prime * result + Arrays.hashCode(links);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CountColumnSpec other = (CountColumnSpec) obj;
+		if (columnNameOverride == null) {
+			if (other.columnNameOverride != null)
+				return false;
+		} else if (!columnNameOverride.equals(other.columnNameOverride))
+			return false;
+		if (countUnique != other.countUnique)
+			return false;
+		if (!Arrays.equals(links, other.links))
+			return false;
+		return true;
 	}
 }

@@ -1,6 +1,7 @@
 package org.protempa.query.handler.table;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -340,4 +341,30 @@ public final class Reference extends Link {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Arrays.hashCode(referenceNames);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Reference other = (Reference) obj;
+		if (!Arrays.equals(referenceNames, other.referenceNames)) {
+			return false;
+		}
+		return true;
+	}
 }

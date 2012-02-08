@@ -91,4 +91,46 @@ public final class PropertyConstraint {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((propertyName == null) ? 0 : propertyName.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		result = prime * result + ((valueComparator == null) ? 0 : valueComparator.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		PropertyConstraint other = (PropertyConstraint) obj;
+		if (propertyName == null) {
+			if (other.propertyName != null) {
+				return false;
+			}
+		} else if (!propertyName.equals(other.propertyName)) {
+			return false;
+		}
+		if (value == null) {
+			if (other.value != null) {
+				return false;
+			}
+		} else if (!value.equals(other.value)) {
+			return false;
+		}
+		if (valueComparator != other.valueComparator) {
+			return false;
+		}
+		return true;
+	}
 }

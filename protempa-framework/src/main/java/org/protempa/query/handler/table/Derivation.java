@@ -309,4 +309,50 @@ public final class Derivation extends Link {
     public Relation getRelation() {
     	return relation;
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + java.util.Arrays.hashCode(allowedValues);
+		result = prime * result + ((behavior == null) ? 0 : behavior.hashCode());
+		result = prime * result + ((knowledgeTree == null) ? 0 : knowledgeTree.hashCode());
+		result = prime * result + ((relation == null) ? 0 : relation.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Derivation other = (Derivation) obj;
+		if (!java.util.Arrays.equals(allowedValues, other.allowedValues)) {
+			return false;
+		}
+		if (behavior != other.behavior) {
+			return false;
+		}
+		if (knowledgeTree == null) {
+			if (other.knowledgeTree != null) {
+				return false;
+			}
+		} else if (!knowledgeTree.equals(other.knowledgeTree)) {
+			return false;
+		}
+		if (relation == null) {
+			if (other.relation != null) {
+				return false;
+			}
+		} else if (!relation.equals(other.relation)) {
+			return false;
+		}
+		return true;
+	}
 }

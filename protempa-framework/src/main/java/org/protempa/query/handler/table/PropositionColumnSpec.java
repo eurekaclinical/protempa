@@ -2,6 +2,7 @@ package org.protempa.query.handler.table;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -466,5 +467,51 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
 	public ValuesPropositionVisitor getPropositionVisitor() {
 		return propositionVisitor;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((columnNamePrefixOverride == null) ? 0 : columnNamePrefixOverride.hashCode());
+		result = prime * result + Arrays.hashCode(links);
+		result = prime * result + numInstances;
+		result = prime * result + ((outputConfig == null) ? 0 : outputConfig.hashCode());
+		result = prime * result + Arrays.hashCode(propertyNames);
+		result = prime * result + ((valueOutputConfig == null) ? 0 : valueOutputConfig.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PropositionColumnSpec other = (PropositionColumnSpec) obj;
+		if (columnNamePrefixOverride == null) {
+			if (other.columnNamePrefixOverride != null)
+				return false;
+		} else if (!columnNamePrefixOverride.equals(other.columnNamePrefixOverride))
+			return false;
+		if (!Arrays.equals(links, other.links))
+			return false;
+		if (numInstances != other.numInstances)
+			return false;
+		if (outputConfig == null) {
+			if (other.outputConfig != null)
+				return false;
+		} else if (!outputConfig.equals(other.outputConfig))
+			return false;
+		if (!Arrays.equals(propertyNames, other.propertyNames))
+			return false;
+		if (valueOutputConfig == null) {
+			if (other.valueOutputConfig != null)
+				return false;
+		} else if (!valueOutputConfig.equals(other.valueOutputConfig))
+			return false;
+		return true;
 	}
 }

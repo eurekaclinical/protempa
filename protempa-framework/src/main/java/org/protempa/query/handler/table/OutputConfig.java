@@ -158,4 +158,86 @@ public class OutputConfig {
         return i;
     }
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((abbrevDisplayNameHeading == null) ? 0 : abbrevDisplayNameHeading.hashCode());
+		result = prime * result + ((displayNameHeading == null) ? 0 : displayNameHeading.hashCode());
+		result = prime * result + ((finishHeading == null) ? 0 : finishHeading.hashCode());
+		result = prime * result + ((idHeading == null) ? 0 : idHeading.hashCode());
+		result = prime * result + ((lengthHeading == null) ? 0 : lengthHeading.hashCode());
+		result = prime * result + (showAbbrevDisplayName ? 1231 : 1237);
+		result = prime * result + (showDisplayName ? 1231 : 1237);
+		result = prime * result + (showFinish ? 1231 : 1237);
+		result = prime * result + (showId ? 1231 : 1237);
+		result = prime * result + (showLength ? 1231 : 1237);
+		result = prime * result + (showStartOrTimestamp ? 1231 : 1237);
+		result = prime * result + (showValue ? 1231 : 1237);
+		result = prime * result + ((startOrTimestampHeading == null) ? 0 : startOrTimestampHeading.hashCode());
+		result = prime * result + ((valueHeading == null) ? 0 : valueHeading.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		OutputConfig other = (OutputConfig) obj;
+		if (abbrevDisplayNameHeading == null) {
+			if (other.abbrevDisplayNameHeading != null)
+				return false;
+		} else if (!abbrevDisplayNameHeading.equals(other.abbrevDisplayNameHeading))
+			return false;
+		if (displayNameHeading == null) {
+			if (other.displayNameHeading != null)
+				return false;
+		} else if (!displayNameHeading.equals(other.displayNameHeading))
+			return false;
+		if (finishHeading == null) {
+			if (other.finishHeading != null)
+				return false;
+		} else if (!finishHeading.equals(other.finishHeading))
+			return false;
+		if (idHeading == null) {
+			if (other.idHeading != null)
+				return false;
+		} else if (!idHeading.equals(other.idHeading))
+			return false;
+		if (lengthHeading == null) {
+			if (other.lengthHeading != null)
+				return false;
+		} else if (!lengthHeading.equals(other.lengthHeading))
+			return false;
+		if (showAbbrevDisplayName != other.showAbbrevDisplayName)
+			return false;
+		if (showDisplayName != other.showDisplayName)
+			return false;
+		if (showFinish != other.showFinish)
+			return false;
+		if (showId != other.showId)
+			return false;
+		if (showLength != other.showLength)
+			return false;
+		if (showStartOrTimestamp != other.showStartOrTimestamp)
+			return false;
+		if (showValue != other.showValue)
+			return false;
+		if (startOrTimestampHeading == null) {
+			if (other.startOrTimestampHeading != null)
+				return false;
+		} else if (!startOrTimestampHeading.equals(other.startOrTimestampHeading))
+			return false;
+		if (valueHeading == null) {
+			if (other.valueHeading != null)
+				return false;
+		} else if (!valueHeading.equals(other.valueHeading))
+			return false;
+		return true;
+	}
+
 }

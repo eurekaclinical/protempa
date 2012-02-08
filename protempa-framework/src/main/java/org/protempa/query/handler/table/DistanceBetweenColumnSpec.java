@@ -1,5 +1,6 @@
 package org.protempa.query.handler.table;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -135,6 +136,40 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
 
 	public Unit getUnits() {
 		return units;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((columnNamePrefixOverride == null) ? 0 : columnNamePrefixOverride.hashCode());
+		result = prime * result + Arrays.hashCode(links);
+		result = prime * result + ((units == null) ? 0 : units.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DistanceBetweenColumnSpec other = (DistanceBetweenColumnSpec) obj;
+		if (columnNamePrefixOverride == null) {
+			if (other.columnNamePrefixOverride != null)
+				return false;
+		} else if (!columnNamePrefixOverride.equals(other.columnNamePrefixOverride))
+			return false;
+		if (!Arrays.equals(links, other.links))
+			return false;
+		if (units == null) {
+			if (other.units != null)
+				return false;
+		} else if (!units.equals(other.units))
+			return false;
+		return true;
 	}
     
 }

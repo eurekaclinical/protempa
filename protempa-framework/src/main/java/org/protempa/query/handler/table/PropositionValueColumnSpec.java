@@ -2,6 +2,7 @@ package org.protempa.query.handler.table;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -259,5 +260,36 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
 
 	public String getColumnNamePrefixOverride() {
 		return columnNamePrefixOverride;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((columnNamePrefixOverride == null) ? 0 : columnNamePrefixOverride.hashCode());
+		result = prime * result + Arrays.hashCode(links);
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PropositionValueColumnSpec other = (PropositionValueColumnSpec) obj;
+		if (columnNamePrefixOverride == null) {
+			if (other.columnNamePrefixOverride != null)
+				return false;
+		} else if (!columnNamePrefixOverride.equals(other.columnNamePrefixOverride))
+			return false;
+		if (!Arrays.equals(links, other.links))
+			return false;
+		if (type != other.type)
+			return false;
+		return true;
 	}
 }

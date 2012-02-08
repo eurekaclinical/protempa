@@ -1,5 +1,6 @@
 package org.protempa.query.handler.table;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -97,5 +98,48 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
 
 	public String getFalseOutput() {
 		return falseOutput;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((columnNameOverride == null) ? 0 : columnNameOverride.hashCode());
+		result = prime * result + ((falseOutput == null) ? 0 : falseOutput.hashCode());
+		result = prime * result + Arrays.hashCode(links);
+		result = prime * result + n;
+		result = prime * result + ((trueOutput == null) ? 0 : trueOutput.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AtLeastNColumnSpec other = (AtLeastNColumnSpec) obj;
+		if (columnNameOverride == null) {
+			if (other.columnNameOverride != null)
+				return false;
+		} else if (!columnNameOverride.equals(other.columnNameOverride))
+			return false;
+		if (falseOutput == null) {
+			if (other.falseOutput != null)
+				return false;
+		} else if (!falseOutput.equals(other.falseOutput))
+			return false;
+		if (!Arrays.equals(links, other.links))
+			return false;
+		if (n != other.n)
+			return false;
+		if (trueOutput == null) {
+			if (other.trueOutput != null)
+				return false;
+		} else if (!trueOutput.equals(other.trueOutput))
+			return false;
+		return true;
 	}
 }

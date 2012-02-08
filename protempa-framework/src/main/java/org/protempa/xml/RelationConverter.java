@@ -86,7 +86,7 @@ public class RelationConverter extends AbstractConverter {
 		}
 		if (relation.getMinDistanceBetweenFinishes() != null || relation.getMinDistanceBetweenFinishesUnits() != null) {
 			writer.startNode(MIN_DISTANCE_BETWEEN_FINISHES);
-			addDurationAttributes(writer, relation.getMinDistanceBetween(), relation.getMinDistanceBetweenUnits());
+			addDurationAttributes(writer, relation.getMinDistanceBetweenFinishes(), relation.getMinDistanceBetweenFinishesUnits());
 			writer.endNode();
 		}
 		if (relation.getMaxDistanceBetweenFinishes() != null || relation.getMaxDistanceBetweenFinishesUnits() != null) {
@@ -153,6 +153,9 @@ public class RelationConverter extends AbstractConverter {
 			} else if (MAX_DISTANCE_BETWEEN.equals(elementName)) {
 				maxDistanceBetween = integerAttributeValue(reader, LENGTH);
 				maxDistanceBetweenUnits = unitAttributeValue(reader, UNIT);
+			} else if (MIN_DISTANCE_BETWEEN_FINISHES.equals(elementName)) {
+				minDistanceBetweenFinishes = integerAttributeValue(reader, LENGTH);
+				minDistanceBetweenFinishesUnits = unitAttributeValue(reader, UNIT);
 			} else if (MAX_DISTANCE_BETWEEN_FINISHES.equals(elementName)) {
 				maxDistanceBetweenFinishes = integerAttributeValue(reader, LENGTH);
 				maxDistanceBetweenFinishesUnits = unitAttributeValue(reader, UNIT);
@@ -160,8 +163,10 @@ public class RelationConverter extends AbstractConverter {
 			reader.moveUp();
 		}
 
-		return new Relation(minDistanceBetweenStarts, minDistanceBetweenStartsUnits, maxDistanceBetweenStarts, maxDistanceBetweenStartsUnits, minSpan,
-				minSpanUnits, maxSpan, maxSpanUnits, minDistanceBetween, minDistanceBetweenUnits, maxDistanceBetween, maxDistanceBetweenUnits,
+		return new Relation(
+				minDistanceBetweenStarts, minDistanceBetweenStartsUnits, maxDistanceBetweenStarts, maxDistanceBetweenStartsUnits, 
+				minSpan, minSpanUnits, maxSpan, maxSpanUnits,
+				minDistanceBetween, minDistanceBetweenUnits, maxDistanceBetween, maxDistanceBetweenUnits,
 				minDistanceBetweenFinishes, minDistanceBetweenFinishesUnits, maxDistanceBetweenFinishes, maxDistanceBetweenFinishesUnits);
 	}
 

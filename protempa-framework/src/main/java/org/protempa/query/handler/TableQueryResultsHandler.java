@@ -201,4 +201,35 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
             i++;
         }
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + columnDelimiter;
+		result = prime * result + Arrays.hashCode(columnSpecs);
+		result = prime * result + (headerWritten ? 1231 : 1237);
+		result = prime * result + Arrays.hashCode(rowPropositionIds);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TableQueryResultsHandler other = (TableQueryResultsHandler) obj;
+		if (columnDelimiter != other.columnDelimiter)
+			return false;
+		if (!Arrays.equals(columnSpecs, other.columnSpecs))
+			return false;
+		if (headerWritten != other.headerWritten)
+			return false;
+		if (!Arrays.equals(rowPropositionIds, other.rowPropositionIds))
+			return false;
+		return true;
+	}
 }

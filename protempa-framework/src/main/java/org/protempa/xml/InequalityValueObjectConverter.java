@@ -49,7 +49,8 @@ class InequalityValueObjectConverter extends AbstractConverter {
 	 */
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		InequalityNumberValue ival = InequalityNumberValue.parse(reader.getValue());
+		String value = reader.getValue();
+		InequalityNumberValue ival = InequalityNumberValue.parse(value);
 		return ival;
 	}
 }

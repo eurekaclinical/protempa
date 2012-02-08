@@ -314,4 +314,34 @@ public final class Relation implements Serializable {
         return "RELATION: " + Arrays.asList(this.intValues) + "; "
                 + Arrays.asList(this.units);
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(intValues);
+		result = prime * result + Arrays.hashCode(units);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Relation other = (Relation) obj;
+		if (!Arrays.equals(intValues, other.intValues)) {
+			return false;
+		}
+		if (!Arrays.equals(units, other.units)) {
+			return false;
+		}
+		return true;
+	}
 }

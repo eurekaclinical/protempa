@@ -578,9 +578,9 @@ public class XMLConfiguration implements QueryBuilder {
 		XMLConfiguration.surpressSchemaReference.set(Boolean.valueOf(surpressSchemaReference));
 		myLogger.entering(XMLConfiguration.class.getName(), "writeQueryAsXML");
 		XStream xstream = getTableQueryResultsHandlerXStream();
-
-		xstream.toXML(resultsHandler, writer);
-		writer.close();
+		CharacterToReferenceWriter ctrw = new CharacterToReferenceWriter(writer);
+		xstream.toXML(resultsHandler, ctrw);
+		ctrw.close();
 		myLogger.exiting(XMLConfiguration.class.getName(), "writeQueryAsXML");
 	}
 

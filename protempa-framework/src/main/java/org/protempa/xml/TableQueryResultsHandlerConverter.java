@@ -66,7 +66,6 @@ class TableQueryResultshandlerConverter extends AbstractConverter {
 		PropIDsConverter propIDsConverter = new PropIDsConverter();
 		writer.startNode("rowPropositionIDs");
 		context.convertAnother(propIDs, propIDsConverter);
-		propIDsConverter.marshal(propIDs, writer, context);
 		writer.endNode();
 
 		TableColumnSpec[] tableColumnSpecs = resultsHandler.getColumnSpecs();

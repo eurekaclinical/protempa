@@ -40,4 +40,9 @@ public class AllPropositionIntervalComparator
             return 0;
         }
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	return obj instanceof AllPropositionIntervalComparator;
+    }
 }
