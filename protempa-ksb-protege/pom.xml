@@ -13,7 +13,7 @@
     <artifactId>protempa-ksb-protege</artifactId>
     <packaging>jar</packaging>
     <version>2.0-SNAPSHOT</version>
-    <name>Protege Knowledge Source Backend</name>
+    <name>Protempa Protege Knowledge Source Backend</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
