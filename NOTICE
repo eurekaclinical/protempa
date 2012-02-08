@@ -12,4 +12,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+The following third-party binaries are distributed with this project:
 
+- The Protege ontology editor from Stanford University
+(http://protege.stanford.edu). It is free to redistribute without
+any notice (http://protege.stanford.edu/doc/faq.html#08.01).
+
+The following third-party libraries are dependencies of the system but are
+not distributed with it. They are used without modification:
+
+- Software developed at The Apache Software Foundation
+(http://www.apache.org) and licensed under the Apache License, Version 2.0.
+Specifically, it uses the following libraries from Apache Commons 
+(http://commons.apache.org): BeanUtils, CLI, Collections, Configruation, 
+Digester, Discovery, and Logging.
+
+- Support for caching is provided by the Oracle Berkeley DB Java Edition
+under the Open Source License for Oracle Berkeley DB Java Edition
+(http://www.oracle.com/technetwork/database/berkeleydb/downloads/jeoslicense-086837.html)
+
+- Testing is done using the JUnit test framework (http://www.junit.org).
+
+- JBoss Drools is used as a rules engined (http://www.jboss.org/drools).
+
+- XStream (http://xstream.codehaus.org/) is used for XML processing.
