@@ -35,6 +35,7 @@
               <!-- Adds licensing to everything under src/main/ -->
               <!--  might want to include src/test and etc/ as well -->
               <root>src/main</root>
+              <root>src/test/java/</root>
             </roots>
             <extraExtensions>
               <!-- .xsd files are not supported by default -->

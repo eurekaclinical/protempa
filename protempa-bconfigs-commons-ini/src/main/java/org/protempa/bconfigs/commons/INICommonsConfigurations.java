@@ -1,6 +1,6 @@
 /*
  * #%L
- * Commons INI Backend Configurations
+ * Protempa Commons INI Backend Configurations
  * %%
  * Copyright (C) 2012 Emory University
  * %%
