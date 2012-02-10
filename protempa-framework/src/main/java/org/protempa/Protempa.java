@@ -213,16 +213,20 @@ public final class Protempa {
     public TermSource getTermSource() {
         return this.abstractionFinder.getTermSource();
     }
-    
+
     /**
-     * Convenience method for calling {@link QueryBuilder#build(org.protempa.KnowledgeSource, org.protempa.AlgorithmSource) }
+     * Convenience method for calling
+     * {@link QueryBuilder#build(org.protempa.KnowledgeSource, org.protempa.AlgorithmSource) }
      * with this Protempa instance's knowledge source and algorithm source.
-     * @param queryBuilder a query specification.
+     * 
+     * @param queryBuilder
+     *            a query specification.
      * @return the query.
-     * @throws QueryBuildException if the query specification failed validation
-     * or some other error occurred.
+     * @throws QueryBuildException
+     *             if the query specification failed validation or some other
+     *             error occurred.
      */
-    public Query buildQuery(QueryBuilder queryBuilder) 
+    public Query buildQuery(QueryBuilder queryBuilder)
             throws QueryBuildException {
         return this.abstractionFinder.buildQuery(queryBuilder);
     }
@@ -276,8 +280,7 @@ public final class Protempa {
                     "term id support has not been implemented yet.");
         }
         if (resultsHandler == null) {
-            throw new IllegalArgumentException(
-                    "resultsHandler cannot be null");
+            throw new IllegalArgumentException("resultsHandler cannot be null");
         }
         Logger logger = ProtempaUtil.logger();
         logger.info("Executing query");
