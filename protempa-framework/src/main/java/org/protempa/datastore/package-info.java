@@ -23,7 +23,7 @@
  * way of getting handles to the {@link org.arp.javautil.Store} interface, via
  * the {@link org.arp.javautil.datastore.DataStoreFactory} class. If a new type
  * of store is needed, an appropriate class should be created and should
- * implement {@link org.protempa.datastore.ProtempaDataStoreCreator}, which
+ * implement {@link org.protempa.datastore.DataStoreCreator}, which
  * defines two methods for building stores.
  * <p>
  * <code>getPermanentStore</code> returns a named store that will not be removed

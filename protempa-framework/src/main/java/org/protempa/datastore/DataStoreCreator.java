@@ -31,7 +31,7 @@ import org.arp.javautil.datastore.DataStore;
  * @param <V>
  *            the value type to store
  */
-public interface ProtempaDataStoreCreator<K, V> {
+public interface DataStoreCreator<K, V> {
 
     /**
      * Returns a permanent store with the given name. If a store with the name

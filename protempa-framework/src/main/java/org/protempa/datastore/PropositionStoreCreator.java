@@ -35,7 +35,7 @@ import org.protempa.proposition.Proposition;
  * @author Michel Mansour
  */
 public final class PropositionStoreCreator<P extends Proposition> implements
-        ProtempaDataStoreCreator<String, List<P>> {
+        DataStoreCreator<String, List<P>> {
     private PropositionStoreCreator() {
     }
 

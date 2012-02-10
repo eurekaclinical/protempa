@@ -24,10 +24,10 @@ import java.util.Map;
 
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.datastore.DataStoreFactory;
-import org.protempa.datastore.ProtempaDataStoreCreator;
+import org.protempa.datastore.DataStoreCreator;
 
 final class DerivationsBuilderStoreCreator implements
-        ProtempaDataStoreCreator<String, DerivationsBuilder> {
+        DataStoreCreator<String, DerivationsBuilder> {
 
     private DerivationsBuilderStoreCreator() {
     }

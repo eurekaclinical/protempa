@@ -36,7 +36,7 @@ import org.drools.WorkingMemory;
  * @author Michel Mansour
  */
 public final class WorkingMemoryStoreCreator implements
-        ProtempaDataStoreCreator<String, WorkingMemory> {
+        DataStoreCreator<String, WorkingMemory> {
 
     /*
      * To reconstruct Drools WorkingMemory objects from byte arrays, which is

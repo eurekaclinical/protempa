@@ -29,7 +29,7 @@ import org.arp.javautil.datastore.DataStoreFactory;
 import org.protempa.proposition.UniqueId;
 
 public final class UniqueIdUniqueIdStoreCreator implements
-        ProtempaDataStoreCreator<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>> {
+        DataStoreCreator<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>> {
 
     private UniqueIdUniqueIdStoreCreator() {
     }
