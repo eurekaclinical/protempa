@@ -1,14 +1,14 @@
 /*
- * #%L
- * Protempa Framework
- * %%
- * Copyright (C) 2012 Emory University
- * %%
+ * #%L 
+ * Protempa Framework 
+ * %% 
+ * Copyright (C) 2012 Emory University 
+ * %% 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,8 +29,8 @@ import java.util.logging.Level;
 import org.apache.commons.collections.map.ReferenceMap;
 
 /**
- * Represents types of values of propositions and properties, and provides
- * a method for parsing them from strings.
+ * Represents types of values of propositions and properties, and provides a
+ * method for parsing them from strings.
  * 
  * @author Andrew Post
  */
@@ -38,14 +38,13 @@ public enum ValueType {
 
     VALUE {
         private ValueType[] parseOrder;
-        
+
         @Override
         public Value parse(String val) {
             if (parseOrder == null) {
-                parseOrder = new ValueType[] {
-                    BOOLEANVALUE, NUMBERVALUE, INEQUALITYNUMBERVALUE, 
-                    DATEVALUE, VALUELIST, NOMINALVALUE
-                };
+                parseOrder = new ValueType[] { BOOLEANVALUE, NUMBERVALUE,
+                        INEQUALITYNUMBERVALUE, DATEVALUE, VALUELIST,
+                        NOMINALVALUE };
             }
             Value result = null;
 
@@ -57,7 +56,7 @@ public enum ValueType {
 
             return result;
         }
-        
+
         @Override
         public boolean isInstance(Value value) {
             if (value == null) {
@@ -83,8 +82,7 @@ public enum ValueType {
     BOOLEANVALUE {
         @Override
         public Value parse(String val) {
-            if ("true".equalsIgnoreCase(val) 
-                    || "false".equalsIgnoreCase(val)) {
+            if ("true".equalsIgnoreCase(val) || "false".equalsIgnoreCase(val)) {
                 return Boolean.valueOf(val).booleanValue() ? BooleanValue.TRUE
                         : BooleanValue.FALSE;
             }
@@ -122,23 +120,29 @@ public enum ValueType {
     INEQUALITYNUMBERVALUE {
         @Override
         public Value parse(String s) {
-            InequalityNumberValue result = null;
-			s = s.trim();
-			String comparatorString;
-			String numberString;
-			if (s.startsWith(">=") || s.startsWith("<=")) {
-				comparatorString = s.substring(0, 2);
-				numberString = s.substring(2).trim();
-			} else if (s.startsWith(">") || s.startsWith("<")) {
-				comparatorString = s.substring(0, 1);
-				numberString = s.substring(1).trim();
-			} else {
-				throw new NumberFormatException("Improperly formatted inequality value: " + s);
-			}
-			ValueComparator comparator = ValueComparator.parse(comparatorString);
-			BigDecimal val = new BigDecimal(numberString);
-			result = new InequalityNumberValue(comparator, val);
-            return result;
+            if (s != null) {
+                InequalityNumberValue result = null;
+                s = s.trim();
+                String comparatorString;
+                String numberString;
+                if (s.startsWith(">=") || s.startsWith("<=")) {
+                    comparatorString = s.substring(0, 2);
+                    numberString = s.substring(2).trim();
+                } else if (s.startsWith(">") || s.startsWith("<")) {
+                    comparatorString = s.substring(0, 1);
+                    numberString = s.substring(1).trim();
+                } else {
+                    throw new NumberFormatException(
+                            "Improperly formatted inequality value: " + s);
+                }
+                ValueComparator comparator = ValueComparator
+                        .parse(comparatorString);
+                BigDecimal val = new BigDecimal(numberString);
+                result = new InequalityNumberValue(comparator, val);
+                return result;
+            } else {
+                return null;
+            }
         }
 
         @Override
@@ -173,14 +177,14 @@ public enum ValueType {
     NUMBERVALUE {
         @SuppressWarnings("unchecked")
         private Map<String, BigDecimal> cache = new ReferenceMap();
-        
+
         @Override
         public Value parse(String val) {
             if (val != null) {
                 try {
                     /*
-                     * BigDecimal constructor returns a NumberFormatException
-                     * if there are spaces before or after the number in val.
+                     * BigDecimal constructor returns a NumberFormatException if
+                     * there are spaces before or after the number in val.
                      */
                     String valTrimmed = val.trim();
                     BigDecimal bd = this.cache.get(valTrimmed);
@@ -210,7 +214,7 @@ public enum ValueType {
     },
     ORDINALVALUE {
         private final List<String> allowedValues = new ArrayList<String>();
-        
+
         @Override
         public Value parse(String val) {
             return new OrdinalValue(val, allowedValues);
@@ -232,8 +236,8 @@ public enum ValueType {
             }
             if (val.startsWith("[") && val.endsWith("]")) {
                 String[] vals = val.substring(1, val.length() - 1).split(",");
-                List<String> mergedInnerLists = 
-                        new ArrayList<String>(vals.length);
+                List<String> mergedInnerLists = new ArrayList<String>(
+                        vals.length);
                 StringBuilder b = new StringBuilder();
                 int refCount = 0;
                 for (String str : vals) {
@@ -263,8 +267,8 @@ public enum ValueType {
                 for (String s : mergedInnerLists) {
                     if ((s.startsWith("'") && s.endsWith("'"))
                             || (s.startsWith("\"") && s.endsWith("\""))) {
-                        l.add(ValueType.NOMINALVALUE.parse(
-                                s.substring(1, s.length() - 1)));
+                        l.add(ValueType.NOMINALVALUE.parse(s.substring(1,
+                                s.length() - 1)));
                     } else {
                         l.add(ValueType.VALUE.parse(s));
                     }
@@ -288,12 +292,12 @@ public enum ValueType {
         public DateValue parse(String string) {
             DateValue result;
             if (string != null) {
-                DateFormat dateFormat = 
-                        AbsoluteTimeGranularity.DAY.getShortFormat();
+                DateFormat dateFormat = AbsoluteTimeGranularity.DAY
+                        .getShortFormat();
                 try {
                     result = DateValue.getInstance(dateFormat.parse(string));
-                    ValueUtil.logger().log(Level.WARNING, 
-                            "String {0} could not be parsed into a date", 
+                    ValueUtil.logger().log(Level.WARNING,
+                            "String {0} could not be parsed into a date",
                             string);
                 } catch (ParseException ex) {
                     result = null;
@@ -303,7 +307,7 @@ public enum ValueType {
             }
             return result;
         }
-        
+
         @Override
         public boolean isInstance(Value value) {
             if (value == null) {
@@ -315,19 +319,20 @@ public enum ValueType {
 
     /**
      * Returns whether a value is an instance of this value type.
-     *
-     * @param value a {@link Value}.
+     * 
+     * @param value
+     *            a {@link Value}.
      * @return <code>true</code> or <code>false</code>.
      */
     public abstract boolean isInstance(Value value);
-    
+
     /**
      * Creates a {@link Value} instance by parsing the given string.
-     *
+     * 
      * @param val
      *            a <code>String</code>. May be <code>null</code>.
-     * @return a <code>Value</code>, or <code>null</code> if the supplied
-     *         string is <code>null</code> or has an invalid format.
+     * @return a <code>Value</code>, or <code>null</code> if the supplied string
+     *         is <code>null</code> or has an invalid format.
      */
     public abstract Value parse(String val);
 }
