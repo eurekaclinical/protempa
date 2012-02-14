@@ -111,7 +111,7 @@ public class XMLConfigurationTest extends TestCase {
 		XMLConfiguration.writeQueryAsXML(reconstitutedQuery, z2);
 		FileReader freader = new FileReader(z2);
 		String xml = new BufferedReader(freader).readLine();
-		assertTrue(xml.contains("xsi:noNamespaceSchemaLocation=\"http://aiwdev02.eusch.org/protempa/schema/1.1/protempa_query.xsd\""));
+		assertTrue(xml.contains("xsi:noNamespaceSchemaLocation=\"http://schema.example.org/protempa/schema/1.1/protempa_query.xsd\""));
 		
 	}
 

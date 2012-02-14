@@ -56,10 +56,10 @@ public final class ProtegeKnowledgeSourceBackendTest {
     public void setUp() throws Exception {
         this.backend = new RemoteKnowledgeSourceBackend();
 
-        backend.setHostname("aiwdev02.eushc.org");
-        backend.setUsername("mansour");
-        backend.setPassword("eHmMrKM2");
-        backend.setKnowledgeBaseName("ERATDiagnoses");
+        backend.setHostname("protege.example.org");
+        backend.setUsername("user");
+        backend.setPassword("pass");
+        backend.setKnowledgeBaseName("test");
         backend.setUnits("ABSOLUTE");
 
         List<BackendPropertySpec> propSpecs = new ArrayList<BackendPropertySpec>();

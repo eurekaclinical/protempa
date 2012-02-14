@@ -56,9 +56,9 @@ public class UMLSTermSourceBackendTest {
 
         this.backend = new UMLSTermSourceBackend();
         backend.setDatabaseAPI(DatabaseAPI.DRIVERMANAGER);
-        backend.setDatabaseId("jdbc:mysql://aiwdev02.eushc.org:3307/umls_2010AA");
-        backend.setUsername("umlsuser");
-        backend.setPassword("3SqQgPOh");
+        backend.setDatabaseId("id");
+        backend.setUsername("user");
+        backend.setPassword("pass");
 
         List<BackendPropertySpec> propSpecs = new ArrayList<BackendPropertySpec>();
 
