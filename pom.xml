@@ -19,43 +19,6 @@
     <module>protempa-ksb-protege</module>
     <module>protempa-tsb-umls</module>
   </modules>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <version>1.0</version>
-        <configuration>
-            <licenseName>apache_v2</licenseName>
-            <verbose>false</verbose>
-            <organizationName>Emory University</organizationName>
-            <inceptionYear>2012</inceptionYear>
-	    <canUpdateDescription>true</canUpdateDescription>
-            <roots>
-              <!-- Adds licensing to everything under src/main/ -->
-              <!--  might want to include src/test and etc/ as well -->
-              <root>src/main</root>
-              <root>src/test/java/</root>
-            </roots>
-            <extraExtensions>
-              <!-- .xsd files are not supported by default -->
-              <!-- but should be commented in XML style -->
-              <xsd>xml</xsd>
-            </extraExtensions>
-        </configuration>
-        <executions>
-            <execution>
-                <id>first</id>
-                <goals>
-                    <goal>update-file-header</goal>
-                </goals>
-                <phase>process-sources</phase>
-            </execution>
-        </executions>
- 
-      </plugin>
-    </plugins>
-  </build>  
   <profiles>
     <profile>
       <id>test-tier1</id>
