@@ -24,7 +24,7 @@ not distributed with it. They are used without modification:
 - Software developed at The Apache Software Foundation
 (http://www.apache.org) and licensed under the Apache License, Version 2.0.
 Specifically, it uses the following libraries from Apache Commons 
-(http://commons.apache.org): BeanUtils, CLI, Collections, Configruation, 
+(http://commons.apache.org): BeanUtils, CLI, Collections, Configuration, 
 Digester, Discovery, and Logging.
 
 - Support for caching is provided by the Oracle Berkeley DB Java Edition
@@ -33,6 +33,6 @@ under the Open Source License for Oracle Berkeley DB Java Edition
 
 - Testing is done using the JUnit test framework (http://www.junit.org).
 
-- JBoss Drools is used as a rules engined (http://www.jboss.org/drools).
+- JBoss Drools is used as a rules engine (http://www.jboss.org/drools).
 
 - XStream (http://xstream.codehaus.org/) is used for XML processing.
