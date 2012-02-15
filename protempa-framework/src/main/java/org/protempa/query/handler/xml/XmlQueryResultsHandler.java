@@ -83,11 +83,11 @@ public class XmlQueryResultsHandler implements QueryResultsHandler {
 	 *            The {@link Writer} object that will be used to write the
 	 *            output.
 	 * @param propOrder
-	 *            A {@link Map} object that will be used to guide the between
-	 *            some propositions. If this results handler visits a
+	 *            A {@link Map} object that will be used to guide the navigation
+	 *            between some propositions. If this results handler visits a
 	 *            proposition, the ID of the proposition equals a key in the Map
 	 *            and the value associated with the key is a name in a
-	 *            {@link Reference} associated with the proposition, then
+	 *            {@link Reference} associated with the proposition, then the
 	 *            Reference is used to navigate from the proposition. This has
 	 *            the effect of imposing a partial ordering on the nesting of
 	 *            XML elements in the output.
