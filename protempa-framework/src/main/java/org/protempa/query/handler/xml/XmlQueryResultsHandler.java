@@ -40,16 +40,15 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.apache.commons.lang.StringUtils;
 import org.protempa.DerivedDataSourceType;
-
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
-import org.protempa.proposition.interval.Relation;
 import org.protempa.query.handler.QueryResultsHandler;
 import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
 import org.protempa.query.handler.table.Reference;
