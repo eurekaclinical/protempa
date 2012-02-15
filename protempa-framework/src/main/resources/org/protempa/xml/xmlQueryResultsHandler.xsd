@@ -22,23 +22,47 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
     <xs:include schemaLocation="protempa_common.xsd"/>
     <xs:element name="xmlQueryResultsHandler">
+        <xs:annotation>
+            <xs:documentation>Configuration specification for an instance of XmlQueryResultsHandler</xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="orderings">
+                    <xs:annotation>
+                        <xs:documentation>This is used to guide the navigation between some propositions. If the configured results handler visits a proposition, the ID of the proposition equals the value of a propositionID attribute in one of the order elements and the value that order element's referenceName attribute is a name in a Reference associated with the proposition, then the Reference is used to navigate from the proposition. This has the effect of imposing a partial ordering on the nesting of XML elements in the output.</xs:documentation>
+                    </xs:annotation>
                     <xs:complexType>
                         <xs:sequence maxOccurs="unbounded">
                             <xs:element name="order">
+                                <xs:annotation>
+                                    <xs:documentation>An individual navigation/ordering constraint to be applied to a proposition with the Specified propositionID that specifies that a Reference that contains the spcified referenceName is to be used for navigation.</xs:documentation>
+                                </xs:annotation>
                                 <xs:complexType>
                                     <xs:attribute ref="propositionID"/>
-                                    <xs:attribute name="referenceName" type="propositionIdType"/>
+                                    <xs:attribute name="referenceName" type="propositionIdType">
+                                        <xs:annotation>
+                                            <xs:documentation>A name in a Reference object.</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:attribute>
                                 </xs:complexType>
                             </xs:element>
                         </xs:sequence>
                     </xs:complexType>
+                    <xs:unique name="newUnique">
+                        <xs:annotation>
+                            <xs:documentation>The value of each order element's propositionID attribute must be unique within the enclosing orderings element.</xs:documentation>
+                        </xs:annotation>
+                        <xs:selector xpath="./order"/>
+                        <xs:field xpath="@propositionID"/>
+                    </xs:unique>
                 </xs:element>
                 <xs:element ref="propositionIDs"/>
             </xs:sequence>
-            <xs:attribute name="initialPropositionID" type="propositionIdType"/>
+            <xs:attribute name="initialPropositionID" type="propositionIdType">
+                <xs:annotation>
+                    <xs:documentation>The ID of the proposition that will be the root of the output.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 </xs:schema>
