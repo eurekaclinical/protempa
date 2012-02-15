@@ -80,7 +80,7 @@
                         <xs:documentation>If present, restricts a query to consider only sets of propositions from the database back end that are associated with one of the key IDs contined by this element.</xs:documentation>
                     </xs:annotation>
                 </xs:element>
-                <xs:element name="propositionIDs" type="propositionIDs_type">
+                <xs:element ref="propositionIDs">
                     <xs:annotation>
                         <xs:documentation xml:lang="en">The query will match each set of propositions that is returned by the back end and accepted by the filters against the propositions named by the elements contained by this element.</xs:documentation>
                     </xs:annotation>
@@ -94,8 +94,7 @@
                             <xs:element name="dateTimeFilter" type="dateTimeFilterType"/>
                             <xs:element name="postionFilter" type="positionFilterType"/>
                             <xs:element name="propertyValueFilter" type="propertyValueFilterType"/>
-                            <xs:element name="propertyValuesFilter" type="propertyValuesFilterType"
-                            />
+                            <xs:element name="propertyValuesFilter" type="propertyValuesFilterType"/>
                         </xs:choice>
                     </xs:complexType>
                 </xs:element>
@@ -108,8 +107,7 @@
                             <xs:element maxOccurs="unbounded" minOccurs="0" name="and">
                                 <xs:complexType>
                                     <xs:sequence>
-                                        <xs:element maxOccurs="unbounded" name="termID"
-                                            type="nameType"/>
+                                        <xs:element maxOccurs="unbounded" name="termID" type="nameType"/>
                                     </xs:sequence>
                                 </xs:complexType>
                             </xs:element>

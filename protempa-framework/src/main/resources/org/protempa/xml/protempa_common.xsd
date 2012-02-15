@@ -33,7 +33,7 @@
             <xs:documentation>A collection of one or more propositionID elements.</xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element maxOccurs="unbounded" name="propositionID" type="propositionIdType">
+            <xs:element maxOccurs="unbounded" ref="propositionID">
                 <xs:annotation>
                     <xs:documentation>The value of this element is a string that identifies a proposition in the ontology.</xs:documentation>
                 </xs:annotation>
@@ -70,6 +70,16 @@
                 <xs:pattern value="[&lt;>]=?[+-]?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))"/>
             </xs:restriction>
         </xs:simpleType>
+    </xs:element>
+    <xs:element name="propositionID" type="propositionIdType">
+        <xs:annotation>
+            <xs:documentation>A proposition ID.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="propositionIDs" type="propositionIDs_type">
+        <xs:annotation>
+            <xs:documentation>A collection of proposition IDs.</xs:documentation>
+        </xs:annotation>
     </xs:element>
     <xs:attribute name="typeOfValue">
         <xs:annotation>
@@ -283,7 +293,7 @@ A list of values
             <xs:documentation>Common structure for filters.</xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element name="propositionIDs" type="propositionIDs_type">
+            <xs:element ref="propositionIDs">
                 <xs:annotation>
                     <xs:documentation>The proposition IDs that this filter applies to.</xs:documentation>
                 </xs:annotation>
