@@ -31,17 +31,29 @@ import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec;
 import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
 
 /**
- *
+ * Maps proposition IDs from the knowledge source to SQL. Looks for mapping
+ * sources (typically files) in a specified resource location (typically a file
+ * system directory).
+ * 
  * @author Andrew Post
  */
 public final class PropIdToSQLCodeMapper {
     private final String resourcePrefix;
     private final Class<?> cls;
-    
+
+    /**
+     * Initializes the mapper. Accepts the resource location where the mapping
+     * resources can be found and the class whose loader to use.
+     * 
+     * @param resourcePrefix
+     *            where the mapping resources are found (as a {@link String}).
+     *            Typically a file system directory.
+     * @param cls
+     *            the {@link Class} whose resource loader to use
+     */
     public PropIdToSQLCodeMapper(String resourcePrefix, Class<?> cls) {
         if (resourcePrefix == null) {
-            throw new IllegalArgumentException(
-                    "resourcePrefix cannot be null");
+            throw new IllegalArgumentException("resourcePrefix cannot be null");
         }
         if (cls == null) {
             throw new IllegalArgumentException("cls cannot be null");
@@ -49,8 +61,27 @@ public final class PropIdToSQLCodeMapper {
         this.resourcePrefix = resourcePrefix;
         this.cls = cls;
     }
-    
-    public String[] readCodes(String resource, String sep, int colNum) 
+
+    /**
+     * Reads codes in a resource. The resource is prefixed by the resource
+     * prefix specified at construction. Each mapping must on a separate line,
+     * and each line must be delimited by a separator. A column number indicates
+     * which column holds the SQL code for the mapping.
+     * 
+     * @param resource
+     *            the name of the resource, as a {@link String}. Will be
+     *            prefixed by the prefix indicated at construction.
+     * @param sep
+     *            a {@link String} delimiting the lines of the resource
+     * @param colNum
+     *            an integer indicating which column of hthe mapping holds the
+     *            SQL version of a code
+     * @return a {@link String} array containing all of the mapped SQL codes in
+     *         the resource
+     * @throws IOException
+     *             if something goes wrong while accessing the resource
+     */
+    public String[] readCodes(String resource, String sep, int colNum)
             throws IOException {
         if (resource == null) {
             throw new IllegalArgumentException("resource cannot be null");
@@ -63,7 +94,7 @@ public final class PropIdToSQLCodeMapper {
         }
         resource = this.resourcePrefix + resource;
         List<String> codes = new ArrayList<String>();
-        DSBUtil.logger().log(Level.FINER, "Attempting to get resource: {0}", 
+        DSBUtil.logger().log(Level.FINER, "Attempting to get resource: {0}",
                 resource);
         InputStream is = IOUtil.getResourceAsStream(resource, this.cls);
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
@@ -72,8 +103,8 @@ public final class PropIdToSQLCodeMapper {
             while ((line = br.readLine()) != null) {
                 String[] cols = line.split(sep);
                 if (cols.length != 2) {
-                    throw new AssertionError("Invalid mapping in " + resource + 
-                            ": " + line);
+                    throw new AssertionError("Invalid mapping in " + resource
+                            + ": " + line);
                 }
                 codes.add(cols[colNum].trim());
             }
@@ -90,16 +121,31 @@ public final class PropIdToSQLCodeMapper {
         return codes.toArray(new String[codes.size()]);
     }
 
+    /**
+     * Reads codes associated with a property name or proposition ID from a
+     * resource. The resource will be prefixed with the prefix specified at
+     * construction time. The result of this method can be passed to the
+     * {@link ColumnSpec} constructor.
+     * 
+     * @param resource
+     *            a {@link String} that is the name of resource that holds the
+     *            mappings. It will be prefixed by the prefix specified at
+     *            construction time.
+     * @return an array of {@link KnowledgeSourceIdToSqlCode}s read from the
+     *         resource
+     * @throws IOException
+     *             if something goes wrong while accessing the resource
+     */
     public KnowledgeSourceIdToSqlCode[] propertyNameOrPropIdToSqlCodeArray(
             String resource) throws IOException {
         if (resource == null) {
             throw new IllegalArgumentException("resource cannot be null");
         }
         resource = this.resourcePrefix + resource;
-        DSBUtil.logger().log(Level.FINER, "Attempting to get resource: {0}", 
+        DSBUtil.logger().log(Level.FINER, "Attempting to get resource: {0}",
                 resource);
-        List<ColumnSpec.KnowledgeSourceIdToSqlCode> cvs =
-                new ArrayList<ColumnSpec.KnowledgeSourceIdToSqlCode>(1000);
+        List<ColumnSpec.KnowledgeSourceIdToSqlCode> cvs = new ArrayList<ColumnSpec.KnowledgeSourceIdToSqlCode>(
+                1000);
         InputStream is = IOUtil.getResourceAsStream(resource, this.cls);
         BufferedReader br = new BufferedReader(new InputStreamReader(is));
         String line = null;
@@ -108,10 +154,10 @@ public final class PropIdToSQLCodeMapper {
             while ((line = br.readLine()) != null) {
                 String[] cols = line.split("\t");
                 if (cols.length != 2) {
-                    throw new AssertionError("Invalid mapping in " + resource + 
-                            ": " + line);
+                    throw new AssertionError("Invalid mapping in " + resource
+                            + ": " + line);
                 }
-                cvs.add(new ColumnSpec.KnowledgeSourceIdToSqlCode(cols[0], 
+                cvs.add(new ColumnSpec.KnowledgeSourceIdToSqlCode(cols[0],
                         cols[1]));
                 i++;
             }
@@ -125,7 +171,7 @@ public final class PropIdToSQLCodeMapper {
                 }
             }
         }
-        return cvs.toArray(
-                new ColumnSpec.KnowledgeSourceIdToSqlCode[cvs.size()]);
+        return cvs
+                .toArray(new ColumnSpec.KnowledgeSourceIdToSqlCode[cvs.size()]);
     }
 }
