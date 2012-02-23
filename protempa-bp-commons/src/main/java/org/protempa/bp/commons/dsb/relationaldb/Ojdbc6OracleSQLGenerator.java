@@ -29,6 +29,7 @@ import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.backend.dsb.filter.Filter;
 
 /**
+ * Generates SQL compatible with Oracle 10.x and 11.x 
  * 
  * @author Andrew Post
  */
@@ -100,5 +101,4 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGenerator {
         return new Ojdbc6OracleDataStager(stagingSpecs, referenceSpec,
                 entitySpecs, filters, propIds, keyIds, order, connectionSpec);
     }
-
 }
