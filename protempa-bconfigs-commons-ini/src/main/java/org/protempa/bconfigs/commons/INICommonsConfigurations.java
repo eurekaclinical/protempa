@@ -57,7 +57,8 @@ public class INICommonsConfigurations implements Configurations {
         HierarchicalINIConfiguration.setDefaultExpressionEngine(engine);
     }
     
-    private String pathname;
+    public static String pathname;
+//    private String pathname;
 
 
     public INICommonsConfigurations() {

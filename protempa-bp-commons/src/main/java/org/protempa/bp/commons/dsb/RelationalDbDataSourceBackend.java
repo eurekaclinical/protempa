@@ -81,7 +81,7 @@ public abstract class RelationalDbDataSourceBackend
 
     private DatabaseAPI databaseAPI;
     private String databaseId;
-    private String username;
+    protected String username;
     private String password;
     private RelationalDatabaseSpec relationalDatabaseSpec;
     private SQLGenerator sqlGenerator;
