@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
@@ -303,15 +302,18 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 .keySet();
         Logger logger = SQLGenUtil.logger();
 
-        DataStager stager = getDataStager(this.stagedTableSpecs, null,
-                new LinkedList<EntitySpec>(allEntitySpecs),
-                copyFilters(filters), propIds, keyIds, order, getConnectionSpec());
-        try {
-            stager.stageTables();
-        } catch (SQLException ex) {
-            logger.log(Level.SEVERE,
-                    "Failed to create staging area", ex);
-            throw new DataSourceReadException(ex);
+        DataStager stager = null;
+        if (stagingApplies()) {
+            try {
+                stager = getDataStager(this.stagedTableSpecs, null,
+                        new LinkedList<EntitySpec>(allEntitySpecs),
+                        copyFilters(filters), propIds, keyIds, order,
+                        getConnectionSpec());
+                stager.stageTables();
+            } catch (SQLException ex) {
+                logger.log(Level.SEVERE, "Failed to create staging area", ex);
+                throw new DataSourceReadException(ex);
+            }
         }
 
         for (EntitySpec entitySpec : entitySpecMapFromPropIds.keySet()) {
@@ -403,16 +405,22 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             logDoneProcessing(logger, entitySpec);
         }
 
-        logger.log(Level.INFO, "Cleaning up staged data");
-        try {
-            stager.cleanup();
-        } catch (SQLException ex) {
-            logger.log(Level.WARNING,
-                    "Failed to clean up the staging area",
-                    ex);
+        if (stagingApplies()) {
+            logger.log(Level.INFO, "Cleaning up staged data");
+            try {
+                stager.cleanup();
+            } catch (SQLException ex) {
+                logger.log(Level.WARNING,
+                        "Failed to clean up the staging area", ex);
+            }
         }
 
         return results;
+    }
+
+    private boolean stagingApplies() {
+        return this.stagedTableSpecs != null
+                && this.stagedTableSpecs.length > 0;
     }
 
     private static void retainEntitySpecsWithFiltersOrConstraints(
@@ -665,10 +673,13 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables);
 
-    protected abstract DataStager getDataStager(StagingSpec[] stagingSpecs,
+    protected DataStager getDataStager(StagingSpec[] stagingSpecs,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, ConnectionSpec connectionSpec);
+            SQLOrderBy order, ConnectionSpec connectionSpec) {
+        throw new UnsupportedOperationException("SQL generator "
+                + getClass().getName() + " does not support data staging");
+    }
 
     private String generateSelect(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, Set<String> propIds,
