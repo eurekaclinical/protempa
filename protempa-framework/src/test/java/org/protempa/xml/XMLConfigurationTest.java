@@ -111,8 +111,8 @@ public class XMLConfigurationTest extends TestCase {
 		XMLConfiguration.writeQueryAsXML(reconstitutedQuery, z2);
 		FileReader freader = new FileReader(z2);
 		String xml = new BufferedReader(freader).readLine();
-		assertTrue(xml.contains("xsi:noNamespaceSchemaLocation=\"http://aiwdev02.eusch.org/protempa/schema/1.1/protempa_query.xsd\""));
-		
+		System.out.println(xml);
+		assertTrue(xml.contains("xsi:noNamespaceSchemaLocation=\"http://aiwdev02.eushc.org/protempa/schema/1.1/protempa_query.xsd\""));
 	}
 
 	private void checkXMLValid(File file, String xsd) throws SAXException, ParserConfigurationException, IOException {
