@@ -18,6 +18,7 @@
     <module>protempa-bp-commons</module>
     <module>protempa-ksb-protege</module>
     <module>protempa-tsb-umls</module>
+    <module>protempa-test-suite</module>
   </modules>
   <build>
     <plugins>
@@ -52,10 +53,9 @@
                 <phase>process-sources</phase>
             </execution>
         </executions>
- 
       </plugin>
     </plugins>
-  </build>  
+  </build>
   <profiles>
     <profile>
       <id>test-tier1</id>
