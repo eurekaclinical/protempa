@@ -1,4 +1,4 @@
-; Fri Mar 16 15:45:41 EDT 2012
+; Mon Mar 19 11:59:21 EDT 2012
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
@@ -941,10 +941,10 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[protempa_ProjectKB_Class521]
-		[protempa_ProjectKB_Class522]
-		[protempa_ProjectKB_Class523]
-		[protempa_ProjectKB_Class524]))
+		[protempa_ProjectKB_Class106]
+		[protempa_ProjectKB_Class107]
+		[protempa_ProjectKB_Class108]
+		[protempa_ProjectKB_Class109]))
 
 ([CLSES_TAB] of  Widget
 
@@ -986,7 +986,7 @@
 
 	(widget_class_name "edu.stanford.smi.protege.widget.InstancesTab"))
 
-([KB_091446_Class0] of  Map
+([KB_096145_Class3] of  Map
 )
 
 ([KB_495177_Class0] of  String
@@ -1047,8 +1047,8 @@
 
 ([KB_495177_Class6] of  Map
 
-	(entries [protempa_ProjectKB_Class527])
-	(referenced_maps [protempa_ProjectKB_Class525]))
+	(entries [protempa_ProjectKB_Class112])
+	(referenced_maps [protempa_ProjectKB_Class110]))
 
 ([KB_495177_Class88] of  Property_List
 
@@ -1183,14 +1183,14 @@
 
 	(browser_slot_names [BROWSER_SLOT_NAMES])
 	(customized_instance_widgets
-		[STANDARD_FACET_FORM_WIDGET]
-		[AIW_ProjectKB_Class84]
-		[PAL_FORM_WIDGET]
-		[STANDARD_CLASS_FORM_WIDGET]
 		[INSTANCE_ANNOTATION_FORM_WIDGET]
 		[AIW_ProjectKB_Class10117]
 		[STANDARD_SLOT_FORM_WIDGET]
-		[AIW_ProjectKB_Class10158])
+		[AIW_ProjectKB_Class84]
+		[STANDARD_FACET_FORM_WIDGET]
+		[PAL_FORM_WIDGET]
+		[AIW_ProjectKB_Class10158]
+		[STANDARD_CLASS_FORM_WIDGET])
 	(default_cls_metaclass ":STANDARD-CLASS")
 	(default_facet_metaclass ":STANDARD-FACET")
 	(default_instance_widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
@@ -1206,1830 +1206,241 @@
 		[INSTANCES_TAB]
 		[QUERIES_TAB]))
 
-([protempa_ProjectKB_Class100] of  Widget
+([protempa_ProjectKB_Class10] of  Widget
 
-	(height 120)
-	(is_hidden FALSE)
-	(name "property")
-	(property_list [protempa_ProjectKB_Class101])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 120))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class11])
+	(widget_class_name "edu.stanford.smi.protege.widget.ProtegePropertiesTab"))
 
-([protempa_ProjectKB_Class101] of  Property_List
+([protempa_ProjectKB_Class106] of  String
 
-	(properties
-		[protempa_ProjectKB_Class102]
-		[protempa_ProjectKB_Class103]))
+	(name ":INSTANCE-ANNOTATION")
+	(string_value "%3AANNOTATION-TEXT"))
 
-([protempa_ProjectKB_Class102] of  Boolean
+([protempa_ProjectKB_Class107] of  String
 
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
+	(name ":META-CLASS")
+	(string_value "%3ANAME"))
 
-([protempa_ProjectKB_Class103] of  Boolean
+([protempa_ProjectKB_Class108] of  String
 
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
+	(name ":PAL-CONSTRAINT")
+	(string_value "%3APAL-NAME"))
 
-([protempa_ProjectKB_Class104] of  Widget
+([protempa_ProjectKB_Class109] of  String
 
-	(height 60)
-	(is_hidden FALSE)
-	(name "documentation")
-	(property_list [protempa_ProjectKB_Class105])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 120))
+	(name "ValueSetElement")
+	(string_value "elementOfValueSet"))
 
-([protempa_ProjectKB_Class105] of  Property_List
+([protempa_ProjectKB_Class11] of  Property_List
 )
 
-([protempa_ProjectKB_Class106] of  Widget
+([protempa_ProjectKB_Class110] of  Map
 
-	(height 120)
-	(is_hidden FALSE)
-	(name "inverseIsA")
-	(property_list [protempa_ProjectKB_Class107])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 240))
+	(entries [protempa_ProjectKB_Class111]))
 
-([protempa_ProjectKB_Class107] of  Property_List
+([protempa_ProjectKB_Class111] of  Map_Entry
 
-	(properties
-		[protempa_ProjectKB_Class108]
-		[protempa_ProjectKB_Class109]))
+	(key "KB_468183_Class0")
+	(key_class "edu.stanford.smi.protege.model.Frame")
+	(value "25 25 202 123")
+	(value_class "java.awt.Rectangle"))
 
-([protempa_ProjectKB_Class108] of  Boolean
+([protempa_ProjectKB_Class112] of  Map_Entry
 
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
+	(key "InstanceDisplay.yellow_stickies")
+	(key_class "java.lang.String")
+	(value "protempa_ProjectKB_Class110")
+	(value_class "java.util.Map"))
 
-([protempa_ProjectKB_Class109] of  Boolean
+([protempa_ProjectKB_Class12] of  Widget
 
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class13])
+	(widget_class_name "uk.ac.man.cs.mig.coode.debugger.test.DebuggerTestTab"))
 
-([protempa_ProjectKB_Class110] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "valueType")
-	(property_list [protempa_ProjectKB_Class111])
-	(widget_class_name "edu.stanford.smi.protege.widget.ClsFieldWidget")
-	(width 200)
-	(x 200)
-	(y 60))
-
-([protempa_ProjectKB_Class111] of  Property_List
+([protempa_ProjectKB_Class13] of  Property_List
 )
 
-([protempa_ProjectKB_Class112] of  Widget
+([protempa_ProjectKB_Class14] of  Widget
 
-	(height 60)
-	(is_hidden FALSE)
-	(label "Solid")
-	(name "solid")
-	(property_list [protempa_ProjectKB_Class113])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 300))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class15])
+	(widget_class_name "ca.uvic.csr.shrimp.jambalaya.JambalayaTab"))
 
-([protempa_ProjectKB_Class113] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class114]
-		[protempa_ProjectKB_Class115]))
-
-([protempa_ProjectKB_Class114] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class115] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
-
-([protempa_ProjectKB_Class116] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "displayName")
-	(property_list [protempa_ProjectKB_Class117])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 60))
-
-([protempa_ProjectKB_Class117] of  Property_List
+([protempa_ProjectKB_Class15] of  Property_List
 )
 
-([protempa_ProjectKB_Class118] of  Widget
+([protempa_ProjectKB_Class16] of  Widget
 
-	(height 60)
-	(is_hidden FALSE)
-	(name ":NAME")
-	(property_list [protempa_ProjectKB_Class119])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
-	(width 200)
-	(x 0)
-	(y 180))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class17])
+	(widget_class_name "edu.stanford.smi.protegex.server_changes.prompt.UsersTab"))
 
-([protempa_ProjectKB_Class119] of  Property_List
+([protempa_ProjectKB_Class17] of  Property_List
 )
 
-([protempa_ProjectKB_Class120] of  Widget
+([protempa_ProjectKB_Class18] of  Widget
 
-	(height 120)
-	(is_hidden FALSE)
-	(name "abstractedInto")
-	(property_list [protempa_ProjectKB_Class121])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 120))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class19])
+	(widget_class_name "ezpal.EZPalTab"))
 
-([protempa_ProjectKB_Class121] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class122]
-		[protempa_ProjectKB_Class123]))
-
-([protempa_ProjectKB_Class122] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class123] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class124] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "maxGapUnits")
-	(property_list [protempa_ProjectKB_Class125])
-	(widget_class_name "edu.stanford.smi.protege.widget.ComboBoxWidget")
-	(width 100)
-	(x 300)
-	(y 0))
-
-([protempa_ProjectKB_Class125] of  Property_List
+([protempa_ProjectKB_Class19] of  Property_List
 )
 
-([protempa_ProjectKB_Class126] of  Widget
+([protempa_ProjectKB_Class20] of  Widget
 
-	(height 60)
-	(is_hidden FALSE)
-	(name "abbrevDisplayName")
-	(property_list [protempa_ProjectKB_Class127])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 0))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class21])
+	(widget_class_name "edu.stanford.smi.protege.widget.instance_tree.InstanceTreeTab"))
 
-([protempa_ProjectKB_Class127] of  Property_List
+([protempa_ProjectKB_Class21] of  Property_List
 )
 
-([protempa_ProjectKB_Class128] of  Widget
+([protempa_ProjectKB_Class22] of  Widget
 
-	(height 60)
-	(is_hidden FALSE)
-	(name "maxGap")
-	(property_list [protempa_ProjectKB_Class129])
-	(widget_class_name "edu.stanford.smi.protege.widget.IntegerFieldWidget")
-	(width 100)
-	(x 200)
-	(y 0))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class23])
+	(widget_class_name "edu.stanford.smi.protegex.widget.pal.PalConstraintsTab"))
 
-([protempa_ProjectKB_Class129] of  Property_List
+([protempa_ProjectKB_Class23] of  Property_List
 )
 
-([protempa_ProjectKB_Class130] of  Widget
+([protempa_ProjectKB_Class24] of  Widget
 
-	(height 60)
-	(is_hidden FALSE)
-	(label "Concatenable")
-	(name "concatenable")
-	(property_list [protempa_ProjectKB_Class131])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 360))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class25])
+	(widget_class_name "edu.stanford.smi.RemoteKBTab.WordNetTab"))
 
-([protempa_ProjectKB_Class131] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class132]
-		[protempa_ProjectKB_Class133]))
-
-([protempa_ProjectKB_Class132] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class133] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
-
-([protempa_ProjectKB_Class134] of  Widget
-
-	(is_hidden FALSE)
-	(name "Vital")
-	(property_list [protempa_ProjectKB_Class137])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
-
-([protempa_ProjectKB_Class137] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class138]
-		[protempa_ProjectKB_Class139]
-		[protempa_ProjectKB_Class143]
-		[protempa_ProjectKB_Class145]
-		[protempa_ProjectKB_Class149]
-		[protempa_ProjectKB_Class153]
-		[protempa_ProjectKB_Class155]
-		[protempa_ProjectKB_Class159]
-		[protempa_ProjectKB_Class161]
-		[protempa_ProjectKB_Class165]
-		[protempa_ProjectKB_Class167]
-		[protempa_ProjectKB_Class169]
-		[protempa_ProjectKB_Class173]
-		[protempa_ProjectKB_Class175]
-		[protempa_ProjectKB_Class177]
-		[protempa_ProjectKB_Class179]))
-
-([protempa_ProjectKB_Class138] of  Property_List
-
-	(name "layout properties"))
-
-([protempa_ProjectKB_Class139] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "isA")
-	(property_list [protempa_ProjectKB_Class140])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 0))
-
-([protempa_ProjectKB_Class140] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class141]
-		[protempa_ProjectKB_Class142]))
-
-([protempa_ProjectKB_Class141] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class142] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class143] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "inDataSource")
-	(property_list [protempa_ProjectKB_Class144])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 240))
-
-([protempa_ProjectKB_Class144] of  Property_List
+([protempa_ProjectKB_Class25] of  Property_List
 )
 
-([protempa_ProjectKB_Class145] of  Widget
+([protempa_ProjectKB_Class26] of  Widget
 
-	(height 120)
-	(is_hidden FALSE)
-	(name "term")
-	(property_list [protempa_ProjectKB_Class146])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 240))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class27])
+	(widget_class_name "uk.ac.man.ac.mig.coode.individuals.ui.OWLDLIndividualsTab"))
 
-([protempa_ProjectKB_Class146] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class147]
-		[protempa_ProjectKB_Class148]))
-
-([protempa_ProjectKB_Class147] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class148] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class149] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "property")
-	(property_list [protempa_ProjectKB_Class150])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 120))
-
-([protempa_ProjectKB_Class150] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class151]
-		[protempa_ProjectKB_Class152]))
-
-([protempa_ProjectKB_Class151] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class152] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class153] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "documentation")
-	(property_list [protempa_ProjectKB_Class154])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 120))
-
-([protempa_ProjectKB_Class154] of  Property_List
+([protempa_ProjectKB_Class27] of  Property_List
 )
 
-([protempa_ProjectKB_Class155] of  Widget
+([protempa_ProjectKB_Class28] of  Widget
 
-	(height 120)
-	(is_hidden FALSE)
-	(name "inverseIsA")
-	(property_list [protempa_ProjectKB_Class156])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 240))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class29])
+	(widget_class_name "edu.stanford.smi.protege.widget.ClsesAndInstancesTab"))
 
-([protempa_ProjectKB_Class156] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class157]
-		[protempa_ProjectKB_Class158]))
-
-([protempa_ProjectKB_Class157] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class158] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class159] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "valueType")
-	(property_list [protempa_ProjectKB_Class160])
-	(widget_class_name "edu.stanford.smi.protege.widget.ClsFieldWidget")
-	(width 200)
-	(x 200)
-	(y 60))
-
-([protempa_ProjectKB_Class160] of  Property_List
+([protempa_ProjectKB_Class29] of  Property_List
 )
 
-([protempa_ProjectKB_Class161] of  Widget
+([protempa_ProjectKB_Class30] of  Widget
 
-	(height 60)
-	(is_hidden FALSE)
-	(label "Solid")
-	(name "solid")
-	(property_list [protempa_ProjectKB_Class162])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 300))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class31])
+	(widget_class_name "edu.stanford.smi.protegex.evaluation.MetaAnalysis"))
 
-([protempa_ProjectKB_Class162] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class163]
-		[protempa_ProjectKB_Class164]))
-
-([protempa_ProjectKB_Class163] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class164] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
-
-([protempa_ProjectKB_Class165] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "displayName")
-	(property_list [protempa_ProjectKB_Class166])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 60))
-
-([protempa_ProjectKB_Class166] of  Property_List
+([protempa_ProjectKB_Class31] of  Property_List
 )
 
-([protempa_ProjectKB_Class167] of  Widget
+([protempa_ProjectKB_Class32] of  Widget
 
-	(height 60)
-	(is_hidden FALSE)
-	(name ":NAME")
-	(property_list [protempa_ProjectKB_Class168])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
-	(width 200)
-	(x 0)
-	(y 180))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class33])
+	(widget_class_name "org.protege.owl.mm.protege3.MappingMasterTab"))
 
-([protempa_ProjectKB_Class168] of  Property_List
+([protempa_ProjectKB_Class33] of  Property_List
 )
 
-([protempa_ProjectKB_Class169] of  Widget
+([protempa_ProjectKB_Class34] of  Widget
 
-	(height 120)
-	(is_hidden FALSE)
-	(name "abstractedInto")
-	(property_list [protempa_ProjectKB_Class170])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 120))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class35])
+	(widget_class_name "edu.stanford.smi.protege.query.LuceneQueryPlugin"))
 
-([protempa_ProjectKB_Class170] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class171]
-		[protempa_ProjectKB_Class172]))
-
-([protempa_ProjectKB_Class171] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class172] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class173] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "maxGapUnits")
-	(property_list [protempa_ProjectKB_Class174])
-	(widget_class_name "edu.stanford.smi.protege.widget.ComboBoxWidget")
-	(width 100)
-	(x 300)
-	(y 0))
-
-([protempa_ProjectKB_Class174] of  Property_List
+([protempa_ProjectKB_Class35] of  Property_List
 )
 
-([protempa_ProjectKB_Class175] of  Widget
+([protempa_ProjectKB_Class36] of  Widget
 
-	(height 60)
-	(is_hidden FALSE)
-	(name "abbrevDisplayName")
-	(property_list [protempa_ProjectKB_Class176])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 0))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class37])
+	(widget_class_name "uk.ac.man.cs.mig.coode.owlviz.ui.OWLVizTab"))
 
-([protempa_ProjectKB_Class176] of  Property_List
+([protempa_ProjectKB_Class37] of  Property_List
 )
 
-([protempa_ProjectKB_Class177] of  Widget
+([protempa_ProjectKB_Class38] of  Widget
 
-	(height 60)
-	(is_hidden FALSE)
-	(name "maxGap")
-	(property_list [protempa_ProjectKB_Class178])
-	(widget_class_name "edu.stanford.smi.protege.widget.IntegerFieldWidget")
-	(width 100)
-	(x 200)
-	(y 0))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class39])
+	(widget_class_name "edu.stanford.smi.protegex.owl.ui.cls.OWLClassesTab"))
 
-([protempa_ProjectKB_Class178] of  Property_List
+([protempa_ProjectKB_Class39] of  Property_List
 )
 
-([protempa_ProjectKB_Class179] of  Widget
+([protempa_ProjectKB_Class4] of  Widget
 
-	(height 60)
-	(is_hidden FALSE)
-	(label "Concatenable")
-	(name "concatenable")
-	(property_list [protempa_ProjectKB_Class180])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 360))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class5])
+	(widget_class_name "se.liu.ida.JessTab.JessTab"))
 
-([protempa_ProjectKB_Class180] of  Property_List
+([protempa_ProjectKB_Class40] of  Widget
 
-	(properties
-		[protempa_ProjectKB_Class181]
-		[protempa_ProjectKB_Class182]))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class41])
+	(widget_class_name "edu.stanford.smi.RemoteKBTab.UMLSTab"))
 
-([protempa_ProjectKB_Class181] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class182] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
-
-([protempa_ProjectKB_Class309] of  Widget
-
-	(is_hidden FALSE)
-	(name "CPTProcedureCodeCls")
-	(property_list [protempa_ProjectKB_Class312])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
-
-([protempa_ProjectKB_Class312] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class313]
-		[protempa_ProjectKB_Class314]
-		[protempa_ProjectKB_Class318]
-		[protempa_ProjectKB_Class322]
-		[protempa_ProjectKB_Class324]
-		[protempa_ProjectKB_Class328]
-		[protempa_ProjectKB_Class332]
-		[protempa_ProjectKB_Class334]
-		[protempa_ProjectKB_Class338]
-		[protempa_ProjectKB_Class342]
-		[protempa_ProjectKB_Class344]
-		[protempa_ProjectKB_Class346]
-		[protempa_ProjectKB_Class350]
-		[protempa_ProjectKB_Class352]))
-
-([protempa_ProjectKB_Class313] of  Property_List
-
-	(name "layout properties"))
-
-([protempa_ProjectKB_Class314] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "partOf")
-	(property_list [protempa_ProjectKB_Class315])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 0))
-
-([protempa_ProjectKB_Class315] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class316]
-		[protempa_ProjectKB_Class317]))
-
-([protempa_ProjectKB_Class316] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class317] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class318] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "isA")
-	(property_list [protempa_ProjectKB_Class319])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 240))
-
-([protempa_ProjectKB_Class319] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class320]
-		[protempa_ProjectKB_Class321]))
-
-([protempa_ProjectKB_Class320] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class321] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class322] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "inDataSource")
-	(property_list [protempa_ProjectKB_Class323])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 240))
-
-([protempa_ProjectKB_Class323] of  Property_List
+([protempa_ProjectKB_Class41] of  Property_List
 )
 
-([protempa_ProjectKB_Class324] of  Widget
+([protempa_ProjectKB_Class42] of  Widget
 
-	(height 120)
-	(is_hidden FALSE)
-	(name "term")
-	(property_list [protempa_ProjectKB_Class325])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 240))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class43])
+	(widget_class_name "edu.stanford.smi.protegex.owl.ui.individuals.OWLIndividualsTab"))
 
-([protempa_ProjectKB_Class325] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class326]
-		[protempa_ProjectKB_Class327]))
-
-([protempa_ProjectKB_Class326] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class327] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class328] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "property")
-	(property_list [protempa_ProjectKB_Class329])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 120))
-
-([protempa_ProjectKB_Class329] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class330]
-		[protempa_ProjectKB_Class331]))
-
-([protempa_ProjectKB_Class330] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class331] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class332] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "documentation")
-	(property_list [protempa_ProjectKB_Class333])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 120))
-
-([protempa_ProjectKB_Class333] of  Property_List
+([protempa_ProjectKB_Class43] of  Property_List
 )
 
-([protempa_ProjectKB_Class334] of  Widget
+([protempa_ProjectKB_Class44] of  Widget
 
-	(height 120)
-	(is_hidden FALSE)
-	(name "inverseIsA")
-	(property_list [protempa_ProjectKB_Class335])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 120))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class45])
+	(widget_class_name "edu.stanford.smi.protegex.changeanalysis.ChangeAnalysisTab"))
 
-([protempa_ProjectKB_Class335] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class336]
-		[protempa_ProjectKB_Class337]))
-
-([protempa_ProjectKB_Class336] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class337] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class338] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(label "Solid")
-	(name "solid")
-	(property_list [protempa_ProjectKB_Class339])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 300))
-
-([protempa_ProjectKB_Class339] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class340]
-		[protempa_ProjectKB_Class341]))
-
-([protempa_ProjectKB_Class340] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class341] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
-
-([protempa_ProjectKB_Class342] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "displayName")
-	(property_list [protempa_ProjectKB_Class343])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 60))
-
-([protempa_ProjectKB_Class343] of  Property_List
+([protempa_ProjectKB_Class45] of  Property_List
 )
 
-([protempa_ProjectKB_Class344] of  Widget
+([protempa_ProjectKB_Class46] of  Widget
 
-	(height 60)
-	(is_hidden FALSE)
-	(name ":NAME")
-	(property_list [protempa_ProjectKB_Class345])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
-	(width 200)
-	(x 0)
-	(y 180))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class47])
+	(widget_class_name "org.algernon.kb.okbc.protege.plugins.AlgernonTab"))
 
-([protempa_ProjectKB_Class345] of  Property_List
+([protempa_ProjectKB_Class47] of  Property_List
 )
 
-([protempa_ProjectKB_Class346] of  Widget
+([protempa_ProjectKB_Class48] of  Widget
 
-	(height 120)
-	(is_hidden FALSE)
-	(name "hasPart")
-	(property_list [protempa_ProjectKB_Class347])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 0))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class49])
+	(widget_class_name "TGViztab.TGVizTab"))
 
-([protempa_ProjectKB_Class347] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class348]
-		[protempa_ProjectKB_Class349]))
-
-([protempa_ProjectKB_Class348] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class349] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class350] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "abbrevDisplayName")
-	(property_list [protempa_ProjectKB_Class351])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 0))
-
-([protempa_ProjectKB_Class351] of  Property_List
+([protempa_ProjectKB_Class49] of  Property_List
 )
 
-([protempa_ProjectKB_Class352] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(label "Concatenable")
-	(name "concatenable")
-	(property_list [protempa_ProjectKB_Class353])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 360))
-
-([protempa_ProjectKB_Class353] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class354]
-		[protempa_ProjectKB_Class355]))
-
-([protempa_ProjectKB_Class354] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class355] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
-
-([protempa_ProjectKB_Class356] of  Widget
-
-	(is_hidden FALSE)
-	(name "ICD9ProcedureCodeCls")
-	(property_list [protempa_ProjectKB_Class359])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
-
-([protempa_ProjectKB_Class359] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class360]
-		[protempa_ProjectKB_Class361]
-		[protempa_ProjectKB_Class365]
-		[protempa_ProjectKB_Class369]
-		[protempa_ProjectKB_Class371]
-		[protempa_ProjectKB_Class375]
-		[protempa_ProjectKB_Class379]
-		[protempa_ProjectKB_Class381]
-		[protempa_ProjectKB_Class385]
-		[protempa_ProjectKB_Class389]
-		[protempa_ProjectKB_Class391]
-		[protempa_ProjectKB_Class393]
-		[protempa_ProjectKB_Class397]
-		[protempa_ProjectKB_Class399]))
-
-([protempa_ProjectKB_Class360] of  Property_List
-
-	(name "layout properties"))
-
-([protempa_ProjectKB_Class361] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "partOf")
-	(property_list [protempa_ProjectKB_Class362])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 0))
-
-([protempa_ProjectKB_Class362] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class363]
-		[protempa_ProjectKB_Class364]))
-
-([protempa_ProjectKB_Class363] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class364] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class365] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "isA")
-	(property_list [protempa_ProjectKB_Class366])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 240))
-
-([protempa_ProjectKB_Class366] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class367]
-		[protempa_ProjectKB_Class368]))
-
-([protempa_ProjectKB_Class367] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class368] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class369] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "inDataSource")
-	(property_list [protempa_ProjectKB_Class370])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 240))
-
-([protempa_ProjectKB_Class370] of  Property_List
+([protempa_ProjectKB_Class5] of  Property_List
 )
 
-([protempa_ProjectKB_Class371] of  Widget
+([protempa_ProjectKB_Class50] of  Widget
 
-	(height 120)
-	(is_hidden FALSE)
-	(name "term")
-	(property_list [protempa_ProjectKB_Class372])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 240))
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class51])
+	(widget_class_name "edu.stanford.smi.protegex.changes.changesKBViewTab.ChangesKBViewTab"))
 
-([protempa_ProjectKB_Class372] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class373]
-		[protempa_ProjectKB_Class374]))
-
-([protempa_ProjectKB_Class373] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class374] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class375] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "property")
-	(property_list [protempa_ProjectKB_Class376])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 120))
-
-([protempa_ProjectKB_Class376] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class377]
-		[protempa_ProjectKB_Class378]))
-
-([protempa_ProjectKB_Class377] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class378] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class379] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "documentation")
-	(property_list [protempa_ProjectKB_Class380])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 120))
-
-([protempa_ProjectKB_Class380] of  Property_List
+([protempa_ProjectKB_Class51] of  Property_List
 )
-
-([protempa_ProjectKB_Class381] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "inverseIsA")
-	(property_list [protempa_ProjectKB_Class382])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 120))
-
-([protempa_ProjectKB_Class382] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class383]
-		[protempa_ProjectKB_Class384]))
-
-([protempa_ProjectKB_Class383] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class384] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class385] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(label "Solid")
-	(name "solid")
-	(property_list [protempa_ProjectKB_Class386])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 300))
-
-([protempa_ProjectKB_Class386] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class387]
-		[protempa_ProjectKB_Class388]))
-
-([protempa_ProjectKB_Class387] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class388] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
-
-([protempa_ProjectKB_Class389] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "displayName")
-	(property_list [protempa_ProjectKB_Class390])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 60))
-
-([protempa_ProjectKB_Class390] of  Property_List
-)
-
-([protempa_ProjectKB_Class391] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name ":NAME")
-	(property_list [protempa_ProjectKB_Class392])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
-	(width 200)
-	(x 0)
-	(y 180))
-
-([protempa_ProjectKB_Class392] of  Property_List
-)
-
-([protempa_ProjectKB_Class393] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "hasPart")
-	(property_list [protempa_ProjectKB_Class394])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 0))
-
-([protempa_ProjectKB_Class394] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class395]
-		[protempa_ProjectKB_Class396]))
-
-([protempa_ProjectKB_Class395] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class396] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class397] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "abbrevDisplayName")
-	(property_list [protempa_ProjectKB_Class398])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 0))
-
-([protempa_ProjectKB_Class398] of  Property_List
-)
-
-([protempa_ProjectKB_Class399] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(label "Concatenable")
-	(name "concatenable")
-	(property_list [protempa_ProjectKB_Class400])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 360))
-
-([protempa_ProjectKB_Class400] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class401]
-		[protempa_ProjectKB_Class402]))
-
-([protempa_ProjectKB_Class401] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class402] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
-
-([protempa_ProjectKB_Class403] of  Widget
-
-	(is_hidden FALSE)
-	(name "MedicationCls")
-	(property_list [protempa_ProjectKB_Class406])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
-
-([protempa_ProjectKB_Class406] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class407]
-		[protempa_ProjectKB_Class408]
-		[protempa_ProjectKB_Class412]
-		[protempa_ProjectKB_Class416]
-		[protempa_ProjectKB_Class418]
-		[protempa_ProjectKB_Class422]
-		[protempa_ProjectKB_Class426]
-		[protempa_ProjectKB_Class428]
-		[protempa_ProjectKB_Class432]
-		[protempa_ProjectKB_Class436]
-		[protempa_ProjectKB_Class438]
-		[protempa_ProjectKB_Class440]
-		[protempa_ProjectKB_Class444]
-		[protempa_ProjectKB_Class446]))
-
-([protempa_ProjectKB_Class407] of  Property_List
-
-	(name "layout properties"))
-
-([protempa_ProjectKB_Class408] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "partOf")
-	(property_list [protempa_ProjectKB_Class409])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 0))
-
-([protempa_ProjectKB_Class409] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class410]
-		[protempa_ProjectKB_Class411]))
-
-([protempa_ProjectKB_Class410] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class411] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class412] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "isA")
-	(property_list [protempa_ProjectKB_Class413])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 240))
-
-([protempa_ProjectKB_Class413] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class414]
-		[protempa_ProjectKB_Class415]))
-
-([protempa_ProjectKB_Class414] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class415] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class416] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "inDataSource")
-	(property_list [protempa_ProjectKB_Class417])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 240))
-
-([protempa_ProjectKB_Class417] of  Property_List
-)
-
-([protempa_ProjectKB_Class418] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "term")
-	(property_list [protempa_ProjectKB_Class419])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 240))
-
-([protempa_ProjectKB_Class419] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class420]
-		[protempa_ProjectKB_Class421]))
-
-([protempa_ProjectKB_Class420] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class421] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class422] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "property")
-	(property_list [protempa_ProjectKB_Class423])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 120))
-
-([protempa_ProjectKB_Class423] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class424]
-		[protempa_ProjectKB_Class425]))
-
-([protempa_ProjectKB_Class424] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class425] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class426] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "documentation")
-	(property_list [protempa_ProjectKB_Class427])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 120))
-
-([protempa_ProjectKB_Class427] of  Property_List
-)
-
-([protempa_ProjectKB_Class428] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "inverseIsA")
-	(property_list [protempa_ProjectKB_Class429])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 120))
-
-([protempa_ProjectKB_Class429] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class430]
-		[protempa_ProjectKB_Class431]))
-
-([protempa_ProjectKB_Class430] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class431] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class432] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(label "Solid")
-	(name "solid")
-	(property_list [protempa_ProjectKB_Class433])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 300))
-
-([protempa_ProjectKB_Class433] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class434]
-		[protempa_ProjectKB_Class435]))
-
-([protempa_ProjectKB_Class434] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class435] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
-
-([protempa_ProjectKB_Class436] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "displayName")
-	(property_list [protempa_ProjectKB_Class437])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 60))
-
-([protempa_ProjectKB_Class437] of  Property_List
-)
-
-([protempa_ProjectKB_Class438] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name ":NAME")
-	(property_list [protempa_ProjectKB_Class439])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
-	(width 200)
-	(x 0)
-	(y 180))
-
-([protempa_ProjectKB_Class439] of  Property_List
-)
-
-([protempa_ProjectKB_Class440] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "hasPart")
-	(property_list [protempa_ProjectKB_Class441])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 0))
-
-([protempa_ProjectKB_Class441] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class442]
-		[protempa_ProjectKB_Class443]))
-
-([protempa_ProjectKB_Class442] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class443] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class444] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "abbrevDisplayName")
-	(property_list [protempa_ProjectKB_Class445])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 0))
-
-([protempa_ProjectKB_Class445] of  Property_List
-)
-
-([protempa_ProjectKB_Class446] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(label "Concatenable")
-	(name "concatenable")
-	(property_list [protempa_ProjectKB_Class447])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 360))
-
-([protempa_ProjectKB_Class447] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class448]
-		[protempa_ProjectKB_Class449]))
-
-([protempa_ProjectKB_Class448] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class449] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
-
-([protempa_ProjectKB_Class450] of  Widget
-
-	(is_hidden FALSE)
-	(name "ICD9DiagnosisCodeCls")
-	(property_list [protempa_ProjectKB_Class453])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
-
-([protempa_ProjectKB_Class453] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class454]
-		[protempa_ProjectKB_Class455]
-		[protempa_ProjectKB_Class459]
-		[protempa_ProjectKB_Class463]
-		[protempa_ProjectKB_Class465]
-		[protempa_ProjectKB_Class469]
-		[protempa_ProjectKB_Class473]
-		[protempa_ProjectKB_Class475]
-		[protempa_ProjectKB_Class479]
-		[protempa_ProjectKB_Class483]
-		[protempa_ProjectKB_Class485]
-		[protempa_ProjectKB_Class487]
-		[protempa_ProjectKB_Class491]
-		[protempa_ProjectKB_Class493]))
-
-([protempa_ProjectKB_Class454] of  Property_List
-
-	(name "layout properties"))
-
-([protempa_ProjectKB_Class455] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "partOf")
-	(property_list [protempa_ProjectKB_Class456])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 0))
-
-([protempa_ProjectKB_Class456] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class457]
-		[protempa_ProjectKB_Class458]))
-
-([protempa_ProjectKB_Class457] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class458] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class459] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "isA")
-	(property_list [protempa_ProjectKB_Class460])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 240))
-
-([protempa_ProjectKB_Class460] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class461]
-		[protempa_ProjectKB_Class462]))
-
-([protempa_ProjectKB_Class461] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class462] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class463] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "inDataSource")
-	(property_list [protempa_ProjectKB_Class464])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 240))
-
-([protempa_ProjectKB_Class464] of  Property_List
-)
-
-([protempa_ProjectKB_Class465] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "term")
-	(property_list [protempa_ProjectKB_Class466])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 240))
-
-([protempa_ProjectKB_Class466] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class467]
-		[protempa_ProjectKB_Class468]))
-
-([protempa_ProjectKB_Class467] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class468] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class469] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "property")
-	(property_list [protempa_ProjectKB_Class470])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 120))
-
-([protempa_ProjectKB_Class470] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class471]
-		[protempa_ProjectKB_Class472]))
-
-([protempa_ProjectKB_Class471] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class472] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class473] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "documentation")
-	(property_list [protempa_ProjectKB_Class474])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 120))
-
-([protempa_ProjectKB_Class474] of  Property_List
-)
-
-([protempa_ProjectKB_Class475] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "inverseIsA")
-	(property_list [protempa_ProjectKB_Class476])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 120))
-
-([protempa_ProjectKB_Class476] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class477]
-		[protempa_ProjectKB_Class478]))
-
-([protempa_ProjectKB_Class477] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class478] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class479] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(label "Solid")
-	(name "solid")
-	(property_list [protempa_ProjectKB_Class480])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 300))
-
-([protempa_ProjectKB_Class480] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class481]
-		[protempa_ProjectKB_Class482]))
-
-([protempa_ProjectKB_Class481] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class482] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
-
-([protempa_ProjectKB_Class483] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "displayName")
-	(property_list [protempa_ProjectKB_Class484])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 60))
-
-([protempa_ProjectKB_Class484] of  Property_List
-)
-
-([protempa_ProjectKB_Class485] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name ":NAME")
-	(property_list [protempa_ProjectKB_Class486])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
-	(width 200)
-	(x 0)
-	(y 180))
-
-([protempa_ProjectKB_Class486] of  Property_List
-)
-
-([protempa_ProjectKB_Class487] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "hasPart")
-	(property_list [protempa_ProjectKB_Class488])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 200)
-	(y 0))
-
-([protempa_ProjectKB_Class488] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class489]
-		[protempa_ProjectKB_Class490]))
-
-([protempa_ProjectKB_Class489] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class490] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class491] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "abbrevDisplayName")
-	(property_list [protempa_ProjectKB_Class492])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 0))
-
-([protempa_ProjectKB_Class492] of  Property_List
-)
-
-([protempa_ProjectKB_Class493] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(label "Concatenable")
-	(name "concatenable")
-	(property_list [protempa_ProjectKB_Class494])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 360))
-
-([protempa_ProjectKB_Class494] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class495]
-		[protempa_ProjectKB_Class496]))
-
-([protempa_ProjectKB_Class495] of  String
-
-	(name "tooltip_text"))
-
-([protempa_ProjectKB_Class496] of  Boolean
-
-	(boolean_value TRUE)
-	(name "readOnly_configured"))
 
 ([protempa_ProjectKB_Class512] of  Property_List
 
@@ -3038,502 +1449,167 @@
 ([protempa_ProjectKB_Class513] of  Property_List
 )
 
-([protempa_ProjectKB_Class521] of  String
-
-	(name ":INSTANCE-ANNOTATION")
-	(string_value "%3AANNOTATION-TEXT"))
-
-([protempa_ProjectKB_Class522] of  String
-
-	(name ":PAL-CONSTRAINT")
-	(string_value "%3APAL-NAME"))
-
-([protempa_ProjectKB_Class523] of  String
-
-	(name ":META-CLASS")
-	(string_value "%3ANAME"))
-
-([protempa_ProjectKB_Class524] of  String
-
-	(name "ValueSetElement")
-	(string_value "elementOfValueSet"))
-
-([protempa_ProjectKB_Class525] of  Map
-
-	(entries [protempa_ProjectKB_Class526]))
-
-([protempa_ProjectKB_Class526] of  Map_Entry
-
-	(key "KB_468183_Class0")
-	(key_class "edu.stanford.smi.protege.model.Frame")
-	(value "25 25 202 123")
-	(value_class "java.awt.Rectangle"))
-
-([protempa_ProjectKB_Class527] of  Map_Entry
-
-	(key "InstanceDisplay.yellow_stickies")
-	(key_class "java.lang.String")
-	(value "protempa_ProjectKB_Class525")
-	(value_class "java.util.Map"))
-
-([protempa_ProjectKB_Class85] of  Widget
-
-	(is_hidden FALSE)
-	(name "LabCls")
-	(property_list [protempa_ProjectKB_Class88])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
-
-([protempa_ProjectKB_Class88] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class89]
-		[protempa_ProjectKB_Class90]
-		[protempa_ProjectKB_Class94]
-		[protempa_ProjectKB_Class96]
-		[protempa_ProjectKB_Class100]
-		[protempa_ProjectKB_Class104]
-		[protempa_ProjectKB_Class106]
-		[protempa_ProjectKB_Class110]
-		[protempa_ProjectKB_Class112]
-		[protempa_ProjectKB_Class116]
-		[protempa_ProjectKB_Class118]
-		[protempa_ProjectKB_Class120]
-		[protempa_ProjectKB_Class124]
-		[protempa_ProjectKB_Class126]
-		[protempa_ProjectKB_Class128]
-		[protempa_ProjectKB_Class130]))
-
-([protempa_ProjectKB_Class89] of  Property_List
-
-	(name "layout properties"))
-
-([protempa_ProjectKB_Class90] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "isA")
-	(property_list [protempa_ProjectKB_Class91])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 0))
-
-([protempa_ProjectKB_Class91] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class92]
-		[protempa_ProjectKB_Class93]))
-
-([protempa_ProjectKB_Class92] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class93] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([protempa_ProjectKB_Class94] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "inDataSource")
-	(property_list [protempa_ProjectKB_Class95])
-	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
-	(width 200)
-	(x 0)
-	(y 240))
-
-([protempa_ProjectKB_Class95] of  Property_List
-)
-
-([protempa_ProjectKB_Class96] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "term")
-	(property_list [protempa_ProjectKB_Class97])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 400)
-	(y 240))
-
-([protempa_ProjectKB_Class97] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class98]
-		[protempa_ProjectKB_Class99]))
-
-([protempa_ProjectKB_Class98] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class99] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([ProtempaTest_ProjectKB_Class1] of  Widget
+([protempa_ProjectKB_Class52] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class2])
-	(widget_class_name "se.liu.ida.JessTab.JessTab"))
-
-([ProtempaTest_ProjectKB_Class10] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class11] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class12])
-	(widget_class_name "ca.uvic.csr.shrimp.jambalaya.JambalayaTab"))
-
-([ProtempaTest_ProjectKB_Class12] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class13] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class14])
-	(widget_class_name "edu.stanford.smi.protegex.server_changes.prompt.UsersTab"))
-
-([ProtempaTest_ProjectKB_Class14] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class15] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class16])
-	(widget_class_name "ezpal.EZPalTab"))
-
-([ProtempaTest_ProjectKB_Class16] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class17] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class18])
-	(widget_class_name "edu.stanford.smi.protege.widget.instance_tree.InstanceTreeTab"))
-
-([ProtempaTest_ProjectKB_Class18] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class19] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class20])
-	(widget_class_name "edu.stanford.smi.protegex.widget.pal.PalConstraintsTab"))
-
-([ProtempaTest_ProjectKB_Class2] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class20] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class21] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class22])
-	(widget_class_name "edu.stanford.smi.RemoteKBTab.WordNetTab"))
-
-([ProtempaTest_ProjectKB_Class22] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class23] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class24])
-	(widget_class_name "uk.ac.man.ac.mig.coode.individuals.ui.OWLDLIndividualsTab"))
-
-([ProtempaTest_ProjectKB_Class24] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class25] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class26])
-	(widget_class_name "edu.stanford.smi.protege.widget.ClsesAndInstancesTab"))
-
-([ProtempaTest_ProjectKB_Class26] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class27] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class28])
-	(widget_class_name "edu.stanford.smi.protegex.evaluation.MetaAnalysis"))
-
-([ProtempaTest_ProjectKB_Class28] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class29] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class30])
-	(widget_class_name "org.protege.owl.mm.protege3.MappingMasterTab"))
-
-([ProtempaTest_ProjectKB_Class3] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class4])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.metadatatab.OWLMetadataTab"))
-
-([ProtempaTest_ProjectKB_Class30] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class31] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class32])
-	(widget_class_name "edu.stanford.smi.protege.query.LuceneQueryPlugin"))
-
-([ProtempaTest_ProjectKB_Class32] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class33] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class34])
-	(widget_class_name "uk.ac.man.cs.mig.coode.owlviz.ui.OWLVizTab"))
-
-([ProtempaTest_ProjectKB_Class34] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class35] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class36])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.cls.OWLClassesTab"))
-
-([ProtempaTest_ProjectKB_Class36] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class37] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class38])
-	(widget_class_name "edu.stanford.smi.RemoteKBTab.UMLSTab"))
-
-([ProtempaTest_ProjectKB_Class38] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class39] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class40])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.individuals.OWLIndividualsTab"))
-
-([ProtempaTest_ProjectKB_Class4] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class40] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class41] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class42])
-	(widget_class_name "edu.stanford.smi.protegex.changeanalysis.ChangeAnalysisTab"))
-
-([ProtempaTest_ProjectKB_Class42] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class43] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class44])
-	(widget_class_name "org.algernon.kb.okbc.protege.plugins.AlgernonTab"))
-
-([ProtempaTest_ProjectKB_Class44] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class45] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class46])
-	(widget_class_name "TGViztab.TGVizTab"))
-
-([ProtempaTest_ProjectKB_Class46] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class47] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class48])
-	(widget_class_name "edu.stanford.smi.protegex.changes.changesKBViewTab.ChangesKBViewTab"))
-
-([ProtempaTest_ProjectKB_Class48] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class49] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class50])
+	(property_list [protempa_ProjectKB_Class53])
 	(widget_class_name "edu.stanford.smi.protege.widget.KAToolTab"))
 
-([ProtempaTest_ProjectKB_Class5] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class6])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.properties.OWLPropertiesTab"))
-
-([ProtempaTest_ProjectKB_Class50] of  Property_List
+([protempa_ProjectKB_Class53] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class51] of  Widget
+([protempa_ProjectKB_Class54] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class52])
+	(property_list [protempa_ProjectKB_Class55])
 	(widget_class_name "edu.stanford.smi.protegex.xml.tab.XMLTab"))
 
-([ProtempaTest_ProjectKB_Class52] of  Property_List
+([protempa_ProjectKB_Class55] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class53] of  Widget
+([protempa_ProjectKB_Class56] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class54])
+	(property_list [protempa_ProjectKB_Class57])
 	(widget_class_name "edu.stanford.smi.protegex.chatPlugin.ChatTab"))
 
-([ProtempaTest_ProjectKB_Class54] of  Property_List
+([protempa_ProjectKB_Class57] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class55] of  Widget
+([protempa_ProjectKB_Class58] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class56])
+	(property_list [protempa_ProjectKB_Class59])
 	(widget_class_name "edu.stanford.smi.protegex.widget.pal.PalQueriesTab"))
 
-([ProtempaTest_ProjectKB_Class56] of  Property_List
+([protempa_ProjectKB_Class59] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class57] of  Widget
+([protempa_ProjectKB_Class6] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class58])
+	(property_list [protempa_ProjectKB_Class7])
+	(widget_class_name "edu.stanford.smi.protegex.owl.ui.metadatatab.OWLMetadataTab"))
+
+([protempa_ProjectKB_Class60] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class61])
 	(widget_class_name "org.protege.owl.axiome.ui.AxiomeTab"))
 
-([ProtempaTest_ProjectKB_Class58] of  Property_List
+([protempa_ProjectKB_Class61] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class59] of  Widget
+([protempa_ProjectKB_Class62] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class60])
+	(property_list [protempa_ProjectKB_Class63])
 	(widget_class_name "edu.stanford.smi.protege.keywordsearch.StringSearch"))
 
-([ProtempaTest_ProjectKB_Class6] of  Property_List
+([protempa_ProjectKB_Class63] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class60] of  Property_List
-)
-
-([ProtempaTest_ProjectKB_Class61] of  Widget
+([protempa_ProjectKB_Class64] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class62])
+	(property_list [protempa_ProjectKB_Class65])
 	(widget_class_name "edu.stanford.smi.protegex.owl.ui.widget.OWLFormsTab"))
 
-([ProtempaTest_ProjectKB_Class62] of  Property_List
+([protempa_ProjectKB_Class65] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class63] of  Widget
+([protempa_ProjectKB_Class66] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class64])
+	(property_list [protempa_ProjectKB_Class67])
 	(widget_class_name "script.ProtegeScriptTab"))
 
-([ProtempaTest_ProjectKB_Class64] of  Property_List
+([protempa_ProjectKB_Class67] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class65] of  Widget
+([protempa_ProjectKB_Class68] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class66])
+	(property_list [protempa_ProjectKB_Class69])
 	(widget_class_name "edu.stanford.smi.protegex.changes.ChangesTab"))
 
-([ProtempaTest_ProjectKB_Class66] of  Property_List
+([protempa_ProjectKB_Class69] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class67] of  Widget
+([protempa_ProjectKB_Class7] of  Property_List
+)
+
+([protempa_ProjectKB_Class70] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class68])
+	(property_list [protempa_ProjectKB_Class71])
 	(widget_class_name "edu.stanford.smi.protegex.owl.swrl.ui.tab.SWRLTab"))
 
-([ProtempaTest_ProjectKB_Class68] of  Property_List
+([protempa_ProjectKB_Class71] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class69] of  Widget
+([protempa_ProjectKB_Class72] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class70])
+	(property_list [protempa_ProjectKB_Class73])
 	(widget_class_name "edu.stanford.smi.protegex.fctab.FacetConstraintsTab"))
 
-([ProtempaTest_ProjectKB_Class7] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class8])
-	(widget_class_name "edu.stanford.smi.protege.widget.ProtegePropertiesTab"))
-
-([ProtempaTest_ProjectKB_Class70] of  Property_List
+([protempa_ProjectKB_Class73] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class71] of  Widget
+([protempa_ProjectKB_Class74] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class72])
+	(property_list [protempa_ProjectKB_Class75])
 	(widget_class_name "edu.stanford.smi.protege.widget.instance_tree.KnowledgeTreeTab"))
 
-([ProtempaTest_ProjectKB_Class72] of  Property_List
+([protempa_ProjectKB_Class75] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class73] of  Widget
+([protempa_ProjectKB_Class76] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class74])
+	(property_list [protempa_ProjectKB_Class77])
 	(widget_class_name "edu.stanford.smi.protegex.datamaster.DataMasterTab"))
 
-([ProtempaTest_ProjectKB_Class74] of  Property_List
+([protempa_ProjectKB_Class77] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class75] of  Widget
+([protempa_ProjectKB_Class78] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class76])
+	(property_list [protempa_ProjectKB_Class79])
 	(widget_class_name "dfki.protege.ontoviz_tab.OntovizTab"))
 
-([ProtempaTest_ProjectKB_Class76] of  Property_List
+([protempa_ProjectKB_Class79] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class77] of  Widget
+([protempa_ProjectKB_Class8] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class78])
+	(property_list [protempa_ProjectKB_Class9])
+	(widget_class_name "edu.stanford.smi.protegex.owl.ui.properties.OWLPropertiesTab"))
+
+([protempa_ProjectKB_Class80] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [protempa_ProjectKB_Class81])
 	(widget_class_name "edu.stanford.smi.protegex.changes.stats.ChangeStatisticsTab"))
 
-([ProtempaTest_ProjectKB_Class78] of  Property_List
+([protempa_ProjectKB_Class81] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class79] of  Widget
+([protempa_ProjectKB_Class82] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class80])
+	(property_list [protempa_ProjectKB_Class83])
 	(widget_class_name "edu.stanford.smi.protegex.prompt.PromptTab"))
 
-([ProtempaTest_ProjectKB_Class8] of  Property_List
+([protempa_ProjectKB_Class83] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class80] of  Property_List
+([protempa_ProjectKB_Class9] of  Property_List
 )
-
-([ProtempaTest_ProjectKB_Class9] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [ProtempaTest_ProjectKB_Class10])
-	(widget_class_name "uk.ac.man.cs.mig.coode.debugger.test.DebuggerTestTab"))
 
 ([QUERIES_TAB] of  Widget
 

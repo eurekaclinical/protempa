@@ -1,17 +1,7 @@
-; Fri Mar 16 15:45:41 EDT 2012
+; Mon Mar 19 11:59:21 EDT 2012
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
-
-([HELLP_Instance_0] of  Argument
-
-	(name "maxThresholdVal")
-	(valueType NominalValue))
-
-([HELLP_Instance_1] of  Argument
-
-	(name "minThresholdVal")
-	(valueType NominalValue))
 
 ([KB_163878_Class1] of  %3APAL-CONSTRAINT
 )
@@ -33,20 +23,10 @@
 		[PROTEMPANEW_Instance_7]
 		[PROTEMPANEW_Instance_30002]))
 
-([PROTEMPANEW_Instance_20011] of  Argument
-
-	(name "minThresholdComp")
-	(valueType NominalValue))
-
 ([PROTEMPANEW_Instance_30002] of  Argument
 
 	(name "maxThreshold")
 	(valueType NumericalValue))
-
-([PROTEMPANEW_Instance_30003] of  Argument
-
-	(name "maxThresholdComp")
-	(valueType NominalValue))
 
 ([PROTEMPANEW_Instance_7] of  Argument
 
