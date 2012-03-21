@@ -1,4 +1,4 @@
-; Thu Mar 15 17:15:54 EDT 2012
+; Wed Mar 21 14:56:40 EDT 2012
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
@@ -940,10 +940,10 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[ProtempaTest_ProjectKB_Class81]
-		[ProtempaTest_ProjectKB_Class82]
-		[ProtempaTest_ProjectKB_Class83]
-		[ProtempaTest_ProjectKB_Class84]))
+		[ProtempaTest_ProjectKB_Class10090]
+		[ProtempaTest_ProjectKB_Class10091]
+		[ProtempaTest_ProjectKB_Class10092]
+		[ProtempaTest_ProjectKB_Class10093]))
 
 ([CLSES_TAB] of  Widget
 
@@ -983,9 +983,6 @@
 ([INSTANCES_TAB] of  Widget
 
 	(widget_class_name "edu.stanford.smi.protege.widget.InstancesTab"))
-
-([KB_316174_Class0] of  Map
-)
 
 ([KB_495177_Class0] of  String
 
@@ -1097,6 +1094,9 @@
 ([KB_495177_Class99] of  Property_List
 )
 
+([KB_496033_Class0] of  Map
+)
+
 ([LAYOUT_PROPERTIES] of  Property_List
 
 	(name "layout properties")
@@ -1181,9 +1181,9 @@
 	(customized_instance_widgets
 		[INSTANCE_ANNOTATION_FORM_WIDGET]
 		[AIW_ProjectKB_Class10117]
-		[STANDARD_FACET_FORM_WIDGET]
-		[AIW_ProjectKB_Class84]
 		[STANDARD_SLOT_FORM_WIDGET]
+		[AIW_ProjectKB_Class84]
+		[STANDARD_FACET_FORM_WIDGET]
 		[PAL_FORM_WIDGET]
 		[AIW_ProjectKB_Class10158]
 		[STANDARD_CLASS_FORM_WIDGET])
@@ -1211,11 +1211,31 @@
 ([ProtempaTest_ProjectKB_Class10] of  Property_List
 )
 
+([ProtempaTest_ProjectKB_Class10090] of  String
+
+	(name ":INSTANCE-ANNOTATION")
+	(string_value "%3AANNOTATION-TEXT"))
+
+([ProtempaTest_ProjectKB_Class10091] of  String
+
+	(name ":PAL-CONSTRAINT")
+	(string_value "%3APAL-NAME"))
+
+([ProtempaTest_ProjectKB_Class10092] of  String
+
+	(name ":META-CLASS")
+	(string_value "%3ANAME"))
+
+([ProtempaTest_ProjectKB_Class10093] of  String
+
+	(name "ValueSetElement")
+	(string_value "elementOfValueSet"))
+
 ([ProtempaTest_ProjectKB_Class11] of  Widget
 
 	(is_hidden TRUE)
 	(property_list [ProtempaTest_ProjectKB_Class12])
-	(widget_class_name "ca.uvic.csr.shrimp.jambalaya.JambalayaTab"))
+	(widget_class_name "ezpal.EZPalTab"))
 
 ([ProtempaTest_ProjectKB_Class12] of  Property_List
 )
@@ -1224,7 +1244,7 @@
 
 	(is_hidden TRUE)
 	(property_list [ProtempaTest_ProjectKB_Class14])
-	(widget_class_name "edu.stanford.smi.protegex.server_changes.prompt.UsersTab"))
+	(widget_class_name "ca.uvic.csr.shrimp.jambalaya.JambalayaTab"))
 
 ([ProtempaTest_ProjectKB_Class14] of  Property_List
 )
@@ -1233,7 +1253,7 @@
 
 	(is_hidden TRUE)
 	(property_list [ProtempaTest_ProjectKB_Class16])
-	(widget_class_name "ezpal.EZPalTab"))
+	(widget_class_name "edu.stanford.smi.protegex.server_changes.prompt.UsersTab"))
 
 ([ProtempaTest_ProjectKB_Class16] of  Property_List
 )
@@ -1555,26 +1575,6 @@
 
 ([ProtempaTest_ProjectKB_Class80] of  Property_List
 )
-
-([ProtempaTest_ProjectKB_Class81] of  String
-
-	(name ":INSTANCE-ANNOTATION")
-	(string_value "%3AANNOTATION-TEXT"))
-
-([ProtempaTest_ProjectKB_Class82] of  String
-
-	(name ":META-CLASS")
-	(string_value "%3ANAME"))
-
-([ProtempaTest_ProjectKB_Class83] of  String
-
-	(name ":PAL-CONSTRAINT")
-	(string_value "%3APAL-NAME"))
-
-([ProtempaTest_ProjectKB_Class84] of  String
-
-	(name "ValueSetElement")
-	(string_value "elementOfValueSet"))
 
 ([ProtempaTest_ProjectKB_Class9] of  Widget
 
