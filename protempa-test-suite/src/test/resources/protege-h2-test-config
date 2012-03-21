@@ -8,5 +8,5 @@ databaseId = jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
 databaseAPI = DRIVERMANAGER
 
 [org.protempa.ksb.protege.LocalKnowledgeSourceBackend_3]
-projectString = src/test/resources/ksb/AIW.pprj
+projectString = src/test/resources/ksb/ProtempaTest.pprj
 units = ABSOLUTE
