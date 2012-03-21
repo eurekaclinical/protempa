@@ -29,7 +29,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,7 +72,7 @@ import org.protempa.test.dataloading.XlsxDataProvider;
  * @author Michel Mansour
  */
 public class ProtempaTest {
-    
+
     private static final String QUERY_ERROR_MSG = "Failed to build query";
     private static final String AF_ERROR_MSG = "Exception thrown by AbstractionFinder";
 
@@ -78,15 +80,22 @@ public class ProtempaTest {
             .getName());
 
     /**
-     * The ground truth results for the test dataset
+     * The ground truth results directory for the test data
      */
-    private static final String TRUTH_FILE = "src/test/resources/output/truth.txt";
+    private static final String TRUTH_DIR = "src/test/resources/truth/";
+
+    /**
+     * The ground truth for the number of propositions for each key pulled from
+     * the sample data
+     */
+    private static final String TRUTH_PROP_COUNTS_FILE = TRUTH_DIR
+            + "/db-proposition-counts.txt";
 
     /**
      * Where to keep the persistent stores
      */
     private static final String STORE_HOME = "src/test/resources/store";
-    
+
     /**
      * Name of the persistent storage environment
      */
@@ -118,7 +127,7 @@ public class ProtempaTest {
      * Instance of Protempa to run
      */
     private Protempa protempa;
-    
+
     /**
      * Performs set up operations required for all testing (eg, setting up the
      * in-memory database).
@@ -131,8 +140,7 @@ public class ProtempaTest {
 
     }
 
-    private void populateDatabase() throws DataProviderException,
-            SQLException {
+    private void populateDatabase() throws DataProviderException, SQLException {
         logger.log(Level.INFO, "Populating database");
         XlsxDataProvider provider = new XlsxDataProvider(new File(
                 "src/test/resources/dsb/sample-data.xlsx"));
@@ -159,17 +167,17 @@ public class ProtempaTest {
         // others
         System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
                 "org.protempa.bp.commons.dsb.relationaldb.H2SQLGenerator");
-        
+
         File storeHome = new File(STORE_HOME);
         logger.log(Level.INFO, "Clearing out persistent storage files");
         deleteDir(storeHome);
         storeHome.mkdir();
         logger.log(Level.INFO, "Persistent storage area clear");
-        
+
         // system properties for caching and persistence
         System.setProperty("java.io.tmpdir", STORE_HOME);
         System.setProperty("store.env.name", STORE_ENV_NAME);
-        
+
         protempa = Protempa.newInstance("protege-h2-test-config");
     }
 
@@ -220,8 +228,8 @@ public class ProtempaTest {
     @Test
     public void testProtempa() {
         testRetrieveDataAndPersist();
-        testProcessResultsAndPersist();
-        testOutputResults();
+        // testProcessResultsAndPersist();
+        // testOutputResults();
     }
 
     private Query query() throws ParseException, KnowledgeSourceReadException,
@@ -258,6 +266,20 @@ public class ProtempaTest {
         return query;
     }
 
+    private static Map<String, Integer> getResultCounts(String filename)
+            throws NumberFormatException, IOException {
+        HashMap<String, Integer> result = new HashMap<String, Integer>();
+
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] count = line.split(":");
+            result.put(count[0], Integer.parseInt(count[1]));
+        }
+
+        return result;
+    }
+
     /**
      * Tests Protempa's retrieve and persist method.
      */
@@ -268,10 +290,10 @@ public class ProtempaTest {
             results = PropositionStoreCreator.getInstance().getPersistentStore(
                     RETRIEVAL_STORE_NAME);
             assertEquals("data not expected size", 512, results.size());
+            Map<String, Integer> propCounts = getResultCounts(TRUTH_PROP_COUNTS_FILE);
             for (Entry<String, List<Proposition>> r : results.entrySet()) {
-                // check the results
-                // assertEquals("propositions for key " + r.getKey()
-                // + " not expected", EXPECTED, r.getValue().size());
+                 assertEquals("propositions for key " + r.getKey()
+                 + " not expected", propCounts.get(r.getKey()), r.getValue().size());
             }
         } catch (FinderException ex) {
             ex.printStackTrace();
@@ -285,6 +307,10 @@ public class ProtempaTest {
         } catch (QueryBuildException ex) {
             ex.printStackTrace();
             fail(QUERY_ERROR_MSG);
+        } catch (NumberFormatException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         } finally {
             if (results != null) {
                 results.shutdown();
