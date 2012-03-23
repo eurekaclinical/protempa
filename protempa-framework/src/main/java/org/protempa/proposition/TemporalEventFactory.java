@@ -19,15 +19,21 @@
  */
 package org.protempa.proposition;
 
-import org.protempa.proposition.interval.IntervalFactory;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 
 import org.protempa.DataSourceType;
+import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.value.Granularity;
 
+/**
+ * Generate instances of {@link Event} based on the provided date format and 
+ * granularity.
+ * <b>NOTE:</b> This class is not thread-safe, as it uses a {@link DateFormat} 
+ * instance field to parse dates from strings.
+ */
 public final class TemporalEventFactory {
 
     private static final IntervalFactory intervalFactory =
