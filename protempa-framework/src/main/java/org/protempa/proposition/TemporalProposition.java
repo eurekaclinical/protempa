@@ -41,10 +41,14 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     private static final long serialVersionUID = 3263217702318065414L;
 
-    private static final NumberFormat numberFormat = NumberFormat.getInstance();
-    static {
-        numberFormat.setGroupingUsed(true);
-    }
+    private static final ThreadLocal<NumberFormat> numberFormat = new ThreadLocal<NumberFormat>() {
+        @Override
+        protected NumberFormat initialValue () {
+            NumberFormat format = NumberFormat.getInstance();
+            format.setGroupingUsed(true);
+            return format;
+        }
+    };
 
     protected static final IntervalFactory INTERVAL_FACTORY = new IntervalFactory();
 
@@ -201,7 +205,7 @@ public abstract class TemporalProposition extends AbstractProposition {
         } else {
             Long minStart = interval.getMinStart();
             if (minStart != null) {
-                return numberFormat.format(minStart);
+                return numberFormat.get().format(minStart);
             } else {
                 return "Unknown";
             }
@@ -228,7 +232,7 @@ public abstract class TemporalProposition extends AbstractProposition {
         } else {
             Long minFinish = interval.getMinFinish();
             if (minFinish != null) {
-                return numberFormat.format(minFinish);
+                return numberFormat.get().format(minFinish);
             } else {
                 return "Unknown";
             }
@@ -246,7 +250,7 @@ public abstract class TemporalProposition extends AbstractProposition {
         } else {
             Long minLength = interval.getMinLength();
             if (minLength != null) {
-                return numberFormat.format(minLength);
+                return numberFormat.get().format(minLength);
             } else {
                 return "Unknown";
             }
