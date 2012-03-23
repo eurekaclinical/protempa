@@ -48,8 +48,12 @@ import org.protempa.ValueSet;
 
 public class PropositionColumnSpec extends AbstractTableColumnSpec {
     
-    private static final NumberFormat numberFormat = 
-            NumberFormat.getInstance();
+    private static final ThreadLocal<NumberFormat> numberFormat = new ThreadLocal<NumberFormat>() {
+        @Override
+        protected NumberFormat initialValue () {
+            return NumberFormat.getInstance();
+        }
+    };
 
     private final Link[] links;
     private final String[] propertyNames;
@@ -211,7 +215,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                  * This is a hack until we have an API in PROTEMPA to get a 
                  * length string without units.
                  */
-                result[i++] = numberFormat.format(
+                result[i++] = numberFormat.get().format(
                         abstractParameter.getInterval().getMinLength());
             }
             processProperties(abstractParameter);
@@ -240,7 +244,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                  */
                 Long minLength = event.getInterval().getMinLength();
                 if (minLength != null) {
-                    result[i++] = numberFormat.format(minLength);
+                    result[i++] = numberFormat.get().format(minLength);
                 } else {
                     result[i++] = "";
                 }
@@ -273,7 +277,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 Long minLength = 
                         primitiveParameter.getInterval().getMinLength();
                 if (minLength != null) {
-                    result[i++] = numberFormat.format(minLength);
+                    result[i++] = numberFormat.get().format(minLength);
                 } else {
                     result[i++] = "";
                 }
