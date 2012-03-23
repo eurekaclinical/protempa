@@ -26,6 +26,9 @@ import java.text.NumberFormat;
 import java.text.ParsePosition;
 
 /**
+ * <b>NOTE:</b> This class is not thread-safe, since it uses a NumberFormat 
+ * instance and a MessageFormat instance as private fields.
+ * 
  * @author Andrew Post
  */
 class RelativeTimeUnitFormat extends Format {
