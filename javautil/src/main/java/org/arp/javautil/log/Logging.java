@@ -29,8 +29,12 @@ import java.util.logging.Logger;
  * @author Andrew Post
  */
 public class Logging {
-    private static NumberFormat numberFormat = 
-            NumberFormat.getIntegerInstance();
+    private static final ThreadLocal<NumberFormat> numberFormat = new ThreadLocal<NumberFormat>() {
+        @Override
+        protected NumberFormat initialValue() {
+            return NumberFormat.getIntegerInstance();
+        }
+    };
     
     /**
      * Prints a count of something to a log with an appropriate singular or
@@ -75,7 +79,7 @@ public class Logging {
     public static void logCount(Logger logger, Level level, int count, 
             String singularMessage, String pluralMessage, 
             Object[] singularParams, Object[] pluralParams) {
-        String countStr = numberFormat.format(count);
+        String countStr = numberFormat.get().format(count);
         if (count > 1 || count == 0) {
             logger.log(level, pluralMessage, 
                     processLogCountParams(countStr, pluralParams));
