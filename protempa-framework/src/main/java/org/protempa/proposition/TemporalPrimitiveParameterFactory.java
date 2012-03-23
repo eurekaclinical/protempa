@@ -28,6 +28,12 @@ import org.protempa.DataSourceType;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Value;
 
+/**
+ * Generate instances of {@link PrimitiveParameter} based on the provided date 
+ * format and granularity.
+ * <b>NOTE:</b> This class is not thread-safe, as it uses a {@link DateFormat} 
+ * instance field to parse dates from strings.
+ */
 public final class TemporalPrimitiveParameterFactory {
     private final DateFormat dateFormat;
     private final Granularity granularity;
