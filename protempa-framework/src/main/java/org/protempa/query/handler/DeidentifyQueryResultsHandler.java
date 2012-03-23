@@ -23,6 +23,7 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
@@ -37,8 +38,12 @@ public final class DeidentifyQueryResultsHandler
         implements QueryResultsHandler {
 
     private static final long serialVersionUID = 4289223507110468993L;
-    private static final NumberFormat disguisedKeyFormat =
-            NumberFormat.getInstance();
+    private static final ThreadLocal<NumberFormat> disguisedKeyFormat = new ThreadLocal<NumberFormat>() {
+        @Override
+        protected NumberFormat initialValue () {
+            return NumberFormat.getInstance();
+        }
+    };
     private boolean keyIdDisguised;
     private final QueryResultsHandler handler;
     private final Map<String, String> keyMapper;
@@ -99,7 +104,7 @@ public final class DeidentifyQueryResultsHandler
             if (this.keyMapper.containsKey(keyId)) {
                 keyId = this.keyMapper.get(keyId);
             } else {
-                keyId = disguisedKeyFormat.format(nextDisguisedKey++);
+                keyId = disguisedKeyFormat.get().format(nextDisguisedKey++);
             }
         }
         return keyId;
