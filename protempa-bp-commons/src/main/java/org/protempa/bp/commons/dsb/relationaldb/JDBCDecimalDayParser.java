@@ -36,8 +36,13 @@ import java.util.Calendar;
 public class JDBCDecimalDayParser implements JDBCPositionFormat {
 
     private static final Calendar calendar = Calendar.getInstance();
-    private static final DateFormat DATE_FORMAT =
-            new SimpleDateFormat("yyyyMMdd");
+    private static final ThreadLocal<DateFormat> DATE_FORMAT =
+            new ThreadLocal<DateFormat> () {
+                @Override
+                protected DateFormat initialValue() {
+                    return new SimpleDateFormat("yyyyMMdd");
+                }
+    };
 
     /**
      * Parses strings with format <code>yyyyMMdd</code> into a position with a
@@ -84,6 +89,6 @@ public class JDBCDecimalDayParser implements JDBCPositionFormat {
      */
     @Override
     public String format(Long position) {
-        return DATE_FORMAT.format(position);
+        return DATE_FORMAT.get().format(position);
     }
 }
