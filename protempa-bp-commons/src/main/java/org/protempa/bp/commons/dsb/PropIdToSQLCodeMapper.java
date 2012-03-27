@@ -64,9 +64,9 @@ public final class PropIdToSQLCodeMapper {
 
     /**
      * Reads codes in a resource. The resource is prefixed by the resource
-     * prefix specified at construction. Each mapping must on a separate line,
-     * and each line must be delimited by a separator. A column number indicates
-     * which column holds the SQL code for the mapping.
+     * prefix specified at construction. Each mapping must be on a separate
+     * line, and each line must be delimited by a separator. A column number
+     * indicates which column holds the knowledge source code for the mapping.
      * 
      * @param resource
      *            the name of the resource, as a {@link String}. Will be
@@ -74,10 +74,10 @@ public final class PropIdToSQLCodeMapper {
      * @param sep
      *            a {@link String} delimiting the lines of the resource
      * @param colNum
-     *            an integer indicating which column of hthe mapping holds the
-     *            SQL version of a code
-     * @return a {@link String} array containing all of the mapped SQL codes in
-     *         the resource
+     *            an integer indicating which column of the mapping holds the
+     *            knowledge source version of a code
+     * @return a {@link String} array containing all of the mapped knowledge source
+     *         codes in the resource
      * @throws IOException
      *             if something goes wrong while accessing the resource
      */
