@@ -88,8 +88,22 @@ public class ProtempaTest {
      * The ground truth for the number of propositions for each key pulled from
      * the sample data
      */
-    private static final String TRUTH_PROP_COUNTS_FILE = TRUTH_DIR
+    private static final String PROP_COUNTS_FILE = TRUTH_DIR
             + "/db-proposition-counts.txt";
+
+    /**
+     * The ground truth for the number of forward derivations for each key
+     * processed from the sample data
+     */
+    private static final String FORWARD_DERIVATION_COUNTS_FILE = TRUTH_DIR
+            + "/forward-derivations.txt";
+
+    /**
+     * The ground truth for the number of backward derivations for each key
+     * processed from the sample data
+     */
+    private static final String BACKWARD_DERIVATION_COUNTS_FILE = TRUTH_DIR
+            + "/backward-derivations.txt";
 
     /**
      * Where to keep the persistent stores
@@ -228,7 +242,7 @@ public class ProtempaTest {
     @Test
     public void testProtempa() {
         testRetrieveDataAndPersist();
-        // testProcessResultsAndPersist();
+        testProcessResultsAndPersist();
         // testOutputResults();
     }
 
@@ -292,8 +306,9 @@ public class ProtempaTest {
             assertEquals("data not expected size", 512, results.size());
             Map<String, Integer> propCounts = getResultCounts(TRUTH_PROP_COUNTS_FILE);
             for (Entry<String, List<Proposition>> r : results.entrySet()) {
-                 assertEquals("propositions for key " + r.getKey()
-                 + " not expected", propCounts.get(r.getKey()), r.getValue().size());
+                assertEquals("propositions for key " + r.getKey()
+                        + " not expected", propCounts.get(r.getKey()), r
+                        .getValue().size());
             }
         } catch (FinderException ex) {
             ex.printStackTrace();
@@ -334,12 +349,17 @@ public class ProtempaTest {
                     Arrays.asSet(PROP_IDS), null, RETRIEVAL_STORE_NAME);
             assertEquals("wrong number of working memories", 512,
                     results.size());
+            Map<String, Integer> forwardDerivCounts = getResultCounts(FORWARD_DERIVATION_COUNTS_FILE);
+            Map<String, Integer> backwardDerivCounts = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
             for (Entry<String, WorkingMemory> r : results.entrySet()) {
-                // assertEquals("wrong number of forward derivations", EXPECTED,
-                // afh.getForwardDerivations(r.getKey()));
-                // assertEquals("wrong number of backward derivations",
-                // EXPECTED,
-                // afh.getBackwardDerivations(r.getKey()));
+                assertEquals(
+                        "wrong number of forward derivations for key "
+                                + r.getKey(),
+                        forwardDerivCounts.get(r.getKey()), afh
+                                .getForwardDerivations(r.getKey()).size());
+                assertEquals("wrong number of backward derivations for key "
+                        + r.getKey(), backwardDerivCounts.get(r.getKey()), afh
+                        .getBackwardDerivations(r.getKey()).size());
             }
         } catch (KnowledgeSourceReadException e) {
             e.printStackTrace();
@@ -350,6 +370,12 @@ public class ProtempaTest {
         } catch (ProtempaException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
+        } catch (NumberFormatException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         } finally {
             afh.cleanUp();
             if (results != null) {
