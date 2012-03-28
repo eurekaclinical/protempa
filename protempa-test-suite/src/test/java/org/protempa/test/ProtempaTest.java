@@ -304,7 +304,7 @@ public class ProtempaTest {
             results = PropositionStoreCreator.getInstance().getPersistentStore(
                     RETRIEVAL_STORE_NAME);
             assertEquals("data not expected size", 512, results.size());
-            Map<String, Integer> propCounts = getResultCounts(TRUTH_PROP_COUNTS_FILE);
+            Map<String, Integer> propCounts = getResultCounts(PROP_COUNTS_FILE);
             for (Entry<String, List<Proposition>> r : results.entrySet()) {
                 assertEquals("propositions for key " + r.getKey()
                         + " not expected", propCounts.get(r.getKey()), r
