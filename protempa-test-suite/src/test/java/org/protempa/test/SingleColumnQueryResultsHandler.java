@@ -66,7 +66,7 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
     private void printDerivations(
             Map<Proposition, List<Proposition>> derivations) throws IOException {
         for (Entry<Proposition, List<Proposition>> pp : derivations.entrySet()) {
-            writeLine(pp.getKey().getId());
+            writeLine("Key:" + pp.getKey().getId());
             for (Proposition p : pp.getValue()) {
                 writeLine(p.getId());
             }
