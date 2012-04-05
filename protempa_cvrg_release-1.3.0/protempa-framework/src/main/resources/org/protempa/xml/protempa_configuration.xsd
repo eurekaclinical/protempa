@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  Protempa Framework
+  %%
+  Copyright (C) 2012 Emory University
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:include schemaLocation="protempa_query.xsd"/>
+    <xs:include schemaLocation="protempa_tableQueryResultsHandler.xsd"/>
+    <xs:include schemaLocation="protempa_relationalDBBackend.xsd"/>
+    <xs:element name="protempaConfiguration">
+        <xs:annotation>
+            <xs:documentation>Describes a configuration of Protempa</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="dataOutputFile" type="filePathType">
+                    <xs:annotation>
+                        <xs:documentation>Identifies the data file to be written by Protempa.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element minOccurs="0" name="explanationOutputFile" type="filePathType">
+                    <xs:annotation>
+                        <xs:documentation>Identifies a file to be output that explains why a protempa run did what it did.  The contents of the identified file should conform to this schema.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element ref="protempaQuery">
+                    <xs:annotation>
+                        <xs:documentation>The query that will drive drive a Protempa run.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element ref="relationalDBBackend">
+                    <xs:annotation>
+                        <xs:documentation>A description of the data source that Protempa should use.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element ref="tableQueryResultsHandler"> </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

@@ -1,0 +1,1117 @@
+; Mon Mar 19 11:59:21 EDT 2012
+; 
+;+ (version "3.4.7")
+;+ (build "Build 620")
+
+
+(defclass %3ACLIPS_TOP_LEVEL_SLOT_CLASS "Fake class to save top-level slot information"
+	(is-a USER)
+	(role abstract)
+	(single-slot maxs1s2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot term
+;+		(comment "Terms associated with this Proposition")
+		(type INSTANCE)
+;+		(allowed-classes Term)
+;+		(inverse-slot termProposition)
+		(create-accessor read-write))
+	(single-slot mins1s2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot valueSet
+		(type INSTANCE)
+;+		(allowed-classes ValueSetElement)
+		(cardinality 1 ?VARIABLE)
+		(create-accessor read-write))
+	(single-slot displayName
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxValues
+		(type INTEGER)
+		(range 1 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot aggregateAllowedValueOf
+		(type INSTANCE)
+;+		(allowed-classes)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(multislot abstractedInto
+		(type INSTANCE)
+;+		(allowed-classes AbstractParameter)
+;+		(inverse-slot abstractedFrom)
+		(create-accessor read-write))
+	(single-slot temporalOffsets
+		(type INSTANCE)
+;+		(allowed-classes TemporalOffsets)
+;+		(cardinality 0 1)
+;+		(inverse-slot complexAbstraction)
+		(create-accessor read-write))
+	(single-slot minValues
+		(type INTEGER)
+		(range 1 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot startExtendedProposition
+		(type INSTANCE)
+;+		(allowed-classes ExtendedProposition)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot isA
+		(type INSTANCE)
+;+		(allowed-classes Proposition)
+;+		(inverse-slot inverseIsA)
+		(create-accessor read-write))
+	(single-slot documentation
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxf1f2
+;+		(comment "Leaving blank implies -inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot finishExtendedProposition
+		(type INSTANCE)
+;+		(allowed-classes ExtendedProposition)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot requireSecond
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default TRUE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot maxs1f2
+;+		(comment "Leaving blank implies +inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot complexAbstraction
+		(type INSTANCE)
+;+		(allowed-classes ComplexAbstraction PairAbstraction)
+;+		(cardinality 1 1)
+;+		(inverse-slot temporalOffsets)
+		(create-accessor read-write))
+	(single-slot proposition
+		(type INSTANCE)
+;+		(allowed-classes Proposition)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot solid
+;+		(comment "Solid means never holds over properly overlapping intervals.")
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default TRUE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot maxDurationUnits
+		(type SYMBOL)
+		(allowed-values Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minDurationUnits
+		(type SYMBOL)
+		(allowed-values Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot inValueType
+		(type SYMBOL)
+;+		(allowed-parents Value)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot parameterValue
+		(type INSTANCE)
+;+		(allowed-classes)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot withArguments
+		(type INSTANCE)
+;+		(allowed-classes Argument)
+		(create-accessor read-write))
+	(single-slot finishOffsetUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxs1s2
+;+		(comment "Leaving blank implies +inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxf1s2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minf1f2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot inverseIsA
+		(type INSTANCE)
+;+		(allowed-classes Proposition)
+;+		(inverse-slot isA)
+		(create-accessor read-write))
+	(single-slot startOffset
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot withRelations
+		(type INSTANCE)
+;+		(allowed-classes Relation)
+		(create-accessor read-write))
+	(single-slot code
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot allowedValueOf
+		(type INSTANCE)
+;+		(allowed-classes Parameter)
+;+		(cardinality 1 1)
+;+		(inverse-slot allowedValues)
+		(create-accessor read-write))
+	(single-slot maxDuration
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot mins1f2
+;+		(comment "Leaving blank implies -inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxIndex
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot value
+		(type STRING)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot maxValComp
+		(type SYMBOL)
+		(allowed-values lt lte eq)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxGapValues
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot property
+		(type INSTANCE)
+;+		(allowed-classes Property)
+		(create-accessor read-write))
+	(single-slot usingAlgorithm
+		(type INSTANCE)
+;+		(allowed-classes Algorithm)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot startOffsetUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot hasValueSetElement
+		(type INSTANCE)
+;+		(allowed-classes ValueSetElement)
+		(cardinality 1 ?VARIABLE)
+;+		(inverse-slot elementOfValueSet)
+		(create-accessor read-write))
+	(multislot termProposition
+;+		(comment "The propositions this term maps to")
+		(type INSTANCE)
+;+		(allowed-classes Proposition)
+;+		(inverse-slot term)
+		(create-accessor read-write))
+	(single-slot minValThreshold
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot termName
+;+		(comment "Name of the term")
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot hasPart
+		(type INSTANCE)
+;+		(allowed-classes Event)
+;+		(inverse-slot partOf)
+		(create-accessor read-write))
+	(single-slot minf1s2
+;+		(comment "Leaving blank implies -inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minValComp
+		(type SYMBOL)
+		(allowed-values gt gte eq)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxGapValuesUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxf1s2
+;+		(comment "Leaving blank implies +inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot abstractedFrom
+		(type INSTANCE)
+;+		(allowed-classes Parameter Event)
+;+		(inverse-slot abstractedInto)
+		(create-accessor read-write))
+	(single-slot minGapValuesUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot startSide
+		(type SYMBOL)
+		(allowed-values Start Finish)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot concatenable
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default TRUE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot KB_662003_Class0
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minGapValues
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxNumVal
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxf1f2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minIndex
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot withRelation
+		(type INSTANCE)
+;+		(allowed-classes Relation)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot abbrevDisplayName
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot extendedParameters
+		(type INSTANCE)
+;+		(allowed-classes ExtendedProposition)
+		(cardinality 1 ?VARIABLE)
+		(create-accessor read-write))
+	(multislot allowedValues
+		(type INSTANCE)
+;+		(allowed-classes SimpleParameterConstraint)
+;+		(inverse-slot allowedValueOf)
+		(create-accessor read-write))
+	(single-slot inDataSource
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default FALSE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot minf1s2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot mins1s2
+;+		(comment "Leaving blank implies -inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxValThreshold
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot finishSide
+		(type SYMBOL)
+		(allowed-values Start Finish)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot lhs
+		(type INSTANCE)
+;+		(allowed-classes ExtendedProposition)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot maxGapUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxGap
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+		(default 0)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot rhs
+		(type INSTANCE)
+;+		(allowed-classes ExtendedProposition)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(multislot partOf
+		(type INSTANCE)
+;+		(allowed-classes Event)
+;+		(inverse-slot hasPart)
+		(create-accessor read-write))
+	(single-slot minDuration
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot valueType
+		(type SYMBOL)
+;+		(allowed-parents Value)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot minNumVal
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot name_
+		(type STRING)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot mins1f2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot elementOfValueSet
+		(type SYMBOL)
+;+		(allowed-parents CategoryValue)
+;+		(cardinality 1 1)
+;+		(inverse-slot hasValueSetElement)
+		(create-accessor read-write))
+	(single-slot minf1f2
+;+		(comment "Leaving blank implies -inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxs1f2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot finishOffset
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot termId
+;+		(comment "Term identifier")
+		(type STRING)
+;+		(cardinality 1 1)
+		(create-accessor read-write)))
+
+(defclass KB
+	(is-a %3ASTANDARD-CLASS)
+	(role concrete))
+
+(defclass Abstraction
+	(is-a USER)
+	(role abstract))
+
+(defclass SimpleAbstraction
+	(is-a Abstraction)
+	(role concrete)
+	(single-slot usingAlgorithm
+		(type INSTANCE)
+;+		(allowed-classes Algorithm)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minDuration
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxValues
+		(type INTEGER)
+		(range 1 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxDurationUnits
+		(type SYMBOL)
+		(allowed-values Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minGapValues
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minDurationUnits
+		(type SYMBOL)
+		(allowed-values Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxDuration
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minValues
+		(type INTEGER)
+		(range 1 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxGapUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxGapValuesUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxGap
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+		(default 0)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minGapValuesUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot allowedValues
+		(type INSTANCE)
+;+		(allowed-classes SimpleParameterConstraint)
+		(create-accessor read-write))
+	(single-slot maxGapValues
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass ComplexAbstraction
+	(is-a Abstraction)
+	(role concrete)
+	(single-slot temporalOffsets
+		(type INSTANCE)
+;+		(allowed-classes TemporalOffsets)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxGapUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot withRelations
+		(type INSTANCE)
+;+		(allowed-classes Relation)
+		(create-accessor read-write))
+	(single-slot maxGap
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+		(default 0)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass SliceAbstraction
+	(is-a Abstraction)
+	(role concrete)
+	(single-slot minIndex
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxIndex
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot extendedParameters
+		(type INSTANCE)
+;+		(allowed-classes ExtendedProposition)
+		(cardinality 1 ?VARIABLE)
+		(create-accessor read-write)))
+
+(defclass PairAbstraction
+	(is-a Abstraction)
+	(role concrete)
+	(single-slot withRelation
+		(type INSTANCE)
+;+		(allowed-classes Relation)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot temporalOffsets
+		(type INSTANCE)
+;+		(allowed-classes TemporalOffsets)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxGapUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot requireSecond
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default TRUE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot maxGap
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+		(default 0)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass Proposition
+	(is-a USER)
+	(role abstract)
+	(multislot isA
+		(type INSTANCE)
+;+		(allowed-classes Proposition)
+		(create-accessor read-write))
+	(multislot term
+;+		(comment "Terms associated with this Proposition")
+		(type INSTANCE)
+;+		(allowed-classes Term)
+		(create-accessor read-write))
+	(single-slot inDataSource
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default FALSE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(multislot property
+		(type INSTANCE)
+;+		(allowed-classes Property)
+		(create-accessor read-write))
+	(single-slot documentation
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot concatenable
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default TRUE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(multislot inverseIsA
+		(type INSTANCE)
+;+		(allowed-classes Proposition)
+		(create-accessor read-write))
+	(single-slot displayName
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot solid
+;+		(comment "Solid means never holds over properly overlapping intervals.")
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default TRUE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot abbrevDisplayName
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass Parameter "A value with an optional temporal extant."
+	(is-a Proposition)
+	(role abstract)
+	(multislot abstractedInto
+		(type INSTANCE)
+;+		(allowed-classes AbstractParameter)
+		(create-accessor read-write))
+	(single-slot valueType
+		(type SYMBOL)
+;+		(allowed-parents Value)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass AbstractParameter "A value that is true over an interval of time."
+	(is-a Parameter)
+	(role concrete)
+	(multislot abstractedFrom
+		(type INSTANCE)
+;+		(allowed-classes Parameter Event)
+		(create-accessor read-write)))
+
+(defclass PrimitiveParameter "A value that is true at a time instance."
+	(is-a Parameter)
+	(role concrete)
+	(single-slot concatenable
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default FALSE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot maxGapUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxGap
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+		(default 0)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass Event
+	(is-a Proposition)
+	(role concrete)
+	(multislot partOf
+		(type INSTANCE)
+;+		(allowed-classes Event)
+		(create-accessor read-write))
+	(multislot hasPart
+		(type INSTANCE)
+;+		(allowed-classes Event)
+		(create-accessor read-write))
+	(single-slot concatenable
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default FALSE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot solid
+;+		(comment "Solid means never holds over properly overlapping intervals.")
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default FALSE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass Constant
+	(is-a Proposition)
+	(role concrete)
+	(single-slot concatenable
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default FALSE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot solid
+;+		(comment "Solid means never holds over properly overlapping intervals.")
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default FALSE)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass Value
+	(is-a USER)
+	(role abstract)
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass NumericalValue
+	(is-a Value)
+	(role abstract))
+
+(defclass DoubleValue
+	(is-a NumericalValue)
+	(role concrete))
+
+(defclass InequalityDoubleValue
+	(is-a NumericalValue)
+	(role concrete))
+
+(defclass CategoryValue
+	(is-a Value)
+	(role abstract)
+	(multislot valueSet
+		(type INSTANCE)
+;+		(allowed-classes ValueSetElement)
+		(cardinality 1 ?VARIABLE)
+		(create-accessor read-write))
+	(multislot hasValueSetElement
+		(type INSTANCE)
+;+		(allowed-classes ValueSetElement)
+		(cardinality 1 ?VARIABLE)
+		(create-accessor read-write)))
+
+(defclass OrdinalValue
+	(is-a CategoryValue)
+	(role concrete))
+
+(defclass NominalValue
+	(is-a CategoryValue)
+	(role concrete))
+
+(defclass BooleanValue
+	(is-a CategoryValue)
+	(role concrete))
+
+(defclass CodedValue
+	(is-a CategoryValue)
+	(role concrete))
+
+(defclass DateValue
+	(is-a Value)
+	(role concrete))
+
+(defclass Argument
+	(is-a USER)
+	(role concrete)
+	(single-slot valueType
+		(type SYMBOL)
+;+		(allowed-parents Value)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot name_
+		(type STRING)
+;+		(cardinality 1 1)
+		(create-accessor read-write)))
+
+(defclass Relation
+	(is-a USER)
+	(role concrete)
+	(single-slot maxs1s2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot mins1s2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxf1s2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minf1s2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minf1f2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot mins1s2
+;+		(comment "Leaving blank implies -inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxf1f2
+;+		(comment "Leaving blank implies -inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot mins1f2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxf1f2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot lhs
+		(type INSTANCE)
+;+		(allowed-classes ExtendedProposition)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot minf1f2
+;+		(comment "Leaving blank implies -inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxs1f2Units
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minf1s2
+;+		(comment "Leaving blank implies -inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot mins1f2
+;+		(comment "Leaving blank implies -inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxf1s2
+;+		(comment "Leaving blank implies +inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxs1f2
+;+		(comment "Leaving blank implies +inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot rhs
+		(type INSTANCE)
+;+		(allowed-classes ExtendedProposition)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot maxs1s2
+;+		(comment "Leaving blank implies +inf.")
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass Algorithm
+	(is-a USER)
+	(role concrete)
+	(single-slot inValueType
+		(type SYMBOL)
+;+		(allowed-parents Value)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot minNumVal
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot withArguments
+		(type INSTANCE)
+;+		(allowed-classes Argument)
+		(create-accessor read-write))
+	(single-slot maxNumVal
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass TemporalOffsets
+	(is-a USER)
+	(role concrete)
+	(single-slot finishSide
+		(type SYMBOL)
+		(allowed-values Start Finish)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot startOffset
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot finishExtendedProposition
+		(type INSTANCE)
+;+		(allowed-classes ExtendedProposition)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot finishOffsetUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot startExtendedProposition
+		(type INSTANCE)
+;+		(allowed-classes ExtendedProposition)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot finishOffset
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot startSide
+		(type SYMBOL)
+		(allowed-values Start Finish)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot startOffsetUnits
+		(type SYMBOL)
+		(allowed-values Minute Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot complexAbstraction
+		(type INSTANCE)
+;+		(allowed-classes ComplexAbstraction PairAbstraction)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass ExtendedProposition
+	(is-a USER)
+	(role concrete)
+	(single-slot proposition
+		(type INSTANCE)
+;+		(allowed-classes Proposition)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot minDuration
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxDuration
+		(type INTEGER)
+		(range 0 %3FVARIABLE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot displayName
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot parameterValue
+		(type INSTANCE)
+;+		(allowed-classes)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot abbrevDisplayName
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxDurationUnits
+		(type SYMBOL)
+		(allowed-values Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minDurationUnits
+		(type SYMBOL)
+		(allowed-values Hour Day)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass SimpleParameterConstraint
+	(is-a USER)
+	(role concrete)
+	(single-slot allowedValueOf
+		(type INSTANCE)
+;+		(allowed-classes Parameter)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot minValThreshold
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot minValComp
+		(type SYMBOL)
+		(allowed-values gt gte eq)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot displayName
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot abbrevDisplayName
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxValThreshold
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot maxValComp
+		(type SYMBOL)
+		(allowed-values lt lte eq)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass Property
+	(is-a USER)
+	(role concrete)
+	(single-slot documentation
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot valueType
+		(type SYMBOL)
+;+		(allowed-parents Value)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass Term "Represents a term in a terminology"
+	(is-a USER)
+	(role concrete)
+	(multislot termProposition
+;+		(comment "The propositions this term maps to")
+		(type INSTANCE)
+;+		(allowed-classes Proposition)
+		(create-accessor read-write))
+	(single-slot termName
+;+		(comment "Name of the term")
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass ValueSetElement
+	(is-a USER)
+	(role concrete)
+	(single-slot displayName
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot abbrevDisplayName
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot value
+		(type STRING)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot elementOfValueSet
+		(type SYMBOL)
+;+		(allowed-parents CategoryValue)
+;+		(cardinality 1 1)
+		(create-accessor read-write)))

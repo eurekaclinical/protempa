@@ -1,0 +1,50 @@
+/*
+ * #%L
+ * Protempa Framework
+ * %%
+ * Copyright (C) 2012 Emory University
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package org.protempa.proposition.value;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Locale;
+
+import org.protempa.proposition.value.AbsoluteTimeGranularity;
+
+import junit.framework.TestCase;
+
+public class AbsoluteTimeGranularityTest extends TestCase {
+	private static final DateFormat DATE_FORMAT = DateFormat.getDateInstance(
+			DateFormat.SHORT, Locale.US);
+
+	public void testLatestMonthApril() throws ParseException {
+		long april1 = DATE_FORMAT.parse("4/1/07").getTime();
+		assertEquals(april1 + 30 * 24 * 60 * 60 * 1000L - 1,
+				AbsoluteTimeGranularity.MONTH.latest(april1));
+	}
+	
+	public void testLatestMonthFebruary2007() throws ParseException {
+		long feb1 = DATE_FORMAT.parse("2/1/07").getTime();
+		assertEquals(feb1 + 28 * 24 * 60 * 60 * 1000L - 1,
+				AbsoluteTimeGranularity.MONTH.latest(feb1));
+	}
+
+	public void testEarliestMonth() throws ParseException {
+		long april1 = DATE_FORMAT.parse("4/1/07").getTime();
+		assertEquals(april1, AbsoluteTimeGranularity.MONTH.earliest(april1));
+	}
+}

@@ -1,0 +1,67 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.protempa</groupId>
+  <artifactId>protempa</artifactId>
+  <version>2.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>PROTEMPA</name>
+  <scm>
+    <connection>scm:svn:svn://scm.cci.emory.edu/svn/protempa/trunk</connection>
+  </scm>
+
+  <modules>
+    <module>javautil</module>
+    <module>protempa-framework</module>
+    <module>protempa-bconfigs-commons-ini</module>
+    <module>protempa-bcp-commons</module>
+    <module>protempa-bp-commons</module>
+    <module>protempa-ksb-protege</module>
+    <module>protempa-tsb-umls</module>
+    <module>protempa-test-suite</module>
+  </modules>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>1.0</version>
+        <configuration>
+            <licenseName>apache_v2</licenseName>
+            <verbose>false</verbose>
+            <organizationName>Emory University</organizationName>
+            <inceptionYear>2012</inceptionYear>
+	    <canUpdateDescription>true</canUpdateDescription>
+            <roots>
+              <!-- Adds licensing to everything under src/main/ -->
+              <!--  might want to include src/test and etc/ as well -->
+              <root>src/main</root>
+              <root>src/test/java/</root>
+            </roots>
+            <extraExtensions>
+              <!-- .xsd files are not supported by default -->
+              <!-- but should be commented in XML style -->
+              <xsd>xml</xsd>
+            </extraExtensions>
+        </configuration>
+        <executions>
+            <execution>
+                <id>first</id>
+                <goals>
+                    <goal>update-file-header</goal>
+                </goals>
+                <phase>process-sources</phase>
+            </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+      <id>test-tier1</id>
+    </profile>
+    <profile>
+      <id>test-tier2</id>
+    </profile>
+  </profiles>
+</project>
