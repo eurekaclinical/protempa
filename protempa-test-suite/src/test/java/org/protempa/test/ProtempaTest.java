@@ -20,6 +20,7 @@
 package org.protempa.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
@@ -41,6 +42,7 @@ import org.arp.javautil.datastore.DataStore;
 import org.drools.WorkingMemory;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -244,7 +246,7 @@ public class ProtempaTest {
     public void testProtempa() {
         testRetrieveDataAndPersist();
         testProcessResultsAndPersist();
-        testOutputResults();
+        // testOutputResults();
     }
 
     private Query query() throws ParseException, KnowledgeSourceReadException,
@@ -304,13 +306,14 @@ public class ProtempaTest {
             protempa.retrieveDataAndPersist(query(), RETRIEVAL_STORE_NAME);
             results = PropositionStoreCreator.getInstance().getPersistentStore(
                     RETRIEVAL_STORE_NAME);
-//            assertEquals("data not expected size", 512, results.size());
+            System.out.println(results.size());
+            // assertEquals("data not expected size", 512, results.size());
             Map<String, Integer> propCounts = getResultCounts(PROP_COUNTS_FILE);
-//            for (Entry<String, List<Proposition>> r : results.entrySet()) {
-//                assertEquals("propositions for key " + r.getKey()
-//                        + " not expected", propCounts.get(r.getKey()), r
-//                        .getValue().size());
-//            }
+            // for (Entry<String, List<Proposition>> r : results.entrySet()) {
+            // assertEquals("propositions for key " + r.getKey()
+            // + " not expected", propCounts.get(r.getKey()), r
+            // .getValue().size());
+            // }
         } catch (FinderException ex) {
             ex.printStackTrace();
             fail(AF_ERROR_MSG);
@@ -348,20 +351,69 @@ public class ProtempaTest {
         try {
             results = afh.processStoredResults(protempa, null,
                     Arrays.asSet(PROP_IDS), null, RETRIEVAL_STORE_NAME);
-//            assertEquals("wrong number of working memories", 512,
-//                    results.size());
+            // assertEquals("wrong number of working memories", 512,
+            // results.size());
             Map<String, Integer> forwardDerivCounts = getResultCounts(FORWARD_DERIVATION_COUNTS_FILE);
             Map<String, Integer> backwardDerivCounts = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
-//            for (Entry<String, WorkingMemory> r : results.entrySet()) {
-//                assertEquals(
-//                        "wrong number of forward derivations for key "
-//                                + r.getKey(),
-//                        forwardDerivCounts.get(r.getKey()), afh
-//                                .getForwardDerivations(r.getKey()).size());
-//                assertEquals("wrong number of backward derivations for key "
-//                        + r.getKey(), backwardDerivCounts.get(r.getKey()), afh
-//                        .getBackwardDerivations(r.getKey()).size());
-//            }
+            boolean foundId0 = false;
+            for (Entry<String, WorkingMemory> r : results.entrySet()) {
+                if (r.getKey().equals("0")) {
+                    boolean foundEncId1 = false;
+                    boolean foundEncId2 = false;
+                    foundId0 = true;
+                    System.out
+                            .print("-----------------\nFORWARD\n---------------\n");
+                    for (Entry<Proposition, List<Proposition>> e : afh
+                            .getForwardDerivations(r.getKey()).entrySet()) {
+                        if (e.getKey().getId().equals("Encounter")) {
+                            if (e.getKey().getProperty("encounterId")
+                                    .equals(NominalValue.getInstance("1"))) {
+                                boolean found30DayReadmit = false;
+                                foundEncId1 = true;
+                                for (Proposition p : e.getValue()) {
+                                    if (p.getId().equals("30DayReadmission")) {
+                                        found30DayReadmit = true;
+                                    }
+                                }
+                                assertTrue(
+                                        "Did not find '30 Day Readmission' for encounter ID 1",
+                                        found30DayReadmit);
+                            }
+                            if (e.getKey().getProperty("encounterId")
+                                    .equals(NominalValue.getInstance("2"))) {
+                                boolean found30DayReadmit = false;
+                                foundEncId2 = true;
+                                for (Proposition p : e.getValue()) {
+                                    if (p.getId().equals("30DayReadmission")) {
+                                        found30DayReadmit = true;
+                                    }
+                                }
+                                assertTrue(
+                                        "Did not find '30 Day Readmission' for encounter ID 2",
+                                        found30DayReadmit);
+                            }
+                        }
+                    }
+                    assertTrue("Did not find encounter ID 1", foundEncId1);
+                    assertTrue("Did not find encounter Id 2", foundEncId2);
+                    // System.out
+                    // .print("-----------------\nBACKWARD\n---------------\n");
+                    // for (Entry<Proposition, List<Proposition>> e : afh
+                    // .getBackwardDerivations(r.getKey()).entrySet()) {
+                    // System.out.println(e.getKey().getId() + ": "
+                    // + e.getValue());
+                    // }
+                }
+                // assertEquals(
+                // "wrong number of forward derivations for key "
+                // + r.getKey(),
+                // forwardDerivCounts.get(r.getKey()), afh
+                // .getForwardDerivations(r.getKey()).size());
+                // assertEquals("wrong number of backward derivations for key "
+                // + r.getKey(), backwardDerivCounts.get(r.getKey()), afh
+                // .getBackwardDerivations(r.getKey()).size());
+            }
+            assertTrue("Patient ID 0 not retrieved", foundId0);
         } catch (KnowledgeSourceReadException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
