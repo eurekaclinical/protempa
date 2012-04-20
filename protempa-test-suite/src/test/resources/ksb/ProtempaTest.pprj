@@ -1,4 +1,4 @@
-; Mon Apr 16 18:45:32 EDT 2012
+; Fri Apr 20 17:17:50 EDT 2012
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
@@ -941,10 +941,10 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[ProtempaTest_ProjectKB_Class10368]
-		[ProtempaTest_ProjectKB_Class10369]
-		[ProtempaTest_ProjectKB_Class10370]
-		[ProtempaTest_ProjectKB_Class10371]))
+		[ProtempaTest_ProjectKB_Class10395]
+		[ProtempaTest_ProjectKB_Class10396]
+		[ProtempaTest_ProjectKB_Class10397]
+		[ProtempaTest_ProjectKB_Class10398]))
 
 ([CLSES_TAB] of  Widget
 
@@ -1044,8 +1044,8 @@
 
 ([KB_495177_Class6] of  Map
 
-	(entries [ProtempaTest_ProjectKB_Class10373])
-	(referenced_maps [ProtempaTest_ProjectKB_Class10372]))
+	(entries [ProtempaTest_ProjectKB_Class10400])
+	(referenced_maps [ProtempaTest_ProjectKB_Class10399]))
 
 ([KB_495177_Class88] of  Property_List
 
@@ -1218,34 +1218,34 @@
 ([ProtempaTest_ProjectKB_Class10082] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class10368] of  String
+([ProtempaTest_ProjectKB_Class10395] of  String
 
 	(name ":INSTANCE-ANNOTATION")
 	(string_value "%3AANNOTATION-TEXT"))
 
-([ProtempaTest_ProjectKB_Class10369] of  String
+([ProtempaTest_ProjectKB_Class10396] of  String
 
 	(name ":META-CLASS")
 	(string_value "%3ANAME"))
 
-([ProtempaTest_ProjectKB_Class10370] of  String
+([ProtempaTest_ProjectKB_Class10397] of  String
 
 	(name ":PAL-CONSTRAINT")
 	(string_value "%3APAL-NAME"))
 
-([ProtempaTest_ProjectKB_Class10371] of  String
+([ProtempaTest_ProjectKB_Class10398] of  String
 
 	(name "ValueSetElement")
 	(string_value "elementOfValueSet"))
 
-([ProtempaTest_ProjectKB_Class10372] of  Map
+([ProtempaTest_ProjectKB_Class10399] of  Map
 )
 
-([ProtempaTest_ProjectKB_Class10373] of  Map_Entry
+([ProtempaTest_ProjectKB_Class10400] of  Map_Entry
 
 	(key "InstanceDisplay.yellow_stickies")
 	(key_class "java.lang.String")
-	(value "ProtempaTest_ProjectKB_Class10372")
+	(value "ProtempaTest_ProjectKB_Class10399")
 	(value_class "java.util.Map"))
 
 ([ProtempaTest_ProjectKB_Class11] of  Widget
