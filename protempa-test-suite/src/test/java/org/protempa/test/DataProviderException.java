@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.test.dataloading;
+package org.protempa.test;
 
 /**
  * Exception thrown when the data provider can not properly parse or fetch the

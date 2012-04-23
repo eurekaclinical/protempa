@@ -17,14 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.test.dataloading;
+package org.protempa.test;
 
 /**
- * Hold information about a patient's CPT codes.
+ * Bean to hold information about ICD9 Diagnosis codes.
  * 
  * @author hrathod
  * 
  */
-class CPT extends Observation {
-	// no additional fields required, as of now.
+class Icd9Diagnosis extends Observation {
+	// no new fields to add, yet.
 }

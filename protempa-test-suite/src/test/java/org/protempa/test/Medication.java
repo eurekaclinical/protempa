@@ -17,14 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.test.dataloading;
+package org.protempa.test;
 
 /**
- * Holds information about vital signs taken during a patient's visit.
+ * Bean class to hold informationa bout medications during an encounter.
  * 
  * @author hrathod
  * 
  */
-class Vital extends ObservationWithResult {
-	// no additional fields needed, yet.
+class Medication extends Observation {
+	// No new fields to add, yet.
 }

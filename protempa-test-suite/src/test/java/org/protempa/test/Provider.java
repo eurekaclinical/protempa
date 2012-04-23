@@ -17,14 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.test.dataloading;
+package org.protempa.test;
 
 /**
- * Bean class to hold information about ICD9 procedures codes.
+ * Holds information about a provider during a patient's visit.
  * 
  * @author hrathod
  * 
  */
-class Icd9Procedure extends Observation {
-	// no new fields to add, yet.
+class Provider extends Person {
+	// no additional fields, yet.
 }

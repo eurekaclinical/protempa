@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.test.dataloading;
+package org.protempa.test;
 
 import java.io.File;
 import java.io.FileInputStream;

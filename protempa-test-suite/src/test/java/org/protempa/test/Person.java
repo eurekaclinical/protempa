@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.test.dataloading;
+package org.protempa.test;
 
 /**
  * A person related to an encounter; for example, a patient or a provider.

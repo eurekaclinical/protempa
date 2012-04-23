@@ -17,14 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.test.dataloading;
+package org.protempa.test;
 
 /**
- * Holds information about a provider during a patient's visit.
+ * Hold information about a patient's CPT codes.
  * 
  * @author hrathod
  * 
  */
-class Provider extends Person {
-	// no additional fields, yet.
+class CPT extends Observation {
+	// no additional fields required, as of now.
 }

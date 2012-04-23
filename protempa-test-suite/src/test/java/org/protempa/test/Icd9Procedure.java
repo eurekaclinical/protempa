@@ -17,14 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.test.dataloading;
+package org.protempa.test;
 
 /**
- * Bean class to hold informationa bout medications during an encounter.
+ * Bean class to hold information about ICD9 procedures codes.
  * 
  * @author hrathod
  * 
  */
-class Medication extends Observation {
-	// No new fields to add, yet.
+class Icd9Procedure extends Observation {
+	// no new fields to add, yet.
 }

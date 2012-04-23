@@ -17,14 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.test.dataloading;
+package org.protempa.test;
 
 /**
- * Bean to hold information about ICD9 Diagnosis codes.
+ * Holds results information about lab tests performed during an encounter.
  * 
  * @author hrathod
  * 
  */
-class Icd9Diagnosis extends Observation {
-	// no new fields to add, yet.
+class Lab extends ObservationWithResult {
+	// no additional fields needed, yet.
 }

@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.test.dataloading;
+package org.protempa.test;
 
 /**
  * Holds information about an observation during a patient's visit, including

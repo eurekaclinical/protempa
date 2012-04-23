@@ -17,14 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.test.dataloading;
+package org.protempa.test;
 
 /**
- * Holds results information about lab tests performed during an encounter.
+ * Holds information about vital signs taken during a patient's visit.
  * 
  * @author hrathod
  * 
  */
-class Lab extends ObservationWithResult {
+class Vital extends ObservationWithResult {
 	// no additional fields needed, yet.
 }
