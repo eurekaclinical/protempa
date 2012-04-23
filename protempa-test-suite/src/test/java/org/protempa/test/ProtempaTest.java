@@ -30,10 +30,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,7 +45,6 @@ import org.arp.javautil.datastore.DataStore;
 import org.drools.WorkingMemory;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,15 +60,13 @@ import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import org.protempa.datastore.PropositionStoreCreator;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
+import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.ValueComparator;
 import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.handler.QueryResultsHandler;
-import org.protempa.test.dataloading.DataInserter;
-import org.protempa.test.dataloading.DataProviderException;
-import org.protempa.test.dataloading.XlsxDataProvider;
 
 /**
  * Unit tests for Protempa.
@@ -80,6 +80,11 @@ public class ProtempaTest {
 
     private static Logger logger = Logger.getLogger(ProtempaTest.class
             .getName());
+
+    /**
+     * Sample data file
+     */
+    private static final String SAMPLE_DATA_FILE = "src/test/resources/dsb/sample-data.xlsx";
 
     /**
      * The ground truth results directory for the test data
@@ -135,30 +140,50 @@ public class ProtempaTest {
     /**
      * All proposition IDs in the sample data
      */
-    private static final String[] PROP_IDS = { 
-        "Patient", "PatientAll",
-            "Encounter",
+    private static final String[] PROP_IDS = {
+            "Patient",
+            "PatientAll",
+             "Encounter",
             // "AttendingPhysician",
             // "CPTCode",
             // "ICD9:Procedures",
             // "ICD9:Diagnoses",
-//             "LAB:LabTest",
+            // "LAB:LabTest",
             // "MED:medications",
             // "VitalSign",
-            "LDH_TREND", 
-            "LAB:LDH",
-//            "30DayReadmission", "No30DayReadmission"
-            };
+            "LAB_HELLP_PLATELETS", "HELLP_RECOVERING_PLATELETS",
+            "HELLP_FIRST_RECOVERING_PLATELETS",
+            "HELLP_SECOND_RECOVERING_PLATELETS",
+    // "LAB:LDH",
+    // "30DayReadmission", "No30DayReadmission"
+    };
 
     /**
      * Key IDs (testing purposes only...you know what I mean)
      */
-    private static final String[] KEY_IDS = { "0" };
+    private static final String[] KEY_IDS = { "0", "1", "2", "3", "4", "5",
+            "6", "7", "8", "9", "10", "11" };
+
+    /*
+     * Date format used by the data source
+     */
+    private static final SimpleDateFormat SDF = new SimpleDateFormat(
+            "yyyy.MM.dd HH:mm:ss");
 
     /*
      * Instance of Protempa to run
      */
     private Protempa protempa;
+
+    /*
+     * Spreadsheet reader and data provider
+     */
+    private DataProvider dataProvider;
+
+    /*
+     * Number of patients in the dataset
+     */
+    private int patientCount;
 
     /**
      * Performs set up operations required for all testing (eg, setting up the
@@ -174,20 +199,20 @@ public class ProtempaTest {
 
     private void populateDatabase() throws DataProviderException, SQLException {
         logger.log(Level.INFO, "Populating database");
-        XlsxDataProvider provider = new XlsxDataProvider(new File(
-                "src/test/resources/dsb/sample-data.xlsx"));
+        this.dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
         DataInserter inserter = new DataInserter(
                 "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
         inserter.createTables("src/test/resources/dsb/test-schema.sql");
-        inserter.insertPatients(provider.getPatients());
-        inserter.insertEncounters(provider.getEncounters());
-        inserter.insertProviders(provider.getProviders());
-        inserter.insertCptCodes(provider.getCptCodes());
-        inserter.insertIcd9Diagnoses(provider.getIcd9Diagnoses());
-        inserter.insertIcd9Procedures(provider.getIcd9Procedures());
-        inserter.insertLabs(provider.getLabs());
-        inserter.insertMedications(provider.getMedications());
-        inserter.insertVitals(provider.getVitals());
+        this.patientCount = dataProvider.getPatients().size();
+        inserter.insertPatients(dataProvider.getPatients());
+        inserter.insertEncounters(dataProvider.getEncounters());
+        inserter.insertProviders(dataProvider.getProviders());
+        inserter.insertCptCodes(dataProvider.getCptCodes());
+        inserter.insertIcd9Diagnoses(dataProvider.getIcd9Diagnoses());
+        inserter.insertIcd9Procedures(dataProvider.getIcd9Procedures());
+        inserter.insertLabs(dataProvider.getLabs());
+        inserter.insertMedications(dataProvider.getMedications());
+        inserter.insertVitals(dataProvider.getVitals());
         inserter.close();
         logger.log(Level.INFO, "Database populated");
     }
@@ -261,14 +286,13 @@ public class ProtempaTest {
     public void testProtempa() {
         testRetrieveDataAndPersist();
         testProcessResultsAndPersist();
-         testOutputResults();
+        testOutputResults();
     }
 
     private Query query() throws ParseException, KnowledgeSourceReadException,
             QueryBuildException {
         DefaultQueryBuilder q = new DefaultQueryBuilder();
 
-        q.setKeyIds(KEY_IDS);
         q.setPropIds(PROP_IDS);
         DateTimeFilter timeRange = new DateTimeFilter(
                 new String[] { "Encounter" }, AbsoluteTimeGranularity.DAY
@@ -322,17 +346,20 @@ public class ProtempaTest {
             protempa.retrieveDataAndPersist(query(), RETRIEVAL_STORE_NAME);
             results = PropositionStoreCreator.getInstance().getPersistentStore(
                     RETRIEVAL_STORE_NAME);
-            System.out.println(results.size());
-            // assertEquals("data not expected size", 512, results.size());
+            System.out.println(results.keySet());
+            assertEquals("data not expected size", this.patientCount,
+                    results.size());
             Map<String, Integer> propCounts = getResultCounts(PROP_COUNTS_FILE);
-             for (Entry<String, List<Proposition>> r : results.entrySet()) {
-                 for (Proposition p : r.getValue()) {
-                     System.out.println(p.getId());
-                 }
-            // assertEquals("propositions for key " + r.getKey()
-            // + " not expected", propCounts.get(r.getKey()), r
-            // .getValue().size());
-             }
+            for (Entry<String, List<Proposition>> r : results.entrySet()) {
+                for (Proposition p : r.getValue()) {
+                    System.out.println(p.getId());
+                }
+                // assertEquals("propositions for key " + r.getKey()
+                // + " not expected", propCounts.get(r.getKey()), r
+                // .getValue().size());
+            }
+            assertPatientsRetrieved(results);
+            assertEncountersRetrieved(results);
         } catch (FinderException ex) {
             ex.printStackTrace();
             fail(AF_ERROR_MSG);
@@ -377,55 +404,55 @@ public class ProtempaTest {
             Map<String, Integer> backwardDerivCounts = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
             boolean foundId0 = false;
             for (Entry<String, WorkingMemory> r : results.entrySet()) {
-                if (r.getKey().equals("0")) {
-                    boolean foundEncId1 = false;
-                    boolean foundEncId2 = false;
-                    foundId0 = true;
-                    System.out
-                            .print("-----------------\nFORWARD\n---------------\n");
-                    for (Entry<Proposition, List<Proposition>> e : afh
-                            .getForwardDerivations(r.getKey()).entrySet()) {
-                        System.out.println(e.getKey().getId() + ": "
-                                + e.getValue());
-                        if (e.getKey().getId().equals("Encounter")) {
-                            if (e.getKey().getProperty("encounterId")
-                                    .equals(NominalValue.getInstance("1"))) {
-                                boolean found30DayReadmit = false;
-                                foundEncId1 = true;
-                                for (Proposition p : e.getValue()) {
-                                    if (p.getId().equals("30DayReadmission")) {
-                                        found30DayReadmit = true;
-                                    }
-                                }
-                                assertTrue(
-                                        "Did not find '30 Day Readmission' for encounter ID 1",
-                                        found30DayReadmit);
-                            }
-                            if (e.getKey().getProperty("encounterId")
-                                    .equals(NominalValue.getInstance("2"))) {
-                                boolean found30DayReadmit = false;
-                                foundEncId2 = true;
-                                for (Proposition p : e.getValue()) {
-                                    if (p.getId().equals("30DayReadmission")) {
-                                        found30DayReadmit = true;
-                                    }
-                                }
-                                assertTrue(
-                                        "Did not find '30 Day Readmission' for encounter ID 2",
-                                        found30DayReadmit);
-                            }
-                        }
-                    }
-//                    assertTrue("Did not find encounter ID 1", foundEncId1);
-//                    assertTrue("Did not find encounter Id 2", foundEncId2);
-                    System.out
-                            .print("-----------------\nBACKWARD\n---------------\n");
-                    for (Entry<Proposition, List<Proposition>> e : afh
-                            .getBackwardDerivations(r.getKey()).entrySet()) {
-                        System.out.println(e.getKey().getId() + ": "
-                                + e.getValue());
-                    }
+                // if (r.getKey().equals("0")) {
+                boolean foundEncId1 = false;
+                boolean foundEncId2 = false;
+                foundId0 = true;
+                System.out
+                        .print("-----------------\nFORWARD\n---------------\n");
+                for (Entry<Proposition, List<Proposition>> e : afh
+                        .getForwardDerivations(r.getKey()).entrySet()) {
+//                    System.out
+//                            .println(e.getKey().getId() + ": " + e.getValue());
+                    // if (e.getKey().getId().equals("Encounter")) {
+                    // if (e.getKey().getProperty("encounterId")
+                    // .equals(NominalValue.getInstance("1"))) {
+                    // boolean found30DayReadmit = false;
+                    // foundEncId1 = true;
+                    // for (Proposition p : e.getValue()) {
+                    // if (p.getId().equals("30DayReadmission")) {
+                    // found30DayReadmit = true;
+                    // }
+                    // }
+                    // assertTrue(
+                    // "Did not find '30 Day Readmission' for encounter ID 1",
+                    // found30DayReadmit);
+                    // }
+                    // if (e.getKey().getProperty("encounterId")
+                    // .equals(NominalValue.getInstance("2"))) {
+                    // boolean found30DayReadmit = false;
+                    // foundEncId2 = true;
+                    // for (Proposition p : e.getValue()) {
+                    // if (p.getId().equals("30DayReadmission")) {
+                    // found30DayReadmit = true;
+                    // }
+                    // }
+                    // assertTrue(
+                    // "Did not find '30 Day Readmission' for encounter ID 2",
+                    // found30DayReadmit);
+                    // }
+                    // }
                 }
+                // assertTrue("Did not find encounter ID 1", foundEncId1);
+                // assertTrue("Did not find encounter Id 2", foundEncId2);
+                System.out
+                        .print("-----------------\nBACKWARD\n---------------\n");
+                for (Entry<Proposition, List<Proposition>> e : afh
+                        .getBackwardDerivations(r.getKey()).entrySet()) {
+//                    System.out
+//                            .println(e.getKey().getId() + ": " + e.getValue());
+                }
+                // }
                 // assertEquals(
                 // "wrong number of forward derivations for key "
                 // + r.getKey(),
@@ -435,7 +462,7 @@ public class ProtempaTest {
                 // + r.getKey(), backwardDerivCounts.get(r.getKey()), afh
                 // .getBackwardDerivations(r.getKey()).size());
             }
-            assertTrue("Patient ID 0 not retrieved", foundId0);
+            // assertTrue("Patient ID 0 not retrieved", foundId0);
         } catch (KnowledgeSourceReadException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
@@ -520,4 +547,125 @@ public class ProtempaTest {
         fail("Not yet implemented");
     }
 
+    private void assertEncountersRetrieved(
+            DataStore<String, List<Proposition>> objectGraph) {
+        Map<String, Integer> patientEncounterMap = new HashMap<String, Integer>();
+        System.out.println(this.dataProvider.getEncounters().size());
+        for (Encounter e : this.dataProvider.getEncounters()) {
+            if (patientEncounterMap.containsKey(e.getPatientId().toString())) {
+                patientEncounterMap.put(e.getPatientId().toString(),
+                        1 + patientEncounterMap.get(e.getPatientId().toString()));
+            } else {
+                patientEncounterMap.put(e.getPatientId().toString(), 1);
+            }
+        }
+        
+        System.out.println(patientEncounterMap);
+
+        for (Entry<String, List<Proposition>> e : objectGraph.entrySet()) {
+            assertEquals("Wrong number of encounters for key ID " + e.getKey(),
+                    patientEncounterMap.get(e.getKey()),
+                    getPropositionsForKey(e.getKey(), "Encounter", objectGraph)
+                            .size());
+        }
+    }
+
+    private void assertPatientsRetrieved(
+            DataStore<String, List<Proposition>> objectGraph) {
+        Map<String, Patient> patientMap = new HashMap<String, Patient>();
+
+        for (Patient p : this.dataProvider.getPatients()) {
+            patientMap.put(p.getId().toString(), p);
+        }
+        for (String keyId : KEY_IDS) {
+            assertTrue("Key ID " + keyId + " not retrieved",
+                    objectGraph.containsKey(keyId));
+            Set<Proposition> patientProp = getPropositionsForKey(keyId,
+                    "Patient", objectGraph);
+            Set<Proposition> patientAllProp = getPropositionsForKey(keyId,
+                    "PatientAll", objectGraph);
+            assertEquals("Should be exactly 1 Patient proposition, got "
+                    + patientProp.size() + " for key ID " + keyId,
+                    1, patientProp.size());
+            assertEquals("Should be exactly 1 PatientAll proposition, got "
+                    + patientAllProp.size() + " for key ID " + keyId,
+                    1, patientAllProp.size());
+            checkPatient(patientMap.get(keyId), singleProp(patientProp),
+                    singleProp(patientAllProp));
+        }
+    }
+
+    private Proposition singleProp(Set<Proposition> singletonSet) {
+        return singletonSet.iterator().next();
+    }
+
+    private void checkPatient(Patient patient, Proposition patientProp,
+            Proposition patientAllProp) {
+        String id = patient.getId().toString();
+        assertEquals("Patient " + id + " first name",
+                NominalValue.getInstance(patient.getFirstName()),
+                patientProp.getProperty("firstName"));
+        assertEquals("Patient " + id + "  last name",
+                NominalValue.getInstance(patient.getLastName()),
+                patientProp.getProperty("lastName"));
+        assertEquals("Patient " + id + " date of birth",
+                DateValue.getInstance(patient.getDateOfBirth()),
+                patientProp.getProperty("dateOfBirth"));
+        assertEquals("Patient " + id + " race",
+                NominalValue.getInstance(patient.getRace()),
+                patientProp.getProperty("race"));
+        assertEquals("Patient " + id + " gender",
+                NominalValue.getInstance(patient.getGender()),
+                patientProp.getProperty("gender"));
+    }
+
+    private void assertVitalsRetrieved(
+            DataStore<String, List<Proposition>> objectGraph) {
+
+    }
+
+    private void assert30DayReadmissionDerived(
+            DataStore<String, List<Proposition>> derivedData) {
+
+    }
+
+    private void assertNo30DayReadmissionDerived(
+            DataStore<String, List<Proposition>> derivedData) {
+
+    }
+
+    private void assertParentIcd9Derived(
+            DataStore<String, List<Proposition>> derivedData) {
+
+    }
+
+    private void assertLdhTrendDerived(
+            DataStore<String, List<Proposition>> derivedData) {
+
+    }
+
+    private void assertAstStateDerived(
+            DataStore<String, List<Proposition>> derivedData) {
+
+    }
+
+    private void assertFristHellpRecoveringSliceDerived(
+            DataStore<String, List<Proposition>> derivedData) {
+
+    }
+
+    private Set<Proposition> getPropositionsForKey(String keyId, String propId,
+            DataStore<String, List<Proposition>> props) {
+        Set<Proposition> results = new HashSet<Proposition>();
+
+        List<Proposition> values = props.get(keyId);
+        for (Proposition p : values) {
+            System.out.println(p.getId());
+            if (p.getId().equals(propId)) {
+                results.add(p);
+            }
+        }
+
+        return results;
+    }
 }
