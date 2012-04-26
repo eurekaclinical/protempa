@@ -31,8 +31,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -58,6 +60,8 @@ import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import org.protempa.datastore.PropositionStoreCreator;
+import org.protempa.proposition.Event;
+import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.DateValue;
@@ -140,23 +144,30 @@ public class ProtempaTest {
     /**
      * All proposition IDs in the sample data
      */
-    private static final String[] PROP_IDS = {
-            "Patient",
-            "PatientAll",
-             "Encounter",
+    private static final String[] PROP_IDS = { "Patient", "PatientAll",
+            "Encounter",
             // "AttendingPhysician",
             // "CPTCode",
             // "ICD9:Procedures",
             // "ICD9:Diagnoses",
             // "LAB:LabTest",
             // "MED:medications",
-            // "VitalSign",
-            "LAB_HELLP_PLATELETS", "HELLP_RECOVERING_PLATELETS",
-            "HELLP_FIRST_RECOVERING_PLATELETS",
-            "HELLP_SECOND_RECOVERING_PLATELETS",
+            "VitalSign",
+    // "LAB_HELLP_PLATELETS", "HELLP_RECOVERING_PLATELETS",
+    // "HELLP_FIRST_RECOVERING_PLATELETS",
+    // "HELLP_SECOND_RECOVERING_PLATELETS",
     // "LAB:LDH",
     // "30DayReadmission", "No30DayReadmission"
     };
+
+    /**
+     * Vital signs
+     */
+    private static final String[] VITALS = { "BodyMassIndex",
+            "DiastolicBloodPressure", "HeartRate", "O2Saturation",
+            "RespiratoryRate", "SystolicBloodPressure", "TemperatureAxillary",
+            "TemperatureCore", "TemperatureNOS", "TemperatureRectal",
+            "TemperatureTympanic" };
 
     /**
      * Key IDs (testing purposes only...you know what I mean)
@@ -346,20 +357,17 @@ public class ProtempaTest {
             protempa.retrieveDataAndPersist(query(), RETRIEVAL_STORE_NAME);
             results = PropositionStoreCreator.getInstance().getPersistentStore(
                     RETRIEVAL_STORE_NAME);
-            System.out.println(results.keySet());
             assertEquals("data not expected size", this.patientCount,
                     results.size());
             Map<String, Integer> propCounts = getResultCounts(PROP_COUNTS_FILE);
-            for (Entry<String, List<Proposition>> r : results.entrySet()) {
-                for (Proposition p : r.getValue()) {
-                    System.out.println(p.getId());
-                }
-                // assertEquals("propositions for key " + r.getKey()
-                // + " not expected", propCounts.get(r.getKey()), r
-                // .getValue().size());
-            }
-            assertPatientsRetrieved(results);
+            // for (Entry<String, List<Proposition>> r : results.entrySet()) {
+            // assertEquals("propositions for key " + r.getKey()
+            // + " not expected", propCounts.get(r.getKey()), r
+            // .getValue().size());
+            // }
+            // assertPatientsRetrieved(results);
             assertEncountersRetrieved(results);
+            // assertVitalsRetrieved(results);
         } catch (FinderException ex) {
             ex.printStackTrace();
             fail(AF_ERROR_MSG);
@@ -412,8 +420,8 @@ public class ProtempaTest {
                         .print("-----------------\nFORWARD\n---------------\n");
                 for (Entry<Proposition, List<Proposition>> e : afh
                         .getForwardDerivations(r.getKey()).entrySet()) {
-//                    System.out
-//                            .println(e.getKey().getId() + ": " + e.getValue());
+                    // System.out
+                    // .println(e.getKey().getId() + ": " + e.getValue());
                     // if (e.getKey().getId().equals("Encounter")) {
                     // if (e.getKey().getProperty("encounterId")
                     // .equals(NominalValue.getInstance("1"))) {
@@ -449,8 +457,8 @@ public class ProtempaTest {
                         .print("-----------------\nBACKWARD\n---------------\n");
                 for (Entry<Proposition, List<Proposition>> e : afh
                         .getBackwardDerivations(r.getKey()).entrySet()) {
-//                    System.out
-//                            .println(e.getKey().getId() + ": " + e.getValue());
+                    // System.out
+                    // .println(e.getKey().getId() + ": " + e.getValue());
                 }
                 // }
                 // assertEquals(
@@ -550,23 +558,39 @@ public class ProtempaTest {
     private void assertEncountersRetrieved(
             DataStore<String, List<Proposition>> objectGraph) {
         Map<String, Integer> patientEncounterMap = new HashMap<String, Integer>();
-        System.out.println(this.dataProvider.getEncounters().size());
+        Map<String, Encounter> encountersMap = new HashMap<String, Encounter>();
         for (Encounter e : this.dataProvider.getEncounters()) {
+            encountersMap.put(e.getId().toString(), e);
             if (patientEncounterMap.containsKey(e.getPatientId().toString())) {
                 patientEncounterMap.put(e.getPatientId().toString(),
-                        1 + patientEncounterMap.get(e.getPatientId().toString()));
+                        1 + patientEncounterMap
+                                .get(e.getPatientId().toString()));
             } else {
                 patientEncounterMap.put(e.getPatientId().toString(), 1);
             }
         }
-        
-        System.out.println(patientEncounterMap);
 
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d, yyyy");
         for (Entry<String, List<Proposition>> e : objectGraph.entrySet()) {
+            Set<Proposition> encounters = getPropositionsForKey(e.getKey(),
+                    "Encounter", objectGraph);
             assertEquals("Wrong number of encounters for key ID " + e.getKey(),
-                    patientEncounterMap.get(e.getKey()),
-                    getPropositionsForKey(e.getKey(), "Encounter", objectGraph)
-                            .size());
+                    patientEncounterMap.get(e.getKey()), encounters.size());
+            for (Proposition enc : encounters) {
+                Event event = (Event) enc;
+                Encounter encounter = encountersMap.get(event.getProperty(
+                        "encounterId").getFormatted());
+                assertEquals(
+                        "Wrong start time for encounter " + encounter.getId()
+                                + " for key ID " + encounter.getPatientId(),
+                        sdf.format(encounter.getStart()),
+                        event.getStartFormattedLong());
+                assertEquals(
+                        "Wrong finish time for encounter " + encounter.getId()
+                                + " for key ID " + encounter.getPatientId(),
+                        sdf.format(encounter.getEnd()),
+                        event.getFinishFormattedLong());
+            }
         }
     }
 
@@ -585,17 +609,17 @@ public class ProtempaTest {
             Set<Proposition> patientAllProp = getPropositionsForKey(keyId,
                     "PatientAll", objectGraph);
             assertEquals("Should be exactly 1 Patient proposition, got "
-                    + patientProp.size() + " for key ID " + keyId,
-                    1, patientProp.size());
+                    + patientProp.size() + " for key ID " + keyId, 1,
+                    patientProp.size());
             assertEquals("Should be exactly 1 PatientAll proposition, got "
-                    + patientAllProp.size() + " for key ID " + keyId,
-                    1, patientAllProp.size());
-            checkPatient(patientMap.get(keyId), singleProp(patientProp),
-                    singleProp(patientAllProp));
+                    + patientAllProp.size() + " for key ID " + keyId, 1,
+                    patientAllProp.size());
+            checkPatient(patientMap.get(keyId), firstProp(patientProp),
+                    firstProp(patientAllProp));
         }
     }
 
-    private Proposition singleProp(Set<Proposition> singletonSet) {
+    private Proposition firstProp(Set<Proposition> singletonSet) {
         return singletonSet.iterator().next();
     }
 
@@ -619,14 +643,61 @@ public class ProtempaTest {
                 patientProp.getProperty("gender"));
     }
 
-    private void assertVitalsRetrieved(
-            DataStore<String, List<Proposition>> objectGraph) {
+    private Map<Long, Long> mapEncountersToPatients() {
+        Map<Long, Long> result = new HashMap<Long, Long>();
 
+        for (Encounter e : this.dataProvider.getEncounters()) {
+            result.put(e.getId(), e.getPatientId());
+        }
+
+        return result;
     }
 
-    private void assert30DayReadmissionDerived(
-            DataStore<String, List<Proposition>> derivedData) {
+    private void assertVitalsRetrieved(
+            DataStore<String, List<Proposition>> objectGraph) {
+        for (String vitalSign : VITALS) {
+            for (Patient patient : this.dataProvider.getPatients()) {
+                checkPatientVitalSign(patient.getId(), vitalSign, objectGraph);
+            }
+        }
+    }
 
+    private void checkPatientVitalSign(Long keyId, String vitalSign,
+            DataStore<String, List<Proposition>> objectGraph) {
+        Set<Proposition> retrievedVitals = getPropositionsForKey(
+                keyId.toString(), vitalSign, objectGraph);
+        List<Vital> dataVitals = new ArrayList<Vital>(
+                this.dataProvider.getVitals());
+        Map<Long, Long> enc2Pat = mapEncountersToPatients();
+        for (Iterator<Vital> it = dataVitals.iterator(); it.hasNext();) {
+            Vital v = it.next();
+            if (!v.getEntityId().equals(vitalSign)
+                    || !enc2Pat.get(v.getEncounterId()).equals(keyId)) {
+                it.remove();
+            }
+        }
+        assertEquals("Wrong number of " + vitalSign + " instances for key ID "
+                + keyId, dataVitals.size(), retrievedVitals.size());
+        Set<String> dataVitalValues = new HashSet<String>();
+        for (Vital v : dataVitals) {
+            dataVitalValues.add(v.getResultAsStr());
+        }
+        Set<String> retrievedVitalValues = new HashSet<String>();
+        for (Proposition p : retrievedVitals) {
+            retrievedVitalValues.add(((PrimitiveParameter) p)
+                    .getValueFormatted());
+        }
+        for (String value : retrievedVitalValues) {
+            System.out.println(value);
+        }
+        assertTrue("Value sets not equal for vital sign " + vitalSign
+                + " for key ID " + keyId,
+                dataVitalValues.equals(retrievedVitalValues));
+    }
+
+    private void assert30DayReadmissionDerived(AbstractionFinderTestHelper afh) {
+        Set<Proposition> readmits = getDerivedPropositionsForKey(
+                "30DayReadmission", afh.getForwardDerivations("0"));
     }
 
     private void assertNo30DayReadmissionDerived(
@@ -660,9 +731,23 @@ public class ProtempaTest {
 
         List<Proposition> values = props.get(keyId);
         for (Proposition p : values) {
-            System.out.println(p.getId());
             if (p.getId().equals(propId)) {
                 results.add(p);
+            }
+        }
+
+        return results;
+    }
+
+    private Set<Proposition> getDerivedPropositionsForKey(String propId,
+            Map<Proposition, List<Proposition>> derivations) {
+        Set<Proposition> results = new HashSet<Proposition>();
+
+        for (List<Proposition> derivedProps : derivations.values()) {
+            for (Proposition derived : derivedProps) {
+                if (derived.getId().equals(propId)) {
+                    results.add(derived);
+                }
             }
         }
 
