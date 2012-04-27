@@ -412,53 +412,19 @@ public class ProtempaTest {
             Map<String, Integer> backwardDerivCounts = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
             boolean foundId0 = false;
             for (Entry<String, WorkingMemory> r : results.entrySet()) {
-                // if (r.getKey().equals("0")) {
-                boolean foundEncId1 = false;
-                boolean foundEncId2 = false;
-                foundId0 = true;
+                assert30DayReadmissionDerived(afh);
                 System.out
                         .print("-----------------\nFORWARD\n---------------\n");
                 for (Entry<Proposition, List<Proposition>> e : afh
                         .getForwardDerivations(r.getKey()).entrySet()) {
-                    // System.out
-                    // .println(e.getKey().getId() + ": " + e.getValue());
-                    // if (e.getKey().getId().equals("Encounter")) {
-                    // if (e.getKey().getProperty("encounterId")
-                    // .equals(NominalValue.getInstance("1"))) {
-                    // boolean found30DayReadmit = false;
-                    // foundEncId1 = true;
-                    // for (Proposition p : e.getValue()) {
-                    // if (p.getId().equals("30DayReadmission")) {
-                    // found30DayReadmit = true;
-                    // }
-                    // }
-                    // assertTrue(
-                    // "Did not find '30 Day Readmission' for encounter ID 1",
-                    // found30DayReadmit);
-                    // }
-                    // if (e.getKey().getProperty("encounterId")
-                    // .equals(NominalValue.getInstance("2"))) {
-                    // boolean found30DayReadmit = false;
-                    // foundEncId2 = true;
-                    // for (Proposition p : e.getValue()) {
-                    // if (p.getId().equals("30DayReadmission")) {
-                    // found30DayReadmit = true;
-                    // }
-                    // }
-                    // assertTrue(
-                    // "Did not find '30 Day Readmission' for encounter ID 2",
-                    // found30DayReadmit);
-                    // }
-                    // }
+
                 }
-                // assertTrue("Did not find encounter ID 1", foundEncId1);
-                // assertTrue("Did not find encounter Id 2", foundEncId2);
+
                 System.out
                         .print("-----------------\nBACKWARD\n---------------\n");
                 for (Entry<Proposition, List<Proposition>> e : afh
                         .getBackwardDerivations(r.getKey()).entrySet()) {
-                    // System.out
-                    // .println(e.getKey().getId() + ": " + e.getValue());
+
                 }
                 // }
                 // assertEquals(
@@ -696,8 +662,32 @@ public class ProtempaTest {
     }
 
     private void assert30DayReadmissionDerived(AbstractionFinderTestHelper afh) {
-        Set<Proposition> readmits = getDerivedPropositionsForKey(
-                "30DayReadmission", afh.getForwardDerivations("0"));
+        Map<Proposition, List<Proposition>> encDerivations = getDerivedPropositionsForKey(
+                "Encounter", afh.getForwardDerivations("0"));
+        for (Entry<Proposition, List<Proposition>> prop : encDerivations.entrySet()) {
+            Proposition encounter = prop.getKey();
+            System.out.println("Encounter? " + encounter.getId());
+            String encounterId = encounter.getProperty("encounterId")
+                    .getFormatted();
+            int count30DayReadmit = 0;
+
+            for (Proposition derived : prop.getValue()) {
+                if (derived.getId().equals("30DayReadmission")) {
+                    count30DayReadmit++;
+                }
+            }
+
+            if (encounterId.equals("1")) {
+                assertEquals(
+                        "Did not find exactly 1 '30DayReadmission' for encounter ID 1",
+                        1, count30DayReadmit);
+            } else {
+                assertEquals(
+                        "Found some '30DayReadmission' propositions for encounter ID "
+                                + encounterId, 0, count30DayReadmit);
+            }
+        }
+
     }
 
     private void assertNo30DayReadmissionDerived(
@@ -720,7 +710,7 @@ public class ProtempaTest {
 
     }
 
-    private void assertFristHellpRecoveringSliceDerived(
+    private void assertFirstHellpRecoveringSliceDerived(
             DataStore<String, List<Proposition>> derivedData) {
 
     }
@@ -739,18 +729,16 @@ public class ProtempaTest {
         return results;
     }
 
-    private Set<Proposition> getDerivedPropositionsForKey(String propId,
-            Map<Proposition, List<Proposition>> derivations) {
-        Set<Proposition> results = new HashSet<Proposition>();
-
-        for (List<Proposition> derivedProps : derivations.values()) {
-            for (Proposition derived : derivedProps) {
-                if (derived.getId().equals(propId)) {
-                    results.add(derived);
-                }
+    private Map<Proposition, List<Proposition>> getDerivedPropositionsForKey(
+            String propId, Map<Proposition, List<Proposition>> derivations) {
+        Map<Proposition, List<Proposition>> results = new HashMap<Proposition, List<Proposition>>();
+        for (Entry<Proposition, List<Proposition>> prop : derivations
+                .entrySet()) {
+            if (prop.getKey().equals(propId)) {
+                results.put(prop.getKey(), prop.getValue());
             }
         }
-
+        
         return results;
     }
 }
