@@ -149,16 +149,18 @@ public class ProtempaTest {
             // "AttendingPhysician",
             // "CPTCode",
             // "ICD9:Procedures",
-            // "ICD9:Diagnoses",
-            // "LAB:LabTest",
+//             "ICD9:Diagnoses",
+             "ICD9:013.82",
+             // "LAB:LabTest",
             // "MED:medications",
-            "VitalSign",
-    // "LAB_HELLP_PLATELETS", "HELLP_RECOVERING_PLATELETS",
-    // "HELLP_FIRST_RECOVERING_PLATELETS",
-    // "HELLP_SECOND_RECOVERING_PLATELETS",
-    // "LAB:LDH",
-    // "30DayReadmission", "No30DayReadmission"
-    };
+            // "VitalSign",
+            // "LAB_HELLP_PLATELETS", "HELLP_RECOVERING_PLATELETS",
+            // "HELLP_FIRST_RECOVERING_PLATELETS",
+            // "HELLP_SECOND_RECOVERING_PLATELETS",
+            // "LAB:LDH",
+//            "30DayReadmission",
+//            "No30DayReadmission"
+            };
 
     /**
      * Vital signs
@@ -172,8 +174,9 @@ public class ProtempaTest {
     /**
      * Key IDs (testing purposes only...you know what I mean)
      */
-    private static final String[] KEY_IDS = { "0", "1", "2", "3", "4", "5",
-            "6", "7", "8", "9", "10", "11" };
+    // private static final String[] KEY_IDS = { "0", "1", "2", "3", "4", "5",
+    // "6", "7", "8", "9", "10", "11" };
+    private static final String[] KEY_IDS = { "0" };
 
     /*
      * Date format used by the data source
@@ -304,6 +307,7 @@ public class ProtempaTest {
             QueryBuildException {
         DefaultQueryBuilder q = new DefaultQueryBuilder();
 
+        q.setKeyIds(KEY_IDS);
         q.setPropIds(PROP_IDS);
         DateTimeFilter timeRange = new DateTimeFilter(
                 new String[] { "Encounter" }, AbsoluteTimeGranularity.DAY
@@ -357,16 +361,19 @@ public class ProtempaTest {
             protempa.retrieveDataAndPersist(query(), RETRIEVAL_STORE_NAME);
             results = PropositionStoreCreator.getInstance().getPersistentStore(
                     RETRIEVAL_STORE_NAME);
-            assertEquals("data not expected size", this.patientCount,
-                    results.size());
+            // assertEquals("data not expected size", this.patientCount,
+            // results.size());
             Map<String, Integer> propCounts = getResultCounts(PROP_COUNTS_FILE);
-            // for (Entry<String, List<Proposition>> r : results.entrySet()) {
+             for (Entry<String, List<Proposition>> r : results.entrySet()) {
+                 for (Proposition p : r.getValue()) {
+                     System.out.println(p.getId());
+                 }
             // assertEquals("propositions for key " + r.getKey()
             // + " not expected", propCounts.get(r.getKey()), r
             // .getValue().size());
-            // }
+             }
             // assertPatientsRetrieved(results);
-            assertEncountersRetrieved(results);
+            // assertEncountersRetrieved(results);
             // assertVitalsRetrieved(results);
         } catch (FinderException ex) {
             ex.printStackTrace();
@@ -412,19 +419,26 @@ public class ProtempaTest {
             Map<String, Integer> backwardDerivCounts = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
             boolean foundId0 = false;
             for (Entry<String, WorkingMemory> r : results.entrySet()) {
-                assert30DayReadmissionDerived(afh);
+//                assert30DayReadmissionDerived(afh);
+//                assertNo30DayReadmissionDerived(afh);
                 System.out
                         .print("-----------------\nFORWARD\n---------------\n");
                 for (Entry<Proposition, List<Proposition>> e : afh
                         .getForwardDerivations(r.getKey()).entrySet()) {
-
+                    System.out.println("*" + e.getKey().getId());
+                    for (Proposition derived : e.getValue()) {
+                        System.out.println(derived.getId());
+                    }
                 }
 
                 System.out
                         .print("-----------------\nBACKWARD\n---------------\n");
                 for (Entry<Proposition, List<Proposition>> e : afh
                         .getBackwardDerivations(r.getKey()).entrySet()) {
-
+                    System.out.println("*" + e.getKey().getId());
+                    for (Proposition derived : e.getValue()) {
+                        System.out.println(derived.getId());
+                    }
                 }
                 // }
                 // assertEquals(
@@ -664,9 +678,9 @@ public class ProtempaTest {
     private void assert30DayReadmissionDerived(AbstractionFinderTestHelper afh) {
         Map<Proposition, List<Proposition>> encDerivations = getDerivedPropositionsForKey(
                 "Encounter", afh.getForwardDerivations("0"));
-        for (Entry<Proposition, List<Proposition>> prop : encDerivations.entrySet()) {
+        for (Entry<Proposition, List<Proposition>> prop : encDerivations
+                .entrySet()) {
             Proposition encounter = prop.getKey();
-            System.out.println("Encounter? " + encounter.getId());
             String encounterId = encounter.getProperty("encounterId")
                     .getFormatted();
             int count30DayReadmit = 0;
@@ -677,7 +691,7 @@ public class ProtempaTest {
                 }
             }
 
-            if (encounterId.equals("1")) {
+            if (encounterId.equals("1") || encounterId.equals("2")) {
                 assertEquals(
                         "Did not find exactly 1 '30DayReadmission' for encounter ID 1",
                         1, count30DayReadmit);
@@ -690,9 +704,12 @@ public class ProtempaTest {
 
     }
 
-    private void assertNo30DayReadmissionDerived(
-            DataStore<String, List<Proposition>> derivedData) {
-
+    private void assertNo30DayReadmissionDerived(AbstractionFinderTestHelper afh) {
+        Map<Proposition, List<Proposition>> no30DayDerivations = getDerivedPropositionsForKey(
+                "No30DayReadmission", afh.getBackwardDerivations("0"));
+        assertEquals(
+                "Found wrong number of 'No30DayReadmissions' for key ID 0", 4,
+                no30DayDerivations.size());
     }
 
     private void assertParentIcd9Derived(
@@ -734,11 +751,11 @@ public class ProtempaTest {
         Map<Proposition, List<Proposition>> results = new HashMap<Proposition, List<Proposition>>();
         for (Entry<Proposition, List<Proposition>> prop : derivations
                 .entrySet()) {
-            if (prop.getKey().equals(propId)) {
+            if (prop.getKey().getId().equals(propId)) {
                 results.put(prop.getKey(), prop.getValue());
             }
         }
-        
+
         return results;
     }
 }
