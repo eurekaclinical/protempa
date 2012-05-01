@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.datastore.DataStore;
 import org.drools.WorkingMemory;
@@ -79,6 +80,8 @@ import org.protempa.query.handler.QueryResultsHandler;
  */
 public class ProtempaTest {
 
+    private static final String ICD9_013_82 = "ICD9:013.82";
+    private static final String ICD9_804 = "ICD9:804";
     private static final String QUERY_ERROR_MSG = "Failed to build query";
     private static final String AF_ERROR_MSG = "Exception thrown by AbstractionFinder";
 
@@ -145,22 +148,21 @@ public class ProtempaTest {
      * All proposition IDs in the sample data
      */
     private static final String[] PROP_IDS = { "Patient", "PatientAll",
-            "Encounter",
-            // "AttendingPhysician",
-            // "CPTCode",
-            // "ICD9:Procedures",
-//             "ICD9:Diagnoses",
-             "ICD9:013.82",
-             // "LAB:LabTest",
-            // "MED:medications",
-            // "VitalSign",
-            // "LAB_HELLP_PLATELETS", "HELLP_RECOVERING_PLATELETS",
-            // "HELLP_FIRST_RECOVERING_PLATELETS",
-            // "HELLP_SECOND_RECOVERING_PLATELETS",
-            // "LAB:LDH",
-//            "30DayReadmission",
-//            "No30DayReadmission"
-            };
+            "Encounter", 
+//            ICD9_013_82, 
+//            ICD9_804,
+    // "LAB:LabTest",
+    // "MED:medications",
+    // "VitalSign",
+    // "LAB_HELLP_PLATELETS", 
+//            "HELLP_RECOVERING_PLATELETS",
+    // "HELLP_FIRST_RECOVERING_PLATELETS",
+    // "HELLP_SECOND_RECOVERING_PLATELETS",
+    // "LAB:LDH",
+            "LDH_TREND",
+    // "30DayReadmission",
+    // "No30DayReadmission"
+    };
 
     /**
      * Vital signs
@@ -348,6 +350,7 @@ public class ProtempaTest {
             String[] count = line.split(":");
             result.put(count[0], Integer.parseInt(count[1]));
         }
+        br.close();
 
         return result;
     }
@@ -364,14 +367,14 @@ public class ProtempaTest {
             // assertEquals("data not expected size", this.patientCount,
             // results.size());
             Map<String, Integer> propCounts = getResultCounts(PROP_COUNTS_FILE);
-             for (Entry<String, List<Proposition>> r : results.entrySet()) {
-                 for (Proposition p : r.getValue()) {
-                     System.out.println(p.getId());
-                 }
-            // assertEquals("propositions for key " + r.getKey()
-            // + " not expected", propCounts.get(r.getKey()), r
-            // .getValue().size());
-             }
+            for (Entry<String, List<Proposition>> r : results.entrySet()) {
+                for (Proposition p : r.getValue()) {
+                    System.out.println(p.getId());
+                }
+                // assertEquals("propositions for key " + r.getKey()
+                // + " not expected", propCounts.get(r.getKey()), r
+                // .getValue().size());
+            }
             // assertPatientsRetrieved(results);
             // assertEncountersRetrieved(results);
             // assertVitalsRetrieved(results);
@@ -419,8 +422,6 @@ public class ProtempaTest {
             Map<String, Integer> backwardDerivCounts = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
             boolean foundId0 = false;
             for (Entry<String, WorkingMemory> r : results.entrySet()) {
-//                assert30DayReadmissionDerived(afh);
-//                assertNo30DayReadmissionDerived(afh);
                 System.out
                         .print("-----------------\nFORWARD\n---------------\n");
                 for (Entry<Proposition, List<Proposition>> e : afh
@@ -435,11 +436,16 @@ public class ProtempaTest {
                         .print("-----------------\nBACKWARD\n---------------\n");
                 for (Entry<Proposition, List<Proposition>> e : afh
                         .getBackwardDerivations(r.getKey()).entrySet()) {
-                    System.out.println("*" + e.getKey().getId());
-                    for (Proposition derived : e.getValue()) {
-                        System.out.println(derived.getId());
+                    if (e.getKey().getId().equals("LDH_TREND")) {
+                        System.out.println("*" + e.getKey().getId());
+                        for (Proposition derived : e.getValue()) {
+                            System.out.println(StringUtils.join(((PrimitiveParameter) derived).getReferenceNames(), ","));
+                        }
                     }
                 }
+                // assert30DayReadmissionDerived(afh);
+                // assertNo30DayReadmissionDerived(afh);
+//                assertChildIcd9Derived(results, afh);
                 // }
                 // assertEquals(
                 // "wrong number of forward derivations for key "
@@ -712,9 +718,92 @@ public class ProtempaTest {
                 no30DayDerivations.size());
     }
 
-    private void assertParentIcd9Derived(
-            DataStore<String, List<Proposition>> derivedData) {
+    private void assertChildIcd9Derived(
+            DataStore<String, WorkingMemory> derivedData,
+            AbstractionFinderTestHelper afh) {
+        boolean icd9d01382Derived = false;
+        boolean icd9d804Derived = false;
 
+        for (@SuppressWarnings("unchecked")
+        Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
+                .hasNext();) {
+            Proposition p = it.next();
+            if (p.getId().equals(ICD9_013_82)) {
+                icd9d01382Derived = true;
+            } else if (p.getId().equals(ICD9_804)) {
+                icd9d804Derived = true;
+            }
+
+        }
+        
+        // matched exactly - should be no derivations
+        assertTrue("Proposition '" + ICD9_013_82 + "' not found",
+                icd9d01382Derived);
+        assertEquals(
+                "Proposition '" + ICD9_013_82
+                        + "' should not have any forward derivations",
+                0,
+                getDerivedPropositionsForKey(ICD9_013_82,
+                        afh.getForwardDerivations("0")).size());
+        assertEquals(
+                "Proposition '" + ICD9_013_82
+                        + "' should not have any backward derivations",
+                0,
+                getDerivedPropositionsForKey(ICD9_013_82,
+                        afh.getBackwardDerivations("0")).size());
+        assertTrue("Proposition '" + ICD9_804 + "' not found", icd9d804Derived);
+
+        // matched at higher level - should be derivations
+        String[] icd9Levels = new String[] { "ICD9:804", "ICD9:804.3", "ICD9:804.34" };
+        Set<String> expectedForwardDerivationsLevel0 = Arrays
+                .asSet(new String[] {});
+        Set<String> expectedBackwardDerivationsLevel0 = Arrays
+                .asSet(new String[] { icd9Levels[1] });
+        Set<String> expectedForwardDerivationsLevel1 = Arrays
+                .asSet(new String[] { icd9Levels[0] });
+        Set<String> expectedBackwardDerivationsLevel1 = Arrays
+                .asSet(new String[] { icd9Levels[2] });
+        Set<String> expectedForwardDerivationsLevel2 = Arrays
+                .asSet(new String[] { icd9Levels[1] });
+        Set<String> expectedBackwardDerivationsLevel2 = Arrays
+                .asSet(new String[] {});
+        Map<String, Set<String>> expectedForwardDerivations = new HashMap<String, Set<String>>();
+        expectedForwardDerivations.put(icd9Levels[0], expectedForwardDerivationsLevel0);
+        expectedForwardDerivations.put(icd9Levels[1],
+                expectedForwardDerivationsLevel1);
+        expectedForwardDerivations.put(icd9Levels[2],
+                expectedForwardDerivationsLevel2);
+        Map<String, Set<String>> expectedBackwardDerivations = new HashMap<String, Set<String>>();
+        expectedBackwardDerivations.put(icd9Levels[0],
+                expectedBackwardDerivationsLevel0);
+        expectedBackwardDerivations.put(icd9Levels[1],
+                expectedBackwardDerivationsLevel1);
+        expectedBackwardDerivations.put(icd9Levels[2],
+                expectedBackwardDerivationsLevel2);
+
+        for (String icd9Code : icd9Levels) {
+            Set<String> foundForwardDerivations = new HashSet<String>();
+            Set<String> foundBackwardDerivations = new HashSet<String>();
+            for (Entry<Proposition, List<Proposition>> p : getDerivedPropositionsForKey(
+                    icd9Code, afh.getForwardDerivations("0")).entrySet()) {
+                for (Proposition p2 : p.getValue()) {
+                    foundForwardDerivations.add(p2.getId());
+                }
+            }
+            for (Entry<Proposition, List<Proposition>> p : getDerivedPropositionsForKey(
+                    icd9Code, afh.getBackwardDerivations("0")).entrySet()) {
+                for (Proposition p2 : p.getValue()) {
+                    foundBackwardDerivations.add(p2.getId());
+                }
+            }
+
+            assertEquals("Wrong forward derivations found for proposition '"
+                    + icd9Code + "'", expectedForwardDerivations.get(icd9Code),
+                    foundForwardDerivations);
+            assertEquals("Wrong backward derivations found for proposition '"
+                    + icd9Code + "'", expectedBackwardDerivations.get(icd9Code),
+                    foundBackwardDerivations);
+        }
     }
 
     private void assertLdhTrendDerived(
