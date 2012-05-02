@@ -316,22 +316,6 @@ public class ProtempaTest {
                         .getShortFormat().parse("08/31/2011"),
                 AbsoluteTimeGranularity.DAY, Side.START, Side.START);
 
-        String[] meds = protempa.getKnowledgeSource()
-                .inDataSourcePropositionIds("MED:medications")
-                .toArray(new String[0]);
-        PropertyValueFilter medOrderStatus = new PropertyValueFilter(meds,
-                "orderStatus", ValueComparator.NOT_IN, new NominalValue(
-                        "Canceled"), new NominalValue("Deleted"),
-                new NominalValue("Incomplete"), new NominalValue(
-                        "VoidedWithResults"));
-        timeRange.setAnd(medOrderStatus);
-
-        PropertyValueFilter medOrderNotContinuing = new PropertyValueFilter(
-                meds, "continuingOrder", ValueComparator.IN, new NominalValue(
-                        "Modify"), new NominalValue("Order"));
-
-        medOrderStatus.setAnd(medOrderNotContinuing);
-
         q.setFilters(timeRange);
         Query query = protempa.buildQuery(q);
 
