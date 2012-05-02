@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Inserts sample data into a databse
+ * Inserts sample data into a database
  * 
  * 
  * @author Himanshu Rathod, Michel Mansour
@@ -235,7 +235,6 @@ public final class DataInserter {
         connection.commit();
         preparedStatement.clearBatch();
         preparedStatement.close();
-        ;
     }
 
     /**
@@ -360,7 +359,6 @@ public final class DataInserter {
         connection.commit();
         preparedStatement.clearBatch();
         preparedStatement.close();
-        ;
     }
 
     /**
@@ -410,7 +408,6 @@ public final class DataInserter {
         connection.commit();
         preparedStatement.clearBatch();
         preparedStatement.close();
-        ;
     }
 
 }
