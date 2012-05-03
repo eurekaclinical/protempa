@@ -21,9 +21,15 @@ package org.protempa.test;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
@@ -37,9 +43,11 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
 
     private final Writer writer;
 
+    private final Map<String, Map<Proposition, List<Proposition>>> data = new HashMap<String, Map<Proposition, List<Proposition>>>();
+
     /**
-     * Creates a new instance that will write to the given writer. It is the
-     * responsiblity of the caller to open and close the writer.
+     * Creates a new instance that will write to the given writer. The finish()
+     * method will close the writer.
      * 
      * @param writer
      *            the {@link Writer} to output to
@@ -55,7 +63,25 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
 
     @Override
     public void finish() throws FinderException {
-
+        try {
+            SortedSet<String> sortedKeyIds = new TreeSet<String>(this.data.keySet());
+            for (String keyId : sortedKeyIds) {
+                writeLine(keyId);
+                List<Proposition> sortedProps = new ArrayList<Proposition>(this.data.get(keyId).keySet());
+                Collections.sort(sortedProps, new PropositionComparator());
+                for (Proposition p : sortedProps) {
+                    writeLine(p.getId());
+                    List<Proposition> sortedDerivations = new ArrayList<Proposition>(this.data.get(keyId).get(p));
+                    Collections.sort(sortedProps, new PropositionComparator());
+                    for (Proposition d : sortedDerivations) {
+                        writeLine(d.getId());
+                    }
+                }
+            }
+            this.writer.close();
+        } catch (IOException e) {
+            throw new FinderException(e);
+        }
     }
 
     private void writeLine(String str) throws IOException {
@@ -63,12 +89,12 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
         this.writer.write("\n");
     }
 
-    private void printDerivations(
-            Map<Proposition, List<Proposition>> derivations) throws IOException {
+    private void storeDerivations(
+            Map<Proposition, List<Proposition>> derivations,
+            List<Proposition> outputDerivations) throws IOException {
         for (Entry<Proposition, List<Proposition>> pp : derivations.entrySet()) {
-            writeLine("Key:" + pp.getKey().getId());
             for (Proposition p : pp.getValue()) {
-                writeLine(p.getId());
+                outputDerivations.add(p);
             }
         }
     }
@@ -79,12 +105,14 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references) throws FinderException {
         try {
-            writeLine(keyId);
+            this.data.put(keyId, new HashMap<Proposition, List<Proposition>>());
             for (Proposition p : propositions) {
-                writeLine(p.getId());
+                this.data.get(keyId).put(p, new ArrayList<Proposition>());
+                storeDerivations(forwardDerivations, this.data.get(keyId)
+                        .get(p));
+                storeDerivations(backwardDerivations,
+                        this.data.get(keyId).get(p));
             }
-            printDerivations(forwardDerivations);
-            printDerivations(backwardDerivations);
         } catch (IOException ex) {
             throw new FinderException(ex);
         }
@@ -94,6 +122,16 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
     public void validate(KnowledgeSource knowledgeSource)
             throws QueryResultsHandlerValidationFailedException,
             KnowledgeSourceReadException {
+
+    }
+
+    private static class PropositionComparator implements
+            Comparator<Proposition> {
+
+        @Override
+        public int compare(Proposition o1, Proposition o2) {
+            return o1.getId().compareTo(o2.getId());
+        }
 
     }
 }
