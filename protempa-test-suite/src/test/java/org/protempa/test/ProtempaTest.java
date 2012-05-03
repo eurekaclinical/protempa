@@ -33,6 +33,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -59,7 +60,6 @@ import org.protempa.ProtempaException;
 import org.protempa.ProtempaStartupException;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
-import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import org.protempa.datastore.PropositionStoreCreator;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Event;
@@ -68,7 +68,6 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.NominalValue;
-import org.protempa.proposition.value.ValueComparator;
 import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
@@ -99,6 +98,11 @@ public class ProtempaTest {
      */
     private static final String TRUTH_DIR = "src/test/resources/truth/";
 
+    /**
+     * The ground truth output.
+     */
+    private static final String TRUTH_OUTPUT = TRUTH_DIR + "/output.txt";
+    
     /**
      * The ground truth for the number of propositions for each key pulled from
      * the sample data
@@ -148,25 +152,10 @@ public class ProtempaTest {
     /**
      * All proposition IDs in the sample data
      */
-    private static final String[] PROP_IDS = { 
-        "Patient", 
-        "PatientAll",
-        "Encounter",
-        ICD9_013_82,
-        ICD9_804,
-            // "LAB:LabTest",
-            // "MED:medications",
-        "VitalSign",
-            // "LAB_HELLP_PLATELETS",
-            // "HELLP_RECOVERING_PLATELETS",
-        "HELLP_FIRST_RECOVERING_PLATELETS",
-    // "HELLP_SECOND_RECOVERING_PLATELETS",
-    // "LAB:LDH",
-        "LDH_TREND",
-        "AST_STATE",
-        "30DayReadmission",
-        "No30DayReadmission"
-    };
+    private static final String[] PROP_IDS = { "Patient", "PatientAll",
+            "Encounter", ICD9_013_82, ICD9_804, "VitalSign",
+            "HELLP_FIRST_RECOVERING_PLATELETS", "LDH_TREND", "AST_STATE",
+            "30DayReadmission", "No30DayReadmission" };
 
     /**
      * Vital signs
@@ -178,11 +167,10 @@ public class ProtempaTest {
             "TemperatureTympanic" };
 
     /**
-     * Key IDs (testing purposes only...you know what I mean)
+     * Key IDs (testing purposes only...you know what I mean...for testing the tests)
      */
-     private static final String[] KEY_IDS = { "0", "1", "2", "3", "4", "5",
-     "6", "7", "8", "9", "10", "11" };
-//    private static final String[] KEY_IDS = { "11" };
+    private static final String[] KEY_IDS = { "0", "1", "2", "3", "4", "5",
+            "6", "7", "8", "9", "10", "11" };
 
     /*
      * Instance of Protempa to run
@@ -221,11 +209,9 @@ public class ProtempaTest {
         inserter.insertPatients(dataProvider.getPatients());
         inserter.insertEncounters(dataProvider.getEncounters());
         inserter.insertProviders(dataProvider.getProviders());
-        inserter.insertCptCodes(dataProvider.getCptCodes());
         inserter.insertIcd9Diagnoses(dataProvider.getIcd9Diagnoses());
         inserter.insertIcd9Procedures(dataProvider.getIcd9Procedures());
         inserter.insertLabs(dataProvider.getLabs());
-        inserter.insertMedications(dataProvider.getMedications());
         inserter.insertVitals(dataProvider.getVitals());
         inserter.close();
         logger.log(Level.INFO, "Database populated");
@@ -346,17 +332,16 @@ public class ProtempaTest {
             protempa.retrieveDataAndPersist(query(), RETRIEVAL_STORE_NAME);
             results = PropositionStoreCreator.getInstance().getPersistentStore(
                     RETRIEVAL_STORE_NAME);
-            // assertEquals("data not expected size", this.patientCount,
-            // results.size());
-            Map<String, Integer> propCounts = getResultCounts(PROP_COUNTS_FILE);
-            for (Entry<String, List<Proposition>> r : results.entrySet()) {
-                for (Proposition p : r.getValue()) {
-                    System.out.println(p.getId());
-                }
-                // assertEquals("propositions for key " + r.getKey()
-                // + " not expected", propCounts.get(r.getKey()), r
-                // .getValue().size());
-            }
+             assertEquals("Wrong number of keys retrieved", this.patientCount,
+             results.size());
+             Map<String, Integer> propCounts =
+             getResultCounts(PROP_COUNTS_FILE);
+             for (Entry<String, List<Proposition>> r : results.entrySet()) {
+             assertEquals(
+             "Wrong number of raw propositions retrieved for key "
+             + r.getKey(), propCounts.get(r.getKey()), r
+             .getValue().size());
+             }
              assertPatientsRetrieved(results);
              assertEncountersRetrieved(results);
              assertVitalsRetrieved(results);
@@ -387,6 +372,23 @@ public class ProtempaTest {
         fail("Not yet implemented");
     }
 
+    private void printDerivations(String keyId, AbstractionFinderTestHelper afh) {
+        System.out.println("----- FORWARD DERIVATIONS -----");
+        for (List<Proposition> derivs : afh.getForwardDerivations(keyId)
+                .values()) {
+            for (Proposition p : derivs) {
+                System.out.println(p.getId());
+            }
+        }
+        System.out.println("----- BACKWARD DERIVATIONS -----");
+        for (List<Proposition> derivs : afh.getBackwardDerivations(keyId)
+                .values()) {
+            for (Proposition p : derivs) {
+                System.out.println(p.getId());
+            }
+        }
+    }
+
     /**
      * Tests Protempa's process and persist method.
      */
@@ -397,63 +399,32 @@ public class ProtempaTest {
         try {
             results = afh.processStoredResults(protempa, null,
                     Arrays.asSet(PROP_IDS), null, RETRIEVAL_STORE_NAME);
-            // assertEquals("wrong number of working memories", 512,
-            // results.size());
-            System.out.println(results.size());
+             assertEquals("Wrong number of working memories generated",
+             this.patientCount, results.size());
             Map<String, Integer> forwardDerivCounts = getResultCounts(FORWARD_DERIVATION_COUNTS_FILE);
             Map<String, Integer> backwardDerivCounts = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
-            boolean foundId0 = false;
-            for (Entry<String, WorkingMemory> r : results.entrySet()) {
-                System.out
-                        .print("-----------------\nPROPOSITIONS\n-----------------\n");
-                for (@SuppressWarnings("unchecked")
-                Iterator<Proposition> it = r.getValue().iterateObjects(); it
-                        .hasNext();) {
-                    Proposition p = it.next();
-                    System.out.println(p.getId());
-                    if (p.getId().equals("HELLP_FIRST_RECOVERING_PLATELETS")) {
-                        AbstractParameter hellpFirst = (AbstractParameter) p;
-                        System.out.println(hellpFirst.getStartFormattedLong());
-                        System.out.println(hellpFirst.getFinishFormattedLong());
-                        System.out.println(hellpFirst.getValueFormatted());
-                    }
+            for (String keyId : results.keySet()) {
+                int derivCount = 0;
+                for (List<Proposition> derivs : afh.getForwardDerivations(keyId).values()) {
+                    derivCount += derivs.size();
                 }
-                System.out
-                        .print("-----------------\nFORWARD\n-----------------\n");
-                for (Entry<Proposition, List<Proposition>> e : afh
-                        .getForwardDerivations(r.getKey()).entrySet()) {
-                    System.out.println("*" + e.getKey().getId());
-                    for (Proposition derived : e.getValue()) {
-                        System.out.println(derived.getId());
-                    }
+                assertEquals("wrong number of forward derivations for key "
+                        + keyId, forwardDerivCounts.get(keyId), derivCount);
+                
+                derivCount = 0;
+                for (List<Proposition> derivs : afh.getBackwardDerivations(keyId).values()) {
+                    derivCount += derivs.size();
                 }
+                assertEquals("wrong number of backward derivations for key "
+                        + keyId, backwardDerivCounts.get(keyId), derivCount);
 
-                System.out
-                        .print("-----------------\nBACKWARD\n-----------------\n");
-                for (Entry<Proposition, List<Proposition>> e : afh
-                        .getBackwardDerivations(r.getKey()).entrySet()) {
-                    System.out.println("*" + e.getKey().getId());
-                    for (Proposition derived : e.getValue()) {
-                        System.out.println(derived.getId());
-                    }
-                }
-                 assert30DayReadmissionDerived(afh);
-                 assertNo30DayReadmissionDerived(afh);
-                 assertChildIcd9Derived(results, afh);
-                 assertLdhTrendDerived(results);
-                 assertAstStateDerived(results);
+                assert30DayReadmissionDerived(afh);
+                assertNo30DayReadmissionDerived(afh);
+                assertChildIcd9Derived(results, afh);
+                assertLdhTrendDerived(results);
+                assertAstStateDerived(results);
                 assertFirstHellpRecoveringSliceDerived(results);
-                // }
-                // assertEquals(
-                // "wrong number of forward derivations for key "
-                // + r.getKey(),
-                // forwardDerivCounts.get(r.getKey()), afh
-                // .getForwardDerivations(r.getKey()).size());
-                // assertEquals("wrong number of backward derivations for key "
-                // + r.getKey(), backwardDerivCounts.get(r.getKey()), afh
-                // .getBackwardDerivations(r.getKey()).size());
             }
-            // assertTrue("Patient ID 0 not retrieved", foundId0);
         } catch (KnowledgeSourceReadException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
@@ -463,11 +434,7 @@ public class ProtempaTest {
         } catch (ProtempaException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
-        } catch (NumberFormatException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
             afh.cleanUp();
@@ -487,8 +454,8 @@ public class ProtempaTest {
             QueryResultsHandler handler = new SingleColumnQueryResultsHandler(
                     fw);
             protempa.outputResults(query(), handler, WORKING_MEMORY_STORE_NAME);
-            // assertTrue("output doesn't match",
-            // outputMatches(OUTPUT_FILENAME, TRUTH_FILE));
+             assertTrue("output doesn't match",
+             outputMatches(OUTPUT_FILENAME, TRUTH_OUTPUT));
         } catch (FinderException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
@@ -531,7 +498,8 @@ public class ProtempaTest {
         }
         br1.close();
         br2.close();
-        return ((line1 == null && line2 == null));
+
+        return line1 == null && line2 == null;
     }
 
     private void testOutputResultsNewKeysProps() {
@@ -670,9 +638,6 @@ public class ProtempaTest {
             retrievedVitalValues.add(((PrimitiveParameter) p)
                     .getValueFormatted());
         }
-        for (String value : retrievedVitalValues) {
-            System.out.println(value);
-        }
         assertTrue("Value sets not equal for vital sign " + vitalSign
                 + " for key ID " + keyId,
                 dataVitalValues.equals(retrievedVitalValues));
@@ -806,6 +771,32 @@ public class ProtempaTest {
         }
     }
 
+    private Date buildDate(int year, int month, int dayOfMonth, int hour,
+            int minute, int ampm) {
+        Calendar date = Calendar.getInstance();
+
+        date.set(Calendar.YEAR, year);
+        date.set(Calendar.MONTH, month);
+        date.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        date.set(Calendar.HOUR, hour);
+        date.set(Calendar.MINUTE, minute);
+        date.set(Calendar.SECOND, 0);
+        date.set(Calendar.MILLISECOND, 0);
+        date.set(Calendar.AM_PM, ampm);
+
+        return date.getTime();
+    }
+
+    private void assertDateStringEquals(Date expected, String actual,
+            SimpleDateFormat format, String testFailureMsg, String parseErrMsg) {
+        try {
+            assertEquals(testFailureMsg, expected, format.parse(actual));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            fail(parseErrMsg);
+        }
+    }
+
     private void assertLdhTrendDerived(
             DataStore<String, WorkingMemory> derivedData) {
         Set<AbstractParameter> ldhTrends = new HashSet<AbstractParameter>();
@@ -826,87 +817,39 @@ public class ProtempaTest {
         boolean foundDec = false;
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d, yyyy h:mm aa");
         for (AbstractParameter ldhTrend : ldhTrends) {
-            Calendar expectedStart = Calendar.getInstance();
-            Calendar expectedFinish = Calendar.getInstance();
+            Date expectedStart = null;
+            Date expectedFinish = null;
             if (ldhTrend.getValueFormatted().equals("Increasing LDH")) {
-                expectedStart.set(Calendar.YEAR, 2006);
-                expectedStart.set(Calendar.MONTH, Calendar.AUGUST);
-                expectedStart.set(Calendar.DAY_OF_MONTH, 26);
-                expectedStart.set(Calendar.HOUR, 9);
-                expectedStart.set(Calendar.MINUTE, 38);
-                expectedStart.set(Calendar.SECOND, 0);
-                expectedStart.set(Calendar.MILLISECOND, 0);
-                expectedStart.set(Calendar.AM_PM, Calendar.PM);
-
-                expectedFinish.set(Calendar.YEAR, 2006);
-                expectedFinish.set(Calendar.MONTH, Calendar.AUGUST);
-                expectedFinish.set(Calendar.DAY_OF_MONTH, 28);
-                expectedFinish.set(Calendar.HOUR, 10);
-                expectedFinish.set(Calendar.MINUTE, 45);
-                expectedFinish.set(Calendar.SECOND, 0);
-                expectedFinish.set(Calendar.MILLISECOND, 0);
-                expectedFinish.set(Calendar.AM_PM, Calendar.AM);
-
-                try {
-                    assertEquals("Wrong start time for 'INCREASING_LDH'",
-                            expectedStart.getTime(),
-                            sdf.parse(ldhTrend.getStartFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse start time for 'INCREASING_LDH': "
-                            + ldhTrend.getStartFormattedLong());
-                }
-                try {
-                    assertEquals("Wrong finish time for 'INCREASING_LDH'",
-                            expectedFinish.getTime(),
-                            sdf.parse(ldhTrend.getFinishFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse finish time for 'INCREASING_LDH': "
-                            + ldhTrend.getFinishFormattedLong());
-                }
+                expectedStart = buildDate(2006, Calendar.AUGUST, 26, 9, 38,
+                        Calendar.PM);
+                expectedFinish = buildDate(2006, Calendar.AUGUST, 28, 10, 45,
+                        Calendar.AM);
+                assertDateStringEquals(expectedStart,
+                        ldhTrend.getStartFormattedLong(), sdf,
+                        "Wrong start time for 'INCREASING_LDH'",
+                        "Unable to parse start time for 'INCREASING_LDH': "
+                                + ldhTrend.getStartFormattedLong());
+                assertDateStringEquals(expectedFinish,
+                        ldhTrend.getFinishFormattedLong(), sdf,
+                        "Wrong finish time for 'INCREASING_LDH'",
+                        "Unable to parse finish time for 'INCREASING_LDH': "
+                                + ldhTrend.getFinishFormattedLong());
                 foundInc = true;
             } else if (ldhTrend.getValueFormatted().equals("Decreasing LDH")) {
-                expectedStart.set(Calendar.YEAR, 2006);
-                expectedStart.set(Calendar.MONTH, Calendar.AUGUST);
-                expectedStart.set(Calendar.DAY_OF_MONTH, 26);
-                expectedStart.set(Calendar.HOUR, 8);
-                expectedStart.set(Calendar.MINUTE, 35);
-                expectedStart.set(Calendar.SECOND, 0);
-                expectedStart.set(Calendar.MILLISECOND, 0);
-                expectedStart.set(Calendar.AM_PM, Calendar.AM);
-                System.out.println("LDH_TREND (dec) start date: "
-                        + expectedStart.getTime());
-
-                expectedFinish.set(Calendar.YEAR, 2006);
-                expectedFinish.set(Calendar.MONTH, Calendar.AUGUST);
-                expectedFinish.set(Calendar.DAY_OF_MONTH, 26);
-                expectedFinish.set(Calendar.HOUR, 9);
-                expectedFinish.set(Calendar.MINUTE, 38);
-                expectedFinish.set(Calendar.SECOND, 0);
-                expectedFinish.set(Calendar.MILLISECOND, 0);
-                expectedFinish.set(Calendar.AM_PM, Calendar.PM);
-                System.out.println("LDH_TREND (dec) finish date: "
-                        + expectedFinish.getTime());
-
-                try {
-                    assertEquals("Wrong start time for 'DECREASING_LDH'",
-                            expectedStart.getTime(),
-                            sdf.parse(ldhTrend.getStartFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse start time for 'DECREASING_LDH': "
-                            + ldhTrend.getStartFormattedLong());
-                }
-                try {
-                    assertEquals("Wrong finish time for 'DECREASING_LDH'",
-                            expectedFinish.getTime(),
-                            sdf.parse(ldhTrend.getFinishFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse finish time for 'DECREASING_LDH': "
-                            + ldhTrend.getFinishFormattedLong());
-                }
+                expectedStart = buildDate(2006, Calendar.AUGUST, 26, 8, 35,
+                        Calendar.AM);
+                expectedFinish = buildDate(2006, Calendar.AUGUST, 26, 9, 38,
+                        Calendar.PM);
+                assertDateStringEquals(expectedStart,
+                        ldhTrend.getStartFormattedLong(), sdf,
+                        "Wrong start time for 'DECREASING_LDH'",
+                        "Unable to parse start time for 'DECREASING_LDH': "
+                                + ldhTrend.getStartFormattedLong());
+                assertDateStringEquals(expectedFinish,
+                        ldhTrend.getFinishFormattedLong(), sdf,
+                        "Wrong finish time for 'DECREASING_LDH'",
+                        "Unable to parse finish time for 'DECREASING_LDH': "
+                                + ldhTrend.getFinishFormattedLong());
                 foundDec = true;
             } else {
                 fail("Found 'LDH_TREND' with unknown value: "
@@ -940,160 +883,73 @@ public class ProtempaTest {
         boolean foundVeryHighAstState = false;
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d, yyyy h:mm aa");
         for (AbstractParameter astState : astStates) {
-            Calendar expectedStart = Calendar.getInstance();
-            Calendar expectedFinish = Calendar.getInstance();
+            Date expectedStart = null;
+            Date expectedFinish = null;
             if (astState.getValueFormatted().equals("Normal AST")) {
-                expectedStart.set(Calendar.YEAR, 2007);
-                expectedStart.set(Calendar.MONTH, Calendar.FEBRUARY);
-                expectedStart.set(Calendar.DAY_OF_MONTH, 28);
-                expectedStart.set(Calendar.HOUR, 0);
-                expectedStart.set(Calendar.MINUTE, 50);
-                expectedStart.set(Calendar.SECOND, 0);
-                expectedStart.set(Calendar.MILLISECOND, 0);
-                expectedStart.set(Calendar.AM_PM, Calendar.AM);
-
-                expectedFinish.set(Calendar.YEAR, 2007);
-                expectedFinish.set(Calendar.MONTH, Calendar.FEBRUARY);
-                expectedFinish.set(Calendar.DAY_OF_MONTH, 28);
-                expectedFinish.set(Calendar.HOUR, 7);
-                expectedFinish.set(Calendar.MINUTE, 49);
-                expectedFinish.set(Calendar.SECOND, 0);
-                expectedFinish.set(Calendar.MILLISECOND, 0);
-                expectedFinish.set(Calendar.AM_PM, Calendar.AM);
-
-                try {
-                    assertEquals("Wrong start time for 'NORMAL_AST'",
-                            expectedStart.getTime(),
-                            sdf.parse(astState.getStartFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse start time for 'NORMAL_AST': "
-                            + astState.getStartFormattedLong());
-                }
-                try {
-                    assertEquals("Wrong finish time for 'NORMAL_AST'",
-                            expectedFinish.getTime(),
-                            sdf.parse(astState.getFinishFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse finish time for 'NORMAL_AST': "
-                            + astState.getFinishFormattedLong());
-                }
-
+                expectedStart = buildDate(2007, Calendar.FEBRUARY, 28, 0, 50,
+                        Calendar.AM);
+                expectedFinish = buildDate(2007, Calendar.FEBRUARY, 28, 7, 49,
+                        Calendar.AM);
+                assertDateStringEquals(expectedStart,
+                        astState.getStartFormattedLong(), sdf,
+                        "Wrong start time for 'NORMAL_AST'",
+                        "Unable to parse start time for 'NORMAL_AST': "
+                                + astState.getStartFormattedLong());
+                assertDateStringEquals(expectedFinish,
+                        astState.getFinishFormattedLong(), sdf,
+                        "Wrong finish time for 'NORMAL_AST'",
+                        "Unable to parse finish time for 'NORMAL_AST': "
+                                + astState.getFinishFormattedLong());
                 foundNormalAstState = true;
             } else if (astState.getValueFormatted().equals("Low AST")) {
-                expectedStart.set(Calendar.YEAR, 2007);
-                expectedStart.set(Calendar.MONTH, Calendar.FEBRUARY);
-                expectedStart.set(Calendar.DAY_OF_MONTH, 28);
-                expectedStart.set(Calendar.HOUR, 8);
-                expectedStart.set(Calendar.MINUTE, 49);
-                expectedStart.set(Calendar.SECOND, 0);
-                expectedStart.set(Calendar.MILLISECOND, 0);
-                expectedStart.set(Calendar.AM_PM, Calendar.PM);
-
-                expectedFinish.set(Calendar.YEAR, 2007);
-                expectedFinish.set(Calendar.MONTH, Calendar.FEBRUARY);
-                expectedFinish.set(Calendar.DAY_OF_MONTH, 28);
-                expectedFinish.set(Calendar.HOUR, 8);
-                expectedFinish.set(Calendar.MINUTE, 49);
-                expectedFinish.set(Calendar.SECOND, 0);
-                expectedFinish.set(Calendar.MILLISECOND, 0);
-                expectedFinish.set(Calendar.AM_PM, Calendar.PM);
-
-                try {
-                    assertEquals("Wrong start time for 'LOW_AST'",
-                            expectedStart.getTime(),
-                            sdf.parse(astState.getStartFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse start time for 'LOW_AST': "
-                            + astState.getStartFormattedLong());
-                }
-                try {
-                    assertEquals("Wrong finish time for 'LOW_AST'",
-                            expectedFinish.getTime(),
-                            sdf.parse(astState.getFinishFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse finish time for 'LOW_AST': "
-                            + astState.getFinishFormattedLong());
-                }
+                expectedStart = buildDate(2007, Calendar.FEBRUARY, 28, 8, 49,
+                        Calendar.PM);
+                expectedFinish = buildDate(2007, Calendar.FEBRUARY, 28, 8, 49,
+                        Calendar.PM);
+                assertDateStringEquals(
+                        expectedStart,
+                        astState.getStartFormattedLong(),
+                        sdf,
+                        "Wrong start time for 'LOW_AST'",
+                        "Unable to parse start time for 'LOW_AST': "
+                                + astState.getStartFormattedLong());
+                assertDateStringEquals(expectedFinish,
+                        astState.getFinishFormattedLong(), sdf,
+                        "Wrong finish time for 'LOW_AST'",
+                        "Unable to parse finish time for 'LOW_AST': "
+                                + astState.getFinishFormattedLong());
                 foundLowAstState = true;
             } else if (astState.getValueFormatted().equals("High AST")) {
-                expectedStart.set(Calendar.YEAR, 2007);
-                expectedStart.set(Calendar.MONTH, Calendar.FEBRUARY);
-                expectedStart.set(Calendar.DAY_OF_MONTH, 28);
-                expectedStart.set(Calendar.HOUR, 9);
-                expectedStart.set(Calendar.MINUTE, 52);
-                expectedStart.set(Calendar.SECOND, 0);
-                expectedStart.set(Calendar.MILLISECOND, 0);
-                expectedStart.set(Calendar.AM_PM, Calendar.PM);
-
-                expectedFinish.set(Calendar.YEAR, 2007);
-                expectedFinish.set(Calendar.MONTH, Calendar.MARCH);
-                expectedFinish.set(Calendar.DAY_OF_MONTH, 1);
-                expectedFinish.set(Calendar.HOUR, 8);
-                expectedFinish.set(Calendar.MINUTE, 32);
-                expectedFinish.set(Calendar.SECOND, 0);
-                expectedFinish.set(Calendar.MILLISECOND, 0);
-                expectedFinish.set(Calendar.AM_PM, Calendar.PM);
-
-                try {
-                    assertEquals("Wrong start time for 'HIGH_AST'",
-                            expectedStart.getTime(),
-                            sdf.parse(astState.getStartFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse start time for 'HIGH_AST': "
-                            + astState.getStartFormattedLong());
-                }
-                try {
-                    assertEquals("Wrong finish time for 'HIGH_AST'",
-                            expectedFinish.getTime(),
-                            sdf.parse(astState.getFinishFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse finish time for 'HIGH_AST': "
-                            + astState.getFinishFormattedLong());
-                }
+                expectedStart = buildDate(2007, Calendar.FEBRUARY, 28, 9, 52,
+                        Calendar.PM);
+                expectedFinish = buildDate(2007, Calendar.MARCH, 1, 8, 32,
+                        Calendar.PM);
+                assertDateStringEquals(expectedStart,
+                        astState.getStartFormattedLong(), sdf,
+                        "Wrong start time for 'HIGH_AST'",
+                        "Unable to parse start time for 'HIGH_AST': "
+                                + astState.getStartFormattedLong());
+                assertDateStringEquals(expectedFinish,
+                        astState.getFinishFormattedLong(), sdf,
+                        "Wrong finish time for 'HIGH_AST'",
+                        "Unable to parse finish time for 'HIGH_AST': "
+                                + astState.getFinishFormattedLong());
                 foundHighAstState = true;
             } else if (astState.getValueFormatted().equals("Very High AST")) {
-                expectedStart.set(Calendar.YEAR, 2007);
-                expectedStart.set(Calendar.MONTH, Calendar.MARCH);
-                expectedStart.set(Calendar.DAY_OF_MONTH, 2);
-                expectedStart.set(Calendar.HOUR, 2);
-                expectedStart.set(Calendar.MINUTE, 5);
-                expectedStart.set(Calendar.SECOND, 0);
-                expectedStart.set(Calendar.MILLISECOND, 0);
-                expectedStart.set(Calendar.AM_PM, Calendar.PM);
-
-                expectedFinish.set(Calendar.YEAR, 2007);
-                expectedFinish.set(Calendar.MONTH, Calendar.MARCH);
-                expectedFinish.set(Calendar.DAY_OF_MONTH, 2);
-                expectedFinish.set(Calendar.HOUR, 2);
-                expectedFinish.set(Calendar.MINUTE, 5);
-                expectedFinish.set(Calendar.SECOND, 0);
-                expectedFinish.set(Calendar.MILLISECOND, 0);
-                expectedFinish.set(Calendar.AM_PM, Calendar.PM);
-
-                try {
-                    assertEquals("Wrong start time for 'VERY_HIGH_AST'",
-                            expectedStart.getTime(),
-                            sdf.parse(astState.getStartFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse start time for 'VERY_HIGH_AST': "
-                            + astState.getStartFormattedLong());
-                }
-                try {
-                    assertEquals("Wrong finish time for 'VERY_HIGH_AST'",
-                            expectedFinish.getTime(),
-                            sdf.parse(astState.getFinishFormattedLong()));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    fail("Unable to parse finish time for 'VERY_HIGH_AST': "
-                            + astState.getFinishFormattedLong());
-                }
+                expectedStart = buildDate(2007, Calendar.MARCH, 2, 2, 5,
+                        Calendar.PM);
+                expectedFinish = buildDate(2007, Calendar.MARCH, 2, 2, 5,
+                        Calendar.PM);
+                assertDateStringEquals(expectedStart,
+                        astState.getStartFormattedLong(), sdf,
+                        "Wrong start time for 'VERY_HIGH_AST'",
+                        "Unable to parse start time for 'VERY_HIGH_AST': "
+                                + astState.getStartFormattedLong());
+                assertDateStringEquals(expectedFinish,
+                        astState.getFinishFormattedLong(), sdf,
+                        "Wrong finish time for 'VERY_HIGH_AST'",
+                        "Unable to parse finish time for 'VERY_HIGH_AST': "
+                                + astState.getFinishFormattedLong());
                 foundVeryHighAstState = true;
             } else {
                 fail("Found 'AST_STATE' with unknown value "
@@ -1128,46 +984,20 @@ public class ProtempaTest {
                 hellpFirstRecoverings.size());
         AbstractParameter hellpFirstRecovering = (AbstractParameter) onlyProp(hellpFirstRecoverings);
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d, yyyy h:mm aa");
-        Calendar expectedStart = Calendar.getInstance();
-        Calendar expectedFinish = Calendar.getInstance();
-        expectedStart.set(Calendar.YEAR, 2010);
-        expectedStart.set(Calendar.MONTH, Calendar.MAY);
-        expectedStart.set(Calendar.DAY_OF_MONTH, 12);
-        expectedStart.set(Calendar.HOUR, 8);
-        expectedStart.set(Calendar.MINUTE, 47);
-        expectedStart.set(Calendar.SECOND, 0);
-        expectedStart.set(Calendar.MILLISECOND, 0);
-        expectedStart.set(Calendar.AM_PM, Calendar.PM);
-
-        expectedFinish.set(Calendar.YEAR, 2010);
-        expectedFinish.set(Calendar.MONTH, Calendar.MAY);
-        expectedFinish.set(Calendar.DAY_OF_MONTH, 13);
-        expectedFinish.set(Calendar.HOUR, 11);
-        expectedFinish.set(Calendar.MINUTE, 30);
-        expectedFinish.set(Calendar.SECOND, 0);
-        expectedFinish.set(Calendar.MILLISECOND, 0);
-        expectedFinish.set(Calendar.AM_PM, Calendar.AM);
-
-        try {
-            assertEquals(
-                    "Wrong start time for 'HELLP_FIRST_RECOVERING_PLATELETS'",
-                    expectedStart.getTime(),
-                    sdf.parse(hellpFirstRecovering.getStartFormattedLong()));
-        } catch (ParseException e) {
-            e.printStackTrace();
-            fail("Unable to parse start time for 'HELLP_FIRST_RECOVERING_PLATELETS': "
-                    + hellpFirstRecovering.getStartFormattedLong());
-        }
-        try {
-            assertEquals(
-                    "Wrong finish time for 'HELLP_FIRST_RECOVERING_PLATELETS'",
-                    expectedFinish.getTime(),
-                    sdf.parse(hellpFirstRecovering.getFinishFormattedLong()));
-        } catch (ParseException e) {
-            e.printStackTrace();
-            fail("Unable to parse finish time for 'HELLP_FIRST_RECOVERING_PLATELETS': "
-                    + hellpFirstRecovering.getFinishFormattedLong());
-        }
+        Date expectedStart = buildDate(2010, Calendar.MAY, 12, 8, 47,
+                Calendar.PM);
+        Date expectedFinish = buildDate(2010, Calendar.MAY, 13, 11, 30,
+                Calendar.AM);
+        assertDateStringEquals(expectedStart,
+                hellpFirstRecovering.getStartFormattedLong(), sdf,
+                "Wrong start time for 'HELLP_FIRST_RECOVERING_PLATELETS'",
+                "Unable to parse start time for 'HELLP_FIRST_RECOVERING_PLATELETS': "
+                        + hellpFirstRecovering.getStartFormattedLong());
+        assertDateStringEquals(expectedFinish,
+                hellpFirstRecovering.getFinishFormattedLong(), sdf,
+                "Wrong finish time for 'HELLP_FIRST_RECOVERING_PLATELETS'",
+                "Unable to parse finish time for 'HELLP_FIRST_RECOVERING_PLATELETS': "
+                        + hellpFirstRecovering.getFinishFormattedLong());
     }
 
     private Set<Proposition> getPropositionsForKey(String keyId, String propId,
