@@ -64,15 +64,24 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
     @Override
     public void finish() throws FinderException {
         try {
-            SortedSet<String> sortedKeyIds = new TreeSet<String>(this.data.keySet());
+            SortedSet<String> sortedKeyIds = new TreeSet<String>(
+                    this.data.keySet());
             for (String keyId : sortedKeyIds) {
                 writeLine(keyId);
-                List<Proposition> sortedProps = new ArrayList<Proposition>(this.data.get(keyId).keySet());
-                Collections.sort(sortedProps, new PropositionComparator());
-                for (Proposition p : sortedProps) {
-                    writeLine(p.getId());
-                    List<Proposition> sortedDerivations = new ArrayList<Proposition>(this.data.get(keyId).get(p));
-                    Collections.sort(sortedProps, new PropositionComparator());
+                List<PropositionWithDerivations> sortedProps = new ArrayList<PropositionWithDerivations>();
+                for (Entry<Proposition, List<Proposition>> pp : this.data.get(
+                        keyId).entrySet()) {
+                    sortedProps.add(new PropositionWithDerivations(pp.getKey(),
+                            pp.getValue()));
+                }
+                Collections.sort(sortedProps,
+                        new PropositionWithDerivationsComparator());
+                for (PropositionWithDerivations pwd : sortedProps) {
+                    writeLine(pwd.getProposition().getId());
+                    List<Proposition> sortedDerivations = new ArrayList<Proposition>(
+                            pwd.getDerivations());
+                    Collections.sort(sortedDerivations,
+                            new PropositionComparator());
                     for (Proposition d : sortedDerivations) {
                         writeLine(d.getId());
                     }
@@ -89,12 +98,11 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
         this.writer.write("\n");
     }
 
-    private void storeDerivations(
-            Map<Proposition, List<Proposition>> derivations,
+    private void storeDerivations(List<Proposition> derivations,
             List<Proposition> outputDerivations) throws IOException {
-        for (Entry<Proposition, List<Proposition>> pp : derivations.entrySet()) {
-            for (Proposition p : pp.getValue()) {
-                outputDerivations.add(p);
+        if (derivations != null && derivations.size() > 0) {
+            for (Proposition d : derivations) {
+                outputDerivations.add(d);
             }
         }
     }
@@ -108,9 +116,9 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
             this.data.put(keyId, new HashMap<Proposition, List<Proposition>>());
             for (Proposition p : propositions) {
                 this.data.get(keyId).put(p, new ArrayList<Proposition>());
-                storeDerivations(forwardDerivations, this.data.get(keyId)
-                        .get(p));
-                storeDerivations(backwardDerivations,
+                storeDerivations(forwardDerivations.get(p), this.data
+                        .get(keyId).get(p));
+                storeDerivations(backwardDerivations.get(p),
                         this.data.get(keyId).get(p));
             }
         } catch (IOException ex) {
@@ -131,6 +139,57 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
         @Override
         public int compare(Proposition o1, Proposition o2) {
             return o1.getId().compareTo(o2.getId());
+        }
+
+    }
+
+    private static class PropositionWithDerivations {
+        private final Proposition proposition;
+        private final List<Proposition> derivations;
+
+        PropositionWithDerivations(Proposition proposition,
+                List<Proposition> derivations) {
+            this.proposition = proposition;
+            this.derivations = derivations;
+        }
+
+        public Proposition getProposition() {
+            return this.proposition;
+        }
+
+        public List<Proposition> getDerivations() {
+            return this.derivations;
+        }
+    }
+
+    private static class PropositionWithDerivationsComparator implements
+            Comparator<PropositionWithDerivations> {
+
+        @Override
+        public int compare(PropositionWithDerivations o1,
+                PropositionWithDerivations o2) {
+            if (o1.getProposition().getId().equals(o2.getProposition().getId())) {
+                if (o1.getDerivations().size() != o2.getDerivations().size()) {
+                    return o1.getDerivations().size()
+                            - o2.getDerivations().size();
+                } else {
+                    for (int i = 0; i < o1.getDerivations().size(); i++) {
+                        if (!o1.getDerivations().get(i).getId()
+                                .equals(o2.getDerivations().get(i).getId())) {
+                            return o1
+                                    .getDerivations()
+                                    .get(i)
+                                    .getId()
+                                    .compareTo(
+                                            o2.getDerivations().get(i).getId());
+                        }
+                    }
+                    return 0;
+                }
+            } else {
+                return o1.getProposition().getId()
+                        .compareTo(o2.getProposition().getId());
+            }
         }
 
     }
