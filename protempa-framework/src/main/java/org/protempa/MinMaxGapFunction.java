@@ -48,11 +48,11 @@ public final class MinMaxGapFunction extends GapFunction {
 
     public MinMaxGapFunction(Integer minimumGap, Unit minimumGapUnit,
             Integer maximumGap, Unit maximumGapUnit) {
+        this.changes = new PropertyChangeSupport(this);
         this.minimumGapUnits = minimumGapUnit;
         setMinimumGap(minimumGap);
         this.maximumGapUnits = maximumGapUnit;
         setMaximumGap(maximumGap);
-        this.changes = new PropertyChangeSupport(this);
     }
 
     @Override
