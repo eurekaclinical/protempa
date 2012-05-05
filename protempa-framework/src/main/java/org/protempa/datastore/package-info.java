@@ -20,7 +20,7 @@
 /**
  * The package <code>org.protempa.datastore</code> contains classes for
  * accessing external temporary and permanent stores. This is the only type-safe
- * way of getting handles to the {@link org.arp.javautil.Store} interface, via
+ * way of getting handles to the {@link org.arp.javautil.DataStore} interface, via
  * the {@link org.arp.javautil.datastore.DataStoreFactory} class. If a new type
  * of store is needed, an appropriate class should be created and should
  * implement {@link org.protempa.datastore.DataStoreCreator}, which
