@@ -496,10 +496,23 @@ public class ProtempaTest {
                 return false;
             }
         }
+        
+        // this accounts for the short-circuiting in the while loop above
+        // when line1 == null, we won't execute br2.readLine()
+        boolean retval = false;
+        if (line1 == null && line2 != null) {
+            line2 = br2.readLine();
+            if (line2 == null) {
+                retval = true;
+            } else {
+                retval = false;
+            }
+        }
+        
         br1.close();
         br2.close();
 
-        return line1 == null && line2 == null;
+        return retval;
     }
 
     private void testOutputResultsNewKeysProps() {
@@ -508,6 +521,7 @@ public class ProtempaTest {
 
     private void assertEncountersRetrieved(
             DataStore<String, List<Proposition>> objectGraph) {
+        logger.log(Level.INFO, "Running encounters test...");
         Map<String, Integer> patientEncounterMap = new HashMap<String, Integer>();
         Map<String, Encounter> encountersMap = new HashMap<String, Encounter>();
         for (Encounter e : this.dataProvider.getEncounters()) {
@@ -543,10 +557,12 @@ public class ProtempaTest {
                         event.getFinishFormattedLong());
             }
         }
+        logger.log(Level.INFO, "Completed encounters test");
     }
 
     private void assertPatientsRetrieved(
             DataStore<String, List<Proposition>> objectGraph) {
+        logger.log(Level.INFO, "Running patients test...");
         Map<String, Patient> patientMap = new HashMap<String, Patient>();
 
         for (Patient p : this.dataProvider.getPatients()) {
@@ -568,6 +584,7 @@ public class ProtempaTest {
             checkPatient(patientMap.get(keyId), onlyProp(patientProp),
                     onlyProp(patientAllProp));
         }
+        logger.log(Level.INFO, "Completed patients test");
     }
 
     private Proposition onlyProp(Set<Proposition> singletonSet) {
@@ -606,11 +623,13 @@ public class ProtempaTest {
 
     private void assertVitalsRetrieved(
             DataStore<String, List<Proposition>> objectGraph) {
+        logger.log(Level.INFO, "Running vitals test...");
         for (String vitalSign : VITALS) {
             for (Patient patient : this.dataProvider.getPatients()) {
                 checkPatientVitalSign(patient.getId(), vitalSign, objectGraph);
             }
         }
+        logger.log(Level.INFO, "Completed vitals test");
     }
 
     private void checkPatientVitalSign(Long keyId, String vitalSign,
@@ -644,6 +663,7 @@ public class ProtempaTest {
     }
 
     private void assert30DayReadmissionDerived(AbstractionFinderTestHelper afh) {
+        logger.log(Level.INFO, "Running 30DayReadmissions test...");
         Map<Proposition, List<Proposition>> encDerivations = getDerivedPropositionsForKey(
                 "Encounter", afh.getForwardDerivations("0"));
         for (Entry<Proposition, List<Proposition>> prop : encDerivations
@@ -669,20 +689,23 @@ public class ProtempaTest {
                                 + encounterId, 0, count30DayReadmit);
             }
         }
-
+        logger.log(Level.INFO, "Completed 30DayReadmissions test");
     }
 
     private void assertNo30DayReadmissionDerived(AbstractionFinderTestHelper afh) {
+        logger.log(Level.INFO, "Running No30DayReadmissions test...");
         Map<Proposition, List<Proposition>> no30DayDerivations = getDerivedPropositionsForKey(
                 "No30DayReadmission", afh.getBackwardDerivations("0"));
         assertEquals(
                 "Found wrong number of 'No30DayReadmissions' for key ID 0", 4,
                 no30DayDerivations.size());
+        logger.log(Level.INFO, "Completed No30DayReadmissions test");
     }
 
     private void assertChildIcd9Derived(
             DataStore<String, WorkingMemory> derivedData,
             AbstractionFinderTestHelper afh) {
+        logger.log(Level.INFO, "Running ICD9 test...");
         boolean icd9d01382Derived = false;
         boolean icd9d804Derived = false;
 
@@ -769,6 +792,7 @@ public class ProtempaTest {
                     expectedBackwardDerivations.get(icd9Code),
                     foundBackwardDerivations);
         }
+        logger.log(Level.INFO, "Completed ICD9 test");
     }
 
     private Date buildDate(int year, int month, int dayOfMonth, int hour,
@@ -799,6 +823,7 @@ public class ProtempaTest {
 
     private void assertLdhTrendDerived(
             DataStore<String, WorkingMemory> derivedData) {
+        logger.log(Level.INFO, "Running LDH_TREND test...");
         Set<AbstractParameter> ldhTrends = new HashSet<AbstractParameter>();
 
         for (@SuppressWarnings("unchecked")
@@ -860,10 +885,13 @@ public class ProtempaTest {
 
         assertTrue("Did not find the increasing 'LDH_TREND'", foundInc);
         assertTrue("Did not find the decreasing 'LDH_TREND'", foundDec);
+        
+        logger.log(Level.INFO, "Completed LDH_TREND test");
     }
 
     private void assertAstStateDerived(
             DataStore<String, WorkingMemory> derivedData) {
+        logger.log(Level.INFO, "Running AST_STATE test...");
         Set<AbstractParameter> astStates = new HashSet<AbstractParameter>();
 
         for (@SuppressWarnings("unchecked")
@@ -966,10 +994,13 @@ public class ProtempaTest {
                 foundHighAstState);
         assertTrue("Failed to find 'AST_STATE' with value 'VERY_HIGH_AST'",
                 foundVeryHighAstState);
+        
+        logger.log(Level.INFO, "Completed AST_STATE test");
     }
 
     private void assertFirstHellpRecoveringSliceDerived(
             DataStore<String, WorkingMemory> derivedData) {
+        logger.log(Level.INFO, "Running HELLP_FIRST_RECOVERING_PLATELETS test...");
         Set<Proposition> hellpFirstRecoverings = new HashSet<Proposition>();
         for (@SuppressWarnings("unchecked")
         Iterator<Proposition> it = derivedData.get("11").iterateObjects(); it
@@ -998,6 +1029,8 @@ public class ProtempaTest {
                 "Wrong finish time for 'HELLP_FIRST_RECOVERING_PLATELETS'",
                 "Unable to parse finish time for 'HELLP_FIRST_RECOVERING_PLATELETS': "
                         + hellpFirstRecovering.getFinishFormattedLong());
+        
+        logger.log(Level.INFO, "Completed HELLP_FIRST_RECOVERING_PLATELETS test");
     }
 
     private Set<Proposition> getPropositionsForKey(String keyId, String propId,
