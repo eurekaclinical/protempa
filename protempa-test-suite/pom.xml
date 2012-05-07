@@ -8,7 +8,7 @@
   </parent>
   <artifactId>protempa-test-suite</artifactId>
   <name>Protempa Test Suite</name>
-  <description>For running end-to-end regression tests against Protempa</description>
+  <description>For running end-to-end regression and integration tests against Protempa</description>
   <dependencies>
   	<dependency>
   		<groupId>org.protempa</groupId>
@@ -73,7 +73,43 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.7.1</version>
+          <configuration>
+          <!--  tests will run via one of the profiles below -->
+            <skipTests>true</skipTests>
+          </configuration>
       </plugin>
     </plugins>
   </build>
+  <profiles>
+        <profile>
+            <id>test-tier1</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                        <!--  This is a full test of the system, so it's tier 2 
+                              Nothing to do here -->
+                            <skipTests>true</skipTests>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>test-tier2</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>false</skipTests>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
