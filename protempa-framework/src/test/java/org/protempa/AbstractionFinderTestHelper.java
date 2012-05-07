@@ -134,6 +134,8 @@ public final class AbstractionFinderTestHelper {
      * longer needed.
      */
     public void cleanUp() {
-        this.dbStore.shutdown();
+        if (this.dbStore != null && !this.dbStore.isClosed()) {
+            this.dbStore.shutdown();
+        }
     }
 }
