@@ -21,6 +21,7 @@ package org.protempa.bp.commons.dsb.relationaldb;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -217,9 +218,11 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                         "Data source backend {0} is executing query for {1}",
                         new Object[] { backendNameForMessages, entitySpecName });
             }
+            logQueryTimeout(logger, backendNameForMessages);
 
             RetryableSQLExecutor operation = new RetryableSQLExecutor(
-                    getConnectionSpec(), query, resultProcessor);
+                    getConnectionSpec(), query, resultProcessor,
+                    this.backend.getQueryTimeout());
             Retryer<SQLException> retryer = new Retryer<SQLException>(3);
             if (!retryer.execute(operation)) {
                 SQLException ex = SQLExecutor.assembleSQLException(retryer
@@ -233,6 +236,23 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 logger.log(Level.FINE,
                         "Query for {0} in data source backend {1} is complete",
                         new Object[] { entitySpecName, backendNameForMessages });
+            }
+        }
+    }
+
+    private void logQueryTimeout(Logger logger, 
+            String backendNameForMessages) {
+        Level level = Level.FINER;
+        if (logger.isLoggable(level)) {
+            Integer queryTimeout = this.backend.getQueryTimeout();
+            if (queryTimeout != null) {
+                logger.log(level,
+                    "Data source backend {0} has query timeout set to {1,number,integer} seconds",
+                    new Object[] {backendNameForMessages, queryTimeout});
+            } else {
+                logger.log(level,
+                    "Query timeout is not set for data source backend {0}",
+                    new Object[] {backendNameForMessages});
             }
         }
     }
@@ -598,9 +618,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         String query = generateSelect(entitySpec, referenceSpec, propIds,
                 filtersCopy, entitySpecsCopy, keyIds, order, resultProcessor);
 
-        if (logger.isLoggable(Level.INFO)) {
+        if (logger.isLoggable(Level.FINE)) {
             logger.log(
-                    Level.INFO,
+                    Level.FINE,
                     "Data source backend {0} generated the following query for {1}: {2}",
                     new Object[] { backendNameForMessages, entitySpecName,
                             query });

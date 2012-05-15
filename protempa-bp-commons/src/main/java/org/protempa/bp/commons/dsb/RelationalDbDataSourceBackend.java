@@ -85,6 +85,7 @@ public abstract class RelationalDbDataSourceBackend
     private String password;
     private RelationalDatabaseSpec relationalDatabaseSpec;
     private SQLGenerator sqlGenerator;
+    private Integer queryTimeout;
 
     public RelationalDbDataSourceBackend() {
         this(null);
@@ -242,6 +243,34 @@ public abstract class RelationalDbDataSourceBackend
                     "cannot set this field after initialize has been called");
         }
         this.databaseId = databaseId;
+    }
+    
+    /**
+     * Sets the query timeout.  If <code>null</code>, no timeout will be set 
+     * (the default).
+     * 
+     * @param seconds the timeout in seconds, or <code>null</code> to disable 
+     * query timeout.
+     */
+    @BackendProperty
+    public void setQueryTimeout(Integer seconds) {
+        if (seconds != null && seconds.intValue() < 0) {
+            throw new IllegalArgumentException("invalid seconds: " + seconds);
+        }
+        this.queryTimeout = seconds;
+    }
+    
+    /**
+     * Returns the query timeout in seconds. The query timeout setting halts
+     * query execution if execution does not complete within the specified 
+     * number of seconds. A value of <code>0</code> or a negative
+     * number (the default) means that no query timeout is set.
+     * 
+     * @return the query timeout in seconds, or <code>null</code> if query 
+     * timeout is disabled.
+     */
+    public Integer getQueryTimeout() {
+        return this.queryTimeout;
     }
 
     /**

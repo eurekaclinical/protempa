@@ -278,10 +278,19 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
             resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
                     ARRAY_LIST_OT, "result")));
+            int len;
+            int minInd = def.getMinIndex();
+            int maxInd = def.getMaxIndex();
+            if (maxInd < 0) {
+                len = Math.abs(minInd);
+            } else {
+                len = maxInd;
+            }
             resultP.addConstraint(new PredicateConstraint(
-                    new CollectionSizeExpression(1)));
+                    new CollectionSizeExpression(len)));
             rule.addPattern(resultP);
-            rule.setConsequence(new SliceConsequence(def, this.derivationsBuilder));
+            rule.setConsequence(new SliceConsequence(def, 
+                    this.derivationsBuilder));
             rule.setSalience(MINUS_TWO_SALIENCE);
             this.ruleToAbstractionDefinition.put(rule, def);
             rules.add(rule);
