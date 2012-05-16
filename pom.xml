@@ -31,10 +31,8 @@
             <verbose>false</verbose>
             <organizationName>Emory University</organizationName>
             <inceptionYear>2012</inceptionYear>
-	    <canUpdateDescription>true</canUpdateDescription>
+	    <canUpdateDescription>false</canUpdateDescription>
             <roots>
-              <!-- Adds licensing to everything under src/main/ -->
-              <!--  might want to include src/test and etc/ as well -->
               <root>src/main</root>
               <root>src/test/java/</root>
             </roots>
@@ -53,6 +51,19 @@
                 <phase>process-sources</phase>
             </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+            <finalName>protempa</finalName>
+            <descriptors>
+                <descriptor>assembly.xml</descriptor>
+            </descriptors>
+            <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+            <tarLongFileMode>gnu</tarLongFileMode>
+        </configuration>
       </plugin>
     </plugins>
   </build>
