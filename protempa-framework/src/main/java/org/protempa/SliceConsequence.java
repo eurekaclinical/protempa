@@ -38,9 +38,25 @@ final class SliceConsequence implements Consequence {
     private static final long serialVersionUID = -7485083104777547624L;
     
     private final PropositionCopier copier;
+    
+    /*
+     * A sublist index range for performing the slice. This will not
+     * necessarily be the same as the {@link SliceDefinition}'s index range.
+     * If the slice definition's min index is negative, the input propositions
+     * are sorted in reverse chronological order, and these two fields will
+     * store the index range to be sliced for the reversed propositions. See 
+     * the constructor for the logic that is performed.
+     */
     private final int minIndex;
     private final int maxIndex;
-    private final Comparator comp;
+    
+    /*
+     * Whether or not to sort the propositions in reverse or forward
+     * chronological order. We don't just store the comparator to use because
+     * this class implements {@link Serializable} and the comparator may not be
+     * serializable.
+     */
+    private final boolean reverse;
 
     /**
      * Constructs a consequence instance with a definition of the temporal
@@ -58,11 +74,11 @@ final class SliceConsequence implements Consequence {
         if (minInd < 0) {
             this.minIndex = -maxInd;
             this.maxIndex = -minInd;
-            this.comp = ProtempaUtil.REVERSE_TEMP_PROP_COMP;
+            this.reverse = true;
         } else {
             this.minIndex = minInd;
             this.maxIndex = maxInd;
-            this.comp = ProtempaUtil.TEMP_PROP_COMP;
+            this.reverse = false;
         }
         this.copier = new PropositionCopier(def.getId(), listener);
     }
@@ -83,7 +99,13 @@ final class SliceConsequence implements Consequence {
         List<TemporalProposition> pl =
                 (List<TemporalProposition>) arg0.get(
                 arg0.getDeclaration("result"));
-        Collections.sort(pl, this.comp);
+        Comparator<TemporalProposition> comp;
+        if (this.reverse) {
+            comp = ProtempaUtil.REVERSE_TEMP_PROP_COMP;
+        } else {
+            comp = ProtempaUtil.TEMP_PROP_COMP;
+        }
+        Collections.sort(pl, comp);
         this.copier.grab(arg1);
         for (ListIterator<TemporalProposition> itr = 
                 pl.listIterator(this.minIndex);
