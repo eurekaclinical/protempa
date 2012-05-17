@@ -106,6 +106,7 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <skipTests>false</skipTests>
+                            <argLine>-enableassertions -Xmx256M</argLine>
                         </configuration>
                     </plugin>
                 </plugins>
