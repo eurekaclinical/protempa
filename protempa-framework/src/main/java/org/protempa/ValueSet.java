@@ -119,9 +119,10 @@ public final class ValueSet {
     private final Set<Value> valuesKeySet;
     private final OrderedValue lowerBound;
     private final OrderedValue upperBound;
+    private final SourceId sourceId;
 
     public ValueSet(String id, OrderedValue lowerBound,
-            OrderedValue upperBound, KnowledgeBase kb) {
+            OrderedValue upperBound, KnowledgeBase kb, SourceId sourceId) {
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
@@ -131,6 +132,11 @@ public final class ValueSet {
         this.valueSetElements = EMPTY_VALUE_SET_ELT_ARRAY;
         this.values = new HashMap<Value, ValueSetElement>();
         this.valuesKeySet = this.values.keySet();
+        if (sourceId == null) {
+            this.sourceId = NotRecordedSourceId.getInstance();
+        } else {
+            this.sourceId = sourceId;
+        }
     }
 
     /**
@@ -141,7 +147,7 @@ public final class ValueSet {
      * {@link ValueSetElement}s are allowed.
      */
     public ValueSet(KnowledgeBase kb, String id,
-            ValueSetElement[] valueSetElements) {
+            ValueSetElement[] valueSetElements, SourceId sourceId) {
         if (kb == null) {
             throw new IllegalArgumentException(
                     "A knowledge base must be specified");
@@ -172,6 +178,11 @@ public final class ValueSet {
         this.valuesKeySet = this.values.keySet();
         this.lowerBound = null;
         this.upperBound = null;
+        if (sourceId == null) {
+            this.sourceId = NotRecordedSourceId.getInstance();
+        } else {
+            this.sourceId = sourceId;
+        }
         kb.addValueSet(this);
     }
 
@@ -182,6 +193,15 @@ public final class ValueSet {
      */
     public String getId() {
         return this.id;
+    }
+    
+    /**
+     * Returns the source of this value set.
+     * 
+     * @return a {@link SourceId}, guaranteed not <code>null</code>.
+     */
+    public SourceId getSourceId() {
+        return this.sourceId;
     }
 
     /**

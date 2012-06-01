@@ -34,8 +34,7 @@ import org.protempa.TermSourceReadException;
 public class PrintTermChildren extends CLI {
 
     public PrintTermChildren() {
-        super(System.getProperty("app.name"),
-                new Argument[]{new Argument("termId", true)});
+        super(new Argument[]{new Argument("termId", true)});
     }
 
     @Override

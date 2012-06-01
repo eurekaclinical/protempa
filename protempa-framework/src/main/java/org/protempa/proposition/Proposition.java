@@ -94,7 +94,8 @@ public interface Proposition extends PropositionVisitable,
     /**
      * Gets the value of the specified property.
      *
-     * @param name the name {@link String} of a valid property.
+     * @param name the name {@link String} of a valid property. Cannot be
+     * <code>null</code>.
      * @return the {@link Value} of the specified property.
      */
     Value getProperty(String name);
@@ -103,7 +104,7 @@ public interface Proposition extends PropositionVisitable,
      * Gets the global unique identifiers for the propositions that have the
      * specified 1:N relationship with this proposition.
      *
-     * @param name the name of the relationship.
+     * @param name the name of the relationship. Cannot be <code>null</code>.
      * @return a {@link List<UniqueIdentifier>} of global unique identifiers.
      * Guaranteed not <code>null</code>.
      * @see QuerySession#getReferences(org.protempa.proposition.Proposition,

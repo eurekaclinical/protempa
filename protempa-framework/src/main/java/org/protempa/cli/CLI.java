@@ -33,7 +33,7 @@ import org.protempa.ProtempaStartupException;
 
 /**
  * Convenience class for creating command line applications using PROTEMPA.
- * 
+ *
  * @author Andrew Post
  */
 public abstract class CLI {
@@ -102,6 +102,14 @@ public abstract class CLI {
     private final String shellCommand;
     private final Argument[] arguments;
     private final boolean configurationIdEnabled;
+    
+    /**
+     * Instantiates this application. The system property <code>app.name</code>
+     * must be set to the shell command name.
+     */
+    protected CLI() {
+        this(null, null);
+    }
 
     /**
      * Instantiates the application with a required shell command name.
@@ -112,6 +120,17 @@ public abstract class CLI {
     protected CLI(String shellCommand) {
         this(shellCommand, null);
     }
+    
+    /**
+     * Instantiates the application with optional arguments. The system 
+     * property <code>app.name</code> must be set to the shell command name.
+     *
+     * @param arguments the command line arguments for this application. May
+     * be <code>null</code> or empty.
+     */
+    protected CLI(Argument[] arguments) {
+        this(null, null, true);
+    }
 
     /**
      * Instantiates the application with a required shell command name and
@@ -119,13 +138,30 @@ public abstract class CLI {
      *
      * To add options, override
      * {@link #addCustomCliOptions(org.apache.commons.cli.Options)}.
-     * 
+     *
      * @param shellCommand a {@link String}, cannot be <code>null</code> or
      * empty.
-     * @param arguments a {@link Argument[]}.
+     * @param arguments an {@link Argument[]}.
      */
     protected CLI(String shellCommand, Argument[] arguments) {
         this(shellCommand, arguments, true);
+    }
+    
+    /**
+     * Instantiates the application with a required shell command name and
+     * whether to create the configuration id option. The latter is
+     * <code>true</code> by default, and normally would be unless PROTEMPA
+     * would not be initialized by the program for some reason.
+     * 
+     * To add options, override
+     * {@link #addCustomCliOptions(org.apache.commons.cli.Options)}.
+     * 
+     * @param arguments an {@link Argument[]}.
+     * @param configurationIdEnabled whether or not the configuration id option
+     * should be created.
+     */
+    protected CLI(Argument[] arguments, boolean configurationIdEnabled) {
+        this(null, arguments, configurationIdEnabled);
     }
 
     /**
@@ -140,15 +176,18 @@ public abstract class CLI {
      *
      * @param shellCommand a {@link String}, cannot be <code>null</code> or
      * empty.
-     * @param arguments a {@link Argument[]}.
+     * @param arguments an {@link Argument[]}.
      * @param configurationIdEnabled whether or not the configuration id option
      * should be created.
      */
     protected CLI(String shellCommand, Argument[] arguments,
             boolean configurationIdEnabled) {
         if (shellCommand == null || shellCommand.trim().length() == 0) {
-            throw new IllegalArgumentException(
-                    "shellCommand cannot be null or empty");
+            shellCommand = System.getProperty("app.name");
+            if (shellCommand == null || shellCommand.trim().length() == 0) {
+                throw new IllegalArgumentException(
+                        "shellCommand cannot be null or empty (tried system property app.name too)");
+            }
         }
         this.shellCommand = shellCommand;
 
@@ -224,8 +263,8 @@ public abstract class CLI {
     }
 
     /**
-     * Prints to the console an exception's message and its nested
-     * exception's message (if any).
+     * Prints to the console an exception's message and its nested exception's
+     * message (if any).
      *
      * @param cliException the {@link Exception} to print.
      */
@@ -244,6 +283,7 @@ public abstract class CLI {
     /**
      * Calls the code in
      * {@link #execute(org.protempa.Protempa, org.apache.commons.cli.CommandLine)}.
+     *
      * @throws CLIException if
      * {@link #execute(org.protempa.Protempa, org.apache.commons.cli.CommandLine)}
      * throws an exception.
@@ -256,11 +296,13 @@ public abstract class CLI {
     }
 
     /**
-     * Closes the instance of {@link Protempa} created by {@link #initialize(java.lang.String)}.
+     * Closes the instance of {@link Protempa} created by 
+     * {@link #initialize(java.lang.String)}.
      */
     public final void close() {
-        if (this.protempa == null)
+        if (this.protempa == null) {
             throw new IllegalStateException("PROTEMPA not initialized");
+        }
         this.protempa.close();
         this.protempa = null;
     }
@@ -268,10 +310,12 @@ public abstract class CLI {
     /**
      * Processes command line options. The default command line options are -h
      * or --help, which prints usage and the list of options, and -c or
-     * --configuration, which is followed by the id of a PROTEMPA
-     * configuration. The latter is required unless -h is specified. Any additional
-     * options that are specified in {@link #addCustomCliOptions(org.apache.commons.cli.Options)}
-     * should be handled by {@link #execute(org.protempa.Protempa, org.apache.commons.cli.CommandLine) }.
+     * --configuration, which is followed by the id of a PROTEMPA 
+     * configuration. The latter is required unless -h is specified. Any 
+     * additional options that are specified in 
+     * {@link #addCustomCliOptions(org.apache.commons.cli.Options)} should be 
+     * handled by 
+     * {@link #execute(org.protempa.Protempa, org.apache.commons.cli.CommandLine)}. 
      * There always must be at least one argument for the configuration id.
      *
      * @param args the argument {@link String[]} passed into <code>main</code>.
@@ -311,9 +355,9 @@ public abstract class CLI {
     }
 
     /**
-     * Like calling {@link #initialize(java.lang.String)},
-     * {@link #execute()} and {@link #close()} in succession. Must be called
-     * only after {@link #processArgs(java.lang.String[], int, int) }.
+     * Like calling {@link #initialize(java.lang.String)}, {@link #execute()} 
+     * and {@link #close()} in succession. Must be called only after 
+     * {@link #processArgs(java.lang.String[], int, int) }.
      *
      * @param configurationId a PROTEMPA configuration id {@link String}.
      */

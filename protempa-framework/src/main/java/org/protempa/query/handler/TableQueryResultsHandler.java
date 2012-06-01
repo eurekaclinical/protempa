@@ -21,10 +21,7 @@ package org.protempa.query.handler;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,12 +43,14 @@ import org.protempa.query.handler.table.TableColumnSpecValidationFailedException
 public final class TableQueryResultsHandler implements QueryResultsHandler {
 
     private static final long serialVersionUID = -1503401944818776787L;
+    
     private final char columnDelimiter;
     private final String[] rowPropositionIds;
     private final TableColumnSpec[] columnSpecs;
     private final boolean headerWritten;
     private KnowledgeSource knowledgeSource;
     private final BufferedWriter out;
+    private final Map<String, String> replace;
 
     public TableQueryResultsHandler(BufferedWriter out, char columnDelimiter,
             String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
@@ -63,6 +62,9 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
         this.out = out;
+        this.replace = new HashMap<String, String>();
+        this.replace.put(null, "(null)");
+        this.replace.put("", "(empty)");
     }
 
     private void checkConstructorArgs(String[] rowPropositionIds,
@@ -163,20 +165,8 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
                             forwardDerivations, backwardDerivations,
                             references, this.knowledgeSource);
 
-                    for (int j = 0; j < colValues.length; j++) {
-                        String colValue = colValues[j];
-                        if (colValue == null) {
-                            this.out.write("(null)");
-                        } else if (colValue.length() == 0) {
-                            this.out.write("(empty)");
-                        } else {
-                            StringUtil.escapeAndWriteDelimitedColumn(colValue, 
-                                    this.columnDelimiter, this.out);
-                        }
-                        if (j < colValues.length - 1) {
-                            this.out.write(this.columnDelimiter);
-                        }
-                    }
+                    StringUtil.escapeAndWriteDelimitedColumns(colValues, 
+                            this.replace, this.columnDelimiter, this.out);
 
                     if (i < n - 1) {
                         this.out.write(this.columnDelimiter);

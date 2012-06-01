@@ -32,8 +32,7 @@ import org.protempa.Protempa;
  */
 public class PrintLeaves extends CLI {
     public PrintLeaves() {
-        super(System.getProperty("app.name"),
-                new Argument[] {new Argument("propositionId", true)});
+        super(new Argument[] {new Argument("propositionId", true)});
     }
 
     @Override

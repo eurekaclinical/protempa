@@ -118,4 +118,6 @@ public interface PropositionDefinition extends Serializable,
 
     void removePropertyChangeListener(String proeprtyName,
             PropertyChangeListener listener);
+
+    SourceId getSourceId();
 }

@@ -34,8 +34,7 @@ import org.protempa.Terminology;
 public class PrintTerm extends CLI {
 
     public PrintTerm() {
-        super(System.getProperty("app.name"),
-                new Argument[]{new Argument("termId", true)});
+        super(new Argument[]{new Argument("termId", true)});
     }
 
     @Override

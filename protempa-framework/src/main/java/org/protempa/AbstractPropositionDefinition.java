@@ -23,6 +23,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.protempa.SourceId;
 
 /**
  * Abstract base class for all knowledge definition classes.
@@ -72,6 +73,7 @@ public abstract class AbstractPropositionDefinition implements
     private ReferenceDefinition[] referenceDefinitions;
     private boolean inDataSource;
     protected PropertyChangeSupport changes;
+    private SourceId sourceId;
 
     /**
      * Creates a new knowledge definition.
@@ -98,6 +100,7 @@ public abstract class AbstractPropositionDefinition implements
         this.description = "";
         this.propertyDefinitions = EMPTY_PROPERTIES;
         this.referenceDefinitions = EMPTY_REFERENCES;
+        this.sourceId = NotRecordedSourceId.getInstance();
     }
 
     /**
@@ -331,6 +334,19 @@ public abstract class AbstractPropositionDefinition implements
         if (this.changes != null) {
             this.changes.firePropertyChange("inDataSource", old,
                     this.inDataSource);
+        }
+    }
+
+    @Override
+    public SourceId getSourceId() {
+        return this.sourceId;
+    }
+    
+    public void setSourceId(SourceId sourceId) {
+        if (sourceId == null) {
+            this.sourceId = NotRecordedSourceId.getInstance();
+        } else {
+            this.sourceId = sourceId;
         }
     }
 

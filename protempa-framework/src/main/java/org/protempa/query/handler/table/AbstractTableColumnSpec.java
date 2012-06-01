@@ -19,14 +19,8 @@
  */
 package org.protempa.query.handler.table;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
@@ -36,6 +30,11 @@ import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 
 public abstract class AbstractTableColumnSpec implements TableColumnSpec {
+    private final LinkTraverser linkTraverser;
+    
+    public AbstractTableColumnSpec() {
+        this.linkTraverser = new LinkTraverser();
+    }
     
     boolean checkCompatible(Proposition proposition,
             PropertyConstraint[] constraints) {
@@ -63,7 +62,8 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
      * 
      * @param links the {@link Link}s to traverse.
      * @param proposition the {@link Proposition} from which to start.
-     * @param forwardDerivations map of propositions from raw data toward derived propositions.
+     * @param forwardDerivations map of propositions from raw data toward 
+     * derived propositions.
      * @param backwardDerivations map of propositions from derived propositions 
      * toward raw data.
      * @param references a map of unique id to the corresponding proposition
@@ -78,33 +78,10 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
-        LinkedList<Proposition> result = new LinkedList<Proposition>();
-        Set<Proposition> cache = new HashSet<Proposition>();
-        Logger logger = Util.logger();
-        result.add(proposition);
-        int num = 1;
-        for (Link link : links) {
-            int j = 0;
-            while (j < num) {
-                Proposition prop = result.remove();
-                Collection<Proposition> c = link.traverse(prop, 
-                        forwardDerivations, backwardDerivations,
-                        references, knowledgeSource, cache);
-                result.addAll(c);
-                j++;
-            }
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.log(Level.FINEST, "{0} traversed to {1} with {2}",
-                        new Object[]{getClass().getName(), result, link});
-            }
-            num = result.size();
-            cache.clear();
-        }
-        if (logger.isLoggable(Level.FINER)) {
-            logger.log(Level.FINER, "{0} traversed to {1}",
-                    new Object[]{getClass().getName(), result});
-        }
-        return result;
+            KnowledgeSource knowledgeSource) throws 
+                KnowledgeSourceReadException {
+        return this.linkTraverser.traverseLinks(links, proposition, 
+                forwardDerivations, backwardDerivations, references, 
+                knowledgeSource);
     }
 }

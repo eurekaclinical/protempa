@@ -33,8 +33,7 @@ import org.protempa.Protempa;
  */
 public class PrintInverseIsA extends CLI {
     public PrintInverseIsA() {
-        super(System.getProperty("app.name"),
-                new Argument[] {new Argument("propositionId", true)});
+        super(new Argument[] {new Argument("propositionId", true)});
     }
 
     @Override

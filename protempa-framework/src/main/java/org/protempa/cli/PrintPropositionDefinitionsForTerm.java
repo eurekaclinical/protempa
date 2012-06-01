@@ -38,8 +38,7 @@ import org.protempa.query.And;
 public class PrintPropositionDefinitionsForTerm extends CLI {
 
     public PrintPropositionDefinitionsForTerm() {
-        super(System.getProperty("app.name"),
-                new Argument[]{new Argument("termId", true)});
+        super(new Argument[]{new Argument("termId", true)});
     }
 
     @Override

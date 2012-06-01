@@ -33,8 +33,7 @@ import org.protempa.Protempa;
 public class PrintPropositionDefinition extends CLI {
 
     public PrintPropositionDefinition() {
-        super(System.getProperty("app.name"),
-                new Argument[] {new Argument("propositionId", true)});
+        super(new Argument[] {new Argument("propositionId", true)});
     }
 
     @Override

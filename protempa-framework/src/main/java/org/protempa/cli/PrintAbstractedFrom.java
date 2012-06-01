@@ -34,8 +34,7 @@ import org.protempa.Protempa;
  */
 public class PrintAbstractedFrom extends CLI {
     public PrintAbstractedFrom() {
-        super(System.getProperty("app.name"),
-                new Argument[] {new Argument("propositionId", true)});
+        super(new Argument[] {new Argument("propositionId", true)});
     }
 
     @Override

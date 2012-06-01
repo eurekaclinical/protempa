@@ -132,7 +132,7 @@ public abstract class AbstractProposition implements Proposition {
     @Override
     public final Value getProperty(String name) {
         if (this.properties == null) {
-            return null;
+            throw new IllegalArgumentException("name cannot be null");
         } else {
             return this.properties.get(name);
         }
@@ -190,6 +190,9 @@ public abstract class AbstractProposition implements Proposition {
 
     @Override
     public final List<UniqueId> getReferences(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("name cannot be null");
+        }
         if (this.references == null) {
             return Collections.emptyList();
         } else {
