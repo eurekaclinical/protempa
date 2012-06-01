@@ -76,6 +76,9 @@ import org.protempa.query.handler.QueryResultsHandler;
 /**
  * Unit tests for Protempa.
  * 
+ * Persistent stores go into the directory in the system property 
+ * java.io.tmpdir.
+ * 
  * @author Michel Mansour
  */
 public class ProtempaTest {
@@ -125,11 +128,6 @@ public class ProtempaTest {
             + "/backward-derivations.txt";
 
     /**
-     * Where to keep the persistent stores
-     */
-    private static final String STORE_HOME = "src/test/resources/store";
-
-    /**
      * Name of the persistent storage environment
      */
     private static final String STORE_ENV_NAME = "test-store";
@@ -143,11 +141,6 @@ public class ProtempaTest {
      * Name of the persistent store for data after rules processing
      */
     private static final String WORKING_MEMORY_STORE_NAME = "working-memory-store";
-
-    /**
-     * Name of the output file
-     */
-    private static final String OUTPUT_FILENAME = "src/test/resources/output/test-output";
 
     /**
      * All proposition IDs in the sample data
@@ -225,29 +218,10 @@ public class ProtempaTest {
         System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
                 "org.protempa.bp.commons.dsb.relationaldb.H2SQLGenerator");
 
-        File storeHome = new File(STORE_HOME);
-        logger.log(Level.INFO, "Clearing out persistent storage files");
-        deleteDir(storeHome);
-        storeHome.mkdir();
-        logger.log(Level.INFO, "Persistent storage area clear");
-
-        // system properties for caching and persistence
-        System.setProperty("java.io.tmpdir", STORE_HOME);
+        // system property for caching and persistence
         System.setProperty("store.env.name", STORE_ENV_NAME);
 
         protempa = Protempa.newInstance("protege-h2-test-config");
-    }
-
-    private void deleteDir(File path) {
-        if (path.exists()) {
-            if (path.isDirectory()) {
-                for (File f : path.listFiles()) {
-                    deleteDir(f);
-                }
-            } else {
-                path.delete();
-            }
-        }
     }
 
     /**
@@ -449,13 +423,15 @@ public class ProtempaTest {
      */
     private void testOutputResults() {
         FileWriter fw = null;
+        File outputFile = null;
         try {
-            fw = new FileWriter(OUTPUT_FILENAME);
+            outputFile = File.createTempFile("protempa-test", null);
+            fw = new FileWriter(outputFile);
             QueryResultsHandler handler = new SingleColumnQueryResultsHandler(
                     fw);
             protempa.outputResults(query(), handler, WORKING_MEMORY_STORE_NAME);
-             assertTrue("output doesn't match",
-             outputMatches(OUTPUT_FILENAME, TRUTH_OUTPUT));
+            assertTrue("output doesn't match",
+                outputMatches(outputFile, TRUTH_OUTPUT));
         } catch (FinderException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
@@ -477,12 +453,12 @@ public class ProtempaTest {
                     fw.close();
                 }
             } catch (IOException ex) {
-                System.err.println("Failed to close file: " + OUTPUT_FILENAME);
+                System.err.println("Failed to close file: " + outputFile);
             }
         }
     }
 
-    private boolean outputMatches(String file1, String file2)
+    private boolean outputMatches(File file1, String file2)
             throws IOException {
         BufferedReader br1 = new BufferedReader(new FileReader(file1));
         BufferedReader br2 = new BufferedReader(new FileReader(file2));

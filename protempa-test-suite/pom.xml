@@ -9,6 +9,9 @@
   <artifactId>protempa-test-suite</artifactId>
   <name>Protempa Test Suite</name>
   <description>For running end-to-end regression and integration tests against Protempa</description>
+  <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <dependencies>
   	<dependency>
   		<groupId>org.protempa</groupId>
