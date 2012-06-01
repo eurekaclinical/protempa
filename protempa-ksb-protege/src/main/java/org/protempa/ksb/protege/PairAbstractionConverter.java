@@ -29,7 +29,7 @@ import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
 import java.util.HashMap;
 import java.util.Map;
-import org.protempa.PropositionDefinition;
+import org.protempa.*;
 
 public class PairAbstractionConverter implements PropositionConverter {
 
@@ -48,6 +48,7 @@ public class PairAbstractionConverter implements PropositionConverter {
         Util.setSolid(protegeProposition, result, cm);
         Util.setConcatenable(protegeProposition, result, cm);
         Util.setGap(protegeProposition, result, backend, cm);
+        Util.setReferences(protegeProposition, result, cm);
         Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache =
                 new HashMap<Instance, TemporalExtendedPropositionDefinition>();
         addComponentAbstractionDefinitions(protegeProposition, result,
@@ -57,6 +58,8 @@ public class PairAbstractionConverter implements PropositionConverter {
         Util.setInverseIsAs(protegeProposition, result, cm);
         result.setTemporalOffset(Util.temporalOffsets(protegeProposition, 
                 backend, extendedParameterCache));
+        result.setSourceId(
+                DefaultSourceId.getInstance(backend.getDisplayName()));
         return result;
     }
 

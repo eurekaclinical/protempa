@@ -27,30 +27,17 @@ import java.util.logging.Logger;
 
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
-import org.protempa.AbstractAbstractionDefinition;
-import org.protempa.AbstractPropositionDefinition;
-import org.protempa.HighLevelAbstractionDefinition;
-import org.protempa.IntervalSide;
-import org.protempa.KnowledgeBase;
-import org.protempa.KnowledgeSourceReadException;
-import org.protempa.Offsets;
-import org.protempa.PairDefinition;
-import org.protempa.PrimitiveParameterDefinition;
-import org.protempa.PropertyDefinition;
-import org.protempa.SimpleGapFunction;
-import org.protempa.TemporalExtendedParameterDefinition;
-import org.protempa.TemporalExtendedPropositionDefinition;
+import org.protempa.*;
 import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.ValueSet.ValueSetElement;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.Value;
-import org.protempa.ValueSet;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -109,7 +96,8 @@ class Util {
     }
 
     static ValueSet parseValueSet(Cls valueTypeCls,
-            ValueType valueType, ConnectionManager cm, KnowledgeBase kb)
+            ValueType valueType, ConnectionManager cm, KnowledgeBase kb,
+            KnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         Slot valueSetSlot = cm.getSlot("valueSet");
         Collection objs =
@@ -121,7 +109,8 @@ class Util {
         if (!objs.isEmpty()) {
             valueSet = parseEnumeratedValueSet(valueTypeCls, objs, cm,
                     displayNameSlot,
-                    abbrevDisplayNameSlot, valueSlot, valueType, kb);
+                    abbrevDisplayNameSlot, valueSlot, valueType, kb,
+                    backend);
         }
         return valueSet;
     }
@@ -130,7 +119,7 @@ class Util {
             Collection objs,
             ConnectionManager cm, Slot displayNameSlot,
             Slot abbrevDisplayNameSlot, Slot valueSlot, ValueType valueType,
-            KnowledgeBase kb)
+            KnowledgeBase kb, KnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         ValueSetElement[] vses = new ValueSetElement[objs.size()];
         int i = 0;
@@ -146,7 +135,8 @@ class Util {
             vses[i] = new ValueSetElement(val, displayName, abbrevDisplayName);
             i++;
         }
-        return new ValueSet(kb, valueSetCls.getName(), vses);
+        return new ValueSet(kb, valueSetCls.getName(), vses, 
+                DefaultSourceId.getInstance(backend.getDisplayName()));
     }
 
     static ValueType parseValueType(Cls valueTypeCls) {
@@ -377,6 +367,45 @@ class Util {
             i++;
         }
         d.setPropertyDefinitions(propDefs);
+    }
+    
+    static void setReferences(Instance propInstance,
+            AbstractPropositionDefinition d, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        Slot referenceSlot = cm.getSlot("reference");
+        if (referenceSlot == null) {
+            logger().warning("The ontology doesn't know about the 'reference' slot");
+            return;
+        }
+        Slot referenceToSlot = cm.getSlot("referenceTo");
+        if (referenceToSlot == null) {
+            logger().warning("The ontology doesn't know about the 'referenceTo' slot");
+            return;
+        }
+        Collection<?> references = cm.getOwnSlotValues(propInstance,
+                referenceSlot);
+        ReferenceDefinition[] refDefs =
+                new ReferenceDefinition[references.size()];
+        int i = 0;
+        for (Object refInstance : references) {
+            Instance inst = (Instance) refInstance;
+            Collection referenceTos = cm.getOwnSlotValues(inst, referenceToSlot);
+            if (referenceTos == null || referenceTos.isEmpty()) {
+                throw new AssertionError("reference " + inst.getName() +
+                        " cannot have no references!");
+            }
+            List<String> propIds = new ArrayList<String>(referenceTos.size());
+            for (Object refToInst : referenceTos) {
+                Instance refToInstInst = (Instance) refToInst;
+                String propId = refToInstInst.getName();
+                propIds.add(propId);
+            }
+            ReferenceDefinition refDef = new ReferenceDefinition(inst.getName(),
+                    propIds.toArray(new String[propIds.size()]));
+            refDefs[i] = refDef;
+            i++;
+        }
+        d.setReferenceDefinitions(refDefs);
     }
 
     static void setTerms(Instance propInstance,

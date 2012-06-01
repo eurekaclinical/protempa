@@ -21,10 +21,7 @@ package org.protempa.ksb.protege;
 
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
-import org.protempa.KnowledgeBase;
-import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PrimitiveParameterDefinition;
-import org.protempa.PropositionDefinition;
+import org.protempa.*;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -51,10 +48,13 @@ class PrimitiveParameterConverter implements PropositionConverter {
         Util.setInverseIsAs(instance, result, cm);
         Util.setProperties(instance, result, cm);
         Util.setTerms(instance, result, cm);
+        Util.setReferences(instance, result, cm);
         Cls valueType = (Cls) cm.getOwnSlotValue(instance, cm.getSlot("valueType"));
         if (valueType != null) {
             result.setValueType(Util.parseValueType(valueType));
         }
+        result.setSourceId(
+                DefaultSourceId.getInstance(backend.getDisplayName()));
         return result;
     }
 

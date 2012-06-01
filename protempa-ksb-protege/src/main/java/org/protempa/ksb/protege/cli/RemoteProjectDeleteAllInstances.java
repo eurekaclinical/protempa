@@ -40,8 +40,7 @@ import org.protempa.ksb.protege.RemoteProjectFactory;
 public class RemoteProjectDeleteAllInstances extends CLI {
 
     public RemoteProjectDeleteAllInstances() {
-        super(System.getProperty("app.name"),
-                new Argument[] {
+        super(new Argument[] {
             new Argument("configurationId", true),
             new Argument("host", true),
             new Argument("knowledgeBaseName", true)

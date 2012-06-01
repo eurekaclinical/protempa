@@ -26,13 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.smi.protege.model.Instance;
-import org.protempa.HighLevelAbstractionDefinition;
-import org.protempa.IntervalSide;
-import org.protempa.KnowledgeBase;
-import org.protempa.KnowledgeSourceReadException;
-import org.protempa.TemporalExtendedPropositionDefinition;
-import org.protempa.Offsets;
-import org.protempa.PropositionDefinition;
+import org.protempa.*;
 import org.protempa.proposition.interval.Relation;
 
 /**
@@ -63,6 +57,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
         Util.setGap(complexAbstractionInstance, result, backend, cm);
         Util.setSolid(complexAbstractionInstance, result, cm);
         Util.setConcatenable(complexAbstractionInstance, result, cm);
+        Util.setReferences(complexAbstractionInstance, result, cm);
         Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache =
                 new HashMap<Instance, TemporalExtendedPropositionDefinition>();
         addComponentAbstractionDefinitions(complexAbstractionInstance, result,
@@ -72,6 +67,7 @@ class HighLevelAbstractionConverter implements PropositionConverter {
         Util.setInverseIsAs(complexAbstractionInstance, result, cm);
         result.setTemporalOffset(Util.temporalOffsets(
                 complexAbstractionInstance, backend, extendedParameterCache));
+        result.setSourceId(DefaultSourceId.getInstance(backend.getDisplayName()));
         return result;
     }
 

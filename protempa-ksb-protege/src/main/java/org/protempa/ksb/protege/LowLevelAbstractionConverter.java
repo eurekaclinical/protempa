@@ -27,12 +27,7 @@ import java.util.Map;
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
-import org.protempa.KnowledgeBase;
-import org.protempa.KnowledgeSourceReadException;
-import org.protempa.LowLevelAbstractionDefinition;
-import org.protempa.LowLevelAbstractionValueDefinition;
-import org.protempa.PropositionDefinition;
-import org.protempa.SlidingWindowWidthMode;
+import org.protempa.*;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.value.ValueType;
@@ -69,6 +64,7 @@ class LowLevelAbstractionConverter implements PropositionConverter {
                 constructValue(d, allowedValue, cm);
             }
         }
+        d.setSourceId(DefaultSourceId.getInstance(backend.getDisplayName()));
         return d;
     }
 
@@ -101,6 +97,7 @@ class LowLevelAbstractionConverter implements PropositionConverter {
             Util.setGap(lowLevelAbstractionInstance, d, backend, cm);
             Util.setProperties(lowLevelAbstractionInstance, d, cm);
             Util.setTerms(lowLevelAbstractionInstance, d, cm);
+            Util.setReferences(lowLevelAbstractionInstance, d, cm);
             setDuration(lowLevelAbstractionInstance, d, backend, cm);
             setValueType(lowLevelAbstractionInstance, d, cm);
             Instance algoIntf = (Instance) cm.getOwnSlotValue(lowLevelAbstractionInstance, cm.getSlot("usingAlgorithm"));

@@ -25,11 +25,7 @@ import java.util.Iterator;
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
 import org.arp.javautil.graph.WeightFactory;
-import org.protempa.EventDefinition;
-import org.protempa.IntervalSide;
-import org.protempa.KnowledgeBase;
-import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PropositionDefinition;
+import org.protempa.*;
 
 class EventConverter implements PropositionConverter {
 
@@ -50,6 +46,7 @@ class EventConverter implements PropositionConverter {
         Util.setProperties(protegeProposition, result, cm);
         Util.setTerms(protegeProposition, result, cm);
         Util.setInverseIsAs(protegeProposition, result, cm);
+        Util.setReferences(protegeProposition, result, cm);
 
         Collection<?> hasParts = cm.getOwnSlotValues(protegeProposition,
                 cm.getSlot("hasPart"));
@@ -65,6 +62,8 @@ class EventConverter implements PropositionConverter {
                     cst != null ? weightFactory.getInstance(cst) : null, Util.parseUnitsConstraint(hasPartInstance,
                     "finishOffsetUnits", backend, cm)));
         }
+        result.setSourceId(
+                DefaultSourceId.getInstance(backend.getDisplayName()));
         return result;
     }
 

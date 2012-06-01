@@ -37,10 +37,7 @@ import org.protempa.cli.CLI;
 public class LocalProjectDeleteAllInstances extends CLI {
 
     public LocalProjectDeleteAllInstances() {
-        super(System.getProperty("app.name"),
-                new Argument[]{
-                    new Argument("projectString", true)
-                }, false);
+        super(new Argument[]{new Argument("projectString", true)}, false);
     }
 
     public static void main(String[] args) {

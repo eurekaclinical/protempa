@@ -387,7 +387,7 @@ public abstract class ProtegeKnowledgeSourceBackend
         } else {
             ValueType valueType = Util.parseValueSet(cls);
             assert valueType != null : "Could not find value type for " + id;
-            return Util.parseValueSet(cls, valueType, cm, kb);
+            return Util.parseValueSet(cls, valueType, cm, kb, this);
         }
     }
 
