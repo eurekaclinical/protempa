@@ -19,14 +19,9 @@
  */
 package org.arp.javautil.io;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -261,6 +256,39 @@ public final class IOUtil {
                     " using " + cls.getName() + "'s class loader");
         }
         return result;
+    }
+    
+    /**
+     * Converts a resource into a temporary file that can be read by objects
+     * that look up files by name. Returns the file that was created. The file
+     * will be deleted when the program exits.
+     * 
+     * @param resourceName the resource to convert. Cannot be 
+     * <code>null</code>.
+     * @param filePrefix the prefix of the temporary file. Cannot be 
+     * <code>null</code>.
+     * @param fileSuffix the suffix of the temporary file.
+     * @return a temporary {@link File}.
+     * @throws IOException if an error occurs while writing the contents of the
+     * resource to the temporary file.
+     */
+    public static File resourceToFile(String resourceName, String filePrefix,
+	    String fileSuffix) throws IOException {
+	BufferedReader reader = new BufferedReader(
+                new InputStreamReader(getResourceAsStream(resourceName)));
+	File outFile = File.createTempFile(filePrefix, fileSuffix);
+	BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+	        new FileOutputStream(outFile)));
+
+	int c;
+	while ((c = reader.read()) != -1) {
+	    writer.write(c);
+	}
+	reader.close();
+	writer.close();
+
+	outFile.deleteOnExit();
+	return outFile;
     }
     
     /**

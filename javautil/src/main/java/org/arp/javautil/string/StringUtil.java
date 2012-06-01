@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang.CharUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -39,14 +40,15 @@ public class StringUtil {
     }
 
     /**
-     * Returns whether the given string is <code>null</code>, of length 0, or
-     * contains just whitespace.
+     * Returns whether the given string is
+     * <code>null</code>, of length 0, or contains just whitespace.
      *
-     * @param str
-     *            a <code>String</code>.
-     * @return <code>true</code> if the string is <code>null</code>, of
-     *         length 0, or contains just whitespace; <code>false</code>
-     *         otherwise.
+     * @param str a
+     * <code>String</code>.
+     * @return
+     * <code>true</code> if the string is
+     * <code>null</code>, of length 0, or contains just whitespace;
+     * <code>false</code> otherwise.
      */
     public static boolean getEmptyOrNull(String str) {
         return str == null || str.trim().length() == 0;
@@ -58,8 +60,15 @@ public class StringUtil {
 
     public static List<String> escapeDelimitedColumns(
             List<String> columnValues, char delimiter) {
+        return escapeDelimitedColumns(columnValues, null, delimiter);
+    }
+    
+    public static List<String> escapeDelimitedColumns(
+            List<String> columnValues, Map<String, String> replace,
+            char delimiter) {
         List<String> result = new ArrayList<String>(columnValues.size());
         for (String value : columnValues) {
+            value = doReplace(value, replace);
             result.add(StringUtil.escapeDelimitedColumn(value, delimiter));
         }
         return result;
@@ -67,8 +76,15 @@ public class StringUtil {
 
     public static void escapeDelimitedColumnsInPlace(
             List<String> columnValues, char delimiter) {
+        escapeDelimitedColumnsInPlace(columnValues, null, delimiter);
+    }
+    
+    public static void escapeDelimitedColumnsInPlace(
+            List<String> columnValues, Map<String, String> replace,
+            char delimiter) {
         for (int i = 0, n = columnValues.size(); i < n; i++) {
             String value = columnValues.get(i);
+            value = doReplace(value, replace);
             columnValues.set(i,
                     StringUtil.escapeDelimitedColumn(value, delimiter));
         }
@@ -76,19 +92,33 @@ public class StringUtil {
 
     public static String[] escapeDelimitedColumns(String[] columnValues,
             char delimiter) {
+        return escapeDelimitedColumns(columnValues, null, delimiter);
+    }
+    
+    public static String[] escapeDelimitedColumns(String[] columnValues,
+            Map<String, String> replace, char delimiter) {
         String[] result = new String[columnValues.length];
         for (int i = 0; i < columnValues.length; i++) {
             String columnValue = columnValues[i];
+            columnValue = doReplace(columnValue, replace);
             result[i] = StringUtil.escapeDelimitedColumn(columnValue,
                     delimiter);
         }
         return result;
     }
-
+    
     public static void escapeDelimitedColumnsInPlace(String[] columnValues,
             char delimiter) {
+        escapeDelimitedColumnsInPlace(columnValues, null, delimiter);
+    }
+
+    public static void escapeDelimitedColumnsInPlace(String[] columnValues,
+            Map<String, String> replace, char delimiter) {
         for (int i = 0; i < columnValues.length; i++) {
             String columnValue = columnValues[i];
+            if (replace != null && replace.containsKey(columnValue)) {
+                columnValue = replace.get(columnValue);
+            }
             columnValues[i] = StringUtil.escapeDelimitedColumn(columnValue,
                     delimiter);
         }
@@ -96,8 +126,15 @@ public class StringUtil {
 
     public static void escapeAndWriteDelimitedColumns(String[] columnValues,
             char delimiter, Writer writer) throws IOException {
+        escapeAndWriteDelimitedColumns(columnValues, null, delimiter, writer);
+    }
+
+    public static void escapeAndWriteDelimitedColumns(String[] columnValues,
+            Map<String, String> replace,
+            char delimiter, Writer writer) throws IOException {
         for (int i = 0; i < columnValues.length; i++) {
             String columnValue = columnValues[i];
+            columnValue = doReplace(columnValue, replace);
             escapeAndWriteDelimitedColumn(columnValue, delimiter, writer);
             if (i < columnValues.length - 1) {
                 writer.write(delimiter);
@@ -108,8 +145,15 @@ public class StringUtil {
     public static void escapeAndWriteDelimitedColumns(
             List<String> columnValues,
             char delimiter, Writer writer) throws IOException {
+        escapeAndWriteDelimitedColumns(columnValues, null, delimiter, writer);
+    }
+
+    public static void escapeAndWriteDelimitedColumns(
+            List<String> columnValues, Map<String, String> replace,
+            char delimiter, Writer writer) throws IOException {
         for (int i = 0, n = columnValues.size(); i < n; i++) {
             String columnValue = columnValues.get(i);
+            columnValue = doReplace(columnValue, replace);
             escapeAndWriteDelimitedColumn(columnValue, delimiter, writer);
             if (i < n - 1) {
                 writer.write(delimiter);
@@ -123,13 +167,14 @@ public class StringUtil {
      * {@link #escapeDelimitedColumn(java.lang.String, char)} because it does
      * less temporary object creation. The performance difference will become
      * more apparent when writing large delimited files.
-     * 
+     *
      * @param str a column {@link String}.
      * @param delimiter the file's delimiter character.
      * @param writer the {@link Writer} to which to write the escaped column.
-     * @throws IOException if an error writing to <code>writer</code> occurs.
+     * @throws IOException if an error writing to
+     * <code>writer</code> occurs.
      */
-    public static void escapeAndWriteDelimitedColumn(String str, 
+    public static void escapeAndWriteDelimitedColumn(String str,
             char delimiter, Writer writer) throws IOException {
         if (str == null) {
             throw new IllegalArgumentException("str cannot be null");
@@ -176,6 +221,15 @@ public class StringUtil {
             }
             writer.append(QUOTE);
             return writer.toString();
+        }
+    }
+
+    private static String doReplace(String columnValue, 
+            Map<String, String> replace) {
+        if (replace != null && replace.containsKey(columnValue)) {
+            return replace.get(columnValue);
+        } else {
+            return columnValue;
         }
     }
 }
