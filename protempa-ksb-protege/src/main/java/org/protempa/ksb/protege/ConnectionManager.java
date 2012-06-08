@@ -638,6 +638,11 @@ abstract class ConnectionManager {
         return getFromProtege(new SlotValueSpec(frame, slot),
                 OWN_SLOT_VALUES_GETTER);
     }
+    
+    Collection<?> getOwnSlotValues(Frame frame, String slotName) 
+            throws KnowledgeSourceReadException {
+        return getOwnSlotValues(frame, getSlot(slotName));
+    }
     private final ProtegeCommand<Collection<Cls>, Instance> DIRECT_TYPES_GETTER = new ProtegeCommand<Collection<Cls>, Instance>(
             "get direct types") {
 

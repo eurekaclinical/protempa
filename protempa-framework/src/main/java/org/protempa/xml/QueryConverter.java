@@ -94,7 +94,7 @@ class QueryConverter extends AbstractConverter {
 			context.convertAnother(keyIDs, keyIDsConverter);
 			writer.endNode();
 		}
-		String[] propIDs = query.getPropIds();
+		String[] propIDs = query.getPropositionIds();
 		PropIDsConverter propIDsConverter = new PropIDsConverter();
 		writer.startNode(PROPOSITION_IDS);
 		context.convertAnother(propIDs, propIDsConverter);
@@ -148,7 +148,7 @@ class QueryConverter extends AbstractConverter {
 		expect(reader, PROPOSITION_IDS);
 		PropIDsConverter propIDsConverter = new PropIDsConverter();
 		String[] propIds = (String[]) context.convertAnother(null, String[].class, propIDsConverter);
-		queryBuilder.setPropIds(propIds);
+		queryBuilder.setPropositionIds(propIds);
 		reader.moveUp();
 
 		if (reader.hasMoreChildren()) {

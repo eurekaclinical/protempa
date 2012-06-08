@@ -22,13 +22,15 @@ package org.protempa.ksb.protege;
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
 import java.util.Collection;
-import org.apache.commons.lang.StringUtils;
+import java.util.HashMap;
+import java.util.Map;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.proposition.Proposition;
 
 /**
  * Factory for constructing a PROTEMPA proposition definition from a Protege
  * proposition.
- * 
+ *
  * @author Andrew Post
  */
 final class InstanceConverterFactory {
@@ -37,17 +39,12 @@ final class InstanceConverterFactory {
     private final PropositionConverter primitiveParameterConverter;
     private final PropositionConverter eventConverter;
     private final PropositionConverter constantConverter;
-    private final PropositionConverter lowLevelAbstractionConverter;
-    private final PropositionConverter sliceConverter;
-    private final PropositionConverter highLevelAbstractionConverter;
-    private final PropositionConverter pairAbstractionConverter;
-    private Cls primitiveParameterCls;
-    private Cls simpleAbstractionCls;
-    private Cls sliceAbstractionCls;
-    private Cls complexAbstractionCls;
-    private Cls eventCls;
-    private Cls constantCls;
-    private Cls pairAbstractionCls;
+    private final AbstractionConverter lowLevelAbstractionConverter;
+    private final AbstractionConverter sliceConverter;
+    private final AbstractionConverter highLevelAbstractionConverter;
+    private final AbstractionConverter pairAbstractionConverter;
+    private Map<Cls, PropositionConverter> converterMap;
+    private Map<Cls, AbstractionConverter> abstractionConverterMap;
 
     InstanceConverterFactory(ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
@@ -63,89 +60,97 @@ final class InstanceConverterFactory {
     }
 
     /**
-     * Gets an appropriate {@link PropositionConverter} for
-     * constructing a PROTEMPA proposition definition from the given Protege
-     * proposition instance.
+     * Gets an appropriate {@link PropositionConverter} for constructing a
+     * PROTEMPA proposition definition from the given Protege proposition
+     * instance.
      *
-     * @param proposition
-     *            a Protege proposition {@link Proposition} instance.
-     * 
-     * @return an appropriate {@link PropositionConverter} object,
-     *         or <code>null</code> if the given <code>proposition</code> is
-     *         <code>null</code>.
-     * @throws AssertionError if the given <code>proposition</code> does not
-     * have a type in the Protege <code>Proposition</code> class hierarchy.
+     * @param proposition a Protege proposition {@link Proposition} instance.
+     *
+     * @return an appropriate {@link PropositionConverter} object, or
+     * <code>null</code> if the given
+     * <code>proposition</code> is
+     * <code>null</code>.
+     * @throws AssertionError if the given
+     * <code>proposition</code> does not have a type in the Protege
+     * <code>Proposition</code> class hierarchy.
      */
     PropositionConverter getInstance(Instance proposition)
             throws KnowledgeSourceReadException {
         if (proposition == null) {
             return null;
         } else {
-            if (this.primitiveParameterCls == null) {
-                this.primitiveParameterCls =
-                        this.connectionManager.getCls("PrimitiveParameter");
+            if (this.converterMap == null) {
+                populateConverterMap();
             }
-            if (this.simpleAbstractionCls == null) {
-                this.simpleAbstractionCls =
-                        this.connectionManager.getCls("SimpleAbstraction");
+            Collection<Cls> types = (Collection<Cls>) proposition.getDirectTypes();
+            for (Cls cls : types) {
+                PropositionConverter pc = this.converterMap.get(cls);
+                if (pc != null) {
+                    return pc;
+                }
             }
-            if (this.sliceAbstractionCls == null) {
-                this.sliceAbstractionCls =
-                        this.connectionManager.getCls("SliceAbstraction");
+            return null;
+        }
+    }
+    
+    AbstractionConverter getAbstractionInstance(Instance proposition) 
+            throws KnowledgeSourceReadException {
+        if (proposition == null) {
+            return null;
+        } else {
+            if (this.abstractionConverterMap == null) {
+                populateConverterMap();
             }
-            if (this.complexAbstractionCls == null) {
-                this.complexAbstractionCls =
-                        this.connectionManager.getCls("ComplexAbstraction");
+            Collection<Cls> types = 
+                    (Collection<Cls>) proposition.getDirectTypes();
+            for (Cls cls : types) {
+                AbstractionConverter ac = 
+                        this.abstractionConverterMap.get(cls);
+                if (ac != null) {
+                    return ac;
+                }
             }
-            if (this.eventCls == null) {
-                this.eventCls =
-                        this.connectionManager.getCls("Event");
-            }
-            if (this.constantCls == null) {
-                this.constantCls =
-                        this.connectionManager.getCls("Constant");
-            }
-            if (this.pairAbstractionCls == null) {
-                this.pairAbstractionCls =
-                        this.connectionManager.getCls("PairAbstraction");
-            }
-            if (this.connectionManager.hasType(proposition, this.eventCls)) {
-                return this.eventConverter;
-            } else if (this.connectionManager.hasType(proposition,
-                    this.primitiveParameterCls)) {
-                return this.primitiveParameterConverter;
-            } else if (this.connectionManager.hasType(proposition,
-                    this.constantCls)) {
-                return this.constantConverter;
-            } else if (this.connectionManager.hasType(proposition,
-                    this.simpleAbstractionCls)) {
-                return this.lowLevelAbstractionConverter;
-            } else if (this.connectionManager.hasType(proposition,
-                    this.sliceAbstractionCls)) {
-                return this.sliceConverter;
-            } else if (this.connectionManager.hasType(proposition,
-                    this.complexAbstractionCls)) {
-                return this.highLevelAbstractionConverter;
-            } else if (this.connectionManager.hasType(proposition,
-                    this.pairAbstractionCls)) {
-                return this.pairAbstractionConverter;
-            } else {
-                String name = proposition.getName();
-                Collection directTypes = proposition.getDirectTypes();
-                String directTypesStr = StringUtils.join(directTypes, ", ");
-                throw new AssertionError("Proposition " + name + 
-                        " has invalid types: " + directTypesStr);
-            }
+            return null;
         }
     }
 
-    void close() {
-        this.primitiveParameterCls = null;
-        this.simpleAbstractionCls = null;
-        this.sliceAbstractionCls = null;
-        this.complexAbstractionCls = null;
-        this.eventCls = null;
-        this.constantCls = null;
-        this.pairAbstractionCls = null;
+    void reset() {
+        if (this.converterMap != null) {
+            this.converterMap.clear();
+            this.converterMap = null;
+        }
+    }
+    
+    private void populateConverterMap() throws KnowledgeSourceReadException {
+        this.converterMap = new HashMap<Cls, PropositionConverter>();
+        this.abstractionConverterMap = new HashMap<Cls, AbstractionConverter>();
+        populateConverterMap0(this.primitiveParameterConverter.getClsName(), this.primitiveParameterConverter);
+        populateConverterMap0(this.lowLevelAbstractionConverter.getClsName(), this.lowLevelAbstractionConverter);
+        populateAbstractionConverterMap0(this.lowLevelAbstractionConverter.getClsName(), this.lowLevelAbstractionConverter);
+        populateConverterMap0(this.sliceConverter.getClsName(), this.sliceConverter);
+        populateAbstractionConverterMap0(this.sliceConverter.getClsName(), this.sliceConverter);
+        populateConverterMap0(this.highLevelAbstractionConverter.getClsName(), this.highLevelAbstractionConverter);
+        populateAbstractionConverterMap0(this.highLevelAbstractionConverter.getClsName(), this.highLevelAbstractionConverter);
+        populateConverterMap0(this.eventConverter.getClsName(), this.eventConverter);
+        populateConverterMap0(this.constantConverter.getClsName(), this.constantConverter);
+        populateConverterMap0(this.pairAbstractionConverter.getClsName(), this.pairAbstractionConverter);
+        populateAbstractionConverterMap0(this.pairAbstractionConverter.getClsName(), this.pairAbstractionConverter);
+
+    }
+
+    private void populateConverterMap0(String rootClsName, PropositionConverter converter) throws KnowledgeSourceReadException {
+        Cls cls = this.connectionManager.getCls(rootClsName);
+        this.converterMap.put(cls, converter);
+        for (Object subCls : cls.getSubclasses()) {
+            this.converterMap.put((Cls) subCls, converter);
+        }
+    }
+    
+    private void populateAbstractionConverterMap0(String rootClsName, AbstractionConverter converter) throws KnowledgeSourceReadException {
+        Cls cls = this.connectionManager.getCls(rootClsName);
+        this.abstractionConverterMap.put(cls, converter);
+        for (Object subCls : cls.getSubclasses()) {
+            this.abstractionConverterMap.put((Cls) subCls, converter);
+        }
     }
 }

@@ -29,17 +29,12 @@ import org.protempa.*;
 
 class EventConverter implements PropositionConverter {
 
-    private static final WeightFactory weightFactory = new WeightFactory();
-
     @Override
     public EventDefinition convert(Instance protegeProposition,
-            KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        assert protempaKnowledgeBase != null :
-                "protempaKnowledgeBase cannot be null";
         EventDefinition result = new EventDefinition(
-                protempaKnowledgeBase, protegeProposition.getName());
+                protegeProposition.getName());
         ConnectionManager cm = backend.getConnectionManager();
         Util.setNames(protegeProposition, result, cm);
         Util.setInDataSource(protegeProposition, result, cm);
@@ -56,11 +51,6 @@ class EventConverter implements PropositionConverter {
             Instance hasPartInstance = (Instance) itr.next();
             Integer cst = Util.parseTimeConstraint(
                     hasPartInstance, "offset", cm);
-            result.addHasPart(new EventDefinition.HasPartOffset(
-                    ((Instance) cm.getOwnSlotValue(hasPartInstance, offsetEventSlot)).getName(),
-                    IntervalSide.intervalSide((String) cm.getOwnSlotValue(hasPartInstance, offsetSide)),
-                    cst != null ? weightFactory.getInstance(cst) : null, Util.parseUnitsConstraint(hasPartInstance,
-                    "finishOffsetUnits", backend, cm)));
         }
         result.setSourceId(
                 DefaultSourceId.getInstance(backend.getDisplayName()));
@@ -68,9 +58,7 @@ class EventConverter implements PropositionConverter {
     }
 
     @Override
-    public PropositionDefinition readPropositionDefinition(
-            Instance protegeProposition, KnowledgeBase protempaKnowledgeBase) {
-        return protempaKnowledgeBase.getEventDefinition(
-                protegeProposition.getName());
+    public String getClsName() {
+        return "Event";
     }
 }

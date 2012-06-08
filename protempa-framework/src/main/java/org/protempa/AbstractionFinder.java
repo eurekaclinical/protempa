@@ -190,14 +190,6 @@ final class AbstractionFinder implements Module {
             // allPropIds.addAll(propIds);
             // allPropIds.addAll(termPropIds);
             Logger logger = ProtempaUtil.logger();
-            logger.log(Level.FINE, "Checking query...");
-            for (String propId : propIds) {
-                if (!this.knowledgeSource.hasPropositionDefinition(propId)) {
-                    throw new FinderException(
-                            "Invalid proposition id in query: " + propId);
-                }
-            }
-            logger.log(Level.FINE, "Query checks out");
             logger.log(Level.FINE, "Validating query results handler...");
             resultsHandler.validate(this.knowledgeSource);
             logger.log(Level.FINE, 

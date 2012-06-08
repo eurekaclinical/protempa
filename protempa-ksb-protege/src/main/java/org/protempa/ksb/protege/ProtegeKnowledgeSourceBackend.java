@@ -27,12 +27,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.protempa.AbstractionDefinition;
-import org.protempa.ConstantDefinition;
-import org.protempa.EventDefinition;
-import org.protempa.KnowledgeBase;
 import org.protempa.backend.KnowledgeSourceBackendInitializationException;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PrimitiveParameterDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.TermSubsumption;
 import org.protempa.backend.BackendInstanceSpec;
@@ -49,11 +45,12 @@ import edu.stanford.smi.protege.event.ProjectListener;
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
+import org.drools.util.StringUtils;
 
 /**
  * Abstract class for converting a Protege knowledge base into a PROTEMPA
  * knowledge base.
- * 
+ *
  * @author Andrew Post
  */
 public abstract class ProtegeKnowledgeSourceBackend
@@ -126,140 +123,37 @@ public abstract class ProtegeKnowledgeSourceBackend
             this.cm = null;
         }
         if (this.instanceConverterFactory != null) {
-            this.instanceConverterFactory.close();
+            this.instanceConverterFactory.reset();
             this.instanceConverterFactory = null;
         }
     }
 
     @Override
-    public ConstantDefinition readConstantDefinition(String name,
-            KnowledgeBase protempaKnowledgeBase)
+    public PropositionDefinition readPropositionDefinition(String name)
             throws KnowledgeSourceReadException {
         Instance instance = this.cm.getInstance(name);
-        convert(instance, protempaKnowledgeBase);
-        return protempaKnowledgeBase.getConstantDefinition(name);
+        return this.instanceConverterFactory.getInstance(instance).convert(instance, this);
     }
-
+    
     @Override
-    public EventDefinition readEventDefinition(String name,
-            KnowledgeBase protempaKnowledgeBase)
+    public AbstractionDefinition readAbstractionDefinition(String name) 
             throws KnowledgeSourceReadException {
         Instance instance = this.cm.getInstance(name);
-        convert(instance, protempaKnowledgeBase);
-        return protempaKnowledgeBase.getEventDefinition(name);
-    }
-
-    /**
-     * Returns the Cls from Protege if a matching Cls is found with the given
-     * ancestor
-     * 
-     * @param name
-     *            Name of the class to fetch
-     * @param superClass
-     *            name of the anscestor
-     * @return A Cls containing the given class name
-     * @throws KnowledgeSourceReadException
-     */
-    private Cls readClass(String name, String superClass)
-            throws KnowledgeSourceReadException {
-        Cls cls = this.cm.getCls(name);
-        Cls superCls = this.cm.getCls(superClass);
-        if (cls != null && cls.hasSuperclass(superCls)) {
-            return cls;
-        } else {
+        AbstractionConverter ac = 
+                this.instanceConverterFactory.getAbstractionInstance(instance);
+        if (ac == null) {
             return null;
+        } else {
+            return ac.convert(instance, this);
         }
     }
 
     @Override
-    public PrimitiveParameterDefinition readPrimitiveParameterDefinition(
-            String name, KnowledgeBase protempaKnowledgeBase)
+    public String[] getPropositionsByTerm(String termId)
             throws KnowledgeSourceReadException {
-        Instance instance = this.cm.getInstance(name);
-        convert(instance, protempaKnowledgeBase);
-        return protempaKnowledgeBase.getPrimitiveParameterDefinition(name);
+        return collectAssociatedNames(termId, "termProposition");
     }
 
-    @Override
-    public AbstractionDefinition readAbstractionDefinition(String name,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        Instance candidateAbstractParameter = this.cm.getInstance(name);
-        convert(candidateAbstractParameter, protempaKnowledgeBase);
-        return protempaKnowledgeBase.getAbstractionDefinition(name);
-    }
-
-    @Override
-    public List<PropositionDefinition> readAbstractedFrom(
-            AbstractionDefinition abstractionDefinition,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        List<PropositionDefinition> result =
-                new ArrayList<PropositionDefinition>();
-        Instance instance = this.cm.getInstance(abstractionDefinition.getId());
-        if (instance != null) {
-            Collection<?> children =
-                    cm.getOwnSlotValues(instance,
-                    cm.getSlot("abstractedFrom"));
-            for (Iterator<?> itr = children.iterator(); itr.hasNext();) {
-                Instance child = (Instance) itr.next();
-                result.add(convert(child, protempaKnowledgeBase, true));
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public List<PropositionDefinition> readInverseIsA(
-            PropositionDefinition propDef, KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        List<PropositionDefinition> result =
-                new ArrayList<PropositionDefinition>();
-        Instance instance = this.cm.getInstance(propDef.getId());
-        if (instance != null) {
-            Collection<?> children =
-                    cm.getOwnSlotValues(instance, cm.getSlot("inverseIsA"));
-            for (Iterator<?> itr = children.iterator(); itr.hasNext();) {
-                Instance child = (Instance) itr.next();
-                result.add(convert(child, protempaKnowledgeBase, true));
-            }
-        }
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.protempa.AbstractKnowledgeSourceBackend#getPropositionsByTerm(java
-     * .lang.String)
-     */
-    @Override
-    public List<String> getPropositionsByTerm(String termId)
-            throws KnowledgeSourceReadException {
-        List<String> result = new ArrayList<String>();
-
-        Instance termInstance = this.cm.getInstance(termId);
-        if (termInstance != null) {
-            Collection<?> props = cm.getOwnSlotValues(termInstance,
-                    cm.getSlot("termProposition"));
-            Iterator<?> it = props.iterator();
-            while (it.hasNext()) {
-                Instance prop = (Instance) it.next();
-                result.add(prop.getName());
-            }
-        }
-
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.protempa.AbstractKnowledgeSourceBackend#getPropositionDefinitionsByTerm
-     * (java.lang.And<TermSubsumption>)
-     */
     @Override
     public List<String> getPropositionsByTermSubsumption(
             And<TermSubsumption> termIds) throws KnowledgeSourceReadException {
@@ -303,43 +197,50 @@ public abstract class ProtegeKnowledgeSourceBackend
     }
 
     /**
-     * Converts the given proposition instance and all proposition instances in
-     * its dependency tree, which is defined by proposition instances connected
-     * by the isA relationship.
-     * 
-     * @param proposition
-     *            a proposition instance.
-     * @param protegeKb
-     *            a Protege
-     *            <code>edu.stanford.smi.protege.model.KnowledgeBase</code>
-     *            instance.
-     * @param protempaKb
-     *            a PROTEMPA <code>KnowledgeBase</code> instance.
+     * Returns the Cls from Protege if a matching Cls is found with the given
+     * ancestor
+     *
+     * @param name Name of the class to fetch
+     * @param superClass name of the anscestor
+     * @return A Cls containing the given class name
+     * @throws KnowledgeSourceReadException
      */
-    private PropositionDefinition convert(Instance proposition,
-            KnowledgeBase protempaKb, boolean check) throws KnowledgeSourceReadException {
-        PropositionConverter converter =
-                this.instanceConverterFactory.getInstance(proposition);
-        if (converter != null) {
-            PropositionDefinition result = null;
-            if (check) {
-                result = converter.readPropositionDefinition(proposition,
-                        protempaKb);
-                if (result == null) {
-                    result = converter.convert(proposition, protempaKb, this);
-                }
-            } else {
-                result = converter.convert(proposition, protempaKb, this);
-            }
-            return result;
+    private Cls readClass(String name, String superClass)
+            throws KnowledgeSourceReadException {
+        Cls cls = this.cm.getCls(name);
+        Cls superCls = this.cm.getCls(superClass);
+        if (cls != null && cls.hasSuperclass(superCls)) {
+            return cls;
         } else {
             return null;
         }
     }
 
-    private PropositionDefinition convert(Instance proposition,
-            KnowledgeBase protempaKb) throws KnowledgeSourceReadException {
-        return convert(proposition, protempaKb, false);
+    private String[] collectAssociatedNames(String id, String slotName) throws KnowledgeSourceReadException {
+        Instance instance = cm.getInstance(id);
+        return collectAssociatedInstanceNames(instance, slotName);
+    }
+
+    private String[] collectAssociatedInstanceNames(Instance instance, String slotName) throws KnowledgeSourceReadException {
+        String[] result;
+        if (instance != null) {
+            Collection<Instance> children =
+                    (Collection<Instance>) cm.getOwnSlotValues(instance, slotName);
+            result = collectInstanceNames(children);
+        } else {
+            result = StringUtils.EMPTY_STRING_ARRAY;
+        }
+        return result;
+    }
+
+    private String[] collectInstanceNames(Collection<Instance> instances) {
+        String[] result = new String[instances.size()];
+        int i = 0;
+        for (Iterator<?> itr = instances.iterator(); itr.hasNext();) {
+            Instance child = (Instance) itr.next();
+            result[i++] = child.getName();
+        }
+        return result;
     }
 
     /*
@@ -348,21 +249,25 @@ public abstract class ProtegeKnowledgeSourceBackend
      */
     @Override
     public void formChanged(ProjectEvent arg0) {
+        this.instanceConverterFactory.reset();
         fireKnowledgeSourceBackendUpdated();
     }
 
     @Override
     public void projectClosed(ProjectEvent arg0) {
+        this.instanceConverterFactory.reset();
         fireKnowledgeSourceBackendUpdated();
     }
 
     @Override
     public void projectSaved(ProjectEvent arg0) {
+        this.instanceConverterFactory.reset();
         fireKnowledgeSourceBackendUpdated();
     }
 
     @Override
     public void runtimeClsWidgetCreated(ProjectEvent arg0) {
+        this.instanceConverterFactory.reset();
         fireKnowledgeSourceBackendUpdated();
     }
 
@@ -379,7 +284,7 @@ public abstract class ProtegeKnowledgeSourceBackend
     }
 
     @Override
-    public ValueSet readValueSet(String id, KnowledgeBase kb)
+    public ValueSet readValueSet(String id)
             throws KnowledgeSourceReadException {
         Cls cls = this.readClass(id, "Value");
         if (cls == null) {
@@ -387,15 +292,7 @@ public abstract class ProtegeKnowledgeSourceBackend
         } else {
             ValueType valueType = Util.parseValueSet(cls);
             assert valueType != null : "Could not find value type for " + id;
-            return Util.parseValueSet(cls, valueType, cm, kb, this);
+            return Util.parseValueSet(cls, valueType, cm, this);
         }
-    }
-
-    @Override
-    public PropositionDefinition readPropositionDefinition(String name,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        Instance instance = this.cm.getInstance(name);
-        return convert(instance, protempaKnowledgeBase);
     }
 }

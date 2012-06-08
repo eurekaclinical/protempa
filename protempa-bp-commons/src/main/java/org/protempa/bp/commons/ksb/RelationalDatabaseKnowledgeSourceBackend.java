@@ -20,10 +20,7 @@
 package org.protempa.bp.commons.ksb;
 
 import org.arp.javautil.sql.ConnectionSpec;
-import org.protempa.EventDefinition;
-import org.protempa.KnowledgeBase;
 import org.protempa.backend.KnowledgeSourceBackendInitializationException;
-import org.protempa.KnowledgeSourceReadException;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.bp.commons.AbstractCommonsKnowledgeSourceBackend;
 import org.protempa.bp.commons.BackendProperty;
@@ -160,13 +157,6 @@ public abstract class RelationalDatabaseKnowledgeSourceBackend
     @Override
     public void close() {
         
-    }
-
-    @Override
-    public EventDefinition readEventDefinition(String id,
-            KnowledgeBase protempaKnowledgeBase)
-            throws KnowledgeSourceReadException {
-        return null;
     }
 
 }

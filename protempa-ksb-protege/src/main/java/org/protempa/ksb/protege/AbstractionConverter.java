@@ -20,15 +20,15 @@
 package org.protempa.ksb.protege;
 
 import edu.stanford.smi.protege.model.Instance;
+import org.protempa.AbstractionDefinition;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PropositionDefinition;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 
 /**
+ *
  * @author Andrew Post
  */
-interface PropositionConverter {
-
+interface AbstractionConverter extends PropositionConverter {
     /**
      * Convert and add the given Protege parameter instance to the given
      * PROTEMPA knowledge base, if it hasn't already been added to the PROTEMPA
@@ -39,9 +39,7 @@ interface PropositionConverter {
      * @param backend
      *            the Protege {@link KnowledgeSourceBackend}.
      */
-    PropositionDefinition convert(Instance protegeProposition,
+    AbstractionDefinition convert(Instance protegeProposition,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException;
-    
-    String getClsName();
 }

@@ -33,10 +33,10 @@ import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.value.ValueType;
 
 /**
- * 
+ *
  * @author Andrew Post
  */
-class LowLevelAbstractionConverter implements PropositionConverter {
+class LowLevelAbstractionConverter implements AbstractionConverter {
 
     /**
      *
@@ -46,12 +46,10 @@ class LowLevelAbstractionConverter implements PropositionConverter {
 
     @Override
     public LowLevelAbstractionDefinition convert(Instance lowLevelAbstractionInstance,
-            org.protempa.KnowledgeBase protempaKnowledgeBase,
-            ProtegeKnowledgeSourceBackend backend) 
+            ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         LowLevelAbstractionDefinition d = construct(
-                lowLevelAbstractionInstance, protempaKnowledgeBase,
-                backend);
+                lowLevelAbstractionInstance, backend);
         setGapBetweenValues(lowLevelAbstractionInstance, d, backend);
         ConnectionManager cm = backend.getConnectionManager();
         setPatternLength(lowLevelAbstractionInstance, d, cm);
@@ -69,11 +67,11 @@ class LowLevelAbstractionConverter implements PropositionConverter {
     }
 
     @Override
-    public PropositionDefinition readPropositionDefinition(
-            Instance protegeProposition, KnowledgeBase protempaKnowledgeBase) {
-        return protempaKnowledgeBase.getAbstractionDefinition(
-                protegeProposition.getName());
+    public String getClsName() {
+        return "SimpleAbstraction";
     }
+    
+    
 
     /**
      * @param lowLevelAbstractionInstance
@@ -83,31 +81,28 @@ class LowLevelAbstractionConverter implements PropositionConverter {
      */
     private static LowLevelAbstractionDefinition construct(
             Instance lowLevelAbstractionInstance,
-            org.protempa.KnowledgeBase protempaKnowledgeBase,
-            ProtegeKnowledgeSourceBackend backend) 
+            ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         LowLevelAbstractionDefinition result = null;
-        if (!protempaKnowledgeBase.hasAbstractionDefinition(lowLevelAbstractionInstance.getName())) {
-            LowLevelAbstractionDefinition d = new LowLevelAbstractionDefinition(
-                    protempaKnowledgeBase, lowLevelAbstractionInstance.getName());
-            ConnectionManager cm = backend.getConnectionManager();
-            Util.setNames(lowLevelAbstractionInstance, d, cm);
-            Util.setInDataSource(lowLevelAbstractionInstance, d, cm);
-            Util.setInverseIsAs(lowLevelAbstractionInstance, d, cm);
-            Util.setGap(lowLevelAbstractionInstance, d, backend, cm);
-            Util.setProperties(lowLevelAbstractionInstance, d, cm);
-            Util.setTerms(lowLevelAbstractionInstance, d, cm);
-            Util.setReferences(lowLevelAbstractionInstance, d, cm);
-            setDuration(lowLevelAbstractionInstance, d, backend, cm);
-            setValueType(lowLevelAbstractionInstance, d, cm);
-            Instance algoIntf = (Instance) cm.getOwnSlotValue(lowLevelAbstractionInstance, cm.getSlot("usingAlgorithm"));
-            // set parameter types here?
-            if (algoIntf != null) {
-                d.setAlgorithmId(algoIntf.getName());
-                d.setSlidingWindowWidthMode(SlidingWindowWidthMode.DEFAULT);
-            }
-            result = d;
+        LowLevelAbstractionDefinition d = new LowLevelAbstractionDefinition(
+                lowLevelAbstractionInstance.getName());
+        ConnectionManager cm = backend.getConnectionManager();
+        Util.setNames(lowLevelAbstractionInstance, d, cm);
+        Util.setInDataSource(lowLevelAbstractionInstance, d, cm);
+        Util.setInverseIsAs(lowLevelAbstractionInstance, d, cm);
+        Util.setGap(lowLevelAbstractionInstance, d, backend, cm);
+        Util.setProperties(lowLevelAbstractionInstance, d, cm);
+        Util.setTerms(lowLevelAbstractionInstance, d, cm);
+        Util.setReferences(lowLevelAbstractionInstance, d, cm);
+        setDuration(lowLevelAbstractionInstance, d, backend, cm);
+        setValueType(lowLevelAbstractionInstance, d, cm);
+        Instance algoIntf = (Instance) cm.getOwnSlotValue(lowLevelAbstractionInstance, cm.getSlot("usingAlgorithm"));
+        // set parameter types here?
+        if (algoIntf != null) {
+            d.setAlgorithmId(algoIntf.getName());
+            d.setSlidingWindowWidthMode(SlidingWindowWidthMode.DEFAULT);
         }
+        result = d;
         return result;
     }
 

@@ -23,16 +23,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Aggregates the direct children of proposition definitions.
+ * Aggregates the children of proposition definitions.
  *
  * @author Andrew Post
  */
-public final class DirectChildrenVisitor extends AbstractPropositionDefinitionCheckedVisitor {
+public final class HierarchicalProjectionChildrenVisitor extends AbstractPropositionDefinitionCheckedVisitor {
 
     private final List<PropositionDefinition> propDefs;
     private final KnowledgeSource knowledgeSource;
 
-    public DirectChildrenVisitor(KnowledgeSource knowledgeSource) {
+    public HierarchicalProjectionChildrenVisitor(KnowledgeSource knowledgeSource) {
         this.knowledgeSource = knowledgeSource;
         this.propDefs = new ArrayList<PropositionDefinition>();
     }
@@ -77,11 +77,11 @@ public final class DirectChildrenVisitor extends AbstractPropositionDefinitionCh
     }
 
     /**
-     * Gets the direct children.
+     * Gets the children.
      *
      * @return a {@link List<PropositionDefinition>} of the direct children.
      */
-    public List<PropositionDefinition> getDirectChildren() {
+    public List<PropositionDefinition> getChildren() {
         return this.propDefs;
     }
 

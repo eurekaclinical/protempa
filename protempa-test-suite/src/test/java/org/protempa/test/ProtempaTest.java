@@ -268,7 +268,7 @@ public class ProtempaTest {
         DefaultQueryBuilder q = new DefaultQueryBuilder();
 
         q.setKeyIds(KEY_IDS);
-        q.setPropIds(PROP_IDS);
+        q.setPropositionIds(PROP_IDS);
         DateTimeFilter timeRange = new DateTimeFilter(
                 new String[] { "Encounter" }, AbsoluteTimeGranularity.DAY
                         .getShortFormat().parse("08/01/2006"),

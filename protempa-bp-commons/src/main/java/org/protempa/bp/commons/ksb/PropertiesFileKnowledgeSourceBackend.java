@@ -19,6 +19,9 @@
  */
 package org.protempa.bp.commons.ksb;
 
+import org.protempa.AbstractionDefinition;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.bp.commons.BackendInfo;
 import org.protempa.bp.commons.BackendProperty;
 import org.protempa.bp.commons.CommonsBackend;

@@ -21,7 +21,6 @@ package org.protempa.bp.commons.dsb.relationaldb;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -102,14 +101,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
 
         this.backend = backend;
-    }
-
-    /**
-     * 
-     * @return the connection spec
-     */
-    public ConnectionSpec getConnectionSpec() {
-        return this.connectionSpec;
     }
 
     @Override
@@ -221,7 +212,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             logQueryTimeout(logger, backendNameForMessages);
 
             RetryableSQLExecutor operation = new RetryableSQLExecutor(
-                    getConnectionSpec(), query, resultProcessor,
+                    this.connectionSpec, query, resultProcessor,
                     this.backend.getQueryTimeout());
             Retryer<SQLException> retryer = new Retryer<SQLException>(3);
             if (!retryer.execute(operation)) {
@@ -328,7 +319,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 stager = getDataStager(this.stagedTableSpecs, null,
                         new LinkedList<EntitySpec>(allEntitySpecs),
                         copyFilters(filters), propIds, keyIds, order,
-                        getConnectionSpec());
+                        this.connectionSpec);
                 stager.stageTables();
             } catch (SQLException ex) {
                 logger.log(Level.SEVERE, "Failed to create staging area", ex);

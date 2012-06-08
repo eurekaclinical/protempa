@@ -19,7 +19,7 @@
  */
 package org.protempa.ksb.protege;
 
-import org.protempa.KnowledgeBase;
+import org.protempa.PropositionDefinitionCache;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PairDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
@@ -31,14 +31,13 @@ import java.util.HashMap;
 import java.util.Map;
 import org.protempa.*;
 
-public class PairAbstractionConverter implements PropositionConverter {
+public class PairAbstractionConverter implements AbstractionConverter {
 
     @Override
     public PairDefinition convert(Instance protegeProposition,
-            KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        PairDefinition result = new PairDefinition(protempaKnowledgeBase,
+        PairDefinition result = new PairDefinition(
                 protegeProposition.getName());
         ConnectionManager cm = backend.getConnectionManager();
         Util.setNames(protegeProposition, result, cm);
@@ -62,12 +61,10 @@ public class PairAbstractionConverter implements PropositionConverter {
                 DefaultSourceId.getInstance(backend.getDisplayName()));
         return result;
     }
-
+    
     @Override
-    public PropositionDefinition readPropositionDefinition(
-            Instance protegeProposition, KnowledgeBase protempaKnowledgeBase) {
-        return protempaKnowledgeBase.getAbstractionDefinition(
-                protegeProposition.getName());
+    public String getClsName() {
+        return "PairAbstraction";
     }
 
     private void setRelation(

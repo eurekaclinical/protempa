@@ -129,7 +129,7 @@ public abstract class CLI {
      * be <code>null</code> or empty.
      */
     protected CLI(Argument[] arguments) {
-        this(null, null, true);
+        this(null, arguments, true);
     }
 
     /**
@@ -270,11 +270,17 @@ public abstract class CLI {
      */
     public final void printException(Exception cliException) {
         System.err.print(cliException.getMessage());
+        printCause(cliException);
+    }
+
+    private void printCause(Throwable cliException) {
         Throwable cause = cliException.getCause();
         if (cause != null && cause.getMessage() != null
                 && cause.getMessage().length() > 0) {
             System.err.print(": ");
-            System.err.println(cause.getMessage());
+            System.err.println();
+            System.err.print(cause.getMessage());
+            printCause(cause);
         } else {
             System.err.println();
         }

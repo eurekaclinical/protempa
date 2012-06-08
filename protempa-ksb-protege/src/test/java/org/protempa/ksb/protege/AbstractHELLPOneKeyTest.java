@@ -472,7 +472,7 @@ public abstract class AbstractHELLPOneKeyTest extends AbstractTest {
                 new MappingQueryResultsHandler();
         DefaultQueryBuilder q = new DefaultQueryBuilder();
         q.setKeyIds(new String[] {keyId});
-        q.setPropIds(ALL_PARAMETERS);
+        q.setPropositionIds(ALL_PARAMETERS);
         protempa.execute(protempa.buildQuery(q), mqrh);
         Collection<Proposition> actual =
                 mqrh.getResultMap().get(keyId);

@@ -23,25 +23,21 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import edu.stanford.smi.protege.model.Instance;
-import org.protempa.KnowledgeBase;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PropositionDefinition;
 import org.protempa.SliceDefinition;
 
-final class SliceConverter implements
-        PropositionConverter {
+final class SliceConverter implements AbstractionConverter {
 
     SliceConverter() {
     }
 
     @Override
     public SliceDefinition convert(Instance protegeParameter,
-            KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
 
         SliceDefinition ad = new SliceDefinition(
-                protempaKnowledgeBase, protegeParameter.getName());
+                protegeParameter.getName());
         ConnectionManager cm = backend.getConnectionManager();
         Util.setNames(protegeParameter, ad, cm);
         Util.setInDataSource(protegeParameter, ad, cm);
@@ -72,9 +68,7 @@ final class SliceConverter implements
     }
 
     @Override
-    public PropositionDefinition readPropositionDefinition(
-            Instance protegeProposition, KnowledgeBase protempaKnowledgeBase) {
-        return protempaKnowledgeBase.getAbstractionDefinition(
-                protegeProposition.getName());
+    public String getClsName() {
+        return "SliceAbstraction";
     }
 }

@@ -26,11 +26,10 @@ class ConstantConverter implements PropositionConverter {
 
     @Override
     public ConstantDefinition convert(Instance protegeProposition,
-            KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         ConstantDefinition result = new ConstantDefinition(
-                protempaKnowledgeBase, protegeProposition.getName());
+                protegeProposition.getName());
         ConnectionManager cm = backend.getConnectionManager();
         Util.setNames(protegeProposition, result, cm);
         Util.setInDataSource(protegeProposition, result, cm);
@@ -42,11 +41,9 @@ class ConstantConverter implements PropositionConverter {
                 backend.getDisplayName()));
         return result;
     }
-
+    
     @Override
-    public PropositionDefinition readPropositionDefinition(
-            Instance protegeProposition, KnowledgeBase protempaKnowledgeBase) {
-        return protempaKnowledgeBase.getConstantDefinition(
-                protegeProposition.getName());
+    public String getClsName() {
+        return "Constant";
     }
 }

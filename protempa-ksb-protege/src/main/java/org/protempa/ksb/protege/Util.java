@@ -96,7 +96,7 @@ class Util {
     }
 
     static ValueSet parseValueSet(Cls valueTypeCls,
-            ValueType valueType, ConnectionManager cm, KnowledgeBase kb,
+            ValueType valueType, ConnectionManager cm,
             KnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         Slot valueSetSlot = cm.getSlot("valueSet");
@@ -109,7 +109,7 @@ class Util {
         if (!objs.isEmpty()) {
             valueSet = parseEnumeratedValueSet(valueTypeCls, objs, cm,
                     displayNameSlot,
-                    abbrevDisplayNameSlot, valueSlot, valueType, kb,
+                    abbrevDisplayNameSlot, valueSlot, valueType,
                     backend);
         }
         return valueSet;
@@ -119,7 +119,7 @@ class Util {
             Collection objs,
             ConnectionManager cm, Slot displayNameSlot,
             Slot abbrevDisplayNameSlot, Slot valueSlot, ValueType valueType,
-            KnowledgeBase kb, KnowledgeSourceBackend backend)
+            KnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         ValueSetElement[] vses = new ValueSetElement[objs.size()];
         int i = 0;
@@ -135,7 +135,7 @@ class Util {
             vses[i] = new ValueSetElement(val, displayName, abbrevDisplayName);
             i++;
         }
-        return new ValueSet(kb, valueSetCls.getName(), vses, 
+        return new ValueSet(valueSetCls.getName(), vses, 
                 DefaultSourceId.getInstance(backend.getDisplayName()));
     }
 

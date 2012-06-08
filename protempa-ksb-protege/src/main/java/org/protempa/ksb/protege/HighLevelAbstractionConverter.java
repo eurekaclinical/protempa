@@ -35,19 +35,17 @@ import org.protempa.proposition.interval.Relation;
  * 
  * @author Andrew Post
  */
-class HighLevelAbstractionConverter implements PropositionConverter {
+class HighLevelAbstractionConverter implements AbstractionConverter {
 
     HighLevelAbstractionConverter() {
     }
 
     @Override
     public HighLevelAbstractionDefinition convert(Instance complexAbstractionInstance,
-            KnowledgeBase protempaKnowledgeBase,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         HighLevelAbstractionDefinition result =
                 new HighLevelAbstractionDefinition(
-                protempaKnowledgeBase,
                 complexAbstractionInstance.getName());
         ConnectionManager cm = backend.getConnectionManager();
         Util.setNames(complexAbstractionInstance, result, cm);
@@ -69,13 +67,6 @@ class HighLevelAbstractionConverter implements PropositionConverter {
                 complexAbstractionInstance, backend, extendedParameterCache));
         result.setSourceId(DefaultSourceId.getInstance(backend.getDisplayName()));
         return result;
-    }
-
-    @Override
-    public PropositionDefinition readPropositionDefinition(
-            Instance protegeProposition, KnowledgeBase protempaKnowledgeBase) {
-        return protempaKnowledgeBase.getAbstractionDefinition(
-                protegeProposition.getName());
     }
 
     /**
@@ -158,5 +149,10 @@ class HighLevelAbstractionConverter implements PropositionConverter {
             extendedParameterCache.put(extendedParameter, def);
             cad.add(def);
         }
+    }
+
+    @Override
+    public String getClsName() {
+        return "ComplexAbstraction";
     }
 }

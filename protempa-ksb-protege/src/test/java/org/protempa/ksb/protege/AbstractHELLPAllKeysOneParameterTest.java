@@ -57,7 +57,7 @@ public abstract class AbstractHELLPAllKeysOneParameterTest
             MappingQueryResultsHandler mqrh =
                     new MappingQueryResultsHandler();
             DefaultQueryBuilder q = new DefaultQueryBuilder();
-            q.setPropIds(new String[]{propId});
+            q.setPropositionIds(new String[]{propId});
             protempa.execute(protempa.buildQuery(q), mqrh);
             Map<String, List<Proposition>> results = mqrh.getResultMap();
             this.numberOfKeysFound = results.size();

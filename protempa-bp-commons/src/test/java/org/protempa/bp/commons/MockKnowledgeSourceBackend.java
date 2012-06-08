@@ -19,6 +19,11 @@
  */
 package org.protempa.bp.commons;
 
+import org.drools.util.StringUtils;
+import org.protempa.AbstractionDefinition;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
+
 @BackendInfo(displayName = "Mock Knowledge Source Backend")
 public class MockKnowledgeSourceBackend 
         extends AbstractCommonsKnowledgeSourceBackend {
@@ -36,6 +41,16 @@ public class MockKnowledgeSourceBackend
     )
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    @Override
+    public PropositionDefinition readPropositionDefinition(String id) throws KnowledgeSourceReadException {
+        return null;
+    }
+
+    @Override
+    public AbstractionDefinition readAbstractionDefinition(String id) throws KnowledgeSourceReadException {
+        return null;
     }
 
 }

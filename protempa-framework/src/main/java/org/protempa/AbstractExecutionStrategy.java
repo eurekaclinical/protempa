@@ -58,8 +58,8 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
                 this.abstractionFinder.getAlgorithmSource());
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
                 visitor.getAlgorithms(), listener);
-        List<PropositionDefinition> propDefs = new ArrayList<PropositionDefinition>(
-                propIds.size());
+        List<PropositionDefinition> propDefs = 
+                new ArrayList<PropositionDefinition>(propIds.size());
         for (String propId : propIds) {
             PropositionDefinition propDef = this.abstractionFinder
                     .getKnowledgeSource().readPropositionDefinition(propId);
@@ -71,7 +71,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         }
         if (propIds != null) {
             Set<PropositionDefinition> result = new HashSet<PropositionDefinition>();
-            aggregateChildren(visitor, result, propDefs);
+            aggregateDescendants(visitor, result, propDefs);
             ruleCreator.visit(result);
         }
         this.ruleBase = new JBossRuleBaseFactory(ruleCreator,
@@ -111,18 +111,19 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
      *             if an error occurs reading the algorithm specified by a
      *             proposition definition.
      */
-    private void aggregateChildren(
+    private void aggregateDescendants(
             ValidateAlgorithmCheckedVisitor validatorVisitor,
             Set<PropositionDefinition> result,
             List<PropositionDefinition> propDefs) throws ProtempaException {
-        DirectChildrenVisitor dcVisitor = new DirectChildrenVisitor(
+        HierarchicalProjectionChildrenVisitor dcVisitor = 
+                new HierarchicalProjectionChildrenVisitor(
                 this.abstractionFinder.getKnowledgeSource());
         for (PropositionDefinition propDef : propDefs) {
             propDef.acceptChecked(validatorVisitor);
             propDef.acceptChecked(dcVisitor);
             result.add(propDef);
-            aggregateChildren(validatorVisitor, result,
-                    dcVisitor.getDirectChildren());
+            aggregateDescendants(validatorVisitor, result,
+                    dcVisitor.getChildren());
             dcVisitor.clear();
         }
     }
