@@ -82,8 +82,8 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
     private final MinMaxGapBetweenValues gapBtwValues;
     private static final ValueType DEFAULT_VALUE_TYPE = ValueType.NOMINALVALUE;
 
-    public LowLevelAbstractionDefinition(KnowledgeBase kb, String id) {
-        super(kb, id);
+    public LowLevelAbstractionDefinition(String id) {
+        super(id);
         this.paramIds = new LinkedHashSet<String>(1);
         this.valueDefinitions = new ArrayList<LowLevelAbstractionValueDefinition>(
                 5);

@@ -31,9 +31,8 @@ public abstract class AbstractAbstractionDefinition extends AbstractPropositionD
     private static final long serialVersionUID = 8075373039175465215L;
     private GapFunction gapFunction = GapFunction.DEFAULT;
 
-    protected AbstractAbstractionDefinition(KnowledgeBase kb, String id) {
-        super(kb, id);
-        kb.addAbstractionDefinition(this);
+    AbstractAbstractionDefinition(String id) {
+        super(id);
     }
 
     @Override

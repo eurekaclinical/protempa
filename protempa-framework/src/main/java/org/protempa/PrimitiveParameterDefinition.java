@@ -47,10 +47,9 @@ public final class PrimitiveParameterDefinition extends AbstractPropositionDefin
      */
     private String units;
 
-    public PrimitiveParameterDefinition(KnowledgeBase kb, String id) {
-        super(kb, id);
+    public PrimitiveParameterDefinition(String id) {
+        super(id);
         this.valueType = DEFAULT_VALUE_TYPE;
-        kb.addPrimitiveParameterDefinition(this);
     }
 
     /**

@@ -27,10 +27,8 @@ public final class ConstantDefinition extends AbstractPropositionDefinition {
 
     private static final long serialVersionUID = 727799438356160581L;
 
-    public ConstantDefinition(KnowledgeBase kb, String id) {
-        super(kb, id);
-
-        kb.addConstantDefinition(this);
+    public ConstantDefinition(String id) {
+        super(id);
     }
 
     /**

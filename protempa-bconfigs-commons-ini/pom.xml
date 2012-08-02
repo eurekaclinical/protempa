@@ -11,7 +11,7 @@
     <groupId>org.protempa</groupId>
     <artifactId>protempa-bconfigs-commons-ini</artifactId>
     <packaging>jar</packaging>
-    <version>2.0-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <name>Protempa Commons INI Backend Configurations</name>
     <url>http://maven.apache.org</url>
     <properties>
@@ -47,8 +47,8 @@
         </dependency>
         <dependency>
             <groupId>org.protempa</groupId>
-            <artifactId>protempa-bcp-serviceloader</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <artifactId>protempa-bcp-commons</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
@@ -64,7 +64,7 @@
                         <!--  There are no non-database tests yet, so we just
                                 want tests skipped. Change this to "false" when
                                 appropriate test classes are added -->
-                            <skipTests>false</skipTests>
+                            <skipTests>true</skipTests>
                         </configuration>
                     </plugin>
                 </plugins>

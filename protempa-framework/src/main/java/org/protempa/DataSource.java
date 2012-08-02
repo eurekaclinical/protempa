@@ -48,7 +48,7 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
     public DataSource(DataSourceBackend[] backends) {
         super(backends);
         this.backendManager =
-                new BackendManager<DataSourceBackendUpdatedEvent, DataSource, DataSourceBackend>(this, backends);
+                new BackendManager<DataSourceBackendUpdatedEvent, DataSource, DataSourceBackend>(backends);
 
     }
 

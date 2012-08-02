@@ -114,7 +114,7 @@ class PropositionDefinitionPrinter
         if (refDefs.length == 0) {
             System.out.println("\tNo references");
         } else {
-            System.out.println('\t' + refDefs.length + " references:");
+            System.out.println("\t" + refDefs.length + " references:");
             for (ReferenceDefinition refDef : refDefs) {
                 printReference(refDef);
             }
@@ -122,10 +122,8 @@ class PropositionDefinitionPrinter
     }
 
     private void printReference(ReferenceDefinition refDef) {
-        System.out.println("\t" + refDef.getName() + ":");
-        for (String propId : refDef.getPropositionIds()) {
-            System.out.println("\t\t" + propId);
-        }
+        System.out.print("\t" + refDef.getName() + ": ");
+        System.out.println(StringUtils.join(refDef.getPropositionIds(), ", "));
     }
 
     private void printProperties(PropositionDefinition propositionDefinition) {
@@ -134,7 +132,7 @@ class PropositionDefinitionPrinter
         if (propDefs.length == 0) {
             System.out.println("\tNo properties");
         } else {
-            System.out.println('\t' + propDefs.length + " properties:");
+            System.out.println("\t" + propDefs.length + " properties:");
             for (PropertyDefinition propDef : propDefs) {
                 printProperty(propDef);
             }

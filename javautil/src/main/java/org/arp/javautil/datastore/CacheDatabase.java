@@ -48,13 +48,14 @@ class CacheDatabase {
     private static final String CLASS_CATALOG = "java_class_catalog";
     private static StoredClassCatalog classCatalog;
     private static Environment env;
-    private static File location;
+    private static String location;
     private static Map<String, Database> maps = Collections
             .synchronizedMap(new HashMap<String, Database>());
 
     static {
-        location = new File(System.getProperty("java.io.tmpdir"), 
-                UUID.randomUUID().toString());
+        location = System.getProperty("java.io.tmpdir")
+                + System.getProperty("file.separator")
+                + UUID.randomUUID().toString();
         Runtime.getRuntime().addShutdownHook(new Thread("CacheDBShutdownHook") {
 
             @Override
@@ -69,10 +70,11 @@ class CacheDatabase {
                     } catch (DatabaseException e) {
                         e.printStackTrace();
                     }
-                    for (File f : location.listFiles()) {
+                    File dataDir = new File(location);
+                    for (File f : dataDir.listFiles()) {
                         f.delete();
                     }
-                    location.delete();
+                    dataDir.delete();
                 }
             }
         });
@@ -126,12 +128,13 @@ class CacheDatabase {
             envConf.setCacheSize(cacheSize);
             DataStoreUtil.logger().log(Level.FINE, "Cache size set to {0} bytes",
                     cacheSize);
-            
-            if (!location.exists()) {
-                location.mkdirs();
+
+            File envFile = new File(location);
+            if (!envFile.exists()) {
+                envFile.mkdirs();
             }
 
-            env = new Environment(location, envConf);
+            env = new Environment(envFile, envConf);
         }
     }
 }

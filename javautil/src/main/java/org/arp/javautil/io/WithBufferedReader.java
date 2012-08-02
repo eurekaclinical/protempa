@@ -19,51 +19,46 @@
  */
 package org.arp.javautil.io;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
- * Convenience class for reading from a
- * <code>BufferedReader</code>.
- *
+ * Convenience class for reading from a <code>BufferedReader</code>.
+ * 
  * @author Andrew Post
  */
 public abstract class WithBufferedReader {
+	private InputStreamReader inputStreamReader;
 
-    private InputStreamReader inputStreamReader;
+	public WithBufferedReader(InputStream inputStream) {
+		this(new InputStreamReader(inputStream));
+	}
 
-    public WithBufferedReader(InputStream inputStream) {
-        this(new InputStreamReader(inputStream));
-    }
+	public WithBufferedReader(String file) throws Exception {
+		this(new File(file));
+	}
 
-    public WithBufferedReader(String file) throws FileNotFoundException {
-        this(new File(file));
-    }
+	public WithBufferedReader(File file) throws Exception {
+		this(new FileReader(file));
 
-    public WithBufferedReader(File file) throws FileNotFoundException {
-        this(new FileReader(file));
+	}
 
-    }
+	public WithBufferedReader(InputStreamReader inputStreamReader) {
+		this.inputStreamReader = inputStreamReader;
 
-    public WithBufferedReader(InputStreamReader inputStreamReader) {
-        this.inputStreamReader = inputStreamReader;
+	}
 
-    }
+	public abstract void read(BufferedReader reader) throws Exception;
 
-    public abstract void read(BufferedReader reader);
-
-    public void execute() throws IOException {
-        BufferedReader r = new BufferedReader(this.inputStreamReader);
-        try {
-            read(r);
-            r.close();
-            r = null;
-        } finally {
-            if (r != null) {
-                try {
-                    r.close();
-                } catch (IOException ignore) {
-                }
-            }
-        }
-    }
+	public void execute() throws Exception {
+		BufferedReader r = new BufferedReader(inputStreamReader);
+		try {
+			read(r);
+		} finally {
+			r.close();
+		}
+	}
 }

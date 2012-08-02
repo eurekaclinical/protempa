@@ -244,7 +244,7 @@ public class ProtempaTest {
         DefaultQueryBuilder q = new DefaultQueryBuilder();
 
         q.setKeyIds(KEY_IDS);
-        q.setPropIds(PROP_IDS);
+        q.setPropositionIds(PROP_IDS);
         DateFormat shortFormat = AbsoluteTimeGranularity.DAY.getShortFormat();
         DateTimeFilter timeRange = new DateTimeFilter(
                 new String[]{"Encounter"},

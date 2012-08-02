@@ -19,6 +19,10 @@
  */
 package org.protempa.ksb;
 
+import org.drools.util.StringUtils;
+import org.protempa.AbstractionDefinition;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.ksb.AbstractKnowledgeSourceBackend;
@@ -43,5 +47,15 @@ public final class MockKnowledgeSourceBackend
     @Override
     public String getDisplayName() {
         return "Mock Knowledge Source Backend";
+    }
+
+    @Override
+    public PropositionDefinition readPropositionDefinition(String id) throws KnowledgeSourceReadException {
+        return null;
+    }
+
+    @Override
+    public AbstractionDefinition readAbstractionDefinition(String id) throws KnowledgeSourceReadException {
+        return null;
     }
 }

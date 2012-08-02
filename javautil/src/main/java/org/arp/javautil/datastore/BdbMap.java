@@ -24,24 +24,21 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sleepycat.bind.EntryBinding;
+import com.sleepycat.bind.serial.ClassCatalog;
 import com.sleepycat.bind.serial.SerialBinding;
-import com.sleepycat.bind.serial.StoredClassCatalog;
 import com.sleepycat.collections.StoredMap;
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseException;
 
-public class BdbMap<K, V> implements DataStore<K, V> {
-
+abstract class BdbMap<K, V> implements DataStore<K, V> {
     private final Database db;
-    private final StoredMap<K, V> storedMap;
-    private boolean isClosed;
-    private EnvironmentInfo envInfo;
+    private final StoredMap<K,V> storedMap;
 
-    BdbMap(EnvironmentInfo envInfo, Database database) throws DataStoreError {
-        this.db = database;
-        this.envInfo = envInfo;
-        StoredClassCatalog catalog = envInfo.getClassCatalog();
+    BdbMap(String dbName) throws DataStoreError {
         try {
+            this.db = getDatabase(dbName);
+
+            ClassCatalog catalog = createOrGetClassCatalog();
             EntryBinding<K> kBinding = new SerialBinding<K>(catalog, null);
             EntryBinding<V> vBinding = new SerialBinding<V>(catalog, null);
             storedMap = new StoredMap<K, V>(db, kBinding, vBinding, true);
@@ -50,15 +47,16 @@ public class BdbMap<K, V> implements DataStore<K, V> {
         }
     }
 
+    abstract Database getDatabase(String dbName);
+    abstract ClassCatalog createOrGetClassCatalog();
+    
     @Override
-    public void shutdown() {
-        this.envInfo.closeAndRemoveDatabaseHandle(this.db);
-        this.isClosed = true;
-    }
-
-    @Override
-    public boolean isClosed() {
-        return isClosed;
+    public void shutdown() throws DataStoreError {
+        try {
+            this.db.close();
+        } catch (DatabaseException ex) {
+            throw new DataStoreError(ex);
+        }
     }
 
     @Override
@@ -115,7 +113,7 @@ public class BdbMap<K, V> implements DataStore<K, V> {
     public int size() {
         return this.storedMap.size();
     }
-
+    
     @Override
     public Collection<V> values() {
         return this.storedMap.values();
@@ -131,8 +129,8 @@ public class BdbMap<K, V> implements DataStore<K, V> {
         }
         @SuppressWarnings("unchecked")
         final BdbMap<K, V> other = (BdbMap<K, V>) obj;
-        if (this.storedMap != other.storedMap
-                && (this.storedMap == null
+        if (this.storedMap != other.storedMap && 
+                (this.storedMap == null
                 || !this.storedMap.equals(other.storedMap))) {
             return false;
         }
@@ -142,10 +140,5 @@ public class BdbMap<K, V> implements DataStore<K, V> {
     @Override
     public int hashCode() {
         return this.storedMap.hashCode();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        shutdown();
     }
 }

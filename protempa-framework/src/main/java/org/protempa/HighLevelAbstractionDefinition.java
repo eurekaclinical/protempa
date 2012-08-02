@@ -50,8 +50,8 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
     private transient Map<List<TemporalExtendedPropositionDefinition>, Relation> defPairsMap;
     private boolean solid;
 
-    public HighLevelAbstractionDefinition(KnowledgeBase kb, String id) {
-        super(kb, id);
+    public HighLevelAbstractionDefinition(String id) {
+        super(id);
         initInstance();
         this.concatenable = true;
         this.solid = true;

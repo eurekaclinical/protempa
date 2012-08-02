@@ -58,8 +58,8 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
                 this.abstractionFinder.getAlgorithmSource());
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
                 visitor.getAlgorithms(), listener);
-        List<PropositionDefinition> propDefs = new ArrayList<PropositionDefinition>(
-                propIds.size());
+        List<PropositionDefinition> propDefs = 
+                new ArrayList<PropositionDefinition>(propIds.size());
         for (String propId : propIds) {
             PropositionDefinition propDef;
             try {
@@ -76,7 +76,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         }
         if (propIds != null) {
             Set<PropositionDefinition> result = new HashSet<PropositionDefinition>();
-            aggregateChildren(visitor, result, propDefs);
+            aggregateDescendants(visitor, result, propDefs);
             try {
                 ruleCreator.visit(result);
             } catch (ProtempaException ex) {
@@ -124,19 +124,24 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
      *             if an error occurs reading the algorithm specified by a
      *             proposition definition.
      */
-    private void aggregateChildren(
+    private void aggregateDescendants(
             ValidateAlgorithmCheckedVisitor validatorVisitor,
             Set<PropositionDefinition> result,
             List<PropositionDefinition> propDefs) throws FinderException {
-        DirectChildrenVisitor dcVisitor = new DirectChildrenVisitor(
+        HierarchicalProjectionChildrenVisitor dcVisitor = 
+                new HierarchicalProjectionChildrenVisitor(
                 this.abstractionFinder.getKnowledgeSource());
         for (PropositionDefinition propDef : propDefs) {
-            propDef.acceptChecked(validatorVisitor);
-            propDef.acceptChecked(dcVisitor);
-            result.add(propDef);
-            aggregateChildren(validatorVisitor, result,
-                    dcVisitor.getDirectChildren());
-            dcVisitor.clear();
+            try {
+                propDef.acceptChecked(validatorVisitor);
+                propDef.acceptChecked(dcVisitor);
+                result.add(propDef);
+                aggregateDescendants(validatorVisitor, result,
+                        dcVisitor.getChildren());
+                dcVisitor.clear();
+            } catch (ProtempaException ex) {
+                throw new FinderException("Problem reading from knowledge source", ex);
+            }
         }
     }
 

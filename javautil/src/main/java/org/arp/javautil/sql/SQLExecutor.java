@@ -31,11 +31,11 @@ import org.arp.javautil.io.Retryer;
 
 /**
  * Convenience class for executing SQL queries.
- *
+ * 
  * @author Andrew Post
  */
 public final class SQLExecutor {
-
+    
     private static final int RETRIES = 3;
 
     public static interface StatementPreparer {
@@ -182,12 +182,11 @@ public final class SQLExecutor {
             ResultProcessor resultProcessor) throws SQLException {
         executeSQL(connectionCreator, sql, resultProcessor, 0);
     }
-
-    private static abstract class RetryableExecutor implements
+    
+    private static abstract class RetryableExecutor implements 
             Retryable<SQLException> {
-
         private static final long THREE_SECONDS = 3 * 1000L;
-
+        
         @Override
         public void recover() {
             try {
@@ -197,14 +196,13 @@ public final class SQLExecutor {
             }
         }
     }
-
+    
     private static class RetryableStatementExecutor extends RetryableExecutor {
-
         private final ConnectionSpec connectionSpec;
         private final String sql;
         private final ResultProcessor resultProcessor;
-
-        RetryableStatementExecutor(ConnectionSpec connectionCreator,
+        
+        RetryableStatementExecutor(ConnectionSpec connectionCreator, 
                 String sql, ResultProcessor resultProcessor) {
             this.connectionSpec = connectionCreator;
             this.sql = sql;
@@ -233,37 +231,36 @@ public final class SQLExecutor {
             }
         }
     }
-
+    
     public static void executeSQL(ConnectionSpec connectionCreator, String sql,
             ResultProcessor resultProcessor, int retries) throws SQLException {
         if (connectionCreator == null) {
             throw new IllegalArgumentException(
                     "connectionCreator cannot be null");
         }
-        RetryableStatementExecutor executor =
+        RetryableStatementExecutor executor = 
                 new RetryableStatementExecutor(connectionCreator, sql,
-                resultProcessor);
+                        resultProcessor);
         Retryer<SQLException> retryer = new Retryer<SQLException>(RETRIES);
         if (!retryer.execute(executor)) {
             throw assembleSQLException(retryer.getErrors());
         }
     }
-
+    
     public static void executeSQL(ConnectionSpec connectionCreator, String sql,
-            StatementPreparer stmtPreparer, ResultProcessor resultProcessor)
+            StatementPreparer stmtPreparer, ResultProcessor resultProcessor) 
             throws SQLException {
         executeSQL(connectionCreator, sql, stmtPreparer, resultProcessor, 0);
     }
-
-    private static class RetryablePreparedStatementExecutor
+    
+    private static class RetryablePreparedStatementExecutor 
             extends RetryableExecutor {
-
         private final ConnectionSpec connectionSpec;
         private final String sql;
         private final StatementPreparer stmtPreparer;
         private final ResultProcessor resultProcessor;
-
-        RetryablePreparedStatementExecutor(ConnectionSpec connectionCreator,
+        
+        RetryablePreparedStatementExecutor(ConnectionSpec connectionCreator, 
                 String sql, StatementPreparer stmtPreparer,
                 ResultProcessor resultProcessor) {
             this.connectionSpec = connectionCreator;
@@ -302,15 +299,15 @@ public final class SQLExecutor {
             throw new IllegalArgumentException(
                     "connectionCreator cannot be null");
         }
-        RetryableExecutor executor =
+        RetryableExecutor executor = 
                 new RetryablePreparedStatementExecutor(connectionCreator, sql,
-                stmtPreparer, resultProcessor);
+                        stmtPreparer, resultProcessor);
         Retryer<SQLException> retryer = new Retryer<SQLException>(RETRIES);
         if (!retryer.execute(executor)) {
             throw assembleSQLException(retryer.getErrors());
         }
     }
-
+    
     public static SQLException assembleSQLException(
             List<SQLException> exceptions) {
         if (exceptions == null) {
