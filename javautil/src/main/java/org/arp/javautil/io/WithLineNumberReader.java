@@ -19,49 +19,54 @@
  */
 package org.arp.javautil.io;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import java.io.*;
 
 /**
- * Convenience class for reading from a <code>LineNumberReader</code>.
- * 
+ * Convenience class for reading from a
+ * <code>LineNumberReader</code>.
+ *
  * @author Andrew Post
  */
 public abstract class WithLineNumberReader {
-	private InputStreamReader inputStreamReader;
 
-	public WithLineNumberReader(InputStream inputStream) throws Exception {
-		this(new InputStreamReader(inputStream));
-	}
+    private InputStreamReader inputStreamReader;
 
-	public WithLineNumberReader(String file) throws Exception {
-		this(new File(file));
-	}
+    public WithLineNumberReader(InputStream inputStream) {
+        this(new InputStreamReader(inputStream));
+    }
 
-	public WithLineNumberReader(File file) throws Exception {
-		this(new FileReader(file));
+    public WithLineNumberReader(String file) throws FileNotFoundException {
+        this(new File(file));
+    }
 
-	}
+    public WithLineNumberReader(File file) throws FileNotFoundException {
+        this(new FileReader(file));
 
-	public WithLineNumberReader(InputStreamReader inputStreamReader) {
-		this.inputStreamReader = inputStreamReader;
-	}
+    }
 
-	public abstract void readLine(int lineNumber, String line) throws Exception;
+    public WithLineNumberReader(InputStreamReader inputStreamReader) {
+        this.inputStreamReader = inputStreamReader;
+    }
 
-	public void execute() throws Exception {
-		LineNumberReader r = new LineNumberReader(inputStreamReader);
-		try {
-			String line = null;
-			while ((line = r.readLine()) != null) {
-				readLine(r.getLineNumber(), line);
-			}
-		} finally {
-			r.close();
-			inputStreamReader = null;
-		}
-	}
+    public abstract void readLine(int lineNumber, String line);
+
+    public void execute() throws IOException {
+        LineNumberReader r = new LineNumberReader(this.inputStreamReader);
+        try {
+            String line;
+            while ((line = r.readLine()) != null) {
+                readLine(r.getLineNumber(), line);
+            }
+            r.close();
+            r = null;
+        } finally {
+            if (r != null) {
+                try {
+                    r.close();
+                } catch (IOException ignore) {
+                }
+            }
+            this.inputStreamReader = null;
+        }
+    }
 }
