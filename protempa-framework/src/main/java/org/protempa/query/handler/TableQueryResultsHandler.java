@@ -37,13 +37,12 @@ import org.protempa.query.handler.table.TableColumnSpec;
 import org.protempa.query.handler.table.TableColumnSpecValidationFailedException;
 
 /**
- * 
+ *
  * @author Andrew Post
  */
 public final class TableQueryResultsHandler implements QueryResultsHandler {
 
     private static final long serialVersionUID = -1503401944818776787L;
-    
     private final char columnDelimiter;
     private final String[] rowPropositionIds;
     private final TableColumnSpec[] columnSpecs;
@@ -102,14 +101,13 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
                             columnSpec.getClass().getName());
                     String[] colNames =
                             columnSpec.columnNames(knowledgeSource);
-                    assert colNames.length > 0 : 
+                    assert colNames.length > 0 :
                             "colNames must have length > 0";
 
                     for (int index = 0; index < colNames.length; index++) {
-                        if (colNames[index] == null) {
-                            colNames[index] = "(null)";
-                        } else if (colNames[index].length() == 0) {
-                            colNames[index] = "(empty)";
+                        String colName = colNames[index];
+                        if (this.replace.containsKey(colName)) {
+                            colNames[index] = this.replace.get(colName);
                         }
                     }
 
@@ -154,7 +152,7 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
                 continue;
             }
             try {
-                StringUtil.escapeAndWriteDelimitedColumn(keyId, 
+                StringUtil.escapeAndWriteDelimitedColumn(keyId,
                         this.columnDelimiter, this.out);
                 if (n > 0) {
                     this.out.write(this.columnDelimiter);
@@ -165,7 +163,7 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
                             forwardDerivations, backwardDerivations,
                             references, this.knowledgeSource);
 
-                    StringUtil.escapeAndWriteDelimitedColumns(colValues, 
+                    StringUtil.escapeAndWriteDelimitedColumns(colValues,
                             this.replace, this.columnDelimiter, this.out);
 
                     if (i < n - 1) {
@@ -185,7 +183,7 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
     }
 
     @Override
-    public void validate(KnowledgeSource knowledgeSource) 
+    public void validate(KnowledgeSource knowledgeSource)
             throws QueryResultsHandlerValidationFailedException,
             KnowledgeSourceReadException {
         List<String> invalidPropIds = new ArrayList<String>();
@@ -196,8 +194,8 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
         }
         if (!invalidPropIds.isEmpty()) {
             throw new QueryResultsHandlerValidationFailedException(
-                        "Invalid row proposition id(s): " + 
-                    StringUtils.join(invalidPropIds, ", "));
+                    "Invalid row proposition id(s): "
+                    + StringUtils.join(invalidPropIds, ", "));
         }
         int i = 1;
         for (TableColumnSpec columnSpec : this.columnSpecs) {
@@ -211,34 +209,41 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
         }
     }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + columnDelimiter;
-		result = prime * result + Arrays.hashCode(columnSpecs);
-		result = prime * result + (headerWritten ? 1231 : 1237);
-		result = prime * result + Arrays.hashCode(rowPropositionIds);
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + columnDelimiter;
+        result = prime * result + Arrays.hashCode(columnSpecs);
+        result = prime * result + (headerWritten ? 1231 : 1237);
+        result = prime * result + Arrays.hashCode(rowPropositionIds);
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TableQueryResultsHandler other = (TableQueryResultsHandler) obj;
-		if (columnDelimiter != other.columnDelimiter)
-			return false;
-		if (!Arrays.equals(columnSpecs, other.columnSpecs))
-			return false;
-		if (headerWritten != other.headerWritten)
-			return false;
-		if (!Arrays.equals(rowPropositionIds, other.rowPropositionIds))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        TableQueryResultsHandler other = (TableQueryResultsHandler) obj;
+        if (columnDelimiter != other.columnDelimiter) {
+            return false;
+        }
+        if (!Arrays.equals(columnSpecs, other.columnSpecs)) {
+            return false;
+        }
+        if (headerWritten != other.headerWritten) {
+            return false;
+        }
+        if (!Arrays.equals(rowPropositionIds, other.rowPropositionIds)) {
+            return false;
+        }
+        return true;
+    }
 }

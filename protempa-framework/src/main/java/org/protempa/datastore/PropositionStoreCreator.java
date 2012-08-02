@@ -19,66 +19,61 @@
  */
 package org.protempa.datastore;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.arp.javautil.datastore.BdbPersistentStoreFactory;
 
 import org.arp.javautil.datastore.DataStore;
-import org.arp.javautil.datastore.DataStoreFactory;
 import org.protempa.proposition.Proposition;
 
 /**
  * A permanent store mapping key IDs to lists of propositions.
- * 
+ *
  * @author Michel Mansour
  */
-public final class PropositionStoreCreator<P extends Proposition> implements
-        DataStoreCreator<String, List<P>> {
-    private PropositionStoreCreator() {
+public final class PropositionStoreCreator<P extends Proposition> extends AbstractDataStoreCreator<String, List<P>> {
+
+    public static final String DATABASE_NAME = "PropositionStore";
+    private final BdbPersistentStoreFactory<String, List<P>> storeFactory;
+    private int index;
+    
+    public PropositionStoreCreator() {
+        this(null);
     }
 
-    public static <Q extends Proposition> PropositionStoreCreator<Q> getInstance() {
-        return new PropositionStoreCreator<Q>();
+    public PropositionStoreCreator(String environmentName) {
+        super(environmentName);
+        if (environmentName != null) {
+            this.storeFactory =
+                    new BdbPersistentStoreFactory<String, List<P>>(environmentName);
+        } else {
+            this.storeFactory = null;
+        }
     }
-
-    // We can't keep a static collection of the class parameter P, so it has
-    // to be raw. But the only place this map is manipulated is within this
-    // class, so it's safe.
-    @SuppressWarnings("rawtypes")
-    private static Map<String, DataStore> stores = new HashMap<String, DataStore>();
 
     // The map of instances isn't generic, so we have to cast to the correct
     // parameterized type. This is safe because this method is the only place
     // we access the map.
     @SuppressWarnings("unchecked")
     @Override
-    public DataStore<String, List<P>> getPersistentStore(String name) {
-        Logger logger = DataStoreUtil.logger();
-        logger.log(Level.FINE, "Getting persistent store {0}", name);
-        if (stores.containsKey(name) && !stores.get(name).isClosed()) {
-            logger.log(
-                    Level.FINEST,
-                    "Persistent store {0} has been accessed during this run: using it",
-                    name);
-            return (DataStore<String, List<P>>) stores.get(name);
-        } else {
-            logger.log(
-                    Level.FINEST,
-                    "Persistent store {0} has not been accessed during this" +
-                    " run or does not exist: attempting to get it from the underlying store",
-                    name);
-            DataStore<String, List<P>> store = DataStoreFactory
-                    .getPersistentStore(name);
-            logger.log(Level.FINEST, "Got persistent store {0}", name);
-            stores.put(name, store);
-            return store;
+    public DataStore<String, List<P>> getPersistentStore() {
+        if (this.storeFactory == null) {
+            throw new IllegalStateException("null environmentName; cannot get a persistent store");
         }
+        Logger logger = DataStoreUtil.logger();
+        String dbName = nextDatabaseName();
+        logger.log(Level.FINE, "Getting persistent store {0}", dbName);
+        DataStore<String, List<P>> store =
+                this.storeFactory.newInstance(dbName);
+        logger.log(Level.FINEST, "Got persistent store {0}", dbName);
+        return store;
     }
 
     @Override
-    public DataStore<String, List<P>> newCacheStore() {
-        return DataStoreFactory.<String, List<P>> newCacheStore();
+    protected String nextDatabaseName() {
+        synchronized (this) {
+            return DATABASE_NAME + (index++);
+        }
     }
 }

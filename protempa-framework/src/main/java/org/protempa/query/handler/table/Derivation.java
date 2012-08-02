@@ -41,7 +41,7 @@ import org.protempa.proposition.value.Value;
 
 /**
  * Traverses traversals from a proposition to/from a derived proposition.
- * 
+ *
  * @author Andrew Post
  */
 public final class Derivation extends Link {
@@ -73,6 +73,7 @@ public final class Derivation extends Link {
     private final Value[] allowedValues;
     private Set<String> knowledgeTree;
     private final Relation relation;
+    private final Queue<Proposition> internalDerived;
 
     public Derivation(String[] propositionIds, Behavior behavior) {
         this(propositionIds, null, null, behavior, null);
@@ -83,7 +84,7 @@ public final class Derivation extends Link {
         this(propositionIds, constraints, null, -1, -1, null,
                 behavior, null);
     }
-    
+
     public Derivation(String[] propositionIds,
             PropertyConstraint[] constraints, Value[] allowedValues,
             Behavior behavior) {
@@ -138,6 +139,7 @@ public final class Derivation extends Link {
         }
         this.behavior = behavior;
         this.relation = relation;
+        this.internalDerived = new LinkedList<Proposition>();
     }
 
     @Override
@@ -147,43 +149,39 @@ public final class Derivation extends Link {
 
     /**
      * Traverses a derivation.
-     * 
-     * @param proposition
-     *            a {@link Proposition} at which to start the traversal.
-     * @param forwardDerivations
-     *            a {@link Map<Proposition,List<Proposition>>} of derived
-     *            propositions.
-     * @param backwardDerivations 
-     *            a {@link Map<Proposition,List<Proposition>>} of derived
-     *            propositions.
-     * @param references
-     *            a {@link Map<Proposition,Proposition>} of unique identifiers
-     *            to {@link Proposition}s, used to resolve references.
-     * @param knowledgeSource
-     *            the {@link KnowledgeSource}.
-     * @param cache
-     *            a {@link Set<Proposition>} for convenience in checking if
-     *            duplicate propositions are traversed to. It is cleared 
-     *            in between calls to this method.
+     *
+     * @param proposition a {@link Proposition} at which to start the traversal.
+     * @param forwardDerivations a {@link Map<Proposition,List<Proposition>>} of
+     * derived propositions.
+     * @param backwardDerivations a {@link Map<Proposition,List<Proposition>>}
+     * of derived propositions.
+     * @param references a {@link Map<Proposition,Proposition>} of unique
+     * identifiers to {@link Proposition}s, used to resolve references.
+     * @param knowledgeSource the {@link KnowledgeSource}.
+     * @param cache a {@link Set<Proposition>} for convenience in checking if
+     * duplicate propositions are traversed to. It is cleared in between calls
+     * to this method.
      * @return the {@link Collection<Proposition>} at the end of the traversal
-     *            step.
+     * step.
      */
     @Override
     Collection<Proposition> traverse(Proposition proposition,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource, final Set<Proposition> cache) 
+            KnowledgeSource knowledgeSource, final Set<Proposition> cache)
             throws KnowledgeSourceReadException {
         //First, aggregate derived values according to the specified behavior.
         List<Proposition> derived = null;
         switch (this.behavior) {
             case SINGLE_FORWARD:
-                derived = filterMatches(proposition, forwardDerivations.get(proposition),
+                derived = filterMatches(proposition,
+                        forwardDerivations.get(proposition),
                         cache);
                 break;
             case SINGLE_BACKWARD:
-                derived = filterMatches(proposition, backwardDerivations.get(proposition),
+                derived = filterMatches(proposition,
+                        backwardDerivations.get(proposition),
                         cache);
                 break;
             case MULT_FORWARD:
@@ -191,22 +189,20 @@ public final class Derivation extends Link {
                 if (this.knowledgeTree.contains(proposition.getId())) {
                     /*
                      * For performance, pull the specified proposition ids,
-                     * cache the hierarchy, and check to see if each 
-                     * traversed-to proposition's id is in the hierarchy. This 
-                     * is much faster than traversing the whole hierarchy in 
+                     * cache the hierarchy, and check to see if each
+                     * traversed-to proposition's id is in the hierarchy. This
+                     * is much faster than traversing the whole hierarchy in
                      * most cases.
                      */
                     derived = new ArrayList<Proposition>();
-                    Queue<Proposition> internalDerived =
-                            new LinkedList<Proposition>();
                     internalDerived.add(proposition);
                     while (!internalDerived.isEmpty()) {
                         Proposition prop = internalDerived.remove();
                         /*
-                         * If (in hierarchy or ???) and not in cache, then add 
+                         * If (in hierarchy or ???) and not in cache, then add
                          * to derived.
                          */
-                        Collection<Proposition> c = 
+                        Collection<Proposition> c =
                                 forwardDerivations.get(prop);
                         if (c != null) {
                             for (Proposition p : c) {
@@ -223,17 +219,15 @@ public final class Derivation extends Link {
                 break;
             case MULT_BACKWARD:
                 derived = new ArrayList<Proposition>();
-                Queue<Proposition> internalDerived2 =
-                        new LinkedList<Proposition>();
-                internalDerived2.add(proposition);
-                while (!internalDerived2.isEmpty()) {
-                    Proposition prop = internalDerived2.remove();
-                    Collection<Proposition> c = 
+                internalDerived.add(proposition);
+                while (!internalDerived.isEmpty()) {
+                    Proposition prop = internalDerived.remove();
+                    Collection<Proposition> c =
                             backwardDerivations.get(prop);
                     if (c != null) {
                         for (Proposition p : c) {
                             if (cache.add(p)) {
-                                internalDerived2.add(p);
+                                internalDerived.add(p);
                                 if (isMatch(p) && hasAllowedValue(p)) {
                                     derived.add(p);
                                 }
@@ -247,6 +241,7 @@ public final class Derivation extends Link {
                         + this.behavior);
         }
 
+        this.internalDerived.clear();
         return createResults(derived);
     }
 
@@ -254,8 +249,8 @@ public final class Derivation extends Link {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
-    
-    private void populateKnowledgeTree(KnowledgeSource knowledgeSource) 
+
+    private void populateKnowledgeTree(KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
         if (this.knowledgeTree == null) {
             this.knowledgeTree = new HashSet<String>();
@@ -281,13 +276,14 @@ public final class Derivation extends Link {
     }
 
     /**
-     * Filters <code>propositions</code>. Removes duplicates, propositions not
-     * in the proposition id list, and parameters that do not meet any value
+     * Filters
+     * <code>propositions</code>. Removes duplicates, propositions not in the
+     * proposition id list, and parameters that do not meet any value
      * constraints set.
+     *
      * @param propositions the {@link Collection<Proposition>} to filter.
-     * @param cache a {@link Set<Proposition>} that is used to find 
-     * duplicates.
-     * 
+     * @param cache a {@link Set<Proposition>} that is used to find duplicates.
+     *
      * @return a newly-created {@link List<Proposition>}.
      */
     private List<Proposition> filterMatches(Proposition inProposition,
@@ -316,62 +312,62 @@ public final class Derivation extends Link {
         }
         return result;
     }
-    
+
     public Behavior getBehavior() {
-    	return behavior;
+        return behavior;
     }
-    
+
     public Value[] getAllowedValues() {
-    	return allowedValues;
+        return allowedValues;
     }
-    
+
     public Relation getRelation() {
-    	return relation;
+        return relation;
     }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + java.util.Arrays.hashCode(allowedValues);
-		result = prime * result + ((behavior == null) ? 0 : behavior.hashCode());
-		result = prime * result + ((knowledgeTree == null) ? 0 : knowledgeTree.hashCode());
-		result = prime * result + ((relation == null) ? 0 : relation.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + java.util.Arrays.hashCode(allowedValues);
+        result = prime * result + ((behavior == null) ? 0 : behavior.hashCode());
+        result = prime * result + ((knowledgeTree == null) ? 0 : knowledgeTree.hashCode());
+        result = prime * result + ((relation == null) ? 0 : relation.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		Derivation other = (Derivation) obj;
-		if (!java.util.Arrays.equals(allowedValues, other.allowedValues)) {
-			return false;
-		}
-		if (behavior != other.behavior) {
-			return false;
-		}
-		if (knowledgeTree == null) {
-			if (other.knowledgeTree != null) {
-				return false;
-			}
-		} else if (!knowledgeTree.equals(other.knowledgeTree)) {
-			return false;
-		}
-		if (relation == null) {
-			if (other.relation != null) {
-				return false;
-			}
-		} else if (!relation.equals(other.relation)) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Derivation other = (Derivation) obj;
+        if (!java.util.Arrays.equals(allowedValues, other.allowedValues)) {
+            return false;
+        }
+        if (behavior != other.behavior) {
+            return false;
+        }
+        if (knowledgeTree == null) {
+            if (other.knowledgeTree != null) {
+                return false;
+            }
+        } else if (!knowledgeTree.equals(other.knowledgeTree)) {
+            return false;
+        }
+        if (relation == null) {
+            if (other.relation != null) {
+                return false;
+            }
+        } else if (!relation.equals(other.relation)) {
+            return false;
+        }
+        return true;
+    }
 }

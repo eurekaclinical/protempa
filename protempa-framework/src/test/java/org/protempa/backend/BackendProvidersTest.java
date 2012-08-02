@@ -43,6 +43,7 @@ public class BackendProvidersTest {
 
     @AfterClass
     public static void tearDownClass() throws Exception {
+        BackendProviderManager.setBackendProvider(null);
     }
 
     @Before

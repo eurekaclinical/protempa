@@ -37,12 +37,12 @@ import org.protempa.proposition.value.UnitFactory;
 /**
  * Read-only access to a database. Data source backends are specified in the
  * constructor that implement the actual database connection(s).
- * 
+ *
  * @author Andrew Post
  * @see DataSourceBackend
  */
 public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, DataSourceBackendUpdatedEvent> {
-    
+
     private final BackendManager<DataSourceBackendUpdatedEvent, DataSource, DataSourceBackend> backendManager;
 
     public DataSource(DataSourceBackend[] backends) {
@@ -56,11 +56,12 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
      * Returns a string representing the type of keys in this data source (e.g.,
      * patient, case).
      *
-     * @return a {@link String}, guaranteed not <code>null</code>.
-     * @throws TerminologyAdaptorInitializationException
-     *             if the terminology adaptor could not be initialized.
-     * @throws SchemaAdaptorInitializationException
-     *             if the schema adaptor could not be initialized.
+     * @return a {@link String}, guaranteed not
+     * <code>null</code>.
+     * @throws TerminologyAdaptorInitializationException if the terminology
+     * adaptor could not be initialized.
+     * @throws SchemaAdaptorInitializationException if the schema adaptor could
+     * not be initialized.
      */
     public String getKeyType() throws DataSourceReadException {
         initializeIfNeeded();
@@ -79,11 +80,12 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
      * Returns a string representing the type of keys in this data source (e.g.,
      * patient, case) for display purposes.
      *
-     * @return a {@link String}, guaranteed not <code>null</code>.
-     * @throws TerminologyAdaptorInitializationException
-     *             if the terminology adaptor could not be initialized.
-     * @throws SchemaAdaptorInitializationException
-     *             if the schema adaptor could not be initialized.
+     * @return a {@link String}, guaranteed not
+     * <code>null</code>.
+     * @throws TerminologyAdaptorInitializationException if the terminology
+     * adaptor could not be initialized.
+     * @throws SchemaAdaptorInitializationException if the schema adaptor could
+     * not be initialized.
      */
     public String getKeyTypeDisplayName()
             throws DataSourceReadException {
@@ -104,15 +106,15 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
      * Returns a plural string representing the type of keys in this data source
      * (e.g., patient, case) for display purposes.
      *
-     * @return a {@link String}, guaranteed not <code>null</code>.
-     * @throws TerminologyAdaptorInitializationException
-     *             if the terminology adaptor could not be initialized.
-     * @throws SchemaAdaptorInitializationException
-     *             if the schema adaptor could not be initialized.
-     * @throws IllegalStateException
-     *             if the schema adaptor and/or terminology adaptor could not be
-     *             initialized, or if the schema adaptor returned a
-     *             <code>null</code> key type plural display name.
+     * @return a {@link String}, guaranteed not
+     * <code>null</code>.
+     * @throws TerminologyAdaptorInitializationException if the terminology
+     * adaptor could not be initialized.
+     * @throws SchemaAdaptorInitializationException if the schema adaptor could
+     * not be initialized.
+     * @throws IllegalStateException if the schema adaptor and/or terminology
+     * adaptor could not be initialized, or if the schema adaptor returned a
+     * <code>null</code> key type plural display name.
      */
     public String getKeyTypePluralDisplayName()
             throws DataSourceReadException {
@@ -133,13 +135,13 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
      * Returns an object for accessing the granularity of returned data from the
      * schema adaptor for this data source.
      *
-     * @return a {@link GranularityFactory}, or <code>null</code> if the data
-     *         source could not be initialized or the schema adaptor returned a
-     *         null GranularityFactory.
-     * @throws TerminologyAdaptorInitializationException
-     *             if the terminology adaptor could not be initialized.
-     * @throws SchemaAdaptorInitializationException
-     *             if the schema adaptor could not be initialized.
+     * @return a {@link GranularityFactory}, or
+     * <code>null</code> if the data source could not be initialized or the
+     * schema adaptor returned a null GranularityFactory.
+     * @throws TerminologyAdaptorInitializationException if the terminology
+     * adaptor could not be initialized.
+     * @throws SchemaAdaptorInitializationException if the schema adaptor could
+     * not be initialized.
      * @see SchemaAdaptor#getGranularityFactory()
      */
     public GranularityFactory getGranularityFactory()
@@ -158,14 +160,13 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
     }
 
     /**
-     * Returns the length units of returned data from
-     * this data source.
+     * Returns the length units of returned data from this data source.
      *
-     * @return a {@link UnitFactory}, or <code>null</code> if the data
-     *         source could not be initialized or the schema adaptor returned a
-     *         null UnitFactory.
-     * @throws DataSourceReadException
-     *             if the data source could not be initialized.
+     * @return a {@link UnitFactory}, or
+     * <code>null</code> if the data source could not be initialized or the
+     * schema adaptor returned a null UnitFactory.
+     * @throws DataSourceReadException if the data source could not be
+     * initialized.
      */
     public UnitFactory getUnitFactory() throws DataSourceReadException {
         initializeIfNeeded();
@@ -181,18 +182,7 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
         return result;
     }
 
-    /**
-     * Queries for propositions.
-     *
-     * @param keyIds the key id {@link String}s to query.
-     * @param propIds the proposition id {@link String}s of the primitive
-     * parameters of interest.
-     * @param filters {@link Filter}s to constraint the query.
-     * @param qs
-     * @return an immutable {@link Map<String, List<PrimitiveParameter>>}.
-     * @throws DataSourceReadException
-     */
-    public Map<String, List<Proposition>> readPropositions(
+    public DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds,
             Filter filters, QuerySession qs)
             throws DataSourceReadException {
@@ -200,20 +190,15 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
         Set<String> notNullPropIds = handlePropIdSetArgument(propIds);
 
         initializeIfNeeded();
-        List<DataSourceBackend> backends =
-                this.backendManager.getBackends();
-        List<Map<String, List<Proposition>>> resultMaps =
-                new ArrayList<Map<String, List<Proposition>>>(backends.size());
+        List<DataSourceBackend> backends = this.backendManager.getBackends();
+        List<DataStreamingEventIterator<Proposition>> itrs =
+                new ArrayList<DataStreamingEventIterator<Proposition>>(backends.size());
         for (DataSourceBackend backend : backends) {
-            resultMaps.add(backend.readPropositions(
-                    notNullKeyIds, notNullPropIds, filters, qs));
-
+            itrs.add(backend.readPropositions(notNullKeyIds,
+                    notNullPropIds, filters, qs));
         }
-
-        Map<String, List<Proposition>> result =
-                new DataSourceResultMap<Proposition>(resultMaps);
-
-        return result;
+        return new MultiplexingDataStreamingEventIterator(itrs, 
+                new PropositionDataStreamerProcessor());
     }
 
     @Override
@@ -223,12 +208,12 @@ public final class DataSource extends AbstractSource<DataSourceUpdatedEvent, Dat
     }
 
     /**
-     * Determines whether the data source's data element mappings are
-     * consistent with the data elements' definitions.
+     * Determines whether the data source's data element mappings are consistent
+     * with the data elements' definitions.
      *
      * @param knowledgeSource a {@link KnowledgeSource}.
-     * @throws DataSourceFailedValidationException if the data element
-     * mappings are not consistent with the data elements' definitions.
+     * @throws DataSourceFailedValidationException if the data element mappings
+     * are not consistent with the data elements' definitions.
      * @throws DataSourceValidationException if an error occurred during
      * validation.
      */

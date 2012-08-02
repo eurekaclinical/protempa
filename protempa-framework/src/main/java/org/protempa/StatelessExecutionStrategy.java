@@ -46,7 +46,7 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
     @SuppressWarnings("unchecked")
     public Iterator<Proposition> execute(String keyId,
             Set<String> propositionIds, List<?> objects,
-            DataStore<String, WorkingMemory> wm) throws ProtempaException {
+            DataStore<String, WorkingMemory> wm) {
         StatelessSessionResult result = this.statelessSession
                 .executeWithResults(objects);
         return result.iterateObjects();

@@ -99,7 +99,7 @@ public class XMLConfigurationTest extends TestCase {
 
 	public void testQuery() throws Throwable {
 		Query query = createTestQuery();
-		File file = new File("z.xml");
+		File file = File.createTempFile("xmlConfigTestz", ".xml");
 		XMLConfiguration.writeQueryAsXML(query, file, true);
 		checkXMLValid(file, "protempa_query.xsd");
 		KnowledgeSource ks = new KnowledgeSource(new KnowledgeSourceBackend[0]);
@@ -107,7 +107,7 @@ public class XMLConfigurationTest extends TestCase {
 		Query reconstitutedQuery = XMLConfiguration.readQueryAsXML(file, ks, as);
 		assertTrue("Deserialized query is equal to the original query", reconstitutedQuery.equals(query));
 		
-		File z2 = new File("z2.xml");
+		File z2 = File.createTempFile("xmlConfigTestz2", ".xml");
 		XMLConfiguration.writeQueryAsXML(reconstitutedQuery, z2);
 		FileReader freader = new FileReader(z2);
 		String xml = new BufferedReader(freader).readLine();
@@ -187,7 +187,7 @@ public class XMLConfigurationTest extends TestCase {
 	public void testTableResultsQueryHandler() throws Throwable {
 		BufferedWriter dataWriter = new BufferedWriter(new StringWriter());
 		TableQueryResultsHandler resultsHandler = createTestTableResultsQueryHandler(dataWriter);
-		File file = new File("testTableResultsQueryHandler.xml");
+		File file = File.createTempFile("testTableResultsQueryHandler", ".xml");
 		XMLConfiguration.writeTableQueryResultsHandlerAsXML(resultsHandler, file, true);
 		checkXMLValid(file, "protempa_tableQueryResultsHandler.xsd");
 		TableQueryResultsHandler reconstitutedResultsHandler = XMLConfiguration.readTableQueryResultsHandlerAsXML(file, dataWriter);

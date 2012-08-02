@@ -37,11 +37,9 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
     StatefulExecutionStrategy(AbstractionFinder abstractionFinder) {
         super(abstractionFinder);
-        // TODO Auto-generated constructor stub
     }
 
-    private StatefulSession applyRules(String keyId, List<?> objects)
-            throws ProtempaException {
+    private StatefulSession applyRules(String keyId, List<?> objects) {
         StatefulSession workingMemory = ruleBase.newStatefulSession(false);
         ProtempaUtil.logger().log(Level.FINEST,
                 "Adding {0} objects for key ID {1}",
@@ -62,8 +60,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     @Override
     public Iterator<Proposition> execute(String keyId,
             Set<String> propositionIds, List<?> objects,
-            DataStore<String, WorkingMemory> wmStore)
-            throws ProtempaException {
+            DataStore<String, WorkingMemory> wmStore) {
         StatefulSession workingMemory = applyRules(keyId, objects);
         ProtempaUtil.logger().log(Level.FINEST,
                 "Persisting working memory for key ID {0}", keyId);

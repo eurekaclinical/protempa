@@ -19,32 +19,55 @@
  */
 package org.protempa.backend;
 
-import java.util.logging.Level;
-import org.apache.commons.discovery.DiscoveryException;
-import org.apache.commons.discovery.tools.DiscoverSingleton;
+import org.arp.javautil.serviceloader.SingletonServiceLoader;
 
 /**
  * Class for getting PROTEMPA configurations.
  *
+ * Uses Java's {@link ServiceLoader} to load a {@link ConfigurationsProvider}.
+ * By default, it configures {@link ServiceLoader} to use the current thread's
+ * context class loader. The {@link ConfigurationsProvider} is loaded lazily
+ * upon calls to {@link #getConfigurations()} or
+ * {@link #getConfigurationsProvider()}. Use
+ * {@link #setConfigurationsProviderClassLoader} to specify a different class
+ * loader. The {@link ConfigurationsProvider} in turn is used to get
+ * {@link Configurations}.
+ *
+ * A program can also explicitly set a configurations provider using the
+ * {@link #setConfigurationsProvider} method. This will override the use of {@link ServiceLoader}.
+ *
  * @author Andrew Post
  */
 public final class ConfigurationsProviderManager {
-    private static ConfigurationsProvider configurationsProvider;
 
-    static {
-        try {
-            configurationsProvider = (ConfigurationsProvider)
-                    DiscoverSingleton.find(ConfigurationsProvider.class);
-        } catch (DiscoveryException de) {
-            BackendUtil.logger().log(Level.FINE,
-                "No ConfigurationsProvider was found by service discovery.",
-                de);
-        }
+    private static ConfigurationsProvider configurationsProvider;
+    private static ClassLoader configurationsProviderClassLoader;
+    private static boolean configurationsProviderClassLoaderSpecified;
+
+    public static void setConfigurationsProviderClassLoader(
+            ClassLoader loader) {
+        configurationsProviderClassLoader = loader;
+        configurationsProviderClassLoaderSpecified = true;
+    }
+
+    public static ClassLoader getConfigurationsProviderClassLoader() {
+        return configurationsProviderClassLoader;
     }
 
     /**
-     * Sets the configurations provider, overriding any configurations
-     * provider that was found by service discovery.
+     * Indicates whether {@link #setConfigurationsProviderClassLoader} has been
+     * called.
+     *
+     * @return whether {@link #setConfigurationsProviderClassLoader} has been
+     * called.
+     */
+    public static boolean isConfigurationsProviderClassLoaderSpecified() {
+        return configurationsProviderClassLoaderSpecified;
+    }
+
+    /**
+     * Sets the configurations provider, overriding any configurations provider
+     * that was found by service discovery.
      *
      * @param configurationsProvider a {@link ConfigurationsProvider}.
      */
@@ -55,12 +78,13 @@ public final class ConfigurationsProviderManager {
     }
 
     /**
-     * Gets the configurations provider found by service discovery or set
-     * with {@link #setConfigurationsProvider(org.protempa.backend.ConfigurationsProvider).
+     * Gets the configurations provider found by service discovery or set with 
+     * {@link #setConfigurationsProvider(org.protempa.backend.ConfigurationsProvider).
      *
      * @return a {@link ConfigurationsProvider}.
      */
     public static ConfigurationsProvider getConfigurationsProvider() {
+        loadConfigurationsProviderIfNeeded();
         return configurationsProvider;
     }
 
@@ -72,9 +96,24 @@ public final class ConfigurationsProviderManager {
      * @return a {@link Configurations} instance.
      */
     public static Configurations getConfigurations() {
-        if (configurationsProvider == null)
-            throw new IllegalStateException(
-                    "No ConfigurationsProvider was found by service discovery or set with setConfigurationsProvider");
+        loadConfigurationsProviderIfNeeded();
         return configurationsProvider.getConfigurations();
+    }
+
+    private static void loadConfigurationsProviderIfNeeded() {
+        if (configurationsProvider == null) {
+            if (configurationsProviderClassLoaderSpecified) {
+                configurationsProvider =
+                        SingletonServiceLoader.load(ConfigurationsProvider.class,
+                        configurationsProviderClassLoader);
+            } else {
+                configurationsProvider =
+                        SingletonServiceLoader.load(ConfigurationsProvider.class);
+            }
+        }
+        
+        if (configurationsProvider == null) {
+            throw new IllegalStateException("No configurationsProvider found by service discovery or set with setConfigurationsProvider");
+        }
     }
 }

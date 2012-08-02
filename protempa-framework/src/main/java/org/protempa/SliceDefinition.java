@@ -124,7 +124,7 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
         if (propId != null) {
             boolean result = this.abstractedFrom.add(propId);
             if (result) {
-                recalculateDirectChildren();
+                recalculateChildren();
             }
             return result;
         } else {
@@ -138,7 +138,7 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
         minIndex = 0;
         maxIndex = Integer.MAX_VALUE;
         abstractedFrom.clear();
-        recalculateDirectChildren();
+        recalculateChildren();
     }
 
     /**
@@ -165,11 +165,11 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
     }
 
     @Override
-    protected void recalculateDirectChildren() {
+    protected void recalculateChildren() {
         String[] old = this.directChildren;
         this.directChildren = this.abstractedFrom.toArray(new String[this.abstractedFrom.size()]);
         if (this.changes != null) {
-            this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
                     this.directChildren);
         }
     }

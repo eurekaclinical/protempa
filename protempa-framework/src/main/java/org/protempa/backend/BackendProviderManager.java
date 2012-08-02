@@ -19,45 +19,62 @@
  */
 package org.protempa.backend;
 
-import java.util.logging.Level;
-import org.apache.commons.discovery.DiscoveryException;
-import org.apache.commons.discovery.tools.DiscoverSingleton;
+import org.arp.javautil.serviceloader.SingletonServiceLoader;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.backend.tsb.TermSourceBackend;
 
 /**
- * A service for managing PROTEMPA's backend provider.
+ * Manages PROTEMPA's backend provider.
  *
- * As part of its initialization, the {@link BackendProviderManager} class will
- * attempt to load the {@link BackendProvider} class referenced in the
- * "org.protempa.backend.BackendProvider" system property. This allows users to
- * customize the PROTEMPA backend provider used by their applications.
+ * Uses Java's {@link ServiceLoader} to load a {@link BackendProvider}. 
+ * By default, it configures {@link ServiceLoader} to use the current thread's 
+ * context class loader. The {@link BackendProvider} is loaded lazily
+ * upon calls to {@link #getBackendProvider()} or the backend spec loader 
+ * getter methods. Use {@link #setBackendProviderClassLoader} to specify a 
+ * different class loader.
  *
- * A program can also explicitly load a backend provider using the
- * {@link #setBackendProvider} method. This will override the initialization
- * above.
- * 
+ * A program can also explicitly set a backend provider using the
+ * {@link #setBackendProvider} method. This will override the 
+ * use of {@link ServiceLoader}.
+ *
  * @author Andrew Post
  */
 public final class BackendProviderManager {
 
     private static BackendProvider backendProvider;
+    private static ClassLoader backendProviderClassLoader;
+    private static boolean backendProviderClassLoaderSpecified;
 
     private BackendProviderManager() {
-        
+    }
+
+    /**
+     * Sets the class loader to use for loading a {@link BackendProvider}. If
+     * never called, the current thread's context class loader will be used.
+     * If set to <code>null</code>, the system class loader (or, failing that, 
+     * the bootstrap class loader) will be used.
+     * 
+     * @param loader 
+     */
+    public static void setBackendProviderClassLoader(ClassLoader loader) {
+        backendProviderClassLoader = loader;
+        backendProviderClassLoaderSpecified = true;
     }
     
-    static {
-        try {
-            backendProvider = (BackendProvider)
-                    DiscoverSingleton.find(BackendProvider.class);
-        } catch (DiscoveryException de) {
-            BackendUtil.logger().log(Level.FINE,
-                "No BackendProvider classes were found by service discovery.",
-                de);
-        }
+    public static ClassLoader getBackendProviderClassLoader() {
+        return backendProviderClassLoader;
+    }
+    
+    /**
+     * Indicates whether {@link #setBackendProviderClassLoader} has been 
+     * called.
+     * 
+     * @return whether {@link #setBackendProviderClassLoader} has been called.
+     */
+    public static boolean isBackendProviderClassLoaderSpecified() {
+        return backendProviderClassLoaderSpecified;
     }
 
     public static void setBackendProvider(BackendProvider backendProvider) {
@@ -65,38 +82,45 @@ public final class BackendProviderManager {
     }
 
     public static BackendProvider getBackendProvider() {
+        loadBackendProviderIfNeeded();
         return backendProvider;
     }
 
-    public static BackendSpecLoader<DataSourceBackend>
-            getDataSourceBackendSpecLoader()
+    public static BackendSpecLoader<DataSourceBackend> getDataSourceBackendSpecLoader()
             throws BackendProviderSpecLoaderException {
-        if (backendProvider == null)
-            throw new IllegalStateException("No backendProvider found by service discovery or set with setBackendProvicer");
+        loadBackendProviderIfNeeded();
         return backendProvider.getDataSourceBackendSpecLoader();
     }
 
-    public static BackendSpecLoader<KnowledgeSourceBackend>
-            getKnowledgeSourceBackendSpecLoader()
+    public static BackendSpecLoader<KnowledgeSourceBackend> getKnowledgeSourceBackendSpecLoader()
             throws BackendProviderSpecLoaderException {
-        if (backendProvider == null)
-            throw new IllegalStateException("No backendProvider found by service discovery or set with setBackendProvicer");
+        loadBackendProviderIfNeeded();
         return backendProvider.getKnowledgeSourceBackendSpecLoader();
     }
 
-    public static BackendSpecLoader<AlgorithmSourceBackend>
-            getAlgorithmSourceBackendSpecLoader()
+    public static BackendSpecLoader<AlgorithmSourceBackend> getAlgorithmSourceBackendSpecLoader()
             throws BackendProviderSpecLoaderException {
-        if (backendProvider == null)
-            throw new IllegalStateException("No backendProvider found by service discovery or set with setBackendProvicer");
+        loadBackendProviderIfNeeded();
         return backendProvider.getAlgorithmSourceBackendSpecLoader();
     }
 
-    public static BackendSpecLoader<TermSourceBackend>
-            getTermSourceBackendSpecLoader()
+    public static BackendSpecLoader<TermSourceBackend> getTermSourceBackendSpecLoader()
             throws BackendProviderSpecLoaderException {
-        if (backendProvider == null)
-            throw new IllegalStateException("No backendProvider found by service discovery or set with setBackendProvicer");
+        loadBackendProviderIfNeeded();
         return backendProvider.getTermSourceBackendSpecLoader();
+    }
+
+    private static void loadBackendProviderIfNeeded() {
+        if (backendProvider == null) {
+            if (backendProviderClassLoaderSpecified) {
+                backendProvider = SingletonServiceLoader.load(BackendProvider.class, backendProviderClassLoader);
+            } else {
+                backendProvider = SingletonServiceLoader.load(BackendProvider.class);
+        
+            }
+        }
+        if (backendProvider == null) {
+            throw new IllegalStateException("No backendProvider found by service discovery or set with setBackendProvicer");
+        }
     }
 }

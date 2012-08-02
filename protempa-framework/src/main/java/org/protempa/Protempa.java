@@ -288,9 +288,10 @@ public final class Protempa {
         Set<String> propIds = Arrays.asSet(query.getPropositionIds());
         Set<And<String>> termIds = Arrays.asSet(query.getTermIds());
         Filter filters = query.getFilters();
+        PropositionDefinition[] propDefs = query.getPropositionDefinitions();
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
         this.abstractionFinder.doFind(keyIdsSet, propIds, termIds, filters,
-                resultsHandler, qs);
+                resultsHandler, propDefs, qs);
         logger.info("Query execution complete");
     }
 
@@ -303,7 +304,7 @@ public final class Protempa {
      *            the query to execute
      * @param resultHandler
      *            a result handler specifying how the output should be produced
-     * @param retrievalStoreName
+     * @param retrievalStoreEnvironment
      *            the name of the persistent store that will hold the
      *            propositions retrieved from the data source
      * @param processStoreName
@@ -313,7 +314,7 @@ public final class Protempa {
      *             if PROTEMPA fails to complete for any reason
      */
     public void executeWithPersistence(Query query,
-            QueryResultsHandler resultHandler, String retrievalStoreName,
+            QueryResultsHandler resultHandler, String retrievalStoreEnvironment,
             String processStoreName) throws FinderException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
@@ -326,7 +327,7 @@ public final class Protempa {
         logger.log(
                 Level.INFO,
                 "Executing all PROTEMPA phases. Will store retrieved propositions in {0} and derived propositions in {1}",
-                new String[] { retrievalStoreName, processStoreName });
+                new String[] { retrievalStoreEnvironment, processStoreName });
 
         Set<String> keyIds = Arrays.asSet(query.getKeyIds());
         Set<String> propIds = Arrays.asSet(query.getPropositionIds());
@@ -336,11 +337,11 @@ public final class Protempa {
 
         logger.log(Level.INFO, "Beginning data retrieval stage");
         this.abstractionFinder.retrieveData(keyIds, propIds, termIds, filters,
-                qs, retrievalStoreName);
+                qs, retrievalStoreEnvironment);
         logger.log(Level.INFO, "Data retrieval complete");
         logger.log(Level.INFO, "Beginning processing stage");
         this.abstractionFinder.processStoredResults(keyIds, propIds, qs,
-                retrievalStoreName, processStoreName);
+                retrievalStoreEnvironment, processStoreName);
         logger.log(Level.INFO, "Processing complete");
         logger.log(Level.INFO, "Beginning output stage");
         this.abstractionFinder.outputStoredResults(keyIds, propIds,
@@ -355,7 +356,7 @@ public final class Protempa {
      * 
      * @param query
      *            the query to execute in the data source
-     * @param retrievalStoreName
+     * @param retrievalStoreEnvironment
      *            the name of the persistent store for holding the propositions.
      *            This name should be provided to subsequent calls to
      *            {@link #processResultsAndPersist(Query, String, String)} as
@@ -363,8 +364,8 @@ public final class Protempa {
      * @throws FinderException
      *             if the retrieval could not complete
      */
-    public void retrieveDataAndPersist(Query query, String retrievalStoreName)
-            throws FinderException {
+    public void retrieveDataAndPersist(Query query, 
+            String retrievalStoreEnvironment) throws FinderException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
         }
@@ -375,15 +376,15 @@ public final class Protempa {
         Logger logger = ProtempaUtil.logger();
         logger.log(Level.FINE, "Retrieving and persisting data");
         logger.log(Level.INFO,
-                "Retrieved data will be persisted in store named: {0}",
-                retrievalStoreName);
+                "Retrieved data will be persisted in store: {0}",
+                retrievalStoreEnvironment);
         Set<String> keyIdsSet = Arrays.asSet(query.getKeyIds());
         Set<String> propIds = Arrays.asSet(query.getPropositionIds());
         Set<And<String>> termIds = Arrays.asSet(query.getTermIds());
         Filter filters = query.getFilters();
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
         this.abstractionFinder.retrieveData(keyIdsSet, propIds, termIds,
-                filters, qs, retrievalStoreName);
+                filters, qs, retrievalStoreEnvironment);
         logger.log(Level.FINE, "Data retrieval complete");
     }
 
@@ -400,18 +401,18 @@ public final class Protempa {
      * @param propositionIds
      *            the proposition IDs with respect to which processing should be
      *            done
-     * @param retrievalStoreName
+     * @param retrievalStoreEnvironment
      *            the name of the persistent store containing the propositions
      *            to process; should be the same name as the one provided to
      *            {@link #retrieveDataAndPersist(Query, String)}.
-     * @param workingMemoryStoreName
+     * @param workingMemoryStoreEnvironment
      *            the name of the persistent store to use the processed data
      * @throws FinderException
      *             if processing fails to complete
      */
     public void processResultsAndPersist(Query query, Set<String> keyIds,
-            Set<String> propositionIds, String retrievalStoreName,
-            String workingMemoryStoreName) throws FinderException {
+            Set<String> propositionIds, String retrievalStoreEnvironment,
+            String workingMemoryStoreEnvironment) throws FinderException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
         }
@@ -422,15 +423,15 @@ public final class Protempa {
         Logger logger = ProtempaUtil.logger();
         logger.log(Level.FINE, "Processing and persisting results");
         logger.log(Level.INFO,
-                "Processed results will be persisted in store named: {0}",
-                workingMemoryStoreName);
+                "Processed results will be persisted in store: {0}",
+                workingMemoryStoreEnvironment);
         logger.log(Level.INFO,
-                "Pulling previously retrieved data from store named: {0}",
-                retrievalStoreName);
+                "Pulling previously retrieved data from store: {0}",
+                retrievalStoreEnvironment);
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
 
         this.abstractionFinder.processStoredResults(keyIds, propositionIds, qs,
-                retrievalStoreName, workingMemoryStoreName);
+                retrievalStoreEnvironment, workingMemoryStoreEnvironment);
         logger.log(Level.FINE, "Data processing complete");
     }
 
@@ -443,18 +444,18 @@ public final class Protempa {
      *            the original query used to retrieve the data
      * @param propositionStoreName
      *            name of the persistent store holding the propositions
-     * @param workingMemoryStoreName
+     * @param workingMemoryStoreEnvironment
      *            name of the persistent store intended to hold the processed
      *            data
      * @throws FinderException
      *             if processing fails to complete
      */
     public void processResultsAndPersist(Query query,
-            String propositionStoreName, String workingMemoryStoreName)
+            String propositionStoreName, String workingMemoryStoreEnvironment)
             throws FinderException {
         processResultsAndPersist(query, Arrays.asSet(query.getKeyIds()),
                 Arrays.asSet(query.getPropositionIds()), propositionStoreName,
-                workingMemoryStoreName);
+                workingMemoryStoreEnvironment);
     }
 
     /**
@@ -470,7 +471,7 @@ public final class Protempa {
      * @param resultHandler
      *            a result handler that specifies how the output should be
      *            produced
-     * @param workingMemoryStoreName
+     * @param workingMemoryEnvironment
      *            the name of the persistent store containing the processed
      *            propositions; should be the same as the one provided to
      *            {@link #processResultsAndPersist}.
@@ -478,10 +479,10 @@ public final class Protempa {
      *             if the output fails to complete
      */
     public void outputResults(Query query, QueryResultsHandler resultHandler,
-            String workingMemoryStoreName) throws FinderException {
+            String workingMemoryEnvironment) throws FinderException {
         outputResults(query, Arrays.asSet(query.getKeyIds()),
                 Arrays.asSet(query.getPropositionIds()), resultHandler,
-                workingMemoryStoreName);
+                workingMemoryEnvironment);
     }
 
     /**
@@ -500,7 +501,7 @@ public final class Protempa {
      * @param resultHandler
      *            a result handler that specifies how the output should be
      *            produced
-     * @param workingMemoryStoreName
+     * @param workingMemoryStoreEnvironment
      *            the name of the persistent store containing the processed
      *            propositions; should be the same as the one provided to
      *            {@link #processResultsAndPersist(Query, Set, Set, String, String)}
@@ -509,7 +510,7 @@ public final class Protempa {
      */
     public void outputResults(Query query, Set<String> keyIds,
             Set<String> propositionIds, QueryResultsHandler resultHandler,
-            String workingMemoryStoreName) throws FinderException {
+            String workingMemoryStoreEnvironment) throws FinderException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
         }
@@ -521,10 +522,10 @@ public final class Protempa {
         logger.log(Level.FINE, "Outputting results");
         logger.log(Level.INFO,
                 "Retrieving processed results from store named: {0}",
-                workingMemoryStoreName);
+                workingMemoryStoreEnvironment);
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
         this.abstractionFinder.outputStoredResults(keyIds, propositionIds,
-                resultHandler, qs, workingMemoryStoreName);
+                resultHandler, qs, workingMemoryStoreEnvironment);
         logger.log(Level.FINE, "Output complete");
     }
 
@@ -539,7 +540,7 @@ public final class Protempa {
      * @param resultHandler
      *            a result handler that specifies how the output should be
      *            produced
-     * @param propositionStoreName
+     * @param propositionStoreEnvironment
      *            the name of the persistent store containing the retrieved
      *            propositions; should be the same as the one provided to
      *            {@link #retrieveDataAndPersist(Query, String)}
@@ -547,13 +548,13 @@ public final class Protempa {
      *             if the processing and output fail to complete
      */
     public void processResultsAndOutput(Query origQuery, Query newQuery,
-            QueryResultsHandler resultHandler, String propositionStoreName)
-            throws FinderException {
+            QueryResultsHandler resultHandler, 
+            String propositionStoreEnvironment) throws FinderException {
         QuerySession qs = new QuerySession(origQuery, this.abstractionFinder);
         this.abstractionFinder.processAndOutputStoredResults(
                 Arrays.asSet(origQuery.getKeyIds()),
                 Arrays.asSet(origQuery.getPropositionIds()), resultHandler, qs,
-                propositionStoreName);
+                propositionStoreEnvironment);
     }
 
     /**

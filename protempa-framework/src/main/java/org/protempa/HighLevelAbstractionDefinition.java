@@ -172,7 +172,7 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
      */
     public boolean add(ExtendedPropositionDefinition def) {
         if (def != null && this.defs.add(def)) {
-            recalculateDirectChildren();
+            recalculateChildren();
             this.defsAsListOutdated = true;
             return true;
         } else {
@@ -238,7 +238,7 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
         }
         boolean result = defs.remove(def);
         if (result) {
-            recalculateDirectChildren();
+            recalculateChildren();
             this.defsAsListOutdated = true;
         }
         return result;
@@ -349,7 +349,7 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
     }
 
     @Override
-    protected void recalculateDirectChildren() {
+    protected void recalculateChildren() {
         String[] old = this.directChildren;
         Set<String> abstractedFrom = getAbstractedFrom();
         Set<String> directChildrenLocal = new HashSet<String>(abstractedFrom);
@@ -360,7 +360,7 @@ public final class HighLevelAbstractionDefinition extends AbstractAbstractionDef
         this.directChildren = directChildrenLocal.toArray(
                 new String[directChildrenLocal.size()]);
         if (this.changes != null) {
-            this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
                     this.directChildren);
         }
     }

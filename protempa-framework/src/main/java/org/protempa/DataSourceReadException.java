@@ -19,31 +19,47 @@
  */
 package org.protempa;
 
+import java.util.Arrays;
+import java.util.List;
+import org.apache.commons.lang.exception.ExceptionUtils;
+
 /**
- * Thrown when there is an error retrieving data from the data source.
- * To be raised from {@link SchemaAdaptor}s.
- * 
+ * Thrown when there is an error retrieving data from the data source. To be
+ * raised from {@link SchemaAdaptor}s.
+ *
  * @author Andrew Post
- * 
+ *
  */
 public class DataSourceReadException extends DataSourceException {
 
-	private static final long serialVersionUID = -1607783133183868272L;
+    private static final long serialVersionUID = -1607783133183868272L;
 
-	public DataSourceReadException() {
-		super();
-	}
+    public DataSourceReadException() {
+        super();
+    }
 
-	public DataSourceReadException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public DataSourceReadException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public DataSourceReadException(String message) {
-		super(message);
-	}
+    public DataSourceReadException(String message) {
+        super(message);
+    }
 
-	public DataSourceReadException(Throwable cause) {
-		super(cause);
-	}
+    public DataSourceReadException(Throwable cause) {
+        super(cause);
+    }
 
+    public DataSourceReadException(List<DataSourceReadException> causes) {
+        super(exceptionsToString(causes));
+    }
+    
+    private static String exceptionsToString(List<DataSourceReadException> causes) {
+        StringBuilder stackTrace = new StringBuilder();
+        for (DataSourceReadException ex : causes) {
+            stackTrace.append(ExceptionUtils.getStackTrace(ex));
+        }
+        
+        return stackTrace.toString();
+    }
 }

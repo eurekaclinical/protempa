@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,17 +40,17 @@ import org.protempa.proposition.Proposition;
 public final class AbstractionFinderTestHelper {
 
     private DataStore<String, DerivationsBuilder> dbStore;
-    private final String wmStoreName;
+    private final String wmStorePathname;
 
     /**
      * Initializes a new instance using a working memory store name.
      * 
-     * @param workingMemoryStoreName
+     * @param workingMemoryStorePathname
      *            the name of the persistent store that will hold the working
      *            memories
      */
-    public AbstractionFinderTestHelper(String workingMemoryStoreName) {
-        this.wmStoreName = workingMemoryStoreName;
+    public AbstractionFinderTestHelper(String workingMemoryStorePathname) {
+        this.wmStorePathname = workingMemoryStorePathname;
     }
 
     /**
@@ -65,7 +66,7 @@ public final class AbstractionFinderTestHelper {
      *            the propositions to process
      * @param qs
      *            the query session
-     * @param propositionStoreName
+     * @param propositionStorePathname
      *            the name of persistent store where the retrieved data is
      * @return a {@link DataStore} mapping key IDs to working memories as a
      *         result of the rules engine processing
@@ -78,13 +79,13 @@ public final class AbstractionFinderTestHelper {
      */
     public DataStore<String, WorkingMemory> processStoredResults(Protempa p,
             Set<String> keyIds, Set<String> propositionIds, QuerySession qs,
-            String propositionStoreName) throws FinderException,
+            String propositionStorePathname) throws FinderException,
             KnowledgeSourceReadException, ProtempaException {
         AbstractionFinder af = new AbstractionFinder(p.getDataSource(),
                 p.getKnowledgeSource(), p.getAlgorithmSource(),
                 p.getTermSource(), true);
         af.processStoredResults(keyIds, propositionIds, qs,
-                propositionStoreName, this.wmStoreName);
+                propositionStorePathname, this.wmStorePathname);
         StatefulExecutionStrategy strategy = new StatefulExecutionStrategy(af);
         strategy.createRuleBase(propositionIds, new DerivationsBuilder(), qs);
 
@@ -92,11 +93,11 @@ public final class AbstractionFinderTestHelper {
         // the constructor because AbstractionFinder.processStoredResults() uses
         // a data store with the same name and closes the store when it's done.
         // Getting the store here forces it to reopen.
-        this.dbStore = DerivationsBuilderStoreCreator.getInstance()
-                .getPersistentStore(this.wmStoreName);
+        this.dbStore = new DerivationsBuilderStoreCreator(this.wmStorePathname)
+                .getPersistentStore();
 
-        return WorkingMemoryStoreCreator.getInstance(strategy.ruleBase)
-                .getPersistentStore(this.wmStoreName);
+        return new WorkingMemoryStoreCreator(strategy.ruleBase, this.wmStorePathname)
+                .getPersistentStore();
     }
 
     /**
@@ -109,7 +110,12 @@ public final class AbstractionFinderTestHelper {
      */
     public Map<Proposition, List<Proposition>> getForwardDerivations(
             String keyId) {
-        return getDerivationsBuilder(keyId).toForwardDerivations();
+        DerivationsBuilder derivationsBuilder = getDerivationsBuilder(keyId);
+        if (derivationsBuilder == null) {
+            return Collections.emptyMap();
+        } else {
+            return derivationsBuilder.toForwardDerivations();
+        }
     }
 
     /**
@@ -122,7 +128,12 @@ public final class AbstractionFinderTestHelper {
      */
     public Map<Proposition, List<Proposition>> getBackwardDerivations(
             String keyId) {
-        return getDerivationsBuilder(keyId).toBackwardDerivations();
+        DerivationsBuilder derivationsBuilder = getDerivationsBuilder(keyId);
+        if (derivationsBuilder == null) {
+            return Collections.emptyMap();
+        } else {
+            return derivationsBuilder.toBackwardDerivations();
+        }
     }
 
     private DerivationsBuilder getDerivationsBuilder(String keyId) {

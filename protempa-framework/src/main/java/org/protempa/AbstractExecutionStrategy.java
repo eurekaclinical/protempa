@@ -53,7 +53,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
     @Override
     public void createRuleBase(Set<String> propIds,
             DerivationsBuilder listener, QuerySession qs)
-            throws ProtempaException {
+            throws FinderException {
         ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
                 this.abstractionFinder.getAlgorithmSource());
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
@@ -61,8 +61,13 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         List<PropositionDefinition> propDefs = 
                 new ArrayList<PropositionDefinition>(propIds.size());
         for (String propId : propIds) {
-            PropositionDefinition propDef = this.abstractionFinder
+            PropositionDefinition propDef;
+            try {
+                propDef = this.abstractionFinder
                     .getKnowledgeSource().readPropositionDefinition(propId);
+            } catch (KnowledgeSourceReadException ex) {
+                throw new FinderException("Problem retrieving proposition definition " + propId + " from knowledge source");
+            }
             if (propDef != null) {
                 propDefs.add(propDef);
             } else {
@@ -72,10 +77,18 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         if (propIds != null) {
             Set<PropositionDefinition> result = new HashSet<PropositionDefinition>();
             aggregateDescendants(visitor, result, propDefs);
-            ruleCreator.visit(result);
+            try {
+                ruleCreator.visit(result);
+            } catch (ProtempaException ex) {
+                throw new FinderException("Problem creating data processing rules", ex);
+            }
         }
-        this.ruleBase = new JBossRuleBaseFactory(ruleCreator,
-                createRuleBaseConfiguration(ruleCreator)).newInstance();
+        try {
+            this.ruleBase = new JBossRuleBaseFactory(ruleCreator,
+                    createRuleBaseConfiguration(ruleCreator)).newInstance();
+        } catch (PropositionDefinitionInstantiationException ex) {
+            throw new FinderException("Problem creating data processing rules", ex);
+        }
     }
 
     protected RuleBaseConfiguration createRuleBaseConfiguration(
@@ -114,17 +127,21 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
     private void aggregateDescendants(
             ValidateAlgorithmCheckedVisitor validatorVisitor,
             Set<PropositionDefinition> result,
-            List<PropositionDefinition> propDefs) throws ProtempaException {
+            List<PropositionDefinition> propDefs) throws FinderException {
         HierarchicalProjectionChildrenVisitor dcVisitor = 
                 new HierarchicalProjectionChildrenVisitor(
                 this.abstractionFinder.getKnowledgeSource());
         for (PropositionDefinition propDef : propDefs) {
-            propDef.acceptChecked(validatorVisitor);
-            propDef.acceptChecked(dcVisitor);
-            result.add(propDef);
-            aggregateDescendants(validatorVisitor, result,
-                    dcVisitor.getChildren());
-            dcVisitor.clear();
+            try {
+                propDef.acceptChecked(validatorVisitor);
+                propDef.acceptChecked(dcVisitor);
+                result.add(propDef);
+                aggregateDescendants(validatorVisitor, result,
+                        dcVisitor.getChildren());
+                dcVisitor.clear();
+            } catch (ProtempaException ex) {
+                throw new FinderException("Problem reading from knowledge source", ex);
+            }
         }
     }
 

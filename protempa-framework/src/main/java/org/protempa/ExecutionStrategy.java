@@ -33,10 +33,10 @@ interface ExecutionStrategy {
 
     Iterator<Proposition> execute(String keyIds,
             Set<String> propositionIds, List<?> objects,
-            DataStore<String, WorkingMemory> wm) throws ProtempaException;
+            DataStore<String, WorkingMemory> wm);
 
     void cleanup();
 
     void createRuleBase(Set<String> propIds, DerivationsBuilder listener,
-            QuerySession qs) throws ProtempaException;
+            QuerySession qs) throws FinderException;
 }

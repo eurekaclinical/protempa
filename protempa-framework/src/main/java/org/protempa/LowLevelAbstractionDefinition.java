@@ -383,7 +383,7 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
     public boolean addPrimitiveParameterId(String paramId) {
         boolean result = this.paramIds.add(paramId);
         if (result) {
-            recalculateDirectChildren();
+            recalculateChildren();
         }
         return result;
     }
@@ -401,7 +401,7 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
     public boolean removePrimitiveParameterId(String paramId) {
         boolean result = this.paramIds.remove(paramId);
         if (result) {
-            recalculateDirectChildren();
+            recalculateChildren();
         }
         return result;
     }
@@ -508,7 +508,7 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
         this.maximumDuration = null;
         this.valueDefinitions.clear();
         setValueType(null);
-        recalculateDirectChildren();
+        recalculateChildren();
     }
 
     String getNextLowLevelAbstractionValueDefinitionId() {
@@ -606,11 +606,11 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
     }
 
     @Override
-    protected void recalculateDirectChildren() {
+    protected void recalculateChildren() {
         String[] old = this.directChildren;
         this.directChildren = this.paramIds.toArray(new String[this.paramIds.size()]);
         if (this.changes != null) {
-            this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
                     this.directChildren);
         }
     }

@@ -21,18 +21,18 @@ package org.protempa.test;
 
 import java.io.IOException;
 
-import org.protempa.bp.commons.BackendInfo;
-import org.protempa.bp.commons.dsb.PropIdToSQLCodeMapper;
-import org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend;
-import org.protempa.bp.commons.dsb.relationaldb.ColumnSpec;
-import org.protempa.bp.commons.dsb.relationaldb.EntitySpec;
-import org.protempa.bp.commons.dsb.relationaldb.JDBCDateTimeTimestampDateValueFormat;
-import org.protempa.bp.commons.dsb.relationaldb.JDBCDateTimeTimestampPositionParser;
-import org.protempa.bp.commons.dsb.relationaldb.JDBCPositionFormat;
-import org.protempa.bp.commons.dsb.relationaldb.JoinSpec;
-import org.protempa.bp.commons.dsb.relationaldb.PropertySpec;
-import org.protempa.bp.commons.dsb.relationaldb.ReferenceSpec;
-import org.protempa.bp.commons.dsb.relationaldb.StagingSpec;
+import org.protempa.backend.annotations.BackendInfo;
+import org.protempa.backend.dsb.relationaldb.PropIdToSQLCodeMapper;
+import org.protempa.backend.dsb.relationaldb.RelationalDbDataSourceBackend;
+import org.protempa.backend.dsb.relationaldb.ColumnSpec;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.JDBCDateTimeTimestampDateValueFormat;
+import org.protempa.backend.dsb.relationaldb.JDBCDateTimeTimestampPositionParser;
+import org.protempa.backend.dsb.relationaldb.JDBCPositionFormat;
+import org.protempa.backend.dsb.relationaldb.JoinSpec;
+import org.protempa.backend.dsb.relationaldb.PropertySpec;
+import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
+import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.AbsoluteTimeGranularityFactory;
 import org.protempa.proposition.value.AbsoluteTimeUnitFactory;
@@ -143,7 +143,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         "Patient Details",
                         null,
                         new String[] { "Patient" },
-                        true,
+                        false,
                         new ColumnSpec(getKeyIdSchema(), getKeyIdTable(),
                                 getKeyIdColumn()),
                         new ColumnSpec[] { new ColumnSpec(schemaName,

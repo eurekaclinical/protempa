@@ -29,37 +29,27 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.datastore.DataStore;
+import org.arp.javautil.io.IOUtil;
+import org.arp.javautil.io.UniqueDirectoryCreator;
+import org.arp.javautil.io.WithBufferedReaderByLine;
 import org.drools.WorkingMemory;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.protempa.AbstractionFinderTestHelper;
-import org.protempa.FinderException;
-import org.protempa.KnowledgeSourceReadException;
-import org.protempa.Protempa;
-import org.protempa.ProtempaException;
-import org.protempa.ProtempaStartupException;
+import org.junit.*;
+import org.protempa.*;
+import org.protempa.backend.*;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
+import org.protempa.bconfigs.commons.INICommonsConfigurations;
 import org.protempa.datastore.PropositionStoreCreator;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Event;
@@ -75,10 +65,10 @@ import org.protempa.query.handler.QueryResultsHandler;
 
 /**
  * Unit tests for Protempa.
- * 
- * Persistent stores go into the directory in the system property 
- * java.io.tmpdir.
- * 
+ *
+ * Persistent stores go into the directory in the system property
+ * <code>java.io.tmpdir</code>.
+ *
  * @author Michel Mansour
  */
 public class ProtempaTest {
@@ -87,83 +77,64 @@ public class ProtempaTest {
     private static final String ICD9_804 = "ICD9:804";
     private static final String QUERY_ERROR_MSG = "Failed to build query";
     private static final String AF_ERROR_MSG = "Exception thrown by AbstractionFinder";
-
-    private static Logger logger = Logger.getLogger(ProtempaTest.class
-            .getName());
-
+    private static Logger logger = Logger.getLogger(ProtempaTest.class.getName());
     /**
      * Sample data file
      */
     private static final String SAMPLE_DATA_FILE = "src/test/resources/dsb/sample-data.xlsx";
-
     /**
      * The ground truth results directory for the test data
      */
     private static final String TRUTH_DIR = "src/test/resources/truth/";
-
     /**
      * The ground truth output.
      */
     private static final String TRUTH_OUTPUT = TRUTH_DIR + "/output.txt";
-    
     /**
      * The ground truth for the number of propositions for each key pulled from
      * the sample data
      */
     private static final String PROP_COUNTS_FILE = TRUTH_DIR
             + "/db-proposition-counts.txt";
-
+    /**
+     * The ground truth for the number of Encounter propositions for each key
+     * pulled from the sample data
+     */
+    private static final String ENCOUNTER_COUNTS_FILE = TRUTH_DIR
+            + "/db-encounter-counts.txt";
     /**
      * The ground truth for the number of forward derivations for each key
      * processed from the sample data
      */
     private static final String FORWARD_DERIVATION_COUNTS_FILE = TRUTH_DIR
             + "/forward-derivations.txt";
-
     /**
      * The ground truth for the number of backward derivations for each key
      * processed from the sample data
      */
     private static final String BACKWARD_DERIVATION_COUNTS_FILE = TRUTH_DIR
             + "/backward-derivations.txt";
-
-    /**
-     * Name of the persistent storage environment
-     */
-    private static final String STORE_ENV_NAME = "test-store";
-
-    /**
-     * Name of the persistent store for the data retrieved from the data source.
-     */
-    private static final String RETRIEVAL_STORE_NAME = "test-retrieve";
-
-    /**
-     * Name of the persistent store for data after rules processing
-     */
-    private static final String WORKING_MEMORY_STORE_NAME = "working-memory-store";
-
     /**
      * All proposition IDs in the sample data
      */
-    private static final String[] PROP_IDS = { "Patient", "PatientAll",
-            "Encounter", ICD9_013_82, ICD9_804, "VitalSign",
-            "HELLP_FIRST_RECOVERING_PLATELETS", "LDH_TREND", "AST_STATE",
-            "30DayReadmission", "No30DayReadmission" };
-
+    private static final String[] PROP_IDS = {"Patient", "PatientAll",
+        "Encounter", ICD9_013_82, ICD9_804, "VitalSign",
+        "HELLP_FIRST_RECOVERING_PLATELETS", "LDH_TREND", "AST_STATE",
+        "30DayReadmission", "No30DayReadmission"};
     /**
      * Vital signs
      */
-    private static final String[] VITALS = { "BodyMassIndex",
-            "DiastolicBloodPressure", "HeartRate", "O2Saturation",
-            "RespiratoryRate", "SystolicBloodPressure", "TemperatureAxillary",
-            "TemperatureCore", "TemperatureNOS", "TemperatureRectal",
-            "TemperatureTympanic" };
-
+    private static final String[] VITALS = {"BodyMassIndex",
+        "DiastolicBloodPressure", "HeartRate", "O2Saturation",
+        "RespiratoryRate", "SystolicBloodPressure", "TemperatureAxillary",
+        "TemperatureCore", "TemperatureNOS", "TemperatureRectal",
+        "TemperatureTympanic"};
     /**
-     * Key IDs (testing purposes only...you know what I mean...for testing the tests)
+     * Key IDs (testing purposes only...you know what I mean...for testing the
+     * tests)
      */
-    private static final String[] KEY_IDS = { "0", "1", "2", "3", "4", "5",
-            "6", "7", "8", "9", "10", "11" };
+    private static final String[] KEY_IDS = {"0", "1", "2", "3", "4", "5",
+        "6", "7", "8", "9", "10", "11"};
 
     /*
      * Instance of Protempa to run
@@ -183,13 +154,11 @@ public class ProtempaTest {
     /**
      * Performs set up operations required for all testing (eg, setting up the
      * in-memory database).
-     * 
-     * @throws Exception
-     *             if something goes wrong
+     *
+     * @throws Exception if something goes wrong
      */
     @BeforeClass
     public static void setUpAll() throws Exception {
-
     }
 
     private void populateDatabase() throws DataProviderException, SQLException {
@@ -210,30 +179,28 @@ public class ProtempaTest {
         logger.log(Level.INFO, "Database populated");
     }
 
-    private void initializeProtempa() throws ProtempaStartupException {
+    private void initializeProtempa() throws ProtempaStartupException, 
+            BackendProviderSpecLoaderException, ConfigurationsLoadException, 
+            InvalidConfigurationException {
         System.setProperty("protempa.inicommonsconfigurations.pathname",
                 "src/test/resources");
         // force the use of the H2 driver so we don't bother trying to load
         // others
         System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
-                "org.protempa.bp.commons.dsb.relationaldb.H2SQLGenerator");
-
-        // system property for caching and persistence
-        System.setProperty("store.env.name", STORE_ENV_NAME);
-
-        protempa = Protempa.newInstance("protege-h2-test-config");
+                "org.protempa.backend.dsb.relationaldb.H2SQLGenerator");
+        SourceFactory sf = new SourceFactory(new INICommonsConfigurations(), 
+                "protege-h2-test-config");
+        protempa = Protempa.newInstance(sf);
     }
 
     /**
      * Performs tear down operations once all testing is complete (eg, closing
      * Protempa)
-     * 
-     * @throws Exception
-     *             if something goes wrong
+     *
+     * @throws Exception if something goes wrong
      */
     @AfterClass
     public static void tearDownAll() throws Exception {
-
     }
 
     /**
@@ -250,17 +217,26 @@ public class ProtempaTest {
      */
     @After
     public void tearDown() throws Exception {
-        protempa.close();
+        if (this.protempa != null) {
+            this.protempa.close();
+        }
     }
 
     /**
      * Tests the end-to-end execution of Protempa.
      */
     @Test
-    public void testProtempa() {
-        testRetrieveDataAndPersist();
-        testProcessResultsAndPersist();
-        testOutputResults();
+    public void testProtempa() throws IOException {
+        File dir = new UniqueDirectoryCreator().create("test-protempa", null,
+                FileUtils.getTempDirectory());
+        try {
+            String environmentName = dir.getAbsolutePath();
+            testRetrieveDataAndPersist(environmentName);
+            testProcessResultsAndPersist(environmentName);
+            testOutputResults(environmentName);
+        } finally {
+            FileUtils.deleteDirectory(dir);
+        }
     }
 
     private Query query() throws ParseException, KnowledgeSourceReadException,
@@ -269,12 +245,12 @@ public class ProtempaTest {
 
         q.setKeyIds(KEY_IDS);
         q.setPropositionIds(PROP_IDS);
+        DateFormat shortFormat = AbsoluteTimeGranularity.DAY.getShortFormat();
         DateTimeFilter timeRange = new DateTimeFilter(
-                new String[] { "Encounter" }, AbsoluteTimeGranularity.DAY
-                        .getShortFormat().parse("08/01/2006"),
-                AbsoluteTimeGranularity.DAY, AbsoluteTimeGranularity.DAY
-                        .getShortFormat().parse("08/31/2011"),
-                AbsoluteTimeGranularity.DAY, Side.START, Side.START);
+                new String[]{"Encounter"},
+                shortFormat.parse("08/01/2006"), AbsoluteTimeGranularity.DAY,
+                shortFormat.parse("08/31/2011"), AbsoluteTimeGranularity.DAY,
+                Side.START, Side.START);
 
         q.setFilters(timeRange);
         Query query = protempa.buildQuery(q);
@@ -284,15 +260,15 @@ public class ProtempaTest {
 
     private static Map<String, Integer> getResultCounts(String filename)
             throws NumberFormatException, IOException {
-        HashMap<String, Integer> result = new HashMap<String, Integer>();
+        final HashMap<String, Integer> result = new HashMap<String, Integer>();
+        new WithBufferedReaderByLine(filename) {
 
-        BufferedReader br = new BufferedReader(new FileReader(filename));
-        String line;
-        while ((line = br.readLine()) != null) {
-            String[] count = line.split(":");
-            result.put(count[0], Integer.parseInt(count[1]));
-        }
-        br.close();
+            @Override
+            public void readLine(String line) {
+                String[] count = line.split(":");
+                result.put(count[0], Integer.parseInt(count[1]));
+            }
+        }.execute();
 
         return result;
     }
@@ -300,25 +276,26 @@ public class ProtempaTest {
     /**
      * Tests Protempa's retrieve and persist method.
      */
-    private void testRetrieveDataAndPersist() {
+    private void testRetrieveDataAndPersist(String environmentName) {
         DataStore<String, List<Proposition>> results = null;
         try {
-            protempa.retrieveDataAndPersist(query(), RETRIEVAL_STORE_NAME);
-            results = PropositionStoreCreator.getInstance().getPersistentStore(
-                    RETRIEVAL_STORE_NAME);
-             assertEquals("Wrong number of keys retrieved", this.patientCount,
-             results.size());
-             Map<String, Integer> propCounts =
-             getResultCounts(PROP_COUNTS_FILE);
-             for (Entry<String, List<Proposition>> r : results.entrySet()) {
-             assertEquals(
-             "Wrong number of raw propositions retrieved for key "
-             + r.getKey(), propCounts.get(r.getKey()), r
-             .getValue().size());
-             }
-             assertPatientsRetrieved(results);
-             assertEncountersRetrieved(results);
-             assertVitalsRetrieved(results);
+            results = new PropositionStoreCreator(environmentName).getPersistentStore();
+            protempa.retrieveDataAndPersist(query(), environmentName);
+
+            assertEquals("Wrong number of keys retrieved", this.patientCount,
+                    results.size());
+            Map<String, Integer> propCounts =
+                    getResultCounts(PROP_COUNTS_FILE);
+            for (Entry<String, List<Proposition>> r : results.entrySet()) {
+                assertEquals(
+                        "Wrong number of raw propositions retrieved for key "
+                        + r.getKey(), propCounts.get(r.getKey()),
+                        r.getValue().size());
+            }
+            assertPatientsRetrieved(results);
+            assertEncountersRetrieved(results);
+            assertVitalsRetrieved(results);
+            assertReferencesRetrieved(results);
         } catch (FinderException ex) {
             ex.printStackTrace();
             fail(AF_ERROR_MSG);
@@ -348,15 +325,13 @@ public class ProtempaTest {
 
     private void printDerivations(String keyId, AbstractionFinderTestHelper afh) {
         System.out.println("----- FORWARD DERIVATIONS -----");
-        for (List<Proposition> derivs : afh.getForwardDerivations(keyId)
-                .values()) {
+        for (List<Proposition> derivs : afh.getForwardDerivations(keyId).values()) {
             for (Proposition p : derivs) {
                 System.out.println(p.getId());
             }
         }
         System.out.println("----- BACKWARD DERIVATIONS -----");
-        for (List<Proposition> derivs : afh.getBackwardDerivations(keyId)
-                .values()) {
+        for (List<Proposition> derivs : afh.getBackwardDerivations(keyId).values()) {
             for (Proposition p : derivs) {
                 System.out.println(p.getId());
             }
@@ -366,15 +341,15 @@ public class ProtempaTest {
     /**
      * Tests Protempa's process and persist method.
      */
-    private void testProcessResultsAndPersist() {
-        AbstractionFinderTestHelper afh = new AbstractionFinderTestHelper(
-                WORKING_MEMORY_STORE_NAME);
+    private void testProcessResultsAndPersist(String environmentName) {
         DataStore<String, WorkingMemory> results = null;
+        AbstractionFinderTestHelper afh = null;
         try {
+            afh = new AbstractionFinderTestHelper(environmentName);
             results = afh.processStoredResults(protempa, null,
-                    Arrays.asSet(PROP_IDS), null, RETRIEVAL_STORE_NAME);
-             assertEquals("Wrong number of working memories generated",
-             this.patientCount, results.size());
+                    Arrays.asSet(PROP_IDS), null, environmentName);
+            assertEquals("Wrong number of working memories generated",
+                    this.patientCount, results.size());
             Map<String, Integer> forwardDerivCounts = getResultCounts(FORWARD_DERIVATION_COUNTS_FILE);
             Map<String, Integer> backwardDerivCounts = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
             for (String keyId : results.keySet()) {
@@ -384,7 +359,7 @@ public class ProtempaTest {
                 }
                 assertEquals("wrong number of forward derivations for key "
                         + keyId, forwardDerivCounts.get(keyId), derivCount);
-                
+
                 derivCount = 0;
                 for (List<Proposition> derivs : afh.getBackwardDerivations(keyId).values()) {
                     derivCount += derivs.size();
@@ -411,7 +386,9 @@ public class ProtempaTest {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            afh.cleanUp();
+            if (afh != null) {
+                afh.cleanUp();
+            }
             if (results != null) {
                 results.shutdown();
             }
@@ -421,7 +398,7 @@ public class ProtempaTest {
     /**
      * Tests Protempa's output method
      */
-    private void testOutputResults() {
+    private void testOutputResults(String environmentName) {
         FileWriter fw = null;
         File outputFile = null;
         try {
@@ -429,9 +406,9 @@ public class ProtempaTest {
             fw = new FileWriter(outputFile);
             QueryResultsHandler handler = new SingleColumnQueryResultsHandler(
                     fw);
-            protempa.outputResults(query(), handler, WORKING_MEMORY_STORE_NAME);
+            protempa.outputResults(query(), handler, environmentName);
             assertTrue("output doesn't match",
-                outputMatches(outputFile, TRUTH_OUTPUT));
+                    outputMatches(outputFile, TRUTH_OUTPUT));
         } catch (FinderException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
@@ -472,7 +449,7 @@ public class ProtempaTest {
                 return false;
             }
         }
-        
+
         // this accounts for the short-circuiting in the while loop above
         // when line1 == null, we won't execute br2.readLine()
         boolean retval = false;
@@ -484,7 +461,7 @@ public class ProtempaTest {
                 retval = false;
             }
         }
-        
+
         br1.close();
         br2.close();
 
@@ -504,8 +481,7 @@ public class ProtempaTest {
             encountersMap.put(e.getId().toString(), e);
             if (patientEncounterMap.containsKey(e.getPatientId().toString())) {
                 patientEncounterMap.put(e.getPatientId().toString(),
-                        1 + patientEncounterMap
-                                .get(e.getPatientId().toString()));
+                        1 + patientEncounterMap.get(e.getPatientId().toString()));
             } else {
                 patientEncounterMap.put(e.getPatientId().toString(), 1);
             }
@@ -523,12 +499,12 @@ public class ProtempaTest {
                         "encounterId").getFormatted());
                 assertEquals(
                         "Wrong start time for encounter " + encounter.getId()
-                                + " for key ID " + encounter.getPatientId(),
+                        + " for key ID " + encounter.getPatientId(),
                         sdf.format(encounter.getStart()),
                         event.getStartFormattedLong());
                 assertEquals(
                         "Wrong finish time for encounter " + encounter.getId()
-                                + " for key ID " + encounter.getPatientId(),
+                        + " for key ID " + encounter.getPatientId(),
                         sdf.format(encounter.getEnd()),
                         event.getFinishFormattedLong());
             }
@@ -597,6 +573,25 @@ public class ProtempaTest {
         return result;
     }
 
+    private void assertReferencesRetrieved(
+            DataStore<String, List<Proposition>> objectGraph) throws IOException {
+        logger.log(Level.INFO, "Running references test...");
+        Map<String, Integer> propCounts =
+                getResultCounts(ENCOUNTER_COUNTS_FILE);
+        for (Map.Entry<String, Integer> me : propCounts.entrySet()) {
+            List<Proposition> props = objectGraph.get(me.getKey());
+            for (Proposition prop : props) {
+                if (prop.getId().equals("PatientAll")) {
+                    Assert.assertEquals("PatientAll for keyId 0 failed", 1, prop.getReferences("patientDetails").size());
+                } else if (prop.getId().equals("Patient")) {
+                    Assert.assertEquals("Patient for keyId 0 failed", me.getValue(), prop.getReferences("encounters").size());
+                }
+            }
+        }
+
+        logger.log(Level.INFO, "Completed references test");
+    }
+
     private void assertVitalsRetrieved(
             DataStore<String, List<Proposition>> objectGraph) {
         logger.log(Level.INFO, "Running vitals test...");
@@ -630,8 +625,7 @@ public class ProtempaTest {
         }
         Set<String> retrievedVitalValues = new HashSet<String>();
         for (Proposition p : retrievedVitals) {
-            retrievedVitalValues.add(((PrimitiveParameter) p)
-                    .getValueFormatted());
+            retrievedVitalValues.add(((PrimitiveParameter) p).getValueFormatted());
         }
         assertTrue("Value sets not equal for vital sign " + vitalSign
                 + " for key ID " + keyId,
@@ -642,11 +636,9 @@ public class ProtempaTest {
         logger.log(Level.INFO, "Running 30DayReadmissions test...");
         Map<Proposition, List<Proposition>> encDerivations = getDerivedPropositionsForKey(
                 "Encounter", afh.getForwardDerivations("0"));
-        for (Entry<Proposition, List<Proposition>> prop : encDerivations
-                .entrySet()) {
+        for (Entry<Proposition, List<Proposition>> prop : encDerivations.entrySet()) {
             Proposition encounter = prop.getKey();
-            String encounterId = encounter.getProperty("encounterId")
-                    .getFormatted();
+            String encounterId = encounter.getProperty("encounterId").getFormatted();
             int count30DayReadmit = 0;
 
             for (Proposition derived : prop.getValue()) {
@@ -662,7 +654,7 @@ public class ProtempaTest {
             } else {
                 assertEquals(
                         "Found some '30DayReadmission' propositions for encounter ID "
-                                + encounterId, 0, count30DayReadmit);
+                        + encounterId, 0, count30DayReadmit);
             }
         }
         logger.log(Level.INFO, "Completed 30DayReadmissions test");
@@ -685,9 +677,7 @@ public class ProtempaTest {
         boolean icd9d01382Derived = false;
         boolean icd9d804Derived = false;
 
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
-                .hasNext();) {
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it.hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals(ICD9_013_82)) {
                 icd9d01382Derived = true;
@@ -702,33 +692,27 @@ public class ProtempaTest {
                 icd9d01382Derived);
         assertEquals(
                 "Proposition '" + ICD9_013_82
-                        + "' should not have any forward derivations",
+                + "' should not have any forward derivations",
                 0,
                 getDerivedPropositionsForKey(ICD9_013_82,
-                        afh.getForwardDerivations("0")).size());
+                afh.getForwardDerivations("0")).size());
         assertEquals(
                 "Proposition '" + ICD9_013_82
-                        + "' should not have any backward derivations",
+                + "' should not have any backward derivations",
                 0,
                 getDerivedPropositionsForKey(ICD9_013_82,
-                        afh.getBackwardDerivations("0")).size());
+                afh.getBackwardDerivations("0")).size());
         assertTrue("Proposition '" + ICD9_804 + "' not found", icd9d804Derived);
 
         // matched at higher level - should be derivations
-        String[] icd9Levels = new String[] { "ICD9:804", "ICD9:804.3",
-                "ICD9:804.34" };
-        Set<String> expectedForwardDerivationsLevel0 = Arrays
-                .asSet(new String[] {});
-        Set<String> expectedBackwardDerivationsLevel0 = Arrays
-                .asSet(new String[] { icd9Levels[1] });
-        Set<String> expectedForwardDerivationsLevel1 = Arrays
-                .asSet(new String[] { icd9Levels[0] });
-        Set<String> expectedBackwardDerivationsLevel1 = Arrays
-                .asSet(new String[] { icd9Levels[2] });
-        Set<String> expectedForwardDerivationsLevel2 = Arrays
-                .asSet(new String[] { icd9Levels[1] });
-        Set<String> expectedBackwardDerivationsLevel2 = Arrays
-                .asSet(new String[] {});
+        String[] icd9Levels = new String[]{"ICD9:804", "ICD9:804.3",
+            "ICD9:804.34"};
+        Set<String> expectedForwardDerivationsLevel0 = Arrays.asSet(new String[]{});
+        Set<String> expectedBackwardDerivationsLevel0 = Arrays.asSet(new String[]{icd9Levels[1]});
+        Set<String> expectedForwardDerivationsLevel1 = Arrays.asSet(new String[]{icd9Levels[0]});
+        Set<String> expectedBackwardDerivationsLevel1 = Arrays.asSet(new String[]{icd9Levels[2]});
+        Set<String> expectedForwardDerivationsLevel2 = Arrays.asSet(new String[]{icd9Levels[1]});
+        Set<String> expectedBackwardDerivationsLevel2 = Arrays.asSet(new String[]{});
         Map<String, Set<String>> expectedForwardDerivations = new HashMap<String, Set<String>>();
         expectedForwardDerivations.put(icd9Levels[0],
                 expectedForwardDerivationsLevel0);
@@ -802,9 +786,7 @@ public class ProtempaTest {
         logger.log(Level.INFO, "Running LDH_TREND test...");
         Set<AbstractParameter> ldhTrends = new HashSet<AbstractParameter>();
 
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
-                .hasNext();) {
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it.hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("LDH_TREND")) {
                 ldhTrends.add((AbstractParameter) p);
@@ -829,12 +811,12 @@ public class ProtempaTest {
                         ldhTrend.getStartFormattedLong(), sdf,
                         "Wrong start time for 'INCREASING_LDH'",
                         "Unable to parse start time for 'INCREASING_LDH': "
-                                + ldhTrend.getStartFormattedLong());
+                        + ldhTrend.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         ldhTrend.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'INCREASING_LDH'",
                         "Unable to parse finish time for 'INCREASING_LDH': "
-                                + ldhTrend.getFinishFormattedLong());
+                        + ldhTrend.getFinishFormattedLong());
                 foundInc = true;
             } else if (ldhTrend.getValueFormatted().equals("Decreasing LDH")) {
                 expectedStart = buildDate(2006, Calendar.AUGUST, 26, 8, 35,
@@ -845,12 +827,12 @@ public class ProtempaTest {
                         ldhTrend.getStartFormattedLong(), sdf,
                         "Wrong start time for 'DECREASING_LDH'",
                         "Unable to parse start time for 'DECREASING_LDH': "
-                                + ldhTrend.getStartFormattedLong());
+                        + ldhTrend.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         ldhTrend.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'DECREASING_LDH'",
                         "Unable to parse finish time for 'DECREASING_LDH': "
-                                + ldhTrend.getFinishFormattedLong());
+                        + ldhTrend.getFinishFormattedLong());
                 foundDec = true;
             } else {
                 fail("Found 'LDH_TREND' with unknown value: "
@@ -861,7 +843,7 @@ public class ProtempaTest {
 
         assertTrue("Did not find the increasing 'LDH_TREND'", foundInc);
         assertTrue("Did not find the decreasing 'LDH_TREND'", foundDec);
-        
+
         logger.log(Level.INFO, "Completed LDH_TREND test");
     }
 
@@ -870,9 +852,7 @@ public class ProtempaTest {
         logger.log(Level.INFO, "Running AST_STATE test...");
         Set<AbstractParameter> astStates = new HashSet<AbstractParameter>();
 
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
-                .hasNext();) {
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it.hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("AST_STATE")) {
                 astStates.add((AbstractParameter) p);
@@ -898,12 +878,12 @@ public class ProtempaTest {
                         astState.getStartFormattedLong(), sdf,
                         "Wrong start time for 'NORMAL_AST'",
                         "Unable to parse start time for 'NORMAL_AST': "
-                                + astState.getStartFormattedLong());
+                        + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'NORMAL_AST'",
                         "Unable to parse finish time for 'NORMAL_AST': "
-                                + astState.getFinishFormattedLong());
+                        + astState.getFinishFormattedLong());
                 foundNormalAstState = true;
             } else if (astState.getValueFormatted().equals("Low AST")) {
                 expectedStart = buildDate(2007, Calendar.FEBRUARY, 28, 8, 49,
@@ -916,12 +896,12 @@ public class ProtempaTest {
                         sdf,
                         "Wrong start time for 'LOW_AST'",
                         "Unable to parse start time for 'LOW_AST': "
-                                + astState.getStartFormattedLong());
+                        + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'LOW_AST'",
                         "Unable to parse finish time for 'LOW_AST': "
-                                + astState.getFinishFormattedLong());
+                        + astState.getFinishFormattedLong());
                 foundLowAstState = true;
             } else if (astState.getValueFormatted().equals("High AST")) {
                 expectedStart = buildDate(2007, Calendar.FEBRUARY, 28, 9, 52,
@@ -932,12 +912,12 @@ public class ProtempaTest {
                         astState.getStartFormattedLong(), sdf,
                         "Wrong start time for 'HIGH_AST'",
                         "Unable to parse start time for 'HIGH_AST': "
-                                + astState.getStartFormattedLong());
+                        + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'HIGH_AST'",
                         "Unable to parse finish time for 'HIGH_AST': "
-                                + astState.getFinishFormattedLong());
+                        + astState.getFinishFormattedLong());
                 foundHighAstState = true;
             } else if (astState.getValueFormatted().equals("Very High AST")) {
                 expectedStart = buildDate(2007, Calendar.MARCH, 2, 2, 5,
@@ -948,12 +928,12 @@ public class ProtempaTest {
                         astState.getStartFormattedLong(), sdf,
                         "Wrong start time for 'VERY_HIGH_AST'",
                         "Unable to parse start time for 'VERY_HIGH_AST': "
-                                + astState.getStartFormattedLong());
+                        + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'VERY_HIGH_AST'",
                         "Unable to parse finish time for 'VERY_HIGH_AST': "
-                                + astState.getFinishFormattedLong());
+                        + astState.getFinishFormattedLong());
                 foundVeryHighAstState = true;
             } else {
                 fail("Found 'AST_STATE' with unknown value "
@@ -970,7 +950,7 @@ public class ProtempaTest {
                 foundHighAstState);
         assertTrue("Failed to find 'AST_STATE' with value 'VERY_HIGH_AST'",
                 foundVeryHighAstState);
-        
+
         logger.log(Level.INFO, "Completed AST_STATE test");
     }
 
@@ -978,9 +958,7 @@ public class ProtempaTest {
             DataStore<String, WorkingMemory> derivedData) {
         logger.log(Level.INFO, "Running HELLP_FIRST_RECOVERING_PLATELETS test...");
         Set<Proposition> hellpFirstRecoverings = new HashSet<Proposition>();
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("11").iterateObjects(); it
-                .hasNext();) {
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("11").iterateObjects(); it.hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("HELLP_FIRST_RECOVERING_PLATELETS")) {
                 hellpFirstRecoverings.add(p);
@@ -999,13 +977,13 @@ public class ProtempaTest {
                 hellpFirstRecovering.getStartFormattedLong(), sdf,
                 "Wrong start time for 'HELLP_FIRST_RECOVERING_PLATELETS'",
                 "Unable to parse start time for 'HELLP_FIRST_RECOVERING_PLATELETS': "
-                        + hellpFirstRecovering.getStartFormattedLong());
+                + hellpFirstRecovering.getStartFormattedLong());
         assertDateStringEquals(expectedFinish,
                 hellpFirstRecovering.getFinishFormattedLong(), sdf,
                 "Wrong finish time for 'HELLP_FIRST_RECOVERING_PLATELETS'",
                 "Unable to parse finish time for 'HELLP_FIRST_RECOVERING_PLATELETS': "
-                        + hellpFirstRecovering.getFinishFormattedLong());
-        
+                + hellpFirstRecovering.getFinishFormattedLong());
+
         logger.log(Level.INFO, "Completed HELLP_FIRST_RECOVERING_PLATELETS test");
     }
 
@@ -1026,8 +1004,7 @@ public class ProtempaTest {
     private Map<Proposition, List<Proposition>> getDerivedPropositionsForKey(
             String propId, Map<Proposition, List<Proposition>> derivations) {
         Map<Proposition, List<Proposition>> results = new HashMap<Proposition, List<Proposition>>();
-        for (Entry<Proposition, List<Proposition>> prop : derivations
-                .entrySet()) {
+        for (Entry<Proposition, List<Proposition>> prop : derivations.entrySet()) {
             if (prop.getKey().getId().equals(propId)) {
                 results.put(prop.getKey(), prop.getValue());
             }

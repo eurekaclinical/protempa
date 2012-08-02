@@ -52,11 +52,11 @@ public final class ConstantDefinition extends AbstractPropositionDefinition {
     }
 
     @Override
-    protected void recalculateDirectChildren() {
+    protected void recalculateChildren() {
         String[] old = this.directChildren;
         this.directChildren = getInverseIsA();
         if (this.changes != null) {
-            this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
                     this.directChildren);
         }
     }

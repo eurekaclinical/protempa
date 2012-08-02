@@ -23,7 +23,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.protempa.SourceId;
 
 /**
  * Abstract base class for all knowledge definition classes.
@@ -47,7 +46,7 @@ public abstract class AbstractPropositionDefinition implements
             new PropertyDefinition[0];
     private static final ReferenceDefinition[] EMPTY_REFERENCES =
             new ReferenceDefinition[0];
-    protected static final String DIRECT_CHILDREN_PROPERTY = "directChildren";
+    protected static final String CHILDREN_PROPERTY = "children";
     /**
      * The id of propositions created by this definition.
      */
@@ -182,11 +181,11 @@ public abstract class AbstractPropositionDefinition implements
         if (this.changes != null) {
             this.changes.firePropertyChange("inverseIsA", old, getInverseIsA());
         }
-        recalculateDirectChildren();
+        recalculateChildren();
     }
 
     @Override
-    public String[] getDirectChildren() {
+    public String[] getChildren() {
         return this.directChildren.clone();
     }
 
@@ -289,8 +288,7 @@ public abstract class AbstractPropositionDefinition implements
     public boolean getInDataSource() {
         return this.inDataSource;
     }
-
-    @Override
+    
     public void setInDataSource(boolean inDataSource) {
         boolean old = this.inDataSource;
         this.inDataSource = inDataSource;
@@ -361,7 +359,7 @@ public abstract class AbstractPropositionDefinition implements
         setInDataSource(false);
     }
 
-    protected abstract void recalculateDirectChildren();
+    protected abstract void recalculateChildren();
 
     @Override
     public String toString() {

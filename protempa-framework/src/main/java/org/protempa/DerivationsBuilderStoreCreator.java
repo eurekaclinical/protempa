@@ -19,44 +19,49 @@
  */
 package org.protempa;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.arp.javautil.datastore.BdbPersistentStoreFactory;
 
 import org.arp.javautil.datastore.DataStore;
-import org.arp.javautil.datastore.DataStoreFactory;
-import org.protempa.datastore.DataStoreCreator;
+import org.protempa.datastore.AbstractDataStoreCreator;
 
-final class DerivationsBuilderStoreCreator implements
-        DataStoreCreator<String, DerivationsBuilder> {
+final class DerivationsBuilderStoreCreator extends
+        AbstractDataStoreCreator<String, DerivationsBuilder> {
+    
+    public static final String DATABASE_NAME = "DerivationsBuilderStore";
+    
+    private final BdbPersistentStoreFactory storeFactory;
+    private int index;
 
-    private DerivationsBuilderStoreCreator() {
-    }
-
-    private static Map<String, DataStore<String, DerivationsBuilder>> stores = 
-        new HashMap<String, DataStore<String, DerivationsBuilder>>();
-
-    private static final DerivationsBuilderStoreCreator INSTANCE = new DerivationsBuilderStoreCreator();
-
-    public static DerivationsBuilderStoreCreator getInstance() {
-        return INSTANCE;
+    public DerivationsBuilderStoreCreator(String environmentName) {
+        super(environmentName);
+        if (environmentName != null) {
+        this.storeFactory = new BdbPersistentStoreFactory(environmentName);
+        } else {
+            throw new IllegalStateException(
+                    "null environmentName; cannot get a persistent store");
+        }
     }
 
     @Override
-    public DataStore<String, DerivationsBuilder> getPersistentStore(String name) {
-        if (stores.containsKey(name) && !stores.get(name).isClosed()) {
-            return stores.get(name);
-        } else {
-            DataStore<String, DerivationsBuilder> store = DataStoreFactory
-                    .getPersistentStore("DerivationsBuilderStore-" + name);
-            stores.put(name, store);
-            return store;
+    public DataStore<String, DerivationsBuilder> getPersistentStore() {
+        if (this.storeFactory == null) {
+            throw new IllegalStateException("null environmentName; cannot get a persistent store");
         }
+        DataStore<String, DerivationsBuilder> store = 
+                this.storeFactory.newInstance(nextDatabaseName());
+        return store;
     }
 
     @Override
     public DataStore<String, DerivationsBuilder> newCacheStore() {
         throw new UnsupportedOperationException(
-                "Temporary caches are not supported for DerivationsBuilder objects");
+            "Temporary caches are not supported for DerivationsBuilder objects");
     }
 
+    @Override
+    protected String nextDatabaseName() {
+        synchronized (this) {
+            return DATABASE_NAME + (index++);
+        }
+    }
 }

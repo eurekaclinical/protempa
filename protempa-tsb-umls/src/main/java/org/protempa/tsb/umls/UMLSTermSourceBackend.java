@@ -32,9 +32,9 @@ import org.protempa.Term;
 import org.protempa.backend.TermSourceBackendInitializationException;
 import org.protempa.TermSourceReadException;
 import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.bp.commons.AbstractCommonsTermSourceBackend;
-import org.protempa.bp.commons.BackendInfo;
-import org.protempa.bp.commons.BackendProperty;
+import org.protempa.backend.AbstractCommonsTermSourceBackend;
+import org.protempa.backend.annotations.BackendInfo;
+import org.protempa.backend.annotations.BackendProperty;
 
 import edu.emory.cci.aiw.umls.SAB;
 import edu.emory.cci.aiw.umls.TerminologyCode;

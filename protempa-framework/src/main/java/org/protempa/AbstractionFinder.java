@@ -47,21 +47,18 @@ import org.protempa.query.handler.QueryResultsHandler;
 
 /**
  * Class that actually does the abstraction finding.
- * 
+ *
  * @author Andrew Post
  */
 final class AbstractionFinder implements Module {
 
     private final Map<String, StatefulSession> workingMemoryCache;
-    // private final Map<String, Set<String>> propIdCache;
     private final DataSource dataSource;
     private final KnowledgeSource knowledgeSource;
     private final TermSource termSource;
     private final AlgorithmSource algorithmSource;
     // private final Map<String, List<String>> termToPropDefMap;
     private boolean clearNeeded;
-    // private final Map<String, Map<Set<String>, Sequence<PrimitiveParameter>>>
-    // sequences;
     private boolean closed;
 
     AbstractionFinder(DataSource dataSource, KnowledgeSource knowledgeSource,
@@ -76,8 +73,8 @@ final class AbstractionFinder implements Module {
         this.termSource = termSource;
         this.algorithmSource = algorithmSource;
 
-        this.dataSource
-                .addSourceListener(new SourceListener<DataSourceUpdatedEvent>() {
+        this.dataSource.addSourceListener(
+                new SourceListener<DataSourceUpdatedEvent>() {
 
                     @Override
                     public void sourceUpdated(DataSourceUpdatedEvent event) {
@@ -91,8 +88,8 @@ final class AbstractionFinder implements Module {
                     }
                 });
 
-        this.knowledgeSource
-                .addSourceListener(new SourceListener<KnowledgeSourceUpdatedEvent>() {
+        this.knowledgeSource.addSourceListener(
+                new SourceListener<KnowledgeSourceUpdatedEvent>() {
 
                     @Override
                     public void sourceUpdated(KnowledgeSourceUpdatedEvent event) {
@@ -106,8 +103,8 @@ final class AbstractionFinder implements Module {
                     }
                 });
 
-        this.termSource
-                .addSourceListener(new SourceListener<TermSourceUpdatedEvent>() {
+        this.termSource.addSourceListener(
+                new SourceListener<TermSourceUpdatedEvent>() {
 
                     @Override
                     public void sourceUpdated(TermSourceUpdatedEvent event) {
@@ -121,8 +118,8 @@ final class AbstractionFinder implements Module {
                     }
                 });
 
-        this.algorithmSource
-                .addSourceListener(new SourceListener<AlgorithmSourceUpdatedEvent>() {
+        this.algorithmSource.addSourceListener(
+                new SourceListener<AlgorithmSourceUpdatedEvent>() {
 
                     @Override
                     public void sourceUpdated(AlgorithmSourceUpdatedEvent event) {
@@ -141,13 +138,6 @@ final class AbstractionFinder implements Module {
         } else {
             this.workingMemoryCache = null;
         }
-        // if (cacheFoundAbstractParameters) {
-        // this.propIdCache = new HashMap<String, Set<String>>();
-        // } else {
-        // this.propIdCache = null;
-        // }
-        // this.sequences = new HashMap<String, Map<Set<String>,
-        // Sequence<PrimitiveParameter>>>();
     }
 
     DataSource getDataSource() {
@@ -176,7 +166,8 @@ final class AbstractionFinder implements Module {
 
     void doFind(Set<String> keyIds, Set<String> propIds,
             Set<And<String>> termIds, Filter filters,
-            QueryResultsHandler resultsHandler, QuerySession qs)
+            QueryResultsHandler resultsHandler,
+            PropositionDefinition[] propDefs, QuerySession qs)
             throws FinderException {
         assert resultsHandler != null : "resultsHandler cannot be null";
         if (this.closed) {
@@ -192,15 +183,15 @@ final class AbstractionFinder implements Module {
             Logger logger = ProtempaUtil.logger();
             logger.log(Level.FINE, "Validating query results handler...");
             resultsHandler.validate(this.knowledgeSource);
-            logger.log(Level.FINE, 
+            logger.log(Level.FINE,
                     "Query results handler validated successfully");
 
             if (workingMemoryCache != null) {
-                doFindExecute(keyIds, propIds, filters, resultsHandler, qs,
-                        new StatefulExecutionStrategy(this));
+                doFindExecute(keyIds, propIds, filters, resultsHandler,
+                        propDefs, qs, new StatefulExecutionStrategy(this));
             } else {
-                doFindExecute(keyIds, propIds, filters, resultsHandler, qs,
-                        new StatelessExecutionStrategy(this));
+                doFindExecute(keyIds, propIds, filters, resultsHandler,
+                        propDefs, qs, new StatelessExecutionStrategy(this));
             }
             resultsHandler.finish();
         } catch (ProtempaException e) {
@@ -208,7 +199,7 @@ final class AbstractionFinder implements Module {
             throw new FinderException(msg, e);
         }
     }
-    
+
     Query buildQuery(QueryBuilder queryBuilder) throws QueryBuildException {
         return queryBuilder.build(this.knowledgeSource, this.algorithmSource);
     }
@@ -220,7 +211,6 @@ final class AbstractionFinder implements Module {
     public void clear() {
         if (clearNeeded) {
             clearWorkingMemoryCache();
-            // this.sequences.clear();
             clearNeeded = false;
         }
     }
@@ -236,12 +226,10 @@ final class AbstractionFinder implements Module {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations) {
         qs.addPropositionsToCache(propositions);
-        for (Map.Entry<Proposition, List<Proposition>> me : forwardDerivations
-                .entrySet()) {
+        for (Map.Entry<Proposition, List<Proposition>> me : forwardDerivations.entrySet()) {
             qs.addDerivationsToCache(me.getKey(), me.getValue());
         }
-        for (Map.Entry<Proposition, List<Proposition>> me : backwardDerivations
-                .entrySet()) {
+        for (Map.Entry<Proposition, List<Proposition>> me : backwardDerivations.entrySet()) {
             qs.addDerivationsToCache(me.getKey(), me.getValue());
         }
     }
@@ -272,7 +260,6 @@ final class AbstractionFinder implements Module {
 //
 //        return result;
 //    }
-
 //    private Set<And<TermSubsumption>> explodeTerms(Set<And<String>> termClauses)
 //            throws TermSourceReadException {
 //        Set<And<TermSubsumption>> result = new HashSet<And<TermSubsumption>>();
@@ -290,42 +277,10 @@ final class AbstractionFinder implements Module {
 //
 //        return result;
 //    }
-
-//    private static byte[] detachWorkingMemory(StatefulSession workingMemory)
-//            throws IOException {
-//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        ObjectOutputStream oos = new ObjectOutputStream(baos);
-//        byte[] wmSerialized;
-//        try {
-//            oos.writeObject(workingMemory);
-//            wmSerialized = baos.toByteArray();
-//        } finally {
-//            oos.close();
-//        }
-//        return wmSerialized;
-//    }
-
-//    private static StatefulSession reattachWorkingMemory(byte[] wmSerialized,
-//            RuleBase ruleBase) throws IOException, ClassNotFoundException {
-//        ByteArrayInputStream bais = new ByteArrayInputStream(wmSerialized);
-//        StatefulSession workingMemory;
-//        try {
-//            workingMemory = reattachWorkingMemory(bais, ruleBase);
-//        } finally {
-//            bais.close();
-//        }
-//        return workingMemory;
-//    }
-
-//    private static StatefulSession reattachWorkingMemory(InputStream wmIn,
-//            RuleBase ruleBase) throws IOException, ClassNotFoundException {
-//        return ruleBase.newStatefulSession(wmIn, false);
-//    }
-
     private void clearWorkingMemoryCache() {
         if (workingMemoryCache != null) {
-            for (Iterator<StatefulSession> itr = workingMemoryCache.values()
-                    .iterator(); itr.hasNext();) {
+            for (Iterator<StatefulSession> itr =
+                    workingMemoryCache.values().iterator(); itr.hasNext();) {
                 try {
                     itr.next().dispose();
                     itr.remove();
@@ -339,27 +294,29 @@ final class AbstractionFinder implements Module {
 
     void retrieveData(Set<String> keyIds, Set<String> propositionIds,
             Set<And<String>> termIds, Filter filters, QuerySession qs,
-            String persistentStoreName) throws FinderException {
-        DataStore<String, List<Proposition>> store = PropositionStoreCreator
-                .<Proposition> getInstance().getPersistentStore(
-                        persistentStoreName);
+            String persistentStoreEnvironment) throws FinderException {
+        final DataStore<String, List<Proposition>> store =
+                new PropositionStoreCreator(persistentStoreEnvironment).getPersistentStore();
         int numWritten = 0;
         try {
-            ObjectIterator oi = new ObjectIterator(keyIds, propositionIds,
-                    filters, qs, false);
-
-            ProtempaUtil.logger().log(Level.INFO, "Storing propositions");
-            for (Iterator<ObjectEntry> itr = oi; itr.hasNext();) {
-                ObjectEntry entry = itr.next();
-                String keyId = entry.keyId;
-                List<Proposition> props = entry.propositions;
-
-                store.put(keyId, props);
-                numWritten++;
+            Set<String> leafPropIds =
+                    this.knowledgeSource.inDataSourcePropositionIds(
+                    propositionIds.toArray(new String[propositionIds.size()]));
+            DataStreamingEventIterator<Proposition> itr =
+                    this.dataSource.readPropositions(keyIds,
+                    leafPropIds, filters, qs);
+            try {
+                for (; itr.hasNext();) {
+                    DataStreamingEvent<Proposition> next = itr.next();
+                    store.put(next.getKeyId(), next.getData());
+                    numWritten++;
+                }
+            } finally {
+                itr.close();
             }
             ProtempaUtil.logger().log(Level.INFO,
                     "Wrote {0} records into store {1}",
-                    new Object[] { numWritten, persistentStoreName });
+                    new Object[]{numWritten, persistentStoreEnvironment});
         } catch (ProtempaException ex) {
             throw new FinderException(ex);
         } finally {
@@ -368,21 +325,19 @@ final class AbstractionFinder implements Module {
     }
 
     void processStoredResults(Set<String> keyIds, Set<String> propositionIds,
-            QuerySession qs, String propositionStoreName,
-            String workingMemoryStoreName) throws FinderException {
+            QuerySession qs, String propositionStoreEnvironment,
+            String workingMemoryStoreEnvironment) throws FinderException {
 
         Logger logger = ProtempaUtil.logger();
 
-        DataStore<String, List<Proposition>> propStore = PropositionStoreCreator
-                .<Proposition> getInstance().getPersistentStore(
-                        propositionStoreName);
-        DataStore<String, WorkingMemory> wmStore = WorkingMemoryStoreCreator
-                .getInstance(null).getPersistentStore(workingMemoryStoreName);
-        DataStore<String, DerivationsBuilder> dbStore = DerivationsBuilderStoreCreator
-                .getInstance().getPersistentStore(workingMemoryStoreName);
+        DataStore<String, List<Proposition>> propStore =
+                new PropositionStoreCreator(propositionStoreEnvironment).getPersistentStore();
+        DataStore<String, WorkingMemory> wmStore =
+                new WorkingMemoryStoreCreator(null, workingMemoryStoreEnvironment).getPersistentStore();
+        DataStore<String, DerivationsBuilder> dbStore = new DerivationsBuilderStoreCreator(workingMemoryStoreEnvironment).getPersistentStore();
 
-        logger.log(Level.INFO, "Found {0} records in store {1}", new Object[] {
-                propStore.size(), propositionStoreName });
+        logger.log(Level.INFO, "Found {0} records in store {1}", new Object[]{
+                    propStore.size(), propositionStoreEnvironment});
 
         try {
             DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
@@ -415,6 +370,17 @@ final class AbstractionFinder implements Module {
             wmStore.shutdown();
             dbStore.shutdown();
         }
+    }
+
+    private void initializeStrategy(Logger logger, ExecutionStrategy strategy,
+            Set<String> propositionIds, PropositionDefinition[] propDefs,
+            DerivationsBuilder derivationsBuilder,
+            QuerySession qs) throws FinderException {
+        logger.log(Level.FINE, "Creating rule base");
+        strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
+        this.clearNeeded = true;
+        logger.log(Level.FINE, "Rule base is created");
+        strategy.initialize();
     }
 
     private Set<String> keysToProcess(Set<String> keyIds,
@@ -457,19 +423,18 @@ final class AbstractionFinder implements Module {
 
     void outputStoredResults(Set<String> keyIds, Set<String> propositionIds,
             QueryResultsHandler resultHandler, QuerySession qs,
-            String workingMemoryStoreName) throws FinderException {
+            String workingMemoryStoreEnvironment) throws FinderException {
         Logger logger = ProtempaUtil.logger();
         DataStore<String, WorkingMemory> wmStore = null;
-        DataStore<String, DerivationsBuilder> dbStore = DerivationsBuilderStoreCreator
-                .getInstance().getPersistentStore(workingMemoryStoreName);
+        DataStore<String, DerivationsBuilder> dbStore =
+                new DerivationsBuilderStoreCreator(workingMemoryStoreEnvironment).getPersistentStore();
 
         try {
             StatefulExecutionStrategy strategy = new StatefulExecutionStrategy(this);
             strategy.createRuleBase(propositionIds, new DerivationsBuilder(),
                     qs);
             this.clearNeeded = true;
-            wmStore = WorkingMemoryStoreCreator.getInstance(strategy.ruleBase)
-                    .getPersistentStore(workingMemoryStoreName);
+            wmStore = new WorkingMemoryStoreCreator(strategy.ruleBase, workingMemoryStoreEnvironment).getPersistentStore();
             resultHandler.init(knowledgeSource);
             logger.log(Level.INFO, "Found {0} elements in the store",
                     wmStore.size());
@@ -499,13 +464,12 @@ final class AbstractionFinder implements Module {
 
     void processAndOutputStoredResults(Set<String> keyIds,
             Set<String> propositionIds, QueryResultsHandler resultHandler,
-            QuerySession qs, String propositionStoreName)
+            QuerySession qs, String propositionStoreEnvironment)
             throws FinderException {
 
         Logger logger = ProtempaUtil.logger();
-        DataStore<String, List<Proposition>> propStore = PropositionStoreCreator
-                .<Proposition> getInstance().getPersistentStore(
-                        propositionStoreName);
+        DataStore<String, List<Proposition>> propStore =
+                new PropositionStoreCreator(propositionStoreEnvironment).getPersistentStore();
         try {
             DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
             StatelessExecutionStrategy strategy = new StatelessExecutionStrategy(this);
@@ -537,58 +501,55 @@ final class AbstractionFinder implements Module {
     }
 
     private void doFindExecute(Set<String> keyIds, Set<String> propositionIds,
-            Filter filters, QueryResultsHandler resultHandler, QuerySession qs,
+            Filter filters, QueryResultsHandler resultHandler,
+            PropositionDefinition[] propDefs, QuerySession qs,
             ExecutionStrategy strategy) throws ProtempaException {
         Logger logger = ProtempaUtil.logger();
+        DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
         logger.info("Retrieving data");
-        ObjectIterator objectIterator = new ObjectIterator(keyIds,
-                propositionIds, filters, qs, false);
-        logger.info("Data retrieval complete");
-        if (objectIterator.hasNext()) {
-            logger.info("Processing data");
-            DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
-            logger.log(Level.FINE, "Creating rule base");
-            strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
-            this.clearNeeded = true;
-            logger.log(Level.FINE, "Rule base is created");
-            strategy.initialize();
-            logger.log(Level.FINE, "Now processing data");
-            int numProcessed = 0;
-
-            for (Iterator<ObjectEntry> itr = objectIterator; itr.hasNext();) {
-                ObjectEntry entry = itr.next();
-                String keyId = entry.keyId;
-                List<Proposition> props = entry.propositions;
-                logger.log(Level.FINER, "About to assert raw data {0}", props);
-                Iterator<Proposition> propositions = strategy.execute(
-                        entry.keyId, propositionIds, entry.propositions, null);
-                processResults(qs, propositions,
+        initializeStrategy(logger, strategy, propositionIds, propDefs,
+                derivationsBuilder, qs);
+        Set<String> inDataSourcePropIds =
+                this.knowledgeSource.inDataSourcePropositionIds(
+                propositionIds.toArray(new String[propositionIds.size()]));
+        DataStreamingEventIterator<Proposition> itr =
+                this.dataSource.readPropositions(keyIds,
+                inDataSourcePropIds, filters, qs);
+        try {
+            int numWritten = 0;
+            for (; itr.hasNext();) {
+                DataStreamingEvent<Proposition> next = itr.next();
+                String keyId = next.getKeyId();
+                Iterator<Proposition> resultsItr = strategy.execute(
+                        keyId, propositionIds, next.getData(),
+                        null);
+                processResults(qs, resultsItr,
                         derivationsBuilder.toForwardDerivations(),
                         derivationsBuilder.toBackwardDerivations(),
                         propositionIds, resultHandler, keyId);
                 derivationsBuilder.reset();
-                if (++numProcessed % 1000 == 0) {
-                    logNumProcessed(numProcessed, logger);
+                if (++numWritten % 1000 == 0) {
+                    logNumProcessed(numWritten, ProtempaUtil.logger());
                 }
             }
-            strategy.cleanup();
-            logger.info("Processing data is complete");
-        } else {
-            logger.info("No data to process");
+        } finally {
+            itr.close();
         }
+
+        logger.info("Processing data is complete");
     }
 
     private void logNumProcessed(int numProcessed, Logger logger)
             throws DataSourceReadException {
         if (logger.isLoggable(Level.FINE)) {
-            String keyTypeSingDisplayName = this.dataSource
-                    .getKeyTypeDisplayName();
-            String keyTypePluralDisplayName = this.dataSource
-                    .getKeyTypePluralDisplayName();
+            String keyTypeSingDisplayName =
+                    this.dataSource.getKeyTypeDisplayName();
+            String keyTypePluralDisplayName =
+                    this.dataSource.getKeyTypePluralDisplayName();
             Logging.logCount(logger, Level.FINE, numProcessed,
                     "Processed {0} {1}", "Processed {0} {1}",
-                    new Object[] { keyTypeSingDisplayName },
-                    new Object[] { keyTypePluralDisplayName });
+                    new Object[]{keyTypeSingDisplayName},
+                    new Object[]{keyTypePluralDisplayName});
         }
     }
 
@@ -611,7 +572,7 @@ final class AbstractionFinder implements Module {
         Map<UniqueId, Proposition> refs = new HashMap<UniqueId, Proposition>();
         logger.log(Level.FINER, "References: {0}", refs);
         List<Proposition> filteredPropositions = // a newly created list
-        extractRequestedPropositions(propositions, propositionIds, refs);
+                extractRequestedPropositions(propositions, propositionIds, refs);
         if (logger.isLoggable(Level.FINER)) {
             logger.log(Level.FINER, "Proposition ids: {0}", propositionIds);
             logger.log(Level.FINER, "Filtered propositions: {0}",
@@ -625,116 +586,4 @@ final class AbstractionFinder implements Module {
         resultHandler.handleQueryResult(keyId, filteredPropositions,
                 forwardDerivations, backwardDerivations, refs);
     }
-
-    private static class ObjectEntry {
-
-        String keyId;
-        List<Proposition> propositions;
-    }
-
-    private class ObjectIterator implements Iterator<ObjectEntry> {
-
-        private Map<String, List<Proposition>> propositions;
-        private final Logger logger;
-        private final Iterator<String> keySetItr;
-
-        ObjectIterator(Set<String> keyIds, Set<String> propIds, Filter filters,
-                QuerySession qs, boolean stateful)
-                throws KnowledgeSourceReadException, DataSourceReadException {
-            this.logger = ProtempaUtil.logger();
-
-            this.logger.log(Level.INFO, "Starting data retrieval");
-
-            Set<String> leafPropIds = knowledgeSource
-                    .inDataSourcePropositionIds(propIds
-                            .toArray(new String[propIds.size()]));
-            this.logger.log(Level.FINE, "Proposition ids: {0}", leafPropIds);
-            this.propositions = dataSource.readPropositions(keyIds,
-                    leafPropIds, filters, qs);
-            Set<String> keySet = this.propositions.keySet();
-
-            this.keySetItr = keySet.iterator();
-
-            this.logger.log(Level.INFO, "Data retrieval is complete");
-            if (this.logger.isLoggable(Level.INFO)) {
-                Logging.logCount(
-                        this.logger,
-                        Level.INFO,
-                        this.propositions.size(),
-                        "There is {0} {1} to process",
-                        "There are {0} {1} to process",
-                        new Object[] { dataSource.getKeyTypeDisplayName() },
-                        new Object[] { dataSource.getKeyTypePluralDisplayName() });
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.keySetItr.hasNext();
-        }
-
-        @Override
-        public ObjectEntry next() {
-            ObjectEntry result = new ObjectEntry();
-            result.keyId = this.keySetItr.next();
-            result.propositions = this.propositions.get(result.keyId);
-            return result;
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-//    /**
-//     * Returns a stateful working memory instance for the given key.
-//     * 
-//     * @param key
-//     *            a key <code>String</code>.
-//     * @return a <code>StatefulRuleSession</code>, or null if the given key is
-//     *         <code>null</code>.
-//     */
-//    private StatefulSession statefulWorkingMemory(RuleBase ruleBase, String key)
-//            throws ProtempaException {
-//        StatefulSession workingMemory = null;
-//        if (key != null) {
-//            // we have not cached a working memory for this key yet.
-//            if ((workingMemory = this.workingMemoryCache.get(key)) == null) {
-//                // TODO: change the last null parameter to an actual derivations
-//                // cache
-//                workingMemory = ruleBase.newStatefulSession(false);
-//                this.workingMemoryCache.put(key, workingMemory);
-//                // we have cached a working memory for this key.
-//            } // else {
-//            /*
-//             * There apparently is no way to assign an existing working memory
-//             * to a knowledge base without serializing it and passing the
-//             * serialized object to a new rule base... This could actually come
-//             * in handy for transparently saving the working memories out to
-//             * disk...
-//             */
-//            // try {
-//            // byte[] wmSerialized = detachWorkingMemory(workingMemory);
-//            // Set<String> propIdCacheForKey = this.propIdCache.get(key);
-//            // assert propIdCacheForKey != null :
-//            // "the proposition id cache was not set";
-//            /*
-//             * We construct the rule base of proposition definitions that have
-//             * not been looked for previously.
-//             */
-//            // TODO: change the last null parameter to an actual
-//            // derivations cache
-//            // workingMemory = reattachWorkingMemory(wmSerialized,
-//            // ruleBase);
-//            // this.workingMemoryCache.put(key, workingMemory);
-//            // } catch (IOException ex) {
-//            // throw new AssertionError(ex);
-//            // } catch (ClassNotFoundException cnfe) {
-//            // throw new AssertionError(cnfe);
-//            // }
-//            // }
-//        }
-//        return workingMemory;
-//    }
 }

@@ -410,9 +410,11 @@ public final class KnowledgeSource
         }
     }
 
-    public Set<String> inDataSourcePropositionIds(String... propIds) throws KnowledgeSourceReadException {
+    public Set<String> inDataSourcePropositionIds(String... propIds) 
+            throws KnowledgeSourceReadException {
         Set<String> propIdsAsSet = Arrays.asSet(propIds);
-        return inDataSourcePropositionIds(propIdsAsSet, this.propIdInDataSourceCache);
+        return inDataSourcePropositionIds(propIdsAsSet, 
+                this.propIdInDataSourceCache);
     }
 
     public Set<PropositionDefinition> inDataSourcePropositionDefinitions(
@@ -423,14 +425,17 @@ public final class KnowledgeSource
     private Set<PropositionDefinition> inDataSourcePropositionDefinitions(
             Set<String> propIds) throws KnowledgeSourceReadException {
         assert propIds != null : "propIds cannot be null";
-        return inDataSourcePropositionDefinitions(propIds, this.propIdPropInDataSourceCache);
+        return inDataSourcePropositionDefinitions(propIds, 
+                this.propIdPropInDataSourceCache);
     }
 
-    private Set<PropositionDefinition> inDataSourcePropositionDefinitions(Set<String> propIds,
+    private Set<PropositionDefinition> inDataSourcePropositionDefinitions(
+            Set<String> propIds,
             Map<Set<String>, Set<PropositionDefinition>> cache)
             throws KnowledgeSourceReadException {
         if (propIds.contains(null)) {
-            throw new IllegalArgumentException("propIds cannot contain a null element");
+            throw new IllegalArgumentException(
+                    "propIds cannot contain a null element");
         }
 
         Set<PropositionDefinition> cachedResult = cache.get(propIds);
@@ -449,9 +454,11 @@ public final class KnowledgeSource
     }
 
     private Set<String> inDataSourcePropositionIds(Set<String> propIds,
-            Map<Set<String>, Set<String>> cache) throws KnowledgeSourceReadException {
+            Map<Set<String>, Set<String>> cache) 
+            throws KnowledgeSourceReadException {
         if (propIds.contains(null)) {
-            throw new IllegalArgumentException("propIds cannot contain a null element");
+            throw new IllegalArgumentException(
+                    "propIds cannot contain a null element");
         }
 
         Set<String> cachedResult = cache.get(propIds);
@@ -471,7 +478,8 @@ public final class KnowledgeSource
     private void inDataSourcePropositionIdsHelper(Collection<String> propIds,
             Set<String> result, Set<PropositionDefinition> propResult)
             throws KnowledgeSourceReadException {
-        List<PropositionDefinition> propDefs = new ArrayList<PropositionDefinition>();
+        List<PropositionDefinition> propDefs = 
+                new ArrayList<PropositionDefinition>();
         for (String propId : propIds) {
             PropositionDefinition propDef = readPropositionDefinition(propId);
             if (propDef != null) {
@@ -481,12 +489,14 @@ public final class KnowledgeSource
         inDataSourcePropositionIdsHelper(propDefs, result, propResult);
     }
 
-    private void inDataSourcePropositionIdsHelper(List<PropositionDefinition> propDefs,
+    private void inDataSourcePropositionIdsHelper(
+            List<PropositionDefinition> propDefs,
             Set<String> result, Set<PropositionDefinition> propResult)
             throws KnowledgeSourceReadException {
         for (PropositionDefinition propDef : propDefs) {
             String propDefId = propDef.getId();
-            List<PropositionDefinition> children = new ArrayList<PropositionDefinition>();
+            List<PropositionDefinition> children = 
+                    new ArrayList<PropositionDefinition>();
             if (propDef instanceof AbstractionDefinition) {
                 for (PropositionDefinition ad : readAbstractedFrom((AbstractionDefinition) propDef)) {
                     children.add(ad);

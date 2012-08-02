@@ -43,7 +43,7 @@ import org.arp.javautil.collections.CompositeList;
 public class DataSourceResultMap<P> implements Map<String, List<P>> {
     private final List<Map<String, List<P>>> maps;
 
-    public DataSourceResultMap(List<Map<String, List<P>>> maps) {
+    public DataSourceResultMap(List<? extends Map<String, List<P>>> maps) {
         if (maps != null) {
            this.maps = new ArrayList<Map<String, List<P>>>(maps);
         } else {

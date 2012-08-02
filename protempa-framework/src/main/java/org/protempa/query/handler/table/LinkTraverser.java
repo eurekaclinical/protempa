@@ -32,6 +32,12 @@ import org.protempa.proposition.UniqueId;
  * @author Andrew Post
  */
 public class LinkTraverser {
+    
+    private final Set<Proposition> cache;
+
+    public LinkTraverser() {
+        this.cache = new HashSet<Proposition>();
+    }
 
     /**
      * Traverses links from a proposition to a list of propositions.
@@ -57,7 +63,6 @@ public class LinkTraverser {
             Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
         LinkedList<Proposition> result = new LinkedList<Proposition>();
-        Set<Proposition> cache = new HashSet<Proposition>();
         Logger logger = Util.logger();
         result.add(proposition);
         if (links != null) {
@@ -68,7 +73,7 @@ public class LinkTraverser {
                     Proposition prop = result.remove();
                     Collection<Proposition> c = link.traverse(prop,
                             forwardDerivations, backwardDerivations,
-                            references, knowledgeSource, cache);
+                            references, knowledgeSource, this.cache);
                     result.addAll(c);
                     j++;
                 }
@@ -77,7 +82,7 @@ public class LinkTraverser {
                             new Object[]{getClass().getName(), result, link});
                 }
                 num = result.size();
-                cache.clear();
+                this.cache.clear();
             }
         }
         if (logger.isLoggable(Level.FINER)) {

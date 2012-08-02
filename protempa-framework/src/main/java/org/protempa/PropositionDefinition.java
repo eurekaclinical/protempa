@@ -61,7 +61,7 @@ public interface PropositionDefinition extends Serializable,
      * 
      * @return an array of {@link String}s, guaranteed not <code>null</code>.
      */
-    String[] getDirectChildren();
+    String[] getChildren();
 
     /**
      * Returns the ids of the proposition definitions that have an is-a
@@ -104,8 +104,6 @@ public interface PropositionDefinition extends Serializable,
     ReferenceDefinition[] getReferenceDefinitions();
 
     ReferenceDefinition referenceDefinition(String name);
-
-    void setInDataSource(boolean inDataSource);
 
     boolean getInDataSource();
 

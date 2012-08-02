@@ -151,7 +151,7 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     }
 
     @Override
-    protected void recalculateDirectChildren() {
+    protected void recalculateChildren() {
         String[] old = this.directChildren;
         Set<String> abstractedFrom = getAbstractedFrom();
         String[] inverseIsA = getInverseIsA();
@@ -162,7 +162,7 @@ public class PairDefinition extends AbstractAbstractionDefinition {
         }
         this.directChildren = abstractedFrom.toArray(new String[abstractedFrom.size()]);
         if (this.changes != null) {
-            this.changes.firePropertyChange(DIRECT_CHILDREN_PROPERTY, old,
+            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
                     this.directChildren);
         }
     }
@@ -181,7 +181,7 @@ public class PairDefinition extends AbstractAbstractionDefinition {
             TemporalExtendedPropositionDefinition proposition) {
         TemporalExtendedPropositionDefinition old = this.leftHandProposition;
         this.leftHandProposition = proposition;
-        recalculateDirectChildren();
+        recalculateChildren();
         if (this.changes != null) {
             this.changes.firePropertyChange("leftHandProposition", old,
                     this.leftHandProposition);
@@ -196,7 +196,7 @@ public class PairDefinition extends AbstractAbstractionDefinition {
             TemporalExtendedPropositionDefinition rightHandProposition) {
         TemporalExtendedPropositionDefinition old = this.rightHandProposition;
         this.rightHandProposition = rightHandProposition;
-        recalculateDirectChildren();
+        recalculateChildren();
         if (this.changes != null) {
             this.changes.firePropertyChange("rightHandProposition", old,
                     this.rightHandProposition);

@@ -41,14 +41,14 @@
         </dependency>
         <dependency>
             <groupId>org.protempa</groupId>
-            <artifactId>protempa-bp-commons</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>protempa-bp-serviceloader</artifactId>
+            <version>2.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-bconfigs-commons-ini</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -78,68 +78,6 @@
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
-      <!--<plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>sql-maven-plugin</artifactId>
-        <version>1.2</version>
-        <dependencies>
-          <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.6</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <settingsKey>protempa-ksb-protege-test-db</settingsKey>
-          <driver>com.mysql.jdbc.Driver</driver>
-          <url>jdbc:mysql://localhost:3306/protempa_ksb_protege_test?createDatabaseIfNotExist=true</url>
-          <skip>${maven.test.skip}</skip>
-        </configuration>
-        <executions>
-          <execution>
-            <id>create-schema</id>
-            <phase>process-test-resources</phase>
-            <goals>
-              <goal>execute</goal>
-            </goals>
-            <configuration>
-              <srcFiles>  
-                <srcFile>src/test/resources/data/mysql-schema.sql</srcFile>
-              </srcFiles>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>dbunit-maven-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.6</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <settingsKey>protempa-ksb-protege-test-db</settingsKey>
-          <driver>com.mysql.jdbc.Driver</driver>
-          <url>jdbc:mysql://localhost:3306/protempa_ksb_protege_test</url>
-          <skip>${maven.test.skip}</skip>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>test-compile</phase>
-            <goals>
-              <goal>operation</goal>
-            </goals>
-            <configuration>
-              <format>flat</format>
-              <type>CLEAN_INSERT</type>
-              <src>src/test/resources/data/dataset.xml</src>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>-->
         </plugins>
     </build>
     <reporting>

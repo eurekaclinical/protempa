@@ -132,8 +132,7 @@ public enum ValueType {
                     comparatorString = s.substring(0, 1);
                     numberString = s.substring(1).trim();
                 } else {
-                    throw new NumberFormatException(
-                            "Improperly formatted inequality value: " + s);
+                    return null;
                 }
                 ValueComparator comparator = ValueComparator
                         .parse(comparatorString);

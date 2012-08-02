@@ -19,18 +19,16 @@
  */
 package org.protempa.backend.dsb;
 
+import org.protempa.DataSource;
+import org.protempa.MultiplexingDataStreamingEventIterator;
 import org.protempa.backend.dsb.filter.Filter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.protempa.*;
 import org.protempa.backend.Backend;
-import org.protempa.DataSource;
 import org.protempa.backend.DataSourceBackendFailedValidationException;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
-import org.protempa.DataSourceReadException;
-import org.protempa.KnowledgeSource;
-import org.protempa.KnowledgeSourceReadException;
-import org.protempa.QuerySession;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
@@ -43,10 +41,11 @@ import org.protempa.proposition.value.UnitFactory;
  */
 public interface DataSourceBackend extends
 		Backend<DataSourceBackendUpdatedEvent, DataSource>{
-
-    Map<String, List<Proposition>> readPropositions(
-            Set<String> keyIds, Set<String> paramIds, Filter filters,
-            QuerySession qs) throws DataSourceReadException;
+    
+    DataStreamingEventIterator<Proposition> readPropositions(
+            Set<String> keyIds,
+            Set<String> propIds, Filter filters, QuerySession qs) 
+            throws DataSourceReadException;
 
     GranularityFactory getGranularityFactory();
 

@@ -1,3 +1,0 @@
-org.protempa.bp.commons.dsb.relationaldb.Ojdbc6OracleSQLGenerator
-org.protempa.bp.commons.dsb.relationaldb.ConnectorJ5MySQL415Generator
-org.protempa.bp.commons.dsb.relationaldb.H2SQLGenerator
