@@ -57,8 +57,7 @@ class TopologicalSortComparator implements Comparator<AbstractionDefinition>, Se
             Collection<AbstractionDefinition> abstractionDefinitions)
             throws KnowledgeSourceReadException {
         // build the graph, a map of node name -> list of neighbors.
-        HashMap<String, List<String>> nodes = 
-                new HashMap<String, List<String>>(
+        HashMap<String, List<String>> nodes = new HashMap<String, List<String>>(
                 abstractionDefinitions.size() * 4 / 3 + 1);
         for (AbstractionDefinition apd : abstractionDefinitions) {
             List<String> ads = new ArrayList<String>();
@@ -70,8 +69,7 @@ class TopologicalSortComparator implements Comparator<AbstractionDefinition>, Se
             nodes.put(apd.getId(), ads);
         }
         // topological sort on graph
-        ArrayList<String> sortedAbstractions = 
-                new ArrayList<String>(nodes.size());
+        ArrayList<String> sortedAbstractions = new ArrayList<String>(nodes.size());
         HashSet<String> toBeRemoved = new HashSet<String>(); // nodes with no
         // neighbors
         String[] zeroOutDegree = new String[nodes.size()];

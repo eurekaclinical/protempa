@@ -28,8 +28,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 import org.arp.javautil.io.IOUtil;
@@ -42,24 +40,24 @@ import org.protempa.proposition.value.ValueType;
  * PRIMITIVE_PARAMETER_DEFINITIONS specifies a properties file on the classpath
  * containing the primitive parameter definitions, and EVENT_DEFINITIONS
  * specifies a properties file on the classpath containing the event
- * definitions. CONSTANT_DEFINITIONS specifies a properties file on the
- * classpath containing the constant definitions. The properties files are
- * loaded using this class' class loader, and relative classpaths are resolved
- * relative to this class.
- *
+ * definitions. CONSTANT_DEFINITIONS specifies a properties file on the classpath
+ * containing the constant definitions.
+ * The properties files are loaded using this class' class loader,
+ * and relative classpaths are resolved relative to this class.
+ * 
  * The primitive parameter definitions properties file specifies one line per
  * primitive parameter definition in the format: id =
  * displayName|abbrevDisplayName|valueFactoryStr
- *
- * The event definitions properties file specifies one line per event definition
- * in the format: id = displayName|abbrevDisplayName
+ * 
+ * The event definitions properties file specifies one line per event 
+ * definition in the format: id = displayName|abbrevDisplayName
  *
  * The constant definitions properties file specifies one line per constant
  * definition in the format: id = displayName|abbrevDisplayName
- *
+ * 
  * @author Andrew Post
  */
-public abstract class AbstractPropertiesFileKnowledgeSourceBackend
+public abstract class AbstractPropertiesFileKnowledgeSourceBackend 
         extends AbstractKnowledgeSourceBackend {
 
     private Properties primParams;
@@ -100,39 +98,21 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
     }
 
     @Override
-    public PropositionDefinition readPropositionDefinition(String id) throws KnowledgeSourceReadException {
-        PropositionDefinition propDef = readEventDefinition(id);
-        if (propDef != null) {
-            return propDef;
-        }
-        if ((propDef = readConstantDefinition(id)) != null) {
-            return propDef;
-        }
-        if ((propDef = readPrimitiveParameterDefinition(id)) != null) {
-            return propDef;
-        }
-        return propDef;
-    }
-    
-    @Override
-    public AbstractionDefinition readAbstractionDefinition(String id) throws KnowledgeSourceReadException {
-        return null;
-    }
-
-    private EventDefinition readEventDefinition(String id)
+    public final EventDefinition readEventDefinition(String id,
+            KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
-        readEventDefinitions();
+        readEventDefinitions(protempaKnowledgeBase);
         String[] vals = this.eventsMap.get(id);
         if (vals == null) {
             return null;
         }
-        EventDefinition def = new EventDefinition(id);
+        EventDefinition def = new EventDefinition(protempaKnowledgeBase, id);
         def.setDisplayName(vals[0]);
         def.setAbbreviatedDisplayName(vals[1]);
         return def;
     }
 
-    private void readEventDefinitions()
+    private void readEventDefinitions(KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
         if (this.eventsMap == null) {
             this.eventsMap = new HashMap<String, String[]>();
@@ -141,21 +121,23 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
         }
     }
 
-    private ConstantDefinition readConstantDefinition(String id)
+    @Override
+    public final ConstantDefinition readConstantDefinition(String id,
+            KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
-        readConstantDefinitions();
+        readConstantDefinitions(protempaKnowledgeBase);
         String[] vals = this.constantsMap.get(id);
         if (vals == null) {
             return null;
         }
         ConstantDefinition def =
-                new ConstantDefinition(id);
+                new ConstantDefinition(protempaKnowledgeBase, id);
         def.setDisplayName(vals[0]);
         def.setAbbreviatedDisplayName(vals[1]);
         return def;
     }
 
-    private void readConstantDefinitions()
+    private void readConstantDefinitions(KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
         if (this.constantsMap == null) {
             this.constantsMap = new HashMap<String, String[]>();
@@ -164,8 +146,15 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
         }
     }
 
-    private PrimitiveParameterDefinition readPrimitiveParameterDefinition(
-            String id)
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.protempa.AbstractKnowledgeSourceBackend#readPrimitiveParameterDefinition(java.lang.String,
+     *      org.protempa.KnowledgeBase)
+     */
+    @Override
+    public final PrimitiveParameterDefinition readPrimitiveParameterDefinition(
+            String id, KnowledgeBase protempaKnowledgeBase)
             throws KnowledgeSourceReadException {
         if (this.primParamsMap == null) {
             this.primParamsMap = new HashMap<String, String[]>();
@@ -177,7 +166,7 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
             return null;
         }
         PrimitiveParameterDefinition def = new PrimitiveParameterDefinition(
-                id);
+                protempaKnowledgeBase, id);
         String displayName = vals[0];
         def.setDisplayName(displayName.length() > 0 ? displayName : null);
         String abbrevDisplayName = vals[1];
@@ -186,6 +175,8 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
         def.setValueType(ValueType.valueOf(vals[2]));
         return def;
     }
+
+
 
     /*
      * (non-Javadoc)
@@ -203,7 +194,7 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
             Map<String, String[]> defsMap, int expectedLength, String name) {
         try {
             for (Enumeration<?> enu = properties.propertyNames();
-                    enu.hasMoreElements();) {
+            enu.hasMoreElements();) {
                 String id = (String) enu.nextElement();
                 String val = properties.getProperty(id);
                 String[] elts = val.split("\\|");
@@ -213,11 +204,8 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
                             + expectedLength + ", but actual length="
                             + elts.length + ")");
                 }
-                Logger logger = KSUtil.logger();
-                if (logger.isLoggable(Level.FINE)) {
-                    logger.log(Level.FINE,
-                            "New definition: {0}; {0}", new Object[]{id, Arrays.asList(elts)});
-                }
+                KSUtil.logger().fine(
+                        "New definition: " + id + "; " + Arrays.asList(elts));
                 defsMap.put(id, elts);
             }
             return true;

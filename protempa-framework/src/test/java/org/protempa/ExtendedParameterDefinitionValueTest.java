@@ -42,7 +42,8 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        this.llad = new LowLevelAbstractionDefinition("TEST");
+        KnowledgeBase kb = new KnowledgeBase();
+        this.llad = new LowLevelAbstractionDefinition(kb, "TEST");
     }
 
     @Override

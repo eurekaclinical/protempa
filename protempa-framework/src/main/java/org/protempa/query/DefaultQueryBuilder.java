@@ -24,248 +24,226 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.protempa.*;
+import org.protempa.AlgorithmSource;
+import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.ProtempaUtil;
 import org.protempa.backend.dsb.filter.Filter;
 
 /**
- *
+ * 
  * @author Andrew Post
  */
 public class DefaultQueryBuilder implements QueryBuilder, Serializable {
 
-    private static final long serialVersionUID = -3920993703423486485L;
-    private static final PropositionDefinition[] EMPTY_PROP_DEF_ARRAY =
-            new PropositionDefinition[0];
-    
-    private String[] keyIds;
-    private Filter filters;
-    private String[] propIds;
-    @SuppressWarnings("unchecked")
-    private And<String>[] termIds;
-    private PropositionDefinition[] propDefs;
-    private final PropertyChangeSupport changes;
-    // Flag to control validation of proposition IDs. Should only be turned off
-    // for testing.
-    private static boolean validatePropositionIds = true;
+	private static final long serialVersionUID = -3920993703423486485L;
+	private String[] keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
+	private Filter filters;
+	private String[] propIds = ArrayUtils.EMPTY_STRING_ARRAY;
+	@SuppressWarnings("unchecked")
+	private And<String>[] termIds = new And[0];
+	private final PropertyChangeSupport changes;
 
-    public DefaultQueryBuilder() {
-        this.changes = new PropertyChangeSupport(this);
-        this.propDefs = EMPTY_PROP_DEF_ARRAY;
-        this.keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
-        this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
-        this.termIds = new And[0];
-    }
+	// Flag to control validation of proposition IDs. Should only be turned off
+	// for testing.
+	private static boolean validatePropositionIds = true;
 
-    /**
-     * Gets the filters to be applied to this query.
-     *
-     * @return a {@link Filter}.
-     */
-    public final Filter getFilters() {
-        return this.filters;
-    }
+	public DefaultQueryBuilder() {
+		this.changes = new PropertyChangeSupport(this);
+	}
 
-    /**
-     * Sets the filters to apply to this query.
-     *
-     * Note that in order to serialize this query, the supplied filters must
-     * also implement {@link Serializable}.
-     *
-     * @param filters a {@link Filter}.
-     */
-    public final void setFilters(Filter filters) {
-        Filter old = this.filters;
-        this.filters = filters;
-        this.changes.firePropertyChange("filters", old, this.filters);
-    }
+	/**
+	 * Gets the filters to be applied to this query.
+	 * 
+	 * @return a {@link Filter}.
+	 */
+	public final Filter getFilters() {
+		return this.filters;
+	}
 
-    /**
-     * Returns the key ids to be queried. An array of length 0 means that all
-     * key ids will be queried.
-     *
-     * @return a {@link String[]}. Never returns
-     * <code>null</code>.
-     */
-    public final String[] getKeyIds() {
-        return this.keyIds.clone();
-    }
+	/**
+	 * Sets the filters to apply to this query.
+	 * 
+	 * Note that in order to serialize this query, the supplied filters must
+	 * also implement {@link Serializable}.
+	 * 
+	 * @param filters
+	 *            a {@link Filter}.
+	 */
+	public final void setFilters(Filter filters) {
+		Filter old = this.filters;
+		this.filters = filters;
+		this.changes.firePropertyChange("filters", old, this.filters);
+	}
 
-    /**
-     * Sets the key ids to be queried. An array of length 0 or
-     * <code>null</code> means that all key ids will be queried.
-     *
-     * @param keyIds a {@link String[]} of key ids. If
-     * <code>null</code>, an empty
-     *            {@link String[]} will be stored.
-     */
-    public final void setKeyIds(String[] keyIds) {
-        if (keyIds == null) {
-            keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
-        }
-        String[] old = this.keyIds;
-        this.keyIds = keyIds.clone();
-        this.changes.firePropertyChange("keyIds", old, this.keyIds);
-    }
+	/**
+	 * Returns the key ids to be queried. An array of length 0 means that all
+	 * key ids will be queried.
+	 * 
+	 * @return a {@link String[]}. Never returns <code>null</code>.
+	 */
+	public final String[] getKeyIds() {
+		return this.keyIds.clone();
+	}
 
-    /**
-     * Returns the proposition ids to be queried. An array of length 0 means
-     * that all proposition ids will be queried.
-     *
-     * @param propIds a {@link String[]}. Never returns
-     * <code>null</code>.
-     */
-    public final String[] getPropositionIds() {
-        return this.propIds.clone();
-    }
+	/**
+	 * Sets the key ids to be queried. An array of length 0 or <code>null</code>
+	 * means that all key ids will be queried.
+	 * 
+	 * @param keyIds
+	 *            a {@link String[]} of key ids. If <code>null</code>, an empty
+	 *            {@link String[]} will be stored.
+	 */
+	public final void setKeyIds(String[] keyIds) {
+		if (keyIds == null) {
+			keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
+		}
+		String[] old = this.keyIds;
+		this.keyIds = keyIds.clone();
+		this.changes.firePropertyChange("keyIds", old, this.keyIds);
+	}
 
-    /**
-     * Sets the proposition ids to be queried. An array of length 0 or
-     * <code>null</code> means that all proposition ids will be queried.
-     *
-     * @param propIds a {@link String[]} of proposition ids. If
-     * <code>null</code>, an empty {@link String[]} will be stored.
-     */
-    public final void setPropositionIds(String[] propIds) {
-        String[] old = this.propIds;
-        if (propIds == null) {
-            this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
-        } else {
-            this.propIds = propIds.clone();
-            ProtempaUtil.internAll(this.propIds);
-        }
-        this.changes.firePropertyChange("propIds", old, this.propIds);
-    }
+	/**
+	 * Returns the proposition ids to be queried. An array of length 0 means
+	 * that all proposition ids will be queried.
+	 * 
+	 * @param propIds
+	 *            a {@link String[]}. Never returns <code>null</code>.
+	 */
+	public final String[] getPropIds() {
+		return this.propIds.clone();
+	}
 
-    /**
-     * Gets the term ids to be queried in disjunctive normal form. PROTEMPA will
-     * navigate these terms' subsumption hierarchy, find proposition definitions
-     * that have been annotated with each term, and add those to the query.
-     * <code>And</code>'d term ids will only match a proposition definition if
-     * it is annotated with all of the specified term ids (or terms in their
-     * subsumption hierarchies).
-     *
-     * @return a {@link String[]} of term ids representing disjunctive normal
-     * form.
-     */
-    public final And<String>[] getTermIds() {
-        return this.termIds.clone();
-    }
+	/**
+	 * Sets the proposition ids to be queried. An array of length 0 or
+	 * <code>null</code> means that all proposition ids will be queried.
+	 * 
+	 * @param propIds
+	 *            a {@link String[]} of proposition ids. If <code>null</code>,
+	 *            an empty {@link String[]} will be stored.
+	 */
+	public final void setPropIds(String[] propIds) {
+		String[] old = this.propIds;
+		if (propIds == null) {
+			this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
+		} else {
+			this.propIds = propIds.clone();
+			ProtempaUtil.internAll(this.propIds);
+		}
+		this.changes.firePropertyChange("propIds", old, this.propIds);
+	}
 
-    /**
-     * Sets the term ids to be queried in disjunctive normal form. If any terms
-     * are specified, PROTEMPA will navigate the term's subsumption hierarchy,
-     * find proposition definitions that have been annotated with each term, and
-     * add those to the query. If
-     * <code>and</code>'d term ids are specified, proposition definitions will
-     * only match if they are annotated with all of the specified term ids (or
-     * terms in their subsumption hierarchies).
-     *
-     * @param termIds a {@link And[]} term ids representing disjunctive normal
-     * form.
-     */
-    @SuppressWarnings("unchecked")
-    public final void setTermIds(And<String>[] termIds) {
-        if (termIds == null) {
-            termIds = new And[0];
-        }
-        And<String>[] old = this.termIds;
-        this.termIds = (And<String>[]) termIds.clone();
-        this.changes.firePropertyChange("termIds", old, this.termIds);
-    }
-    
-    /**
-     * Returns an optional set of user-specified proposition definitions.
-     * 
-     * @return an array of {@link PropositionDefinition}s.
-     */
-    public final PropositionDefinition[] getPropositionDefinitions() {
-        return this.propDefs.clone();
-    }
-    
-    /** 
-     * Returns an optional set of user-specified proposition definitions.
-     * 
-     * @param propDefs an array of {@link PropositionDefinition}s.
-     */
-    public final void setPropositionDefinitions(PropositionDefinition[] propDefs) {
-        if (propDefs == null) {
-            propDefs = EMPTY_PROP_DEF_ARRAY;
-        }
-        PropositionDefinition[] old = this.propDefs;
-        this.propDefs = propDefs.clone();
-        this.changes.firePropertyChange("propositionDefinitions", old, 
-                this.propDefs);
-    }
+	/**
+	 * Gets the term ids to be queried in disjunctive normal form. PROTEMPA will
+	 * navigate these terms' subsumption hierarchy, find proposition definitions
+	 * that have been annotated with each term, and add those to the query.
+	 * <code>And</code>'d term ids will only match a proposition definition if
+	 * it is annotated with all of the specified term ids (or terms in their
+	 * subsumption hierarchies).
+	 * 
+	 * @return a {@link String[]} of term ids representing disjunctive normal
+	 *         form.
+	 */
+	public final And<String>[] getTermIds() {
+		return this.termIds.clone();
+	}
 
-    /**
-     * Adds listeners for changes to this Query's properties.
-     *
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void addPropertyChangeListener(PropertyChangeListener listener) {
-        this.changes.addPropertyChangeListener(listener);
-    }
+	/**
+	 * Sets the term ids to be queried in disjunctive normal form. If any terms
+	 * are specified, PROTEMPA will navigate the term's subsumption hierarchy,
+	 * find proposition definitions that have been annotated with each term, and
+	 * add those to the query. If <code>and</code>'d term ids are specified,
+	 * proposition definitions will only match if they are annotated with all of
+	 * the specified term ids (or terms in their subsumption hierarchies).
+	 * 
+	 * @param termIds
+	 *            a {@link And[]} term ids representing disjunctive normal form.
+	 */
+	@SuppressWarnings("unchecked")
+	public final void setTermIds(And<String>[] termIds) {
+		if (termIds == null) {
+			termIds = new And[0];
+		}
+		And<String>[] old = this.termIds;
+		this.termIds = (And<String>[]) termIds.clone();
+		this.changes.firePropertyChange("termIds", old, this.termIds);
+	}
 
-    /**
-     * Removes listeners for changes to this Query's properties.
-     *
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void removePropertyChangeListener(PropertyChangeListener listener) {
-        this.changes.removePropertyChangeListener(listener);
-    }
+	/**
+	 * Adds listeners for changes to this Query's properties.
+	 * 
+	 * @param listener
+	 *            a {@link PropertyChangeListener}.
+	 */
+	public final void addPropertyChangeListener(PropertyChangeListener listener) {
+		this.changes.addPropertyChangeListener(listener);
+	}
 
-    /**
-     * Adds listeners for changes to the specified property.
-     *
-     * @param propertyName the name {@link String} of the property of interest.
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        this.changes.addPropertyChangeListener(propertyName, listener);
-    }
+	/**
+	 * Removes listeners for changes to this Query's properties.
+	 * 
+	 * @param listener
+	 *            a {@link PropertyChangeListener}.
+	 */
+	public final void removePropertyChangeListener(PropertyChangeListener listener) {
+		this.changes.removePropertyChangeListener(listener);
+	}
 
-    /**
-     * Removes listeners for changes to the specified property.
-     *
-     * @param propertyName the name {@link String} of the property that is no
-     * longer of interest.
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        this.changes.removePropertyChangeListener(propertyName, listener);
-    }
+	/**
+	 * Adds listeners for changes to the specified property.
+	 * 
+	 * @param propertyName
+	 *            the name {@link String} of the property of interest.
+	 * @param listener
+	 *            a {@link PropertyChangeListener}.
+	 */
+	public final void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+		this.changes.addPropertyChangeListener(propertyName, listener);
+	}
 
-    @Override
-    public Query build(KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) throws QueryBuildException {
-        if (validatePropositionIds) {
-            for (String propId : propIds) {
-                try {
-                    if (!knowledgeSource.hasPropositionDefinition(propId)) {
-                        throw new QueryBuildException("Invalid proposition id: " + propId);
+	/**
+	 * Removes listeners for changes to the specified property.
+	 * 
+	 * @param propertyName
+	 *            the name {@link String} of the property that is no longer of
+	 *            interest.
+	 * @param listener
+	 *            a {@link PropertyChangeListener}.
+	 */
+	public final void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+		this.changes.removePropertyChangeListener(propertyName, listener);
+	}
 
-                    }
-                } catch (KnowledgeSourceReadException ex) {
-                    throw new QueryBuildException("Could not build query", ex);
-                }
-            }
-        }
-        return new Query(this.keyIds, this.filters, this.propIds, this.termIds,
-                this.propDefs);
-    }
+	@Override
+	public Query build(KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) throws QueryBuildException {
+		if (validatePropositionIds) {
+			for (String propId : propIds) {
+				try {
+					if (!knowledgeSource.hasPropositionDefinition(propId)) {
+						throw new QueryBuildException("Invalid proposition id: " + propId);
 
-    /**
-     * Set the value of the flag that determined whether the build method
-     * validates proposition IDs.
-     *
-     * @param validatePropositionIds Proposition IDs are validated if, and only
-     * if, this is true. The default value for this is true.
-     */
-    public static void setValidatePropositionIds(boolean validatePropositionIdsFlag) {
-        validatePropositionIds = validatePropositionIdsFlag;
-    }
+					}
+				} catch (KnowledgeSourceReadException ex) {
+					throw new QueryBuildException("Could not build query", ex);
+				}
+			}
+		}
+		return new Query(this.keyIds, this.filters, this.propIds, this.termIds);
+	}
 
-    public static boolean isValidatePropositionIds() {
-        return validatePropositionIds;
-    }
+	/**
+	 * Set the value of the flag that determined whether the build method
+	 * validates proposition IDs.
+	 * 
+	 * @param validatePropositionIds
+	 *            Proposition IDs are validated if, and only if, this is true.
+	 *            The default value for this is true.
+	 */
+	public static void setValidatePropositionIds(boolean validatePropositionIdsFlag) {
+		validatePropositionIds = validatePropositionIdsFlag;
+	}
+
+	public static boolean isValidatePropositionIds() {
+		return validatePropositionIds;
+	}
 }

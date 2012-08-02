@@ -285,7 +285,7 @@ public final class Protempa {
         Logger logger = ProtempaUtil.logger();
         logger.info("Executing query");
         Set<String> keyIdsSet = Arrays.asSet(query.getKeyIds());
-        Set<String> propIds = Arrays.asSet(query.getPropositionIds());
+        Set<String> propIds = Arrays.asSet(query.getPropIds());
         Set<And<String>> termIds = Arrays.asSet(query.getTermIds());
         Filter filters = query.getFilters();
         PropositionDefinition[] propDefs = query.getPropositionDefinitions();
@@ -330,7 +330,7 @@ public final class Protempa {
                 new String[] { retrievalStoreEnvironment, processStoreName });
 
         Set<String> keyIds = Arrays.asSet(query.getKeyIds());
-        Set<String> propIds = Arrays.asSet(query.getPropositionIds());
+        Set<String> propIds = Arrays.asSet(query.getPropIds());
         Set<And<String>> termIds = Arrays.asSet(query.getTermIds());
         Filter filters = query.getFilters();
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
@@ -379,7 +379,7 @@ public final class Protempa {
                 "Retrieved data will be persisted in store: {0}",
                 retrievalStoreEnvironment);
         Set<String> keyIdsSet = Arrays.asSet(query.getKeyIds());
-        Set<String> propIds = Arrays.asSet(query.getPropositionIds());
+        Set<String> propIds = Arrays.asSet(query.getPropIds());
         Set<And<String>> termIds = Arrays.asSet(query.getTermIds());
         Filter filters = query.getFilters();
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
@@ -454,7 +454,7 @@ public final class Protempa {
             String propositionStoreName, String workingMemoryStoreEnvironment)
             throws FinderException {
         processResultsAndPersist(query, Arrays.asSet(query.getKeyIds()),
-                Arrays.asSet(query.getPropositionIds()), propositionStoreName,
+                Arrays.asSet(query.getPropIds()), propositionStoreName,
                 workingMemoryStoreEnvironment);
     }
 
@@ -481,7 +481,7 @@ public final class Protempa {
     public void outputResults(Query query, QueryResultsHandler resultHandler,
             String workingMemoryEnvironment) throws FinderException {
         outputResults(query, Arrays.asSet(query.getKeyIds()),
-                Arrays.asSet(query.getPropositionIds()), resultHandler,
+                Arrays.asSet(query.getPropIds()), resultHandler,
                 workingMemoryEnvironment);
     }
 
@@ -553,7 +553,7 @@ public final class Protempa {
         QuerySession qs = new QuerySession(origQuery, this.abstractionFinder);
         this.abstractionFinder.processAndOutputStoredResults(
                 Arrays.asSet(origQuery.getKeyIds()),
-                Arrays.asSet(origQuery.getPropositionIds()), resultHandler, qs,
+                Arrays.asSet(origQuery.getPropIds()), resultHandler, qs,
                 propositionStoreEnvironment);
     }
 

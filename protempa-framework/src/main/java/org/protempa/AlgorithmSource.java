@@ -55,7 +55,7 @@ public final class AlgorithmSource
         super(backends);
         this.backendManager =
                 new BackendManager<AlgorithmSourceBackendUpdatedEvent, AlgorithmSource, AlgorithmSourceBackend>(
-                backends);
+                this, backends);
     }
 
     /**

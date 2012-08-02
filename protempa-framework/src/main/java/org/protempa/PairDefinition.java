@@ -36,8 +36,8 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     private TemporalExtendedPropositionDefinition leftHandProposition;
     private boolean secondRequired;
 
-    public PairDefinition(String id) {
-        super(id);
+    public PairDefinition(KnowledgeBase kb, String id) {
+        super(kb, id);
         this.concatenable = true;
         this.solid = true;
     }

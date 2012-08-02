@@ -26,23 +26,25 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * Abstract base class for all knowledge definition classes.
- *
+ * 
  * FIXME We support event, abstraction, and primitive parameter definitions with
- * the same name, yet
- * <code>Protempa</code>'s public API assumes that they all share the same
- * namespace. This needs to be fixed. I'm leaning toward having all knowledge
- * definitions share the same namespace, in which case, no changes to Protempa's
- * API would be required, and the duplicate id checking could all occur in this
- * class in a concrete implementation of
+ * the same name, yet <code>Protempa</code>'s public API assumes that they
+ * all share the same namespace. This needs to be fixed. I'm leaning toward
+ * having all knowledge definitions share the same namespace, in which case, no
+ * changes to Protempa's API would be required, and the duplicate id checking
+ * could all occur in this class in a concrete implementation of
  * <code>setId0()</code>.
- *
+ * 
  * @author Andrew Post
  */
 public abstract class AbstractPropositionDefinition implements
         PropositionDefinition {
-    
-    private static final long serialVersionUID = -2754387751719003721L;
-    private static final PropertyDefinition[] EMPTY_PROPERTIES =
+
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -2754387751719003721L;
+	private static final PropertyDefinition[] EMPTY_PROPERTIES =
             new PropertyDefinition[0];
     private static final ReferenceDefinition[] EMPTY_REFERENCES =
             new ReferenceDefinition[0];
@@ -75,17 +77,21 @@ public abstract class AbstractPropositionDefinition implements
     /**
      * Creates a new knowledge definition.
      *
-     * @param id the requested {@link String} id of propositions created by this
-     * definition. If
-     * <code>null</code> or already taken by another knowledge definition,
-     * another id will be assigned (check with
-     * <code>getId()</code>).
+     * @param kb
+     *            the <code>KnowledgeBase</code> in which to store this
+     *            object.
+     * @param id
+     *            the requested {@link String} id of propositions created by
+     *            this definition. If <code>null</code> or already taken by
+     *            another knowledge definition, another id will be assigned
+     *            (check with <code>getId()</code>).
      */
-    AbstractPropositionDefinition(String id) {
-        if (id == null) {
-            throw new IllegalArgumentException("id cannot be null");
+    protected AbstractPropositionDefinition(KnowledgeBase kb, String id) {
+        if (kb == null) {
+            throw new IllegalArgumentException(
+                    "A knowledge base must be specified");
         }
-        this.id = id.intern();
+        this.id = setId0(kb, id).intern();
         this.directChildren = ArrayUtils.EMPTY_STRING_ARRAY;
         this.inverseIsA = ArrayUtils.EMPTY_STRING_ARRAY;
         this.displayName = "";
@@ -94,6 +100,34 @@ public abstract class AbstractPropositionDefinition implements
         this.propertyDefinitions = EMPTY_PROPERTIES;
         this.referenceDefinitions = EMPTY_REFERENCES;
         this.sourceId = NotRecordedSourceId.getInstance();
+    }
+
+    /**
+     * Uses the knowledge base to validate the requested <code>id</code>, and
+     * optionally provide a valid one of the requested <code>id</code> can't
+     * be given out (e.g., because the requested <code>id</code> was
+     * <code>null</code>, because the requested <code>id</code> is already
+     * taken.
+     *
+     * @param kb
+     *            this knowledge definition's {@link KnowledgeBase}.
+     * @param id
+     *            the requested id {@link String}.
+     * @param fail
+     *            if an <code>IllegalArgumentException</code> should be thrown
+     *            when an invalid <code>id</code> is provided. If
+     *            <code>true</code> the exception is thrown; if
+     *            <code>false</code>, a valid id is automatically assigned.
+     * @return the assigned id <code>String</code>.
+     */
+    private static String setId0(KnowledgeBase kb, String id) {
+        if (id == null || id.length() == 0) {
+            return kb.getNextKnowledgeDefinitionObjectId();
+        } else if (!kb.isUniqueKnowledgeDefinitionObjectId(id)) {
+            throw new IllegalArgumentException("duplicate proposition definition id: " + id);
+        } else {
+            return id;
+        }
     }
 
     @Override
@@ -109,7 +143,8 @@ public abstract class AbstractPropositionDefinition implements
     /**
      * Sets this knowledge definition's abbreviated display name.
      *
-     * @param abbrev an abbreviated display name {@link String}.
+     * @param abbrev
+     *            an abbreviated display name {@link String}.
      */
     public final void setAbbreviatedDisplayName(String abbrev) {
         if (abbrev == null) {
@@ -130,7 +165,8 @@ public abstract class AbstractPropositionDefinition implements
     /**
      * Sets this proposition definition's human-readable display name.
      *
-     * @param displayName a display name {@link String}.
+     * @param displayName
+     *            a display name {@link String}.
      */
     public final void setDisplayName(String displayName) {
         if (displayName == null) {
@@ -166,8 +202,9 @@ public abstract class AbstractPropositionDefinition implements
     /**
      * Sets the children of this proposition definition.
      *
-     * @param inverseIsA a {@link String[]} of proposition definition ids. No
-     * <code>null</code> or duplicate elements allowed.
+     * @param inverseIsA
+     *            a {@link String[]} of proposition definition ids. No
+     *            <code>null</code> or duplicate elements allowed.
      */
     public void setInverseIsA(String[] inverseIsA) {
         String[] old = this.inverseIsA;
@@ -196,9 +233,9 @@ public abstract class AbstractPropositionDefinition implements
 
     /**
      * Assigns this proposition with associated {@link TermDefinition} ids.
-     *
-     * @param termId a term definition id {@link String}. No
-     * <code>null</code> or duplicate elements allowed.
+     * 
+     * @param termId a term definition id {@link String}.  No
+     *            <code>null</code> or duplicate elements allowed.
      */
     public final void setTermIds(String[] termIds) {
         String[] old = this.termIds;
@@ -283,7 +320,7 @@ public abstract class AbstractPropositionDefinition implements
                     this.referenceDefinitions);
         }
     }
-
+    
     @Override
     public boolean getInDataSource() {
         return this.inDataSource;
@@ -302,7 +339,7 @@ public abstract class AbstractPropositionDefinition implements
     public SourceId getSourceId() {
         return this.sourceId;
     }
-
+    
     public void setSourceId(SourceId sourceId) {
         if (sourceId == null) {
             this.sourceId = NotRecordedSourceId.getInstance();

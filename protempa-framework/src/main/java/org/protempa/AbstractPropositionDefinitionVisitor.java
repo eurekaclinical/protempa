@@ -40,7 +40,7 @@ public abstract class AbstractPropositionDefinitionVisitor implements
      *            a {@link Collection<PropositionDefinition>}.
      */
     @Override
-    public void visit(Collection<? extends PropositionDefinition> propositionDefinitions) {
+    public void visit(Collection<PropositionDefinition> propositionDefinitions) {
         for (PropositionDefinition def : propositionDefinitions) {
             def.accept(this);
         }

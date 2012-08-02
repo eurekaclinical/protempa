@@ -36,7 +36,7 @@ public interface PropositionDefinitionVisitor {
      *            a {@link Collection<PropositionDefinition>}. Cannot be
      *            <code>null</code>.
      */
-    void visit(Collection<? extends PropositionDefinition> propositionDefinitions);
+    void visit(Collection<PropositionDefinition> propositionDefinitions);
 
     /**
      * Process a low-level abstraction definition

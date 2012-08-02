@@ -48,8 +48,8 @@ public class PrintInverseIsA extends CLI {
             throw new CLIException("Error reading proposition definition", ex);
         }
         if (propDef == null) {
-            System.out.println("No proposition definition with id '" +
-                    propositionId + "'");
+            System.out.println("No proposition definition with id " +
+                    propositionId);
         } else {
             try {
                 List<PropositionDefinition> result =

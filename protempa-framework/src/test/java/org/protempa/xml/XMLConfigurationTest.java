@@ -178,7 +178,7 @@ public class XMLConfigurationTest extends TestCase {
 		DefaultQueryBuilder queryBuilder = new DefaultQueryBuilder();
 		queryBuilder.setKeyIds(keyIds);
 		queryBuilder.setFilters(timeRange);
-		queryBuilder.setPropositionIds(PROP_IDS);
+		queryBuilder.setPropIds(PROP_IDS);
 		DefaultQueryBuilder.setValidatePropositionIds(false);
 		Query query = queryBuilder.build(new KnowledgeSource(new KnowledgeSourceBackend[0]), new AlgorithmSource(new AlgorithmSourceBackend[0]));
 		return query;

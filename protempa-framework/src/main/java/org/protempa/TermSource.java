@@ -38,7 +38,7 @@ public final class TermSource extends
     public TermSource(TermSourceBackend[] backends) {
         super(backends);
         this.backendManager = new BackendManager<TermSourceBackendUpdatedEvent, TermSource, TermSourceBackend>(
-                backends);
+                this, backends);
         this.notFoundTerms = new HashSet<String>();
     }
 

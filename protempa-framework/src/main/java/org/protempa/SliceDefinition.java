@@ -42,8 +42,8 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
      */
     private int maxIndex = Integer.MAX_VALUE;
 
-    public SliceDefinition(String id) {
-        super(id);
+    public SliceDefinition(KnowledgeBase kb, String id) {
+        super(kb, id);
         this.abstractedFrom = new HashSet<String>(2);
     }
 

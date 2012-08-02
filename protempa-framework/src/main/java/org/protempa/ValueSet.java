@@ -122,7 +122,7 @@ public final class ValueSet {
     private final SourceId sourceId;
 
     public ValueSet(String id, OrderedValue lowerBound,
-            OrderedValue upperBound, SourceId sourceId) {
+            OrderedValue upperBound, KnowledgeBase kb, SourceId sourceId) {
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
@@ -146,8 +146,12 @@ public final class ValueSet {
      * @param valueSetElements a {@link ValueSetElement[]}. No duplicate
      * {@link ValueSetElement}s are allowed.
      */
-    public ValueSet(String id,
+    public ValueSet(KnowledgeBase kb, String id,
             ValueSetElement[] valueSetElements, SourceId sourceId) {
+        if (kb == null) {
+            throw new IllegalArgumentException(
+                    "A knowledge base must be specified");
+        }
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
@@ -179,6 +183,7 @@ public final class ValueSet {
         } else {
             this.sourceId = sourceId;
         }
+        kb.addValueSet(this);
     }
 
     /**
