@@ -72,6 +72,13 @@ public class INICommonsConfigurationsTest {
             f.delete();
         }
     }
+    
+    @Test
+    public void testPathname() {
+        INICommonsConfigurations configurations =
+                new INICommonsConfigurations();
+        assertEquals(CONFIG_DIR, configurations.getDirectory());
+    }
 
     /**
      * Test of load method, of class INICommonsConfigurations.

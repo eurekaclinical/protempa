@@ -30,6 +30,7 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalINIConfiguration;
 import org.apache.commons.configuration.tree.DefaultExpressionEngine;
+import org.apache.commons.io.FileUtils;
 import org.protempa.backend.Backend;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendPropertySpec;
@@ -42,65 +43,115 @@ import org.protempa.backend.InvalidPropertyNameException;
 import org.protempa.backend.InvalidPropertyValueException;
 
 /**
+ * Implements configurations for Protempa using INI files.
  *
  * @author Andrew Post
  */
 public class INICommonsConfigurations implements Configurations {
 
-    private static final String DEFAULT_PATHNAME = 
-            System.getProperty("user.home") + File.separator +
-            ".protempa-configs" + File.separator;
+    /**
+     * The default directory for configurations 
+     * (<code>.protempa-configs</code> in the user's home directory).
+     */
+    public static final File DEFAULT_DIRECTORY =
+            new File(FileUtils.getUserDirectory(), ".protempa-configs");
+    
+    /**
+     * The name of the system property 
+     * (<code>protempa.inicommonsconfigurations.pathname</code>) for specifying 
+     * the configuration file directory.
+     */
+    public static final String DIRECTORY_SYSTEM_PROPERTY =
+            "protempa.inicommonsconfigurations.pathname";
 
     static {
         DefaultExpressionEngine engine = new DefaultExpressionEngine();
         engine.setPropertyDelimiter("|");
         HierarchicalINIConfiguration.setDefaultExpressionEngine(engine);
     }
-    
-    public static String pathname;
-//    private String pathname;
+    private File directory;
 
-
+    /**
+     * Creates an INI file configurations instance. Using this constructor is
+     * equivalent to specifying a
+     * <code>pathname</code> of
+     * <code>null</code> in the one-argument constructor.
+     */
     public INICommonsConfigurations() {
-        this.pathname =
-                System.getProperty(
-                "protempa.inicommonsconfigurations.pathname");
-        if (this.pathname != null && !this.pathname.endsWith(File.separator))
-            this.pathname += File.separator;
-        if (this.pathname == null)
-            this.pathname = DEFAULT_PATHNAME;
-        CommonsUtil.logger().log(Level.FINE, "Using configurations path {0}", 
-                this.pathname);
+        this(null);
+    }
+
+    /**
+     * Creates an INI file configurations instance that looks for configuration
+     * files in the specified directory. If <code>null</code>, it first looks 
+     * for a system property, 
+     * <code>protempa.inicommonsconfigurations.pathname</code> for a pathname.
+     * If unspecified, it looks for configuration files in the default location
+     * (see {@link #DEFAULT_FILE}).
+     *
+     * @param directory a directory.
+     */
+    public INICommonsConfigurations(File directory) {
+        if (directory != null) {
+            this.directory = directory;
+        } else {
+            String pathnameFromSystemProperty =
+                    System.getProperty(DIRECTORY_SYSTEM_PROPERTY);
+            if (pathnameFromSystemProperty != null) {
+                this.directory = new File(pathnameFromSystemProperty);
+            }
+
+        }
+        if (this.directory == null) {
+            this.directory = DEFAULT_DIRECTORY;
+        }
+        CommonsUtil.logger().log(Level.FINE, "Using configurations path {0}",
+                this.directory);
+    }
+
+    /**
+     * Returns the directory in which configuration files are expected to be
+     * found.
+     *
+     * @return a directory {@link File}.
+     */
+    public File getDirectory() {
+        return this.directory;
     }
 
     @Override
     public <B extends Backend> List<BackendInstanceSpec<B>> load(
-            String configurationsId,
+            String configurationId,
             BackendSpec<B> backendSpec)
             throws ConfigurationsLoadException {
-        if (configurationsId == null)
+        if (configurationId == null) {
             throw new IllegalArgumentException(
-                    "configurationsId cannot be null");
-        if (backendSpec == null)
+                    "configurationId cannot be null");
+        }
+        if (backendSpec == null) {
             throw new IllegalArgumentException(
                     "backendSpec cannot be null");
-        File dir = new File(this.pathname);
-        if (!dir.exists() && !dir.mkdir())
+        }
+        if (!this.directory.exists() && !this.directory.mkdir()) {
             throw new ConfigurationsLoadException("Cannot create directory "
-                    + this.pathname);
-        
+                    + this.directory);
+        }
+
         HierarchicalINIConfiguration config =
                 new HierarchicalINIConfiguration();
         try {
-            config.load(this.pathname + configurationsId);
+            config.load(
+                    new File(
+                    this.directory, configurationId).getAbsolutePath());
             Set<String> sectionNames = config.getSections();
             List<BackendInstanceSpec<B>> results =
                     new ArrayList<BackendInstanceSpec<B>>();
             for (String sectionName : sectionNames) {
                 String specId = sectionName.substring(0,
                         sectionName.lastIndexOf('_'));
-                if (!specId.equals(backendSpec.getId()))
+                if (!specId.equals(backendSpec.getId())) {
                     continue;
+                }
                 Configuration section = config.subset(sectionName);
                 BackendInstanceSpec<B> backendInstanceSpec =
                         backendSpec.newBackendInstanceSpec();
@@ -122,27 +173,28 @@ public class INICommonsConfigurations implements Configurations {
     }
 
     @Override
-    public void save(String configurationsId,
+    public void save(String configurationId,
             List<BackendInstanceSpec> backendInstanceSpecs)
             throws ConfigurationsSaveException {
-        if (configurationsId == null)
+        if (configurationId == null) {
             throw new IllegalArgumentException(
-                    "configurationsId cannot be null");
-        File dir = new File(this.pathname);
-        if (!dir.exists() && !dir.mkdir()) {
+                    "configurationId cannot be null");
+        }
+        if (!this.directory.exists() && !this.directory.mkdir()) {
             throw new ConfigurationsSaveException("Cannot create directory "
-                    + this.pathname);
+                    + this.directory);
         }
         HierarchicalINIConfiguration config =
                 new HierarchicalINIConfiguration();
         try {
-            File configurationsPath = new File(dir, configurationsId);
+            File configurationsPath = 
+                    new File(this.directory, configurationId);
             int i = 0;
             for (BackendInstanceSpec backendInstanceSpec :
-                backendInstanceSpecs) {
+                    backendInstanceSpecs) {
                 BackendSpec backendSpec = backendInstanceSpec.getBackendSpec();
                 List<BackendPropertySpec> specs =
-                    backendInstanceSpec.getBackendPropertySpecs();
+                        backendInstanceSpec.getBackendPropertySpecs();
                 for (BackendPropertySpec spec : specs) {
                     config.setProperty(backendSpec.getId() + "_" + i
                             + "|" + spec.getName(),
@@ -150,7 +202,7 @@ public class INICommonsConfigurations implements Configurations {
                 }
                 i++;
             }
-            
+
             config.save(configurationsPath.getPath());
         } catch (InvalidPropertyNameException ex) {
             throw new ConfigurationsSaveException(ex);
@@ -160,19 +212,22 @@ public class INICommonsConfigurations implements Configurations {
     }
 
     @Override
-    public List<String> loadConfigurationIds(String configurationsId)
+    public List<String> loadConfigurationIds(String configurationId)
             throws ConfigurationsLoadException {
-        if (configurationsId == null)
+        if (configurationId == null) {
             throw new IllegalArgumentException(
-                    "configurationsId cannot be null");
-        File dir = new File(this.pathname);
-        if (!dir.exists() && !dir.mkdir())
+                    "configurationId cannot be null");
+        }
+        if (!this.directory.exists() && !this.directory.mkdir()) {
             throw new ConfigurationsLoadException("Cannot create directory "
-                    + this.pathname);
+                    + this.directory);
+        }
         HierarchicalINIConfiguration config =
                 new HierarchicalINIConfiguration();
         try {
-            config.load(this.pathname + configurationsId);
+            config.load(
+                    new File(this.directory, 
+                    configurationId).getAbsolutePath());
             Set<String> sections = config.getSections();
             String[] result = new String[sections.size()];
             for (String section : sections) {
@@ -182,9 +237,10 @@ public class INICommonsConfigurations implements Configurations {
                 if (result[index] != null) {
                     throw new ConfigurationsLoadException(
                             "duplicate indices on sections");
-                } else if (index > result.length - 1)
+                } else if (index > result.length - 1) {
                     throw new ConfigurationsLoadException("index too high: "
                             + index);
+                }
                 result[index] =
                         section.substring(0, section.lastIndexOf('_'));
             }
@@ -195,15 +251,16 @@ public class INICommonsConfigurations implements Configurations {
     }
 
     @Override
-    public void remove(String configurationsId) 
+    public void remove(String configurationId)
             throws ConfigurationRemoveException {
-        if (configurationsId == null)
+        if (configurationId == null) {
             throw new IllegalArgumentException(
                     "configurationsId cannot be null");
-        File f = new File(this.pathname + configurationsId);
-        if (f.exists() && !f.delete())
+        }
+        File f = new File(this.directory + configurationId);
+        if (f.exists() && !f.delete()) {
             throw new ConfigurationRemoveException(
-                    "Could not remove " + configurationsId);
+                    "Could not remove " + configurationId);
+        }
     }
-
 }
