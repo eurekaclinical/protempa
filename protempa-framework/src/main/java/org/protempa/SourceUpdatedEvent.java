@@ -20,34 +20,29 @@
 package org.protempa;
 
 import java.util.EventObject;
+import org.protempa.backend.Backend;
+import org.protempa.backend.BackendUpdatedEvent;
 
 /**
  * Source updated events.
- * 
+ *
  * @author Andrew Post
  *
  * @param <S>
  */
 public abstract class SourceUpdatedEvent extends EventObject {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 7105747666448825906L;
-	private final Source<?> source;
+    
+    private static final long serialVersionUID = 7105747666448825906L;
 
-	SourceUpdatedEvent(Source<?> protempaSource) {
-		super(protempaSource);
-		this.source = protempaSource;
-	}
-	
-	/**
-	 * Returns the source {@link Source} (the same as what
-	 * <code>getSource()</code> returns).
-	 * 
-	 * @return a {@link Backend}.
-	 */
-	public Source<?> getPROTEMPASource() {
-		return this.source;
-	}
+    <E extends BackendUpdatedEvent> SourceUpdatedEvent(Source<? extends SourceUpdatedEvent, ? extends Backend<E>, E> protempaSource) {
+        super(protempaSource);
+    }
 
+    /**
+     * Returns the source {@link Source} (the same as what
+     * <code>getSource()</code> returns).
+     *
+     * @return a {@link Backend}.
+     */
+    public abstract<E extends BackendUpdatedEvent> Source<? extends SourceUpdatedEvent, ? extends Backend<E>, E> getProtempaSource();
 }

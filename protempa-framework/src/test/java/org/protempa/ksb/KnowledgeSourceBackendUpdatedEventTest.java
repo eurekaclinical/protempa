@@ -35,7 +35,7 @@ public class KnowledgeSourceBackendUpdatedEventTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         this.knowledgeSourceBackend = new MockKnowledgeSourceBackend();
-        this.knowledgeSource = new KnowledgeSource(
+        this.knowledgeSource = new KnowledgeSourceImpl(
                 new KnowledgeSourceBackend[]{this.knowledgeSourceBackend});
     }
 

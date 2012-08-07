@@ -40,7 +40,9 @@ import javax.xml.validation.Validator;
 import junit.framework.TestCase;
 
 import org.protempa.AlgorithmSource;
+import org.protempa.AlgorithmSourceImpl;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceImpl;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
@@ -80,180 +82,180 @@ import org.xml.sax.SAXException;
 
 /**
  * Tests for XML
- * 
+ *
  * @author Mark Grand
  */
 public class XMLConfigurationTest extends TestCase {
 
-	private DateTimeFilter timeRange = new DateTimeFilter(new String[] { "Encounter" }, new GregorianCalendar(2010, 11, 1).getTime(),
-			AbsoluteTimeGranularity.DAY, new GregorianCalendar(2011, 2, 31).getTime(), AbsoluteTimeGranularity.DAY, Side.FINISH,
-			Side.START);
+    private DateTimeFilter timeRange = new DateTimeFilter(new String[]{"Encounter"}, new GregorianCalendar(2010, 11, 1).getTime(),
+            AbsoluteTimeGranularity.DAY, new GregorianCalendar(2011, 2, 31).getTime(), AbsoluteTimeGranularity.DAY, Side.FINISH,
+            Side.START);
 
-	@Override
-	protected void setUp() throws Exception {
-	}
+    @Override
+    protected void setUp() throws Exception {
+    }
 
-	@Override
-	protected void tearDown() throws Exception {
-	}
+    @Override
+    protected void tearDown() throws Exception {
+    }
 
-	public void testQuery() throws Throwable {
-		Query query = createTestQuery();
-		File file = File.createTempFile("xmlConfigTestz", ".xml");
-		XMLConfiguration.writeQueryAsXML(query, file, true);
-		checkXMLValid(file, "protempa_query.xsd");
-		KnowledgeSource ks = new KnowledgeSource(new KnowledgeSourceBackend[0]);
-		AlgorithmSource as = new AlgorithmSource(new AlgorithmSourceBackend[0]);
-		Query reconstitutedQuery = XMLConfiguration.readQueryAsXML(file, ks, as);
-		assertTrue("Deserialized query is equal to the original query", reconstitutedQuery.equals(query));
-		
-		File z2 = File.createTempFile("xmlConfigTestz2", ".xml");
-		XMLConfiguration.writeQueryAsXML(reconstitutedQuery, z2);
-		FileReader freader = new FileReader(z2);
-		String xml = new BufferedReader(freader).readLine();
-		System.out.println(xml);
-		assertTrue(xml.contains("xsi:noNamespaceSchemaLocation=\"http://aiwdev02.eushc.org/protempa/schema/1.1/protempa_query.xsd\""));
-	}
+    public void testQuery() throws Throwable {
+        Query query = createTestQuery();
+        File file = File.createTempFile("xmlConfigTestz", ".xml");
+        XMLConfiguration.writeQueryAsXML(query, file, true);
+        checkXMLValid(file, "protempa_query.xsd");
+        KnowledgeSource ks = new KnowledgeSourceImpl(new KnowledgeSourceBackend[0]);
+        AlgorithmSource as = new AlgorithmSourceImpl(new AlgorithmSourceBackend[0]);
+        Query reconstitutedQuery = XMLConfiguration.readQueryAsXML(file, ks, as);
+        assertTrue("Deserialized query is equal to the original query", reconstitutedQuery.equals(query));
 
-	private void checkXMLValid(File file, String xsd) throws SAXException, ParserConfigurationException, IOException {
-		DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		Document document = parser.parse(file);
+        File z2 = File.createTempFile("xmlConfigTestz2", ".xml");
+        XMLConfiguration.writeQueryAsXML(reconstitutedQuery, z2);
+        FileReader freader = new FileReader(z2);
+        String xml = new BufferedReader(freader).readLine();
+        System.out.println(xml);
+        assertTrue(xml.contains("xsi:noNamespaceSchemaLocation=\"http://aiwdev02.eushc.org/protempa/schema/1.1/protempa_query.xsd\""));
+    }
 
-		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-		// Get schema from the local file since the correct schema may not yet
-		// be deployed to its URL when we run this test.
-		Schema schema = schemaFactory.newSchema(getClass().getResource(xsd));
-		Validator validator = schema.newValidator();
-		validator.validate(new DOMSource(document));
-	}
+    private void checkXMLValid(File file, String xsd) throws SAXException, ParserConfigurationException, IOException {
+        DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document document = parser.parse(file);
 
-	private Query createTestQuery() throws Exception {
-		final String[] keyIds = { "keyId1", "keyId2" };
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        // Get schema from the local file since the correct schema may not yet
+        // be deployed to its URL when we run this test.
+        Schema schema = schemaFactory.newSchema(getClass().getResource(xsd));
+        Validator validator = schema.newValidator();
+        validator.validate(new DOMSource(document));
+    }
 
-		final String[] PROP_IDS = { "Patient", "Encounter", "30DayReadmission", "No30DayReadmission", "PatientAll", "DISEASEINDICATOR:EndStageRenalDisease",
-				"DISEASEINDICATOR:UncontrolledDiabetes", "DISEASEINDICATOR:MetastasisEvent", "PROCEDUREINDICATOR:BoneMarrowTransplantEvent",
-				"DISEASEINDICATOR:Obesity", "ERATCancer", "ERATCKD", "VitalSign", "Geography", "MSDRG:MSDRG", "LAB:PlateletCountClassification", "LAB:1000764",
-				"MED:(LME87) inotropic agents" };
+    private Query createTestQuery() throws Exception {
+        final String[] keyIds = {"keyId1", "keyId2"};
 
-		/*
-		 * Includes only inpatient visits.
-		 */
-		PropertyValueFilter encType = new PropertyValueFilter(new String[] { "Encounter" }, "type", ValueComparator.EQUAL_TO, new NominalValue("INPATIENT"));
-		timeRange.setAnd(encType);
+        final String[] PROP_IDS = {"Patient", "Encounter", "30DayReadmission", "No30DayReadmission", "PatientAll", "DISEASEINDICATOR:EndStageRenalDisease",
+            "DISEASEINDICATOR:UncontrolledDiabetes", "DISEASEINDICATOR:MetastasisEvent", "PROCEDUREINDICATOR:BoneMarrowTransplantEvent",
+            "DISEASEINDICATOR:Obesity", "ERATCancer", "ERATCKD", "VitalSign", "Geography", "MSDRG:MSDRG", "LAB:PlateletCountClassification", "LAB:1000764",
+            "MED:(LME87) inotropic agents"};
 
-		/*
-		 * Includes only inpatient visits at EUH, EUHM and WW.
-		 */
-		PropertyValueFilter healthcareEntity = new PropertyValueFilter(new String[] { "Encounter" }, "healthcareEntity", ValueComparator.IN,
-				NominalValue.getInstance("EUH"), NominalValue.getInstance("CLH"), NominalValue.getInstance("WW"));
-		encType.setAnd(healthcareEntity);
+        /*
+         * Includes only inpatient visits.
+         */
+        PropertyValueFilter encType = new PropertyValueFilter(new String[]{"Encounter"}, "type", ValueComparator.EQUAL_TO, new NominalValue("INPATIENT"));
+        timeRange.setAnd(encType);
 
-		/*
-		 * Nonsense filter for testing booleanValue
-		 */
-		PropertyValueFilter fubarEntity = new PropertyValueFilter(new String[] { "Encounter" }, "FUBAR", ValueComparator.EQUAL_TO, BooleanValue.TRUE);
-		healthcareEntity.setAnd(fubarEntity);
+        /*
+         * Includes only inpatient visits at EUH, EUHM and WW.
+         */
+        PropertyValueFilter healthcareEntity = new PropertyValueFilter(new String[]{"Encounter"}, "healthcareEntity", ValueComparator.IN,
+                NominalValue.getInstance("EUH"), NominalValue.getInstance("CLH"), NominalValue.getInstance("WW"));
+        encType.setAnd(healthcareEntity);
 
-		/*
-		 * Nonsense filter for testing numberValue
-		 */
-		PropertyValueFilter numberEntity = new PropertyValueFilter(new String[] { "Encounter" }, "measure", ValueComparator.LESS_THAN_OR_EQUAL_TO,
-				NumberValue.getInstance(44));
-		fubarEntity.setAnd(numberEntity);
+        /*
+         * Nonsense filter for testing booleanValue
+         */
+        PropertyValueFilter fubarEntity = new PropertyValueFilter(new String[]{"Encounter"}, "FUBAR", ValueComparator.EQUAL_TO, BooleanValue.TRUE);
+        healthcareEntity.setAnd(fubarEntity);
 
-		/*
-		 * Nonsense filter for testing inequalityValue
-		 */
-		PropertyValueFilter inequalityEntity = new PropertyValueFilter(new String[] { "Encounter" }, "measure", ValueComparator.GREATER_THAN_OR_EQUAL_TO,
-				InequalityNumberValue.parse("<44"));
-		numberEntity.setAnd(inequalityEntity);
+        /*
+         * Nonsense filter for testing numberValue
+         */
+        PropertyValueFilter numberEntity = new PropertyValueFilter(new String[]{"Encounter"}, "measure", ValueComparator.LESS_THAN_OR_EQUAL_TO,
+                NumberValue.getInstance(44));
+        fubarEntity.setAnd(numberEntity);
 
-		/*
-		 * Nonsense filter for testing dateValue
-		 */
-		PropertyValueFilter dateEntity = new PropertyValueFilter(new String[] { "Encounter" }, "measure", ValueComparator.LESS_THAN,
-				DateValue.getInstance(new Date()));
-		inequalityEntity.setAnd(dateEntity);
+        /*
+         * Nonsense filter for testing inequalityValue
+         */
+        PropertyValueFilter inequalityEntity = new PropertyValueFilter(new String[]{"Encounter"}, "measure", ValueComparator.GREATER_THAN_OR_EQUAL_TO,
+                InequalityNumberValue.parse("<44"));
+        numberEntity.setAnd(inequalityEntity);
 
-		DefaultQueryBuilder queryBuilder = new DefaultQueryBuilder();
-		queryBuilder.setKeyIds(keyIds);
-		queryBuilder.setFilters(timeRange);
-		queryBuilder.setPropositionIds(PROP_IDS);
-		DefaultQueryBuilder.setValidatePropositionIds(false);
-		Query query = queryBuilder.build(new KnowledgeSource(new KnowledgeSourceBackend[0]), new AlgorithmSource(new AlgorithmSourceBackend[0]));
-		return query;
-	}
-	
-	public void testTableResultsQueryHandler() throws Throwable {
-		BufferedWriter dataWriter = new BufferedWriter(new StringWriter());
-		TableQueryResultsHandler resultsHandler = createTestTableResultsQueryHandler(dataWriter);
-		File file = File.createTempFile("testTableResultsQueryHandler", ".xml");
-		XMLConfiguration.writeTableQueryResultsHandlerAsXML(resultsHandler, file, true);
-		checkXMLValid(file, "protempa_tableQueryResultsHandler.xsd");
-		TableQueryResultsHandler reconstitutedResultsHandler = XMLConfiguration.readTableQueryResultsHandlerAsXML(file, dataWriter);
-		assertTrue("Deserialized query is equal to the original query", reconstitutedResultsHandler.equals(resultsHandler));
-	}
+        /*
+         * Nonsense filter for testing dateValue
+         */
+        PropertyValueFilter dateEntity = new PropertyValueFilter(new String[]{"Encounter"}, "measure", ValueComparator.LESS_THAN,
+                DateValue.getInstance(new Date()));
+        inequalityEntity.setAnd(dateEntity);
 
-	private TableQueryResultsHandler createTestTableResultsQueryHandler(BufferedWriter dataWriter) {
-		String[] propIds1 = {"p1", "p2", "p3", "p4"};
-		String[] propIds2 = {"q1", "q2", "q3"};
-		PropertyConstraint constraint1 = new PropertyConstraint("foo", ValueComparator.EQUAL_TO, new BooleanValue(Boolean.FALSE));
-		PropertyConstraint constraint2 = new PropertyConstraint("bar", ValueComparator.GREATER_THAN, new DateValue(new Date()));
-		PropertyConstraint constraint3 = new PropertyConstraint("blech", ValueComparator.GREATER_THAN_OR_EQUAL_TO, new NominalValue("qwerty"));
-		ValueList<NominalValue> valueList1 = new ValueList<NominalValue>();
-		valueList1.add(new NominalValue("fx"));
-		valueList1.add(new NominalValue("a1"));
-		PropertyConstraint constraint4 = new PropertyConstraint("gobo", ValueComparator.IN, valueList1);
-		PropertyConstraint constraint5 = new PropertyConstraint("akwa", ValueComparator.LESS_THAN, new NumberValue(123));
-		PropertyConstraint constraint6 = new PropertyConstraint("coom", ValueComparator.LESS_THAN_OR_EQUAL_TO, new InequalityNumberValue(ValueComparator.GREATER_THAN_OR_EQUAL_TO, 34));
-		PropertyConstraint constraint7 = new PropertyConstraint("doga", ValueComparator.NOT_EQUAL_TO , new InequalityNumberValue(ValueComparator.LESS_THAN, 34));
-		ValueList<NumberValue> valueList2 = new ValueList<NumberValue>();
-		valueList2.add(new NumberValue(77));
-		valueList2.add(new NumberValue(86));
-		PropertyConstraint constraint8 = new PropertyConstraint("ekro", ValueComparator.NOT_IN , valueList2);
-		
-		PropertyConstraint[] constraints1 = {constraint1, constraint2, constraint3, constraint4};
-		PropertyConstraint[] constraints2 = {constraint5, constraint6, constraint7, constraint8};
-		Value[] valueArray1 = {new NumberValue(4), new NumberValue(5), new NumberValue(7.3)};
-		Value[] valueArray2 = {new NominalValue("asdf"), new NominalValue("opd")};
-		Relation relation1 = new Relation(6, RelativeDayUnit.DAY, 4, RelativeHourUnit.HOUR, 2, AbsoluteTimeUnit.SECOND, 44, AbsoluteTimeUnit.MINUTE, 33, AbsoluteTimeUnit.HOUR, 144, AbsoluteTimeUnit.DAY, 14, AbsoluteTimeUnit.WEEK, 3, AbsoluteTimeUnit.YEAR);
-		Relation relation2 = new Relation(6, RelativeDayUnit.DAY, 4, RelativeHourUnit.HOUR, 2, AbsoluteTimeUnit.MONTH, 44, AbsoluteTimeUnit.MINUTE, 33, AbsoluteTimeUnit.HOUR, 144, AbsoluteTimeUnit.DAY, 14, AbsoluteTimeUnit.WEEK, 3, AbsoluteTimeUnit.YEAR);
-		Derivation derivation1 = new Derivation(propIds1, constraints1, new AllPropositionIntervalComparator(),       1, 6,  null,        Derivation.Behavior.MULT_BACKWARD, relation1);
-		Derivation derivation2 = new Derivation(propIds2, constraints2, new AllPropositionIntervalComparator(), 3, 9,  valueArray1, Derivation.Behavior.SINGLE_FORWARD, relation2);
-		Derivation derivation3 = new Derivation(propIds1, constraints1, new AllPropositionIntervalComparator(),  8, 15, valueArray2, Derivation.Behavior.MULT_FORWARD, relation1);
-		Derivation derivation4 = new Derivation(propIds1, constraints1, new AllPropositionIntervalComparator(),  8, 15, valueArray2, Derivation.Behavior.SINGLE_FORWARD, relation2);
-		
-		String[] referenceNames = {"foo","bar","blech"};
-		Reference reference1 = new Reference(referenceNames, propIds1, constraints1, new AllPropositionIntervalComparator(), 1, 5);
-		Reference reference2 = new Reference(new String[0], propIds2, constraints2, new AllPropositionIntervalComparator(), -1, -1);
-		
-		Link[] links = {derivation1, reference1, reference2, derivation2, derivation3, derivation4};
-		AtLeastNColumnSpec atLeastN = new AtLeastNColumnSpec("An overridden name", 47, links, "ja", "nein");
-		CountColumnSpec countColumnSpec = new CountColumnSpec("Different Name", links, true);
-		DistanceBetweenColumnSpec secondsBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.SECOND);
-		DistanceBetweenColumnSpec minutesBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.MINUTE);
-		DistanceBetweenColumnSpec hoursBetweenColumnSpec   = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.HOUR);
-		DistanceBetweenColumnSpec daysBetweenColumnSpec    = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.DAY);
-		DistanceBetweenColumnSpec weeksBetweenColumnSpec   = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.WEEK);
-		DistanceBetweenColumnSpec monthsBetweenColumnSpec  = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.MONTH);
-		DistanceBetweenColumnSpec yearsBetweenColumnSpec   = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.YEAR);
-		OutputConfig outputConfig = new OutputConfig(true, true, true, true, true, true, true, 
-				"idHeading", "valueHeading", "displayNameHeading", "abbrevDisplayNameHeading", "startOrTimestampHeading", "finishHeading", "lengthHeading");
-		ValueOutputConfig valueOutputConfig = new ValueOutputConfig(true, true, "Display Name", "Disp. Nm.");
-		PropositionColumnSpec propositionColumnSpec = new PropositionColumnSpec("xPref", propIds1, outputConfig, valueOutputConfig, links, 5);
-		PropositionValueColumnSpec maxPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.MAX);
-		PropositionValueColumnSpec minPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.MIN);
-		PropositionValueColumnSpec firstPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.FIRST);
-		PropositionValueColumnSpec lastPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.LAST);
-		PropositionValueColumnSpec sumPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.SUM);
-		TableColumnSpec[] columnSpecs = new TableColumnSpec[]{
-				atLeastN, countColumnSpec, 
-				secondsBetweenColumnSpec, minutesBetweenColumnSpec, hoursBetweenColumnSpec, 
-				daysBetweenColumnSpec, weeksBetweenColumnSpec, monthsBetweenColumnSpec, yearsBetweenColumnSpec, 
-				propositionColumnSpec, firstPropositionValueColumnSpec, lastPropositionValueColumnSpec, 
-				maxPropositionValueColumnSpec, minPropositionValueColumnSpec, sumPropositionValueColumnSpec
-				};
-		String[] rowPropositionIds = {"alpha", "beta", "gamma"};
-		return new TableQueryResultsHandler(dataWriter, '\t', rowPropositionIds, columnSpecs, true);
-	}
+        DefaultQueryBuilder queryBuilder = new DefaultQueryBuilder();
+        queryBuilder.setKeyIds(keyIds);
+        queryBuilder.setFilters(timeRange);
+        queryBuilder.setPropositionIds(PROP_IDS);
+        DefaultQueryBuilder.setValidatePropositionIds(false);
+        Query query = queryBuilder.build(new KnowledgeSourceImpl(new KnowledgeSourceBackend[0]), new AlgorithmSourceImpl(new AlgorithmSourceBackend[0]));
+        return query;
+    }
+
+    public void testTableResultsQueryHandler() throws Throwable {
+        BufferedWriter dataWriter = new BufferedWriter(new StringWriter());
+        TableQueryResultsHandler resultsHandler = createTestTableResultsQueryHandler(dataWriter);
+        File file = File.createTempFile("testTableResultsQueryHandler", ".xml");
+        XMLConfiguration.writeTableQueryResultsHandlerAsXML(resultsHandler, file, true);
+        checkXMLValid(file, "protempa_tableQueryResultsHandler.xsd");
+        TableQueryResultsHandler reconstitutedResultsHandler = XMLConfiguration.readTableQueryResultsHandlerAsXML(file, dataWriter);
+        assertTrue("Deserialized query is equal to the original query", reconstitutedResultsHandler.equals(resultsHandler));
+    }
+
+    private TableQueryResultsHandler createTestTableResultsQueryHandler(BufferedWriter dataWriter) {
+        String[] propIds1 = {"p1", "p2", "p3", "p4"};
+        String[] propIds2 = {"q1", "q2", "q3"};
+        PropertyConstraint constraint1 = new PropertyConstraint("foo", ValueComparator.EQUAL_TO, new BooleanValue(Boolean.FALSE));
+        PropertyConstraint constraint2 = new PropertyConstraint("bar", ValueComparator.GREATER_THAN, new DateValue(new Date()));
+        PropertyConstraint constraint3 = new PropertyConstraint("blech", ValueComparator.GREATER_THAN_OR_EQUAL_TO, new NominalValue("qwerty"));
+        ValueList<NominalValue> valueList1 = new ValueList<NominalValue>();
+        valueList1.add(new NominalValue("fx"));
+        valueList1.add(new NominalValue("a1"));
+        PropertyConstraint constraint4 = new PropertyConstraint("gobo", ValueComparator.IN, valueList1);
+        PropertyConstraint constraint5 = new PropertyConstraint("akwa", ValueComparator.LESS_THAN, new NumberValue(123));
+        PropertyConstraint constraint6 = new PropertyConstraint("coom", ValueComparator.LESS_THAN_OR_EQUAL_TO, new InequalityNumberValue(ValueComparator.GREATER_THAN_OR_EQUAL_TO, 34));
+        PropertyConstraint constraint7 = new PropertyConstraint("doga", ValueComparator.NOT_EQUAL_TO, new InequalityNumberValue(ValueComparator.LESS_THAN, 34));
+        ValueList<NumberValue> valueList2 = new ValueList<NumberValue>();
+        valueList2.add(new NumberValue(77));
+        valueList2.add(new NumberValue(86));
+        PropertyConstraint constraint8 = new PropertyConstraint("ekro", ValueComparator.NOT_IN, valueList2);
+
+        PropertyConstraint[] constraints1 = {constraint1, constraint2, constraint3, constraint4};
+        PropertyConstraint[] constraints2 = {constraint5, constraint6, constraint7, constraint8};
+        Value[] valueArray1 = {new NumberValue(4), new NumberValue(5), new NumberValue(7.3)};
+        Value[] valueArray2 = {new NominalValue("asdf"), new NominalValue("opd")};
+        Relation relation1 = new Relation(6, RelativeDayUnit.DAY, 4, RelativeHourUnit.HOUR, 2, AbsoluteTimeUnit.SECOND, 44, AbsoluteTimeUnit.MINUTE, 33, AbsoluteTimeUnit.HOUR, 144, AbsoluteTimeUnit.DAY, 14, AbsoluteTimeUnit.WEEK, 3, AbsoluteTimeUnit.YEAR);
+        Relation relation2 = new Relation(6, RelativeDayUnit.DAY, 4, RelativeHourUnit.HOUR, 2, AbsoluteTimeUnit.MONTH, 44, AbsoluteTimeUnit.MINUTE, 33, AbsoluteTimeUnit.HOUR, 144, AbsoluteTimeUnit.DAY, 14, AbsoluteTimeUnit.WEEK, 3, AbsoluteTimeUnit.YEAR);
+        Derivation derivation1 = new Derivation(propIds1, constraints1, new AllPropositionIntervalComparator(), 1, 6, null, Derivation.Behavior.MULT_BACKWARD, relation1);
+        Derivation derivation2 = new Derivation(propIds2, constraints2, new AllPropositionIntervalComparator(), 3, 9, valueArray1, Derivation.Behavior.SINGLE_FORWARD, relation2);
+        Derivation derivation3 = new Derivation(propIds1, constraints1, new AllPropositionIntervalComparator(), 8, 15, valueArray2, Derivation.Behavior.MULT_FORWARD, relation1);
+        Derivation derivation4 = new Derivation(propIds1, constraints1, new AllPropositionIntervalComparator(), 8, 15, valueArray2, Derivation.Behavior.SINGLE_FORWARD, relation2);
+
+        String[] referenceNames = {"foo", "bar", "blech"};
+        Reference reference1 = new Reference(referenceNames, propIds1, constraints1, new AllPropositionIntervalComparator(), 1, 5);
+        Reference reference2 = new Reference(new String[0], propIds2, constraints2, new AllPropositionIntervalComparator(), -1, -1);
+
+        Link[] links = {derivation1, reference1, reference2, derivation2, derivation3, derivation4};
+        AtLeastNColumnSpec atLeastN = new AtLeastNColumnSpec("An overridden name", 47, links, "ja", "nein");
+        CountColumnSpec countColumnSpec = new CountColumnSpec("Different Name", links, true);
+        DistanceBetweenColumnSpec secondsBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.SECOND);
+        DistanceBetweenColumnSpec minutesBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.MINUTE);
+        DistanceBetweenColumnSpec hoursBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.HOUR);
+        DistanceBetweenColumnSpec daysBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.DAY);
+        DistanceBetweenColumnSpec weeksBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.WEEK);
+        DistanceBetweenColumnSpec monthsBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.MONTH);
+        DistanceBetweenColumnSpec yearsBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.YEAR);
+        OutputConfig outputConfig = new OutputConfig(true, true, true, true, true, true, true,
+                "idHeading", "valueHeading", "displayNameHeading", "abbrevDisplayNameHeading", "startOrTimestampHeading", "finishHeading", "lengthHeading");
+        ValueOutputConfig valueOutputConfig = new ValueOutputConfig(true, true, "Display Name", "Disp. Nm.");
+        PropositionColumnSpec propositionColumnSpec = new PropositionColumnSpec("xPref", propIds1, outputConfig, valueOutputConfig, links, 5);
+        PropositionValueColumnSpec maxPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.MAX);
+        PropositionValueColumnSpec minPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.MIN);
+        PropositionValueColumnSpec firstPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.FIRST);
+        PropositionValueColumnSpec lastPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.LAST);
+        PropositionValueColumnSpec sumPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.SUM);
+        TableColumnSpec[] columnSpecs = new TableColumnSpec[]{
+            atLeastN, countColumnSpec,
+            secondsBetweenColumnSpec, minutesBetweenColumnSpec, hoursBetweenColumnSpec,
+            daysBetweenColumnSpec, weeksBetweenColumnSpec, monthsBetweenColumnSpec, yearsBetweenColumnSpec,
+            propositionColumnSpec, firstPropositionValueColumnSpec, lastPropositionValueColumnSpec,
+            maxPropositionValueColumnSpec, minPropositionValueColumnSpec, sumPropositionValueColumnSpec
+        };
+        String[] rowPropositionIds = {"alpha", "beta", "gamma"};
+        return new TableQueryResultsHandler(dataWriter, '\t', rowPropositionIds, columnSpecs, true);
+    }
 }

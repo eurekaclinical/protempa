@@ -43,7 +43,9 @@ import org.protempa.backend.InvalidPropertyNameException;
 import org.protempa.backend.InvalidPropertyValueException;
 
 /**
- * Implements configurations for Protempa using INI files.
+ * Implements configurations for Protempa using INI files. A configuration id
+ * is the name of an INI file that is in a directory specified in the 
+ * constructor.
  *
  * @author Andrew Post
  */

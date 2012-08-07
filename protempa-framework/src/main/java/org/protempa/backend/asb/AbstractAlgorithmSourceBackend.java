@@ -30,7 +30,7 @@ import org.protempa.backend.AlgorithmSourceBackendUpdatedEvent;
  * @author Andrew Post
  */
 public abstract class AbstractAlgorithmSourceBackend extends 
-        AbstractBackend<AlgorithmSourceBackendUpdatedEvent, AlgorithmSource>
+        AbstractBackend<AlgorithmSourceBackendUpdatedEvent>
         implements AlgorithmSourceBackend {
 
     /**

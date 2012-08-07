@@ -25,38 +25,48 @@ import org.protempa.backend.Backend;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractSource<E extends SourceUpdatedEvent,
-        T extends BackendUpdatedEvent> implements Source<T> {
+public abstract class AbstractSource<S extends SourceUpdatedEvent, 
+        B extends Backend, E extends SourceUpdatedEvent, 
+        T extends BackendUpdatedEvent> implements Source<S, B, T> {
 
-    private final List<SourceListener<E>> listenerList;
-    private Backend[] backends;
+    private final List<SourceListener<S>> listenerList;
+    private B[] backends;
     private boolean closed;
 
     /**
      * Makes this {@link Source} a listener to events fired by the provided
      * {@link Backend}s.
-     * 
-     * @param backends a {@link Backend[]}.
+     *
+     * @param backends a {@link Backend[]}. Cannot be <code>null</code>, and
+     * cannot contain <code>null</code> elements or duplicates.
      */
-    AbstractSource(Backend[] backends) {
-        this.listenerList = new ArrayList<SourceListener<E>>();
-        if (backends != null) {
-            this.backends = backends;
-            for (Backend backend : this.backends) {
-                backend.addBackendListener(this);
-            }
-        } else {
-            this.backends = null;
+    AbstractSource(B[] backends) {
+        ProtempaUtil.checkArrayForNullElement(backends, "backends");
+        ProtempaUtil.checkArrayForDuplicates(backends, "backends");
+        this.listenerList = new ArrayList<SourceListener<S>>();
+        this.backends = backends.clone();
+        for (Backend backend : this.backends) {
+            backend.addBackendListener(this);
         }
+    }
+    
+    /**
+     * Gets the backends registered to this source.
+     * 
+     * @return an array of backends. Guaranteed not <code>null</code>.
+     */
+    @Override
+    public final B[] getBackends() {
+        return this.backends.clone();
     }
 
     /**
      * Adds a listener that gets called whenever something changes.
      *
-     * @param listener
-     *            a {@link DataSourceListener}.
+     * @param listener a {@link DataSourceListener}.
      */
-    public void addSourceListener(SourceListener<E> listener) {
+    @Override
+    public final void addSourceListener(SourceListener<S> listener) {
         if (listener != null) {
             this.listenerList.add(listener);
         }
@@ -65,10 +75,10 @@ public abstract class AbstractSource<E extends SourceUpdatedEvent,
     /**
      * Removes a listener so that changes to the source are no longer sent.
      *
-     * @param listener
-     *            a {@link DataSourceListener}.
+     * @param listener a {@link DataSourceListener}.
      */
-    public void removeSourceListener(SourceListener<E> listener) {
+    @Override
+    public final void removeSourceListener(SourceListener<S> listener) {
         this.listenerList.remove(listener);
     }
 
@@ -79,13 +89,13 @@ public abstract class AbstractSource<E extends SourceUpdatedEvent,
      *
      * @see SourceListener
      */
-    protected void fireSourceUpdated(E e) {
+    protected void fireSourceUpdated(S e) {
         for (int i = 0, n = this.listenerList.size(); i < n; i++) {
             this.listenerList.get(i).sourceUpdated(e);
         }
     }
 
-    protected void fireClosedUnexpectedly(SourceClosedUnexpectedlyEvent<T> e) {
+    protected void fireClosedUnexpectedly(SourceClosedUnexpectedlyEvent<S, B, T> e) {
         for (int i = 0, n = this.listenerList.size(); i < n; i++) {
             this.listenerList.get(i).closedUnexpectedly(e);
         }
@@ -99,12 +109,12 @@ public abstract class AbstractSource<E extends SourceUpdatedEvent,
      */
     @Override
     public void close() {
-        if (this.backends != null) {
-            for (Backend backend : this.backends) {
-                backend.removeBackendListener(this);
-            }
+        for (Backend backend : this.backends) {
+            backend.removeBackendListener(this);
         }
-        this.backends = null;
+        for (Backend backend : this.backends) {
+            backend.close();
+        }
         this.closed = true;
     }
 
@@ -113,8 +123,9 @@ public abstract class AbstractSource<E extends SourceUpdatedEvent,
     }
 
     @Override
-    public void unrecoverableErrorOccurred(UnrecoverableBackendErrorEvent e) {
+    public final void unrecoverableErrorOccurred(
+            UnrecoverableBackendErrorEvent e) {
         close();
-        this.fireClosedUnexpectedly(new SourceClosedUnexpectedlyEvent<T>(this));
+        fireClosedUnexpectedly(new SourceClosedUnexpectedlyEvent<S, B, T>(this));
     }
 }

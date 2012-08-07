@@ -19,16 +19,9 @@
  */
 package org.protempa.backend.dsb;
 
-import org.protempa.DataSource;
-import org.protempa.backend.dsb.filter.Filter;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.protempa.*;
 
 import org.protempa.backend.AbstractBackend;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
-import org.protempa.proposition.Proposition;
 
 
 /**
@@ -37,16 +30,8 @@ import org.protempa.proposition.Proposition;
  * @author Andrew Post
  */
 public abstract class AbstractDataSourceBackend extends
-		AbstractBackend<DataSourceBackendUpdatedEvent, DataSource> 
+		AbstractBackend<DataSourceBackendUpdatedEvent> 
                 implements DataSourceBackend {
-
-//    @Override
-//    public Map<String, List<Proposition>> readPropositions(
-//            Set<String> keyIds, Set<String> paramIds, Filter filters,
-//            QuerySession qs)
-//            throws DataSourceReadException {
-//        return null;
-//    }
 
     @Override
     public void close() {

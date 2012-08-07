@@ -41,7 +41,7 @@ public class AlgorithmSourceBackendUpdatedEventTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         this.algorithmSourceBackend = new MockAlgorithmSourceBackend();
-        this.algorithmSource = new AlgorithmSource(
+        this.algorithmSource = new AlgorithmSourceImpl(
                 new AlgorithmSourceBackend[]{this.algorithmSourceBackend});
         this.algorithmSource.readAlgorithms(); // Force it to initialize.
     }

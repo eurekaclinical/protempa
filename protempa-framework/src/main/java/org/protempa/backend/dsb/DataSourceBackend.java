@@ -40,7 +40,7 @@ import org.protempa.proposition.value.UnitFactory;
  * @author Andrew Post
  */
 public interface DataSourceBackend extends
-		Backend<DataSourceBackendUpdatedEvent, DataSource>{
+		Backend<DataSourceBackendUpdatedEvent>{
     
     DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds,

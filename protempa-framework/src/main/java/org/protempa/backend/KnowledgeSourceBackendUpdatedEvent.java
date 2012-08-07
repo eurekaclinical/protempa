@@ -29,6 +29,8 @@ import org.protempa.backend.ksb.KnowledgeSourceBackend;
 public final class KnowledgeSourceBackendUpdatedEvent extends BackendUpdatedEvent {
 
     private static final long serialVersionUID = 2757359115821263581L;
+    
+    private final KnowledgeSourceBackend knowledgeSourceBackend;
 
     /**
      * Constructs an event with the source <code>KnowledgeSourceBackend</code>
@@ -40,5 +42,11 @@ public final class KnowledgeSourceBackendUpdatedEvent extends BackendUpdatedEven
     public KnowledgeSourceBackendUpdatedEvent(
             KnowledgeSourceBackend knowledgeSourceBackend) {
         super(knowledgeSourceBackend);
+        this.knowledgeSourceBackend = knowledgeSourceBackend;
+    }
+
+    @Override
+    public KnowledgeSourceBackend getBackend() {
+        return this.knowledgeSourceBackend;
     }
 }

@@ -20,6 +20,7 @@
 package org.protempa;
 
 import java.util.EventObject;
+import org.protempa.backend.Backend;
 
 import org.protempa.backend.BackendUpdatedEvent;
 
@@ -27,16 +28,16 @@ import org.protempa.backend.BackendUpdatedEvent;
  *
  * @author Andrew Post
  */
-public final class SourceClosedUnexpectedlyEvent<T extends BackendUpdatedEvent> extends EventObject {
+public final class SourceClosedUnexpectedlyEvent<S extends SourceUpdatedEvent, B extends Backend, T extends BackendUpdatedEvent> extends EventObject {
     private static final long serialVersionUID = 7088929112407759901L;
-    private Source<T> protempaSource;
+    private Source<S, B, T> protempaSource;
 
     /**
      * Initializes the event with the {@link Source} that closed unexpectedly.
      *
      * @param protempaSource a {@link Source}.
      */
-    public SourceClosedUnexpectedlyEvent(Source<T> protempaSource) {
+    public SourceClosedUnexpectedlyEvent(Source<S, B, T> protempaSource) {
         super(protempaSource);
         this.protempaSource = protempaSource;
     }
@@ -47,7 +48,7 @@ public final class SourceClosedUnexpectedlyEvent<T extends BackendUpdatedEvent> 
      *
      * @return a {@link Source}.
      */
-    public Source<T> getProtempaSource() {
+    public Source<S, B, T> getProtempaSource() {
         return this.protempaSource;
     }
 }

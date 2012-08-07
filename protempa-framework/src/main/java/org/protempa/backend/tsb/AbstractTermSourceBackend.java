@@ -23,16 +23,16 @@ import java.util.List;
 import java.util.Map;
 import org.protempa.backend.AbstractBackend;
 import org.protempa.Term;
-import org.protempa.TermSource;
 import org.protempa.backend.TermSourceBackendUpdatedEvent;
 import org.protempa.TermSourceReadException;
+import org.protempa.Terminology;
 
 /**
  * 
  * @author Michel Mansour
  */
 public abstract class AbstractTermSourceBackend extends
-        AbstractBackend<TermSourceBackendUpdatedEvent, TermSource> implements
+        AbstractBackend<TermSourceBackendUpdatedEvent> implements
         TermSourceBackend {
 
     /**

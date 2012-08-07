@@ -33,7 +33,7 @@ import org.protempa.backend.BackendInstanceSpec;
  * @param <S> 
  *            this backend's corresponding {@link Source}.
  */
-public interface Backend<E extends BackendUpdatedEvent, S extends Source<E>> {
+public interface Backend<E extends BackendUpdatedEvent> {
 
     /**
      * Initializes the backend from a {@link BackendInstanceSpec}. It is called

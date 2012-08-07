@@ -19,10 +19,15 @@
  */
 package org.protempa;
 
+import org.protempa.backend.Backend;
 import org.protempa.backend.BackendUpdatedEvent;
 
-public interface Source<T extends BackendUpdatedEvent> 
-        extends BackendListener<T>, Module {
-    @Override
-    void close();
+public interface Source<S extends SourceUpdatedEvent, B extends Backend, 
+        T extends BackendUpdatedEvent> extends BackendListener<T>, Module {
+    
+    B[] getBackends();
+    
+    void addSourceListener(SourceListener<S> sourceListener);
+    
+    void removeSourceListener(SourceListener<S> sourceListener);
 }

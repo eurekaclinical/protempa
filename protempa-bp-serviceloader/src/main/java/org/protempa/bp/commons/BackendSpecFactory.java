@@ -40,7 +40,7 @@ final class BackendSpecFactory {
         
     }
 
-    static <B extends Backend<?, ?>> BackendSpec<B> newInstance(
+    static <B extends Backend<?>> BackendSpec<B> newInstance(
             BackendProvider backendProvider, Class<B> backendCls) 
             throws InvalidBackendException {
         BackendInfo backendAnnotation =

@@ -27,7 +27,7 @@ import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendPropertySpec;
 import org.protempa.backend.BackendSpec;
 
-public final class MockBackendInstanceSpec<B extends Backend<?, ?>> {
+public final class MockBackendInstanceSpec<B extends Backend<?>> {
     private BackendInstanceSpec<B> backendInstSpec;
 
     public BackendInstanceSpec<B> getBackendInstanceSpec() {

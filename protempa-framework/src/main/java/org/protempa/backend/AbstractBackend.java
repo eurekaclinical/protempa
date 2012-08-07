@@ -22,7 +22,6 @@ package org.protempa.backend;
 import java.util.ArrayList;
 import java.util.List;
 import org.protempa.BackendListener;
-import org.protempa.Source;
 
 /**
  * Common interface for PROTEMPA backends.
@@ -30,9 +29,9 @@ import org.protempa.Source;
  * @author Andrew Post
  * 
  * @param <E> the {@link BackendUpdatedEvent} that this backend fires.
- * @param <S> the backend's corresponding {@link Source}.
  */
-public abstract class AbstractBackend<E extends BackendUpdatedEvent, S extends Source<E>>  implements Backend<E, S> {
+public abstract class AbstractBackend<E extends BackendUpdatedEvent> 
+        implements Backend<E> {
 
     private final List<BackendListener<E>> listenerList;
 

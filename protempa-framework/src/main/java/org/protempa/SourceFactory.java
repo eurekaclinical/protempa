@@ -127,7 +127,7 @@ public final class SourceFactory {
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.dataSourceBackendInstanceSpecs.get(i).getInstance();
         }
-        return new DataSource(backends);
+        return new DataSourceImpl(backends);
     }
 
     public KnowledgeSource newKnowledgeSourceInstance()
@@ -136,7 +136,7 @@ public final class SourceFactory {
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.knowledgeSourceBackendInstanceSpecs.get(i).getInstance();
         }
-        return new KnowledgeSource(backends);
+        return new KnowledgeSourceImpl(backends);
     }
 
     public AlgorithmSource newAlgorithmSourceInstance()
@@ -145,7 +145,7 @@ public final class SourceFactory {
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.algorithmSourceBackendInstanceSpecs.get(i).getInstance();
         }
-        return new AlgorithmSource(backends);
+        return new AlgorithmSourceImpl(backends);
     }
 
     public TermSource newTermSourceInstance()
@@ -154,7 +154,7 @@ public final class SourceFactory {
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.termSourceBackendInstanceSpecs.get(i).getInstance();
         }
-        return new TermSource(backends);
+        return new TermSourceImpl(backends);
 
     }
 }

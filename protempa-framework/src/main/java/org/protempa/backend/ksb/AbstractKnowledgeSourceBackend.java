@@ -24,7 +24,6 @@ import java.util.List;
 import org.drools.util.StringUtils;
 
 import org.protempa.backend.AbstractBackend;
-import org.protempa.KnowledgeSource;
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.TermSubsumption;
@@ -38,7 +37,7 @@ import org.protempa.query.And;
  * @author Andrew Post
  */
 public abstract class AbstractKnowledgeSourceBackend extends
-        AbstractBackend<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource>
+        AbstractBackend<KnowledgeSourceBackendUpdatedEvent>
         implements KnowledgeSourceBackend {
 
     /**

@@ -17,135 +17,31 @@
  * limitations under the License.
  * #L%
  */
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package org.protempa;
 
-import org.protempa.backend.BackendInitializationException;
+import java.util.List;
 import org.protempa.backend.TermSourceBackendUpdatedEvent;
 import org.protempa.backend.tsb.TermSourceBackend;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-import org.protempa.backend.BackendNewInstanceException;
-
-public final class TermSource extends
-        AbstractSource<TermSourceUpdatedEvent, TermSourceBackendUpdatedEvent> {
-
-    private final BackendManager<TermSourceBackendUpdatedEvent, TermSource, TermSourceBackend> backendManager;
-
-    private final Set<String> notFoundTerms;
-
-    public TermSource(TermSourceBackend[] backends) {
-        super(backends);
-        this.backendManager = new BackendManager<TermSourceBackendUpdatedEvent, TermSource, TermSourceBackend>(
-                backends);
-        this.notFoundTerms = new HashSet<String>();
-    }
-
-    /**
-     * Connect to the term source's backend(s).
-     */
-    private void initializeIfNeeded() throws BackendInitializationException,
-            BackendNewInstanceException {
-        if (isClosed()) {
-            throw new IllegalStateException("Term source already closed!");
-        }
-        this.backendManager.initializeIfNeeded();
-    }
-
-    public Term readTerm(String id) throws TermSourceReadException {
-        Term result = null;
-        if (!notFoundTerms.contains(id)) {
-            try {
-                initializeIfNeeded();
-            } catch (BackendInitializationException ex) {
-                throw new TermSourceReadException(ex);
-            } catch (BackendNewInstanceException ex) {
-                throw new TermSourceReadException(ex);
-            }
-            if (this.backendManager.getBackends() != null) {
-                for (TermSourceBackend backend : this.backendManager
-                        .getBackends()) {
-                    result = backend.readTerm(id);
-                    if (result != null) {
-                        return result;
-                    }
-                }
-                this.notFoundTerms.add(id);
-            }
-        }
-
-        return result;
-    }
+/**
+ *
+ * @author Andrew Post
+ */
+public interface TermSource extends Source<TermSourceUpdatedEvent, TermSourceBackend, TermSourceBackendUpdatedEvent> {
 
     /**
      * Gets the term subsumption for the given term ID. The subsumption is the
      * term itself and all of its descendants.
-     * 
-     * @param termId
-     *            the term ID to subsume
+     *
+     * @param termId the term ID to subsume
      * @return a {@link List} of term IDs composing the given term's subsumption
      */
-    public List<String> getTermSubsumption(String termId)
-            throws TermSourceReadException {
-        List<String> result = null;
-        try {
-            initializeIfNeeded();
-        } catch (BackendInitializationException ex) {
-            throw new TermSourceReadException(ex);
-        } catch (BackendNewInstanceException ex) {
-            throw new TermSourceReadException(ex);
-        }
-        if (this.backendManager.getBackends() != null) {
-            for (TermSourceBackend backend : this.backendManager.getBackends()) {
-                result = backend.getSubsumption(termId);
-                if (result != null) {
-                    return result;
-                }
-            }
-        }
+    List<String> getTermSubsumption(String termId) throws TermSourceReadException;
 
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.protempa.AbstractSource#close()
-     */
-    @Override
-    public void close() {
-        clear();
-        this.backendManager.close();
-        super.close();
-    }
-
-    /**
-     * Notifies registered listeners that the term source has been updated.
-     * 
-     * @see {@link TermSourceUpdatedEvent}
-     * @see {@link SourceListener}
-     */
-    private void fireTermSourceUpdated() {
-        fireSourceUpdated(new TermSourceUpdatedEvent(this));
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.protempa.BackendListener#backendUpdated(org.protempa.BackendUpdatedEvent
-     * )
-     */
-    @Override
-    public void backendUpdated(TermSourceBackendUpdatedEvent event) {
-        clear();
-        fireTermSourceUpdated();
-    }
+    Term readTerm(String id) throws TermSourceReadException;
     
-    @Override
-    public void clear() {
-
-    }
-
 }

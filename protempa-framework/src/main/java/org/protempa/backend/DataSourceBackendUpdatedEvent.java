@@ -29,6 +29,8 @@ import org.protempa.backend.dsb.DataSourceBackend;
 public final class DataSourceBackendUpdatedEvent extends BackendUpdatedEvent {
 
     private static final long serialVersionUID = -2553743716414678296L;
+    
+    private final DataSourceBackend dataSourceBackend;
 
     /**
      * Constructs an event with the source <code>AlgorithmSourceBackend</code>
@@ -40,5 +42,13 @@ public final class DataSourceBackendUpdatedEvent extends BackendUpdatedEvent {
     public DataSourceBackendUpdatedEvent(
             DataSourceBackend dataSourceBackend) {
         super(dataSourceBackend);
+        this.dataSourceBackend = dataSourceBackend;
     }
+
+    @Override
+    public DataSourceBackend getBackend() {
+        return this.dataSourceBackend;
+    }
+    
+    
 }

@@ -64,6 +64,8 @@ import com.thoughtworks.xstream.converters.basic.DateConverter;
 import com.thoughtworks.xstream.core.MapBackedDataHolder;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
+import org.protempa.AlgorithmSourceImpl;
+import org.protempa.KnowledgeSourceImpl;
 
 /**
  * This class takes a Protempa configuration information such as a query and
@@ -345,7 +347,7 @@ public class XMLConfiguration implements QueryBuilder {
 	public static void writeQueryAsXML(Query query, Writer writer, boolean surpressSchemaReference) throws IOException {
 		XMLConfiguration.surpressSchemaReference.set(Boolean.valueOf(surpressSchemaReference));
 		myLogger.entering(XMLConfiguration.class.getName(), "writeQueryAsXML");
-		getXStream(new KnowledgeSource(new KnowledgeSourceBackend[0]), new AlgorithmSource(new AlgorithmSourceBackend[0])).toXML(query, writer);
+		getXStream(new KnowledgeSourceImpl(new KnowledgeSourceBackend[0]), new AlgorithmSourceImpl(new AlgorithmSourceBackend[0])).toXML(query, writer);
 		writer.close();
 		myLogger.exiting(XMLConfiguration.class.getName(), "writeQueryAsXML");
 	}

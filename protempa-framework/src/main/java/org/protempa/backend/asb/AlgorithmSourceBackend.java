@@ -32,7 +32,7 @@ import org.protempa.backend.Backend;
  * @author Andrew
  */
 public interface AlgorithmSourceBackend extends
-        Backend<AlgorithmSourceBackendUpdatedEvent, AlgorithmSource> {
+        Backend<AlgorithmSourceBackendUpdatedEvent> {
 
     /**
      * Reads an algorithm from this backend.

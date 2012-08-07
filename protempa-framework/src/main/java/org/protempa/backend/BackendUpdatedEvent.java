@@ -19,34 +19,24 @@
  */
 package org.protempa.backend;
 
-import org.protempa.backend.Backend;
 import java.util.EventObject;
 
 /**
  * Backend updated events.
- * 
+ *
  * @author Andrew Post
  */
 public abstract class BackendUpdatedEvent extends EventObject {
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 6550773926231495491L;
-	private final Backend<?, ?> backend;
-
-    BackendUpdatedEvent(Backend<?, ?> source) {
+    BackendUpdatedEvent(Backend<? extends BackendUpdatedEvent> source) {
         super(source);
-        this.backend = source;
     }
 
     /**
      * Returns the source {@link Backend} (the same as what
      * <code>getSource()</code> returns).
-     * 
+     *
      * @return a {@link Backend}.
      */
-    public Backend<?, ?> getBackend() {
-        return this.backend;
-    }
+    public abstract Backend<? extends BackendUpdatedEvent> getBackend();
 }

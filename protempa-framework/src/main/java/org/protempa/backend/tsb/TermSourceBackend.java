@@ -33,7 +33,7 @@ import org.protempa.TermSourceReadException;
  * @author Michel Mansour
  */
 public interface TermSourceBackend extends
-        Backend<TermSourceBackendUpdatedEvent, TermSource> {
+        Backend<TermSourceBackendUpdatedEvent> {
 
     /**
      * Reads a term from the given terminology

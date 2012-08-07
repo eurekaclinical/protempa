@@ -40,7 +40,7 @@ import org.protempa.query.And;
  * @author Andrew Post
  */
 public interface KnowledgeSourceBackend extends
-        Backend<KnowledgeSourceBackendUpdatedEvent, KnowledgeSource> {
+        Backend<KnowledgeSourceBackendUpdatedEvent> {
 
     /**
      * Reads a proposition definition into the given PROTEMPA knowledge base.
