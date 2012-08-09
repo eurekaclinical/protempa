@@ -122,7 +122,7 @@ class PropositionDefinitionPrinter
     }
 
     private void printReference(ReferenceDefinition refDef) {
-        System.out.print("\t" + refDef.getName() + ": ");
+        System.out.print("\t\t" + refDef.getName() + ": ");
         System.out.println(StringUtils.join(refDef.getPropositionIds(), ", "));
     }
 
