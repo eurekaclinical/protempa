@@ -166,11 +166,11 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.directChildren;
-        this.directChildren = this.abstractedFrom.toArray(new String[this.abstractedFrom.size()]);
+        String[] old = this.children;
+        this.children = this.abstractedFrom.toArray(new String[this.abstractedFrom.size()]);
         if (this.changes != null) {
             this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.directChildren);
+                    this.children);
         }
     }
 

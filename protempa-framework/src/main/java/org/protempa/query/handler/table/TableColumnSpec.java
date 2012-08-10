@@ -81,4 +81,14 @@ public interface TableColumnSpec {
     void validate(KnowledgeSource knowledgeSource) throws
                 TableColumnSpecValidationFailedException,
                 KnowledgeSourceReadException;
+    
+    /**
+     * Infers the ids of the propositions corresponding to the contents of this
+     * column.
+     * 
+     * @return an array of proposition id {@link String}s. Guaranteed not
+     * <code>null</code>.
+     */
+    String[] getInferredPropositionIds(KnowledgeSource knowledgeSource, 
+            String[] inPropIds) throws KnowledgeSourceReadException;
 }

@@ -79,12 +79,12 @@ public final class EventDefinition extends AbstractPropositionDefinition
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.directChildren;
+        String[] old = this.children;
         String[] inverseIsA = getInverseIsA();
-        this.directChildren = inverseIsA;
+        this.children = inverseIsA;
         if (this.changes != null) {
             this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.directChildren);
+                    this.children);
         }
     }
 

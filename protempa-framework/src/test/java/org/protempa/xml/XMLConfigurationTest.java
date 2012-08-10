@@ -256,6 +256,6 @@ public class XMLConfigurationTest extends TestCase {
             maxPropositionValueColumnSpec, minPropositionValueColumnSpec, sumPropositionValueColumnSpec
         };
         String[] rowPropositionIds = {"alpha", "beta", "gamma"};
-        return new TableQueryResultsHandler(dataWriter, '\t', rowPropositionIds, columnSpecs, true);
+        return new TableQueryResultsHandler(dataWriter, '\t', rowPropositionIds, columnSpecs, true, false);
     }
 }

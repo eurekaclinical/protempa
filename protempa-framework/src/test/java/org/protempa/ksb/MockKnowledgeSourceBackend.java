@@ -19,6 +19,7 @@
  */
 package org.protempa.ksb;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.drools.util.StringUtils;
 import org.protempa.AbstractionDefinition;
 import org.protempa.KnowledgeSourceReadException;
@@ -57,5 +58,15 @@ public final class MockKnowledgeSourceBackend
     @Override
     public AbstractionDefinition readAbstractionDefinition(String id) throws KnowledgeSourceReadException {
         return null;
+    }
+
+    @Override
+    public String[] readAbstractedInto(String propId) {
+        return ArrayUtils.EMPTY_STRING_ARRAY;
+    }
+
+    @Override
+    public String[] readIsA(String propId) {
+        return ArrayUtils.EMPTY_STRING_ARRAY;
     }
 }

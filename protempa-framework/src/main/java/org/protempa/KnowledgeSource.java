@@ -54,15 +54,23 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
 
     Set<String> inDataSourcePropositionIds(String... propIds) throws KnowledgeSourceReadException;
 
-    List<? extends PropositionDefinition> readAbstractedFrom(AbstractionDefinition propDef) throws KnowledgeSourceReadException;
+    List<PropositionDefinition> readAbstractedFrom(AbstractionDefinition propDef) throws KnowledgeSourceReadException;
 
-    List<? extends PropositionDefinition> readAbstractedFrom(String id) throws KnowledgeSourceReadException;
+    List<PropositionDefinition> readAbstractedFrom(String id) throws KnowledgeSourceReadException;
 
+    List<AbstractionDefinition> readAbstractedInto(PropositionDefinition propDef) throws KnowledgeSourceReadException;
+    
+    List<AbstractionDefinition> readAbstractedInto(String propId) throws KnowledgeSourceReadException;
+    
     AbstractionDefinition readAbstractionDefinition(String id) throws KnowledgeSourceReadException;
 
     List<PropositionDefinition> readInverseIsA(PropositionDefinition propDef) throws KnowledgeSourceReadException;
 
     List<PropositionDefinition> readInverseIsA(String id) throws KnowledgeSourceReadException;
+    
+    List<PropositionDefinition> readIsA(PropositionDefinition propDef) throws KnowledgeSourceReadException;
+    
+    List<PropositionDefinition> readIsA(String id) throws KnowledgeSourceReadException;
 
     /**
      * Returns the specified proposition definition.
@@ -76,5 +84,11 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
     PropositionDefinition readPropositionDefinition(String id) throws KnowledgeSourceReadException;
 
     ValueSet readValueSet(String id) throws KnowledgeSourceReadException;
+    
+    List<PropositionDefinition> readParents(PropositionDefinition propDef)
+            throws KnowledgeSourceReadException;
+    
+    List<PropositionDefinition> readParents(String propId)
+            throws KnowledgeSourceReadException;
     
 }

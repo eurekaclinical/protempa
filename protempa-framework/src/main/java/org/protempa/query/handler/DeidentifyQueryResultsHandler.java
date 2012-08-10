@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 
@@ -40,7 +41,7 @@ public final class DeidentifyQueryResultsHandler
     private static final long serialVersionUID = 4289223507110468993L;
     private static final ThreadLocal<NumberFormat> disguisedKeyFormat = new ThreadLocal<NumberFormat>() {
         @Override
-        protected NumberFormat initialValue () {
+        protected NumberFormat initialValue() {
             return NumberFormat.getInstance();
         }
     };
@@ -50,8 +51,9 @@ public final class DeidentifyQueryResultsHandler
     private int nextDisguisedKey;
 
     public DeidentifyQueryResultsHandler(QueryResultsHandler handler) {
-        if (handler == null)
+        if (handler == null) {
             throw new IllegalArgumentException("handler cannot be null");
+        }
         this.handler = handler;
         this.keyMapper = new HashMap<String, String>();
         this.keyIdDisguised = true;
@@ -59,8 +61,9 @@ public final class DeidentifyQueryResultsHandler
     }
 
     /**
-     * Returns whether key ids will be disguised. Default is <code>true</code>.
-     * 
+     * Returns whether key ids will be disguised. Default is
+     * <code>true</code>.
+     *
      * @return <code>true</code> or <code>false</code>.
      */
     public boolean isKeyIdDisguised() {
@@ -81,20 +84,20 @@ public final class DeidentifyQueryResultsHandler
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references)
-            throws FinderException {
+            throws QueryResultsHandlerProcessingException {
         keyId = disguiseKeyIds(keyId);
         this.handler.handleQueryResult(keyId, propositions, forwardDerivations,
                 backwardDerivations, references);
     }
 
     @Override
-    public void init(KnowledgeSource knowledgeSource) throws FinderException {
+    public void init(KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
         this.handler.init(knowledgeSource);
         this.nextDisguisedKey = 1;
     }
 
     @Override
-    public void finish() throws FinderException {
+    public void finish() throws QueryResultsHandlerProcessingException {
         this.handler.finish();
         this.keyMapper.clear();
     }
@@ -110,7 +113,31 @@ public final class DeidentifyQueryResultsHandler
         return keyId;
     }
 
+    /**
+     * Delegates to the query results handler passed into the constructor.
+     * 
+     * @throws QueryResultsHandlerValidationFailedException if the query 
+     * results handler passed into the constructor is invalid.
+     */
     @Override
-    public void validate(KnowledgeSource knowledgeSource) {
+    public void validate() throws QueryResultsHandlerValidationFailedException, 
+            KnowledgeSourceReadException {
+        this.handler.validate();
+    }
+
+    /**
+     * Delegates to the query results handler passed into the constructor.
+     *
+     * @return an array of proposition id {@link String}s.
+     */
+    @Override
+    public String[] getPropositionIdsNeeded() 
+            throws KnowledgeSourceReadException {
+        return this.handler.getPropositionIdsNeeded();
+    }
+
+    @Override
+    public void start() throws QueryResultsHandlerProcessingException {
+        this.handler.start();
     }
 }

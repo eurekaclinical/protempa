@@ -22,9 +22,11 @@ package org.protempa.query.handler.table;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.protempa.KnowledgeSource;
@@ -190,5 +192,17 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
 			return false;
 		return true;
 	}
+
+    @Override
+    public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
+            String[] inPropIds) throws KnowledgeSourceReadException {
+        Set<String> result = new HashSet<String>();
+        for (Link link : this.links) {
+            inPropIds = link.getInferredPropositionIds(knowledgeSource, 
+                    inPropIds);
+            org.arp.javautil.arrays.Arrays.addAll(result, inPropIds);
+        }
+        return result.toArray(new String[result.size()]);
+    }
     
 }

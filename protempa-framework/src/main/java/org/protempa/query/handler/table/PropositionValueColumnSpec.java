@@ -24,8 +24,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
@@ -42,13 +44,16 @@ import org.protempa.proposition.value.ValueType;
 
 /**
  * Creates a column with an aggregation of primitive parameters with numerical
- * values. For MAX and MIN on data with {@link InequalityNumberValue}s for
- * which a comparison between the inequality number and another number is
- * not possible, we convert to {@link NumberValue}s before comparison. For 
- * example, given two numbers <code>< 4</code> and <code>3</code>, we convert 
- * <code>< 4</code> to <code>4</code> before aggregation because otherwise the 
- * two numbers are not comparable.
- * 
+ * values. For MAX and MIN on data with {@link InequalityNumberValue}s for which
+ * a comparison between the inequality number and another number is not
+ * possible, we convert to {@link NumberValue}s before comparison. For example,
+ * given two numbers
+ * <code>< 4</code> and
+ * <code>3</code>, we convert
+ * <code>< 4</code> to
+ * <code>4</code> before aggregation because otherwise the two numbers are not
+ * comparable.
+ *
  * @author Andrew Post
  */
 public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
@@ -122,7 +127,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                     break;
                 default:
                     throw new AssertionError("Invalid aggregation type "
-                        + this.type);
+                            + this.type);
             }
         }
 
@@ -152,8 +157,8 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                             break;
                         default:
                             throw new AssertionError(
-                                        "Invalid aggregation type "
-                                        + this.type);
+                                    "Invalid aggregation type "
+                                    + this.type);
                     }
 
                     /*
@@ -177,9 +182,9 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                                         "Invalid aggregation type "
                                         + this.type);
                         }
-                    /*
-                     * Process subsequent values.
-                     */
+                        /*
+                         * Process subsequent values.
+                         */
                     } else {
                         switch (this.type) {
                             case MAX:
@@ -265,50 +270,69 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
         }
     }
 
-	public Type getType() {
-		return type;
-	}
+    public Type getType() {
+        return type;
+    }
 
-	public void setType(Type type) {
-		this.type = type;
-	}
+    public void setType(Type type) {
+        this.type = type;
+    }
 
-	public Link[] getLinks() {
-		return links;
-	}
+    public Link[] getLinks() {
+        return links;
+    }
 
-	public String getColumnNamePrefixOverride() {
-		return columnNamePrefixOverride;
-	}
+    public String getColumnNamePrefixOverride() {
+        return columnNamePrefixOverride;
+    }
+    
+    @Override
+    public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
+            String[] inPropIds) throws KnowledgeSourceReadException {
+        Set<String> result = new HashSet<String>();
+        for (Link link : this.links) {
+            inPropIds = link.getInferredPropositionIds(knowledgeSource, 
+                    inPropIds);
+            org.arp.javautil.arrays.Arrays.addAll(result, inPropIds);
+        }
+        return result.toArray(new String[result.size()]);
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((columnNamePrefixOverride == null) ? 0 : columnNamePrefixOverride.hashCode());
-		result = prime * result + Arrays.hashCode(links);
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((columnNamePrefixOverride == null) ? 0 : columnNamePrefixOverride.hashCode());
+        result = prime * result + Arrays.hashCode(links);
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		PropositionValueColumnSpec other = (PropositionValueColumnSpec) obj;
-		if (columnNamePrefixOverride == null) {
-			if (other.columnNamePrefixOverride != null)
-				return false;
-		} else if (!columnNamePrefixOverride.equals(other.columnNamePrefixOverride))
-			return false;
-		if (!Arrays.equals(links, other.links))
-			return false;
-		if (type != other.type)
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        PropositionValueColumnSpec other = (PropositionValueColumnSpec) obj;
+        if (columnNamePrefixOverride == null) {
+            if (other.columnNamePrefixOverride != null) {
+                return false;
+            }
+        } else if (!columnNamePrefixOverride.equals(other.columnNamePrefixOverride)) {
+            return false;
+        }
+        if (!Arrays.equals(links, other.links)) {
+            return false;
+        }
+        if (type != other.type) {
+            return false;
+        }
+        return true;
+    }
 }

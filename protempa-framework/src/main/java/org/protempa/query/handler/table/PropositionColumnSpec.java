@@ -23,8 +23,10 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import org.apache.commons.lang.ArrayUtils;
 
@@ -47,14 +49,13 @@ import org.protempa.proposition.value.Value;
 import org.protempa.ValueSet;
 
 public class PropositionColumnSpec extends AbstractTableColumnSpec {
-    
+
     private static final ThreadLocal<NumberFormat> numberFormat = new ThreadLocal<NumberFormat>() {
         @Override
-        protected NumberFormat initialValue () {
+        protected NumberFormat initialValue() {
             return NumberFormat.getInstance();
         }
     };
-
     private final Link[] links;
     private final String[] propertyNames;
     private final int numInstances;
@@ -180,15 +181,14 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
         ValuesPropositionVisitor() {
         }
-        
+
         void setKnowledgeSource(KnowledgeSource knowledgeSource) {
             this.knowledgeSource = knowledgeSource;
         }
-        
+
 //        KnowledgeSource getKnowledgeSource() {
 //            return this.knowledgeSource;
 //        }
-
         void setResult(String[] result) {
             this.result = result;
         }
@@ -274,7 +274,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                  * This is a hack until we have an API in PROTEMPA to get a 
                  * length string without units.
                  */
-                Long minLength = 
+                Long minLength =
                         primitiveParameter.getInterval().getMinLength();
                 if (minLength != null) {
                     result[i++] = numberFormat.get().format(minLength);
@@ -316,7 +316,6 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 //        String[] getResult() {
 //            return this.result;
 //        }
-
         void clear() {
             this.result = null;
             this.knowledgeSource = null;
@@ -334,7 +333,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                         result[i++] = propositionDefinition.getDisplayName();
                     }
                     if (showAbbrevDisplayName) {
-                        result[i++] = 
+                        result[i++] =
                                 propositionDefinition.getAbbreviatedDisplayName();
                     }
                 } else {
@@ -409,12 +408,11 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
         Collection<Proposition> propositions = this.traverseLinks(this.links,
-                proposition, forwardDerivations, backwardDerivations, 
+                proposition, forwardDerivations, backwardDerivations,
                 references, knowledgeSource);
         propositionVisitor.setKnowledgeSource(knowledgeSource);
-        String[] result = new String[
-                (this.outputConfig.numActiveColumns() + 
-                this.propertyNames.length) * this.numInstances];
+        String[] result = new String[(this.outputConfig.numActiveColumns()
+                + this.propertyNames.length) * this.numInstances];
         propositionVisitor.setResult(result);
         int i = 0;
         for (Proposition prop : propositions) {
@@ -431,7 +429,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             }
         }
         propositionVisitor.clear();
-        
+
         return result;
     }
 
@@ -447,10 +445,10 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         }
         return result;
     }
-    
+
     @Override
-    public void validate(KnowledgeSource knowledgeSource) throws 
-            TableColumnSpecValidationFailedException, 
+    public void validate(KnowledgeSource knowledgeSource) throws
+            TableColumnSpecValidationFailedException,
             KnowledgeSourceReadException {
         int i = 1;
         for (Link link : this.links) {
@@ -464,77 +462,101 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         }
     }
 
-	public Link[] getLinks() {
-		return links;
-	}
+    public Link[] getLinks() {
+        return links;
+    }
 
-	public String[] getPropertyNames() {
-		return propertyNames;
-	}
+    public String[] getPropertyNames() {
+        return propertyNames;
+    }
 
-	public int getNumInstances() {
-		return numInstances;
-	}
+    public int getNumInstances() {
+        return numInstances;
+    }
 
-	public String getColumnNamePrefixOverride() {
-		return columnNamePrefixOverride;
-	}
+    public String getColumnNamePrefixOverride() {
+        return columnNamePrefixOverride;
+    }
 
-	public OutputConfig getOutputConfig() {
-		return outputConfig;
-	}
+    public OutputConfig getOutputConfig() {
+        return outputConfig;
+    }
 
-	public ValueOutputConfig getValueOutputConfig() {
-		return valueOutputConfig;
-	}
+    public ValueOutputConfig getValueOutputConfig() {
+        return valueOutputConfig;
+    }
 
-	public ValuesPropositionVisitor getPropositionVisitor() {
-		return propositionVisitor;
-	}
+    public ValuesPropositionVisitor getPropositionVisitor() {
+        return propositionVisitor;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((columnNamePrefixOverride == null) ? 0 : columnNamePrefixOverride.hashCode());
-		result = prime * result + Arrays.hashCode(links);
-		result = prime * result + numInstances;
-		result = prime * result + ((outputConfig == null) ? 0 : outputConfig.hashCode());
-		result = prime * result + Arrays.hashCode(propertyNames);
-		result = prime * result + ((valueOutputConfig == null) ? 0 : valueOutputConfig.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((columnNamePrefixOverride == null) ? 0 : columnNamePrefixOverride.hashCode());
+        result = prime * result + Arrays.hashCode(links);
+        result = prime * result + numInstances;
+        result = prime * result + ((outputConfig == null) ? 0 : outputConfig.hashCode());
+        result = prime * result + Arrays.hashCode(propertyNames);
+        result = prime * result + ((valueOutputConfig == null) ? 0 : valueOutputConfig.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		PropositionColumnSpec other = (PropositionColumnSpec) obj;
-		if (columnNamePrefixOverride == null) {
-			if (other.columnNamePrefixOverride != null)
-				return false;
-		} else if (!columnNamePrefixOverride.equals(other.columnNamePrefixOverride))
-			return false;
-		if (!Arrays.equals(links, other.links))
-			return false;
-		if (numInstances != other.numInstances)
-			return false;
-		if (outputConfig == null) {
-			if (other.outputConfig != null)
-				return false;
-		} else if (!outputConfig.equals(other.outputConfig))
-			return false;
-		if (!Arrays.equals(propertyNames, other.propertyNames))
-			return false;
-		if (valueOutputConfig == null) {
-			if (other.valueOutputConfig != null)
-				return false;
-		} else if (!valueOutputConfig.equals(other.valueOutputConfig))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        PropositionColumnSpec other = (PropositionColumnSpec) obj;
+        if (columnNamePrefixOverride == null) {
+            if (other.columnNamePrefixOverride != null) {
+                return false;
+            }
+        } else if (!columnNamePrefixOverride.equals(other.columnNamePrefixOverride)) {
+            return false;
+        }
+        if (!Arrays.equals(links, other.links)) {
+            return false;
+        }
+        if (numInstances != other.numInstances) {
+            return false;
+        }
+        if (outputConfig == null) {
+            if (other.outputConfig != null) {
+                return false;
+            }
+        } else if (!outputConfig.equals(other.outputConfig)) {
+            return false;
+        }
+        if (!Arrays.equals(propertyNames, other.propertyNames)) {
+            return false;
+        }
+        if (valueOutputConfig == null) {
+            if (other.valueOutputConfig != null) {
+                return false;
+            }
+        } else if (!valueOutputConfig.equals(other.valueOutputConfig)) {
+            return false;
+        }
+        return true;
+    }
+    
+    @Override
+    public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
+            String[] inPropIds) throws KnowledgeSourceReadException {
+        Set<String> result = new HashSet<String>();
+        for (Link link : this.links) {
+            inPropIds = link.getInferredPropositionIds(knowledgeSource, 
+                    inPropIds);
+            org.arp.javautil.arrays.Arrays.addAll(result, inPropIds);
+        }
+        return result.toArray(new String[result.size()]);
+    }
 }

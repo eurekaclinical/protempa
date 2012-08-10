@@ -56,4 +56,14 @@ public class MockKnowledgeSourceBackend
         return null;
     }
 
+    @Override
+    public String[] readAbstractedInto(String propId) throws KnowledgeSourceReadException {
+        return StringUtils.EMPTY_STRING_ARRAY;
+    }
+
+    @Override
+    public String[] readIsA(String propId) throws KnowledgeSourceReadException {
+        return StringUtils.EMPTY_STRING_ARRAY;
+    }
+
 }

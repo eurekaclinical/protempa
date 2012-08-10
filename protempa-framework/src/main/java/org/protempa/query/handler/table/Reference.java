@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,13 +31,16 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
+import org.protempa.ReferenceDefinition;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 
 /**
  * Specifies reference traversals from one proposition to other propositions.
- * 
+ *
  * @author Andrew Post
  */
 public final class Reference extends Link {
@@ -46,9 +50,9 @@ public final class Reference extends Link {
     /**
      * Creates an instance that specifies traversals using the specified
      * references from a proposition to all referred-to propositions.
-     * 
-     * @param referenceNames a {@link String[]} of reference names. An empty
-     * or <code>null</code> array specifies that all references should be 
+     *
+     * @param referenceNames a {@link String[]} of reference names. An empty *
+     * or <code>null</code> array specifies that all references should be
      * traversed.
      */
     public Reference(String[] referenceNames) {
@@ -58,12 +62,12 @@ public final class Reference extends Link {
     /**
      * Creates an instance that specifies traversals using the specified
      * references from a proposition only to propositions with the given ids.
-     * 
-     * @param referenceNames a {@link String[]} of reference names. An empty
-     * or <code>null</code> array specifies that all references should be 
+     *
+     * @param referenceNames a {@link String[]} of reference names. An empty *
+     * or <code>null</code> array specifies that all references should be
      * traversed.
-     * @param propositionIds a {@link String[]} of proposition ids. An empty
-     * or <code>null</code> array specifies that all propositions on the 
+     * @param propositionIds a {@link String[]} of proposition ids. An empty *
+     * or <code>null</code> array specifies that all propositions on the
      * right-hand-side of the reference should be used.
      */
     public Reference(String[] referenceNames, String[] propositionIds) {
@@ -72,18 +76,18 @@ public final class Reference extends Link {
 
     /**
      * Creates an instance that specifies traversals using the specified
-     * references from a proposition only to propositions with the given ids 
-     * and that satisfy the specified constraints.
-     * 
-     * @param referenceNames a {@link String[]} of reference names. An empty
-     * or <code>null</code> array specifies that all references should be 
+     * references from a proposition only to propositions with the given ids and
+     * that satisfy the specified constraints.
+     *
+     * @param referenceNames a {@link String[]} of reference names. An empty *
+     * or <code>null</code> array specifies that all references should be
      * traversed.
-     * @param propositionIds a {@link String[]} of proposition ids. An empty
-     * or <code>null</code> array specifies that all propositions on the 
+     * @param propositionIds a {@link String[]} of proposition ids. An empty *
+     * or <code>null</code> array specifies that all propositions on the
      * right-hand-side of a reference should be used.
-     * @param constraints a {@link PropertyConstraint[]} of property 
-     * constraints on the propositions on the right-hand-side of a reference.
-     * An empty or null array specifies that no constraints should be applied.
+     * @param constraints a {@link PropertyConstraint[]} of property constraints
+     * on the propositions on the right-hand-side of a reference. An empty or
+     * null array specifies that no constraints should be applied.
      */
     public Reference(String[] referenceNames, String[] propositionIds,
             PropertyConstraint[] constraints) {
@@ -92,27 +96,26 @@ public final class Reference extends Link {
 
     /**
      * Creates an instance that specifies traversals using the specified
-     * references from a proposition only to propositions with the given ids 
-     * and that satisfy the specified constraints. It also allows specifying
-     * the first, second, or other proposition on the right-hand-side of the
+     * references from a proposition only to propositions with the given ids and
+     * that satisfy the specified constraints. It also allows specifying the
+     * first, second, or other proposition on the right-hand-side of the
      * reference.
-     * 
-     * @param referenceNames a {@link String[]} of reference names. An empty
-     * or <code>null</code> array specifies that all references should be 
+     *
+     * @param referenceNames a {@link String[]} of reference names. An empty *
+     * or <code>null</code> array specifies that all references should be
      * traversed.
-     * @param propositionIds a {@link String[]} of proposition ids. An empty
-     * or <code>null</code> array specifies that all propositions on the 
+     * @param propositionIds a {@link String[]} of proposition ids. An empty *
+     * or <code>null</code> array specifies that all propositions on the
      * right-hand-side of a reference should be used.
-     * @param constraints a {@link PropertyConstraint[]} of property 
-     * constraints on the propositions on the right-hand-side of a reference.
-     * An empty or <code>null</code> array specifies that no constraints should 
-     * be applied.
+     * @param constraints a {@link PropertyConstraint[]} of property constraints
+     * on the propositions on the right-hand-side of a reference. An empty      * or <code>null</code> array specifies that no constraints should be
+     * applied.
      * @param comparator a comparison function representing the total order to
      * apply to propositions on the right-hand-side of the reference when using
      * the <code>index</code> parameter. If <code>null</code> and an
      * <code>index</code> is specified, the total order is unspecified.
      * @param index the position of the proposition on the right-hand-side of
-     * the reference to traverse to, using the total order specified by the 
+     * the reference to traverse to, using the total order specified by the
      * <code>comparator</code> argument. An index of <code>-1</code> means that
      * all propositions on the right-hand-side will be traversed to.
      */
@@ -125,35 +128,34 @@ public final class Reference extends Link {
 
     /**
      * Creates an instance that specifies traversals using the specified
-     * references from a proposition only to propositions with the given ids 
-     * and that satisfy the specified constraints. It also allows specifying
-     * a range of propositions on the right-hand-side of the reference to be 
-     * traversed to (first and second, first through third, etc.).
-     * 
-     * @param referenceNames a {@link String[]} of reference names. An empty
-     * or <code>null</code> array specifies that all references should be 
+     * references from a proposition only to propositions with the given ids and
+     * that satisfy the specified constraints. It also allows specifying a range
+     * of propositions on the right-hand-side of the reference to be traversed
+     * to (first and second, first through third, etc.).
+     *
+     * @param referenceNames a {@link String[]} of reference names. An empty *
+     * or <code>null</code> array specifies that all references should be
      * traversed.
-     * @param propositionIds a {@link String[]} of proposition ids. An empty
-     * or <code>null</code> array specifies that all propositions on the 
+     * @param propositionIds a {@link String[]} of proposition ids. An empty *
+     * or <code>null</code> array specifies that all propositions on the
      * right-hand-side of a reference should be used.
-     * @param constraints a {@link PropertyConstraint[]} of property 
-     * constraints on the propositions on the right-hand-side of a reference.
-     * An empty or <code>null</code> array specifies that no constraints should 
-     * be applied.
+     * @param constraints a {@link PropertyConstraint[]} of property constraints
+     * on the propositions on the right-hand-side of a reference. An empty      * or <code>null</code> array specifies that no constraints should be
+     * applied.
      * @param comparator a comparison function representing the total order to
      * apply to propositions on the right-hand-side of the reference when using
      * the <code>index</code> parameter. If <code>null</code> and an
      * <code>index</code> is specified, the total order is unspecified.
-     * @param fromIndex the lower-bound on the positions of the propositions 
-     * on the right-hand-side of
-     * the reference to traverse to, inclusive, using the total order specified 
-     * by the <code>comparator</code> argument. An index of <code>-1</code> 
-     * means that all propositions on the right-hand-side will be traversed to.
-     * @param toIndex the upper-bound on the positions of the propositions 
-     * on the right-hand-side of
-     * the reference to traverse to, exclusive, using the total order specified 
-     * by the <code>comparator</code> argument. An index of <code>-1</code> 
-     * means that all propositions on the right-hand-side will be traversed to.
+     * @param fromIndex the lower-bound on the positions of the propositions on
+     * the right-hand-side of the reference to traverse to, inclusive, using the
+     * total order specified by the <code>comparator</code> argument. An index
+     * of <code>-1</code> means that all propositions on the right-hand-side
+     * will be traversed to.
+     * @param toIndex the upper-bound on the positions of the propositions on
+     * the right-hand-side of the reference to traverse to, exclusive, using the
+     * total order specified by the <code>comparator</code> argument. An index
+     * of <code>-1</code> means that all propositions on the right-hand-side
+     * will be traversed to.
      */
     public Reference(String[] referenceNames, String[] propositionIds,
             PropertyConstraint[] constraints,
@@ -175,8 +177,8 @@ public final class Reference extends Link {
     /**
      * Creates an instance that specifies traversals using the specified
      * reference from a proposition to all referred-to propositions.
-     * 
-     * @param referenceName a reference name {@link String} A value of 
+     *
+     * @param referenceName a reference name {@link String} A value of
      * <code>null</code> specifies that all references should be traversed.
      */
     public Reference(String referenceName) {
@@ -186,11 +188,11 @@ public final class Reference extends Link {
     /**
      * Creates an instance that specifies traversals using the specified
      * reference from a proposition only to propositions with the given ids.
-     * 
-     * @param referenceName a reference name {@link String} A value of 
+     *
+     * @param referenceName a reference name {@link String} A value of
      * <code>null</code> specifies that all references should be traversed.
-     * @param propositionIds a {@link String[]} of proposition ids. An empty
-     * or <code>null</code> array specifies that all propositions on the 
+     * @param propositionIds a {@link String[]} of proposition ids. An empty *
+     * or <code>null</code> array specifies that all propositions on the
      * right-hand-side of the reference should be used.
      */
     public Reference(String referenceName, String[] propositionIds) {
@@ -199,17 +201,17 @@ public final class Reference extends Link {
 
     /**
      * Creates an instance that specifies traversals using the specified
-     * references from a proposition only to propositions with the given ids 
-     * and that satisfy the specified property constraints.
-     * 
-     * @param referenceName a reference name {@link String} A value of 
+     * references from a proposition only to propositions with the given ids and
+     * that satisfy the specified property constraints.
+     *
+     * @param referenceName a reference name {@link String} A value of
      * <code>null</code> specifies that all references should be traversed.
-     * @param propositionIds a {@link String[]} of proposition ids. An empty
-     * or <code>null</code> array specifies that all propositions on the 
+     * @param propositionIds a {@link String[]} of proposition ids. An empty *
+     * or <code>null</code> array specifies that all propositions on the
      * right-hand-side of a reference should be used.
-     * @param constraints a {@link PropertyConstraint[]} of property 
-     * constraints on the propositions on the right-hand-side of a reference.
-     * An empty or null array specifies that no constraints should be applied.
+     * @param constraints a {@link PropertyConstraint[]} of property constraints
+     * on the propositions on the right-hand-side of a reference. An empty or
+     * null array specifies that no constraints should be applied.
      */
     public Reference(String referenceName, String[] propositionIds,
             PropertyConstraint[] constraints) {
@@ -218,26 +220,25 @@ public final class Reference extends Link {
 
     /**
      * Creates an instance that specifies traversals using the specified
-     * reference from a proposition only to propositions with the given ids 
-     * and that satisfy the specified property constraints. It also allows 
-     * specifying the first, second, or other proposition on the 
-     * right-hand-side of the reference.
-     * 
-     * @param referenceName a reference name {@link String} A value of 
+     * reference from a proposition only to propositions with the given ids and
+     * that satisfy the specified property constraints. It also allows
+     * specifying the first, second, or other proposition on the right-hand-side
+     * of the reference.
+     *
+     * @param referenceName a reference name {@link String} A value of
      * <code>null</code> specifies that all references should be traversed.
-     * @param propositionIds a {@link String[]} of proposition ids. An empty
-     * or <code>null</code> array specifies that all propositions on the 
+     * @param propositionIds a {@link String[]} of proposition ids. An empty *
+     * or <code>null</code> array specifies that all propositions on the
      * right-hand-side of a reference should be used.
-     * @param constraints a {@link PropertyConstraint[]} of property 
-     * constraints on the propositions on the right-hand-side of a reference.
-     * An empty or <code>null</code> array specifies that no constraints should 
-     * be applied.
+     * @param constraints a {@link PropertyConstraint[]} of property constraints
+     * on the propositions on the right-hand-side of a reference. An empty      * or <code>null</code> array specifies that no constraints should be
+     * applied.
      * @param comparator a comparison function representing the total order to
      * apply to propositions on the right-hand-side of the reference when using
      * the <code>index</code> parameter. If <code>null</code> and an
      * <code>index</code> is specified, the total order is unspecified.
      * @param index the position of the proposition on the right-hand-side of
-     * the reference to traverse to, using the total order specified by the 
+     * the reference to traverse to, using the total order specified by the
      * <code>comparator</code> argument. An index of <code>-1</code> means that
      * all propositions on the right-hand-side will be traversed to.
      */
@@ -250,34 +251,31 @@ public final class Reference extends Link {
 
     /**
      * Creates an instance that specifies traversals using the specified
-     * reference from a proposition only to propositions with the given ids 
-     * and that satisfy the specified constraints. It also allows specifying
-     * a range of propositions on the right-hand-side of the reference to be 
-     * traversed to (first and second, first through third, etc.).
-     * 
-     * @param referenceName a reference name {@link String} A value of 
+     * reference from a proposition only to propositions with the given ids and
+     * that satisfy the specified constraints. It also allows specifying a range
+     * of propositions on the right-hand-side of the reference to be traversed
+     * to (first and second, first through third, etc.).
+     *
+     * @param referenceName a reference name {@link String} A value of
      * <code>null</code> specifies that all references should be traversed.
-     * @param propositionIds a {@link String[]} of proposition ids. An empty
-     * or <code>null</code> array specifies that all propositions on the 
+     * @param propositionIds a {@link String[]} of proposition ids. An empty *
+     * or <code>null</code> array specifies that all propositions on the
      * right-hand-side of a reference should be used.
-     * @param constraints a {@link PropertyConstraint[]} of property 
-     * constraints on the propositions on the right-hand-side of a reference.
-     * An empty or <code>null</code> array specifies that no constraints should 
-     * be applied.
+     * @param constraints a {@link PropertyConstraint[]} of property constraints
+     * on the propositions on the right-hand-side of a reference. An empty      * or <code>null</code> array specifies that no constraints should be
+     * applied.
      * @param comparator a comparison function representing the total order to
      * apply to propositions on the right-hand-side of the reference when using
      * the <code>index</code> parameter. If <code>null</code> and an
      * <code>index</code> is specified, the total order is unspecified.
-     * @param fromIndex the lower-bound on the positions of the propositions 
-     * on the right-hand-side of
-     * the reference to traverse to, inclusive, using the ordering specified by 
-     * the <code>comparator</code> argument. An index of <code>-1</code> means 
-     * that all propositions on the right-hand-side will be traversed to.
-     * @param toIndex the upper-bound on the positions of the propositions 
-     * on the right-hand-side of
-     * the reference to traverse to, exclusive, using the ordering specified by 
-     * the <code>comparator</code> argument. An index of <code>-1</code> means 
-     * that all propositions on the right-hand-side will be traversed to.
+     * @param fromIndex the lower-bound on the positions of the propositions on
+     * the right-hand-side of the reference to traverse to, inclusive, using the
+     * ordering specified by the <code>comparator</code> argument. An index      * of <code>-1</code> means that all propositions on the
+     * right-hand-side will be traversed to.
+     * @param toIndex the upper-bound on the positions of the propositions on
+     * the right-hand-side of the reference to traverse to, exclusive, using the
+     * ordering specified by the <code>comparator</code> argument. An index      * of <code>-1</code> means that all propositions on the
+     * right-hand-side will be traversed to.
      */
     public Reference(String referenceName, String[] propositionIds,
             PropertyConstraint[] constraints,
@@ -291,7 +289,7 @@ public final class Reference extends Link {
 
     /**
      * Gets the names of the reference(s) to be traversed.
-     * 
+     *
      * @return a {@link String[]} of reference names.
      */
     public String[] getReferenceNames() {
@@ -310,26 +308,20 @@ public final class Reference extends Link {
 
     /**
      * Traverses a reference.
-     * 
-     * @param proposition
-     *            a {@link Proposition} at which to start the traversal.
-     * @param forwardDerivations
-     *            a {@link Map<Proposition,List<Proposition>>} of derived
-     *            propositions.
-     * @param backwardDerivations 
-     *            a {@link Map<Proposition,List<Proposition>>} of derived
-     *            propositions.
-     * @param references
-     *            a {@link Map<Proposition,Proposition>} of unique identifiers
-     *            to {@link Proposition}s, used to resolve references.
-     * @param knowledgeSource
-     *            the {@link KnowledgeSource}.
-     * @param cache
-     *            a {@link Set<Proposition>} for convenience in checking if
-     *            duplicate propositions are traversed to. It is cleared 
-     *            in between calls to this method.
+     *
+     * @param proposition a {@link Proposition} at which to start the traversal.
+     * @param forwardDerivations a {@link Map<Proposition,List<Proposition>>} of
+     * derived propositions.
+     * @param backwardDerivations a {@link Map<Proposition,List<Proposition>>}
+     * of derived propositions.
+     * @param references a {@link Map<Proposition,Proposition>} of unique
+     * identifiers to {@link Proposition}s, used to resolve references.
+     * @param knowledgeSource the {@link KnowledgeSource}.
+     * @param cache a {@link Set<Proposition>} for convenience in checking if
+     * duplicate propositions are traversed to. It is cleared in between calls
+     * to this method.
      * @return the {@link Collection<Proposition>} at the end of the traversal
-     *            step.
+     * step.
      */
     @Override
     Collection<Proposition> traverse(Proposition proposition,
@@ -357,33 +349,61 @@ public final class Reference extends Link {
     }
 
     @Override
+    public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
+            String[] inPropIds) throws KnowledgeSourceReadException {
+        String[] explicitPropIds = getPropositionIds();
+        if (explicitPropIds.length > 0) {
+            return explicitPropIds.clone();
+        } else {
+            Set<String> result = new HashSet<String>();
+            for (String propId : inPropIds) {
+                PropositionDefinition propDef =
+                        knowledgeSource.readPropositionDefinition(propId);
+                if (propDef == null) {
+                    throw new IllegalArgumentException("Invalid propId: " + 
+                            propId);
+                }
+                for (String refName : this.referenceNames) {
+                    ReferenceDefinition refDef =
+                            propDef.referenceDefinition(refName);
+                    if (refDef != null) {
+                        org.arp.javautil.arrays.Arrays.addAll(result,
+                                refDef.getPropositionIds());
+                    }
+                }
+            }
+            return result.toArray(new String[result.size()]);
+        }
+    }
+
+    @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Arrays.hashCode(referenceNames);
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Arrays.hashCode(referenceNames);
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (!super.equals(obj)) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		Reference other = (Reference) obj;
-		if (!Arrays.equals(referenceNames, other.referenceNames)) {
-			return false;
-		}
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Reference other = (Reference) obj;
+        if (!Arrays.equals(referenceNames, other.referenceNames)) {
+            return false;
+        }
+        return true;
+    }
 }

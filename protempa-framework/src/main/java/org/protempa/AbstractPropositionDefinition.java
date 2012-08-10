@@ -63,7 +63,7 @@ public abstract class AbstractPropositionDefinition implements
      * An array of proposition definition id {@link String}s.
      */
     private String[] inverseIsA;
-    protected String[] directChildren;
+    protected String[] children;
     private String[] termIds;
     private String description;
     private PropertyDefinition[] propertyDefinitions;
@@ -86,7 +86,7 @@ public abstract class AbstractPropositionDefinition implements
             throw new IllegalArgumentException("id cannot be null");
         }
         this.id = id.intern();
-        this.directChildren = ArrayUtils.EMPTY_STRING_ARRAY;
+        this.children = ArrayUtils.EMPTY_STRING_ARRAY;
         this.inverseIsA = ArrayUtils.EMPTY_STRING_ARRAY;
         this.displayName = "";
         this.abbrevDisplayName = "";
@@ -186,7 +186,7 @@ public abstract class AbstractPropositionDefinition implements
 
     @Override
     public String[] getChildren() {
-        return this.directChildren.clone();
+        return this.children.clone();
     }
 
     @Override
@@ -363,6 +363,6 @@ public abstract class AbstractPropositionDefinition implements
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("id", this.id).append("displayName", this.displayName).append("description", this.description).append("abbreviatedDisplayName", this.abbrevDisplayName).append("inverseIsA", this.inverseIsA).append("directChildren", this.directChildren).append("termIds", this.termIds).append("concatenable", isConcatenable()).append("solid", isSolid()).append("propertyDefinitions", this.propertyDefinitions).append("referenceDefinitions", this.referenceDefinitions).toString();
+        return new ToStringBuilder(this).append("id", this.id).append("displayName", this.displayName).append("description", this.description).append("abbreviatedDisplayName", this.abbrevDisplayName).append("inverseIsA", this.inverseIsA).append("directChildren", this.children).append("termIds", this.termIds).append("concatenable", isConcatenable()).append("solid", isSolid()).append("propertyDefinitions", this.propertyDefinitions).append("referenceDefinitions", this.referenceDefinitions).toString();
     }
 }

@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.ArrayUtils;
 
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
@@ -38,7 +39,7 @@ import org.protempa.proposition.UniqueId;
  * @author Michel Mansour
  *
  */
-public class MappingQueryResultsHandler implements QueryResultsHandler {
+public class MappingQueryResultsHandler extends AbstractQueryResultsHandler {
 
     private Map<String, List<Proposition>> resultMap;
 
@@ -64,21 +65,10 @@ public class MappingQueryResultsHandler implements QueryResultsHandler {
 //	}
 
     /**
-     * No-op.
-     * 
-     * @throws FinderException should never throw.
-     */
-    @Override
-    public void finish() throws FinderException {
-    }
-
-    /**
      * Initializes the map returned by {@link #getResultMap()}.
-     *
-     * @throws FinderException should never throw.
      */
     @Override
-    public void init(KnowledgeSource knowledgeSource) throws FinderException {
+    public void init(KnowledgeSource knowledgeSource) {
         this.resultMap = new HashMap<String, List<Proposition>>();
     }
 
@@ -88,18 +78,12 @@ public class MappingQueryResultsHandler implements QueryResultsHandler {
      *
      * @param key a key id {@link String}.
      * @param propositions a {@link List<Proposition>} of propositions.
-     * @throws FinderException should never throw.
      */
     @Override
     public void handleQueryResult(String key, List<Proposition> propositions,
             Map<Proposition,List<Proposition>> forwardDerivations,
             Map<Proposition,List<Proposition>> backwardDerivations,
-            Map<UniqueId, Proposition> references)
-            throws FinderException {
+            Map<UniqueId, Proposition> references) {
         resultMap.put(key, propositions);
-    }
-
-    @Override
-    public void validate(KnowledgeSource knowledgeSource) {
     }
 }

@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import java.util.HashSet;
 import org.protempa.backend.BackendInitializationException;
 import java.util.Set;
 import java.util.logging.Level;
@@ -260,8 +261,15 @@ public final class Protempa {
     /**
      * Executes a query.
      *
+     * Protempa determines which propositions to retrieve from the underlying
+     * data sources and compute as the union of the proposition ids specified in
+     * the supplied {@link Query} and the proposition ids returned from the
+     * results handler's {@link QueryResultsHandler#getPropositionIdsNeeded() }
+     * method.
+     *
      * @param query a {@link Query}. Cannot be <code>null</code>.
-     * @param resultsHandler a {@link QueryResultsHandler}. Cannot *      * be <code>null</code>.
+     * @param resultsHandler a {@link QueryResultsHandler}. Cannot * *
+     * be <code>null</code>.
      * @throws FinderException if an error occurred during query.
      */
     public void execute(Query query, QueryResultsHandler resultsHandler)
@@ -293,6 +301,12 @@ public final class Protempa {
      * Executes all three phases of the PROTEMPA lifecycle (data retrieval,
      * processing, and output) while also persisting intermediate results,
      * specifically the results of the proposition retrieval and processing.
+     *
+     * Protempa determines which propositions to retrieve from the underlying
+     * data sources and compute as the union of the proposition ids specified in
+     * the supplied {@link Query} and the proposition ids returned from the
+     * results handler's {@link QueryResultsHandler#getPropositionIdsNeeded() }
+     * method.
      *
      * @param query the query to execute
      * @param resultHandler a result handler specifying how the output should be
@@ -465,6 +479,12 @@ public final class Protempa {
      * processed results, with respect to the given proposition IDs. The query
      * does not have to be the same as those in either of the previous two
      * stages.
+     *
+     * Protempa determines which propositions to output as the union of the
+     * proposition ids specified in the supplied {@link Query} and the
+     * proposition ids returned from the results handler's 
+     * {@link QueryResultsHandler#getPropositionIdsNeeded() }
+     * method.
      *
      * @param query the original query used to retrieve the data
      * @param keyIds if not empty or null, the output will be restricted to the

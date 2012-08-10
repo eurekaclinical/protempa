@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 
 import org.arp.javautil.io.IOUtil;
+import org.drools.util.StringUtils;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.proposition.value.ValueType;
 
@@ -117,6 +118,16 @@ public abstract class AbstractPropertiesFileKnowledgeSourceBackend
     @Override
     public AbstractionDefinition readAbstractionDefinition(String id) throws KnowledgeSourceReadException {
         return null;
+    }
+    
+    @Override
+    public String[] readAbstractedInto(String propId) {
+        return StringUtils.EMPTY_STRING_ARRAY;
+    }
+
+    @Override
+    public String[] readIsA(String propId) {
+        return StringUtils.EMPTY_STRING_ARRAY;
     }
 
     private EventDefinition readEventDefinition(String id)

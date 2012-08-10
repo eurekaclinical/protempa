@@ -607,11 +607,11 @@ public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefi
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.directChildren;
-        this.directChildren = this.paramIds.toArray(new String[this.paramIds.size()]);
+        String[] old = this.children;
+        this.children = this.paramIds.toArray(new String[this.paramIds.size()]);
         if (this.changes != null) {
             this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.directChildren);
+                    this.children);
         }
     }
 

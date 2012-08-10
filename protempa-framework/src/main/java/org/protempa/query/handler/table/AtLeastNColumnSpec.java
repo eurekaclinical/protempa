@@ -21,8 +21,10 @@ package org.protempa.query.handler.table;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
@@ -31,6 +33,7 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 
 public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
+
     private final int n;
     private final Link[] links;
     private final String columnNameOverride;
@@ -44,13 +47,13 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
     public AtLeastNColumnSpec(String columnNameOverride, int n, Link[] links) {
         this(columnNameOverride, n, links, "true", "false");
     }
-    
-    public AtLeastNColumnSpec(String columnNameOverride, int n, Link[] links, 
+
+    public AtLeastNColumnSpec(String columnNameOverride, int n, Link[] links,
             String trueOutput, String falseOutput) {
         this.n = n;
         ProtempaUtil.checkArray(links, "links");
         this.links = links.clone();
-        this.columnNameOverride = columnNameOverride;        
+        this.columnNameOverride = columnNameOverride;
         this.trueOutput = trueOutput;
         this.falseOutput = falseOutput;
     }
@@ -78,14 +81,14 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
             Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
         Collection<Proposition> props = traverseLinks(this.links, proposition,
-                forwardDerivations, backwardDerivations, references, 
+                forwardDerivations, backwardDerivations, references,
                 knowledgeSource);
         return new String[]{props.size() >= this.n ? this.trueOutput : this.falseOutput};
     }
 
     @Override
-    public void validate(KnowledgeSource knowledgeSource) throws 
-            TableColumnSpecValidationFailedException, 
+    public void validate(KnowledgeSource knowledgeSource) throws
+            TableColumnSpecValidationFailedException,
             KnowledgeSourceReadException {
         int i = 1;
         for (Link link : this.links) {
@@ -99,66 +102,89 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
         }
     }
 
-	public int getN() {
-		return n;
-	}
+    public int getN() {
+        return n;
+    }
 
-	public Link[] getLinks() {
-		return links;
-	}
+    public Link[] getLinks() {
+        return links;
+    }
 
-	public String getColumnNameOverride() {
-		return columnNameOverride;
-	}
+    public String getColumnNameOverride() {
+        return columnNameOverride;
+    }
 
-	public String getTrueOutput() {
-		return trueOutput;
-	}
+    public String getTrueOutput() {
+        return trueOutput;
+    }
 
-	public String getFalseOutput() {
-		return falseOutput;
-	}
+    public String getFalseOutput() {
+        return falseOutput;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((columnNameOverride == null) ? 0 : columnNameOverride.hashCode());
-		result = prime * result + ((falseOutput == null) ? 0 : falseOutput.hashCode());
-		result = prime * result + Arrays.hashCode(links);
-		result = prime * result + n;
-		result = prime * result + ((trueOutput == null) ? 0 : trueOutput.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((columnNameOverride == null) ? 0 : columnNameOverride.hashCode());
+        result = prime * result + ((falseOutput == null) ? 0 : falseOutput.hashCode());
+        result = prime * result + Arrays.hashCode(links);
+        result = prime * result + n;
+        result = prime * result + ((trueOutput == null) ? 0 : trueOutput.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AtLeastNColumnSpec other = (AtLeastNColumnSpec) obj;
-		if (columnNameOverride == null) {
-			if (other.columnNameOverride != null)
-				return false;
-		} else if (!columnNameOverride.equals(other.columnNameOverride))
-			return false;
-		if (falseOutput == null) {
-			if (other.falseOutput != null)
-				return false;
-		} else if (!falseOutput.equals(other.falseOutput))
-			return false;
-		if (!Arrays.equals(links, other.links))
-			return false;
-		if (n != other.n)
-			return false;
-		if (trueOutput == null) {
-			if (other.trueOutput != null)
-				return false;
-		} else if (!trueOutput.equals(other.trueOutput))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AtLeastNColumnSpec other = (AtLeastNColumnSpec) obj;
+        if (columnNameOverride == null) {
+            if (other.columnNameOverride != null) {
+                return false;
+            }
+        } else if (!columnNameOverride.equals(other.columnNameOverride)) {
+            return false;
+        }
+        if (falseOutput == null) {
+            if (other.falseOutput != null) {
+                return false;
+            }
+        } else if (!falseOutput.equals(other.falseOutput)) {
+            return false;
+        }
+        if (!Arrays.equals(links, other.links)) {
+            return false;
+        }
+        if (n != other.n) {
+            return false;
+        }
+        if (trueOutput == null) {
+            if (other.trueOutput != null) {
+                return false;
+            }
+        } else if (!trueOutput.equals(other.trueOutput)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
+            String[] inPropIds) throws KnowledgeSourceReadException {
+        Set<String> result = new HashSet<String>();
+        for (Link link : this.links) {
+            inPropIds = link.getInferredPropositionIds(knowledgeSource, 
+                    inPropIds);
+            org.arp.javautil.arrays.Arrays.addAll(result, inPropIds);
+        }
+        return result.toArray(new String[result.size()]);
+    }
 }

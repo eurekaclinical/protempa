@@ -38,23 +38,33 @@ import org.protempa.proposition.UniqueId;
 public interface QueryResultsHandler {
 
     /**
-     * Performs all initialization functions to prepare the handler. This method
-     * is guaranteed to be called by Protempa before any query result processing
-     * is done.
+     * Performs all initialization functions to prepare the handler. This 
+     * method is guaranteed to be called by Protempa before any query result 
+     * processing is done.
      *
-     * @throws FinderException
+     * @throws QueryResultsHandlerInitException
      *             if any exceptions occur at a lower level
      */
-    public void init(KnowledgeSource knowledgeSource) throws FinderException;
+    public void init(KnowledgeSource knowledgeSource) 
+            throws QueryResultsHandlerInitException;
+    
+    /**
+     * Called by Protempa prior to the first invocation of 
+     * {@link #handleQueryResult}.
+     * 
+     * @throws QueryResultsHandlerProcessingException if any exceptions occur 
+     * at a lower level.
+     */
+    public void start() throws QueryResultsHandlerProcessingException;
 
     /**
      * Called by Protempa as soon as all query results have
      * been retrieved from the data source.
      *
-     * @throws FinderException
+     * @throws QueryResultsHandlerProcessingException
      *             if any exceptions occur at a lower level
      */
-    public void finish() throws FinderException;
+    public void finish() throws QueryResultsHandlerProcessingException;
 
     /**
      * Handles a single query result, which is the list of propositions
@@ -74,22 +84,42 @@ public interface QueryResultsHandler {
             Map<Proposition,List<Proposition>> forwardDerivations,
             Map<Proposition,List<Proposition>> backwardDerivations,
             Map<UniqueId,Proposition> references)
-            throws FinderException;
+            throws QueryResultsHandlerProcessingException;
     
     /**
      * Validates this query results handler's specification against the
-     * knowledge source. Probably will get replaced by a builder pattern like
-     * queries in the future.
-     * 
-     * @param knowledgeSource a {@link KnowledgeSource}. Guaranteed not
-     * <code>null</code>.
+     * knowledge source. It is called by the abstraction finder after query
+     * results handler initialization.
      * 
      * @throws QueryResultsHandlerValidationFailedException if validation
      * failed.
      * @throws KnowledgeSourceReadException if the knowledge source could
      * not be read.
      */
-    public void validate(KnowledgeSource knowledgeSource) 
+    public void validate() 
             throws QueryResultsHandlerValidationFailedException,
             KnowledgeSourceReadException;
+    
+    /**
+     * Infers from the query results handler's specification what propositions
+     * need to be queried in order to populate the query result handler's 
+     * output.
+     * 
+     * When executing a processing job, Protempa takes the union of
+     * the proposition ids returned from this API and the proposition ids
+     * specified in the Protempa {@link Query} when determining what
+     * propositions to retrieve from the underlying data sources and what
+     * propositions to compute.
+     * 
+     * Implementations of {@link QueryResultsHandler} for which such inference
+     * does not make sense may return an empty array.
+     * 
+     * @return an array of proposition id {@link String}. Guaranteed not
+     * <code>null</code>.
+     * 
+     * @throws KnowledgeSourceReadException if reading from the knowledge 
+     * source fails while inferring the proposition ids needed.
+     */
+    public String[] getPropositionIdsNeeded() 
+            throws KnowledgeSourceReadException;
 }

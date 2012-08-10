@@ -286,7 +286,7 @@ public abstract class ProtegeKnowledgeSourceBackend
     @Override
     public ValueSet readValueSet(String id)
             throws KnowledgeSourceReadException {
-        Cls cls = this.readClass(id, "Value");
+        Cls cls = readClass(id, "Value");
         if (cls == null) {
             return null;
         } else {
@@ -295,4 +295,32 @@ public abstract class ProtegeKnowledgeSourceBackend
             return Util.parseValueSet(cls, valueType, cm, this);
         }
     }
+
+    @Override
+    public String[] readAbstractedInto(String propId) throws KnowledgeSourceReadException {
+        Instance instance = this.cm.getInstance(propId);
+        Slot abstractedIntoSlot = this.cm.getSlot("abstractedInto");
+        Collection<Instance> abstractedIntos = (Collection<Instance>) this.cm.getOwnSlotValues(instance, abstractedIntoSlot);
+        String[] result = new String[abstractedIntos.size()];
+        int i = 0;
+        for (Instance inst : abstractedIntos) {
+            result[i++] = inst.getName();
+        }
+        return result;
+    }
+
+    @Override
+    public String[] readIsA(String propId) throws KnowledgeSourceReadException {
+        Instance instance = this.cm.getInstance(propId);
+        Slot isASlot = this.cm.getSlot("isA");
+        Collection<Instance> isAs = (Collection<Instance>) this.cm.getOwnSlotValues(instance, isASlot);
+        String[] result = new String[isAs.size()];
+        int i = 0;
+        for (Instance inst : isAs) {
+            result[i++] = inst.getName();
+        }
+        return result;
+    }
+    
+    
 }

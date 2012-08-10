@@ -151,7 +151,7 @@ public final class PrimitiveParameterDefinition extends AbstractPropositionDefin
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.directChildren;
+        String[] old = this.children;
         Set<String> c = new HashSet<String>();
         String[] inverseIsA = getInverseIsA();
         if (inverseIsA != null) {
@@ -159,10 +159,10 @@ public final class PrimitiveParameterDefinition extends AbstractPropositionDefin
                 c.add(propId);
             }
         }
-        this.directChildren = c.toArray(new String[c.size()]);
+        this.children = c.toArray(new String[c.size()]);
         if (this.changes != null) {
             this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.directChildren);
+                    this.children);
         }
     }
 

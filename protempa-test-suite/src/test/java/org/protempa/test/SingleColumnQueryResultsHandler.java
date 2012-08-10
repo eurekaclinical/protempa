@@ -30,20 +30,25 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.commons.lang.ArrayUtils;
 
 import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.query.handler.AbstractQueryResultsHandler;
 import org.protempa.query.handler.QueryResultsHandler;
+import org.protempa.query.handler.QueryResultsHandlerProcessingException;
 import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
 
-final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
+final class SingleColumnQueryResultsHandler 
+        extends AbstractQueryResultsHandler {
 
     private final Writer writer;
 
-    private final Map<String, Map<Proposition, List<Proposition>>> data = new HashMap<String, Map<Proposition, List<Proposition>>>();
+    private final Map<String, Map<Proposition, List<Proposition>>> data = 
+            new HashMap<String, Map<Proposition, List<Proposition>>>();
 
     /**
      * Creates a new instance that will write to the given writer. The finish()
@@ -57,18 +62,14 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
     }
 
     @Override
-    public void init(KnowledgeSource knowledgeSource) throws FinderException {
-
-    }
-
-    @Override
-    public void finish() throws FinderException {
+    public void finish() throws QueryResultsHandlerProcessingException {
         try {
             SortedSet<String> sortedKeyIds = new TreeSet<String>(
                     this.data.keySet());
             for (String keyId : sortedKeyIds) {
                 writeLine(keyId);
-                List<PropositionWithDerivations> sortedProps = new ArrayList<PropositionWithDerivations>();
+                List<PropositionWithDerivations> sortedProps = 
+                        new ArrayList<PropositionWithDerivations>();
                 for (Entry<Proposition, List<Proposition>> pp : this.data.get(
                         keyId).entrySet()) {
                     sortedProps.add(new PropositionWithDerivations(pp.getKey(),
@@ -78,8 +79,8 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
                         new PropositionWithDerivationsComparator());
                 for (PropositionWithDerivations pwd : sortedProps) {
                     writeLine(pwd.getProposition().getId());
-                    List<Proposition> sortedDerivations = new ArrayList<Proposition>(
-                            pwd.getDerivations());
+                    List<Proposition> sortedDerivations = 
+                            new ArrayList<Proposition>(pwd.getDerivations());
                     Collections.sort(sortedDerivations,
                             new PropositionComparator());
                     for (Proposition d : sortedDerivations) {
@@ -89,10 +90,46 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
             }
             this.writer.close();
         } catch (IOException e) {
-            throw new FinderException(e);
+            throw new QueryResultsHandlerProcessingException(e);
         }
     }
 
+    @Override
+    public void handleQueryResult(String keyId, List<Proposition> propositions,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<UniqueId, Proposition> references) 
+            throws QueryResultsHandlerProcessingException {
+        try {
+            this.data.put(keyId, 
+                    new HashMap<Proposition, List<Proposition>>());
+            for (Proposition p : propositions) {
+                this.data.get(keyId).put(p, new ArrayList<Proposition>());
+                storeDerivations(forwardDerivations.get(p), this.data
+                        .get(keyId).get(p));
+                storeDerivations(backwardDerivations.get(p),
+                        this.data.get(keyId).get(p));
+            }
+        } catch (IOException ex) {
+            throw new QueryResultsHandlerProcessingException(ex);
+        }
+    }
+
+    @Override
+    public void validate() {
+
+    }
+
+    /**
+     * Returns an empty string array always.
+     * 
+     * @return an empty {@link String} array. Guaranteed not <code>null</code>.
+     */
+    @Override
+    public String[] getPropositionIdsNeeded() {
+        return ArrayUtils.EMPTY_STRING_ARRAY;
+    }
+    
     private void writeLine(String str) throws IOException {
         this.writer.write(str);
         this.writer.write("\n");
@@ -105,32 +142,6 @@ final class SingleColumnQueryResultsHandler implements QueryResultsHandler {
                 outputDerivations.add(d);
             }
         }
-    }
-
-    @Override
-    public void handleQueryResult(String keyId, List<Proposition> propositions,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueId, Proposition> references) throws FinderException {
-        try {
-            this.data.put(keyId, new HashMap<Proposition, List<Proposition>>());
-            for (Proposition p : propositions) {
-                this.data.get(keyId).put(p, new ArrayList<Proposition>());
-                storeDerivations(forwardDerivations.get(p), this.data
-                        .get(keyId).get(p));
-                storeDerivations(backwardDerivations.get(p),
-                        this.data.get(keyId).get(p));
-            }
-        } catch (IOException ex) {
-            throw new FinderException(ex);
-        }
-    }
-
-    @Override
-    public void validate(KnowledgeSource knowledgeSource)
-            throws QueryResultsHandlerValidationFailedException,
-            KnowledgeSourceReadException {
-
     }
 
     private static class PropositionComparator implements

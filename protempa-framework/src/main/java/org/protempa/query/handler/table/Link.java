@@ -122,6 +122,19 @@ public abstract class Link {
     }
     
     /**
+     * Aggregates and returns the possible proposition ids on the right-hand
+     * side of the link.
+     * 
+     * @param inPropIds the proposition ids inferred from the previous link,
+     * or the row proposition id if this is the first link.
+     * 
+     * @return an array of proposition id {@link String}s. 
+     */
+    public abstract String[] getInferredPropositionIds(
+            KnowledgeSource knowledgeSource, String[] inPropIds)
+            throws KnowledgeSourceReadException;
+    
+    /**
      * Returns whether a proposition has one of the proposition ids specified
      * by the link.
      * 

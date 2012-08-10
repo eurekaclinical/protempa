@@ -26,6 +26,7 @@ import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,9 @@ import org.protempa.query.And;
  * @author Andrew Post
  */
 public final class KnowledgeSourceImpl
-        extends AbstractSource<KnowledgeSourceUpdatedEvent, KnowledgeSourceBackend, KnowledgeSourceUpdatedEvent, KnowledgeSourceBackendUpdatedEvent> implements KnowledgeSource {
+        extends AbstractSource<KnowledgeSourceUpdatedEvent, 
+        KnowledgeSourceBackend, KnowledgeSourceUpdatedEvent, 
+        KnowledgeSourceBackendUpdatedEvent> implements KnowledgeSource {
 
     /**
      * PROTEMPA knowledge base.
@@ -72,9 +75,11 @@ public final class KnowledgeSourceImpl
         this.propIdPropCache = new ReferenceMap();
         this.inverseIsACache = new ReferenceMap();
         this.abstractedFromCache = new ReferenceMap();
-        this.notFoundAbstractionDefinitionRequests = new WeakHashMap<String, Object>();
+        this.notFoundAbstractionDefinitionRequests =
+                new WeakHashMap<String, Object>();
         this.notFoundValueSetRequests = new WeakHashMap<String, Object>();
-        this.notFoundPropositionDefinitionRequests = new WeakHashMap<String, Object>();
+        this.notFoundPropositionDefinitionRequests =
+                new WeakHashMap<String, Object>();
 
         this.propDefReader = new PropositionDefinitionReader();
         this.abstractionDefReader = new AbstractionDefinitionReader();
@@ -93,7 +98,8 @@ public final class KnowledgeSourceImpl
         }
     }
 
-    private void initializeIfNeeded(String template, String substitution) throws KnowledgeSourceReadException {
+    private void initializeIfNeeded(String template, String substitution)
+            throws KnowledgeSourceReadException {
         try {
             initializeIfNeeded();
         } catch (BackendInitializationException ex) {
@@ -113,7 +119,8 @@ public final class KnowledgeSourceImpl
     }
 
     @Override
-    public List<PropositionDefinition> readInverseIsA(PropositionDefinition propDef)
+    public List<PropositionDefinition> readInverseIsA(
+            PropositionDefinition propDef)
             throws KnowledgeSourceReadException {
         if (propDef == null) {
             throw new IllegalArgumentException("propDef cannot be null");
@@ -135,6 +142,16 @@ public final class KnowledgeSourceImpl
     }
 
     @Override
+    public List<PropositionDefinition> readIsA(PropositionDefinition propDef)
+            throws KnowledgeSourceReadException {
+        if (propDef == null) {
+            throw new IllegalArgumentException("propDef cannot be null");
+        }
+
+        return readIsA(propDef.getId());
+    }
+
+    @Override
     public List<PropositionDefinition> readInverseIsA(String id)
             throws KnowledgeSourceReadException {
         if (id == null) {
@@ -149,7 +166,27 @@ public final class KnowledgeSourceImpl
     }
 
     @Override
-    public List<? extends PropositionDefinition> readAbstractedFrom(AbstractionDefinition propDef)
+    public List<PropositionDefinition> readIsA(String id)
+            throws KnowledgeSourceReadException {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+        Set<String> isAs = new HashSet<String>();
+        for (KnowledgeSourceBackend backend : getBackends()) {
+            Arrays.addAll(isAs, backend.readIsA(id));
+        }
+        List<PropositionDefinition> result =
+                new ArrayList<PropositionDefinition>();
+        for (String isAPropId : isAs) {
+            result.add(readPropositionDefinition(isAPropId));
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<PropositionDefinition> readAbstractedFrom(
+            AbstractionDefinition propDef)
             throws KnowledgeSourceReadException {
         if (propDef == null) {
             throw new IllegalArgumentException("propDef cannot be null");
@@ -176,7 +213,18 @@ public final class KnowledgeSourceImpl
     }
 
     @Override
-    public List<? extends PropositionDefinition> readAbstractedFrom(String id)
+    public List<AbstractionDefinition> readAbstractedInto(
+            PropositionDefinition propDef)
+            throws KnowledgeSourceReadException {
+        if (propDef == null) {
+            throw new IllegalArgumentException("propDef cannot be null");
+        }
+
+        return readAbstractedInto(propDef.getId());
+    }
+
+    @Override
+    public List<PropositionDefinition> readAbstractedFrom(String id)
             throws KnowledgeSourceReadException {
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
@@ -185,7 +233,61 @@ public final class KnowledgeSourceImpl
         if (propDef == null) {
             return Collections.emptyList();
         } else {
-            return readAbstractedFrom((AbstractionDefinition) propDef);
+            return readAbstractedFrom(propDef);
+        }
+    }
+
+    @Override
+    public List<AbstractionDefinition> readAbstractedInto(String id)
+            throws KnowledgeSourceReadException {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+        Set<String> abstractedIntos = new HashSet<String>();
+        for (KnowledgeSourceBackend backend : getBackends()) {
+            Arrays.addAll(abstractedIntos,
+                    backend.readAbstractedInto(id));
+        }
+        List<AbstractionDefinition> result =
+                new ArrayList<AbstractionDefinition>();
+        for (String abstractedIntoPropId : abstractedIntos) {
+            result.add(readAbstractionDefinition(abstractedIntoPropId));
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<PropositionDefinition> readParents(
+            PropositionDefinition propDef)
+            throws KnowledgeSourceReadException {
+        if (propDef == null) {
+            throw new IllegalArgumentException("propDef cannot be null");
+        }
+        List<AbstractionDefinition> ad = readAbstractedInto(propDef);
+        List<PropositionDefinition> pd = readIsA(propDef);
+        Map<String, PropositionDefinition> map =
+                new HashMap<String, PropositionDefinition>();
+        for (AbstractionDefinition def : ad) {
+            map.put(def.getId(), def);
+        }
+        for (PropositionDefinition def : pd) {
+            map.put(def.getId(), def);
+        }
+        return new ArrayList(map.values());
+    }
+
+    @Override
+    public List<PropositionDefinition> readParents(String propId)
+            throws KnowledgeSourceReadException {
+        if (propId == null) {
+            throw new IllegalArgumentException("propId cannot be null");
+        }
+        PropositionDefinition pd = readPropositionDefinition(propId);
+        if (pd != null) {
+            return readParents(pd);
+        } else {
+            return new ArrayList(0);
         }
     }
 

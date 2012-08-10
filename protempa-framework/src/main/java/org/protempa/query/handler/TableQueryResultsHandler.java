@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang.ArrayUtils;
 
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.string.StringUtil;
@@ -40,7 +41,8 @@ import org.protempa.query.handler.table.TableColumnSpecValidationFailedException
  *
  * @author Andrew Post
  */
-public final class TableQueryResultsHandler implements QueryResultsHandler {
+public final class TableQueryResultsHandler 
+        extends AbstractQueryResultsHandler {
 
     private static final long serialVersionUID = -1503401944818776787L;
     private final char columnDelimiter;
@@ -50,10 +52,18 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
     private KnowledgeSource knowledgeSource;
     private final BufferedWriter out;
     private final Map<String, String> replace;
+    private final boolean inferPropositionIdsNeeded;
 
     public TableQueryResultsHandler(BufferedWriter out, char columnDelimiter,
             String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
             boolean headerWritten) {
+        this(out, columnDelimiter, rowPropositionIds, columnSpecs,
+                headerWritten, true);
+    }
+
+    public TableQueryResultsHandler(BufferedWriter out, char columnDelimiter,
+            String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
+            boolean headerWritten, boolean inferPropositionIdsNeeded) {
         checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
         this.rowPropositionIds = rowPropositionIds.clone();
@@ -64,6 +74,7 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
         this.replace = new HashMap<String, String>();
         this.replace.put(null, "(null)");
         this.replace.put("", "(empty)");
+        this.inferPropositionIdsNeeded = inferPropositionIdsNeeded;
     }
 
     private void checkConstructorArgs(String[] rowPropositionIds,
@@ -89,9 +100,14 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
     }
 
     @Override
-    public void init(KnowledgeSource knowledgeSource) throws FinderException {
-        Logger logger = Util.logger();
+    public void init(KnowledgeSource knowledgeSource) {
         this.knowledgeSource = knowledgeSource;
+    }
+    
+    @Override
+    public void start() throws QueryResultsHandlerProcessingException {
+        Logger logger = Util.logger();
+        
         if (this.headerWritten) {
             try {
                 List<String> columnNames = new ArrayList<String>();
@@ -126,16 +142,12 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
                         this.columnDelimiter, this.out);
                 this.out.newLine();
             } catch (KnowledgeSourceReadException ex1) {
-                throw new FinderException("Error reading knowledge source", ex1);
+                throw new QueryResultsHandlerProcessingException("Error reading knowledge source", ex1);
             } catch (IOException ex) {
-                throw new FinderException("Could not write header", ex);
+                throw new QueryResultsHandlerProcessingException("Could not write header", ex);
             }
         }
 
-    }
-
-    @Override
-    public void finish() throws FinderException {
     }
 
     @Override
@@ -143,7 +155,7 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references)
-            throws FinderException {
+            throws QueryResultsHandlerProcessingException {
         int n = this.columnSpecs.length;
         Util.logger().log(Level.FINER, "Processing keyId {0}", keyId);
         for (Proposition prop : propositions) {
@@ -174,16 +186,17 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
 
                 }
             } catch (KnowledgeSourceReadException ex1) {
-                throw new FinderException(
+                throw new QueryResultsHandlerProcessingException(
                         "Could not read knowledge source", ex1);
             } catch (IOException ex) {
-                throw new FinderException("Could not write row" + ex);
+                throw new QueryResultsHandlerProcessingException(
+                        "Could not write row" + ex);
             }
         }
     }
 
     @Override
-    public void validate(KnowledgeSource knowledgeSource)
+    public void validate()
             throws QueryResultsHandlerValidationFailedException,
             KnowledgeSourceReadException {
         List<String> invalidPropIds = new ArrayList<String>();
@@ -245,5 +258,29 @@ public final class TableQueryResultsHandler implements QueryResultsHandler {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Infers a list of propositions to populate all of the specified columns.
+     *
+     * @return an array of proposition id {@link String}s.
+     */
+    @Override
+    public String[] getPropositionIdsNeeded() 
+            throws KnowledgeSourceReadException {
+        if (this.inferPropositionIdsNeeded) {
+            Set<String> result = new HashSet<String>();
+            org.arp.javautil.arrays.Arrays.addAll(result, 
+                    this.rowPropositionIds);
+            for (TableColumnSpec columnSpec : this.columnSpecs) {
+                String[] inferredPropIds = 
+                        columnSpec.getInferredPropositionIds(
+                        this.knowledgeSource, this.rowPropositionIds);
+                org.arp.javautil.arrays.Arrays.addAll(result, inferredPropIds);
+            }
+            return result.toArray(new String[result.size()]);
+        } else {
+            return ArrayUtils.EMPTY_STRING_ARRAY;
+        }
     }
 }

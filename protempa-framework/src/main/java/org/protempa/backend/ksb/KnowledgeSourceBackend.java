@@ -98,4 +98,8 @@ public interface KnowledgeSourceBackend extends
      */
     ValueSet readValueSet(String id)
             throws KnowledgeSourceReadException;
+    
+    String[] readAbstractedInto(String propId) throws KnowledgeSourceReadException;
+    
+    String[] readIsA(String propId) throws KnowledgeSourceReadException;
 }

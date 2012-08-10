@@ -171,4 +171,16 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
 			return false;
 		return true;
 	}
+
+    @Override
+    public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
+            String[] inPropIds) throws KnowledgeSourceReadException {
+        Set<String> result = new HashSet<String>();
+        for (Link link : this.links) {
+            inPropIds = link.getInferredPropositionIds(knowledgeSource, 
+                    inPropIds);
+            org.arp.javautil.arrays.Arrays.addAll(result, inPropIds);
+        }
+        return result.toArray(new String[result.size()]);
+    }
 }

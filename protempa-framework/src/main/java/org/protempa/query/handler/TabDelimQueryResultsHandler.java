@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang.ArrayUtils;
 
 import org.arp.javautil.string.StringUtil;
 import org.protempa.FinderException;
@@ -51,7 +52,7 @@ import org.protempa.proposition.UniqueId;
  * @author Michel Mansour
  *
  */
-public class TabDelimQueryResultsHandler implements QueryResultsHandler {
+public class TabDelimQueryResultsHandler extends AbstractQueryResultsHandler {
 
     private static final char COLUMN_DELIMITER = '\t';
     private final List<Comparator<Proposition>> comparator;
@@ -109,15 +110,15 @@ public class TabDelimQueryResultsHandler implements QueryResultsHandler {
      *
      * @param key a key id {@link String}.
      * @param propositions a {@link List<Proposition>}.
-     * @throws FinderException if an error occurred writing to the specified
-     * file, output stream or writer.
+     * @throws QueryResultsHandlerProcessingException if an error occurred 
+     * writing to the specified file, output stream or writer.
      */
     @Override
     public void handleQueryResult(String key, List<Proposition> propositions,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references)
-            throws FinderException {
+            throws QueryResultsHandlerProcessingException {
         Set<Proposition> propositionsAsSet = new HashSet<Proposition>();
         addDerived(propositions, forwardDerivations, 
                 backwardDerivations, propositionsAsSet);
@@ -130,7 +131,7 @@ public class TabDelimQueryResultsHandler implements QueryResultsHandler {
         try {
             this.visitor.visit(propositionsCopy);
         } catch (TabDelimHandlerProtempaException pe) {
-            throw new FinderException(pe);
+            throw new QueryResultsHandlerProcessingException(pe);
         } catch (ProtempaException pe) {
             throw new AssertionError(pe);
         }
@@ -154,17 +155,16 @@ public class TabDelimQueryResultsHandler implements QueryResultsHandler {
             }
         }
     }
-
+    
+    /**
+     * Returns an empty string array, because this method cannot return 
+     * inferred proposition ids.
+     * 
+     * @return an empty {@link String} array. Guaranteed not <code>null</code>.
+     */
     @Override
-    public void init(KnowledgeSource knowledgeSource) throws FinderException {
-    }
-
-    @Override
-    public void finish() throws FinderException {
-    }
-
-    @Override
-    public void validate(KnowledgeSource knowledgeSource) {
+    public String[] getPropositionIdsNeeded() {
+        return ArrayUtils.EMPTY_STRING_ARRAY;
     }
 
     private final static class TabDelimHandlerProtempaException

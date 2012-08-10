@@ -152,7 +152,7 @@ public class PairDefinition extends AbstractAbstractionDefinition {
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.directChildren;
+        String[] old = this.children;
         Set<String> abstractedFrom = getAbstractedFrom();
         String[] inverseIsA = getInverseIsA();
         if (inverseIsA != null) {
@@ -160,10 +160,10 @@ public class PairDefinition extends AbstractAbstractionDefinition {
                 abstractedFrom.add(propId);
             }
         }
-        this.directChildren = abstractedFrom.toArray(new String[abstractedFrom.size()]);
+        this.children = abstractedFrom.toArray(new String[abstractedFrom.size()]);
         if (this.changes != null) {
             this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.directChildren);
+                    this.children);
         }
     }
 

@@ -32,6 +32,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
@@ -140,6 +141,70 @@ public final class Derivation extends Link {
         this.behavior = behavior;
         this.relation = relation;
         this.internalDerived = new LinkedList<Proposition>();
+    }
+
+    @Override
+    public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
+            String[] inPropIds) throws KnowledgeSourceReadException {
+        String[] explicitPropIds = getPropositionIds();
+        if (explicitPropIds.length > 0) {
+            return explicitPropIds.clone();
+        } else {
+            Set<String> result = new HashSet<String>();
+            for (String propId : inPropIds) {
+                PropositionDefinition propDef =
+                        knowledgeSource.readPropositionDefinition(propId);
+                if (propDef == null) {
+                    throw new IllegalArgumentException("Invalid propId: "
+                            + propId);
+                }
+                switch (this.behavior) {
+                    case SINGLE_BACKWARD:
+                        Arrays.addAll(result, propDef.getChildren());
+                        break;
+                    case MULT_BACKWARD:
+                        Queue<String> backwardProps =
+                                new LinkedList<String>();
+                        Arrays.addAll(backwardProps, propDef.getChildren());
+                        String pId;
+                        while ((pId = backwardProps.poll()) != null) {
+                            PropositionDefinition pDef =
+                                    knowledgeSource.readPropositionDefinition(pId);
+                            Arrays.addAll(backwardProps, pDef.getChildren());
+                        }
+                        result.addAll(backwardProps);
+                        break;
+                    case SINGLE_FORWARD:
+                        for (PropositionDefinition def :
+                                knowledgeSource.readParents(propDef)) {
+                            result.add(def.getId());
+                        }
+                        break;
+                    case MULT_FORWARD:
+                        Queue<String> forwardProps =
+                                new LinkedList<String>();
+                        for (PropositionDefinition def :
+                                knowledgeSource.readParents(propDef)) {
+                            forwardProps.add(def.getId());
+                        }
+                        // pId is declared in MULT_BACKWARD case.
+                        while ((pId = forwardProps.poll()) != null) {
+                            PropositionDefinition pDef =
+                                    knowledgeSource.readPropositionDefinition(pId);
+                            for (PropositionDefinition def :
+                                    knowledgeSource.readParents(pDef)) {
+                                forwardProps.add(def.getId());
+                            }
+                        }
+                        result.addAll(forwardProps);
+                        break;
+                    default:
+                        throw new AssertionError(
+                                "Invalid derivation behavior specified");
+                }
+            }
+            return result.toArray(new String[result.size()]);
+        }
     }
 
     @Override
