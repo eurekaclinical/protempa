@@ -5,14 +5,13 @@
   <artifactId>protempa</artifactId>
   <version>2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>PROTEMPA</name>
+  <name>Protempa</name>
   <scm>
     <connection>scm:svn:svn://scm.cci.emory.edu/svn/protempa/trunk</connection>
     <url>https://scm.cci.emory.edu/svn/protempa/trunk</url>
   </scm>
 
   <modules>
-    <module>javautil</module>
     <module>protempa-framework</module>
     <module>protempa-bconfigs-commons-ini</module>
     <module>protempa-bcp-serviceloader</module>
