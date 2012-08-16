@@ -39,7 +39,8 @@ import org.protempa.proposition.interval.Relation;
  * 
  * @author Andrew Post
  */
-public final class HighLevelAbstractionDefinition extends AbstractAbstractionDefinition {
+public final class HighLevelAbstractionDefinition 
+        extends AbstractAbstractionDefinition {
 
     private static final long serialVersionUID = -2434163106247371362L;
     private Offsets temporalOffset;

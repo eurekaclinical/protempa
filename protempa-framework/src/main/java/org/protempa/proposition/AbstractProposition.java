@@ -41,29 +41,29 @@ import org.protempa.proposition.value.Value;
 
 /**
  * Abstract class for implementing the various kinds of propositions.
- * 
+ *
  * @author Andrew Post
  */
 public abstract class AbstractProposition implements Proposition {
 
     private static final int DEFAULT_REFERENCE_LIST_SIZE = 100;
     /**
-     * An identification <code>String</code> for this proposition.
+     * An identification
+     * <code>String</code> for this proposition.
      */
     private String id;
     private PropertyChangeSupport changes;
     private Map<String, Value> properties;
     private Map<String, List<UniqueId>> references;
     private UniqueId uniqueId; // not final because of custom deserialization
-                          // but there is no public modification access
+    // but there is no public modification access
     private DataSourceType dataSourceType;
 
     /**
      * Creates a proposition with an id and unique identifier. The unique
      * identifier cannot be null.
-     * 
-     * @param id
-     *            an identification <code>String</code> for this proposition.
+     *
+     * @param id an identification <code>String</code> for this proposition.
      */
     AbstractProposition(String id, UniqueId uniqueId) {
         if (uniqueId == null) {
@@ -73,24 +73,24 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     /**
-     * Here only for use by deserialization of {@link java.util.Serializable} 
-     * subclasses of this class. Do not call this for any other
-     * reason because id and uniqueId are left uninitialized! Subclasses that
-     * are serializable should implement a <code>readObject</code> method that
-     * calls {@link #readAbstractProposition(java.io.ObjectInputStream) }.
+     * Here only for use by deserialization of {@link java.util.Serializable}
+     * subclasses of this class. Do not call this for any other reason because
+     * id and uniqueId are left uninitialized! Subclasses that are serializable
+     * should implement a
+     * <code>readObject</code> method that calls {@link #readAbstractProposition(java.io.ObjectInputStream)
+     * }.
      */
     protected AbstractProposition() {
     }
 
     /**
-     * Assigns fields specified in the constructor. This is pulled into a
-     * method so that deserialization can initialize those fields 
-     * correctly.
-     * 
+     * Assigns fields specified in the constructor. This is pulled into a method
+     * so that deserialization can initialize those fields correctly.
+     *
      * @param id the proposition id.
      * @param uniqueId the proposition's unique id.
      */
-    protected final void initializeAbstractProposition(String id, 
+    protected final void initializeAbstractProposition(String id,
             UniqueId uniqueId) {
         this.uniqueId = uniqueId;
         if (id == null) {
@@ -131,10 +131,14 @@ public abstract class AbstractProposition implements Proposition {
 
     @Override
     public final Value getProperty(String name) {
-        if (this.properties == null) {
+        if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
         } else {
-            return this.properties.get(name);
+            if (this.properties == null) {
+                return null;
+            } else {
+                return this.properties.get(name);
+            }
         }
     }
 
@@ -235,8 +239,9 @@ public abstract class AbstractProposition implements Proposition {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this)
+        if (o == this) {
             return true;
+        }
         if (o instanceof AbstractProposition) {
             AbstractProposition other = (AbstractProposition) o;
             return this.uniqueId.equals(other.uniqueId);
@@ -258,7 +263,7 @@ public abstract class AbstractProposition implements Proposition {
         return (id == p.id || id.equals(p.id))
                 && this.properties == p.properties
                 || (this.properties != null && this.properties
-                        .equals(p.properties));
+                .equals(p.properties));
 
     }
 
@@ -294,7 +299,6 @@ public abstract class AbstractProposition implements Proposition {
      * prop.getUniqueIdentifier().equals( this.key) &&
      * prop.getDataSourceBackendId().equals( this.datasourceBackendId); } } }
      */
-
     protected void writeAbstractProposition(ObjectOutputStream s)
             throws IOException {
         s.writeObject(this.id);

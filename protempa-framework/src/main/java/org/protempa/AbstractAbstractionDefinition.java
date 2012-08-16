@@ -26,7 +26,9 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * 
  * @author Andrew Post
  */
-public abstract class AbstractAbstractionDefinition extends AbstractPropositionDefinition implements AbstractionDefinition {
+public abstract class AbstractAbstractionDefinition 
+        extends AbstractPropositionDefinition 
+        implements AbstractionDefinition {
 
     private static final long serialVersionUID = 8075373039175465215L;
     private GapFunction gapFunction = GapFunction.DEFAULT;

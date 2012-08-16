@@ -48,9 +48,7 @@ import org.protempa.query.And;
  * @author Andrew Post
  */
 public final class KnowledgeSourceImpl
-        extends AbstractSource<KnowledgeSourceUpdatedEvent, 
-        KnowledgeSourceBackend, KnowledgeSourceUpdatedEvent, 
-        KnowledgeSourceBackendUpdatedEvent> implements KnowledgeSource {
+        extends AbstractSource<KnowledgeSourceUpdatedEvent, KnowledgeSourceBackend, KnowledgeSourceUpdatedEvent, KnowledgeSourceBackendUpdatedEvent> implements KnowledgeSource {
 
     /**
      * PROTEMPA knowledge base.
@@ -251,7 +249,13 @@ public final class KnowledgeSourceImpl
         List<AbstractionDefinition> result =
                 new ArrayList<AbstractionDefinition>();
         for (String abstractedIntoPropId : abstractedIntos) {
-            result.add(readAbstractionDefinition(abstractedIntoPropId));
+            AbstractionDefinition def =
+                    readAbstractionDefinition(abstractedIntoPropId);
+            if (def == null) {
+                throw new KnowledgeSourceReadException(
+                        "Invalid proposition id: " + abstractedIntoPropId);
+            }
+            result.add(def);
         }
 
         return result;
@@ -269,9 +273,11 @@ public final class KnowledgeSourceImpl
         Map<String, PropositionDefinition> map =
                 new HashMap<String, PropositionDefinition>();
         for (AbstractionDefinition def : ad) {
+            assert def != null : "The abstractedInto list for " + propDef.getId() + " cannot have a null element";
             map.put(def.getId(), def);
         }
         for (PropositionDefinition def : pd) {
+            assert def != null : "The abstractedInto list for " + propDef.getId() + " cannot have a null element";
             map.put(def.getId(), def);
         }
         return new ArrayList(map.values());
@@ -304,21 +310,21 @@ public final class KnowledgeSourceImpl
                 if (propositionDefinitionCache != null) {
                     result = readFromKnowledgeBase(id);
                     if (result == null) {
-                        if (!propositionDefinitionCache.hasPropositionDefinition(id)
-                                && getBackends() != null) {
-                            for (KnowledgeSourceBackend backend : getBackends()) {
-                                result = readFromBackend(id, backend);
-                                if (result != null) {
-                                    try {
-                                        putInKnowledgeBase(result);
-                                    } catch (InvalidPropositionIdException ex) {
-                                        ProtempaUtil.logger().log(Level.SEVERE, "Error adding proposition definition to cache", ex);
-                                        throw new AssertionError("Error adding proposition definition to cache: " + ex.getMessage());
-                                    }
-                                    return result;
+                        //if (!propositionDefinitionCache.hasPropositionDefinition(id)
+                        //        && getBackends() != null) {
+                        for (KnowledgeSourceBackend backend : getBackends()) {
+                            result = readFromBackend(id, backend);
+                            if (result != null) {
+                                try {
+                                    putInKnowledgeBase(result);
+                                } catch (InvalidPropositionIdException ex) {
+                                    ProtempaUtil.logger().log(Level.SEVERE, "Error adding proposition definition to cache", ex);
+                                    throw new AssertionError("Error adding proposition definition to cache: " + ex.getMessage());
                                 }
+                                return result;
                             }
                         }
+                        //}
                         putInNotFound(id);
                     }
                 }
@@ -381,7 +387,19 @@ public final class KnowledgeSourceImpl
 
         @Override
         protected AbstractionDefinition readFromKnowledgeBase(String id) {
-            return propositionDefinitionCache.getAbstractionDefinition(id);
+            AbstractionDefinition result = propositionDefinitionCache.getAbstractionDefinition(id);
+            if (result == null) {
+                PropositionDefinition r = propositionDefinitionCache.getPropositionDefinition(id);
+                if (r instanceof AbstractionDefinition) {
+                    try {
+                        propositionDefinitionCache.addAbstractionDefinition((AbstractionDefinition) r);
+                    } catch (InvalidPropositionIdException ex) {
+                        throw new AssertionError("Should not happen");
+                    }
+                    result = (AbstractionDefinition) r;
+                }
+            }
+            return result;
         }
 
         @Override

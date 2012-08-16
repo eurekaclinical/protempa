@@ -36,7 +36,9 @@ import org.protempa.proposition.value.ValueType;
  * 
  * @author Andrew Post
  */
-public final class LowLevelAbstractionDefinition extends AbstractAbstractionDefinition implements PatternFinderUser {
+public final class LowLevelAbstractionDefinition 
+        extends AbstractAbstractionDefinition implements PatternFinderUser,
+        ParameterDefinition {
 
     private static final long serialVersionUID = -3829737731539676713L;
     private final Set<String> paramIds;
