@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
+import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
 
 /**
  * Implements parsing of dates/times into a PROTEMPA position using an 
@@ -51,7 +52,7 @@ public final class JDBCDateTimeTimestampPositionParser
      * the column cannot be parsed into a date.
      */
     @Override
-    public Long toLong(ResultSet resultSet, int columnIndex, int colType)
+    public Long toPosition(ResultSet resultSet, int columnIndex, int colType)
             throws SQLException {
         Date result;
         switch (colType) {
@@ -70,7 +71,7 @@ public final class JDBCDateTimeTimestampPositionParser
                 result = resultSet.getTimestamp(columnIndex);
         }
         if (result != null) {
-            return result.getTime();
+            return AbsoluteTimeGranularityUtil.asPosition(result);
         } else {
             return null;
         }

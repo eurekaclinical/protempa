@@ -111,7 +111,7 @@ class PrimitiveParameterResultProcessor extends
 
             Long timestamp = null;
             try {
-                timestamp = entitySpec.getPositionParser().toLong(resultSet,
+                timestamp = entitySpec.getPositionParser().toPosition(resultSet,
                         i, columnTypes[i - 1]);
                 i++;
             } catch (SQLException e) {
@@ -131,7 +131,7 @@ class PrimitiveParameterResultProcessor extends
             }
 
             PrimitiveParameter p = new PrimitiveParameter(propId, uniqueId);
-            p.setTimestamp(timestamp);
+            p.setPosition(timestamp);
             p.setGranularity(entitySpec.getGranularity());
             p.setValue(cpVal);
             for (int j = 0; j < propertySpecs.length; j++) {

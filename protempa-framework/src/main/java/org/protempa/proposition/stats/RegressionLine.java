@@ -70,7 +70,7 @@ public class RegressionLine extends Line {
         double sumY = 0;
         double sumX = 0;
         PrimitiveParameter curPoint = points.first();
-        sumX = curPoint.getTimestamp();
+        sumX = curPoint.getPosition();
         if (curPoint.getValue() == null) {
             throw new NullValueException(curPoint);
         }
@@ -80,7 +80,7 @@ public class RegressionLine extends Line {
         covarCalc = new UpdatingCovarCalc(sumX, sumY);
         for (int i = 1, n = points.size(); i < n; i++) {
             curPoint = points.get(i);
-            double x = curPoint.getTimestamp();
+            double x = curPoint.getPosition();
             sumX += x;
             if (curPoint.getValue() == null) {
                 throw new NullValueException(curPoint);

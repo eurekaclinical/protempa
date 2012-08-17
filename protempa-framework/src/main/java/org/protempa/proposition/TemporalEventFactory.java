@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import org.protempa.DataSourceType;
 import org.protempa.proposition.interval.IntervalFactory;
+import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
 import org.protempa.proposition.value.Granularity;
 
 /**
@@ -59,19 +60,8 @@ public final class TemporalEventFactory {
 
     public Event getInstance(String id, Date timestamp,
             DataSourceType dataSourceType) {
-        return getInstance(id, timestamp != null ? timestamp.getTime() : null,
-                dataSourceType);
-    }
-
-    public Event getInstance(String id, Long timestamp,
-            DataSourceType dataSourceType) {
-        Event pp = new Event(id, new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString())));
-        pp.setDataSourceType(dataSourceType);
-        pp.setInterval(intervalFactory.getInstance(timestamp, this.granularity,
-                timestamp, this.granularity));
-        return pp;
+        Long tstampAsPos = AbsoluteTimeGranularityUtil.asPosition(timestamp);
+        return getInstance(id, tstampAsPos, dataSourceType);
     }
 
     public Event getInstance(String id, String start, String finish,
@@ -85,11 +75,24 @@ public final class TemporalEventFactory {
 
     public Event getInstance(String id, Date start, Date finish,
             DataSourceType dataSourceType) {
-        return getInstance(id, start != null ? start.getTime() : null,
-                finish != null ? finish.getTime() : null, dataSourceType);
+        Long startAsPos = AbsoluteTimeGranularityUtil.asPosition(start);
+        Long finishAsPos = AbsoluteTimeGranularityUtil.asPosition(finish);
+        return getInstance(id, startAsPos, finishAsPos, 
+                dataSourceType);
+    }
+    
+    private Event getInstance(String id, Long pos,
+            DataSourceType dataSourceType) {
+        Event pp = new Event(id, new UniqueId(
+                DerivedSourceId.getInstance(),
+                new DerivedUniqueId(UUID.randomUUID().toString())));
+        pp.setDataSourceType(dataSourceType);
+        pp.setInterval(intervalFactory.getInstance(pos, this.granularity,
+                pos, this.granularity));
+        return pp;
     }
 
-    public Event getInstance(String id, Long start, Long finish,
+    private Event getInstance(String id, Long start, Long finish,
             DataSourceType dataSourceType) {
         Event e = new Event(id, new UniqueId(
                 DerivedSourceId.getInstance(),

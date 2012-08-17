@@ -26,6 +26,8 @@ import java.util.Locale;
 
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
+import static
+        org.protempa.proposition.value.AbsoluteTimeGranularityUtil.asPosition;
 
 import junit.framework.TestCase;
 
@@ -40,8 +42,8 @@ public class DefaultIntervalTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		d = DATE_FORMAT.parse("1/1/07 1:00 am");
-		this.interval = new DefaultInterval(d.getTime(),
-				AbsoluteTimeGranularity.MINUTE, d.getTime(),
+		this.interval = new DefaultInterval(asPosition(d),
+				AbsoluteTimeGranularity.MINUTE, asPosition(d),
 				AbsoluteTimeGranularity.MINUTE, Long.valueOf(0L), null);
 	}
 
@@ -69,24 +71,24 @@ public class DefaultIntervalTest extends TestCase {
 
 	public void testDefaultInterval12HoursMinDistance() throws ParseException {
 		Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
-		Interval i2 = new DefaultInterval(d.getTime(),
-				AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+		Interval i2 = new DefaultInterval(asPosition(d),
+				AbsoluteTimeGranularity.MINUTE, asPosition(d2),
 				AbsoluteTimeGranularity.MINUTE, null, null);
 		assertEquals(Long.valueOf(720), i2.getMinLength());
 	}
 
 	public void testDefaultInterval12HoursMaxDistance() throws ParseException {
 		Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
-		Interval i2 = new DefaultInterval(d.getTime(),
-				AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+		Interval i2 = new DefaultInterval(asPosition(d),
+				AbsoluteTimeGranularity.MINUTE, asPosition(d2),
 				AbsoluteTimeGranularity.MINUTE, null, null);
 		assertEquals(Long.valueOf(720), i2.getMaxLength());
 	}
 
 	public void testDefaultInterval12HoursDistanceUnit() throws ParseException {
 		Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
-		Interval i2 = new DefaultInterval(d.getTime(),
-				AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+		Interval i2 = new DefaultInterval(asPosition(d),
+				AbsoluteTimeGranularity.MINUTE, asPosition(d2),
 				AbsoluteTimeGranularity.MINUTE, null, null);
 		assertEquals(AbsoluteTimeUnit.MINUTE, i2.getLengthUnit());
 	}

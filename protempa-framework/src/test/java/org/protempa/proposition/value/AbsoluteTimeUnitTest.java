@@ -28,6 +28,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
+import static
+        org.protempa.proposition.value.AbsoluteTimeGranularityUtil.asPosition;
 
 
 import junit.framework.TestCase;
@@ -71,7 +73,7 @@ public class AbsoluteTimeUnitTest extends TestCase {
                 Locale.US);
         Date d1 = format.parse("1/1/08");
         Date d2 = format.parse("2/1/08");
-        assertEquals(1, AbsoluteTimeGranularity.DAY.distance(d1.getTime(), d2.getTime(),
+        assertEquals(1, AbsoluteTimeGranularity.DAY.distance(asPosition(d1), asPosition(d2),
                 AbsoluteTimeGranularity.DAY, AbsoluteTimeUnit.MONTH));
     }
 
@@ -80,7 +82,7 @@ public class AbsoluteTimeUnitTest extends TestCase {
                 Locale.US);
         Date d1 = format.parse("1/1/08");
         Date d2 = format.parse("2/15/08");
-        assertEquals(1, AbsoluteTimeGranularity.DAY.distance(d1.getTime(), d2.getTime(),
+        assertEquals(1, AbsoluteTimeGranularity.DAY.distance(asPosition(d1), asPosition(d2),
                 AbsoluteTimeGranularity.DAY, AbsoluteTimeUnit.MONTH));
     }
 
@@ -89,7 +91,7 @@ public class AbsoluteTimeUnitTest extends TestCase {
                 Locale.US);
         Date d1 = format.parse("1/1/07");
         Date d2 = format.parse("7/1/08");
-        assertEquals(18, AbsoluteTimeGranularity.DAY.distance(d1.getTime(), d2.getTime(),
+        assertEquals(18, AbsoluteTimeGranularity.DAY.distance(asPosition(d1), asPosition(d2),
                 AbsoluteTimeGranularity.DAY, AbsoluteTimeUnit.MONTH));
     }
 
@@ -98,6 +100,6 @@ public class AbsoluteTimeUnitTest extends TestCase {
                 Locale.US);
         Date d1 = format.parse("1/1/07");
         Date d2 = format.parse("1/15/07");
-        assertEquals(14, AbsoluteTimeGranularity.DAY.distance(d1.getTime(), d2.getTime(), AbsoluteTimeGranularity.DAY, AbsoluteTimeUnit.DAY));
+        assertEquals(14, AbsoluteTimeGranularity.DAY.distance(asPosition(d1), asPosition(d2), AbsoluteTimeGranularity.DAY, AbsoluteTimeUnit.DAY));
     }
 }

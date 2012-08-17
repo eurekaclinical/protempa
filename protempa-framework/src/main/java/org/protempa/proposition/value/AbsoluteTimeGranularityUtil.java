@@ -20,7 +20,6 @@
 package org.protempa.proposition.value;
 
 import java.util.Date;
-import org.protempa.proposition.TemporalProposition;
 
 /**
  *
@@ -34,6 +33,14 @@ public class AbsoluteTimeGranularityUtil {
     public static Date asDate(Long position) {
         if (position != null) {
             return new Date(position);
+        } else {
+            return null;
+        }
+    }
+    
+    public static Long asPosition(Date date) {
+        if (date != null) {
+            return date.getTime();
         } else {
             return null;
         }

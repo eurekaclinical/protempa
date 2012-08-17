@@ -64,7 +64,7 @@ public final class PrimitiveParameter extends TemporalParameter implements
      * 
      * @return a {@link Long}.
      */
-    public Long getTimestamp() {
+    public Long getPosition() {
         Interval interval = getInterval();
         if (interval != null) {
             return interval.getMinStart();
@@ -76,15 +76,15 @@ public final class PrimitiveParameter extends TemporalParameter implements
     /**
      * Sets this parameter's timestamp (or other kind of position value).
      * 
-     * @param timestamp
+     * @param pos
      *            a <code>long</code>.
      */
-    public void setTimestamp(Long timestamp) {
+    public void setPosition(Long pos) {
         Interval interval = getInterval();
         if (interval != null) {
-            resetInterval(timestamp, interval.getStartGranularity());
+            resetInterval(pos, interval.getStartGranularity());
         } else {
-            resetInterval(timestamp, null);
+            resetInterval(pos, null);
         }
     }
 
@@ -130,7 +130,7 @@ public final class PrimitiveParameter extends TemporalParameter implements
      * 
      * @return a <code>String</code>.
      */
-    public String getTimestampFormattedLong() {
+    public String getPositionFormattedLong() {
         return getStartFormattedLong();
     }
 
@@ -139,7 +139,7 @@ public final class PrimitiveParameter extends TemporalParameter implements
      * 
      * @return a <code>String</code>.
      */
-    public String getTimestampFormattedMedium() {
+    public String getPositionFormattedMedium() {
         return getStartFormattedMedium();
     }
 
@@ -148,7 +148,7 @@ public final class PrimitiveParameter extends TemporalParameter implements
      * 
      * @return a <code>String</code>.
      */
-    public String getTimestampFormattedShort() {
+    public String getPositionFormattedShort() {
         return getStartFormattedShort();
     }
 
@@ -185,7 +185,7 @@ public final class PrimitiveParameter extends TemporalParameter implements
 
     private void writeObject(ObjectOutputStream s) throws IOException {
         writeAbstractProposition(s);
-        s.writeObject(getTimestamp());
+        s.writeObject(getPosition());
         s.writeObject(getGranularity());
         writeTemporalParameter(s);
     }
@@ -193,7 +193,7 @@ public final class PrimitiveParameter extends TemporalParameter implements
     private void readObject(ObjectInputStream s) throws IOException,
             ClassNotFoundException {
         readAbstractProposition(s);
-        setTimestamp((Long) s.readObject());
+        setPosition((Long) s.readObject());
         setGranularity((Granularity) s.readObject());
         readTemporalParameter(s);
     }

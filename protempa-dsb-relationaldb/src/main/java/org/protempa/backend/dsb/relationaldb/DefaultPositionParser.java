@@ -29,7 +29,7 @@ import java.sql.SQLException;
 public final class DefaultPositionParser implements JDBCPositionFormat {
 
     @Override
-    public Long toLong(ResultSet resultSet, int columnIndex, int colType)
+    public Long toPosition(ResultSet resultSet, int columnIndex, int colType)
             throws SQLException {
         return resultSet.getLong(columnIndex);
     }

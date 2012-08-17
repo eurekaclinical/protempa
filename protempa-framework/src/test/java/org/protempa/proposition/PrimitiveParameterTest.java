@@ -28,6 +28,8 @@ import junit.framework.TestCase;
 import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.NumberValue;
+import static 
+        org.protempa.proposition.value.AbsoluteTimeGranularityUtil.asPosition;
 
 /**
  * @author Andrew Post
@@ -51,7 +53,7 @@ public class PrimitiveParameterTest extends TestCase {
         p = new PrimitiveParameter("TEST", uid());
         p.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
         p.setValue(new NumberValue(13));
-        p.setTimestamp(cal.getTimeInMillis());
+        p.setPosition(asPosition(cal.getTime()));
         p.setGranularity(AbsoluteTimeGranularity.MINUTE);
     }
     
@@ -109,7 +111,7 @@ public class PrimitiveParameterTest extends TestCase {
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(2007, Calendar.MARCH, 1, 15, 11);
-        p2.setTimestamp(cal.getTimeInMillis());
+        p2.setPosition(asPosition(cal.getTime()));
         p2.setGranularity(AbsoluteTimeGranularity.MINUTE);
         assertTrue(p.isEqual(p2));
     }
@@ -121,7 +123,7 @@ public class PrimitiveParameterTest extends TestCase {
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(2007, Calendar.MARCH, 1, 15, 11);
-        p2.setTimestamp(cal.getTimeInMillis());
+        p2.setPosition(asPosition(cal.getTime()));
         p2.setGranularity(AbsoluteTimeGranularity.MINUTE);
         assertFalse("expected: " + p + "; actual: " + p2, p.isEqual(p2));
     }
@@ -133,7 +135,7 @@ public class PrimitiveParameterTest extends TestCase {
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(2007, Calendar.MARCH, 1, 15, 12);
-        p2.setTimestamp(cal.getTimeInMillis());
+        p2.setPosition(asPosition(cal.getTime()));
         p2.setGranularity(AbsoluteTimeGranularity.MINUTE);
         assertFalse("expected: " + p + "; actual: " + p2, p.isEqual(p2));
     }
@@ -145,7 +147,7 @@ public class PrimitiveParameterTest extends TestCase {
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(2007, Calendar.MARCH, 1, 15, 11);
-        p2.setTimestamp(cal.getTimeInMillis());
+        p2.setPosition(asPosition(cal.getTime()));
         p2.setGranularity(AbsoluteTimeGranularity.SECOND);
         assertFalse("expected: " + p + "; actual: " + p2, p.isEqual(p2));
     }

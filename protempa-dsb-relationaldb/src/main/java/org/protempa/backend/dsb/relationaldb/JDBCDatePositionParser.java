@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
+import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
 
 /**
  * Implements parsing of dates/times using {@link ResultSet#getDate(int)}.
@@ -32,11 +33,11 @@ import org.protempa.proposition.value.AbsoluteTimeGranularity;
 public final class JDBCDatePositionParser implements JDBCPositionFormat {
 
     @Override
-    public Long toLong(ResultSet resultSet, int columnIndex, int colType)
+    public Long toPosition(ResultSet resultSet, int columnIndex, int colType)
             throws SQLException {
         Date result = resultSet.getDate(columnIndex);
         if (result != null) {
-            return result.getTime();
+            return AbsoluteTimeGranularityUtil.asPosition(result);
         } else {
             return null;
         }

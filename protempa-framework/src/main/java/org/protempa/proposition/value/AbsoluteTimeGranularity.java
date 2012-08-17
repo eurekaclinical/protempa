@@ -583,7 +583,8 @@ public final class AbsoluteTimeGranularity implements Granularity {
      * @return a {@link String} in JDBC timestamp escape format.
      */
     public static String toSQLString(Long position) {
-        return new Timestamp(position).toString();
+        java.util.Date date = AbsoluteTimeGranularityUtil.asDate(position);
+        return new Timestamp(date.getTime()).toString();
     }
 
     public static AbsoluteTimeGranularity granularityStringToGranularity(

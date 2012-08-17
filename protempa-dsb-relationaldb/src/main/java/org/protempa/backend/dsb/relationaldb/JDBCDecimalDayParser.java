@@ -24,6 +24,8 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
 
 /**
  * Translates between a date string with format <code>yyyyMMdd</code> and a
@@ -60,7 +62,7 @@ public class JDBCDecimalDayParser implements JDBCPositionFormat {
      * the result set.
      */
     @Override
-    public Long toLong(ResultSet resultSet, int columnIndex, int colType)
+    public Long toPosition(ResultSet resultSet, int columnIndex, int colType)
             throws SQLException {
         int date = resultSet.getInt(columnIndex);
         if (date < 10000000) {
@@ -73,7 +75,7 @@ public class JDBCDecimalDayParser implements JDBCPositionFormat {
         synchronized (calendar) {
             calendar.clear();
             calendar.set(year, month - 1, day);
-            return calendar.getTimeInMillis();
+            return AbsoluteTimeGranularityUtil.asPosition(calendar.getTime());
         }
     }
 
@@ -89,6 +91,7 @@ public class JDBCDecimalDayParser implements JDBCPositionFormat {
      */
     @Override
     public String format(Long position) {
-        return DATE_FORMAT.get().format(position);
+        Date date = AbsoluteTimeGranularityUtil.asDate(position);
+        return DATE_FORMAT.get().format(date);
     }
 }

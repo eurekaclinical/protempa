@@ -350,7 +350,7 @@ public class PropositionUtil {
              */
             int mid = (low + high) >>> 1;
             PrimitiveParameter midVal = list.get(mid);
-            long cmp = midVal.getTimestamp() - tstamp;
+            long cmp = midVal.getPosition() - tstamp;
 
             if (cmp < 0) {
                 low = mid + 1;
@@ -390,7 +390,7 @@ public class PropositionUtil {
              */
             int mid = (low + high) >>> 1;
             PrimitiveParameter midVal = iteratorBinarySearchGet(i, mid);
-            long cmp = midVal.getTimestamp() - tstamp;
+            long cmp = midVal.getPosition() - tstamp;
 
             if (cmp < 0) {
                 low = mid + 1;

@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.interval.IntervalFactory;
+import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
 import org.protempa.proposition.value.Granularity;
 
 /**
@@ -60,14 +61,15 @@ public final class TemporalAbstractParameterFactory {
     }
 
     public AbstractParameter getInstance(String id, Date start, Date finish) {
-        return getInstance(id, start != null ? start.getTime() : null,
-                finish != null ? finish.getTime() : null);
+        Long startAsPos = AbsoluteTimeGranularityUtil.asPosition(start);
+        Long finishAsPos = AbsoluteTimeGranularityUtil.asPosition(finish);
+        return getInstance(id, startAsPos, finishAsPos);
     }
 
-    public AbstractParameter getInstance(String id, Long start, Long finish) {
+    private AbstractParameter getInstance(String id, Long start, Long finish) {
         AbstractParameter e = new AbstractParameter(id, new UniqueId(
                 DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString())) );
+                new DerivedUniqueId(UUID.randomUUID().toString())));
         e.setDataSourceType(DerivedDataSourceType.getInstance());
         e.setInterval(intervalFactory.getInstance(start,
                 this.granularity, finish, this.granularity));

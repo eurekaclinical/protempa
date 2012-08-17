@@ -39,16 +39,16 @@ public class ParametersUtilTest extends TestCase {
 	protected void setUp() throws Exception {
 		PrimitiveParameter[] paramsArr = new PrimitiveParameter[4];
 		paramsArr[3] = new PrimitiveParameter("TEST", uid());
-		paramsArr[3].setTimestamp(6L);
+		paramsArr[3].setPosition(6L);
 		paramsArr[3].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
 		paramsArr[2] = new PrimitiveParameter("TEST", uid());
-		paramsArr[2].setTimestamp(4L);
+		paramsArr[2].setPosition(4L);
 		paramsArr[2].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
 		paramsArr[1] = new PrimitiveParameter("TEST", uid());
-		paramsArr[1].setTimestamp(2L);
+		paramsArr[1].setPosition(2L);
 		paramsArr[1].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
 		paramsArr[0] = new PrimitiveParameter("TEST", uid());
-		paramsArr[0].setTimestamp(0L);
+		paramsArr[0].setPosition(0L);
 		paramsArr[0].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
 
 		params = Arrays.asList(paramsArr);

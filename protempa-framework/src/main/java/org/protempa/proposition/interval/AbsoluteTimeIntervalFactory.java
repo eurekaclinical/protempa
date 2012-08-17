@@ -20,6 +20,8 @@
 package org.protempa.proposition.interval;
 
 import java.util.Date;
+import static 
+        org.protempa.proposition.value.AbsoluteTimeGranularityUtil.asPosition;
 import org.protempa.proposition.value.Granularity;
 
 /**
@@ -38,25 +40,27 @@ public class AbsoluteTimeIntervalFactory {
         return factory.getInstance();
     }
 
-    public Interval getInstance(Date position, Granularity gran) {
-        return factory.getInstance(
-                position != null ? position.getTime() : null, gran);
+    public Interval getInstance(Date date, Granularity gran) {
+        Long dateAsPos = asPosition(date);
+        return factory.getInstance(dateAsPos, gran);
     }
 
     public Interval getInstance(Date start, Granularity startGran, 
             Date finish, Granularity finishGran) {
-        return factory.getInstance(start != null ? start.getTime() : null, 
-                startGran, finish != null ? finish.getTime() : null, 
+        Long startAsPos = asPosition(start);
+        Long finishAsPos = asPosition(finish);
+        return factory.getInstance(startAsPos, startGran, finishAsPos, 
                 finishGran);
     }
 
     public Interval getInstance(Date minStart, Date maxStart, 
             Granularity startGran, Date minFinish, Date maxFinish, 
             Granularity finishGran) {
-        return factory.getInstance(
-                minStart != null ? minStart.getTime() : null,
-                maxStart != null ? maxStart.getTime() : null, startGran, 
-                minFinish != null ? minFinish.getTime() : null, 
-                maxFinish != null ? maxFinish.getTime() : null, finishGran);
+        Long minStartAsPos = asPosition(minStart);
+        Long maxStartAsPos = asPosition(maxStart);
+        Long minFinishAsPos = asPosition(minFinish);
+        Long maxFinishAsPos = asPosition(maxFinish);
+        return factory.getInstance(minStartAsPos, maxStartAsPos, startGran, 
+                minFinishAsPos, maxFinishAsPos, finishGran);
     }
 }

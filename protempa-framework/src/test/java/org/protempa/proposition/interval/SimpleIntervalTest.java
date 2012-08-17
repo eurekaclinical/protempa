@@ -26,6 +26,8 @@ import java.util.Locale;
 
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
+import static
+        org.protempa.proposition.value.AbsoluteTimeGranularityUtil.asPosition;
 
 import junit.framework.TestCase;
 
@@ -38,8 +40,8 @@ public class SimpleIntervalTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         d = DATE_FORMAT.parse("1/1/07 1:00 am");
-        this.interval = new SimpleInterval(d.getTime(),
-                AbsoluteTimeGranularity.MINUTE, d.getTime(),
+        this.interval = new SimpleInterval(asPosition(d),
+                AbsoluteTimeGranularity.MINUTE, asPosition(d),
                 AbsoluteTimeGranularity.MINUTE);
     }
 
@@ -59,32 +61,32 @@ public class SimpleIntervalTest extends TestCase {
 
     public void test12HoursMinDistance() throws ParseException {
         Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
-        Interval i2 = new SimpleInterval(d.getTime(),
-                AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+        Interval i2 = new SimpleInterval(asPosition(d),
+                AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
         assertEquals(Long.valueOf(720), i2.getMinLength());
     }
 
     public void test12HoursMaxDistance() throws ParseException {
         Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
-        Interval i2 = new SimpleInterval(d.getTime(),
-                AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+        Interval i2 = new SimpleInterval(asPosition(d),
+                AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
         assertEquals(Long.valueOf(720), i2.getMaxLength());
     }
 
     public void test12HoursDistanceUnit() throws ParseException {
         Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
-        Interval i2 = new SimpleInterval(d.getTime(),
-                AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+        Interval i2 = new SimpleInterval(asPosition(d),
+                AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
         assertEquals(AbsoluteTimeUnit.MINUTE, i2.getLengthUnit());
     }
 
     public void test12HoursReallyInHoursGranularity() throws ParseException {
         Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
-        Interval i2 = new SimpleInterval(d.getTime(),
-                AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+        Interval i2 = new SimpleInterval(asPosition(d),
+                AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
         long distance = AbsoluteTimeGranularity.MINUTE.distance(interval.getMinStart(), i2.getMinFinish(), i2.getFinishGranularity(),
                 AbsoluteTimeUnit.HOUR);
@@ -93,8 +95,8 @@ public class SimpleIntervalTest extends TestCase {
 
     public void test12HoursReallyInHoursInterval() throws ParseException {
         Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
-        Interval i2 = new SimpleInterval(d.getTime(),
-                AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+        Interval i2 = new SimpleInterval(asPosition(d),
+                AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
         long distance = i2.minLengthIn(AbsoluteTimeUnit.HOUR);
         assertEquals(12L, distance);
@@ -102,8 +104,8 @@ public class SimpleIntervalTest extends TestCase {
 
     public void test12HoursReallyInSecondsInterval() throws ParseException {
         Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
-        Interval i2 = new SimpleInterval(d.getTime(),
-                AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+        Interval i2 = new SimpleInterval(asPosition(d),
+                AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
         long distance = i2.minLengthIn(AbsoluteTimeUnit.SECOND);
         assertEquals(43200L, distance);
@@ -111,32 +113,32 @@ public class SimpleIntervalTest extends TestCase {
 
     public void test12HoursMinimumDistance() throws ParseException {
         Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
-        Interval i2 = new SimpleInterval(d.getTime(),
-                AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+        Interval i2 = new SimpleInterval(asPosition(d),
+                AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
         assertEquals(Long.valueOf(43140001L), i2.getMinimumLength());
     }
 
     public void test12HoursMaximumDistance() throws ParseException {
         Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
-        Interval i2 = new SimpleInterval(d.getTime(),
-                AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+        Interval i2 = new SimpleInterval(asPosition(d),
+                AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
         assertEquals(Long.valueOf(43259999L), i2.getMaximumLength());
     }
 
     public void testOneMinuteMinimumDistance() throws ParseException {
         Date d2 = DATE_FORMAT.parse("1/1/07 1:01 am");
-        Interval i2 = new SimpleInterval(d.getTime(),
-                AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+        Interval i2 = new SimpleInterval(asPosition(d),
+                AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
         assertEquals(Long.valueOf(1L), i2.getMinimumLength());
     }
 
     public void testOneMinuteMinDistance() throws ParseException {
         Date d2 = DATE_FORMAT.parse("1/1/07 1:01 am");
-        Interval i2 = new SimpleInterval(d.getTime(),
-                AbsoluteTimeGranularity.MINUTE, d2.getTime(),
+        Interval i2 = new SimpleInterval(asPosition(d),
+                AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
         assertEquals(Long.valueOf(60L), i2.minLengthIn(AbsoluteTimeUnit.SECOND));
     }

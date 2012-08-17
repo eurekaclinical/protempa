@@ -155,7 +155,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         PrimitiveParameter param = new PrimitiveParameter(propId, new UniqueId(
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())));
-        param.setTimestamp(primitiveParameter.getTimestamp());
+        param.setPosition(primitiveParameter.getPosition());
         param.setGranularity(primitiveParameter.getGranularity());
         param.setValue(primitiveParameter.getValue());
         param.setDataSourceType(DerivedDataSourceType.getInstance());

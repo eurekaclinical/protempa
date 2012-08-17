@@ -109,7 +109,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
             if (finishTimeSpec == null) {
                 Long d = null;
                 try {
-                    d = positionParser.toLong(resultSet, i, columnTypes[i - 1]);
+                    d = positionParser.toPosition(resultSet, i, columnTypes[i - 1]);
                     i++;
                 } catch (SQLException e) {
                     logger.log(
@@ -121,7 +121,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
             } else {
                 Long start = null;
                 try {
-                    start = positionParser.toLong(resultSet, i,
+                    start = positionParser.toPosition(resultSet, i,
                             columnTypes[i - 1]);
                 } catch (SQLException e) {
                     logger.log(
@@ -133,7 +133,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
                 }
                 Long finish = null;
                 try {
-                    finish = positionParser.toLong(resultSet, i,
+                    finish = positionParser.toPosition(resultSet, i,
                             columnTypes[i - 1]);
                 } catch (SQLException e) {
                     logger.log(

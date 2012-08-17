@@ -41,7 +41,7 @@ public interface JDBCPositionFormat {
      * @throws SQLException if an error occurs accessing the result set or the
      * column cannot be parsed.
      */
-    Long toLong(ResultSet resultSet, int columnIndex, int columnType)
+    Long toPosition(ResultSet resultSet, int columnIndex, int columnType)
             throws SQLException;
     
     /**
