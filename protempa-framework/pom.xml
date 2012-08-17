@@ -33,6 +33,12 @@
             <id>drools.org</id>
             <url>https://repository.jboss.org/nexus/content/repositories/releases/</url>
         </repository>
+	<repository>
+		<id>javautil</id>
+		<name>Local Javautil repository</name>
+		<layout>default</layout>
+		<url>file:/${basedir}/repository</url}
+	</repository>
     </repositories>
     <dependencies>
         <dependency>

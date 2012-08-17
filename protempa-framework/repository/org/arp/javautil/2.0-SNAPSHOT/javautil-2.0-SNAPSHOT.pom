@@ -1,31 +1,16 @@
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.protempa</groupId>
-        <artifactId>protempa</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </parent>
-
-    <groupId>org.protempa</groupId>
-    <artifactId>protempa-tsb-umls</artifactId>
+    <groupId>org.arp</groupId>
+    <artifactId>javautil</artifactId>
     <packaging>jar</packaging>
     <version>2.0-SNAPSHOT</version>
-    <name>Protempa UMLS Term Source Backend</name>
+    <name>JavaUtil</name>
     <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <repositories>
-      <repository>
-        <id>umlsquery</id>
-        <name>Local UMLS Query Repository</name>
-        <layout>default</layout>
-        <url>file://${basedir}/repository</url>
-      </repository>
-    </repositories>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -34,34 +19,24 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
-            <artifactId>protempa-framework</artifactId>
-            <version>2.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.5</version>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
-            <artifactId>protempa-bp-serviceloader</artifactId>
-            <version>2.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>com.sleepycat</groupId>
+            <artifactId>je</artifactId>
+            <version>4.1.10</version>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
-            <artifactId>protempa-bconfigs-commons-ini</artifactId>
-            <version>2.0-SNAPSHOT</version>
-            <scope>test</scope>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
         </dependency>
         <dependency>
-            <groupId>umlsquery</groupId>
-            <artifactId>umls-query</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-        	<groupId>mysql</groupId>
-        	<artifactId>mysql-connector-java</artifactId>
-        	<version>5.1.18</version>
-        	<scope>test</scope>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.3</version>
         </dependency>
     </dependencies>
     <build>
@@ -80,7 +55,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.7.1</version>
                 <configuration>
-          <!--  Tests are handled by testing profiles below -->
+                    <!--  Tests are handled by testing profiles below -->
                     <skipTests>true</skipTests>
                 </configuration>
             </plugin>
@@ -104,10 +79,10 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                        <!--  There are no non-database tests yet, so we just
-                                want tests skipped. Change this to "false" when
-                                appropriate test classes are added -->
-                            <skipTests>true</skipTests>
+                            <includes>
+                                <include>**/*Test.java</include>
+                            </includes>
+                            <skipTests>false</skipTests>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -121,14 +96,21 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
-                            <includes>
-                                <include>**/UMLSTermSourceBackendTest.java</include>
-                            </includes>
-                            <skipTests>false</skipTests>
+                            <!--  There are no database tests, so we just want
+                                tests skipped. Change this to "false" when
+                                appropriate test classes are added -->
+                            <skipTests>true</skipTests>
                         </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
     </profiles>
+    <repositories>
+        <repository>
+            <id>oracle-repo</id>
+            <name>Oracle Repository</name>
+            <url>http://download.oracle.com/maven</url>
+        </repository>
+    </repositories>
 </project>
