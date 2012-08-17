@@ -37,7 +37,7 @@
 		<id>javautil</id>
 		<name>Local Javautil repository</name>
 		<layout>default</layout>
-		<url>file:/${basedir}/repository</url}
+		<url>file:/${basedir}/repository</url>
 	</repository>
     </repositories>
     <dependencies>
