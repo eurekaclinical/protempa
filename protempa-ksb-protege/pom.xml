@@ -20,10 +20,12 @@
     </properties>
     <repositories>
         <repository>
-            <id>protege</id>
-            <name>Local Protege Repository</name>
-            <layout>default</layout>
-            <url>file://${basedir}/repository</url>
+            <id>aiw.internal.repo</id>
+            <url>http://maven.cci.emory.edu:8081/nexus/content/repositories/aiw/</url>
+        </repository>
+        <repository>
+            <id>aiw.snapshots.internal.repo</id>
+            <url>http://maven.cci.emory.edu:8081/nexus/content/repositories/aiw-snapshots/</url>
         </repository>
     </repositories>
     <dependencies>
