@@ -28,6 +28,7 @@ import org.arp.javautil.datastore.DataStore;
 import org.drools.WorkingMemory;
 import org.protempa.datastore.WorkingMemoryStoreCreator;
 import org.protempa.proposition.Proposition;
+import org.protempa.query.Query;
 
 /**
  * This is a helper class for testing {@link AbstractionFinder}. It provides
@@ -78,15 +79,26 @@ public final class AbstractionFinderTestHelper {
      *             if a general problem occurs within Protempa
      */
     public DataStore<String, WorkingMemory> processStoredResults(Protempa p,
-            Set<String> keyIds, Set<String> propositionIds, QuerySession qs,
+            Query query, Set<String> keyIds, Set<String> propositionIds, 
+            QuerySession qs,
             String propositionStorePathname) throws FinderException,
             KnowledgeSourceReadException, ProtempaException {
+        PropositionDefinition[] propDefs = query.getPropositionDefinitions();
+        KnowledgeSource ks;
+        if (propDefs.length > 0) {
+            ks = new KnowledgeSourceImplWrapper(p.getKnowledgeSource(), 
+                    propDefs);
+        } else {
+            ks = p.getKnowledgeSource();
+        }
         AbstractionFinder af = new AbstractionFinder(p.getDataSource(),
                 p.getKnowledgeSource(), p.getAlgorithmSource(),
                 p.getTermSource(), true);
-        af.processStoredResults(keyIds, propositionIds, qs,
+        af.processStoredResults(keyIds, propositionIds, 
+                query.getPropositionDefinitions(), qs,
                 propositionStorePathname, this.wmStorePathname);
-        StatefulExecutionStrategy strategy = new StatefulExecutionStrategy(af);
+        StatefulExecutionStrategy strategy = new StatefulExecutionStrategy(
+                ks, af.getAlgorithmSource());
         strategy.createRuleBase(propositionIds, new DerivationsBuilder(), qs);
 
         // The derivations builder store needs to be acquired here instead of in

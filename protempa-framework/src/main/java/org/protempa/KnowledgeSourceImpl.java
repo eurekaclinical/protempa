@@ -24,7 +24,6 @@ import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,8 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.collections.map.ReferenceMap;
+import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 
 import org.protempa.backend.BackendNewInstanceException;
@@ -54,8 +53,6 @@ public final class KnowledgeSourceImpl
      * PROTEMPA knowledge base.
      */
     private PropositionDefinitionCache propositionDefinitionCache;
-    private final Map<Set<String>, Set<String>> propIdInDataSourceCache;
-    private final Map<Set<String>, Set<PropositionDefinition>> propIdPropInDataSourceCache;
     private final Map<Set<String>, Set<PropositionDefinition>> propIdPropCache;
     private final Map<String, Object> notFoundAbstractionDefinitionRequests;
     private final Map<String, Object> notFoundValueSetRequests;
@@ -64,12 +61,11 @@ public final class KnowledgeSourceImpl
     private final AbstractionDefinitionReader abstractionDefReader;
     private final Map<PropositionDefinition, List<PropositionDefinition>> inverseIsACache;
     private final Map<AbstractionDefinition, List<PropositionDefinition>> abstractedFromCache;
+    private InDataSourcePropositionDefinitionGetter inDataSourceGetter;
 
     @SuppressWarnings("unchecked")
-    public KnowledgeSourceImpl(KnowledgeSourceBackend[] backends) {
-        super(backends != null ? backends : new KnowledgeSourceBackend[0]);
-        this.propIdPropInDataSourceCache = new ReferenceMap();
-        this.propIdInDataSourceCache = new ReferenceMap();
+    public KnowledgeSourceImpl(KnowledgeSourceBackend... backends) {
+        super(backends);
         this.propIdPropCache = new ReferenceMap();
         this.inverseIsACache = new ReferenceMap();
         this.abstractedFromCache = new ReferenceMap();
@@ -81,6 +77,7 @@ public final class KnowledgeSourceImpl
 
         this.propDefReader = new PropositionDefinitionReader();
         this.abstractionDefReader = new AbstractionDefinitionReader();
+
     }
 
     /**
@@ -93,6 +90,10 @@ public final class KnowledgeSourceImpl
         }
         if (this.propositionDefinitionCache == null) {
             this.propositionDefinitionCache = new PropositionDefinitionCache();
+        }
+        if (this.inDataSourceGetter == null) {
+            this.inDataSourceGetter =
+                    new InDataSourcePropositionDefinitionGetter(this);
         }
     }
 
@@ -518,126 +519,33 @@ public final class KnowledgeSourceImpl
     public void clear() {
         if (this.propositionDefinitionCache != null) {
             this.propositionDefinitionCache.clear();
-            this.propIdInDataSourceCache.clear();
-            this.propIdPropInDataSourceCache.clear();
             this.propIdPropCache.clear();
             this.inverseIsACache.clear();
             this.abstractedFromCache.clear();
             this.notFoundAbstractionDefinitionRequests.clear();
             this.notFoundValueSetRequests.clear();
             this.notFoundPropositionDefinitionRequests.clear();
-
+            this.inDataSourceGetter.clear();
         }
     }
 
     @Override
     public Set<String> inDataSourcePropositionIds(String... propIds)
             throws KnowledgeSourceReadException {
-        Set<String> propIdsAsSet = Arrays.asSet(propIds);
-        return inDataSourcePropositionIds(propIdsAsSet,
-                this.propIdInDataSourceCache);
+        initializeIfNeeded(
+                "Getting proposition ids for {0} with inDataSource set to true", 
+                StringUtils.join(propIds, ","));
+        return this.inDataSourceGetter.inDataSourcePropositionIds(propIds);
     }
 
     @Override
     public Set<PropositionDefinition> inDataSourcePropositionDefinitions(
             String... propIds) throws KnowledgeSourceReadException {
-        return inDataSourcePropositionDefinitions(Arrays.asSet(propIds));
-    }
-
-    private Set<PropositionDefinition> inDataSourcePropositionDefinitions(
-            Set<String> propIds) throws KnowledgeSourceReadException {
-        assert propIds != null : "propIds cannot be null";
-        return inDataSourcePropositionDefinitions(propIds,
-                this.propIdPropInDataSourceCache);
-    }
-
-    private Set<PropositionDefinition> inDataSourcePropositionDefinitions(
-            Set<String> propIds,
-            Map<Set<String>, Set<PropositionDefinition>> cache)
-            throws KnowledgeSourceReadException {
-        if (propIds.contains(null)) {
-            throw new IllegalArgumentException(
-                    "propIds cannot contain a null element");
-        }
-
-        Set<PropositionDefinition> cachedResult = cache.get(propIds);
-        if (cachedResult != null) {
-            return cachedResult;
-        } else {
-            Set<PropositionDefinition> propResult =
-                    new HashSet<PropositionDefinition>();
-            if (propIds != null) {
-                inDataSourcePropositionIdsHelper(propIds, null, propResult);
-                propResult = Collections.unmodifiableSet(propResult);
-                cache.put(propIds, propResult);
-            }
-            return propResult;
-        }
-    }
-
-    private Set<String> inDataSourcePropositionIds(Set<String> propIds,
-            Map<Set<String>, Set<String>> cache)
-            throws KnowledgeSourceReadException {
-        if (propIds.contains(null)) {
-            throw new IllegalArgumentException(
-                    "propIds cannot contain a null element");
-        }
-
-        Set<String> cachedResult = cache.get(propIds);
-        if (cachedResult != null) {
-            return cachedResult;
-        } else {
-            Set<String> result = new HashSet<String>();
-            if (propIds != null) {
-                inDataSourcePropositionIdsHelper(propIds, result, null);
-                result = Collections.unmodifiableSet(result);
-                cache.put(propIds, result);
-            }
-            return result;
-        }
-    }
-
-    private void inDataSourcePropositionIdsHelper(Collection<String> propIds,
-            Set<String> result, Set<PropositionDefinition> propResult)
-            throws KnowledgeSourceReadException {
-        List<PropositionDefinition> propDefs =
-                new ArrayList<PropositionDefinition>();
-        for (String propId : propIds) {
-            PropositionDefinition propDef = readPropositionDefinition(propId);
-            if (propDef != null) {
-                propDefs.add(propDef);
-            }
-        }
-        inDataSourcePropositionIdsHelper(propDefs, result, propResult);
-    }
-
-    private void inDataSourcePropositionIdsHelper(
-            List<PropositionDefinition> propDefs,
-            Set<String> result, Set<PropositionDefinition> propResult)
-            throws KnowledgeSourceReadException {
-        for (PropositionDefinition propDef : propDefs) {
-            String propDefId = propDef.getId();
-            List<PropositionDefinition> children =
-                    new ArrayList<PropositionDefinition>();
-            if (propDef instanceof AbstractionDefinition) {
-                for (PropositionDefinition ad : readAbstractedFrom((AbstractionDefinition) propDef)) {
-                    children.add(ad);
-                }
-            }
-            for (PropositionDefinition propId : readInverseIsA(propDef)) {
-                children.add(propId);
-            }
-
-            if (propDef.getInDataSource()) {
-                if (result != null) {
-                    result.add(propDefId);
-                }
-                if (propResult != null) {
-                    propResult.add(propDef);
-                }
-            }
-            inDataSourcePropositionIdsHelper(children, result, propResult);
-        }
+        initializeIfNeeded(
+                "Getting proposition definitions for {0} with inDataSource set to true", 
+                StringUtils.join(propIds, ","));
+        return this.inDataSourceGetter.inDataSourcePropositionDefinitions(
+                propIds);
     }
 
     /**

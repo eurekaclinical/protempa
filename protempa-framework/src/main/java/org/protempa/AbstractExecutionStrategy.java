@@ -35,19 +35,26 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
     /**
      * The {@link AbstractionFinder} using this execution strategy.
      */
-    private final AbstractionFinder abstractionFinder;
+    private final KnowledgeSource knowledgeSource;
+    private final AlgorithmSource algorithmSource;
     protected RuleBase ruleBase;
 
     /**
      * @param abstractionFinder
      *            the {@link AbstractionFinder} using this execution strategy
      */
-    AbstractExecutionStrategy(AbstractionFinder abstractionFinder) {
-        this.abstractionFinder = abstractionFinder;
+    AbstractExecutionStrategy(KnowledgeSource knowledgeSource, 
+            AlgorithmSource algorithmSource) {
+        this.knowledgeSource = knowledgeSource;
+        this.algorithmSource = algorithmSource;
+    }
+    
+    protected final KnowledgeSource getKnowledgeSource() {
+        return this.knowledgeSource;
     }
 
-    protected final AbstractionFinder getAbstractionFinder() {
-        return this.abstractionFinder;
+    protected final AlgorithmSource getAlgorithmSource() {
+        return this.algorithmSource;
     }
 
     @Override
@@ -55,7 +62,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
             DerivationsBuilder listener, QuerySession qs)
             throws FinderException {
         ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
-                this.abstractionFinder.getAlgorithmSource());
+                this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
                 visitor.getAlgorithms(), listener);
         List<PropositionDefinition> propDefs = 
@@ -63,8 +70,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         for (String propId : propIds) {
             PropositionDefinition propDef;
             try {
-                propDef = this.abstractionFinder
-                    .getKnowledgeSource().readPropositionDefinition(propId);
+                propDef = this.knowledgeSource.readPropositionDefinition(propId);
             } catch (KnowledgeSourceReadException ex) {
                 throw new FinderException("Problem retrieving proposition definition " + propId + " from knowledge source");
             }
@@ -98,7 +104,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         config.setShadowProxy(false);
         try {
             config.setConflictResolver(new PROTEMPAConflictResolver(
-                    this.abstractionFinder.getKnowledgeSource(), ruleCreator
+                    this.knowledgeSource, ruleCreator
                             .getRuleToAbstractionDefinitionMap()));
         } catch (KnowledgeSourceReadException ex) {
             throw new PropositionDefinitionInstantiationException(
@@ -129,8 +135,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
             Set<PropositionDefinition> result,
             List<PropositionDefinition> propDefs) throws FinderException {
         HierarchicalProjectionChildrenVisitor dcVisitor = 
-                new HierarchicalProjectionChildrenVisitor(
-                this.abstractionFinder.getKnowledgeSource());
+                new HierarchicalProjectionChildrenVisitor(knowledgeSource);
         for (PropositionDefinition propDef : propDefs) {
             try {
                 propDef.acceptChecked(validatorVisitor);

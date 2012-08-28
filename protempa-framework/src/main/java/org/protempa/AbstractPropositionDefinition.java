@@ -40,7 +40,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  */
 public abstract class AbstractPropositionDefinition implements
         PropositionDefinition {
-    
+
     private static final long serialVersionUID = -2754387751719003721L;
     private static final PropertyDefinition[] EMPTY_PROPERTIES =
             new PropertyDefinition[0];
@@ -76,9 +76,8 @@ public abstract class AbstractPropositionDefinition implements
      * Creates a new knowledge definition.
      *
      * @param id the requested {@link String} id of propositions created by this
-     * definition. If
-     * <code>null</code> or already taken by another knowledge definition,
-     * another id will be assigned (check with
+     * definition. If <code>null</code> or already taken by another knowledge
+     * definition, another id will be assigned (check with
      * <code>getId()</code>).
      */
     AbstractPropositionDefinition(String id) {
@@ -88,6 +87,7 @@ public abstract class AbstractPropositionDefinition implements
         this.id = id.intern();
         this.children = ArrayUtils.EMPTY_STRING_ARRAY;
         this.inverseIsA = ArrayUtils.EMPTY_STRING_ARRAY;
+        this.termIds = ArrayUtils.EMPTY_STRING_ARRAY;
         this.displayName = "";
         this.abbrevDisplayName = "";
         this.description = "";
@@ -169,15 +169,11 @@ public abstract class AbstractPropositionDefinition implements
      * @param inverseIsA a {@link String[]} of proposition definition ids. No
      * <code>null</code> or duplicate elements allowed.
      */
-    public void setInverseIsA(String[] inverseIsA) {
+    public void setInverseIsA(String... inverseIsA) {
         String[] old = this.inverseIsA;
-        if (inverseIsA == null) {
-            this.inverseIsA = ArrayUtils.EMPTY_STRING_ARRAY;
-        } else {
-            ProtempaUtil.checkArrayForNullElement(inverseIsA, "inverseIsA");
-            ProtempaUtil.checkArrayForDuplicates(inverseIsA, "inverseIsA");
-            this.inverseIsA = inverseIsA.clone();
-        }
+        ProtempaUtil.checkArrayForNullElement(inverseIsA, "inverseIsA");
+        ProtempaUtil.checkArrayForDuplicates(inverseIsA, "inverseIsA");
+        this.inverseIsA = inverseIsA.clone();
         if (this.changes != null) {
             this.changes.firePropertyChange("inverseIsA", old, getInverseIsA());
         }
@@ -197,18 +193,14 @@ public abstract class AbstractPropositionDefinition implements
     /**
      * Assigns this proposition with associated {@link TermDefinition} ids.
      *
-     * @param termId a term definition id {@link String}. No
-     * <code>null</code> or duplicate elements allowed.
+     * @param termId a term definition id {@link String}. No <code>null</code>
+     * or duplicate elements allowed.
      */
-    public final void setTermIds(String[] termIds) {
+    public final void setTermIds(String... termIds) {
         String[] old = this.termIds;
-        if (termIds == null) {
-            this.termIds = ArrayUtils.EMPTY_STRING_ARRAY;
-        } else {
-            ProtempaUtil.checkArrayForNullElement(termIds, "termIds");
-            ProtempaUtil.checkArrayForDuplicates(termIds, "termIds");
-            this.termIds = termIds.clone();
-        }
+        ProtempaUtil.checkArrayForNullElement(termIds, "termIds");
+        ProtempaUtil.checkArrayForDuplicates(termIds, "termIds");
+        this.termIds = termIds.clone();
 
         if (this.changes != null) {
             this.changes.firePropertyChange("termIds", old, getTermIds());
@@ -232,17 +224,13 @@ public abstract class AbstractPropositionDefinition implements
     }
 
     public final void setPropertyDefinitions(
-            PropertyDefinition[] propertyDefinitions) {
+            PropertyDefinition... propertyDefinitions) {
         PropertyDefinition[] old = this.propertyDefinitions;
-        if (propertyDefinitions == null) {
-            this.propertyDefinitions = EMPTY_PROPERTIES;
-        } else {
-            ProtempaUtil.checkArrayForNullElement(propertyDefinitions,
-                    "propertyDefinitions");
-            ProtempaUtil.checkArrayForDuplicates(propertyDefinitions,
-                    "propertyDefinitions");
-            this.propertyDefinitions = propertyDefinitions.clone();
-        }
+        ProtempaUtil.checkArrayForNullElement(propertyDefinitions,
+                "propertyDefinitions");
+        ProtempaUtil.checkArrayForDuplicates(propertyDefinitions,
+                "propertyDefinitions");
+        this.propertyDefinitions = propertyDefinitions.clone();
         if (this.changes != null) {
             this.changes.firePropertyChange("propertyDefinitions", old,
                     this.propertyDefinitions);
@@ -266,17 +254,13 @@ public abstract class AbstractPropositionDefinition implements
     }
 
     public final void setReferenceDefinitions(
-            ReferenceDefinition[] referenceDefinitions) {
+            ReferenceDefinition... referenceDefinitions) {
         ReferenceDefinition[] old = this.referenceDefinitions;
-        if (referenceDefinitions == null) {
-            this.referenceDefinitions = EMPTY_REFERENCES;
-        } else {
-            ProtempaUtil.checkArrayForNullElement(referenceDefinitions,
-                    "referenceDefinitions");
-            ProtempaUtil.checkArrayForDuplicates(referenceDefinitions,
-                    "referenceDefinitions");
-            this.referenceDefinitions = referenceDefinitions.clone();
-        }
+        ProtempaUtil.checkArrayForNullElement(referenceDefinitions,
+                "referenceDefinitions");
+        ProtempaUtil.checkArrayForDuplicates(referenceDefinitions,
+                "referenceDefinitions");
+        this.referenceDefinitions = referenceDefinitions.clone();
 
         if (this.changes != null) {
             this.changes.firePropertyChange("referenceDefinitions", old,
@@ -288,7 +272,7 @@ public abstract class AbstractPropositionDefinition implements
     public boolean getInDataSource() {
         return this.inDataSource;
     }
-    
+
     public void setInDataSource(boolean inDataSource) {
         boolean old = this.inDataSource;
         this.inDataSource = inDataSource;

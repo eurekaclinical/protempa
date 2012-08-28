@@ -41,6 +41,7 @@ public abstract class AbstractSource<S extends SourceUpdatedEvent,
      * cannot contain <code>null</code> elements or duplicates.
      */
     AbstractSource(B[] backends) {
+        assert backends != null : "backends cannot be null";
         ProtempaUtil.checkArrayForNullElement(backends, "backends");
         ProtempaUtil.checkArrayForDuplicates(backends, "backends");
         this.listenerList = new ArrayList<SourceListener<S>>();

@@ -22,8 +22,11 @@ package org.protempa.query;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.arp.javautil.arrays.Arrays;
 import org.protempa.*;
 import org.protempa.backend.dsb.filter.Filter;
 
@@ -36,7 +39,6 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     private static final long serialVersionUID = -3920993703423486485L;
     private static final PropositionDefinition[] EMPTY_PROP_DEF_ARRAY =
             new PropositionDefinition[0];
-    
     private String[] keyIds;
     private Filter filters;
     private String[] propIds;
@@ -83,8 +85,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * Returns the key ids to be queried. An array of length 0 means that all
      * key ids will be queried.
      *
-     * @return a {@link String[]}. Never returns
-     * <code>null</code>.
+     * @return a {@link String[]}. Never returns <code>null</code>.
      */
     public final String[] getKeyIds() {
         return this.keyIds.clone();
@@ -94,9 +95,8 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * Sets the key ids to be queried. An array of length 0 or
      * <code>null</code> means that all key ids will be queried.
      *
-     * @param keyIds a {@link String[]} of key ids. If
-     * <code>null</code>, an empty
-     *            {@link String[]} will be stored.
+     * @param keyIds a {@link String[]} of key ids. If <code>null</code>, an
+     * empty {@link String[]} will be stored.
      */
     public final void setKeyIds(String[] keyIds) {
         if (keyIds == null) {
@@ -111,8 +111,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * Returns the proposition ids to be queried. An array of length 0 means
      * that all proposition ids will be queried.
      *
-     * @param propIds a {@link String[]}. Never returns
-     * <code>null</code>.
+     * @param propIds a {@link String[]}. Never returns <code>null</code>.
      */
     public final String[] getPropositionIds() {
         return this.propIds.clone();
@@ -172,19 +171,19 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         this.termIds = (And<String>[]) termIds.clone();
         this.changes.firePropertyChange("termIds", old, this.termIds);
     }
-    
+
     /**
      * Returns an optional set of user-specified proposition definitions.
-     * 
+     *
      * @return an array of {@link PropositionDefinition}s.
      */
     public final PropositionDefinition[] getPropositionDefinitions() {
         return this.propDefs.clone();
     }
-    
-    /** 
+
+    /**
      * Returns an optional set of user-specified proposition definitions.
-     * 
+     *
      * @param propDefs an array of {@link PropositionDefinition}s.
      */
     public final void setPropositionDefinitions(PropositionDefinition[] propDefs) {
@@ -193,7 +192,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         }
         PropositionDefinition[] old = this.propDefs;
         this.propDefs = propDefs.clone();
-        this.changes.firePropertyChange("propositionDefinitions", old, 
+        this.changes.firePropertyChange("propositionDefinitions", old,
                 this.propDefs);
     }
 
@@ -239,11 +238,32 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     @Override
     public Query build(KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) throws QueryBuildException {
         if (validatePropositionIds) {
+            Set<String> userSpecifiedPropIds = new HashSet<String>();
+            for (PropositionDefinition propDef : this.propDefs) {
+                userSpecifiedPropIds.add(propDef.getId());
+            }
+            for (PropositionDefinition propDef : this.propDefs) {
+                for (String propId : propDef.getChildren()) {
+                    try {
+                        if (!userSpecifiedPropIds.contains(propId)
+                                && !knowledgeSource.hasPropositionDefinition(propId)) {
+                            throw new QueryBuildException("Invalid proposition id: " + propId);
+                        }
+                    } catch (KnowledgeSourceReadException ex) {
+                        throw new QueryBuildException("Could not build query", ex);
+                    }
+                }
+            }
             for (String propId : propIds) {
                 try {
-                    if (!knowledgeSource.hasPropositionDefinition(propId)) {
-                        throw new QueryBuildException("Invalid proposition id: " + propId);
-
+                    boolean isUserSpecified = false;
+                    if (userSpecifiedPropIds.contains(propId)) {
+                        isUserSpecified = true;
+                    }
+                    if (!isUserSpecified
+                            && !knowledgeSource.hasPropositionDefinition(propId)) {
+                        throw new QueryBuildException(
+                                "Invalid proposition id: " + propId);
                     }
                 } catch (KnowledgeSourceReadException ex) {
                     throw new QueryBuildException("Could not build query", ex);

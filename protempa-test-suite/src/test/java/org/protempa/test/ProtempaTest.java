@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 
 import org.arp.javautil.arrays.Arrays;
+import org.arp.javautil.collections.Iterators;
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.io.IOUtil;
 import org.arp.javautil.io.UniqueDirectoryCreator;
@@ -55,6 +56,7 @@ import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.NominalValue;
@@ -120,7 +122,8 @@ public class ProtempaTest {
     private static final String[] PROP_IDS = {"Patient", "PatientAll",
         "Encounter", ICD9_013_82, ICD9_804, "VitalSign",
         "HELLP_FIRST_RECOVERING_PLATELETS", "LDH_TREND", "AST_STATE",
-        "30DayReadmission", "No30DayReadmission"};
+        "30DayReadmission", "No30DayReadmission", "MyDiagnosis", "MyVitalSign",
+        "MyTemporalPattern"};
     /**
      * Vital signs
      */
@@ -179,8 +182,8 @@ public class ProtempaTest {
         logger.log(Level.INFO, "Database populated");
     }
 
-    private void initializeProtempa() throws ProtempaStartupException, 
-            BackendProviderSpecLoaderException, ConfigurationsLoadException, 
+    private void initializeProtempa() throws ProtempaStartupException,
+            BackendProviderSpecLoaderException, ConfigurationsLoadException,
             InvalidConfigurationException {
         System.setProperty("protempa.inicommonsconfigurations.pathname",
                 "src/test/resources");
@@ -188,7 +191,7 @@ public class ProtempaTest {
         // others
         System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
                 "org.protempa.backend.dsb.relationaldb.H2SQLGenerator");
-        SourceFactory sf = new SourceFactory(new INICommonsConfigurations(), 
+        SourceFactory sf = new SourceFactory(new INICommonsConfigurations(),
                 "protege-h2-test-config");
         protempa = Protempa.newInstance(sf);
     }
@@ -226,7 +229,7 @@ public class ProtempaTest {
      * Tests the end-to-end execution of Protempa.
      */
     @Test
-    public void testProtempa() throws IOException {
+    public void testProtempa() throws IOException, ParseException {
         File dir = new UniqueDirectoryCreator().create("test-protempa", null,
                 FileUtils.getTempDirectory());
         try {
@@ -245,6 +248,31 @@ public class ProtempaTest {
 
         q.setKeyIds(KEY_IDS);
         q.setPropositionIds(PROP_IDS);
+
+        EventDefinition ed = new EventDefinition("MyDiagnosis");
+        ed.setDisplayName("My Diagnosis");
+        ed.setInverseIsA("ICD9:907.1");
+
+        PrimitiveParameterDefinition pd =
+                new PrimitiveParameterDefinition("MyVitalSign");
+        pd.setDisplayName("My Vital Sign");
+        pd.setInverseIsA("HeartRate");
+
+        HighLevelAbstractionDefinition hd =
+                new HighLevelAbstractionDefinition("MyTemporalPattern");
+        hd.setDisplayName("My Temporal Pattern");
+        TemporalExtendedPropositionDefinition td1 =
+                new TemporalExtendedPropositionDefinition(ed.getId());
+        TemporalExtendedPropositionDefinition td2 =
+                new TemporalExtendedPropositionDefinition(pd.getId());
+        hd.add(td1);
+        hd.add(td2);
+        Relation rel = new Relation();
+        hd.setRelation(td1, td2, rel);
+
+        q.setPropositionDefinitions(
+                new PropositionDefinition[]{ed, pd, hd});
+
         DateFormat shortFormat = AbsoluteTimeGranularity.DAY.getShortFormat();
         DateTimeFilter timeRange = new DateTimeFilter(
                 new String[]{"Encounter"},
@@ -262,7 +290,6 @@ public class ProtempaTest {
             throws NumberFormatException, IOException {
         final HashMap<String, Integer> result = new HashMap<String, Integer>();
         new WithBufferedReaderByLine(filename) {
-
             @Override
             public void readLine(String line) {
                 String[] count = line.split(":");
@@ -341,12 +368,12 @@ public class ProtempaTest {
     /**
      * Tests Protempa's process and persist method.
      */
-    private void testProcessResultsAndPersist(String environmentName) {
+    private void testProcessResultsAndPersist(String environmentName) throws ParseException {
         DataStore<String, WorkingMemory> results = null;
         AbstractionFinderTestHelper afh = null;
         try {
             afh = new AbstractionFinderTestHelper(environmentName);
-            results = afh.processStoredResults(protempa, null,
+            results = afh.processStoredResults(protempa, query(), null,
                     Arrays.asSet(PROP_IDS), null, environmentName);
             assertEquals("Wrong number of working memories generated",
                     this.patientCount, results.size());
@@ -355,6 +382,7 @@ public class ProtempaTest {
             for (String keyId : results.keySet()) {
                 int derivCount = 0;
                 for (List<Proposition> derivs : afh.getForwardDerivations(keyId).values()) {
+                    System.err.println("Key id " + keyId + ": " + derivs);
                     derivCount += derivs.size();
                 }
                 assertEquals("wrong number of forward derivations for key "
@@ -366,13 +394,15 @@ public class ProtempaTest {
                 }
                 assertEquals("wrong number of backward derivations for key "
                         + keyId, backwardDerivCounts.get(keyId), derivCount);
-
                 assert30DayReadmissionDerived(afh);
                 assertNo30DayReadmissionDerived(afh);
                 assertChildIcd9Derived(results, afh);
                 assertLdhTrendDerived(results);
                 assertAstStateDerived(results);
                 assertFirstHellpRecoveringSliceDerived(results);
+                assertMyDiagnosisDerived(results);
+                assertMyLabTestDerived(results);
+                
             }
         } catch (KnowledgeSourceReadException e) {
             e.printStackTrace();
@@ -668,6 +698,32 @@ public class ProtempaTest {
                 "Found wrong number of 'No30DayReadmissions' for key ID 0", 4,
                 no30DayDerivations.size());
         logger.log(Level.INFO, "Completed No30DayReadmissions test");
+    }
+
+    private void assertMyDiagnosisDerived(
+            DataStore<String, WorkingMemory> derivedData) {
+        boolean myDiagnosisDerived = false;
+        for (Iterator<Proposition> it = derivedData.get("1").iterateObjects(); it.hasNext();) {
+            Proposition p = it.next();
+            if (p.getId().equals("MyDiagnosis")) {
+                myDiagnosisDerived = true;
+                break;
+            }
+        }
+        assertTrue("Proposition 'MyDiagnosis' not found", myDiagnosisDerived);
+    }
+    
+    private void assertMyLabTestDerived(
+            DataStore<String, WorkingMemory> derivedData) {
+        boolean myLabTestDerived = false;
+        for (Iterator<Proposition> it = derivedData.get("3").iterateObjects(); it.hasNext();) {
+            Proposition p = it.next();
+            if (p.getId().equals("MyVitalSign")) {
+                myLabTestDerived = true;
+                break;
+            }
+        }
+        assertTrue("Proposition 'MyVitalSign' not found", myLabTestDerived);
     }
 
     private void assertChildIcd9Derived(

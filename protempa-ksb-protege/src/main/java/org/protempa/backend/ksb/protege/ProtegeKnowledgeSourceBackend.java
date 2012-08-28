@@ -132,14 +132,18 @@ public abstract class ProtegeKnowledgeSourceBackend
     public PropositionDefinition readPropositionDefinition(String name)
             throws KnowledgeSourceReadException {
         Instance instance = this.cm.getInstance(name);
-        return this.instanceConverterFactory.getInstance(instance).convert(instance, this);
+        if (instance != null) {
+            return this.instanceConverterFactory.getInstance(instance).convert(instance, this);
+        } else {
+            return null;
+        }
     }
-    
+
     @Override
-    public AbstractionDefinition readAbstractionDefinition(String name) 
+    public AbstractionDefinition readAbstractionDefinition(String name)
             throws KnowledgeSourceReadException {
         Instance instance = this.cm.getInstance(name);
-        AbstractionConverter ac = 
+        AbstractionConverter ac =
                 this.instanceConverterFactory.getAbstractionInstance(instance);
         if (ac == null) {
             return null;
@@ -180,17 +184,9 @@ public abstract class ProtegeKnowledgeSourceBackend
             propIdSets.add(subsumpPropIds);
         }
 
-        // finds the intersection of the sets of proposition IDs
-        boolean firstPass = true;
-        Set<String> matchingPropIds = new HashSet<String>();
-        for (Set<String> propIdSet : propIdSets) {
-            if (firstPass) {
-                matchingPropIds.addAll(propIdSet);
-                firstPass = false;
-            } else {
-                matchingPropIds.retainAll(propIdSet);
-            }
-        }
+        Set<String> matchingPropIds =
+                org.arp.javautil.collections.Collections.intersection(
+                propIdSets);
         result.addAll(matchingPropIds);
 
         return result;
@@ -321,6 +317,4 @@ public abstract class ProtegeKnowledgeSourceBackend
         }
         return result;
     }
-    
-    
 }

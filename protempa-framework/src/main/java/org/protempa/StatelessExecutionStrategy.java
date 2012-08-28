@@ -32,9 +32,13 @@ import org.protempa.proposition.Proposition;
 class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
     private StatelessSession statelessSession;
+    private final AbstractionFinder abstractionFinder;
 
-    public StatelessExecutionStrategy(AbstractionFinder abstractionFinder) {
-        super(abstractionFinder);
+    StatelessExecutionStrategy(AbstractionFinder abstractionFinder, 
+            KnowledgeSource knowledgeSource, 
+            AlgorithmSource algorithmSource) {
+        super(knowledgeSource, algorithmSource);
+        this.abstractionFinder = abstractionFinder;
     }
     
     @Override
@@ -54,7 +58,7 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
     @Override
     public void cleanup() {
-        getAbstractionFinder().clear();
+        this.abstractionFinder.clear();
     }
 
 }

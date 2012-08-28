@@ -19,6 +19,7 @@
  */
 package org.protempa.ksb;
 
+import org.protempa.backend.ksb.SimpleKnowledgeSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.*;
 import junit.framework.TestCase;
@@ -29,12 +30,12 @@ import junit.framework.TestCase;
 public class KnowledgeSourceBackendUpdatedEventTest extends TestCase {
 
     private KnowledgeSource knowledgeSource;
-    private MockKnowledgeSourceBackend knowledgeSourceBackend;
+    private SimpleKnowledgeSourceBackend knowledgeSourceBackend;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        this.knowledgeSourceBackend = new MockKnowledgeSourceBackend();
+        this.knowledgeSourceBackend = new SimpleKnowledgeSourceBackend();
         this.knowledgeSource = new KnowledgeSourceImpl(
                 new KnowledgeSourceBackend[]{this.knowledgeSourceBackend});
     }

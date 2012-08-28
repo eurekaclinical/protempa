@@ -35,8 +35,9 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     public void initialize() {
     }
 
-    StatefulExecutionStrategy(AbstractionFinder abstractionFinder) {
-        super(abstractionFinder);
+    StatefulExecutionStrategy(KnowledgeSource knowledgeSource, 
+            AlgorithmSource algorithmSource) {
+        super(knowledgeSource, algorithmSource);
     }
 
     private StatefulSession applyRules(String keyId, List<?> objects) {

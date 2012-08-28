@@ -337,18 +337,21 @@ public final class Protempa {
         Set<String> propIds = Arrays.asSet(query.getPropositionIds());
         Set<And<String>> termIds = Arrays.asSet(query.getTermIds());
         Filter filters = query.getFilters();
+        PropositionDefinition[] propDefs = query.getPropositionDefinitions();
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
 
         logger.log(Level.INFO, "Beginning data retrieval stage");
         this.abstractionFinder.retrieveData(keyIds, propIds, termIds, filters,
-                qs, retrievalStoreEnvironment);
+                propDefs, qs, retrievalStoreEnvironment);
         logger.log(Level.INFO, "Data retrieval complete");
         logger.log(Level.INFO, "Beginning processing stage");
-        this.abstractionFinder.processStoredResults(keyIds, propIds, qs,
+        this.abstractionFinder.processStoredResults(keyIds, propIds, 
+                propDefs, qs,
                 retrievalStoreEnvironment, processStoreName);
         logger.log(Level.INFO, "Processing complete");
         logger.log(Level.INFO, "Beginning output stage");
         this.abstractionFinder.outputStoredResults(keyIds, propIds,
+                query.getPropositionDefinitions(),
                 resultHandler, qs, processStoreName);
         logger.log(Level.INFO, "Output complete");
     }
@@ -382,10 +385,11 @@ public final class Protempa {
         Set<String> keyIdsSet = Arrays.asSet(query.getKeyIds());
         Set<String> propIds = Arrays.asSet(query.getPropositionIds());
         Set<And<String>> termIds = Arrays.asSet(query.getTermIds());
+        PropositionDefinition[] propDefs = query.getPropositionDefinitions();
         Filter filters = query.getFilters();
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
         this.abstractionFinder.retrieveData(keyIdsSet, propIds, termIds,
-                filters, qs, retrievalStoreEnvironment);
+                filters, propDefs, qs, retrievalStoreEnvironment);
         logger.log(Level.FINE, "Data retrieval complete");
     }
 
@@ -426,7 +430,8 @@ public final class Protempa {
                 retrievalStoreEnvironment);
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
 
-        this.abstractionFinder.processStoredResults(keyIds, propositionIds, qs,
+        this.abstractionFinder.processStoredResults(keyIds, propositionIds, 
+                query.getPropositionDefinitions(), qs,
                 retrievalStoreEnvironment, workingMemoryStoreEnvironment);
         logger.log(Level.FINE, "Data processing complete");
     }
@@ -515,7 +520,8 @@ public final class Protempa {
                 workingMemoryStoreEnvironment);
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
         this.abstractionFinder.outputStoredResults(keyIds, propositionIds,
-                resultHandler, qs, workingMemoryStoreEnvironment);
+                query.getPropositionDefinitions(), resultHandler, qs, 
+                workingMemoryStoreEnvironment);
         logger.log(Level.FINE, "Output complete");
     }
 
@@ -538,7 +544,8 @@ public final class Protempa {
         QuerySession qs = new QuerySession(origQuery, this.abstractionFinder);
         this.abstractionFinder.processAndOutputStoredResults(
                 Arrays.asSet(origQuery.getKeyIds()),
-                Arrays.asSet(origQuery.getPropositionIds()), resultHandler, qs,
+                Arrays.asSet(origQuery.getPropositionIds()), 
+                origQuery.getPropositionDefinitions(), resultHandler, qs,
                 propositionStoreEnvironment);
     }
 
