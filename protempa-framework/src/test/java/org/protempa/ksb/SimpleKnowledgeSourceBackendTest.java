@@ -88,7 +88,7 @@ public class SimpleKnowledgeSourceBackendTest {
         KnowledgeSourceBackend b = new SimpleKnowledgeSourceBackend(fooDef, 
                 barDef, bazDef);
         String[] actual = b.readIsA("foo");
-        Set<String> expected = Arrays.asSet("bar", "baz");
+        Set<String> expected = Arrays.asSet(new String[]{"bar", "baz"});
         Assert.assertEquals(expected, Arrays.asSet(actual));
     }
     
@@ -104,7 +104,7 @@ public class SimpleKnowledgeSourceBackendTest {
         KnowledgeSourceBackend b = new SimpleKnowledgeSourceBackend(fooDef, 
                 barDef, bazDef);
         String[] actual = b.readAbstractedInto("foo");
-        Set<String> expected = Arrays.asSet("bar", "baz");
+        Set<String> expected = Arrays.asSet(new String[]{"bar", "baz"});
         Assert.assertEquals(expected, Arrays.asSet(actual));
     }
 }
