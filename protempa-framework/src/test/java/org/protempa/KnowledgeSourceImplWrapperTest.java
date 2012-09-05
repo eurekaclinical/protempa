@@ -80,7 +80,8 @@ public class KnowledgeSourceImplWrapperTest {
                 new SimpleKnowledgeSourceBackend());
         KnowledgeSource wrapper = new KnowledgeSourceImplWrapper(wrapped,
                 fooDef, barDef, bazDef);
-        Set<ConstantDefinition> expected = Arrays.asSet(barDef, bazDef);
+        Set<ConstantDefinition> expected = 
+                Arrays.asSet(new ConstantDefinition[]{barDef, bazDef});
         Set<PropositionDefinition> actual =
                 new HashSet<PropositionDefinition>(wrapper.readIsA("foo"));
         Assert.assertEquals(expected, actual);
@@ -98,7 +99,8 @@ public class KnowledgeSourceImplWrapperTest {
                 new SimpleKnowledgeSourceBackend(fooDef));
         KnowledgeSource wrapper = new KnowledgeSourceImplWrapper(wrapped,
                 barDef, bazDef);
-        Set<ConstantDefinition> expected = Arrays.asSet(barDef, bazDef);
+        Set<ConstantDefinition> expected = 
+                Arrays.asSet(new ConstantDefinition[]{barDef, bazDef});
         Set<PropositionDefinition> actual =
                 new HashSet<PropositionDefinition>(wrapper.readIsA("foo"));
         Assert.assertEquals(expected, actual);
@@ -116,7 +118,8 @@ public class KnowledgeSourceImplWrapperTest {
                 new SimpleKnowledgeSourceBackend(barDef, fooDef));
         KnowledgeSource wrapper = new KnowledgeSourceImplWrapper(wrapped,
                 bazDef);
-        Set<ConstantDefinition> expected = Arrays.asSet(barDef, bazDef);
+        Set<ConstantDefinition> expected = 
+                Arrays.asSet(new ConstantDefinition[]{barDef, bazDef});
         Set<PropositionDefinition> actual =
                 new HashSet<PropositionDefinition>(wrapper.readIsA("foo"));
         Assert.assertEquals(expected, actual);
@@ -135,7 +138,8 @@ public class KnowledgeSourceImplWrapperTest {
                 new SimpleKnowledgeSourceBackend(barDef, fooDef1));
         KnowledgeSource wrapper = new KnowledgeSourceImplWrapper(wrapped,
                 fooDef2, bazDef);
-        Set<ConstantDefinition> expected = Arrays.asSet(barDef, bazDef);
+        Set<ConstantDefinition> expected = 
+                Arrays.asSet(new ConstantDefinition[]{barDef, bazDef});
         Set<PropositionDefinition> actual =
                 new HashSet<PropositionDefinition>(wrapper.readIsA("foo"));
         Assert.assertEquals(expected, actual);
@@ -233,7 +237,8 @@ public class KnowledgeSourceImplWrapperTest {
         KnowledgeSource wrapper = new KnowledgeSourceImplWrapper(wrapped,
                 fooDef, barDef, bazDef);
         Set<LowLevelAbstractionDefinition> expected =
-                Arrays.asSet(barDef, bazDef);
+                Arrays.asSet(
+                new LowLevelAbstractionDefinition[]{barDef, bazDef});
         Set<PropositionDefinition> actual =
                 new HashSet<PropositionDefinition>(wrapper.readIsA("foo"));
         Assert.assertEquals(expected, actual);
