@@ -46,7 +46,7 @@ final class ConnectorJ5MySQL415FromClause extends AbstractFromClause {
     public String generateFromTable(ColumnSpec columnSpec) {
         StringBuilder fromPart = new StringBuilder();
 
-        if (columnSpec.getSchema() != null) {
+        if (columnSpec.getSchema() != null && !columnSpec.getSchema().isEmpty()) {
             throw new IllegalArgumentException("schema is not supported");
         }
 
