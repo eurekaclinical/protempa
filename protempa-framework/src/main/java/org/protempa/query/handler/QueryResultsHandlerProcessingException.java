@@ -30,7 +30,8 @@ public class QueryResultsHandlerProcessingException extends ProtempaException {
     public QueryResultsHandlerProcessingException() {
     }
 
-    public QueryResultsHandlerProcessingException(String message, Throwable cause) {
+    public QueryResultsHandlerProcessingException(String message, 
+            Throwable cause) {
         super(message, cause);
     }
 

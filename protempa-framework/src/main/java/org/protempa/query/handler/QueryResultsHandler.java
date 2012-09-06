@@ -27,6 +27,7 @@ import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.query.Query;
 
 /**
  * Interface defining the operations for handling a single result from a
@@ -39,18 +40,20 @@ public interface QueryResultsHandler {
 
     /**
      * Performs all initialization functions to prepare the handler. This 
-     * method is guaranteed to be called by Protempa before any query result 
-     * processing is done.
+     * method is called by Protempa before {@link #start() }.
      *
      * @throws QueryResultsHandlerInitException
-     *             if any exceptions occur at a lower level
+     *             if any exceptions occur during initialization.
      */
-    public void init(KnowledgeSource knowledgeSource) 
+    public void init(KnowledgeSource knowledgeSource, Query query) 
             throws QueryResultsHandlerInitException;
     
     /**
      * Called by Protempa prior to the first invocation of 
-     * {@link #handleQueryResult}.
+     * {@link #handleQueryResult}. Implementers of this method may perform 
+     * arbitrary processing related to the output of the handler, such as
+     * printing out headers of a file or extracting metadata from the knowledge
+     * source for the handler's output.
      * 
      * @throws QueryResultsHandlerProcessingException if any exceptions occur 
      * at a lower level.

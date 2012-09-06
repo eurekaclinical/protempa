@@ -22,6 +22,7 @@ package org.protempa.query.handler;
 import org.apache.commons.lang.ArrayUtils;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.query.Query;
 
 /**
  *
@@ -31,7 +32,7 @@ public abstract class AbstractQueryResultsHandler
         implements QueryResultsHandler {
 
     @Override
-    public void init(KnowledgeSource knowledgeSource)
+    public void init(KnowledgeSource knowledgeSource, Query query)
             throws QueryResultsHandlerInitException {
     }
 

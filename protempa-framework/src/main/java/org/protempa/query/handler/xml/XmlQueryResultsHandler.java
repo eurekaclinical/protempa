@@ -49,6 +49,7 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.query.Query;
 import org.protempa.query.handler.AbstractQueryResultsHandler;
 import org.protempa.query.handler.QueryResultsHandlerProcessingException;
 import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
@@ -115,7 +116,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
     }
 
     @Override
-    public void init(KnowledgeSource knowledgeSource) {
+    public void init(KnowledgeSource knowledgeSource, Query query) {
         this.knowledgeSource = knowledgeSource;
     }
 

@@ -48,6 +48,7 @@ public final class DataInserter {
     private static final String LABS = "labs_event";
     private static final String MEDS = "meds_event";
     private static final String VITALS = "vitals_event";
+    private static final String SCHEMA = "TEST";
 
     private static final String TABLES[] = new String[] { PATIENT, ENCOUNTER,
             PROVIDER, CPT, ICD9D, ICD9P, LABS, MEDS, VITALS };
@@ -86,12 +87,13 @@ public final class DataInserter {
      * @throws SQLException
      *             Thrown if there are any JDBC errors.
      */
-    private void truncateTables() throws SQLException {
-        final Connection connection = this.getConnection();
+    public void truncateTables() throws SQLException {
+        final Connection connection = getConnection();
         final List<String> sqlStatements = new ArrayList<String>();
         for (String table : TABLES) {
             sqlStatements.add("truncate table " + table);
         }
+        sqlStatements.add("drop schema " + SCHEMA);
 
         for (String sql : sqlStatements) {
             Statement statement = connection.createStatement();

@@ -28,12 +28,12 @@ import org.apache.commons.lang.ArrayUtils;
 
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.string.StringUtil;
-import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.query.Query;
 import org.protempa.query.handler.table.TableColumnSpec;
 import org.protempa.query.handler.table.TableColumnSpecValidationFailedException;
 
@@ -100,7 +100,7 @@ public final class TableQueryResultsHandler
     }
 
     @Override
-    public void init(KnowledgeSource knowledgeSource) {
+    public void init(KnowledgeSource knowledgeSource, Query query) {
         this.knowledgeSource = knowledgeSource;
     }
     

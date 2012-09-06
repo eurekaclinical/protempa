@@ -29,6 +29,7 @@ import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.query.Query;
 
 /**
  * An implementation of QueryResultsHandler that stores the results in a map
@@ -68,7 +69,7 @@ public class MappingQueryResultsHandler extends AbstractQueryResultsHandler {
      * Initializes the map returned by {@link #getResultMap()}.
      */
     @Override
-    public void init(KnowledgeSource knowledgeSource) {
+    public void init(KnowledgeSource knowledgeSource, Query query) {
         this.resultMap = new HashMap<String, List<Proposition>>();
     }
 

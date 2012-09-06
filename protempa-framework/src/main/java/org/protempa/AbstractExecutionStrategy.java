@@ -96,6 +96,11 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
             throw new FinderException("Problem creating data processing rules", ex);
         }
     }
+    
+    @Override
+    public RuleBase getRuleBase() {
+        return this.ruleBase;
+    }
 
     protected RuleBaseConfiguration createRuleBaseConfiguration(
             JBossRuleCreator ruleCreator)

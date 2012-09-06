@@ -39,9 +39,7 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 
 import org.arp.javautil.arrays.Arrays;
-import org.arp.javautil.collections.Iterators;
 import org.arp.javautil.datastore.DataStore;
-import org.arp.javautil.io.IOUtil;
 import org.arp.javautil.io.UniqueDirectoryCreator;
 import org.arp.javautil.io.WithBufferedReaderByLine;
 import org.drools.WorkingMemory;
@@ -153,6 +151,7 @@ public class ProtempaTest {
      * Number of patients in the dataset
      */
     private int patientCount;
+    private DataInserter inserter;
 
     /**
      * Performs set up operations required for all testing (eg, setting up the
@@ -162,24 +161,6 @@ public class ProtempaTest {
      */
     @BeforeClass
     public static void setUpAll() throws Exception {
-    }
-
-    private void populateDatabase() throws DataProviderException, SQLException {
-        logger.log(Level.INFO, "Populating database");
-        this.dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
-        DataInserter inserter = new DataInserter(
-                "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
-        inserter.createTables("src/test/resources/dsb/test-schema.sql");
-        this.patientCount = dataProvider.getPatients().size();
-        inserter.insertPatients(dataProvider.getPatients());
-        inserter.insertEncounters(dataProvider.getEncounters());
-        inserter.insertProviders(dataProvider.getProviders());
-        inserter.insertIcd9Diagnoses(dataProvider.getIcd9Diagnoses());
-        inserter.insertIcd9Procedures(dataProvider.getIcd9Procedures());
-        inserter.insertLabs(dataProvider.getLabs());
-        inserter.insertVitals(dataProvider.getVitals());
-        inserter.close();
-        logger.log(Level.INFO, "Database populated");
     }
 
     private void initializeProtempa() throws ProtempaStartupException,
@@ -210,8 +191,24 @@ public class ProtempaTest {
      * @throws Exception
      */
     @Before
-    public void setUp() throws Exception {
-        populateDatabase();
+    public void setUp() throws DataProviderException, SQLException, 
+            ProtempaStartupException, BackendProviderSpecLoaderException, 
+            ConfigurationsLoadException, InvalidConfigurationException {
+        logger.log(Level.INFO, "Populating database");
+        this.dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
+        inserter = new DataInserter(
+                "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
+        inserter.createTables("src/test/resources/dsb/test-schema.sql");
+        this.patientCount = dataProvider.getPatients().size();
+        inserter.insertPatients(dataProvider.getPatients());
+        inserter.insertEncounters(dataProvider.getEncounters());
+        inserter.insertProviders(dataProvider.getProviders());
+        inserter.insertIcd9Diagnoses(dataProvider.getIcd9Diagnoses());
+        inserter.insertIcd9Procedures(dataProvider.getIcd9Procedures());
+        inserter.insertLabs(dataProvider.getLabs());
+        inserter.insertVitals(dataProvider.getVitals());
+        logger.log(Level.INFO, "Database populated");
+        
         initializeProtempa();
     }
 
@@ -219,9 +216,14 @@ public class ProtempaTest {
      * @throws Exception
      */
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() throws SQLException {
         if (this.protempa != null) {
             this.protempa.close();
+        }
+        try {
+            this.inserter.truncateTables();
+        } finally {
+            this.inserter.close();
         }
     }
 
@@ -229,7 +231,7 @@ public class ProtempaTest {
      * Tests the end-to-end execution of Protempa.
      */
     @Test
-    public void testProtempa() throws IOException, ParseException {
+    public void testProtempaWithPersistence() throws IOException, ParseException {
         File dir = new UniqueDirectoryCreator().create("test-protempa", null,
                 FileUtils.getTempDirectory());
         try {
@@ -240,6 +242,20 @@ public class ProtempaTest {
         } finally {
             FileUtils.deleteDirectory(dir);
         }
+    }
+
+    @Test
+    public void testProtempaWithoutPersistence() throws FinderException,
+            ParseException, KnowledgeSourceReadException, QueryBuildException, 
+            IOException {
+        File outputFile = File.createTempFile("protempa-test", null);
+        FileWriter fw = new FileWriter(outputFile);
+        QueryResultsHandler handler = new SingleColumnQueryResultsHandler(
+                fw);
+        protempa.execute(query(), handler);
+        assertTrue("output doesn't match",
+                outputMatches(outputFile, TRUTH_OUTPUT));
+
     }
 
     private Query query() throws ParseException, KnowledgeSourceReadException,
@@ -374,7 +390,7 @@ public class ProtempaTest {
         try {
             afh = new AbstractionFinderTestHelper(environmentName);
             results = afh.processStoredResults(protempa, query(), null,
-                    Arrays.asSet(PROP_IDS), null, environmentName);
+                    environmentName);
             assertEquals("Wrong number of working memories generated",
                     this.patientCount, results.size());
             Map<String, Integer> forwardDerivCounts = getResultCounts(FORWARD_DERIVATION_COUNTS_FILE);
@@ -402,7 +418,7 @@ public class ProtempaTest {
                 assertFirstHellpRecoveringSliceDerived(results);
                 assertMyDiagnosisDerived(results);
                 assertMyLabTestDerived(results);
-                
+
             }
         } catch (KnowledgeSourceReadException e) {
             e.printStackTrace();
@@ -712,7 +728,7 @@ public class ProtempaTest {
         }
         assertTrue("Proposition 'MyDiagnosis' not found", myDiagnosisDerived);
     }
-    
+
     private void assertMyLabTestDerived(
             DataStore<String, WorkingMemory> derivedData) {
         boolean myLabTestDerived = false;

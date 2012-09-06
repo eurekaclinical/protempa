@@ -22,7 +22,6 @@ package org.protempa;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
+import org.arp.javautil.arrays.Arrays;
 
 import org.arp.javautil.collections.Iterators;
 import org.arp.javautil.datastore.DataStore;
@@ -163,60 +163,460 @@ final class AbstractionFinder implements Module {
         }
     }
 
-    void doFind(Set<String> keyIds, Set<String> propIds,
-            Set<And<String>> termIds, Filter filters,
-            QueryResultsHandler resultsHandler,
-            PropositionDefinition[] propDefs, QuerySession qs)
+    private static enum ExecutorStrategy {
+
+        STATELESS, STATEFUL
+    }
+
+    private abstract class Executor {
+
+        private final Logger logger;
+        private final Set<String> keyIds;
+        private final Set<String> propIds;
+        private final Set<And<String>> termIds;
+        private final Filter filters;
+        private final PropositionDefinition[] propDefs;
+        private final KnowledgeSource ks;
+        private final Query query;
+        private final QuerySession qs;
+        private DerivationsBuilder derivationsBuilder;
+        private final ExecutorStrategy strategy;
+
+        private class ExecutorCounter {
+
+            private int count;
+
+            ExecutorCounter() {
+            }
+
+            void incr() throws DataSourceReadException {
+                if (++this.count % 1000 == 0) {
+                    logNumProcessed(this.count);
+                }
+            }
+
+            int getCount() {
+                return this.count;
+            }
+        }
+
+        abstract class KeyIdProcessor {
+
+            private final Iterator<String> itr;
+            private ExecutorCounter counter;
+
+            public KeyIdProcessor(Iterator<String> itr) {
+                assert itr != null : "itr cannot be null";
+                this.itr = itr;
+                this.counter = new ExecutorCounter();
+            }
+
+            void process() throws DataSourceReadException, FinderException {
+                for (; this.itr.hasNext();) {
+                    doProcess(this.itr.next(), propIds);
+                    this.counter.incr();
+                    derivationsBuilder.reset();
+                }
+            }
+
+            abstract void doProcess(String keyId, Set<String> propIds)
+                    throws FinderException;
+        }
+
+        abstract class DataStreamingEventProcessor {
+
+            private final DataStreamingEventIterator<Proposition> itr;
+            private ExecutorCounter counter;
+
+            public DataStreamingEventProcessor(
+                    DataStreamingEventIterator<Proposition> itr) {
+                assert itr != null : "itr cannot be null";
+                this.itr = itr;
+                this.counter = new ExecutorCounter();
+            }
+
+            final void process() throws DataSourceReadException,
+                    FinderException {
+                String queryId = query.getId();
+                log(Level.INFO, "Processing data for query {0}", queryId);
+                try {
+                    for (; this.itr.hasNext();) {
+                        doProcess(this.itr.next(), propIds);
+                        this.counter.incr();
+                        derivationsBuilder.reset();
+                    }
+                    log(Level.INFO, "Done processing data for query {0}",
+                            queryId);
+                } finally {
+                    this.itr.close();
+                    log(Level.INFO, "Done retrieving data for query {0}",
+                            queryId);
+                }
+            }
+
+            final int getCount() {
+                return this.counter.getCount();
+            }
+
+            abstract void doProcess(DataStreamingEvent next,
+                    Set<String> propIds) throws FinderException;
+        }
+
+        Executor(Query query, QuerySession querySession)
+                throws FinderException {
+            this(query, querySession, null);
+        }
+
+        Executor(Query query, QuerySession querySession,
+                ExecutorStrategy strategy)
+                throws FinderException {
+            assert query != null : "query cannot be null";
+
+            this.logger = ProtempaUtil.logger();
+
+            if (AbstractionFinder.this.closed) {
+                throw new FinderException("Protempa already closed!");
+            }
+
+            this.keyIds = Arrays.asSet(query.getKeyIds());
+            this.propIds = Arrays.asSet(query.getPropositionIds());
+            this.termIds = Arrays.asSet(query.getTermIds());
+            this.filters = query.getFilters();
+            this.propDefs = query.getPropositionDefinitions();
+            if (propDefs != null && propDefs.length > 0) {
+                ks = new KnowledgeSourceImplWrapper(
+                        knowledgeSource, propDefs);
+            } else {
+                ks = knowledgeSource;
+            }
+            this.query = query;
+            this.qs = querySession;
+            this.derivationsBuilder = new DerivationsBuilder();
+            this.strategy = strategy;
+        }
+
+        protected final Query getQuery() {
+            return query;
+        }
+
+        protected final Set<String> getPropIds() {
+            return propIds;
+        }
+
+        protected final void addAllPropIds(String[] propIds) {
+            org.arp.javautil.arrays.Arrays.addAll(this.propIds, propIds);
+        }
+
+        protected final DerivationsBuilder getDerivationsBuilder() {
+            return this.derivationsBuilder;
+        }
+
+        final KnowledgeSource getKnowledgeSource() {
+            return ks;
+        }
+
+        final QuerySession getQuerySession() {
+            return qs;
+        }
+
+        final boolean isLoggable(Level level) {
+            return this.logger.isLoggable(level);
+        }
+
+        final void log(Level level, String msg, Object[] params) {
+            this.logger.log(level, msg, params);
+        }
+
+        final void log(Level level, String msg, Object param) {
+            this.logger.log(level, msg, param);
+        }
+
+        final void log(Level level, String msg) {
+            this.logger.log(level, msg);
+        }
+
+        final void logCount(Level level, int count, String singularMsg,
+                String pluralMsg, Object[] singularParams,
+                Object[] pluralParams) {
+            Logging.logCount(this.logger, level, count, singularMsg, pluralMsg,
+                    singularParams, pluralParams);
+        }
+
+        void execute() throws FinderException {
+            if (isLoggable(Level.FINE)) {
+                log(Level.FINE, 
+                        "Propositions to be queried for query {0} are {1}",
+                        new Object[]{
+                            query.getId(), 
+                            StringUtils.join(this.propIds, ", ")
+                        });
+            }
+
+            ExecutionStrategy executionStrategy;
+            if (strategy == null) {
+                executionStrategy = null;
+            } else {
+                switch (strategy) {
+                    case STATELESS:
+                        executionStrategy = newStatelessStrategy();
+                        break;
+                    case STATEFUL:
+                        executionStrategy = newStatefulStrategy();
+                        break;
+                    default:
+                        throw new AssertionError("Invalid execution strategy: "
+                                + strategy);
+                }
+            }
+
+            try {
+                doExecute(this.keyIds, this.derivationsBuilder,
+                        executionStrategy);
+            } catch (ProtempaException e) {
+                String msg = "Query " + query.getId() + " did not complete";
+                throw new FinderException(msg, e);
+            } finally {
+                if (executionStrategy != null) {
+                    executionStrategy.cleanup();
+                }
+            }
+        }
+
+        final DataStreamingEventIterator<Proposition> newDataIterator()
+                throws KnowledgeSourceReadException, DataSourceReadException {
+            log(Level.INFO, "Retrieving data for query {0}", query.getId());
+            Set<String> inDataSourcePropIds = getKnowledgeSource()
+                    .inDataSourcePropositionIds(
+                    this.propIds.toArray(new String[this.propIds.size()]));
+            if (isLoggable(Level.FINE)) {
+                log(Level.FINE, "Asking data source for {0} for query {1}",
+                        new Object[]{
+                            StringUtils.join(inDataSourcePropIds, ", "),
+                            query.getId()
+                        });
+            }
+            DataStreamingEventIterator<Proposition> itr =
+                    getDataSource().readPropositions(this.keyIds,
+                    inDataSourcePropIds, this.filters, getQuerySession());
+            return itr;
+        }
+
+        final Iterator<String> keysToProcess(Set<String> keyIds,
+                DataStore<String, ?> propStore) {
+            Set<String> result;
+            if (keyIds != null && !keyIds.isEmpty()) {
+                result = keyIds;
+            } else {
+                result = propStore.keySet();
+            }
+            return result.iterator();
+        }
+
+        final void logNumProcessed(int numProcessed)
+                throws DataSourceReadException {
+            if (isLoggable(Level.FINE)) {
+                String keyTypeSingDisplayName =
+                        getDataSource().getKeyTypeDisplayName();
+                String keyTypePluralDisplayName =
+                        getDataSource().getKeyTypePluralDisplayName();
+                String queryId = query.getId();
+                logCount(Level.FINE, numProcessed,
+                        "Processed {0} {1} for query {2}",
+                        "Processed {0} {1} for query {2}",
+                        new Object[]{keyTypeSingDisplayName, queryId},
+                        new Object[]{keyTypePluralDisplayName, queryId});
+            }
+        }
+
+        protected abstract void doExecute(Set<String> keyIds,
+                final DerivationsBuilder derivationsBuilder,
+                final ExecutionStrategy strategy) throws ProtempaException;
+
+        private StatelessExecutionStrategy newStatelessStrategy()
+                throws FinderException {
+            StatelessExecutionStrategy result =
+                    new StatelessExecutionStrategy(
+                    AbstractionFinder.this, getKnowledgeSource(),
+                    getAlgorithmSource());
+
+            createRuleBase(result);
+            result.initialize();
+            return result;
+        }
+
+        private StatefulExecutionStrategy newStatefulStrategy()
+                throws FinderException {
+            StatefulExecutionStrategy result =
+                    new StatefulExecutionStrategy(getKnowledgeSource(),
+                    getAlgorithmSource());
+
+            createRuleBase(result);
+            result.initialize();
+            return result;
+        }
+
+        private void createRuleBase(ExecutionStrategy result) throws FinderException {
+            log(Level.FINEST, "Initializing rule base for query {0}",
+                    query.getId());
+            result.createRuleBase(this.propIds, derivationsBuilder, qs);
+            AbstractionFinder.this.clearNeeded = true;
+            log(Level.FINEST, "Rule base initialized for query {0}",
+                    query.getId());
+        }
+    }
+
+    private abstract class ExecutorWithResultsHandler extends Executor {
+
+        private final QueryResultsHandler resultsHandler;
+
+        public ExecutorWithResultsHandler(Query query,
+                QueryResultsHandler resultsHandler, QuerySession querySession,
+                ExecutorStrategy strategy)
+                throws FinderException {
+            super(query, querySession, strategy);
+            assert resultsHandler != null : "resultsHandler cannot be null";
+            this.resultsHandler = resultsHandler;
+        }
+
+        QueryResultsHandler getResultsHandler() {
+            return resultsHandler;
+        }
+
+        @Override
+        void execute() throws FinderException {
+            String queryId = getQuery().getId();
+            try {
+                log(Level.FINE,
+                        "Initializing query results handler for query {0}",
+                        queryId);
+                resultsHandler.init(getKnowledgeSource(), getQuery());
+                log(Level.FINE,
+                        "Done initalizing query results handler for query {0}",
+                        queryId);
+                log(Level.FINE, "Validating query results handler for query {0}",
+                        queryId);
+                resultsHandler.validate();
+                log(Level.FINE,
+                        "Query results handler validated successfully for query {0}",
+                        queryId);
+
+                addAllPropIds(getResultsHandler().getPropositionIdsNeeded());
+
+                if (isLoggable(Level.FINE)) {
+                    log(Level.FINE,
+                            "Propositions to be queried for query {0} are: {1}",
+                            new Object[]{queryId, StringUtils.join(getPropIds(), ", ")});
+                }
+
+                resultsHandler.start();
+
+                super.execute();
+
+                resultsHandler.finish();
+            } catch (FinderException fe) {
+                throw fe;
+            } catch (ProtempaException e) {
+                String msg = "Query " + queryId + " did not complete";
+                throw new FinderException(msg, e);
+            }
+        }
+
+        final void processResults(Iterator<Proposition> propositions,
+                DerivationsBuilder derivationsBuilder, String keyId)
+                throws FinderException {
+            if (derivationsBuilder == null) {
+                derivationsBuilder = getDerivationsBuilder();
+            }
+            Map<Proposition, List<Proposition>> forwardDerivations =
+                    derivationsBuilder.toForwardDerivations();
+            Map<Proposition, List<Proposition>> backwardDerivations =
+                    derivationsBuilder.toBackwardDerivations();
+            Set<String> propositionIds = getPropIds();
+            QuerySession qs = getQuerySession();
+            if (qs.isCachingEnabled()) {
+                List<Proposition> props = Iterators.asList(propositions);
+                addToCache(qs, Collections.unmodifiableList(props),
+                        Collections.unmodifiableMap(forwardDerivations),
+                        Collections.unmodifiableMap(backwardDerivations));
+                propositions = props.iterator();
+            }
+
+            Map<UniqueId, Proposition> refs =
+                    new HashMap<UniqueId, Proposition>();
+            if (isLoggable(Level.FINER)) {
+                log(Level.FINER, "References for query {0}: {1}",
+                        new Object[]{getQuery().getId(), refs});
+            }
+            List<Proposition> filteredPropositions = // a newly created list
+                    extractRequestedPropositions(propositions,
+                    propositionIds, refs);
+            if (isLoggable(Level.FINER)) {
+                String queryId = getQuery().getId();
+                log(Level.FINER, "Proposition ids for query {0}: {1}",
+                        new Object[]{queryId, propositionIds});
+                log(Level.FINER, "Filtered propositions for query {0}: {1}",
+                        new Object[]{queryId, filteredPropositions});
+                log(Level.FINER, "Forward derivations for query {0}: {1}",
+                        new Object[]{queryId, forwardDerivations});
+                log(Level.FINER, "Backward derivations for query {0}: {1}",
+                        new Object[]{queryId, backwardDerivations});
+            }
+            try {
+                this.resultsHandler.handleQueryResult(keyId,
+                        filteredPropositions,
+                        forwardDerivations, backwardDerivations, refs);
+            } catch (QueryResultsHandlerProcessingException ex) {
+                throw new FinderException(
+                        "Could not process results for query "
+                        + getQuery().getId(),
+                        ex);
+            }
+        }
+
+        final void processResults(
+                Iterator<Proposition> propositions,
+                String keyId) throws FinderException {
+            processResults(propositions, null, keyId);
+        }
+    }
+
+    void doFind(Query query, QueryResultsHandler resultsHandler,
+            QuerySession qs)
             throws FinderException {
         assert resultsHandler != null : "resultsHandler cannot be null";
-        if (this.closed) {
-            throw new FinderException("Protempa already closed!");
-        }
 
-        KnowledgeSource ks;
-        if (propDefs != null && propDefs.length > 0) {
-            ks = new KnowledgeSourceImplWrapper(
-                    this.knowledgeSource, propDefs);
+        ExecutorStrategy strategy;
+        if (workingMemoryCache != null) {
+            strategy = ExecutorStrategy.STATEFUL;
         } else {
-            ks = this.knowledgeSource;
+            strategy = ExecutorStrategy.STATELESS;
         }
+        new ExecutorWithResultsHandler(query, resultsHandler, qs, strategy) {
+            @Override
+            protected void doExecute(Set<String> keyIds,
+                    final DerivationsBuilder derivationsBuilder,
+                    final ExecutionStrategy strategy)
+                    throws ProtempaException {
+                // List<String> termPropIds =
+                // getPropIdsFromTerms(explodeTerms(termIds));
+                // List<String> allPropIds = new ArrayList<String>();
+                // allPropIds.addAll(propIds);
+                // allPropIds.addAll(termPropIds);
 
-        try {
-            resultsHandler.init(ks);
-            // List<String> termPropIds =
-            // getPropIdsFromTerms(explodeTerms(termIds));
-            // List<String> allPropIds = new ArrayList<String>();
-            // allPropIds.addAll(propIds);
-            // allPropIds.addAll(termPropIds);
-            Logger logger = ProtempaUtil.logger();
-            logger.log(Level.FINE, "Validating query results handler...");
-            resultsHandler.validate();
-            logger.log(Level.FINE,
-                    "Query results handler validated successfully");
-
-            propIds = new HashSet<String>(propIds);
-            org.arp.javautil.arrays.Arrays.addAll(propIds,
-                    resultsHandler.getPropositionIdsNeeded());
-
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "Propositions to be queried are {0}",
-                        StringUtils.join(propIds, ", "));
+                new DataStreamingEventProcessor(newDataIterator()) {
+                    @Override
+                    void doProcess(DataStreamingEvent next,
+                            Set<String> propositionIds)
+                            throws FinderException {
+                        String keyId = next.getKeyId();
+                        Iterator<Proposition> resultsItr = strategy.execute(
+                                keyId, propositionIds, next.getData(),
+                                null);
+                        processResults(resultsItr, keyId);
+                    }
+                }.process();
             }
-
-            if (workingMemoryCache != null) {
-                doFindExecute(keyIds, propIds, filters, resultsHandler,
-                        propDefs, qs, new StatefulExecutionStrategy(
-                        ks, this.algorithmSource));
-            } else {
-                doFindExecute(keyIds, propIds, filters, resultsHandler,
-                        propDefs, qs, new StatelessExecutionStrategy(this,
-                        ks, this.algorithmSource));
-            }
-            resultsHandler.finish();
-        } catch (ProtempaException e) {
-            String msg = "Query did not complete";
-            throw new FinderException(msg, e);
-        }
+        }.execute();
     }
 
     Query buildQuery(QueryBuilder queryBuilder) throws QueryBuildException {
@@ -245,10 +645,12 @@ final class AbstractionFinder implements Module {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations) {
         qs.addPropositionsToCache(propositions);
-        for (Map.Entry<Proposition, List<Proposition>> me : forwardDerivations.entrySet()) {
+        for (Map.Entry<Proposition, List<Proposition>> me :
+                forwardDerivations.entrySet()) {
             qs.addDerivationsToCache(me.getKey(), me.getValue());
         }
-        for (Map.Entry<Proposition, List<Proposition>> me : backwardDerivations.entrySet()) {
+        for (Map.Entry<Proposition, List<Proposition>> me :
+                backwardDerivations.entrySet()) {
             qs.addDerivationsToCache(me.getKey(), me.getValue());
         }
     }
@@ -305,397 +707,187 @@ final class AbstractionFinder implements Module {
                     itr.remove();
                 } catch (Exception e) {
                     ProtempaUtil.logger().log(Level.SEVERE,
-                            "Could not dispose stateful rule session.", e);
+                            "Could not dispose stateful rule session", e);
                 }
             }
         }
     }
 
-    void retrieveData(Set<String> keyIds, Set<String> propositionIds,
-            Set<And<String>> termIds, Filter filters, 
-            PropositionDefinition[] propDefs, QuerySession qs,
-            String persistentStoreEnvironment) throws FinderException {
-        final DataStore<String, List<Proposition>> store =
-                new PropositionStoreCreator(persistentStoreEnvironment).getPersistentStore();
-        int numWritten = 0;
-        try {
-            KnowledgeSource ks = null;
-            if (propDefs != null && propDefs.length > 0) {
-                ks = new KnowledgeSourceImplWrapper(this.knowledgeSource, 
-                        propDefs);
-            } else {
-                ks = this.knowledgeSource;
-            }
-            Set<String> leafPropIds =
-                    ks.inDataSourcePropositionIds(
-                    propositionIds.toArray(new String[propositionIds.size()]));
-            DataStreamingEventIterator<Proposition> itr =
-                    this.dataSource.readPropositions(keyIds,
-                    leafPropIds, filters, qs);
-            try {
-                for (; itr.hasNext();) {
-                    DataStreamingEvent<Proposition> next = itr.next();
-                    store.put(next.getKeyId(), next.getData());
-                    numWritten++;
-                }
-            } finally {
-                itr.close();
-            }
-            ProtempaUtil.logger().log(Level.INFO,
-                    "Wrote {0} records into store {1}",
-                    new Object[]{numWritten, persistentStoreEnvironment});
-        } catch (ProtempaException ex) {
-            throw new FinderException(ex);
-        } finally {
-            store.shutdown();
-        }
-    }
+    void retrieveAndStoreData(Query query, QuerySession qs,
+            final String persistentStoreEnvironment) throws FinderException {
+        assert query != null : "query cannot be null";
 
-    void processStoredResults(Set<String> keyIds, Set<String> propositionIds,
-            PropositionDefinition[] propDefs, QuerySession qs, 
-            String propositionStoreEnvironment,
-            String workingMemoryStoreEnvironment) throws FinderException {
-
-        Logger logger = ProtempaUtil.logger();
-
-        DataStore<String, List<Proposition>> propStore =
-                new PropositionStoreCreator(propositionStoreEnvironment).getPersistentStore();
-        DataStore<String, WorkingMemory> wmStore =
-                new WorkingMemoryStoreCreator(null, workingMemoryStoreEnvironment).getPersistentStore();
-        DataStore<String, DerivationsBuilder> dbStore = new DerivationsBuilderStoreCreator(workingMemoryStoreEnvironment).getPersistentStore();
-
-        logger.log(Level.INFO, "Found {0} records in store {1}", new Object[]{
-                    propStore.size(), propositionStoreEnvironment});
-        
-        KnowledgeSource ks = null;
-        if (propDefs != null && propDefs.length > 0) {
-            ks = new KnowledgeSourceImplWrapper(this.knowledgeSource, 
-                    propDefs);
-        } else {
-            ks = this.knowledgeSource;
-        }
-
-        try {
-            DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
-            StatefulExecutionStrategy strategy = 
-                    new StatefulExecutionStrategy(ks, this.algorithmSource);
-            strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
-            this.clearNeeded = true;
-            strategy.initialize();
-            int count = 0;
-            for (String keyId : keysToProcess(keyIds, propStore)) {
-                // the important part here is that the working memory produced
-                // by the rules engine is being persisted by
-                // StatefulExecutionStrategy.execute()
-                if (propStore.containsKey(keyId)) {
-                    strategy.execute(keyId, propositionIds,
-                            propStore.get(keyId), wmStore);
-                    dbStore.put(keyId, derivationsBuilder);
-                    derivationsBuilder.reset();
-                }
-                count++;
-                if (count % 100 == 0) {
-                    logNumProcessed(count, logger);
+        new Executor(query, qs) {
+            @Override
+            protected void doExecute(Set<String> keyIds,
+                    final DerivationsBuilder derivationsBuilder,
+                    final ExecutionStrategy executionStrategy)
+                    throws ProtempaException {
+                final DataStore<String, List<Proposition>> store =
+                        new PropositionStoreCreator(
+                        persistentStoreEnvironment).getPersistentStore();
+                try {
+                    DataStreamingEventProcessor processor =
+                            new DataStreamingEventProcessor(newDataIterator()) {
+                                @Override
+                                void doProcess(DataStreamingEvent next,
+                                        Set<String> propIds)
+                                        throws FinderException {
+                                    store.put(next.getKeyId(), next.getData());
+                                }
+                            };
+                    processor.process();
+                    if (isLoggable(Level.INFO)) {
+                        log(Level.INFO,
+                                "Wrote {0} records into store {1} for query {2}",
+                                new Object[]{processor.getCount(),
+                                    persistentStoreEnvironment,
+                                    getQuery().getId()});
+                    }
+                } finally {
+                    store.shutdown();
                 }
             }
-
-            strategy.cleanup();
-        } catch (ProtempaException ex) {
-            throw new FinderException(ex);
-        } finally {
-            propStore.shutdown();
-            wmStore.shutdown();
-            dbStore.shutdown();
-        }
+        }.execute();
     }
 
-    private void initializeStrategy(Logger logger, ExecutionStrategy strategy,
-            Set<String> propositionIds, PropositionDefinition[] propDefs,
-            DerivationsBuilder derivationsBuilder,
-            QuerySession qs) throws FinderException {
-        logger.log(Level.FINE, "Creating rule base");
-        strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
-        this.clearNeeded = true;
-        logger.log(Level.FINE, "Rule base is created");
-        strategy.initialize();
+    void processStoredResults(Query query, QuerySession qs,
+            final String propositionStoreEnvironment,
+            final String workingMemoryStoreEnvironment) throws FinderException {
+        assert query != null : "query cannot be null";
+
+        new Executor(query, qs, ExecutorStrategy.STATEFUL) {
+            @Override
+            protected void doExecute(Set<String> keyIds,
+                    final DerivationsBuilder derivationsBuilder,
+                    final ExecutionStrategy strategy)
+                    throws ProtempaException {
+                final DataStore<String, List<Proposition>> propStore =
+                        new PropositionStoreCreator(
+                        propositionStoreEnvironment).getPersistentStore();
+                if (isLoggable(Level.INFO)) {
+                    log(Level.INFO,
+                            "Found {0} records in store {1} for query {2}",
+                            new Object[]{
+                                propStore.size(),
+                                propositionStoreEnvironment,
+                                getQuery().getId()});
+                }
+                final DataStore<String, WorkingMemory> wmStore =
+                        new WorkingMemoryStoreCreator(null,
+                        workingMemoryStoreEnvironment).getPersistentStore();
+                final DataStore<String, DerivationsBuilder> dbStore =
+                        new DerivationsBuilderStoreCreator(
+                        workingMemoryStoreEnvironment).getPersistentStore();
+                try {
+                    new KeyIdProcessor(keysToProcess(keyIds, propStore)) {
+                        @Override
+                        void doProcess(String keyId, Set<String> propIds)
+                                throws FinderException {
+                            // the important part here is that the working memory produced
+                            // by the rules engine is being persisted by
+                            // StatefulExecutionStrategy.execute()
+                            if (propStore.containsKey(keyId)) {
+                                strategy.execute(keyId, propIds,
+                                        propStore.get(keyId), wmStore);
+                                dbStore.put(keyId, derivationsBuilder);
+                            }
+                        }
+                    }.process();
+                } finally {
+                    propStore.shutdown();
+                    wmStore.shutdown();
+                    dbStore.shutdown();
+                }
+            }
+        }.execute();
     }
 
-    private Set<String> keysToProcess(Set<String> keyIds,
-            DataStore<String, ?> propStore) {
-        Set<String> result;
-        if (keyIds != null && !keyIds.isEmpty()) {
-            result = keyIds;
-        } else {
-            result = propStore.keySet();
-        }
-        return result;
-    }
-
-    private void outputResult(QuerySession qs,
-            Iterator<Proposition> propositions,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
-            Set<String> propositionIds, QueryResultsHandler resultsHandler,
-            String keyId) throws FinderException {
-
-        Logger logger = ProtempaUtil.logger();
-        if (qs.isCachingEnabled()) {
-            List<Proposition> props = Iterators.asList(propositions);
-            addToCache(qs, Collections.unmodifiableList(props),
-                    Collections.unmodifiableMap(forwardDerivations),
-                    Collections.unmodifiableMap(backwardDerivations));
-            propositions = props.iterator();
-        }
-
-        logger.log(Level.FINEST, "Processing key ID: {0}", keyId);
-        Map<UniqueId, Proposition> refs = new HashMap<UniqueId, Proposition>();
-        List<Proposition> filteredPropositions = extractRequestedPropositions(
-                propositions, propositionIds, refs);
-        logger.log(Level.FINEST, "Filtered propositions: {0}",
-                filteredPropositions);
-        try {
-            resultsHandler.handleQueryResult(keyId, filteredPropositions,
-                    forwardDerivations, backwardDerivations, refs);
-        } catch (QueryResultsHandlerProcessingException ex) {
-            throw new FinderException("Could not output results", ex);
-        }
-    }
-
-    void outputStoredResults(Set<String> keyIds, Set<String> propositionIds,
-            PropositionDefinition[] propDefs, 
+    void outputStoredResults(Query query,
             QueryResultsHandler resultsHandler, QuerySession qs,
-            String workingMemoryStoreEnvironment) throws FinderException {
-        Logger logger = ProtempaUtil.logger();
-        DataStore<String, WorkingMemory> wmStore = null;
-        DataStore<String, DerivationsBuilder> dbStore =
-                new DerivationsBuilderStoreCreator(workingMemoryStoreEnvironment).getPersistentStore();
-        
-        KnowledgeSource ks = null;
-        if (propDefs != null && propDefs.length > 0) {
-            ks = new KnowledgeSourceImplWrapper(this.knowledgeSource, 
-                    propDefs);
-        } else {
-            ks = this.knowledgeSource;
-        }
+            final String workingMemoryStoreEnvironment) throws FinderException {
+        assert query != null : "query cannot be null";
 
-        try {
-            propositionIds = new HashSet<String>(propositionIds);
-            String[] propositionIdsNeeded;
-            propositionIdsNeeded = resultsHandler.getPropositionIdsNeeded();
-            org.arp.javautil.arrays.Arrays.addAll(propositionIds,
-                    propositionIdsNeeded);
+        new ExecutorWithResultsHandler(query, resultsHandler, qs,
+                ExecutorStrategy.STATEFUL) {
+            @Override
+            protected void doExecute(Set<String> keyIds,
+                    final DerivationsBuilder ignored,
+                    final ExecutionStrategy strategy)
+                    throws ProtempaException {
+                final DataStore<String, DerivationsBuilder> dbStore =
+                        new DerivationsBuilderStoreCreator(
+                        workingMemoryStoreEnvironment).getPersistentStore();
+                DataStore<String, WorkingMemory> wmStore = null;
+                try {
+                    wmStore = new WorkingMemoryStoreCreator(
+                            strategy.getRuleBase(),
+                            workingMemoryStoreEnvironment)
+                            .getPersistentStore();
 
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "Propositions to be queried are {0}",
-                        StringUtils.join(propositionIds, ", "));
-            }
+                    final DataStore<String, WorkingMemory> fwmStore = wmStore;
 
-            StatefulExecutionStrategy strategy = 
-                    new StatefulExecutionStrategy(ks, this.algorithmSource);
-            strategy.createRuleBase(propositionIds, new DerivationsBuilder(),
-                    qs);
-            this.clearNeeded = true;
-            wmStore = new WorkingMemoryStoreCreator(strategy.ruleBase, workingMemoryStoreEnvironment).getPersistentStore();
+                    new KeyIdProcessor(keysToProcess(keyIds, wmStore)) {
+                        @Override
+                        void doProcess(String keyId, Set<String> propIds)
+                                throws FinderException {
+                            if (isLoggable(Level.FINEST)) {
+                                log(Level.FINEST,
+                                        "Determining output for key {0} for query {1}",
+                                        new Object[]{keyId, getQuery().getId()});
+                            }
+                            if (fwmStore.containsKey(keyId)) {
+                                WorkingMemory wm = fwmStore.get(keyId);
+                                DerivationsBuilder derivationsBuilder = dbStore.get(keyId);
 
-            resultsHandler.init(ks);
-
-            logger.log(Level.FINE, "Validating query results handler...");
-            resultsHandler.validate();
-            logger.log(Level.FINE,
-                    "Query results handler validated successfully");
-
-            logger.log(Level.INFO, "Found {0} elements in the store",
-                    wmStore.size());
-
-            resultsHandler.start();
-
-            for (String keyId : keysToProcess(keyIds, wmStore)) {
-                logger.log(Level.FINEST, "Determining output for key {0}",
-                        keyId);
-                if (wmStore.containsKey(keyId)) {
-                    WorkingMemory wm = wmStore.get(keyId);
-                    DerivationsBuilder derivationsBuilder = dbStore.get(keyId);
-
-                    @SuppressWarnings("unchecked")
-                    Iterator<Proposition> propositions = wm.iterateObjects();
-                    outputResult(qs, propositions,
-                            derivationsBuilder.toForwardDerivations(),
-                            derivationsBuilder.toBackwardDerivations(),
-                            propositionIds, resultsHandler, keyId);
+                                @SuppressWarnings("unchecked")
+                                Iterator<Proposition> propositions =
+                                        wm.iterateObjects();
+                                processResults(propositions,
+                                        derivationsBuilder, keyId);
+                            }
+                        }
+                    }.process();
+                } finally {
+                    dbStore.shutdown();
+                    wmStore.shutdown();
                 }
             }
-            resultsHandler.finish();
-
-        } catch (ProtempaException ex) {
-            throw new FinderException("Could not output stored results", ex);
-        } finally {
-            dbStore.shutdown();
-            wmStore.shutdown();
-        }
+        }.execute();
     }
 
-    void processAndOutputStoredResults(Set<String> keyIds,
-            Set<String> propositionIds, PropositionDefinition[] propDefs,
+    void processAndOutputStoredResults(Query query,
             QueryResultsHandler resultsHandler,
-            QuerySession qs, String propositionStoreEnvironment)
+            QuerySession qs, final String propositionStoreEnvironment)
             throws FinderException {
-
-        Logger logger = ProtempaUtil.logger();
-        DataStore<String, List<Proposition>> propStore =
-                new PropositionStoreCreator(propositionStoreEnvironment).getPersistentStore();
-        
-        KnowledgeSource ks = null;
-        if (propDefs != null && propDefs.length > 0) {
-            ks = new KnowledgeSourceImplWrapper(this.knowledgeSource, 
-                    propDefs);
-        } else {
-            ks = this.knowledgeSource;
-        }
-        try {
-            DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
-            StatelessExecutionStrategy strategy = 
-                    new StatelessExecutionStrategy(this, ks, 
-                    this.algorithmSource);
-            logger.log(Level.FINEST, "Initializing rule base");
-            strategy.createRuleBase(propositionIds, derivationsBuilder, qs);
-            this.clearNeeded = true;
-            strategy.initialize();
-            logger.log(Level.FINEST, "Rule base initialized");
-
-            resultsHandler.init(ks);
-
-            logger.log(Level.FINEST, "Results handler initialized");
-
-            logger.log(Level.FINE, "Validating query results handler...");
-            resultsHandler.validate();
-            logger.log(Level.FINE,
-                    "Query results handler validated successfully");
-
-            propositionIds = new HashSet<String>(propositionIds);
-            org.arp.javautil.arrays.Arrays.addAll(propositionIds,
-                    resultsHandler.getPropositionIdsNeeded());
-
-            if (logger.isLoggable(Level.FINE)) {
-                logger.log(Level.FINE, "Propositions to be queried are {0}",
-                        StringUtils.join(propositionIds, ", "));
-            }
-
-            resultsHandler.start();
-
-            for (String keyId : keysToProcess(keyIds, propStore)) {
-                if (propStore.containsKey(keyId)) {
-                    Iterator<Proposition> propositions = strategy.execute(
-                            keyId, propositionIds, propStore.get(keyId), null);
-                    outputResult(qs, propositions,
-                            derivationsBuilder.toForwardDerivations(),
-                            derivationsBuilder.toBackwardDerivations(),
-                            propositionIds, resultsHandler, keyId);
-                    derivationsBuilder.reset();
+        new ExecutorWithResultsHandler(query, resultsHandler, qs,
+                ExecutorStrategy.STATELESS) {
+            @Override
+            protected void doExecute(Set<String> keyIds,
+                    final DerivationsBuilder derivationsBuilder,
+                    final ExecutionStrategy strategy)
+                    throws ProtempaException {
+                final DataStore<String, List<Proposition>> propStore =
+                        new PropositionStoreCreator(
+                        propositionStoreEnvironment).getPersistentStore();
+                try {
+                    new KeyIdProcessor(keysToProcess(keyIds, propStore)) {
+                        @Override
+                        void doProcess(String keyId, Set<String> propIds)
+                                throws FinderException {
+                            if (propStore.containsKey(keyId)) {
+                                Iterator<Proposition> propositions =
+                                        strategy.execute(keyId, propIds,
+                                        propStore.get(keyId), null);
+                                processResults(propositions, keyId);
+                                derivationsBuilder.reset();
+                            }
+                        }
+                    }.process();
+                } finally {
+                    propStore.shutdown();
                 }
             }
-
-            resultsHandler.finish();
-        } catch (ProtempaException ex) {
-            throw new FinderException("Could not output stored results",
-                    ex);
-        } finally {
-            propStore.shutdown();
-        }
-    }
-
-    private void doFindExecute(Set<String> keyIds, Set<String> propositionIds,
-            Filter filters, QueryResultsHandler resultsHandler,
-            PropositionDefinition[] propDefs, QuerySession qs,
-            ExecutionStrategy strategy) throws ProtempaException {
-        Logger logger = ProtempaUtil.logger();
-        DerivationsBuilder derivationsBuilder = new DerivationsBuilder();
-        logger.info("Retrieving data");
-        initializeStrategy(logger, strategy, propositionIds, propDefs,
-                derivationsBuilder, qs);
-        Set<String> inDataSourcePropIds =
-                this.knowledgeSource.inDataSourcePropositionIds(
-                propositionIds.toArray(new String[propositionIds.size()]));
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Asking data source for {0}",
-                    StringUtils.join(inDataSourcePropIds, ", "));
-        }
-        DataStreamingEventIterator<Proposition> itr =
-                this.dataSource.readPropositions(keyIds,
-                inDataSourcePropIds, filters, qs);
-        try {
-            resultsHandler.start();
-            int numWritten = 0;
-            for (; itr.hasNext();) {
-                DataStreamingEvent<Proposition> next = itr.next();
-                String keyId = next.getKeyId();
-                Iterator<Proposition> resultsItr = strategy.execute(
-                        keyId, propositionIds, next.getData(),
-                        null);
-                processResults(qs, resultsItr,
-                        derivationsBuilder.toForwardDerivations(),
-                        derivationsBuilder.toBackwardDerivations(),
-                        propositionIds, resultsHandler, keyId);
-                derivationsBuilder.reset();
-                if (++numWritten % 1000 == 0) {
-                    logNumProcessed(numWritten, ProtempaUtil.logger());
-                }
-            }
-        } finally {
-            itr.close();
-        }
-
-        logger.info("Processing data is complete");
-    }
-
-    private void logNumProcessed(int numProcessed, Logger logger)
-            throws DataSourceReadException {
-        if (logger.isLoggable(Level.FINE)) {
-            String keyTypeSingDisplayName =
-                    this.dataSource.getKeyTypeDisplayName();
-            String keyTypePluralDisplayName =
-                    this.dataSource.getKeyTypePluralDisplayName();
-            Logging.logCount(logger, Level.FINE, numProcessed,
-                    "Processed {0} {1}", "Processed {0} {1}",
-                    new Object[]{keyTypeSingDisplayName},
-                    new Object[]{keyTypePluralDisplayName});
-        }
-    }
-
-    private void processResults(QuerySession qs,
-            Iterator<Proposition> propositions,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
-            Set<String> propositionIds, QueryResultsHandler resultHandler,
-            String keyId) throws FinderException {
-        Logger logger = ProtempaUtil.logger();
-
-        if (qs.isCachingEnabled()) {
-            List<Proposition> props = Iterators.asList(propositions);
-            addToCache(qs, Collections.unmodifiableList(props),
-                    Collections.unmodifiableMap(forwardDerivations),
-                    Collections.unmodifiableMap(backwardDerivations));
-            propositions = props.iterator();
-        }
-
-        Map<UniqueId, Proposition> refs = new HashMap<UniqueId, Proposition>();
-        logger.log(Level.FINER, "References: {0}", refs);
-        List<Proposition> filteredPropositions = // a newly created list
-                extractRequestedPropositions(propositions, propositionIds, refs);
-        if (logger.isLoggable(Level.FINER)) {
-            logger.log(Level.FINER, "Proposition ids: {0}", propositionIds);
-            logger.log(Level.FINER, "Filtered propositions: {0}",
-                    filteredPropositions);
-            logger.log(Level.FINER, "Forward derivations: {0}",
-                    forwardDerivations);
-            logger.log(Level.FINER, "Backward derivations: {0}",
-                    backwardDerivations);
-        }
-        try {
-            resultHandler.handleQueryResult(keyId, filteredPropositions,
-                    forwardDerivations, backwardDerivations, refs);
-        } catch (QueryResultsHandlerProcessingException ex) {
-            throw new FinderException("Could not process results",
-                    ex);
-        }
+        }.execute();
     }
 }

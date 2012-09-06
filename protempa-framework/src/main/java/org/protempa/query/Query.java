@@ -21,6 +21,7 @@ package org.protempa.query;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.protempa.PropositionDefinition;
@@ -45,10 +46,10 @@ public class Query implements Serializable {
     private final String[] propIds;
     private final And<String>[] termIds;
     private final PropositionDefinition[] propDefs;
-
+    private String id;
+    
     /**
-     * Creates new Query instance. This constructor is non-public at the request
-     * of Andrew, so that only query builders will construct Query objects.
+     * Creates new Query instance with a default identifier.
      *
      * @param keyIds An array of key IDs. If this is null then the query will
      * include all keyIDs.
@@ -57,8 +58,24 @@ public class Query implements Serializable {
      * @param propIds The proposition IDs that the query will try to derive.
      * @param termIds
      */
-    @SuppressWarnings("unchecked")
     public Query(String[] keyIds, Filter filters, String[] propIds,
+            And<String>[] termIds, PropositionDefinition[] propDefs) {
+        this(null, keyIds, filters, propIds, termIds, propDefs);
+    }
+
+    /**
+     * Creates new Query instance.
+     *
+     * @param id An identifier for this query. If <code>null</code>, a default 
+     * identifier is assigned.
+     * @param keyIds An array of key IDs. If this is null then the query will
+     * include all keyIDs.
+     * @param filters A chain of filters. The first filter's getAnd method
+     * returns the second filter in the chain or null.
+     * @param propIds The proposition IDs that the query will try to derive.
+     * @param termIds
+     */
+    public Query(String id, String[] keyIds, Filter filters, String[] propIds,
             And<String>[] termIds, PropositionDefinition[] propDefs) {
         if (keyIds == null) {
             keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
@@ -84,6 +101,10 @@ public class Query implements Serializable {
         ProtempaUtil.internAll(this.propIds);
         this.termIds = termIds.clone();
         this.propDefs = propDefs.clone();
+        if (id == null) {
+            id = UUID.randomUUID().toString();
+        }
+        this.id = id;
     }
 
     /**
@@ -139,6 +160,15 @@ public class Query implements Serializable {
      */
     public final PropositionDefinition[] getPropositionDefinitions() {
         return this.propDefs.clone();
+    }
+    
+    /**
+     * Returns this query's identifier. Guaranteed not <code>null</code>.
+     * 
+     * @return an identifier {@link String}. 
+     */
+    public final String getId() {
+        return id;
     }
 
     /**

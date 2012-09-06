@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.arp.javautil.arrays.Arrays;
 
 import org.arp.javautil.datastore.DataStore;
 import org.drools.WorkingMemory;
@@ -79,7 +80,7 @@ public final class AbstractionFinderTestHelper {
      *             if a general problem occurs within Protempa
      */
     public DataStore<String, WorkingMemory> processStoredResults(Protempa p,
-            Query query, Set<String> keyIds, Set<String> propositionIds, 
+            Query query,
             QuerySession qs,
             String propositionStorePathname) throws FinderException,
             KnowledgeSourceReadException, ProtempaException {
@@ -94,11 +95,11 @@ public final class AbstractionFinderTestHelper {
         AbstractionFinder af = new AbstractionFinder(p.getDataSource(),
                 p.getKnowledgeSource(), p.getAlgorithmSource(),
                 p.getTermSource(), true);
-        af.processStoredResults(keyIds, propositionIds, 
-                query.getPropositionDefinitions(), qs,
+        af.processStoredResults(query, qs,
                 propositionStorePathname, this.wmStorePathname);
         StatefulExecutionStrategy strategy = new StatefulExecutionStrategy(
                 ks, af.getAlgorithmSource());
+        Set<String> propositionIds = Arrays.asSet(query.getPropositionIds());
         strategy.createRuleBase(propositionIds, new DerivationsBuilder(), qs);
 
         // The derivations builder store needs to be acquired here instead of in

@@ -45,6 +45,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     @SuppressWarnings("unchecked")
     private And<String>[] termIds;
     private PropositionDefinition[] propDefs;
+    private String id;
     private final PropertyChangeSupport changes;
     // Flag to control validation of proposition IDs. Should only be turned off
     // for testing.
@@ -56,6 +57,14 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         this.keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
         this.termIds = new And[0];
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     /**
@@ -270,8 +279,8 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
                 }
             }
         }
-        return new Query(this.keyIds, this.filters, this.propIds, this.termIds,
-                this.propDefs);
+        return new Query(this.id, this.keyIds, this.filters, this.propIds, 
+                this.termIds, this.propDefs);
     }
 
     /**

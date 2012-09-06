@@ -29,6 +29,7 @@ import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.query.Query;
 
 /**
  * Implements de-identification. Only replaces key ids so far.
@@ -91,8 +92,9 @@ public final class DeidentifyQueryResultsHandler
     }
 
     @Override
-    public void init(KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
-        this.handler.init(knowledgeSource);
+    public void init(KnowledgeSource knowledgeSource, Query query) 
+            throws QueryResultsHandlerInitException {
+        this.handler.init(knowledgeSource, query);
         this.nextDisguisedKey = 1;
     }
 
