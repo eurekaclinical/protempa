@@ -4661,5 +4661,5 @@ ICD9:99.96	ICD9:99.96
 ICD9:99.97	ICD9:99.97
 ICD9:99.98	ICD9:99.98
 ICD9:99.99	ICD9:99.99
-ICD9:DescriptionMissing	ICD9:DescriptionMissing
-ICD9:NotRecorded	ICD9:NotRecorded
+ICD9P:DescriptionMissing	ICD9:DescriptionMissing
+ICD9P:NotRecorded	ICD9:NotRecorded
