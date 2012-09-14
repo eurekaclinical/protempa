@@ -60,10 +60,14 @@ class TopologicalSortComparator implements Comparator<AbstractionDefinition>, Se
         HashMap<String, List<String>> nodes = 
                 new HashMap<String, List<String>>(
                 abstractionDefinitions.size() * 4 / 3 + 1);
+        Set<String> abstractionDefPropIds = new HashSet<String>();
+        for (AbstractionDefinition apd : abstractionDefinitions) {
+            abstractionDefPropIds.add(apd.getId());
+        }
         for (AbstractionDefinition apd : abstractionDefinitions) {
             List<String> ads = new ArrayList<String>();
             for (String id : apd.getAbstractedFrom()) {
-                if (knowledgeSource.hasAbstractionDefinition(id)) {
+                if (abstractionDefPropIds.contains(id)) {
                     ads.add(id);
                 }
             }

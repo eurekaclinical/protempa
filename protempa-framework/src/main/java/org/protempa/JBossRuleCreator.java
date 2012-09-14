@@ -74,6 +74,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     private static final ClassObjectType PROP_OT = new ClassObjectType(
             Proposition.class);
     private static final SalienceInteger ONE_SALIENCE = new SalienceInteger(1);
+    private static final SalienceInteger ZERO_SALIENCE = 
+            new SalienceInteger(0);
     private static final SalienceInteger MINUS_TWO_SALIENCE =
             new SalienceInteger(-2);
     private final Map<LowLevelAbstractionDefinition, Algorithm> algorithms;
@@ -247,10 +249,10 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                         this.derivationsBuilder));
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
+                AbstractionCombiner.toRules(def, rules,
+                        this.derivationsBuilder);
             }
             addInverseIsARule(def);
-            AbstractionCombiner.toRules(def, rules,
-                        this.derivationsBuilder);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -353,10 +355,10 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                     assert rhProp != null : "rhProp should not be null in "
                             + def.getId();
                 }
+                AbstractionCombiner.toRules(def, rules,
+                    this.derivationsBuilder);
             }
             addInverseIsARule(def);
-            AbstractionCombiner.toRules(def, rules,
-                    this.derivationsBuilder);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -471,7 +473,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             rule.addPattern(p);
             rule.setConsequence(new InverseIsAConsequence(
                     this.inverseIsAPropIdMap, this.derivationsBuilder));
-            rule.setSalience(ONE_SALIENCE);
+            rule.setSalience(ZERO_SALIENCE);
             this.inverseIsAIndex = rules.size();
             rules.add(rule);
         } else {
