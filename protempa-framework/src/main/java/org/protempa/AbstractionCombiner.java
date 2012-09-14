@@ -51,7 +51,7 @@ import org.protempa.proposition.UniqueId;
  * Represents rules that combine two abstract parameters with 1) the same
  * abstraction definition, 2) values, and 3) are within the minimum and maximum
  * gap defined in the abstraction definition.
- * 
+ *
  * @author Andrew Post
  */
 final class AbstractionCombiner {
@@ -80,13 +80,13 @@ final class AbstractionCombiner {
                     .get(0));
             AbstractParameter a2 = (AbstractParameter) arg2.getObject(arg0
                     .get(1));
-            
+
             return a1 != a2
                     && (a1.getValue() == a2.getValue() || (a1.getValue() != null && a1
-                            .getValue().equals(a2.getValue())))
+                    .getValue().equals(a2.getValue())))
                     && (a1.getInterval().compareTo(a2.getInterval()) <= 0)
                     && (hti.execute(this.abstractionDefinition, a1, a2) || abstractionDefinition
-                            .getGapFunction().execute(a1, a2));
+                    .getGapFunction().execute(a1, a2));
         }
 
         @Override
@@ -98,7 +98,6 @@ final class AbstractionCombiner {
     private static class AbstractionCombinerConsequence implements Consequence {
 
         private static final long serialVersionUID = -7984448674528718012L;
-
         private final DerivationsBuilder derivationsBuilder;
 
         public AbstractionCombinerConsequence(
@@ -124,7 +123,7 @@ final class AbstractionCombiner {
 
             AbstractParameter result = new AbstractParameter(a1Id,
                     new UniqueId(DerivedSourceId.getInstance(),
-                            new DerivedUniqueId(UUID.randomUUID().toString())));
+                    new DerivedUniqueId(UUID.randomUUID().toString())));
             result.setDataSourceType(DerivedDataSourceType.getInstance());
             result.setInterval(segment.getInterval());
             result.setValue(a1.getValue());
@@ -132,7 +131,7 @@ final class AbstractionCombiner {
             Logger logger = ProtempaUtil.logger();
             if (logger.isLoggable(Level.FINEST)) {
                 logger.log(Level.FINEST, "Created {0} from {1} and {2}",
-                        new Object[] { result, a1, a2 });
+                        new Object[]{result, a1, a2});
             }
 
             arg1.retract(a1f);
@@ -180,8 +179,8 @@ final class AbstractionCombiner {
             p1.addConstraint(c1);
             rule.addPattern(p0);
             rule.addPattern(p1);
-            rule.addPattern(new EvalCondition(new AbstractionCombinerCondition(
-                    d), null));
+            rule.addPattern(new EvalCondition(
+                    new AbstractionCombinerCondition(d), null));
             rule.setConsequence(new AbstractionCombinerConsequence(
                     derivationsBuilder));
             rules.add(rule);
