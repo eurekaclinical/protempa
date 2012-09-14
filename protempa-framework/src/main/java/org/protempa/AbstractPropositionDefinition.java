@@ -336,10 +336,10 @@ public abstract class AbstractPropositionDefinition implements
         setDisplayName(null);
         setAbbreviatedDisplayName(null);
         setDescription(null);
-        setInverseIsA(null);
-        setTermIds(null);
-        setPropertyDefinitions(null);
-        setReferenceDefinitions(null);
+        setInverseIsA(ArrayUtils.EMPTY_STRING_ARRAY);
+        setTermIds(ArrayUtils.EMPTY_STRING_ARRAY);
+        setPropertyDefinitions(new PropertyDefinition[]{});
+        setReferenceDefinitions(new ReferenceDefinition[]{});
         setInDataSource(false);
     }
 
