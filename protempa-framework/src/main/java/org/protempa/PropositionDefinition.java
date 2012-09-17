@@ -82,10 +82,14 @@ public interface PropositionDefinition extends Serializable,
 
     /**
      * Returns whether intervals of this type are solid, i.e., never hold over
-     * properly overlapping intervals. By definition, low-level abstraction 
-     * intervals are solid.
+     * properly overlapping intervals. For example, a proposition representing
+     * a pregnancy is solid because it is not possible for two pregnancies to
+     * overlap in time. This field could be used for data and interval 
+     * validation. It alternatively could be used to merge overlapping
+     * propositions if there are multiple ways to infer a proposition. This
+     * field is settable for some types of propositions.
      *
-     * @return <code>true</code> or <code>false</code>.
+     * @return <code>true</code> if solid, <code>false</code> if not.
      */
     boolean isSolid();
 
