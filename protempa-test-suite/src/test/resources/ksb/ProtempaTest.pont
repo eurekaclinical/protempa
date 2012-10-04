@@ -1,4 +1,4 @@
-; Thu Sep 06 18:19:23 EDT 2012
+; Thu Sep 27 10:29:29 EDT 2012
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
@@ -125,6 +125,11 @@
 		(type SYMBOL)
 ;+		(allowed-parents Value)
 ;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(multislot referenceTo
+		(type INSTANCE)
+;+		(allowed-classes Proposition)
+		(cardinality 1 ?VARIABLE)
 		(create-accessor read-write))
 	(single-slot parameterValue
 		(type INSTANCE)
@@ -353,6 +358,10 @@
 		(type SYMBOL)
 		(allowed-values Start Finish)
 ;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot reference
+		(type INSTANCE)
+;+		(allowed-classes Reference)
 		(create-accessor read-write))
 	(single-slot lhs
 		(type INSTANCE)
@@ -609,6 +618,10 @@
 	(single-slot documentation
 		(type STRING)
 ;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot reference
+		(type INSTANCE)
+;+		(allowed-classes Reference)
 		(create-accessor read-write))
 	(single-slot concatenable
 		(type SYMBOL)
@@ -1188,4 +1201,21 @@
 	(single-slot value
 		(type STRING)
 ;+		(cardinality 1 1)
+		(create-accessor read-write)))
+
+(defclass Reference
+	(is-a USER)
+	(role concrete)
+	(multislot referenceTo
+		(type INSTANCE)
+;+		(allowed-classes Proposition)
+		(cardinality 1 ?VARIABLE)
+		(create-accessor read-write))
+	(single-slot documentation
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3ANAME
+		(type STRING)
+;+		(cardinality 0 1)
 		(create-accessor read-write)))

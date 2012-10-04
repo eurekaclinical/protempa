@@ -1,4 +1,4 @@
-; Thu Sep 06 18:19:24 EDT 2012
+; Thu Sep 27 10:29:31 EDT 2012
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
@@ -151,7 +151,8 @@
 		[AIW_ProjectKB_Class10148]
 		[AIW_ProjectKB_Class10150]
 		[AIW_ProjectKB_Class10154]
-		[AIW_ProjectKB_Class10085]))
+		[AIW_ProjectKB_Class10085]
+		[ProtempaTest_ProjectKB_Class10006]))
 
 ([AIW_ProjectKB_Class10119] of  Property_List
 
@@ -441,7 +442,8 @@
 		[AIW_ProjectKB_Class10193]
 		[AIW_ProjectKB_Class10195]
 		[AIW_ProjectKB_Class10197]
-		[AIW_ProjectKB_Class10089]))
+		[AIW_ProjectKB_Class10089]
+		[ProtempaTest_ProjectKB_Class20093]))
 
 ([AIW_ProjectKB_Class10160] of  Property_List
 
@@ -827,7 +829,8 @@
 		[AIW_ProjectKB_Class109]
 		[AIW_ProjectKB_Class10111]
 		[AIW_ProjectKB_Class10113]
-		[AIW_ProjectKB_Class81]))
+		[AIW_ProjectKB_Class81]
+		[ProtempaTest_ProjectKB_Class20017]))
 
 ([AIW_ProjectKB_Class86] of  Property_List
 
@@ -941,10 +944,10 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[ProtempaTest_ProjectKB_Class20177]
-		[ProtempaTest_ProjectKB_Class20178]
-		[ProtempaTest_ProjectKB_Class20179]
-		[ProtempaTest_ProjectKB_Class20180]))
+		[ProtempaTest_ProjectKB_Class20030]
+		[ProtempaTest_ProjectKB_Class20031]
+		[ProtempaTest_ProjectKB_Class20032]
+		[ProtempaTest_ProjectKB_Class20033]))
 
 ([CLSES_TAB] of  Widget
 
@@ -989,7 +992,7 @@
 	(is_hidden FALSE)
 	(widget_class_name "edu.stanford.smi.protege.widget.InstancesTab"))
 
-([KB_185179_Class2] of  Map
+([KB_398262_Class5] of  Map
 )
 
 ([KB_495177_Class0] of  String
@@ -1051,11 +1054,11 @@
 ([KB_495177_Class6] of  Map
 
 	(entries
-		[ProtempaTest_ProjectKB_Class20181]
-		[ProtempaTest_ProjectKB_Class20182]
-		[ProtempaTest_ProjectKB_Class20184]
-		[ProtempaTest_ProjectKB_Class20185])
-	(referenced_maps [ProtempaTest_ProjectKB_Class20183]))
+		[ProtempaTest_ProjectKB_Class20034]
+		[ProtempaTest_ProjectKB_Class20035]
+		[ProtempaTest_ProjectKB_Class20037]
+		[ProtempaTest_ProjectKB_Class20038])
+	(referenced_maps [ProtempaTest_ProjectKB_Class20036]))
 
 ([KB_495177_Class88] of  Property_List
 
@@ -1258,6 +1261,33 @@
 ([ProtempaTest_ProjectKB_Class10] of  Property_List
 )
 
+([ProtempaTest_ProjectKB_Class10006] of  Widget
+
+	(height 120)
+	(is_hidden FALSE)
+	(name "reference")
+	(property_list [ProtempaTest_ProjectKB_Class10007])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
+	(width 200)
+	(x 0)
+	(y 420))
+
+([ProtempaTest_ProjectKB_Class10007] of  Property_List
+
+	(properties
+		[ProtempaTest_ProjectKB_Class10008]
+		[ProtempaTest_ProjectKB_Class10009]))
+
+([ProtempaTest_ProjectKB_Class10008] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-View References to Value"))
+
+([ProtempaTest_ProjectKB_Class10009] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-Delete Instance"))
+
 ([ProtempaTest_ProjectKB_Class10081] of  Widget
 
 	(is_hidden TRUE)
@@ -1312,56 +1342,110 @@
 ([ProtempaTest_ProjectKB_Class20] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class20177] of  String
+([ProtempaTest_ProjectKB_Class20017] of  Widget
+
+	(height 120)
+	(is_hidden FALSE)
+	(name "reference")
+	(property_list [ProtempaTest_ProjectKB_Class20018])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
+	(width 200)
+	(x 0)
+	(y 360))
+
+([ProtempaTest_ProjectKB_Class20018] of  Property_List
+
+	(properties
+		[ProtempaTest_ProjectKB_Class20019]
+		[ProtempaTest_ProjectKB_Class20020]))
+
+([ProtempaTest_ProjectKB_Class20019] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-View References to Value"))
+
+([ProtempaTest_ProjectKB_Class20020] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-Delete Instance"))
+
+([ProtempaTest_ProjectKB_Class20030] of  String
 
 	(name ":INSTANCE-ANNOTATION")
 	(string_value "%3AANNOTATION-TEXT"))
 
-([ProtempaTest_ProjectKB_Class20178] of  String
+([ProtempaTest_ProjectKB_Class20031] of  String
 
 	(name ":PAL-CONSTRAINT")
 	(string_value "%3APAL-NAME"))
 
-([ProtempaTest_ProjectKB_Class20179] of  String
+([ProtempaTest_ProjectKB_Class20032] of  String
 
 	(name ":META-CLASS")
 	(string_value "%3ANAME"))
 
-([ProtempaTest_ProjectKB_Class20180] of  String
+([ProtempaTest_ProjectKB_Class20033] of  String
 
 	(name "ValueSetElement")
 	(string_value "elementOfValueSet"))
 
-([ProtempaTest_ProjectKB_Class20181] of  Map_Entry
+([ProtempaTest_ProjectKB_Class20034] of  Map_Entry
 
 	(key "add_name_on_instance_form")
 	(key_class "java.lang.String")
 	(value "false")
 	(value_class "java.lang.String"))
 
-([ProtempaTest_ProjectKB_Class20182] of  Map_Entry
+([ProtempaTest_ProjectKB_Class20035] of  Map_Entry
 
 	(key "change_tracking_active")
 	(key_class "java.lang.String")
 	(value "false")
 	(value_class "java.lang.String"))
 
-([ProtempaTest_ProjectKB_Class20183] of  Map
+([ProtempaTest_ProjectKB_Class20036] of  Map
 )
 
-([ProtempaTest_ProjectKB_Class20184] of  Map_Entry
+([ProtempaTest_ProjectKB_Class20037] of  Map_Entry
 
 	(key "InstanceDisplay.yellow_stickies")
 	(key_class "java.lang.String")
-	(value "ProtempaTest_ProjectKB_Class20183")
+	(value "ProtempaTest_ProjectKB_Class20036")
 	(value_class "java.util.Map"))
 
-([ProtempaTest_ProjectKB_Class20185] of  Map_Entry
+([ProtempaTest_ProjectKB_Class20038] of  Map_Entry
 
 	(key "suppress_instance_counting")
 	(key_class "java.lang.String")
 	(value "false")
 	(value_class "java.lang.String"))
+
+([ProtempaTest_ProjectKB_Class20093] of  Widget
+
+	(height 120)
+	(is_hidden FALSE)
+	(name "reference")
+	(property_list [ProtempaTest_ProjectKB_Class20094])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
+	(width 200)
+	(x 0)
+	(y 420))
+
+([ProtempaTest_ProjectKB_Class20094] of  Property_List
+
+	(properties
+		[ProtempaTest_ProjectKB_Class20095]
+		[ProtempaTest_ProjectKB_Class20096]))
+
+([ProtempaTest_ProjectKB_Class20095] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-View References to Value"))
+
+([ProtempaTest_ProjectKB_Class20096] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-Delete Instance"))
 
 ([ProtempaTest_ProjectKB_Class21] of  Widget
 
