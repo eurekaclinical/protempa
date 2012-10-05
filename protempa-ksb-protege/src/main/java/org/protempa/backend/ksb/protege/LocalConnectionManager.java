@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import edu.stanford.smi.protege.model.Project;
+import java.util.logging.Level;
 
 /**
  * Access to Protege knowledge bases in local files or at URIs.
@@ -57,17 +58,6 @@ final class LocalConnectionManager extends ConnectionManager {
     protected Project initProject() {
         Collection errors = new ArrayList();
         String projectFilePathOrURI = getProjectIdentifier();
-        Util.logger().fine("Trying to load Protege project "
-                + projectFilePathOrURI);
-        Project project = new Project(projectFilePathOrURI, errors);
-        if (errors.size() == 0) {
-            Util.logger().fine("Protege project "
-                    + projectFilePathOrURI + " is opened.");
-            return project;
-        } else {
-            throw new IllegalStateException(
-                    "Error(s) loading knowledge base "
-                    + projectFilePathOrURI + ": " + errors);
-        }
+        return new Project(projectFilePathOrURI, errors);
     }
 }

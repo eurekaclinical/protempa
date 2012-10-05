@@ -86,14 +86,17 @@ abstract class ConnectionManager {
      */
     void init() throws KnowledgeSourceBackendInitializationException {
         if (this.project == null) {
-            Util.logger().fine("Opening Protege project");
+            Util.logger().log(Level.FINE, "Opening Protege project {0}", 
+                    this.projectIdentifier);
             this.project = initProject();
             if (this.project == null) {
                 throw new KnowledgeSourceBackendInitializationException(
-                        "Could not load project");
+                        "Could not load project " + this.projectIdentifier);
             } else {
                 this.protegeKnowledgeBase = this.project.getKnowledgeBase();
-                Util.logger().fine("Project opened successfully");
+                Util.logger().log(Level.FINE, 
+                        "Project {0} opened successfully",
+                        this.projectIdentifier);
             }
         }
     }
@@ -111,9 +114,11 @@ abstract class ConnectionManager {
      */
     void close() {
         if (this.project != null) {
-            Util.logger().fine("Closing Protege project");
+            Util.logger().log(Level.FINE, "Closing Protege project {0}",
+                    this.projectIdentifier);
 
-            for (Iterator<ProjectListener> itr = this.projectListeners.iterator(); itr.hasNext();) {
+            for (Iterator<ProjectListener> itr = 
+                    this.projectListeners.iterator(); itr.hasNext();) {
                 this.project.removeProjectListener(itr.next());
                 itr.remove();
             }
