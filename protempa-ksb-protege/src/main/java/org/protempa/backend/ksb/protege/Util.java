@@ -392,7 +392,8 @@ class Util {
             Collection referenceTos = cm.getOwnSlotValues(inst, referenceToSlot);
             if (referenceTos == null || referenceTos.isEmpty()) {
                 throw new AssertionError("reference " + inst.getName() +
-                        " cannot have no references!");
+                        " from proposition " + propInstance.getName() + 
+                        " cannot have no referred-to proposition types!");
             }
             List<String> propIds = new ArrayList<String>(referenceTos.size());
             for (Object refToInst : referenceTos) {
