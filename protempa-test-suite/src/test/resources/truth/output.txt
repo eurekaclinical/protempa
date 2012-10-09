@@ -212,6 +212,9 @@ Temperature
 2
 Encounter
 No30DayReadmissionBefore
+MyAndLikePattern
+ICD9:35.83
+ICD9:V-codes
 No30DayReadmission
 No30DayReadmissionBefore
 Patient

@@ -40,6 +40,7 @@ import org.apache.commons.io.FileUtils;
 
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.datastore.DataStore;
+import org.arp.javautil.io.IOUtil;
 import org.arp.javautil.io.UniqueDirectoryCreator;
 import org.arp.javautil.io.WithBufferedReaderByLine;
 import org.drools.WorkingMemory;
@@ -121,7 +122,7 @@ public class ProtempaTest {
         "Encounter", ICD9_013_82, ICD9_804, "VitalSign",
         "HELLP_FIRST_RECOVERING_PLATELETS", "LDH_TREND", "AST_STATE",
         "30DayReadmission", "No30DayReadmission", "MyDiagnosis", "MyVitalSign",
-        "MyTemporalPattern"};
+        "MyTemporalPattern", "MyAndLikePattern"};
     /**
      * Vital signs
      */
@@ -191,8 +192,8 @@ public class ProtempaTest {
      * @throws Exception
      */
     @Before
-    public void setUp() throws DataProviderException, SQLException, 
-            ProtempaStartupException, BackendProviderSpecLoaderException, 
+    public void setUp() throws DataProviderException, SQLException,
+            ProtempaStartupException, BackendProviderSpecLoaderException,
             ConfigurationsLoadException, InvalidConfigurationException {
         logger.log(Level.INFO, "Populating database");
         this.dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
@@ -208,7 +209,7 @@ public class ProtempaTest {
         inserter.insertLabs(dataProvider.getLabs());
         inserter.insertVitals(dataProvider.getVitals());
         logger.log(Level.INFO, "Database populated");
-        
+
         initializeProtempa();
     }
 
@@ -246,7 +247,7 @@ public class ProtempaTest {
 
     @Test
     public void testProtempaWithoutPersistence() throws FinderException,
-            ParseException, KnowledgeSourceReadException, QueryBuildException, 
+            ParseException, KnowledgeSourceReadException, QueryBuildException,
             IOException {
         File outputFile = File.createTempFile("protempa-test", null);
         FileWriter fw = new FileWriter(outputFile);
@@ -286,8 +287,18 @@ public class ProtempaTest {
         Relation rel = new Relation();
         hd.setRelation(td1, td2, rel);
 
+        HighLevelAbstractionDefinition hd2 =
+                new HighLevelAbstractionDefinition("MyAndLikePattern");
+        hd.setDisplayName("My Or-like Pattern");
+        ExtendedPropositionDefinition epd1 =
+                new ExtendedPropositionDefinition("ICD9:V-codes");
+        ExtendedPropositionDefinition epd2 =
+                new ExtendedPropositionDefinition("ICD9:35.83");
+        hd2.add(epd1);
+        hd2.add(epd2);
+
         q.setPropositionDefinitions(
-                new PropositionDefinition[]{ed, pd, hd});
+                new PropositionDefinition[]{ed, pd, hd, hd2});
 
         DateFormat shortFormat = AbsoluteTimeGranularity.DAY.getShortFormat();
         DateTimeFilter timeRange = new DateTimeFilter(
@@ -398,7 +409,6 @@ public class ProtempaTest {
             for (String keyId : results.keySet()) {
                 int derivCount = 0;
                 for (List<Proposition> derivs : afh.getForwardDerivations(keyId).values()) {
-                    System.err.println("Key id " + keyId + ": " + derivs);
                     derivCount += derivs.size();
                 }
                 assertEquals("wrong number of forward derivations for key "
@@ -418,6 +428,7 @@ public class ProtempaTest {
                 assertFirstHellpRecoveringSliceDerived(results);
                 assertMyDiagnosisDerived(results);
                 assertMyLabTestDerived(results);
+                assertOrLikePatternDerived(results);
 
             }
         } catch (KnowledgeSourceReadException e) {
@@ -453,6 +464,7 @@ public class ProtempaTest {
             QueryResultsHandler handler = new SingleColumnQueryResultsHandler(
                     fw);
             protempa.outputResults(query(), handler, environmentName);
+            System.err.println("output: " + IOUtil.readFileAsString(outputFile));
             assertTrue("output doesn't match",
                     outputMatches(outputFile, TRUTH_OUTPUT));
         } catch (FinderException e) {
@@ -727,6 +739,27 @@ public class ProtempaTest {
             }
         }
         assertTrue("Proposition 'MyDiagnosis' not found", myDiagnosisDerived);
+    }
+
+    private void assertOrLikePatternDerived(
+            DataStore<String, WorkingMemory> derivedData) {
+        String[] ptIds = {"0", "1", "2", "8", "10"};
+        boolean[] result = {false, false, true, false, false};
+        for (int i = 0; i < ptIds.length; i++) {
+            String ptId = ptIds[i];
+            boolean orLikePatternDerived = false;
+            for (Iterator<Proposition> it = derivedData.get(ptId).iterateObjects();
+                    it.hasNext();) {
+                Proposition p = it.next();
+                if (p.getId().equals("MyAndLikePattern")) {
+                    orLikePatternDerived = true;
+                    break;
+                }
+            }
+            assertEquals("Proposition 'MyAndLikePattern' not found",
+                    result[i],
+                    orLikePatternDerived);
+        }
     }
 
     private void assertMyLabTestDerived(
