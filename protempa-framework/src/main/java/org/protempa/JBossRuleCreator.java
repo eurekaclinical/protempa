@@ -160,19 +160,19 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             PredicateExpression {
 
         private static final long serialVersionUID = -6225160728904051528L;
-        private TemporalExtendedPropositionDefinition tepd;
+        private ExtendedPropositionDefinition epd;
 
         private GetMatchesPredicateExpression(
-                TemporalExtendedPropositionDefinition tepd) {
-            assert tepd != null : "tepd cannot be null";
-            this.tepd = tepd;
+                ExtendedPropositionDefinition epd) {
+            assert epd != null : "tepd cannot be null";
+            this.epd = epd;
         }
 
         @Override
         public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
                 Declaration[] arg3, WorkingMemory arg4, Object context)
                 throws Exception {
-            return this.tepd.getMatches((Proposition) arg0);
+            return this.epd.getMatches((Proposition) arg0);
         }
 
         @Override
@@ -225,7 +225,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
-            Set<ExtendedPropositionDefinition> epdsC = def.getExtendedPropositionDefinitions();
+            Set<ExtendedPropositionDefinition> epdsC = 
+                    def.getExtendedPropositionDefinitions();
             /*
              * If there are no extended proposition definitions defined, we
              * might still have an inverseIsA relationship with another
@@ -234,8 +235,9 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             if (!epdsC.isEmpty()) {
                 Rule rule = new Rule(def.getId());
                 rule.setSalience(ONE_SALIENCE);
-                TemporalExtendedPropositionDefinition[] epds =
-                        epdsC.toArray(new TemporalExtendedPropositionDefinition[epdsC.size()]);
+                ExtendedPropositionDefinition[] epds =
+                        epdsC.toArray(
+                        new ExtendedPropositionDefinition[epdsC.size()]);
                 for (int i = 0; i < epds.length; i++) {
                     Pattern p = new Pattern(i, TEMP_PROP_OT);
                     Constraint c = new PredicateConstraint(

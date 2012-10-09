@@ -29,25 +29,26 @@ import org.drools.WorkingMemory;
 import org.drools.rule.Declaration;
 import org.drools.spi.EvalExpression;
 import org.drools.spi.Tuple;
+import org.protempa.proposition.Proposition;
 import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.TemporalProposition;
 
 /**
  * High level abstraction definition condition.
- * 
+ *
  * @author Andrew Post
  */
 class HighLevelAbstractionCondition implements EvalExpression {
 
     private static final long serialVersionUID = -4946151589366639279L;
     private final HighLevelAbstractionDefinition def;
-    private final TemporalExtendedPropositionDefinition[] epds;
+    private final ExtendedPropositionDefinition[] epds;
     private int parameterMapCapacity;
     private List<List<TemporalExtendedPropositionDefinition>> epdPairs;
     private Map<List<TemporalExtendedPropositionDefinition>, Relation> epdToRelation;
 
     HighLevelAbstractionCondition(HighLevelAbstractionDefinition def,
-            TemporalExtendedPropositionDefinition[] epds) {
+            ExtendedPropositionDefinition[] epds) {
         this.def = def;
         this.epds = epds;
         this.parameterMapCapacity = this.epds.length * 4 / 3 + 1;
@@ -59,7 +60,7 @@ class HighLevelAbstractionCondition implements EvalExpression {
             this.epdToRelation.put(pair, this.def.getRelation(pair));
         }
     }
-    
+
     @Override
     public boolean evaluate(Tuple arg0, Declaration[] arg1, WorkingMemory arg2,
             Object context) throws Exception {
@@ -68,26 +69,27 @@ class HighLevelAbstractionCondition implements EvalExpression {
          * For constructing a map of extended proposition definition to actual
          * temporal proposition.
          */
-        Map<TemporalExtendedPropositionDefinition, TemporalProposition>
-                propositionMap =
-                    new HashMap<TemporalExtendedPropositionDefinition,
-                    TemporalProposition>(this.parameterMapCapacity);
+        Map<TemporalExtendedPropositionDefinition, TemporalProposition> propositionMap =
+                new HashMap<TemporalExtendedPropositionDefinition, TemporalProposition>(this.parameterMapCapacity);
         /*
          * To check for duplicate inputs. We'll only have a few temporal
          * propositions, so using a set for tps probably would be slower.
          */
-        TemporalProposition[] tps = new TemporalProposition[this.epds.length];
+        Proposition[] tps = new Proposition[this.epds.length];
 
         /*
          * Populate the map and remove duplicates.
          */
         for (int i = 0; i < this.epds.length; i++) {
-            TemporalProposition tp =
-                    (TemporalProposition) arg2.getObject(arg0.get(i));
+            Proposition tp = (Proposition) arg2.getObject(arg0.get(i));
             if (Arrays.contains(tps, tp)) // remove duplicates
+            {
                 return false;
+            }
             tps[i] = tp;
-            propositionMap.put(epds[i], tp);
+            if (epds[i] instanceof TemporalExtendedPropositionDefinition) {
+                propositionMap.put((TemporalExtendedPropositionDefinition) epds[i], (TemporalProposition) tp);
+            }
         }
 
         /*
