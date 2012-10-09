@@ -75,20 +75,20 @@ class HighLevelAbstractionCondition implements EvalExpression {
          * To check for duplicate inputs. We'll only have a few temporal
          * propositions, so using a set for tps probably would be slower.
          */
-        Proposition[] tps = new Proposition[this.epds.length];
+        Proposition[] ps = new Proposition[this.epds.length];
 
         /*
          * Populate the map and remove duplicates.
          */
         for (int i = 0; i < this.epds.length; i++) {
-            Proposition tp = (Proposition) arg2.getObject(arg0.get(i));
-            if (Arrays.contains(tps, tp)) // remove duplicates
+            Proposition p = (Proposition) arg2.getObject(arg0.get(i));
+            if (Arrays.contains(ps, p)) // remove duplicates
             {
                 return false;
             }
-            tps[i] = tp;
+            ps[i] = p;
             if (epds[i] instanceof TemporalExtendedPropositionDefinition) {
-                propositionMap.put((TemporalExtendedPropositionDefinition) epds[i], (TemporalProposition) tp);
+                propositionMap.put((TemporalExtendedPropositionDefinition) epds[i], (TemporalProposition) p);
             }
         }
 
