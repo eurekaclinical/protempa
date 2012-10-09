@@ -48,20 +48,22 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
 
 /**
- * Translates PROTEMPA proposition definitions into Drools (formerly called 
+ * Translates PROTEMPA proposition definitions into Drools (formerly called
  * JBoss) rules.
- * 
- * A single instance of this class is created during execution of a PROTEMPA 
- * query by the {@link AbstractionFinder}. For proposition definitions that are 
- * relevant to a PROTEMPA query, the abstraction finder calls each 
- * proposition definition's {@link PropositionDefinition#accept(org.protempa.PropositionDefinitionVisitor) }
- * method with this instance. The abstraction finder then calls {@link #getRules()}
- * to retrieve the rules thus created. Turn on logging at the 
+ *
+ * A single instance of this class is created during execution of a PROTEMPA
+ * query by the {@link AbstractionFinder}. For proposition definitions that are
+ * relevant to a PROTEMPA query, the abstraction finder calls each proposition
+ * definition's {@link PropositionDefinition#accept(org.protempa.PropositionDefinitionVisitor)
+ * }
+ * method with this instance. The abstraction finder then calls
+ * {@link #getRules()} to retrieve the rules thus created. Turn on logging at
+ * the
  * <code>FINER</code> level to see what rules get created during PROTEMPA
  * execution.
- * 
+ *
  * @author Andrew Post
- * 
+ *
  */
 class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
@@ -74,7 +76,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     private static final ClassObjectType PROP_OT = new ClassObjectType(
             Proposition.class);
     private static final SalienceInteger ONE_SALIENCE = new SalienceInteger(1);
-    private static final SalienceInteger ZERO_SALIENCE = 
+    private static final SalienceInteger ZERO_SALIENCE =
             new SalienceInteger(0);
     private static final SalienceInteger MINUS_TWO_SALIENCE =
             new SalienceInteger(-2);
@@ -99,9 +101,9 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     /**
      * Gets a mapping from Drools rules to {@link AbstractionDefinition}s that
      * is created during the proposition definition translation process
-     * described above. Rules that correspond to other types of 
+     * described above. Rules that correspond to other types of
      * {@link PropositionDefinition}s are not stored in this mapping.
-     * 
+     *
      * @return the mapping as a {@link Map<Rule, AbstractionDefinition>}.
      */
     Map<Rule, AbstractionDefinition> getRuleToAbstractionDefinitionMap() {
@@ -110,8 +112,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     /**
      * Translates a low-level abstraction definition into rules.
-     * 
-     * @param def a {@link LowLevelAbstractionDefinition}. Cannot be 
+     *
+     * @param def a {@link LowLevelAbstractionDefinition}. Cannot be
      * <code>null</code>.
      * @throws KnowledgeSourceReadException if an error occurs accessing the
      * knowledge source during rule creation.
@@ -164,7 +166,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
         private GetMatchesPredicateExpression(
                 ExtendedPropositionDefinition epd) {
-            assert epd != null : "tepd cannot be null";
+            assert epd != null : "epd cannot be null";
             this.epd = epd;
         }
 
@@ -214,8 +216,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     /**
      * Translates a high-level abstraction definition into rules.
-     * 
-     * @param def a {@link HighLevelAbstractionDefinition}. Cannot be 
+     *
+     * @param def a {@link HighLevelAbstractionDefinition}. Cannot be
      * <code>null</code>.
      * @throws KnowledgeSourceReadException if an error occurs accessing the
      * knowledge source during rule creation.
@@ -225,8 +227,9 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
-            Set<ExtendedPropositionDefinition> epdsC = 
+            Set<ExtendedPropositionDefinition> epdsC =
                     def.getExtendedPropositionDefinitions();
+
             /*
              * If there are no extended proposition definitions defined, we
              * might still have an inverseIsA relationship with another
@@ -239,7 +242,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                         epdsC.toArray(
                         new ExtendedPropositionDefinition[epdsC.size()]);
                 for (int i = 0; i < epds.length; i++) {
-                    Pattern p = new Pattern(i, TEMP_PROP_OT);
+                    Pattern p = new Pattern(i, PROP_OT);
                     Constraint c = new PredicateConstraint(
                             new GetMatchesPredicateExpression(epds[i]));
                     p.addConstraint(c);
@@ -263,7 +266,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     /**
      * Translates a slice definition into rules.
-     * 
+     *
      * @param def a {@link SliceDefinition}. Cannot be <code>null</code>.
      * @throws KnowledgeSourceReadException if an error occurs accessing the
      * knowledge source during rule creation.
@@ -293,7 +296,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             resultP.addConstraint(new PredicateConstraint(
                     new CollectionSizeExpression(len)));
             rule.addPattern(resultP);
-            rule.setConsequence(new SliceConsequence(def, 
+            rule.setConsequence(new SliceConsequence(def,
                     this.derivationsBuilder));
             rule.setSalience(MINUS_TWO_SALIENCE);
             this.ruleToAbstractionDefinition.put(rule, def);
@@ -307,7 +310,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     /**
      * Translates a pair definition into rules.
-     * 
+     *
      * @param def a {@link PairDefinition}. Cannot be <code>null</code>.
      * @throws KnowledgeSourceReadException if an error occurs accessing the
      * knowledge source during rule creation.
@@ -358,7 +361,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                             + def.getId();
                 }
                 AbstractionCombiner.toRules(def, rules,
-                    this.derivationsBuilder);
+                        this.derivationsBuilder);
             }
             addInverseIsARule(def);
         } catch (InvalidRuleException e) {
@@ -369,7 +372,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     /**
      * Translates an event definition into rules.
-     * 
+     *
      * @param def an {@link EventDefinition}. Cannot be <code>null</code>.
      * @throws KnowledgeSourceReadException if an error occurs accessing the
      * knowledge source during rule creation.
@@ -388,7 +391,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     /**
      * Translates a constant definition into rules.
-     * 
+     *
      * @param def a {@link ConstantDefinition}. Cannot be <code>null</code>.
      * @throws KnowledgeSourceReadException if an error occurs accessing the
      * knowledge source during rule creation.
@@ -406,8 +409,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     /**
      * Translates a primitive parameter definition into rules.
-     * 
-     * @param def a {@link PrimitiveParameterDefinition}. Cannot be 
+     *
+     * @param def a {@link PrimitiveParameterDefinition}. Cannot be
      * <code>null</code>.
      * @throws KnowledgeSourceReadException if an error occurs accessing the
      * knowledge source during rule creation.
@@ -425,7 +428,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     /**
      * Returns a newly-created an array of rules that were generated.
-     * 
+     *
      * @return a {@link Rule[]}. Guaranteed not <code>null</code>.
      */
     Rule[] getRules() {
@@ -440,7 +443,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * Populates a map of isA relationships between proposition ids. When
      * {@link #getRules()} is called, this mapping is used to create a single
      * Drools rule for deriving such propositions.
-     * 
+     *
      * @param def a {@link PropositionDefinition}.
      */
     private void addInverseIsARule(PropositionDefinition def) {
