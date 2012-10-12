@@ -1,0 +1,12 @@
+[org.protempa.test.TestDataSourceBackend_0]
+dataSourceBackendId = Test
+databaseId = jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
+
+[org.protempa.backend.asb.java.JavaAlgorithmBackend_1]
+
+[org.protempa.backend.tsb.umls.UMLSTermSourceBackend_2]
+databaseAPI = DRIVERMANAGER
+
+[org.protempa.backend.ksb.protege.LocalKnowledgeSourceBackend_3]
+projectString = src/test/resources/ksb/ProtempaTest.pprj
+units = ABSOLUTE

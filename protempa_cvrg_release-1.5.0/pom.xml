@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.protempa</groupId>
+  <artifactId>protempa</artifactId>
+  <version>2.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Protempa</name>
+  <scm>
+    <connection>scm:svn:svn://scm.cci.emory.edu/svn/protempa/trunk</connection>
+    <url>https://scm.cci.emory.edu/svn/protempa/trunk</url>
+  </scm>
+
+  <modules>
+    <module>protempa-framework</module>
+    <module>protempa-bconfigs-commons-ini</module>
+    <module>protempa-bcp-serviceloader</module>
+    <module>protempa-bp-serviceloader</module>
+    <module>protempa-ksb-protege</module>
+    <module>protempa-tsb-umls</module>
+    <module>protempa-test-suite</module>
+    <module>protempa-dsb-relationaldb</module>
+  </modules>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>1.0</version>
+        <configuration>
+            <licenseName>apache_v2</licenseName>
+            <verbose>false</verbose>
+            <organizationName>Emory University</organizationName>
+            <inceptionYear>2012</inceptionYear>
+	    <canUpdateDescription>false</canUpdateDescription>
+            <roots>
+              <root>src/main</root>
+              <root>src/test/java/</root>
+            </roots>
+            <extraExtensions>
+              <!-- .xsd files are not supported by default -->
+              <!-- but should be commented in XML style -->
+              <xsd>xml</xsd>
+            </extraExtensions>
+        </configuration>
+        <executions>
+            <execution>
+                <id>first</id>
+                <goals>
+                    <goal>update-file-header</goal>
+                </goals>
+                <phase>process-sources</phase>
+            </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+            <finalName>protempa</finalName>
+            <descriptors>
+                <descriptor>assembly.xml</descriptor>
+            </descriptors>
+            <runOnlyAtExecutionRoot>true</runOnlyAtExecutionRoot>
+            <tarLongFileMode>gnu</tarLongFileMode>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+      <id>test-tier1</id>
+    </profile>
+    <profile>
+      <id>test-tier2</id>
+    </profile>
+  </profiles>
+</project>
