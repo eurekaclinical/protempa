@@ -1,4 +1,4 @@
-; Thu Sep 27 10:29:31 EDT 2012
+; Mon Oct 15 09:52:55 EDT 2012
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
@@ -944,10 +944,10 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[ProtempaTest_ProjectKB_Class20030]
-		[ProtempaTest_ProjectKB_Class20031]
-		[ProtempaTest_ProjectKB_Class20032]
-		[ProtempaTest_ProjectKB_Class20033]))
+		[ProtempaTest_ProjectKB_Class30035]
+		[ProtempaTest_ProjectKB_Class30036]
+		[ProtempaTest_ProjectKB_Class30037]
+		[ProtempaTest_ProjectKB_Class30038]))
 
 ([CLSES_TAB] of  Widget
 
@@ -992,7 +992,7 @@
 	(is_hidden FALSE)
 	(widget_class_name "edu.stanford.smi.protege.widget.InstancesTab"))
 
-([KB_398262_Class5] of  Map
+([KB_370200_Class5] of  Map
 )
 
 ([KB_495177_Class0] of  String
@@ -1054,11 +1054,11 @@
 ([KB_495177_Class6] of  Map
 
 	(entries
-		[ProtempaTest_ProjectKB_Class20034]
-		[ProtempaTest_ProjectKB_Class20035]
-		[ProtempaTest_ProjectKB_Class20037]
-		[ProtempaTest_ProjectKB_Class20038])
-	(referenced_maps [ProtempaTest_ProjectKB_Class20036]))
+		[ProtempaTest_ProjectKB_Class30039]
+		[ProtempaTest_ProjectKB_Class30040]
+		[ProtempaTest_ProjectKB_Class30042]
+		[ProtempaTest_ProjectKB_Class30043])
+	(referenced_maps [ProtempaTest_ProjectKB_Class30041]))
 
 ([KB_495177_Class88] of  Property_List
 
@@ -1196,9 +1196,9 @@
 	(customized_instance_widgets
 		[INSTANCE_ANNOTATION_FORM_WIDGET]
 		[AIW_ProjectKB_Class10117]
-		[STANDARD_SLOT_FORM_WIDGET]
-		[AIW_ProjectKB_Class84]
 		[STANDARD_FACET_FORM_WIDGET]
+		[AIW_ProjectKB_Class84]
+		[STANDARD_SLOT_FORM_WIDGET]
 		[PAL_FORM_WIDGET]
 		[AIW_ProjectKB_Class10158]
 		[STANDARD_CLASS_FORM_WIDGET])
@@ -1369,57 +1369,6 @@
 	(boolean_value FALSE)
 	(name "ButtonDisplayed-Delete Instance"))
 
-([ProtempaTest_ProjectKB_Class20030] of  String
-
-	(name ":INSTANCE-ANNOTATION")
-	(string_value "%3AANNOTATION-TEXT"))
-
-([ProtempaTest_ProjectKB_Class20031] of  String
-
-	(name ":PAL-CONSTRAINT")
-	(string_value "%3APAL-NAME"))
-
-([ProtempaTest_ProjectKB_Class20032] of  String
-
-	(name ":META-CLASS")
-	(string_value "%3ANAME"))
-
-([ProtempaTest_ProjectKB_Class20033] of  String
-
-	(name "ValueSetElement")
-	(string_value "elementOfValueSet"))
-
-([ProtempaTest_ProjectKB_Class20034] of  Map_Entry
-
-	(key "add_name_on_instance_form")
-	(key_class "java.lang.String")
-	(value "false")
-	(value_class "java.lang.String"))
-
-([ProtempaTest_ProjectKB_Class20035] of  Map_Entry
-
-	(key "change_tracking_active")
-	(key_class "java.lang.String")
-	(value "false")
-	(value_class "java.lang.String"))
-
-([ProtempaTest_ProjectKB_Class20036] of  Map
-)
-
-([ProtempaTest_ProjectKB_Class20037] of  Map_Entry
-
-	(key "InstanceDisplay.yellow_stickies")
-	(key_class "java.lang.String")
-	(value "ProtempaTest_ProjectKB_Class20036")
-	(value_class "java.util.Map"))
-
-([ProtempaTest_ProjectKB_Class20038] of  Map_Entry
-
-	(key "suppress_instance_counting")
-	(key_class "java.lang.String")
-	(value "false")
-	(value_class "java.lang.String"))
-
 ([ProtempaTest_ProjectKB_Class20093] of  Widget
 
 	(height 120)
@@ -1497,6 +1446,57 @@
 
 ([ProtempaTest_ProjectKB_Class30] of  Property_List
 )
+
+([ProtempaTest_ProjectKB_Class30035] of  String
+
+	(name ":INSTANCE-ANNOTATION")
+	(string_value "%3AANNOTATION-TEXT"))
+
+([ProtempaTest_ProjectKB_Class30036] of  String
+
+	(name ":META-CLASS")
+	(string_value "%3ANAME"))
+
+([ProtempaTest_ProjectKB_Class30037] of  String
+
+	(name ":PAL-CONSTRAINT")
+	(string_value "%3APAL-NAME"))
+
+([ProtempaTest_ProjectKB_Class30038] of  String
+
+	(name "ValueSetElement")
+	(string_value "elementOfValueSet"))
+
+([ProtempaTest_ProjectKB_Class30039] of  Map_Entry
+
+	(key "add_name_on_instance_form")
+	(key_class "java.lang.String")
+	(value "false")
+	(value_class "java.lang.String"))
+
+([ProtempaTest_ProjectKB_Class30040] of  Map_Entry
+
+	(key "change_tracking_active")
+	(key_class "java.lang.String")
+	(value "false")
+	(value_class "java.lang.String"))
+
+([ProtempaTest_ProjectKB_Class30041] of  Map
+)
+
+([ProtempaTest_ProjectKB_Class30042] of  Map_Entry
+
+	(key "InstanceDisplay.yellow_stickies")
+	(key_class "java.lang.String")
+	(value "ProtempaTest_ProjectKB_Class30041")
+	(value_class "java.util.Map"))
+
+([ProtempaTest_ProjectKB_Class30043] of  Map_Entry
+
+	(key "suppress_instance_counting")
+	(key_class "java.lang.String")
+	(value "false")
+	(value_class "java.lang.String"))
 
 ([ProtempaTest_ProjectKB_Class31] of  Widget
 
