@@ -19,26 +19,44 @@
  */
 package org.protempa.backend.ksb.protege;
 
-import edu.stanford.smi.protege.model.Cls;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import edu.stanford.smi.protege.model.Instance;
-import edu.stanford.smi.protege.model.Slot;
-import java.util.*;
-import java.util.logging.Level;
-import org.protempa.*;
-import org.protempa.proposition.interval.Relation;
-import org.protempa.proposition.value.AbsoluteTimeUnit;
+import org.protempa.AbstractAbstractionDefinition;
+import org.protempa.AbstractPropositionDefinition;
+import org.protempa.DefaultSourceId;
+import org.protempa.HighLevelAbstractionDefinition;
+import org.protempa.IntervalSide;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.Offsets;
+import org.protempa.PairDefinition;
+import org.protempa.PropertyConstraint;
+import org.protempa.PropertyDefinition;
+import org.protempa.ReferenceDefinition;
+import org.protempa.SimpleGapFunction;
+import org.protempa.TemporalExtendedParameterDefinition;
+import org.protempa.TemporalExtendedPropositionDefinition;
+import org.protempa.ValueSet;
 import org.protempa.ValueSet.ValueSetElement;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
+import org.protempa.proposition.interval.Relation;
+import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueType;
+
+import edu.stanford.smi.protege.model.Cls;
+import edu.stanford.smi.protege.model.Instance;
+import edu.stanford.smi.protege.model.Slot;
 
 /**
  * Utility class for classes in <code>edu.virginia.pbhs.protempa.protege</code>.
@@ -62,22 +80,19 @@ class Util {
      * Days (24 * 60 * 60 * 1000 milliseconds).
      */
     private static final String DAY = "Day";
-    static final Map<String, AbsoluteTimeUnit> ABSOLUTE_DURATION_MULTIPLIER =
-            new HashMap<String, AbsoluteTimeUnit>();
+    static final Map<String, AbsoluteTimeUnit> ABSOLUTE_DURATION_MULTIPLIER = new HashMap<String, AbsoluteTimeUnit>();
 
     static {
         ABSOLUTE_DURATION_MULTIPLIER.put(MINUTE, AbsoluteTimeUnit.MINUTE);
         ABSOLUTE_DURATION_MULTIPLIER.put(HOUR, AbsoluteTimeUnit.HOUR);
         ABSOLUTE_DURATION_MULTIPLIER.put(DAY, AbsoluteTimeUnit.DAY);
     }
-    static final Map<String, RelativeHourUnit> RELATIVE_HOURS_DURATION_MULTIPLIER =
-            new HashMap<String, RelativeHourUnit>();
+    static final Map<String, RelativeHourUnit> RELATIVE_HOURS_DURATION_MULTIPLIER = new HashMap<String, RelativeHourUnit>();
 
     static {
         RELATIVE_HOURS_DURATION_MULTIPLIER.put(HOUR, RelativeHourUnit.HOUR);
     }
-    static final Map<String, ValueType> VALUE_CLASS_NAME_TO_VALUE_TYPE =
-            new HashMap<String, ValueType>();
+    static final Map<String, ValueType> VALUE_CLASS_NAME_TO_VALUE_TYPE = new HashMap<String, ValueType>();
 
     static {
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("Value", ValueType.VALUE);
@@ -87,46 +102,41 @@ class Util {
                 ValueType.ORDINALVALUE);
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("NumericalValue",
                 ValueType.NUMERICALVALUE);
-        VALUE_CLASS_NAME_TO_VALUE_TYPE.put("DoubleValue",
-                ValueType.NUMBERVALUE);
+        VALUE_CLASS_NAME_TO_VALUE_TYPE
+                .put("DoubleValue", ValueType.NUMBERVALUE);
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("InequalityDoubleValue",
                 ValueType.INEQUALITYNUMBERVALUE);
-        VALUE_CLASS_NAME_TO_VALUE_TYPE.put("DateValue", 
-                ValueType.DATEVALUE);
+        VALUE_CLASS_NAME_TO_VALUE_TYPE.put("DateValue", ValueType.DATEVALUE);
     }
 
-    static ValueSet parseValueSet(Cls valueTypeCls,
-            ValueType valueType, ConnectionManager cm,
-            KnowledgeSourceBackend backend)
+    static ValueSet parseValueSet(Cls valueTypeCls, ValueType valueType,
+            ConnectionManager cm, KnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         Slot valueSetSlot = cm.getSlot("valueSet");
-        Collection objs =
-                valueTypeCls.getDirectTemplateSlotValues(valueSetSlot);
+        Collection objs = valueTypeCls
+                .getDirectTemplateSlotValues(valueSetSlot);
         ValueSet valueSet = null;
         Slot displayNameSlot = cm.getSlot("displayName");
         Slot abbrevDisplayNameSlot = cm.getSlot("abbrevDisplayName");
         Slot valueSlot = cm.getSlot("value");
         if (!objs.isEmpty()) {
             valueSet = parseEnumeratedValueSet(valueTypeCls, objs, cm,
-                    displayNameSlot,
-                    abbrevDisplayNameSlot, valueSlot, valueType,
-                    backend);
+                    displayNameSlot, abbrevDisplayNameSlot, valueSlot,
+                    valueType, backend);
         }
         return valueSet;
     }
 
     private static ValueSet parseEnumeratedValueSet(Cls valueSetCls,
-            Collection objs,
-            ConnectionManager cm, Slot displayNameSlot,
+            Collection objs, ConnectionManager cm, Slot displayNameSlot,
             Slot abbrevDisplayNameSlot, Slot valueSlot, ValueType valueType,
-            KnowledgeSourceBackend backend)
-            throws KnowledgeSourceReadException {
+            KnowledgeSourceBackend backend) throws KnowledgeSourceReadException {
         ValueSetElement[] vses = new ValueSetElement[objs.size()];
         int i = 0;
         for (Object obj : objs) {
             Instance valueSetEltInst = (Instance) obj;
-            String displayName = (String) cm.getOwnSlotValue(
-                    valueSetEltInst, displayNameSlot);
+            String displayName = (String) cm.getOwnSlotValue(valueSetEltInst,
+                    displayNameSlot);
             String abbrevDisplayName = (String) cm.getOwnSlotValue(
                     valueSetEltInst, abbrevDisplayNameSlot);
             String value = (String) cm.getOwnSlotValue(valueSetEltInst,
@@ -135,13 +145,13 @@ class Util {
             vses[i] = new ValueSetElement(val, displayName, abbrevDisplayName);
             i++;
         }
-        return new ValueSet(valueSetCls.getName(), vses, 
+        return new ValueSet(valueSetCls.getName(), vses,
                 DefaultSourceId.getInstance(backend.getDisplayName()));
     }
 
     static ValueType parseValueType(Cls valueTypeCls) {
-        ValueType result = 
-                VALUE_CLASS_NAME_TO_VALUE_TYPE.get(valueTypeCls.getName());
+        ValueType result = VALUE_CLASS_NAME_TO_VALUE_TYPE.get(valueTypeCls
+                .getName());
         if (result == null) {
             result = parseValueSet(valueTypeCls);
         }
@@ -160,8 +170,8 @@ class Util {
             }
         }
         if (valueType == null) {
-            throw new AssertionError("valueTypeCls " + valueTypeCls.getName() +
-                    " has no corresponding value type");
+            throw new AssertionError("valueTypeCls " + valueTypeCls.getName()
+                    + " has no corresponding value type");
         }
         return valueType;
     }
@@ -171,8 +181,8 @@ class Util {
 
     private static class LazyLoggerHolder {
 
-        private static Logger instance =
-                Logger.getLogger(Util.class.getPackage().getName());
+        private static Logger instance = Logger.getLogger(Util.class
+                .getPackage().getName());
     }
 
     static Logger logger() {
@@ -227,8 +237,8 @@ class Util {
     static void setGap(Instance instance, AbstractAbstractionDefinition d,
             ProtegeKnowledgeSourceBackend backend, ConnectionManager cm)
             throws KnowledgeSourceReadException {
-        Integer maxGap =
-                (Integer) cm.getOwnSlotValue(instance, cm.getSlot("maxGap"));
+        Integer maxGap = (Integer) cm.getOwnSlotValue(instance,
+                cm.getSlot("maxGap"));
         Unit maxGapUnits = Util.parseUnitsConstraint(instance, "maxGapUnits",
                 backend, cm);
         d.setGapFunction(new SimpleGapFunction(maxGap, maxGapUnits));
@@ -242,55 +252,53 @@ class Util {
         cad.setAbbreviatedDisplayName((String) cm.getOwnSlotValue(
                 complexAbstractionInstance, cm.getSlot("abbrevDisplayName")));
     }
-    
+
     static void setSolid(Instance protegeProposition,
             HighLevelAbstractionDefinition result, ConnectionManager cm)
             throws KnowledgeSourceReadException {
         boolean bool = parseSolid(protegeProposition, cm);
         result.setSolid(bool);
     }
-    
-    static void setSolid(Instance protegeProposition,
-            PairDefinition result, ConnectionManager cm)
-            throws KnowledgeSourceReadException {
-        boolean bool = parseSolid(protegeProposition, cm);
-        result.setSolid(bool);
-    }
-    
-    static void setConcatenable(Instance protegeProposition,
-            PairDefinition result, ConnectionManager cm)
-            throws KnowledgeSourceReadException {
-        boolean bool = parseConcatenable(protegeProposition, cm);
-        result.setConcatenable(bool);
-    }
-    
-    static void setConcatenable(Instance protegeProposition,
-            HighLevelAbstractionDefinition result, ConnectionManager cm)
-            throws KnowledgeSourceReadException {
-        boolean bool = parseConcatenable(protegeProposition, cm);
-        result.setConcatenable(bool);
-    }
-    
-    private static boolean parseConcatenable(Instance protegeProposition, 
+
+    static void setSolid(Instance protegeProposition, PairDefinition result,
             ConnectionManager cm) throws KnowledgeSourceReadException {
-        Boolean bool =
-                (Boolean) protegeProposition.getDirectOwnSlotValue(
-                cm.getSlot("concatenable"));
+        boolean bool = parseSolid(protegeProposition, cm);
+        result.setSolid(bool);
+    }
+
+    static void setConcatenable(Instance protegeProposition,
+            PairDefinition result, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        boolean bool = parseConcatenable(protegeProposition, cm);
+        result.setConcatenable(bool);
+    }
+
+    static void setConcatenable(Instance protegeProposition,
+            HighLevelAbstractionDefinition result, ConnectionManager cm)
+            throws KnowledgeSourceReadException {
+        boolean bool = parseConcatenable(protegeProposition, cm);
+        result.setConcatenable(bool);
+    }
+
+    private static boolean parseConcatenable(Instance protegeProposition,
+            ConnectionManager cm) throws KnowledgeSourceReadException {
+        Boolean bool = (Boolean) protegeProposition.getDirectOwnSlotValue(cm
+                .getSlot("concatenable"));
         if (bool == null) {
-            Util.logger().log(Level.WARNING,
-                    "{0} has no value for the 'concatenable' property: setting FALSE",
-                    protegeProposition.getName());
+            Util.logger()
+                    .log(Level.WARNING,
+                            "{0} has no value for the 'concatenable' property: setting FALSE",
+                            protegeProposition.getName());
             return false;
         } else {
             return bool.booleanValue();
         }
     }
-    
-    private static boolean parseSolid(Instance protegeProposition, 
+
+    private static boolean parseSolid(Instance protegeProposition,
             ConnectionManager cm) throws KnowledgeSourceReadException {
-        Boolean bool =
-                (Boolean) protegeProposition.getDirectOwnSlotValue(
-                cm.getSlot("solid"));
+        Boolean bool = (Boolean) protegeProposition.getDirectOwnSlotValue(cm
+                .getSlot("solid"));
         if (bool == null) {
             Util.logger().log(Level.WARNING,
                     "{0} has no value for the 'solid' property: setting FALSE",
@@ -304,14 +312,14 @@ class Util {
     static void setInDataSource(Instance protegeProposition,
             AbstractPropositionDefinition result, ConnectionManager cm)
             throws KnowledgeSourceReadException {
-        Boolean bool =
-                (Boolean) protegeProposition.getDirectOwnSlotValue(
-                cm.getSlot("inDataSource"));
+        Boolean bool = (Boolean) protegeProposition.getDirectOwnSlotValue(cm
+                .getSlot("inDataSource"));
         if (bool == null) {
             bool = Boolean.FALSE;
-            Util.logger().log(Level.WARNING,
-                    "{0} has no value for the 'inDataSource' property: setting FALSE",
-                    protegeProposition.getName());
+            Util.logger()
+                    .log(Level.WARNING,
+                            "{0} has no value for the 'inDataSource' property: setting FALSE",
+                            protegeProposition.getName());
         }
         result.setInDataSource(bool.booleanValue());
     }
@@ -320,25 +328,26 @@ class Util {
      * Sets inverseIsA on the given proposition definition. Automatically
      * resolves duplicate entries but logs a warning.
      * 
-     * @param propInstance a Protege proposition definition {@link Instance}.
-     * @param propDef the corresponding {@link AbstractPropositionDefinition}.
-     * @param cm a {@link ConnectionManager}.
-     * @throws KnowledgeSourceReadException if there is an error accessing
-     * the Protege ontology.
+     * @param propInstance
+     *            a Protege proposition definition {@link Instance}.
+     * @param propDef
+     *            the corresponding {@link AbstractPropositionDefinition}.
+     * @param cm
+     *            a {@link ConnectionManager}.
+     * @throws KnowledgeSourceReadException
+     *             if there is an error accessing the Protege ontology.
      */
     static void setInverseIsAs(Instance propInstance,
             AbstractPropositionDefinition propDef, ConnectionManager cm)
             throws KnowledgeSourceReadException {
-        Collection<?> isas =
-                propInstance.getDirectOwnSlotValues(cm.getSlot("inverseIsA"));
+        Collection<?> isas = propInstance.getDirectOwnSlotValues(cm
+                .getSlot("inverseIsA"));
         Logger logger = Util.logger();
         if (isas != null && !isas.isEmpty()) {
-            Set<String> inverseIsANames =
-                    resolveAndLogDuplicates(isas, logger, propInstance,
-                    "inverseIsA");
-            String[] inverseIsAsArr =
-                    inverseIsANames.toArray(
-                    new String[inverseIsANames.size()]);
+            Set<String> inverseIsANames = resolveAndLogDuplicates(isas, logger,
+                    propInstance, "inverseIsA");
+            String[] inverseIsAsArr = inverseIsANames
+                    .toArray(new String[inverseIsANames.size()]);
             propDef.setInverseIsA(inverseIsAsArr);
         }
     }
@@ -350,15 +359,15 @@ class Util {
         Slot valueTypeSlot = cm.getSlot("valueType");
         Collection<?> properties = cm.getOwnSlotValues(propInstance,
                 propertySlot);
-        PropertyDefinition[] propDefs =
-                new PropertyDefinition[properties.size()];
+        PropertyDefinition[] propDefs = new PropertyDefinition[properties
+                .size()];
         int i = 0;
         for (Object propertyInstance : properties) {
             Instance inst = (Instance) propertyInstance;
             Cls valueTypeCls = (Cls) cm.getOwnSlotValue(inst, valueTypeSlot);
             if (valueTypeCls == null) {
-                throw new AssertionError("property " + inst.getName() +
-                        " cannot have a null value type");
+                throw new AssertionError("property " + inst.getName()
+                        + " cannot have a null value type");
             }
             ValueType valueType = parseValueType(valueTypeCls);
             PropertyDefinition propDef = new PropertyDefinition(inst.getName(),
@@ -368,32 +377,35 @@ class Util {
         }
         d.setPropertyDefinitions(propDefs);
     }
-    
+
     static void setReferences(Instance propInstance,
             AbstractPropositionDefinition d, ConnectionManager cm)
             throws KnowledgeSourceReadException {
         Slot referenceSlot = cm.getSlot("reference");
         if (referenceSlot == null) {
-            logger().warning("The ontology doesn't know about the 'reference' slot");
+            logger().warning(
+                    "The ontology doesn't know about the 'reference' slot");
             return;
         }
         Slot referenceToSlot = cm.getSlot("referenceTo");
         if (referenceToSlot == null) {
-            logger().warning("The ontology doesn't know about the 'referenceTo' slot");
+            logger().warning(
+                    "The ontology doesn't know about the 'referenceTo' slot");
             return;
         }
         Collection<?> references = cm.getOwnSlotValues(propInstance,
                 referenceSlot);
-        ReferenceDefinition[] refDefs =
-                new ReferenceDefinition[references.size()];
+        ReferenceDefinition[] refDefs = new ReferenceDefinition[references
+                .size()];
         int i = 0;
         for (Object refInstance : references) {
             Instance inst = (Instance) refInstance;
-            Collection referenceTos = cm.getOwnSlotValues(inst, referenceToSlot);
+            Collection referenceTos = cm
+                    .getOwnSlotValues(inst, referenceToSlot);
             if (referenceTos == null || referenceTos.isEmpty()) {
-                throw new AssertionError("reference " + inst.getName() +
-                        " from proposition " + propInstance.getName() + 
-                        " cannot have no referred-to proposition types!");
+                throw new AssertionError("reference " + inst.getName()
+                        + " from proposition " + propInstance.getName()
+                        + " cannot have no referred-to proposition types!");
             }
             List<String> propIds = new ArrayList<String>(referenceTos.size());
             for (Object refToInst : referenceTos) {
@@ -401,8 +413,8 @@ class Util {
                 String propId = refToInstInst.getName();
                 propIds.add(propId);
             }
-            ReferenceDefinition refDef = new ReferenceDefinition(inst.getName(),
-                    propIds.toArray(new String[propIds.size()]));
+            ReferenceDefinition refDef = new ReferenceDefinition(
+                    inst.getName(), propIds.toArray(new String[propIds.size()]));
             refDefs[i] = refDef;
             i++;
         }
@@ -418,49 +430,49 @@ class Util {
         int i = 0;
         for (Object termInstance : terms) {
             Instance inst = (Instance) termInstance;
-//            String termId =
-//                    (String) cm.getOwnSlotValue(inst, cm.getSlot("termId"));
-//            termIds[i] = termId;
+            // String termId =
+            // (String) cm.getOwnSlotValue(inst, cm.getSlot("termId"));
+            // termIds[i] = termId;
             String name = inst.getName();
             termIds[i] = name;
         }
         d.setTermIds(termIds);
-//        d.setTermIds(null);
+        // d.setTermIds(null);
     }
 
     static Relation instanceToRelation(Instance relationInstance,
             ConnectionManager cm, ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        Integer mins1s2 = Util.parseTimeConstraint(relationInstance,
-                "mins1s2", cm);
+        Integer mins1s2 = Util.parseTimeConstraint(relationInstance, "mins1s2",
+                cm);
         Unit mins1s2Units = Util.parseUnitsConstraint(relationInstance,
                 "mins1s2Units", backend, cm);
-        Integer maxs1s2 = Util.parseTimeConstraint(relationInstance,
-                "maxs1s2", cm);
+        Integer maxs1s2 = Util.parseTimeConstraint(relationInstance, "maxs1s2",
+                cm);
         Unit maxs1s2Units = Util.parseUnitsConstraint(relationInstance,
                 "maxs1s2Units", backend, cm);
-        Integer mins1f2 = Util.parseTimeConstraint(relationInstance,
-                "mins1f2", cm);
+        Integer mins1f2 = Util.parseTimeConstraint(relationInstance, "mins1f2",
+                cm);
         Unit mins1f2Units = Util.parseUnitsConstraint(relationInstance,
                 "mins1f2Units", backend, cm);
-        Integer maxs1f2 = Util.parseTimeConstraint(relationInstance,
-                "maxs1f2", cm);
+        Integer maxs1f2 = Util.parseTimeConstraint(relationInstance, "maxs1f2",
+                cm);
         Unit maxs1f2Units = Util.parseUnitsConstraint(relationInstance,
                 "maxs1f2Units", backend, cm);
-        Integer minf1s2 = Util.parseTimeConstraint(relationInstance,
-                "minf1s2", cm);
+        Integer minf1s2 = Util.parseTimeConstraint(relationInstance, "minf1s2",
+                cm);
         Unit minf1s2Units = Util.parseUnitsConstraint(relationInstance,
                 "minf1s2Units", backend, cm);
-        Integer maxf1s2 = Util.parseTimeConstraint(relationInstance,
-                "maxf1s2", cm);
+        Integer maxf1s2 = Util.parseTimeConstraint(relationInstance, "maxf1s2",
+                cm);
         Unit maxf1s2Units = Util.parseUnitsConstraint(relationInstance,
                 "maxf1s2Units", backend, cm);
-        Integer minf1f2 = Util.parseTimeConstraint(relationInstance,
-                "minf1f2", cm);
+        Integer minf1f2 = Util.parseTimeConstraint(relationInstance, "minf1f2",
+                cm);
         Unit minf1f2Units = Util.parseUnitsConstraint(relationInstance,
                 "minf1f2Units", backend, cm);
-        Integer maxf1f2 = Util.parseTimeConstraint(relationInstance,
-                "maxf1f2", cm);
+        Integer maxf1f2 = Util.parseTimeConstraint(relationInstance, "maxf1f2",
+                cm);
         Unit maxf1f2Units = Util.parseUnitsConstraint(relationInstance,
                 "maxf1f2Units", backend, cm);
         Relation relation = new Relation(mins1s2, mins1s2Units, maxs1s2,
@@ -471,22 +483,20 @@ class Util {
     }
 
     static TemporalExtendedPropositionDefinition instanceToTemporalExtendedPropositionDefinition(
-            Instance extendedProposition,
-            ProtegeKnowledgeSourceBackend backend)
+            Instance extendedProposition, ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         ConnectionManager cm = backend.getConnectionManager();
         String ad = propositionId(extendedProposition);
 
         String displayName = (String) cm.getOwnSlotValue(extendedProposition,
                 cm.getSlot("displayName"));
-        String abbrevDisplayName =
-                (String) cm.getOwnSlotValue(extendedProposition,
-                cm.getSlot("abbrevDisplayName"));
+        String abbrevDisplayName = (String) cm.getOwnSlotValue(
+                extendedProposition, cm.getSlot("abbrevDisplayName"));
 
         TemporalExtendedPropositionDefinition result;
         if (isParameter(extendedProposition, cm)) {
-            TemporalExtendedParameterDefinition r =
-                    new TemporalExtendedParameterDefinition(ad);
+            TemporalExtendedParameterDefinition r = new TemporalExtendedParameterDefinition(
+                    ad);
             r.setValue(extendedParameterValue(extendedProposition, cm));
             result = r;
         } else {
@@ -503,18 +513,43 @@ class Util {
                 "maxDuration", cm));
         result.setMaxLengthUnit(Util.parseUnitsConstraint(extendedProposition,
                 "maxDurationUnits", backend, cm));
+        result.getPropertyConstraints().addAll(
+                instanceToPropertyConstraints(
+                        cm.getOwnSlotValues(extendedProposition,
+                                cm.getSlot("propertyConstraints")), backend));
 
         return result;
     }
 
-    static Value extendedParameterValue(
-            Instance extendedParamInstance, ConnectionManager cm)
+    static Set<PropertyConstraint> instanceToPropertyConstraints(
+            @SuppressWarnings("rawtypes") Collection propertyConstraints,
+            ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
+        Set<PropertyConstraint> result = new HashSet<PropertyConstraint>();
+
+        ConnectionManager cm = backend.getConnectionManager();
+        for (Object o : propertyConstraints) {
+            Instance pci = (Instance) o;
+            PropertyConstraint pc = new PropertyConstraint();
+            Instance propertyInst = (Instance) cm.getOwnSlotValue(pci,
+                    cm.getSlot("property"));
+            pc.setPropertyName(propertyInst.getName());
+            pc.setValueComp(HighLevelAbstractionConverter.STRING_TO_VAL_COMP_MAP.get((String) cm
+                    .getOwnSlotValue(pci, cm.getSlot("valComp"))));
+            pc.setValue(ValueType.VALUE.parse((String) cm.getOwnSlotValue(pci,
+                    cm.getSlot("value"))));
+            result.add(pc);
+        }
+
+        return result;
+    }
+
+    static Value extendedParameterValue(Instance extendedParamInstance,
+            ConnectionManager cm) throws KnowledgeSourceReadException {
         Value result = null;
         String resultStr = null;
-        Instance paramConstraint =
-                (Instance) cm.getOwnSlotValue(extendedParamInstance,
-                cm.getSlot("parameterValue"));
+        Instance paramConstraint = (Instance) cm.getOwnSlotValue(
+                extendedParamInstance, cm.getSlot("parameterValue"));
         if (paramConstraint != null) {
             resultStr = (String) cm.getOwnSlotValue(paramConstraint,
                     cm.getSlot("displayName"));
@@ -524,47 +559,49 @@ class Util {
         }
         return result;
     }
-    
-    static Offsets temporalOffsets(Instance abstractionInstance,
+
+    static Offsets temporalOffsets(
+            Instance abstractionInstance,
             ProtegeKnowledgeSourceBackend backend,
             Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache)
             throws KnowledgeSourceReadException {
         ConnectionManager cm = backend.getConnectionManager();
-        Instance temporalOffsetInstance =
-                (Instance) cm.getOwnSlotValue(abstractionInstance,
-                cm.getSlot("temporalOffsets"));
+        Instance temporalOffsetInstance = (Instance) cm.getOwnSlotValue(
+                abstractionInstance, cm.getSlot("temporalOffsets"));
         if (temporalOffsetInstance != null) {
             Offsets temporalOffsets = new Offsets();
-            Instance startExtendedParamInstance =
-                    (Instance) cm.getOwnSlotValue(temporalOffsetInstance,
-                    cm.getSlot("startExtendedProposition"));
-            Instance finishExtendedParamInstance =
-                    (Instance) cm.getOwnSlotValue(temporalOffsetInstance,
-                    cm.getSlot("finishExtendedProposition"));
+            Instance startExtendedParamInstance = (Instance) cm
+                    .getOwnSlotValue(temporalOffsetInstance,
+                            cm.getSlot("startExtendedProposition"));
+            Instance finishExtendedParamInstance = (Instance) cm
+                    .getOwnSlotValue(temporalOffsetInstance,
+                            cm.getSlot("finishExtendedProposition"));
             if (startExtendedParamInstance != null) {
-                temporalOffsets.setStartTemporalExtendedPropositionDefinition(
-                        extendedParameterCache.get(
-                        startExtendedParamInstance));
-                temporalOffsets.setStartAbstractParamValue(
-                        Util.extendedParameterValue(startExtendedParamInstance,
-                        cm));
+                temporalOffsets
+                        .setStartTemporalExtendedPropositionDefinition(extendedParameterCache
+                                .get(startExtendedParamInstance));
+                temporalOffsets
+                        .setStartAbstractParamValue(Util
+                                .extendedParameterValue(
+                                        startExtendedParamInstance, cm));
             }
 
             if (finishExtendedParamInstance != null) {
-                temporalOffsets.setFinishTemporalExtendedPropositionDefinition(
-                        extendedParameterCache.get(
-                        finishExtendedParamInstance));
-                temporalOffsets.setFinishAbstractParamValue(
-                        Util.extendedParameterValue(finishExtendedParamInstance,
-                        cm));
+                temporalOffsets
+                        .setFinishTemporalExtendedPropositionDefinition(extendedParameterCache
+                                .get(finishExtendedParamInstance));
+                temporalOffsets
+                        .setFinishAbstractParamValue(Util
+                                .extendedParameterValue(
+                                        finishExtendedParamInstance, cm));
             }
 
-            temporalOffsets.setStartIntervalSide(IntervalSide.intervalSide(
-                    (String) cm.getOwnSlotValue(temporalOffsetInstance,
-                    cm.getSlot("startSide"))));
-            temporalOffsets.setFinishIntervalSide(IntervalSide.intervalSide(
-                    (String) cm.getOwnSlotValue(temporalOffsetInstance,
-                    cm.getSlot("finishSide"))));
+            temporalOffsets.setStartIntervalSide(IntervalSide
+                    .intervalSide((String) cm.getOwnSlotValue(
+                            temporalOffsetInstance, cm.getSlot("startSide"))));
+            temporalOffsets.setFinishIntervalSide(IntervalSide
+                    .intervalSide((String) cm.getOwnSlotValue(
+                            temporalOffsetInstance, cm.getSlot("finishSide"))));
             Integer startOffset = Util.parseTimeConstraint(
                     temporalOffsetInstance, "startOffset", cm);
             temporalOffsets.setStartOffset(startOffset);
@@ -582,10 +619,9 @@ class Util {
         }
     }
 
-
     /**
      * Returns whether a Protege instance is a Parameter.
-     *
+     * 
      * @param extendedParameter
      *            a Protege instance that is assumed to be a Proposition.
      * @return <code>true</code> if the provided Protege instance is a
@@ -604,20 +640,20 @@ class Util {
 
     /**
      * Returns the proposition id for an extended proposition definition.
-     *
+     * 
      * @param extendedProposition
      *            an ExtendedProposition.
      * @return a proposition id {@link String}.
      */
     private static String propositionId(Instance extendedProposition) {
-        Instance proposition =
-                (Instance) extendedProposition.getOwnSlotValue(
-                extendedProposition.getKnowledgeBase().getSlot("proposition"));
+        Instance proposition = (Instance) extendedProposition
+                .getOwnSlotValue(extendedProposition.getKnowledgeBase()
+                        .getSlot("proposition"));
         if (proposition.hasType(proposition.getKnowledgeBase().getCls(
                 "ConstantParameter"))) {
             throw new IllegalStateException(
                     "Constant parameters are not yet supported as "
-                    + "components of a high level abstraction definition.");
+                            + "components of a high level abstraction definition.");
         } else {
             return proposition.getName();
         }
@@ -630,7 +666,7 @@ class Util {
             String name = ((Instance) isAInstance).getName();
             if (!inverseIsAs.add(name) && logger.isLoggable(Level.WARNING)) {
                 logger.log(Level.WARNING, "Duplicate {0} in {1}: {2}",
-                        new Object[]{slotName, propInstance.getName(), name});
+                        new Object[] { slotName, propInstance.getName(), name });
             }
         }
         return inverseIsAs;

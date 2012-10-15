@@ -25,9 +25,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import edu.stanford.smi.protege.model.Instance;
-import org.protempa.*;
+import org.protempa.DefaultSourceId;
+import org.protempa.HighLevelAbstractionDefinition;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.proposition.interval.Relation;
+import org.protempa.proposition.value.ValueComparator;
+
+import edu.stanford.smi.protege.model.Instance;
 
 /**
  * Converts and adds Protege complex abstraction instances to a PROTEMPA
@@ -37,6 +42,20 @@ import org.protempa.proposition.interval.Relation;
  */
 class HighLevelAbstractionConverter implements AbstractionConverter {
 
+    static final Map<String, ValueComparator> STRING_TO_VAL_COMP_MAP = new HashMap<String, ValueComparator>();
+
+    static {
+        STRING_TO_VAL_COMP_MAP.put("eq", ValueComparator.EQUAL_TO);
+        STRING_TO_VAL_COMP_MAP.put("gt", ValueComparator.GREATER_THAN);
+        STRING_TO_VAL_COMP_MAP.put("gte",
+                ValueComparator.GREATER_THAN_OR_EQUAL_TO);
+        STRING_TO_VAL_COMP_MAP.put("lt", ValueComparator.LESS_THAN);
+        STRING_TO_VAL_COMP_MAP.put("lte", ValueComparator.LESS_THAN_OR_EQUAL_TO);
+        STRING_TO_VAL_COMP_MAP.put("in", ValueComparator.IN);
+        STRING_TO_VAL_COMP_MAP.put("notin", ValueComparator.NOT_IN);
+    }
+
+    
     HighLevelAbstractionConverter() {
     }
 
