@@ -142,6 +142,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         HierarchicalProjectionChildrenVisitor dcVisitor = 
                 new HierarchicalProjectionChildrenVisitor(knowledgeSource);
         for (PropositionDefinition propDef : propDefs) {
+            assert propDef != null : "propDef cannot be null";
             try {
                 propDef.acceptChecked(validatorVisitor);
                 propDef.acceptChecked(dcVisitor);
