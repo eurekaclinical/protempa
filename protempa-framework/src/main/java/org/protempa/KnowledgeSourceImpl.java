@@ -132,7 +132,14 @@ public final class KnowledgeSourceImpl
             initializeIfNeeded("reading inverseIsA of {0}", propDef.getId());
             String[] propIds = propDef.getInverseIsA();
             for (String propId : propIds) {
-                result.add(readPropositionDefinition(propId));
+                PropositionDefinition pd = readPropositionDefinition(propId);
+                assert pd != null :
+                        "Proposition definition " + propId + 
+                        ", which is specified as a child of " + 
+                        propDef.getId() + ", does not exist";
+                if (pd != null) {
+                    result.add(pd);
+                }
             }
             result = Collections.unmodifiableList(result);
             this.inverseIsACache.put(propDef, result);
@@ -201,7 +208,14 @@ public final class KnowledgeSourceImpl
 
             Set<String> propIds = propDef.getAbstractedFrom();
             for (String propId : propIds) {
-                result.add(readPropositionDefinition(propId));
+                PropositionDefinition pd = readPropositionDefinition(propId);
+                assert pd != null :
+                        "Proposition definition " + propId + 
+                        ", which " + propDef.getId() + 
+                        "is specified as abstracted from, does not exist";
+                if (pd != null) {
+                    result.add(pd);
+                }
             }
             result = Collections.unmodifiableList(result);
             if (propDef != null) {
@@ -533,7 +547,7 @@ public final class KnowledgeSourceImpl
     public Set<String> inDataSourcePropositionIds(String... propIds)
             throws KnowledgeSourceReadException {
         initializeIfNeeded(
-                "Getting proposition ids for {0} with inDataSource set to true", 
+                "Getting proposition ids for {0} with inDataSource set to true",
                 StringUtils.join(propIds, ","));
         return this.inDataSourceGetter.inDataSourcePropositionIds(propIds);
     }
@@ -542,7 +556,7 @@ public final class KnowledgeSourceImpl
     public Set<PropositionDefinition> inDataSourcePropositionDefinitions(
             String... propIds) throws KnowledgeSourceReadException {
         initializeIfNeeded(
-                "Getting proposition definitions for {0} with inDataSource set to true", 
+                "Getting proposition definitions for {0} with inDataSource set to true",
                 StringUtils.join(propIds, ","));
         return this.inDataSourceGetter.inDataSourcePropositionDefinitions(
                 propIds);
