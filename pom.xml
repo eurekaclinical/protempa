@@ -7,7 +7,7 @@
     <packaging>pom</packaging>
     <name>Protempa</name>
     <scm>
-        <connection>scm:svn:svn://scm.cci.emory.edu/svn/protempa/trunk</connection>
+        <connection>scm:svn:https://scm.cci.emory.edu/svn/protempa/trunk</connection>
         <url>https://scm.cci.emory.edu/svn/protempa/trunk</url>
     </scm>
     
