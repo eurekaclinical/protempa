@@ -1,4 +1,4 @@
-; Thu Oct 04 14:13:24 EDT 2012
+; Fri Oct 19 09:11:12 EDT 2012
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
@@ -309,10 +309,10 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[protempa_ProjectKB_Class10677]
-		[protempa_ProjectKB_Class10678]
-		[protempa_ProjectKB_Class10679]
-		[protempa_ProjectKB_Class10680]))
+		[protempa_ProjectKB_Class98]
+		[protempa_ProjectKB_Class99]
+		[protempa_ProjectKB_Class100]
+		[protempa_ProjectKB_Class101]))
 
 ([CLSES_TAB] of  Widget
 
@@ -354,7 +354,7 @@
 
 	(widget_class_name "edu.stanford.smi.protege.widget.InstancesTab"))
 
-([KB_399608_Class3] of  Map
+([KB_310192_Class3] of  Map
 )
 
 ([KB_495177_Class0] of  String
@@ -415,8 +415,8 @@
 
 ([KB_495177_Class6] of  Map
 
-	(entries [protempa_ProjectKB_Class10683])
-	(referenced_maps [protempa_ProjectKB_Class10681]))
+	(entries [protempa_ProjectKB_Class104])
+	(referenced_maps [protempa_ProjectKB_Class102]))
 
 ([KB_495177_Class88] of  Property_List
 
@@ -551,22 +551,22 @@
 
 	(browser_slot_names [BROWSER_SLOT_NAMES])
 	(customized_instance_widgets
+		[STANDARD_FACET_FORM_WIDGET]
+		[AIW_ProjectKB_Class84]
 		[PAL_FORM_WIDGET]
 		[protempa_ProjectKB_Class10256]
+		[protempa_ProjectKB_Class10206]
+		[STANDARD_CLASS_FORM_WIDGET]
+		[protempa_ProjectKB_Class10349]
 		[INSTANCE_ANNOTATION_FORM_WIDGET]
+		[AIW_ProjectKB_Class10117]
+		[protempa_ProjectKB_Class10377]
 		[protempa_ProjectKB_Class10132]
 		[STANDARD_SLOT_FORM_WIDGET]
 		[protempa_ProjectKB_Class10288]
 		[AIW_ProjectKB_Class10158]
-		[protempa_ProjectKB_Class10227]
-		[STANDARD_FACET_FORM_WIDGET]
-		[AIW_ProjectKB_Class84]
-		[protempa_ProjectKB_Class10206]
-		[STANDARD_CLASS_FORM_WIDGET]
-		[protempa_ProjectKB_Class10349]
-		[AIW_ProjectKB_Class10117]
-		[protempa_ProjectKB_Class10377]
-		[protempa_ProjectKB_Class10304])
+		[protempa_ProjectKB_Class10304]
+		[protempa_ProjectKB_Class10227])
 	(default_cls_metaclass ":STANDARD-CLASS")
 	(default_facet_metaclass ":STANDARD-FACET")
 	(default_instance_widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
@@ -588,46 +588,15 @@
 	(property_list [protempa_ProjectKB_Class11])
 	(widget_class_name "edu.stanford.smi.protege.widget.ProtegePropertiesTab"))
 
-([protempa_ProjectKB_Class10115] of  Widget
+([protempa_ProjectKB_Class100] of  String
 
-	(height 60)
-	(is_hidden FALSE)
-	(name "references")
-	(property_list [protempa_ProjectKB_Class10116])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 300))
+	(name ":PAL-CONSTRAINT")
+	(string_value "%3APAL-NAME"))
 
-([protempa_ProjectKB_Class10116] of  Property_List
-)
+([protempa_ProjectKB_Class101] of  String
 
-([protempa_ProjectKB_Class10117] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "references")
-	(property_list [protempa_ProjectKB_Class10118])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceFieldWidget")
-	(width 200)
-	(x 0)
-	(y 300))
-
-([protempa_ProjectKB_Class10118] of  Property_List
-
-	(properties
-		[protempa_ProjectKB_Class10119]
-		[protempa_ProjectKB_Class10120]))
-
-([protempa_ProjectKB_Class10119] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([protempa_ProjectKB_Class10120] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
+	(name "ValueSetElement")
+	(string_value "elementOfValueSet"))
 
 ([protempa_ProjectKB_Class10132] of  Widget
 
@@ -880,6 +849,10 @@
 
 ([protempa_ProjectKB_Class10166] of  Property_List
 )
+
+([protempa_ProjectKB_Class102] of  Map
+
+	(entries [protempa_ProjectKB_Class103]))
 
 ([protempa_ProjectKB_Class10206] of  Widget
 
@@ -1296,6 +1269,13 @@
 
 ([protempa_ProjectKB_Class10296] of  Property_List
 )
+
+([protempa_ProjectKB_Class103] of  Map_Entry
+
+	(key "KB_468183_Class0")
+	(key_class "edu.stanford.smi.protege.model.Frame")
+	(value "25 25 202 123")
+	(value_class "java.awt.Rectangle"))
 
 ([protempa_ProjectKB_Class10304] of  Widget
 
@@ -1939,6 +1919,13 @@
 	(properties
 		[protempa_ProjectKB_Class10400]
 		[protempa_ProjectKB_Class10401]))
+
+([protempa_ProjectKB_Class104] of  Map_Entry
+
+	(key "InstanceDisplay.yellow_stickies")
+	(key_class "java.lang.String")
+	(value "protempa_ProjectKB_Class102")
+	(value_class "java.util.Map"))
 
 ([protempa_ProjectKB_Class10400] of  Boolean
 
@@ -2694,44 +2681,6 @@
 ([protempa_ProjectKB_Class10608] of  Property_List
 )
 
-([protempa_ProjectKB_Class10677] of  String
-
-	(name ":INSTANCE-ANNOTATION")
-	(string_value "%3AANNOTATION-TEXT"))
-
-([protempa_ProjectKB_Class10678] of  String
-
-	(name ":PAL-CONSTRAINT")
-	(string_value "%3APAL-NAME"))
-
-([protempa_ProjectKB_Class10679] of  String
-
-	(name ":META-CLASS")
-	(string_value "%3ANAME"))
-
-([protempa_ProjectKB_Class10680] of  String
-
-	(name "ValueSetElement")
-	(string_value "elementOfValueSet"))
-
-([protempa_ProjectKB_Class10681] of  Map
-
-	(entries [protempa_ProjectKB_Class10682]))
-
-([protempa_ProjectKB_Class10682] of  Map_Entry
-
-	(key "KB_468183_Class0")
-	(key_class "edu.stanford.smi.protege.model.Frame")
-	(value "25 25 202 123")
-	(value_class "java.awt.Rectangle"))
-
-([protempa_ProjectKB_Class10683] of  Map_Entry
-
-	(key "InstanceDisplay.yellow_stickies")
-	(key_class "java.lang.String")
-	(value "protempa_ProjectKB_Class10681")
-	(value_class "java.util.Map"))
-
 ([protempa_ProjectKB_Class11] of  Property_List
 )
 
@@ -2748,7 +2697,7 @@
 
 	(is_hidden TRUE)
 	(property_list [protempa_ProjectKB_Class15])
-	(widget_class_name "ca.uvic.csr.shrimp.jambalaya.JambalayaTab"))
+	(widget_class_name "ezpal.EZPalTab"))
 
 ([protempa_ProjectKB_Class15] of  Property_List
 )
@@ -2766,7 +2715,7 @@
 
 	(is_hidden TRUE)
 	(property_list [protempa_ProjectKB_Class19])
-	(widget_class_name "ezpal.EZPalTab"))
+	(widget_class_name "ca.uvic.csr.shrimp.jambalaya.JambalayaTab"))
 
 ([protempa_ProjectKB_Class19] of  Property_List
 )
@@ -2820,7 +2769,7 @@
 
 	(is_hidden TRUE)
 	(property_list [protempa_ProjectKB_Class31])
-	(widget_class_name "edu.stanford.smi.protegex.evaluation.MetaAnalysis"))
+	(widget_class_name "org.protege.owl.mm.protege3.MappingMasterTab"))
 
 ([protempa_ProjectKB_Class31] of  Property_List
 )
@@ -2829,7 +2778,7 @@
 
 	(is_hidden TRUE)
 	(property_list [protempa_ProjectKB_Class33])
-	(widget_class_name "org.protege.owl.mm.protege3.MappingMasterTab"))
+	(widget_class_name "edu.stanford.smi.protegex.evaluation.MetaAnalysis"))
 
 ([protempa_ProjectKB_Class33] of  Property_List
 )
@@ -2838,7 +2787,7 @@
 
 	(is_hidden TRUE)
 	(property_list [protempa_ProjectKB_Class35])
-	(widget_class_name "edu.stanford.smi.protege.query.LuceneQueryPlugin"))
+	(widget_class_name "uk.ac.man.cs.mig.coode.owlviz.ui.OWLVizTab"))
 
 ([protempa_ProjectKB_Class35] of  Property_List
 )
@@ -2847,7 +2796,7 @@
 
 	(is_hidden TRUE)
 	(property_list [protempa_ProjectKB_Class37])
-	(widget_class_name "uk.ac.man.cs.mig.coode.owlviz.ui.OWLVizTab"))
+	(widget_class_name "edu.stanford.smi.protege.query.LuceneQueryPlugin"))
 
 ([protempa_ProjectKB_Class37] of  Property_List
 )
@@ -2898,7 +2847,7 @@
 
 	(is_hidden TRUE)
 	(property_list [protempa_ProjectKB_Class47])
-	(widget_class_name "org.algernon.kb.okbc.protege.plugins.AlgernonTab"))
+	(widget_class_name "TGViztab.TGVizTab"))
 
 ([protempa_ProjectKB_Class47] of  Property_List
 )
@@ -2907,7 +2856,7 @@
 
 	(is_hidden TRUE)
 	(property_list [protempa_ProjectKB_Class49])
-	(widget_class_name "TGViztab.TGVizTab"))
+	(widget_class_name "org.algernon.kb.okbc.protege.plugins.AlgernonTab"))
 
 ([protempa_ProjectKB_Class49] of  Property_List
 )
@@ -2953,7 +2902,7 @@
 
 	(is_hidden TRUE)
 	(property_list [protempa_ProjectKB_Class57])
-	(widget_class_name "edu.stanford.smi.protegex.chatPlugin.ChatTab"))
+	(widget_class_name "edu.stanford.smi.protegex.widget.pal.PalQueriesTab"))
 
 ([protempa_ProjectKB_Class57] of  Property_List
 )
@@ -2962,7 +2911,7 @@
 
 	(is_hidden TRUE)
 	(property_list [protempa_ProjectKB_Class59])
-	(widget_class_name "edu.stanford.smi.protegex.widget.pal.PalQueriesTab"))
+	(widget_class_name "edu.stanford.smi.protegex.chatPlugin.ChatTab"))
 
 ([protempa_ProjectKB_Class59] of  Property_List
 )
@@ -3092,6 +3041,16 @@
 
 ([protempa_ProjectKB_Class9] of  Property_List
 )
+
+([protempa_ProjectKB_Class98] of  String
+
+	(name ":INSTANCE-ANNOTATION")
+	(string_value "%3AANNOTATION-TEXT"))
+
+([protempa_ProjectKB_Class99] of  String
+
+	(name ":META-CLASS")
+	(string_value "%3ANAME"))
 
 ([QUERIES_TAB] of  Widget
 
