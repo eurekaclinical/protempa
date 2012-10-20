@@ -13,7 +13,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 This project includes:
-  Apache POI under The Apache Software License, Version 2.0
   Apache ServiceMix :: Bundles :: xstream under The Apache Software License, Version 2.0
   com.sleepycat:je under Open Source License for Oracle Berkeley DB Java Edition
   Commons BeanUtils Core under The Apache Software License, Version 2.0
@@ -25,27 +24,12 @@ This project includes:
   Commons Logging under The Apache Software License, Version 2.0
   commons-beanutils under Apache License, Version 2.0
   Digester under The Apache Software License, Version 2.0
-  dom4j under BSD License
-  H2 Database Engine under The H2 License, Version 1.0
   JavaUtil under Apache License, Version 2.0
   JUnit under Common Public License Version 1.0
   kXML 2 is a small XML pull parser based on the common XML pull API under BSD style or Public Domain
   mvel under The Apache Software License, Version 2.0
-  MySQL java connector under The GNU General Public License, Version 2
   org.drools:drools-core under Apache License, Version 2.0
-  protege under Mozilla Public License
-  Protempa under Apache License, Version 2.0
   Protempa Commons INI Backend Configurations under Apache License, Version 2.0
   Protempa Framework under Apache License, Version 2.0
-  Protempa Protege Knowledge Source Backend under Apache License, Version 2.0
-  Protempa Relational Database Data Source Backend under Apache License, Version 2.0
   Protempa ServiceLoader Backend Configurations Provider under Apache License, Version 2.0
-  Protempa ServiceLoader Backend Provider under Apache License, Version 2.0
-  Protempa Test Suite under Apache License, Version 2.0
-  Protempa UMLS Term Source Backend under Apache License, Version 2.0
-  StAX API under The Apache Software License, Version 2.0
-  Streaming API for XML (STAX API 1.0) under The Apache Software License, Version 2.0
-  UMLSQuery under Apache License, Version 2.0
-  XML Commons External Components XML APIs under The Apache Software License, Version 2.0
-  XmlBeans under The Apache Software License, Version 2.0
 

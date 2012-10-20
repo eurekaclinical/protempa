@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<license-lookup xmlns="https://source.jasig.org/schemas/maven-notice-plugin/license-lookup" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://source.jasig.org/schemas/maven-notice-plugin/license-lookup https://source.jasig.org/schemas/maven-notice-plugin/license-lookup/license-lookup-v1.0.xsd">
+    <artifact>
+        <groupId>com.sleepycat</groupId>
+        <artifactId>je</artifactId>
+        <version>4.1.10</version>
+        <license>Open Source License for Oracle Berkeley DB Java Edition</license>
+    </artifact>
+    <artifact>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.7.0</version>
+        <license>Apache License, Version 2.0</license>
+    </artifact>
+    <artifact>
+        <groupId>dom4j</groupId>
+        <artifactId>dom4j</artifactId>
+        <version>1.6.1</version>
+        <license>BSD License</license>
+    </artifact>
+    <artifact>
+        <groupId>edu.stanford</groupId>
+        <artifactId>protege</artifactId>
+        <version>3.4.7</version>
+        <license>Mozilla Public License</license>
+    </artifact>
+    <artifact>
+        <groupId>org.drools</groupId>
+        <artifactId>drools-core</artifactId>
+        <version>4.0.7</version>
+        <license>Apache License, Version 2.0</license>
+    </artifact>
+    <artifact>
+        <groupId>umlsquery</groupId>
+        <artifactId>umls-query</artifactId>
+        <version>1.0</version>
+        <license>Apache License, Version 2.0</license>
+    </artifact>
+</license-lookup>

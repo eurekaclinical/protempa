@@ -59,8 +59,9 @@ import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
 
 /**
- * Utility class for classes in <code>edu.virginia.pbhs.protempa.protege</code>.
- * 
+ * Utility class for classes in
+ * <code>edu.virginia.pbhs.protempa.protege</code>.
+ *
  * @author Andrew Post
  */
 class Util {
@@ -192,15 +193,12 @@ class Util {
     /**
      * Calculates a time constraint in milliseconds from a pair of time
      * constraint and units values in a Protege instance.
-     * 
-     * @param instance
-     *            a Protege <code>Instance</code> object.
-     * @param constraint
-     *            a time constraint slot name. The named slot is expected to
-     *            have an Integer value.
-     * @param constraintUnits
-     *            a time constraint units slot name. May have the values
-     *            "Minute", "Hour", or "Day".
+     *
+     * @param instance a Protege <code>Instance</code> object.
+     * @param constraint a time constraint slot name. The named slot is expected
+     * to have an Integer value.
+     * @param constraintUnits a time constraint units slot name. May have the
+     * values "Minute", "Hour", or "Day".
      * @return a <code>Weight</code> object representing a time in milliseconds.
      */
     static Integer parseTimeConstraint(Instance instance, String constraint,
@@ -287,8 +285,8 @@ class Util {
         if (bool == null) {
             Util.logger()
                     .log(Level.WARNING,
-                            "{0} has no value for the 'concatenable' property: setting FALSE",
-                            protegeProposition.getName());
+                    "{0} has no value for the 'concatenable' property: setting FALSE",
+                    protegeProposition.getName());
             return false;
         } else {
             return bool.booleanValue();
@@ -318,8 +316,8 @@ class Util {
             bool = Boolean.FALSE;
             Util.logger()
                     .log(Level.WARNING,
-                            "{0} has no value for the 'inDataSource' property: setting FALSE",
-                            protegeProposition.getName());
+                    "{0} has no value for the 'inDataSource' property: setting FALSE",
+                    protegeProposition.getName());
         }
         result.setInDataSource(bool.booleanValue());
     }
@@ -327,15 +325,12 @@ class Util {
     /**
      * Sets inverseIsA on the given proposition definition. Automatically
      * resolves duplicate entries but logs a warning.
-     * 
-     * @param propInstance
-     *            a Protege proposition definition {@link Instance}.
-     * @param propDef
-     *            the corresponding {@link AbstractPropositionDefinition}.
-     * @param cm
-     *            a {@link ConnectionManager}.
-     * @throws KnowledgeSourceReadException
-     *             if there is an error accessing the Protege ontology.
+     *
+     * @param propInstance a Protege proposition definition {@link Instance}.
+     * @param propDef the corresponding {@link AbstractPropositionDefinition}.
+     * @param cm a {@link ConnectionManager}.
+     * @throws KnowledgeSourceReadException if there is an error accessing the
+     * Protege ontology.
      */
     static void setInverseIsAs(Instance propInstance,
             AbstractPropositionDefinition propDef, ConnectionManager cm)
@@ -513,11 +508,17 @@ class Util {
                 "maxDuration", cm));
         result.setMaxLengthUnit(Util.parseUnitsConstraint(extendedProposition,
                 "maxDurationUnits", backend, cm));
-        result.getPropertyConstraints().addAll(
-                instanceToPropertyConstraints(
-                        cm.getOwnSlotValues(extendedProposition,
-                                cm.getSlot("propertyConstraints")), backend));
-
+        Slot slot = cm.getSlot("propertyConstraints");
+        if (slot == null) {
+            logger().log(Level.WARNING, 
+                    "Ontology does not have a propertyConstraints slot, skipping for extended proposition definition {0}", 
+                    result.getDisplayName());
+        } else {
+            result.getPropertyConstraints().addAll(
+                    instanceToPropertyConstraints(
+                    cm.getOwnSlotValues(extendedProposition,
+                    cm.getSlot("propertyConstraints")), backend));
+        }
         return result;
     }
 
@@ -572,36 +573,36 @@ class Util {
             Offsets temporalOffsets = new Offsets();
             Instance startExtendedParamInstance = (Instance) cm
                     .getOwnSlotValue(temporalOffsetInstance,
-                            cm.getSlot("startExtendedProposition"));
+                    cm.getSlot("startExtendedProposition"));
             Instance finishExtendedParamInstance = (Instance) cm
                     .getOwnSlotValue(temporalOffsetInstance,
-                            cm.getSlot("finishExtendedProposition"));
+                    cm.getSlot("finishExtendedProposition"));
             if (startExtendedParamInstance != null) {
                 temporalOffsets
                         .setStartTemporalExtendedPropositionDefinition(extendedParameterCache
-                                .get(startExtendedParamInstance));
+                        .get(startExtendedParamInstance));
                 temporalOffsets
                         .setStartAbstractParamValue(Util
-                                .extendedParameterValue(
-                                        startExtendedParamInstance, cm));
+                        .extendedParameterValue(
+                        startExtendedParamInstance, cm));
             }
 
             if (finishExtendedParamInstance != null) {
                 temporalOffsets
                         .setFinishTemporalExtendedPropositionDefinition(extendedParameterCache
-                                .get(finishExtendedParamInstance));
+                        .get(finishExtendedParamInstance));
                 temporalOffsets
                         .setFinishAbstractParamValue(Util
-                                .extendedParameterValue(
-                                        finishExtendedParamInstance, cm));
+                        .extendedParameterValue(
+                        finishExtendedParamInstance, cm));
             }
 
             temporalOffsets.setStartIntervalSide(IntervalSide
                     .intervalSide((String) cm.getOwnSlotValue(
-                            temporalOffsetInstance, cm.getSlot("startSide"))));
+                    temporalOffsetInstance, cm.getSlot("startSide"))));
             temporalOffsets.setFinishIntervalSide(IntervalSide
                     .intervalSide((String) cm.getOwnSlotValue(
-                            temporalOffsetInstance, cm.getSlot("finishSide"))));
+                    temporalOffsetInstance, cm.getSlot("finishSide"))));
             Integer startOffset = Util.parseTimeConstraint(
                     temporalOffsetInstance, "startOffset", cm);
             temporalOffsets.setStartOffset(startOffset);
@@ -621,11 +622,11 @@ class Util {
 
     /**
      * Returns whether a Protege instance is a Parameter.
-     * 
-     * @param extendedParameter
-     *            a Protege instance that is assumed to be a Proposition.
+     *
+     * @param extendedParameter a Protege instance that is assumed to be a
+     * Proposition.
      * @return <code>true</code> if the provided Protege instance is a
-     *         Parameter, <code>false</code> otherwise.
+     * Parameter, <code>false</code> otherwise.
      */
     private static boolean isParameter(Instance extendedParameter,
             ConnectionManager cm) throws KnowledgeSourceReadException {
@@ -640,20 +641,19 @@ class Util {
 
     /**
      * Returns the proposition id for an extended proposition definition.
-     * 
-     * @param extendedProposition
-     *            an ExtendedProposition.
+     *
+     * @param extendedProposition an ExtendedProposition.
      * @return a proposition id {@link String}.
      */
     private static String propositionId(Instance extendedProposition) {
         Instance proposition = (Instance) extendedProposition
                 .getOwnSlotValue(extendedProposition.getKnowledgeBase()
-                        .getSlot("proposition"));
+                .getSlot("proposition"));
         if (proposition.hasType(proposition.getKnowledgeBase().getCls(
                 "ConstantParameter"))) {
             throw new IllegalStateException(
                     "Constant parameters are not yet supported as "
-                            + "components of a high level abstraction definition.");
+                    + "components of a high level abstraction definition.");
         } else {
             return proposition.getName();
         }
@@ -666,7 +666,7 @@ class Util {
             String name = ((Instance) isAInstance).getName();
             if (!inverseIsAs.add(name) && logger.isLoggable(Level.WARNING)) {
                 logger.log(Level.WARNING, "Duplicate {0} in {1}: {2}",
-                        new Object[] { slotName, propInstance.getName(), name });
+                        new Object[]{slotName, propInstance.getName(), name});
             }
         }
         return inverseIsAs;
