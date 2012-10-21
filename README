@@ -1,4 +1,4 @@
-Protempa 2.0.1 -- A temporal query framework for clinical databases.
+Protempa 2.0.1 -- A Temporal Query Framework for Clinical Databases
 Center for Comprehensive Informatics, Emory University
 
 OVERVIEW
@@ -27,6 +27,10 @@ REQUIREMENTS
 
 The current version is known to work with Oracle Java 6. It is expected to work
 with OpenJDK 6 as well. It is incompatible with Java 7. 
+
+Protempa uses the Maven build system, available from http://maven.apache.org. 
+You must install maven, if you do not already have it, to work with the source 
+code. We use Maven 3.
 
 INSTALLATION
 
