@@ -36,32 +36,32 @@ final class SliceConverter implements AbstractionConverter {
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
 
-        SliceDefinition ad = new SliceDefinition(
-                protegeParameter.getName());
+        SliceDefinition ad = new SliceDefinition(protegeParameter.getName());
         ConnectionManager cm = backend.getConnectionManager();
         Util.setNames(protegeParameter, ad, cm);
         Util.setInDataSource(protegeParameter, ad, cm);
         Util.setInverseIsAs(protegeParameter, ad, cm);
         Util.setProperties(protegeParameter, ad, cm);
         Util.setTerms(protegeParameter, ad, cm);
-        Integer maxIndexInt =
-                (Integer) cm.getOwnSlotValue(protegeParameter,
+        Integer maxIndexInt = (Integer) cm.getOwnSlotValue(protegeParameter,
                 cm.getSlot("maxIndex"));
         if (maxIndexInt != null) {
             ad.setMaxIndex(maxIndexInt.intValue());
         }
-        Integer minIndexInt =
-                (Integer) cm.getOwnSlotValue(protegeParameter,
+        Integer minIndexInt = (Integer) cm.getOwnSlotValue(protegeParameter,
                 cm.getSlot("minIndex"));
         if (maxIndexInt != null) {
             ad.setMinIndex(minIndexInt.intValue());
         }
 
-        Collection<?> abstractedFromInstances =
-                cm.getOwnSlotValues(protegeParameter,
-                cm.getSlot("abstractedFrom"));
-        for (Iterator<?> itr = abstractedFromInstances.iterator();
-                itr.hasNext();) {
+        Boolean mergedInterval = (Boolean) cm.getOwnSlotValue(protegeParameter,
+                cm.getSlot("mergedInterval"));
+        ad.setMergedInterval(mergedInterval);
+
+        Collection<?> abstractedFromInstances = cm.getOwnSlotValues(
+                protegeParameter, cm.getSlot("abstractedFrom"));
+        for (Iterator<?> itr = abstractedFromInstances.iterator(); itr
+                .hasNext();) {
             ad.addAbstractedFrom(((Instance) itr.next()).getName());
         }
         return ad;
