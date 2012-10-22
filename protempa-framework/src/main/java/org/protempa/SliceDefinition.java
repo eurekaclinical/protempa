@@ -41,6 +41,11 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
      * The upper limit of the range of this slice (exclusive).
      */
     private int maxIndex = Integer.MAX_VALUE;
+    
+    /*
+     * Whether or not the intervals in the slice should be merged into one
+     */
+    private boolean mergedInterval = false;
 
     public SliceDefinition(String id) {
         super(id);
@@ -89,6 +94,14 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
      */
     public int getMaxIndex() {
         return maxIndex;
+    }
+
+    public boolean isMergedInterval() {
+        return mergedInterval;
+    }
+
+    public void setMergedInterval(boolean mergedInterval) {
+        this.mergedInterval = mergedInterval;
     }
 
     @Override
