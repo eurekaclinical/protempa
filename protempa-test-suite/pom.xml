@@ -4,12 +4,12 @@
     <parent>
         <artifactId>protempa</artifactId>
         <groupId>org.protempa</groupId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>2.0.2</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>protempa-test-suite</artifactId>
     <name>Protempa Test Suite</name>
-    <version>2.0.2-SNAPSHOT</version>
+    <version>2.0.2</version>
     <description>For running end-to-end regression and integration tests against Protempa</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,20 +18,20 @@
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-framework</artifactId>
-            <version>2.0.2-SNAPSHOT</version>
+            <version>2.0.2</version>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-ksb-protege</artifactId>
-            <version>2.0.2-SNAPSHOT</version>
+            <version>2.0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-tsb-umls</artifactId>
-            <version>2.0.2-SNAPSHOT</version>
+            <version>2.0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -43,13 +43,13 @@
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-bcp-serviceloader</artifactId>
-            <version>2.0.2-SNAPSHOT</version>
+            <version>2.0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-bconfigs-commons-ini</artifactId>
-            <version>2.0.2-SNAPSHOT</version>
+            <version>2.0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-dsb-relationaldb</artifactId>
-            <version>2.0.2-SNAPSHOT</version>
+            <version>2.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
