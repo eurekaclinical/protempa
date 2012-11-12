@@ -13,7 +13,6 @@
     <packaging>jar</packaging>
     <version>2.0.2-SNAPSHOT</version>
     <name>Protempa UMLS Term Source Backend</name>
-    <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -46,7 +45,7 @@
         <dependency>
             <groupId>umlsquery</groupId>
             <artifactId>umls-query</artifactId>
-            <version>1.0</version>
+            <version>1.0.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

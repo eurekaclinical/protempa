@@ -1,4 +1,4 @@
-Protempa 2.0.1 -- A Temporal Query Framework for Clinical Databases
+Protempa 2.0.2 -- A Temporal Query Framework for Clinical Databases
 Center for Comprehensive Informatics, Emory University
 
 OVERVIEW
@@ -14,11 +14,11 @@ observation); sequences (chemotherapy followed by surgery within 180 days,
 a hospital encounter followed by another hospital encounter within 30 days); 
 and overlaps (falling platelet counts in the setting of HELLP syndrome).
 Protempa is the foundation for the Eureka! Clinical Analytics tool, available
-from http://eureka.cci.emory.edu.
+from http://aiw.sourceforge.net.
 
 WHAT'S NEW
 
-Version 2.0.1 improves support for specifying property constraints in temporal
+Version 2.0.2 improves support for specifying property constraints in temporal
 abstraction definitions, for example, encounters with a type of Inpatient. This
 release allows using pre-property constraint temporal abstraction ontologies
 that lack the propertyConstraint slot.
@@ -41,11 +41,11 @@ declaration:
 <dependency>
   <groupId>org.protempa</groupId>
   <artifactId>protempa</artifactId>
-  <version>2.0.1</version>
+  <version>2.0.2</version>
 </dependency>
 
 The source code is also available in tarball and zip file formats from 
-http://eureka-dev.cci.emory.edu/dev/.
+http://aiw.sourceforge.net/dev/protempa-2.0.2.
 
 Please see the technical documentation linked below for detailed instructions 
 on what the framework does and how to use it.
@@ -64,5 +64,5 @@ Protempa is Copyright (C) 2012 Emory University.
 
 MORE INFORMATION
 
-Please see http://eureka-dev.cci.emory.edu/dev for technical documentation and
-more information.
+Please see http://aiw.sourceforge.net/dev/protempa-2.0.2 for technical
+documentation and more information.

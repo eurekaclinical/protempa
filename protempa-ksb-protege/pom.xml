@@ -13,7 +13,6 @@
     <packaging>jar</packaging>
     <version>2.0.2-SNAPSHOT</version>
     <name>Protempa Protege Knowledge Source Backend</name>
-    <url>http://maven.apache.org</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
