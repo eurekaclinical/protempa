@@ -24,12 +24,12 @@ This project includes:
   Commons Logging under The Apache Software License, Version 2.0
   commons-beanutils under Apache License, Version 2.0
   Digester under The Apache Software License, Version 2.0
+  Drools :: Rete-OO Core under Apache License, Version 2.0
   JavaUtil under Apache License, Version 2.0
   JUnit under Common Public License Version 1.0
   kXML 2 is a small XML pull parser based on the common XML pull API under BSD style or Public Domain
   mvel under The Apache Software License, Version 2.0
   MySQL java connector under The GNU General Public License, Version 2
-  org.drools:drools-core under Apache License, Version 2.0
   Protempa Commons INI Backend Configurations under Apache License, Version 2.0
   Protempa Framework under Apache License, Version 2.0
   Protempa ServiceLoader Backend Configurations Provider under Apache License, Version 2.0

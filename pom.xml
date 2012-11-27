@@ -67,6 +67,10 @@
         </plugins>
     </reporting>
     <repositories>
+	<repository>
+	    <id>maven.cci</id>
+	    <url>http://maven.cci.emory.edu:8081/nexus/content/repositories/public</url>
+	</repository>
         <repository>
             <id>aiw.internal.repo</id>
             <url>http://maven.cci.emory.edu:8081/nexus/content/repositories/aiw/</url>

@@ -26,12 +26,12 @@
         <protempa.xsd.tableQueryResultsHandler.name>protempa_tableQueryResultsHandler.xsd</protempa.xsd.tableQueryResultsHandler.name>
         <protempa.xsd.tableQueryResultsHandler.url>${protempa.xsd.parentUrl}/${protempa.xsd.tableQueryResultsHandler.name}</protempa.xsd.tableQueryResultsHandler.url>
     </properties>
-    <repositories>
+<!--    <repositories>
         <repository>
             <id>drools.org</id>
             <url>https://repository.jboss.org/nexus/content/repositories/releases/</url>
         </repository>
-    </repositories>
+    </repositories>-->
     <dependencies>
         <dependency>
             <groupId>org.arp</groupId>
