@@ -14,7 +14,6 @@ limitations under the License.
 
 This project includes:
   Apache ServiceMix :: Bundles :: xstream under The Apache Software License, Version 2.0
-  com.sleepycat:je under Open Source License for Oracle Berkeley DB Java Edition
   Commons BeanUtils Core under The Apache Software License, Version 2.0
   Commons CLI under The Apache Software License, Version 2.0
   Commons Collections under The Apache Software License, Version 2.0
@@ -26,6 +25,7 @@ This project includes:
   Digester under The Apache Software License, Version 2.0
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
   JavaUtil under Apache License, Version 2.0
+  je under Sleepycat License
   JUnit under Common Public License Version 1.0
   kXML 2 is a small XML pull parser based on the common XML pull API under BSD style or Public Domain
   mvel under The Apache Software License, Version 2.0
