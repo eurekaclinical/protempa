@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import edu.stanford.smi.protege.model.Instance;
+import edu.stanford.smi.protege.model.Slot;
+import java.util.logging.Level;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.SliceDefinition;
 
@@ -54,9 +56,17 @@ final class SliceConverter implements AbstractionConverter {
             ad.setMinIndex(minIndexInt.intValue());
         }
 
-        Boolean mergedInterval = (Boolean) cm.getOwnSlotValue(protegeParameter,
-                cm.getSlot("mergedInterval"));
-        ad.setMergedInterval(mergedInterval);
+        Slot mergedIntervalSlot = cm.getSlot("mergedInterval");
+        if (mergedIntervalSlot != null) {
+            Boolean mergedInterval = 
+                    (Boolean) cm.getOwnSlotValue(protegeParameter,
+                    mergedIntervalSlot);
+            ad.setMergedInterval(mergedInterval);
+        } else {
+            Util.logger().log(Level.WARNING, 
+                    "Ontology in {0} does not have mergedInterval slot, skipping for slice definition {1}", 
+                    new Object[]{backend.getDisplayName(), ad.getId()});
+        }
 
         Collection<?> abstractedFromInstances = cm.getOwnSlotValues(
                 protegeParameter, cm.getSlot("abstractedFrom"));

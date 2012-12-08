@@ -213,16 +213,21 @@ public class INICommonsConfigurations implements Configurations {
         }
     }
 
+    /**
+     * Loads an INI file with the specified name in the configuration file
+     * directory.
+     * 
+     * @param configurationId the INI file's name.
+     * @return the ids of the sections of the file.
+     * 
+     * @throws ConfigurationsLoadException if an error occurs reading the file.
+     */
     @Override
     public List<String> loadConfigurationIds(String configurationId)
             throws ConfigurationsLoadException {
         if (configurationId == null) {
             throw new IllegalArgumentException(
                     "configurationId cannot be null");
-        }
-        if (!this.directory.exists() && !this.directory.mkdir()) {
-            throw new ConfigurationsLoadException("Cannot create directory "
-                    + this.directory);
         }
         HierarchicalINIConfiguration config =
                 new HierarchicalINIConfiguration();
@@ -248,7 +253,8 @@ public class INICommonsConfigurations implements Configurations {
             }
             return Arrays.asList(result);
         } catch (ConfigurationException ex) {
-            throw new ConfigurationsLoadException(ex);
+            throw new ConfigurationsLoadException(
+                    "Could not load configuration " + configurationId, ex);
         }
     }
 
