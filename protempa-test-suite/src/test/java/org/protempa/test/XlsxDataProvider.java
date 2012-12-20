@@ -449,7 +449,11 @@ public class XlsxDataProvider implements DataProvider {
             result = null;
         } else {
             if (cell.getCellType() != Cell.CELL_TYPE_STRING) {
-                result = null;
+                if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                    result = String.valueOf(cell.getNumericCellValue());
+                } else {
+                    result = null;
+                }
             } else {
                 result = cell.getStringCellValue();
             }

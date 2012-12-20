@@ -34,6 +34,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,8 +45,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.FileUtils;
 
+import org.apache.commons.io.FileUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.io.IOUtil;
@@ -59,17 +60,24 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.protempa.AbstractionFinderTestHelper;
+import org.protempa.CompoundLowLevelAbstractionDefinition;
+import org.protempa.CompoundLowLevelAbstractionDefinition.ValueDefinitionMatchOperator;
 import org.protempa.EventDefinition;
 import org.protempa.ExtendedPropositionDefinition;
 import org.protempa.FinderException;
 import org.protempa.HighLevelAbstractionDefinition;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.LowLevelAbstractionDefinition;
+import org.protempa.LowLevelAbstractionValueDefinition;
 import org.protempa.PrimitiveParameterDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.Protempa;
 import org.protempa.ProtempaException;
 import org.protempa.ProtempaStartupException;
+import org.protempa.SimpleGapFunction;
+import org.protempa.SlidingWindowWidthMode;
 import org.protempa.SourceFactory;
+import org.protempa.TemporalExtendedParameterDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
@@ -82,10 +90,14 @@ import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.comparator.TemporalPropositionIntervalComparator;
 import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
+import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.NominalValue;
+import org.protempa.proposition.value.NumberValue;
+import org.protempa.proposition.value.ValueComparator;
 import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
@@ -93,10 +105,10 @@ import org.protempa.query.handler.QueryResultsHandler;
 
 /**
  * Unit tests for Protempa.
- *
+ * 
  * Persistent stores go into the directory in the system property
  * <code>java.io.tmpdir</code>.
- *
+ * 
  * @author Michel Mansour
  */
 public class ProtempaTest {
@@ -105,7 +117,8 @@ public class ProtempaTest {
     private static final String ICD9_804 = "ICD9:804";
     private static final String QUERY_ERROR_MSG = "Failed to build query";
     private static final String AF_ERROR_MSG = "Exception thrown by AbstractionFinder";
-    private static Logger logger = Logger.getLogger(ProtempaTest.class.getName());
+    private static Logger logger = Logger.getLogger(ProtempaTest.class
+            .getName());
     /**
      * Sample data file
      */
@@ -145,25 +158,32 @@ public class ProtempaTest {
     /**
      * All proposition IDs in the sample data
      */
-    private static final String[] PROP_IDS = {"Patient", "PatientAll",
-        "Encounter", ICD9_013_82, ICD9_804, "VitalSign",
-        "HELLP_FIRST_RECOVERING_PLATELETS", "LDH_TREND", "AST_STATE",
-        "30DayReadmission", "No30DayReadmission", "MyDiagnosis", "MyVitalSign",
-        "MyTemporalPattern", "MyAndLikePattern"};
+    private static final String[] PROP_IDS = { "Patient", "PatientAll",
+            "Encounter", ICD9_013_82, ICD9_804, "VitalSign",
+            "HELLP_FIRST_RECOVERING_PLATELETS", "LDH_TREND", "AST_STATE",
+            "30DayReadmission", "No30DayReadmission", "MyDiagnosis",
+            "MyVitalSign", "MyTemporalPattern", "MyAndLikePattern",
+            "DiastolicBloodPressure", "SystolicBloodPressure",
+            "MySystolicClassification", "MyDiastolicClassification",
+            "MyBloodPressureClassificationAny",
+            "MyBloodPressureClassificationConsecutiveAny",
+            "MyBloodPressureClassificationAll",
+            "MyTwoConsecutiveHighBloodPressure", "MySystolicClassification3",
+            "MyDiastolicClassification3", "MyBloodPressureClassification3Any" };
     /**
      * Vital signs
      */
-    private static final String[] VITALS = {"BodyMassIndex",
-        "DiastolicBloodPressure", "HeartRate", "O2Saturation",
-        "RespiratoryRate", "SystolicBloodPressure", "TemperatureAxillary",
-        "TemperatureCore", "TemperatureNOS", "TemperatureRectal",
-        "TemperatureTympanic"};
+    private static final String[] VITALS = { "BodyMassIndex",
+            "DiastolicBloodPressure", "HeartRate", "O2Saturation",
+            "RespiratoryRate", "SystolicBloodPressure", "TemperatureAxillary",
+            "TemperatureCore", "TemperatureNOS", "TemperatureRectal",
+            "TemperatureTympanic" };
     /**
      * Key IDs (testing purposes only...you know what I mean...for testing the
      * tests)
      */
-    private static final String[] KEY_IDS = {"0", "1", "2", "3", "4", "5",
-        "6", "7", "8", "9", "10", "11"};
+    private static final String[] KEY_IDS = { "0", "1", "2", "3", "4", "5",
+            "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" };
 
     /*
      * Instance of Protempa to run
@@ -184,8 +204,9 @@ public class ProtempaTest {
     /**
      * Performs set up operations required for all testing (eg, setting up the
      * in-memory database).
-     *
-     * @throws Exception if something goes wrong
+     * 
+     * @throws Exception
+     *             if something goes wrong
      */
     @BeforeClass
     public static void setUpAll() throws Exception {
@@ -208,8 +229,9 @@ public class ProtempaTest {
     /**
      * Performs tear down operations once all testing is complete (eg, closing
      * Protempa)
-     *
-     * @throws Exception if something goes wrong
+     * 
+     * @throws Exception
+     *             if something goes wrong
      */
     @AfterClass
     public static void tearDownAll() throws Exception {
@@ -224,8 +246,7 @@ public class ProtempaTest {
             ConfigurationsLoadException, InvalidConfigurationException {
         logger.log(Level.INFO, "Populating database");
         this.dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
-        inserter = new DataInserter(
-                "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
+        inserter = new DataInserter("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
         inserter.createTables("src/test/resources/dsb/test-schema.sql");
         this.patientCount = dataProvider.getPatients().size();
         inserter.insertPatients(dataProvider.getPatients());
@@ -256,10 +277,13 @@ public class ProtempaTest {
     }
 
     /**
-     * Tests the end-to-end execution of Protempa.
+     * Tests the end-to-end execution of Protempa with persistence. Tests that
+     * the results are expected at each stage of execution: retrieval,
+     * processing, and output.
      */
     @Test
-    public void testProtempaWithPersistence() throws IOException, ParseException {
+    public void testProtempaWithPersistence() throws IOException,
+            ParseException {
         File dir = new UniqueDirectoryCreator().create("test-protempa", null,
                 FileUtils.getTempDirectory());
         try {
@@ -272,18 +296,241 @@ public class ProtempaTest {
         }
     }
 
+    /**
+     * Tests the end-to-end execution of Protempa without persistence. Only
+     * verifies that the final output is correct.
+     */
     @Test
     public void testProtempaWithoutPersistence() throws FinderException,
             ParseException, KnowledgeSourceReadException, QueryBuildException,
             IOException {
         File outputFile = File.createTempFile("protempa-test", null);
         FileWriter fw = new FileWriter(outputFile);
-        QueryResultsHandler handler = new SingleColumnQueryResultsHandler(
-                fw);
+        QueryResultsHandler handler = new SingleColumnQueryResultsHandler(fw);
         protempa.execute(query(), handler);
         assertTrue("output doesn't match",
                 outputMatches(outputFile, TRUTH_OUTPUT));
 
+    }
+
+    private PropositionDefinition systolicClassification() {
+        LowLevelAbstractionDefinition systolic = new LowLevelAbstractionDefinition(
+                "MySystolicClassification");
+        systolic.setDisplayName("My Systolic Classification");
+        systolic.setAlgorithmId("stateDetector");
+        systolic.addPrimitiveParameterId("SystolicBloodPressure");
+        systolic.setSlidingWindowWidthMode(SlidingWindowWidthMode.DEFAULT);
+        systolic.setGapFunction(new SimpleGapFunction(168,
+                AbsoluteTimeUnit.HOUR));
+        systolic.setMaximumGapBetweenValues(24);
+        systolic.setMaximumGapBetweenValuesUnits(AbsoluteTimeUnit.HOUR);
+
+        LowLevelAbstractionValueDefinition sysHigh = new LowLevelAbstractionValueDefinition(
+                systolic, "MY_SYSTOLIC_HIGH");
+        sysHigh.setValue(NominalValue.getInstance("My Systolic High"));
+        sysHigh.setParameterValue("minThreshold", NumberValue.getInstance(140));
+        sysHigh.setParameterComp("minThreshold",
+                ValueComparator.GREATER_THAN_OR_EQUAL_TO);
+
+        LowLevelAbstractionValueDefinition sysNormal = new LowLevelAbstractionValueDefinition(
+                systolic, "MY_SYSTOLIC_NORMAL");
+        sysNormal.setValue(NominalValue.getInstance("My Systolic Normal"));
+        sysNormal.setParameterValue("maxThreshold",
+                NumberValue.getInstance(140));
+        sysNormal.setParameterComp("maxThreshold", ValueComparator.LESS_THAN);
+
+        return systolic;
+    }
+
+    private PropositionDefinition systolicClassification3() {
+        LowLevelAbstractionDefinition systolic = new LowLevelAbstractionDefinition(
+                "MySystolicClassification3");
+
+        systolic.setDisplayName("My Systolic Classification 3");
+        systolic.setAlgorithmId("stateDetector");
+        systolic.addPrimitiveParameterId("SystolicBloodPressure");
+        systolic.setSlidingWindowWidthMode(SlidingWindowWidthMode.DEFAULT);
+        systolic.setGapFunction(new SimpleGapFunction(168,
+                AbsoluteTimeUnit.HOUR));
+        systolic.setMaximumGapBetweenValues(24);
+        systolic.setMaximumGapBetweenValuesUnits(AbsoluteTimeUnit.HOUR);
+
+        LowLevelAbstractionValueDefinition sysHigh = new LowLevelAbstractionValueDefinition(
+                systolic, "MY_SYSTOLIC_HIGH_3");
+        sysHigh.setValue(NominalValue.getInstance("My Systolic High 3"));
+        sysHigh.setParameterValue("minThreshold", NumberValue.getInstance(140));
+        sysHigh.setParameterComp("minThreshold",
+                ValueComparator.GREATER_THAN_OR_EQUAL_TO);
+
+        LowLevelAbstractionValueDefinition sysLow = new LowLevelAbstractionValueDefinition(
+                systolic, "MY_SYSTOLIC_LOW_3");
+        sysLow.setValue(NominalValue.getInstance("My Systolic Low 3"));
+        sysLow.setParameterValue("maxThreshold", NumberValue.getInstance(60));
+        sysLow.setParameterComp("maxThreshold",
+                ValueComparator.LESS_THAN_OR_EQUAL_TO);
+
+        LowLevelAbstractionValueDefinition sysNormal = new LowLevelAbstractionValueDefinition(
+                systolic, "MY_SYSTOLIC_NORMAL_3");
+        sysNormal.setValue(NominalValue.getInstance("My Systolic Normal 3"));
+        sysNormal.setParameterValue("maxThreshold",
+                NumberValue.getInstance(140));
+        sysNormal.setParameterComp("maxThreshold", ValueComparator.LESS_THAN);
+        sysNormal
+                .setParameterValue("minThreshold", NumberValue.getInstance(60));
+        sysNormal
+                .setParameterComp("minThreshold", ValueComparator.GREATER_THAN);
+
+        return systolic;
+    }
+
+    private LowLevelAbstractionDefinition diastolicClassification() {
+        LowLevelAbstractionDefinition diastolic = new LowLevelAbstractionDefinition(
+                "MyDiastolicClassification");
+        diastolic.setDisplayName("My Diastolic Classification");
+        diastolic.setAlgorithmId("stateDetector");
+        diastolic.addPrimitiveParameterId("DiastolicBloodPressure");
+        diastolic.setSlidingWindowWidthMode(SlidingWindowWidthMode.DEFAULT);
+        diastolic.setGapFunction(new SimpleGapFunction(168,
+                AbsoluteTimeUnit.HOUR));
+        diastolic.setMaximumGapBetweenValues(24);
+        diastolic.setMaximumGapBetweenValuesUnits(AbsoluteTimeUnit.HOUR);
+
+        LowLevelAbstractionValueDefinition diasHigh = new LowLevelAbstractionValueDefinition(
+                diastolic, "MY_DIASTOLIC_HIGH");
+        diasHigh.setValue(NominalValue.getInstance("My Diastolic High"));
+        diasHigh.setParameterValue("minThreshold", NumberValue.getInstance(90));
+        diasHigh.setParameterComp("minThreshold",
+                ValueComparator.GREATER_THAN_OR_EQUAL_TO);
+
+        LowLevelAbstractionValueDefinition diasNormal = new LowLevelAbstractionValueDefinition(
+                diastolic, "MY_DIASTOLIC_NORMAL");
+        diasNormal.setValue(NominalValue.getInstance("My Diastolic Normal"));
+        diasNormal.setParameterValue("maxThreshold",
+                NumberValue.getInstance(90));
+        diasNormal.setParameterComp("maxThreshold", ValueComparator.LESS_THAN);
+
+        return diastolic;
+    }
+
+    private PropositionDefinition diastolicClassification3() {
+        LowLevelAbstractionDefinition diastolic = new LowLevelAbstractionDefinition(
+                "MyDiastolicClassification3");
+
+        diastolic.setDisplayName("My Diastolic Classification 3");
+        diastolic.setAlgorithmId("stateDetector");
+        diastolic.addPrimitiveParameterId("DiastolicBloodPressure");
+        diastolic.setSlidingWindowWidthMode(SlidingWindowWidthMode.DEFAULT);
+        diastolic.setGapFunction(new SimpleGapFunction(24,
+                AbsoluteTimeUnit.HOUR));
+        diastolic.setMaximumGapBetweenValues(24);
+        diastolic.setMaximumGapBetweenValuesUnits(AbsoluteTimeUnit.HOUR);
+
+        LowLevelAbstractionValueDefinition sysHigh = new LowLevelAbstractionValueDefinition(
+                diastolic, "MY_DIASTOLIC_HIGH_3");
+        sysHigh.setValue(NominalValue.getInstance("My Diastolic High 3"));
+        sysHigh.setParameterValue("minThreshold", NumberValue.getInstance(90));
+        sysHigh.setParameterComp("minThreshold",
+                ValueComparator.GREATER_THAN_OR_EQUAL_TO);
+
+        LowLevelAbstractionValueDefinition sysLow = new LowLevelAbstractionValueDefinition(
+                diastolic, "MY_DIASTOLIC_LOW_3");
+        sysLow.setValue(NominalValue.getInstance("My Diastolic Low 3"));
+        sysLow.setParameterValue("maxThreshold", NumberValue.getInstance(30));
+        sysLow.setParameterComp("maxThreshold",
+                ValueComparator.LESS_THAN_OR_EQUAL_TO);
+
+        LowLevelAbstractionValueDefinition sysNormal = new LowLevelAbstractionValueDefinition(
+                diastolic, "MY_DIASTOLIC_NORMAL_3");
+        sysNormal.setValue(NominalValue.getInstance("My Diastolic Normal 3"));
+        sysNormal
+                .setParameterValue("maxThreshold", NumberValue.getInstance(90));
+        sysNormal.setParameterComp("maxThreshold", ValueComparator.LESS_THAN);
+        sysNormal
+                .setParameterValue("minThreshold", NumberValue.getInstance(30));
+        sysNormal
+                .setParameterComp("minThreshold", ValueComparator.GREATER_THAN);
+
+        return diastolic;
+    }
+
+    private PropositionDefinition bloodPressureClassificationConsecutiveAny() {
+        CompoundLowLevelAbstractionDefinition bp = new CompoundLowLevelAbstractionDefinition(
+                "MyBloodPressureClassificationConsecutiveAny");
+        bp.setDisplayName("My Blood Pressure Classification (ANY - 2)");
+        bp.addValueClassification("MYBP_HIGH", "MySystolicClassification",
+                "My Systolic High");
+        bp.addValueClassification("MYBP_HIGH", "MyDiastolicClassification",
+                "My Diastolic High");
+        bp.addValueClassification("MYBP_NORMAL", "MySystolicClassification",
+                "My Systolic Normal");
+        bp.addValueClassification("MYBP_NORMAL", "MyDiastolicClassification",
+                "My Diastolic Normal");
+        bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ANY);
+        bp.setMinimumNumberOfValues(2);
+        bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+
+        return bp;
+    }
+
+    private PropositionDefinition bloodPressureClassificationAny() {
+        CompoundLowLevelAbstractionDefinition bp = new CompoundLowLevelAbstractionDefinition(
+                "MyBloodPressureClassificationAny");
+        bp.setDisplayName("My Blood Pressure Classification (ANY)");
+        bp.addValueClassification("MYBP_HIGH", "MySystolicClassification",
+                "My Systolic High");
+        bp.addValueClassification("MYBP_HIGH", "MyDiastolicClassification",
+                "My Diastolic High");
+        bp.addValueClassification("MYBP_NORMAL", "MySystolicClassification",
+                "My Systolic Normal");
+        bp.addValueClassification("MYBP_NORMAL", "MyDiastolicClassification",
+                "My Diastolic Normal");
+        bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ANY);
+        bp.setMinimumNumberOfValues(1);
+        bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+
+        return bp;
+    }
+
+    private PropositionDefinition bloodPressureClassificationAll() {
+        CompoundLowLevelAbstractionDefinition bp = new CompoundLowLevelAbstractionDefinition(
+                "MyBloodPressureClassificationAll");
+        bp.setDisplayName("My Blood Pressure Classification (ALL)");
+        bp.addValueClassification("MYBP_HIGH", "MySystolicClassification",
+                "My Systolic High");
+        bp.addValueClassification("MYBP_HIGH", "MyDiastolicClassification",
+                "My Diastolic High");
+        bp.addValueClassification("MYBP_NORMAL", "MySystolicClassification",
+                "My Systolic Normal");
+        bp.addValueClassification("MYBP_NORMAL", "MyDiastolicClassification",
+                "My Diastolic Normal");
+        bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ALL);
+        bp.setMinimumNumberOfValues(1);
+        bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+
+        return bp;
+    }
+
+    private PropositionDefinition bloodPressureClassification3Any() {
+        CompoundLowLevelAbstractionDefinition bp = new CompoundLowLevelAbstractionDefinition(
+                "MyBloodPressureClassification3Any");
+        bp.setDisplayName("My Blood Pressure Classification 3 (ANY)");
+        bp.addValueClassification("MYBP3_HIGH", "MySystolicClassification3",
+                "My Systolic High 3");
+        bp.addValueClassification("MYBP3_HIGH", "MyDiastolicClassification",
+                "My Diastolic High 3");
+        bp.addValueClassification("MYBP3_LOW", "MySystolicClassification3",
+                "My Systolic Low 3");
+        bp.addValueClassification("MYBP3_LOW", "MyDiastolicClassification",
+                "My Diastolic Low 3");
+        bp.addValueClassification("MYBP3_NORMAL", "MySystolicClassification3",
+                "My Systolic Normal 3");
+        bp.addValueClassification("MYBP3_NORMAL", "MyDiastolicClassification",
+                "My Diastolic Normal 3");
+        bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ANY);
+        bp.setMinimumNumberOfValues(1);
+        bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+
+        return bp;
     }
 
     private Query query() throws ParseException, KnowledgeSourceReadException,
@@ -297,42 +544,55 @@ public class ProtempaTest {
         ed.setDisplayName("My Diagnosis");
         ed.setInverseIsA("ICD9:907.1");
 
-        PrimitiveParameterDefinition pd =
-                new PrimitiveParameterDefinition("MyVitalSign");
+        PrimitiveParameterDefinition pd = new PrimitiveParameterDefinition(
+                "MyVitalSign");
         pd.setDisplayName("My Vital Sign");
         pd.setInverseIsA("HeartRate");
 
-        HighLevelAbstractionDefinition hd =
-                new HighLevelAbstractionDefinition("MyTemporalPattern");
+        HighLevelAbstractionDefinition hd = new HighLevelAbstractionDefinition(
+                "MyTemporalPattern");
         hd.setDisplayName("My Temporal Pattern");
-        TemporalExtendedPropositionDefinition td1 =
-                new TemporalExtendedPropositionDefinition(ed.getId());
-        TemporalExtendedPropositionDefinition td2 =
-                new TemporalExtendedPropositionDefinition(pd.getId());
+        TemporalExtendedPropositionDefinition td1 = new TemporalExtendedPropositionDefinition(
+                ed.getId());
+        TemporalExtendedPropositionDefinition td2 = new TemporalExtendedPropositionDefinition(
+                pd.getId());
         hd.add(td1);
         hd.add(td2);
         Relation rel = new Relation();
         hd.setRelation(td1, td2, rel);
 
-        HighLevelAbstractionDefinition hd2 =
-                new HighLevelAbstractionDefinition("MyAndLikePattern");
+        HighLevelAbstractionDefinition hd2 = new HighLevelAbstractionDefinition(
+                "MyAndLikePattern");
         hd.setDisplayName("My Or-like Pattern");
-        ExtendedPropositionDefinition epd1 =
-                new ExtendedPropositionDefinition("ICD9:V-codes");
-        ExtendedPropositionDefinition epd2 =
-                new ExtendedPropositionDefinition("ICD9:35.83");
+        ExtendedPropositionDefinition epd1 = new ExtendedPropositionDefinition(
+                "ICD9:V-codes");
+        ExtendedPropositionDefinition epd2 = new ExtendedPropositionDefinition(
+                "ICD9:35.83");
         hd2.add(epd1);
         hd2.add(epd2);
 
-        q.setPropositionDefinitions(
-                new PropositionDefinition[]{ed, pd, hd, hd2});
+        HighLevelAbstractionDefinition highBp = new HighLevelAbstractionDefinition(
+                "MyTwoConsecutiveHighBloodPressure");
+        highBp.setDisplayName("My Two Consecutive High Blood Pressure");
+        TemporalExtendedParameterDefinition highBpTpd = new TemporalExtendedParameterDefinition(
+                "MyBloodPressureClassificationConsecutiveAny");
+        highBpTpd.setValue(NominalValue.getInstance("MYBP_HIGH"));
+        highBp.add(highBpTpd);
+        Relation highBpRel = new Relation();
+        highBp.setRelation(highBpTpd, highBpTpd, highBpRel);
+
+        q.setPropositionDefinitions(new PropositionDefinition[] { ed, pd, hd,
+                hd2, systolicClassification(), diastolicClassification(),
+                bloodPressureClassificationAny(),
+                bloodPressureClassificationConsecutiveAny(), highBp,
+                bloodPressureClassificationAll(), systolicClassification3(),
+                diastolicClassification3(), bloodPressureClassification3Any() });
 
         DateFormat shortFormat = AbsoluteTimeGranularity.DAY.getShortFormat();
         DateTimeFilter timeRange = new DateTimeFilter(
-                new String[]{"Encounter"},
-                shortFormat.parse("08/01/2006"), AbsoluteTimeGranularity.DAY,
-                shortFormat.parse("08/31/2011"), AbsoluteTimeGranularity.DAY,
-                Side.START, Side.START);
+                new String[] { "Encounter" }, shortFormat.parse("08/01/2006"),
+                AbsoluteTimeGranularity.DAY, shortFormat.parse("08/31/2011"),
+                AbsoluteTimeGranularity.DAY, Side.START, Side.START);
 
         q.setFilters(timeRange);
         Query query = protempa.buildQuery(q);
@@ -360,18 +620,19 @@ public class ProtempaTest {
     private void testRetrieveDataAndPersist(String environmentName) {
         DataStore<String, List<Proposition>> results = null;
         try {
-            results = new PropositionStoreCreator(environmentName).getPersistentStore();
+            results = new PropositionStoreCreator(environmentName)
+                    .getPersistentStore();
             protempa.retrieveDataAndPersist(query(), environmentName);
 
             assertEquals("Wrong number of keys retrieved", this.patientCount,
                     results.size());
-            Map<String, Integer> propCounts =
-                    getResultCounts(PROP_COUNTS_FILE);
+            Map<String, Integer> propCounts = getResultCounts(PROP_COUNTS_FILE);
             for (Entry<String, List<Proposition>> r : results.entrySet()) {
+                System.out.println(r.getKey() + ": " + r.getValue().size());
                 assertEquals(
                         "Wrong number of raw propositions retrieved for key "
-                        + r.getKey(), propCounts.get(r.getKey()),
-                        r.getValue().size());
+                                + r.getKey(), propCounts.get(r.getKey()), r
+                                .getValue().size());
             }
             assertPatientsRetrieved(results);
             assertEncountersRetrieved(results);
@@ -406,13 +667,15 @@ public class ProtempaTest {
 
     private void printDerivations(String keyId, AbstractionFinderTestHelper afh) {
         System.out.println("----- FORWARD DERIVATIONS -----");
-        for (List<Proposition> derivs : afh.getForwardDerivations(keyId).values()) {
+        for (List<Proposition> derivs : afh.getForwardDerivations(keyId)
+                .values()) {
             for (Proposition p : derivs) {
                 System.out.println(p.getId());
             }
         }
         System.out.println("----- BACKWARD DERIVATIONS -----");
-        for (List<Proposition> derivs : afh.getBackwardDerivations(keyId).values()) {
+        for (List<Proposition> derivs : afh.getBackwardDerivations(keyId)
+                .values()) {
             for (Proposition p : derivs) {
                 System.out.println(p.getId());
             }
@@ -422,7 +685,8 @@ public class ProtempaTest {
     /**
      * Tests Protempa's process and persist method.
      */
-    private void testProcessResultsAndPersist(String environmentName) throws ParseException {
+    private void testProcessResultsAndPersist(String environmentName)
+            throws ParseException {
         DataStore<String, WorkingMemory> results = null;
         AbstractionFinderTestHelper afh = null;
         try {
@@ -435,18 +699,21 @@ public class ProtempaTest {
             Map<String, Integer> backwardDerivCounts = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
             for (String keyId : results.keySet()) {
                 int derivCount = 0;
-                for (List<Proposition> derivs : afh.getForwardDerivations(keyId).values()) {
+                for (List<Proposition> derivs : afh
+                        .getForwardDerivations(keyId).values()) {
                     derivCount += derivs.size();
                 }
                 assertEquals("wrong number of forward derivations for key "
                         + keyId, forwardDerivCounts.get(keyId), derivCount);
 
                 derivCount = 0;
-                for (List<Proposition> derivs : afh.getBackwardDerivations(keyId).values()) {
+                for (List<Proposition> derivs : afh.getBackwardDerivations(
+                        keyId).values()) {
                     derivCount += derivs.size();
                 }
                 assertEquals("wrong number of backward derivations for key "
                         + keyId, backwardDerivCounts.get(keyId), derivCount);
+
                 assert30DayReadmissionDerived(afh);
                 assertNo30DayReadmissionDerived(afh);
                 assertChildIcd9Derived(results, afh);
@@ -456,7 +723,11 @@ public class ProtempaTest {
                 assertMyDiagnosisDerived(results);
                 assertMyLabTestDerived(results);
                 assertOrLikePatternDerived(results);
-
+                assertCompoundBloodPressureHighAllDerived(results);
+                assertConsecutiveCompoundBloodPressureAnyDerived(results);
+                assertTwoConsecutiveElevatedBloodPressureDerived(results);
+                assertCompoundBloodPressure3ClassificationsDerived(results);
+                assertCompoundBloodPressureArbitraryIntervalsDerived(results);
             }
         } catch (KnowledgeSourceReadException e) {
             e.printStackTrace();
@@ -491,7 +762,8 @@ public class ProtempaTest {
             QueryResultsHandler handler = new SingleColumnQueryResultsHandler(
                     fw);
             protempa.outputResults(query(), handler, environmentName);
-            System.err.println("output: " + IOUtil.readFileAsString(outputFile));
+            System.err
+                    .println("output: " + IOUtil.readFileAsString(outputFile));
             assertTrue("output doesn't match",
                     outputMatches(outputFile, TRUTH_OUTPUT));
         } catch (FinderException e) {
@@ -520,8 +792,7 @@ public class ProtempaTest {
         }
     }
 
-    private boolean outputMatches(File file1, String file2)
-            throws IOException {
+    private boolean outputMatches(File file1, String file2) throws IOException {
         BufferedReader br1 = new BufferedReader(new FileReader(file1));
         BufferedReader br2 = new BufferedReader(new FileReader(file2));
         String line1 = null, line2 = null;
@@ -566,7 +837,8 @@ public class ProtempaTest {
             encountersMap.put(e.getId().toString(), e);
             if (patientEncounterMap.containsKey(e.getPatientId().toString())) {
                 patientEncounterMap.put(e.getPatientId().toString(),
-                        1 + patientEncounterMap.get(e.getPatientId().toString()));
+                        1 + patientEncounterMap
+                                .get(e.getPatientId().toString()));
             } else {
                 patientEncounterMap.put(e.getPatientId().toString(), 1);
             }
@@ -584,12 +856,12 @@ public class ProtempaTest {
                         "encounterId").getFormatted());
                 assertEquals(
                         "Wrong start time for encounter " + encounter.getId()
-                        + " for key ID " + encounter.getPatientId(),
+                                + " for key ID " + encounter.getPatientId(),
                         sdf.format(encounter.getStart()),
                         event.getStartFormattedLong());
                 assertEquals(
                         "Wrong finish time for encounter " + encounter.getId()
-                        + " for key ID " + encounter.getPatientId(),
+                                + " for key ID " + encounter.getPatientId(),
                         sdf.format(encounter.getEnd()),
                         event.getFinishFormattedLong());
             }
@@ -659,17 +931,20 @@ public class ProtempaTest {
     }
 
     private void assertReferencesRetrieved(
-            DataStore<String, List<Proposition>> objectGraph) throws IOException {
+            DataStore<String, List<Proposition>> objectGraph)
+            throws IOException {
         logger.log(Level.INFO, "Running references test...");
-        Map<String, Integer> propCounts =
-                getResultCounts(ENCOUNTER_COUNTS_FILE);
+        Map<String, Integer> propCounts = getResultCounts(ENCOUNTER_COUNTS_FILE);
         for (Map.Entry<String, Integer> me : propCounts.entrySet()) {
             List<Proposition> props = objectGraph.get(me.getKey());
             for (Proposition prop : props) {
                 if (prop.getId().equals("PatientAll")) {
-                    Assert.assertEquals("PatientAll for keyId 0 failed", 1, prop.getReferences("patientDetails").size());
+                    Assert.assertEquals("PatientAll for keyId 0 failed", 1,
+                            prop.getReferences("patientDetails").size());
                 } else if (prop.getId().equals("Patient")) {
-                    Assert.assertEquals("Patient for keyId 0 failed", me.getValue(), prop.getReferences("encounters").size());
+                    Assert.assertEquals("Patient for keyId 0 failed", me
+                            .getValue(), prop.getReferences("encounters")
+                            .size());
                 }
             }
         }
@@ -710,7 +985,8 @@ public class ProtempaTest {
         }
         Set<String> retrievedVitalValues = new HashSet<String>();
         for (Proposition p : retrievedVitals) {
-            retrievedVitalValues.add(((PrimitiveParameter) p).getValueFormatted());
+            retrievedVitalValues.add(((PrimitiveParameter) p)
+                    .getValueFormatted());
         }
         assertTrue("Value sets not equal for vital sign " + vitalSign
                 + " for key ID " + keyId,
@@ -721,9 +997,11 @@ public class ProtempaTest {
         logger.log(Level.INFO, "Running 30DayReadmissions test...");
         Map<Proposition, List<Proposition>> encDerivations = getDerivedPropositionsForKey(
                 "Encounter", afh.getForwardDerivations("0"));
-        for (Entry<Proposition, List<Proposition>> prop : encDerivations.entrySet()) {
+        for (Entry<Proposition, List<Proposition>> prop : encDerivations
+                .entrySet()) {
             Proposition encounter = prop.getKey();
-            String encounterId = encounter.getProperty("encounterId").getFormatted();
+            String encounterId = encounter.getProperty("encounterId")
+                    .getFormatted();
             int count30DayReadmit = 0;
 
             for (Proposition derived : prop.getValue()) {
@@ -739,7 +1017,7 @@ public class ProtempaTest {
             } else {
                 assertEquals(
                         "Found some '30DayReadmission' propositions for encounter ID "
-                        + encounterId, 0, count30DayReadmit);
+                                + encounterId, 0, count30DayReadmit);
             }
         }
         logger.log(Level.INFO, "Completed 30DayReadmissions test");
@@ -758,7 +1036,8 @@ public class ProtempaTest {
     private void assertMyDiagnosisDerived(
             DataStore<String, WorkingMemory> derivedData) {
         boolean myDiagnosisDerived = false;
-        for (Iterator<Proposition> it = derivedData.get("1").iterateObjects(); it.hasNext();) {
+        for (Iterator<Proposition> it = derivedData.get("1").iterateObjects(); it
+                .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("MyDiagnosis")) {
                 myDiagnosisDerived = true;
@@ -770,21 +1049,20 @@ public class ProtempaTest {
 
     private void assertOrLikePatternDerived(
             DataStore<String, WorkingMemory> derivedData) {
-        String[] ptIds = {"0", "1", "2", "8", "10"};
-        boolean[] result = {false, false, true, false, false};
+        String[] ptIds = { "0", "1", "2", "8", "10" };
+        boolean[] result = { false, false, true, false, false };
         for (int i = 0; i < ptIds.length; i++) {
             String ptId = ptIds[i];
             boolean orLikePatternDerived = false;
-            for (Iterator<Proposition> it = derivedData.get(ptId).iterateObjects();
-                    it.hasNext();) {
+            for (Iterator<Proposition> it = derivedData.get(ptId)
+                    .iterateObjects(); it.hasNext();) {
                 Proposition p = it.next();
                 if (p.getId().equals("MyAndLikePattern")) {
                     orLikePatternDerived = true;
                     break;
                 }
             }
-            assertEquals("Proposition 'MyAndLikePattern' not found",
-                    result[i],
+            assertEquals("Proposition 'MyAndLikePattern' not found", result[i],
                     orLikePatternDerived);
         }
     }
@@ -792,7 +1070,8 @@ public class ProtempaTest {
     private void assertMyLabTestDerived(
             DataStore<String, WorkingMemory> derivedData) {
         boolean myLabTestDerived = false;
-        for (Iterator<Proposition> it = derivedData.get("3").iterateObjects(); it.hasNext();) {
+        for (Iterator<Proposition> it = derivedData.get("3").iterateObjects(); it
+                .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("MyVitalSign")) {
                 myLabTestDerived = true;
@@ -802,6 +1081,11 @@ public class ProtempaTest {
         assertTrue("Proposition 'MyVitalSign' not found", myLabTestDerived);
     }
 
+    private void assertMyBloodPressureDerived(
+            DataStore<String, WorkingMemory> derivedData) {
+
+    }
+
     private void assertChildIcd9Derived(
             DataStore<String, WorkingMemory> derivedData,
             AbstractionFinderTestHelper afh) {
@@ -809,7 +1093,9 @@ public class ProtempaTest {
         boolean icd9d01382Derived = false;
         boolean icd9d804Derived = false;
 
-        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it.hasNext();) {
+        for (@SuppressWarnings("unchecked")
+        Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
+                .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals(ICD9_013_82)) {
                 icd9d01382Derived = true;
@@ -824,27 +1110,33 @@ public class ProtempaTest {
                 icd9d01382Derived);
         assertEquals(
                 "Proposition '" + ICD9_013_82
-                + "' should not have any forward derivations",
+                        + "' should not have any forward derivations",
                 0,
                 getDerivedPropositionsForKey(ICD9_013_82,
-                afh.getForwardDerivations("0")).size());
+                        afh.getForwardDerivations("0")).size());
         assertEquals(
                 "Proposition '" + ICD9_013_82
-                + "' should not have any backward derivations",
+                        + "' should not have any backward derivations",
                 0,
                 getDerivedPropositionsForKey(ICD9_013_82,
-                afh.getBackwardDerivations("0")).size());
+                        afh.getBackwardDerivations("0")).size());
         assertTrue("Proposition '" + ICD9_804 + "' not found", icd9d804Derived);
 
         // matched at higher level - should be derivations
-        String[] icd9Levels = new String[]{"ICD9:804", "ICD9:804.3",
-            "ICD9:804.34"};
-        Set<String> expectedForwardDerivationsLevel0 = Arrays.asSet(new String[]{});
-        Set<String> expectedBackwardDerivationsLevel0 = Arrays.asSet(new String[]{icd9Levels[1]});
-        Set<String> expectedForwardDerivationsLevel1 = Arrays.asSet(new String[]{icd9Levels[0]});
-        Set<String> expectedBackwardDerivationsLevel1 = Arrays.asSet(new String[]{icd9Levels[2]});
-        Set<String> expectedForwardDerivationsLevel2 = Arrays.asSet(new String[]{icd9Levels[1]});
-        Set<String> expectedBackwardDerivationsLevel2 = Arrays.asSet(new String[]{});
+        String[] icd9Levels = new String[] { "ICD9:804", "ICD9:804.3",
+                "ICD9:804.34" };
+        Set<String> expectedForwardDerivationsLevel0 = Arrays
+                .asSet(new String[] {});
+        Set<String> expectedBackwardDerivationsLevel0 = Arrays
+                .asSet(new String[] { icd9Levels[1] });
+        Set<String> expectedForwardDerivationsLevel1 = Arrays
+                .asSet(new String[] { icd9Levels[0] });
+        Set<String> expectedBackwardDerivationsLevel1 = Arrays
+                .asSet(new String[] { icd9Levels[2] });
+        Set<String> expectedForwardDerivationsLevel2 = Arrays
+                .asSet(new String[] { icd9Levels[1] });
+        Set<String> expectedBackwardDerivationsLevel2 = Arrays
+                .asSet(new String[] {});
         Map<String, Set<String>> expectedForwardDerivations = new HashMap<String, Set<String>>();
         expectedForwardDerivations.put(icd9Levels[0],
                 expectedForwardDerivationsLevel0);
@@ -918,7 +1210,9 @@ public class ProtempaTest {
         logger.log(Level.INFO, "Running LDH_TREND test...");
         Set<AbstractParameter> ldhTrends = new HashSet<AbstractParameter>();
 
-        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it.hasNext();) {
+        for (@SuppressWarnings("unchecked")
+        Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
+                .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("LDH_TREND")) {
                 ldhTrends.add((AbstractParameter) p);
@@ -943,12 +1237,12 @@ public class ProtempaTest {
                         ldhTrend.getStartFormattedLong(), sdf,
                         "Wrong start time for 'INCREASING_LDH'",
                         "Unable to parse start time for 'INCREASING_LDH': "
-                        + ldhTrend.getStartFormattedLong());
+                                + ldhTrend.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         ldhTrend.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'INCREASING_LDH'",
                         "Unable to parse finish time for 'INCREASING_LDH': "
-                        + ldhTrend.getFinishFormattedLong());
+                                + ldhTrend.getFinishFormattedLong());
                 foundInc = true;
             } else if (ldhTrend.getValueFormatted().equals("Decreasing LDH")) {
                 expectedStart = buildDate(2006, Calendar.AUGUST, 26, 8, 35,
@@ -959,12 +1253,12 @@ public class ProtempaTest {
                         ldhTrend.getStartFormattedLong(), sdf,
                         "Wrong start time for 'DECREASING_LDH'",
                         "Unable to parse start time for 'DECREASING_LDH': "
-                        + ldhTrend.getStartFormattedLong());
+                                + ldhTrend.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         ldhTrend.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'DECREASING_LDH'",
                         "Unable to parse finish time for 'DECREASING_LDH': "
-                        + ldhTrend.getFinishFormattedLong());
+                                + ldhTrend.getFinishFormattedLong());
                 foundDec = true;
             } else {
                 fail("Found 'LDH_TREND' with unknown value: "
@@ -984,7 +1278,9 @@ public class ProtempaTest {
         logger.log(Level.INFO, "Running AST_STATE test...");
         Set<AbstractParameter> astStates = new HashSet<AbstractParameter>();
 
-        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it.hasNext();) {
+        for (@SuppressWarnings("unchecked")
+        Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
+                .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("AST_STATE")) {
                 astStates.add((AbstractParameter) p);
@@ -1010,12 +1306,12 @@ public class ProtempaTest {
                         astState.getStartFormattedLong(), sdf,
                         "Wrong start time for 'NORMAL_AST'",
                         "Unable to parse start time for 'NORMAL_AST': "
-                        + astState.getStartFormattedLong());
+                                + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'NORMAL_AST'",
                         "Unable to parse finish time for 'NORMAL_AST': "
-                        + astState.getFinishFormattedLong());
+                                + astState.getFinishFormattedLong());
                 foundNormalAstState = true;
             } else if (astState.getValueFormatted().equals("Low AST")) {
                 expectedStart = buildDate(2007, Calendar.FEBRUARY, 28, 8, 49,
@@ -1028,12 +1324,12 @@ public class ProtempaTest {
                         sdf,
                         "Wrong start time for 'LOW_AST'",
                         "Unable to parse start time for 'LOW_AST': "
-                        + astState.getStartFormattedLong());
+                                + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'LOW_AST'",
                         "Unable to parse finish time for 'LOW_AST': "
-                        + astState.getFinishFormattedLong());
+                                + astState.getFinishFormattedLong());
                 foundLowAstState = true;
             } else if (astState.getValueFormatted().equals("High AST")) {
                 expectedStart = buildDate(2007, Calendar.FEBRUARY, 28, 9, 52,
@@ -1044,12 +1340,12 @@ public class ProtempaTest {
                         astState.getStartFormattedLong(), sdf,
                         "Wrong start time for 'HIGH_AST'",
                         "Unable to parse start time for 'HIGH_AST': "
-                        + astState.getStartFormattedLong());
+                                + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'HIGH_AST'",
                         "Unable to parse finish time for 'HIGH_AST': "
-                        + astState.getFinishFormattedLong());
+                                + astState.getFinishFormattedLong());
                 foundHighAstState = true;
             } else if (astState.getValueFormatted().equals("Very High AST")) {
                 expectedStart = buildDate(2007, Calendar.MARCH, 2, 2, 5,
@@ -1060,12 +1356,12 @@ public class ProtempaTest {
                         astState.getStartFormattedLong(), sdf,
                         "Wrong start time for 'VERY_HIGH_AST'",
                         "Unable to parse start time for 'VERY_HIGH_AST': "
-                        + astState.getStartFormattedLong());
+                                + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'VERY_HIGH_AST'",
                         "Unable to parse finish time for 'VERY_HIGH_AST': "
-                        + astState.getFinishFormattedLong());
+                                + astState.getFinishFormattedLong());
                 foundVeryHighAstState = true;
             } else {
                 fail("Found 'AST_STATE' with unknown value "
@@ -1088,9 +1384,12 @@ public class ProtempaTest {
 
     private void assertFirstHellpRecoveringSliceDerived(
             DataStore<String, WorkingMemory> derivedData) {
-        logger.log(Level.INFO, "Running HELLP_FIRST_RECOVERING_PLATELETS test...");
+        logger.log(Level.INFO,
+                "Running HELLP_FIRST_RECOVERING_PLATELETS test...");
         Set<Proposition> hellpFirstRecoverings = new HashSet<Proposition>();
-        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("11").iterateObjects(); it.hasNext();) {
+        for (@SuppressWarnings("unchecked")
+        Iterator<Proposition> it = derivedData.get("11").iterateObjects(); it
+                .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("HELLP_FIRST_RECOVERING_PLATELETS")) {
                 hellpFirstRecoverings.add(p);
@@ -1109,14 +1408,229 @@ public class ProtempaTest {
                 hellpFirstRecovering.getStartFormattedLong(), sdf,
                 "Wrong start time for 'HELLP_FIRST_RECOVERING_PLATELETS'",
                 "Unable to parse start time for 'HELLP_FIRST_RECOVERING_PLATELETS': "
-                + hellpFirstRecovering.getStartFormattedLong());
+                        + hellpFirstRecovering.getStartFormattedLong());
         assertDateStringEquals(expectedFinish,
                 hellpFirstRecovering.getFinishFormattedLong(), sdf,
                 "Wrong finish time for 'HELLP_FIRST_RECOVERING_PLATELETS'",
                 "Unable to parse finish time for 'HELLP_FIRST_RECOVERING_PLATELETS': "
-                + hellpFirstRecovering.getFinishFormattedLong());
+                        + hellpFirstRecovering.getFinishFormattedLong());
 
-        logger.log(Level.INFO, "Completed HELLP_FIRST_RECOVERING_PLATELETS test");
+        logger.log(Level.INFO,
+                "Completed HELLP_FIRST_RECOVERING_PLATELETS test");
+    }
+
+    private void assertConsecutiveCompoundBloodPressureAnyDerived(
+            DataStore<String, WorkingMemory> derivedData) {
+        logger.log(Level.INFO,
+                "Running MyBloodPressureClassificationConsecutiveAny test...");
+        Set<Proposition> bps = new HashSet<Proposition>();
+        for (@SuppressWarnings("unchecked")
+        Iterator<Proposition> it = derivedData.get("12").iterateObjects(); it
+                .hasNext();) {
+            Proposition p = it.next();
+            if (p.getId().equals("MyBloodPressureClassificationConsecutiveAny")) {
+                bps.add(p);
+            }
+        }
+        assertEquals(
+                "Found wrong number of 'MyBloodPressureClassificationConsecutiveAny'",
+                1, bps.size());
+        AbstractParameter bp = (AbstractParameter) onlyProp(bps);
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d, yyyy h:mm aa");
+        Date expectedStart = buildDate(2009, Calendar.SEPTEMBER, 9, 8, 0,
+                Calendar.AM);
+        Date expectedFinish = buildDate(2009, Calendar.OCTOBER, 10, 8, 0,
+                Calendar.AM);
+        assertDateStringEquals(
+                expectedStart,
+                bp.getStartFormattedLong(),
+                sdf,
+                "Wrong start time for 'MyBloodPressureClassificationConsecutiveAny'",
+                "Unable to parse start time for 'MyBloodPressureClassificationConsecutiveAny': "
+                        + bp.getStartFormattedLong());
+        assertDateStringEquals(
+                expectedFinish,
+                bp.getFinishFormattedLong(),
+                sdf,
+                "Wrong finish time for 'MyBloodPressureClassificationConsecutiveAny'",
+                "Unable to parse finish time for 'MyBloodPressureClassificationConsecutiveAny': "
+                        + bp.getFinishFormattedLong());
+        logger.log(Level.INFO,
+                "Completed MyBloodPressureClassificationConsecutiveAny test");
+    }
+
+    private void assertTwoConsecutiveElevatedBloodPressureDerived(
+            DataStore<String, WorkingMemory> derivedData) {
+        logger.log(Level.INFO,
+                "Running MyTwoConsecutiveHighBloodPressure test...");
+        Set<Proposition> bps = new HashSet<Proposition>();
+        for (@SuppressWarnings("unchecked")
+        Iterator<Proposition> it = derivedData.get("12").iterateObjects(); it
+                .hasNext();) {
+            Proposition p = it.next();
+            if (p.getId().equals("MyTwoConsecutiveHighBloodPressure")) {
+                bps.add(p);
+            }
+        }
+        assertEquals(
+                "Found wrong number of 'MyTwoConsecutiveHighBloodPressure'", 1,
+                bps.size());
+        AbstractParameter bp = (AbstractParameter) onlyProp(bps);
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d, yyyy h:mm aa");
+        Date expectedStart = buildDate(2009, Calendar.SEPTEMBER, 9, 8, 0,
+                Calendar.AM);
+        Date expectedFinish = buildDate(2009, Calendar.OCTOBER, 10, 8, 0,
+                Calendar.AM);
+        assertDateStringEquals(expectedStart, bp.getStartFormattedLong(), sdf,
+                "Wrong start time for 'MyTwoConsecutiveHighBloodPressure'",
+                "Unable to parse start time for 'MyTwoConsecutiveHighBloodPressure': "
+                        + bp.getStartFormattedLong());
+        assertDateStringEquals(expectedFinish, bp.getFinishFormattedLong(),
+                sdf, "Wrong finish time for 'MyTwoConsecutiveBloodPressure'",
+                "Unable to parse finish time for 'MyTwoConsecutiveBloodPressure': "
+                        + bp.getFinishFormattedLong());
+        logger.log(Level.INFO,
+                "Completed MyTwoConsecutiveHighBloodPressure test");
+    }
+
+    private void assertCompoundBloodPressureHighAllDerived(
+            DataStore<String, WorkingMemory> derivedData) {
+        logger.log(Level.INFO,
+                "Running MyBloodPressureClassificationAll test...");
+        List<AbstractParameter> bps = new ArrayList<AbstractParameter>();
+        for (@SuppressWarnings("unchecked")
+        Iterator<Proposition> it = derivedData.get("13").iterateObjects(); it
+                .hasNext();) {
+            Proposition p = it.next();
+            if (p.getId().equals("MyBloodPressureClassificationAll")) {
+                bps.add((AbstractParameter) p);
+            }
+        }
+        assertEquals(
+                "Found wrong number of 'MyBloodPressureClassificationAll'", 2,
+                bps.size());
+        Collections.sort(bps, new TemporalPropositionIntervalComparator());
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d, yyyy h:mm aa");
+
+        AbstractParameter bp1 = bps.get(0);
+        Date expectedStart1 = buildDate(2008, Calendar.JULY, 7, 9, 0,
+                Calendar.AM);
+        Date expectedFinish1 = buildDate(2008, Calendar.JULY, 7, 9, 0,
+                Calendar.AM);
+        assertDateStringEquals(
+                expectedStart1,
+                bp1.getStartFormattedLong(),
+                sdf,
+                "Wrong start time for 'MyBloodPressureClassificationAll' (first)",
+                "Unable to parse start time for 'MyBloodPressureClassificationAll' (first): "
+                        + bp1.getStartFormattedLong());
+        assertDateStringEquals(
+                expectedFinish1,
+                bp1.getFinishFormattedLong(),
+                sdf,
+                "Wrong finish time for 'MyBloodPressureClassificationAll' (first)",
+                "Unable to parse finish time for 'MyBloodPressureClassificationAll' (first): "
+                        + bp1.getFinishFormattedLong());
+        assertEquals(
+                "Wrong value for 'MyBloodPressureClassificationAll' (first)",
+                NominalValue.getInstance("MYBP_NORMAL"), bp1.getValue());
+
+        AbstractParameter bp2 = bps.get(1);
+        Date expectedStart2 = buildDate(2008, Calendar.AUGUST, 8, 10, 0,
+                Calendar.AM);
+        Date expectedFinish2 = buildDate(2008, Calendar.AUGUST, 8, 10, 0,
+                Calendar.AM);
+        assertDateStringEquals(
+                expectedStart2,
+                bp2.getStartFormattedLong(),
+                sdf,
+                "Wrong start time for 'MyBloodPressureClassificationAll' (second)",
+                "Unable to parse start time for 'MyBloodPressureClassificationAll (second)': "
+                        + bp2.getStartFormattedLong());
+        assertDateStringEquals(
+                expectedFinish2,
+                bp2.getFinishFormattedLong(),
+                sdf,
+                "Wrong finish time for 'MyBloodPressureClassificationAll' (second)",
+                "Unable to parse finish time for 'MyBloodPressureClassificationAll' (second): "
+                        + bp2.getFinishFormattedLong());
+        assertEquals(
+                "Wrong value for 'MyBloodPressureClassificationAll' (second)",
+                NominalValue.getInstance("MYBP_HIGH"), bp2.getValue());
+
+        logger.log(Level.INFO,
+                "Completed MyBloodPressureClassificationAll test");
+    }
+
+    private void assertCompoundBloodPressure3ClassificationsDerived(
+            DataStore<String, WorkingMemory> derivedData) {
+        logger.log(Level.INFO,
+                "Running MyBloodPressureClassification3Any test...");
+
+        List<AbstractParameter> bps = new ArrayList<AbstractParameter>();
+        for (@SuppressWarnings("unchecked")
+        Iterator<Proposition> it = derivedData.get("14").iterateObjects(); it
+                .hasNext();) {
+            Proposition p = it.next();
+            if (p.getId().equals("MyBloodPressureClassification3Any"))
+                bps.add((AbstractParameter) p);
+        }
+        assertEquals(
+                "Found wrong number of 'MyBloodPressureClassification3Any'", 2,
+                bps.size());
+        Collections.sort(bps, new TemporalPropositionIntervalComparator());
+        AbstractParameter bp1 = bps.get(0);
+        assertEquals(
+                "Wrong value for 'MyBloodPressureClassification3Any' (first)",
+                NominalValue.getInstance("MYBP3_LOW"), bp1.getValue());
+
+        AbstractParameter bp2 = bps.get(1);
+        assertEquals(
+                "Wrong value for 'MyBloodPressureClassification3Any' (second)",
+                NominalValue.getInstance("MYBP3_HIGH"), bp2.getValue());
+
+        logger.log(Level.INFO,
+                "Completed MyBloodPressureClassification3Any test");
+    }
+
+    private void assertCompoundBloodPressureArbitraryIntervalsDerived(
+            DataStore<String, WorkingMemory> derivedData) {
+        logger.log(Level.INFO,
+                "Running MyBloodPressureClassificationAny with arbitrary intervals test...");
+        List<AbstractParameter> bps = new ArrayList<AbstractParameter>();
+        for (@SuppressWarnings("unchecked")
+        Iterator<Proposition> it = derivedData.get("15").iterateObjects(); it
+                .hasNext();) {
+            Proposition p = it.next();
+            if (p.getId().equals("MyBloodPressureClassificationAny")) {
+                bps.add((AbstractParameter) p);
+            }
+        }
+        assertEquals(
+                "Found wrong number of 'MyBloodPressureClassificationAny'", 12,
+                bps.size());
+        Set<AbstractParameter> normals = new HashSet<AbstractParameter>();
+        Set<AbstractParameter> highs = new HashSet<AbstractParameter>();
+        for (AbstractParameter p : bps) {
+            if (p.getValue().equals(NominalValue.getInstance("MYBP_HIGH"))) {
+                highs.add(p);
+            } else if (p.getValue().equals(
+                    NominalValue.getInstance("MYBP_NORMAL"))) {
+                normals.add(p);
+            } else {
+                fail("Unexpected value for 'MyBloodPressureClassificationAny':"
+                        + p.getValueFormatted());
+            }
+        }
+        assertEquals(
+                "Found wrong number of 'MyBloodPressureClassificationAny' with value 'MYBP_HIGH'",
+                7, highs.size());
+        assertEquals(
+                "Found wrong number of 'MyBloodPressureClassificationAny' with value 'MYBP_NORMAL'",
+                5, normals.size());
+
+        logger.log(Level.INFO,
+                "Completed MyBloodPressureClassificationAny with arbitrary intervals test");
     }
 
     private Set<Proposition> getPropositionsForKey(String keyId, String propId,
@@ -1136,7 +1650,8 @@ public class ProtempaTest {
     private Map<Proposition, List<Proposition>> getDerivedPropositionsForKey(
             String propId, Map<Proposition, List<Proposition>> derivations) {
         Map<Proposition, List<Proposition>> results = new HashMap<Proposition, List<Proposition>>();
-        for (Entry<Proposition, List<Proposition>> prop : derivations.entrySet()) {
+        for (Entry<Proposition, List<Proposition>> prop : derivations
+                .entrySet()) {
             if (prop.getKey().getId().equals(propId)) {
                 results.put(prop.getKey(), prop.getValue());
             }
