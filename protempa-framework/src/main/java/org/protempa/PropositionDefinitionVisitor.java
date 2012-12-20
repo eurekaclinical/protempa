@@ -31,16 +31,17 @@ public interface PropositionDefinitionVisitor {
 
     /**
      * Process a collection of proposition definitions.
-     *
+     * 
      * @param propositionDefinitions
      *            a {@link Collection<PropositionDefinition>}. Cannot be
      *            <code>null</code>.
      */
-    void visit(Collection<? extends PropositionDefinition> propositionDefinitions);
+    void visit(
+            Collection<? extends PropositionDefinition> propositionDefinitions);
 
     /**
      * Process a low-level abstraction definition
-     *
+     * 
      * @param def
      *            a {@link LowLevelAbstractionDefinition}. Cannot be
      *            <code>null</code>.
@@ -48,8 +49,17 @@ public interface PropositionDefinitionVisitor {
     void visit(LowLevelAbstractionDefinition def);
 
     /**
+     * Process a compound low-level abstraction definition
+     * 
+     * @param def
+     *            an {@link CompoundLowLevelAbstractionDefinition}. Cannot be
+     *            <code>null</code>.
+     */
+    void visit(CompoundLowLevelAbstractionDefinition def);
+
+    /**
      * Process a high-level abstraction definition
-     *
+     * 
      * @param def
      *            a {@link HighLevelAbstractionDefinition}. Cannot be
      *            <code>null</code>.
@@ -58,16 +68,15 @@ public interface PropositionDefinitionVisitor {
 
     /**
      * Process a slice definition.
-     *
+     * 
      * @param def
-     *            a {@link SliceDefinition}. Cannot be
-     *            <code>null</code>.
+     *            a {@link SliceDefinition}. Cannot be <code>null</code>.
      */
     void visit(SliceDefinition def);
 
     /**
      * Process an event definition.
-     *
+     * 
      * @param def
      *            an {@link EventDefinition}. Cannot be <code>null</code>.
      */
@@ -75,7 +84,7 @@ public interface PropositionDefinitionVisitor {
 
     /**
      * Process a primitive parameter definition.
-     *
+     * 
      * @param def
      *            a {@link PrimitiveParameterDefinition}. Cannot be
      *            <code>null</code>.
@@ -84,19 +93,18 @@ public interface PropositionDefinitionVisitor {
 
     /**
      * Process a constant definition.
-     *
+     * 
      * @param def
-     *            a {@link ConstantDefinition}. Cannot be
-     *            <code>null</code>.
+     *            a {@link ConstantDefinition}. Cannot be <code>null</code>.
      */
 
     void visit(ConstantDefinition def);
+
     /**
      * Process a pair definition.
-     *
+     * 
      * @param def
-     *            a {@link PairDefinition}. Cannot be
-     *            <code>null</code>.
+     *            a {@link PairDefinition}. Cannot be <code>null</code>.
      */
     void visit(PairDefinition def);
 }

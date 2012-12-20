@@ -158,7 +158,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
             Set<String> propIdsAsSet = org.arp.javautil.arrays.Arrays.asSet(this.propIds);
             DerivedDataSourceType ddst = DerivedDataSourceType.getInstance();
             for (Proposition prop : propositions) {
-                if (prop.getDataSourceType().equals(ddst) && propIdsAsSet.contains(prop.getId())) {
+                if (/*prop.getDataSourceType().equals(ddst) &&*/ propIdsAsSet.contains(prop.getId())) {
                     Element elem = handleProposition(handled, forwardDerivations, backwardDerivations, references, prop, visitor, document);
                     if (elem != null) {
                         abstractionNode.appendChild(elem);
@@ -350,10 +350,10 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
         Element derivationsElem = document.createElement("derivations");
         List<Proposition> derived = new ArrayList<Proposition>();
 
-        List<Proposition> fd = forwardDerivations.get(proposition);
-        if (fd != null) {
-            derived.addAll(fd);
-        }
+//        List<Proposition> fd = forwardDerivations.get(proposition);
+//        if (fd != null) {
+//            derived.addAll(fd);
+//        }
 
         List<Proposition> bd = backwardDerivations.get(proposition);
         if (bd != null) {
@@ -398,6 +398,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
 
             propElem.appendChild(handleDerivations(tempHandled, forwardDerivations, backwardDerivations, references, proposition, visitor, document));
 
+            handled.add(proposition.getUniqueId());
             return propElem;
         } else {
             Util.logger().log(Level.FINEST, "Skipping proposition {0}", proposition.getId());

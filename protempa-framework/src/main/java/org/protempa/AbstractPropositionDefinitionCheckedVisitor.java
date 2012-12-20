@@ -35,10 +35,11 @@ public abstract class AbstractPropositionDefinitionCheckedVisitor implements
 
     /**
      * Processes a collection of proposition definitions.
-     *
+     * 
      * @param propositionDefinitions
      *            a {@link Collection<PropositionDefinition>}.
-     * @throws ProtempaException if an error occurs.
+     * @throws ProtempaException
+     *             if an error occurs.
      * 
      * @see org.protempa.PropositionDefinitionCheckedVisitor#visit(java.util.Collection)
      */
@@ -50,32 +51,31 @@ public abstract class AbstractPropositionDefinitionCheckedVisitor implements
         }
     }
 
-    /**
+/**
      * Processes event definitions. This default implementation throws an
-     * {@link UnsupportedOperationException).
+     * {@link UnsupportedOperationException}.
      *
      * @param eventDefinition
      *            an {@link EventDefinition}.
      * @throws ProtempaException if an error occurs.
      * @throws UnsupportedOperationException.
-     * @see org.protempa.PropositionDefinitionVisitor#visit(org.protempa.EventDefinition)
+     * @see org.protempa.PropositionDefinitionCheckedVisitor#visit(org.protempa.EventDefinition)
      */
     @Override
-    public void visit(EventDefinition eventDefinition)
-            throws ProtempaException {
+    public void visit(EventDefinition eventDefinition) throws ProtempaException {
         throw new UnsupportedOperationException(
                 "Visiting EventDefinitions is unsupported.");
     }
 
-    /**
+/**
      * Processes constant definitions. This default implementation throws an
-     * {@link UnsupportedOperationException).
+     * {@link UnsupportedOperationException}.
      *
      * @param constantDefinition
      *            a {@link ConstantDefinition}.
      * @throws ProtempaException if an error occurs.
      * @throws UnsupportedOperationException.
-     * @see org.protempa.PropositionDefinitionVisitor#visit(org.protempa.EventDefinition)
+     * @see org.protempa.PropositionDefinitionCheckedVisitor#visit(org.protempa.EventDefinition)
      */
     @Override
     public void visit(ConstantDefinition constantDefinition)
@@ -84,15 +84,15 @@ public abstract class AbstractPropositionDefinitionCheckedVisitor implements
                 "Visiting ConstantDefinitions is unsupported.");
     }
 
-    /**
+/**
      * Processes high-level abstraction definitions. This default implementation
-     * throws an {@link UnsupportedOperationException).
+     * throws an {@link UnsupportedOperationException}.
      *
      * @param highLevelAbstractionDefinition
      *            an {@link HighLevelAbstractionDefinition}.
      * @throws ProtempaException if an error occurs.
      * @throws UnsupportedOperationException.
-     * @see org.protempa.PropositionDefinitionVisitor#visit(org.protempa.HighLevelAbstractionDefinition)
+     * @see org.protempa.PropositionDefinitionCheckedVisitor#visit(org.protempa.HighLevelAbstractionDefinition)
      */
     @Override
     public void visit(
@@ -103,15 +103,15 @@ public abstract class AbstractPropositionDefinitionCheckedVisitor implements
 
     }
 
-    /**
+/**
      * Processes low-level abstraction definitions. This default implementation
-     * throws an {@link UnsupportedOperationException).
+     * throws an {@link UnsupportedOperationException}.
      *
      * @param lowLevelAbstractionDefinition
      *            a {@link LowLevelAbstractionDefinition}.
      * @throws ProtempaException if an error occurs.
      * @throws UnsupportedOperationException.
-     * @see org.protempa.PropositionDefinitionVisitor#visit(org.protempa.LowLevelAbstractionDefinition)
+     * @see org.protempa.PropositionDefinitionCheckedVisitor#visit(org.protempa.LowLevelAbstractionDefinition)
      */
     @Override
     public void visit(
@@ -123,13 +123,29 @@ public abstract class AbstractPropositionDefinitionCheckedVisitor implements
     }
 
     /**
+     * Processes compound low-level abstraction definitions. This default implementation throws an {@link UnsupportedOperationException}.
+     * 
+     * @param compoundLowLevelAbstractionDefinition a {@link CompoundLowLevelAbstractionDefinition}.
+     * @throws ProtempaException if an error occurs.
+     * @throws UnsupportedOperationException.
+     * @see org.protempa.PropositionDefinitionCheckedVisitor(org.protempa.ExtendedLowLevelAbstractionDefinition)
+     */
+    @Override
+    public void visit(
+            CompoundLowLevelAbstractionDefinition compoundLowLevelAbstractionDefinition)
+            throws ProtempaException {
+        throw new UnsupportedOperationException(
+                "Visiting CompoundLowLevelAbstractionDefinitions is unsupported.");
+    }
+
+/**
      * Processes primitive parameter definitions. This default implementation
-     * throws an {@link UnsupportedOperationException).
+     * throws an {@link UnsupportedOperationException}.
      *
      * @param primitiveParameterDefinition
      *            a {@link PrimitiveParameterDefinition}.
      * @throws UnsupportedOperationException.
-     * @see org.protempa.PropositionDefinitionVisitor#visit(org.protempa.PrimitiveParameterDefinition)
+     * @see org.protempa.PropositionDefinitionCheckedVisitor#visit(org.protempa.PrimitiveParameterDefinition)
      */
     @Override
     public void visit(PrimitiveParameterDefinition primitiveParameterDefinition)
@@ -139,15 +155,15 @@ public abstract class AbstractPropositionDefinitionCheckedVisitor implements
 
     }
 
-    /**
+/**
      * Processes slice abstraction definitions. This default implementation
-     * throws an {@link UnsupportedOperationException).
+     * throws an {@link UnsupportedOperationException}.
      *
      * @param sliceAbstractionDefinition
      *            a {@link SliceDefinition}.
      * @throws ProtempaException if an error occurs.
      * @throws UnsupportedOperationException.
-     * @see org.protempa.PropositionDefinitionVisitor#visit(org.protempa.SliceDefinition)
+     * @see org.protempa.PropositionDefinitionCheckedVisitor#visit(org.protempa.SliceDefinition)
      */
     @Override
     public void visit(SliceDefinition sliceAbstractionDefinition)
@@ -157,19 +173,18 @@ public abstract class AbstractPropositionDefinitionCheckedVisitor implements
 
     }
 
-    /**
+/**
      * Processes pair abstraction definitions. This default implementation
-     * throws an {@link UnsupportedOperationException).
+     * throws an {@link UnsupportedOperationException}.
      *
      * @param pairAbstractionDefinition
      *            a {@link pairDefinition}.
      * @throws ProtempaException if an error occurs.
      * @throws UnsupportedOperationException.
-     * @see org.protempa.PropositionDefinitionVisitor#visit(org.protempa.PairDefinition)
+     * @see org.protempa.PropositionDefinitionCheckedVisitor#visit(org.protempa.PairDefinition)
      */
     @Override
-    public void visit(PairDefinition pairDefinition)
-            throws ProtempaException {
+    public void visit(PairDefinition pairDefinition) throws ProtempaException {
         throw new UnsupportedOperationException(
                 "Visiting PairDefinitions is unsupported.");
 

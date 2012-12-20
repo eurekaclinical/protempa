@@ -21,6 +21,7 @@ package org.protempa.cli;
 
 import org.apache.commons.lang.StringUtils;
 import org.protempa.AbstractPropositionDefinitionVisitor;
+import org.protempa.CompoundLowLevelAbstractionDefinition;
 import org.protempa.ConstantDefinition;
 import org.protempa.EventDefinition;
 import org.protempa.HighLevelAbstractionDefinition;
@@ -38,8 +39,7 @@ import org.protempa.SliceDefinition;
  * 
  * @author Andrew Post
  */
-class PropositionDefinitionPrinter
-        extends AbstractPropositionDefinitionVisitor {
+class PropositionDefinitionPrinter extends AbstractPropositionDefinitionVisitor {
 
     @Override
     public void visit(EventDefinition eventDefinition) {
@@ -50,37 +50,44 @@ class PropositionDefinitionPrinter
     @Override
     public void visit(
             HighLevelAbstractionDefinition highLevelAbstractionDefinition) {
-        System.out.println("High level abstraction definition " +
-                highLevelAbstractionDefinition.getId());
+        System.out.println("High level abstraction definition "
+                + highLevelAbstractionDefinition.getId());
         printCommon(highLevelAbstractionDefinition);
     }
 
     @Override
     public void visit(
             LowLevelAbstractionDefinition lowLevelAbstractionDefinition) {
-        System.out.println("Low level abstraction definition " +
-                lowLevelAbstractionDefinition.getId());
-        System.out.println("\tvalue: " +
-                lowLevelAbstractionDefinition.getValueType());
+        System.out.println("Low level abstraction definition "
+                + lowLevelAbstractionDefinition.getId());
+        System.out.println("\tvalue: "
+                + lowLevelAbstractionDefinition.getValueType());
         printCommon(lowLevelAbstractionDefinition);
     }
 
     @Override
     public void visit(
-            PrimitiveParameterDefinition primitiveParameterDefinition) {
-        System.out.println("Primitive parameter definition " +
-                primitiveParameterDefinition.getId());
-        System.out.println("\tvalue: " +
-                primitiveParameterDefinition.getValueType());
-        System.out.println("\tunits: " +
-                primitiveParameterDefinition.getUnits());
+            CompoundLowLevelAbstractionDefinition compoundLowLevelAbstractionDefinition) {
+        System.out.println("Extended low level abstraction definition "
+                + compoundLowLevelAbstractionDefinition.getId());
+        printCommon(compoundLowLevelAbstractionDefinition);
+    }
+
+    @Override
+    public void visit(PrimitiveParameterDefinition primitiveParameterDefinition) {
+        System.out.println("Primitive parameter definition "
+                + primitiveParameterDefinition.getId());
+        System.out.println("\tvalue: "
+                + primitiveParameterDefinition.getValueType());
+        System.out.println("\tunits: "
+                + primitiveParameterDefinition.getUnits());
         printCommon(primitiveParameterDefinition);
     }
 
     @Override
     public void visit(SliceDefinition sliceAbstractionDefinition) {
-        System.out.println("Slice abstraction definition " +
-                sliceAbstractionDefinition.getId());
+        System.out.println("Slice abstraction definition "
+                + sliceAbstractionDefinition.getId());
         printCommon(sliceAbstractionDefinition);
     }
 
@@ -93,24 +100,24 @@ class PropositionDefinitionPrinter
     @Override
     public void visit(PairDefinition pairDefinition) {
         System.out.println("Pair definition " + pairDefinition.getId());
-        System.out.println("\tsecondRequired: " + 
-                pairDefinition.isSecondRequired());
+        System.out.println("\tsecondRequired: "
+                + pairDefinition.isSecondRequired());
         printCommon(pairDefinition);
     }
-    
+
     private void printCommon(PropositionDefinition propositionDefinition) {
         printDisplayNames(propositionDefinition);
         System.out.println("\tsolid: " + propositionDefinition.isSolid());
-        System.out.println("\tconcatenable: " + 
-                propositionDefinition.isConcatenable());
+        System.out.println("\tconcatenable: "
+                + propositionDefinition.isConcatenable());
         printProperties(propositionDefinition);
         printReferences(propositionDefinition);
         printTerms(propositionDefinition);
     }
 
     private void printReferences(PropositionDefinition propositionDefinition) {
-        ReferenceDefinition[] refDefs =
-                propositionDefinition.getReferenceDefinitions();
+        ReferenceDefinition[] refDefs = propositionDefinition
+                .getReferenceDefinitions();
         if (refDefs.length == 0) {
             System.out.println("\tNo references");
         } else {
@@ -127,8 +134,8 @@ class PropositionDefinitionPrinter
     }
 
     private void printProperties(PropositionDefinition propositionDefinition) {
-        PropertyDefinition[] propDefs =
-                propositionDefinition.getPropertyDefinitions();
+        PropertyDefinition[] propDefs = propositionDefinition
+                .getPropertyDefinitions();
         if (propDefs.length == 0) {
             System.out.println("\tNo properties");
         } else {
@@ -144,19 +151,19 @@ class PropositionDefinitionPrinter
         if (valueSetId != null) {
             valueSetId = ", " + valueSetId;
         }
-        System.out.println("\t\t" + propDef.getName() + ": " +
-                propDef.getValueType() + valueSetId);
+        System.out.println("\t\t" + propDef.getName() + ": "
+                + propDef.getValueType() + valueSetId);
     }
 
     private void printDisplayNames(PropositionDefinition propositionDefinition) {
-        System.out.println("\tDisplay name: " +
-                propositionDefinition.getDisplayName());
-        System.out.println("\tAbbreviated display name: " +
-                propositionDefinition.getAbbreviatedDisplayName());
+        System.out.println("\tDisplay name: "
+                + propositionDefinition.getDisplayName());
+        System.out.println("\tAbbreviated display name: "
+                + propositionDefinition.getAbbreviatedDisplayName());
     }
 
     private void printTerms(PropositionDefinition propositionDefinition) {
-        System.out.println("\tAssociated terms: " +
-                StringUtils.join(propositionDefinition.getTermIds(), ", "));
+        System.out.println("\tAssociated terms: "
+                + StringUtils.join(propositionDefinition.getTermIds(), ", "));
     }
 }

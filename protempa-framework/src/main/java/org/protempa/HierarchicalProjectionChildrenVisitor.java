@@ -53,6 +53,12 @@ public final class HierarchicalProjectionChildrenVisitor extends AbstractProposi
         this.propDefs.addAll(knowledgeSource.readInverseIsA(lowLevelAbstractionDefinition));
         this.propDefs.addAll(knowledgeSource.readAbstractedFrom(lowLevelAbstractionDefinition));
     }
+    
+    @Override
+    public void visit(CompoundLowLevelAbstractionDefinition compoundLowLevelAbstractionDefinition) throws KnowledgeSourceReadException {
+        this.propDefs.addAll(knowledgeSource.readInverseIsA(compoundLowLevelAbstractionDefinition));
+        this.propDefs.addAll(knowledgeSource.readAbstractedFrom(compoundLowLevelAbstractionDefinition));
+    }
 
     @Override
     public void visit(PrimitiveParameterDefinition primitiveParameterDefinition) throws KnowledgeSourceReadException {

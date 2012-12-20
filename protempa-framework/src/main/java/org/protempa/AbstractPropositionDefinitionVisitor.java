@@ -91,6 +91,22 @@ public abstract class AbstractPropositionDefinitionVisitor implements
                 "Visiting LowLevelAbstractionDefinitions is unsupported");
 
     }
+    
+    /**
+     * Processes compound low-level abstraction definitions. This default implementation
+     * throws an {@link UnsupportedOperationException).
+     *
+     * @param compoundLowLevelAbstractionDefinition
+     *            a {@link CompoundLowLevelAbstractionDefinition}.
+     * @throws UnsupportedOperationException.
+     */
+    @Override
+    public void visit(
+            CompoundLowLevelAbstractionDefinition compoundLowLevelAbstractionDefinition) {
+        throw new UnsupportedOperationException(
+                "Visiting CompoundLowLevelAbstractionDefinitions is unsupported");
+
+    }
 
     /**
      * Processes primitive parameter definitions. This default implementation

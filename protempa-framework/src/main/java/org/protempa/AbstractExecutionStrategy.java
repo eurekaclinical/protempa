@@ -43,12 +43,12 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
      * @param abstractionFinder
      *            the {@link AbstractionFinder} using this execution strategy
      */
-    AbstractExecutionStrategy(KnowledgeSource knowledgeSource, 
+    AbstractExecutionStrategy(KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource) {
         this.knowledgeSource = knowledgeSource;
         this.algorithmSource = algorithmSource;
     }
-    
+
     protected final KnowledgeSource getKnowledgeSource() {
         return this.knowledgeSource;
     }
@@ -65,14 +65,17 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
                 this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
                 visitor.getAlgorithms(), listener);
-        List<PropositionDefinition> propDefs = 
-                new ArrayList<PropositionDefinition>(propIds.size());
+        List<PropositionDefinition> propDefs = new ArrayList<PropositionDefinition>(
+                propIds.size());
         for (String propId : propIds) {
             PropositionDefinition propDef;
             try {
-                propDef = this.knowledgeSource.readPropositionDefinition(propId);
+                propDef = this.knowledgeSource
+                        .readPropositionDefinition(propId);
             } catch (KnowledgeSourceReadException ex) {
-                throw new FinderException("Problem retrieving proposition definition " + propId + " from knowledge source");
+                throw new FinderException(
+                        "Problem retrieving proposition definition " + propId
+                                + " from knowledge source");
             }
             if (propDef != null) {
                 propDefs.add(propDef);
@@ -86,17 +89,19 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
             try {
                 ruleCreator.visit(result);
             } catch (ProtempaException ex) {
-                throw new FinderException("Problem creating data processing rules", ex);
+                throw new FinderException(
+                        "Problem creating data processing rules", ex);
             }
         }
         try {
             this.ruleBase = new JBossRuleBaseFactory(ruleCreator,
                     createRuleBaseConfiguration(ruleCreator)).newInstance();
         } catch (PropositionDefinitionInstantiationException ex) {
-            throw new FinderException("Problem creating data processing rules", ex);
+            throw new FinderException("Problem creating data processing rules",
+                    ex);
         }
     }
-    
+
     @Override
     public RuleBase getRuleBase() {
         return this.ruleBase;
@@ -118,7 +123,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         config.setAssertBehaviour(AssertBehaviour.EQUALITY);
         return config;
     }
-    
+
     /**
      * Collect all of the propositions for which we need to create rules.
      * 
@@ -139,8 +144,8 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
             ValidateAlgorithmCheckedVisitor validatorVisitor,
             Set<PropositionDefinition> result,
             List<PropositionDefinition> propDefs) throws FinderException {
-        HierarchicalProjectionChildrenVisitor dcVisitor = 
-                new HierarchicalProjectionChildrenVisitor(knowledgeSource);
+        HierarchicalProjectionChildrenVisitor dcVisitor = new HierarchicalProjectionChildrenVisitor(
+                knowledgeSource);
         for (PropositionDefinition propDef : propDefs) {
             assert propDef != null : "propDef cannot be null";
             try {
@@ -151,7 +156,8 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
                         dcVisitor.getChildren());
                 dcVisitor.clear();
             } catch (ProtempaException ex) {
-                throw new FinderException("Problem reading from knowledge source", ex);
+                throw new FinderException(
+                        "Problem reading from knowledge source", ex);
             }
         }
     }
@@ -186,6 +192,12 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
             }
             this.algorithms.put(lowLevelAbstractionDefinition, algorithm);
 
+        }
+
+        @Override
+        public void visit(
+                CompoundLowLevelAbstractionDefinition extendedLowLevelAbstractionDefinition)
+                throws ProtempaException {
         }
 
         @Override
