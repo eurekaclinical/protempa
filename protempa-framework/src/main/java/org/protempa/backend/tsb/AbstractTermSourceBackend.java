@@ -38,8 +38,7 @@ public abstract class AbstractTermSourceBackend extends
     /**
      * A default implementation that returns null
      * 
-     * @see org.protempa.TermSourceBackend#readTerm(java.lang.String,
-     *      org.protempa.Terminology)
+     * @see org.protempa.backend.tsb.TermSourceBackend#readTerm(java.lang.String)
      */
     @Override
     public Term readTerm(String id) throws TermSourceReadException {
@@ -49,7 +48,7 @@ public abstract class AbstractTermSourceBackend extends
     /**
      * A default implementation that returns null
      * 
-     * @see org.protempa.TermSourceBackend#readTerms(String[], Terminology)
+     * @see org.protempa.backend.tsb.TermSourceBackend#readTerms(String[])
      */
     @Override
     public Map<String, Term> readTerms(String[] ids)
@@ -60,7 +59,7 @@ public abstract class AbstractTermSourceBackend extends
     /**
      * Implemented as a no-op
      * 
-     * @see org.protempa.Backend#close()
+     * @see org.protempa.backend.Backend#close()
      */
     @Override
     public void close() {
@@ -69,7 +68,7 @@ public abstract class AbstractTermSourceBackend extends
     /**
      * A default implementation that returns null
      * 
-     * @see org.protempa.Backend#getDisplayName()
+     * @see org.protempa.backend.Backend#getDisplayName()
      */
     @Override
     public String getDisplayName() {
@@ -80,7 +79,7 @@ public abstract class AbstractTermSourceBackend extends
     /**
      * A default implementation that returns null
      * 
-     * @see org.protempa.TermSourceBackend#getSubsumption(java.lang.String)
+     * @see org.protempa.backend.tsb.TermSourceBackend#getSubsumption(java.lang.String)
      */
     @Override
     public List<String> getSubsumption(String id)
