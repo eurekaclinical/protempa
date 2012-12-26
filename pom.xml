@@ -6,6 +6,22 @@
     <packaging>pom</packaging>
     <name>Protempa</name>
     <url>http://aiw.sourceforge.net/dev/protempa-${project.version}</url>
+    <description>Protempa supports the construction of software systems for 
+        querying clinical databases, summarizing patient data, detecting clinically 
+        significant data patterns in groups of patients or individual patients, and 
+        extract, transform and load (ETL). Its special feature, temporal abstraction,
+        supports queries and summarization of data in terms of temporal patterns. 
+        Temporal patterns enable robust querying and extraction of clinical history. 
+        These patterns include frequencies (at least two, three, etc. of some event or
+        observation); sequences (chemotherapy followed by surgery within 180 days,
+        a hospital encounter followed by another hospital encounter within 30 days); 
+        and overlaps (falling platelet counts in the setting of HELLP syndrome).
+    </description>
+    
+    <organization>
+        <name>Emory University</name>
+        <url>http://www.emory.edu</url>
+    </organization>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
