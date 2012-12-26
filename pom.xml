@@ -5,14 +5,14 @@
     <version>2.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Protempa</name>
-    <url>http://aiw.sourceforge.net</url>
+    <url>http://aiw.sourceforge.net/dev/${project.build.finalName}</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <scm>
-        <connection>scm:svn:https://scm.cci.emory.edu/svn/protempa/trunk</connection>
+        <developerConnection>scm:svn:https://scm.cci.emory.edu/svn/protempa/trunk</developerConnection>
         <url>https://scm.cci.emory.edu/svn/protempa/trunk</url>
     </scm>
     
@@ -35,14 +35,14 @@
             <url>scp://shell.sourceforge.net/home/project-web/aiw/htdocs/dev/${project.build.finalName}</url>
         </site>
         <repository>
-            <id>aiw.internal.repo</id>
-            <name>AIW Internal Repo</name>
-            <url>http://maven.cci.emory.edu:8081/nexus/content/repositories/aiw/</url>
+            <id>aiw.repo</id>
+            <name>AIW Repo</name>
+            <url>http://maven.cci.emory.edu/nexus/content/repositories/aiw/</url>
         </repository>
         <snapshotRepository>
-            <id>aiw.snapshots.internal.repo</id>
-            <name>AIW Internal Snapshots Repo</name>
-            <url>http://maven.cci.emory.edu:8081/nexus/content/repositories/aiw-snapshots/</url>
+            <id>aiw.snapshots.repo</id>
+            <name>AIW Snapshots Repo</name>
+            <url>http://maven.cci.emory.edu/nexus/content/repositories/aiw-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
     <reporting>
@@ -69,11 +69,11 @@
     <repositories>
         <repository>
             <id>maven.cci</id>
-            <url>http://maven.cci.emory.edu:8081/nexus/content/repositories/public</url>
+            <url>http://maven.cci.emory.edu/nexus/content/repositories/public</url>
         </repository>
         <repository>
-            <id>aiw.internal.repo</id>
-            <url>http://maven.cci.emory.edu:8081/nexus/content/repositories/aiw/</url>
+            <id>aiw.repo</id>
+            <url>http://maven.cci.emory.edu/nexus/content/repositories/aiw/</url>
         </repository>
     </repositories>
     
