@@ -5,7 +5,7 @@
     <version>2.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Protempa</name>
-    <url>http://aiw.sourceforge.net/dev/${project.build.finalName}</url>
+    <url>http://aiw.sourceforge.net/dev/protempa-${project.version}</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -32,7 +32,7 @@
     <distributionManagement>
         <site>
             <id>aiw.sourceforge.net</id>
-            <url>scp://shell.sourceforge.net/home/project-web/aiw/htdocs/dev/${project.build.finalName}</url>
+            <url>scp://shell.sourceforge.net/home/project-web/aiw/htdocs/dev/protempa-${project.version}</url>
         </site>
         <repository>
             <id>aiw.repo</id>
