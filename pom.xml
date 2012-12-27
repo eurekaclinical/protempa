@@ -316,6 +316,9 @@
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-checkstyle-plugin</artifactId>
                             <version>2.9.1</version>
+                            <configuration>  
+                                <configLocation>http://aiw.sourceforge.net/dev/aiw-checkstyle-1.0/protempa-checkstyle.xml</configLocation>  
+                            </configuration>
                         </plugin>
                     </reportPlugins>
                 </configuration>
