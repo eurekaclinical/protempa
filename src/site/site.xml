@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<project name="Eureka! Clinical Analytics Developer Resources" 
-         xmlns="http://maven.apache.org/DECORATION/1.0.0" 
+<project xmlns="http://maven.apache.org/DECORATION/1.0.0" 
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.0 http://maven.apache.org/xsd/decoration-1.0.0.xsd">
     <skin>
@@ -17,15 +16,10 @@
         </fluidoSkin>
     </custom>
 
-    <bannerLeft>
-        <name>Eureka! Clinical Analytics</name>
-        <src>../../images/eureka-banner-logo.png</src>
-        <href>../../.</href>
-    </bannerLeft>
     <bannerRight>
-        <name>Sponsors</name>
-        <src>../../images/eureka-banner-sponsors.png</src>
-        <href>../../sponsors.html</href>
+        <name>Emory University Center for Comprehensive Informatics</name>
+        <src>../../images/cci-logo.gif</src>
+        <href>http://cci.emory.edu</href>
     </bannerRight>
 
     <body>
