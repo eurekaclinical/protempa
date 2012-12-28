@@ -1,40 +1,52 @@
 <?xml version="1.0"?>
 <document xmlns="http://maven.apache.org/XDOC/2.0" 
-		  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
-	<properties>
-		<title>${project.name}</title>
-		<author email="aiwhelp@emory.edu">
-			The Eureka! Clinical Analytics Team
-		</author>
-	</properties>
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+    <properties>
+        <title>Homepage</title>
+        <author email="aiwhelp@emory.edu">
+            The Eureka! Clinical Analytics Team
+        </author>
+    </properties>
 
-	<body>
-		<h2>What is ${project.name}?</h2>
+    <body>
+        <h2>What is ${project.name}?</h2>
         
-		<p>${project.description}</p>
+        <p>${project.description}</p>
 
-		<p>${project.name} is developed and maintained by the
-		<a href="http://cci.emory.edu">Emory Center for Comprehensive Informatics</a>.</p>
+        <p>${project.name} is developed and maintained by the
+            <a href="http://cci.emory.edu">Emory Center for Comprehensive Informatics</a>.
+        </p>
                 
-                <h2>Binaries</h2>
-                <p>To use ${project.name} with your favorite build system, consult the 
-                    <a href="dependency-info.html">Dependency Information</a> 
-                    page for the appropriate lines to add to its configuration.</p>
-                <p>Alternatively, you can download binaries in 
-                    <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=bin&amp;e=zip">zip file</a>
-			and <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=bin&amp;e=tar.gz">tar.gz</a> formats.</p>
+        <h2>Binaries</h2>
+        <p>To use ${project.name} with your favorite build system, consult the 
+            <a href="dependency-info.html">Dependency Information page</a> 
+            for the appropriate lines to add to your build system's configuration.
+        </p>
+        <p>Alternatively, you can download a binary distribution from either of the following links:</p>
+        <ul>
+            <li>
+                <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=bin&amp;e=zip">${project.artifactId}-${project.version}-bin.zip</a>
+            </li>
+            <li>
+                <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=bin&amp;e=tar.gz">${project.artifactId}-${project.version}-bin.tar.gz</a>
+            </li>
+        </ul>
 
-		<h2>Source Code</h2>
-		<p>Source code for the current release (version ${project.version}) 
-			is available from our 
-                    <a href="http://maven.cci.emory.edu/nexus/">Maven repository</a>
-                        in 
-                    <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=src&amp;e=zip">zip file</a>
-			and <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=src&amp;e=tar.gz">tar.gz</a> formats. You 
-			can also download the 
-			<a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw-snapshots&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=LATEST&amp;c=src&amp;e=zip">latest snapshot</a> from our 
-			<a href="http://maven.cci.emory.edu/nexus">Maven repository</a>.
-		</p>
-	</body>
+        <h2>Source Code</h2>
+        <p>Source code for the current release (version ${project.version}) is available from our 
+            <a href="http://maven.cci.emory.edu/nexus/">Maven repository</a>:
+        </p>
+        <ul>
+            <li>
+                <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=src&amp;e=zip">${project.artifactId}-${project.version}-src.zip</a>
+            </li>
+            <li>
+                <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=src&amp;e=tar.gz">${project.artifactId}-${project.version}-src.tar.gz</a>
+            </li>
+            <li>
+                <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw-snapshots&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=LATEST&amp;c=src&amp;e=zip">Latest snapshot</a>
+            </li>  
+        </ul>
+    </body>
 </document>

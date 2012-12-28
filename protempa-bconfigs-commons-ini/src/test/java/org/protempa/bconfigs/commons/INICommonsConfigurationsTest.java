@@ -63,6 +63,8 @@ public class INICommonsConfigurationsTest {
         LOADER = null;
         BackendProviderManager.setBackendProvider(null);
         FileUtils.deleteDirectory(CONFIG_DIR);
+        
+        System.clearProperty("protempa.inicommonsconfigurations.pathname");
     }
 
     @After

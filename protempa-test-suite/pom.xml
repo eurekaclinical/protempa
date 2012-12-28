@@ -10,10 +10,10 @@
     <artifactId>protempa-test-suite</artifactId>
     <name>Protempa Test Suite</name>
     <version>2.0.3-SNAPSHOT</version>
-    <description>For running end-to-end regression and integration tests against Protempa</description>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <description>For running end-to-end regression and integration tests 
+        against Protempa
+    </description>
+    
     <dependencies>
         <dependency>
             <groupId>org.protempa</groupId>
@@ -32,12 +32,6 @@
             <groupId>org.protempa</groupId>
             <artifactId>protempa-tsb-umls</artifactId>
             <version>2.0.3-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.3.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -72,55 +66,21 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <argLine>-enableassertions -Xmx256M -Djava.awt.headless=true</argLine>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.7.1</version>
+                <groupId>org.jasig.maven</groupId>
+                <artifactId>maven-notice-plugin</artifactId>
                 <configuration>
-          <!--  tests will run via one of the profiles below -->
-                    <skipTests>true</skipTests>
+                    <noticeTemplate>../etc/NOTICE.template</noticeTemplate>
+                    <licenseMapping>
+                        <param>../etc/license-mappings.xml</param>
+                    </licenseMapping>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>test-tier1</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                        <!--  This is a full test of the system, so it's tier 2 
-                              Nothing to do here -->
-                            <skipTests>true</skipTests>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>test-tier2</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <skipTests>false</skipTests>
-                            <argLine>-enableassertions -Xmx256M</argLine>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

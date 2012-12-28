@@ -27,6 +27,7 @@ This project includes:
   dom4j under BSD License
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
   H2 Database Engine under The H2 License, Version 1.0
+  Hamcrest Core under New BSD License
   JavaUtil under Apache License, Version 2.0
   je under Sleepycat License
   JUnit under Common Public License Version 1.0

@@ -55,7 +55,6 @@ import org.arp.javautil.io.WithBufferedReaderByLine;
 import org.drools.WorkingMemory;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -105,10 +104,10 @@ import org.protempa.query.handler.QueryResultsHandler;
 
 /**
  * Unit tests for Protempa.
- * 
+ *
  * Persistent stores go into the directory in the system property
  * <code>java.io.tmpdir</code>.
- * 
+ *
  * @author Michel Mansour
  */
 public class ProtempaTest {
@@ -158,32 +157,32 @@ public class ProtempaTest {
     /**
      * All proposition IDs in the sample data
      */
-    private static final String[] PROP_IDS = { "Patient", "PatientAll",
-            "Encounter", ICD9_013_82, ICD9_804, "VitalSign",
-            "HELLP_FIRST_RECOVERING_PLATELETS", "LDH_TREND", "AST_STATE",
-            "30DayReadmission", "No30DayReadmission", "MyDiagnosis",
-            "MyVitalSign", "MyTemporalPattern", "MyAndLikePattern",
-            "DiastolicBloodPressure", "SystolicBloodPressure",
-            "MySystolicClassification", "MyDiastolicClassification",
-            "MyBloodPressureClassificationAny",
-            "MyBloodPressureClassificationConsecutiveAny",
-            "MyBloodPressureClassificationAll",
-            "MyTwoConsecutiveHighBloodPressure", "MySystolicClassification3",
-            "MyDiastolicClassification3", "MyBloodPressureClassification3Any" };
+    private static final String[] PROP_IDS = {"Patient", "PatientAll",
+        "Encounter", ICD9_013_82, ICD9_804, "VitalSign",
+        "HELLP_FIRST_RECOVERING_PLATELETS", "LDH_TREND", "AST_STATE",
+        "30DayReadmission", "No30DayReadmission", "MyDiagnosis",
+        "MyVitalSign", "MyTemporalPattern", "MyAndLikePattern",
+        "DiastolicBloodPressure", "SystolicBloodPressure",
+        "MySystolicClassification", "MyDiastolicClassification",
+        "MyBloodPressureClassificationAny",
+        "MyBloodPressureClassificationConsecutiveAny",
+        "MyBloodPressureClassificationAll",
+        "MyTwoConsecutiveHighBloodPressure", "MySystolicClassification3",
+        "MyDiastolicClassification3", "MyBloodPressureClassification3Any"};
     /**
      * Vital signs
      */
-    private static final String[] VITALS = { "BodyMassIndex",
-            "DiastolicBloodPressure", "HeartRate", "O2Saturation",
-            "RespiratoryRate", "SystolicBloodPressure", "TemperatureAxillary",
-            "TemperatureCore", "TemperatureNOS", "TemperatureRectal",
-            "TemperatureTympanic" };
+    private static final String[] VITALS = {"BodyMassIndex",
+        "DiastolicBloodPressure", "HeartRate", "O2Saturation",
+        "RespiratoryRate", "SystolicBloodPressure", "TemperatureAxillary",
+        "TemperatureCore", "TemperatureNOS", "TemperatureRectal",
+        "TemperatureTympanic"};
     /**
      * Key IDs (testing purposes only...you know what I mean...for testing the
      * tests)
      */
-    private static final String[] KEY_IDS = { "0", "1", "2", "3", "4", "5",
-            "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" };
+    private static final String[] KEY_IDS = {"0", "1", "2", "3", "4", "5",
+        "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"};
 
     /*
      * Instance of Protempa to run
@@ -204,9 +203,8 @@ public class ProtempaTest {
     /**
      * Performs set up operations required for all testing (eg, setting up the
      * in-memory database).
-     * 
-     * @throws Exception
-     *             if something goes wrong
+     *
+     * @throws Exception if something goes wrong
      */
     @BeforeClass
     public static void setUpAll() throws Exception {
@@ -215,13 +213,12 @@ public class ProtempaTest {
     private void initializeProtempa() throws ProtempaStartupException,
             BackendProviderSpecLoaderException, ConfigurationsLoadException,
             InvalidConfigurationException {
-        System.setProperty("protempa.inicommonsconfigurations.pathname",
-                "src/test/resources");
         // force the use of the H2 driver so we don't bother trying to load
         // others
         System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
                 "org.protempa.backend.dsb.relationaldb.H2SQLGenerator");
-        SourceFactory sf = new SourceFactory(new INICommonsConfigurations(),
+        SourceFactory sf = new SourceFactory(
+                new INICommonsConfigurations(new File("src/test/resources")),
                 "protege-h2-test-config");
         protempa = Protempa.newInstance(sf);
     }
@@ -229,9 +226,8 @@ public class ProtempaTest {
     /**
      * Performs tear down operations once all testing is complete (eg, closing
      * Protempa)
-     * 
-     * @throws Exception
-     *             if something goes wrong
+     *
+     * @throws Exception if something goes wrong
      */
     @AfterClass
     public static void tearDownAll() throws Exception {
@@ -581,16 +577,16 @@ public class ProtempaTest {
         Relation highBpRel = new Relation();
         highBp.setRelation(highBpTpd, highBpTpd, highBpRel);
 
-        q.setPropositionDefinitions(new PropositionDefinition[] { ed, pd, hd,
-                hd2, systolicClassification(), diastolicClassification(),
-                bloodPressureClassificationAny(),
-                bloodPressureClassificationConsecutiveAny(), highBp,
-                bloodPressureClassificationAll(), systolicClassification3(),
-                diastolicClassification3(), bloodPressureClassification3Any() });
+        q.setPropositionDefinitions(new PropositionDefinition[]{ed, pd, hd,
+                    hd2, systolicClassification(), diastolicClassification(),
+                    bloodPressureClassificationAny(),
+                    bloodPressureClassificationConsecutiveAny(), highBp,
+                    bloodPressureClassificationAll(), systolicClassification3(),
+                    diastolicClassification3(), bloodPressureClassification3Any()});
 
         DateFormat shortFormat = AbsoluteTimeGranularity.DAY.getShortFormat();
         DateTimeFilter timeRange = new DateTimeFilter(
-                new String[] { "Encounter" }, shortFormat.parse("08/01/2006"),
+                new String[]{"Encounter"}, shortFormat.parse("08/01/2006"),
                 AbsoluteTimeGranularity.DAY, shortFormat.parse("08/31/2011"),
                 AbsoluteTimeGranularity.DAY, Side.START, Side.START);
 
@@ -631,8 +627,9 @@ public class ProtempaTest {
                 System.out.println(r.getKey() + ": " + r.getValue().size());
                 assertEquals(
                         "Wrong number of raw propositions retrieved for key "
-                                + r.getKey(), propCounts.get(r.getKey()), r
-                                .getValue().size());
+                        + r.getKey(),
+                        propCounts.get(r.getKey()).intValue(), 
+                        r.getValue().size());
             }
             assertPatientsRetrieved(results);
             assertEncountersRetrieved(results);
@@ -704,7 +701,8 @@ public class ProtempaTest {
                     derivCount += derivs.size();
                 }
                 assertEquals("wrong number of forward derivations for key "
-                        + keyId, forwardDerivCounts.get(keyId), derivCount);
+                        + keyId, forwardDerivCounts.get(keyId).intValue(), 
+                        derivCount);
 
                 derivCount = 0;
                 for (List<Proposition> derivs : afh.getBackwardDerivations(
@@ -712,7 +710,8 @@ public class ProtempaTest {
                     derivCount += derivs.size();
                 }
                 assertEquals("wrong number of backward derivations for key "
-                        + keyId, backwardDerivCounts.get(keyId), derivCount);
+                        + keyId, backwardDerivCounts.get(keyId).intValue(), 
+                        derivCount);
 
                 assert30DayReadmissionDerived(afh);
                 assertNo30DayReadmissionDerived(afh);
@@ -838,7 +837,7 @@ public class ProtempaTest {
             if (patientEncounterMap.containsKey(e.getPatientId().toString())) {
                 patientEncounterMap.put(e.getPatientId().toString(),
                         1 + patientEncounterMap
-                                .get(e.getPatientId().toString()));
+                        .get(e.getPatientId().toString()));
             } else {
                 patientEncounterMap.put(e.getPatientId().toString(), 1);
             }
@@ -849,19 +848,20 @@ public class ProtempaTest {
             Set<Proposition> encounters = getPropositionsForKey(e.getKey(),
                     "Encounter", objectGraph);
             assertEquals("Wrong number of encounters for key ID " + e.getKey(),
-                    patientEncounterMap.get(e.getKey()), encounters.size());
+                    patientEncounterMap.get(e.getKey()).intValue(), 
+                    encounters.size());
             for (Proposition enc : encounters) {
                 Event event = (Event) enc;
                 Encounter encounter = encountersMap.get(event.getProperty(
                         "encounterId").getFormatted());
                 assertEquals(
                         "Wrong start time for encounter " + encounter.getId()
-                                + " for key ID " + encounter.getPatientId(),
+                        + " for key ID " + encounter.getPatientId(),
                         sdf.format(encounter.getStart()),
                         event.getStartFormattedLong());
                 assertEquals(
                         "Wrong finish time for encounter " + encounter.getId()
-                                + " for key ID " + encounter.getPatientId(),
+                        + " for key ID " + encounter.getPatientId(),
                         sdf.format(encounter.getEnd()),
                         event.getFinishFormattedLong());
             }
@@ -939,12 +939,12 @@ public class ProtempaTest {
             List<Proposition> props = objectGraph.get(me.getKey());
             for (Proposition prop : props) {
                 if (prop.getId().equals("PatientAll")) {
-                    Assert.assertEquals("PatientAll for keyId 0 failed", 1,
+                    assertEquals("PatientAll for keyId 0 failed", 1,
                             prop.getReferences("patientDetails").size());
                 } else if (prop.getId().equals("Patient")) {
-                    Assert.assertEquals("Patient for keyId 0 failed", me
-                            .getValue(), prop.getReferences("encounters")
-                            .size());
+                    assertEquals("Patient for keyId 0 failed", me
+                            .getValue().intValue(), 
+                            prop.getReferences("encounters").size());
                 }
             }
         }
@@ -1017,7 +1017,7 @@ public class ProtempaTest {
             } else {
                 assertEquals(
                         "Found some '30DayReadmission' propositions for encounter ID "
-                                + encounterId, 0, count30DayReadmit);
+                        + encounterId, 0, count30DayReadmit);
             }
         }
         logger.log(Level.INFO, "Completed 30DayReadmissions test");
@@ -1049,8 +1049,8 @@ public class ProtempaTest {
 
     private void assertOrLikePatternDerived(
             DataStore<String, WorkingMemory> derivedData) {
-        String[] ptIds = { "0", "1", "2", "8", "10" };
-        boolean[] result = { false, false, true, false, false };
+        String[] ptIds = {"0", "1", "2", "8", "10"};
+        boolean[] result = {false, false, true, false, false};
         for (int i = 0; i < ptIds.length; i++) {
             String ptId = ptIds[i];
             boolean orLikePatternDerived = false;
@@ -1083,7 +1083,6 @@ public class ProtempaTest {
 
     private void assertMyBloodPressureDerived(
             DataStore<String, WorkingMemory> derivedData) {
-
     }
 
     private void assertChildIcd9Derived(
@@ -1093,8 +1092,7 @@ public class ProtempaTest {
         boolean icd9d01382Derived = false;
         boolean icd9d804Derived = false;
 
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals(ICD9_013_82)) {
@@ -1110,33 +1108,33 @@ public class ProtempaTest {
                 icd9d01382Derived);
         assertEquals(
                 "Proposition '" + ICD9_013_82
-                        + "' should not have any forward derivations",
+                + "' should not have any forward derivations",
                 0,
                 getDerivedPropositionsForKey(ICD9_013_82,
-                        afh.getForwardDerivations("0")).size());
+                afh.getForwardDerivations("0")).size());
         assertEquals(
                 "Proposition '" + ICD9_013_82
-                        + "' should not have any backward derivations",
+                + "' should not have any backward derivations",
                 0,
                 getDerivedPropositionsForKey(ICD9_013_82,
-                        afh.getBackwardDerivations("0")).size());
+                afh.getBackwardDerivations("0")).size());
         assertTrue("Proposition '" + ICD9_804 + "' not found", icd9d804Derived);
 
         // matched at higher level - should be derivations
-        String[] icd9Levels = new String[] { "ICD9:804", "ICD9:804.3",
-                "ICD9:804.34" };
+        String[] icd9Levels = new String[]{"ICD9:804", "ICD9:804.3",
+            "ICD9:804.34"};
         Set<String> expectedForwardDerivationsLevel0 = Arrays
-                .asSet(new String[] {});
+                .asSet(new String[]{});
         Set<String> expectedBackwardDerivationsLevel0 = Arrays
-                .asSet(new String[] { icd9Levels[1] });
+                .asSet(new String[]{icd9Levels[1]});
         Set<String> expectedForwardDerivationsLevel1 = Arrays
-                .asSet(new String[] { icd9Levels[0] });
+                .asSet(new String[]{icd9Levels[0]});
         Set<String> expectedBackwardDerivationsLevel1 = Arrays
-                .asSet(new String[] { icd9Levels[2] });
+                .asSet(new String[]{icd9Levels[2]});
         Set<String> expectedForwardDerivationsLevel2 = Arrays
-                .asSet(new String[] { icd9Levels[1] });
+                .asSet(new String[]{icd9Levels[1]});
         Set<String> expectedBackwardDerivationsLevel2 = Arrays
-                .asSet(new String[] {});
+                .asSet(new String[]{});
         Map<String, Set<String>> expectedForwardDerivations = new HashMap<String, Set<String>>();
         expectedForwardDerivations.put(icd9Levels[0],
                 expectedForwardDerivationsLevel0);
@@ -1210,8 +1208,7 @@ public class ProtempaTest {
         logger.log(Level.INFO, "Running LDH_TREND test...");
         Set<AbstractParameter> ldhTrends = new HashSet<AbstractParameter>();
 
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("LDH_TREND")) {
@@ -1237,12 +1234,12 @@ public class ProtempaTest {
                         ldhTrend.getStartFormattedLong(), sdf,
                         "Wrong start time for 'INCREASING_LDH'",
                         "Unable to parse start time for 'INCREASING_LDH': "
-                                + ldhTrend.getStartFormattedLong());
+                        + ldhTrend.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         ldhTrend.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'INCREASING_LDH'",
                         "Unable to parse finish time for 'INCREASING_LDH': "
-                                + ldhTrend.getFinishFormattedLong());
+                        + ldhTrend.getFinishFormattedLong());
                 foundInc = true;
             } else if (ldhTrend.getValueFormatted().equals("Decreasing LDH")) {
                 expectedStart = buildDate(2006, Calendar.AUGUST, 26, 8, 35,
@@ -1253,12 +1250,12 @@ public class ProtempaTest {
                         ldhTrend.getStartFormattedLong(), sdf,
                         "Wrong start time for 'DECREASING_LDH'",
                         "Unable to parse start time for 'DECREASING_LDH': "
-                                + ldhTrend.getStartFormattedLong());
+                        + ldhTrend.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         ldhTrend.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'DECREASING_LDH'",
                         "Unable to parse finish time for 'DECREASING_LDH': "
-                                + ldhTrend.getFinishFormattedLong());
+                        + ldhTrend.getFinishFormattedLong());
                 foundDec = true;
             } else {
                 fail("Found 'LDH_TREND' with unknown value: "
@@ -1278,8 +1275,7 @@ public class ProtempaTest {
         logger.log(Level.INFO, "Running AST_STATE test...");
         Set<AbstractParameter> astStates = new HashSet<AbstractParameter>();
 
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("AST_STATE")) {
@@ -1306,12 +1302,12 @@ public class ProtempaTest {
                         astState.getStartFormattedLong(), sdf,
                         "Wrong start time for 'NORMAL_AST'",
                         "Unable to parse start time for 'NORMAL_AST': "
-                                + astState.getStartFormattedLong());
+                        + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'NORMAL_AST'",
                         "Unable to parse finish time for 'NORMAL_AST': "
-                                + astState.getFinishFormattedLong());
+                        + astState.getFinishFormattedLong());
                 foundNormalAstState = true;
             } else if (astState.getValueFormatted().equals("Low AST")) {
                 expectedStart = buildDate(2007, Calendar.FEBRUARY, 28, 8, 49,
@@ -1324,12 +1320,12 @@ public class ProtempaTest {
                         sdf,
                         "Wrong start time for 'LOW_AST'",
                         "Unable to parse start time for 'LOW_AST': "
-                                + astState.getStartFormattedLong());
+                        + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'LOW_AST'",
                         "Unable to parse finish time for 'LOW_AST': "
-                                + astState.getFinishFormattedLong());
+                        + astState.getFinishFormattedLong());
                 foundLowAstState = true;
             } else if (astState.getValueFormatted().equals("High AST")) {
                 expectedStart = buildDate(2007, Calendar.FEBRUARY, 28, 9, 52,
@@ -1340,12 +1336,12 @@ public class ProtempaTest {
                         astState.getStartFormattedLong(), sdf,
                         "Wrong start time for 'HIGH_AST'",
                         "Unable to parse start time for 'HIGH_AST': "
-                                + astState.getStartFormattedLong());
+                        + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'HIGH_AST'",
                         "Unable to parse finish time for 'HIGH_AST': "
-                                + astState.getFinishFormattedLong());
+                        + astState.getFinishFormattedLong());
                 foundHighAstState = true;
             } else if (astState.getValueFormatted().equals("Very High AST")) {
                 expectedStart = buildDate(2007, Calendar.MARCH, 2, 2, 5,
@@ -1356,12 +1352,12 @@ public class ProtempaTest {
                         astState.getStartFormattedLong(), sdf,
                         "Wrong start time for 'VERY_HIGH_AST'",
                         "Unable to parse start time for 'VERY_HIGH_AST': "
-                                + astState.getStartFormattedLong());
+                        + astState.getStartFormattedLong());
                 assertDateStringEquals(expectedFinish,
                         astState.getFinishFormattedLong(), sdf,
                         "Wrong finish time for 'VERY_HIGH_AST'",
                         "Unable to parse finish time for 'VERY_HIGH_AST': "
-                                + astState.getFinishFormattedLong());
+                        + astState.getFinishFormattedLong());
                 foundVeryHighAstState = true;
             } else {
                 fail("Found 'AST_STATE' with unknown value "
@@ -1387,8 +1383,7 @@ public class ProtempaTest {
         logger.log(Level.INFO,
                 "Running HELLP_FIRST_RECOVERING_PLATELETS test...");
         Set<Proposition> hellpFirstRecoverings = new HashSet<Proposition>();
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("11").iterateObjects(); it
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("11").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("HELLP_FIRST_RECOVERING_PLATELETS")) {
@@ -1408,12 +1403,12 @@ public class ProtempaTest {
                 hellpFirstRecovering.getStartFormattedLong(), sdf,
                 "Wrong start time for 'HELLP_FIRST_RECOVERING_PLATELETS'",
                 "Unable to parse start time for 'HELLP_FIRST_RECOVERING_PLATELETS': "
-                        + hellpFirstRecovering.getStartFormattedLong());
+                + hellpFirstRecovering.getStartFormattedLong());
         assertDateStringEquals(expectedFinish,
                 hellpFirstRecovering.getFinishFormattedLong(), sdf,
                 "Wrong finish time for 'HELLP_FIRST_RECOVERING_PLATELETS'",
                 "Unable to parse finish time for 'HELLP_FIRST_RECOVERING_PLATELETS': "
-                        + hellpFirstRecovering.getFinishFormattedLong());
+                + hellpFirstRecovering.getFinishFormattedLong());
 
         logger.log(Level.INFO,
                 "Completed HELLP_FIRST_RECOVERING_PLATELETS test");
@@ -1424,8 +1419,7 @@ public class ProtempaTest {
         logger.log(Level.INFO,
                 "Running MyBloodPressureClassificationConsecutiveAny test...");
         Set<Proposition> bps = new HashSet<Proposition>();
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("12").iterateObjects(); it
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("12").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("MyBloodPressureClassificationConsecutiveAny")) {
@@ -1447,14 +1441,14 @@ public class ProtempaTest {
                 sdf,
                 "Wrong start time for 'MyBloodPressureClassificationConsecutiveAny'",
                 "Unable to parse start time for 'MyBloodPressureClassificationConsecutiveAny': "
-                        + bp.getStartFormattedLong());
+                + bp.getStartFormattedLong());
         assertDateStringEquals(
                 expectedFinish,
                 bp.getFinishFormattedLong(),
                 sdf,
                 "Wrong finish time for 'MyBloodPressureClassificationConsecutiveAny'",
                 "Unable to parse finish time for 'MyBloodPressureClassificationConsecutiveAny': "
-                        + bp.getFinishFormattedLong());
+                + bp.getFinishFormattedLong());
         logger.log(Level.INFO,
                 "Completed MyBloodPressureClassificationConsecutiveAny test");
     }
@@ -1464,8 +1458,7 @@ public class ProtempaTest {
         logger.log(Level.INFO,
                 "Running MyTwoConsecutiveHighBloodPressure test...");
         Set<Proposition> bps = new HashSet<Proposition>();
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("12").iterateObjects(); it
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("12").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("MyTwoConsecutiveHighBloodPressure")) {
@@ -1484,11 +1477,11 @@ public class ProtempaTest {
         assertDateStringEquals(expectedStart, bp.getStartFormattedLong(), sdf,
                 "Wrong start time for 'MyTwoConsecutiveHighBloodPressure'",
                 "Unable to parse start time for 'MyTwoConsecutiveHighBloodPressure': "
-                        + bp.getStartFormattedLong());
+                + bp.getStartFormattedLong());
         assertDateStringEquals(expectedFinish, bp.getFinishFormattedLong(),
                 sdf, "Wrong finish time for 'MyTwoConsecutiveBloodPressure'",
                 "Unable to parse finish time for 'MyTwoConsecutiveBloodPressure': "
-                        + bp.getFinishFormattedLong());
+                + bp.getFinishFormattedLong());
         logger.log(Level.INFO,
                 "Completed MyTwoConsecutiveHighBloodPressure test");
     }
@@ -1498,8 +1491,7 @@ public class ProtempaTest {
         logger.log(Level.INFO,
                 "Running MyBloodPressureClassificationAll test...");
         List<AbstractParameter> bps = new ArrayList<AbstractParameter>();
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("13").iterateObjects(); it
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("13").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("MyBloodPressureClassificationAll")) {
@@ -1523,14 +1515,14 @@ public class ProtempaTest {
                 sdf,
                 "Wrong start time for 'MyBloodPressureClassificationAll' (first)",
                 "Unable to parse start time for 'MyBloodPressureClassificationAll' (first): "
-                        + bp1.getStartFormattedLong());
+                + bp1.getStartFormattedLong());
         assertDateStringEquals(
                 expectedFinish1,
                 bp1.getFinishFormattedLong(),
                 sdf,
                 "Wrong finish time for 'MyBloodPressureClassificationAll' (first)",
                 "Unable to parse finish time for 'MyBloodPressureClassificationAll' (first): "
-                        + bp1.getFinishFormattedLong());
+                + bp1.getFinishFormattedLong());
         assertEquals(
                 "Wrong value for 'MyBloodPressureClassificationAll' (first)",
                 NominalValue.getInstance("MYBP_NORMAL"), bp1.getValue());
@@ -1546,14 +1538,14 @@ public class ProtempaTest {
                 sdf,
                 "Wrong start time for 'MyBloodPressureClassificationAll' (second)",
                 "Unable to parse start time for 'MyBloodPressureClassificationAll (second)': "
-                        + bp2.getStartFormattedLong());
+                + bp2.getStartFormattedLong());
         assertDateStringEquals(
                 expectedFinish2,
                 bp2.getFinishFormattedLong(),
                 sdf,
                 "Wrong finish time for 'MyBloodPressureClassificationAll' (second)",
                 "Unable to parse finish time for 'MyBloodPressureClassificationAll' (second): "
-                        + bp2.getFinishFormattedLong());
+                + bp2.getFinishFormattedLong());
         assertEquals(
                 "Wrong value for 'MyBloodPressureClassificationAll' (second)",
                 NominalValue.getInstance("MYBP_HIGH"), bp2.getValue());
@@ -1568,12 +1560,12 @@ public class ProtempaTest {
                 "Running MyBloodPressureClassification3Any test...");
 
         List<AbstractParameter> bps = new ArrayList<AbstractParameter>();
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("14").iterateObjects(); it
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("14").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
-            if (p.getId().equals("MyBloodPressureClassification3Any"))
+            if (p.getId().equals("MyBloodPressureClassification3Any")) {
                 bps.add((AbstractParameter) p);
+            }
         }
         assertEquals(
                 "Found wrong number of 'MyBloodPressureClassification3Any'", 2,
@@ -1598,8 +1590,7 @@ public class ProtempaTest {
         logger.log(Level.INFO,
                 "Running MyBloodPressureClassificationAny with arbitrary intervals test...");
         List<AbstractParameter> bps = new ArrayList<AbstractParameter>();
-        for (@SuppressWarnings("unchecked")
-        Iterator<Proposition> it = derivedData.get("15").iterateObjects(); it
+        for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("15").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals("MyBloodPressureClassificationAny")) {

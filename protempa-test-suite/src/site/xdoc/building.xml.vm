@@ -25,7 +25,7 @@
             <subsection name="A quick build (no tests are run)">
                 <source>mvn clean install</source>
             </subsection>
-            <subsection name="Build with unit tests">
+            <subsection name="Build and run unit tests">
                 <source>mvn clean install -Ptest-tier1</source>
             </subsection>
             <subsection name="Build and run the test suite">

@@ -44,7 +44,9 @@ public class INICommonsConfigurationsPathnameTest {
         String dirSysProp = INICommonsConfigurations.DIRECTORY_SYSTEM_PROPERTY;
         System.setProperty(dirSysProp, tempDirPath);
         INICommonsConfigurations configs = new INICommonsConfigurations();
+        System.clearProperty(dirSysProp);
         assertEquals(new File(tempDirPath), configs.getDirectory());
+        
     }
     
     @Test
