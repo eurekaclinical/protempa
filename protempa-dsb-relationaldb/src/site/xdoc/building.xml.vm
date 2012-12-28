@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" 
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+    <properties>
+        <title>Building</title>
+        <author email="aiwhelp@emory.edu">
+            The Eureka! Clinical Analytics Team
+        </author>
+    </properties>
+
+    <body>
+        <section name="Building ${project.name} from Source">
+            <p>${project.name} uses <a href="http://maven.apache.org">Maven</a>
+            as its build and management tool.</p>
+            
+            <subsection name="Prerequisites">
+                <p>Required:</p>
+                <ul>
+                    <li>Download and install <a href="http://maven.apache.org">Maven</a> (Version 3 is required), if you don't already have it.</li>
+                    <li>Get the <a href="index.html">latest source</a>.</li>
+                    <li>Download and install <a href="http://www.oracle.com/technetwork/java/index.html">Java 1.6</a>, if you don't already have it.</li>
+                </ul>
+            </subsection>
+            <subsection name="A quick build (no tests are run)">
+                <source>mvn clean install</source>
+            </subsection>
+            <subsection name="Build with unit tests">
+                <source>mvn clean install -Ptest-tier1</source>
+            </subsection>
+            <subsection name="Build with integration tests">
+                <source>mvn clean install -Ptest-tier2</source>
+            </subsection>
+        </section>
+    </body>
+</document>

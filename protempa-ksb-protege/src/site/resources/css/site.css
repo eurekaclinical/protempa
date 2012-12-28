@@ -1,0 +1,14 @@
+.imageAndCaption {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.container-fluid {
+    min-width: 900px;
+}
+
+img.screenshot {
+    padding-bottom: 2em;
+}
