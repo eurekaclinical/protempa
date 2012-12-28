@@ -19,34 +19,16 @@
         </p>
                 
         <h2>Binaries</h2>
-        <p>To use ${project.name} with your favorite build system, consult the 
-            <a href="dependency-info.html">Dependency Information page</a> 
-            for the appropriate lines to add to your build system's configuration.
+        <p>Please see the Protempa 
+            <a href="../index.html">Homepage</a> 
+            for instructions on getting binaries for the entire project.
         </p>
-        <p>Alternatively, you can download a binary distribution from either of the following links:</p>
-        <ul>
-            <li>
-                <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=bin&amp;e=zip">${project.artifactId}-${project.version}-bin.zip</a>
-            </li>
-            <li>
-                <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=bin&amp;e=tar.gz">${project.artifactId}-${project.version}-bin.tar.gz</a>
-            </li>
-        </ul>
 
         <h2>Source Code</h2>
-        <p>Source code for the current release (version ${project.version}) is available from our 
-            <a href="http://maven.cci.emory.edu/nexus/">Maven repository</a>:
+        <p>Please see the Protempa 
+            <a href="../index.html">Homepage</a> 
+            for instructions on getting source code for the entire 
+            project.
         </p>
-        <ul>
-            <li>
-                <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=src&amp;e=zip">${project.artifactId}-${project.version}-src.zip</a>
-            </li>
-            <li>
-                <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=${project.version}&amp;c=src&amp;e=tar.gz">${project.artifactId}-${project.version}-src.tar.gz</a>
-            </li>
-            <li>
-                <a href="http://maven.cci.emory.edu/nexus/service/local/artifact/maven/redirect?r=aiw-snapshots&amp;g=${project.groupId}&amp;a=${project.artifactId}&amp;v=LATEST&amp;c=src&amp;e=zip">Latest snapshot</a>
-            </li>  
-        </ul>
     </body>
 </document>

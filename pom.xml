@@ -51,12 +51,12 @@
             <url>scp://shell.sourceforge.net/home/project-web/aiw/htdocs/dev/protempa-${project.version}</url>
         </site>
         <repository>
-            <id>aiw.repo</id>
+            <id>aiw</id>
             <name>AIW Repo</name>
             <url>http://maven.cci.emory.edu/nexus/content/repositories/aiw/</url>
         </repository>
         <snapshotRepository>
-            <id>aiw.snapshots.repo</id>
+            <id>aiw-snapshots</id>
             <name>AIW Snapshots Repo</name>
             <url>http://maven.cci.emory.edu/nexus/content/repositories/aiw-snapshots/</url>
         </snapshotRepository>
@@ -67,7 +67,7 @@
             <url>http://maven.cci.emory.edu/nexus/content/repositories/public</url>
         </repository>
         <repository>
-            <id>aiw.repo</id>
+            <id>aiw</id>
             <url>http://maven.cci.emory.edu/nexus/content/repositories/aiw/</url>
         </repository>
     </repositories>
