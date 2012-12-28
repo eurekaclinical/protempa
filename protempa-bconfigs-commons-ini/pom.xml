@@ -16,7 +16,6 @@
     <description>Protempa Commons INI Backend Configurations implements an INI
         configuration mechanism for Protempa.
     </description>
-    <url>http://maven.apache.org</url>
     
     <build>
         <plugins>
