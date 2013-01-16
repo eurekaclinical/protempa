@@ -19,10 +19,13 @@
  */
 package org.protempa;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -79,6 +82,7 @@ public class CompoundLowLevelAbstractionDefinition extends
 
     private final Set<String> lowLevelIds;
     private final LinkedHashMap<String, Map<String, Value>> classificationMatrix;
+    private final List<ValueClassification> valueClassifications;
 
     /*
      * Number of consecutive intervals with the same value required for this
@@ -120,6 +124,8 @@ public class CompoundLowLevelAbstractionDefinition extends
         this.lowLevelIds = new HashSet<String>();
         this.classificationMatrix = new LinkedHashMap<String, Map<String, Value>>();
         this.minimumNumberOfValues = 1;
+        this.valueDefinitionMatchOperator = ValueDefinitionMatchOperator.ANY;
+        this.valueClassifications = new ArrayList<ValueClassification>();
     }
 
     /**
@@ -147,10 +153,13 @@ public class CompoundLowLevelAbstractionDefinition extends
      * Sets the minimum number of consecutive intervals that must have the same
      * value before this abstraction is asserted.
      * 
-     * @param minimumNumberOfValues
-     *            the minimum number of values, an <code>int</code>
+     * @param minimumNumberOfValues the minimum number of values, an 
+     * <code>int</code> greater than 0.
      */
     public void setMinimumNumberOfValues(int minimumNumberOfValues) {
+        if (minimumNumberOfValues < 1) {
+            throw new IllegalArgumentException("minimumNumberOfValues must be > 0");
+        }
         this.minimumNumberOfValues = minimumNumberOfValues;
     }
 
@@ -158,7 +167,8 @@ public class CompoundLowLevelAbstractionDefinition extends
      * Gets the operator that is applied to each interval's low-level
      * abstraction values to determine the value to set for this abstraction.
      * 
-     * @return a {@link ValueDefinitionMatchOperator}
+     * @return a {@link ValueDefinitionMatchOperator}. The default value is 
+     * ANY.
      */
     public ValueDefinitionMatchOperator getValueDefinitionMatchOperator() {
         return valueDefinitionMatchOperator;
@@ -167,6 +177,7 @@ public class CompoundLowLevelAbstractionDefinition extends
     /**
      * Sets the operator that is applied to each interval's low-level
      * abstraction values to determine the value to set for this abstraction.
+     * If <code>null</code>, the setting will revert to the default (ANY).
      * 
      * @param valueDefinitionMatchOperator
      *            the match operator to set, a
@@ -174,18 +185,12 @@ public class CompoundLowLevelAbstractionDefinition extends
      */
     public void setValueDefinitionMatchOperator(
             ValueDefinitionMatchOperator valueDefinitionMatchOperator) {
-        this.valueDefinitionMatchOperator = valueDefinitionMatchOperator;
-    }
-
-    /**
-     * The given proposition ID is added as an abstracted-from relationship. The
-     * ID should match that of a {@link LowLevelAbstractionDefinition}.
-     * 
-     * @param id
-     *            the proposition ID, a {@link String}
-     */
-    public void addLowLevelAbstractionId(String id) {
-        this.lowLevelIds.add(id);
+        if (valueDefinitionMatchOperator == null) {
+            this.valueDefinitionMatchOperator = 
+                    ValueDefinitionMatchOperator.ANY;
+        } else {
+            this.valueDefinitionMatchOperator = valueDefinitionMatchOperator;
+        }
     }
 
     /**
@@ -202,20 +207,33 @@ public class CompoundLowLevelAbstractionDefinition extends
      * @param lowLevelValueDefName
      *            the name of the low-level abstraction's value
      */
-    public void addValueClassification(String id, String lowLevelAbstractionId,
-            String lowLevelValueDefName) {
-        if (!classificationMatrix.containsKey(id)) {
-            classificationMatrix.put(id, new HashMap<String, Value>());
+    public void addValueClassification(
+            ValueClassification valueClassification) {
+        if (valueClassification == null) {
+            throw new IllegalArgumentException(
+                    "valueClassification cannot be null");
         }
-        if (!lowLevelIds.contains(lowLevelAbstractionId)) {
-            lowLevelIds.add(lowLevelAbstractionId);
+        if (!classificationMatrix.containsKey(valueClassification.id)) {
+            classificationMatrix.put(valueClassification.id, 
+                    new HashMap<String, Value>());
         }
-        classificationMatrix.get(id).put(lowLevelAbstractionId,
-                NominalValue.getInstance(lowLevelValueDefName));
+        if (!lowLevelIds.contains(valueClassification.lowLevelAbstractionId)) {
+            lowLevelIds.add(valueClassification.lowLevelAbstractionId);
+        }
+        classificationMatrix.get(valueClassification.id).put(
+                valueClassification.lowLevelAbstractionId,
+                NominalValue.getInstance(
+                valueClassification.lowLevelValueDefName));
+        this.valueClassifications.add(valueClassification);
+    }
+    
+    LinkedHashMap<String, Map<String, Value>> getValueClassificationsInt() {
+        return this.classificationMatrix;
     }
 
-    LinkedHashMap<String, Map<String, Value>> getValueClassifications() {
-        return classificationMatrix;
+    public ValueClassification[] getValueClassifications() {
+        return this.valueClassifications.toArray(
+                new ValueClassification[this.valueClassifications.size()]);
     }
 
     @Override
@@ -272,6 +290,44 @@ public class CompoundLowLevelAbstractionDefinition extends
             this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
                     this.children);
         }
+    }
+
+    public static final class ValueClassification implements Serializable {
+        private static final long serialVersionUID = 1L;
+        
+        private final String id;
+        private final String lowLevelAbstractionId;
+        private final String lowLevelValueDefName;
+
+        public ValueClassification(String id, String lowLevelAbstractionId,
+            String lowLevelValueDefName) {
+            if (id == null) {
+                throw new IllegalArgumentException("id cannot be null");
+            }
+            if (lowLevelAbstractionId == null) {
+                throw new IllegalArgumentException("lowLevelAbstractionId cannot be null");
+            }
+            if (lowLevelValueDefName == null) {
+                throw new IllegalArgumentException("lowLevelValueDefName cannot be null");
+            }
+            this.id = id;
+            this.lowLevelAbstractionId = lowLevelAbstractionId;
+            this.lowLevelValueDefName = lowLevelValueDefName;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getLowLevelAbstractionId() {
+            return lowLevelAbstractionId;
+        }
+
+        public String getLowLevelValueDefName() {
+            return lowLevelValueDefName;
+        }
+        
+        
     }
 
 }

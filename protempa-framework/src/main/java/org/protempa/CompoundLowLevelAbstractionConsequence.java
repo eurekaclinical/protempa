@@ -109,7 +109,7 @@ public final class CompoundLowLevelAbstractionConsequence implements
             boolean match = false;
             String lastCheckedValue = null;
             for (Entry<String, Map<String, Value>> e : cllad
-                    .getValueClassifications().entrySet()) {
+                    .getValueClassificationsInt().entrySet()) {
                 lastCheckedValue = e.getKey();
                 switch (cllad.getValueDefinitionMatchOperator()) {
                     case ALL:

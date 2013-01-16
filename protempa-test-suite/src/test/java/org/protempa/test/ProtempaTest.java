@@ -60,6 +60,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.protempa.AbstractionFinderTestHelper;
 import org.protempa.CompoundLowLevelAbstractionDefinition;
+import org.protempa.CompoundLowLevelAbstractionDefinition.ValueClassification;
 import org.protempa.CompoundLowLevelAbstractionDefinition.ValueDefinitionMatchOperator;
 import org.protempa.EventDefinition;
 import org.protempa.ExtendedPropositionDefinition;
@@ -453,14 +454,14 @@ public class ProtempaTest {
         CompoundLowLevelAbstractionDefinition bp = new CompoundLowLevelAbstractionDefinition(
                 "MyBloodPressureClassificationConsecutiveAny");
         bp.setDisplayName("My Blood Pressure Classification (ANY - 2)");
-        bp.addValueClassification("MYBP_HIGH", "MySystolicClassification",
-                "My Systolic High");
-        bp.addValueClassification("MYBP_HIGH", "MyDiastolicClassification",
-                "My Diastolic High");
-        bp.addValueClassification("MYBP_NORMAL", "MySystolicClassification",
-                "My Systolic Normal");
-        bp.addValueClassification("MYBP_NORMAL", "MyDiastolicClassification",
-                "My Diastolic Normal");
+        bp.addValueClassification(new ValueClassification("MYBP_HIGH", "MySystolicClassification",
+                "My Systolic High"));
+        bp.addValueClassification(new ValueClassification("MYBP_HIGH", "MyDiastolicClassification",
+                "My Diastolic High"));
+        bp.addValueClassification(new ValueClassification("MYBP_NORMAL", "MySystolicClassification",
+                "My Systolic Normal"));
+        bp.addValueClassification(new ValueClassification("MYBP_NORMAL", "MyDiastolicClassification",
+                "My Diastolic Normal"));
         bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ANY);
         bp.setMinimumNumberOfValues(2);
         bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
@@ -472,14 +473,14 @@ public class ProtempaTest {
         CompoundLowLevelAbstractionDefinition bp = new CompoundLowLevelAbstractionDefinition(
                 "MyBloodPressureClassificationAny");
         bp.setDisplayName("My Blood Pressure Classification (ANY)");
-        bp.addValueClassification("MYBP_HIGH", "MySystolicClassification",
-                "My Systolic High");
-        bp.addValueClassification("MYBP_HIGH", "MyDiastolicClassification",
-                "My Diastolic High");
-        bp.addValueClassification("MYBP_NORMAL", "MySystolicClassification",
-                "My Systolic Normal");
-        bp.addValueClassification("MYBP_NORMAL", "MyDiastolicClassification",
-                "My Diastolic Normal");
+        bp.addValueClassification(new ValueClassification("MYBP_HIGH", "MySystolicClassification",
+                "My Systolic High"));
+        bp.addValueClassification(new ValueClassification("MYBP_HIGH", "MyDiastolicClassification",
+                "My Diastolic High"));
+        bp.addValueClassification(new ValueClassification("MYBP_NORMAL", "MySystolicClassification",
+                "My Systolic Normal"));
+        bp.addValueClassification(new ValueClassification("MYBP_NORMAL", "MyDiastolicClassification",
+                "My Diastolic Normal"));
         bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ANY);
         bp.setMinimumNumberOfValues(1);
         bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
@@ -491,14 +492,14 @@ public class ProtempaTest {
         CompoundLowLevelAbstractionDefinition bp = new CompoundLowLevelAbstractionDefinition(
                 "MyBloodPressureClassificationAll");
         bp.setDisplayName("My Blood Pressure Classification (ALL)");
-        bp.addValueClassification("MYBP_HIGH", "MySystolicClassification",
-                "My Systolic High");
-        bp.addValueClassification("MYBP_HIGH", "MyDiastolicClassification",
-                "My Diastolic High");
-        bp.addValueClassification("MYBP_NORMAL", "MySystolicClassification",
-                "My Systolic Normal");
-        bp.addValueClassification("MYBP_NORMAL", "MyDiastolicClassification",
-                "My Diastolic Normal");
+        bp.addValueClassification(new ValueClassification("MYBP_HIGH", "MySystolicClassification",
+                "My Systolic High"));
+        bp.addValueClassification(new ValueClassification("MYBP_HIGH", "MyDiastolicClassification",
+                "My Diastolic High"));
+        bp.addValueClassification(new ValueClassification("MYBP_NORMAL", "MySystolicClassification",
+                "My Systolic Normal"));
+        bp.addValueClassification(new ValueClassification("MYBP_NORMAL", "MyDiastolicClassification",
+                "My Diastolic Normal"));
         bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ALL);
         bp.setMinimumNumberOfValues(1);
         bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
@@ -510,18 +511,18 @@ public class ProtempaTest {
         CompoundLowLevelAbstractionDefinition bp = new CompoundLowLevelAbstractionDefinition(
                 "MyBloodPressureClassification3Any");
         bp.setDisplayName("My Blood Pressure Classification 3 (ANY)");
-        bp.addValueClassification("MYBP3_HIGH", "MySystolicClassification3",
-                "My Systolic High 3");
-        bp.addValueClassification("MYBP3_HIGH", "MyDiastolicClassification",
-                "My Diastolic High 3");
-        bp.addValueClassification("MYBP3_LOW", "MySystolicClassification3",
-                "My Systolic Low 3");
-        bp.addValueClassification("MYBP3_LOW", "MyDiastolicClassification",
-                "My Diastolic Low 3");
-        bp.addValueClassification("MYBP3_NORMAL", "MySystolicClassification3",
-                "My Systolic Normal 3");
-        bp.addValueClassification("MYBP3_NORMAL", "MyDiastolicClassification",
-                "My Diastolic Normal 3");
+        bp.addValueClassification(new ValueClassification("MYBP3_HIGH", "MySystolicClassification3",
+                "My Systolic High 3"));
+        bp.addValueClassification(new ValueClassification("MYBP3_HIGH", "MyDiastolicClassification",
+                "My Diastolic High 3"));
+        bp.addValueClassification(new ValueClassification("MYBP3_LOW", "MySystolicClassification3",
+                "My Systolic Low 3"));
+        bp.addValueClassification(new ValueClassification("MYBP3_LOW", "MyDiastolicClassification",
+                "My Diastolic Low 3"));
+        bp.addValueClassification(new ValueClassification("MYBP3_NORMAL", "MySystolicClassification3",
+                "My Systolic Normal 3"));
+        bp.addValueClassification(new ValueClassification("MYBP3_NORMAL", "MyDiastolicClassification",
+                "My Diastolic Normal 3"));
         bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ANY);
         bp.setMinimumNumberOfValues(1);
         bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
