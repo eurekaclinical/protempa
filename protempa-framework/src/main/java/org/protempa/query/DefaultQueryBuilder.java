@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.*;
 import org.protempa.backend.dsb.filter.Filter;
@@ -282,6 +283,13 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         return new Query(this.id, this.keyIds, this.filters, this.propIds, 
                 this.termIds, this.propDefs);
     }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+    
+    
 
     /**
      * Set the value of the flag that determined whether the build method

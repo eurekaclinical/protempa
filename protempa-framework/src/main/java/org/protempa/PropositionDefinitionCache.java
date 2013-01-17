@@ -179,7 +179,7 @@ public final class PropositionDefinitionCache implements Serializable {
         assert def != null : "def cannot be null";
         String id = def.getId();
         if (this.idToPropositionDefinitionMap.containsKey(id)) {
-            throw new InvalidPropositionIdException("Duplicate proposition id: " + id);
+            throw new InvalidPropositionIdException(id);
         } else {
             this.idToPropositionDefinitionMap.put(id, def);
         }
@@ -190,7 +190,7 @@ public final class PropositionDefinitionCache implements Serializable {
         assert def != null : "def cannot be null";
         String id = def.getId();
         if (this.idToAbstractionDefinitionMap.containsKey(id)) {
-            throw new InvalidPropositionIdException("Duplicate proposition id: " + id);
+            throw new InvalidPropositionIdException(id);
         } else {
             idToAbstractionDefinitionMap.put(id, def);
         }

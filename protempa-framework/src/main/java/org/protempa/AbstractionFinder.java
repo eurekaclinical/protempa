@@ -46,7 +46,9 @@ import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
 import org.protempa.query.handler.QueryResultsHandler;
+import org.protempa.query.handler.QueryResultsHandlerInitException;
 import org.protempa.query.handler.QueryResultsHandlerProcessingException;
+import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
 
 /**
  * Class that actually does the abstraction finding.
@@ -71,6 +73,8 @@ final class AbstractionFinder implements Module {
         assert dataSource != null : "dataSource cannot be null";
         assert knowledgeSource != null : "knowledgeSource cannot be null";
         assert algorithmSource != null : "algorithmSource cannot be null";
+        assert termSource != null : "termSource cannot be null";
+        
         this.dataSource = dataSource;
         this.knowledgeSource = knowledgeSource;
         this.termSource = termSource;
@@ -275,7 +279,8 @@ final class AbstractionFinder implements Module {
             this.logger = ProtempaUtil.logger();
 
             if (AbstractionFinder.this.closed) {
-                throw new FinderException("Protempa already closed!");
+                throw new FinderException(query.getId(), 
+                        new ProtempaAlreadyClosedException());
             }
 
             this.keyIds = Arrays.asSet(query.getKeyIds());
@@ -373,8 +378,7 @@ final class AbstractionFinder implements Module {
                 doExecute(this.keyIds, this.derivationsBuilder,
                         executionStrategy);
             } catch (ProtempaException e) {
-                String msg = "Query " + query.getId() + " did not complete";
-                throw new FinderException(msg, e);
+                throw new FinderException(query.getId(), e);
             } finally {
                 if (executionStrategy != null) {
                     executionStrategy.cleanup();
@@ -513,11 +517,14 @@ final class AbstractionFinder implements Module {
                 super.execute();
 
                 resultsHandler.finish();
-            } catch (FinderException fe) {
-                throw fe;
-            } catch (ProtempaException e) {
-                String msg = "Query " + queryId + " did not complete";
-                throw new FinderException(msg, e);
+            } catch (QueryResultsHandlerProcessingException ex) {
+                throw new FinderException(queryId, ex);
+            } catch (QueryResultsHandlerValidationFailedException ex) {
+                throw new FinderException(queryId, ex);
+            } catch (KnowledgeSourceReadException ex) {
+                throw new FinderException(queryId, ex);
+            } catch (QueryResultsHandlerInitException ex) {
+                throw new FinderException(queryId, ex);
             }
         }
 
@@ -566,10 +573,7 @@ final class AbstractionFinder implements Module {
                         filteredPropositions,
                         forwardDerivations, backwardDerivations, refs);
             } catch (QueryResultsHandlerProcessingException ex) {
-                throw new FinderException(
-                        "Could not process results for query "
-                        + getQuery().getId(),
-                        ex);
+                throw new FinderException(getQuery().getId(), ex);
             }
         }
 

@@ -31,8 +31,11 @@ import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.DataSourceBackendFailedValidationException;
 import org.protempa.backend.InvalidConfigurationException;
+import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
+import org.protempa.backend.tsb.TermSourceBackend;
 import org.protempa.query.And;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
@@ -108,16 +111,20 @@ public final class Protempa {
      * parameters.
      *
      * @param dataSource a {@link DataSource}. Will be closed when
-     * {@link #close()} is called.
+     * {@link #close()} is called. May be <code>null</code> if you're not
+     * retrieving data from a data source (for example, you're only working 
+     * with a persistent store).
      * @param knowledgeSource a {@link KnowledgeSource}. Will be closed when
      * {@link #close()} is called.
      * @param algorithmSource an {@link AlgorithmSource}. Will be closed when
-     * {@link #close()} is called.
-     * @throws DataSourceFailedValidationException if the data source's data
-     * element mappings are inconsistent with those defined in the knowledge
-     * source.
-     * @throws DataSourceValidationIncompleteException if an error occurred
-     * during data source validation.
+     * {@link #close()} is called. May be <code>null</code> if you're not 
+     * computing any low-level abstractions.
+     * @param termSource a {@link TermSource}. Will be closed when
+     * {@link #close()} is called. May be <code>null</code> if you're not 
+     * using terms.
+     * 
+     * @throws ProtempaException if an error occur in starting Protempa. There
+     * frequently will be a nested exception that provides more detail.
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource, TermSource termSource)
@@ -130,45 +137,58 @@ public final class Protempa {
      * abstract parameters.
      *
      * @param dataSource a {@link DataSource}. Will be closed when
-     * {@link #close()} is called.
+     * {@link #close()} is called. May be <code>null</code> if you're not
+     * retrieving data from a data source (for example, you're only working 
+     * with a persistent store).
      * @param knowledgeSource a {@link KnowledgeSource}. Will be closed when
      * {@link #close()} is called.
      * @param algorithmSource an {@link AlgorithmSource}. Will be closed when
-     * {@link #close()} is called.
+     * {@link #close()} is called. May be <code>null</code> if you're not 
+     * computing any low-level abstractions.
      * @param termSource a {@link TermSource}. Will be closed when
-     * {@link #close()} is called.
+     * {@link #close()} is called. May be <code>null</code> if you're not 
+     * using terms.
      * @param cacheFoundAbstractParameters <code>true</code> to cache found
      * abstract parameters, <code>false</code> not to cache found abstract
      * parameters.
-     * @throws DataSourceFailedValidationException if the data source's data
-     * element mappings are inconsistent with those defined in the knowledge
-     * source.
-     * @throws DataSourceValidationIncompleteException if an error occurred
-     * during data source validation.
+     * 
+     * @throws ProtempaException if an error occur in starting Protempa. There
+     * frequently will be a nested exception that provides more detail.
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource, TermSource termSource,
             boolean cacheFoundAbstractParameters)
             throws ProtempaStartupException {
-        try {
-            if (dataSource == null) {
-                throw new IllegalArgumentException("dataSource cannot be null");
-            }
-            if (knowledgeSource == null) {
-                throw new IllegalArgumentException(
-                        "knowledgeSource cannot be null");
-            }
-            if (algorithmSource == null) {
-                throw new IllegalArgumentException(
-                        "algorithmSource cannot be null");
-            }
-            if (termSource == null) {
-                throw new IllegalArgumentException(
-                        "termSource cannot be null");
-            }
+        DataSource ds;
+        if (dataSource == null) {
+            ds = new DataSourceImpl(new DataSourceBackend[0]);
+        } else {
+            ds = dataSource;
+        }
 
-            this.abstractionFinder = new AbstractionFinder(dataSource,
-                    knowledgeSource, algorithmSource, termSource,
+        KnowledgeSource ks;
+        if (knowledgeSource == null) {
+            ks = new KnowledgeSourceImpl(new KnowledgeSourceBackend[0]);
+        } else {
+            ks = knowledgeSource;
+        }
+
+        AlgorithmSource as;
+        if (algorithmSource == null) {
+            as = new AlgorithmSourceImpl(new AlgorithmSourceBackend[0]);
+        } else {
+            as = algorithmSource;
+        }
+
+        TermSource ts;
+        if (termSource == null) {
+            ts = new TermSourceImpl(new TermSourceBackend[0]);
+        } else {
+            ts = termSource;
+        }
+        
+        try {
+            this.abstractionFinder = new AbstractionFinder(ds, ks, as, ts,
                     cacheFoundAbstractParameters);
         } catch (KnowledgeSourceReadException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
@@ -268,8 +288,7 @@ public final class Protempa {
      * method.
      *
      * @param query a {@link Query}. Cannot be <code>null</code>.
-     * @param resultsHandler a {@link QueryResultsHandler}. Cannot * *
-     * be <code>null</code>.
+     * @param resultsHandler a {@link QueryResultsHandler}. Cannot * *      * be <code>null</code>.
      * @throws FinderException if an error occurred during query.
      */
     public void execute(Query query, QueryResultsHandler resultsHandler)
@@ -312,7 +331,7 @@ public final class Protempa {
      * @throws FinderException if PROTEMPA fails to complete for any reason
      */
     public void executeWithPersistence(Query query,
-            QueryResultsHandler resultHandler, 
+            QueryResultsHandler resultHandler,
             String retrievalStoreEnvironment,
             String processStoreName) throws FinderException {
         if (query == null) {
@@ -327,11 +346,11 @@ public final class Protempa {
                 Level.INFO,
                 "Executing all PROTEMPA phases. Will store retrieved propositions in {0} and derived propositions in {1}",
                 new String[]{retrievalStoreEnvironment, processStoreName});
-        
+
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
 
         logger.log(Level.INFO, "Beginning data retrieval stage");
-        this.abstractionFinder.retrieveAndStoreData(query, qs, 
+        this.abstractionFinder.retrieveAndStoreData(query, qs,
                 retrievalStoreEnvironment);
         logger.log(Level.INFO, "Data retrieval complete");
         logger.log(Level.INFO, "Beginning processing stage");
@@ -370,9 +389,9 @@ public final class Protempa {
         logger.log(Level.INFO,
                 "Retrieved data will be persisted in store: {0}",
                 retrievalStoreEnvironment);
-        
+
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
-        this.abstractionFinder.retrieveAndStoreData(query, qs, 
+        this.abstractionFinder.retrieveAndStoreData(query, qs,
                 retrievalStoreEnvironment);
         logger.log(Level.FINE, "Data retrieval complete");
     }
@@ -394,7 +413,7 @@ public final class Protempa {
      * use the processed data
      * @throws FinderException if processing fails to complete
      */
-    public void processResultsAndPersist(Query query, 
+    public void processResultsAndPersist(Query query,
             String retrievalStoreEnvironment,
             String workingMemoryStoreEnvironment) throws FinderException {
         if (query == null) {
@@ -482,7 +501,7 @@ public final class Protempa {
                 "Retrieving processed results from store named: {0}",
                 workingMemoryStoreEnvironment);
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
-        this.abstractionFinder.outputStoredResults(query, resultHandler, qs, 
+        this.abstractionFinder.outputStoredResults(query, resultHandler, qs,
                 workingMemoryStoreEnvironment);
         logger.log(Level.FINE, "Output complete");
     }
@@ -510,7 +529,7 @@ public final class Protempa {
                     "term id support has not been implemented yet.");
         }
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
-        this.abstractionFinder.processAndOutputStoredResults(query, 
+        this.abstractionFinder.processAndOutputStoredResults(query,
                 resultHandler, qs, propositionStoreEnvironment);
     }
 

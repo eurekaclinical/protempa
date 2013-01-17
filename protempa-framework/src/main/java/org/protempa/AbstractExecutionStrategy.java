@@ -73,32 +73,29 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
                 propDef = this.knowledgeSource
                         .readPropositionDefinition(propId);
             } catch (KnowledgeSourceReadException ex) {
-                throw new FinderException(
-                        "Problem retrieving proposition definition " + propId
-                                + " from knowledge source");
+                throw new FinderException(qs.getQuery().getId(), ex);
             }
             if (propDef != null) {
                 propDefs.add(propDef);
             } else {
-                throw new FinderException("Invalid proposition id: " + propId);
+                throw new FinderException(qs.getQuery().getId(), 
+                        new InvalidPropositionIdException(propId));
             }
         }
         if (propIds != null) {
             Set<PropositionDefinition> result = new HashSet<PropositionDefinition>();
-            aggregateDescendants(visitor, result, propDefs);
+            aggregateDescendants(qs.getQuery().getId(), visitor, result, propDefs);
             try {
                 ruleCreator.visit(result);
             } catch (ProtempaException ex) {
-                throw new FinderException(
-                        "Problem creating data processing rules", ex);
+                throw new FinderException(qs.getQuery().getId(), ex);
             }
         }
         try {
             this.ruleBase = new JBossRuleBaseFactory(ruleCreator,
                     createRuleBaseConfiguration(ruleCreator)).newInstance();
         } catch (PropositionDefinitionInstantiationException ex) {
-            throw new FinderException("Problem creating data processing rules",
-                    ex);
+            throw new FinderException(qs.getQuery().getId(), ex);
         }
     }
 
@@ -118,7 +115,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
                             .getRuleToAbstractionDefinitionMap()));
         } catch (KnowledgeSourceReadException ex) {
             throw new PropositionDefinitionInstantiationException(
-                    "Could not instantiate proposition definitions", ex);
+                    "Problem creating data processing rules", ex);
         }
         config.setAssertBehaviour(AssertBehaviour.EQUALITY);
         return config;
@@ -140,24 +137,23 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
      *             if an error occurs reading the algorithm specified by a
      *             proposition definition.
      */
-    private void aggregateDescendants(
+    private void aggregateDescendants(String queryId,
             ValidateAlgorithmCheckedVisitor validatorVisitor,
             Set<PropositionDefinition> result,
             List<PropositionDefinition> propDefs) throws FinderException {
-        HierarchicalProjectionChildrenVisitor dcVisitor = new HierarchicalProjectionChildrenVisitor(
-                knowledgeSource);
+        HierarchicalProjectionChildrenVisitor dcVisitor = 
+                new HierarchicalProjectionChildrenVisitor(knowledgeSource);
         for (PropositionDefinition propDef : propDefs) {
             assert propDef != null : "propDef cannot be null";
             try {
                 propDef.acceptChecked(validatorVisitor);
                 propDef.acceptChecked(dcVisitor);
                 result.add(propDef);
-                aggregateDescendants(validatorVisitor, result,
+                aggregateDescendants(queryId, validatorVisitor, result,
                         dcVisitor.getChildren());
                 dcVisitor.clear();
             } catch (ProtempaException ex) {
-                throw new FinderException(
-                        "Problem reading from knowledge source", ex);
+                throw new FinderException(queryId, ex);
             }
         }
     }

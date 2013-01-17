@@ -74,6 +74,7 @@ import org.protempa.PropositionDefinition;
 import org.protempa.Protempa;
 import org.protempa.ProtempaException;
 import org.protempa.ProtempaStartupException;
+import org.protempa.QuerySession;
 import org.protempa.SimpleGapFunction;
 import org.protempa.SlidingWindowWidthMode;
 import org.protempa.SourceFactory;
@@ -689,7 +690,7 @@ public class ProtempaTest {
         AbstractionFinderTestHelper afh = null;
         try {
             afh = new AbstractionFinderTestHelper(environmentName);
-            results = afh.processStoredResults(protempa, query(), null,
+            results = afh.processStoredResults(protempa, query(),
                     environmentName);
             assertEquals("Wrong number of working memories generated",
                     this.patientCount, results.size());

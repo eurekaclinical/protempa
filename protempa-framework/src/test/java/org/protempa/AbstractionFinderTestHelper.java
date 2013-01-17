@@ -81,7 +81,6 @@ public final class AbstractionFinderTestHelper {
      */
     public DataStore<String, WorkingMemory> processStoredResults(Protempa p,
             Query query,
-            QuerySession qs,
             String propositionStorePathname) throws FinderException,
             KnowledgeSourceReadException, ProtempaException {
         PropositionDefinition[] propDefs = query.getPropositionDefinitions();
@@ -95,6 +94,7 @@ public final class AbstractionFinderTestHelper {
         AbstractionFinder af = new AbstractionFinder(p.getDataSource(),
                 p.getKnowledgeSource(), p.getAlgorithmSource(),
                 p.getTermSource(), true);
+        QuerySession qs = new QuerySession(query, af);
         af.processStoredResults(query, qs,
                 propositionStorePathname, this.wmStorePathname);
         StatefulExecutionStrategy strategy = new StatefulExecutionStrategy(

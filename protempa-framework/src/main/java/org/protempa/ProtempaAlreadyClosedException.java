@@ -2,7 +2,7 @@
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 Emory University
+ * Copyright (C) 2012 - 2013 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,15 @@
 package org.protempa;
 
 /**
- * Thrown when a proposition id was not found in the knowledge source or in the
- * user-defined proposition definitions.
+ * A cause of {@link FinderException}s when a query is attempted while Protempa
+ * is closed.
  * 
  * @author Andrew Post
  */
-public final class InvalidPropositionIdException extends Exception {
-    private static final long serialVersionUID = 1L;
+public final class ProtempaAlreadyClosedException extends Exception {
 
-    InvalidPropositionIdException(String propId) {
-        super("Invalid proposition id " + propId);
-        assert propId != null : "propId cannot be null";
+    public ProtempaAlreadyClosedException() {
+        super("Protempa is already closed");
     }
+    
 }
