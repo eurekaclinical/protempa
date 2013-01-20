@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 import org.protempa.proposition.interval.Relation;
 
@@ -368,7 +368,9 @@ public final class HighLevelAbstractionDefinition
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString()).append("temporalOffset", this.temporalOffset).append("abstractedFrom", getAbstractedFrom()).append("temporalExtendedPropositionDefinitionPairs",
-                this.defPairsMap.keySet()).toString();
+        ReflectionToStringBuilder builder = 
+                new ReflectionToStringBuilder(this);
+        builder.setAppendTransients(true);
+        return builder.toString();
     }
 }

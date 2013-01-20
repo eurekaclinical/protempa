@@ -22,7 +22,7 @@ package org.protempa;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 /**
  * Abstract base class for all knowledge definition classes.
@@ -347,6 +347,6 @@ public abstract class AbstractPropositionDefinition implements
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("id", this.id).append("displayName", this.displayName).append("description", this.description).append("abbreviatedDisplayName", this.abbrevDisplayName).append("inverseIsA", this.inverseIsA).append("directChildren", this.children).append("termIds", this.termIds).append("concatenable", isConcatenable()).append("solid", isSolid()).append("propertyDefinitions", this.propertyDefinitions).append("referenceDefinitions", this.referenceDefinitions).toString();
+        return ReflectionToStringBuilder.reflectionToString(this);
     }
 }

@@ -22,7 +22,7 @@ package org.protempa;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 /**
  * 
@@ -189,6 +189,6 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString()).append("minIndex", this.minIndex).append("maxIndex", this.maxIndex).append("abstractedFrom", this.abstractedFrom).toString();
+        return ReflectionToStringBuilder.reflectionToString(this);
     }
 }

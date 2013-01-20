@@ -21,7 +21,7 @@ package org.protempa;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 import org.protempa.proposition.value.ValueType;
 
@@ -169,6 +169,6 @@ public final class PrimitiveParameterDefinition
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString()).append("valueType", this.valueType).append("units", this.units).toString();
+        return ReflectionToStringBuilder.reflectionToString(this);
     }
 }

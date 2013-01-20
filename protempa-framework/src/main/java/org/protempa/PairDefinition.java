@@ -21,6 +21,7 @@ package org.protempa;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.interval.Relation;
@@ -169,8 +170,7 @@ public class PairDefinition extends AbstractAbstractionDefinition {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString()).append("temporalOffset", this.temporalOffset).append("abstractedFrom", getAbstractedFrom()).append("left temporal proposition", this.leftHandProposition).append("right temporal proposition",
-                this.rightHandProposition).append("relation", this.relation).toString();
+        return ReflectionToStringBuilder.reflectionToString(this);
     }
 
     public TemporalExtendedPropositionDefinition getLeftHandProposition() {

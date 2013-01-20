@@ -19,7 +19,7 @@
  */
 package org.protempa;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 /**
  * Definition of the constraints required to infer an abstract parameter.
@@ -61,6 +61,6 @@ public abstract class AbstractAbstractionDefinition
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString()).append("gapFunction", this.gapFunction).toString();
+        return ReflectionToStringBuilder.reflectionToString(this);
     }
 }

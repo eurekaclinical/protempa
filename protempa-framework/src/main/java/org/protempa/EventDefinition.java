@@ -19,7 +19,7 @@
  */
 package org.protempa;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 
 /**
@@ -86,10 +86,5 @@ public final class EventDefinition extends AbstractPropositionDefinition
             this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
                     this.children);
         }
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString()).toString();
     }
 }

@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Segment;
@@ -619,10 +619,6 @@ public final class LowLevelAbstractionDefinition
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString()).append("algorithmId", this.algorithmId).append("paramIds", this.paramIds).append("minimumDuration", this.minimumDuration).append("minimumDurationUnits", this.minimumDurationUnits).append("maximumDuration", this.maximumDuration).append("maximumDurationUnits", this.maximumDurationUnits).append("valueType", this.valueType).append("minimumPatternLength", this.minimumNumberOfValues).append("maximumPatternLength", this.maximumNumberOfValues).append("minGapBetweenValues",
-                this.gapBtwValues.getMinimumGapBetweenValues()).append("minGapBetweenValuesUnits",
-                this.gapBtwValues.getMinimumGapBetweenValuesUnits()).append("maxGapBetweenValues",
-                this.gapBtwValues.getMaximumGapBetweenValues()).append("maxGapBetweenValuesUnits",
-                this.gapBtwValues.getMaximumGapBetweenValuesUnits()).append("maxOverlapping", maxOverlapping).append("skip", skip).append("skipStart", skipStart).append("skipEnd", skipEnd).append("valueDefinitions", this.valueDefinitions).toString();
+        return ReflectionToStringBuilder.reflectionToString(this);
     }
 }
