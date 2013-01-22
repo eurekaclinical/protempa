@@ -97,7 +97,6 @@ class ValueComparatorValueConverter implements SingleValueConverter {
 			return NIN;
 		}
 
-		// TODO Auto-generated method stub
 		throw new ConversionException("Encountered ValueComparator object with no known string representation: " + obj);
 	}
 
