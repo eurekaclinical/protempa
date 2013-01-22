@@ -93,7 +93,6 @@ class PropertyConstraintConverter extends AbstractConverter {
 			expectNoMore(reader);
 		}
 
-		// TODO Auto-generated method stub
 		return new PropertyConstraint(propertyName, comparator, value);
 	}
 
