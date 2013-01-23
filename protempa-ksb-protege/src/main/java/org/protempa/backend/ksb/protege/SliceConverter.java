@@ -24,9 +24,12 @@ import java.util.Iterator;
 
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.SliceDefinition;
+import org.protempa.TemporalExtendedPropositionDefinition;
 
 final class SliceConverter implements AbstractionConverter {
 
@@ -68,11 +71,18 @@ final class SliceConverter implements AbstractionConverter {
                     new Object[]{backend.getDisplayName(), ad.getId()});
         }
 
-        Collection<?> abstractedFromInstances = cm.getOwnSlotValues(
-                protegeParameter, cm.getSlot("abstractedFrom"));
-        for (Iterator<?> itr = abstractedFromInstances.iterator(); itr
+        Collection<?> epInstances = cm.getOwnSlotValues(
+                protegeParameter, cm.getSlot("extendedParameters"));
+        Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache =
+                new HashMap<Instance, TemporalExtendedPropositionDefinition>();
+        for (Iterator<?> itr = epInstances.iterator(); itr
                 .hasNext();) {
-            ad.addAbstractedFrom(((Instance) itr.next()).getName());
+            Instance extendedParameter = (Instance) itr.next();
+            TemporalExtendedPropositionDefinition tepd =
+                    Util.instanceToTemporalExtendedPropositionDefinition(
+                    extendedParameter, backend);
+            extendedParameterCache.put(extendedParameter, tepd);
+            ad.add(tepd);
         }
         return ad;
     }

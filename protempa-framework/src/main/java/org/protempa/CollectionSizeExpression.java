@@ -28,31 +28,29 @@ import org.drools.spi.Tuple;
 
 /**
  * Sets a lower limit on the size of a collection.
- * 
+ *
  * @author Andrew Post
- * 
+ *
  */
 public class CollectionSizeExpression implements PredicateExpression {
 
-	private static final long serialVersionUID = -4559177903829641968L;
+    private static final long serialVersionUID = -4559177903829641968L;
+    private int minSize;
 
-	private int minSize;
+    public CollectionSizeExpression(int minSize) {
+        this.minSize = minSize;
+    }
 
-	public CollectionSizeExpression(int minSize) {
-		this.minSize = minSize;
-	}
-
-	@Override
+    @Override
     public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
-			Declaration[] arg3, WorkingMemory arg4, Object context)
-			throws Exception {
-		boolean result = ((Collection<?>) arg0).size() >= this.minSize;
-		return result;
-	}
+            Declaration[] arg3, WorkingMemory arg4, Object context)
+            throws Exception {
+        boolean result = ((Collection<?>) arg0).size() >= this.minSize;
+        return result;
+    }
 
-	@Override
+    @Override
     public Object createContext() {
-		return null;
-	}
-
+        return null;
+    }
 }

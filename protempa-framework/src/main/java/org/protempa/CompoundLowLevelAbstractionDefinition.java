@@ -213,15 +213,14 @@ public class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDe
             throw new IllegalArgumentException(
                     "valueClassification cannot be null");
         }
-        if (!classificationMatrix.containsKey(valueClassification.id)) {
-            classificationMatrix.put(valueClassification.id,
+        if (!classificationMatrix.containsKey(valueClassification.value)) {
+            classificationMatrix.put(valueClassification.value,
                     new HashMap<String, Value>());
         }
-        lowLevelIds.add(valueClassification.lowLevelAbstractionId);
-        classificationMatrix.get(valueClassification.id).put(
-                valueClassification.lowLevelAbstractionId,
-                NominalValue.getInstance(
-                valueClassification.lowLevelValueDefName));
+        lowLevelIds.add(valueClassification.lladId);
+        classificationMatrix.get(valueClassification.value).put(
+                valueClassification.lladId,
+                NominalValue.getInstance(valueClassification.lladValue));
         this.valueClassifications.add(valueClassification);
     }
 
@@ -293,48 +292,48 @@ public class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDe
     public static final class ValueClassification implements Serializable {
 
         private static final long serialVersionUID = 1L;
-        private final String id;
-        private final String lowLevelAbstractionId;
-        private final String lowLevelValueDefName;
+        private final String value;
+        private final String lladId;
+        private final String lladValue;
 
-        public ValueClassification(String id, String lowLevelAbstractionId,
-                String lowLevelValueDefName) {
-            if (id == null) {
-                throw new IllegalArgumentException("id cannot be null");
+        public ValueClassification(String value, String lowLevelAbstractionId,
+                String lowLevelAbstractionValue) {
+            if (value == null) {
+                throw new IllegalArgumentException("value cannot be null");
             }
             if (lowLevelAbstractionId == null) {
                 throw new IllegalArgumentException("lowLevelAbstractionId cannot be null");
             }
-            if (lowLevelValueDefName == null) {
-                throw new IllegalArgumentException("lowLevelValueDefName cannot be null");
+            if (lowLevelAbstractionValue == null) {
+                throw new IllegalArgumentException("lowLevelAbstractionValue cannot be null");
             }
-            this.id = id;
-            this.lowLevelAbstractionId = lowLevelAbstractionId;
-            this.lowLevelValueDefName = lowLevelValueDefName;
+            this.value = value;
+            this.lladId = lowLevelAbstractionId;
+            this.lladValue = lowLevelAbstractionValue;
         }
 
-        public String getId() {
-            return id;
+        public String getValue() {
+            return value;
         }
 
         public String getLowLevelAbstractionId() {
-            return lowLevelAbstractionId;
+            return lladId;
         }
 
-        public String getLowLevelValueDefName() {
-            return lowLevelValueDefName;
+        public String getLowLevelAbstractionValue() {
+            return lladValue;
         }
 
         private void readObject(ObjectInputStream s) throws IOException,
                 ClassNotFoundException {
             s.defaultReadObject();
-            if (id == null) {
+            if (value == null) {
                 throw new InvalidObjectException("id cannot be null");
             }
-            if (lowLevelAbstractionId == null) {
+            if (lladId == null) {
                 throw new InvalidObjectException("lowLevelAbstractionId cannot be null");
             }
-            if (lowLevelValueDefName == null) {
+            if (lladValue == null) {
                 throw new InvalidObjectException("lowLevelValueDefName cannot be null");
             }
         }

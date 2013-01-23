@@ -32,7 +32,7 @@ import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 public final class SliceDefinition extends AbstractAbstractionDefinition {
 
     private static final long serialVersionUID = 3339167247610447388L;
-    private final Set<String> abstractedFrom;
+    private final Set<TemporalExtendedPropositionDefinition> abstractedFrom;
     /**
      * The lower limit of the range of this slice (inclusive).
      */
@@ -45,11 +45,22 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
     /*
      * Whether or not the intervals in the slice should be merged into one
      */
-    private boolean mergedInterval = false;
+    private boolean mergedInterval;
+    
+    private boolean consecutive;
 
     public SliceDefinition(String id) {
         super(id);
-        this.abstractedFrom = new HashSet<String>(2);
+        this.abstractedFrom = 
+                new HashSet<TemporalExtendedPropositionDefinition>();
+    }
+    
+    public boolean isConsecutive() {
+        return this.consecutive;
+    }
+    
+    public void setConsecutive(boolean consecutive) {
+        this.consecutive = consecutive;
     }
 
     /**
@@ -123,7 +134,11 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
 
     @Override
     public Set<String> getAbstractedFrom() {
-        return Collections.unmodifiableSet(this.abstractedFrom);
+        Set<String> propIds = new HashSet<String>();
+        for (TemporalExtendedPropositionDefinition tepd : this.abstractedFrom) {
+            propIds.add(tepd.getPropositionId());
+        }
+        return propIds;
     }
 
     /**
@@ -133,9 +148,9 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
      *            a proposition id <code>String</code> for an abstract
      *            parameter definition.
      */
-    public boolean addAbstractedFrom(String propId) {
-        if (propId != null) {
-            boolean result = this.abstractedFrom.add(propId);
+    public boolean add(TemporalExtendedPropositionDefinition tepd) {
+        if (tepd != null) {
+            boolean result = this.abstractedFrom.add(tepd);
             if (result) {
                 recalculateChildren();
             }
@@ -143,6 +158,10 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
         } else {
             return false;
         }
+    }
+    
+    public Set<TemporalExtendedPropositionDefinition> getTemporalExtendedPropositionDefinitions() {
+        return Collections.unmodifiableSet(this.abstractedFrom);
     }
 
     @Override
@@ -180,7 +199,9 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
     @Override
     protected void recalculateChildren() {
         String[] old = this.children;
-        this.children = this.abstractedFrom.toArray(new String[this.abstractedFrom.size()]);
+        Set<String> abstractedFrom = getAbstractedFrom();
+        this.children = 
+                abstractedFrom.toArray(new String[abstractedFrom.size()]);
         if (this.changes != null) {
             this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
                     this.children);
