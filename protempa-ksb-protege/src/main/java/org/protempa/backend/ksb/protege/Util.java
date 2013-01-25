@@ -510,8 +510,8 @@ class Util {
                 "maxDurationUnits", backend, cm));
         Slot slot = cm.getSlot("propertyConstraints");
         if (slot == null) {
-            logger().log(Level.WARNING, 
-                    "Ontology does not have a propertyConstraints slot, skipping for extended proposition definition {0}", 
+            logger().log(Level.WARNING,
+                    "Ontology does not have a propertyConstraints slot, skipping for extended proposition definition {0}",
                     result.getDisplayName());
         } else {
             result.getPropertyConstraints().addAll(
@@ -605,13 +605,17 @@ class Util {
                     temporalOffsetInstance, cm.getSlot("finishSide"))));
             Integer startOffset = Util.parseTimeConstraint(
                     temporalOffsetInstance, "startOffset", cm);
-            temporalOffsets.setStartOffset(startOffset);
+            if (startOffset != null) {
+                temporalOffsets.setStartOffset(startOffset);
+            }
 
             temporalOffsets.setStartOffsetUnits(Util.parseUnitsConstraint(
                     temporalOffsetInstance, "startOffsetUnits", backend, cm));
             Integer finishOffset = Util.parseTimeConstraint(
                     temporalOffsetInstance, "finishOffset", cm);
-            temporalOffsets.setFinishOffset(finishOffset);
+            if (finishOffset != null) {
+                temporalOffsets.setFinishOffset(finishOffset);
+            }
             temporalOffsets.setFinishOffsetUnits(Util.parseUnitsConstraint(
                     temporalOffsetInstance, "finishOffsetUnits", backend, cm));
             return temporalOffsets;

@@ -1,4 +1,4 @@
-; Wed Nov 14 12:37:52 EST 2012
+; Thu Jan 24 21:46:20 EST 2013
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
@@ -944,10 +944,10 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[ProtempaTest_ProjectKB_Class30113]
-		[ProtempaTest_ProjectKB_Class30114]
-		[ProtempaTest_ProjectKB_Class30115]
-		[ProtempaTest_ProjectKB_Class30116]))
+		[ProtempaTest_ProjectKB_Class30035]
+		[ProtempaTest_ProjectKB_Class30036]
+		[ProtempaTest_ProjectKB_Class30037]
+		[ProtempaTest_ProjectKB_Class30038]))
 
 ([CLSES_TAB] of  Widget
 
@@ -1051,11 +1051,11 @@
 ([KB_495177_Class6] of  Map
 
 	(entries
-		[ProtempaTest_ProjectKB_Class30117]
-		[ProtempaTest_ProjectKB_Class30118]
-		[ProtempaTest_ProjectKB_Class30120]
-		[ProtempaTest_ProjectKB_Class30121])
-	(referenced_maps [ProtempaTest_ProjectKB_Class30119]))
+		[ProtempaTest_ProjectKB_Class30039]
+		[ProtempaTest_ProjectKB_Class30040]
+		[ProtempaTest_ProjectKB_Class30042]
+		[ProtempaTest_ProjectKB_Class30043])
+	(referenced_maps [ProtempaTest_ProjectKB_Class30041]))
 
 ([KB_495177_Class88] of  Property_List
 
@@ -1108,7 +1108,7 @@
 ([KB_495177_Class99] of  Property_List
 )
 
-([KB_846471_Class5] of  Map
+([KB_722049_Class5] of  Map
 )
 
 ([LAYOUT_PROPERTIES] of  Property_List
@@ -1196,9 +1196,9 @@
 	(customized_instance_widgets
 		[INSTANCE_ANNOTATION_FORM_WIDGET]
 		[AIW_ProjectKB_Class10117]
-		[STANDARD_SLOT_FORM_WIDGET]
-		[AIW_ProjectKB_Class84]
 		[STANDARD_FACET_FORM_WIDGET]
+		[AIW_ProjectKB_Class84]
+		[STANDARD_SLOT_FORM_WIDGET]
 		[PAL_FORM_WIDGET]
 		[AIW_ProjectKB_Class10158]
 		[STANDARD_CLASS_FORM_WIDGET])
@@ -1447,51 +1447,51 @@
 ([ProtempaTest_ProjectKB_Class30] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class30113] of  String
+([ProtempaTest_ProjectKB_Class30035] of  String
 
 	(name ":INSTANCE-ANNOTATION")
 	(string_value "%3AANNOTATION-TEXT"))
 
-([ProtempaTest_ProjectKB_Class30114] of  String
-
-	(name ":META-CLASS")
-	(string_value "%3ANAME"))
-
-([ProtempaTest_ProjectKB_Class30115] of  String
+([ProtempaTest_ProjectKB_Class30036] of  String
 
 	(name ":PAL-CONSTRAINT")
 	(string_value "%3APAL-NAME"))
 
-([ProtempaTest_ProjectKB_Class30116] of  String
+([ProtempaTest_ProjectKB_Class30037] of  String
+
+	(name ":META-CLASS")
+	(string_value "%3ANAME"))
+
+([ProtempaTest_ProjectKB_Class30038] of  String
 
 	(name "ValueSetElement")
 	(string_value "elementOfValueSet"))
 
-([ProtempaTest_ProjectKB_Class30117] of  Map_Entry
+([ProtempaTest_ProjectKB_Class30039] of  Map_Entry
 
 	(key "add_name_on_instance_form")
 	(key_class "java.lang.String")
 	(value "false")
 	(value_class "java.lang.String"))
 
-([ProtempaTest_ProjectKB_Class30118] of  Map_Entry
+([ProtempaTest_ProjectKB_Class30040] of  Map_Entry
 
 	(key "change_tracking_active")
 	(key_class "java.lang.String")
 	(value "false")
 	(value_class "java.lang.String"))
 
-([ProtempaTest_ProjectKB_Class30119] of  Map
+([ProtempaTest_ProjectKB_Class30041] of  Map
 )
 
-([ProtempaTest_ProjectKB_Class30120] of  Map_Entry
+([ProtempaTest_ProjectKB_Class30042] of  Map_Entry
 
 	(key "InstanceDisplay.yellow_stickies")
 	(key_class "java.lang.String")
-	(value "ProtempaTest_ProjectKB_Class30119")
+	(value "ProtempaTest_ProjectKB_Class30041")
 	(value_class "java.util.Map"))
 
-([ProtempaTest_ProjectKB_Class30121] of  Map_Entry
+([ProtempaTest_ProjectKB_Class30043] of  Map_Entry
 
 	(key "suppress_instance_counting")
 	(key_class "java.lang.String")

@@ -22,6 +22,7 @@ package org.protempa;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
@@ -73,5 +74,12 @@ public final class AlgorithmArguments implements Serializable {
     public ValueComparator valueComp(String name) {
         return this.parameterValueComps.get(name);
     }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+    
+    
 
 }

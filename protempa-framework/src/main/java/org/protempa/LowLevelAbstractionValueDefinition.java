@@ -62,10 +62,6 @@ public class LowLevelAbstractionValueDefinition implements Serializable {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 LowLevelAbstractionValueDefinition.this.algorithmArguments = null;
-                LowLevelAbstractionValueDefinition.this.parameterValueComps
-                        .clear();
-                LowLevelAbstractionValueDefinition.this.parameterValues
-                        .clear();
             }
         });
         this.parameterValues = new HashMap<String, Value>();
@@ -160,12 +156,6 @@ public class LowLevelAbstractionValueDefinition implements Serializable {
 
     public final String getId() {
         return id;
-    }
-
-    protected String debugMessage() {
-        StringBuilder buffer = new StringBuilder(id + "-");
-        buffer.append("value=" + value);
-        return buffer.toString();
     }
 
     @Override

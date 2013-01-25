@@ -20,6 +20,7 @@
 package org.protempa;
 
 import java.io.Serializable;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.Value;
@@ -34,13 +35,11 @@ import org.protempa.proposition.value.Value;
 public final class Offsets implements Serializable {
 
     private static final long serialVersionUID = -3143801827380255487L;
-    private String startAbstractParamId;
     private Value startAbstractParamValue;
-    private String finishAbstractParamId;
     private Value finishAbstractParamValue;
-    private Integer startOffset;
+    private int startOffset;
     private Unit startOffsetUnits;
-    private Integer finishOffset;
+    private int finishOffset;
     private Unit finishOffsetUnits;
     private IntervalSide startIntervalSide = IntervalSide.START;
     private IntervalSide finishIntervalSide = IntervalSide.FINISH;
@@ -56,14 +55,6 @@ public final class Offsets implements Serializable {
             TemporalExtendedPropositionDefinition tepd) {
         this.finishExtPropDef = tepd;
     }
-
-//    public String getFinishAbstractParamId() {
-//        return finishAbstractParamId;
-//    }
-//
-//    public void setFinishAbstractParamId(String finishAbstractParamId) {
-//        this.finishAbstractParamId = finishAbstractParamId;
-//    }
 
     public Value getFinishAbstractParamValue() {
         return finishAbstractParamValue;
@@ -83,11 +74,11 @@ public final class Offsets implements Serializable {
         }
     }
 
-    public Integer getFinishOffset() {
+    public int getFinishOffset() {
         return finishOffset;
     }
 
-    public void setFinishOffset(Integer finishOffset) {
+    public void setFinishOffset(int finishOffset) {
         this.finishOffset = finishOffset;
     }
 
@@ -98,14 +89,6 @@ public final class Offsets implements Serializable {
     public void setFinishOffsetUnits(Unit finishOffsetUnits) {
         this.finishOffsetUnits = finishOffsetUnits;
     }
-
-//    public String getStartAbstractParamId() {
-//        return startAbstractParamId;
-//    }
-//
-//    public void setStartAbstractParamId(String startAbstractParamId) {
-//        this.startAbstractParamId = startAbstractParamId;
-//    }
 
     public TemporalExtendedPropositionDefinition
             getStartTemporalExtendedPropositionDefinition() {
@@ -135,11 +118,11 @@ public final class Offsets implements Serializable {
         }
     }
 
-    public Integer getStartOffset() {
+    public int getStartOffset() {
         return startOffset;
     }
 
-    public void setStartOffset(Integer startOffset) {
+    public void setStartOffset(int startOffset) {
         this.startOffset = startOffset;
     }
 
@@ -153,26 +136,6 @@ public final class Offsets implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder buf = new StringBuilder("Offset start: ");
-        buf.append(startAbstractParamId);
-        buf.append("; ");
-        buf.append(startAbstractParamValue);
-        buf.append("; ");
-        buf.append(startIntervalSide);
-        buf.append("; ");
-        buf.append(startOffset);
-        buf.append("; ");
-        buf.append(startOffsetUnits);
-        buf.append("; offset finish: ");
-        buf.append(finishAbstractParamId);
-        buf.append("; ");
-        buf.append(finishAbstractParamValue);
-        buf.append("; ");
-        buf.append(finishIntervalSide);
-        buf.append("; ");
-        buf.append(finishOffset);
-        buf.append("; ");
-        buf.append(finishOffsetUnits);
-        return buf.toString();
+        return ToStringBuilder.reflectionToString(this);
     }
 }

@@ -45,7 +45,7 @@ import org.protempa.proposition.value.Value;
 /**
  * Drools consequence for {@link CompoundLowLevelAbstractionDefinition}s.
  */
-public final class CompoundLowLevelAbstractionConsequence implements
+final class CompoundLowLevelAbstractionConsequence implements
         Consequence {
 
     private static final long serialVersionUID = 6456351279290509422L;
@@ -64,7 +64,7 @@ public final class CompoundLowLevelAbstractionConsequence implements
      * @param derivationsBuilder
      *            the {@link DerivationsBuilder} to add asserted propositions to
      */
-    public CompoundLowLevelAbstractionConsequence(
+    CompoundLowLevelAbstractionConsequence(
             CompoundLowLevelAbstractionDefinition def,
             DerivationsBuilder derivationsBuilder) {
         assert def != null : "def cannot be null";
