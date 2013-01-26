@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import java.util.Arrays;
 import org.protempa.proposition.DerivedSourceId;
 import org.protempa.proposition.UniqueId;
 import java.util.List;
@@ -173,6 +174,8 @@ public final class AbstractParameterFactory {
                 return tps.get(i);
             }
         }
-        throw new AssertionError("never reached");
+        throw new AssertionError("No proposition in " + tps + 
+                " matches temporal extended proposition definition " + tepd + 
+                " from " + Arrays.toString(epds));
     }
 }
