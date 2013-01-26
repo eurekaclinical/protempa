@@ -46,21 +46,11 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
      * Whether or not the intervals in the slice should be merged into one
      */
     private boolean mergedInterval;
-    
-    private boolean consecutive;
 
     public SliceDefinition(String id) {
         super(id);
         this.abstractedFrom = 
                 new HashSet<TemporalExtendedPropositionDefinition>();
-    }
-    
-    public boolean isConsecutive() {
-        return this.consecutive;
-    }
-    
-    public void setConsecutive(boolean consecutive) {
-        this.consecutive = consecutive;
     }
 
     /**

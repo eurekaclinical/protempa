@@ -103,6 +103,10 @@ final class CompoundLowLevelAbstractionConsequence implements
 
         List<CompoundValuedInterval> intervals = CompoundValuedIntervalFactory
                 .buildIntervalList(pl);
+        
+        if (this.cllad.getId().equals("AtLeast2Compound")) {
+            System.err.println("HERE");
+        }
 
         List<AbstractParameterWithSourceParameters> derivedProps = new ArrayList<AbstractParameterWithSourceParameters>();
         for (CompoundValuedInterval interval : intervals) {

@@ -222,6 +222,7 @@ public class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDe
                 valueClassification.lladId,
                 NominalValue.getInstance(valueClassification.lladValue));
         this.valueClassifications.add(valueClassification);
+        recalculateChildren();
     }
 
     LinkedHashMap<String, Map<String, Value>> getValueClassificationsInt() {

@@ -164,7 +164,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         try {
             if (!def.getLowLevelAbstractionIds().isEmpty()) {
                 Rule rule = new Rule(def.getId());
-                Pattern sourceP = new Pattern(2, 1, PROP_OT, "");
+                Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
                 sourceP.addConstraint(new PredicateConstraint(
                         new PropositionPredicateExpression(def
                         .getAbstractedFrom())));
