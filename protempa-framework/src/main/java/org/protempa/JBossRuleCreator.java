@@ -176,6 +176,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 rule.setSalience(ONE_SALIENCE);
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
+                AbstractionCombiner
+                        .toRules(def, rules, this.derivationsBuilder);
             }
             addInverseIsARule(def);
         } catch (InvalidRuleException e) {

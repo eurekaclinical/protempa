@@ -30,12 +30,14 @@ import java.util.logging.Level;
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
-import org.protempa.CompoundLowLevelAbstractionDefinition.ValueDefinitionMatchOperator;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.CompoundValuedInterval;
 import org.protempa.proposition.CompoundValuedIntervalFactory;
 import org.protempa.proposition.DerivedSourceId;
 import org.protempa.proposition.DerivedUniqueId;
+import org.protempa.proposition.Segment;
+import org.protempa.proposition.Sequence;
+import org.protempa.proposition.TemporalParameter;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.IntervalFactory;
@@ -103,12 +105,9 @@ final class CompoundLowLevelAbstractionConsequence implements
 
         List<CompoundValuedInterval> intervals = CompoundValuedIntervalFactory
                 .buildIntervalList(pl);
-        
-        if (this.cllad.getId().equals("AtLeast2Compound")) {
-            System.err.println("HERE");
-        }
 
-        List<AbstractParameterWithSourceParameters> derivedProps = new ArrayList<AbstractParameterWithSourceParameters>();
+        List<AbstractParameterWithSourceParameters> derivedProps = 
+                new ArrayList<AbstractParameterWithSourceParameters>();
         for (CompoundValuedInterval interval : intervals) {
             boolean match = false;
             String lastCheckedValue = null;
@@ -140,16 +139,16 @@ final class CompoundLowLevelAbstractionConsequence implements
             }
             // if none of the classifications matched and this is an ALL
             // situation, then default to the last classification defined
-            if (!match
-                    && cllad.getValueDefinitionMatchOperator() == ValueDefinitionMatchOperator.ALL
-                    && lastCheckedValue != null) {
-                AbstractParameter result = createAbstractParameter(
-                        cllad.getId(),
-                        NominalValue.getInstance(lastCheckedValue),
-                        interval.getInterval());
-                derivedProps.add(new AbstractParameterWithSourceParameters(
-                        result, interval.getParameters()));
-            }
+//            if (!match
+//                    && cllad.getValueDefinitionMatchOperator() == ValueDefinitionMatchOperator.ALL
+//                    && lastCheckedValue != null) {
+//                AbstractParameter result = createAbstractParameter(
+//                        cllad.getId(),
+//                        NominalValue.getInstance(lastCheckedValue),
+//                        interval.getInterval());
+//                derivedProps.add(new AbstractParameterWithSourceParameters(
+//                        result, interval.getParameters()));
+//            }
         }
         if (cllad.getMinimumNumberOfValues() <= 1) {
             for (AbstractParameterWithSourceParameters param : derivedProps) {
@@ -165,18 +164,19 @@ final class CompoundLowLevelAbstractionConsequence implements
                         .size()) {
                     if (rangeMatches(derivedProps, i,
                             i + cllad.getMinimumNumberOfValues() - 1,
-                            cllad.getGapFunction())) {
-                        AbstractParameter startParam = derivedProps.get(i).parameter;
-                        AbstractParameter finishParam = derivedProps.get(i
-                                + cllad.getMinimumNumberOfValues() - 1).parameter;
-                        Interval interval = intervalFactory.getInstance(
-                                startParam.getInterval().getMinStart(),
-                                startParam.getInterval().getStartGranularity(),
-                                finishParam.getInterval().getMaxFinish(),
-                                finishParam.getInterval()
-                                        .getFinishGranularity());
-                        AbstractParameter result = createAbstractParameter(
-                                cllad.getId(), startParam.getValue(), interval);
+                            cllad.getGapFunctionBetweenValues())) {
+                        Sequence<TemporalParameter> seq = 
+                                new Sequence<TemporalParameter>(derivedProps.get(i).parameter.getId());
+                        for (int k = i; k < i + cllad.getMinimumNumberOfValues(); k++) {
+                            seq.add(derivedProps.get(k).parameter);
+                        }
+                        Segment<TemporalParameter> seg = 
+                                new Segment<TemporalParameter>(seq);
+                        AbstractParameter result =
+                                AbstractParameterFactory.getFromAbstraction(
+                                cllad.getId(), seg, null, 
+                                derivedProps.get(i).parameter.getValue(), 
+                                null, null);
                         assertDerivedProposition(workingMemory, result,
                                 derivedProps.get(i).sourceParameters);
                     }

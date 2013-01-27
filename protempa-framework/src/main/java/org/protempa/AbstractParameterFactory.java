@@ -64,7 +64,7 @@ public final class AbstractParameterFactory {
      */
     public static AbstractParameter getFromAbstraction(String propId,
             Segment<? extends TemporalProposition> segment,
-            List<TemporalProposition> tps, Value value, Offsets temporalOffset,
+            List<? extends TemporalProposition> tps, Value value, Offsets temporalOffset,
             TemporalExtendedPropositionDefinition[] epds) {
         AbstractParameter result = new AbstractParameter(propId,new UniqueId(
                 DerivedSourceId.getInstance(),
@@ -166,7 +166,7 @@ public final class AbstractParameterFactory {
     }
 
     private static TemporalProposition matchingTemporalProposition(
-            List<TemporalProposition> tps,
+            List<? extends TemporalProposition> tps,
             TemporalExtendedPropositionDefinition tepd,
             TemporalExtendedPropositionDefinition[] epds) {
         for (int i = 0; i < epds.length; i++) {

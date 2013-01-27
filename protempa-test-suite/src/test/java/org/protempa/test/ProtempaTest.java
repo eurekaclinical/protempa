@@ -306,6 +306,7 @@ public class ProtempaTest {
         FileWriter fw = new FileWriter(outputFile);
         QueryResultsHandler handler = new SingleColumnQueryResultsHandler(fw);
         protempa.execute(query(), handler);
+        System.err.println("outputFile: " + outputFile);
         assertTrue("output doesn't match",
                 outputMatches(outputFile, TRUTH_OUTPUT));
 
@@ -465,7 +466,8 @@ public class ProtempaTest {
                 "My Diastolic Normal"));
         bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ANY);
         bp.setMinimumNumberOfValues(2);
-        bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+        bp.setGapFunctionBetweenValues(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+        bp.setGapFunction(new SimpleGapFunction(0, null));
 
         return bp;
     }
@@ -484,7 +486,8 @@ public class ProtempaTest {
                 "My Diastolic Normal"));
         bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ANY);
         bp.setMinimumNumberOfValues(1);
-        bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+        bp.setGapFunctionBetweenValues(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+        bp.setGapFunction(new SimpleGapFunction(0, null));
 
         return bp;
     }
@@ -503,7 +506,8 @@ public class ProtempaTest {
                 "My Diastolic Normal"));
         bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ALL);
         bp.setMinimumNumberOfValues(1);
-        bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+        bp.setGapFunctionBetweenValues(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+        bp.setGapFunction(new SimpleGapFunction(0, null));
 
         return bp;
     }
@@ -526,7 +530,8 @@ public class ProtempaTest {
                 "My Diastolic Normal 3"));
         bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ANY);
         bp.setMinimumNumberOfValues(1);
-        bp.setGapFunction(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+        bp.setGapFunctionBetweenValues(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+        bp.setGapFunction(new SimpleGapFunction(0, null));
 
         return bp;
     }
@@ -1501,15 +1506,16 @@ public class ProtempaTest {
             }
         }
         assertEquals(
-                "Found wrong number of 'MyBloodPressureClassificationAll'", 2,
+                "Found wrong number of 'MyBloodPressureClassificationAll'", 1,
                 bps.size());
+        System.err.println("bps: " + bps);
         Collections.sort(bps, new TemporalPropositionIntervalComparator());
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d, yyyy h:mm aa");
 
         AbstractParameter bp1 = bps.get(0);
-        Date expectedStart1 = buildDate(2008, Calendar.JULY, 7, 9, 0,
+        Date expectedStart1 = buildDate(2008, Calendar.AUGUST, 8, 10, 0,
                 Calendar.AM);
-        Date expectedFinish1 = buildDate(2008, Calendar.JULY, 7, 9, 0,
+        Date expectedFinish1 = buildDate(2008, Calendar.AUGUST, 8, 10, 0,
                 Calendar.AM);
         assertDateStringEquals(
                 expectedStart1,
@@ -1527,9 +1533,9 @@ public class ProtempaTest {
                 + bp1.getFinishFormattedLong());
         assertEquals(
                 "Wrong value for 'MyBloodPressureClassificationAll' (first)",
-                NominalValue.getInstance("MYBP_NORMAL"), bp1.getValue());
+                NominalValue.getInstance("MYBP_HIGH"), bp1.getValue());
 
-        AbstractParameter bp2 = bps.get(1);
+        AbstractParameter bp2 = bps.get(0);
         Date expectedStart2 = buildDate(2008, Calendar.AUGUST, 8, 10, 0,
                 Calendar.AM);
         Date expectedFinish2 = buildDate(2008, Calendar.AUGUST, 8, 10, 0,
@@ -1599,8 +1605,9 @@ public class ProtempaTest {
                 bps.add((AbstractParameter) p);
             }
         }
+        System.err.println("bps " + bps);
         assertEquals(
-                "Found wrong number of 'MyBloodPressureClassificationAny'", 12,
+                "Found wrong number of 'MyBloodPressureClassificationAny'", 3,
                 bps.size());
         Set<AbstractParameter> normals = new HashSet<AbstractParameter>();
         Set<AbstractParameter> highs = new HashSet<AbstractParameter>();
@@ -1617,10 +1624,10 @@ public class ProtempaTest {
         }
         assertEquals(
                 "Found wrong number of 'MyBloodPressureClassificationAny' with value 'MYBP_HIGH'",
-                7, highs.size());
+                1, highs.size());
         assertEquals(
                 "Found wrong number of 'MyBloodPressureClassificationAny' with value 'MYBP_NORMAL'",
-                5, normals.size());
+                2, normals.size());
 
         logger.log(Level.INFO,
                 "Completed MyBloodPressureClassificationAny with arbitrary intervals test");

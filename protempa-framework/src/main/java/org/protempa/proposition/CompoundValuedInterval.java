@@ -22,6 +22,7 @@ package org.protempa.proposition;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.CompoundLowLevelAbstractionDefinition;
 import org.protempa.proposition.interval.Interval;
@@ -50,7 +51,7 @@ public final class CompoundValuedInterval {
      *            the {@link Proposition}s that belong to this interval. These
      *            will generally be {@link AbstractParameter}s
      */
-    public CompoundValuedInterval(Interval interval,
+    CompoundValuedInterval(Interval interval,
             Set<AbstractParameter> parameters) {
         this.interval = interval;
         this.parameters = parameters;
@@ -86,5 +87,10 @@ public final class CompoundValuedInterval {
      */
     public Set<AbstractParameter> getParameters() {
         return parameters;
+    }
+    
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }

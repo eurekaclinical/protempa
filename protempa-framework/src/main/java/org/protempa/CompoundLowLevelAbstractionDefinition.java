@@ -36,6 +36,7 @@ import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.proposition.value.NominalValue;
+import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.Value;
 
 /**
@@ -81,10 +82,11 @@ import org.protempa.proposition.value.Value;
  * See {@link org.protempa.test.ProtempaTest} in protempa-test-suite for
  * examples of compound low-level abstractions.
  */
-public class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDefinition {
+public final class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDefinition {
 
     private static final long serialVersionUID = -1285908778762502403L;
     private final Set<String> lowLevelIds;
+    private GapFunction gapBtwValues;
     private transient LinkedHashMap<String, Map<String, Value>> classificationMatrix;
     private transient List<ValueClassification> valueClassifications;
 
@@ -125,6 +127,8 @@ public class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDe
         this.lowLevelIds = new HashSet<String>();
         this.minimumNumberOfValues = 1;
         this.valueDefinitionMatchOperator = ValueDefinitionMatchOperator.ANY;
+        this.gapBtwValues = GapFunction.DEFAULT;
+        this.concatenable = true;
         initInstance();
     }
 
@@ -142,6 +146,18 @@ public class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDe
      */
     public Set<String> getLowLevelAbstractionIds() {
         return Collections.unmodifiableSet(lowLevelIds);
+    }
+
+    public void setGapFunctionBetweenValues(GapFunction gf) {
+        if (gf == null) {
+            this.gapBtwValues = GapFunction.DEFAULT;
+        } else {
+            this.gapBtwValues = gf;
+        }
+    }
+
+    public GapFunction getGapFunctionBetweenValues() {
+        return this.gapBtwValues;
     }
 
     /**
@@ -344,7 +360,7 @@ public class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDe
             return ToStringBuilder.reflectionToString(this);
         }
     }
-    
+
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
         s.writeInt(this.valueClassifications.size());
@@ -361,9 +377,9 @@ public class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDe
             throw new InvalidObjectException(
                     "minimumNumberOfValues must be > 0");
         }
-        
+
         initInstance();
-        
+
         int numValueClassifications = s.readInt();
         for (int i = 0; i < numValueClassifications; i++) {
             ValueClassification vc = (ValueClassification) s.readObject();
