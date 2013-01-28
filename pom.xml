@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.protempa</groupId>
     <artifactId>protempa</artifactId>
-    <version>2.0.3</version>
+    <version>2.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Protempa</name>
     <url>http://aiw.sourceforge.net/dev/protempa-${project.version}</url>
@@ -28,8 +28,8 @@
     </properties>
 
     <scm>
-        <developerConnection>scm:svn:https://scm.cci.emory.edu/svn/protempa/tags/protempa-2.0.3</developerConnection>
-        <url>https://scm.cci.emory.edu/svn/protempa/tags/protempa-2.0.3</url>
+        <developerConnection>scm:svn:https://scm.cci.emory.edu/svn/protempa/trunk</developerConnection>
+        <url>https://scm.cci.emory.edu/svn/protempa/trunk</url>
     </scm>
     
     <issueManagement>

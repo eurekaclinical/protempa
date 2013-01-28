@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.protempa</groupId>
         <artifactId>protempa</artifactId>
-        <version>2.0.3</version>
+        <version>2.0.4-SNAPSHOT</version>
     </parent>
 
     <groupId>org.protempa</groupId>
     <artifactId>protempa-bp-serviceloader</artifactId>
     <packaging>jar</packaging>
-    <version>2.0.3</version>
+    <version>2.0.4-SNAPSHOT</version>
     <name>Protempa ServiceLoader Backend Provider</name>
     <description>Provides support for implementing Protempa backends using the 
         Java ServiceLoader mechanism.
@@ -21,7 +21,7 @@
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-framework</artifactId>
-            <version>2.0.3</version>
+            <version>2.0.4-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

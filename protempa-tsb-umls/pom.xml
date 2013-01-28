@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.protempa</groupId>
         <artifactId>protempa</artifactId>
-        <version>2.0.3</version>
+        <version>2.0.4-SNAPSHOT</version>
     </parent>
 
     <groupId>org.protempa</groupId>
     <artifactId>protempa-tsb-umls</artifactId>
     <packaging>jar</packaging>
-    <version>2.0.3</version>
+    <version>2.0.4-SNAPSHOT</version>
     <name>Protempa UMLS Term Source Backend</name>
     <description>Implements support for using the UMLS for access to clinical
         terms.
@@ -21,19 +21,19 @@
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-framework</artifactId>
-            <version>2.0.3</version>
+            <version>2.0.4-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-bp-serviceloader</artifactId>
-            <version>2.0.3</version>
+            <version>2.0.4-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-bconfigs-commons-ini</artifactId>
-            <version>2.0.3</version>
+            <version>2.0.4-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
