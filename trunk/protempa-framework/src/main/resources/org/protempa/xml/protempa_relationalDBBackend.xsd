@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  Protempa Framework
+  %%
+  Copyright (C) 2012 Emory University
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:include schemaLocation="protempa_common.xsd"/>
+    <xs:element name="relationalDBBackend">
+        <xs:annotation>
+            <xs:documentation>Describes a relational database data source.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="constantSpecs">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element maxOccurs="unbounded" minOccurs="0" ref="entitySpec"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="eventSpecs">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element maxOccurs="unbounded" minOccurs="0" ref="entitySpec"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="primitiveParameterSpecs">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element maxOccurs="unbounded" minOccurs="0" ref="entitySpec"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="sqlGenerator" type="javaClassNameType">
+                <xs:annotation>
+                    <xs:documentation>The name of the class used to generate SQL</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="databaseID" use="required">
+                <xs:annotation>
+                    <xs:documentation>A string that identifies the database that will be used for the data source.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute ref="schemaName" use="required">
+                <xs:annotation>
+                    <xs:documentation>The name of the schema from which the back end will get data.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="keyIdSchema" type="nameType">
+                <xs:annotation>
+                    <xs:documentation>The schema that contains the table named by the keyIdTable attrib ute.  If not specified, defaults to the value of schemaName.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="keyIdTable" type="nameType" use="required">
+                <xs:annotation>
+                    <xs:documentation>When the query does not specify a set of key ID values, they set of key IDs to be queried will come from this table.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="keyIdColumn" type="nameType" use="required">
+                <xs:annotation>
+                    <xs:documentation>When the query does not specify a set of key ID values, they set of key IDs to be queried will come from this column of the table named by the keyIdTable attribute.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="entitySpec">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" name="description" type="description_type">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">A description of the enclosing entitySpec.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="propositionIDs" type="propositionIDs_type">
+                    <xs:annotation>
+                        <xs:documentation xml:lang="en">The names of the propositions to which the enclosing entitySpec applies. The propositions must all have the same properties (not enforable by this schema).</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="baseSpec" type="baseSpecType">
+                    <xs:annotation>
+                        <xs:documentation>Represents the path through the datbase from the key's main table to this entity's main table.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="uniqueIdSpec" type="columnSpecType">
+                    <xs:annotation>
+                        <xs:documentation>Represents the paths through the database from this entity's main table to the tables and columns that together form a unique identifier for this entity. The columns comprising the unique identifier cannot have null values.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element maxOccurs="1" minOccurs="0" name="startTimeOrTimestampSpec"
+                    type="columnSpecType">
+                    <xs:annotation>
+                        <xs:documentation>Represents the path through the database from the key's main table to the table and column where the entity's start time (or timestamp is no finishTimeSpec is specified) is located.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element minOccurs="0" name="finishTimeSpec" type="columnSpecType">
+                    <xs:annotation>
+                        <xs:documentation>Represents the path through the database from the key's main table to the table and column where the entity's finish time.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="propertySpecs">
+                    <xs:annotation>
+                        <xs:documentation>Defines the entity's properties, which should be the same as the properties of all the propositions identified by the propositionIDs element.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="propertySpec">
+                                <xs:annotation>
+                                    <xs:documentation>Define an entity's propery and how the property is stored in a relational database.</xs:documentation>
+                                </xs:annotation>
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element minOccurs="0" ref="codeToPropositionIdMap"/>
+                                        <xs:element maxOccurs="1" minOccurs="1" ref="codeSpec">
+                                            <xs:annotation>
+                                                <xs:documentation>Represents the path through the database from the enclosing entity's main table to the table and column where the entity's code is located.</xs:documentation>
+                                            </xs:annotation>
+                                        </xs:element>
+                                    </xs:sequence>
+                                    <xs:attribute ref="name" use="required">
+                                        <xs:annotation>
+                                            <xs:documentation>The name of this property.</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:attribute>
+                                    <xs:attribute ref="typeOfValue" use="required">
+                                        <xs:annotation>
+                                            <xs:documentation>This property's type of value.</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:attribute>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element minOccurs="0" ref="codeToPropositionIdMap"/>
+                <xs:element maxOccurs="1" minOccurs="0" ref="codeSpec">
+                    <xs:annotation>
+                        <xs:documentation>Represents the path through the database from the enclosing entity's main table to the table and column where the entity's code is located.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element maxOccurs="1" minOccurs="0" name="constraintSpecs">
+                    <xs:annotation>
+                        <xs:documentation>Paths from this instance's main table to another table and column whose value is added to a where clause to constrain which rows in the database are members of this entity.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element maxOccurs="unbounded" name="constraintSpec"
+                                type="columnSpecType"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute ref="name" use="required">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The name of this entitySpec.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="unique" type="xs:boolean" use="required">
+                <xs:annotation>
+                    <xs:documentation>True if every row in the database table specified by the baseSpec element contains a unique instance of this entity, false otherwise.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute ref="typeOfValue">
+                <xs:annotation>
+                    <xs:documentation>If the described entity has a value, this attribute specifies the type of value.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="granularity" type="granularityType" use="required">
+                <xs:annotation>
+                    <xs:documentation>The granularity (year, month, ...) with which to interpret this entity's start and finish times.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="parser">
+                <xs:annotation>
+                    <xs:documentation>Indicates whether the database values for this entity's start and finish should be parsed as date values or datetime values.</xs:documentation>
+                </xs:annotation>
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="date"/>
+                        <xs:enumeration value="dateTime"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="partitionBy" type="granularityType">
+                <xs:annotation>
+                    <xs:documentation>A hint to the relational data source backend to partition queries for this entity spec by the given Unit. For example, if a time unit of MONTH is specified, the backend may only query data one month at a time. In order for this to work, at least one org.protempa.dsb.filter.PositionFilter must be specified that defines both upper and lower bounds on the same side of a proposition's intervals. If multiple position filters are specified, then one of these will be used to partition queries (which one is undefined!).</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="codeSpec" type="columnSpecType">
+        <xs:annotation>
+            <xs:documentation>Represents the path through the database from the enclosing entity's main table to the table and column where the code is located.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="codeToPropositionIdMap">
+        <xs:annotation>
+            <xs:documentation>A one-to-one map from code to proposition ID. If a mapping for a code is not specified, it is assume that the code in the datbase is the same as the proposition ID.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="codeToPropositionID">
+                    <xs:annotation>
+                        <xs:documentation>A mapping from one code to one proposition ID</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:attribute ref="code">
+                            <xs:annotation>
+                                <xs:documentation>The code to map.</xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
+                        <xs:attribute ref="propositionID">
+                            <xs:annotation>
+                                <xs:documentation>The proposition ID the code is mapped to.</xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="columnSpecType">
+        <xs:annotation>
+            <xs:documentation>Describes a path from the main table (or a table specified in an enclosing element) to a column which may be in a different table.</xs:documentation>
+        </xs:annotation>
+        <xs:choice maxOccurs="1" minOccurs="0">
+            <xs:sequence>
+                <xs:annotation>
+                    <xs:documentation>This is used for the identifying a column that is directly contained in a table.</xs:documentation>
+                </xs:annotation>
+                <xs:element name="columnName" type="nameType">
+                    <xs:annotation>
+                        <xs:documentation>The name of the column that the enclosing element refers to.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element maxOccurs="1" minOccurs="0" name="constraint">
+                    <xs:annotation>
+                        <xs:documentation>If the enclosing columnSpec is being used in a context that constrains which rows of a table will be included by generating a boolean expression to be included in a WHILE clause, then the this element must be specified and its value will be the type of comparison to perform (equal, like, greater, ...).</xs:documentation>
+                    </xs:annotation>
+                    <xs:simpleType>
+                        <xs:restriction base="xs:token">
+                            <xs:enumeration value="equal"/>
+                            <xs:enumeration value="like"/>
+                            <xs:enumeration value="greater"/>
+                            <xs:enumeration value="greaterOfEqual"/>
+                            <xs:enumeration value="less"/>
+                            <xs:enumeration value="lessOrEqual"/>
+                            <xs:enumeration value="notequal"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element minOccurs="0" name="propositionIdToCodeMap">
+                    <xs:annotation>
+                        <xs:documentation>If present, contains mappings from proposition IDs to database codes.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="propositionIdToCode">
+                                <xs:annotation>
+                                    <xs:documentation>Maps one proposition ID to one database code.</xs:documentation>
+                                </xs:annotation>
+                                <xs:complexType>
+                                    <xs:attribute ref="propositionID" use="required">
+                                        <xs:annotation>
+                                            <xs:documentation>The proposition ID to map.</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:attribute>
+                                    <xs:attribute ref="code" use="required">
+                                        <xs:annotation>
+                                            <xs:documentation>The code that the proposition ID is mapped to.</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:attribute>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element default="false" minOccurs="0" name="propositionIdsComplete"
+                    type="xs:boolean">
+                    <xs:annotation>
+                        <xs:documentation>Indicates whether the codes in propositionIdToCodeMap represent all of the unique values of the specified column. This serves as an optimization hint to the SQL generator to avoid the need for a long IN clause when the list of values in the clause is known to be almost the same as the list of unique values in the column.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:sequence>
+            <xs:sequence>
+                <xs:annotation>
+                    <xs:documentation>This is used for a join with another table.  The join is needed to get from the main table to the table that contains the column we are specifying.</xs:documentation>
+                </xs:annotation>
+                <xs:element name="joinSpec">
+                    <xs:annotation>
+                        <xs:documentation>Describes the join between the table described by the immediately enclosing columnSpec and the next table in the path described by the outermost enclosing columnSpec.  The table described by the enclosing colummSpec is on the left side of the join. The table described by the enclosed columnSpec is on the right side of the join.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="leftColumnName" type="nameType">
+                                <xs:annotation>
+                                    <xs:documentation>The column of the table described by the immediately enclosing columnSpec that is to be used in the join.</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
+                            <xs:element name="rightColumnName" type="nameType">
+                                <xs:annotation>
+                                    <xs:documentation>The column of the table described by the enclosed columnSpec that is to be used in the join.</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
+                            <xs:element name="nextColumnSpec" type="columnSpecType">
+                                <xs:annotation>
+                                    <xs:documentation>Describes the next column in the path described by the outtermost enclosing columnSpec. The table immediately identified by the columnSped will be on the right side of the join described the the immediately enclosing joinSpec.</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute default="inner" name="joinType">
+                            <xs:annotation>
+                                <xs:documentation>Specifies whether this element describes an inner join or a left outter join.</xs:documentation>
+                            </xs:annotation>
+                            <xs:simpleType>
+                                <xs:restriction base="xs:token">
+                                    <xs:enumeration value="inner"/>
+                                    <xs:enumeration value="leftOuter"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:choice>
+        <xs:attribute ref="schemaName">
+            <xs:annotation>
+                <xs:documentation>The name the relational database schema that contains the table that contains the column identified by this element.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute ref="tableName">
+            <xs:annotation>
+                <xs:documentation>The name of the table that contains the column identified by this element.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+    <xs:complexType name="baseSpecType">
+        <xs:annotation>
+            <xs:documentation>Represents the path through the database from the key's main table to this entity's main table.</xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="columnSpecType">
+                <xs:attribute ref="columnName">
+                    <xs:annotation>
+                        <xs:documentation>For those cases where this element contains a joinSpec, this attribute is used to specify the name of the column in the main table that contains the keyID.</xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+</xs:schema>

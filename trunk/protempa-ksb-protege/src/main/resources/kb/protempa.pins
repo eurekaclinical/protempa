@@ -1,0 +1,52 @@
+; Mon Oct 22 17:39:04 EDT 2012
+; 
+;+ (version "3.4.7")
+;+ (build "Build 620")
+
+([KB_163878_Class1] of  %3APAL-CONSTRAINT
+)
+
+([KB_468183_Class0] of  %3AINSTANCE-ANNOTATION
+
+	(%3AANNOTATION-TEXT "bteberbrerebadsfasfdasdfsdf")
+	(%3ACREATION-TIMESTAMP "2011.03.01 11:45:37.735 EST")
+	(%3ACREATOR "geoff"))
+
+([KB_943158_Class0] of  %3APAL-CONSTRAINT
+)
+
+([minDetector] of  Algorithm
+
+	(inValueType NumericalValue)
+	(minNumVal 1)
+	(withArguments
+		[PROTEMPANEW_Instance_7]
+		[PROTEMPANEW_Instance_30002]))
+
+([PROTEMPANEW_Instance_30002] of  Argument
+
+	(name "maxThreshold")
+	(valueType NumericalValue))
+
+([PROTEMPANEW_Instance_7] of  Argument
+
+	(name "minThreshold")
+	(valueType NumericalValue))
+
+([stateDetector] of  Algorithm
+
+	(inValueType NumericalValue)
+	(maxNumVal 1)
+	(minNumVal 1)
+	(withArguments
+		[PROTEMPANEW_Instance_7]
+		[PROTEMPANEW_Instance_30002]))
+
+([trendDetector] of  Algorithm
+
+	(inValueType NumericalValue)
+	(maxNumVal 2)
+	(minNumVal 2)
+	(withArguments
+		[PROTEMPANEW_Instance_7]
+		[PROTEMPANEW_Instance_30002]))

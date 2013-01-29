@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" 
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+    <properties>
+        <title>Homepage</title>
+        <author email="aiwhelp@emory.edu">
+            The Eureka! Clinical Analytics Team
+        </author>
+    </properties>
+
+    <body>
+        <h2>What is ${project.name}?</h2>
+        
+        <p>${project.description}</p>
+
+        <p>${project.name} is developed and maintained by the
+            <a href="http://cci.emory.edu">Emory Center for Comprehensive Informatics</a>.
+        </p>
+        
+        <h2>Binaries</h2>
+		<p>Please see the Protempa <a href="../index.html">Homepage</a> 
+                   for instructions on getting binaries for the entire project.
+		</p>
+
+        <h2>Source Code</h2>
+		<p>Please see the Protempa <a href="../index.html">Homepage</a> 
+                   for instructions on getting source code for the entire 
+                   project.
+		</p>
+    </body>
+</document>

@@ -1,0 +1,2 @@
+org.protempa.backend.ksb.protege.LocalKnowledgeSourceBackend
+org.protempa.backend.ksb.protege.RemoteKnowledgeSourceBackend
