@@ -81,7 +81,7 @@ public final class CommonsBackendProvider
             classNamesL.addAll(ClassServiceLoader.load(clazz));
         } catch (ServiceConfigurationError ex) {
             throw new BackendProviderSpecLoaderException(
-                    "Error loading backend", ex);
+                    "Error loading backend " + clazz.getName(), ex);
         }
         for (Class className : classNamesL) {
             try {

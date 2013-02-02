@@ -56,11 +56,18 @@ public final class KnowledgeSourceImpl
     private final Map<Set<String>, Set<PropositionDefinition>> propIdPropCache;
     private final Map<String, Object> notFoundAbstractionDefinitionRequests;
     private final Map<String, Object> notFoundValueSetRequests;
+    private final Map<String, Object> notFoundContextDefinitionRequests;
     private final Map<String, Object> notFoundPropositionDefinitionRequests;
+    private final Map<String, Object> notFoundTemporalPropositionDefinitionRequests;
     private final PropositionDefinitionReader propDefReader;
     private final AbstractionDefinitionReader abstractionDefReader;
+    private final ContextDefinitionReader contextDefReader;
+    private final TemporalPropositionDefinitionReader tempPropDefReader;
     private final Map<PropositionDefinition, List<PropositionDefinition>> inverseIsACache;
     private final Map<AbstractionDefinition, List<PropositionDefinition>> abstractedFromCache;
+    private final Map<ContextDefinition, List<ContextDefinition>> subContextsCache;
+    private final Map<ContextDefinition, List<TemporalPropositionDefinition>> inducedByCache;
+    private final Map<TemporalPropositionDefinition, List<ContextDefinition>> inducesCache;
     private InDataSourcePropositionDefinitionGetter inDataSourceGetter;
 
     @SuppressWarnings("unchecked")
@@ -69,15 +76,23 @@ public final class KnowledgeSourceImpl
         this.propIdPropCache = new ReferenceMap();
         this.inverseIsACache = new ReferenceMap();
         this.abstractedFromCache = new ReferenceMap();
+        this.subContextsCache = new ReferenceMap();
+        this.inducedByCache = new ReferenceMap();
+        this.inducesCache = new ReferenceMap();
         this.notFoundAbstractionDefinitionRequests =
                 new WeakHashMap<String, Object>();
         this.notFoundValueSetRequests = new WeakHashMap<String, Object>();
         this.notFoundPropositionDefinitionRequests =
                 new WeakHashMap<String, Object>();
+        this.notFoundContextDefinitionRequests =
+                new WeakHashMap<String, Object>();
+        this.notFoundTemporalPropositionDefinitionRequests =
+                new HashMap<String, Object>();
 
         this.propDefReader = new PropositionDefinitionReader();
         this.abstractionDefReader = new AbstractionDefinitionReader();
-
+        this.contextDefReader = new ContextDefinitionReader();
+        this.tempPropDefReader = new TemporalPropositionDefinitionReader();
     }
 
     /**
@@ -134,9 +149,9 @@ public final class KnowledgeSourceImpl
             for (String propId : propIds) {
                 PropositionDefinition pd = readPropositionDefinition(propId);
                 assert pd != null :
-                        "Proposition definition " + propId + 
-                        ", which is specified as a child of " + 
-                        propDef.getId() + ", does not exist";
+                        "Proposition definition " + propId
+                        + ", which is specified as a child of "
+                        + propDef.getId() + ", does not exist";
                 if (pd != null) {
                     result.add(pd);
                 }
@@ -210,9 +225,9 @@ public final class KnowledgeSourceImpl
             for (String propId : propIds) {
                 PropositionDefinition pd = readPropositionDefinition(propId);
                 assert pd != null :
-                        "Proposition definition " + propId + 
-                        ", which " + propDef.getId() + 
-                        "is specified as abstracted from, does not exist";
+                        "Proposition definition " + propId
+                        + ", which " + propDef.getId()
+                        + "is specified as abstracted from, does not exist";
                 if (pd != null) {
                     result.add(pd);
                 }
@@ -277,12 +292,142 @@ public final class KnowledgeSourceImpl
     }
 
     @Override
+    public List<ContextDefinition> readInduces(
+            TemporalPropositionDefinition propDef)
+            throws KnowledgeSourceReadException {
+        if (propDef == null) {
+            throw new IllegalArgumentException("propDef cannot be null");
+        }
+
+        return readInduces(propDef.getId());
+    }
+
+    @Override
+    public List<ContextDefinition> readInduces(String id)
+            throws KnowledgeSourceReadException {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+        Set<String> induces = new HashSet<String>();
+        for (KnowledgeSourceBackend backend : getBackends()) {
+            Arrays.addAll(induces,
+                    backend.readInduces(id));
+        }
+        List<ContextDefinition> result =
+                new ArrayList<ContextDefinition>();
+        for (String inducesPropId : induces) {
+            ContextDefinition def =
+                    readContextDefinition(inducesPropId);
+            if (def == null) {
+                throw new KnowledgeSourceReadException(
+                        "Invalid proposition id: " + inducesPropId);
+            }
+            result.add(def);
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<ContextDefinition> readSubContextOfs(String id)
+            throws KnowledgeSourceReadException {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+        Set<String> subContextOfs = new HashSet<String>();
+        for (KnowledgeSourceBackend backend : getBackends()) {
+            Arrays.addAll(subContextOfs,
+                    backend.readSubContextOfs(id));
+        }
+        List<ContextDefinition> result =
+                new ArrayList<ContextDefinition>();
+        for (String subContextOfPropId : subContextOfs) {
+            ContextDefinition def =
+                    readContextDefinition(subContextOfPropId);
+            if (def == null) {
+                throw new KnowledgeSourceReadException(
+                        "Invalid context id: " + subContextOfPropId);
+            }
+            result.add(def);
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<ContextDefinition> readSubContextOfs(ContextDefinition cd)
+            throws KnowledgeSourceReadException {
+        if (cd == null) {
+            throw new IllegalArgumentException("cd cannot be null");
+        }
+        return readSubContextOfs(cd.getId());
+    }
+
+    @Override
+    public List<ContextDefinition> readSubContexts(String contextId) throws KnowledgeSourceReadException {
+        if (contextId == null) {
+            throw new IllegalArgumentException("contextId cannot be null");
+        }
+        ContextDefinition pd = readContextDefinition(contextId);
+        if (pd != null) {
+            return readSubContexts(pd);
+        } else {
+            return new ArrayList(0);
+        }
+
+    }
+
+    @Override
+    public List<ContextDefinition> readSubContexts(ContextDefinition contextDef) throws KnowledgeSourceReadException {
+        if (contextDef == null) {
+            throw new IllegalArgumentException("contextDef cannot be null");
+        }
+        List<ContextDefinition> result =
+                this.subContextsCache.get(contextDef);
+        if (result != null) {
+            return result;
+        } else {
+            result = new ArrayList<ContextDefinition>();
+            initializeIfNeeded("reading subContexts of {0}",
+                    contextDef.getId());
+
+            String[] propIds = contextDef.getSubContexts();
+            for (String propId : propIds) {
+                ContextDefinition pd = readContextDefinition(propId);
+                assert pd != null :
+                        "Context definition " + propId
+                        + ", which " + contextDef.getId()
+                        + "is specified as abstracted from, does not exist";
+                if (pd != null) {
+                    result.add(pd);
+                }
+            }
+            result = Collections.unmodifiableList(result);
+            if (contextDef != null) {
+                this.subContextsCache.put(contextDef, result);
+            }
+            return result;
+        }
+
+    }
+
+    @Override
     public List<PropositionDefinition> readParents(
             PropositionDefinition propDef)
             throws KnowledgeSourceReadException {
         if (propDef == null) {
             throw new IllegalArgumentException("propDef cannot be null");
         }
+        List<ContextDefinition> subContextOfs;
+        List<ContextDefinition> induces;
+        if (propDef instanceof ContextDefinition) {
+            subContextOfs = readSubContextOfs((ContextDefinition) propDef);
+            induces = readInduces((ContextDefinition) propDef);
+        } else {
+            subContextOfs = Collections.emptyList();
+            induces = Collections.emptyList();
+        }
+        
         List<AbstractionDefinition> ad = readAbstractedInto(propDef);
         List<PropositionDefinition> pd = readIsA(propDef);
         Map<String, PropositionDefinition> map =
@@ -293,6 +438,12 @@ public final class KnowledgeSourceImpl
         }
         for (PropositionDefinition def : pd) {
             assert def != null : "The abstractedInto list for " + propDef.getId() + " cannot have a null element";
+            map.put(def.getId(), def);
+        }
+        for (ContextDefinition def : induces) {
+            map.put(def.getId(), def);
+        }
+        for (ContextDefinition def : subContextOfs) {
             map.put(def.getId(), def);
         }
         return new ArrayList(map.values());
@@ -310,6 +461,62 @@ public final class KnowledgeSourceImpl
         } else {
             return new ArrayList(0);
         }
+    }
+
+    @Override
+    public List<TemporalPropositionDefinition> readInducedBy(String contextId) throws KnowledgeSourceReadException {
+        if (contextId == null) {
+            throw new IllegalArgumentException("contextId cannot be null");
+        }
+        ContextDefinition pd = readContextDefinition(contextId);
+        if (pd != null) {
+            return readInducedBy(pd);
+        } else {
+            return new ArrayList(0);
+        }
+    }
+
+    @Override
+    public List<TemporalPropositionDefinition> readInducedBy(ContextDefinition contextDef) throws KnowledgeSourceReadException {
+        if (contextDef == null) {
+            throw new IllegalArgumentException("contextDef cannot be null");
+        }
+        List<TemporalPropositionDefinition> result =
+                this.inducedByCache.get(contextDef);
+        if (result != null) {
+            return result;
+        } else {
+            result = new ArrayList<TemporalPropositionDefinition>();
+            initializeIfNeeded("reading inducedBy of {0}",
+                    contextDef.getId());
+
+            TemporalExtendedPropositionDefinition[] propIds = contextDef.getInducedBy();
+            for (TemporalExtendedPropositionDefinition tepd : propIds) {
+                TemporalPropositionDefinition pd = readTemporalPropositionDefinition(tepd.getPropositionId());
+                assert pd != null :
+                        "Proposition definition " + tepd.getPropositionId()
+                        + ", which " + contextDef.getId()
+                        + "is specified as induced by, does not exist";
+                if (pd != null) {
+                    result.add(pd);
+                }
+            }
+            result = Collections.unmodifiableList(result);
+            if (contextDef != null) {
+                this.inducedByCache.put(contextDef, result);
+            }
+            return result;
+        }
+    }
+
+    @Override
+    public boolean hasTemporalPropositionDefinition(String id) throws KnowledgeSourceReadException {
+        return this.tempPropDefReader.has(id);
+    }
+
+    @Override
+    public TemporalPropositionDefinition readTemporalPropositionDefinition(String id) throws KnowledgeSourceReadException {
+        return this.tempPropDefReader.read(id);
     }
 
     private abstract class AbstractDefinitionReader<E extends PropositionDefinition> {
@@ -398,16 +605,20 @@ public final class KnowledgeSourceImpl
         }
     }
 
-    private final class AbstractionDefinitionReader extends AbstractDefinitionReader<AbstractionDefinition> {
+    private final class AbstractionDefinitionReader
+            extends AbstractDefinitionReader<AbstractionDefinition> {
 
         @Override
         protected AbstractionDefinition readFromKnowledgeBase(String id) {
-            AbstractionDefinition result = propositionDefinitionCache.getAbstractionDefinition(id);
+            AbstractionDefinition result =
+                    propositionDefinitionCache.getAbstractionDefinition(id);
             if (result == null) {
-                PropositionDefinition r = propositionDefinitionCache.getPropositionDefinition(id);
+                PropositionDefinition r =
+                        propositionDefinitionCache.getPropositionDefinition(id);
                 if (r instanceof AbstractionDefinition) {
                     try {
-                        propositionDefinitionCache.addAbstractionDefinition((AbstractionDefinition) r);
+                        propositionDefinitionCache
+                                .addAbstractionDefinition((AbstractionDefinition) r);
                     } catch (InvalidPropositionIdException ex) {
                         throw new AssertionError("Should not happen");
                     }
@@ -437,6 +648,97 @@ public final class KnowledgeSourceImpl
         @Override
         protected void putInKnowledgeBase(AbstractionDefinition propDef) throws InvalidPropositionIdException {
             propositionDefinitionCache.addAbstractionDefinition(propDef);
+            propositionDefinitionCache.addTemporalPropositionDefinition(propDef);
+            propositionDefinitionCache.addPropositionDefinition(propDef);
+        }
+    }
+
+    private final class ContextDefinitionReader
+            extends AbstractDefinitionReader<ContextDefinition> {
+
+        @Override
+        protected boolean isInNotFound(String id) {
+            return notFoundContextDefinitionRequests.containsKey(id);
+        }
+
+        @Override
+        protected void putInNotFound(String id) {
+            notFoundContextDefinitionRequests.put(id, null);
+        }
+
+        @Override
+        protected ContextDefinition readFromKnowledgeBase(String id) {
+            ContextDefinition result =
+                    propositionDefinitionCache.getContextDefinition(id);
+            if (result == null) {
+                PropositionDefinition r =
+                        propositionDefinitionCache.getPropositionDefinition(id);
+                if (r instanceof ContextDefinition) {
+                    try {
+                        propositionDefinitionCache
+                                .addContextDefinition((ContextDefinition) r);
+                    } catch (InvalidPropositionIdException ex) {
+                        throw new AssertionError("Should not happen");
+                    }
+                    result = (ContextDefinition) r;
+                }
+            }
+            return result;
+        }
+
+        @Override
+        protected ContextDefinition readFromBackend(String id, KnowledgeSourceBackend backend) throws KnowledgeSourceReadException {
+            return backend.readContextDefinition(id);
+        }
+
+        @Override
+        protected void putInKnowledgeBase(ContextDefinition propDef) throws InvalidPropositionIdException {
+            propositionDefinitionCache.addContextDefinition(propDef);
+            propositionDefinitionCache.addPropositionDefinition(propDef);
+        }
+    }
+
+    private final class TemporalPropositionDefinitionReader
+            extends AbstractDefinitionReader<TemporalPropositionDefinition> {
+
+        @Override
+        protected boolean isInNotFound(String id) {
+            return notFoundTemporalPropositionDefinitionRequests.containsKey(id);
+        }
+
+        @Override
+        protected void putInNotFound(String id) {
+            notFoundTemporalPropositionDefinitionRequests.put(id, null);
+        }
+
+        @Override
+        protected TemporalPropositionDefinition readFromKnowledgeBase(String id) {
+            TemporalPropositionDefinition result =
+                    propositionDefinitionCache.getTemporalPropositionDefinition(id);
+            if (result == null) {
+                PropositionDefinition r =
+                        propositionDefinitionCache.getPropositionDefinition(id);
+                if (r instanceof TemporalPropositionDefinition) {
+                    try {
+                        propositionDefinitionCache
+                                .addTemporalPropositionDefinition((TemporalPropositionDefinition) r);
+                    } catch (InvalidPropositionIdException ex) {
+                        throw new AssertionError("Should not happen");
+                    }
+                    result = (TemporalPropositionDefinition) r;
+                }
+            }
+            return result;
+        }
+
+        @Override
+        protected TemporalPropositionDefinition readFromBackend(String id, KnowledgeSourceBackend backend) throws KnowledgeSourceReadException {
+            return backend.readTemporalPropositionDefinition(id);
+        }
+
+        @Override
+        protected void putInKnowledgeBase(TemporalPropositionDefinition propDef) throws InvalidPropositionIdException {
+            propositionDefinitionCache.addTemporalPropositionDefinition(propDef);
             propositionDefinitionCache.addPropositionDefinition(propDef);
         }
     }
@@ -468,8 +770,18 @@ public final class KnowledgeSourceImpl
     }
 
     @Override
+    public ContextDefinition readContextDefinition(String id) throws KnowledgeSourceReadException {
+        return this.contextDefReader.read(id);
+    }
+
+    @Override
     public boolean hasAbstractionDefinition(String id) throws KnowledgeSourceReadException {
         return this.abstractionDefReader.has(id);
+    }
+
+    @Override
+    public boolean hasContextDefinition(String id) throws KnowledgeSourceReadException {
+        return this.contextDefReader.has(id);
     }
 
     @Override
@@ -536,6 +848,8 @@ public final class KnowledgeSourceImpl
             this.propIdPropCache.clear();
             this.inverseIsACache.clear();
             this.abstractedFromCache.clear();
+            this.subContextsCache.clear();
+            this.inducedByCache.clear();
             this.notFoundAbstractionDefinitionRequests.clear();
             this.notFoundValueSetRequests.clear();
             this.notFoundPropositionDefinitionRequests.clear();

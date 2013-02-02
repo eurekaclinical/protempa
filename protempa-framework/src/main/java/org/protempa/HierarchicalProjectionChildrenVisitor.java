@@ -81,6 +81,13 @@ public final class HierarchicalProjectionChildrenVisitor extends AbstractProposi
         this.propDefs.addAll(knowledgeSource.readInverseIsA(pairDefinition));
         this.propDefs.addAll(knowledgeSource.readAbstractedFrom(pairDefinition));
     }
+    
+    @Override
+    public void visit(ContextDefinition def) throws KnowledgeSourceReadException {
+        this.propDefs.addAll(knowledgeSource.readInverseIsA(def));
+        this.propDefs.addAll(knowledgeSource.readSubContexts(def));
+        this.propDefs.addAll(knowledgeSource.readInducedBy(def));
+    }
 
     /**
      * Gets the children.
@@ -94,4 +101,8 @@ public final class HierarchicalProjectionChildrenVisitor extends AbstractProposi
     public void clear() {
         this.propDefs.clear();
     }
+
+    
+
+    
 }

@@ -32,12 +32,13 @@ import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.CompoundValuedInterval;
-import org.protempa.proposition.CompoundValuedIntervalFactory;
+import org.protempa.proposition.IntervalSectioner;
 import org.protempa.proposition.DerivedSourceId;
 import org.protempa.proposition.DerivedUniqueId;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalParameter;
+import org.protempa.proposition.AbstractParameterIntervalSectioner;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.IntervalFactory;
@@ -103,7 +104,8 @@ final class CompoundLowLevelAbstractionConsequence implements
         List<AbstractParameter> pl = (List<AbstractParameter>) knowledgeHelper
                 .get(knowledgeHelper.getDeclaration("result"));
 
-        List<CompoundValuedInterval> intervals = CompoundValuedIntervalFactory
+        List<CompoundValuedInterval> intervals = 
+                new AbstractParameterIntervalSectioner()
                 .buildIntervalList(pl);
 
         List<AbstractParameterWithSourceParameters> derivedProps = 
@@ -131,7 +133,7 @@ final class CompoundLowLevelAbstractionConsequence implements
                             NominalValue.getInstance(e.getKey()),
                             interval.getInterval());
                     derivedProps.add(new AbstractParameterWithSourceParameters(
-                            result, interval.getParameters()));
+                            result, interval.getTemporalPropositions()));
                     // found a matching value, so don't look for any more and
                     // move on to the next interval
                     break;
@@ -218,7 +220,7 @@ final class CompoundLowLevelAbstractionConsequence implements
                         .randomUUID().toString())));
         result.setInterval(interval);
         result.setValue(value);
-        result.setDataSourceType(DerivedDataSourceType.getInstance());
+        result.setDataSourceType(DataSourceType.DERIVED);
 
         return result;
     }

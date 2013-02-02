@@ -121,7 +121,7 @@ public interface PropositionDefinitionCheckedVisitor {
     void visit(ConstantDefinition def) throws ProtempaException;
 
     /**
-     * Process a pair abstraction definition
+     * Process a pair abstraction definition.
      * 
      * @param def
      *            a {@link PairDefinition}. Cannot be <code>null</code>.
@@ -130,4 +130,12 @@ public interface PropositionDefinitionCheckedVisitor {
      *             if an error occurs.
      */
     void visit(PairDefinition def) throws ProtempaException;
+    
+    /**
+     * Process a context definition.
+     * 
+     * @param def a {@link ContextDefinition}. Cannot be <code>null</code>.
+     * @throws ProtempaException if an error occurs.
+     */
+    void visit(ContextDefinition def) throws ProtempaException;
 }

@@ -39,11 +39,11 @@ import org.protempa.proposition.value.Value;
  * A factory for creating order lists of {@link CompoundValuedInterval}s based
  * on input propositions.
  */
-public final class CompoundValuedIntervalFactory {
+public abstract class IntervalSectioner<E extends TemporalProposition, K extends CompoundInterval<E>> {
 
     private final static IntervalFactory intervalFactory = new IntervalFactory();
 
-    private CompoundValuedIntervalFactory() {
+    IntervalSectioner() {
     }
 
     /**
@@ -61,8 +61,7 @@ public final class CompoundValuedIntervalFactory {
      * @return a list of {@link CompoundValuedInterval}, sorted chronologically
      *         based on {@link Interval}'s natural ordering
      */
-    public static List<CompoundValuedInterval> buildIntervalList(
-            List<AbstractParameter> propositions) {
+    public List<K> buildIntervalList(List<E> propositions) {
         return orderIntervals(propositions);
     }
 
@@ -74,13 +73,12 @@ public final class CompoundValuedIntervalFactory {
      * multiple types of propositions, there may be overlapping intervals, which
      * will result in additional intervals being created.
      */
-    private static List<CompoundValuedInterval> orderIntervals(
-            List<AbstractParameter> propositions) {
+    private List<K> orderIntervals(List<E> propositions) {
         Granularity startGran = propositions.get(0).getInterval()
                 .getStartGranularity();
         Granularity finishGran = propositions.get(0).getInterval()
                 .getFinishGranularity();
-        List<CompoundValuedInterval> result = new ArrayList<CompoundValuedInterval>();
+        List<K> result = new ArrayList<K>();
 
         Set<Long> startBoundsSet = new HashSet<Long>();
         Set<Long> finishBoundsSet = new HashSet<Long>();
@@ -91,7 +89,7 @@ public final class CompoundValuedIntervalFactory {
         // note that it doesn't matter whether the bound is a start or finish:
         // two start bounds between different parameters that are
         // chronologically adjacent will form an interval
-        for (AbstractParameter p : propositions) {
+        for (E p : propositions) {
             assert p.getInterval().getStartGranularity().equals(startGran)
                     && p.getInterval().getFinishGranularity()
                             .equals(finishGran) : "all intervals must have the same start and finish granularities to be combined";
@@ -127,11 +125,11 @@ public final class CompoundValuedIntervalFactory {
                     startGran, intervalBounds.get(i + 1), finishGran));
         }
 
-        SortedMap<Interval, Set<AbstractParameter>> fakeIntervals = new TreeMap<Interval, Set<AbstractParameter>>();
+        SortedMap<Interval, Set<E>> fakeIntervals = new TreeMap<Interval, Set<E>>();
 
         // this loop assigns each proposition to the interval(s) it overlaps,
         // creating new intervals as needed
-        for (AbstractParameter p : propositions) {
+        for (E p : propositions) {
             Long ivalStart = p.getInterval().getMinStart();
 
             // we use getMaximumFinish() instead of getMaxFinish() because for
@@ -163,8 +161,7 @@ public final class CompoundValuedIntervalFactory {
                             Math.min(p.getInterval().getMaxFinish(),
                                     interval.getMaxFinish()), finishGran);
                     if (!fakeIntervals.containsKey(ival)) {
-                        fakeIntervals.put(ival,
-                                new HashSet<AbstractParameter>());
+                        fakeIntervals.put(ival, new HashSet<E>());
                     }
                     fakeIntervals.get(ival).add(p);
                 }
@@ -173,15 +170,16 @@ public final class CompoundValuedIntervalFactory {
                 }
             }
         }
-        for (Entry<Interval, Set<AbstractParameter>> e : fakeIntervals
-                .entrySet()) {
-            Set<AbstractParameter> props = new HashSet<AbstractParameter>();
-            for (AbstractParameter p : e.getValue()) {
+        for (Entry<Interval, Set<E>> e : fakeIntervals.entrySet()) {
+            Set<E> props = new HashSet<E>();
+            for (E p : e.getValue()) {
                 props.add(p);
             }
-            result.add(new CompoundValuedInterval(e.getKey(), props));
+            result.add(newCompoundInterval(e.getKey(), props));
         }
 
         return result;
     }
+    
+    protected abstract K newCompoundInterval(Interval ival, Set<E> props);
 }

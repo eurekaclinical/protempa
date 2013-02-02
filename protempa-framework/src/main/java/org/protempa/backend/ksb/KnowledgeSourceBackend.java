@@ -22,11 +22,13 @@ package org.protempa.backend.ksb;
 import java.util.List;
 
 import org.protempa.AbstractionDefinition;
+import org.protempa.ContextDefinition;
 import org.protempa.backend.Backend;
 import org.protempa.KnowledgeSource;
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
+import org.protempa.TemporalPropositionDefinition;
 import org.protempa.TermSubsumption;
 import org.protempa.ValueSet;
 import org.protempa.query.And;
@@ -57,6 +59,12 @@ public interface KnowledgeSourceBackend extends
             throws KnowledgeSourceReadException;
     
     AbstractionDefinition readAbstractionDefinition(String id)
+            throws KnowledgeSourceReadException;
+    
+    ContextDefinition readContextDefinition(String id)
+            throws KnowledgeSourceReadException;
+    
+    TemporalPropositionDefinition readTemporalPropositionDefinition(String id)
             throws KnowledgeSourceReadException;
 
     /**
@@ -102,4 +110,8 @@ public interface KnowledgeSourceBackend extends
     String[] readAbstractedInto(String propId) throws KnowledgeSourceReadException;
     
     String[] readIsA(String propId) throws KnowledgeSourceReadException;
+    
+    String[] readInduces(String propId) throws KnowledgeSourceReadException;
+    
+    String[] readSubContextOfs(String propId) throws KnowledgeSourceReadException;
 }

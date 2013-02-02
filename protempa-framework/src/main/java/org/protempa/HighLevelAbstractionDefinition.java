@@ -43,7 +43,7 @@ public final class HighLevelAbstractionDefinition
         extends AbstractAbstractionDefinition {
 
     private static final long serialVersionUID = -2434163106247371362L;
-    private Offsets temporalOffset;
+    private TemporalPatternOffset temporalOffset;
     private boolean concatenable;
     private transient Set<ExtendedPropositionDefinition> defs;
     private transient Set<String> defsAsList;
@@ -283,12 +283,12 @@ public final class HighLevelAbstractionDefinition
         }
     }
 
-    public Offsets getTemporalOffset() {
+    public TemporalPatternOffset getTemporalOffset() {
         return temporalOffset;
     }
 
-    public void setTemporalOffset(Offsets temporalOffset) {
-        Offsets old = temporalOffset;
+    public void setTemporalOffset(TemporalPatternOffset temporalOffset) {
+        TemporalPatternOffset old = temporalOffset;
         this.temporalOffset = temporalOffset;
         if (this.changes != null) {
             this.changes.firePropertyChange("temporalOffset", old,

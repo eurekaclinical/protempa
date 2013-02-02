@@ -62,6 +62,7 @@ import org.protempa.AbstractionFinderTestHelper;
 import org.protempa.CompoundLowLevelAbstractionDefinition;
 import org.protempa.CompoundLowLevelAbstractionDefinition.ValueClassification;
 import org.protempa.CompoundLowLevelAbstractionDefinition.ValueDefinitionMatchOperator;
+import org.protempa.ContextDefinition;
 import org.protempa.EventDefinition;
 import org.protempa.ExtendedPropositionDefinition;
 import org.protempa.FinderException;
@@ -170,7 +171,9 @@ public class ProtempaTest {
         "MyBloodPressureClassificationConsecutiveAny",
         "MyBloodPressureClassificationAll",
         "MyTwoConsecutiveHighBloodPressure", "MySystolicClassification3",
-        "MyDiastolicClassification3", "MyBloodPressureClassification3Any"};
+        "MyDiastolicClassification3", "MyBloodPressureClassification3Any",
+        "MyContext1", "MyContext2"
+    };
     /**
      * Vital signs
      */
@@ -310,6 +313,21 @@ public class ProtempaTest {
         assertTrue("output doesn't match",
                 outputMatches(outputFile, TRUTH_OUTPUT));
 
+    }
+    
+    private ContextDefinition context1() {
+        ContextDefinition cd = new ContextDefinition("MyContext1");
+        TemporalExtendedParameterDefinition tepd =
+                new TemporalExtendedParameterDefinition("MySystolicClassification");
+        tepd.setValue(NominalValue.getInstance("My Systolic High"));
+        cd.setInducedBy(new TemporalExtendedPropositionDefinition[]{tepd});
+        return cd;
+    }
+    
+    private ContextDefinition context2() {
+        ContextDefinition cd = new ContextDefinition("MyContext2");
+        cd.setSubContexts(new String[]{"MyContext1"});
+        return cd;
     }
 
     private PropositionDefinition systolicClassification() {
@@ -589,7 +607,8 @@ public class ProtempaTest {
                     bloodPressureClassificationAny(),
                     bloodPressureClassificationConsecutiveAny(), highBp,
                     bloodPressureClassificationAll(), systolicClassification3(),
-                    diastolicClassification3(), bloodPressureClassification3Any()});
+                    diastolicClassification3(), bloodPressureClassification3Any(),
+                    context1(), context2()});
 
         DateFormat shortFormat = AbsoluteTimeGranularity.DAY.getShortFormat();
         DateTimeFilter timeRange = new DateTimeFilter(

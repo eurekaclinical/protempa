@@ -25,10 +25,12 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.protempa.AbstractionDefinition;
 import org.protempa.ConstantDefinition;
+import org.protempa.ContextDefinition;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.LowLevelAbstractionDefinition;
 import org.protempa.PrimitiveParameterDefinition;
 import org.protempa.PropositionDefinition;
+import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.backend.ksb.SimpleKnowledgeSourceBackend;
 
@@ -37,9 +39,42 @@ import org.protempa.backend.ksb.SimpleKnowledgeSourceBackend;
  * @author Andrew Post
  */
 public class SimpleKnowledgeSourceBackendTest {
+    
+    @Test
+    public void testInducedContextDefinition() throws KnowledgeSourceReadException {
+        PrimitiveParameterDefinition ppd = new PrimitiveParameterDefinition("foo");
+        ContextDefinition cd = new ContextDefinition("bar");
+        TemporalExtendedPropositionDefinition tepd = new TemporalExtendedPropositionDefinition("foo");
+        TemporalExtendedPropositionDefinition[] tepds = {tepd};
+        cd.setInducedBy(tepds);
+        KnowledgeSourceBackend b = new SimpleKnowledgeSourceBackend(ppd, cd);
+        Assert.assertArrayEquals(new String[] {"bar"}, b.readInduces("foo"));
+    }
+    
+    @Test
+    public void testReadContextDefinitionAsPropositionDefinition() throws KnowledgeSourceReadException {
+        PrimitiveParameterDefinition ppd = new PrimitiveParameterDefinition("foo");
+        ContextDefinition cd = new ContextDefinition("bar");
+        TemporalExtendedPropositionDefinition tepd = new TemporalExtendedPropositionDefinition("foo");
+        TemporalExtendedPropositionDefinition[] tepds = {tepd};
+        cd.setInducedBy(tepds);
+        KnowledgeSourceBackend b = new SimpleKnowledgeSourceBackend(ppd, cd);
+        Assert.assertEquals(cd, b.readPropositionDefinition("bar"));
+    }
+    
+    @Test
+    public void testReadContextDefinition() throws KnowledgeSourceReadException {
+        PrimitiveParameterDefinition ppd = new PrimitiveParameterDefinition("foo");
+        ContextDefinition cd = new ContextDefinition("bar");
+        TemporalExtendedPropositionDefinition tepd = new TemporalExtendedPropositionDefinition("foo");
+        TemporalExtendedPropositionDefinition[] tepds = {tepd};
+        cd.setInducedBy(tepds);
+        KnowledgeSourceBackend b = new SimpleKnowledgeSourceBackend(ppd, cd);
+        Assert.assertEquals(cd, b.readContextDefinition("bar"));
+    }
 
     @Test
-    public void testReadPropositionDefinition()
+    public void testReadConstantDefinitionAsPropositionDefinition()
             throws KnowledgeSourceReadException {
         ConstantDefinition expected = new ConstantDefinition("foo");
         KnowledgeSourceBackend b = new SimpleKnowledgeSourceBackend(expected);

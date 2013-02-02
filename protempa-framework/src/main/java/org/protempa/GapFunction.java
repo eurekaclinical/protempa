@@ -56,8 +56,8 @@ public abstract class GapFunction implements Serializable {
      * @param rhs the second {@link AbstractParameter}.
      * @return <code>true</code> or <code>false</code>.
      */
-    public final boolean execute(AbstractParameter lhs, 
-            AbstractParameter rhs) {
+    public final boolean execute(TemporalProposition lhs, 
+            TemporalProposition rhs) {
         if (lhs == null || rhs == null) {
             return false;
         } else {

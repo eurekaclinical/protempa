@@ -48,6 +48,8 @@ public final class PropositionDefinitionCache implements Serializable {
      */
     private Map<String, AbstractionDefinition> idToAbstractionDefinitionMap;
     private Map<String, PropositionDefinition> idToPropositionDefinitionMap;
+    private Map<String, ContextDefinition> idToContextDefinitionMap;
+    private Map<String, TemporalPropositionDefinition> idToTemporalPropositionDefinitionMap;
     private Map<String, ValueSet> idtoValueSetMap;
 
     PropositionDefinitionCache() {
@@ -58,6 +60,8 @@ public final class PropositionDefinitionCache implements Serializable {
         this.idToAbstractionDefinitionMap = new HashMap<String, AbstractionDefinition>();
         this.idToPropositionDefinitionMap = new HashMap<String, PropositionDefinition>();
         this.idtoValueSetMap = new HashMap<String, ValueSet>();
+        this.idToContextDefinitionMap = new HashMap<String, ContextDefinition>();
+        this.idToTemporalPropositionDefinitionMap = new HashMap<String, TemporalPropositionDefinition>();
     }
 
     /**
@@ -72,6 +76,8 @@ public final class PropositionDefinitionCache implements Serializable {
         s.writeObject(this.idToPropositionDefinitionMap.values());
         s.writeObject(this.idToAbstractionDefinitionMap.values());
         s.writeObject(this.idtoValueSetMap.values());
+        s.writeObject(this.idToContextDefinitionMap.values());
+        s.writeObject(this.idToTemporalPropositionDefinitionMap.values());
     }
 
     /**
@@ -92,6 +98,8 @@ public final class PropositionDefinitionCache implements Serializable {
         Collection<PropositionDefinition> propositionDefinitions = (Collection<PropositionDefinition>) s.readObject();
         Collection<AbstractionDefinition> abstractionDefinitions = (Collection<AbstractionDefinition>) s.readObject();
         Collection<ValueSet> valueSets = (Collection<ValueSet>) s.readObject();
+        Collection<ContextDefinition> contextDefinitions = (Collection<ContextDefinition>) s.readObject();
+        Collection<TemporalPropositionDefinition> temporalPropositionDefinitions = (Collection<TemporalPropositionDefinition>) s.readObject();
 
         if (propositionDefinitions != null) {
             for (PropositionDefinition def : propositionDefinitions) {
@@ -144,6 +152,42 @@ public final class PropositionDefinitionCache implements Serializable {
                 }
             }
         }
+        
+        if (temporalPropositionDefinitions != null) {
+            for (ContextDefinition def : contextDefinitions) {
+                if (def == null) {
+                    throw new InvalidObjectException("Null context definition; can't restore");
+                }
+                try {
+                    addContextDefinition(def);
+                } catch (InvalidPropositionIdException ex) {
+                    String msg = "Could not add de-serialized context definition " + def;
+                    //InvalidObjectException doesn't support nested exceptions.
+                    ProtempaUtil.logger().log(Level.SEVERE, msg, ex);
+                    throw new InvalidObjectException(msg);
+                }
+            }
+        } else {
+            throw new InvalidObjectException("contextDefinitions cannot be null");
+        }
+        
+        if (temporalPropositionDefinitions != null) {
+            for (TemporalPropositionDefinition def : temporalPropositionDefinitions) {
+                if (def == null) {
+                    throw new InvalidObjectException("Null temporalPropositionDefinition; can't restore");
+                }
+                try {
+                    addTemporalPropositionDefinition(def);
+                } catch (InvalidPropositionIdException ex) {
+                    String msg = "Could not add de-serialized temporalPropositionDefinition " + def;
+                    //InvalidObjectException doesn't support nested exceptions.
+                    ProtempaUtil.logger().log(Level.SEVERE, msg, ex);
+                    throw new InvalidObjectException(msg);
+                }
+            }
+        } else {
+            throw new InvalidObjectException("temporalPropositionDefinitions cannot be null");
+        }
     }
 
     boolean isUniqueKnowledgeDefinitionObjectId(String id) {
@@ -154,9 +198,17 @@ public final class PropositionDefinitionCache implements Serializable {
     public boolean hasPropositionDefinition(String eventId) {
         return getPropositionDefinition(eventId) != null;
     }
+    
+    public boolean hasTemporalPropositionDefinition(String propId) {
+        return getTemporalPropositionDefinition(propId) != null;
+    }
 
     public PropositionDefinition getPropositionDefinition(String propId) {
         return idToPropositionDefinitionMap.get(propId);
+    }
+    
+    public TemporalPropositionDefinition getTemporalPropositionDefinition(String propId) {
+        return this.idToTemporalPropositionDefinitionMap.get(propId);
     }
 
     public boolean hasValueSet(String valueSetId) {
@@ -170,9 +222,17 @@ public final class PropositionDefinitionCache implements Serializable {
     public boolean hasAbstractionDefinition(String paramId) {
         return getAbstractionDefinition(paramId) != null;
     }
+    
+    public boolean hasContextDefinition(String contextId) {
+        return getContextDefinition(contextId) != null;
+    }
 
     public AbstractionDefinition getAbstractionDefinition(String paramId) {
         return idToAbstractionDefinitionMap.get(paramId);
+    }
+    
+    public ContextDefinition getContextDefinition(String contextId) {
+        return idToContextDefinitionMap.get(contextId);
     }
 
     public void addPropositionDefinition(PropositionDefinition def) throws InvalidPropositionIdException {
@@ -183,7 +243,6 @@ public final class PropositionDefinitionCache implements Serializable {
         } else {
             this.idToPropositionDefinitionMap.put(id, def);
         }
-
     }
 
     public void addAbstractionDefinition(AbstractionDefinition def) throws InvalidPropositionIdException {
@@ -205,10 +264,33 @@ public final class PropositionDefinitionCache implements Serializable {
             this.idtoValueSetMap.put(id, valueSet);
         }
     }
+    
+    public void addContextDefinition(ContextDefinition def) throws InvalidPropositionIdException {
+        assert def != null : "def cannot be null";
+        String id = def.getId();
+        if (this.idToContextDefinitionMap.containsKey(id)) {
+            throw new InvalidPropositionIdException(id);
+        } else {
+            idToContextDefinitionMap.put(id, def);
+        }
+    }
+    
+    public void addTemporalPropositionDefinition(TemporalPropositionDefinition def) throws InvalidPropositionIdException {
+        assert def != null : "def cannot be null";
+        String id = def.getId();
+        if (this.idToTemporalPropositionDefinitionMap.containsKey(id)) {
+            throw new InvalidPropositionIdException(id);
+        } else {
+            idToTemporalPropositionDefinitionMap.put(id, def);
+        }
+    }
 
     void clear() {
         this.idToAbstractionDefinitionMap.clear();
         this.idToPropositionDefinitionMap.clear();
+        this.idtoValueSetMap.clear();
+        this.idToContextDefinitionMap.clear();
+        this.idToTemporalPropositionDefinitionMap.clear();
     }
 
     /*

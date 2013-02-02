@@ -24,11 +24,15 @@ import java.util.Map;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 public final class DataSourceBackendDataSourceType extends DataSourceType {
+    private static final long serialVersionUID = 1L;
     
     private static Map<String, DataSourceBackendDataSourceType> cache =
             new HashMap<String, DataSourceBackendDataSourceType>();
 
     public static DataSourceBackendDataSourceType getInstance(String id) {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
         DataSourceBackendDataSourceType result = cache.get(id);
         if (result == null) {
             result = new DataSourceBackendDataSourceType(id);

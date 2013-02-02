@@ -19,7 +19,48 @@
  */
 package org.protempa;
 
-public abstract class DataSourceType {
+import java.io.Serializable;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+
+public abstract class DataSourceType implements Serializable {
+    
+    public static final DataSourceType UNKNOWN = new DataSourceType() {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public boolean isDerived() {
+            return false;
+        }
+
+        @Override
+        public String getStringRepresentation() {
+            return "Unknown";
+        }
+        
+        @Override
+        public String toString() {
+            return ReflectionToStringBuilder.reflectionToString(this);
+        }
+    };
+    
+    public static final DataSourceType DERIVED = new DataSourceType() {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public boolean isDerived() {
+            return true;
+        }
+
+        @Override
+        public String getStringRepresentation() {
+            return "Derived";
+        }
+        
+        @Override
+        public String toString() {
+            return ReflectionToStringBuilder.reflectionToString(this);
+        }
+    };
 
     DataSourceType() {}
 

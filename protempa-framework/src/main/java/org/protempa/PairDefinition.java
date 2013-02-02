@@ -31,7 +31,7 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     private static final long serialVersionUID = 456697454379224533L;
     private boolean solid;
     private Relation relation;
-    private Offsets temporalOffset;
+    private TemporalPatternOffset temporalOffset;
     private boolean concatenable;
     private TemporalExtendedPropositionDefinition rightHandProposition;
     private TemporalExtendedPropositionDefinition leftHandProposition;
@@ -127,12 +127,12 @@ public class PairDefinition extends AbstractAbstractionDefinition {
 
     }
 
-    public Offsets getTemporalOffset() {
+    public TemporalPatternOffset getTemporalOffset() {
         return temporalOffset;
     }
 
-    public void setTemporalOffset(Offsets temporalOffset) {
-        Offsets old = temporalOffset;
+    public void setTemporalOffset(TemporalPatternOffset temporalOffset) {
+        TemporalPatternOffset old = temporalOffset;
         this.temporalOffset = temporalOffset;
         if (this.changes != null) {
             this.changes.firePropertyChange("temporalOffset", old,

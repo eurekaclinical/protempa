@@ -26,7 +26,7 @@ import org.protempa.*;
 /**
  * @author Andrew Post
  */
-class PrimitiveParameterConverter implements PropositionConverter {
+class PrimitiveParameterConverter implements TemporalPropositionConverter {
 
     /**
      *

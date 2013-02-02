@@ -80,7 +80,7 @@ class HighLevelAbstractionConsequence implements Consequence {
         Segment<TemporalProposition> segment =
                 new Segment<TemporalProposition>(
                 new Sequence<TemporalProposition>(cad.getId(), tps));
-        Offsets temporalOffset = cad.getTemporalOffset();
+        TemporalPatternOffset temporalOffset = cad.getTemporalOffset();
         AbstractParameter result =
                 AbstractParameterFactory.getFromAbstraction(cad.getId(),
                 segment, tps, null, temporalOffset, tepds);

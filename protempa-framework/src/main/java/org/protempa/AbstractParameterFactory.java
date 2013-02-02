@@ -64,12 +64,12 @@ public final class AbstractParameterFactory {
      */
     public static AbstractParameter getFromAbstraction(String propId,
             Segment<? extends TemporalProposition> segment,
-            List<? extends TemporalProposition> tps, Value value, Offsets temporalOffset,
+            List<? extends TemporalProposition> tps, Value value, TemporalPatternOffset temporalOffset,
             TemporalExtendedPropositionDefinition[] epds) {
         AbstractParameter result = new AbstractParameter(propId,new UniqueId(
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())) );
-        result.setDataSourceType(DerivedDataSourceType.getInstance());
+        result.setDataSourceType(DataSourceType.DERIVED);
 
         Long minStart = null;
         Long maxStart = null;

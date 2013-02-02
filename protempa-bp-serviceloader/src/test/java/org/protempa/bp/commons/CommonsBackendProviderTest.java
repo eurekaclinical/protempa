@@ -40,7 +40,7 @@ import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
 import org.protempa.backend.BackendSpecNotFoundException;
 import org.protempa.backend.asb.java.JavaAlgorithmBackend;
-import org.protempa.backend.ksb.PropertiesFileKnowledgeSourceBackend;
+import org.protempa.backend.ksb.SimpleKnowledgeSourceBackend;
 
 /**
  *
@@ -164,8 +164,7 @@ public class CommonsBackendProviderTest {
             backendIds.add(spec.getId());
         }
         assertEquals(new HashSet<String>(Arrays.asList(new String[] {
-                MockKnowledgeSourceBackend.class.getName(),
-                PropertiesFileKnowledgeSourceBackend.class.getName()})),
+                MockKnowledgeSourceBackend.class.getName()})),
                 backendIds);
     }
 

@@ -27,7 +27,6 @@ import junit.framework.TestCase;
 
 import org.protempa.DataSourceType;
 import org.protempa.DataSourceBackendDataSourceType;
-import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
@@ -68,7 +67,7 @@ public class RelationTest extends TestCase {
 	private static final DataSourceType dbDataSourceType =
                 DataSourceBackendDataSourceType.getInstance("MockTestDatabase");
 	private static final DataSourceType derivedDataSourceType =
-                DerivedDataSourceType.getInstance();
+                DataSourceType.DERIVED;
 
     public void test1MinuteApartHours() {
         Interval i1 = new DefaultInterval(0L, RelativeHourGranularity.HOUR, 0L,

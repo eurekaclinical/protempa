@@ -24,8 +24,10 @@ import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.annotations.BackendProperty;
 import org.drools.util.StringUtils;
 import org.protempa.AbstractionDefinition;
+import org.protempa.ContextDefinition;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
+import org.protempa.TemporalPropositionDefinition;
 
 @BackendInfo(displayName = "Mock Knowledge Source Backend")
 public class MockKnowledgeSourceBackend 
@@ -63,6 +65,26 @@ public class MockKnowledgeSourceBackend
 
     @Override
     public String[] readIsA(String propId) throws KnowledgeSourceReadException {
+        return StringUtils.EMPTY_STRING_ARRAY;
+    }
+
+    @Override
+    public ContextDefinition readContextDefinition(String id) throws KnowledgeSourceReadException {
+        return null;
+    }
+
+    @Override
+    public TemporalPropositionDefinition readTemporalPropositionDefinition(String id) throws KnowledgeSourceReadException {
+        return null;
+    }
+
+    @Override
+    public String[] readInduces(String propId) throws KnowledgeSourceReadException {
+        return StringUtils.EMPTY_STRING_ARRAY;
+    }
+
+    @Override
+    public String[] readSubContextOfs(String propId) throws KnowledgeSourceReadException {
         return StringUtils.EMPTY_STRING_ARRAY;
     }
 

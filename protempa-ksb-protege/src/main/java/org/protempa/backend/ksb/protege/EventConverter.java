@@ -27,7 +27,7 @@ import edu.stanford.smi.protege.model.Slot;
 import org.arp.javautil.graph.WeightFactory;
 import org.protempa.*;
 
-class EventConverter implements PropositionConverter {
+class EventConverter implements TemporalPropositionConverter {
 
     @Override
     public EventDefinition convert(Instance protegeProposition,

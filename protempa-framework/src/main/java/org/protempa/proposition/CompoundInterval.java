@@ -2,7 +2,7 @@
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 Emory University
+ * Copyright (C) 2012 - 2013 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,17 @@
  */
 package org.protempa.proposition;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang.builder.ToStringBuilder;
-
-import org.protempa.CompoundLowLevelAbstractionDefinition;
 import org.protempa.proposition.interval.Interval;
-import org.protempa.proposition.value.Value;
 
 /**
- * Represents an interval of multiple propositions and their values. The
- * propositions are expected to be {@link AbstractParameter}, specifically
- * low-level abstractions. Compound valued intervals are used by
- * {@link CompoundLowLevelAbstractionDefinition} to derive low-level
- * abstractions made up of multiple types of primitive parameters.
+ *
+ * @author Andrew Post
  */
-public final class CompoundValuedInterval extends CompoundInterval<AbstractParameter> {
-    private final Map<String, Value> values;
+public class CompoundInterval<E extends TemporalProposition> {
+    private final Interval interval;
+    private final Set<E> parameters;
 
     /**
      * Constructor for this class. Initializes the object's fields with the
@@ -49,23 +42,28 @@ public final class CompoundValuedInterval extends CompoundInterval<AbstractParam
      *            the {@link Proposition}s that belong to this interval. These
      *            will generally be {@link AbstractParameter}s
      */
-    CompoundValuedInterval(Interval interval,
-            Set<AbstractParameter> parameters) {
-        super(interval, parameters);
-        this.values = new HashMap<String, Value>();
-        for (TemporalParameter p : parameters) {
-            values.put(p.getId(), p.getValue());
-        }
+    CompoundInterval(Interval interval, Set<E> parameters) {
+        this.interval = interval;
+        this.parameters = parameters;
+
     }
 
     /**
-     * Gets the proposition ID-value map for this interval
+     * Gets the interval for this compound interval.
      * 
-     * @return a {@link Map} linking proposition IDs to the values of those
-     *         abstract parameters
+     * @return an {@link Interval}
      */
-    public Map<String, Value> getValues() {
-        return values;
+    public Interval getInterval() {
+        return interval;
+    }
+
+    /**
+     * Gets the abstract parameters that belong to this interval
+     * 
+     * @return the {@link Set} of {@link AbstractParameter}s
+     */
+    public Set<E> getTemporalPropositions() {
+        return parameters;
     }
     
     @Override

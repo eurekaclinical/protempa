@@ -226,5 +226,11 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         @Override
         public void visit(ConstantDefinition def) throws ProtempaException {
         }
+
+        @Override
+        public void visit(ContextDefinition def) throws ProtempaException {
+        }
+        
+        
     }
 }

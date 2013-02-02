@@ -2,7 +2,7 @@
  * #%L
  * Protempa Protege Knowledge Source Backend
  * %%
- * Copyright (C) 2012 Emory University
+ * Copyright (C) 2012 - 2013 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,26 +20,25 @@
 package org.protempa.backend.ksb.protege;
 
 import edu.stanford.smi.protege.model.Instance;
-import org.protempa.AbstractionDefinition;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.backend.ksb.KnowledgeSourceBackend;
+import org.protempa.TemporalPropositionDefinition;
 
 /**
  *
  * @author Andrew Post
  */
-interface AbstractionConverter extends TemporalPropositionConverter {
-    /**
-     * Convert and add the given Protege parameter instance to the given
-     * PROTEMPA knowledge base, if it hasn't already been added to the PROTEMPA
-     * knowledge base.
-     *
-     * @param protegeProposition
-     *            the Protege proposition {@link Instance}.
-     * @param backend
-     *            the Protege {@link KnowledgeSourceBackend}.
-     */
-    AbstractionDefinition convert(Instance protegeProposition,
-            ProtegeKnowledgeSourceBackend backend)
-            throws KnowledgeSourceReadException;
+class ContextConverter implements TemporalPropositionConverter {
+
+    @Override
+    public TemporalPropositionDefinition convert(Instance protegeProposition, 
+    ProtegeKnowledgeSourceBackend backend) 
+            throws KnowledgeSourceReadException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String getClsName() {
+        return "Context";
+    }
+    
 }

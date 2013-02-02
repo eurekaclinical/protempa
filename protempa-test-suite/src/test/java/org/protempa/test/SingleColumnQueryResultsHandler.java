@@ -32,15 +32,10 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import org.apache.commons.lang.ArrayUtils;
 
-import org.protempa.FinderException;
-import org.protempa.KnowledgeSource;
-import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.handler.AbstractQueryResultsHandler;
-import org.protempa.query.handler.QueryResultsHandler;
 import org.protempa.query.handler.QueryResultsHandlerProcessingException;
-import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
 
 final class SingleColumnQueryResultsHandler 
         extends AbstractQueryResultsHandler {
@@ -57,7 +52,7 @@ final class SingleColumnQueryResultsHandler
      * @param writer
      *            the {@link Writer} to output to
      */
-    public SingleColumnQueryResultsHandler(Writer writer) {
+    SingleColumnQueryResultsHandler(Writer writer) {
         this.writer = writer;
     }
 

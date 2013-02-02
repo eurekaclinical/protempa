@@ -47,6 +47,10 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
     boolean hasAbstractionDefinition(String id) throws KnowledgeSourceReadException;
 
     boolean hasPropositionDefinition(String id) throws KnowledgeSourceReadException;
+    
+    boolean hasTemporalPropositionDefinition(String id) throws KnowledgeSourceReadException;
+    
+    boolean hasContextDefinition(String id) throws KnowledgeSourceReadException;
 
     boolean hasValueSet(String id) throws KnowledgeSourceReadException;
 
@@ -63,6 +67,8 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
     List<AbstractionDefinition> readAbstractedInto(String propId) throws KnowledgeSourceReadException;
     
     AbstractionDefinition readAbstractionDefinition(String id) throws KnowledgeSourceReadException;
+    
+    ContextDefinition readContextDefinition(String id) throws KnowledgeSourceReadException;
 
     List<PropositionDefinition> readInverseIsA(PropositionDefinition propDef) throws KnowledgeSourceReadException;
 
@@ -71,6 +77,22 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
     List<PropositionDefinition> readIsA(PropositionDefinition propDef) throws KnowledgeSourceReadException;
     
     List<PropositionDefinition> readIsA(String id) throws KnowledgeSourceReadException;
+    
+    List<ContextDefinition> readSubContexts(String id) throws KnowledgeSourceReadException;
+    
+    List<ContextDefinition> readSubContexts(ContextDefinition contextDef) throws KnowledgeSourceReadException;
+    
+    List<ContextDefinition> readSubContextOfs(String id) throws KnowledgeSourceReadException;
+    
+    List<ContextDefinition> readSubContextOfs(ContextDefinition contextDef) throws KnowledgeSourceReadException;
+    
+    List<ContextDefinition> readInduces(String tempPropDef) throws KnowledgeSourceReadException;
+    
+    List<ContextDefinition> readInduces(TemporalPropositionDefinition tempPropDef) throws KnowledgeSourceReadException;
+    
+    List<TemporalPropositionDefinition> readInducedBy(String contextId) throws KnowledgeSourceReadException;
+    
+    List<TemporalPropositionDefinition> readInducedBy(ContextDefinition contextDef) throws KnowledgeSourceReadException;
 
     /**
      * Returns the specified proposition definition.
@@ -82,6 +104,8 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
      * the knowledge base.
      */
     PropositionDefinition readPropositionDefinition(String id) throws KnowledgeSourceReadException;
+    
+    TemporalPropositionDefinition readTemporalPropositionDefinition(String id) throws KnowledgeSourceReadException;
 
     ValueSet readValueSet(String id) throws KnowledgeSourceReadException;
     

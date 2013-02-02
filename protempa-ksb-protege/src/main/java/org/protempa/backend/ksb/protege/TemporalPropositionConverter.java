@@ -20,15 +20,15 @@
 package org.protempa.backend.ksb.protege;
 
 import edu.stanford.smi.protege.model.Instance;
-import org.protempa.AbstractionDefinition;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.TemporalPropositionDefinition;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 
 /**
  *
  * @author Andrew Post
  */
-interface AbstractionConverter extends TemporalPropositionConverter {
+interface TemporalPropositionConverter extends PropositionConverter {
     /**
      * Convert and add the given Protege parameter instance to the given
      * PROTEMPA knowledge base, if it hasn't already been added to the PROTEMPA
@@ -39,7 +39,7 @@ interface AbstractionConverter extends TemporalPropositionConverter {
      * @param backend
      *            the Protege {@link KnowledgeSourceBackend}.
      */
-    AbstractionDefinition convert(Instance protegeProposition,
+    TemporalPropositionDefinition convert(Instance protegeProposition,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException;
 }

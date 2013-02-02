@@ -32,7 +32,7 @@ import org.protempa.proposition.value.Value;
  * @author Andrew Post
  * 
  */
-public final class Offsets implements Serializable {
+public final class TemporalPatternOffset implements Serializable {
 
     private static final long serialVersionUID = -3143801827380255487L;
     private Value startAbstractParamValue;

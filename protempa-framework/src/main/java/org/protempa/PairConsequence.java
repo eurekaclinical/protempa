@@ -38,7 +38,7 @@ public final class PairConsequence implements Consequence {
     private final DerivationsBuilder derivationsBuilder;
     private final TemporalExtendedPropositionDefinition[] leftAndRightHandSide;
     private final String propId;
-    private final Offsets temporalOffset;
+    private final TemporalPatternOffset temporalOffset;
     private final Relation relation;
     private final boolean secondRequired;
 

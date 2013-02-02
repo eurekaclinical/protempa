@@ -35,7 +35,7 @@ import org.protempa.DefaultSourceId;
 import org.protempa.HighLevelAbstractionDefinition;
 import org.protempa.IntervalSide;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.Offsets;
+import org.protempa.TemporalPatternOffset;
 import org.protempa.PairDefinition;
 import org.protempa.PropertyConstraint;
 import org.protempa.PropertyDefinition;
@@ -561,7 +561,7 @@ class Util {
         return result;
     }
 
-    static Offsets temporalOffsets(
+    static TemporalPatternOffset temporalOffsets(
             Instance abstractionInstance,
             ProtegeKnowledgeSourceBackend backend,
             Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache)
@@ -570,7 +570,7 @@ class Util {
         Instance temporalOffsetInstance = (Instance) cm.getOwnSlotValue(
                 abstractionInstance, cm.getSlot("temporalOffsets"));
         if (temporalOffsetInstance != null) {
-            Offsets temporalOffsets = new Offsets();
+            TemporalPatternOffset temporalOffsets = new TemporalPatternOffset();
             Instance startExtendedParamInstance = (Instance) cm
                     .getOwnSlotValue(temporalOffsetInstance,
                     cm.getSlot("startExtendedProposition"));

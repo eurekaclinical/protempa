@@ -2,7 +2,7 @@
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 Emory University
+ * Copyright (C) 2012 - 2013 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,29 +17,22 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa;
+package org.protempa.proposition;
 
 import java.util.Set;
+import org.protempa.proposition.interval.Interval;
 
 /**
- * Interface to definitions of the constraints required to infer an abstract
- * parameter.
- * 
+ *
  * @author Andrew Post
- * 
  */
-public interface AbstractionDefinition extends TemporalPropositionDefinition {
+public class AbstractParameterIntervalSectioner extends IntervalSectioner<AbstractParameter, CompoundValuedInterval> {
 
-    String getDescription();
+    @Override
+    protected CompoundValuedInterval newCompoundInterval(Interval ival, Set<AbstractParameter> props) {
+        return new CompoundValuedInterval(ival, props);
+    }
 
-    /**
-     * Returns all proposition ids from which this abstract parameter is
-     * abstracted.
-     *
-     * @return an unmodifiable <code>Set</code> of proposition id
-     *         <code>String</code>s. Guaranteed not null.
-     */
-    Set<String> getAbstractedFrom();
-
-    GapFunction getGapFunction();
+    
+    
 }

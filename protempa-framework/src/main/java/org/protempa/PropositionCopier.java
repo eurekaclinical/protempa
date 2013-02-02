@@ -113,7 +113,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         AbstractParameter param = new AbstractParameter(propId, new UniqueId(
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())));
-        param.setDataSourceType(DerivedDataSourceType.getInstance());
+        param.setDataSourceType(DataSourceType.DERIVED);
         param.setInterval(abstractParameter.getInterval());
         param.setValue(abstractParameter.getValue());
         this.workingMemory.insert(param);
@@ -135,7 +135,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())));
         e.setInterval(event.getInterval());
-        e.setDataSourceType(DerivedDataSourceType.getInstance());
+        e.setDataSourceType(DataSourceType.DERIVED);
         this.workingMemory.insert(e);
         this.derivationsBuilder.propositionAsserted(event, e);
         ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", e);
@@ -158,7 +158,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         param.setPosition(primitiveParameter.getPosition());
         param.setGranularity(primitiveParameter.getGranularity());
         param.setValue(primitiveParameter.getValue());
-        param.setDataSourceType(DerivedDataSourceType.getInstance());
+        param.setDataSourceType(DataSourceType.DERIVED);
         this.workingMemory.insert(param);
         this.derivationsBuilder.propositionAsserted(primitiveParameter, param);
         ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", param);
@@ -177,7 +177,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         Constant newConstant = new Constant(propId, new UniqueId(
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())));
-        newConstant.setDataSourceType(DerivedDataSourceType.getInstance());
+        newConstant.setDataSourceType(DataSourceType.DERIVED);
         this.workingMemory.insert(newConstant);
         this.derivationsBuilder.propositionAsserted(constant, newConstant);
         ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", newConstant);

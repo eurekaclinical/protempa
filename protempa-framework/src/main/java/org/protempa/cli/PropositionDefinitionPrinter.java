@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.protempa.AbstractPropositionDefinitionVisitor;
 import org.protempa.CompoundLowLevelAbstractionDefinition;
 import org.protempa.ConstantDefinition;
+import org.protempa.ContextDefinition;
 import org.protempa.EventDefinition;
 import org.protempa.HighLevelAbstractionDefinition;
 import org.protempa.LowLevelAbstractionDefinition;
@@ -45,6 +46,12 @@ class PropositionDefinitionPrinter extends AbstractPropositionDefinitionVisitor 
     public void visit(EventDefinition eventDefinition) {
         System.out.println("Event definition " + eventDefinition.getId());
         printCommon(eventDefinition);
+    }
+    
+    @Override
+    public void visit(ContextDefinition contextDefinition) {
+        System.out.println("Context definition " + contextDefinition.getId());
+        printCommon(contextDefinition);
     }
 
     @Override

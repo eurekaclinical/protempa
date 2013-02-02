@@ -43,7 +43,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.lang.ArrayUtils;
 
 import org.apache.commons.lang.StringUtils;
-import org.protempa.DerivedDataSourceType;
+import org.protempa.DataSourceType;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaException;
@@ -156,7 +156,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
 
             Element abstractionNode = document.createElement("derived");
             Set<String> propIdsAsSet = org.arp.javautil.arrays.Arrays.asSet(this.propIds);
-            DerivedDataSourceType ddst = DerivedDataSourceType.getInstance();
+            DataSourceType ddst = DataSourceType.DERIVED;
             for (Proposition prop : propositions) {
                 if (/*prop.getDataSourceType().equals(ddst) &&*/ propIdsAsSet.contains(prop.getId())) {
                     Element elem = handleProposition(handled, forwardDerivations, backwardDerivations, references, prop, visitor, document);

@@ -43,6 +43,7 @@ import org.drools.rule.Rule;
 import org.drools.spi.Constraint;
 import org.drools.spi.PredicateExpression;
 import org.drools.spi.Tuple;
+import org.protempa.proposition.Context;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
@@ -54,7 +55,7 @@ import org.protempa.proposition.TemporalProposition;
  * A single instance of this class is created during execution of a PROTEMPA
  * query by the {@link AbstractionFinder}. For proposition definitions that are
  * relevant to a PROTEMPA query, the abstraction finder calls each proposition
- * definition's  {@link PropositionDefinition#accept(org.protempa.PropositionDefinitionVisitor)
+ * definition's null {@link PropositionDefinition#accept(org.protempa.PropositionDefinitionVisitor)
  * }
  * method with this instance. The abstraction finder then calls
  * {@link #getRules()} to retrieve the rules thus created. Turn on logging at
@@ -75,11 +76,17 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             TemporalProposition.class);
     private static final ClassObjectType PROP_OT = new ClassObjectType(
             Proposition.class);
+    private static final ClassObjectType CONTEXT_OT = new ClassObjectType(
+            Context.class);
     private static final SalienceInteger TWO_SALIENCE = new SalienceInteger(2);
     private static final SalienceInteger ONE_SALIENCE = new SalienceInteger(1);
     private static final SalienceInteger ZERO_SALIENCE = new SalienceInteger(0);
     private static final SalienceInteger MINUS_TWO_SALIENCE = new SalienceInteger(
             -2);
+    private static final SalienceInteger MINUS_THREE_SALIENCE = new SalienceInteger(
+            -3);
+    private static final SalienceInteger MINUS_FOUR_SALIENCE = new SalienceInteger(
+            -4);
     private final Map<LowLevelAbstractionDefinition, Algorithm> algorithms;
     private final List<Rule> rules;
     private final Map<Rule, AbstractionDefinition> ruleToAbstractionDefinition;
@@ -107,6 +114,57 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      */
     Map<Rule, AbstractionDefinition> getRuleToAbstractionDefinitionMap() {
         return this.ruleToAbstractionDefinition;
+    }
+
+    @Override
+    public void visit(ContextDefinition def)
+            throws KnowledgeSourceReadException {
+        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
+        this.getRulesCalled = false;
+        try {
+            boolean ruleCreated = false;
+            TemporalExtendedPropositionDefinition[] tepds = def.getInducedBy();
+            if (tepds.length > 0) {
+                Rule inducedByRule = new Rule(def.getId() + "_INDUCED_BY");
+                for (int i = 0; i < tepds.length; i++) {
+                    Pattern sourceP = new Pattern(i, TEMP_PROP_OT);
+                    sourceP.addConstraint(new PredicateConstraint(
+                            new GetMatchesPredicateExpression(tepds[i])));
+                    inducedByRule.addPattern(sourceP);
+                }
+                inducedByRule.setConsequence(
+                        new ContextDefinitionInducedByConsequence(def,
+                        this.derivationsBuilder));
+                inducedByRule.setSalience(MINUS_THREE_SALIENCE);
+                this.rules.add(inducedByRule);
+                ruleCreated = true;
+            }
+
+            String[] subContexts = def.getSubContexts();
+            if (subContexts.length > 0) {
+                Rule subContextRule = new Rule(def.getId() + "_SUBCONTEXT");
+
+                Pattern sourceP2 = new Pattern(1, CONTEXT_OT);
+                sourceP2.addConstraint(new PredicateConstraint(
+                        new PropositionPredicateExpression(subContexts)));
+                subContextRule.addPattern(sourceP2);
+                subContextRule.setConsequence(
+                        new ContextDefinitionSubContextConsequence(def,
+                        this.derivationsBuilder));
+                subContextRule.setSalience(MINUS_FOUR_SALIENCE);
+                this.rules.add(subContextRule);
+                ruleCreated = true;
+            }
+
+            if (ruleCreated) {
+                new ContextCombiner()
+                        .toRules(def, rules, this.derivationsBuilder);
+                addInverseIsARule(def);
+            }
+        } catch (InvalidRuleException e) {
+            throw new AssertionError(e.getClass().getName() + ": "
+                    + e.getMessage());
+        }
     }
 
     /**
@@ -176,7 +234,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 rule.setSalience(ONE_SALIENCE);
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
-                AbstractionCombiner
+                new AbstractionCombiner()
                         .toRules(def, rules, this.derivationsBuilder);
             }
             addInverseIsARule(def);
@@ -201,7 +259,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
                 Declaration[] arg3, WorkingMemory arg4, Object context)
                 throws Exception {
-            return this.epd.getMatches((Proposition) arg0);
+            return epd.getMatches((Proposition) arg0);
         }
 
         @Override
@@ -280,7 +338,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                         epds, this.derivationsBuilder));
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
-                AbstractionCombiner
+                new AbstractionCombiner()
                         .toRules(def, rules, this.derivationsBuilder);
             }
             addInverseIsARule(def);
@@ -398,7 +456,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                     assert rhProp != null : "rhProp should not be null in "
                             + def.getId();
                 }
-                AbstractionCombiner
+                new AbstractionCombiner()
                         .toRules(def, rules, this.derivationsBuilder);
             }
             addInverseIsARule(def);

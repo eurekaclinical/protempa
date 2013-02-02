@@ -46,7 +46,7 @@ final class ExtendedParameterDurationTestParameters {
 
     static AbstractParameter twelveHourParameter() {
         AbstractParameter param = new AbstractParameter("TEST", uid());
-        param.setDataSourceType(DerivedDataSourceType.getInstance());
+        param.setDataSourceType(DataSourceType.DERIVED);
         param.setValue(new NumberValue(13));
         Interval ival = intervalFactory.getInstance(0L,
                 AbsoluteTimeGranularity.HOUR, 12L * 60 * 60 * 1000,
@@ -57,7 +57,7 @@ final class ExtendedParameterDurationTestParameters {
 
     static AbstractParameter thirteenHourParameter() {
         AbstractParameter param = new AbstractParameter("TEST", uid());
-        param.setDataSourceType(DerivedDataSourceType.getInstance());
+        param.setDataSourceType(DataSourceType.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance(0L,
                 AbsoluteTimeGranularity.HOUR, 13L * 60 * 60 * 1000,
@@ -67,7 +67,7 @@ final class ExtendedParameterDurationTestParameters {
 
     static AbstractParameter elevenHourParameter() {
         AbstractParameter param = new AbstractParameter("TEST", uid());
-        param.setDataSourceType(DerivedDataSourceType.getInstance());
+        param.setDataSourceType(DataSourceType.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance(0L,
                 AbsoluteTimeGranularity.HOUR, 11L * 60 * 60 * 1000,

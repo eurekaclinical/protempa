@@ -45,7 +45,10 @@ import edu.stanford.smi.protege.event.ProjectListener;
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
+import org.apache.commons.lang.ArrayUtils;
 import org.drools.util.StringUtils;
+import org.protempa.ContextDefinition;
+import org.protempa.TemporalPropositionDefinition;
 
 /**
  * Abstract class for converting a Protege knowledge base into a PROTEMPA
@@ -316,5 +319,32 @@ public abstract class ProtegeKnowledgeSourceBackend
             result[i++] = inst.getName();
         }
         return result;
+    }
+    
+    @Override
+    public ContextDefinition readContextDefinition(String id) throws KnowledgeSourceReadException {
+        return null;
+    }
+
+    @Override
+    public TemporalPropositionDefinition readTemporalPropositionDefinition(String name) throws KnowledgeSourceReadException {
+        Instance instance = this.cm.getInstance(name);
+        TemporalPropositionConverter ac =
+                this.instanceConverterFactory.getTemporalPropositionInstance(instance);
+        if (ac == null) {
+            return null;
+        } else {
+            return ac.convert(instance, this);
+        }
+    }
+
+    @Override
+    public String[] readInduces(String propId) throws KnowledgeSourceReadException {
+        return ArrayUtils.EMPTY_STRING_ARRAY;
+    }
+
+    @Override
+    public String[] readSubContextOfs(String propId) throws KnowledgeSourceReadException {
+        return ArrayUtils.EMPTY_STRING_ARRAY;
     }
 }

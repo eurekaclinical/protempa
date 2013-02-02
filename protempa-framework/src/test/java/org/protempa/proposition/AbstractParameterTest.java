@@ -23,8 +23,8 @@ import org.protempa.proposition.interval.IntervalFactory;
 import java.util.UUID;
 
 import junit.framework.TestCase;
+import org.protempa.DataSourceType;
 
-import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.value.RelativeHourGranularity;
 
 /**
@@ -43,7 +43,7 @@ public class AbstractParameterTest extends TestCase {
         p = new AbstractParameter("TEST", new UniqueId(
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())));
-        p.setDataSourceType(DerivedDataSourceType.getInstance());
+        p.setDataSourceType(DataSourceType.DERIVED);
         p.setInterval(intervalFactory.getInstance(0L,
                 RelativeHourGranularity.HOUR, 12L,
                 RelativeHourGranularity.HOUR));

@@ -35,8 +35,6 @@ import org.apache.commons.lang.ArrayUtils;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.DataSourceType;
-import org.protempa.DataSourceBackendDataSourceType;
-import org.protempa.DerivedDataSourceType;
 import org.protempa.proposition.value.Value;
 
 /**
@@ -47,6 +45,8 @@ import org.protempa.proposition.value.Value;
 public abstract class AbstractProposition implements Proposition {
 
     private static final int DEFAULT_REFERENCE_LIST_SIZE = 100;
+    private static final DataSourceType DEFAULT_DATA_SOURCE_TYPE =
+            DataSourceType.UNKNOWN;
     /**
      * An identification
      * <code>String</code> for this proposition.
@@ -66,6 +66,7 @@ public abstract class AbstractProposition implements Proposition {
      * @param id an identification <code>String</code> for this proposition.
      */
     AbstractProposition(String id, UniqueId uniqueId) {
+        this();
         if (uniqueId == null) {
             throw new IllegalArgumentException("The unique ID cannot be null");
         }
@@ -81,6 +82,7 @@ public abstract class AbstractProposition implements Proposition {
      * }.
      */
     protected AbstractProposition() {
+        this.dataSourceType = DEFAULT_DATA_SOURCE_TYPE;
     }
 
     /**
@@ -158,7 +160,11 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     public void setDataSourceType(DataSourceType type) {
-        this.dataSourceType = type;
+        if (type != null) {
+            this.dataSourceType = type;
+        } else {
+            this.dataSourceType = DEFAULT_DATA_SOURCE_TYPE;
+        }
     }
 
     @Override
@@ -335,13 +341,7 @@ public abstract class AbstractProposition implements Proposition {
             }
         }
 
-        if (this.dataSourceType instanceof DerivedDataSourceType) {
-            s.writeBoolean(true);
-        } else {
-            s.writeBoolean(false);
-            s.writeObject(((DataSourceBackendDataSourceType) this.dataSourceType)
-                    .getId());
-        }
+        s.writeObject(this.dataSourceType);
         s.writeObject(this.changes);
     }
 
@@ -391,13 +391,7 @@ public abstract class AbstractProposition implements Proposition {
                 setReferences(refName, uids);
             }
         }
-
-        if (s.readBoolean()) {
-            setDataSourceType(DerivedDataSourceType.getInstance());
-        } else {
-            setDataSourceType(DataSourceBackendDataSourceType
-                    .getInstance((String) s.readObject()));
-        }
+        setDataSourceType((DataSourceType) s.readObject());
         this.changes = (PropertyChangeSupport) s.readObject();
     }
 }
