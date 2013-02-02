@@ -50,6 +50,8 @@ public final class LowLevelAbstractionDefinition
     private ValueType valueType;
     private String algorithmId;
     private int currentValueDefinitionId;
+    private ContextDefinition interpretationContext;
+    
     /**
      * Stores the value of the skip-start restart search directive. Value must
      * be > 0, -1 if disabled.
@@ -424,6 +426,7 @@ public final class LowLevelAbstractionDefinition
         }
     }
 
+    @Override
     public ValueType getValueType() {
         return this.valueType;
     }
@@ -606,6 +609,16 @@ public final class LowLevelAbstractionDefinition
     public boolean isSolid() {
         return true;
     }
+
+    public ContextDefinition getInterpretationContext() {
+        return interpretationContext;
+    }
+
+    public void setInterpretationContext(ContextDefinition interpretationContext) {
+        this.interpretationContext = interpretationContext;
+    }
+    
+    
 
     @Override
     protected void recalculateChildren() {

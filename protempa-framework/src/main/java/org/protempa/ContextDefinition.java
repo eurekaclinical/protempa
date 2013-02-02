@@ -19,6 +19,9 @@
  */
 package org.protempa;
 
+import java.util.HashSet;
+import java.util.Set;
+import org.arp.javautil.arrays.Arrays;
 import org.drools.util.StringUtils;
 
 /**
@@ -37,7 +40,7 @@ public final class ContextDefinition extends AbstractPropositionDefinition
             new TemporalExtendedPropositionDefinition[0];
     private ContextOffset offset;
     private TemporalExtendedPropositionDefinition[] inducedBy;
-    private String[] subContextOf;
+    private String[] subContexts;
     private GapFunction gapFunction;
 //    private Integer repeatEvery;
 //    private Unit repeatEveryUnits;
@@ -45,13 +48,25 @@ public final class ContextDefinition extends AbstractPropositionDefinition
     public ContextDefinition(String id) {
         super(id);
         this.offset = new ContextOffset();
-        this.subContextOf = StringUtils.EMPTY_STRING_ARRAY;
+        this.subContexts = StringUtils.EMPTY_STRING_ARRAY;
         this.gapFunction = GapFunction.DEFAULT;
         this.inducedBy = INDUCED_BY_DEFAULT;
     }
 
     @Override
     protected void recalculateChildren() {
+        String[] old = this.children;
+        Set<String> newChildren = new HashSet<String>();
+        Arrays.addAll(newChildren, getInverseIsA());
+        Arrays.addAll(newChildren, this.subContexts);
+        for (TemporalExtendedPropositionDefinition tepd : this.inducedBy) {
+            newChildren.add(tepd.getPropositionId());
+        }
+        this.children = newChildren.toArray(new String[newChildren.size()]);
+        if (this.changes != null) {
+            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
+                    this.children);
+        }
     }
 
     @Override
@@ -124,7 +139,7 @@ public final class ContextDefinition extends AbstractPropositionDefinition
      * @return an array of context proposition ids.
      */
     public String[] getSubContexts() {
-        return this.subContextOf.clone();
+        return this.subContexts.clone();
     }
 
     /**
@@ -135,10 +150,10 @@ public final class ContextDefinition extends AbstractPropositionDefinition
      */
     public void setSubContexts(String[] subContextOf) {
         if (subContextOf == null) {
-            this.subContextOf = StringUtils.EMPTY_STRING_ARRAY;
+            this.subContexts = StringUtils.EMPTY_STRING_ARRAY;
         } else {
             ProtempaUtil.checkArray(subContextOf, "subContextOf");
-            this.subContextOf = subContextOf.clone();
+            this.subContexts = subContextOf.clone();
         }
     }
 

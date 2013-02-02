@@ -25,6 +25,6 @@ import org.protempa.proposition.value.ValueType;
  *
  * @author Andrew Post
  */
-public interface ParameterDefinition {
+public interface ParameterDefinition extends PropositionDefinition {
     ValueType getValueType();
 }

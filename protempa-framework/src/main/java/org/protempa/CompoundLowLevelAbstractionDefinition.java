@@ -38,6 +38,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueType;
 
 /**
  * An abstraction for representing compound low-level abstractions. These are
@@ -82,11 +83,13 @@ import org.protempa.proposition.value.Value;
  * See {@link org.protempa.test.ProtempaTest} in protempa-test-suite for
  * examples of compound low-level abstractions.
  */
-public final class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDefinition {
+public final class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDefinition
+        implements ParameterDefinition {
 
     private static final long serialVersionUID = -1285908778762502403L;
     private final Set<String> lowLevelIds;
     private GapFunction gapBtwValues;
+    private ContextDefinition interpretationContext;
     private transient LinkedHashMap<String, Map<String, Value>> classificationMatrix;
     private transient List<ValueClassification> valueClassifications;
 
@@ -273,6 +276,19 @@ public final class CompoundLowLevelAbstractionDefinition extends AbstractAbstrac
     @Override
     public boolean isSolid() {
         return true;
+    }
+    
+    public ContextDefinition getInterpretationContext() {
+        return interpretationContext;
+    }
+
+    public void setInterpretationContext(ContextDefinition interpretationContext) {
+        this.interpretationContext = interpretationContext;
+    }
+    
+    @Override
+    public ValueType getValueType() {
+        return ValueType.NOMINALVALUE;
     }
 
     @Override
