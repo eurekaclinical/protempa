@@ -50,12 +50,12 @@ public final class Context extends TemporalProposition implements Serializable {
 
     @Override
     public void accept(PropositionVisitor propositionVisitor) {
-        throw new UnsupportedOperationException("Unimplemented");
+        propositionVisitor.visit(this);
     }
 
     @Override
     public void acceptChecked(PropositionCheckedVisitor propositionCheckedVisitor) throws ProtempaException {
-        throw new UnsupportedOperationException("Unimplemented");
+        propositionCheckedVisitor.visit(this);
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {
