@@ -55,6 +55,8 @@ public class ContextOffset implements Serializable {
     public void setFinishIntervalSide(IntervalSide finishIntervalSide) {
         if (finishIntervalSide != null) {
             this.finishIntervalSide = finishIntervalSide;
+        } else {
+            this.finishIntervalSide = IntervalSide.FINISH;
         }
     }
 
@@ -89,6 +91,8 @@ public class ContextOffset implements Serializable {
     public void setStartIntervalSide(IntervalSide startIntervalSide) {
         if (startIntervalSide != null) {
             this.startIntervalSide = startIntervalSide;
+        } else {
+            this.startIntervalSide = IntervalSide.START;
         }
     }
 

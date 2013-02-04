@@ -140,22 +140,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 ruleCreated = true;
             }
 
-            String[] subContexts = def.getSubContexts();
-            if (subContexts.length > 0) {
-                Rule subContextRule = new Rule(def.getId() + "_SUBCONTEXT");
-
-                Pattern sourceP2 = new Pattern(1, CONTEXT_OT);
-                sourceP2.addConstraint(new PredicateConstraint(
-                        new PropositionPredicateExpression(subContexts)));
-                subContextRule.addPattern(sourceP2);
-                subContextRule.setConsequence(
-                        new ContextDefinitionSubContextConsequence(def,
-                        this.derivationsBuilder));
-                subContextRule.setSalience(MINUS_FOUR_SALIENCE);
-                this.rules.add(subContextRule);
-                ruleCreated = true;
-            }
-
             if (ruleCreated) {
                 new ContextCombiner()
                         .toRules(def, rules, this.derivationsBuilder);

@@ -172,7 +172,7 @@ public class ProtempaTest {
         "MyBloodPressureClassificationAll",
         "MyTwoConsecutiveHighBloodPressure", "MySystolicClassification3",
         "MyDiastolicClassification3", "MyBloodPressureClassification3Any",
-        "MyContext1", "MyContext2"
+        "MyContext1"
     };
     /**
      * Vital signs
@@ -321,12 +321,6 @@ public class ProtempaTest {
                 new TemporalExtendedParameterDefinition("MySystolicClassification");
         tepd.setValue(NominalValue.getInstance("My Systolic High"));
         cd.setInducedBy(new TemporalExtendedPropositionDefinition[]{tepd});
-        return cd;
-    }
-    
-    private ContextDefinition context2() {
-        ContextDefinition cd = new ContextDefinition("MyContext2");
-        cd.setSubContexts(new String[]{"MyContext1"});
         return cd;
     }
 
@@ -608,7 +602,7 @@ public class ProtempaTest {
                     bloodPressureClassificationConsecutiveAny(), highBp,
                     bloodPressureClassificationAll(), systolicClassification3(),
                     diastolicClassification3(), bloodPressureClassification3Any(),
-                    context1(), context2()});
+                    context1()});
 
         DateFormat shortFormat = AbsoluteTimeGranularity.DAY.getShortFormat();
         DateTimeFilter timeRange = new DateTimeFilter(

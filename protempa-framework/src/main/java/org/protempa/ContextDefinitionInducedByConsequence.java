@@ -53,8 +53,8 @@ class ContextDefinitionInducedByConsequence implements Consequence {
         this.derivationsBuilder = derivationsBuilder;
         this.intervalFactory = new IntervalFactory();
     }
-    
-    private void readObject(ObjectInputStream ois) throws IOException, 
+
+    private void readObject(ObjectInputStream ois) throws IOException,
             ClassNotFoundException {
         ois.defaultReadObject();
         this.intervalFactory = new IntervalFactory();
@@ -77,19 +77,14 @@ class ContextDefinitionInducedByConsequence implements Consequence {
         Granularity startGran;
         Granularity finishGran;
 
-        if (prop != null) {
-            minStart = temporalOffset.getStartIntervalSide()
-                    == IntervalSide.START
-                    ? prop.getInterval().getMinStart()
-                    : prop.getInterval().getMinFinish();
-            maxStart = temporalOffset.getStartIntervalSide()
-                    == IntervalSide.START
-                    ? prop.getInterval().getMaxStart()
-                    : prop.getInterval().getMaxFinish();
-        } else {
-            minStart = oldInterval.getMinStart();
-            maxStart = oldInterval.getMaxStart();
-        }
+        minStart = temporalOffset.getStartIntervalSide()
+                == IntervalSide.START
+                ? prop.getInterval().getMinStart()
+                : prop.getInterval().getMinFinish();
+        maxStart = temporalOffset.getStartIntervalSide()
+                == IntervalSide.START
+                ? prop.getInterval().getMaxStart()
+                : prop.getInterval().getMaxFinish();
 
         Integer startOffset = temporalOffset.getStartOffset();
         if (startOffset != null) {
@@ -98,29 +93,24 @@ class ContextDefinitionInducedByConsequence implements Consequence {
         }
         startGran = prop.getInterval().getStartGranularity();
 
-        if (prop != null) {
-            minFinish = temporalOffset.getFinishIntervalSide()
-                    == IntervalSide.START ? oldInterval.getMinStart()
-                    : oldInterval.getMinFinish();
-            maxFinish = temporalOffset.getFinishIntervalSide()
-                    == IntervalSide.START ? oldInterval.getMaxStart()
-                    : oldInterval.getMaxFinish();
-        } else {
-            minFinish = oldInterval.getMinFinish();
-            maxFinish = oldInterval.getMaxFinish();
-        }
+        minFinish = temporalOffset.getFinishIntervalSide()
+                == IntervalSide.START ? oldInterval.getMinStart()
+                : oldInterval.getMinFinish();
+        maxFinish = temporalOffset.getFinishIntervalSide()
+                == IntervalSide.START ? oldInterval.getMaxStart()
+                : oldInterval.getMaxFinish();
         Integer finishOffset = temporalOffset.getFinishOffset();
         if (finishOffset != null) {
             minFinish += finishOffset;
             maxFinish += finishOffset;
         }
         finishGran = oldInterval.getFinishGranularity();
-        
-        context.setInterval(this.intervalFactory.getInstance(minStart, 
+
+        context.setInterval(this.intervalFactory.getInstance(minStart,
                 maxStart, startGran, minFinish, maxFinish, finishGran));
-        
+
         kh.getWorkingMemory().insert(context);
-        
+
         this.derivationsBuilder.propositionAsserted(prop, context);
     }
 }
