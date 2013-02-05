@@ -53,8 +53,6 @@ final class CompoundLowLevelAbstractionConsequence implements
 
     private static final long serialVersionUID = 6456351279290509422L;
 
-    private static final IntervalFactory intervalFactory = new IntervalFactory();
-
     private final CompoundLowLevelAbstractionDefinition cllad;
     private final DerivationsBuilder derivationsBuilder;
 
@@ -129,9 +127,9 @@ final class CompoundLowLevelAbstractionConsequence implements
                 }
                 if (match) {
                     AbstractParameter result = createAbstractParameter(
-                            cllad.getId(),
+                            cllad.getPropositionId(),
                             NominalValue.getInstance(e.getKey()),
-                            interval.getInterval());
+                            interval.getInterval(), this.cllad.getContextId());
                     derivedProps.add(new AbstractParameterWithSourceParameters(
                             result, interval.getTemporalPropositions()));
                     // found a matching value, so don't look for any more and
@@ -176,9 +174,9 @@ final class CompoundLowLevelAbstractionConsequence implements
                                 new Segment<TemporalParameter>(seq);
                         AbstractParameter result =
                                 AbstractParameterFactory.getFromAbstraction(
-                                cllad.getId(), seg, null, 
+                                cllad.getPropositionId(), seg, null, 
                                 derivedProps.get(i).parameter.getValue(), 
-                                null, null);
+                                null, null, cllad.getContextId());
                         assertDerivedProposition(workingMemory, result,
                                 derivedProps.get(i).sourceParameters);
                     }
@@ -214,13 +212,14 @@ final class CompoundLowLevelAbstractionConsequence implements
     }
 
     private static AbstractParameter createAbstractParameter(String propId,
-            Value value, Interval interval) {
+            Value value, Interval interval, String contextId) {
         AbstractParameter result = new AbstractParameter(propId, new UniqueId(
                 DerivedSourceId.getInstance(), new DerivedUniqueId(UUID
                         .randomUUID().toString())));
         result.setInterval(interval);
         result.setValue(value);
         result.setDataSourceType(DataSourceType.DERIVED);
+        result.setContextId(contextId);
 
         return result;
     }

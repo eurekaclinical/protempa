@@ -51,6 +51,7 @@ public abstract class AbstractPropositionDefinition implements
      * The id of propositions created by this definition.
      */
     private final String id;
+    private String propositionId;
     /**
      * The display name of this knowledge definition.
      */
@@ -85,6 +86,7 @@ public abstract class AbstractPropositionDefinition implements
             throw new IllegalArgumentException("id cannot be null");
         }
         this.id = id.intern();
+        this.propositionId = this.id;
         this.children = ArrayUtils.EMPTY_STRING_ARRAY;
         this.inverseIsA = ArrayUtils.EMPTY_STRING_ARRAY;
         this.termIds = ArrayUtils.EMPTY_STRING_ARRAY;
@@ -99,6 +101,27 @@ public abstract class AbstractPropositionDefinition implements
     @Override
     public final String getId() {
         return this.id;
+    }
+
+    @Override
+    public final String getPropositionId() {
+        return this.propositionId;
+    }
+
+    /**
+     * Sets the proposition id of propositions derived by this proposition
+     * definition.
+     * 
+     * @param propId a proposition id. Pass in <code>null</code> to set the
+     * value of this field to the value of this proposition definition's
+     * <code>id</code> field.
+     */
+    public final void setPropositionId(String propId) {
+        if (propId == null) {
+            this.propositionId = this.id;
+        } else {
+            this.propositionId = propId;
+        }
     }
 
     @Override

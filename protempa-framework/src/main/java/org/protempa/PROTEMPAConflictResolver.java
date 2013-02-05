@@ -28,14 +28,17 @@ import org.drools.spi.Activation;
 /**
  * 
  * This is Drool's default conflict resolver with the addition of a topological
- * sort of the rules corresponding to {@link AbstractionDefinition} hierarchy. 
+ * sort of the rules corresponding to {@link TemporalPropositionDefinition} 
+ * hierarchy. 
  * 
  * We check (in order):
  * <ol>
  * <li>Salience</li>
  * <li>Propagation number</li>
  * <li>Recency</li>
- * <li>Topological sort order (for {@link AbstractionDefinition}s only)</li>
+ * <li>Topological sort order (for {@link TemporalPropositionDefinition}s 
+ *  only)
+ * </li>
  * <li>Load order</li>
  * </ol>
  * 
@@ -45,7 +48,7 @@ final class PROTEMPAConflictResolver extends AbstractConflictResolver {
 
     private static final long serialVersionUID = -2690384525731832692L;
     private final TopologicalSortComparator topSortComp;
-    private final Map<Rule, AbstractionDefinition> ruleToAbstractionDefinition;
+    private final Map<Rule, ? extends TemporalPropositionDefinition> ruleToTPD;
 
     /**
      * Creates a conflict resolver instance.
@@ -53,21 +56,21 @@ final class PROTEMPAConflictResolver extends AbstractConflictResolver {
      * @param knowledgeSource a {@link KnowledgeSource}. Used for creating
      * a topological sort order for all abstraction definitions. Cannot be 
      * <code>null</code>.
-     * @param ruleToAbstractionDefinition a mapping from {@link Rule}s to
-     * {@link AbstractionDefinition}s. All abstraction definitions and rules
-     * should be in this map, or the behavior of the conflict resolver will be
-     * undefined. Cannot be <code>null</code> (throws a 
-     * {@link NullPointerException}.
+     * @param ruleToTPD a mapping from {@link Rule}s to
+     * {@link TemporalPropositionDefinition}s. All temporal proposition 
+     * definitions and context definitions and rules should be in this map, or 
+     * the behavior of the conflict resolver will be undefined. Cannot be 
+     * <code>null</code> (throws a {@link NullPointerException}.
      * @throws KnowledgeSourceReadException if an error occurs reading from
      * the knowledge source.
      */
     PROTEMPAConflictResolver(KnowledgeSource knowledgeSource,
-            Map<Rule, AbstractionDefinition> ruleToAbstractionDefinition)
+            Map<Rule, ? extends TemporalPropositionDefinition> ruleToTPD)
             throws KnowledgeSourceReadException {
         assert knowledgeSource != null : "knowledgeSource cannot be null";
         this.topSortComp = new TopologicalSortComparator(knowledgeSource,
-                ruleToAbstractionDefinition.values());
-        this.ruleToAbstractionDefinition = ruleToAbstractionDefinition;
+                ruleToTPD.values());
+        this.ruleToTPD = ruleToTPD;
     }
 
     /**
@@ -111,16 +114,14 @@ final class PROTEMPAConflictResolver extends AbstractConflictResolver {
         final Rule rule1 = a1.getRule();
         final Rule rule2 = a2.getRule();
         if (rule1 != rule2) {
-            AbstractionDefinition def1 =
-                    this.ruleToAbstractionDefinition.get(rule1);
-            AbstractionDefinition def2 =
-                    this.ruleToAbstractionDefinition.get(rule2);
+            TemporalPropositionDefinition def1 = this.ruleToTPD.get(rule1);
+            TemporalPropositionDefinition def2 = this.ruleToTPD.get(rule2);
             /*
              * If def1 is null, then rule1 does not correspond to an
-             * abstraction definition. If def2 is null, then rule2 does not
-             * correspond to an abstraction definition. In either case, 
-             * topological sort-based conflict resolution does not apply, so 
-             * skip to the next conflict resolution strategy.
+             * abstraction or context definition. If def2 is null, then rule2 
+             * does not correspond to an abstraction or context definition. In 
+             * either case, topological sort-based conflict resolution does not 
+             * apply, so skip to the next conflict resolution strategy.
              */
             if (def1 != null && def2 != null) {
                 return this.topSortComp.compare(def1, def2);

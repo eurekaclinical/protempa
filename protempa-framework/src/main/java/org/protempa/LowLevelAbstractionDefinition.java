@@ -50,7 +50,7 @@ public final class LowLevelAbstractionDefinition
     private ValueType valueType;
     private String algorithmId;
     private int currentValueDefinitionId;
-    private ContextDefinition interpretationContext;
+    private String contextId;
     
     /**
      * Stores the value of the skip-start restart search directive. Value must
@@ -610,12 +610,12 @@ public final class LowLevelAbstractionDefinition
         return true;
     }
 
-    public ContextDefinition getInterpretationContext() {
-        return interpretationContext;
+    public String getContextId() {
+        return contextId;
     }
 
-    public void setInterpretationContext(ContextDefinition interpretationContext) {
-        this.interpretationContext = interpretationContext;
+    public void setContextId(String contextId) {
+        this.contextId = contextId;
     }
     
     

@@ -36,15 +36,16 @@ public class TemporalExtendedParameterDefinition extends TemporalExtendedProposi
         super(parameterId);
     }
 
-    public TemporalExtendedParameterDefinition(String parameterId, Value value) {
+    public TemporalExtendedParameterDefinition(String parameterId, 
+            Value value) {
         super(parameterId);
         this.value = value;
     }
 
     public Value getValue() {
-        return value;
+        return this.value;
     }
-
+    
     /**
      * Returns whether a parameter has the same id and value, and consistent
      * duration as specified by this extended parameter definition.

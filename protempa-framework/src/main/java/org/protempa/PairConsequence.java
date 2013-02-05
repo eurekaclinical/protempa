@@ -37,6 +37,7 @@ public final class PairConsequence implements Consequence {
     private static final long serialVersionUID = -3641374073069516895L;
     private final DerivationsBuilder derivationsBuilder;
     private final TemporalExtendedPropositionDefinition[] leftAndRightHandSide;
+    private final String defId;
     private final String propId;
     private final TemporalPatternOffset temporalOffset;
     private final Relation relation;
@@ -50,7 +51,8 @@ public final class PairConsequence implements Consequence {
                 new TemporalExtendedPropositionDefinition[]{
             def.getLeftHandProposition(),
             def.getRightHandProposition()};
-        this.propId = def.getId();
+        this.defId = def.getId();
+        this.propId = def.getPropositionId();
         this.temporalOffset = def.getTemporalOffset();
         this.relation = def.getRelation();
         this.secondRequired = def.isSecondRequired();
@@ -72,7 +74,7 @@ public final class PairConsequence implements Consequence {
                 this.leftAndRightHandSide[1];
         Segment<TemporalProposition> segment = null;
         Sequence<TemporalProposition> seq =
-                new Sequence<TemporalProposition>(this.propId);
+                new Sequence<TemporalProposition>(this.defId);
 
         if (logger.isLoggable(Level.FINER)) {
             logger.log(Level.FINER, 
@@ -101,7 +103,8 @@ public final class PairConsequence implements Consequence {
                             seq,
                             null,
                             this.temporalOffset,
-                            this.leftAndRightHandSide);
+                            this.leftAndRightHandSide,
+                            null);
 
                     knowledgeHelper.getWorkingMemory().insert(result);
                     derivationsBuilder.propositionAsserted(left, result);
@@ -130,7 +133,8 @@ public final class PairConsequence implements Consequence {
                         seq,
                         null,
                         this.temporalOffset,
-                        this.leftAndRightHandSide);
+                        this.leftAndRightHandSide,
+                        null);
                 knowledgeHelper.getWorkingMemory().insert(result);
                 derivationsBuilder.propositionAsserted(left, result);
                 seq.clear();

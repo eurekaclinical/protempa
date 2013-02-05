@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.DataSourceType;
 import org.protempa.proposition.value.Value;
 
@@ -275,11 +275,7 @@ public abstract class AbstractProposition implements Proposition {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("id", this.id)
-                .append("properties", this.properties)
-                .append("references", this.references)
-                .append("uniqueId", this.uniqueId)
-                .append("dataSourceType", this.dataSourceType).toString();
+        return ReflectionToStringBuilder.reflectionToString(this);
 
     }
 

@@ -103,7 +103,7 @@ final class SliceConsequence implements Consequence {
             this.reverse = false;
         }
         this.merged = def.isMergedInterval();
-        this.copier = new PropositionCopier(def.getId(), listener);
+        this.copier = new PropositionCopier(def.getPropositionId(), listener);
     }
 
     /**
@@ -151,9 +151,9 @@ final class SliceConsequence implements Consequence {
             slice.add(itr.next());
         }
         Segment<TemporalProposition> segment = new Segment<TemporalProposition>(
-                new Sequence<TemporalProposition>(def.getId(), slice));
+                new Sequence<TemporalProposition>(def.getPropositionId(), slice));
         AbstractParameter result = AbstractParameterFactory.getFromAbstraction(
-                def.getId(), segment, slice, null, null, null);
+                def.getPropositionId(), segment, slice, null, null, null, null);
         kh.getWorkingMemory().insert(result);
         for (Proposition p : segment) {
             this.derivationsBuilder.propositionAsserted(p, result);

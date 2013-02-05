@@ -28,6 +28,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.Format;
 import java.text.NumberFormat;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Unit;
@@ -275,8 +276,9 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString())
-                .append("interval", this.interval).toString();
+        return new ToStringBuilder(this)
+                .append("interval=" + this.interval)
+                .appendSuper(super.toString()).toString();
     }
 
     /**

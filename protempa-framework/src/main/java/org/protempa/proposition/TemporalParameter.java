@@ -22,6 +22,7 @@ package org.protempa.proposition;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.Value;
 
@@ -81,8 +82,7 @@ public abstract class TemporalParameter extends TemporalProposition
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString())
-                .append("value", this.value).toString();
+        return new ToStringBuilder(this).appendSuper(super.toString()).toString();
     }
 
     protected void writeTemporalParameter(ObjectOutputStream s) 

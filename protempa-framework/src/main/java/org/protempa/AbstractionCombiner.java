@@ -69,11 +69,11 @@ final class AbstractionCombiner implements TemporalPropositionCombiner<Abstracti
             rule.setSalience(new SalienceInteger(3));
             Pattern p0 = new Pattern(0, ABSTRACT_PARAMETER_OBJECT_TYPE);
             Constraint c0 = new PredicateConstraint(
-                    new ParameterPredicateExpression(d.getId(), null));
+                    new ParameterPredicateExpression(d.getPropositionId(), null));
             p0.addConstraint(c0);
             Pattern p1 = new Pattern(1, ABSTRACT_PARAMETER_OBJECT_TYPE);
             Constraint c1 = new PredicateConstraint(
-                    new ParameterPredicateExpression(d.getId(), null));
+                    new ParameterPredicateExpression(d.getPropositionId(), null));
             p1.addConstraint(c1);
             rule.addPattern(p0);
             rule.addPattern(p1);

@@ -46,7 +46,11 @@ class AbstractionCombinerCondition implements EvalExpression {
     public boolean evaluate(Tuple arg0, Declaration[] arg1, WorkingMemory arg2, Object context) throws Exception {
         AbstractParameter a1 = (AbstractParameter) arg2.getObject(arg0.get(0));
         AbstractParameter a2 = (AbstractParameter) arg2.getObject(arg0.get(1));
-        return a1 != a2 && (a1.getValue() == a2.getValue() || (a1.getValue() != null && a1.getValue().equals(a2.getValue()))) && (a1.getInterval().compareTo(a2.getInterval()) <= 0) && (hti.execute(this.abstractionDefinition, a1, a2) || abstractionDefinition.getGapFunction().execute(a1, a2));
+        return a1 != a2 && 
+                (a1.getValue() == a2.getValue() || (a1.getValue() != null && a1.getValue().equals(a2.getValue()))) && 
+                (a1.getContextId() == a2.getContextId() || (a1.getContextId() != null && a1.getContextId().equals(a2.getContextId()))) &&
+                (a1.getInterval().compareTo(a2.getInterval()) <= 0) && 
+                (hti.execute(this.abstractionDefinition, a1, a2) || abstractionDefinition.getGapFunction().execute(a1, a2));
     }
 
     @Override

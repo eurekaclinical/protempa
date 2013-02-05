@@ -113,6 +113,8 @@ class PropositionDefinitionPrinter extends AbstractPropositionDefinitionVisitor 
     }
 
     private void printCommon(PropositionDefinition propositionDefinition) {
+        System.out.println("\tpropositionId: " + 
+                propositionDefinition.getPropositionId());
         printDisplayNames(propositionDefinition);
         System.out.println("\tsolid: " + propositionDefinition.isSolid());
         System.out.println("\tconcatenable: "

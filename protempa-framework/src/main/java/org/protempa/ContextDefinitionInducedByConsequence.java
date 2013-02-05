@@ -64,7 +64,7 @@ class ContextDefinitionInducedByConsequence implements Consequence {
     public void evaluate(KnowledgeHelper kh, WorkingMemory wm) throws Exception {
         TemporalProposition prop = (TemporalProposition) wm.getObject(
                 kh.getTuple().get(0));
-        Context context = new Context(this.def.getId(), new UniqueId(
+        Context context = new Context(this.def.getPropositionId(), new UniqueId(
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())));
         ContextOffset temporalOffset = this.def.getOffset();
@@ -108,7 +108,6 @@ class ContextDefinitionInducedByConsequence implements Consequence {
 
         context.setInterval(this.intervalFactory.getInstance(minStart,
                 maxStart, startGran, minFinish, maxFinish, finishGran));
-
         kh.getWorkingMemory().insert(context);
 
         this.derivationsBuilder.propositionAsserted(prop, context);

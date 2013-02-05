@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.ProtempaException;
@@ -42,6 +43,8 @@ public final class AbstractParameter extends TemporalParameter implements
         Serializable {
 
     private static final long serialVersionUID = -137441242472941229L;
+    
+    private String contextId;
 
     /**
      * Creates an abstract parameter with an id.
@@ -64,6 +67,14 @@ public final class AbstractParameter extends TemporalParameter implements
     @Override
     public void setInterval(Interval interval) {
         super.setInterval(interval);
+    }
+
+    public String getContextId() {
+        return contextId;
+    }
+
+    public void setContextId(String contextId) {
+        this.contextId = contextId;
     }
 
     /*
@@ -89,7 +100,8 @@ public final class AbstractParameter extends TemporalParameter implements
                 && (startGranularity == aStartGranularity || (startGranularity != null && startGranularity
                         .equals(aStartGranularity)))
                 && (finishGranularity == aFinishGranularity || (finishGranularity != null && finishGranularity
-                        .equals(aFinishGranularity)));
+                        .equals(aFinishGranularity)))
+                && (this.contextId == a.contextId || (this.contextId != null && this.contextId.equals(a.contextId)));
     }
 
     @Override
@@ -106,14 +118,14 @@ public final class AbstractParameter extends TemporalParameter implements
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).appendSuper(super.toString())
-                .toString();
+        return new ToStringBuilder(this).appendSuper(super.toString()).toString();
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {
         writeAbstractProposition(s);
         writeTemporalProposition(s);
         writeTemporalParameter(s);
+        s.writeObject(this.contextId);
     }
 
     private void readObject(ObjectInputStream s) throws IOException,
@@ -121,5 +133,6 @@ public final class AbstractParameter extends TemporalParameter implements
         readAbstractProposition(s);
         readTemporalProposition(s);
         readTemporalParameter(s);
+        this.contextId = (String) s.readObject();
     }
 }

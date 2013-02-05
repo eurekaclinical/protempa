@@ -172,7 +172,7 @@ public class ProtempaTest {
         "MyBloodPressureClassificationAll",
         "MyTwoConsecutiveHighBloodPressure", "MySystolicClassification3",
         "MyDiastolicClassification3", "MyBloodPressureClassification3Any",
-        "MyContext1"
+        "MyContext1", "MySystolicClassificationMyContext1"
     };
     /**
      * Vital signs
@@ -318,10 +318,42 @@ public class ProtempaTest {
     private ContextDefinition context1() {
         ContextDefinition cd = new ContextDefinition("MyContext1");
         TemporalExtendedParameterDefinition tepd =
-                new TemporalExtendedParameterDefinition("MySystolicClassification");
-        tepd.setValue(NominalValue.getInstance("My Systolic High"));
+                new TemporalExtendedParameterDefinition("MyDiastolicClassification");
+        tepd.setValue(NominalValue.getInstance("My Diastolic High"));
         cd.setInducedBy(new TemporalExtendedPropositionDefinition[]{tepd});
         return cd;
+    }
+    
+    private PropositionDefinition systolicClassificationMyContext1() {
+        LowLevelAbstractionDefinition systolic = 
+                new LowLevelAbstractionDefinition(
+                "MySystolicClassificationMyContext1");
+        systolic.setPropositionId("MySystolicClassification");
+        systolic.setContextId("MyContext1");
+        systolic.setDisplayName("My Systolic Classification");
+        systolic.setAlgorithmId("stateDetector");
+        systolic.addPrimitiveParameterId("SystolicBloodPressure");
+        systolic.setSlidingWindowWidthMode(SlidingWindowWidthMode.DEFAULT);
+        systolic.setGapFunction(new SimpleGapFunction(168,
+                AbsoluteTimeUnit.HOUR));
+        systolic.setMaximumGapBetweenValues(24);
+        systolic.setMaximumGapBetweenValuesUnits(AbsoluteTimeUnit.HOUR);
+
+        LowLevelAbstractionValueDefinition sysHigh = new LowLevelAbstractionValueDefinition(
+                systolic, "MY_SYSTOLIC_HIGH");
+        sysHigh.setValue(NominalValue.getInstance("My Systolic High"));
+        sysHigh.setParameterValue("minThreshold", NumberValue.getInstance(130));
+        sysHigh.setParameterComp("minThreshold",
+                ValueComparator.GREATER_THAN_OR_EQUAL_TO);
+
+        LowLevelAbstractionValueDefinition sysNormal = new LowLevelAbstractionValueDefinition(
+                systolic, "MY_SYSTOLIC_NORMAL");
+        sysNormal.setValue(NominalValue.getInstance("My Systolic Normal"));
+        sysNormal.setParameterValue("maxThreshold",
+                NumberValue.getInstance(130));
+        sysNormal.setParameterComp("maxThreshold", ValueComparator.LESS_THAN);
+
+        return systolic;
     }
 
     private PropositionDefinition systolicClassification() {
@@ -602,7 +634,7 @@ public class ProtempaTest {
                     bloodPressureClassificationConsecutiveAny(), highBp,
                     bloodPressureClassificationAll(), systolicClassification3(),
                     diastolicClassification3(), bloodPressureClassification3Any(),
-                    context1()});
+                    context1(), systolicClassificationMyContext1()});
 
         DateFormat shortFormat = AbsoluteTimeGranularity.DAY.getShortFormat();
         DateTimeFilter timeRange = new DateTimeFilter(
@@ -716,6 +748,7 @@ public class ProtempaTest {
             Map<String, Integer> backwardDerivCounts = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
             for (String keyId : results.keySet()) {
                 int derivCount = 0;
+                System.err.println(afh.getForwardDerivations(keyId));
                 for (List<Proposition> derivs : afh
                         .getForwardDerivations(keyId).values()) {
                     derivCount += derivs.size();
@@ -1521,7 +1554,6 @@ public class ProtempaTest {
         assertEquals(
                 "Found wrong number of 'MyBloodPressureClassificationAll'", 1,
                 bps.size());
-        System.err.println("bps: " + bps);
         Collections.sort(bps, new TemporalPropositionIntervalComparator());
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM d, yyyy h:mm aa");
 

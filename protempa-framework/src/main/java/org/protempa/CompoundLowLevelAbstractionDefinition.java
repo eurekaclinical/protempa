@@ -90,6 +90,7 @@ public final class CompoundLowLevelAbstractionDefinition extends AbstractAbstrac
     private final Set<String> lowLevelIds;
     private GapFunction gapBtwValues;
     private ContextDefinition interpretationContext;
+    private String contextId;
     private transient LinkedHashMap<String, Map<String, Value>> classificationMatrix;
     private transient List<ValueClassification> valueClassifications;
 
@@ -149,6 +150,14 @@ public final class CompoundLowLevelAbstractionDefinition extends AbstractAbstrac
      */
     public Set<String> getLowLevelAbstractionIds() {
         return Collections.unmodifiableSet(lowLevelIds);
+    }
+
+    public String getContextId() {
+        return this.contextId;
+    }
+
+    public void setContextId(String contextId) {
+        this.contextId = contextId;
     }
 
     public void setGapFunctionBetweenValues(GapFunction gf) {

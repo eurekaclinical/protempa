@@ -43,6 +43,7 @@ import org.drools.rule.Rule;
 import org.drools.spi.Constraint;
 import org.drools.spi.PredicateExpression;
 import org.drools.spi.Tuple;
+import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Context;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
@@ -74,6 +75,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             ArrayList.class);
     private static final ClassObjectType TEMP_PROP_OT = new ClassObjectType(
             TemporalProposition.class);
+    private static final ClassObjectType ABSTRACT_PARAM_OT =
+            new ClassObjectType(AbstractParameter.class);
     private static final ClassObjectType PROP_OT = new ClassObjectType(
             Proposition.class);
     private static final ClassObjectType CONTEXT_OT = new ClassObjectType(
@@ -89,7 +92,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             -4);
     private final Map<LowLevelAbstractionDefinition, Algorithm> algorithms;
     private final List<Rule> rules;
-    private final Map<Rule, AbstractionDefinition> ruleToAbstractionDefinition;
+    private final Map<Rule, TemporalPropositionDefinition> ruleToAbstractionDefinition;
     private final DerivationsBuilder derivationsBuilder;
     private final Map<String, List<String>> inverseIsAPropIdMap;
     private int inverseIsAIndex = -1;
@@ -99,20 +102,23 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             DerivationsBuilder derivationsBuilder) {
         this.algorithms = algorithms;
         this.rules = new ArrayList<Rule>();
-        this.ruleToAbstractionDefinition = new HashMap<Rule, AbstractionDefinition>();
+        this.ruleToAbstractionDefinition = 
+                new HashMap<Rule, TemporalPropositionDefinition>();
         this.derivationsBuilder = derivationsBuilder;
         this.inverseIsAPropIdMap = new HashMap<String, List<String>>();
     }
 
     /**
-     * Gets a mapping from Drools rules to {@link AbstractionDefinition}s that
-     * is created during the proposition definition translation process
-     * described above. Rules that correspond to other types of
-     * {@link PropositionDefinition}s are not stored in this mapping.
+     * Gets a mapping from Drools rules to 
+     * {@link TemporalPropositionDefinition}s that is created during the 
+     * proposition definition translation process described above. Rules that 
+     * correspond to other types of {@link PropositionDefinition}s are not 
+     * stored in this mapping.
      *
-     * @return the mapping as a {@link Map<Rule, AbstractionDefinition>}.
+     * @return the mapping as a 
+     * {@link Map<Rule, TemporalPropositionDefinition>}.
      */
-    Map<Rule, AbstractionDefinition> getRuleToAbstractionDefinitionMap() {
+    Map<Rule, TemporalPropositionDefinition> getRuleToTPDMap() {
         return this.ruleToAbstractionDefinition;
     }
 
@@ -137,6 +143,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                         this.derivationsBuilder));
                 inducedByRule.setSalience(MINUS_THREE_SALIENCE);
                 this.rules.add(inducedByRule);
+                this.ruleToAbstractionDefinition.put(inducedByRule, def);
                 ruleCreated = true;
             }
 
@@ -176,13 +183,24 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 sourceP.addConstraint(new PredicateConstraint(
                         new PropositionPredicateExpression(def
                         .getAbstractedFrom())));
-
                 Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
                 resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
                         ARRAY_LIST_OT, "result")));
                 resultP.addConstraint(new PredicateConstraint(
                         new CollectionSizeExpression(1)));
                 rule.addPattern(resultP);
+                
+                String contextId = def.getContextId();
+                if (contextId != null) {
+                    Pattern sourceP2 = new Pattern(4, 1, CONTEXT_OT, "context");
+                    sourceP2.addConstraint(new PredicateConstraint(
+                            new PropositionPredicateExpression(contextId)));
+                    Pattern resultP2 = new Pattern(3, 1, ARRAY_LIST_OT, "result2");
+                    resultP2.setSource(new Collect(sourceP2, new Pattern(3, 1, ARRAY_LIST_OT, "result")));
+                    resultP2.addConstraint(new PredicateConstraint(
+                        new CollectionSizeExpression(1)));
+                    rule.addPattern(resultP2);
+                }
 
                 Algorithm algo = this.algorithms.get(def);
 
@@ -206,15 +224,20 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         try {
             if (!def.getLowLevelAbstractionIds().isEmpty()) {
                 Rule rule = new Rule(def.getId());
-                Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
+                Pattern sourceP = new Pattern(2, 1, ABSTRACT_PARAM_OT, "");
                 sourceP.addConstraint(new PredicateConstraint(
-                        new PropositionPredicateExpression(def
-                        .getAbstractedFrom())));
+                        new AbstractParameterPredicateExpression(def
+                        .getAbstractedFrom(), def.getContextId())));
                 Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
-                resultP.setSource(new Collect(sourceP, new Pattern(1, 1, ARRAY_LIST_OT, "result")));
-                resultP.addConstraint(new PredicateConstraint(new CollectionSizeExpression(1)));
+                resultP.setSource(new Collect(sourceP, 
+                        new Pattern(1, 1, ARRAY_LIST_OT, "result")));
+                resultP.addConstraint(
+                        new PredicateConstraint(
+                        new CollectionSizeExpression(1)));
                 rule.addPattern(resultP);
-                rule.setConsequence(new CompoundLowLevelAbstractionConsequence(def, this.derivationsBuilder));
+                rule.setConsequence(
+                        new CompoundLowLevelAbstractionConsequence(def, 
+                        this.derivationsBuilder));
                 rule.setSalience(ONE_SALIENCE);
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);

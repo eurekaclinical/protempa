@@ -112,7 +112,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         try {
             config.setConflictResolver(new PROTEMPAConflictResolver(
                     this.knowledgeSource, ruleCreator
-                            .getRuleToAbstractionDefinitionMap()));
+                            .getRuleToTPDMap()));
         } catch (KnowledgeSourceReadException ex) {
             throw new PropositionDefinitionInstantiationException(
                     "Problem creating data processing rules", ex);

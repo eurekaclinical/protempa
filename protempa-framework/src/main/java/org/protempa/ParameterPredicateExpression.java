@@ -26,7 +26,7 @@ import org.drools.spi.Tuple;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.value.Value;
 
-final class ParameterPredicateExpression implements PredicateExpression {
+class ParameterPredicateExpression implements PredicateExpression {
 
     private static final long serialVersionUID = -8276489182248585309L;
     private String parameterId;

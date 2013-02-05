@@ -36,7 +36,7 @@ import java.util.Set;
  *
  * @author Nora Sovarel
  */
-class TopologicalSortComparator implements Comparator<AbstractionDefinition>, Serializable {
+class TopologicalSortComparator implements Comparator<TemporalPropositionDefinition>, Serializable {
 
     private static final long serialVersionUID = 924247928684751479L;
 
@@ -54,24 +54,35 @@ class TopologicalSortComparator implements Comparator<AbstractionDefinition>, Se
      * from the knowledge source.
      */
     TopologicalSortComparator(KnowledgeSource knowledgeSource,
-            Collection<AbstractionDefinition> abstractionDefinitions)
+            Collection<? extends TemporalPropositionDefinition> abstractionDefinitions)
             throws KnowledgeSourceReadException {
         // build the graph, a map of node name -> list of neighbors.
         HashMap<String, List<String>> nodes = 
                 new HashMap<String, List<String>>(
                 abstractionDefinitions.size() * 4 / 3 + 1);
         Set<String> abstractionDefPropIds = new HashSet<String>();
-        for (AbstractionDefinition apd : abstractionDefinitions) {
+        for (TemporalPropositionDefinition apd : abstractionDefinitions) {
             abstractionDefPropIds.add(apd.getId());
         }
-        for (AbstractionDefinition apd : abstractionDefinitions) {
-            List<String> ads = new ArrayList<String>();
-            for (String id : apd.getAbstractedFrom()) {
-                if (abstractionDefPropIds.contains(id)) {
-                    ads.add(id);
+        for (TemporalPropositionDefinition tpd : abstractionDefinitions) {
+            if (tpd instanceof AbstractionDefinition) {
+                AbstractionDefinition ad = (AbstractionDefinition) tpd;
+                List<String> ads = new ArrayList<String>();
+                for (String id : ad.getAbstractedFrom()) {
+                    if (abstractionDefPropIds.contains(id)) {
+                        ads.add(id);
+                    }
                 }
+                nodes.put(tpd.getId(), ads);
+            } else if (tpd instanceof ContextDefinition) {
+                ContextDefinition cd = (ContextDefinition) tpd;
+                List<String> ibs = new ArrayList<String>();
+                for (TemporalExtendedPropositionDefinition tepd : 
+                        cd.getInducedBy()) {
+                    ibs.add(tepd.getPropositionId());
+                }
+                nodes.put(cd.getId(), ibs);
             }
-            nodes.put(apd.getId(), ads);
         }
         // topological sort on graph
         ArrayList<String> sortedAbstractions = 
@@ -85,7 +96,7 @@ class TopologicalSortComparator implements Comparator<AbstractionDefinition>, Se
             for (Map.Entry<String, List<String>> entry : nodes.entrySet()) {
                 String abstr = entry.getKey();
                 List<String> neighbors = entry.getValue();
-                if (neighbors.size() == 0) {
+                if (neighbors.isEmpty()) {
                     toBeRemoved.add(abstr);
                     zeroOutDegree[pos++] = abstr;
                 }
@@ -116,16 +127,17 @@ class TopologicalSortComparator implements Comparator<AbstractionDefinition>, Se
     }
 
     /**
-     * Compares two abstraction definitions topologically according to the
-     * inverse of their abstractedFrom relationships.
+     * Compares two temporal proposition definitions topologically according to 
+     * the inverse of their abstractedFrom or inducedBy relationships.
      * 
-     * @param a1 an {@link AbstractionDefinition}.
-     * @param a2 another {@link AbstractionDefinition}.
+     * @param a1 an {@link TemporalPropositionDefinition}.
+     * @param a2 another {@link TemporalPropositionDefinition}.
      * @return a negative integer, zero, or a positive integer as the first
      * argument is less than, equal to, or greater than the second.
      */
     @Override
-    public int compare(AbstractionDefinition a1, AbstractionDefinition a2) {
+    public int compare(TemporalPropositionDefinition a1, 
+            TemporalPropositionDefinition a2) {
         if (a1 == a2) {
             return 0;
         } else {

@@ -41,7 +41,7 @@ import org.protempa.proposition.UniqueId;
 
 /**
  *
- * @author arpost
+ * @author Andrew Post
  */
 class AbstractionCombinerConsequence implements Consequence {
     private static final long serialVersionUID = -7984448674528718012L;

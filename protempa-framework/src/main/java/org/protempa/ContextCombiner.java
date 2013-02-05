@@ -48,11 +48,11 @@ final class ContextCombiner implements TemporalPropositionCombiner<ContextDefini
             rule.setSalience(new SalienceInteger(3));
             Pattern p0 = new Pattern(0, CONTEXT_OBJECT_TYPE);
             Constraint c0 = new PredicateConstraint(
-                    new PropositionPredicateExpression(d.getId()));
+                    new PropositionPredicateExpression(d.getPropositionId()));
             p0.addConstraint(c0);
             Pattern p1 = new Pattern(1, CONTEXT_OBJECT_TYPE);
             Constraint c1 = new PredicateConstraint(
-                    new PropositionPredicateExpression(d.getId()));
+                    new PropositionPredicateExpression(d.getPropositionId()));
             p1.addConstraint(c1);
             rule.addPattern(p0);
             rule.addPattern(p1);

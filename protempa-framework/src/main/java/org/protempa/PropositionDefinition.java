@@ -60,6 +60,15 @@ public interface PropositionDefinition extends Serializable,
      * @return a {@link String}, guaranteed not to be <code>null</code>.
      */
     String getId();
+    
+    /**
+     * The proposition id of propositions derived by this proposition 
+     * definition. The default value is the value of this proposition 
+     * definition's <code>id</code> field.
+     * 
+     * @return a proposition id.
+     */
+    String getPropositionId();
 
     /**
      * Returns the ids of this proposition definition's children. These include

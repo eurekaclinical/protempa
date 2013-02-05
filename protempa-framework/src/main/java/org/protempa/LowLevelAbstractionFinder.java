@@ -294,7 +294,7 @@ public final class LowLevelAbstractionFinder {
         Segment<PrimitiveParameter> seg = firstSegment(def, seq, algorithm,
                 maxPatternLength);
 
-        String id = def.getId();
+        String id = def.getPropositionId();
         GapFunction gf = def.getGapFunction();
 
         if (seg != null) {
@@ -318,7 +318,7 @@ public final class LowLevelAbstractionFinder {
                             if (lastSeg != null) {
                                 Proposition proposition = AbstractParameterFactory.getFromAbstraction(id,
                                         lastSeg, null, prevFoundValue.getValue(),
-                                        null, null);
+                                        null, null, def.getContextId());
                                 
                                 objAsserter.assertObject(proposition);
                                 for (Proposition prop : lastSeg) {
@@ -336,8 +336,10 @@ public final class LowLevelAbstractionFinder {
             } while (advanceRow(def, seg, lastSeg, algorithm, minPatternLength,
                     maxPatternLength) != null);
             if (lastSeg != null) {
-                Proposition proposition = AbstractParameterFactory.getFromAbstraction(id,
-                        lastSeg, null, prevFoundValue.getValue(), null, null);
+                Proposition proposition = 
+                        AbstractParameterFactory.getFromAbstraction(id,
+                        lastSeg, null, prevFoundValue.getValue(), null, null,
+                        def.getContextId());
                 
                 objAsserter.assertObject(proposition);
                 for (Proposition prop : lastSeg) {
