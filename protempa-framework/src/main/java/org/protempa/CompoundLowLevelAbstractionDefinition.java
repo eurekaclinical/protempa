@@ -23,21 +23,15 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 
 import org.protempa.proposition.value.NominalValue;
-import org.protempa.proposition.value.Unit;
-import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -91,7 +85,7 @@ public final class CompoundLowLevelAbstractionDefinition
     private GapFunction gapBtwValues;
     private ContextDefinition interpretationContext;
     private String contextId;
-    private transient LinkedHashMap<String, Map<String, Value>> classificationMatrix;
+    private transient LinkedHashMap<String, List<ClassificationMatrixValue>> classificationMatrix;
     private transient List<ValueClassification> valueClassifications;
 
     /*
@@ -137,7 +131,7 @@ public final class CompoundLowLevelAbstractionDefinition
     }
 
     private void initInstance() {
-        this.classificationMatrix = new LinkedHashMap<String, Map<String, Value>>();
+        this.classificationMatrix = new LinkedHashMap<String, List<ClassificationMatrixValue>>();
         this.valueClassifications = new ArrayList<ValueClassification>();
     }
 
@@ -243,17 +237,17 @@ public final class CompoundLowLevelAbstractionDefinition
         }
         if (!classificationMatrix.containsKey(valueClassification.value)) {
             classificationMatrix.put(valueClassification.value,
-                    new HashMap<String, Value>());
+                    new ArrayList<ClassificationMatrixValue>());
         }
         lowLevelIds.add(valueClassification.lladId);
-        classificationMatrix.get(valueClassification.value).put(
-                valueClassification.lladId,
-                NominalValue.getInstance(valueClassification.lladValue));
+        classificationMatrix.get(valueClassification.value).add(
+                new ClassificationMatrixValue(valueClassification.lladId,
+                NominalValue.getInstance(valueClassification.lladValue)));
         this.valueClassifications.add(valueClassification);
         recalculateChildren();
     }
 
-    LinkedHashMap<String, Map<String, Value>> getValueClassificationsInt() {
+    LinkedHashMap<String, List<ClassificationMatrixValue>> getValueClassificationsInt() {
         return this.classificationMatrix;
     }
 
@@ -328,61 +322,6 @@ public final class CompoundLowLevelAbstractionDefinition
         if (this.changes != null) {
             this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
                     this.children);
-        }
-    }
-
-    public static final class ValueClassification implements Serializable {
-
-        private static final long serialVersionUID = 1L;
-        private final String value;
-        private final String lladId;
-        private final String lladValue;
-
-        public ValueClassification(String value, String lowLevelAbstractionId,
-                String lowLevelAbstractionValue) {
-            if (value == null) {
-                throw new IllegalArgumentException("value cannot be null");
-            }
-            if (lowLevelAbstractionId == null) {
-                throw new IllegalArgumentException("lowLevelAbstractionId cannot be null");
-            }
-            if (lowLevelAbstractionValue == null) {
-                throw new IllegalArgumentException("lowLevelAbstractionValue cannot be null");
-            }
-            this.value = value;
-            this.lladId = lowLevelAbstractionId;
-            this.lladValue = lowLevelAbstractionValue;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public String getLowLevelAbstractionId() {
-            return lladId;
-        }
-
-        public String getLowLevelAbstractionValue() {
-            return lladValue;
-        }
-
-        private void readObject(ObjectInputStream s) throws IOException,
-                ClassNotFoundException {
-            s.defaultReadObject();
-            if (value == null) {
-                throw new InvalidObjectException("id cannot be null");
-            }
-            if (lladId == null) {
-                throw new InvalidObjectException("lowLevelAbstractionId cannot be null");
-            }
-            if (lladValue == null) {
-                throw new InvalidObjectException("lowLevelValueDefName cannot be null");
-            }
-        }
-
-        @Override
-        public String toString() {
-            return ToStringBuilder.reflectionToString(this);
         }
     }
 

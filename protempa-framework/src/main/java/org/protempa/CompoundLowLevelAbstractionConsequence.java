@@ -50,18 +50,16 @@ final class CompoundLowLevelAbstractionConsequence implements
         Consequence {
 
     private static final long serialVersionUID = 6456351279290509422L;
-
     private final CompoundLowLevelAbstractionDefinition cllad;
     private final DerivationsBuilder derivationsBuilder;
 
     /**
      * Constructor.
-     * 
-     * @param def
-     *            the {@link CompoundLowLevelAbstractionDefinition} this is a
-     *            consequence for
-     * @param derivationsBuilder
-     *            the {@link DerivationsBuilder} to add asserted propositions to
+     *
+     * @param def the {@link CompoundLowLevelAbstractionDefinition} this is a
+     * consequence for
+     * @param derivationsBuilder the {@link DerivationsBuilder} to add asserted
+     * propositions to
      */
     CompoundLowLevelAbstractionConsequence(
             CompoundLowLevelAbstractionDefinition def,
@@ -82,6 +80,7 @@ final class CompoundLowLevelAbstractionConsequence implements
     }
 
     private final static class AbstractParameterWithSourceParameters {
+
         final AbstractParameter parameter;
         final Set<AbstractParameter> sourceParameters;
 
@@ -100,16 +99,16 @@ final class CompoundLowLevelAbstractionConsequence implements
         List<AbstractParameter> pl = (List<AbstractParameter>) knowledgeHelper
                 .get(knowledgeHelper.getDeclaration("result"));
 
-        List<CompoundValuedInterval> intervals = 
+        List<CompoundValuedInterval> intervals =
                 new AbstractParameterIntervalSectioner()
                 .buildIntervalList(pl);
-        
-        List<AbstractParameterWithSourceParameters> derivedProps = 
+
+        List<AbstractParameterWithSourceParameters> derivedProps =
                 new ArrayList<AbstractParameterWithSourceParameters>();
         for (CompoundValuedInterval interval : intervals) {
             boolean match = false;
             String lastCheckedValue = null;
-            for (Entry<String, Map<String, Value>> e : cllad
+            for (Entry<String, List<ClassificationMatrixValue>> e : cllad
                     .getValueClassificationsInt().entrySet()) {
                 lastCheckedValue = e.getKey();
                 switch (cllad.getValueDefinitionMatchOperator()) {
@@ -163,17 +162,17 @@ final class CompoundLowLevelAbstractionConsequence implements
                     if (rangeMatches(derivedProps, i,
                             i + cllad.getMinimumNumberOfValues() - 1,
                             cllad.getGapFunctionBetweenValues())) {
-                        Sequence<TemporalParameter> seq = 
+                        Sequence<TemporalParameter> seq =
                                 new Sequence<TemporalParameter>(derivedProps.get(i).parameter.getId());
                         for (int k = i; k < i + cllad.getMinimumNumberOfValues(); k++) {
                             seq.add(derivedProps.get(k).parameter);
                         }
-                        Segment<TemporalParameter> seg = 
+                        Segment<TemporalParameter> seg =
                                 new Segment<TemporalParameter>(seq);
                         AbstractParameter result =
                                 AbstractParameterFactory.getFromAbstraction(
-                                cllad.getPropositionId(), seg, null, 
-                                derivedProps.get(i).parameter.getValue(), 
+                                cllad.getPropositionId(), seg, null,
+                                derivedProps.get(i).parameter.getValue(),
                                 null, null, cllad.getContextId());
                         assertDerivedProposition(workingMemory, result,
                                 derivedProps.get(i).sourceParameters);
@@ -184,26 +183,33 @@ final class CompoundLowLevelAbstractionConsequence implements
     }
 
     private boolean allMatch(CompoundValuedInterval multiInterval,
-            Map<String, Value> lowLevelValueDefs) {
+            List<ClassificationMatrixValue> lowLevelValueDefs) {
         for (Entry<String, Value> e : multiInterval.getValues().entrySet()) {
             String id = e.getKey();
             Value val = e.getValue();
-
-            if (!val.equals(lowLevelValueDefs.get(id))) {
-                return false;
+            for (ClassificationMatrixValue cmv : lowLevelValueDefs) {
+                if (id.equals(cmv.getPropId())) {
+                    if (!val.equals(cmv.getValue())) {
+                        return false;
+                    }
+                }
             }
+
         }
         return true;
     }
 
     private boolean anyMatch(CompoundValuedInterval multiInterval,
-            Map<String, Value> lowLevelValueDefs) {
+            List<ClassificationMatrixValue> lowLevelValueDefs) {
         for (Entry<String, Value> e : multiInterval.getValues().entrySet()) {
             String id = e.getKey();
             Value val = e.getValue();
-
-            if (val.equals(lowLevelValueDefs.get(id))) {
-                return true;
+            for (ClassificationMatrixValue cmv : lowLevelValueDefs) {
+                if (id.equals(cmv.getPropId())) {
+                    if (val.equals(cmv.getValue())) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -213,7 +219,7 @@ final class CompoundLowLevelAbstractionConsequence implements
             Value value, Interval interval, String contextId) {
         AbstractParameter result = new AbstractParameter(propId, new UniqueId(
                 DerivedSourceId.getInstance(), new DerivedUniqueId(UUID
-                        .randomUUID().toString())));
+                .randomUUID().toString())));
         result.setInterval(interval);
         result.setValue(value);
         result.setDataSourceType(DataSourceType.DERIVED);
