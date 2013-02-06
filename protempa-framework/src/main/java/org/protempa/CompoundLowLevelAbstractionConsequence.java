@@ -184,42 +184,33 @@ final class CompoundLowLevelAbstractionConsequence implements
 
     private boolean allMatch(CompoundValuedInterval multiInterval,
             List<ClassificationMatrixValue> lowLevelValueDefs) {
-        for (Entry<String, Value> e : multiInterval.getValues().entrySet()) {
-            String id = e.getKey();
-            Value val = e.getValue();
-            for (ClassificationMatrixValue cmv : lowLevelValueDefs) {
-                if (id.equals(cmv.getPropId())) {
-                    if (!val.equals(cmv.getValue())) {
-                        return false;
-                    }
-                }
-            }
-
-        }
-        return true;
+        return match(multiInterval, lowLevelValueDefs, false);
     }
 
     private boolean anyMatch(CompoundValuedInterval multiInterval,
             List<ClassificationMatrixValue> lowLevelValueDefs) {
+        return match(multiInterval, lowLevelValueDefs, true);
+    }
+    
+    private boolean match(CompoundValuedInterval multiInterval,
+            List<ClassificationMatrixValue> lowLevelValueDefs, boolean bool) {
         for (Entry<String, Value> e : multiInterval.getValues().entrySet()) {
             String id = e.getKey();
             Value val = e.getValue();
             for (ClassificationMatrixValue cmv : lowLevelValueDefs) {
                 if (id.equals(cmv.getPropId())) {
-                    if (val.equals(cmv.getValue())) {
-                        return true;
+                    if (val.equals(cmv.getValue()) == bool) {
+                        return bool;
                     }
                 }
             }
         }
-        return false;
+        return !bool;
     }
 
     private static AbstractParameter createAbstractParameter(String propId,
             Value value, Interval interval, String contextId) {
-        AbstractParameter result = new AbstractParameter(propId, new UniqueId(
-                DerivedSourceId.getInstance(), new DerivedUniqueId(UUID
-                .randomUUID().toString())));
+        AbstractParameter result = new AbstractParameter(propId);
         result.setInterval(interval);
         result.setValue(value);
         result.setDataSourceType(DataSourceType.DERIVED);

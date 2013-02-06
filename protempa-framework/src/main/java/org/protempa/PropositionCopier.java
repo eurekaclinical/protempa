@@ -110,9 +110,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
     @Override
     public void visit(AbstractParameter abstractParameter) {
         assert this.workingMemory != null : "workingMemory wasn't set";
-        AbstractParameter param = new AbstractParameter(propId, new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString())));
+        AbstractParameter param = new AbstractParameter(propId);
         param.setDataSourceType(DataSourceType.DERIVED);
         param.setInterval(abstractParameter.getInterval());
         param.setValue(abstractParameter.getValue());

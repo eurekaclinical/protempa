@@ -67,9 +67,7 @@ public final class TemporalAbstractParameterFactory {
     }
 
     private AbstractParameter getInstance(String id, Long start, Long finish) {
-        AbstractParameter e = new AbstractParameter(id, new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString())));
+        AbstractParameter e = new AbstractParameter(id);
         e.setDataSourceType(DataSourceType.DERIVED);
         e.setInterval(intervalFactory.getInstance(start,
                 this.granularity, finish, this.granularity));

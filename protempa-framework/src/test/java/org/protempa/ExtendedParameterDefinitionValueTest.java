@@ -58,7 +58,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         completeDef.setDisplayName("test");
         completeDef.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter("TEST", uid());
+        AbstractParameter param = new AbstractParameter("TEST");
         param.setDataSourceType(DataSourceType.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
@@ -73,7 +73,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         completeDef.setDisplayName("test");
         completeDef.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter("TEST", uid());
+        AbstractParameter param = new AbstractParameter("TEST");
         param.setDataSourceType(DataSourceType.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
@@ -87,7 +87,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         nullValueDef.setAbbreviatedDisplayName("t");
         nullValueDef.setDisplayName("test");
 
-        AbstractParameter param = new AbstractParameter("TEST", uid());
+        AbstractParameter param = new AbstractParameter("TEST");
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
         param.setDataSourceType(DataSourceType.DERIVED);
@@ -101,17 +101,11 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         def1.setDisplayName("test");
         def1.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter("TEST", uid());
+        AbstractParameter param = new AbstractParameter("TEST");
         param.setDataSourceType(DataSourceType.DERIVED);
         param.setValue(new NumberValue(12));
         param.setInterval(intervalFactory.getInstance());
 
         assertFalse(def1.getMatches(param));
-    }
-    
-    private static UniqueId uid() {
-        return new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString()));
     }
 }

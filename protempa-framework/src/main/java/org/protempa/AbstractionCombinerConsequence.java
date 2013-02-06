@@ -24,7 +24,6 @@
 package org.protempa;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.drools.WorkingMemory;
@@ -32,12 +31,9 @@ import org.drools.common.InternalFactHandle;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
 import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.DerivedSourceId;
-import org.protempa.proposition.DerivedUniqueId;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
-import org.protempa.proposition.UniqueId;
 
 /**
  *
@@ -62,7 +58,7 @@ class AbstractionCombinerConsequence implements Consequence {
         s.add(a1);
         s.add(a2);
         Segment<AbstractParameter> segment = new Segment<AbstractParameter>(s);
-        AbstractParameter result = new AbstractParameter(a1Id, new UniqueId(DerivedSourceId.getInstance(), new DerivedUniqueId(UUID.randomUUID().toString())));
+        AbstractParameter result = new AbstractParameter(a1Id);
         result.setDataSourceType(DataSourceType.DERIVED);
         result.setInterval(segment.getInterval());
         result.setValue(a1.getValue());

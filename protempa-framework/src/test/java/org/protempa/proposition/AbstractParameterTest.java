@@ -20,7 +20,6 @@
 package org.protempa.proposition;
 
 import org.protempa.proposition.interval.IntervalFactory;
-import java.util.UUID;
 
 import junit.framework.TestCase;
 import org.protempa.DataSourceType;
@@ -40,9 +39,7 @@ public class AbstractParameterTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        p = new AbstractParameter("TEST", new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString())));
+        p = new AbstractParameter("TEST");
         p.setDataSourceType(DataSourceType.DERIVED);
         p.setInterval(intervalFactory.getInstance(0L,
                 RelativeHourGranularity.HOUR, 12L,
