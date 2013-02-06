@@ -43,6 +43,7 @@ final class InstanceConverterFactory {
     private final AbstractionConverter sliceConverter;
     private final AbstractionConverter highLevelAbstractionConverter;
     private final AbstractionConverter pairAbstractionConverter;
+    private final AbstractionConverter compoundLowLevelAbstractionConverter;
     private final TemporalPropositionConverter contextConverter;
     private Map<Cls, PropositionConverter> converterMap;
     private Map<Cls, AbstractionConverter> abstractionConverterMap;
@@ -59,6 +60,7 @@ final class InstanceConverterFactory {
         this.highLevelAbstractionConverter =
                 new HighLevelAbstractionConverter();
         this.pairAbstractionConverter = new PairAbstractionConverter();
+        this.compoundLowLevelAbstractionConverter = new CompoundLowLevelAbstractionConverter();
         this.contextConverter = new ContextConverter();
     }
 
@@ -70,10 +72,12 @@ final class InstanceConverterFactory {
      * @param proposition a Protege proposition {@link Proposition} instance.
      *
      * @return an appropriate {@link PropositionConverter} object, or
-     * <code>null</code> if the given <code>proposition</code> is
+     * <code>null</code> if the given
+     * <code>proposition</code> is
      * <code>null</code>.
-     * @throws AssertionError if the given <code>proposition</code> does not
-     * have a type in the Protege <code>Proposition</code> class hierarchy.
+     * @throws AssertionError if the given
+     * <code>proposition</code> does not have a type in the Protege
+     * <code>Proposition</code> class hierarchy.
      */
     PropositionConverter getInstance(Instance proposition)
             throws KnowledgeSourceReadException {
@@ -93,8 +97,8 @@ final class InstanceConverterFactory {
             return null;
         }
     }
-
-    AbstractionConverter getAbstractionInstance(Instance proposition)
+    
+    AbstractionConverter getAbstractionInstance(Instance proposition) 
             throws KnowledgeSourceReadException {
         if (proposition == null) {
             return null;
@@ -102,10 +106,10 @@ final class InstanceConverterFactory {
             if (this.abstractionConverterMap == null) {
                 populateConverterMap();
             }
-            Collection<Cls> types =
+            Collection<Cls> types = 
                     (Collection<Cls>) proposition.getDirectTypes();
             for (Cls cls : types) {
-                AbstractionConverter ac =
+                AbstractionConverter ac = 
                         this.abstractionConverterMap.get(cls);
                 if (ac != null) {
                     return ac;
@@ -164,9 +168,11 @@ final class InstanceConverterFactory {
         populateConverterMap0(this.pairAbstractionConverter.getClsName(), this.pairAbstractionConverter);
         populateTemporalPropositionConverterMap0(this.pairAbstractionConverter.getClsName(), this.pairAbstractionConverter);
         populateAbstractionConverterMap0(this.pairAbstractionConverter.getClsName(), this.pairAbstractionConverter);
+        populateConverterMap0(this.compoundLowLevelAbstractionConverter.getClsName(), this.compoundLowLevelAbstractionConverter);
+        populateTemporalPropositionConverterMap0(this.compoundLowLevelAbstractionConverter.getClsName(), this.compoundLowLevelAbstractionConverter);
+        populateAbstractionConverterMap0(this.compoundLowLevelAbstractionConverter.getClsName(), this.compoundLowLevelAbstractionConverter);
         populateConverterMap0(this.contextConverter.getClsName(), this.contextConverter);
         populateTemporalPropositionConverterMap0(this.contextConverter.getClsName(), this.contextConverter);
-
     }
 
     private void populateConverterMap0(String rootClsName, PropositionConverter converter) throws KnowledgeSourceReadException {

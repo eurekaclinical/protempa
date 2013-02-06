@@ -1,4 +1,4 @@
-; Mon Oct 22 17:39:04 EDT 2012
+; Wed Feb 06 13:21:34 EST 2013
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
@@ -309,10 +309,10 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[protempa_ProjectKB_Class84]
-		[protempa_ProjectKB_Class85]
-		[protempa_ProjectKB_Class86]
-		[protempa_ProjectKB_Class87]))
+		[protempa_ProjectKB_Class181]
+		[protempa_ProjectKB_Class182]
+		[protempa_ProjectKB_Class183]
+		[protempa_ProjectKB_Class184]))
 
 ([CLSES_TAB] of  Widget
 
@@ -353,6 +353,9 @@
 ([INSTANCES_TAB] of  Widget
 
 	(widget_class_name "edu.stanford.smi.protege.widget.InstancesTab"))
+
+([KB_441711_Class3] of  Map
+)
 
 ([KB_495177_Class0] of  String
 
@@ -412,8 +415,8 @@
 
 ([KB_495177_Class6] of  Map
 
-	(entries [protempa_ProjectKB_Class90])
-	(referenced_maps [protempa_ProjectKB_Class88]))
+	(entries [protempa_ProjectKB_Class187])
+	(referenced_maps [protempa_ProjectKB_Class185]))
 
 ([KB_495177_Class88] of  Property_List
 
@@ -464,9 +467,6 @@
 )
 
 ([KB_495177_Class99] of  Property_List
-)
-
-([KB_774630_Class3] of  Map
 )
 
 ([LAYOUT_PROPERTIES] of  Property_List
@@ -551,6 +551,7 @@
 
 	(browser_slot_names [BROWSER_SLOT_NAMES])
 	(customized_instance_widgets
+		[protempa_ProjectKB_Class139]
 		[STANDARD_FACET_FORM_WIDGET]
 		[AIW_ProjectKB_Class84]
 		[PAL_FORM_WIDGET]
@@ -2662,8 +2663,42 @@
 	(property_list [protempa_ProjectKB_Class13])
 	(widget_class_name "uk.ac.man.cs.mig.coode.debugger.test.DebuggerTestTab"))
 
+([protempa_ProjectKB_Class126] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "parameterValue")
+	(property_list [protempa_ProjectKB_Class127])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceFieldWidget")
+	(width 200)
+	(x 0)
+	(y 0))
+
+([protempa_ProjectKB_Class127] of  Property_List
+
+	(properties
+		[protempa_ProjectKB_Class128]
+		[protempa_ProjectKB_Class129]))
+
+([protempa_ProjectKB_Class128] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-View References to Value"))
+
+([protempa_ProjectKB_Class129] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-Delete Instance"))
+
 ([protempa_ProjectKB_Class13] of  Property_List
 )
+
+([protempa_ProjectKB_Class139] of  Widget
+
+	(is_hidden FALSE)
+	(name "CompoundSimpleAbstraction")
+	(property_list [protempa_ProjectKB_Class140])
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
 
 ([protempa_ProjectKB_Class14] of  Widget
 
@@ -2671,7 +2706,104 @@
 	(property_list [protempa_ProjectKB_Class15])
 	(widget_class_name "ca.uvic.csr.shrimp.jambalaya.JambalayaTab"))
 
+([protempa_ProjectKB_Class140] of  Property_List
+
+	(properties
+		[protempa_ProjectKB_Class141]
+		[protempa_ProjectKB_Class142]
+		[protempa_ProjectKB_Class144]
+		[protempa_ProjectKB_Class146]
+		[protempa_ProjectKB_Class150]
+		[protempa_ProjectKB_Class152]))
+
+([protempa_ProjectKB_Class141] of  Property_List
+
+	(name "layout properties"))
+
+([protempa_ProjectKB_Class142] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "minValues")
+	(property_list [protempa_ProjectKB_Class143])
+	(widget_class_name "edu.stanford.smi.protege.widget.IntegerFieldWidget")
+	(width 100)
+	(x 0)
+	(y 0))
+
+([protempa_ProjectKB_Class143] of  Property_List
+)
+
+([protempa_ProjectKB_Class144] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "maxGapUnits")
+	(property_list [protempa_ProjectKB_Class145])
+	(widget_class_name "edu.stanford.smi.protege.widget.ComboBoxWidget")
+	(width 100)
+	(x 210)
+	(y 0))
+
+([protempa_ProjectKB_Class145] of  Property_List
+)
+
+([protempa_ProjectKB_Class146] of  Widget
+
+	(height 120)
+	(is_hidden FALSE)
+	(name "compoundValueClassifications")
+	(property_list [protempa_ProjectKB_Class147])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
+	(width 310)
+	(x 0)
+	(y 120))
+
+([protempa_ProjectKB_Class147] of  Property_List
+
+	(properties
+		[protempa_ProjectKB_Class148]
+		[protempa_ProjectKB_Class149]))
+
+([protempa_ProjectKB_Class148] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-View References to Value"))
+
+([protempa_ProjectKB_Class149] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-Delete Instance"))
+
 ([protempa_ProjectKB_Class15] of  Property_List
+)
+
+([protempa_ProjectKB_Class150] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "matchOperator")
+	(property_list [protempa_ProjectKB_Class151])
+	(widget_class_name "edu.stanford.smi.protege.widget.ComboBoxWidget")
+	(width 100)
+	(x 0)
+	(y 60))
+
+([protempa_ProjectKB_Class151] of  Property_List
+)
+
+([protempa_ProjectKB_Class152] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "maxGap")
+	(property_list [protempa_ProjectKB_Class153])
+	(widget_class_name "edu.stanford.smi.protege.widget.IntegerFieldWidget")
+	(width 100)
+	(x 110)
+	(y 0))
+
+([protempa_ProjectKB_Class153] of  Property_List
 )
 
 ([protempa_ProjectKB_Class16] of  Widget
@@ -2683,11 +2815,63 @@
 ([protempa_ProjectKB_Class17] of  Property_List
 )
 
+([protempa_ProjectKB_Class177] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "protempa_Class1")
+	(property_list [protempa_ProjectKB_Class178])
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(width 200)
+	(x 0)
+	(y 180))
+
+([protempa_ProjectKB_Class178] of  Property_List
+)
+
 ([protempa_ProjectKB_Class18] of  Widget
 
 	(is_hidden TRUE)
 	(property_list [protempa_ProjectKB_Class19])
 	(widget_class_name "ezpal.EZPalTab"))
+
+([protempa_ProjectKB_Class181] of  String
+
+	(name ":INSTANCE-ANNOTATION")
+	(string_value "%3AANNOTATION-TEXT"))
+
+([protempa_ProjectKB_Class182] of  String
+
+	(name ":META-CLASS")
+	(string_value "%3ANAME"))
+
+([protempa_ProjectKB_Class183] of  String
+
+	(name ":PAL-CONSTRAINT")
+	(string_value "%3APAL-NAME"))
+
+([protempa_ProjectKB_Class184] of  String
+
+	(name "ValueSetElement")
+	(string_value "elementOfValueSet"))
+
+([protempa_ProjectKB_Class185] of  Map
+
+	(entries [protempa_ProjectKB_Class186]))
+
+([protempa_ProjectKB_Class186] of  Map_Entry
+
+	(key "KB_468183_Class0")
+	(key_class "edu.stanford.smi.protege.model.Frame")
+	(value "25 25 202 123")
+	(value_class "java.awt.Rectangle"))
+
+([protempa_ProjectKB_Class187] of  Map_Entry
+
+	(key "InstanceDisplay.yellow_stickies")
+	(key_class "java.lang.String")
+	(value "protempa_ProjectKB_Class185")
+	(value_class "java.util.Map"))
 
 ([protempa_ProjectKB_Class19] of  Property_List
 )
@@ -3011,46 +3195,8 @@
 ([protempa_ProjectKB_Class83] of  Property_List
 )
 
-([protempa_ProjectKB_Class84] of  String
-
-	(name ":INSTANCE-ANNOTATION")
-	(string_value "%3AANNOTATION-TEXT"))
-
-([protempa_ProjectKB_Class85] of  String
-
-	(name ":PAL-CONSTRAINT")
-	(string_value "%3APAL-NAME"))
-
-([protempa_ProjectKB_Class86] of  String
-
-	(name ":META-CLASS")
-	(string_value "%3ANAME"))
-
-([protempa_ProjectKB_Class87] of  String
-
-	(name "ValueSetElement")
-	(string_value "elementOfValueSet"))
-
-([protempa_ProjectKB_Class88] of  Map
-
-	(entries [protempa_ProjectKB_Class89]))
-
-([protempa_ProjectKB_Class89] of  Map_Entry
-
-	(key "KB_468183_Class0")
-	(key_class "edu.stanford.smi.protege.model.Frame")
-	(value "25 25 202 123")
-	(value_class "java.awt.Rectangle"))
-
 ([protempa_ProjectKB_Class9] of  Property_List
 )
-
-([protempa_ProjectKB_Class90] of  Map_Entry
-
-	(key "InstanceDisplay.yellow_stickies")
-	(key_class "java.lang.String")
-	(value "protempa_ProjectKB_Class88")
-	(value_class "java.util.Map"))
 
 ([QUERIES_TAB] of  Widget
 
