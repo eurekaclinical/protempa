@@ -192,8 +192,8 @@
         <module>protempa-bp-serviceloader</module>
         <module>protempa-ksb-protege</module>
         <module>protempa-tsb-umls</module>
-        <module>protempa-test-suite</module>
         <module>protempa-dsb-relationaldb</module>
+        <module>protempa-test-suite</module>
     </modules>
     <dependencies>
         <dependency>
