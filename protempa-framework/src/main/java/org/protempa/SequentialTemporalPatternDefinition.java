@@ -19,54 +19,86 @@
  */
 package org.protempa;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.interval.Relation;
 
-public class PairDefinition extends AbstractAbstractionDefinition {
+public class SequentialTemporalPatternDefinition extends AbstractAbstractionDefinition {
 
     private static final long serialVersionUID = 456697454379224533L;
+    private static final RelatedTemporalExtendedPropositionDefinition[] DEFAULT_REL = new RelatedTemporalExtendedPropositionDefinition[0];
     private boolean solid;
-    private Relation relation;
     private TemporalPatternOffset temporalOffset;
     private boolean concatenable;
-    private TemporalExtendedPropositionDefinition rightHandProposition;
-    private TemporalExtendedPropositionDefinition leftHandProposition;
-    private boolean secondRequired;
+    private TemporalExtendedPropositionDefinition mainTemporalExtendedPropositionDefinition;
+    private RelatedTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions;
 
-    public PairDefinition(String id) {
+    public static class RelatedTemporalExtendedPropositionDefinition implements Serializable {
+        private static final long serialVersionUID = 1;
+
+        private final Relation relation;
+        private final TemporalExtendedPropositionDefinition relatedTemporalExtendedPropositionDefinition;
+
+        public RelatedTemporalExtendedPropositionDefinition(Relation relation, 
+                TemporalExtendedPropositionDefinition relatedTemporalExtendedPropositionDefinition) {
+            this.relation = relation;
+            this.relatedTemporalExtendedPropositionDefinition = relatedTemporalExtendedPropositionDefinition;
+        }
+
+        public Relation getRelation() {
+            return relation;
+        }
+
+        public TemporalExtendedPropositionDefinition getRelatedTemporalExtendedPropositionDefinition() {
+            return relatedTemporalExtendedPropositionDefinition;
+        }
+    }
+
+    public SequentialTemporalPatternDefinition(String id) {
         super(id);
         this.concatenable = true;
         this.solid = true;
+        this.relatedTemporalExtendedPropositionDefinitions = DEFAULT_REL;
     }
 
-    public Relation getRelation() {
-        return relation;
+    public TemporalExtendedPropositionDefinition getMainTemporalExtendedPropositionDefinition() {
+        return mainTemporalExtendedPropositionDefinition;
     }
 
-    public void setRelation(Relation relation) {
-        this.relation = relation;
+    public void setMainTemporalExtendedPropositionDefinition(TemporalExtendedPropositionDefinition mainTemporalExtendedPropositionDefinition) {
+        this.mainTemporalExtendedPropositionDefinition = mainTemporalExtendedPropositionDefinition;
     }
-    
-    public boolean isSecondRequired() {
-        return this.secondRequired;
+
+    public RelatedTemporalExtendedPropositionDefinition[] getRelatedTemporalExtendedPropositionDefinitions() {
+        return relatedTemporalExtendedPropositionDefinitions;
     }
-    
-    public void setSecondRequired(boolean secondRequired) {
-        this.secondRequired = secondRequired;
+
+    public void setRelatedTemporalExtendedPropositionDefinitions(
+            RelatedTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions) {
+        if (relatedTemporalExtendedPropositionDefinitions == null) {
+            this.relatedTemporalExtendedPropositionDefinitions = DEFAULT_REL;
+        } else {
+            this.relatedTemporalExtendedPropositionDefinitions = 
+                    relatedTemporalExtendedPropositionDefinitions.clone();
+        }
     }
 
     @Override
     public Set<String> getAbstractedFrom() {
         HashSet<String> set = new HashSet<String>();
-        if (this.leftHandProposition != null) {
-            set.add(this.leftHandProposition.getPropositionId());
+        if (this.mainTemporalExtendedPropositionDefinition != null) {
+            set.add(
+                    this.mainTemporalExtendedPropositionDefinition
+                    .getPropositionId());
         }
-        if (this.rightHandProposition != null) {
-            set.add(this.rightHandProposition.getPropositionId());
+        for (RelatedTemporalExtendedPropositionDefinition rel : 
+                this.relatedTemporalExtendedPropositionDefinitions) {
+            set.add(
+                    rel.getRelatedTemporalExtendedPropositionDefinition()
+                    .getPropositionId());
         }
         return set;
     }
@@ -78,9 +110,9 @@ public class PairDefinition extends AbstractAbstractionDefinition {
 
     /**
      * Sets whether this type of high-level abstraction is concatenable.
-     * 
-     * @param concatenable
-     *            <code>true</code> if concatenable, <code>false</code> if not.
+     *
+     * @param concatenable <code>true</code> if concatenable, <code>false</code>
+     * if not.
      */
     public void setConcatenable(boolean concatenable) {
         this.concatenable = concatenable;
@@ -88,7 +120,7 @@ public class PairDefinition extends AbstractAbstractionDefinition {
 
     /**
      * Returns whether intervals of this type are solid, i.e., never hold over
-     * properly overlapping intervals. By default, pair abstraction intervals 
+     * properly overlapping intervals. By default, pair abstraction intervals
      * are solid.
      *
      * @return <code>true</code> or <code>false</code>.
@@ -97,17 +129,17 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     public boolean isSolid() {
         return this.solid;
     }
-    
+
     /**
      * Sets whether intervals of this type are solid, i.e., never hold over
      * properly overlapping intervals.
-     * 
+     *
      * @param solid <code>true</code> or <code>false</code>.
      */
     public void setSolid(boolean solid) {
         this.solid = solid;
     }
-
+    
     @Override
     public void accept(PropositionDefinitionVisitor visitor) {
         if (visitor == null) {
@@ -145,10 +177,9 @@ public class PairDefinition extends AbstractAbstractionDefinition {
         super.reset();
         this.concatenable = true;
         this.solid = true;
-        this.relation = null;
+        this.relatedTemporalExtendedPropositionDefinitions = DEFAULT_REL;
         this.temporalOffset = null;
-        this.rightHandProposition = null;
-        this.leftHandProposition = null;
+        this.mainTemporalExtendedPropositionDefinition = null;
     }
 
     @Override
@@ -161,7 +192,8 @@ public class PairDefinition extends AbstractAbstractionDefinition {
                 abstractedFrom.add(propId);
             }
         }
-        this.children = abstractedFrom.toArray(new String[abstractedFrom.size()]);
+        this.children = 
+                abstractedFrom.toArray(new String[abstractedFrom.size()]);
         if (this.changes != null) {
             this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
                     this.children);
@@ -171,35 +203,5 @@ public class PairDefinition extends AbstractAbstractionDefinition {
     @Override
     public String toString() {
         return ReflectionToStringBuilder.reflectionToString(this);
-    }
-
-    public TemporalExtendedPropositionDefinition getLeftHandProposition() {
-        return this.leftHandProposition;
-    }
-
-    public void setLeftHandProposition(
-            TemporalExtendedPropositionDefinition proposition) {
-        TemporalExtendedPropositionDefinition old = this.leftHandProposition;
-        this.leftHandProposition = proposition;
-        recalculateChildren();
-        if (this.changes != null) {
-            this.changes.firePropertyChange("leftHandProposition", old,
-                    this.leftHandProposition);
-        }
-    }
-
-    public TemporalExtendedPropositionDefinition getRightHandProposition() {
-        return rightHandProposition;
-    }
-
-    public void setRightHandProposition(
-            TemporalExtendedPropositionDefinition rightHandProposition) {
-        TemporalExtendedPropositionDefinition old = this.rightHandProposition;
-        this.rightHandProposition = rightHandProposition;
-        recalculateChildren();
-        if (this.changes != null) {
-            this.changes.firePropertyChange("rightHandProposition", old,
-                    this.rightHandProposition);
-        }
     }
 }

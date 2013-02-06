@@ -19,25 +19,24 @@
  */
 package org.protempa.backend.ksb.protege;
 
-import org.protempa.PropositionDefinitionCache;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PairDefinition;
+import org.protempa.SequentialTemporalPatternDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.proposition.interval.Relation;
 
 import edu.stanford.smi.protege.model.Instance;
-import edu.stanford.smi.protege.model.Slot;
 import java.util.HashMap;
 import java.util.Map;
 import org.protempa.*;
+import org.protempa.SequentialTemporalPatternDefinition.RelatedTemporalExtendedPropositionDefinition;
 
 public class PairAbstractionConverter implements AbstractionConverter {
 
     @Override
-    public PairDefinition convert(Instance protegeProposition,
+    public SequentialTemporalPatternDefinition convert(Instance protegeProposition,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        PairDefinition result = new PairDefinition(
+        SequentialTemporalPatternDefinition result = new SequentialTemporalPatternDefinition(
                 protegeProposition.getName());
         ConnectionManager cm = backend.getConnectionManager();
         Util.setNames(protegeProposition, result, cm);
@@ -50,10 +49,9 @@ public class PairAbstractionConverter implements AbstractionConverter {
         Util.setReferences(protegeProposition, result, cm);
         Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache =
                 new HashMap<Instance, TemporalExtendedPropositionDefinition>();
+        
         addComponentAbstractionDefinitions(protegeProposition, result,
                 extendedParameterCache, backend);
-        setRelation(protegeProposition, result, backend, cm);
-        setRequireSecond(protegeProposition, result, cm);
         Util.setInverseIsAs(protegeProposition, result, cm);
         result.setTemporalOffset(Util.temporalOffsets(protegeProposition, 
                 backend, extendedParameterCache));
@@ -65,32 +63,6 @@ public class PairAbstractionConverter implements AbstractionConverter {
     @Override
     public String getClsName() {
         return "PairAbstraction";
-    }
-
-    private void setRelation(
-            Instance protegeProposition, PairDefinition pd,
-            ProtegeKnowledgeSourceBackend backend, ConnectionManager cm)
-            throws KnowledgeSourceReadException {
-        Slot slot = cm.getSlot("withRelation");
-        Instance relationInstance = (Instance) cm.getOwnSlotValue(
-                protegeProposition, slot);
-
-        if (relationInstance != null) {
-            Relation relation = Util.instanceToRelation(relationInstance,
-                    cm, backend);
-            pd.setRelation(relation);
-        }
-    }
-    
-    private void setRequireSecond(
-            Instance protegeProposition, PairDefinition pd,
-            ConnectionManager cm) 
-            throws KnowledgeSourceReadException {
-        Slot slot = cm.getSlot("requireSecond");
-        Boolean requireSecond = 
-                (Boolean) cm.getOwnSlotValue(protegeProposition, slot);
-        assert requireSecond != null : "requireSecond cannot be null!";
-        pd.setSecondRequired(requireSecond);
     }
 
     /**
@@ -105,18 +77,20 @@ public class PairAbstractionConverter implements AbstractionConverter {
      *            instance.
      */
     private static void addComponentAbstractionDefinitions(
-            Instance pairAbstractionInstance, PairDefinition pd,
+            Instance pairAbstractionInstance, SequentialTemporalPatternDefinition pd,
             Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
         ConnectionManager cm = backend.getConnectionManager();
-        Instance relation = (Instance) cm.getOwnSlotValue(
+        Instance relationInstance = (Instance) cm.getOwnSlotValue(
                 pairAbstractionInstance, cm.getSlot("withRelation"));
-        if (relation != null) {
-            Instance lhs = (Instance) cm.getOwnSlotValue(relation,
+        if (relationInstance != null) {
+            Relation relation = Util.instanceToRelation(relationInstance,
+                    cm, backend);
+            Instance lhs = (Instance) cm.getOwnSlotValue(relationInstance,
                     cm.getSlot("lhs"));
             assert lhs != null : "lhs cannot be null";
-            Instance rhs = (Instance) cm.getOwnSlotValue(relation,
+            Instance rhs = (Instance) cm.getOwnSlotValue(relationInstance,
                     cm.getSlot("rhs"));
             assert rhs != null : "rhs cannot be null";
             TemporalExtendedPropositionDefinition lhsDefinition =
@@ -127,8 +101,12 @@ public class PairAbstractionConverter implements AbstractionConverter {
                     Util.instanceToTemporalExtendedPropositionDefinition(rhs, 
                     backend);
             extendedParameterCache.put(rhs, rhsDefinition);
-            pd.setLeftHandProposition(lhsDefinition);
-            pd.setRightHandProposition(rhsDefinition);
+            pd.setMainTemporalExtendedPropositionDefinition(lhsDefinition);
+            RelatedTemporalExtendedPropositionDefinition related =
+                    new RelatedTemporalExtendedPropositionDefinition(relation, 
+                    rhsDefinition);
+            pd.setRelatedTemporalExtendedPropositionDefinitions(
+                    new RelatedTemporalExtendedPropositionDefinition[]{related});
         }
     }
 }

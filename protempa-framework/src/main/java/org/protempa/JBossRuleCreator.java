@@ -43,6 +43,7 @@ import org.drools.rule.Rule;
 import org.drools.spi.Constraint;
 import org.drools.spi.PredicateExpression;
 import org.drools.spi.Tuple;
+import org.protempa.SequentialTemporalPatternDefinition.RelatedTemporalExtendedPropositionDefinition;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Context;
 import org.protempa.proposition.PrimitiveParameter;
@@ -102,20 +103,20 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             DerivationsBuilder derivationsBuilder) {
         this.algorithms = algorithms;
         this.rules = new ArrayList<Rule>();
-        this.ruleToAbstractionDefinition = 
+        this.ruleToAbstractionDefinition =
                 new HashMap<Rule, TemporalPropositionDefinition>();
         this.derivationsBuilder = derivationsBuilder;
         this.inverseIsAPropIdMap = new HashMap<String, List<String>>();
     }
 
     /**
-     * Gets a mapping from Drools rules to 
-     * {@link TemporalPropositionDefinition}s that is created during the 
-     * proposition definition translation process described above. Rules that 
-     * correspond to other types of {@link PropositionDefinition}s are not 
+     * Gets a mapping from Drools rules to
+     * {@link TemporalPropositionDefinition}s that is created during the
+     * proposition definition translation process described above. Rules that
+     * correspond to other types of {@link PropositionDefinition}s are not
      * stored in this mapping.
      *
-     * @return the mapping as a 
+     * @return the mapping as a
      * {@link Map<Rule, TemporalPropositionDefinition>}.
      */
     Map<Rule, TemporalPropositionDefinition> getRuleToTPDMap() {
@@ -189,7 +190,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 resultP.addConstraint(new PredicateConstraint(
                         new CollectionSizeExpression(1)));
                 rule.addPattern(resultP);
-                
+
                 String contextId = def.getContextId();
                 if (contextId != null) {
                     Pattern sourceP2 = new Pattern(4, 1, CONTEXT_OT, "context");
@@ -198,7 +199,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                     Pattern resultP2 = new Pattern(3, 1, ARRAY_LIST_OT, "result2");
                     resultP2.setSource(new Collect(sourceP2, new Pattern(3, 1, ARRAY_LIST_OT, "result")));
                     resultP2.addConstraint(new PredicateConstraint(
-                        new CollectionSizeExpression(1)));
+                            new CollectionSizeExpression(1)));
                     rule.addPattern(resultP2);
                 }
 
@@ -229,14 +230,14 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                         new AbstractParameterPredicateExpression(def
                         .getAbstractedFrom(), def.getContextId())));
                 Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
-                resultP.setSource(new Collect(sourceP, 
+                resultP.setSource(new Collect(sourceP,
                         new Pattern(1, 1, ARRAY_LIST_OT, "result")));
                 resultP.addConstraint(
                         new PredicateConstraint(
                         new CollectionSizeExpression(1)));
                 rule.addPattern(resultP);
                 rule.setConsequence(
-                        new CompoundLowLevelAbstractionConsequence(def, 
+                        new CompoundLowLevelAbstractionConsequence(def,
                         this.derivationsBuilder));
                 rule.setSalience(ONE_SALIENCE);
                 this.ruleToAbstractionDefinition.put(rule, def);
@@ -267,37 +268,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 Declaration[] arg3, WorkingMemory arg4, Object context)
                 throws Exception {
             return epd.getMatches((Proposition) arg0);
-        }
-
-        @Override
-        public Object createContext() {
-            return null;
-        }
-    }
-
-    private static final class GetMatchesPredicateExpressionPair implements
-            PredicateExpression {
-
-        private static final long serialVersionUID = -6225160728904051528L;
-        private TemporalExtendedPropositionDefinition leftHandSide;
-        private TemporalExtendedPropositionDefinition rightHandSide;
-
-        private GetMatchesPredicateExpressionPair(
-                TemporalExtendedPropositionDefinition leftHandSide,
-                TemporalExtendedPropositionDefinition rightHandSide) {
-            assert leftHandSide != null : "leftHandSide cannot be null";
-            assert rightHandSide != null : "rightHandSide cannot be null";
-            this.leftHandSide = leftHandSide;
-            this.rightHandSide = rightHandSide;
-        }
-
-        @Override
-        public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
-                Declaration[] arg3, WorkingMemory arg4, Object context)
-                throws Exception {
-            return this.leftHandSide.getMatches((Proposition) arg0)
-                    || (this.rightHandSide != null && this.rightHandSide
-                    .getMatches((Proposition) arg0));
         }
 
         @Override
@@ -410,62 +380,49 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     }
 
     /**
-     * Translates a pair definition into rules.
+     * Translates a sequential temporal pattern definition into rules.
      *
      * @param def a {@link PairDefinition}. Cannot be <code>null</code>.
      * @throws KnowledgeSourceReadException if an error occurs accessing the
      * knowledge source during rule creation.
      */
     @Override
-    public void visit(PairDefinition def) throws ProtempaException {
+    public void visit(SequentialTemporalPatternDefinition def) throws ProtempaException {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
+            TemporalExtendedPropositionDefinition lhs = def.getMainTemporalExtendedPropositionDefinition();
+            if (lhs != null) {
+                Rule rule = new Rule("SEQ_TP_" + def.getId());
+                Pattern sourceP = new Pattern(2, TEMP_PROP_OT);
 
-            /*
-             * If there are no extended proposition definitions defined, we
-             * might still have an inverseIsA relationship with another pair
-             * abstraction definition.
-             */
-            if (def.getRelation() != null) {
-                TemporalExtendedPropositionDefinition lhProp = def
-                        .getLeftHandProposition();
-                TemporalExtendedPropositionDefinition rhProp = def
-                        .getRightHandProposition();
-                boolean secondRequired = def.isSecondRequired();
-                if (lhProp != null && (!secondRequired || rhProp != null)) {
-                    Rule rule = new Rule("PAIR_" + def.getId());
-                    Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
-
-                    sourceP.addConstraint(new PredicateConstraint(
-                            new GetMatchesPredicateExpressionPair(lhProp,
-                            rhProp)));
-
-                    Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
-                    resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
-                            ARRAY_LIST_OT, "result")));
-                    if (secondRequired) {
-                        resultP.addConstraint(new PredicateConstraint(
-                                new CollectionSizeExpression(2)));
-                    } else {
-                        resultP.addConstraint(new PredicateConstraint(
-                                new CollectionSizeExpression(1)));
-                    }
-                    rule.addPattern(resultP);
-                    rule.setConsequence(new PairConsequence(def,
-                            this.derivationsBuilder));
-                    rule.setSalience(MINUS_TWO_SALIENCE);
-                    this.ruleToAbstractionDefinition.put(rule, def);
-                    rules.add(rule);
-                } else {
-                    assert lhProp != null : "lhProp should not be null in "
-                            + def.getId();
-                    assert rhProp != null : "rhProp should not be null in "
-                            + def.getId();
+                sourceP.addConstraint(new PredicateConstraint(
+                        new GetMatchesPredicateExpression(lhs)));
+                RelatedTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions = def.getRelatedTemporalExtendedPropositionDefinitions();
+                for (int i = 0; i < relatedTemporalExtendedPropositionDefinitions.length; i++) {
+                    RelatedTemporalExtendedPropositionDefinition rtepd = 
+                            relatedTemporalExtendedPropositionDefinitions[i];
+                    Constraint c = new PredicateConstraint(
+                            new GetMatchesPredicateExpression(
+                            rtepd.getRelatedTemporalExtendedPropositionDefinition()));
+                    sourceP.addConstraint(c);
                 }
+
+                Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
+                resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
+                        ARRAY_LIST_OT, "result")));
+                resultP.addConstraint(new PredicateConstraint(
+                        new CollectionSizeExpression(1)));
+                rule.addPattern(resultP);
+                rule.setConsequence(new SequentialTemporalPatternConsequence(def,
+                        this.derivationsBuilder));
+                rule.setSalience(MINUS_TWO_SALIENCE);
+                this.ruleToAbstractionDefinition.put(rule, def);
+                rules.add(rule);
                 new AbstractionCombiner()
                         .toRules(def, rules, this.derivationsBuilder);
             }
+            
             addInverseIsARule(def);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "

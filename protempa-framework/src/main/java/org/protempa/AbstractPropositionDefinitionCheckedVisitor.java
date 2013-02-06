@@ -184,7 +184,7 @@ public abstract class AbstractPropositionDefinitionCheckedVisitor implements
      * @see org.protempa.PropositionDefinitionCheckedVisitor#visit(org.protempa.PairDefinition)
      */
     @Override
-    public void visit(PairDefinition pairDefinition) throws ProtempaException {
+    public void visit(SequentialTemporalPatternDefinition pairDefinition) throws ProtempaException {
         throw new UnsupportedOperationException(
                 "Visiting PairDefinitions is unsupported.");
 

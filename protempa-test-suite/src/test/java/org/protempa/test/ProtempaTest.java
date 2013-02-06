@@ -48,6 +48,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.arp.javautil.arrays.Arrays;
+import org.arp.javautil.collections.Iterators;
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.io.IOUtil;
 import org.arp.javautil.io.UniqueDirectoryCreator;
@@ -309,7 +310,6 @@ public class ProtempaTest {
         FileWriter fw = new FileWriter(outputFile);
         QueryResultsHandler handler = new SingleColumnQueryResultsHandler(fw);
         protempa.execute(query(), handler);
-        System.err.println("outputFile: " + outputFile);
         assertTrue("output doesn't match",
                 outputMatches(outputFile, TRUTH_OUTPUT));
 
@@ -562,15 +562,15 @@ public class ProtempaTest {
         bp.setDisplayName("My Blood Pressure Classification 3 (ANY)");
         bp.addValueClassification(new ValueClassification("MYBP3_HIGH", "MySystolicClassification3",
                 "My Systolic High 3"));
-        bp.addValueClassification(new ValueClassification("MYBP3_HIGH", "MyDiastolicClassification",
+        bp.addValueClassification(new ValueClassification("MYBP3_HIGH", "MyDiastolicClassification3",
                 "My Diastolic High 3"));
         bp.addValueClassification(new ValueClassification("MYBP3_LOW", "MySystolicClassification3",
                 "My Systolic Low 3"));
-        bp.addValueClassification(new ValueClassification("MYBP3_LOW", "MyDiastolicClassification",
-                "My Diastolic Low 3"));
+        bp.addValueClassification(new ValueClassification("MYBP3_LOW", "MyDiastolicClassification3",
+                "My Diastolic Low"));
         bp.addValueClassification(new ValueClassification("MYBP3_NORMAL", "MySystolicClassification3",
                 "My Systolic Normal 3"));
-        bp.addValueClassification(new ValueClassification("MYBP3_NORMAL", "MyDiastolicClassification",
+        bp.addValueClassification(new ValueClassification("MYBP3_NORMAL", "MyDiastolicClassification3",
                 "My Diastolic Normal 3"));
         bp.setValueDefinitionMatchOperator(ValueDefinitionMatchOperator.ANY);
         bp.setMinimumNumberOfValues(1);
@@ -744,11 +744,15 @@ public class ProtempaTest {
                     environmentName);
             assertEquals("Wrong number of working memories generated",
                     this.patientCount, results.size());
-            Map<String, Integer> forwardDerivCounts = getResultCounts(FORWARD_DERIVATION_COUNTS_FILE);
-            Map<String, Integer> backwardDerivCounts = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
+            Map<String, Integer> forwardDerivCounts = 
+                    getResultCounts(FORWARD_DERIVATION_COUNTS_FILE);
+            Map<String, Integer> backwardDerivCounts = 
+                    getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
             for (String keyId : results.keySet()) {
+                if (keyId.equals("12")) {
+                    System.err.println("OUTPUT FOR " + keyId + " IS " + Iterators.asList(results.get(keyId).iterateObjects()));
+                }
                 int derivCount = 0;
-                System.err.println(afh.getForwardDerivations(keyId));
                 for (List<Proposition> derivs : afh
                         .getForwardDerivations(keyId).values()) {
                     derivCount += derivs.size();
@@ -815,7 +819,8 @@ public class ProtempaTest {
                     fw);
             protempa.outputResults(query(), handler, environmentName);
             System.err
-                    .println("output: " + IOUtil.readFileAsString(outputFile));
+                    .println("output written to " + 
+                    outputFile.getAbsolutePath());
             assertTrue("output doesn't match",
                     outputMatches(outputFile, TRUTH_OUTPUT));
         } catch (FinderException e) {
@@ -1081,7 +1086,7 @@ public class ProtempaTest {
         Map<Proposition, List<Proposition>> no30DayDerivations = getDerivedPropositionsForKey(
                 "No30DayReadmission", afh.getBackwardDerivations("0"));
         assertEquals(
-                "Found wrong number of 'No30DayReadmissions' for key ID 0", 4,
+                "Found wrong number of 'No30DayReadmissions' for key ID 0", 3,
                 no30DayDerivations.size());
         logger.log(Level.INFO, "Completed No30DayReadmissions test");
     }
@@ -1650,7 +1655,6 @@ public class ProtempaTest {
                 bps.add((AbstractParameter) p);
             }
         }
-        System.err.println("bps " + bps);
         assertEquals(
                 "Found wrong number of 'MyBloodPressureClassificationAny'", 3,
                 bps.size());

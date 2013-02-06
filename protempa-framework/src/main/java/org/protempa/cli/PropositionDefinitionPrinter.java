@@ -27,7 +27,7 @@ import org.protempa.ContextDefinition;
 import org.protempa.EventDefinition;
 import org.protempa.HighLevelAbstractionDefinition;
 import org.protempa.LowLevelAbstractionDefinition;
-import org.protempa.PairDefinition;
+import org.protempa.SequentialTemporalPatternDefinition;
 import org.protempa.PrimitiveParameterDefinition;
 import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
@@ -105,10 +105,8 @@ class PropositionDefinitionPrinter extends AbstractPropositionDefinitionVisitor 
     }
 
     @Override
-    public void visit(PairDefinition pairDefinition) {
+    public void visit(SequentialTemporalPatternDefinition pairDefinition) {
         System.out.println("Pair definition " + pairDefinition.getId());
-        System.out.println("\tsecondRequired: "
-                + pairDefinition.isSecondRequired());
         printCommon(pairDefinition);
     }
 

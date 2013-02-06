@@ -77,7 +77,7 @@ public final class HierarchicalProjectionChildrenVisitor extends AbstractProposi
     }
 
     @Override
-    public void visit(PairDefinition pairDefinition) throws KnowledgeSourceReadException {
+    public void visit(SequentialTemporalPatternDefinition pairDefinition) throws KnowledgeSourceReadException {
         this.propDefs.addAll(knowledgeSource.readInverseIsA(pairDefinition));
         this.propDefs.addAll(knowledgeSource.readAbstractedFrom(pairDefinition));
     }

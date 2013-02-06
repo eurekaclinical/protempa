@@ -36,7 +36,7 @@ import org.protempa.HighLevelAbstractionDefinition;
 import org.protempa.IntervalSide;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.TemporalPatternOffset;
-import org.protempa.PairDefinition;
+import org.protempa.SequentialTemporalPatternDefinition;
 import org.protempa.PropertyConstraint;
 import org.protempa.PropertyDefinition;
 import org.protempa.ReferenceDefinition;
@@ -258,14 +258,14 @@ class Util {
         result.setSolid(bool);
     }
 
-    static void setSolid(Instance protegeProposition, PairDefinition result,
+    static void setSolid(Instance protegeProposition, SequentialTemporalPatternDefinition result,
             ConnectionManager cm) throws KnowledgeSourceReadException {
         boolean bool = parseSolid(protegeProposition, cm);
         result.setSolid(bool);
     }
 
     static void setConcatenable(Instance protegeProposition,
-            PairDefinition result, ConnectionManager cm)
+            SequentialTemporalPatternDefinition result, ConnectionManager cm)
             throws KnowledgeSourceReadException {
         boolean bool = parseConcatenable(protegeProposition, cm);
         result.setConcatenable(bool);

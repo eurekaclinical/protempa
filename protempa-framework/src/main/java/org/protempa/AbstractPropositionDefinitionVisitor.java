@@ -161,7 +161,7 @@ public abstract class AbstractPropositionDefinitionVisitor implements
      * @throws UnsupportedOperationException.
      */
     @Override
-    public void visit(PairDefinition pairDefinition) {
+    public void visit(SequentialTemporalPatternDefinition pairDefinition) {
         throw new UnsupportedOperationException(
                 "Visiting PairDefinitions is unsupported");
     }

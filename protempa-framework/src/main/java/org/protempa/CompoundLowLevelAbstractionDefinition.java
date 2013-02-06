@@ -83,8 +83,8 @@ import org.protempa.proposition.value.ValueType;
  * See {@link org.protempa.test.ProtempaTest} in protempa-test-suite for
  * examples of compound low-level abstractions.
  */
-public final class CompoundLowLevelAbstractionDefinition extends AbstractAbstractionDefinition
-        implements ParameterDefinition {
+public final class CompoundLowLevelAbstractionDefinition 
+        extends AbstractAbstractionDefinition implements ParameterDefinition {
 
     private static final long serialVersionUID = -1285908778762502403L;
     private final Set<String> lowLevelIds;

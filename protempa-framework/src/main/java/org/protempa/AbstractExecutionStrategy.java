@@ -219,7 +219,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         }
 
         @Override
-        public void visit(PairDefinition pairAbstractionDefinition)
+        public void visit(SequentialTemporalPatternDefinition pairAbstractionDefinition)
                 throws ProtempaException {
         }
 

@@ -129,7 +129,7 @@ public interface PropositionDefinitionCheckedVisitor {
      * @throws ProtempaException
      *             if an error occurs.
      */
-    void visit(PairDefinition def) throws ProtempaException;
+    void visit(SequentialTemporalPatternDefinition def) throws ProtempaException;
     
     /**
      * Process a context definition.

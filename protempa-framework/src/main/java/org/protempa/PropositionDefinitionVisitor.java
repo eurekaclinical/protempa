@@ -106,7 +106,7 @@ public interface PropositionDefinitionVisitor {
      * @param def
      *            a {@link PairDefinition}. Cannot be <code>null</code>.
      */
-    void visit(PairDefinition def);
+    void visit(SequentialTemporalPatternDefinition def);
     
     /**
      * Process a temporal context.

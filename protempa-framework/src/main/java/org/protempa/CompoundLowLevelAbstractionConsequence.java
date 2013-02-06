@@ -32,7 +32,6 @@ import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.CompoundValuedInterval;
-import org.protempa.proposition.IntervalSectioner;
 import org.protempa.proposition.DerivedSourceId;
 import org.protempa.proposition.DerivedUniqueId;
 import org.protempa.proposition.Segment;
@@ -41,7 +40,6 @@ import org.protempa.proposition.TemporalParameter;
 import org.protempa.proposition.AbstractParameterIntervalSectioner;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.interval.Interval;
-import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.Value;
 
@@ -105,7 +103,7 @@ final class CompoundLowLevelAbstractionConsequence implements
         List<CompoundValuedInterval> intervals = 
                 new AbstractParameterIntervalSectioner()
                 .buildIntervalList(pl);
-
+        
         List<AbstractParameterWithSourceParameters> derivedProps = 
                 new ArrayList<AbstractParameterWithSourceParameters>();
         for (CompoundValuedInterval interval : intervals) {
