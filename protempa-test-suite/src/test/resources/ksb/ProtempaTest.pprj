@@ -1,4 +1,4 @@
-; Thu Jan 24 21:46:20 EST 2013
+; Wed Feb 06 15:41:52 EST 2013
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
@@ -944,10 +944,10 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[ProtempaTest_ProjectKB_Class30035]
-		[ProtempaTest_ProjectKB_Class30036]
-		[ProtempaTest_ProjectKB_Class30037]
-		[ProtempaTest_ProjectKB_Class30038]))
+		[ProtempaTest_ProjectKB_Class30340]
+		[ProtempaTest_ProjectKB_Class30341]
+		[ProtempaTest_ProjectKB_Class30342]
+		[ProtempaTest_ProjectKB_Class30343]))
 
 ([CLSES_TAB] of  Widget
 
@@ -1051,11 +1051,11 @@
 ([KB_495177_Class6] of  Map
 
 	(entries
-		[ProtempaTest_ProjectKB_Class30039]
-		[ProtempaTest_ProjectKB_Class30040]
-		[ProtempaTest_ProjectKB_Class30042]
-		[ProtempaTest_ProjectKB_Class30043])
-	(referenced_maps [ProtempaTest_ProjectKB_Class30041]))
+		[ProtempaTest_ProjectKB_Class30344]
+		[ProtempaTest_ProjectKB_Class30345]
+		[ProtempaTest_ProjectKB_Class30347]
+		[ProtempaTest_ProjectKB_Class30348])
+	(referenced_maps [ProtempaTest_ProjectKB_Class30346]))
 
 ([KB_495177_Class88] of  Property_List
 
@@ -1108,7 +1108,7 @@
 ([KB_495177_Class99] of  Property_List
 )
 
-([KB_722049_Class5] of  Map
+([KB_759625_Class5] of  Map
 )
 
 ([LAYOUT_PROPERTIES] of  Property_List
@@ -1194,14 +1194,17 @@
 
 	(browser_slot_names [BROWSER_SLOT_NAMES])
 	(customized_instance_widgets
-		[INSTANCE_ANNOTATION_FORM_WIDGET]
-		[AIW_ProjectKB_Class10117]
+		[ProtempaTest_ProjectKB_Class30051]
 		[STANDARD_FACET_FORM_WIDGET]
 		[AIW_ProjectKB_Class84]
-		[STANDARD_SLOT_FORM_WIDGET]
 		[PAL_FORM_WIDGET]
-		[AIW_ProjectKB_Class10158]
-		[STANDARD_CLASS_FORM_WIDGET])
+		[ProtempaTest_ProjectKB_Class30042]
+		[STANDARD_CLASS_FORM_WIDGET]
+		[INSTANCE_ANNOTATION_FORM_WIDGET]
+		[AIW_ProjectKB_Class10117]
+		[STANDARD_SLOT_FORM_WIDGET]
+		[ProtempaTest_ProjectKB_Class30033]
+		[AIW_ProjectKB_Class10158])
 	(default_cls_metaclass ":STANDARD-CLASS")
 	(default_facet_metaclass ":STANDARD-FACET")
 	(default_instance_widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
@@ -1447,51 +1450,402 @@
 ([ProtempaTest_ProjectKB_Class30] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class30035] of  String
+([ProtempaTest_ProjectKB_Class30033] of  Widget
+
+	(is_hidden FALSE)
+	(name "SimpleValueClassification")
+	(property_list [ProtempaTest_ProjectKB_Class30034])
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
+
+([ProtempaTest_ProjectKB_Class30034] of  Property_List
+
+	(properties
+		[ProtempaTest_ProjectKB_Class30035]
+		[ProtempaTest_ProjectKB_Class30036]
+		[ProtempaTest_ProjectKB_Class30214]
+		[ProtempaTest_ProjectKB_Class30229]))
+
+([ProtempaTest_ProjectKB_Class30035] of  Property_List
+
+	(name "layout properties"))
+
+([ProtempaTest_ProjectKB_Class30036] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "simpleAbstraction")
+	(property_list [ProtempaTest_ProjectKB_Class30037])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceFieldWidget")
+	(width 200)
+	(x 0)
+	(y 60))
+
+([ProtempaTest_ProjectKB_Class30037] of  Property_List
+
+	(properties
+		[ProtempaTest_ProjectKB_Class30038]
+		[ProtempaTest_ProjectKB_Class30039]))
+
+([ProtempaTest_ProjectKB_Class30038] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-View References to Value"))
+
+([ProtempaTest_ProjectKB_Class30039] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-Delete Instance"))
+
+([ProtempaTest_ProjectKB_Class30040] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "simpleAbstractionValueName")
+	(property_list [ProtempaTest_ProjectKB_Class30041])
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(width 200)
+	(x 0)
+	(y 0))
+
+([ProtempaTest_ProjectKB_Class30041] of  Property_List
+)
+
+([ProtempaTest_ProjectKB_Class30042] of  Widget
+
+	(is_hidden FALSE)
+	(name "CompoundValueClassification")
+	(property_list [ProtempaTest_ProjectKB_Class30043])
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
+
+([ProtempaTest_ProjectKB_Class30043] of  Property_List
+
+	(properties
+		[ProtempaTest_ProjectKB_Class30044]
+		[ProtempaTest_ProjectKB_Class30049]
+		[ProtempaTest_ProjectKB_Class30225]))
+
+([ProtempaTest_ProjectKB_Class30044] of  Property_List
+
+	(name "layout properties"))
+
+([ProtempaTest_ProjectKB_Class30045] of  Widget
+
+	(height 120)
+	(is_hidden FALSE)
+	(name "simpleValueClassifications")
+	(property_list [ProtempaTest_ProjectKB_Class30046])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
+	(width 200)
+	(x 0)
+	(y 60))
+
+([ProtempaTest_ProjectKB_Class30046] of  Property_List
+
+	(properties
+		[ProtempaTest_ProjectKB_Class30047]
+		[ProtempaTest_ProjectKB_Class30048]))
+
+([ProtempaTest_ProjectKB_Class30047] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-View References to Value"))
+
+([ProtempaTest_ProjectKB_Class30048] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-Delete Instance"))
+
+([ProtempaTest_ProjectKB_Class30049] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name ":NAME")
+	(property_list [ProtempaTest_ProjectKB_Class30050])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(width 200)
+	(x 0)
+	(y 0))
+
+([ProtempaTest_ProjectKB_Class30050] of  Property_List
+)
+
+([ProtempaTest_ProjectKB_Class30051] of  Widget
+
+	(is_hidden FALSE)
+	(name "CompoundSimpleAbstraction")
+	(property_list [ProtempaTest_ProjectKB_Class30052])
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
+
+([ProtempaTest_ProjectKB_Class30052] of  Property_List
+
+	(properties
+		[ProtempaTest_ProjectKB_Class30053]
+		[ProtempaTest_ProjectKB_Class30054]
+		[ProtempaTest_ProjectKB_Class30056]
+		[ProtempaTest_ProjectKB_Class30058]
+		[ProtempaTest_ProjectKB_Class30062]
+		[ProtempaTest_ProjectKB_Class30064]
+		[ProtempaTest_ProjectKB_Class30296]
+		[ProtempaTest_ProjectKB_Class30298]
+		[ProtempaTest_ProjectKB_Class30300]
+		[ProtempaTest_ProjectKB_Class30302]))
+
+([ProtempaTest_ProjectKB_Class30053] of  Property_List
+
+	(name "layout properties"))
+
+([ProtempaTest_ProjectKB_Class30054] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "minValues")
+	(property_list [ProtempaTest_ProjectKB_Class30055])
+	(widget_class_name "edu.stanford.smi.protege.widget.IntegerFieldWidget")
+	(width 100)
+	(x 0)
+	(y 0))
+
+([ProtempaTest_ProjectKB_Class30055] of  Property_List
+)
+
+([ProtempaTest_ProjectKB_Class30056] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "maxGapUnits")
+	(property_list [ProtempaTest_ProjectKB_Class30057])
+	(widget_class_name "edu.stanford.smi.protege.widget.ComboBoxWidget")
+	(width 130)
+	(x 350)
+	(y 0))
+
+([ProtempaTest_ProjectKB_Class30057] of  Property_List
+)
+
+([ProtempaTest_ProjectKB_Class30058] of  Widget
+
+	(height 120)
+	(is_hidden FALSE)
+	(name "compoundValueClassifications")
+	(property_list [ProtempaTest_ProjectKB_Class30059])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
+	(width 220)
+	(x 0)
+	(y 60))
+
+([ProtempaTest_ProjectKB_Class30059] of  Property_List
+
+	(properties
+		[ProtempaTest_ProjectKB_Class30060]
+		[ProtempaTest_ProjectKB_Class30061]))
+
+([ProtempaTest_ProjectKB_Class30060] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-View References to Value"))
+
+([ProtempaTest_ProjectKB_Class30061] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-Delete Instance"))
+
+([ProtempaTest_ProjectKB_Class30062] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "maxGap")
+	(property_list [ProtempaTest_ProjectKB_Class30063])
+	(widget_class_name "edu.stanford.smi.protege.widget.IntegerFieldWidget")
+	(width 120)
+	(x 230)
+	(y 0))
+
+([ProtempaTest_ProjectKB_Class30063] of  Property_List
+)
+
+([ProtempaTest_ProjectKB_Class30064] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "matchOperator")
+	(property_list [ProtempaTest_ProjectKB_Class30065])
+	(widget_class_name "edu.stanford.smi.protege.widget.ComboBoxWidget")
+	(width 100)
+	(x 110)
+	(y 0))
+
+([ProtempaTest_ProjectKB_Class30065] of  Property_List
+)
+
+([ProtempaTest_ProjectKB_Class30214] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name ":NAME")
+	(property_list [ProtempaTest_ProjectKB_Class30215])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(width 200)
+	(x 0)
+	(y 0))
+
+([ProtempaTest_ProjectKB_Class30215] of  Property_List
+)
+
+([ProtempaTest_ProjectKB_Class30225] of  Widget
+
+	(height 120)
+	(is_hidden FALSE)
+	(name "simpleValueClassifications")
+	(property_list [ProtempaTest_ProjectKB_Class30226])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
+	(width 200)
+	(x 0)
+	(y 60))
+
+([ProtempaTest_ProjectKB_Class30226] of  Property_List
+
+	(properties
+		[ProtempaTest_ProjectKB_Class30227]
+		[ProtempaTest_ProjectKB_Class30228]))
+
+([ProtempaTest_ProjectKB_Class30227] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-View References to Value"))
+
+([ProtempaTest_ProjectKB_Class30228] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-Delete Instance"))
+
+([ProtempaTest_ProjectKB_Class30229] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "parameterValue")
+	(property_list [ProtempaTest_ProjectKB_Class30230])
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceFieldWidget")
+	(width 200)
+	(x 0)
+	(y 120))
+
+([ProtempaTest_ProjectKB_Class30230] of  Property_List
+
+	(properties
+		[ProtempaTest_ProjectKB_Class30231]
+		[ProtempaTest_ProjectKB_Class30232]))
+
+([ProtempaTest_ProjectKB_Class30231] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-View References to Value"))
+
+([ProtempaTest_ProjectKB_Class30232] of  Boolean
+
+	(boolean_value FALSE)
+	(name "ButtonDisplayed-Delete Instance"))
+
+([ProtempaTest_ProjectKB_Class30296] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "maxGapValues")
+	(property_list [ProtempaTest_ProjectKB_Class30297])
+	(widget_class_name "edu.stanford.smi.protege.widget.IntegerFieldWidget")
+	(width 120)
+	(x 230)
+	(y 120))
+
+([ProtempaTest_ProjectKB_Class30297] of  Property_List
+)
+
+([ProtempaTest_ProjectKB_Class30298] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "maxGapValuesUnits")
+	(property_list [ProtempaTest_ProjectKB_Class30299])
+	(widget_class_name "edu.stanford.smi.protege.widget.ComboBoxWidget")
+	(width 130)
+	(x 350)
+	(y 120))
+
+([ProtempaTest_ProjectKB_Class30299] of  Property_List
+)
+
+([ProtempaTest_ProjectKB_Class30300] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "minGapValues")
+	(property_list [ProtempaTest_ProjectKB_Class30301])
+	(widget_class_name "edu.stanford.smi.protege.widget.IntegerFieldWidget")
+	(width 120)
+	(x 230)
+	(y 60))
+
+([ProtempaTest_ProjectKB_Class30301] of  Property_List
+)
+
+([ProtempaTest_ProjectKB_Class30302] of  Widget
+
+	(height 60)
+	(is_hidden FALSE)
+	(name "minGapValuesUnits")
+	(property_list [ProtempaTest_ProjectKB_Class30303])
+	(widget_class_name "edu.stanford.smi.protege.widget.ComboBoxWidget")
+	(width 130)
+	(x 350)
+	(y 60))
+
+([ProtempaTest_ProjectKB_Class30303] of  Property_List
+)
+
+([ProtempaTest_ProjectKB_Class30340] of  String
 
 	(name ":INSTANCE-ANNOTATION")
 	(string_value "%3AANNOTATION-TEXT"))
 
-([ProtempaTest_ProjectKB_Class30036] of  String
-
-	(name ":PAL-CONSTRAINT")
-	(string_value "%3APAL-NAME"))
-
-([ProtempaTest_ProjectKB_Class30037] of  String
+([ProtempaTest_ProjectKB_Class30341] of  String
 
 	(name ":META-CLASS")
 	(string_value "%3ANAME"))
 
-([ProtempaTest_ProjectKB_Class30038] of  String
+([ProtempaTest_ProjectKB_Class30342] of  String
+
+	(name ":PAL-CONSTRAINT")
+	(string_value "%3APAL-NAME"))
+
+([ProtempaTest_ProjectKB_Class30343] of  String
 
 	(name "ValueSetElement")
 	(string_value "elementOfValueSet"))
 
-([ProtempaTest_ProjectKB_Class30039] of  Map_Entry
+([ProtempaTest_ProjectKB_Class30344] of  Map_Entry
 
 	(key "add_name_on_instance_form")
 	(key_class "java.lang.String")
 	(value "false")
 	(value_class "java.lang.String"))
 
-([ProtempaTest_ProjectKB_Class30040] of  Map_Entry
+([ProtempaTest_ProjectKB_Class30345] of  Map_Entry
 
 	(key "change_tracking_active")
 	(key_class "java.lang.String")
 	(value "false")
 	(value_class "java.lang.String"))
 
-([ProtempaTest_ProjectKB_Class30041] of  Map
+([ProtempaTest_ProjectKB_Class30346] of  Map
 )
 
-([ProtempaTest_ProjectKB_Class30042] of  Map_Entry
+([ProtempaTest_ProjectKB_Class30347] of  Map_Entry
 
 	(key "InstanceDisplay.yellow_stickies")
 	(key_class "java.lang.String")
-	(value "ProtempaTest_ProjectKB_Class30041")
+	(value "ProtempaTest_ProjectKB_Class30346")
 	(value_class "java.util.Map"))
 
-([ProtempaTest_ProjectKB_Class30043] of  Map_Entry
+([ProtempaTest_ProjectKB_Class30348] of  Map_Entry
 
 	(key "suppress_instance_counting")
 	(key_class "java.lang.String")
