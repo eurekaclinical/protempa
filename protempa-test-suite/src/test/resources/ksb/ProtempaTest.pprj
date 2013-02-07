@@ -1,4 +1,4 @@
-; Wed Feb 06 15:41:52 EST 2013
+; Thu Feb 07 11:44:45 EST 2013
 ; 
 ;+ (version "3.4.7")
 ;+ (build "Build 620")
@@ -944,10 +944,10 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[ProtempaTest_ProjectKB_Class30340]
-		[ProtempaTest_ProjectKB_Class30341]
-		[ProtempaTest_ProjectKB_Class30342]
-		[ProtempaTest_ProjectKB_Class30343]))
+		[ProtempaTest_ProjectKB_Class40288]
+		[ProtempaTest_ProjectKB_Class40289]
+		[ProtempaTest_ProjectKB_Class40290]
+		[ProtempaTest_ProjectKB_Class40291]))
 
 ([CLSES_TAB] of  Widget
 
@@ -991,6 +991,9 @@
 
 	(is_hidden FALSE)
 	(widget_class_name "edu.stanford.smi.protege.widget.InstancesTab"))
+
+([KB_430475_Class5] of  Map
+)
 
 ([KB_495177_Class0] of  String
 
@@ -1051,11 +1054,11 @@
 ([KB_495177_Class6] of  Map
 
 	(entries
-		[ProtempaTest_ProjectKB_Class30344]
-		[ProtempaTest_ProjectKB_Class30345]
-		[ProtempaTest_ProjectKB_Class30347]
-		[ProtempaTest_ProjectKB_Class30348])
-	(referenced_maps [ProtempaTest_ProjectKB_Class30346]))
+		[ProtempaTest_ProjectKB_Class40292]
+		[ProtempaTest_ProjectKB_Class40293]
+		[ProtempaTest_ProjectKB_Class40295]
+		[ProtempaTest_ProjectKB_Class40296])
+	(referenced_maps [ProtempaTest_ProjectKB_Class40294]))
 
 ([KB_495177_Class88] of  Property_List
 
@@ -1106,9 +1109,6 @@
 )
 
 ([KB_495177_Class99] of  Property_List
-)
-
-([KB_759625_Class5] of  Map
 )
 
 ([LAYOUT_PROPERTIES] of  Property_List
@@ -1496,20 +1496,6 @@
 	(boolean_value FALSE)
 	(name "ButtonDisplayed-Delete Instance"))
 
-([ProtempaTest_ProjectKB_Class30040] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "simpleAbstractionValueName")
-	(property_list [ProtempaTest_ProjectKB_Class30041])
-	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
-	(width 200)
-	(x 0)
-	(y 0))
-
-([ProtempaTest_ProjectKB_Class30041] of  Property_List
-)
-
 ([ProtempaTest_ProjectKB_Class30042] of  Widget
 
 	(is_hidden FALSE)
@@ -1527,33 +1513,6 @@
 ([ProtempaTest_ProjectKB_Class30044] of  Property_List
 
 	(name "layout properties"))
-
-([ProtempaTest_ProjectKB_Class30045] of  Widget
-
-	(height 120)
-	(is_hidden FALSE)
-	(name "simpleValueClassifications")
-	(property_list [ProtempaTest_ProjectKB_Class30046])
-	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
-	(width 200)
-	(x 0)
-	(y 60))
-
-([ProtempaTest_ProjectKB_Class30046] of  Property_List
-
-	(properties
-		[ProtempaTest_ProjectKB_Class30047]
-		[ProtempaTest_ProjectKB_Class30048]))
-
-([ProtempaTest_ProjectKB_Class30047] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value"))
-
-([ProtempaTest_ProjectKB_Class30048] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
 
 ([ProtempaTest_ProjectKB_Class30049] of  Widget
 
@@ -1801,57 +1760,6 @@
 ([ProtempaTest_ProjectKB_Class30303] of  Property_List
 )
 
-([ProtempaTest_ProjectKB_Class30340] of  String
-
-	(name ":INSTANCE-ANNOTATION")
-	(string_value "%3AANNOTATION-TEXT"))
-
-([ProtempaTest_ProjectKB_Class30341] of  String
-
-	(name ":META-CLASS")
-	(string_value "%3ANAME"))
-
-([ProtempaTest_ProjectKB_Class30342] of  String
-
-	(name ":PAL-CONSTRAINT")
-	(string_value "%3APAL-NAME"))
-
-([ProtempaTest_ProjectKB_Class30343] of  String
-
-	(name "ValueSetElement")
-	(string_value "elementOfValueSet"))
-
-([ProtempaTest_ProjectKB_Class30344] of  Map_Entry
-
-	(key "add_name_on_instance_form")
-	(key_class "java.lang.String")
-	(value "false")
-	(value_class "java.lang.String"))
-
-([ProtempaTest_ProjectKB_Class30345] of  Map_Entry
-
-	(key "change_tracking_active")
-	(key_class "java.lang.String")
-	(value "false")
-	(value_class "java.lang.String"))
-
-([ProtempaTest_ProjectKB_Class30346] of  Map
-)
-
-([ProtempaTest_ProjectKB_Class30347] of  Map_Entry
-
-	(key "InstanceDisplay.yellow_stickies")
-	(key_class "java.lang.String")
-	(value "ProtempaTest_ProjectKB_Class30346")
-	(value_class "java.util.Map"))
-
-([ProtempaTest_ProjectKB_Class30348] of  Map_Entry
-
-	(key "suppress_instance_counting")
-	(key_class "java.lang.String")
-	(value "false")
-	(value_class "java.lang.String"))
-
 ([ProtempaTest_ProjectKB_Class31] of  Widget
 
 	(is_hidden TRUE)
@@ -1899,6 +1807,57 @@
 
 ([ProtempaTest_ProjectKB_Class40] of  Property_List
 )
+
+([ProtempaTest_ProjectKB_Class40288] of  String
+
+	(name ":INSTANCE-ANNOTATION")
+	(string_value "%3AANNOTATION-TEXT"))
+
+([ProtempaTest_ProjectKB_Class40289] of  String
+
+	(name ":PAL-CONSTRAINT")
+	(string_value "%3APAL-NAME"))
+
+([ProtempaTest_ProjectKB_Class40290] of  String
+
+	(name ":META-CLASS")
+	(string_value "%3ANAME"))
+
+([ProtempaTest_ProjectKB_Class40291] of  String
+
+	(name "ValueSetElement")
+	(string_value "elementOfValueSet"))
+
+([ProtempaTest_ProjectKB_Class40292] of  Map_Entry
+
+	(key "add_name_on_instance_form")
+	(key_class "java.lang.String")
+	(value "false")
+	(value_class "java.lang.String"))
+
+([ProtempaTest_ProjectKB_Class40293] of  Map_Entry
+
+	(key "change_tracking_active")
+	(key_class "java.lang.String")
+	(value "false")
+	(value_class "java.lang.String"))
+
+([ProtempaTest_ProjectKB_Class40294] of  Map
+)
+
+([ProtempaTest_ProjectKB_Class40295] of  Map_Entry
+
+	(key "InstanceDisplay.yellow_stickies")
+	(key_class "java.lang.String")
+	(value "ProtempaTest_ProjectKB_Class40294")
+	(value_class "java.util.Map"))
+
+([ProtempaTest_ProjectKB_Class40296] of  Map_Entry
+
+	(key "suppress_instance_counting")
+	(key_class "java.lang.String")
+	(value "false")
+	(value_class "java.lang.String"))
 
 ([ProtempaTest_ProjectKB_Class41] of  Widget
 
