@@ -28,7 +28,7 @@ import edu.stanford.smi.protege.model.Instance;
 import java.util.HashMap;
 import java.util.Map;
 import org.protempa.*;
-import org.protempa.SequentialTemporalPatternDefinition.RelatedTemporalExtendedPropositionDefinition;
+import org.protempa.SequentialTemporalPatternDefinition.SubsequentTemporalExtendedPropositionDefinition;
 
 public class PairAbstractionConverter implements AbstractionConverter {
 
@@ -101,12 +101,12 @@ public class PairAbstractionConverter implements AbstractionConverter {
                     Util.instanceToTemporalExtendedPropositionDefinition(rhs, 
                     backend);
             extendedParameterCache.put(rhs, rhsDefinition);
-            pd.setMainTemporalExtendedPropositionDefinition(lhsDefinition);
-            RelatedTemporalExtendedPropositionDefinition related =
-                    new RelatedTemporalExtendedPropositionDefinition(relation, 
+            pd.setFirstTemporalExtendedPropositionDefinition(lhsDefinition);
+            SubsequentTemporalExtendedPropositionDefinition related =
+                    new SubsequentTemporalExtendedPropositionDefinition(relation, 
                     rhsDefinition);
-            pd.setRelatedTemporalExtendedPropositionDefinitions(
-                    new RelatedTemporalExtendedPropositionDefinition[]{related});
+            pd.setSubsequentTemporalExtendedPropositionDefinitions(
+                    new SubsequentTemporalExtendedPropositionDefinition[]{related});
         }
     }
 }

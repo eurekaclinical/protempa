@@ -43,7 +43,7 @@ import org.drools.rule.Rule;
 import org.drools.spi.Constraint;
 import org.drools.spi.PredicateExpression;
 import org.drools.spi.Tuple;
-import org.protempa.SequentialTemporalPatternDefinition.RelatedTemporalExtendedPropositionDefinition;
+import org.protempa.SequentialTemporalPatternDefinition.SubsequentTemporalExtendedPropositionDefinition;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Context;
 import org.protempa.proposition.PrimitiveParameter;
@@ -170,6 +170,9 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(LowLevelAbstractionDefinition def)
             throws KnowledgeSourceReadException {
+        if (def.getId().startsWith("USER:")) {
+            System.err.println("Creating rule for " + def);
+        }
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
@@ -179,6 +182,9 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
              * definition.
              */
             if (!def.getValueDefinitions().isEmpty()) {
+                if (def.getId().startsWith("USER:")) {
+                    System.err.println("In here");
+                }
                 Rule rule = new Rule(def.getId());
                 Pattern sourceP = new Pattern(2, 1, PRIM_PARAM_OT, "");
                 sourceP.addConstraint(new PredicateConstraint(
@@ -192,6 +198,9 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 rule.addPattern(resultP);
 
                 String contextId = def.getContextId();
+                if (def.getId().startsWith("USER:")) {
+                    System.err.println("Context is " + (contextId == null ? "is null!" : "not null: " + contextId));
+                }
                 if (contextId != null) {
                     Pattern sourceP2 = new Pattern(4, 1, CONTEXT_OT, "context");
                     sourceP2.addConstraint(new PredicateConstraint(
@@ -391,16 +400,16 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
-            TemporalExtendedPropositionDefinition lhs = def.getMainTemporalExtendedPropositionDefinition();
+            TemporalExtendedPropositionDefinition lhs = def.getFirstTemporalExtendedPropositionDefinition();
             if (lhs != null) {
                 Rule rule = new Rule("SEQ_TP_" + def.getId());
                 Pattern sourceP = new Pattern(2, TEMP_PROP_OT);
 
                 sourceP.addConstraint(new PredicateConstraint(
                         new GetMatchesPredicateExpression(lhs)));
-                RelatedTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions = def.getRelatedTemporalExtendedPropositionDefinitions();
+                SubsequentTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions = def.getSubsequentTemporalExtendedPropositionDefinitions();
                 for (int i = 0; i < relatedTemporalExtendedPropositionDefinitions.length; i++) {
-                    RelatedTemporalExtendedPropositionDefinition rtepd = 
+                    SubsequentTemporalExtendedPropositionDefinition rtepd = 
                             relatedTemporalExtendedPropositionDefinitions[i];
                     Constraint c = new PredicateConstraint(
                             new GetMatchesPredicateExpression(

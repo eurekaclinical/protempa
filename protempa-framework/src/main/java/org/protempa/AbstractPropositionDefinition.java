@@ -166,6 +166,7 @@ public abstract class AbstractPropositionDefinition implements
         }
     }
 
+    @Override
     public String getDescription() {
         return this.description;
     }

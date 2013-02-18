@@ -32,7 +32,7 @@ import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
 import org.drools.spi.Tuple;
-import org.protempa.SequentialTemporalPatternDefinition.RelatedTemporalExtendedPropositionDefinition;
+import org.protempa.SequentialTemporalPatternDefinition.SubsequentTemporalExtendedPropositionDefinition;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.Segment;
@@ -64,12 +64,12 @@ class SequentialTemporalPatternConsequence implements Consequence {
             DerivationsBuilder derivationsBuilder) {
         assert def != null : "def cannot be null";
         this.def = def;
-        RelatedTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions = def.getRelatedTemporalExtendedPropositionDefinitions();
+        SubsequentTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions = def.getSubsequentTemporalExtendedPropositionDefinitions();
         TemporalExtendedPropositionDefinition[] epds = new TemporalExtendedPropositionDefinition[relatedTemporalExtendedPropositionDefinitions.length + 1];
         assert epds != null : "epds cannot be null";
         int col = epds.length;
         assert col > 0 : "columns must be > 0, was " + col;
-        epds[0] = def.getMainTemporalExtendedPropositionDefinition();
+        epds[0] = def.getFirstTemporalExtendedPropositionDefinition();
         for (int i = 1; i < epds.length; i++) {
             epds[i] = relatedTemporalExtendedPropositionDefinitions[i - 1].getRelatedTemporalExtendedPropositionDefinition();
         }
@@ -80,10 +80,10 @@ class SequentialTemporalPatternConsequence implements Consequence {
         this.epdPairs = new ArrayList<List<TemporalExtendedPropositionDefinition>>();
         this.epdToRelation = new HashMap<List<TemporalExtendedPropositionDefinition>, Relation>(
                 this.parameterMapCapacity);
-        TemporalExtendedPropositionDefinition lhs = def.getMainTemporalExtendedPropositionDefinition();
+        TemporalExtendedPropositionDefinition lhs = def.getFirstTemporalExtendedPropositionDefinition();
         assert lhs != null : "mainTemporalExtendedPropositionDefinition cannot be null";
-        for (RelatedTemporalExtendedPropositionDefinition rhsr :
-                def.getRelatedTemporalExtendedPropositionDefinitions()) {
+        for (SubsequentTemporalExtendedPropositionDefinition rhsr :
+                def.getSubsequentTemporalExtendedPropositionDefinitions()) {
             TemporalExtendedPropositionDefinition rhs = rhsr.getRelatedTemporalExtendedPropositionDefinition();
             List<TemporalExtendedPropositionDefinition> asList =
                     Arrays.asList(

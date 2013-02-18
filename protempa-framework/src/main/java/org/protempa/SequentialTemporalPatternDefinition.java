@@ -29,20 +29,20 @@ import org.protempa.proposition.interval.Relation;
 public class SequentialTemporalPatternDefinition extends AbstractAbstractionDefinition {
 
     private static final long serialVersionUID = 456697454379224533L;
-    private static final RelatedTemporalExtendedPropositionDefinition[] DEFAULT_REL = new RelatedTemporalExtendedPropositionDefinition[0];
+    private static final SubsequentTemporalExtendedPropositionDefinition[] DEFAULT_REL = new SubsequentTemporalExtendedPropositionDefinition[0];
     private boolean solid;
     private TemporalPatternOffset temporalOffset;
     private boolean concatenable;
-    private TemporalExtendedPropositionDefinition mainTemporalExtendedPropositionDefinition;
-    private RelatedTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions;
+    private TemporalExtendedPropositionDefinition firstTemporalExtendedPropositionDefinition;
+    private SubsequentTemporalExtendedPropositionDefinition[] subsequentTemporalExtendedPropositionDefinitions;
 
-    public static class RelatedTemporalExtendedPropositionDefinition implements Serializable {
+    public static class SubsequentTemporalExtendedPropositionDefinition implements Serializable {
         private static final long serialVersionUID = 1;
 
         private final Relation relation;
         private final TemporalExtendedPropositionDefinition relatedTemporalExtendedPropositionDefinition;
 
-        public RelatedTemporalExtendedPropositionDefinition(Relation relation, 
+        public SubsequentTemporalExtendedPropositionDefinition(Relation relation, 
                 TemporalExtendedPropositionDefinition relatedTemporalExtendedPropositionDefinition) {
             this.relation = relation;
             this.relatedTemporalExtendedPropositionDefinition = relatedTemporalExtendedPropositionDefinition;
@@ -61,41 +61,41 @@ public class SequentialTemporalPatternDefinition extends AbstractAbstractionDefi
         super(id);
         this.concatenable = true;
         this.solid = true;
-        this.relatedTemporalExtendedPropositionDefinitions = DEFAULT_REL;
+        this.subsequentTemporalExtendedPropositionDefinitions = DEFAULT_REL;
     }
 
-    public TemporalExtendedPropositionDefinition getMainTemporalExtendedPropositionDefinition() {
-        return mainTemporalExtendedPropositionDefinition;
+    public TemporalExtendedPropositionDefinition getFirstTemporalExtendedPropositionDefinition() {
+        return firstTemporalExtendedPropositionDefinition;
     }
 
-    public void setMainTemporalExtendedPropositionDefinition(TemporalExtendedPropositionDefinition mainTemporalExtendedPropositionDefinition) {
-        this.mainTemporalExtendedPropositionDefinition = mainTemporalExtendedPropositionDefinition;
+    public void setFirstTemporalExtendedPropositionDefinition(TemporalExtendedPropositionDefinition firstTemporalExtendedPropositionDefinition) {
+        this.firstTemporalExtendedPropositionDefinition = firstTemporalExtendedPropositionDefinition;
     }
 
-    public RelatedTemporalExtendedPropositionDefinition[] getRelatedTemporalExtendedPropositionDefinitions() {
-        return relatedTemporalExtendedPropositionDefinitions;
+    public SubsequentTemporalExtendedPropositionDefinition[] getSubsequentTemporalExtendedPropositionDefinitions() {
+        return subsequentTemporalExtendedPropositionDefinitions;
     }
 
-    public void setRelatedTemporalExtendedPropositionDefinitions(
-            RelatedTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions) {
-        if (relatedTemporalExtendedPropositionDefinitions == null) {
-            this.relatedTemporalExtendedPropositionDefinitions = DEFAULT_REL;
+    public void setSubsequentTemporalExtendedPropositionDefinitions(
+            SubsequentTemporalExtendedPropositionDefinition[] subsequentTemporalExtendedPropositionDefinitions) {
+        if (subsequentTemporalExtendedPropositionDefinitions == null) {
+            this.subsequentTemporalExtendedPropositionDefinitions = DEFAULT_REL;
         } else {
-            this.relatedTemporalExtendedPropositionDefinitions = 
-                    relatedTemporalExtendedPropositionDefinitions.clone();
+            this.subsequentTemporalExtendedPropositionDefinitions = 
+                    subsequentTemporalExtendedPropositionDefinitions.clone();
         }
     }
 
     @Override
     public Set<String> getAbstractedFrom() {
         HashSet<String> set = new HashSet<String>();
-        if (this.mainTemporalExtendedPropositionDefinition != null) {
+        if (this.firstTemporalExtendedPropositionDefinition != null) {
             set.add(
-                    this.mainTemporalExtendedPropositionDefinition
+                    this.firstTemporalExtendedPropositionDefinition
                     .getPropositionId());
         }
-        for (RelatedTemporalExtendedPropositionDefinition rel : 
-                this.relatedTemporalExtendedPropositionDefinitions) {
+        for (SubsequentTemporalExtendedPropositionDefinition rel : 
+                this.subsequentTemporalExtendedPropositionDefinitions) {
             set.add(
                     rel.getRelatedTemporalExtendedPropositionDefinition()
                     .getPropositionId());
@@ -177,9 +177,9 @@ public class SequentialTemporalPatternDefinition extends AbstractAbstractionDefi
         super.reset();
         this.concatenable = true;
         this.solid = true;
-        this.relatedTemporalExtendedPropositionDefinitions = DEFAULT_REL;
+        this.subsequentTemporalExtendedPropositionDefinitions = DEFAULT_REL;
         this.temporalOffset = null;
-        this.mainTemporalExtendedPropositionDefinition = null;
+        this.firstTemporalExtendedPropositionDefinition = null;
     }
 
     @Override

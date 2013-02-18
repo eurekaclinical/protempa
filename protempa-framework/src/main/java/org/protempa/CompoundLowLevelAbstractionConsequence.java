@@ -75,6 +75,9 @@ final class CompoundLowLevelAbstractionConsequence implements
         for (AbstractParameter parameter : sources) {
             derivationsBuilder.propositionAsserted(parameter, derived);
         }
+        if (this.cllad.getId().startsWith("USER:")) {
+            System.err.println("asserting " + derived);
+        }
         ProtempaUtil.logger().log(Level.FINER,
                 "Asserted derived proposition {0}", derived);
     }

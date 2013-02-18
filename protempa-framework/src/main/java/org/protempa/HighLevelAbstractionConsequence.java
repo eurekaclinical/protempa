@@ -38,7 +38,7 @@ import org.protempa.proposition.TemporalProposition;
  * @author Andrew Post
  */
 class HighLevelAbstractionConsequence implements Consequence {
-
+    
     private static final long serialVersionUID = -833609244124008166L;
     private final HighLevelAbstractionDefinition cad;
     private final int columns;
@@ -47,11 +47,9 @@ class HighLevelAbstractionConsequence implements Consequence {
 
     /**
      *
-     * @param def
-     *            a {@link HighLevelAbstractionDefinition}, cannot be
-     *            <code>null</code>.
-     * @param columns
-     *            the number of parameters, must be greater than zero.
+     * @param def a {@link HighLevelAbstractionDefinition}, cannot be
+     * <code>null</code>.
+     * @param columns the number of parameters, must be greater than zero.
      */
     HighLevelAbstractionConsequence(HighLevelAbstractionDefinition def,
             ExtendedPropositionDefinition[] epds,
@@ -65,14 +63,14 @@ class HighLevelAbstractionConsequence implements Consequence {
         this.epds = epds;
         this.derivationsBuilder = derivationsBuilder;
     }
-
+    
     @Override
     public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
             throws Exception {
         Logger logger = ProtempaUtil.logger();
         List<Proposition> ps = parameters(arg0.getTuple(), arg1);
         List<TemporalProposition> tps = extractTemporalPropositions(ps);
-        List<TemporalExtendedPropositionDefinition> tepdsL = 
+        List<TemporalExtendedPropositionDefinition> tepdsL =
                 extractTemporalExtendedPropositionDefinitions();
         TemporalExtendedPropositionDefinition[] tepds =
                 tepdsL.toArray(
@@ -84,13 +82,16 @@ class HighLevelAbstractionConsequence implements Consequence {
         AbstractParameter result =
                 AbstractParameterFactory.getFromAbstraction(cad.getPropositionId(),
                 segment, tps, null, temporalOffset, tepds, null);
+        if (this.cad.getId().startsWith("USER:")) {
+            System.err.println("asserting " + result);
+        }
         arg0.getWorkingMemory().insert(result);
         for (Proposition proposition : segment) {
             this.derivationsBuilder.propositionAsserted(proposition, result);
         }
         logger.log(Level.FINER, "Asserted derived proposition {0}", result);
     }
-
+    
     private List<Proposition> parameters(Tuple arg0,
             WorkingMemory arg1) {
         List<Proposition> sequences =
@@ -100,7 +101,7 @@ class HighLevelAbstractionConsequence implements Consequence {
         }
         return sequences;
     }
-
+    
     private List<TemporalProposition> extractTemporalPropositions(
             List<Proposition> ps) {
         List<TemporalProposition> tps = new ArrayList<TemporalProposition>();
@@ -111,9 +112,8 @@ class HighLevelAbstractionConsequence implements Consequence {
         }
         return tps;
     }
-
-    private List<TemporalExtendedPropositionDefinition> 
-            extractTemporalExtendedPropositionDefinitions() {
+    
+    private List<TemporalExtendedPropositionDefinition> extractTemporalExtendedPropositionDefinitions() {
         List<TemporalExtendedPropositionDefinition> tepdsL =
                 new ArrayList<TemporalExtendedPropositionDefinition>();
         for (ExtendedPropositionDefinition epd : epds) {
