@@ -170,9 +170,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(LowLevelAbstractionDefinition def)
             throws KnowledgeSourceReadException {
-        if (def.getId().startsWith("USER:")) {
-            System.err.println("Creating rule for " + def);
-        }
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
@@ -182,9 +179,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
              * definition.
              */
             if (!def.getValueDefinitions().isEmpty()) {
-                if (def.getId().startsWith("USER:")) {
-                    System.err.println("In here");
-                }
                 Rule rule = new Rule(def.getId());
                 Pattern sourceP = new Pattern(2, 1, PRIM_PARAM_OT, "");
                 sourceP.addConstraint(new PredicateConstraint(
@@ -198,9 +192,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 rule.addPattern(resultP);
 
                 String contextId = def.getContextId();
-                if (def.getId().startsWith("USER:")) {
-                    System.err.println("Context is " + (contextId == null ? "is null!" : "not null: " + contextId));
-                }
                 if (contextId != null) {
                     Pattern sourceP2 = new Pattern(4, 1, CONTEXT_OT, "context");
                     sourceP2.addConstraint(new PredicateConstraint(

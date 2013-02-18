@@ -63,7 +63,6 @@ final class LowLevelAbstractionConsequence implements Consequence {
         @Override
         public void assertObject(Object obj) {
             workingMemory.insert(obj);
-            System.err.println("asserting " + obj);
             ProtempaUtil.logger().log(Level.FINER,
                     "Asserted derived proposition {0}", obj);
         }

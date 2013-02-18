@@ -82,9 +82,6 @@ class HighLevelAbstractionConsequence implements Consequence {
         AbstractParameter result =
                 AbstractParameterFactory.getFromAbstraction(cad.getPropositionId(),
                 segment, tps, null, temporalOffset, tepds, null);
-        if (this.cad.getId().startsWith("USER:")) {
-            System.err.println("asserting " + result);
-        }
         arg0.getWorkingMemory().insert(result);
         for (Proposition proposition : segment) {
             this.derivationsBuilder.propositionAsserted(proposition, result);
