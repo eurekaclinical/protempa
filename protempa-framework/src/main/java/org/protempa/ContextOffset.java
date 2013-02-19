@@ -31,22 +31,12 @@ import org.protempa.proposition.value.Value;
 public class ContextOffset implements Serializable {
     private static final long serialVersionUID = 1;
     
-    private Value startAbstractParamValue;
-    private Value finishAbstractParamValue;
     private int startOffset;
     private Unit startOffsetUnits;
     private int finishOffset;
     private Unit finishOffsetUnits;
     private IntervalSide startIntervalSide = IntervalSide.START;
     private IntervalSide finishIntervalSide = IntervalSide.FINISH;
-
-    public Value getFinishAbstractParamValue() {
-        return finishAbstractParamValue;
-    }
-
-    public void setFinishAbstractParamValue(Value finishAbstractParamValue) {
-        this.finishAbstractParamValue = finishAbstractParamValue;
-    }
 
     public IntervalSide getFinishIntervalSide() {
         return finishIntervalSide;
@@ -74,14 +64,6 @@ public class ContextOffset implements Serializable {
 
     public void setFinishOffsetUnits(Unit finishOffsetUnits) {
         this.finishOffsetUnits = finishOffsetUnits;
-    }
-
-    public Value getStartAbstractParamValue() {
-        return startAbstractParamValue;
-    }
-
-    public void setStartAbstractParamValue(Value startAbstractParamValue) {
-        this.startAbstractParamValue = startAbstractParamValue;
     }
 
     public IntervalSide getStartIntervalSide() {
