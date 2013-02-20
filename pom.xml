@@ -6,6 +6,7 @@
     <packaging>pom</packaging>
     <name>Protempa</name>
     <url>http://aiw.sourceforge.net/dev/protempa-${project.version}</url>
+    <inceptionYear>2012</inceptionYear>
     <description>Protempa supports the construction of software systems for 
         querying clinical databases, summarizing patient data, detecting clinically 
         significant data patterns in groups of patients or individual patients, and 
@@ -229,13 +230,9 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>1.0</version>
+                <version>1.4</version>
                 <configuration>
                     <licenseName>apache_v2</licenseName>
-                    <verbose>false</verbose>
-                    <organizationName>Emory University</organizationName>
-                    <inceptionYear>2012</inceptionYear>
-                    <canUpdateDescription>false</canUpdateDescription>
                     <roots>
                         <root>src/main</root>
                         <root>src/test/java/</root>

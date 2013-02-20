@@ -2,7 +2,7 @@
  * #%L
  * Protempa Protege Knowledge Source Backend
  * %%
- * Copyright (C) 2012 Emory University
+ * Copyright (C) 2012 - 2013 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
