@@ -79,7 +79,13 @@ class TopologicalSortComparator implements Comparator<TemporalPropositionDefinit
                 List<String> ibs = new ArrayList<String>();
                 for (TemporalExtendedPropositionDefinition tepd : 
                         cd.getInducedBy()) {
-                    ibs.add(tepd.getPropositionId());
+                    String propId = tepd.getPropositionId();
+                    TemporalPropositionDefinition propDef = 
+                            knowledgeSource.readTemporalPropositionDefinition(propId);
+                    if (propDef instanceof AbstractionDefinition 
+                            || propDef instanceof ContextDefinition) {
+                        ibs.add(propId);
+                    }
                 }
                 nodes.put(cd.getId(), ibs);
             }

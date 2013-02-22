@@ -152,7 +152,9 @@ public final class ContextDefinition extends AbstractPropositionDefinition
         if (subContextOf == null) {
             this.subContexts = StringUtils.EMPTY_STRING_ARRAY;
         } else {
-            ProtempaUtil.checkArray(subContextOf, "subContextOf");
+            ProtempaUtil.checkArrayForNullElement(subContextOf, 
+                    "subContextOf");
+            ProtempaUtil.checkArrayForDuplicates(subContextOf, "subContextOf");
             this.subContexts = subContextOf.clone();
         }
     }
