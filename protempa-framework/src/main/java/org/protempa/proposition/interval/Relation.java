@@ -38,6 +38,24 @@ public final class Relation implements Serializable {
     private static final long serialVersionUID = -7813328179876098366L;
     private final Integer[] intValues;
     private final Unit[] units;
+    
+    public static final Relation BEFORE = new Relation(null, null, null, null, 
+                                        null, null, null, null, 
+                                        1, null, null, null,
+                                        null, null, null, null);
+    public static final Relation AFTER = BEFORE.inverse();
+    
+    public static final Relation OVERLAPS = new Relation(1, null, null, null, 
+            null, null, null, null, 
+            null, null, -1, null, 
+            1, null, null, null);
+    public static final Relation OVERLAPPED_BY = OVERLAPS.inverse();
+    
+    public static final Relation MEETS = new Relation(null, null, null, null, 
+            null, null, null, null, 
+            0, null, 0, null, 
+            null, null, null, null);
+    public static final Relation MET_BY = MEETS.inverse();
 
     public Relation() {
         this(null, null, null, null, null, null, null, null, null, null, null,

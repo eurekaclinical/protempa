@@ -230,8 +230,9 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
 
                 @Override
                 public int compare(TemporalProposition p0, TemporalProposition p1) {
-                    return p0.getInterval().getMaximumStart().compareTo(
-                            p1.getInterval().getMaximumStart());
+                    Long p0MaxStart = p0.getInterval().getMaximumStart();
+                    Long p1MaxStart = p1.getInterval().getMaximumStart();
+                    return p0MaxStart.compareTo(p1MaxStart);
                 }
             };
 
@@ -244,9 +245,9 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
 
                 @Override
                 public int compare(TemporalProposition p0, TemporalProposition p1) {
-
-                    return p0.getInterval().getMinimumFinish().compareTo(
-                            p1.getInterval().getMinimumFinish());
+                    Long p0MinFinish = p0.getInterval().getMinimumFinish();
+                    Long p1MinFinish = p1.getInterval().getMinimumFinish();
+                    return p0MinFinish.compareTo(p1MinFinish);
                 }
             };
 

@@ -21,6 +21,8 @@ package org.protempa;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Calendar;
+import java.util.TimeZone;
 import java.util.UUID;
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
@@ -33,6 +35,7 @@ import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.value.Granularity;
+import org.protempa.proposition.value.Unit;
 
 /**
  *
@@ -43,6 +46,8 @@ class ContextDefinitionInducedByConsequence implements Consequence {
     private final DerivationsBuilder derivationsBuilder;
     private final ContextDefinition def;
     private transient IntervalFactory intervalFactory;
+    private final long earliestTime;
+    private final long latestTime;
 
     ContextDefinitionInducedByConsequence(ContextDefinition def,
             DerivationsBuilder derivationsBuilder) {
@@ -52,6 +57,18 @@ class ContextDefinitionInducedByConsequence implements Consequence {
         this.def = def;
         this.derivationsBuilder = derivationsBuilder;
         this.intervalFactory = new IntervalFactory();
+        Calendar cal = Calendar.getInstance();
+        cal.clear();
+        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+        cal.set(cal.getMinimum(Calendar.YEAR),
+                cal.getMinimum(Calendar.MONTH),
+                cal.getMinimum(Calendar.DAY_OF_MONTH),
+                cal.getMinimum(Calendar.HOUR),
+                cal.getMinimum(Calendar.MINUTE),
+                cal.getMinimum(Calendar.SECOND));
+        this.earliestTime = cal.getTimeInMillis();
+        this.latestTime = Long.MAX_VALUE;
+
     }
 
     private void readObject(ObjectInputStream ois) throws IOException,
@@ -87,11 +104,23 @@ class ContextDefinitionInducedByConsequence implements Consequence {
                 : prop.getInterval().getMaxFinish();
 
         Integer startOffset = temporalOffset.getStartOffset();
+
         if (startOffset != null) {
-            minStart += startOffset;
-            maxStart += startOffset;
+            Unit startOffsetUnits = temporalOffset.getStartOffsetUnits();
+            if (startOffsetUnits != null) {
+                minStart = startOffsetUnits.addToPosition(minStart, startOffset);
+                maxStart = startOffsetUnits.addToPosition(maxStart, startOffset);
+            } else {
+                minStart += startOffset;
+                maxStart += startOffset;
+            }
+            startGran = prop.getInterval().getStartGranularity();
+        } else {
+            minStart = this.earliestTime;
+            maxStart = this.earliestTime;
+            startGran = null;
         }
-        startGran = prop.getInterval().getStartGranularity();
+        
 
         minFinish = temporalOffset.getFinishIntervalSide()
                 == IntervalSide.START ? oldInterval.getMinStart()
@@ -101,10 +130,21 @@ class ContextDefinitionInducedByConsequence implements Consequence {
                 : oldInterval.getMaxFinish();
         Integer finishOffset = temporalOffset.getFinishOffset();
         if (finishOffset != null) {
-            minFinish += finishOffset;
-            maxFinish += finishOffset;
+            Unit finishOffsetUnits = temporalOffset.getFinishOffsetUnits();
+            if (finishOffsetUnits != null) {
+                minFinish = finishOffsetUnits.addToPosition(minFinish, finishOffset);
+                maxFinish = finishOffsetUnits.addToPosition(maxFinish, finishOffset);
+            } else {
+                minFinish += finishOffset;
+                maxFinish += finishOffset;
+            }
+            finishGran = oldInterval.getFinishGranularity();
+        } else {
+            minFinish = this.latestTime;
+            maxFinish = this.latestTime;
+            finishGran = null;
         }
-        finishGran = oldInterval.getFinishGranularity();
+        
 
         context.setInterval(this.intervalFactory.getInstance(minStart,
                 maxStart, startGran, minFinish, maxFinish, finishGran));

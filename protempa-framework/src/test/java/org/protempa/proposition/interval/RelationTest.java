@@ -93,10 +93,8 @@ public class RelationTest extends TestCase {
     }
 
     public void test1157PMAnd1159PMZeroDaysApart() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:57 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/1/07 11:59 pm"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:57 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -110,10 +108,8 @@ public class RelationTest extends TestCase {
     }
 
     public void test1157PMAnd1159PMEquals() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:57 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/1/07 11:59 pm"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:57 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, twelveOhOne,
                 AbsoluteTimeGranularity.MINUTE);
@@ -128,10 +124,8 @@ public class RelationTest extends TestCase {
     }
 
     public void test1157PMAnd1159PMEquals2() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:57 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/1/07 11:59 pm"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:57 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, twelveOhOne,
                 AbsoluteTimeGranularity.MINUTE);
@@ -144,10 +138,8 @@ public class RelationTest extends TestCase {
     }
 
     public void test1159PMAnd1200AMExactlyOneDayApart() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 12:00 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 12:00 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -161,10 +153,8 @@ public class RelationTest extends TestCase {
     }
 
     public void test1159PMAnd1259AMExactlyOneDayApart() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 12:59 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 12:59 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -178,10 +168,8 @@ public class RelationTest extends TestCase {
     }
 
     public void test1159PMAnd1201AMExactlyOneHourApart() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 12:01 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 12:01 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -195,10 +183,8 @@ public class RelationTest extends TestCase {
     }
 
     public void test1159PMAnd1259AMExactlyOneHourApart() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 12:59 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 12:59 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -213,10 +199,8 @@ public class RelationTest extends TestCase {
 
     public void test1159PMAnd1AMExactlyOneHourApartFalse()
             throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 1:00 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 1:00 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -230,10 +214,8 @@ public class RelationTest extends TestCase {
     }
 
     public void test1159PMAnd1AMExactlyTwoHoursApart() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 1:00 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 1:00 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -247,10 +229,8 @@ public class RelationTest extends TestCase {
     }
 
     public void test1159PMAnd1200AMExactlyOneHourApart() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 12:00 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 12:00 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -265,10 +245,8 @@ public class RelationTest extends TestCase {
 
     public void test1159PMAnd1200AMExactlyZeroHoursApart()
             throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 12:00 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 12:00 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -283,10 +261,8 @@ public class RelationTest extends TestCase {
 
     public void test1159PMAnd1200AMExactlyTwoHoursApartFalse2()
             throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 12:00 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 12:00 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -300,10 +276,8 @@ public class RelationTest extends TestCase {
     }
 
     public void test1159PMAnd1201AMExactlyTwoHoursApart() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 12:01 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 12:01 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -318,10 +292,8 @@ public class RelationTest extends TestCase {
 
     public void test1159PMAnd1201AMExactlyOneMinuteApart()
             throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 12:01 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 12:01 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -336,10 +308,8 @@ public class RelationTest extends TestCase {
 
     public void test1159PMAnd1201AMExactlyTwoMinutesApart()
             throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 12:01 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 12:01 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -354,10 +324,8 @@ public class RelationTest extends TestCase {
 
     public void test1159PMAnd1201AMExactlyThreeMinutesApart()
             throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long elevenFiftyNine = asPosition(format.parse("1/1/07 11:59 pm"));
-        Long twelveOhOne = asPosition(format.parse("1/2/07 12:01 am"));
+        Long elevenFiftyNine = asPosition(DATE_TIME_FORMAT.parse("1/1/07 11:59 pm"));
+        Long twelveOhOne = asPosition(DATE_TIME_FORMAT.parse("1/2/07 12:01 am"));
         Interval i1 = intervalFactory.getInstance(elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE, elevenFiftyNine,
                 AbsoluteTimeGranularity.MINUTE);
@@ -372,10 +340,8 @@ public class RelationTest extends TestCase {
 
     // Spring forward
     public void testSpringForwardMinutes() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("3/11/07 1:55 am"));
-        Long justAfter = asPosition(format.parse("3/11/07 3:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("3/11/07 1:55 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("3/11/07 3:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -389,10 +355,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testSpringForwardMinutesFalse() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("3/11/07 1:55 am"));
-        Long justAfter = asPosition(format.parse("3/11/07 3:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("3/11/07 1:55 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("3/11/07 3:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -406,10 +370,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testSpringForwardHours() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("3/11/07 1:55 am"));
-        Long justAfter = asPosition(format.parse("3/11/07 3:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("3/11/07 1:55 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("3/11/07 3:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -423,10 +385,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testSpringForwardHoursFalse() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("3/11/07 1:55 am"));
-        Long justAfter = asPosition(format.parse("3/11/07 3:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("3/11/07 1:55 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("3/11/07 3:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -441,10 +401,8 @@ public class RelationTest extends TestCase {
 
     // Fall back
     public void testFallBackMinutes() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/29/06 12:55 am"));
-        Long justAfter = asPosition(format.parse("10/29/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/29/06 12:55 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/29/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -458,10 +416,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testFallBackMinutesFalse() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/29/06 12:55 am"));
-        Long justAfter = asPosition(format.parse("10/29/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/29/06 12:55 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/29/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -475,10 +431,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testFallBackHours() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/29/06 12:55 am"));
-        Long justAfter = asPosition(format.parse("10/29/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/29/06 12:55 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/29/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -492,10 +446,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testFallBackHoursFalse() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/29/06 12:55 am"));
-        Long justAfter = asPosition(format.parse("10/29/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/29/06 12:55 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/29/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -509,10 +461,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testFallBackHoursFalse2() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/29/06 12:55 am"));
-        Long justAfter = asPosition(format.parse("10/29/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/29/06 12:55 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/29/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -526,10 +476,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testOneHourApart() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/28/06 1:00 am"));
-        Long justAfter = asPosition(format.parse("10/28/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -543,10 +491,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testOneHourApartFalse() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/28/06 1:00 am"));
-        Long justAfter = asPosition(format.parse("10/28/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -560,10 +506,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testTwoHoursApart() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/28/06 12:55 am"));
-        Long justAfter = asPosition(format.parse("10/28/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/28/06 12:55 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -577,10 +521,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testTwoHoursApart2() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/28/06 12:00 am"));
-        Long justAfter = asPosition(format.parse("10/28/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/28/06 12:00 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -594,10 +536,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testTwoHoursApartFalse() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/28/06 12:55 am"));
-        Long justAfter = asPosition(format.parse("10/28/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/28/06 12:55 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -611,10 +551,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testTwoHoursApartFalse3() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/28/06 12:01 am"));
-        Long justAfter = asPosition(format.parse("10/28/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/28/06 12:01 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -628,10 +566,8 @@ public class RelationTest extends TestCase {
     }
 
     public void testOneHourApartFalse2() throws ParseException {
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                DateFormat.SHORT, Locale.US);
-        Long justBefore = asPosition(format.parse("10/28/06 12:00 am"));
-        Long justAfter = asPosition(format.parse("10/28/06 2:00 am"));
+        Long justBefore = asPosition(DATE_TIME_FORMAT.parse("10/28/06 12:00 am"));
+        Long justAfter = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
         Interval i1 = intervalFactory.getInstance(justBefore,
                 AbsoluteTimeGranularity.MINUTE, justBefore,
                 AbsoluteTimeGranularity.MINUTE);
@@ -1251,13 +1187,269 @@ public class RelationTest extends TestCase {
         assertTrue(relation.hasRelation(earlier, later));
     }
     
-    public void testBefore() {
+    public void testBeforeDay() {
         Relation rel = new Relation(null, null, null, null, 
                                         null, null, null, null, 
                                         1, AbsoluteTimeUnit.DAY, null, null,
                                         null, null, null, null);
         Interval i1 = intervalFactory.getInstance(1285992000000L, AbsoluteTimeGranularity.DAY, 1286424000000L, AbsoluteTimeGranularity.DAY);
         Interval i2 = intervalFactory.getInstance(1285992000000L, AbsoluteTimeGranularity.DAY, 1286424000000L, AbsoluteTimeGranularity.DAY);
+        assertFalse(rel.hasRelation(i1, i2));
+    }
+    
+    public void testBefore() {
+        Interval i1 = intervalFactory.getInstance(1285992000000L, AbsoluteTimeGranularity.DAY, 1286424000000L, AbsoluteTimeGranularity.DAY);
+        Interval i2 = intervalFactory.getInstance(1285992000000L, AbsoluteTimeGranularity.DAY, 1286424000000L, AbsoluteTimeGranularity.DAY);
+        assertFalse(Relation.BEFORE.hasRelation(i1, i2));
+    }
+    
+    public void testAfter() {
+        Interval i1 = intervalFactory.getInstance(1285992000000L, AbsoluteTimeGranularity.DAY, 1286424000000L, AbsoluteTimeGranularity.DAY);
+        Interval i2 = intervalFactory.getInstance(1285992000000L, AbsoluteTimeGranularity.DAY, 1286424000000L, AbsoluteTimeGranularity.DAY);
+        assertFalse(Relation.BEFORE.hasRelation(i2, i1));
+    }
+    
+    public void testMeets() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:30 am"));
+        Interval i1 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i2 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertTrue(Relation.MEETS.hasRelation(i1, i2));
+    }
+    
+    public void testMeetsFalse1() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:01 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:30 am"));
+        Interval i1 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i2 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertFalse(Relation.MEETS.hasRelation(i1, i2));
+    }
+    
+    public void testMeetsFalse2() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:01 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:30 am"));
+        Interval i2 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i1 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertFalse(Relation.MEETS.hasRelation(i1, i2));
+    }
+    
+    public void testMeetsFalse3() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_FORMAT.parse("10/28/06"));
+        Long finish2 = asPosition(DATE_FORMAT.parse("10/28/06"));
+        Interval i1 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i2 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.DAY, finish2,
+                AbsoluteTimeGranularity.DAY);
+        assertFalse(Relation.MEETS.hasRelation(i1, i2));
+    }
+    
+    public void testMeetsFalse4() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:30 am"));
+        Interval i2 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i1 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertFalse(Relation.MEETS.hasRelation(i1, i2));
+    }
+    
+    public void testMetBy() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:30 am"));
+        Interval i2 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i1 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertTrue(Relation.MET_BY.hasRelation(i1, i2));
+    }
+    
+    public void testOverlaps() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:30 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:30 am"));
+        Interval i1 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i2 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertTrue(Relation.OVERLAPS.hasRelation(i1, i2));
+    }
+    
+    public void testOverlapsFalse1() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:30 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:30 am"));
+        Interval i1 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i2 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertFalse(Relation.OVERLAPS.hasRelation(i2, i1));
+    }
+    
+    public void testOverlapsFalse2() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:30 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Interval i1 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i2 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertFalse(Relation.OVERLAPS.hasRelation(i2, i1));
+    }
+    
+    public void testOverlapsFalse3() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 3:30 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 4:00 am"));
+        Interval i1 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i2 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertFalse(Relation.OVERLAPS.hasRelation(i2, i1));
+    }
+    
+    public void testOverlappedBy() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:30 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:30 am"));
+        Interval i2 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i1 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertTrue(Relation.OVERLAPPED_BY.hasRelation(i1, i2));
+    }
+    
+    public void testOverlappedByFalse1() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:30 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:30 am"));
+        Interval i1 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i2 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertFalse(Relation.OVERLAPS.hasRelation(i2, i1));
+    }
+    
+    public void testOverlappedByFalse2() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:30 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Interval i2 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i1 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertFalse(Relation.OVERLAPS.hasRelation(i2, i1));
+    }
+    
+    public void testOverlappedByFalse3() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 3:30 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 4:00 am"));
+        Interval i2 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i1 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertFalse(Relation.OVERLAPS.hasRelation(i2, i1));
+    }
+    
+    public void testContextRelation1() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 12:30 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 4:00 am"));
+        Relation rel = new Relation(null, null, 0, null, null,
+            null, null, null, null, null, null, null, 0, null, null, null);
+        Interval i1 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i2 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertTrue(rel.hasRelation(i1, i2));
+    }
+    
+    public void testContextRelation2() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 4:00 am"));
+        Relation rel = new Relation(null, null, 0, null, null,
+            null, null, null, null, null, null, null, 0, null, null, null);
+        Interval i1 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i2 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
+        assertTrue(rel.hasRelation(i1, i2));
+    }
+    
+    public void testContextRelationFalse1() throws ParseException {
+        Long start1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:00 am"));
+        Long finish1 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 2:00 am"));
+        Long start2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 1:01 am"));
+        Long finish2 = asPosition(DATE_TIME_FORMAT.parse("10/28/06 4:00 am"));
+        Relation rel = new Relation(null, null, 0, null, null,
+            null, null, null, null, null, null, null, 0, null, null, null);
+        Interval i1 = intervalFactory.getInstance(start1,
+                AbsoluteTimeGranularity.MINUTE, finish1,
+                AbsoluteTimeGranularity.MINUTE);
+        Interval i2 = intervalFactory.getInstance(start2,
+                AbsoluteTimeGranularity.MINUTE, finish2,
+                AbsoluteTimeGranularity.MINUTE);
         assertFalse(rel.hasRelation(i1, i2));
     }
 

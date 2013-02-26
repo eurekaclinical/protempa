@@ -31,13 +31,20 @@ import org.protempa.proposition.value.Value;
 public class ContextOffset implements Serializable {
     private static final long serialVersionUID = 1;
     
-    private int startOffset;
+    private Integer startOffset;
     private Unit startOffsetUnits;
-    private int finishOffset;
+    private Integer finishOffset;
     private Unit finishOffsetUnits;
-    private IntervalSide startIntervalSide = IntervalSide.START;
-    private IntervalSide finishIntervalSide = IntervalSide.FINISH;
+    private IntervalSide startIntervalSide;
+    private IntervalSide finishIntervalSide;
 
+    public ContextOffset() {
+        this.startOffset = Integer.valueOf(0);
+        this.finishOffset = Integer.valueOf(0);
+        this.startIntervalSide = IntervalSide.START;
+        this.finishIntervalSide = IntervalSide.FINISH;
+    }
+    
     public IntervalSide getFinishIntervalSide() {
         return finishIntervalSide;
     }
@@ -50,11 +57,11 @@ public class ContextOffset implements Serializable {
         }
     }
 
-    public int getFinishOffset() {
+    public Integer getFinishOffset() {
         return finishOffset;
     }
 
-    public void setFinishOffset(int finishOffset) {
+    public void setFinishOffset(Integer finishOffset) {
         this.finishOffset = finishOffset;
     }
 
@@ -78,11 +85,11 @@ public class ContextOffset implements Serializable {
         }
     }
 
-    public int getStartOffset() {
+    public Integer getStartOffset() {
         return startOffset;
     }
 
-    public void setStartOffset(int startOffset) {
+    public void setStartOffset(Integer startOffset) {
         this.startOffset = startOffset;
     }
 

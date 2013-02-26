@@ -97,21 +97,22 @@ final class LowLevelAbstractionConsequence implements Consequence {
             LinkedList<PrimitiveParameter> ll =
                     new LinkedList<PrimitiveParameter>(seq);
 
-            boolean in = false;
-            Iterator<PrimitiveParameter> itr = ll.iterator();
-            PrimitiveParameter tp = itr.next();
             for (Context context : contextSeq) {
+                boolean in = false;
+                Iterator<PrimitiveParameter> itr = ll.iterator();
+                PrimitiveParameter tp = itr.next();
                 Sequence<PrimitiveParameter> subSeq =
                         new Sequence<PrimitiveParameter>(seq.getPropositionIds());
                 while (true) {
                     if (REL.hasRelation(tp.getInterval(), context.getInterval())) {
                         subSeq.add(tp);
                         in = true;
+                        itr.remove();
                     } else if (in) {
                         in = false;
                         break;
                     }
-                    itr.remove();
+                    
                     if (itr.hasNext()) {
                         tp = itr.next();
                     } else {
