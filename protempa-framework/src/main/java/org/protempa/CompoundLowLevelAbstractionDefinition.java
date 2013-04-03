@@ -85,6 +85,7 @@ public final class CompoundLowLevelAbstractionDefinition
     private GapFunction gapBtwValues;
     private ContextDefinition interpretationContext;
     private String contextId;
+    private int skip;
     private transient LinkedHashMap<String, List<ClassificationMatrixValue>> classificationMatrix;
     private transient List<ValueClassification> valueClassifications;
 
@@ -93,7 +94,7 @@ public final class CompoundLowLevelAbstractionDefinition
      * abstraction to be asserted. Default is 1.
      */
     private int minimumNumberOfValues;
-
+    
     /**
      * The different ways to consider the low-level abstraction value rules in a
      * given interval
@@ -124,6 +125,7 @@ public final class CompoundLowLevelAbstractionDefinition
         super(id);
         this.lowLevelIds = new HashSet<String>();
         this.minimumNumberOfValues = 1;
+        this.skip = -1;
         this.valueDefinitionMatchOperator = ValueDefinitionMatchOperator.ANY;
         this.gapBtwValues = GapFunction.DEFAULT;
         this.concatenable = true;
@@ -152,6 +154,14 @@ public final class CompoundLowLevelAbstractionDefinition
 
     public void setContextId(String contextId) {
         this.contextId = contextId;
+    }
+
+    public int getSkip() {
+        return skip;
+    }
+
+    public void setSkip(int skip) {
+        this.skip = skip;
     }
 
     public void setGapFunctionBetweenValues(GapFunction gf) {

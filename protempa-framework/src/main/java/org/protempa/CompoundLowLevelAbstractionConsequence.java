@@ -21,10 +21,8 @@ package org.protempa;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import org.drools.WorkingMemory;
@@ -32,13 +30,10 @@ import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.CompoundValuedInterval;
-import org.protempa.proposition.DerivedSourceId;
-import org.protempa.proposition.DerivedUniqueId;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalParameter;
 import org.protempa.proposition.AbstractParameterIntervalSectioner;
-import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.Value;
@@ -148,6 +143,7 @@ final class CompoundLowLevelAbstractionConsequence implements
 //            }
         }
         if (cllad.getMinimumNumberOfValues() <= 1) {
+            // We're matching all intervals, even if not consecutive.
             for (AbstractParameterWithSourceParameters param : derivedProps) {
                 assertDerivedProposition(workingMemory, param.parameter,
                         param.sourceParameters);
@@ -156,11 +152,11 @@ final class CompoundLowLevelAbstractionConsequence implements
             // if we need to match multiple consecutive values, and if such a
             // match is present, then the new interval ranges from the start of
             // the first match to the end of the last match
-            for (int i = 0; i < derivedProps.size(); i++) {
-                if (i + cllad.getMinimumNumberOfValues() - 1 < derivedProps
+            for (int i = 0; i < derivedProps.size();) {
+                int rhs = cllad.getMinimumNumberOfValues() - 1;
+                if (i + rhs < derivedProps
                         .size()) {
-                    if (rangeMatches(derivedProps, i,
-                            i + cllad.getMinimumNumberOfValues() - 1,
+                    if (rangeMatches(derivedProps, i, i + rhs,
                             cllad.getGapFunctionBetweenValues())) {
                         Sequence<TemporalParameter> seq =
                                 new Sequence<TemporalParameter>(derivedProps.get(i).parameter.getId());
@@ -178,6 +174,11 @@ final class CompoundLowLevelAbstractionConsequence implements
                                 derivedProps.get(i).sourceParameters);
                     }
                 }
+                if (this.cllad.getSkip() > 0) {
+                    i += rhs + this.cllad.getSkip();
+                } else {
+                    i++;
+                }
             }
         }
     }
@@ -191,7 +192,7 @@ final class CompoundLowLevelAbstractionConsequence implements
             List<ClassificationMatrixValue> lowLevelValueDefs) {
         return match(multiInterval, lowLevelValueDefs, true);
     }
-    
+
     private boolean match(CompoundValuedInterval multiInterval,
             List<ClassificationMatrixValue> lowLevelValueDefs, boolean bool) {
         for (Entry<String, Value> e : multiInterval.getValues().entrySet()) {
