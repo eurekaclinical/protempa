@@ -44,7 +44,7 @@ import org.protempa.backend.ConfigurationsProviderManager;
  *
  * @author Andrew Post
  */
-public final class SourceFactory {
+public class SourceFactory {
 
     private final List<BackendInstanceSpec<AlgorithmSourceBackend>> algorithmSourceBackendInstanceSpecs;
     private final List<BackendInstanceSpec<DataSourceBackend>> dataSourceBackendInstanceSpecs;
@@ -121,7 +121,7 @@ public final class SourceFactory {
         this(null, configurationId);
     }
 
-    public DataSource newDataSourceInstance()
+    public final DataSource newDataSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         DataSourceBackend[] backends = new DataSourceBackend[this.dataSourceBackendInstanceSpecs.size()];
         for (int i = 0; i < backends.length; i++) {
@@ -130,7 +130,7 @@ public final class SourceFactory {
         return new DataSourceImpl(backends);
     }
 
-    public KnowledgeSource newKnowledgeSourceInstance()
+    public final KnowledgeSource newKnowledgeSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         KnowledgeSourceBackend[] backends = new KnowledgeSourceBackend[this.knowledgeSourceBackendInstanceSpecs.size()];
         for (int i = 0; i < backends.length; i++) {
@@ -139,7 +139,7 @@ public final class SourceFactory {
         return new KnowledgeSourceImpl(backends);
     }
 
-    public AlgorithmSource newAlgorithmSourceInstance()
+    public final AlgorithmSource newAlgorithmSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         AlgorithmSourceBackend[] backends = new AlgorithmSourceBackend[this.algorithmSourceBackendInstanceSpecs.size()];
         for (int i = 0; i < backends.length; i++) {
@@ -148,7 +148,7 @@ public final class SourceFactory {
         return new AlgorithmSourceImpl(backends);
     }
 
-    public TermSource newTermSourceInstance()
+    public final TermSource newTermSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         TermSourceBackend[] backends = new TermSourceBackend[this.termSourceBackendInstanceSpecs.size()];
         for (int i = 0; i < backends.length; i++) {
