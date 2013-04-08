@@ -85,7 +85,7 @@ import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.InvalidConfigurationException;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
-import org.protempa.bconfigs.commons.INICommonsConfigurations;
+import org.protempa.bconfigs.ini4j.INIConfigurations;
 import org.protempa.datastore.PropositionStoreCreator;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Event;
@@ -222,7 +222,7 @@ public class ProtempaTest {
         System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
                 "org.protempa.backend.dsb.relationaldb.H2SQLGenerator");
         SourceFactory sf = new SourceFactory(
-                new INICommonsConfigurations(new File("src/test/resources")),
+                new INIConfigurations(new File("src/test/resources")),
                 "protege-h2-test-config");
         protempa = Protempa.newInstance(sf);
     }

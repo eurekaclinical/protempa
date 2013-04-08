@@ -1,12 +1,12 @@
-[org.protempa.test.TestDataSourceBackend_0]
+[org.protempa.test.TestDataSourceBackend]
 dataSourceBackendId = Test
 databaseId = jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
 
-[org.protempa.backend.asb.java.JavaAlgorithmBackend_1]
+[org.protempa.backend.asb.java.JavaAlgorithmBackend]
 
-[org.protempa.backend.tsb.umls.UMLSTermSourceBackend_2]
+[org.protempa.backend.tsb.umls.UMLSTermSourceBackend]
 databaseAPI = DRIVERMANAGER
 
-[org.protempa.backend.ksb.protege.LocalKnowledgeSourceBackend_3]
+[org.protempa.backend.ksb.protege.LocalKnowledgeSourceBackend]
 projectString = src/test/resources/ksb/ProtempaTest.pprj
 units = ABSOLUTE
