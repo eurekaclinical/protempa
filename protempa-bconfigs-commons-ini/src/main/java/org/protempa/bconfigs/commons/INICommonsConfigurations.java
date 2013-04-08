@@ -22,8 +22,11 @@ package org.protempa.bconfigs.commons;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import org.apache.commons.configuration.Configuration;
@@ -148,7 +151,18 @@ public class INICommonsConfigurations implements Configurations {
             Set<String> sectionNames = config.getSections();
             List<BackendInstanceSpec<B>> results =
                     new ArrayList<BackendInstanceSpec<B>>();
+            List<Integer> sectionIndices = new ArrayList<Integer>();
+            Map<Integer, String> sectionsMap = new HashMap<Integer, String>();
             for (String sectionName : sectionNames) {
+                int indexOfSep = sectionName.lastIndexOf('_');
+                String i = sectionName.substring(indexOfSep + 1);
+                Integer ii = Integer.valueOf(i);
+                sectionIndices.add(ii);
+                sectionsMap.put(ii, sectionName);
+            }
+            Collections.sort(sectionIndices);
+            for (Integer sectionIndex : sectionIndices) {
+                String sectionName = sectionsMap.get(sectionIndex);
                 String specId = sectionName.substring(0,
                         sectionName.lastIndexOf('_'));
                 if (!specId.equals(backendSpec.getId())) {
@@ -170,6 +184,8 @@ public class INICommonsConfigurations implements Configurations {
         } catch (InvalidPropertyValueException ex) {
             throw new ConfigurationsLoadException(ex);
         } catch (ConfigurationException ex) {
+            throw new ConfigurationsLoadException(ex);
+        } catch (NumberFormatException ex) {
             throw new ConfigurationsLoadException(ex);
         }
     }
