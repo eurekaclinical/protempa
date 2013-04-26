@@ -25,25 +25,22 @@ import org.protempa.ProtempaException;
  *
  * @author Andrew Post
  */
-public class DataSourceBackendFailedValidationException 
-        extends ProtempaException {
-    private static final long serialVersionUID = 53055128452150166L;
+public final class ConfigurationsNotFoundException extends ProtempaException {
 
-    public DataSourceBackendFailedValidationException(Throwable cause) {
+    private static final long serialVersionUID = -9180141565868689830L;
+
+    public ConfigurationsNotFoundException(Throwable cause) {
         super(cause);
     }
 
-    public DataSourceBackendFailedValidationException(String message, Throwable cause) {
+    public ConfigurationsNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public DataSourceBackendFailedValidationException(String message) {
+    public ConfigurationsNotFoundException(String message) {
         super(message);
     }
 
-    public DataSourceBackendFailedValidationException() {
+    public ConfigurationsNotFoundException() {
     }
-
-    
-
 }

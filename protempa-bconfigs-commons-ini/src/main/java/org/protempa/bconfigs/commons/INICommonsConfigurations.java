@@ -20,6 +20,7 @@
 package org.protempa.bconfigs.commons;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,6 +43,7 @@ import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.ConfigurationRemoveException;
 import org.protempa.backend.ConfigurationsSaveException;
 import org.protempa.backend.Configurations;
+import org.protempa.backend.ConfigurationsNotFoundException;
 import org.protempa.backend.InvalidPropertyNameException;
 import org.protempa.backend.InvalidPropertyValueException;
 
@@ -126,10 +128,10 @@ public class INICommonsConfigurations implements Configurations {
 
     @Override
     public <B extends Backend> List<BackendInstanceSpec<B>> load(
-            String configurationId,
+            String configurationsId,
             BackendSpec<B> backendSpec)
-            throws ConfigurationsLoadException {
-        if (configurationId == null) {
+            throws ConfigurationsNotFoundException, ConfigurationsLoadException {
+        if (configurationsId == null) {
             throw new IllegalArgumentException(
                     "configurationId cannot be null");
         }
@@ -141,13 +143,15 @@ public class INICommonsConfigurations implements Configurations {
             throw new ConfigurationsLoadException("Cannot create directory "
                     + this.directory);
         }
-
+        
+        File configFile = new File(this.directory, configurationsId);
+        if (!configFile.exists()) {
+            throw new ConfigurationsNotFoundException("No such configuration file: " + configFile.getAbsolutePath());
+        }
         HierarchicalINIConfiguration config =
                 new HierarchicalINIConfiguration();
         try {
-            config.load(
-                    new File(
-                    this.directory, configurationId).getAbsolutePath());
+            config.load(configFile.getAbsolutePath());
             Set<String> sectionNames = config.getSections();
             List<BackendInstanceSpec<B>> results =
                     new ArrayList<BackendInstanceSpec<B>>();
@@ -171,6 +175,7 @@ public class INICommonsConfigurations implements Configurations {
                 Configuration section = config.subset(sectionName);
                 BackendInstanceSpec<B> backendInstanceSpec =
                         backendSpec.newBackendInstanceSpec();
+                backendInstanceSpec.setConfigurationsId(configurationsId);
                 for (Iterator<String> itr = section.getKeys(); itr.hasNext();) {
                     String key = itr.next();
                     backendInstanceSpec.parseProperty(key,
@@ -191,12 +196,12 @@ public class INICommonsConfigurations implements Configurations {
     }
 
     @Override
-    public void save(String configurationId,
+    public void save(String configurationsId,
             List<BackendInstanceSpec> backendInstanceSpecs)
             throws ConfigurationsSaveException {
-        if (configurationId == null) {
+        if (configurationsId == null) {
             throw new IllegalArgumentException(
-                    "configurationId cannot be null");
+                    "configurationsId cannot be null");
         }
         if (!this.directory.exists() && !this.directory.mkdir()) {
             throw new ConfigurationsSaveException("Cannot create directory "
@@ -206,10 +211,11 @@ public class INICommonsConfigurations implements Configurations {
                 new HierarchicalINIConfiguration();
         try {
             File configurationsPath = 
-                    new File(this.directory, configurationId);
+                    new File(this.directory, configurationsId);
             int i = 0;
             for (BackendInstanceSpec backendInstanceSpec :
                     backendInstanceSpecs) {
+                backendInstanceSpec.setConfigurationsId(configurationsId);
                 BackendSpec backendSpec = backendInstanceSpec.getBackendSpec();
                 List<BackendPropertySpec> specs =
                         backendInstanceSpec.getBackendPropertySpecs();

@@ -20,6 +20,8 @@
 package org.protempa.backend.dsb;
 
 
+import org.protempa.BackendCloseException;
+import org.protempa.ProtempaException;
 import org.protempa.backend.AbstractBackend;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
 
@@ -32,9 +34,9 @@ import org.protempa.backend.DataSourceBackendUpdatedEvent;
 public abstract class AbstractDataSourceBackend extends
 		AbstractBackend<DataSourceBackendUpdatedEvent> 
                 implements DataSourceBackend {
-
+    
     @Override
-    public void close() {
+    public void close() throws BackendCloseException {
     }
 
     @Override
@@ -46,4 +48,10 @@ public abstract class AbstractDataSourceBackend extends
     public String getKeyTypePluralDisplayName() {
         return getKeyTypeDisplayName() + "s";
     }
+    
+    @Override
+    public void exceptionOccurred(ProtempaException protempaException) {
+        
+    }
+    
 }

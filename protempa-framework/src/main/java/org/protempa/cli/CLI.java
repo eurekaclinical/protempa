@@ -28,6 +28,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.lang.StringUtils;
+import org.protempa.CloseException;
 import org.protempa.Protempa;
 import org.protempa.ProtempaStartupException;
 
@@ -305,7 +306,7 @@ public abstract class CLI {
      * Closes the instance of {@link Protempa} created by 
      * {@link #initialize(java.lang.String)}.
      */
-    public final void close() {
+    public final void close() throws CloseException {
         if (this.protempa == null) {
             throw new IllegalStateException("PROTEMPA not initialized");
         }
@@ -377,11 +378,20 @@ public abstract class CLI {
         boolean error = false;
         try {
             execute();
+            close();
+        } catch (CloseException ex) {
+            printException(ex);
+            error = true;
         } catch (CLIException ex) {
             printException(ex);
             error = true;
         } finally {
-            close();
+            if (error) {
+                try {
+                    close();
+                } catch (CloseException ignore) {
+                }
+            }
         }
         if (error) {
             System.exit(1);

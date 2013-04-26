@@ -30,6 +30,7 @@ import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
 import org.protempa.backend.Configurations;
 import org.protempa.backend.ConfigurationsLoadException;
+import org.protempa.backend.ConfigurationsNotFoundException;
 import org.protempa.backend.ConfigurationsProviderManager;
 import org.protempa.backend.InvalidPropertyNameException;
 
@@ -49,7 +50,8 @@ public class RemoteProjectFactory {
     public Project getInstance(String configurationId,
             String host, String knowledgeBaseName)
             throws ConfigurationsLoadException,
-            BackendProviderSpecLoaderException, InvalidPropertyNameException {
+            BackendProviderSpecLoaderException, InvalidPropertyNameException, 
+            ConfigurationsNotFoundException {
         Configurations configurations =
                 ConfigurationsProviderManager.getConfigurations();
         BackendSpecLoader<KnowledgeSourceBackend> ksl =

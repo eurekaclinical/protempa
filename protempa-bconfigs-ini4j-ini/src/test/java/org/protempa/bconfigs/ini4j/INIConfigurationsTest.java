@@ -89,7 +89,8 @@ public class INIConfigurationsTest {
     @Test
     public void testLoad() throws FileNotFoundException,
             BackendSpecNotFoundException, ConfigurationsLoadException,
-            InvalidPropertyNameException, BackendProviderSpecLoaderException {
+            InvalidPropertyNameException, BackendProviderSpecLoaderException, 
+            ConfigurationsNotFoundException {
         writeTestFile();
         INIConfigurations configurations =
                 new INIConfigurations();

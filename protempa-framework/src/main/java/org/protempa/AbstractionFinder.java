@@ -55,7 +55,7 @@ import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
  *
  * @author Andrew Post
  */
-final class AbstractionFinder implements Module {
+final class AbstractionFinder {
 
     private final Map<String, StatefulSession> workingMemoryCache;
     private final DataSource dataSource;
@@ -630,7 +630,6 @@ final class AbstractionFinder implements Module {
     /**
      * Clears the working memory cache. Only needs to be called in caching mode.
      */
-    @Override
     public void clear() {
         if (clearNeeded) {
             clearWorkingMemoryCache();
@@ -638,7 +637,6 @@ final class AbstractionFinder implements Module {
         }
     }
 
-    @Override
     public void close() {
         clear();
         this.closed = true;

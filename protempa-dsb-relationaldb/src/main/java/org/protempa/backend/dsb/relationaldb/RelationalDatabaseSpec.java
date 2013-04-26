@@ -25,12 +25,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
-import org.protempa.backend.DataSourceBackendFailedValidationException;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
+import org.protempa.backend.DataSourceBackendFailedConfigurationValidationException;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 
@@ -206,7 +207,7 @@ public final class RelationalDatabaseSpec implements Serializable {
 
     public void validate(KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException,
-            DataSourceBackendFailedValidationException {
+            DataSourceBackendFailedConfigurationValidationException {
         List<EntitySpec> allSpecs = Arrays.asList(this.eventSpecs,
                 this.constantSpecs, this.primitiveParameterSpecs);
 
@@ -216,39 +217,44 @@ public final class RelationalDatabaseSpec implements Serializable {
             logger.log(Level.FINER, "Validating entity spec {0}",
                     entitySpecName);
             String[] propIds = entitySpec.getPropositionIds();
-            Set<String> propNames = new HashSet<String>();
+            Set<String> propNamesFromPropSpecs = new HashSet<String>();
             PropertySpec[] propSpecs = entitySpec.getPropertySpecs();
             logger.finer("Checking for duplicate properties");
             for (PropertySpec propSpec : propSpecs) {
                 String propSpecName = propSpec.getName();
-                if (!propNames.add(propSpecName)) {
-                    throw new DataSourceBackendFailedValidationException(
+                if (!propNamesFromPropSpecs.add(propSpecName)) {
+                    throw new DataSourceBackendFailedConfigurationValidationException(
                             "Duplicate property name " + propSpecName
                                     + " in entity spec " + entitySpecName);
                 }
             }
             logger.finer("No duplicate properties found");
             logger.finer("Checking for invalid proposition ids and properties");
+            Set<String> propNamesFromPropDefs = new HashSet<String>();
+            Set<String> invalidPropIds = new HashSet<String>();
             for (String propId : propIds) {
                 PropositionDefinition propDef = knowledgeSource
                         .readPropositionDefinition(propId);
-                if (!knowledgeSource.hasPropositionDefinition(propId)) {
-                    throw new DataSourceBackendFailedValidationException(
-                            "Invalid proposition id named in entity spec "
-                                    + entitySpecName + ": " + propId);
+                if (propDef == null) {
+                    invalidPropIds.add(propId);
                 }
                 PropertyDefinition[] propertyDefs = propDef
                         .getPropertyDefinitions();
                 for (PropertyDefinition propertyDef : propertyDefs) {
                     String propName = propertyDef.getName();
-                    if (!propNames.contains(propName)) {
-                        throw new DataSourceBackendFailedValidationException(
-                                "Required property " + propName
-                                        + " missing from entity spec "
-                                        + entitySpecName);
-                    }
-
+                    propNamesFromPropDefs.add(propName);
                 }
+            }
+            if (!invalidPropIds.isEmpty()) {
+                throw new DataSourceBackendFailedConfigurationValidationException(
+                            "Invalid proposition id(s) named in entity spec "
+                                    + entitySpecName + ": '" + StringUtils.join(invalidPropIds, "', '") + "'");
+            }
+            if (!propNamesFromPropSpecs.removeAll(propNamesFromPropDefs)) {
+                throw new DataSourceBackendFailedConfigurationValidationException(
+                        "Data model entity spec " + entitySpec.getName()
+                        + " has properties '" + StringUtils.join(propNamesFromPropSpecs, "', '")
+                        + "' that are not in the knowledge source's corresponding proposition definitions");
             }
             logger.finer("No invalid proposition ids or properties found");
         }

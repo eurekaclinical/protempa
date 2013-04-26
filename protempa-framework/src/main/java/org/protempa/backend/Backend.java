@@ -19,6 +19,7 @@
  */
 package org.protempa.backend;
 
+import org.protempa.BackendCloseException;
 import org.protempa.BackendListener;
 import org.protempa.Source;
 import org.protempa.backend.BackendInstanceSpec;
@@ -56,11 +57,13 @@ public interface Backend<E extends BackendUpdatedEvent> {
      * @return a {@link String}.
      */
     String getDisplayName();
+    
+    String getConfigurationsId();
 
     /**
      * Releases any resources allocated by this backend.
      */
-    void close();
+    void close() throws BackendCloseException;
 
     /**
      * Registers a listener that get called whenever a backend changes.

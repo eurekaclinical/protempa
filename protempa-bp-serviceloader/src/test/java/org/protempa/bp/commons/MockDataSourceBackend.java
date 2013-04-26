@@ -23,12 +23,13 @@ import org.protempa.MultiplexingDataStreamingEventIterator;
 import java.util.Set;
 import org.protempa.*;
 import org.protempa.backend.AbstractCommonsDataSourceBackend;
+import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.annotations.BackendInfo;
-import org.protempa.backend.DataSourceBackendFailedValidationException;
-import org.protempa.backend.DataSourceBackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
+import org.protempa.backend.DataSourceBackendFailedConfigurationValidationException;
+import org.protempa.backend.DataSourceBackendFailedDataValidationException;
+import org.protempa.backend.dsb.DataValidationEvent;
 import org.protempa.backend.dsb.filter.Filter;
-import org.protempa.bp.commons.*;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 
@@ -37,8 +38,7 @@ public class MockDataSourceBackend extends AbstractCommonsDataSourceBackend {
 
     @Override
     public void initialize(BackendInstanceSpec config)
-            throws DataSourceBackendInitializationException {
-        super.initialize(config);
+            throws BackendInitializationException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -58,12 +58,18 @@ public class MockDataSourceBackend extends AbstractCommonsDataSourceBackend {
     }
 
     @Override
-    public void validate(KnowledgeSource knowledgeSource)
-            throws DataSourceBackendFailedValidationException {
+    public void validateConfiguration(KnowledgeSource knowledgeSource)
+            throws DataSourceBackendFailedConfigurationValidationException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public MultiplexingDataStreamingEventIterator readPropositions(Set<String> keyIds, Set<String> propIds, Filter filters, QuerySession qs) throws DataSourceReadException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public DataValidationEvent[] validateData(KnowledgeSource knowledgeSource) throws DataSourceBackendFailedDataValidationException, KnowledgeSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

@@ -21,10 +21,8 @@ package org.protempa.backend.tsb.umls;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import org.arp.javautil.sql.DatabaseAPI;
 import org.protempa.MalformedTermIdException;
@@ -42,6 +40,7 @@ import edu.emory.cci.aiw.umls.UMLSDatabaseConnection;
 import edu.emory.cci.aiw.umls.UMLSNoSuchTermException;
 import edu.emory.cci.aiw.umls.UMLSQueryException;
 import edu.emory.cci.aiw.umls.UMLSQueryExecutor;
+import org.protempa.backend.BackendInitializationException;
 
 @BackendInfo(displayName = "UMLS term source backend")
 public final class UMLSTermSourceBackend extends
@@ -143,7 +142,7 @@ public final class UMLSTermSourceBackend extends
 
     @Override
     public void initialize(BackendInstanceSpec config)
-            throws TermSourceBackendInitializationException {
+            throws BackendInitializationException {
         super.initialize(config);
 
         if (this.databaseAPI == null) {

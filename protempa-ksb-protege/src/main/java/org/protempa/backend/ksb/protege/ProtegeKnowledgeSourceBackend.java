@@ -49,6 +49,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.drools.util.StringUtils;
 import org.protempa.ContextDefinition;
 import org.protempa.TemporalPropositionDefinition;
+import org.protempa.backend.BackendInitializationException;
 
 /**
  * Abstract class for converting a Protege knowledge base into a PROTEMPA
@@ -83,7 +84,7 @@ public abstract class ProtegeKnowledgeSourceBackend
 
     @Override
     public void initialize(BackendInstanceSpec config)
-            throws KnowledgeSourceBackendInitializationException {
+            throws BackendInitializationException {
         super.initialize(config);
         if (this.cm == null) {
             ConnectionManager pcm = initConnectionManager(config);

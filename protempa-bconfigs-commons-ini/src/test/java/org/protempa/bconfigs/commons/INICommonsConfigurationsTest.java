@@ -88,7 +88,8 @@ public class INICommonsConfigurationsTest {
     @Test
     public void testLoad() throws FileNotFoundException,
             BackendSpecNotFoundException, ConfigurationsLoadException,
-            InvalidPropertyNameException, BackendProviderSpecLoaderException {
+            InvalidPropertyNameException, BackendProviderSpecLoaderException, 
+            ConfigurationsNotFoundException {
         writeTestFile();
         INICommonsConfigurations configurations =
                 new INICommonsConfigurations();

@@ -17,34 +17,32 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa;
+package org.protempa.backend;
+
+import org.protempa.ProtempaException;
 
 /**
- * Base class for PROTEMPA checked exceptions.
  *
  * @author Andrew Post
- *
  */
-public abstract class ProtempaException extends Exception {
-
-    /**
-     *
-     */
-    private static final long serialVersionUID = 5229759417046161519L;
-
-    protected ProtempaException() {
-        super();
+public class DataSourceBackendFailedConfigurationValidationException 
+        extends ProtempaException {
+    private static final long serialVersionUID = 53055128452150166L;
+    
+    public DataSourceBackendFailedConfigurationValidationException(Throwable cause) {
+        super(cause);
     }
 
-    protected ProtempaException(String message, Throwable cause) {
+    public DataSourceBackendFailedConfigurationValidationException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    protected ProtempaException(String message) {
+    public DataSourceBackendFailedConfigurationValidationException(String message) {
         super(message);
     }
 
-    protected ProtempaException(Throwable cause) {
-        super(cause);
+    public DataSourceBackendFailedConfigurationValidationException() {
+        super();
     }
+
 }

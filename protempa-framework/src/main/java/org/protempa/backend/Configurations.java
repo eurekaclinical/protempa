@@ -26,14 +26,41 @@ import java.util.List;
  * @author Andrew Post
  */
 public interface Configurations {
+    /**
+     * Reads all of the backend specifications from the specified 
+     * configurations.
+     * @param <B>
+     * @param configurationsId
+     * @param backendSpec
+     * @return
+     * @throws ConfigurationsNotFoundException
+     * @throws ConfigurationsLoadException 
+     */
     <B extends Backend> List<BackendInstanceSpec<B>>
             load(String configurationsId, BackendSpec<B> backendSpec)
-            throws ConfigurationsLoadException;
+            throws ConfigurationsNotFoundException, ConfigurationsLoadException;
+    
+    /**
+     * Writes the provided backend specifications to the configurations with
+     * the specified id. The passed-in objects will have their 
+     * <code>configurationsId</code> field set to the provided value.
+     * 
+     * @param configurationsId
+     * @param backendInstanceSpec
+     * @throws ConfigurationsSaveException 
+     */
     void save(String configurationsId, 
             List<BackendInstanceSpec> backendInstanceSpec)
             throws ConfigurationsSaveException;
+    /**
+     * Deletes the configurations with the specified id.
+     * 
+     * @param configurationsId
+     * @throws ConfigurationRemoveException 
+     */
     void remove(String configurationsId)
             throws ConfigurationRemoveException;
     List<String> loadConfigurationIds(String configurationsId)
-            throws ConfigurationsLoadException;
+            throws ConfigurationsNotFoundException, 
+            ConfigurationsLoadException;
 }

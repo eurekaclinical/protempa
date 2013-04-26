@@ -20,6 +20,7 @@
 package org.protempa.bconfigs.ini4j;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.ConfigurationRemoveException;
 import org.protempa.backend.ConfigurationsSaveException;
 import org.protempa.backend.Configurations;
+import org.protempa.backend.ConfigurationsNotFoundException;
 import org.protempa.backend.InvalidPropertyNameException;
 import org.protempa.backend.InvalidPropertyValueException;
 
@@ -114,12 +116,12 @@ public class INIConfigurations implements Configurations {
 
     @Override
     public <B extends Backend> List<BackendInstanceSpec<B>> load(
-            String configurationId,
+            final String configurationsId,
             final BackendSpec<B> backendSpec)
-            throws ConfigurationsLoadException {
-        if (configurationId == null) {
+            throws ConfigurationsLoadException, ConfigurationsNotFoundException {
+        if (configurationsId == null) {
             throw new IllegalArgumentException(
-                    "configurationId cannot be null");
+                    "configurationsId cannot be null");
         }
         if (backendSpec == null) {
             throw new IllegalArgumentException(
@@ -132,7 +134,7 @@ public class INIConfigurations implements Configurations {
 
         IniParser parser = new IniParser();
         try {
-            File file = new File(this.directory, configurationId);
+            File file = new File(this.directory, configurationsId);
             FileReader fr = new FileReader(file);
             final List<BackendInstanceSpec<B>> results =
                     new ArrayList<BackendInstanceSpec<B>>();
@@ -174,10 +176,11 @@ public class INIConfigurations implements Configurations {
 
                 @Override
                 public void startSection(String string) {
-                    System.err.println("start section " + string);
                     if (backendSpec.getId().equals(string)) {
                         backendInstanceSpec =
                                 backendSpec.newBackendInstanceSpec();
+                        backendInstanceSpec.setConfigurationsId(
+                                configurationsId);
                     } else {
                         backendInstanceSpec = null;
                     }
@@ -187,7 +190,11 @@ public class INIConfigurations implements Configurations {
                 throw new ConfigurationsLoadException(exceptions.get(0));
             }
             return results;
+        } catch (FileNotFoundException ex) {
+            throw new ConfigurationsNotFoundException(ex);
         } catch (IOException ex) {
+            throw new ConfigurationsLoadException(ex);
+        } catch (SecurityException ex) {
             throw new ConfigurationsLoadException(ex);
         }
     }
@@ -211,6 +218,7 @@ public class INIConfigurations implements Configurations {
                     new File(this.directory, configurationId);
             for (BackendInstanceSpec backendInstanceSpec :
                     backendInstanceSpecs) {
+                backendInstanceSpec.setConfigurationsId(configurationId);
                 BackendSpec backendSpec = backendInstanceSpec.getBackendSpec();
                 List<BackendPropertySpec> specs =
                         backendInstanceSpec.getBackendPropertySpecs();
@@ -224,6 +232,8 @@ public class INIConfigurations implements Configurations {
         } catch (IOException ex) {
             throw new ConfigurationsSaveException(ex);
         } catch (InvalidPropertyNameException ex) {
+            throw new ConfigurationsSaveException(ex);
+        } catch (SecurityException ex) {
             throw new ConfigurationsSaveException(ex);
         }
     }
@@ -239,7 +249,7 @@ public class INIConfigurations implements Configurations {
      */
     @Override
     public List<String> loadConfigurationIds(String configurationId)
-            throws ConfigurationsLoadException {
+            throws ConfigurationsNotFoundException, ConfigurationsLoadException {
         if (configurationId == null) {
             throw new IllegalArgumentException(
                     "configurationId cannot be null");
@@ -275,7 +285,11 @@ public class INIConfigurations implements Configurations {
                 }
             });
             return results;
+        } catch (FileNotFoundException ex) {
+            throw new ConfigurationsNotFoundException(ex);
         } catch (IOException ex) {
+            throw new ConfigurationsLoadException(ex);
+        } catch (SecurityException ex) {
             throw new ConfigurationsLoadException(ex);
         }
     }
@@ -288,9 +302,13 @@ public class INIConfigurations implements Configurations {
                     "configurationsId cannot be null");
         }
         File f = new File(this.directory + configurationId);
-        if (f.exists() && !f.delete()) {
-            throw new ConfigurationRemoveException(
-                    "Could not remove " + configurationId);
+        try {
+            if (f.exists() && !f.delete()) {
+                throw new ConfigurationRemoveException(
+                        "Could not remove " + configurationId);
+            }
+        } catch (SecurityException ex) {
+            throw new ConfigurationRemoveException(ex);
         }
     }
 }

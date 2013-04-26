@@ -59,6 +59,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.protempa.AbstractionFinderTestHelper;
+import org.protempa.CloseException;
 import org.protempa.CompoundLowLevelAbstractionDefinition;
 import org.protempa.ValueClassification;
 import org.protempa.CompoundLowLevelAbstractionDefinition.ValueDefinitionMatchOperator;
@@ -82,6 +83,7 @@ import org.protempa.TemporalExtendedParameterDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
+import org.protempa.backend.ConfigurationsNotFoundException;
 import org.protempa.backend.InvalidConfigurationException;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PositionFilter.Side;
@@ -216,7 +218,7 @@ public class ProtempaTest {
 
     private void initializeProtempa() throws ProtempaStartupException,
             BackendProviderSpecLoaderException, ConfigurationsLoadException,
-            InvalidConfigurationException {
+            InvalidConfigurationException, ConfigurationsNotFoundException {
         // force the use of the H2 driver so we don't bother trying to load
         // others
         System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
@@ -243,7 +245,8 @@ public class ProtempaTest {
     @Before
     public void setUp() throws DataProviderException, SQLException,
             ProtempaStartupException, BackendProviderSpecLoaderException,
-            ConfigurationsLoadException, InvalidConfigurationException {
+            ConfigurationsLoadException, InvalidConfigurationException, 
+            ConfigurationsNotFoundException {
         logger.log(Level.INFO, "Populating database");
         this.dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
         inserter = new DataInserter("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
@@ -265,7 +268,7 @@ public class ProtempaTest {
      * @throws Exception
      */
     @After
-    public void tearDown() throws SQLException {
+    public void tearDown() throws SQLException, CloseException {
         if (this.protempa != null) {
             this.protempa.close();
         }

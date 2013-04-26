@@ -102,7 +102,7 @@ public interface DataSource extends Source<DataSourceUpdatedEvent,
      * initialized.
      */
     UnitFactory getUnitFactory() throws DataSourceReadException;
-
+    
     DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds, Filter filters, 
             QuerySession qs) throws DataSourceReadException;

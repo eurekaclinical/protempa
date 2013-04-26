@@ -19,32 +19,39 @@
  */
 package org.protempa;
 
+import java.util.List;
+import org.apache.commons.lang.exception.ExceptionUtils;
+
 /**
- * Base class for PROTEMPA checked exceptions.
+ * Abstract class for exceptions that are thrown when an error occurs calling
+ * the data source.
  *
  * @author Andrew Post
  *
  */
-public abstract class ProtempaException extends Exception {
+public abstract class SourceCloseException extends CloseException {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 5229759417046161519L;
-
-    protected ProtempaException() {
-        super();
+    SourceCloseException() {
     }
 
-    protected ProtempaException(String message, Throwable cause) {
+    SourceCloseException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    protected ProtempaException(String message) {
+    SourceCloseException(String message) {
         super(message);
     }
 
-    protected ProtempaException(Throwable cause) {
+    SourceCloseException(Throwable cause) {
         super(cause);
+    }
+    
+    protected static String exceptionsToString(List<BackendCloseException> causes) {
+        StringBuilder stackTrace = new StringBuilder();
+        for (BackendCloseException ex : causes) {
+            stackTrace.append(ExceptionUtils.getStackTrace(ex));
+        }
+        
+        return stackTrace.toString();
     }
 }

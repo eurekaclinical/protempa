@@ -20,8 +20,6 @@
 package org.protempa.backend;
 
 import org.protempa.backend.asb.AbstractAlgorithmSourceBackend;
-import org.protempa.backend.AlgorithmSourceBackendInitializationException;
-import org.protempa.backend.BackendInstanceSpec;
 
 /**
  *
@@ -32,7 +30,8 @@ public abstract class AbstractCommonsAlgorithmSourceBackend
 
     @Override
     public void initialize(BackendInstanceSpec<?> backendInstanceSpec)
-            throws AlgorithmSourceBackendInitializationException {
+            throws BackendInitializationException {
+        super.initialize(backendInstanceSpec);
         CommonsBackend.initialize(this, backendInstanceSpec);
     }
 

@@ -21,8 +21,6 @@ package org.protempa.backend.dsb.relationaldb;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.arp.javautil.sql.ConnectionSpec;
@@ -30,43 +28,49 @@ import org.arp.javautil.sql.DatabaseAPI;
 import org.arp.javautil.sql.InvalidConnectionSpecArguments;
 import org.protempa.*;
 import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.backend.DataSourceBackendFailedValidationException;
+import org.protempa.backend.DataSourceBackendFailedDataValidationException;
 import org.protempa.backend.DataSourceBackendInitializationException;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.AbstractCommonsDataSourceBackend;
+import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.DataSourceBackendFailedConfigurationValidationException;
 import org.protempa.backend.annotations.BackendProperty;
+import org.protempa.backend.dsb.DataValidationEvent;
 import org.protempa.proposition.Proposition;
 
 /**
  * Implements access to relational databases. Backend properties set the
  * database connection information. It uses a {@link SQLGenerator} service
- * loadable using Java's {@link java.util.ServiceLoader} for generating SQL
- * that is appropriate for your database and JDBC driver. Service providers are
+ * loadable using Java's {@link java.util.ServiceLoader} for generating SQL that
+ * is appropriate for your database and JDBC driver. Service providers are
  * built-in for MySQL 4.1 and 5 using version 5 of the Connector/J JDBC driver,
  * and Oracle 10g using the ojdbc6 driver.
  *
- * Two system properties control the behavior of the backend and are
- * useful for debugging. The
- * <code>protempa.dsb.relationaldatabase.sqlgenerator</code> property can be
- * set with the full class name of a {@link SQLGenerator} service provider to
- * force its use. This circumvents the built-in algorithm for picking a
- * service provider to use. The
+ * Two system properties control the behavior of the backend and are useful for
+ * debugging. The
+ * <code>protempa.dsb.relationaldatabase.sqlgenerator</code> property can be set
+ * with the full class name of a {@link SQLGenerator} service provider to force
+ * its use. This circumvents the built-in algorithm for picking a service
+ * provider to use. The
  * <code>protempa.dsb.relationaldatabase.skipexecution</code> property can be
- * set to <code>true</code> to cause the backend to generate SQL queries but
- * not execute them. Together with turning on logging to see the SQL queries,
- * this can be useful for debugging the generated SQL without having to wait
- * for them to execute.
+ * set to
+ * <code>true</code> to cause the backend to generate SQL queries but not
+ * execute them. Together with turning on logging to see the SQL queries, this
+ * can be useful for debugging the generated SQL without having to wait for them
+ * to execute.
  *
  * The backend and various classes that it invokes support extensive logging.
  * Logging at the FINE level on the
- * <code>org.protempa.bp.commons.dsb.sqlgen</code> package will activate
- * logging of the generated SQL queries.
- * 
+ * <code>org.protempa.bp.commons.dsb.sqlgen</code> package will activate logging
+ * of the generated SQL queries.
+ *
  * @author Andrew Post
  */
 public abstract class RelationalDbDataSourceBackend
         extends AbstractCommonsDataSourceBackend {
 
+    private static final DataValidationEvent[] EMPTY_VALIDATION_EVENT_ARRAY =
+            new DataValidationEvent[0];
     private DatabaseAPI databaseAPI;
     private String databaseId;
     protected String username;
@@ -122,46 +126,21 @@ public abstract class RelationalDbDataSourceBackend
      * backend's configuration parameters.
      *
      * @throws DataSourceBackendInitializationException if bad database
-     * connection information was provided or a SQL generator that is
-     * compatible with the database and available drivers is not available.
+     * connection information was provided or a SQL generator that is compatible
+     * with the database and available drivers is not available.
      */
     @Override
-    public final void initialize(BackendInstanceSpec config)
-            throws DataSourceBackendInitializationException {
+    public void initialize(BackendInstanceSpec config)
+            throws BackendInitializationException {
         super.initialize(config);
-        
+
         this.relationalDatabaseSpec = createRelationalDatabaseSpec();
-        
-        try {
-            ConnectionSpec connectionSpecInstance =
-                    this.databaseAPI.newConnectionSpecInstance(
-                    this.databaseId, this.username, this.password);
-            this.sqlGenerator = new SQLGeneratorFactory(connectionSpecInstance,
-                    this).newInstance();
-        } catch (InvalidConnectionSpecArguments ex) {
-            throw new DataSourceBackendInitializationException(
-                    "Could not initialize data source backend " +
-                    nameForErrors(), ex);
-        } catch (NoCompatibleSQLGeneratorException ex) {
-            throw new DataSourceBackendInitializationException(
-                    "Could not initialize data source backend " +
-                    nameForErrors(), ex);
-        } catch (SQLGeneratorLoadException ex) {
-            throw new DataSourceBackendInitializationException(
-                    "Could not initialize data source backend " +
-                    nameForErrors(), ex);
-        } catch (SQLException ex) {
-            throw new DataSourceBackendInitializationException(
-                    "Could not initialize data source backend " +
-                    nameForErrors(), ex);
-        }
+
+
     }
 
     public void setRelationalDatabaseSpec(RelationalDatabaseSpec spec) {
-        if (this.sqlGenerator != null) {
-            throw new IllegalStateException(
-                    "cannot set this field after initialize has been called");
-        }
+        this.sqlGenerator = null;
         this.relationalDatabaseSpec = spec;
     }
 
@@ -171,6 +150,7 @@ public abstract class RelationalDbDataSourceBackend
 
     /**
      * Returns which Java database API this backend is configured to use.
+     *
      * @return a {@link DatabaseAPI}. The default value is
      * {@link DatabaseAPI.DRIVERMANAGER}.
      */
@@ -179,18 +159,15 @@ public abstract class RelationalDbDataSourceBackend
     }
 
     /**
-     * Configures which Java database API to use
-     * ({@link java.sql.DriverManager} or {@link javax.sql.DataSource}. If
+     * Configures which Java database API to use ({@link java.sql.DriverManager}
+     * or {@link javax.sql.DataSource}. If
      * <code>null</code>, the default is assigned
      * ({@link DatabaseAPI.DRIVERMANAGER}).
      *
      * @param databaseAPI a {@link DatabaseAPI}.
      */
     public void setDatabaseAPI(DatabaseAPI databaseAPI) {
-        if (this.sqlGenerator != null) {
-            throw new IllegalStateException(
-                    "cannot set this field after initialize has been called");
-        }
+        this.sqlGenerator = null;
         if (databaseAPI == null) {
             databaseAPI = DatabaseAPI.DRIVERMANAGER;
         }
@@ -198,13 +175,13 @@ public abstract class RelationalDbDataSourceBackend
     }
 
     /**
-     * Configures which Java database API to use
-     * ({@link java.sql.DriverManager} or {@link javax.sql.DataSource} by
-     * parsing a {@link DatabaseAPI}'s name. Cannot be null.
+     * Configures which Java database API to use ({@link java.sql.DriverManager}
+     * or {@link javax.sql.DataSource} by parsing a {@link DatabaseAPI}'s name.
+     * Cannot be null.
      *
      * @param databaseAPIString a {@link DatabaseAPI}'s name.
      */
-    @BackendProperty(propertyName="databaseAPI")
+    @BackendProperty(propertyName = "databaseAPI")
     public void parseDatabaseAPI(String databaseAPISTring) {
         setDatabaseAPI(DatabaseAPI.valueOf(databaseAPISTring));
     }
@@ -219,25 +196,22 @@ public abstract class RelationalDbDataSourceBackend
     }
 
     /**
-     * Sets the database id for a database. This must be set to something
-     * not <code>null</code>.
+     * Sets the database id for a database. This must be set to something not
+     * <code>null</code>.
      *
      * @param databaseId a a database id {@link String}.
      */
     @BackendProperty
     public void setDatabaseId(String databaseId) {
-        if (this.sqlGenerator != null) {
-            throw new IllegalStateException(
-                    "cannot set this field after initialize has been called");
-        }
+        this.sqlGenerator = null;
         this.databaseId = databaseId;
     }
-    
+
     /**
-     * Sets the query timeout.  If <code>null</code>, no timeout will be set 
-     * (the default).
-     * 
-     * @param seconds the timeout in seconds, or <code>null</code> to disable 
+     * Sets the query timeout. If
+     * <code>null</code>, no timeout will be set (the default).
+     *
+     * @param seconds the timeout in seconds, or <code>null</code> to disable
      * query timeout.
      */
     @BackendProperty
@@ -247,14 +221,15 @@ public abstract class RelationalDbDataSourceBackend
         }
         this.queryTimeout = seconds;
     }
-    
+
     /**
      * Returns the query timeout in seconds. The query timeout setting halts
-     * query execution if execution does not complete within the specified 
-     * number of seconds. A value of <code>0</code> or a negative
-     * number (the default) means that no query timeout is set.
-     * 
-     * @return the query timeout in seconds, or <code>null</code> if query 
+     * query execution if execution does not complete within the specified
+     * number of seconds. A value of
+     * <code>0</code> or a negative number (the default) means that no query
+     * timeout is set.
+     *
+     * @return the query timeout in seconds, or <code>null</code> if query
      * timeout is disabled.
      */
     public Integer getQueryTimeout() {
@@ -277,10 +252,7 @@ public abstract class RelationalDbDataSourceBackend
      */
     @BackendProperty
     public void setUsername(String user) {
-        if (this.sqlGenerator != null) {
-            throw new IllegalStateException(
-                    "cannot set this field after initialize has been called");
-        }
+        this.sqlGenerator = null;
         this.username = user;
     }
 
@@ -300,10 +272,7 @@ public abstract class RelationalDbDataSourceBackend
      */
     @BackendProperty
     public void setPassword(String password) {
-        if (this.sqlGenerator != null) {
-            throw new IllegalStateException(
-                    "cannot set this field after initialize has been called");
-        }
+        this.sqlGenerator = null;
         this.password = password;
     }
 
@@ -316,34 +285,70 @@ public abstract class RelationalDbDataSourceBackend
 //        return this.sqlGenerator.readPropositions(keyIds, paramIds,
 //                filters, null).getPatientCache();
 //    }
-    
     @Override
     public DataStreamingEventIterator<Proposition> readPropositions(
-            Set<String> keyIds, Set<String> propIds, Filter filters, 
-            QuerySession qs) 
+            Set<String> keyIds, Set<String> propIds, Filter filters,
+            QuerySession qs)
             throws DataSourceReadException {
-        return this.sqlGenerator.readPropositionsStreaming(keyIds, propIds, 
+        if (this.sqlGenerator == null) {
+            try {
+                ConnectionSpec connectionSpecInstance =
+                        getConnectionSpecInstance();
+                this.sqlGenerator = new SQLGeneratorFactory(connectionSpecInstance,
+                        this).newInstance();
+            } catch (InvalidConnectionSpecArguments ex) {
+                throw new DataSourceReadException(
+                        "Could not initialize data source backend "
+                        + nameForErrors(), ex);
+            } catch (NoCompatibleSQLGeneratorException ex) {
+                throw new DataSourceReadException(
+                        "Could not initialize data source backend "
+                        + nameForErrors(), ex);
+            } catch (SQLGeneratorLoadException ex) {
+                throw new DataSourceReadException(
+                        "Could not initialize data source backend "
+                        + nameForErrors(), ex);
+            } catch (SQLException ex) {
+                throw new DataSourceReadException(
+                        "Could not initialize data source backend "
+                        + nameForErrors(), ex);
+            }
+        }
+        return this.sqlGenerator.readPropositionsStreaming(keyIds, propIds,
                 filters);
     }
 
     @Override
-    public void validate(KnowledgeSource knowledgeSource)
-            throws DataSourceBackendFailedValidationException,
-            KnowledgeSourceReadException{
+    public DataValidationEvent[] validateData(KnowledgeSource knowledgeSource)
+            throws DataSourceBackendFailedDataValidationException,
+            KnowledgeSourceReadException {
+        return EMPTY_VALIDATION_EVENT_ARRAY;
+    }
+
+    @Override
+    public void validateConfiguration(KnowledgeSource knowledgeSource)
+            throws DataSourceBackendFailedConfigurationValidationException,
+            KnowledgeSourceReadException {
         this.relationalDatabaseSpec.validate(knowledgeSource);
     }
 
     @Override
-    public void close() {
+    public void close() throws BackendCloseException {
         this.sqlGenerator = null;
     }
-    
+
+    protected ConnectionSpec getConnectionSpecInstance()
+            throws InvalidConnectionSpecArguments {
+        return this.databaseAPI.newConnectionSpecInstance(
+                this.databaseId, this.username, this.password);
+    }
+
     protected abstract EntitySpec[] constantSpecs() throws IOException;
-    
+
     protected abstract EntitySpec[] eventSpecs() throws IOException;
-    
+
     protected abstract EntitySpec[] primitiveParameterSpecs() throws IOException;
-    
+
     protected abstract StagingSpec[] stagedSpecs() throws IOException;
 
     private RelationalDatabaseSpec createRelationalDatabaseSpec() {
@@ -353,13 +358,13 @@ public abstract class RelationalDbDataSourceBackend
         try {
             EntitySpec[] constantSpecs = constantSpecs();
             result.setConstantSpecs(constantSpecs);
-            
+
             EntitySpec[] eventSpecs = eventSpecs();
             result.setEventSpecs(eventSpecs);
 
             EntitySpec[] primParamSpecs = primitiveParameterSpecs();
             result.setPrimitiveParameterSpecs(primParamSpecs);
-            
+
             StagingSpec[] stagedSpecs = stagedSpecs();
             result.setStagedSpecs(stagedSpecs);
 

@@ -24,15 +24,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
-import org.arp.javautil.io.Retryable;
-import org.arp.javautil.io.Retryer;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.*;
 import org.protempa.backend.dsb.filter.Filter;

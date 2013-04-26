@@ -20,20 +20,26 @@
 package org.protempa;
 
 /**
- * Methods shared by PROTEMPA's modules.
+ * Abstract class for exceptions that are thrown when an error occurs calling
+ * the data source.
  *
  * @author Andrew Post
+ *
  */
-public interface Module {
+public abstract class CloseException extends ProtempaException {
 
-    /**
-     * Closes all resources that were created by this module. Subsequent calls
-     * to this module's methods cannot be made.
-     */
-    void close();
+    CloseException() {
+    }
 
-    /**
-     * Resets the state of this module to the default.
-     */
-    void clear();
+    CloseException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    CloseException(String message) {
+        super(message);
+    }
+
+    CloseException(Throwable cause) {
+        super(cause);
+    }
 }

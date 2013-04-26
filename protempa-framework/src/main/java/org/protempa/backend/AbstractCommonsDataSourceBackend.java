@@ -19,6 +19,7 @@
  */
 package org.protempa.backend;
 
+import org.protempa.ProtempaException;
 import org.protempa.backend.annotations.BackendProperty;
 import org.protempa.backend.dsb.AbstractDataSourceBackend;
 
@@ -33,7 +34,8 @@ public abstract class AbstractCommonsDataSourceBackend
 
     @Override
     public void initialize(BackendInstanceSpec config)
-        throws DataSourceBackendInitializationException {
+        throws BackendInitializationException {
+        super.initialize(config);
         CommonsBackend.initialize(this, config);
         if (this.dataSourceBackendId == null)
             throw new DataSourceBackendInitializationException(
@@ -57,4 +59,5 @@ public abstract class AbstractCommonsDataSourceBackend
     public final String getDataSourceBackendId () {
         return this.dataSourceBackendId;
     }
+    
 }

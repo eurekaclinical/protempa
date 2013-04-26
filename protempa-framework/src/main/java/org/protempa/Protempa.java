@@ -19,24 +19,27 @@
  */
 package org.protempa;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import org.protempa.backend.BackendInitializationException;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.collections.CollectionUtils;
 
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
-import org.protempa.backend.DataSourceBackendFailedValidationException;
+import org.protempa.backend.ConfigurationsNotFoundException;
+import org.protempa.backend.DataSourceBackendFailedConfigurationValidationException;
+import org.protempa.backend.DataSourceBackendFailedDataValidationException;
 import org.protempa.backend.InvalidConfigurationException;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
-import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.backend.dsb.DataValidationEvent;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.backend.tsb.TermSourceBackend;
-import org.protempa.query.And;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
@@ -56,6 +59,8 @@ public final class Protempa {
             throws ProtempaStartupException {
         try {
             return newInstance(new SourceFactory(configurationId));
+        } catch (ConfigurationsNotFoundException ex) {
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (ConfigurationsLoadException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (BackendProviderSpecLoaderException ex) {
@@ -83,6 +88,8 @@ public final class Protempa {
             throws ProtempaStartupException {
         try {
             return newInstance(new SourceFactory(configurationsId), useCache);
+        } catch (ConfigurationsNotFoundException ex) {
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (ConfigurationsLoadException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (BackendProviderSpecLoaderException ex) {
@@ -532,25 +539,18 @@ public final class Protempa {
         this.abstractionFinder.processAndOutputStoredResults(query,
                 resultHandler, qs, propositionStoreEnvironment);
     }
-
-    /**
-     * Runs each data source backend's validation routine.
-     *
-     * @throws DataSourceFailedValidationException if validation failed.
-     * @throws DataSourceValidationIncompleteException if an error occurred
-     * during validation that prevented its completion.
-     */
-    public void validateDataSource()
-            throws DataSourceFailedValidationException,
-            DataSourceValidationIncompleteException {
+    
+    public void validateDataSourceBackendConfigurations() 
+            throws DataSourceValidationIncompleteException, 
+            DataSourceFailedConfigurationValidationException {
         KnowledgeSource knowledgeSource = getKnowledgeSource();
         try {
             for (DataSourceBackend backend : getDataSource().getBackends()) {
-                backend.validate(knowledgeSource);
+                backend.validateConfiguration(knowledgeSource);
             }
-        } catch (DataSourceBackendFailedValidationException ex) {
-            throw new DataSourceFailedValidationException(
-                    "Data source failed validation", ex);
+        } catch (DataSourceBackendFailedConfigurationValidationException ex) {
+            throw new DataSourceFailedConfigurationValidationException(
+                    "Data source configuration failed validation", ex);
         } catch (KnowledgeSourceReadException ex) {
             throw new DataSourceValidationIncompleteException(
                     "An error occurred during validation", ex);
@@ -558,10 +558,38 @@ public final class Protempa {
     }
 
     /**
+     * Runs each data source backend's data validation routine.
+     *
+     * @throws DataSourceFailedDataValidationException if validation failed.
+     * @throws DataSourceValidationIncompleteException if an error occurred
+     * during validation that prevented its completion.
+     */
+    public DataValidationEvent[] validateDataSourceBackendData()
+            throws DataSourceFailedDataValidationException,
+            DataSourceValidationIncompleteException {
+        KnowledgeSource knowledgeSource = getKnowledgeSource();
+        List<DataValidationEvent> validationEvents = 
+                new ArrayList<DataValidationEvent>();
+        try {
+            for (DataSourceBackend backend : getDataSource().getBackends()) {
+                CollectionUtils.addAll(validationEvents, 
+                        backend.validateData(knowledgeSource));
+            }
+        } catch (DataSourceBackendFailedDataValidationException ex) {
+            throw new DataSourceFailedDataValidationException(
+                    "Data source failed validation", ex, validationEvents.toArray(new DataValidationEvent[validationEvents.size()]));
+        } catch (KnowledgeSourceReadException ex) {
+            throw new DataSourceValidationIncompleteException(
+                    "An error occurred during validation", ex);
+        }
+        return validationEvents.toArray(new DataValidationEvent[validationEvents.size()]);
+    }
+
+    /**
      * Closes resources created by this object and the data source, knowledge
      * source, and algorithm source.
      */
-    public void close() {
+    public void close() throws CloseException {
         this.abstractionFinder.close();
         this.abstractionFinder.getAlgorithmSource().close();
         this.abstractionFinder.getDataSource().close();

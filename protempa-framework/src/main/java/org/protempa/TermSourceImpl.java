@@ -19,14 +19,12 @@
  */
 package org.protempa;
 
-import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.TermSourceBackendUpdatedEvent;
 import org.protempa.backend.tsb.TermSourceBackend;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.protempa.backend.BackendNewInstanceException;
 
 public final class TermSourceImpl extends AbstractSource<TermSourceUpdatedEvent, TermSourceBackend, TermSourceUpdatedEvent, TermSourceBackendUpdatedEvent> implements TermSource {
 
@@ -81,16 +79,18 @@ public final class TermSourceImpl extends AbstractSource<TermSourceUpdatedEvent,
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.protempa.AbstractSource#close()
-     */
     @Override
-    public void close() {
+    public void close() throws SourceCloseException {
         clear();
         super.close();
     }
+
+    @Override
+    protected void throwCloseException(List<BackendCloseException> exceptions) throws SourceCloseException {
+        throw new TermSourceCloseException(exceptions);
+    }
+    
+    
 
     /**
      * Notifies registered listeners that the term source has been updated.

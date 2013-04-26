@@ -203,10 +203,17 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
     }
 
     @Override
-    public void close() {
+    public void close() throws SourceCloseException {
         clear();
         super.close();
     }
+
+    @Override
+    protected void throwCloseException(List<BackendCloseException> exceptions) throws SourceCloseException {
+        throw new DataSourceCloseException(exceptions);
+    }
+    
+    
 
     @Override
     public void clear() {

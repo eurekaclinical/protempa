@@ -34,9 +34,22 @@ public abstract class AbstractBackend<E extends BackendUpdatedEvent>
         implements Backend<E> {
 
     private final List<BackendListener<E>> listenerList;
+    
+    private String configurationsId;
 
     public AbstractBackend() {
         this.listenerList = new ArrayList<BackendListener<E>>();
+    }
+
+    @Override
+    public void initialize(BackendInstanceSpec<?> config) 
+            throws BackendInitializationException {
+        this.configurationsId = config.getConfigurationsId();
+    }
+    
+    @Override
+    public String getConfigurationsId() {
+        return this.configurationsId;
     }
 
     @Override

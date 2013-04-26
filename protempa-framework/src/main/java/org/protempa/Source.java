@@ -22,12 +22,16 @@ package org.protempa;
 import org.protempa.backend.Backend;
 import org.protempa.backend.BackendUpdatedEvent;
 
-public interface Source<S extends SourceUpdatedEvent, B extends Backend, 
-        T extends BackendUpdatedEvent> extends BackendListener<T>, Module {
-    
+public interface Source<S extends SourceUpdatedEvent, B extends Backend, T extends BackendUpdatedEvent> 
+        extends BackendListener<T> {
+
     B[] getBackends();
-    
+
     void addSourceListener(SourceListener<S> sourceListener);
-    
+
     void removeSourceListener(SourceListener<S> sourceListener);
+
+    void close() throws SourceCloseException;
+    
+    void clear();
 }

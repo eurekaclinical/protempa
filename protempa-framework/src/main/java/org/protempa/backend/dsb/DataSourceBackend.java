@@ -19,15 +19,12 @@
  */
 package org.protempa.backend.dsb;
 
-import org.protempa.DataSource;
-import org.protempa.MultiplexingDataStreamingEventIterator;
 import org.protempa.backend.dsb.filter.Filter;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.protempa.*;
 import org.protempa.backend.Backend;
-import org.protempa.backend.DataSourceBackendFailedValidationException;
+import org.protempa.backend.DataSourceBackendFailedConfigurationValidationException;
+import org.protempa.backend.DataSourceBackendFailedDataValidationException;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
@@ -56,9 +53,15 @@ public interface DataSourceBackend extends
     String getKeyTypeDisplayName();
 
     String getKeyTypePluralDisplayName();
-
-    void validate(KnowledgeSource knowledgeSource)
-            throws DataSourceBackendFailedValidationException,
+    
+    DataValidationEvent[] validateData(KnowledgeSource knowledgeSource) 
+            throws DataSourceBackendFailedDataValidationException,
             KnowledgeSourceReadException;
+
+    void validateConfiguration(KnowledgeSource knowledgeSource)
+            throws DataSourceBackendFailedConfigurationValidationException,
+            KnowledgeSourceReadException;
+    
+    void exceptionOccurred(ProtempaException protempaException);
 
 }

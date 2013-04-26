@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.protempa.Term;
 import org.protempa.TermSourceReadException;
 import org.protempa.backend.BackendPropertySpec;
-import org.protempa.backend.test.MockBackendInstanceSpec;
+import org.protempa.backend.test.MockBackendInstanceSpecFactory;
 import org.protempa.backend.test.MockBackendPropertySpec;
 
 public class UMLSTermSourceBackendTest {
@@ -64,11 +64,12 @@ public class UMLSTermSourceBackendTest {
         propSpecs.add(new MockBackendPropertySpec("username", String.class).getBackendPropertySpec());
         propSpecs.add(new MockBackendPropertySpec("password", String.class).getBackendPropertySpec());
 
-        MockBackendInstanceSpec<UMLSTermSourceBackend> mbis = new MockBackendInstanceSpec<UMLSTermSourceBackend>(
+        MockBackendInstanceSpecFactory<UMLSTermSourceBackend> mbis = 
+                new MockBackendInstanceSpecFactory<UMLSTermSourceBackend>(
                 propSpecs);
 
         try {
-            backend.initialize(mbis.getBackendInstanceSpec());
+            backend.initialize(mbis.getInstance());
         } catch (Exception e) {
             e.printStackTrace();
         }

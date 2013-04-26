@@ -36,11 +36,6 @@ public final class MockAlgorithmSourceBackend
     public void readAlgorithms(Algorithms algorithms) {
     }
 
-    @Override
-    public void initialize(BackendInstanceSpec config)
-            throws BackendInitializationException {
-    }
-
     /**
      * Make public so that tests can call it.
      * @see AbstractAlgorithmSourceBackend

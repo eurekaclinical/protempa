@@ -91,6 +91,7 @@ public final class SimpleKnowledgeSourceBackend
     @Override
     public void initialize(BackendInstanceSpec config)
             throws BackendInitializationException {
+        super.initialize(config);
     }
 
     /**

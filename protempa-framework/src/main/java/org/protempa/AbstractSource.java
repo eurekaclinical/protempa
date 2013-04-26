@@ -109,15 +109,26 @@ public abstract class AbstractSource<S extends SourceUpdatedEvent,
      * Must be called by subclasses, or proper cleanup will not occur.
      */
     @Override
-    public void close() {
+    public void close() throws SourceCloseException {
         for (Backend backend : this.backends) {
             backend.removeBackendListener(this);
         }
+        List<BackendCloseException> exceptions =
+                new ArrayList<BackendCloseException>();
         for (Backend backend : this.backends) {
-            backend.close();
+            try {
+                backend.close();
+            } catch (BackendCloseException ex) {
+                exceptions.add(ex);
+            }
+        }
+        if (!exceptions.isEmpty()) {
+            throwCloseException(exceptions);
         }
         this.closed = true;
     }
+    
+    protected abstract void throwCloseException(List<BackendCloseException> exceptions) throws SourceCloseException;
 
     protected boolean isClosed() {
         return this.closed;
@@ -126,7 +137,10 @@ public abstract class AbstractSource<S extends SourceUpdatedEvent,
     @Override
     public final void unrecoverableErrorOccurred(
             UnrecoverableBackendErrorEvent e) {
-        close();
+        try {
+            close();
+        } catch (SourceCloseException ignore) {
+        }
         fireClosedUnexpectedly(new SourceClosedUnexpectedlyEvent<S, B, T>(this));
     }
 }

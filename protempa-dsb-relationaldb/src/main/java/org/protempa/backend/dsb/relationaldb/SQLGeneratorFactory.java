@@ -29,14 +29,14 @@ import java.util.logging.Logger;
 import org.arp.javautil.sql.ConnectionSpec;
 
 /**
- * Factory for obtaining a {@link SQLGenerator} given the database and
- * JDBC driver that are in use.
+ * Factory for obtaining a {@link SQLGenerator} given the database and JDBC
+ * driver that are in use.
  *
  * The system property
- * <code>protempa.dsb.relationaldatabase.sqlgenerator</code> can be set with
- * the full class name of an implementation of {@link SQLGenerator} to force
- * the use of a particular SQL generator.
- * 
+ * <code>protempa.dsb.relationaldatabase.sqlgenerator</code> can be set with the
+ * full class name of an implementation of {@link SQLGenerator} to force the use
+ * of a particular SQL generator.
+ *
  * @author Andrew Post
  */
 public final class SQLGeneratorFactory {
@@ -49,8 +49,7 @@ public final class SQLGeneratorFactory {
      *
      * @param connectionSpec a {@link ConnectionSpec}, cannot be
      * <code>null</code>.
-     * @param backend an initialized
-     * {@link RelationalDbDataSourceBackend}.
+     * @param backend an initialized {@link RelationalDbDataSourceBackend}.
      */
     public SQLGeneratorFactory(ConnectionSpec connectionSpec,
             RelationalDbDataSourceBackend backend) {
@@ -61,8 +60,8 @@ public final class SQLGeneratorFactory {
     }
 
     /**
-     * Returns a newly-created {@link SQLGenerator} that is compatible with
-     * the database and JDBC driver that are in use.
+     * Returns a newly-created {@link SQLGenerator} that is compatible with the
+     * database and JDBC driver that are in use.
      *
      * @return a {@link SQLGenerator}.
      * @throws SQLException if an attempt to query the database for
@@ -70,15 +69,15 @@ public final class SQLGeneratorFactory {
      * @throws NoCompatibleSQLGeneratorException if no compatible SQL generator
      * could be found.
      * @throws SQLGeneratorLoadException if a ProtempaSQLGenerator class
-     * specified in a {@link ServiceLoader}'s provider-configuration
-     * file cannot be loaded by the the current thread's context class loader.
+     * specified in a {@link ServiceLoader}'s provider-configuration file cannot
+     * be loaded by the the current thread's context class loader.
      */
     public SQLGenerator newInstance() throws SQLException,
             NoCompatibleSQLGeneratorException,
             SQLGeneratorLoadException {
         Logger logger = SQLGenUtil.logger();
         logger.fine("Loading a compatible SQL generator");
-        
+
         ServiceLoader<SQLGenerator> candidates =
                 ServiceLoader.load(SQLGenerator.class);
         /*
@@ -87,9 +86,12 @@ public final class SQLGeneratorFactory {
          */
         try {
             for (SQLGenerator candidateInstance : candidates) {
-                logger.log(Level.FINER, 
-                            "Checking compatibility of SQL generator {0}", 
-                            candidateInstance.getClass().getName());
+                candidateInstance.loadDriverIfNeeded();
+            }
+            for (SQLGenerator candidateInstance : candidates) {
+                logger.log(Level.FINER,
+                        "Checking compatibility of SQL generator {0}",
+                        candidateInstance.getClass().getName());
                 String forcedSQLGenerator =
                         System.getProperty(
                         SQLGenUtil.SYSTEM_PROPERTY_FORCE_SQL_GENERATOR);
@@ -100,7 +102,6 @@ public final class SQLGeneratorFactory {
                         logger.log(Level.INFO,
                                 "Forcing use of SQL generator {0}",
                                 candidateInstance.getClass().getName());
-                        candidateInstance.loadDriverIfNeeded();
                         candidateInstance.initialize(
                                 this.backend.getRelationalDatabaseSpec(),
                                 this.connectionSpec, this.backend);
@@ -115,8 +116,7 @@ public final class SQLGeneratorFactory {
                      */
                     Connection con = this.connectionSpec.getOrCreate();
                     try {
-                        if (candidateInstance.loadDriverIfNeeded() &&
-                                candidateInstance.checkCompatibility(con)) {
+                        if (candidateInstance.checkCompatibility(con)) {
                             DatabaseMetaData metaData = con.getMetaData();
                             logCompatibility(logger, candidateInstance,
                                     metaData);
@@ -127,9 +127,6 @@ public final class SQLGeneratorFactory {
                                     candidateInstance.getClass().getName());
                             return candidateInstance;
                         }
-                        logger.log(Level.FINER,
-                                "SQL generator {0} is not compatible", 
-                                candidateInstance.getClass().getName());
                         con.close();
                         con = null;
                     } finally {
@@ -140,6 +137,9 @@ public final class SQLGeneratorFactory {
                             }
                         }
                     }
+                    logger.log(Level.FINER,
+                            "SQL generator {0} is not compatible",
+                            candidateInstance.getClass().getName());
                 }
             }
         } catch (ServiceConfigurationError sce) {

@@ -20,31 +20,26 @@
 package org.protempa;
 
 /**
- * Base class for PROTEMPA checked exceptions.
+ * Abstract class for exceptions that are thrown when an error occurs calling
+ * the data source.
  *
  * @author Andrew Post
  *
  */
-public abstract class ProtempaException extends Exception {
+public abstract class DataSourceBackendException extends ProtempaException {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 5229759417046161519L;
-
-    protected ProtempaException() {
-        super();
+    DataSourceBackendException() {
     }
 
-    protected ProtempaException(String message, Throwable cause) {
+    DataSourceBackendException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    protected ProtempaException(String message) {
+    DataSourceBackendException(String message) {
         super(message);
     }
 
-    protected ProtempaException(Throwable cause) {
+    DataSourceBackendException(Throwable cause) {
         super(cause);
     }
 }

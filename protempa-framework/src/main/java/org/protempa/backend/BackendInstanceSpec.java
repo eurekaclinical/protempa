@@ -31,11 +31,13 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author Andrew Post
  */
 public final class BackendInstanceSpec<B extends Backend> {
+
     private final BackendSpec<B> backendSpec;
+    private String configurationsId;
     private final Map<String, Object> properties;
     private final List<BackendPropertySpec> propertySpecs;
 
-    public BackendInstanceSpec(
+    BackendInstanceSpec(
             BackendSpec<B> backendSpec,
             List<BackendPropertySpec> propertySpecs) {
         assert backendSpec != null : "backendSpec cannot be null";
@@ -50,6 +52,14 @@ public final class BackendInstanceSpec<B extends Backend> {
         return this.backendSpec;
     }
 
+    public void setConfigurationsId(String configurationsId) {
+        this.configurationsId = configurationsId;
+    }
+    
+    public String getConfigurationsId() {
+        return this.configurationsId;
+    }
+
     public List<BackendPropertySpec> getBackendPropertySpecs() {
         return this.propertySpecs;
     }
@@ -59,22 +69,23 @@ public final class BackendInstanceSpec<B extends Backend> {
         for (BackendPropertySpec spec : this.propertySpecs) {
             if (spec.getName().equals(name)) {
                 Class cls = spec.getType();
-                if (String.class.equals(cls))
+                if (String.class.equals(cls)) {
                     setProperty(name, valueStr);
-                else if (Double.class.equals(cls))
+                } else if (Double.class.equals(cls)) {
                     setProperty(name, Double.valueOf(valueStr));
-                else if (Float.class.equals(cls))
+                } else if (Float.class.equals(cls)) {
                     setProperty(name, Float.valueOf(valueStr));
-                else if (Integer.class.equals(cls))
+                } else if (Integer.class.equals(cls)) {
                     setProperty(name, Integer.valueOf(valueStr));
-                else if (Long.class.equals(cls))
+                } else if (Long.class.equals(cls)) {
                     setProperty(name, Long.valueOf(valueStr));
-                else if (Boolean.class.equals(cls))
+                } else if (Boolean.class.equals(cls)) {
                     setProperty(name, Boolean.valueOf(valueStr));
-                else
-                    throw new AssertionError("name's type, " + cls.getName() 
+                } else {
+                    throw new AssertionError("name's type, " + cls.getName()
                             + ", is invalid, must be one of "
                             + BackendPropertySpec.allowedClassesPrettyPrint());
+                }
                 return;
             }
         }
@@ -85,8 +96,8 @@ public final class BackendInstanceSpec<B extends Backend> {
         for (BackendPropertySpec spec : this.propertySpecs) {
             if (spec.getName().equals(name)) {
                 if (value != null && !spec.getType().isInstance(value)) {
-                    throw new IllegalArgumentException("value should be " +
-                            spec.getType() + " but was " + value.getClass());
+                    throw new IllegalArgumentException("value should be "
+                            + spec.getType() + " but was " + value.getClass());
                 }
                 spec.validate(value);
                 this.properties.put(name, value);
@@ -96,7 +107,7 @@ public final class BackendInstanceSpec<B extends Backend> {
         throw new InvalidPropertyNameException(name);
     }
 
-    public Object getProperty(String name) 
+    public Object getProperty(String name)
             throws InvalidPropertyNameException {
         for (BackendPropertySpec spec : this.propertySpecs) {
             if (spec.getName().equals(name)) {
@@ -107,8 +118,8 @@ public final class BackendInstanceSpec<B extends Backend> {
     }
 
     /**
-     * Instantiates a new {@link Backend} and calls
-     * its {@link Backend#initialize} method before returning it.
+     * Instantiates a new {@link Backend} and calls its
+     * {@link Backend#initialize} method before returning it.
      *
      * @return
      * @throws org.protempa.BackendInitializationException

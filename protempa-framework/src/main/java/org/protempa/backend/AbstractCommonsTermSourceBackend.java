@@ -20,15 +20,14 @@
 package org.protempa.backend;
 
 import org.protempa.backend.tsb.AbstractTermSourceBackend;
-import org.protempa.backend.TermSourceBackendInitializationException;
-import org.protempa.backend.BackendInstanceSpec;
 
 public abstract class AbstractCommonsTermSourceBackend extends
         AbstractTermSourceBackend {
 
     @Override
     public void initialize(BackendInstanceSpec config)
-            throws TermSourceBackendInitializationException {
+            throws BackendInitializationException {
+        super.initialize(config);
         CommonsBackend.initialize(this, config);
     }
 

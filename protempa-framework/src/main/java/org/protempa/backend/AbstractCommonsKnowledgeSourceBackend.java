@@ -20,8 +20,6 @@
 package org.protempa.backend;
 
 import org.protempa.backend.ksb.AbstractKnowledgeSourceBackend;
-import org.protempa.backend.KnowledgeSourceBackendInitializationException;
-import org.protempa.backend.BackendInstanceSpec;
 
 /**
  *
@@ -32,7 +30,8 @@ public abstract class AbstractCommonsKnowledgeSourceBackend
 
     @Override
     public void initialize(BackendInstanceSpec config)
-            throws KnowledgeSourceBackendInitializationException {
+            throws BackendInitializationException {
+        super.initialize(config);
         CommonsBackend.initialize(this, config);
     }
 

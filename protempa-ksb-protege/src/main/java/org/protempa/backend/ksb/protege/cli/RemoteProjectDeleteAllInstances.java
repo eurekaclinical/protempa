@@ -29,6 +29,7 @@ import java.util.Collection;
 import org.apache.commons.cli.CommandLine;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
+import org.protempa.backend.ConfigurationsNotFoundException;
 import org.protempa.backend.InvalidPropertyNameException;
 import org.protempa.cli.CLI;
 import org.protempa.backend.ksb.protege.RemoteProjectFactory;
@@ -59,6 +60,8 @@ public class RemoteProjectDeleteAllInstances extends CLI {
         try {
             project = new RemoteProjectFactory().getInstance(configurationId,
                     host, knowledgeBaseName);
+        } catch (ConfigurationsNotFoundException ex) {
+            pdai.printException(ex);
         } catch (ConfigurationsLoadException ex) {
             pdai.printException(ex);
         } catch (BackendProviderSpecLoaderException ex) {

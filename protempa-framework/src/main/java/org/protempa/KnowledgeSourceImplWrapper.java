@@ -620,7 +620,7 @@ class KnowledgeSourceImplWrapper
     }
 
     @Override
-    public void close() {
+    public void close() throws SourceCloseException {
         if (this.initialized) {
             this.inDataSourceGetter.clear();
         }
@@ -685,5 +685,10 @@ class KnowledgeSourceImplWrapper
             }
         }
         return result;
+    }
+
+    @Override
+    protected void throwCloseException(List<BackendCloseException> exceptions) throws SourceCloseException {
+        throw new KnowledgeSourceCloseException(exceptions);
     }
 }

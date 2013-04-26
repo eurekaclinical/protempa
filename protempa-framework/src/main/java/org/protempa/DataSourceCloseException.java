@@ -19,28 +19,22 @@
  */
 package org.protempa;
 
+import java.util.Arrays;
+import java.util.List;
+import org.apache.commons.lang.exception.ExceptionUtils;
+
 /**
+ * Thrown when there is an error retrieving data from the data source. To be
+ * raised from {@link SchemaAdaptor}s.
  *
  * @author Andrew Post
+ *
  */
-public class DataSourceFailedValidationException extends DataSourceException {
-    private static final long serialVersionUID = 4682398146182167907L;
+public class DataSourceCloseException extends SourceCloseException {
 
-    public DataSourceFailedValidationException(Throwable cause) {
-        super(cause);
+    private static final long serialVersionUID = -1607783133183868272L;
+
+    DataSourceCloseException(List<BackendCloseException> causes) {
+        super(exceptionsToString(causes));
     }
-
-    public DataSourceFailedValidationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public DataSourceFailedValidationException(String message) {
-        super(message);
-    }
-
-    public DataSourceFailedValidationException() {
-    }
-
-    
-
 }

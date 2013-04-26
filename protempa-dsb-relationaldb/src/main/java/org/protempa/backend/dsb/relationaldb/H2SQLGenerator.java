@@ -24,6 +24,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.backend.dsb.filter.Filter;
@@ -51,12 +53,16 @@ public final class H2SQLGenerator extends AbstractSQLGenerator {
 
     private boolean checkDriverCompatibilitiy(Connection connection)
             throws SQLException {
+        Logger logger = SQLGenUtil.logger();
         DatabaseMetaData metaData = connection.getMetaData();
         String name = metaData.getDriverName();
+        logger.log(Level.FINER, "Database driver name: {0}", name);
         if (!name.equals("H2 JDBC Driver")) {
             return false;
         }
-        if (metaData.getDatabaseMajorVersion() != 1) {
+        int databaseMajorVersion = metaData.getDatabaseMajorVersion();
+        logger.log(Level.FINER, "Database major version: {0}", databaseMajorVersion);
+        if (databaseMajorVersion != 1) {
             return false;
         }
 
@@ -65,11 +71,16 @@ public final class H2SQLGenerator extends AbstractSQLGenerator {
 
     private boolean checkDatabaseCompatibility(Connection connection)
             throws SQLException {
+        Logger logger = SQLGenUtil.logger();
         DatabaseMetaData metaData = connection.getMetaData();
-        if (!metaData.getDatabaseProductName().equalsIgnoreCase("H2")) {
+        String databaseProductName = metaData.getDatabaseProductName();
+        logger.log(Level.FINER, "Database product name: {0}", databaseProductName);
+        if (!databaseProductName.equalsIgnoreCase("H2")) {
             return false;
         }
-        if (metaData.getDatabaseMajorVersion() != 1) {
+        int databaseMajorVersion = metaData.getDatabaseMajorVersion();
+        logger.log(Level.FINER, "Database major version: {0}", databaseMajorVersion);
+        if (databaseMajorVersion != 1) {
             return false;
         }
 

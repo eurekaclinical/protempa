@@ -28,6 +28,7 @@ public final class MockTermSourceBackend extends AbstractTermSourceBackend {
     @Override
     public void initialize(BackendInstanceSpec<?> config)
             throws BackendInitializationException {
+        super.initialize(config);
     }
     
     /**

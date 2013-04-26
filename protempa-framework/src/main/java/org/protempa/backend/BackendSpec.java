@@ -27,6 +27,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author Andrew Post
  */
 public final class BackendSpec<B extends Backend> {
+
     private BackendProvider backendProvider;
     private String id;
     private String displayName;
@@ -42,16 +43,19 @@ public final class BackendSpec<B extends Backend> {
     public BackendSpec(BackendProvider backendProvider, String id,
             String displayName,
             List<BackendPropertySpec> propertySpecs) {
-       if (backendProvider == null)
-           throw new IllegalArgumentException("backendProvider cannot be null");
-       if (id == null)
-           throw new IllegalArgumentException("id cannot be null");
-       if (id.contains("|"))
-           throw new IllegalArgumentException("id cannot have the | character");
-       this.id = id;
-       this.backendProvider = backendProvider;
-       this.displayName = displayName;
-       this.propertySpecs = propertySpecs;
+        if (backendProvider == null) {
+            throw new IllegalArgumentException("backendProvider cannot be null");
+        }
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+        if (id.contains("|")) {
+            throw new IllegalArgumentException("id cannot have the | character");
+        }
+        this.id = id;
+        this.backendProvider = backendProvider;
+        this.displayName = displayName;
+        this.propertySpecs = propertySpecs;
     }
 
     public String getId() {
@@ -61,17 +65,17 @@ public final class BackendSpec<B extends Backend> {
     public BackendProvider getBackendProvider() {
         return this.backendProvider;
     }
-    
+
     public String getDisplayName() {
         return this.displayName;
     }
-
+    
     public BackendInstanceSpec<B> newBackendInstanceSpec() {
-         return new BackendInstanceSpec<B>(this, propertySpecs);
+        return new BackendInstanceSpec<B>(this, propertySpecs);
     }
 
     @SuppressWarnings("unchecked")
-	B newBackendInstance() throws BackendNewInstanceException {
+    B newBackendInstance() throws BackendNewInstanceException {
         return (B) this.backendProvider.newInstance(id);
     }
 

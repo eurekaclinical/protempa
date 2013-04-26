@@ -38,6 +38,7 @@ import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.Configurations;
+import org.protempa.backend.ConfigurationsNotFoundException;
 import org.protempa.backend.ConfigurationsProviderManager;
 
 /**
@@ -54,7 +55,8 @@ public class SourceFactory {
     public SourceFactory(Configurations configurations, String configurationId) 
             throws BackendProviderSpecLoaderException, 
             ConfigurationsLoadException, 
-            InvalidConfigurationException {
+            InvalidConfigurationException,
+            ConfigurationsNotFoundException {
         Logger logger = ProtempaUtil.logger();
         logger.fine("Loading backend provider");
         BackendProvider backendProvider =
@@ -117,7 +119,8 @@ public class SourceFactory {
 
     public SourceFactory(String configurationId)
             throws ConfigurationsLoadException,
-            BackendProviderSpecLoaderException, InvalidConfigurationException {
+            BackendProviderSpecLoaderException, InvalidConfigurationException, 
+            ConfigurationsNotFoundException {
         this(null, configurationId);
     }
 
