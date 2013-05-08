@@ -19,10 +19,10 @@
  */
 package org.protempa;
 
+import org.protempa.proposition.interval.Interval.Side;
 import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.value.Unit;
-import org.protempa.proposition.value.Value;
 
 /**
  *
@@ -35,25 +35,25 @@ public class ContextOffset implements Serializable {
     private Unit startOffsetUnits;
     private Integer finishOffset;
     private Unit finishOffsetUnits;
-    private IntervalSide startIntervalSide;
-    private IntervalSide finishIntervalSide;
+    private Side startIntervalSide;
+    private Side finishIntervalSide;
 
     public ContextOffset() {
         this.startOffset = Integer.valueOf(0);
         this.finishOffset = Integer.valueOf(0);
-        this.startIntervalSide = IntervalSide.START;
-        this.finishIntervalSide = IntervalSide.FINISH;
+        this.startIntervalSide = Side.START;
+        this.finishIntervalSide = Side.FINISH;
     }
     
-    public IntervalSide getFinishIntervalSide() {
+    public Side getFinishIntervalSide() {
         return finishIntervalSide;
     }
 
-    public void setFinishIntervalSide(IntervalSide finishIntervalSide) {
+    public void setFinishIntervalSide(Side finishIntervalSide) {
         if (finishIntervalSide != null) {
             this.finishIntervalSide = finishIntervalSide;
         } else {
-            this.finishIntervalSide = IntervalSide.FINISH;
+            this.finishIntervalSide = Side.FINISH;
         }
     }
 
@@ -73,15 +73,15 @@ public class ContextOffset implements Serializable {
         this.finishOffsetUnits = finishOffsetUnits;
     }
 
-    public IntervalSide getStartIntervalSide() {
+    public Side getStartIntervalSide() {
         return startIntervalSide;
     }
 
-    public void setStartIntervalSide(IntervalSide startIntervalSide) {
+    public void setStartIntervalSide(Side startIntervalSide) {
         if (startIntervalSide != null) {
             this.startIntervalSide = startIntervalSide;
         } else {
-            this.startIntervalSide = IntervalSide.START;
+            this.startIntervalSide = Side.START;
         }
     }
 

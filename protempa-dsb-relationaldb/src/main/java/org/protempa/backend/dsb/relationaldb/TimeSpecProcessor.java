@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.dsb.filter.PositionFilter;
-import org.protempa.backend.dsb.filter.PositionFilter.Side;
+import org.protempa.proposition.interval.Interval.Side;
 
 final class TimeSpecProcessor {
 

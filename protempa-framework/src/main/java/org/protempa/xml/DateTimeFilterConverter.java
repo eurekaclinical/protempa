@@ -22,13 +22,13 @@ package org.protempa.xml;
 import java.util.Date;
 
 import org.protempa.backend.dsb.filter.DateTimeFilter;
-import org.protempa.backend.dsb.filter.PositionFilter.Side;
 import org.protempa.proposition.value.Granularity;
 
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.proposition.interval.Interval.Side;
 
 /**
  * Convert a Filter object to/from XML <filters></filters>
@@ -81,9 +81,9 @@ class DateTimeFilterConverter extends AbstractConverter {
 		
 		writer.addAttribute(FINISH_GRANULARITY, granularityConverter.toString(filter.getFinishGranularity()));
 		
-		writer.addAttribute(START_SIDE, filter.getStartSide().getXmlName());
+		writer.addAttribute(START_SIDE, filter.getStartSide().name());
 		
-		writer.addAttribute(FINISH_SIDE, filter.getFinishSide().getXmlName());
+		writer.addAttribute(FINISH_SIDE, filter.getFinishSide().name());
 		
 		writer.startNode(PROPOSITION_IDS);
 		PropIDsConverter propIdsConverter = new PropIDsConverter();
@@ -113,10 +113,10 @@ class DateTimeFilterConverter extends AbstractConverter {
 		Granularity finishGranularity = (Granularity)granularityConverter.fromString(finishGranularityString);
 
 		String startSideString = reader.getAttribute(START_SIDE);
-		Side startSide = Side.fromXmlName(startSideString);
+		Side startSide = Side.valueOf(startSideString);
 		
 		String finishSideString = reader.getAttribute(FINISH_SIDE);
-		Side finishSide = Side.fromXmlName(finishSideString);
+		Side finishSide = Side.valueOf(finishSideString);
 		expectChildren(reader);
 
 		reader.moveDown();

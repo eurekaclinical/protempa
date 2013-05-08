@@ -36,7 +36,7 @@ final class ValueUtil {
 
         private static ResourceBundle instance =
                 ResourceBundle.getBundle(
-                "org.protempa.proposition.value.resources.bundles.Messages");
+                "org.protempa.proposition.value.Messages");
     }
 
     private static class LazyLoggerHolder {

@@ -19,6 +19,8 @@
  */
 package org.protempa.proposition.interval;
 
+import java.util.ResourceBundle;
+import org.protempa.ProtempaUtil;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Unit;
 
@@ -30,13 +32,24 @@ public class IntervalUtil {
 
     private IntervalUtil() {
     }
-    
+
+    private static class LazyResourceBundleHolder {
+
+        private static ResourceBundle instance =
+                ResourceBundle.getBundle(
+                "org.protempa.proposition.interval.Messages");
+    }
+
+    static ResourceBundle resourceBundle() {
+        return LazyResourceBundleHolder.instance;
+    }
+
     public static long distanceBetween(Interval firstIval,
             Interval secondIval) {
         return distanceBetween(firstIval, secondIval, null);
     }
-    
-    public static long distanceBetween(Interval firstIval, Interval secondIval, 
+
+    public static long distanceBetween(Interval firstIval, Interval secondIval,
             Unit units) {
         if (firstIval == null) {
             throw new IllegalArgumentException("firstIval cannot be null");
@@ -48,7 +61,7 @@ public class IntervalUtil {
         if (units == null) {
             units = gran.getCorrespondingUnit();
         }
-        return gran.distance(firstIval.getMinFinish(), 
+        return gran.distance(firstIval.getMinFinish(),
                 secondIval.getMinStart(), gran, units);
     }
 
@@ -73,7 +86,7 @@ public class IntervalUtil {
                 secondIval.getMinStart(), gran, units);
         return units.getShortFormat().format(distance);
     }
-    
+
     public static String distanceBetweenFormattedMedium(Interval firstIval,
             Interval secondIval) {
         return distanceBetweenFormattedMedium(firstIval, secondIval, null);
@@ -95,7 +108,7 @@ public class IntervalUtil {
                 secondIval.getMinStart(), gran, units);
         return units.getMediumFormat().format(distance);
     }
-    
+
     public static String distanceBetweenFormattedLong(Interval firstIval,
             Interval secondIval) {
         return distanceBetweenFormattedLong(firstIval, secondIval, null);

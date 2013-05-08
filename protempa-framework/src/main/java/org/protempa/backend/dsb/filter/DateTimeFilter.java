@@ -20,6 +20,7 @@
 package org.protempa.backend.dsb.filter;
 
 import java.util.Date;
+import org.protempa.proposition.interval.Interval.Side;
 import static 
         org.protempa.proposition.value.AbsoluteTimeGranularityUtil.asPosition;
 import org.protempa.proposition.value.Granularity;

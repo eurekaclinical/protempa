@@ -33,7 +33,7 @@ import org.protempa.AbstractAbstractionDefinition;
 import org.protempa.AbstractPropositionDefinition;
 import org.protempa.DefaultSourceId;
 import org.protempa.HighLevelAbstractionDefinition;
-import org.protempa.IntervalSide;
+import org.protempa.proposition.interval.Interval.Side;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.TemporalPatternOffset;
 import org.protempa.SequentialTemporalPatternDefinition;
@@ -597,12 +597,18 @@ class Util {
                         finishExtendedParamInstance, cm));
             }
 
-            temporalOffsets.setStartIntervalSide(IntervalSide
-                    .intervalSide((String) cm.getOwnSlotValue(
-                    temporalOffsetInstance, cm.getSlot("startSide"))));
-            temporalOffsets.setFinishIntervalSide(IntervalSide
-                    .intervalSide((String) cm.getOwnSlotValue(
-                    temporalOffsetInstance, cm.getSlot("finishSide"))));
+            String startSideStr = (String) cm.getOwnSlotValue(
+                    temporalOffsetInstance, cm.getSlot("startSide"));
+            if (startSideStr != null) {
+                temporalOffsets.setStartIntervalSide(Side
+                        .valueOf(startSideStr.toUpperCase()));
+            }
+            String finishSideStr = (String) cm.getOwnSlotValue(
+                    temporalOffsetInstance, cm.getSlot("finishSide"));
+            if (finishSideStr != null) {
+                temporalOffsets.setFinishIntervalSide(Side
+                        .valueOf(finishSideStr.toUpperCase()));
+            }
             Integer startOffset = Util.parseTimeConstraint(
                     temporalOffsetInstance, "startOffset", cm);
             if (startOffset != null) {

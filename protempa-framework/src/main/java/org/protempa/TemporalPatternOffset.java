@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import org.protempa.proposition.interval.Interval.Side;
 import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
@@ -41,8 +42,8 @@ public final class TemporalPatternOffset implements Serializable {
     private Unit startOffsetUnits;
     private int finishOffset;
     private Unit finishOffsetUnits;
-    private IntervalSide startIntervalSide = IntervalSide.START;
-    private IntervalSide finishIntervalSide = IntervalSide.FINISH;
+    private Side startIntervalSide = Side.START;
+    private Side finishIntervalSide = Side.FINISH;
     private TemporalExtendedPropositionDefinition startExtPropDef;
     private TemporalExtendedPropositionDefinition finishExtPropDef;
 
@@ -64,11 +65,11 @@ public final class TemporalPatternOffset implements Serializable {
         this.finishAbstractParamValue = finishAbstractParamValue;
     }
 
-    public IntervalSide getFinishIntervalSide() {
+    public Side getFinishIntervalSide() {
         return finishIntervalSide;
     }
 
-    public void setFinishIntervalSide(IntervalSide finishIntervalSide) {
+    public void setFinishIntervalSide(Side finishIntervalSide) {
         if (finishIntervalSide != null) {
             this.finishIntervalSide = finishIntervalSide;
         }
@@ -108,11 +109,11 @@ public final class TemporalPatternOffset implements Serializable {
         this.startAbstractParamValue = startAbstractParamValue;
     }
 
-    public IntervalSide getStartIntervalSide() {
+    public Side getStartIntervalSide() {
         return startIntervalSide;
     }
 
-    public void setStartIntervalSide(IntervalSide startIntervalSide) {
+    public void setStartIntervalSide(Side startIntervalSide) {
         if (startIntervalSide != null) {
             this.startIntervalSide = startIntervalSide;
         }

@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import org.protempa.proposition.interval.Interval.Side;
 import java.util.Arrays;
 import java.util.List;
 
@@ -92,11 +93,11 @@ public final class AbstractParameterFactory {
 
             if (param != null) {
                 minStart = temporalOffset.getStartIntervalSide() 
-                        == IntervalSide.START 
+                        == Side.START 
                         ? param.getInterval().getMinStart() 
                         : param.getInterval().getMinFinish();
                 maxStart = temporalOffset.getStartIntervalSide() 
-                        == IntervalSide.START 
+                        == Side.START 
                         ? param.getInterval().getMaxStart() 
                         : param.getInterval().getMaxFinish();
             } else {
@@ -117,7 +118,7 @@ public final class AbstractParameterFactory {
                 .getFinishTemporalExtendedPropositionDefinition() == null) {
             if (temporalOffset != null
                     && temporalOffset.getFinishIntervalSide()
-                    == IntervalSide.START) {
+                    == Side.START) {
                 minFinish = segmentIval.getMinFinish()
                         + temporalOffset.getFinishOffset();
                 maxFinish = segmentIval.getMaxFinish()
@@ -131,10 +132,10 @@ public final class AbstractParameterFactory {
 
             if (param != null) {
                 minFinish = temporalOffset.getFinishIntervalSide() == 
-                        IntervalSide.START ? param.getInterval().getMinStart() 
+                        Side.START ? param.getInterval().getMinStart() 
                         : param.getInterval().getMinFinish();
                 maxFinish = temporalOffset.getFinishIntervalSide() == 
-                        IntervalSide.START ? param.getInterval().getMaxStart() 
+                        Side.START ? param.getInterval().getMaxStart() 
                         : param.getInterval().getMaxFinish();
             } else {
                 minFinish = segmentIval.getMinFinish();

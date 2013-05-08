@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import org.protempa.proposition.interval.Interval.Side;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Calendar;
@@ -95,11 +96,11 @@ class ContextDefinitionInducedByConsequence implements Consequence {
         Granularity finishGran;
 
         minStart = temporalOffset.getStartIntervalSide()
-                == IntervalSide.START
+                == Side.START
                 ? prop.getInterval().getMinStart()
                 : prop.getInterval().getMinFinish();
         maxStart = temporalOffset.getStartIntervalSide()
-                == IntervalSide.START
+                == Side.START
                 ? prop.getInterval().getMaxStart()
                 : prop.getInterval().getMaxFinish();
 
@@ -123,10 +124,10 @@ class ContextDefinitionInducedByConsequence implements Consequence {
         
 
         minFinish = temporalOffset.getFinishIntervalSide()
-                == IntervalSide.START ? oldInterval.getMinStart()
+                == Side.START ? oldInterval.getMinStart()
                 : oldInterval.getMinFinish();
         maxFinish = temporalOffset.getFinishIntervalSide()
-                == IntervalSide.START ? oldInterval.getMaxStart()
+                == Side.START ? oldInterval.getMaxStart()
                 : oldInterval.getMaxFinish();
         Integer finishOffset = temporalOffset.getFinishOffset();
         if (finishOffset != null) {

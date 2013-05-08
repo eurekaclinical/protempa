@@ -26,6 +26,7 @@ import java.util.Arrays;
 
 import org.arp.javautil.graph.Weight;
 import org.arp.javautil.graph.WeightFactory;
+import org.protempa.ProtempaUtil;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Unit;
 
@@ -36,13 +37,27 @@ import org.protempa.proposition.value.Unit;
  * 1995;34:458-74. This representation is also designed to be used in simple
  * temporal problems, as defined in Dechter, R. et al. Temporal Constraint
  * Networks. Artif. Intell. 1991;49:61-95.
- * 
+ *
  * @author Andrew Post
  */
 public abstract class Interval implements Comparable<Interval> {
 
+    public static enum Side {
+
+        START(IntervalUtil.resourceBundle().getString("intervalSide.startDisplayName")),
+        FINISH(IntervalUtil.resourceBundle().getString("intervalSide.finishDisplayName"));
+        private transient String displayName;
+
+        private Side(String displayName) {
+            this.displayName = displayName;
+        }
+        
+        @Override
+        public String toString() {
+            return displayName;
+        }
+    }
     private static final WeightFactory weightFactory = new WeightFactory();
-    
     private Long minStart;
     private Long maxStart;
     private Granularity startGranularity;
@@ -52,7 +67,6 @@ public abstract class Interval implements Comparable<Interval> {
     private Long minLength;
     private Long maxLength;
     private Unit lengthUnit;
-
     //Compute these
     private Start start;
     private Finish finish;
@@ -82,17 +96,17 @@ public abstract class Interval implements Comparable<Interval> {
     Interval(Long minStart, Long maxStart, Granularity startGranularity,
             Long minFinish, Long maxFinish, Granularity finishGranularity,
             Long minLength, Long maxLength, Unit lengthUnit) {
-        init(minStart, maxStart, startGranularity, minFinish, maxFinish, 
+        init(minStart, maxStart, startGranularity, minFinish, maxFinish,
                 finishGranularity, minLength, maxLength, lengthUnit);
     }
-    
+
     protected void init(Long start, Granularity startGranularity, Long finish,
             Granularity finishGranularity, Long length, Unit lengthUnit) {
         init(start, start, startGranularity, finish, finish, finishGranularity,
                 length, length, lengthUnit);
     }
-    
-    protected void init(Long minStart, Long maxStart, 
+
+    protected void init(Long minStart, Long maxStart,
             Granularity startGranularity,
             Long minFinish, Long maxFinish, Granularity finishGranularity,
             Long minLength, Long maxLength, Unit lengthUnit) {
@@ -109,7 +123,7 @@ public abstract class Interval implements Comparable<Interval> {
             throw new IllegalArgumentException(
                     "maxLength must be positive or 0 but was " + maxLength);
         }
-        
+
         this.minStart = minStart;
         this.maxStart = maxStart;
         this.startGranularity = startGranularity;
@@ -119,7 +133,7 @@ public abstract class Interval implements Comparable<Interval> {
         this.minLength = minLength;
         this.maxLength = maxLength;
         this.lengthUnit = lengthUnit;
-        
+
         initComputed();
     }
 
@@ -333,12 +347,12 @@ public abstract class Interval implements Comparable<Interval> {
 
     private void initVw() {
         this.vw = new Weight[]{
-                    v[0] != null ? weightFactory.getInstance(v[0]) : WeightFactory.NEG_INFINITY,
-                    v[1] != null ? weightFactory.getInstance(v[1]) : WeightFactory.POS_INFINITY,
-                    v[2] != null ? weightFactory.getInstance(v[2]) : WeightFactory.NEG_INFINITY,
-                    v[3] != null ? weightFactory.getInstance(v[3]) : WeightFactory.POS_INFINITY,
-                    v[4] != null ? weightFactory.getInstance(v[4]) : WeightFactory.ZERO,
-                    v[5] != null ? weightFactory.getInstance(v[5]) : WeightFactory.POS_INFINITY};
+            v[0] != null ? weightFactory.getInstance(v[0]) : WeightFactory.NEG_INFINITY,
+            v[1] != null ? weightFactory.getInstance(v[1]) : WeightFactory.POS_INFINITY,
+            v[2] != null ? weightFactory.getInstance(v[2]) : WeightFactory.NEG_INFINITY,
+            v[3] != null ? weightFactory.getInstance(v[3]) : WeightFactory.POS_INFINITY,
+            v[4] != null ? weightFactory.getInstance(v[4]) : WeightFactory.ZERO,
+            v[5] != null ? weightFactory.getInstance(v[5]) : WeightFactory.POS_INFINITY};
     }
 
     /**
@@ -435,12 +449,13 @@ public abstract class Interval implements Comparable<Interval> {
         Long minS = getMinimumStart();
         Long minF = getMinimumFinish();
         if (durationUnits == null || minS == null || minF == null) {
-            if (minF == null)
+            if (minF == null) {
                 return false;
-            else if (minS == null)
+            } else if (minS == null) {
                 return true;
-            else
+            } else {
                 return minS + duration < minF;
+            }
         } else {
             return !Relation.isGreaterThanOrEqualToDuration(durationUnits,
                     minS, minF, duration);
@@ -451,12 +466,13 @@ public abstract class Interval implements Comparable<Interval> {
         Long maxS = getMaximumStart();
         Long maxF = getMaximumFinish();
         if (durationUnits == null || maxS == null || maxF == null) {
-            if (maxF == null)
+            if (maxF == null) {
                 return false;
-            else if (maxS == null)
+            } else if (maxS == null) {
                 return true;
-            else
+            } else {
                 return maxS + duration > maxF;
+            }
         } else {
             return !Relation.isLessThanOrEqualToDuration(durationUnits,
                     maxS, maxF, duration);
@@ -474,6 +490,7 @@ public abstract class Interval implements Comparable<Interval> {
     }
 
     static final class Start {
+
         private final Interval interval;
         private volatile int hashCode;
 
@@ -508,6 +525,7 @@ public abstract class Interval implements Comparable<Interval> {
     }
 
     static final class Finish {
+
         private final Interval interval;
         private volatile int hashCode;
 
@@ -530,7 +548,7 @@ public abstract class Interval implements Comparable<Interval> {
             }
             return hashCode;
         }
-        
+
         @Override
         public String toString() {
             return "" + interval + " finish";
@@ -550,7 +568,7 @@ public abstract class Interval implements Comparable<Interval> {
         Interval otherIval = (Interval) other;
         return Arrays.equals(this.v, otherIval.v);
     }
-    
+
     @Override
     public int hashCode() {
         if (this.hashCode == 0) {

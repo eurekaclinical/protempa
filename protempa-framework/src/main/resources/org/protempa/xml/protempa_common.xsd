@@ -238,8 +238,8 @@ A list of values
     </xs:simpleType>
     <xs:simpleType name="sideType">
         <xs:restriction base="xs:token">
-            <xs:enumeration value="start"/>
-            <xs:enumeration value="finish"/>
+            <xs:enumeration value="START"/>
+            <xs:enumeration value="FINISH"/>
         </xs:restriction>
     </xs:simpleType>
     <xs:complexType name="dateTimeFilterType">
