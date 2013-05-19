@@ -136,8 +136,12 @@ public enum ValueType {
                 }
                 ValueComparator comparator = ValueComparator
                         .parse(comparatorString);
-                BigDecimal val = new BigDecimal(numberString);
-                result = new InequalityNumberValue(comparator, val);
+                try {
+                    BigDecimal val = new BigDecimal(numberString);
+                    result = new InequalityNumberValue(comparator, val);
+                } catch (NumberFormatException ex) {
+                    result = null;
+                }
                 return result;
             } else {
                 return null;

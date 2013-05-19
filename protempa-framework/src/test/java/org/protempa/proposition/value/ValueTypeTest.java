@@ -37,6 +37,15 @@ public class ValueTypeTest extends TestCase {
         assertEquals(new NumberValue(6.0), ValueType.VALUE.parse("6.0"));
         assertEquals("6.0", ValueType.VALUE.parse("6.0").getFormatted());
     }
+    
+    public void testValueTypeParse() {
+        assertEquals(NominalValue.getInstance(">BLAH"), 
+                ValueType.VALUE.parse(">BLAH"));
+    }
+    
+    public void testBogusInequalityNumberValueParse() {
+        assertNull(ValueType.INEQUALITYNUMBERVALUE.parse(">BLAH"));
+    }
 
     public void testValueParseInequalityValue() {
         assertEquals(new InequalityNumberValue(ValueComparator.LESS_THAN,
