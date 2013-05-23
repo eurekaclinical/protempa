@@ -35,15 +35,15 @@ import org.protempa.proposition.value.Value;
  * FIXME If there are two input propositions of the same type and value, the
  * behavior is unpredictable (which one it chooses for an offset). We should use
  * extended propositions for this, not straight abstraction definitions.
- * 
+ *
  * FIXME we ignore the units specified in Offsets. The ecode assumes that the
  * units of Segment's interval and the offets are the same, I think.
- * 
+ *
  * @author Andrew Post
  */
 public final class AbstractParameterFactory {
 
-    private static final IntervalFactory intervalFactory = 
+    private static final IntervalFactory intervalFactory =
             new IntervalFactory();
 
     /**
@@ -53,7 +53,7 @@ public final class AbstractParameterFactory {
     }
 
     /**
-     * 
+     *
      * @param propId
      * @param segments
      * @param temporalOffset
@@ -75,7 +75,7 @@ public final class AbstractParameterFactory {
         Granularity finishGran = null;
 
         Interval segmentIval = segment.getInterval();
-        
+
         if (temporalOffset == null
                 || temporalOffset
                 .getStartTemporalExtendedPropositionDefinition() == null) {
@@ -88,17 +88,17 @@ public final class AbstractParameterFactory {
             startGran = segment.getStartGranularity();
         } else {
             TemporalProposition param = matchingTemporalProposition(tps,
-                temporalOffset.getStartTemporalExtendedPropositionDefinition(),
-                epds);
+                    temporalOffset.getStartTemporalExtendedPropositionDefinition(),
+                    epds);
 
             if (param != null) {
-                minStart = temporalOffset.getStartIntervalSide() 
-                        == Side.START 
-                        ? param.getInterval().getMinStart() 
+                minStart = temporalOffset.getStartIntervalSide()
+                        == Side.START
+                        ? param.getInterval().getMinStart()
                         : param.getInterval().getMinFinish();
-                maxStart = temporalOffset.getStartIntervalSide() 
-                        == Side.START 
-                        ? param.getInterval().getMaxStart() 
+                maxStart = temporalOffset.getStartIntervalSide()
+                        == Side.START
+                        ? param.getInterval().getMaxStart()
                         : param.getInterval().getMaxFinish();
             } else {
                 minStart = segmentIval.getMinStart();
@@ -107,12 +107,16 @@ public final class AbstractParameterFactory {
 
             Integer startOffset = temporalOffset.getStartOffset();
             if (startOffset != null) {
-                minStart += startOffset;
-                maxStart += startOffset;
+                if (minStart != null) {
+                    minStart += startOffset;
+                }
+                if (maxStart != null) {
+                    maxStart += startOffset;
+                }
             }
             startGran = param.getInterval().getStartGranularity();
         }
-        
+
         if (temporalOffset == null
                 || temporalOffset
                 .getFinishTemporalExtendedPropositionDefinition() == null) {
@@ -131,11 +135,11 @@ public final class AbstractParameterFactory {
                     .getFinishTemporalExtendedPropositionDefinition(), epds);
 
             if (param != null) {
-                minFinish = temporalOffset.getFinishIntervalSide() == 
-                        Side.START ? param.getInterval().getMinStart() 
+                minFinish = temporalOffset.getFinishIntervalSide()
+                        == Side.START ? param.getInterval().getMinStart()
                         : param.getInterval().getMinFinish();
-                maxFinish = temporalOffset.getFinishIntervalSide() == 
-                        Side.START ? param.getInterval().getMaxStart() 
+                maxFinish = temporalOffset.getFinishIntervalSide()
+                        == Side.START ? param.getInterval().getMaxStart()
                         : param.getInterval().getMaxFinish();
             } else {
                 minFinish = segmentIval.getMinFinish();
@@ -143,8 +147,12 @@ public final class AbstractParameterFactory {
             }
             Integer finishOffset = temporalOffset.getFinishOffset();
             if (finishOffset != null) {
-                minFinish += finishOffset;
-                maxFinish += finishOffset;
+                if (minFinish != null) {
+                    minFinish += finishOffset;
+                }
+                if (maxFinish != null) {
+                    maxFinish += finishOffset;
+                }
             }
             finishGran = param.getInterval().getFinishGranularity();
         }
@@ -170,8 +178,8 @@ public final class AbstractParameterFactory {
                 return tps.get(i);
             }
         }
-        throw new AssertionError("No proposition in " + tps + 
-                " matches temporal extended proposition definition " + tepd + 
-                " from " + Arrays.toString(epds));
+        throw new AssertionError("No proposition in " + tps
+                + " matches temporal extended proposition definition " + tepd
+                + " from " + Arrays.toString(epds));
     }
 }
