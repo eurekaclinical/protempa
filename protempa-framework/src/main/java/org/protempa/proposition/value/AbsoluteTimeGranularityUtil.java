@@ -20,19 +20,29 @@
 package org.protempa.proposition.value;
 
 import java.util.Date;
+import java.util.Map;
+import org.apache.commons.collections.map.ReferenceMap;
 
 /**
  *
  * @author Andrew Post
  */
 public class AbsoluteTimeGranularityUtil {
+    @SuppressWarnings("unchecked")
+    private static final Map<Long, Date> cache = new ReferenceMap();
+    
     private AbsoluteTimeGranularityUtil() {
         
     }
     
     public static Date asDate(Long position) {
         if (position != null) {
-            return new Date(position);
+            Date cached = cache.get(position);
+            if (cached == null) {
+                cached = new Date(position);
+                cache.put(position, cached);
+            }
+            return cached;
         } else {
             return null;
         }

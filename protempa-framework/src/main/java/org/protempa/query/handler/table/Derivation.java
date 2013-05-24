@@ -46,6 +46,7 @@ import org.protempa.proposition.value.Value;
  * @author Andrew Post
  */
 public final class Derivation extends Link {
+    private static final Value[] EMPTY_VALUE_ARRAY = new Value[0];
 
     /**
      * For configuring the direction of the traversal and how many derivation
@@ -131,7 +132,7 @@ public final class Derivation extends Link {
             Value[] allowedValues, Behavior behavior, Relation relation) {
         super(propositionIds, constraints, comparator, fromIndex, toIndex);
         if (allowedValues == null) {
-            this.allowedValues = new Value[0];
+            this.allowedValues = EMPTY_VALUE_ARRAY;
         } else {
             this.allowedValues = allowedValues.clone();
         }
@@ -148,7 +149,7 @@ public final class Derivation extends Link {
             String[] inPropIds) throws KnowledgeSourceReadException {
         String[] explicitPropIds = getPropositionIds();
         if (explicitPropIds.length > 0) {
-            return explicitPropIds.clone();
+            return explicitPropIds;
         } else {
             Set<String> result = new HashSet<String>();
             for (String propId : inPropIds) {
