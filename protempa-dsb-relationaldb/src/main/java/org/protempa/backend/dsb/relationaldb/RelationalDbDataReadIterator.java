@@ -38,8 +38,6 @@ public class RelationalDbDataReadIterator
         extends DataSourceBackendMultiplexingDataStreamingEventIterator {
 
     private Connection connection;
-    private final List<? extends DataStreamingEventIterator<UniqueIdPair>> refs;
-    private final List<? extends DataStreamingEventIterator<Proposition>> itrs;
     private final boolean transaction;
     private final DataStager stager;
 
@@ -49,8 +47,6 @@ public class RelationalDbDataReadIterator
             Connection connection, boolean transaction, DataStager stager) {
         super(itrs, refs);
         this.connection = connection;
-        this.itrs = itrs;
-        this.refs = refs;
         this.transaction = transaction;
         this.stager = stager;
     }
