@@ -106,6 +106,18 @@ abstract class AbstractSelectClause implements SelectClause {
             }
         }
 
+        // process inbound references to the entity spec
+        if (info.getReferenceIndices() != null) {
+            ReferenceSpec[] referenceSpecs = entitySpec.getReferenceSpecs();
+            for (ReferenceSpec referenceSpec : referenceSpecs) {
+                String referenceName = referenceSpec.getReferenceName();
+                int referenceIndex = info.getReferenceIndices().get
+                        (referenceName);
+                indices[k] = referenceIndex;
+                names[k++] = referenceName + "_ref";
+            }
+        }
+
         boolean unique = info.isUnique();
         for (int j = 0; j < indices.length; j++) {
             ColumnSpec cs = info.getColumnSpecs().get(indices[j]);

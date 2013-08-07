@@ -19,19 +19,13 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
 import org.arp.javautil.sql.ConnectionSpec;
-import org.protempa.*;
+import org.protempa.DataSourceReadException;
+import org.protempa.DataStreamingEventIterator;
+import org.protempa.UniqueIdPair;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.dsb.filter.PositionFilter;
 import org.protempa.backend.dsb.relationaldb.ColumnSpec.Constraint;
@@ -40,6 +34,23 @@ import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.UnitFactory;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Abstract class for implement database and driver-specific SQL generators.
@@ -506,7 +517,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     resultProcessor, executor, true);
             DataStreamingEventIterator<Proposition> results =
                     resultProcessor.getResults();
-            List<ReferenceResultSetIterator> refResults =
+            List<ReferenceResultSetIterator> refResults = 
                     processReferencesStreaming(entitySpec, factory,
                     dataSourceBackendId,
                     allEntitySpecs, propIds, filters, keyIds, executor);

@@ -31,6 +31,7 @@ final class ColumnSpecInfo {
     private int valueIndex = -1;
     private int codeIndex = -1;
     private int[] uniqueIdIndices;
+    private Map<String, Integer> referenceIndices = null;
     private boolean usingKeyIdIndex;
 
     ColumnSpecInfo() {
@@ -99,6 +100,14 @@ final class ColumnSpecInfo {
 
     int[] getUniqueIdIndices() {
         return this.uniqueIdIndices;
+    }
+
+    Map<String, Integer> getReferenceIndices() {
+        return referenceIndices;
+    }
+
+    void setReferenceIndices(Map<String, Integer> referenceIndices) {
+        this.referenceIndices = referenceIndices;
     }
 
     boolean isUsingKeyIdIndex() {

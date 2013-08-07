@@ -19,15 +19,16 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.backend.dsb.filter.PropertyValueFilter;
+import org.protempa.backend.dsb.relationaldb.ColumnSpec.Constraint;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.Constraint;
-import org.protempa.backend.dsb.filter.Filter;
-import org.protempa.backend.dsb.filter.PropertyValueFilter;
 
 /**
  * Aggregates info for generating the SQL statement.
@@ -72,6 +73,11 @@ final class ColumnSpecInfoFactory {
             i = processConstraintSpecs(entitySpec2, columnSpecs, i);
             i = processFilters(entitySpec2, filters, columnSpecs,
                     i);
+            if (entitySpec2 != entitySpec && referenceSpec == null &&
+                    entitySpec2.hasReferenceTo(entitySpec)) {
+                i = processReferenceSpecs(entitySpec2, entitySpec, columnSpecs,
+                        i, columnSpecInfo);
+            }
         }
         columnSpecInfo.setColumnSpecs(columnSpecs);
         return columnSpecInfo;
@@ -226,6 +232,28 @@ final class ColumnSpecInfoFactory {
             columnSpecs.addAll(specAsList);
             i += specAsList.size();
             columnSpecInfo.setValueIndex(i - 1);
+        }
+
+        return i;
+    }
+
+    private static int processReferenceSpecs(EntitySpec referringEntitySpec,
+                                             EntitySpec referredToEntitySpec,
+                                             List<ColumnSpec> columnSpecs, int i, ColumnSpecInfo columnSpecInfo) {
+        ReferenceSpec[] inboundReferenceSpecs = referringEntitySpec.referencesTo
+                (referredToEntitySpec);
+        Map<String, Integer> referenceIndices = new HashMap<String, Integer>();
+        for (ReferenceSpec referenceSpec : inboundReferenceSpecs) {
+            ColumnSpec[] refUniqueIdSpecs = referenceSpec.getUniqueIdSpecs();
+            for (ColumnSpec refUniqueIdSpec : refUniqueIdSpecs) {
+                i = processColumnSpec(refUniqueIdSpec, columnSpecs, i);
+            }
+            referenceIndices.put(referenceSpec.getReferenceName(),
+                    i - refUniqueIdSpecs.length);
+        }
+
+        if (inboundReferenceSpecs.length > 0) {
+            columnSpecInfo.setReferenceIndices(referenceIndices);
         }
 
         return i;
