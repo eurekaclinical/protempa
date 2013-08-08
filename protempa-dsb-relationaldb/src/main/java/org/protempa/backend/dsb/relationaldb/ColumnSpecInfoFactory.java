@@ -56,6 +56,7 @@ final class ColumnSpecInfoFactory {
         }
         List<ColumnSpec> columnSpecs = new ArrayList<ColumnSpec>();
         int i = 0;
+        int refNum = 0;
         for (EntitySpec entitySpec2 : entitySpecs) {
             i = processBaseSpec(entitySpec2, columnSpecs, i);
             i = processUniqueIds(entitySpec, entitySpec2, columnSpecs, i,
@@ -76,7 +77,8 @@ final class ColumnSpecInfoFactory {
             if (entitySpec2 != entitySpec && referenceSpec == null &&
                     entitySpec2.hasReferenceTo(entitySpec)) {
                 i = processReferenceSpecs(entitySpec2, entitySpec, columnSpecs,
-                        i, columnSpecInfo);
+                        refNum, i, columnSpecInfo);
+                refNum++;
             }
         }
         columnSpecInfo.setColumnSpecs(columnSpecs);
@@ -239,21 +241,17 @@ final class ColumnSpecInfoFactory {
 
     private static int processReferenceSpecs(EntitySpec referringEntitySpec,
                                              EntitySpec referredToEntitySpec,
-                                             List<ColumnSpec> columnSpecs, int i, ColumnSpecInfo columnSpecInfo) {
-        ReferenceSpec[] inboundReferenceSpecs = referringEntitySpec.referencesTo
-                (referredToEntitySpec);
-        Map<String, Integer> referenceIndices = new HashMap<String, Integer>();
-        for (ReferenceSpec referenceSpec : inboundReferenceSpecs) {
-            ColumnSpec[] refUniqueIdSpecs = referenceSpec.getUniqueIdSpecs();
-            for (ColumnSpec refUniqueIdSpec : refUniqueIdSpecs) {
-                i = processColumnSpec(refUniqueIdSpec, columnSpecs, i);
-            }
-            referenceIndices.put(referenceSpec.getReferenceName(),
-                    i - refUniqueIdSpecs.length);
-        }
+                                             List<ColumnSpec> columnSpecs, int refNum, int i, ColumnSpecInfo columnSpecInfo) {
 
-        if (inboundReferenceSpecs.length > 0) {
-            columnSpecInfo.setReferenceIndices(referenceIndices);
+        if (referringEntitySpec.hasReferenceTo(referredToEntitySpec)) {
+            for (ColumnSpec referringUniqueIdSpec : referringEntitySpec.getUniqueIdSpecs()) {
+                i = processColumnSpec(referringUniqueIdSpec, columnSpecs, i);
+            }
+
+            if (columnSpecInfo.getReferenceIndices() == null) {
+                columnSpecInfo.setReferenceIndices(new HashMap<String, Integer>());
+            }
+            columnSpecInfo.getReferenceIndices().put("ref" + refNum, i - 1);
         }
 
         return i;

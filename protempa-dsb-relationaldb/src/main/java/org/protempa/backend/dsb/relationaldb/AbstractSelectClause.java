@@ -21,6 +21,8 @@ package org.protempa.backend.dsb.relationaldb;
 
 import org.protempa.backend.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
 
+import java.util.Map;
+
 abstract class AbstractSelectClause implements SelectClause {
 
     private final ColumnSpecInfo info;
@@ -67,6 +69,9 @@ abstract class AbstractSelectClause implements SelectClause {
         if (info.getValueIndex() > 0) {
             i++;
         }
+        if (info.getReferenceIndices() != null) {
+            i += info.getReferenceIndices().size();
+        }
         int[] indices = new int[i];
         String[] names = new String[i];
         int k = 0;
@@ -108,13 +113,9 @@ abstract class AbstractSelectClause implements SelectClause {
 
         // process inbound references to the entity spec
         if (info.getReferenceIndices() != null) {
-            ReferenceSpec[] referenceSpecs = entitySpec.getReferenceSpecs();
-            for (ReferenceSpec referenceSpec : referenceSpecs) {
-                String referenceName = referenceSpec.getReferenceName();
-                int referenceIndex = info.getReferenceIndices().get
-                        (referenceName);
-                indices[k] = referenceIndex;
-                names[k++] = referenceName + "_ref";
+            for (Map.Entry<String, Integer> entry : info.getReferenceIndices().entrySet()) {
+                indices[k] = entry.getValue();
+                names[k++] = entry.getKey() + "_ref";
             }
         }
 
