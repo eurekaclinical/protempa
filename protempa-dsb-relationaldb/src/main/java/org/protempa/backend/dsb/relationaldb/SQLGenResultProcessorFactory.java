@@ -32,7 +32,7 @@ abstract class SQLGenResultProcessorFactory<P extends Proposition> {
             ResultCache<P> cache);
 
     abstract StreamingMainResultProcessor<P> getStreamingInstance(
-            String dataSourceBackendId, EntitySpec entitySpec);
+            String dataSourceBackendId, EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs);
 
     abstract RefResultProcessor<P> getRefInstance(String dataSourceBackendId,
             EntitySpec entitySpec, ReferenceSpec referenceSpec,

@@ -243,7 +243,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 //            boolean partitionUsed = false;
 //            boolean partitionUsed = entitySpec.getPartitionBy() != null;
 //            if (!partitionUsed) {
-//                for (ReferenceSpec rs : entitySpec.getReferenceSpecs()) {
+//                for (ReferenceSpec rs : entitySpec.getInboundRefSpecs()) {
 //                    EntitySpec res = entitySpecForName(allEntitySpecs, 
 //                            rs.getEntityName());
 //                    partitionUsed = res.getPartitionBy() != null;
@@ -507,9 +507,11 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         List<Set<Filter>> partitions = constructPartitions(entitySpec,
                 applicableFilters);
 
+        ReferenceSpec[] inboundRefSpecs = collectInboundRefSpecs(applicableEntitySpecs, entitySpec);
+
         String dataSourceBackendId = this.backend.getDataSourceBackendId();
         StreamingMainResultProcessor<Proposition> resultProcessor =
-                factory.getStreamingInstance(dataSourceBackendId, entitySpec);
+                factory.getStreamingInstance(dataSourceBackendId, entitySpec, inboundRefSpecs);
 
         for (Set<Filter> filterSet : partitions) {
             generateAndExecuteSelectStreaming(entitySpec, null, propIds, filterSet,
@@ -1009,6 +1011,22 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 itr.remove();
             }
         }
+    }
+
+    private static ReferenceSpec[] collectInboundRefSpecs(Collection<EntitySpec> entitySpecs, EntitySpec referredToSpec) {
+        List<ReferenceSpec> result = new ArrayList<ReferenceSpec>();
+
+        for (EntitySpec es : entitySpecs) {
+            if (es.hasReferenceTo(referredToSpec)) {
+                for (ReferenceSpec rs : es.getReferenceSpecs()) {
+                    if (rs.getEntityName().equals(referredToSpec.getName())) {
+                        result.add(rs);
+                    }
+                }
+            }
+        }
+
+        return result.toArray(new ReferenceSpec[result.size()]);
     }
 
     /*

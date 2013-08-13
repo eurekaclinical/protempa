@@ -52,9 +52,9 @@ class PrimitiveParameterResultProcessorFactory extends
 
     @Override
     StreamingMainResultProcessor<PrimitiveParameter> getStreamingInstance(
-            String dataSourceBackendId, EntitySpec entitySpec) {
+            String dataSourceBackendId, EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs) {
         PrimitiveParameterStreamingResultProcessor resultProcessor =
-                new PrimitiveParameterStreamingResultProcessor(entitySpec, dataSourceBackendId);
+                new PrimitiveParameterStreamingResultProcessor(entitySpec, inboundRefSpecs, dataSourceBackendId);
         return resultProcessor;
     }
 

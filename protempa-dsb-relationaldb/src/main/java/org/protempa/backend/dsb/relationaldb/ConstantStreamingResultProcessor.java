@@ -19,11 +19,9 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.DataStreamingEvent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
@@ -39,8 +37,8 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
     private DataStreamingEventIterator<Constant> itr;
 
     ConstantStreamingResultProcessor(
-            EntitySpec entitySpec, String dataSourceBackendId) {
-        super(entitySpec, dataSourceBackendId);
+            EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs, String dataSourceBackendId) {
+        super(entitySpec, inboundRefSpecs, dataSourceBackendId);
     }
 
     class ConstantIterator extends PropositionResultSetIterator<Constant> {
@@ -49,8 +47,8 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
         private final DataSourceBackendDataSourceType dsType;
 
         ConstantIterator(Statement statement, ResultSet resultSet, 
-                EntitySpec entitySpec) throws SQLException {
-            super(statement, resultSet, entitySpec, getDataSourceBackendId());
+                EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs) throws SQLException {
+            super(statement, resultSet, entitySpec, inboundRefSpecs, getDataSourceBackendId());
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
         }
@@ -59,7 +57,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
         void doProcess(ResultSet resultSet,
                 String[] uniqueIds, ColumnSpec codeSpec, EntitySpec entitySpec,
                 int[] columnTypes, String[] propIds, PropertySpec[] propertySpecs,
-                Value[] propertyValues) throws SQLException {
+                Value[] propertyValues, ReferenceSpec[] inboundRefSpecs) throws SQLException {
             int i = 1;
             String kId = resultSet.getString(i++);
             if (kId == null) {
@@ -118,7 +116,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
     @Override
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
-        this.itr = new ConstantIterator(getStatement(), resultSet, entitySpec);
+        this.itr = new ConstantIterator(getStatement(), resultSet, entitySpec, getInboundRefSpecs());
     }
 
     @Override

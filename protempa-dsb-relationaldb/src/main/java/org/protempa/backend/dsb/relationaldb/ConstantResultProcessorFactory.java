@@ -52,9 +52,9 @@ class ConstantResultProcessorFactory
     
     @Override
     StreamingMainResultProcessor<Constant> getStreamingInstance(
-            String dataSourceBackendId, EntitySpec entitySpec) {
+            String dataSourceBackendId, EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs) {
         ConstantStreamingResultProcessor resultProcessor =
-                new ConstantStreamingResultProcessor(entitySpec, dataSourceBackendId);
+                new ConstantStreamingResultProcessor(entitySpec, inboundRefSpecs, dataSourceBackendId);
         return resultProcessor;
     }
     

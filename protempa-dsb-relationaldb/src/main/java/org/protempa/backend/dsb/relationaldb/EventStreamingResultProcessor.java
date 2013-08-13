@@ -42,8 +42,8 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
     private DataStreamingEventIterator<Event> itr;
 
     EventStreamingResultProcessor(
-            EntitySpec entitySpec, String dataSourceBackendId) {
-        super(entitySpec, dataSourceBackendId);
+            EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs, String dataSourceBackendId) {
+        super(entitySpec, inboundRefSpecs, dataSourceBackendId);
     }
 
     class EventIterator extends PropositionResultSetIterator<Event> {
@@ -54,8 +54,8 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
         private final JDBCPositionFormat positionParser;
 
         EventIterator(Statement statement, ResultSet resultSet, 
-                EntitySpec entitySpec) throws SQLException {
-            super(statement, resultSet, entitySpec, getDataSourceBackendId());
+                EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs) throws SQLException {
+            super(statement, resultSet, entitySpec, inboundRefSpecs, getDataSourceBackendId());
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
             this.intervalFactory = new IntervalFactory();
@@ -66,7 +66,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
         void doProcess(ResultSet resultSet,
                 String[] uniqueIds, ColumnSpec codeSpec, EntitySpec entitySpec,
                 int[] columnTypes, String[] propIds, PropertySpec[] propertySpecs,
-                Value[] propertyValues) throws SQLException {
+                Value[] propertyValues, ReferenceSpec[] inboundRefSpecs) throws SQLException {
             int i = 1;
             String kId = resultSet.getString(i++);
             if (kId == null) {
@@ -177,7 +177,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
-        this.itr = new EventIterator(getStatement(), resultSet, entitySpec);
+        this.itr = new EventIterator(getStatement(), resultSet, entitySpec, getInboundRefSpecs());
     }
 
     @Override

@@ -49,9 +49,9 @@ class EventResultProcessorFactory extends SQLGenResultProcessorFactory<Event> {
     
     @Override
     StreamingMainResultProcessor<Event> getStreamingInstance(
-            String dataSourceBackendId, EntitySpec entitySpec) {
+            String dataSourceBackendId, EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs) {
         EventStreamingResultProcessor resultProcessor =
-                new EventStreamingResultProcessor(entitySpec, dataSourceBackendId);
+                new EventStreamingResultProcessor(entitySpec, inboundRefSpecs, dataSourceBackendId);
         return resultProcessor;
     }
     

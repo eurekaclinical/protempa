@@ -33,12 +33,14 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
         extends AbstractResultProcessor implements StreamingResultProcessor<P> {
     private ColumnSpec[] lastColumnSpecs;
     private PropertySpec[] propertySpecs;
+    private ReferenceSpec[] inboundRefSpecs;
     private Statement statement;
     
     protected StreamingMainResultProcessor(
-            EntitySpec entitySpec, String dataSourceBackendId) {
+            EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs, String dataSourceBackendId) {
         super(entitySpec, dataSourceBackendId);
         this.propertySpecs = getEntitySpec().getPropertySpecs();
+        this.inboundRefSpecs = inboundRefSpecs;
         this.lastColumnSpecs = new ColumnSpec[this.propertySpecs.length];
     }
 
@@ -76,8 +78,18 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
         }
         return i;
     }
+
+    protected int extractReferenceValues(ResultSet resultSet, int i, String[] refUniqueIds) {
+
+
+        return i;
+    }
     
     abstract DataStreamingEventIterator<P> getResults();
+
+    protected ReferenceSpec[] getInboundRefSpecs() {
+        return this.inboundRefSpecs;
+    }
 
     @Override
     public void setStatement(Statement stmt) {

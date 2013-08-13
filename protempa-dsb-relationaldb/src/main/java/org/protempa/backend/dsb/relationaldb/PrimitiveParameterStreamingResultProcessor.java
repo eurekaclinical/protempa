@@ -38,8 +38,8 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
     private DataStreamingEventIterator<PrimitiveParameter> itr;
 
     PrimitiveParameterStreamingResultProcessor(
-            EntitySpec entitySpec, String dataSourceBackendId) {
-        super(entitySpec, dataSourceBackendId);
+            EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs, String dataSourceBackendId) {
+        super(entitySpec, inboundRefSpecs, dataSourceBackendId);
     }
 
     class PrimParamIterator extends PropositionResultSetIterator<PrimitiveParameter> {
@@ -49,8 +49,8 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
         
 
         PrimParamIterator(Statement statement, ResultSet resultSet, 
-                EntitySpec entitySpec) throws SQLException {
-            super(statement, resultSet, entitySpec, getDataSourceBackendId());
+                EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs) throws SQLException {
+            super(statement, resultSet, entitySpec, inboundRefSpecs, getDataSourceBackendId());
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
         }
@@ -59,7 +59,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
         void doProcess(ResultSet resultSet,
                 String[] uniqueIds, ColumnSpec codeSpec, EntitySpec entitySpec,
                 int[] columnTypes, String[] propIds, PropertySpec[] propertySpecs,
-                Value[] propertyValues) throws SQLException {
+                Value[] propertyValues, ReferenceSpec[] inboundRefSpecs) throws SQLException {
             int i = 1;
 
             String kId = resultSet.getString(i++);
@@ -137,7 +137,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
         
-        this.itr = new PrimParamIterator(getStatement(), resultSet, entitySpec);
+        this.itr = new PrimParamIterator(getStatement(), resultSet, entitySpec, getInboundRefSpecs());
     }
 
     @Override

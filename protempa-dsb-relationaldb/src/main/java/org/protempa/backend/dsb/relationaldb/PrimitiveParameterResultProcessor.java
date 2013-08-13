@@ -51,7 +51,7 @@ class PrimitiveParameterResultProcessor extends
         ResultCache<PrimitiveParameter> results = getResults();
         EntitySpec entitySpec = getEntitySpec();
         String entitySpecName = entitySpec.getName();
-        //boolean hasRefs = entitySpec.getReferenceSpecs().length > 0;
+        //boolean hasRefs = entitySpec.getInboundRefSpecs().length > 0;
         String[] propIds = entitySpec.getPropositionIds();
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
         if (codeSpec != null) {

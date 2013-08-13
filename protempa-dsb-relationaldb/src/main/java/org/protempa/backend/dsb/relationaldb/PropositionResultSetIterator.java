@@ -55,13 +55,14 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     private String[] propIds;
     private PropertySpec[] propertySpecs;
     private Value[] propertyValues;
+    private ReferenceSpec[] inboundRefSpecs;
     private List<P> props;
     private DataStreamingEvent<P> dataStreamingEvent;
     private String keyId;
     private boolean end;
 
     PropositionResultSetIterator(Statement statement, ResultSet resultSet,
-            EntitySpec entitySpec, String dataSourceBackendId)
+            EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs, String dataSourceBackendId)
             throws SQLException {
         assert resultSet != null : "resultSet cannot be null";
         assert entitySpec != null : "entitySpec cannot be null";
@@ -85,6 +86,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
         this.codeSpec = localCodeSpec;
         this.propertySpecs = entitySpec.getPropertySpecs();
         this.propertyValues = new Value[this.propertySpecs.length];
+        this.inboundRefSpecs = inboundRefSpecs;
         this.props = new ArrayList<P>();
         this.statement = statement;
     }
@@ -97,7 +99,6 @@ abstract class PropositionResultSetIterator<P extends Proposition>
      * For recording the key id of the current record.
      *
      * @param kId the key id {@link String}.
-     * @param props that key id's propositions.
      */
     final void handleKeyId(String kId) {
         String oldKeyId = getKeyId();
@@ -114,12 +115,11 @@ abstract class PropositionResultSetIterator<P extends Proposition>
 
     /**
      * Reads the next record from the result set and creates a
-     * {@link Proposition}. Implementations must call {@link #handleKeyId()}
+     * {@link Proposition}. Implementations must call {@link #handleKeyId}
      * with the current key id, and they must call {@link #handleProposition}
      * with the proposition.
      *
      * @param resultSet
-     * @param props
      * @param uniqueIds
      * @param codeSpec
      * @param entitySpec
@@ -127,12 +127,13 @@ abstract class PropositionResultSetIterator<P extends Proposition>
      * @param propIds
      * @param propertySpecs
      * @param propertyValues
+     * @param inboundRefSpecs
      * @throws SQLException
      */
     abstract void doProcess(ResultSet resultSet,
             String[] uniqueIds, ColumnSpec codeSpec, EntitySpec entitySpec,
             int[] columnTypes, String[] propIds, PropertySpec[] propertySpecs,
-            Value[] propertyValues) throws SQLException;
+            Value[] propertyValues, ReferenceSpec[] inboundRefSpecs) throws SQLException;
 
     final void createDataStreamingEvent(String key, List<P> propositions) {
         this.dataStreamingEvent = new DataStreamingEvent<P>(key, propositions);
@@ -176,7 +177,8 @@ abstract class PropositionResultSetIterator<P extends Proposition>
                             doProcess(this.resultSet, this.uniqueIds,
                                 this.codeSpec, this.entitySpec,
                                 this.columnTypes, this.propIds,
-                                this.propertySpecs, this.propertyValues);
+                                this.propertySpecs, this.propertyValues,
+                                this.inboundRefSpecs);
                             this.count++;
                         } else {
                             this.end = true;
