@@ -19,7 +19,14 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.arp.javautil.log.Logging;
+import org.protempa.DataSourceReadException;
 import org.protempa.DataStreamingEvent;
+import org.protempa.DataStreamingEventIterator;
+import org.protempa.UniqueIdPair;
+import org.protempa.proposition.Proposition;
+import org.protempa.proposition.value.Value;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -27,13 +34,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.arp.javautil.log.Logging;
-import org.protempa.DataSourceReadException;
-import org.protempa.DataStreamingEventIterator;
-import org.protempa.proposition.Proposition;
-import org.protempa.proposition.value.Value;
 
 /**
  * Base implementation for iterators that read a result set that is ordered by
@@ -55,14 +58,16 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     private String[] propIds;
     private PropertySpec[] propertySpecs;
     private Value[] propertyValues;
-    private ReferenceSpec[] inboundRefSpecs;
+    private SortedMap<String, ReferenceSpec> inboundRefSpecs;
+    private UniqueIdPair[] refUniqueIds;
     private List<P> props;
     private DataStreamingEvent<P> dataStreamingEvent;
     private String keyId;
     private boolean end;
 
     PropositionResultSetIterator(Statement statement, ResultSet resultSet,
-            EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs, String dataSourceBackendId)
+            EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            String dataSourceBackendId)
             throws SQLException {
         assert resultSet != null : "resultSet cannot be null";
         assert entitySpec != null : "entitySpec cannot be null";
@@ -87,6 +92,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
         this.propertySpecs = entitySpec.getPropertySpecs();
         this.propertyValues = new Value[this.propertySpecs.length];
         this.inboundRefSpecs = inboundRefSpecs;
+        this.refUniqueIds = new UniqueIdPair[this.inboundRefSpecs.size()];
         this.props = new ArrayList<P>();
         this.statement = statement;
     }
@@ -104,10 +110,12 @@ abstract class PropositionResultSetIterator<P extends Proposition>
         String oldKeyId = getKeyId();
         if (oldKeyId != null && !oldKeyId.equals(kId)) {
             createDataStreamingEvent(oldKeyId, this.props);
+            fireKeyCompleted(oldKeyId);
         }
         this.keyId = kId;
-
     }
+
+    abstract void fireKeyCompleted(String keyId);
 
     void handleProposition(P prop) {
         this.props.add(prop);
@@ -127,13 +135,13 @@ abstract class PropositionResultSetIterator<P extends Proposition>
      * @param propIds
      * @param propertySpecs
      * @param propertyValues
-     * @param inboundRefSpecs
      * @throws SQLException
      */
     abstract void doProcess(ResultSet resultSet,
             String[] uniqueIds, ColumnSpec codeSpec, EntitySpec entitySpec,
             int[] columnTypes, String[] propIds, PropertySpec[] propertySpecs,
-            Value[] propertyValues, ReferenceSpec[] inboundRefSpecs) throws SQLException;
+            Value[] propertyValues, UniqueIdPair[] refUniqueIds) throws
+            SQLException;
 
     final void createDataStreamingEvent(String key, List<P> propositions) {
         this.dataStreamingEvent = new DataStreamingEvent<P>(key, propositions);
@@ -178,7 +186,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
                                 this.codeSpec, this.entitySpec,
                                 this.columnTypes, this.propIds,
                                 this.propertySpecs, this.propertyValues,
-                                this.inboundRefSpecs);
+                                this.refUniqueIds);
                             this.count++;
                         } else {
                             this.end = true;

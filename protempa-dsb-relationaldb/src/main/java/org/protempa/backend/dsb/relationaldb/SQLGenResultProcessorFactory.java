@@ -21,6 +21,8 @@ package org.protempa.backend.dsb.relationaldb;
 
 import org.protempa.proposition.Proposition;
 
+import java.util.SortedMap;
+
 /**
  *
  * @author Andrew Post
@@ -32,7 +34,8 @@ abstract class SQLGenResultProcessorFactory<P extends Proposition> {
             ResultCache<P> cache);
 
     abstract StreamingMainResultProcessor<P> getStreamingInstance(
-            String dataSourceBackendId, EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs);
+            String dataSourceBackendId, EntitySpec entitySpec,
+            SortedMap<String, ReferenceSpec> inboundRefSpecs);
 
     abstract RefResultProcessor<P> getRefInstance(String dataSourceBackendId,
             EntitySpec entitySpec, ReferenceSpec referenceSpec,

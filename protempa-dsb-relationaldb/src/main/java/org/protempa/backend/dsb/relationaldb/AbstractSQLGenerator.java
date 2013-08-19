@@ -49,6 +49,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -467,10 +469,10 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private class StreamingIteratorPair {
 
         private final DataStreamingEventIterator<Proposition> props;
-        private final List<ReferenceResultSetIterator> refs;
+        private final List<DataStreamingEventIterator<UniqueIdPair>> refs;
 
         StreamingIteratorPair(DataStreamingEventIterator<Proposition> props,
-                List<ReferenceResultSetIterator> refs) {
+                List<DataStreamingEventIterator<UniqueIdPair>> refs) {
             this.props = props;
             this.refs = refs;
         }
@@ -479,7 +481,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             return props;
         }
 
-        public List<ReferenceResultSetIterator> getRefs() {
+        public List<DataStreamingEventIterator<UniqueIdPair>> getRefs() {
             return refs;
         }
     }
@@ -507,7 +509,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         List<Set<Filter>> partitions = constructPartitions(entitySpec,
                 applicableFilters);
 
-        ReferenceSpec[] inboundRefSpecs = collectInboundRefSpecs(applicableEntitySpecs, entitySpec);
+        SortedMap<String, ReferenceSpec> inboundRefSpecs = collectInboundRefSpecs
+                (applicableEntitySpecs, entitySpec);
 
         String dataSourceBackendId = this.backend.getDataSourceBackendId();
         StreamingMainResultProcessor<Proposition> resultProcessor =
@@ -519,11 +522,14 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     resultProcessor, executor, true);
             DataStreamingEventIterator<Proposition> results =
                     resultProcessor.getResults();
-            List<ReferenceResultSetIterator> refResults = 
-                    processReferencesStreaming(entitySpec, factory,
-                    dataSourceBackendId,
-                    allEntitySpecs, propIds, filters, keyIds, executor);
-            result.add(new StreamingIteratorPair(results, refResults));
+            DataStreamingEventIterator<UniqueIdPair> refResults =
+                    resultProcessor.getInboundReferenceResults();
+//            List<ReferenceResultSetIterator> refResults =
+//                    processReferencesStreaming(entitySpec, factory,
+//                    dataSourceBackendId,
+//                    allEntitySpecs, propIds, filters, keyIds, executor);
+            result.add(new StreamingIteratorPair(results,
+                  java.util.Collections.singletonList(refResults)));
         }
 
         logDoneProcessing(logger, entitySpec);
@@ -1013,20 +1019,22 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
     }
 
-    private static ReferenceSpec[] collectInboundRefSpecs(Collection<EntitySpec> entitySpecs, EntitySpec referredToSpec) {
-        List<ReferenceSpec> result = new ArrayList<ReferenceSpec>();
+    private static SortedMap<String, ReferenceSpec> collectInboundRefSpecs
+            (Collection<EntitySpec> entitySpecs, EntitySpec referredToSpec) {
+        SortedMap<String, ReferenceSpec> result = new TreeMap<String,
+                ReferenceSpec>();
 
         for (EntitySpec es : entitySpecs) {
             if (es.hasReferenceTo(referredToSpec)) {
                 for (ReferenceSpec rs : es.getReferenceSpecs()) {
                     if (rs.getEntityName().equals(referredToSpec.getName())) {
-                        result.add(rs);
+                        result.put(es.getName(), rs);
                     }
                 }
             }
         }
 
-        return result.toArray(new ReferenceSpec[result.size()]);
+        return result;
     }
 
     /*

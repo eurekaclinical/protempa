@@ -21,6 +21,8 @@ package org.protempa.backend.dsb.relationaldb;
 
 import org.protempa.proposition.Constant;
 
+import java.util.SortedMap;
+
 /**
  *
  * @author Andrew Post
@@ -52,7 +54,8 @@ class ConstantResultProcessorFactory
     
     @Override
     StreamingMainResultProcessor<Constant> getStreamingInstance(
-            String dataSourceBackendId, EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs) {
+            String dataSourceBackendId, EntitySpec entitySpec,
+            SortedMap<String, ReferenceSpec> inboundRefSpecs) {
         ConstantStreamingResultProcessor resultProcessor =
                 new ConstantStreamingResultProcessor(entitySpec, inboundRefSpecs, dataSourceBackendId);
         return resultProcessor;

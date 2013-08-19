@@ -19,8 +19,9 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
+
+import java.util.SortedMap;
 
 /**
  * 
@@ -52,7 +53,8 @@ class PrimitiveParameterResultProcessorFactory extends
 
     @Override
     StreamingMainResultProcessor<PrimitiveParameter> getStreamingInstance(
-            String dataSourceBackendId, EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs) {
+            String dataSourceBackendId, EntitySpec entitySpec,
+            SortedMap<String, ReferenceSpec> inboundRefSpecs) {
         PrimitiveParameterStreamingResultProcessor resultProcessor =
                 new PrimitiveParameterStreamingResultProcessor(entitySpec, inboundRefSpecs, dataSourceBackendId);
         return resultProcessor;

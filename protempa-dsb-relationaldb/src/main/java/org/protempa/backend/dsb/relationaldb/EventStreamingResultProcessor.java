@@ -19,17 +19,11 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.DataStreamingEvent;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.DataStreamingEventIterator;
+import org.protempa.UniqueIdPair;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.interval.Interval;
@@ -37,12 +31,21 @@ import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Value;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.SortedMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> {
 
-    private DataStreamingEventIterator<Event> itr;
+    private EventIterator itr;
+    private InboundReferenceResultSetIterator refItr;
 
     EventStreamingResultProcessor(
-            EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs, String dataSourceBackendId) {
+            EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            String dataSourceBackendId) {
         super(entitySpec, inboundRefSpecs, dataSourceBackendId);
     }
 
@@ -54,7 +57,8 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
         private final JDBCPositionFormat positionParser;
 
         EventIterator(Statement statement, ResultSet resultSet, 
-                EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs) throws SQLException {
+                EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs)
+                throws SQLException {
             super(statement, resultSet, entitySpec, inboundRefSpecs, getDataSourceBackendId());
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
@@ -66,7 +70,8 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
         void doProcess(ResultSet resultSet,
                 String[] uniqueIds, ColumnSpec codeSpec, EntitySpec entitySpec,
                 int[] columnTypes, String[] propIds, PropertySpec[] propertySpecs,
-                Value[] propertyValues, ReferenceSpec[] inboundRefSpecs) throws SQLException {
+                Value[] propertyValues,
+                UniqueIdPair[] refUniqueIds) throws SQLException {
             int i = 1;
             String kId = resultSet.getString(i++);
             if (kId == null) {
@@ -156,6 +161,9 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
 
             i = extractPropertyValues(resultSet, i, propertyValues,
                     columnTypes);
+            i = extractReferenceUniqueIdPairs(resultSet, uniqueId,
+                    refUniqueIds, i);
+            refItr.addUniqueIds(refUniqueIds);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
@@ -172,16 +180,28 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
 
             logger.log(Level.FINEST, "Created event {0}", event);
         }
+
+        @Override
+        void fireKeyCompleted(String keyId) {
+            refItr.setKeyId(keyId);
+            refItr.createDataStreamingEvent();
+        }
     }
 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
         this.itr = new EventIterator(getStatement(), resultSet, entitySpec, getInboundRefSpecs());
+        this.refItr = new InboundReferenceResultSetIterator(this.itr);
     }
 
     @Override
     final DataStreamingEventIterator<Event> getResults() {
         return this.itr;
+    }
+
+    @Override
+    DataStreamingEventIterator<UniqueIdPair> getInboundReferenceResults() {
+        return this.refItr;
     }
 }

@@ -19,26 +19,31 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.DataSourceBackendDataSourceType;
 import org.protempa.DataStreamingEventIterator;
+import org.protempa.UniqueIdPair;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueType;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.SortedMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProcessor<PrimitiveParameter> {
 
-    private DataStreamingEventIterator<PrimitiveParameter> itr;
+    private PrimParamIterator itr;
+    private InboundReferenceResultSetIterator refItr;
 
     PrimitiveParameterStreamingResultProcessor(
-            EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs, String dataSourceBackendId) {
+            EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            String dataSourceBackendId) {
         super(entitySpec, inboundRefSpecs, dataSourceBackendId);
     }
 
@@ -49,7 +54,8 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
         
 
         PrimParamIterator(Statement statement, ResultSet resultSet, 
-                EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs) throws SQLException {
+                EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs)
+                throws SQLException {
             super(statement, resultSet, entitySpec, inboundRefSpecs, getDataSourceBackendId());
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
@@ -59,7 +65,8 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
         void doProcess(ResultSet resultSet,
                 String[] uniqueIds, ColumnSpec codeSpec, EntitySpec entitySpec,
                 int[] columnTypes, String[] propIds, PropertySpec[] propertySpecs,
-                Value[] propertyValues, ReferenceSpec[] inboundRefSpecs) throws SQLException {
+                Value[] propertyValues, UniqueIdPair[] refUniqueIds)
+                throws SQLException {
             int i = 1;
 
             String kId = resultSet.getString(i++);
@@ -113,6 +120,9 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
 
             i = extractPropertyValues(resultSet, i,
                     propertyValues, columnTypes);
+            i = extractReferenceUniqueIdPairs(resultSet, uniqueId,
+                    refUniqueIds, i);
+            refItr.addUniqueIds(refUniqueIds);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
@@ -128,8 +138,14 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
             }
             p.setDataSourceType(this.dsType);
             handleProposition(p);
-            
+
             logger.log(Level.FINEST, "Created primitive parameter {0}", p);
+        }
+
+        @Override
+        void fireKeyCompleted(String keyId) {
+            refItr.setKeyId(keyId);
+            refItr.createDataStreamingEvent();
         }
     }
 
@@ -138,10 +154,16 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
         EntitySpec entitySpec = getEntitySpec();
         
         this.itr = new PrimParamIterator(getStatement(), resultSet, entitySpec, getInboundRefSpecs());
+        this.refItr = new InboundReferenceResultSetIterator(this.itr);
     }
 
     @Override
     final DataStreamingEventIterator<PrimitiveParameter> getResults() {
         return this.itr;
+    }
+
+    @Override
+    DataStreamingEventIterator<UniqueIdPair> getInboundReferenceResults() {
+        return this.refItr;
     }
 }

@@ -19,25 +19,30 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.protempa.DataStreamingEventIterator;
+import org.protempa.UniqueIdPair;
+import org.protempa.proposition.Proposition;
+import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueType;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import org.protempa.DataStreamingEventIterator;
-
-import org.protempa.proposition.Proposition;
-import org.protempa.proposition.value.Value;
-import org.protempa.proposition.value.ValueType;
+import java.util.Map;
+import java.util.SortedMap;
 
 abstract class StreamingMainResultProcessor<P extends Proposition>
         extends AbstractResultProcessor implements StreamingResultProcessor<P> {
     private ColumnSpec[] lastColumnSpecs;
     private PropertySpec[] propertySpecs;
-    private ReferenceSpec[] inboundRefSpecs;
+    private SortedMap<String, ReferenceSpec> inboundRefSpecs;
     private Statement statement;
     
     protected StreamingMainResultProcessor(
-            EntitySpec entitySpec, ReferenceSpec[] inboundRefSpecs, String dataSourceBackendId) {
+            EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            String dataSourceBackendId) {
         super(entitySpec, dataSourceBackendId);
         this.propertySpecs = getEntitySpec().getPropertySpecs();
         this.inboundRefSpecs = inboundRefSpecs;
@@ -79,15 +84,33 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
         return i;
     }
 
-    protected int extractReferenceValues(ResultSet resultSet, int i, String[] refUniqueIds) {
-
+    protected int extractReferenceUniqueIdPairs(
+            ResultSet resultSet, UniqueId referredToUniqueId,
+            UniqueIdPair[] uniqueIdPairs, int i) throws SQLException {
+        int j = 0;
+        for (Map.Entry<String, ReferenceSpec> entry : inboundRefSpecs
+                .entrySet()) {
+            ReferenceSpec refSpec = entry.getValue();
+            String[] referringUniqueIds = new String[refSpec
+                    .getUniqueIdSpecs().length];
+            i = readUniqueIds(referringUniqueIds, resultSet, i);
+            UniqueId referringUniqueId = generateUniqueId(entry.getKey(),
+                    referringUniqueIds);
+            UniqueIdPair pair = new UniqueIdPair(refSpec.getReferenceName(),
+                    referringUniqueId, referredToUniqueId);
+            uniqueIdPairs[j] = pair;
+            j++;
+        }
 
         return i;
     }
-    
+
     abstract DataStreamingEventIterator<P> getResults();
 
-    protected ReferenceSpec[] getInboundRefSpecs() {
+    abstract  DataStreamingEventIterator<UniqueIdPair>
+            getInboundReferenceResults();
+
+    protected SortedMap<String, ReferenceSpec> getInboundRefSpecs() {
         return this.inboundRefSpecs;
     }
 
