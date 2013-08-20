@@ -238,6 +238,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
                 "dataStreamingEvent should be null";
         if (this.keyId != null) {
             createDataStreamingEvent(this.keyId, this.props);
+            fireKeyCompleted(this.keyId);
         }
 
         return this.dataStreamingEvent;

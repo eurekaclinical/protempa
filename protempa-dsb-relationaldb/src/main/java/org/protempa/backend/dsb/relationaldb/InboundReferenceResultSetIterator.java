@@ -32,14 +32,15 @@ public final class InboundReferenceResultSetIterator implements
 
     @Override
     public DataStreamingEvent<UniqueIdPair> next() throws DataSourceReadException {
-        if (keyId == null) {
+        if (this.keyId == null && this.dataStreamingEvent == null) {
             throw new IllegalStateException("attempting to access references " +
                     "before key is complete");
         }
-        this.keyId = null;
-        this.referenceUniqueIds = new ArrayList<UniqueIdPair>();
 
-        return this.dataStreamingEvent;
+        DataStreamingEvent<UniqueIdPair> result = this.dataStreamingEvent;
+        this.dataStreamingEvent = null;
+
+        return result;
     }
 
     void addUniqueIds(UniqueIdPair[] uniqueIds) {
@@ -51,6 +52,8 @@ public final class InboundReferenceResultSetIterator implements
     void createDataStreamingEvent() {
         this.dataStreamingEvent = new DataStreamingEvent<UniqueIdPair>(this
                 .keyId, this.referenceUniqueIds);
+        this.keyId = null;
+        this.referenceUniqueIds = new ArrayList<UniqueIdPair>();
     }
 
     void setKeyId(String keyId) {
