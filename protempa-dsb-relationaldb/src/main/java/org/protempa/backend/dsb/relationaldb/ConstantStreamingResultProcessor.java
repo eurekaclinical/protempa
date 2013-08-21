@@ -124,8 +124,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
 
         @Override
         void fireKeyCompleted(String keyId) {
-            refItr.setKeyId(keyId);
-            refItr.createDataStreamingEvent();
+            refItr.createDataStreamingEvent(keyId);
         }
     }
 
@@ -133,7 +132,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
         this.itr = new ConstantIterator(getStatement(), resultSet, entitySpec, getInboundRefSpecs());
-        this.refItr = new InboundReferenceResultSetIterator(this.itr);
+        this.refItr = new InboundReferenceResultSetIterator();
     }
 
     @Override

@@ -144,8 +144,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
 
         @Override
         void fireKeyCompleted(String keyId) {
-            refItr.setKeyId(keyId);
-            refItr.createDataStreamingEvent();
+            refItr.createDataStreamingEvent(keyId);
         }
     }
 
@@ -154,7 +153,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
         EntitySpec entitySpec = getEntitySpec();
         
         this.itr = new PrimParamIterator(getStatement(), resultSet, entitySpec, getInboundRefSpecs());
-        this.refItr = new InboundReferenceResultSetIterator(this.itr);
+        this.refItr = new InboundReferenceResultSetIterator();
     }
 
     @Override

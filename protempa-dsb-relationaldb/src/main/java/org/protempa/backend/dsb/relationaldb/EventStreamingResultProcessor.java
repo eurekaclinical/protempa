@@ -183,8 +183,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
 
         @Override
         void fireKeyCompleted(String keyId) {
-            refItr.setKeyId(keyId);
-            refItr.createDataStreamingEvent();
+            refItr.createDataStreamingEvent(keyId);
         }
     }
 
@@ -192,7 +191,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
         this.itr = new EventIterator(getStatement(), resultSet, entitySpec, getInboundRefSpecs());
-        this.refItr = new InboundReferenceResultSetIterator(this.itr);
+        this.refItr = new InboundReferenceResultSetIterator();
     }
 
     @Override

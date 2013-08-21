@@ -4,41 +4,45 @@ import org.protempa.DataSourceReadException;
 import org.protempa.DataStreamingEvent;
 import org.protempa.DataStreamingEventIterator;
 import org.protempa.UniqueIdPair;
-import org.protempa.proposition.Proposition;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
+import java.util.Queue;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class InboundReferenceResultSetIterator implements
         DataStreamingEventIterator<UniqueIdPair> {
 
-    private String keyId;
-    private List<UniqueIdPair> referenceUniqueIds;
-    private DataStreamingEvent<UniqueIdPair> dataStreamingEvent;
+    private static final Logger LOGGER = Logger.getLogger
+            (InboundReferenceResultSetIterator.class.getName());
 
-    private final PropositionResultSetIterator<? extends Proposition> propItr;
+    private Set<UniqueIdPair> referenceUniqueIds;
+    private Queue<DataStreamingEvent<UniqueIdPair>> dataStreamingEventQueue;
 
-    InboundReferenceResultSetIterator
-            (PropositionResultSetIterator<? extends Proposition> propItr) {
-        this.referenceUniqueIds = new ArrayList<UniqueIdPair>();
-        this.propItr = propItr;
-        this.dataStreamingEvent = null;
+    InboundReferenceResultSetIterator () {
+        this.referenceUniqueIds = new HashSet<UniqueIdPair>();
+        this.dataStreamingEventQueue = new
+                LinkedList<DataStreamingEvent<UniqueIdPair>>();
     }
 
     @Override
     public boolean hasNext() throws DataSourceReadException {
-        return this.propItr.hasNext();
+        return !this.dataStreamingEventQueue.isEmpty();
     }
 
     @Override
     public DataStreamingEvent<UniqueIdPair> next() throws DataSourceReadException {
-        if (this.keyId == null && this.dataStreamingEvent == null) {
-            throw new IllegalStateException("attempting to access references " +
-                    "before key is complete");
+        if (this.dataStreamingEventQueue.isEmpty()) {
+            throw new NoSuchElementException("dataStreamingEventQueue is " +
+                    "empty");
         }
 
-        DataStreamingEvent<UniqueIdPair> result = this.dataStreamingEvent;
-        this.dataStreamingEvent = null;
+        DataStreamingEvent<UniqueIdPair> result = this
+                .dataStreamingEventQueue.remove();
 
         return result;
     }
@@ -49,21 +53,22 @@ public final class InboundReferenceResultSetIterator implements
         }
     }
 
-    void createDataStreamingEvent() {
-        this.dataStreamingEvent = new DataStreamingEvent<UniqueIdPair>(this
-                .keyId, this.referenceUniqueIds);
-        this.keyId = null;
-        this.referenceUniqueIds = new ArrayList<UniqueIdPair>();
-    }
-
-    void setKeyId(String keyId) {
-        this.keyId = keyId;
+    void createDataStreamingEvent(String keyId) {
+        this.dataStreamingEventQueue.offer(new DataStreamingEvent<UniqueIdPair>
+                (keyId, new ArrayList<UniqueIdPair>(this.referenceUniqueIds)));
+        this.referenceUniqueIds = new HashSet<UniqueIdPair>();
     }
 
     @Override
     public void close() throws DataSourceReadException {
-        this.keyId = null;
         this.referenceUniqueIds.clear();
         this.referenceUniqueIds = null;
+        if (!this.dataStreamingEventQueue.isEmpty()) {
+            LOGGER.log(Level.WARNING, "Closing non-empty data streaming event" +
+                    " queue. {0} elements remain.",
+                    new Object[]{this.dataStreamingEventQueue.size()});
+        }
+        this.dataStreamingEventQueue.clear();
+        this.dataStreamingEventQueue = null;
     }
 }
