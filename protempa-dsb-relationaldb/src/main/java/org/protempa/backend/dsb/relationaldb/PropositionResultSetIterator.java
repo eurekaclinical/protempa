@@ -25,6 +25,7 @@ import org.protempa.DataStreamingEvent;
 import org.protempa.DataStreamingEventIterator;
 import org.protempa.UniqueIdPair;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
 
 import java.sql.ResultSet;
@@ -32,7 +33,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.logging.Level;
@@ -60,7 +63,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     private Value[] propertyValues;
     private SortedMap<String, ReferenceSpec> inboundRefSpecs;
     private UniqueIdPair[] refUniqueIds;
-    private List<P> props;
+    private Map<UniqueId, P> props;
     private DataStreamingEvent<P> dataStreamingEvent;
     private String keyId;
     private boolean end;
@@ -93,7 +96,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
         this.propertyValues = new Value[this.propertySpecs.length];
         this.inboundRefSpecs = inboundRefSpecs;
         this.refUniqueIds = new UniqueIdPair[this.inboundRefSpecs.size()];
-        this.props = new ArrayList<P>();
+        this.props = new HashMap<UniqueId, P>();
         this.statement = statement;
     }
 
@@ -110,15 +113,16 @@ abstract class PropositionResultSetIterator<P extends Proposition>
         String oldKeyId = getKeyId();
         if (oldKeyId != null && !oldKeyId.equals(kId)) {
             createDataStreamingEvent(oldKeyId, this.props);
-            fireKeyCompleted(oldKeyId);
         }
         this.keyId = kId;
     }
 
-    abstract void fireKeyCompleted(String keyId);
+    abstract void fireResultSetCompleted();
 
     void handleProposition(P prop) {
-        this.props.add(prop);
+        if (!this.props.containsKey(prop.getUniqueId())) {
+            this.props.put(prop.getUniqueId(), prop);
+        }
     }
 
     /**
@@ -143,9 +147,11 @@ abstract class PropositionResultSetIterator<P extends Proposition>
             Value[] propertyValues, UniqueIdPair[] refUniqueIds) throws
             SQLException;
 
-    final void createDataStreamingEvent(String key, List<P> propositions) {
-        this.dataStreamingEvent = new DataStreamingEvent<P>(key, propositions);
-        this.props = new ArrayList<P>();
+    final void createDataStreamingEvent(String key, Map<UniqueId, P> propositions) {
+        List<P> uniqueProps = new ArrayList<P>
+                (propositions.values());
+        this.dataStreamingEvent = new DataStreamingEvent<P>(key, uniqueProps);
+        this.props = new HashMap<UniqueId, P>();
     }
     
     @Override
@@ -190,6 +196,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
                             this.count++;
                         } else {
                             this.end = true;
+                            fireResultSetCompleted();
                             break;
                         }
                     }
@@ -238,7 +245,6 @@ abstract class PropositionResultSetIterator<P extends Proposition>
                 "dataStreamingEvent should be null";
         if (this.keyId != null) {
             createDataStreamingEvent(this.keyId, this.props);
-            fireKeyCompleted(this.keyId);
         }
 
         return this.dataStreamingEvent;

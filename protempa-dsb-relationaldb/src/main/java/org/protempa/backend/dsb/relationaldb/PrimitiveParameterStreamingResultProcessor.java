@@ -122,7 +122,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                     propertyValues, columnTypes);
             i = extractReferenceUniqueIdPairs(resultSet, uniqueId,
                     refUniqueIds, i);
-            refItr.addUniqueIds(refUniqueIds);
+            refItr.addUniqueIds(kId, refUniqueIds);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
@@ -143,8 +143,8 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
         }
 
         @Override
-        void fireKeyCompleted(String keyId) {
-            refItr.createDataStreamingEvent(keyId);
+        void fireResultSetCompleted() {
+            refItr.resultSetComplete();
         }
     }
 
