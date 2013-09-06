@@ -19,8 +19,13 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.UniqueIdPair;
+import org.arp.javautil.log.Logging;
+import org.protempa.DataSourceReadException;
 import org.protempa.DataStreamingEvent;
+import org.protempa.DataStreamingEventIterator;
+import org.protempa.UniqueIdPair;
+import org.protempa.proposition.UniqueId;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -30,10 +35,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.arp.javautil.log.Logging;
-import org.protempa.DataSourceReadException;
-import org.protempa.DataStreamingEventIterator;
-import org.protempa.proposition.UniqueId;
 
 /**
  *
@@ -41,6 +42,9 @@ import org.protempa.proposition.UniqueId;
  */
 public final class ReferenceResultSetIterator
         implements DataStreamingEventIterator<UniqueIdPair> {
+
+    private static final Logger LOGGER = Logger.getLogger
+            (ReferenceResultSetIterator.class.getName());
 
     private ResultSet resultSet;
     private final Logger logger;
@@ -55,6 +59,7 @@ public final class ReferenceResultSetIterator
     private String[] uniqueIdsCopy;
     private StreamingRefResultProcessor processor;
     private String keyId;
+    private String lastDelivered;
     private Statement statement;
     private boolean end;
 
@@ -98,6 +103,12 @@ public final class ReferenceResultSetIterator
             throw new NoSuchElementException();
         }
         this.dataStreamingEvent = null;
+
+        LOGGER.log(Level.INFO, "{0}: Current: {1}, Last Delivered: {2}",
+                new Object[]{this.entitySpec.getName(), result.getKeyId(),
+                        this.lastDelivered});
+        this.lastDelivered = result.getKeyId();
+
         return result;
     }
 

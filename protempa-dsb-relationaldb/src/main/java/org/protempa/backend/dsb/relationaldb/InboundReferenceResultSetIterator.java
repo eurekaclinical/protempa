@@ -33,8 +33,11 @@ public final class InboundReferenceResultSetIterator implements
     private Queue<DataStreamingEvent<UniqueIdPair>> dataStreamingEventQueue;
     private String keyId;
     private boolean end = false;
+    private final String entityName;
+    private String lastDelivered;
 
-    InboundReferenceResultSetIterator () {
+    InboundReferenceResultSetIterator (String entityName) {
+        this.entityName = entityName;
         this.referenceUniqueIds = new HashMap<DestructuredUniqueIdPair,
                 Set<UniqueId>>();
         this.dataStreamingEventQueue = new
@@ -62,12 +65,18 @@ public final class InboundReferenceResultSetIterator implements
                     "empty");
         }
 
-//        if (!this.referenceUniqueIds.isEmpty()) {
-//            createDataStreamingEvent();
-//        }
+        if (!this.referenceUniqueIds.isEmpty()) {
+            createDataStreamingEvent();
+        }
+
         DataStreamingEvent<UniqueIdPair> result = this
                 .dataStreamingEventQueue.remove();
 
+        LOGGER.log(Level.INFO, "{0}: Current: {1}, Last Delivered: {2}",
+                new Object[]{this.entityName, result.getKeyId(),
+                        this.lastDelivered});
+
+        this.lastDelivered = result.getKeyId();
         return result;
     }
 
