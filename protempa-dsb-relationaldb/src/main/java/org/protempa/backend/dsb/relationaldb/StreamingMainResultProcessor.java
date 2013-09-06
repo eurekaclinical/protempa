@@ -38,14 +38,18 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
     private ColumnSpec[] lastColumnSpecs;
     private PropertySpec[] propertySpecs;
     private SortedMap<String, ReferenceSpec> inboundRefSpecs;
+    private Map<String, ReferenceSpec> bidirectionalRefSpecs;
     private Statement statement;
     
     protected StreamingMainResultProcessor(
-            EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            EntitySpec entitySpec, SortedMap<String,
+            ReferenceSpec> inboundRefSpecs,
+            Map<String, ReferenceSpec> bidirectionalRefSpecs,
             String dataSourceBackendId) {
         super(entitySpec, dataSourceBackendId);
         this.propertySpecs = getEntitySpec().getPropertySpecs();
         this.inboundRefSpecs = inboundRefSpecs;
+        this.bidirectionalRefSpecs = bidirectionalRefSpecs;
         this.lastColumnSpecs = new ColumnSpec[this.propertySpecs.length];
     }
 
@@ -90,18 +94,29 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
         int j = 0;
         for (Map.Entry<String, ReferenceSpec> entry : inboundRefSpecs
                 .entrySet()) {
+            String referringEntityName = entry.getKey();
             ReferenceSpec refSpec = entry.getValue();
             String[] referringUniqueIds = new String[refSpec
                     .getUniqueIdSpecs().length];
             i = readUniqueIds(referringUniqueIds, resultSet, i);
-            UniqueId referringUniqueId = generateUniqueId(entry.getKey(),
+            UniqueId referringUniqueId = generateUniqueId(referringEntityName,
                     referringUniqueIds);
             UniqueIdPair pair = new UniqueIdPair(refSpec.getReferenceName(),
                     referringUniqueId, referredToUniqueId);
             uniqueIdPairs[j] = pair;
+
+            for (Map.Entry<String, ReferenceSpec> bidirRefSpec :
+                    bidirectionalRefSpecs.entrySet()) {
+                if (bidirRefSpec.getKey().equals(referringEntityName)) {
+                    UniqueIdPair reversePair = new UniqueIdPair(bidirRefSpec
+                            .getValue().getReferenceName(),
+                            referredToUniqueId, referringUniqueId);
+                    j++;
+                    uniqueIdPairs[j] = reversePair;
+                }
+            }
             j++;
         }
-
         return i;
     }
 
@@ -112,6 +127,10 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
 
     protected SortedMap<String, ReferenceSpec> getInboundRefSpecs() {
         return this.inboundRefSpecs;
+    }
+
+    protected Map<String, ReferenceSpec> getBidirectionalRefSpecs() {
+        return this.bidirectionalRefSpecs;
     }
 
     @Override

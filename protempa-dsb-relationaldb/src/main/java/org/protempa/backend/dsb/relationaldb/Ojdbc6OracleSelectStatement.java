@@ -19,20 +19,22 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.protempa.backend.dsb.filter.Filter;
+
 import java.util.List;
 import java.util.Set;
-
-import org.protempa.backend.dsb.filter.Filter;
+import java.util.SortedMap;
 
 class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
 
     Ojdbc6OracleSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            SortedMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, 
             StagingSpec[] stagedTables, boolean streamingMode,
             boolean wrapKeyId) {
-        super(entitySpec, referenceSpec, entitySpecs, filters, propIds, keyIds,
+        super(entitySpec, referenceSpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
                 order, resultProcessor, stagedTables, streamingMode,
                 wrapKeyId);
     }

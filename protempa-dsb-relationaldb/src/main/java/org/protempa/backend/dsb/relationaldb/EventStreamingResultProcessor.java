@@ -34,6 +34,8 @@ import org.protempa.proposition.value.Value;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,9 +46,12 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
     private InboundReferenceResultSetIterator refItr;
 
     EventStreamingResultProcessor(
-            EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            EntitySpec entitySpec, SortedMap<String,
+            ReferenceSpec> inboundRefSpecs, Map<String, ReferenceSpec>
+            bidirectionalRefSpecs,
             String dataSourceBackendId) {
-        super(entitySpec, inboundRefSpecs, dataSourceBackendId);
+        super(entitySpec, inboundRefSpecs, bidirectionalRefSpecs,
+                dataSourceBackendId);
     }
 
     class EventIterator extends PropositionResultSetIterator<Event> {
@@ -57,9 +62,12 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
         private final JDBCPositionFormat positionParser;
 
         EventIterator(Statement statement, ResultSet resultSet, 
-                EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs)
+                EntitySpec entitySpec, SortedMap<String,
+                ReferenceSpec> inboundRefSpecs, Map<String,
+                ReferenceSpec> bidirectionalRefSpecs)
                 throws SQLException {
-            super(statement, resultSet, entitySpec, inboundRefSpecs, getDataSourceBackendId());
+            super(statement, resultSet, entitySpec, inboundRefSpecs,
+                    bidirectionalRefSpecs, getDataSourceBackendId());
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
             this.intervalFactory = new IntervalFactory();
@@ -69,6 +77,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
         @Override
         void doProcess(ResultSet resultSet,
                 String[] uniqueIds, ColumnSpec codeSpec, EntitySpec entitySpec,
+                Map<String, ReferenceSpec> bidirectionalRefSpec,
                 int[] columnTypes, String[] propIds, PropertySpec[] propertySpecs,
                 Value[] propertyValues,
                 UniqueIdPair[] refUniqueIds) throws SQLException {
@@ -190,8 +199,9 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
     @Override
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
-        this.itr = new EventIterator(getStatement(), resultSet, entitySpec, getInboundRefSpecs());
-        this.refItr = new InboundReferenceResultSetIterator();
+        this.itr = new EventIterator(getStatement(), resultSet, entitySpec,
+                getInboundRefSpecs(), getBidirectionalRefSpecs());
+        this.refItr = new InboundReferenceResultSetIterator(entitySpec.getName());
     }
 
     @Override

@@ -19,20 +19,19 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.protempa.backend.dsb.filter.Filter;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import org.arp.javautil.sql.ConnectionSpec;
-import org.protempa.backend.dsb.filter.Filter;
+import java.util.SortedMap;
 
 /**
  * A SQL generator that is compatible with Connector/J 5.x and MySQL 4.1 and
  * 5.x.
- * 
+ *
  * @author Andrew Post
  */
 public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
@@ -91,11 +90,12 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
      */
     protected SelectStatement getSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            SortedMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             StagingSpec[] stagedTables, boolean wrapKeyId) {
         return new ConnectorJ5MySQL415SelectStatement(entitySpec,
-                referenceSpec, entitySpecs, filters, propIds, keyIds, order,
+                referenceSpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds, order,
                 resultProcessor, getStreamingMode(), wrapKeyId);
     }
 }

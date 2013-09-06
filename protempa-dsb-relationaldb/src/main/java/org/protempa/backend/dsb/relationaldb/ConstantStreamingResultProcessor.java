@@ -31,6 +31,7 @@ import org.protempa.proposition.value.Value;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,9 +42,11 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
     private InboundReferenceResultSetIterator refItr;
 
     ConstantStreamingResultProcessor(
-            EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs,
-            String dataSourceBackendId) {
-        super(entitySpec, inboundRefSpecs, dataSourceBackendId);
+            EntitySpec entitySpec, SortedMap<String,ReferenceSpec> inboundRefSpecs,
+            Map<String, ReferenceSpec> bidirectionalRefSpecs, String
+            dataSourceBackendId) {
+        super(entitySpec, inboundRefSpecs, bidirectionalRefSpecs,
+                dataSourceBackendId);
     }
 
     class ConstantIterator extends PropositionResultSetIterator<Constant> {
@@ -52,9 +55,12 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
         private final DataSourceBackendDataSourceType dsType;
 
         ConstantIterator(Statement statement, ResultSet resultSet, 
-                EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs)
+                EntitySpec entitySpec, SortedMap<String,
+                ReferenceSpec> inboundRefSpecs,
+                Map<String, ReferenceSpec> bidirectionalRefSpecs)
                 throws SQLException {
-            super(statement, resultSet, entitySpec, inboundRefSpecs, getDataSourceBackendId());
+            super(statement, resultSet, entitySpec, inboundRefSpecs,
+                    bidirectionalRefSpecs, getDataSourceBackendId());
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
         }
@@ -62,6 +68,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
         @Override
         void doProcess(ResultSet resultSet,
                 String[] uniqueIds, ColumnSpec codeSpec, EntitySpec entitySpec,
+                Map<String, ReferenceSpec> bidirectionalRefSpecs,
                 int[] columnTypes, String[] propIds, PropertySpec[] propertySpecs,
                 Value[] propertyValues,
                 UniqueIdPair[] refUniqueIds) throws SQLException {
@@ -131,8 +138,9 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
     @Override
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
-        this.itr = new ConstantIterator(getStatement(), resultSet, entitySpec, getInboundRefSpecs());
-        this.refItr = new InboundReferenceResultSetIterator();
+        this.itr = new ConstantIterator(getStatement(), resultSet,
+                entitySpec, getInboundRefSpecs(), getBidirectionalRefSpecs());
+        this.refItr = new InboundReferenceResultSetIterator(entitySpec.getName());
     }
 
     @Override

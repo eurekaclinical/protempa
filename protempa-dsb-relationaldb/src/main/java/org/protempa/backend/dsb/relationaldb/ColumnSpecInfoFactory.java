@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 
 /**
  * Aggregates info for generating the SQL statement.
@@ -38,8 +39,8 @@ import java.util.Set;
 final class ColumnSpecInfoFactory {
 
     ColumnSpecInfo newInstance(Set<String> propIds, EntitySpec entitySpec,
-            Collection<EntitySpec> entitySpecs,
-            Collection<Filter> filters, ReferenceSpec referenceSpec,
+            Collection<EntitySpec> entitySpecs, SortedMap<String, ReferenceSpec>
+            inboundRefSpecs, Collection<Filter> filters, ReferenceSpec referenceSpec,
             boolean streamingMode) {
         ColumnSpecInfo columnSpecInfo = new ColumnSpecInfo();
         if (referenceSpec == null || streamingMode) {
@@ -74,11 +75,17 @@ final class ColumnSpecInfoFactory {
             i = processConstraintSpecs(entitySpec2, columnSpecs, i);
             i = processFilters(entitySpec2, filters, columnSpecs,
                     i);
-            if (entitySpec2 != entitySpec && referenceSpec == null &&
-                    entitySpec2.hasReferenceTo(entitySpec)) {
-                i = processReferenceSpecs(entitySpec2, entitySpec, columnSpecs,
-                        refNum, i, columnSpecInfo);
-                refNum++;
+
+            for (Map.Entry<String, ReferenceSpec> inboundRef : inboundRefSpecs.entrySet()) {
+                if (inboundRef.getKey().equals(entitySpec2.getName())) {
+                    if (entitySpec2 != entitySpec && referenceSpec == null &&
+                            entitySpec2.hasReferenceTo(entitySpec)) {
+                        i = processReferenceSpecs(entitySpec2, entitySpec, columnSpecs,
+                                refNum, i, columnSpecInfo);
+                        refNum++;
+                    }
+                    break;
+                }
             }
         }
         columnSpecInfo.setColumnSpecs(columnSpecs);
@@ -241,7 +248,8 @@ final class ColumnSpecInfoFactory {
 
     private static int processReferenceSpecs(EntitySpec referringEntitySpec,
                                              EntitySpec referredToEntitySpec,
-                                             List<ColumnSpec> columnSpecs, int refNum, int i, ColumnSpecInfo columnSpecInfo) {
+                                             List<ColumnSpec> columnSpecs, int refNum,
+                                             int i, ColumnSpecInfo columnSpecInfo) {
 
         if (referringEntitySpec.hasReferenceTo(referredToEntitySpec)) {
             for (ColumnSpec referringUniqueIdSpec : referringEntitySpec.getUniqueIdSpecs()) {

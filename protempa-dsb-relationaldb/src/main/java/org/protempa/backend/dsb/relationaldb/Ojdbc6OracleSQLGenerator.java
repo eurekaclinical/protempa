@@ -19,14 +19,15 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.arp.javautil.sql.ConnectionSpec;
+import org.protempa.backend.dsb.filter.Filter;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
-
-import org.arp.javautil.sql.ConnectionSpec;
-import org.protempa.backend.dsb.filter.Filter;
+import java.util.SortedMap;
 
 /**
  * Generates SQL compatible with Oracle 10.x and 11.x 
@@ -85,11 +86,12 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGenerator {
     @Override
     protected SelectStatement getSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            SortedMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             StagingSpec[] stagedTables, boolean wrapKeyId) {
         return new Ojdbc6OracleSelectStatement(entitySpec, referenceSpec,
-                entitySpecs, filters, propIds, keyIds, order, resultProcessor,
+                entitySpecs, inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
                 stagedTables, getStreamingMode(), wrapKeyId);
     }
 

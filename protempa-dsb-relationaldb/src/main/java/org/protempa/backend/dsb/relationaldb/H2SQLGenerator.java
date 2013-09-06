@@ -19,16 +19,16 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.protempa.backend.dsb.filter.Filter;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.arp.javautil.sql.ConnectionSpec;
-import org.protempa.backend.dsb.filter.Filter;
 
 /**
  * Generates SQL compatible with the H2 database engine 1.x
@@ -95,11 +95,12 @@ public final class H2SQLGenerator extends AbstractSQLGenerator {
     @Override
     protected SelectStatement getSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            SortedMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             StagingSpec[] stagedTables, boolean wrapKeyId) {
         return new H2SelectStatement(entitySpec, referenceSpec, entitySpecs,
-                filters, propIds, keyIds, order, resultProcessor,
+                inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
                 getStreamingMode(), wrapKeyId);
     }
 }

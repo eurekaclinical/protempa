@@ -19,11 +19,12 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.protempa.backend.dsb.filter.Filter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import org.protempa.backend.dsb.filter.Filter;
+import java.util.TreeMap;
 
 final class Ojdbc6OracleStagingSelectStatement extends
         Ojdbc6OracleSelectStatement {
@@ -42,7 +43,7 @@ final class Ojdbc6OracleStagingSelectStatement extends
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             StagingSpec stagingSpec, boolean streamingMode, 
             boolean wrapKeyId) {
-        super(entitySpec, referenceSpec, entitySpecs, filters, propIds, keyIds,
+        super(entitySpec, referenceSpec, entitySpecs, new TreeMap<String, ReferenceSpec>(), filters, propIds, keyIds,
                 order, resultProcessor, EMPTY_SSPEC_ARR, streamingMode,
                 wrapKeyId);
         this.stagingSpec = stagingSpec;
@@ -53,8 +54,8 @@ final class Ojdbc6OracleStagingSelectStatement extends
     @Override
     public String generateStatement() {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(
-                getPropIds(), getEntitySpec(), getEntitySpecs(), getFilters(),
-                getReferenceSpec(), streamingMode);
+                getPropIds(), getEntitySpec(), getEntitySpecs(), getInboundReferenceSpecs(),
+                getFilters(), getReferenceSpec(), streamingMode);
 
         List<ColumnSpec> plusStagedSpecs = new ArrayList<ColumnSpec>(
                 info.getColumnSpecs());

@@ -63,13 +63,16 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     private Value[] propertyValues;
     private SortedMap<String, ReferenceSpec> inboundRefSpecs;
     private UniqueIdPair[] refUniqueIds;
+    private Map<String, ReferenceSpec> bidirectionalRefSpecs;
     private Map<UniqueId, P> props;
     private DataStreamingEvent<P> dataStreamingEvent;
     private String keyId;
     private boolean end;
 
     PropositionResultSetIterator(Statement statement, ResultSet resultSet,
-            EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            EntitySpec entitySpec, SortedMap<String,
+            ReferenceSpec> inboundRefSpecs,
+            Map<String, ReferenceSpec> bidirectionalRefSpecs,
             String dataSourceBackendId)
             throws SQLException {
         assert resultSet != null : "resultSet cannot be null";
@@ -95,7 +98,8 @@ abstract class PropositionResultSetIterator<P extends Proposition>
         this.propertySpecs = entitySpec.getPropertySpecs();
         this.propertyValues = new Value[this.propertySpecs.length];
         this.inboundRefSpecs = inboundRefSpecs;
-        this.refUniqueIds = new UniqueIdPair[this.inboundRefSpecs.size()];
+        this.bidirectionalRefSpecs = bidirectionalRefSpecs;
+        this.refUniqueIds = new UniqueIdPair[this.inboundRefSpecs.size() + this.bidirectionalRefSpecs.size()];
         this.props = new HashMap<UniqueId, P>();
         this.statement = statement;
     }
@@ -143,6 +147,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
      */
     abstract void doProcess(ResultSet resultSet,
             String[] uniqueIds, ColumnSpec codeSpec, EntitySpec entitySpec,
+            Map<String, ReferenceSpec> bidirectionalRefSpecs,
             int[] columnTypes, String[] propIds, PropertySpec[] propertySpecs,
             Value[] propertyValues, UniqueIdPair[] refUniqueIds) throws
             SQLException;
@@ -190,6 +195,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
                         if (this.resultSet.next()) {
                             doProcess(this.resultSet, this.uniqueIds,
                                 this.codeSpec, this.entitySpec,
+                                    this.bidirectionalRefSpecs,
                                 this.columnTypes, this.propIds,
                                 this.propertySpecs, this.propertyValues,
                                 this.refUniqueIds);

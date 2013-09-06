@@ -19,19 +19,21 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.protempa.backend.dsb.filter.Filter;
+
 import java.util.List;
 import java.util.Set;
-
-import org.protempa.backend.dsb.filter.Filter;
+import java.util.SortedMap;
 
 final class H2SelectStatement extends AbstractSelectStatement {
 
     H2SelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            SortedMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             boolean streamingMode, boolean wrapKeyId) {
-        super(entitySpec, referenceSpec, entitySpecs, filters, propIds, keyIds, 
+        super(entitySpec, referenceSpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
                 order, resultProcessor, null, streamingMode, wrapKeyId);
     }
 

@@ -19,11 +19,11 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.protempa.backend.dsb.filter.Filter;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
-import org.protempa.backend.dsb.filter.Filter;
 
 /**
  * Class for creating staging areas
@@ -45,8 +45,8 @@ abstract class AbstractStagingCreateStatement implements CreateStatement {
 
     protected AbstractStagingCreateStatement(StagingSpec stagingSpec,
             EntitySpec currentSpec, ReferenceSpec referenceSpec,
-            List<EntitySpec> entitySpecs, Set<Filter> filters,
-            Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
+            List<EntitySpec> entitySpecs,
+            Set<Filter> filters, Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor, boolean streamingMode) {
         this.stagingSpec = stagingSpec;
         this.currentSpec = currentSpec;
@@ -104,9 +104,8 @@ abstract class AbstractStagingCreateStatement implements CreateStatement {
                 + stagingSpec.getStagingArea().getTable()
                 + " AS "
                 + getSelectStatement(currentSpec, referenceSpec,
-                        Collections.singletonList(currentSpec), filters,
-                        propIds, keyIds, order, resultProcessor,
-                        streamingMode)
+                        Collections.singletonList(currentSpec),
+                        filters, propIds, keyIds, order, resultProcessor, streamingMode)
                         .generateStatement();
     }
 

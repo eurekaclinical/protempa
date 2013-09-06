@@ -21,6 +21,7 @@ package org.protempa.backend.dsb.relationaldb;
 
 import org.protempa.proposition.Event;
 
+import java.util.Map;
 import java.util.SortedMap;
 
 /**
@@ -52,9 +53,12 @@ class EventResultProcessorFactory extends SQLGenResultProcessorFactory<Event> {
     @Override
     StreamingMainResultProcessor<Event> getStreamingInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
-            SortedMap<String, ReferenceSpec> inboundRefSpecs) {
+            SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            Map<String, ReferenceSpec> bidirectionalRefSpecs) {
         EventStreamingResultProcessor resultProcessor =
-                new EventStreamingResultProcessor(entitySpec, inboundRefSpecs, dataSourceBackendId);
+                new EventStreamingResultProcessor(entitySpec,
+                        inboundRefSpecs, bidirectionalRefSpecs,
+                        dataSourceBackendId);
         return resultProcessor;
     }
     

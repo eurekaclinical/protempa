@@ -449,7 +449,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         for (Set<Filter> partition : partitions) {
             generateAndExecuteSelect(entitySpec, null, propIds, partition,
-                    applicableEntitySpecs, keyIds, order, resultProcessor,
+                    applicableEntitySpecs, new TreeMap<String, ReferenceSpec>(), keyIds, order, resultProcessor,
                     executor, false);
         }
 
@@ -469,10 +469,12 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private class StreamingIteratorPair {
 
         private final DataStreamingEventIterator<Proposition> props;
-        private final List<DataStreamingEventIterator<UniqueIdPair>> refs;
+        private final List<? extends DataStreamingEventIterator<UniqueIdPair>>
+        refs;
 
         StreamingIteratorPair(DataStreamingEventIterator<Proposition> props,
-                List<DataStreamingEventIterator<UniqueIdPair>> refs) {
+                List<? extends DataStreamingEventIterator<UniqueIdPair>>
+                        refs) {
             this.props = props;
             this.refs = refs;
         }
@@ -481,7 +483,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             return props;
         }
 
-        public List<DataStreamingEventIterator<UniqueIdPair>> getRefs() {
+        public List<? extends DataStreamingEventIterator<UniqueIdPair>> getRefs
+                () {
             return refs;
         }
     }
@@ -509,27 +512,32 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         List<Set<Filter>> partitions = constructPartitions(entitySpec,
                 applicableFilters);
 
-        SortedMap<String, ReferenceSpec> inboundRefSpecs = collectInboundRefSpecs
+        SortedMap<String, ReferenceSpec> inboundRefSpecs =
+                collectInboundRefSpecs
+                (applicableEntitySpecs, entitySpec);
+        Map<String, ReferenceSpec> bidirRefSpecs = collectBidirectionalReferences
                 (applicableEntitySpecs, entitySpec);
 
         String dataSourceBackendId = this.backend.getDataSourceBackendId();
         StreamingMainResultProcessor<Proposition> resultProcessor =
-                factory.getStreamingInstance(dataSourceBackendId, entitySpec, inboundRefSpecs);
+                factory.getStreamingInstance(dataSourceBackendId, entitySpec,
+                        inboundRefSpecs, bidirRefSpecs);
 
         for (Set<Filter> filterSet : partitions) {
             generateAndExecuteSelectStreaming(entitySpec, null, propIds, filterSet,
-                    applicableEntitySpecs, keyIds, SQLOrderBy.ASCENDING,
+                    applicableEntitySpecs, inboundRefSpecs, keyIds,
+                    SQLOrderBy.ASCENDING,
                     resultProcessor, executor, true);
             DataStreamingEventIterator<Proposition> results =
                     resultProcessor.getResults();
-            DataStreamingEventIterator<UniqueIdPair> refResults =
-                    resultProcessor.getInboundReferenceResults();
+            List<DataStreamingEventIterator<UniqueIdPair>> refResults =
+                    java.util.Collections.singletonList(resultProcessor
+                            .getInboundReferenceResults());
 //            List<ReferenceResultSetIterator> refResults =
 //                    processReferencesStreaming(entitySpec, factory,
 //                    dataSourceBackendId,
 //                    allEntitySpecs, propIds, filters, keyIds, executor);
-            result.add(new StreamingIteratorPair(results,
-                  java.util.Collections.singletonList(refResults)));
+            result.add(new StreamingIteratorPair(results, refResults));
         }
 
         logDoneProcessing(logger, entitySpec);
@@ -585,9 +593,13 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     List<Set<Filter>> refsFilterSets = constructPartitions(
                             referredToEntitySpec, refsApplicableFilters);
 
+                    SortedMap<String, ReferenceSpec> applicableRefSpecs = new
+                            TreeMap<String, ReferenceSpec>();
+
                     for (Set<Filter> filterSet : refsFilterSets) {
                         generateAndExecuteSelect(entitySpec, referenceSpec,
                                 propIds, filterSet, allEntitySpecsCopyForRefs,
+                                new TreeMap<String, ReferenceSpec>(),
                                 keyIds, order, refResultProcessor, executor,
                                 false);
                     }
@@ -660,6 +672,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                                 referenceSpec,
                                 propIds, filterSet,
                                 allEntitySpecsCopyForRefs,
+                                new TreeMap<String, ReferenceSpec>(),
                                 keyIds, SQLOrderBy.ASCENDING,
                                 refResultProcessor, executor, true);
                         itrs.add(refResultProcessor.getResult());
@@ -1021,14 +1034,49 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     private static SortedMap<String, ReferenceSpec> collectInboundRefSpecs
             (Collection<EntitySpec> entitySpecs, EntitySpec referredToSpec) {
-        SortedMap<String, ReferenceSpec> result = new TreeMap<String,
-                ReferenceSpec>();
+        SortedMap<String, ReferenceSpec> result = new TreeMap<String, ReferenceSpec>();
 
         for (EntitySpec es : entitySpecs) {
             if (es.hasReferenceTo(referredToSpec)) {
-                for (ReferenceSpec rs : es.getReferenceSpecs()) {
-                    if (rs.getEntityName().equals(referredToSpec.getName())) {
-                        result.put(es.getName(), rs);
+                boolean isMany = false;
+                if (referredToSpec.hasReferenceTo(es)) {
+                    for (ReferenceSpec rs : referredToSpec.getReferenceSpecs()) {
+                        if (rs.getEntityName().equals(es.getName()) &&
+                        rs.getType() == ReferenceSpec.Type.MANY) {
+                            isMany = true;
+                            break;
+                        }
+                    }
+                }
+                if (!isMany) {
+                    for (ReferenceSpec rs : es.getReferenceSpecs()) {
+                        if (rs.getEntityName().equals(referredToSpec.getName())) {
+                            result.put(es.getName(), rs);
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static Map<String, ReferenceSpec> collectBidirectionalReferences
+            (Collection<EntitySpec> entitySpecs, EntitySpec entitySpec) {
+        Map<String, ReferenceSpec> result = new HashMap<String,
+                ReferenceSpec>();
+
+        for (ReferenceSpec rs : entitySpec.getReferenceSpecs()) {
+            for (EntitySpec es : entitySpecs) {
+                if (es.getName().equals(rs.getEntityName())) {
+                    if (es.hasReferenceTo(entitySpec)) {
+                        for (ReferenceSpec referringSpec : es.getReferenceSpecs()) {
+                            if (referringSpec.getEntityName().equals(entitySpec
+                                    .getName()) && referringSpec.getType() ==
+                                    ReferenceSpec.Type.MANY) {
+                                result.put(es.getName(), rs);
+                            }
+                        }
                     }
                 }
             }
@@ -1083,7 +1131,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private <P extends Proposition> void generateAndExecuteSelectStreaming(
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
             Set<String> propIds, Set<Filter> filtersCopy,
-            List<EntitySpec> entitySpecsCopy, Set<String> keyIds,
+            List<EntitySpec> entitySpecsCopy, SortedMap<String,
+            ReferenceSpec> inboundRefSpecs, Set<String> keyIds,
             SQLOrderBy order, StreamingResultProcessor<P> resultProcessor,
             StreamingSQLExecutor executor,
             boolean wrapKeyId) throws DataSourceReadException {
@@ -1098,7 +1147,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
 
         String query = getSelectStatement(entitySpec, referenceSpec,
-                entitySpecsCopy, filtersCopy, propIds, keyIds, order,
+                entitySpecsCopy, inboundRefSpecs, filtersCopy, propIds,
+                keyIds, order,
                 resultProcessor, this.stagedTableSpecs, wrapKeyId).generateStatement();
 
         if (logger.isLoggable(Level.FINE)) {
@@ -1114,7 +1164,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private <P extends Proposition> void generateAndExecuteSelect(
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
             Set<String> propIds, Set<Filter> filtersCopy,
-            List<EntitySpec> entitySpecsCopy, Set<String> keyIds,
+            List<EntitySpec> entitySpecsCopy, SortedMap<String,
+            ReferenceSpec> inboundRefSpecs,
+            Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             org.protempa.backend.dsb.relationaldb.SQLExecutor executor,
             boolean wrapKeyId) throws DataSourceReadException {
@@ -1129,7 +1181,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
 
         String query = getSelectStatement(entitySpec, referenceSpec,
-                entitySpecsCopy, filtersCopy, propIds, keyIds, order,
+                entitySpecsCopy, inboundRefSpecs, filtersCopy, propIds,
+                keyIds, order,
                 resultProcessor, this.stagedTableSpecs, wrapKeyId).generateStatement();
 
         if (logger.isLoggable(Level.FINE)) {
@@ -1199,7 +1252,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     protected abstract SelectStatement getSelectStatement(
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
-            List<EntitySpec> entitySpecs, Set<Filter> filters,
+            List<EntitySpec> entitySpecs, SortedMap<String,
+            ReferenceSpec> inboundRefSpecs, Set<Filter> filters,
             Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables,
             boolean wrapKeyId);

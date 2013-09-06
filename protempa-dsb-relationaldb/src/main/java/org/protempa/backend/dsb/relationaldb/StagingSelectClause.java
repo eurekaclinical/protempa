@@ -19,11 +19,11 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.protempa.backend.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 final class StagingSelectClause implements SelectClause {
 

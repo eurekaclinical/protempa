@@ -19,10 +19,10 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.protempa.backend.dsb.filter.Filter;
+
 import java.util.List;
 import java.util.Set;
-
-import org.protempa.backend.dsb.filter.Filter;
 
 interface CreateStatement extends SqlStatement {
     SelectStatement getSelectStatement(EntitySpec entitySpec,
