@@ -19,19 +19,18 @@
  */
 package org.protempa.test;
 
-import java.io.IOException;
-
+import org.protempa.ProtempaException;
 import org.protempa.backend.annotations.BackendInfo;
-import org.protempa.backend.dsb.relationaldb.PropIdToSQLCodeMapper;
-import org.protempa.backend.dsb.relationaldb.RelationalDbDataSourceBackend;
 import org.protempa.backend.dsb.relationaldb.ColumnSpec;
 import org.protempa.backend.dsb.relationaldb.EntitySpec;
 import org.protempa.backend.dsb.relationaldb.JDBCDateTimeTimestampDateValueFormat;
 import org.protempa.backend.dsb.relationaldb.JDBCDateTimeTimestampPositionParser;
 import org.protempa.backend.dsb.relationaldb.JDBCPositionFormat;
 import org.protempa.backend.dsb.relationaldb.JoinSpec;
+import org.protempa.backend.dsb.relationaldb.PropIdToSQLCodeMapper;
 import org.protempa.backend.dsb.relationaldb.PropertySpec;
 import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
+import org.protempa.backend.dsb.relationaldb.RelationalDbDataSourceBackend;
 import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.AbsoluteTimeGranularityFactory;
@@ -39,6 +38,8 @@ import org.protempa.proposition.value.AbsoluteTimeUnitFactory;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 import org.protempa.proposition.value.ValueType;
+
+import java.io.IOException;
 
 /**
  * Test data source backend (based on RegistryVM).
@@ -137,13 +138,14 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                         new ColumnSpec[] { new ColumnSpec(
                                                 getKeyIdSchema(),
                                                 getKeyIdTable(), "PATIENT_KEY") },
-                                        ReferenceSpec.Type.MANY) }, null, null,
+                                        ReferenceSpec.Type.MANY)
+                        }, null, null,
                         null, null, null, null, null, null),
                 new EntitySpec(
                         "Patient Details",
                         null,
                         new String[] { "Patient" },
-                        false,
+                        true,
                         new ColumnSpec(getKeyIdSchema(), getKeyIdTable(),
                                 getKeyIdColumn()),
                         new ColumnSpec[] { new ColumnSpec(schemaName,
@@ -251,7 +253,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                         new ColumnSpec(schemaName, "PROVIDER",
                                                 "LAST_NAME"),
                                         ValueType.NOMINALVALUE) }, null, null,
-                        null, null, null, null, null, null, null), };
+                        null, null, null, null, null, null, null),
+        };
         return constantSpecs;
     }
 
@@ -387,7 +390,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                         new ColumnSpec[] { new ColumnSpec(
                                                 schemaName, "ENCOUNTER",
                                                 "PATIENT_KEY") },
-                                        ReferenceSpec.Type.MANY), }, null,
+                                        ReferenceSpec.Type.ONE),
+                        }, null,
                         null, null, null, null, AbsoluteTimeGranularity.DAY,
                         dtPositionParser, null),
                 new EntitySpec(
@@ -552,7 +556,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 this.mapper
                                         .propertyNameOrPropIdToSqlCodeArray("meds_02232012.txt"),
                                 true), null, null, null,
-                        AbsoluteTimeGranularity.MINUTE, dtPositionParser, null), };
+                        AbsoluteTimeGranularity.MINUTE, dtPositionParser, null),
+};
         return eventSpecs;
     }
 
@@ -660,5 +665,10 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
     @Override
     public UnitFactory getUnitFactory() {
         return absTimeUnitFactory;
+    }
+
+    @Override
+    public void exceptionOccurred(ProtempaException protempaException) {
+
     }
 }
