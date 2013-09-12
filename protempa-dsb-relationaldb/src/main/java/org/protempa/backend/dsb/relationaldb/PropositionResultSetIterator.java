@@ -218,7 +218,9 @@ abstract class PropositionResultSetIterator<P extends Proposition>
                     }
                 } catch (SQLException ex) {
                     normalExit = false;
-                    throw new StreamingSQLException("Error during streaming",
+                    throw new StreamingSQLException(
+                            "Error during streaming entity " 
+                            + this.entitySpec.getName(),
                             ex);
                 } finally {
                     if (!normalExit && this.resultSet != null) {
