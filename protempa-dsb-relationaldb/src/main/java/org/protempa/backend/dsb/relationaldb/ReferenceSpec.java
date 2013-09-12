@@ -38,6 +38,7 @@ public class ReferenceSpec implements Serializable {
 
     private final String referenceName;
     private final String entityName;
+    private EntitySpec referringEntitySpec;
     private final ColumnSpec[] uniqueIdSpecs;
     private final Type type;
 
@@ -68,6 +69,14 @@ public class ReferenceSpec implements Serializable {
         this.referenceName = referenceName.intern();
         this.entityName = entityName;
         this.type = type;
+    }
+
+    EntitySpec getReferringEntitySpec() {
+        return this.referringEntitySpec;
+    }
+
+    void setReferringEntitySpec(EntitySpec referringEntitySpec) {
+        this.referringEntitySpec = referringEntitySpec;
     }
 
     /**

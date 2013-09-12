@@ -199,6 +199,9 @@ public final class EntitySpec implements Serializable {
             this.referenceSpecs = referenceSpecs.clone();
             ProtempaUtil.checkArrayForNullElement(this.referenceSpecs,
                     "referenceSpecs");
+            for (ReferenceSpec rs : this.referenceSpecs) {
+                rs.setReferringEntitySpec(this);
+            }
         } else {
             this.referenceSpecs = EMPTY_REFERENCE_SPEC_ARRAY;
         }
