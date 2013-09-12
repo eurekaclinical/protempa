@@ -96,7 +96,7 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
                 .entrySet()) {
             String referringEntityName = entry.getKey();
             ReferenceSpec refSpec = entry.getValue();
-            String[] referringUniqueIds = new String[refSpec
+            String[] referringUniqueIds = new String[refSpec.getReferringEntitySpec()
                     .getUniqueIdSpecs().length];
             i = readUniqueIds(referringUniqueIds, resultSet, i);
             UniqueId referringUniqueId = generateUniqueId(referringEntityName,
