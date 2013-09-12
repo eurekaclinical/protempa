@@ -100,10 +100,10 @@ public final class PropIdToSQLCodeMapper {
         try {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] cols = line.split(sep);
+                String[] cols = line.split(sep, -1); // -1 preserves trailing empty string
                 if (cols.length != 2) {
                     throw new AssertionError("Invalid mapping in " + resource
-                            + ": " + line);
+                            + ": " + line + "; mapping has length " + cols.length);
                 }
                 codes.add(cols[colNum].trim());
             }
@@ -151,10 +151,10 @@ public final class PropIdToSQLCodeMapper {
         int i = 0;
         try {
             while ((line = br.readLine()) != null) {
-                String[] cols = line.split("\t");
+                String[] cols = line.split("\t", -1); // -1 preserves trailing empty string
                 if (cols.length != 2) {
                     throw new AssertionError("Invalid mapping in " + resource
-                            + ": " + line);
+                            + ": " + line + "; mapping has length " + cols.length);
                 }
                 cvs.add(new ColumnSpec.KnowledgeSourceIdToSqlCode(cols[0],
                         cols[1]));
