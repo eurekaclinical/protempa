@@ -313,7 +313,7 @@ public class ProtempaTest {
         protempa.execute(query(), handler);
         assertTrue("output doesn't match",
                 outputMatches(outputFile, TRUTH_OUTPUT));
-
+    
     }
     
     private ContextDefinition context1() {
@@ -675,15 +675,7 @@ public class ProtempaTest {
 
             assertEquals("Wrong number of keys retrieved", this.patientCount,
                     results.size());
-            Map<String, Integer> propCounts = getResultCounts(PROP_COUNTS_FILE);
-            for (Entry<String, List<Proposition>> r : results.entrySet()) {
-                System.out.println(r.getKey() + ": " + r.getValue().size());
-                assertEquals(
-                        "Wrong number of raw propositions retrieved for key "
-                        + r.getKey(),
-                        propCounts.get(r.getKey()).intValue(), 
-                        r.getValue().size());
-            }
+            assertRawPropositionCount(results);
             assertPatientsRetrieved(results);
             assertEncountersRetrieved(results);
             assertVitalsRetrieved(results);
@@ -995,10 +987,12 @@ public class ProtempaTest {
         logger.log(Level.INFO, "Running references test...");
         Map<String, Integer> propCounts = getResultCounts(ENCOUNTER_COUNTS_FILE);
         for (Map.Entry<String, Integer> me : propCounts.entrySet()) {
-            List<Proposition> props = objectGraph.get(me.getKey());
+            String keyId = me.getKey();
+            List<Proposition> props = objectGraph.get(keyId);
             for (Proposition prop : props) {
                 if (prop.getId().equals("PatientAll")) {
-                    assertEquals("PatientAll for keyId 0 failed", 1,
+                    System.out.println("Testing for keyId " + keyId + ": " + prop);
+                    assertEquals("PatientAll for keyId " + keyId + " failed", 1,
                             prop.getReferences("patientDetails").size());
                 } else if (prop.getId().equals("Patient")) {
                     assertEquals("Patient for keyId 0 failed", me
@@ -1708,5 +1702,16 @@ public class ProtempaTest {
         }
 
         return results;
+    }
+
+    private void assertRawPropositionCount(DataStore<String, List<Proposition>> results) throws IOException, NumberFormatException {
+        Map<String, Integer> propCounts = getResultCounts(PROP_COUNTS_FILE);
+        for (Entry<String, List<Proposition>> r : results.entrySet()) {
+            assertEquals(
+                    "Wrong number of raw propositions retrieved for key "
+                    + r.getKey(),
+                    propCounts.get(r.getKey()).intValue(), 
+                    r.getValue().size());
+        }
     }
 }
