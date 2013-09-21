@@ -19,13 +19,14 @@
  */
 package org.protempa;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.protempa.proposition.UniqueId;
 
 /**
  *
  * @author Andrew Post
  */
-public class UniqueIdPair {
+public final class UniqueIdPair {
     private final String referenceName;
     private final UniqueId proposition;
     private final UniqueId reference;
@@ -52,5 +53,8 @@ public class UniqueIdPair {
         return reference;
     }
     
-    
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
 }
