@@ -19,7 +19,6 @@ package org.protempa.backend.dsb.relationaldb;
  * limitations under the License.
  * #L%
  */
-
 import org.protempa.DataSourceReadException;
 import org.protempa.DataStreamingEvent;
 import org.protempa.DataStreamingEventIterator;
@@ -39,11 +38,17 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class InboundReferenceResultSetIterator implements
+/**
+ * Iterates over the references. This does not entirely adhere to the 
+ * {@link java.util.Iterator} contract, because it relies on another class to
+ * populate it while iteration is occurring.
+ * 
+ * @author Michel Mansour
+ */
+final class InboundReferenceResultSetIterator implements
         DataStreamingEventIterator<UniqueIdPair> {
 
-    private static final Logger LOGGER = Logger.getLogger
-            (InboundReferenceResultSetIterator.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(InboundReferenceResultSetIterator.class.getName());
 
     /*
      * For many-to-one references, we will get multiple instances of the same
@@ -57,15 +62,13 @@ public final class InboundReferenceResultSetIterator implements
     private final String entityName;
     private String lastDelivered;
 
-    InboundReferenceResultSetIterator (String entityName) {
+    InboundReferenceResultSetIterator(String entityName) {
         this.entityName = entityName;
-        this.referenceUniqueIds = new HashMap<DestructuredUniqueIdPair,
-                Set<UniqueId>>();
-        this.dataStreamingEventQueue = new
-                LinkedList<DataStreamingEvent<UniqueIdPair>>();
+        this.referenceUniqueIds = new HashMap<DestructuredUniqueIdPair, Set<UniqueId>>();
+        this.dataStreamingEventQueue = new LinkedList<DataStreamingEvent<UniqueIdPair>>();
     }
 
-    public void resultSetComplete() {
+    void resultSetComplete() {
         this.end = true;
         createDataStreamingEvent();
     }
@@ -76,27 +79,35 @@ public final class InboundReferenceResultSetIterator implements
 
     @Override
     public boolean hasNext() throws DataSourceReadException {
-        return  !isDone();
+        return !isDone();
     }
 
     @Override
     public DataStreamingEvent<UniqueIdPair> next() throws DataSourceReadException {
         if (isDone()) {
-            throw new NoSuchElementException("dataStreamingEventQueue is " +
-                    "empty");
+            throw new NoSuchElementException("dataStreamingEventQueue is "
+                    + "empty");
         }
 
         DataStreamingEvent<UniqueIdPair> result;
         if (this.dataStreamingEventQueue.isEmpty()) {
-            result = new DataStreamingEvent<UniqueIdPair>(this.keyId, 
+            /*
+             * next() might get called ahead of addUniqueIds(). In that
+             * situation, the queue will be empty. If the queue is empty, then
+             * send back a DataStreamingEvent with no UniqueIdPairs.
+             */
+            result = new DataStreamingEvent<UniqueIdPair>(this.keyId,
                     new ArrayList<UniqueIdPair>(0));
         } else {
             result = this.dataStreamingEventQueue.remove();
         }
 
-        LOGGER.log(Level.INFO, "{0}: Current: {1}, Last Delivered: {2}",
-                new Object[]{this.entityName, result.getKeyId(),
-                        this.lastDelivered});
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.log(Level.FINEST, 
+                    "Iterating over references for {0}: Current: {1}, Last Delivered: {2}",
+                    new Object[]{this.entityName, result.getKeyId(),
+                this.lastDelivered});
+        }
 
         this.lastDelivered = result.getKeyId();
         return result;
@@ -119,8 +130,8 @@ public final class InboundReferenceResultSetIterator implements
             }
             if (o instanceof DestructuredUniqueIdPair) {
                 DestructuredUniqueIdPair other = (DestructuredUniqueIdPair) o;
-                return referenceName.equals(other.referenceName) &&
-                        proposition.equals(other.proposition);
+                return referenceName.equals(other.referenceName)
+                        && proposition.equals(other.proposition);
             }
 
             return false;
@@ -149,8 +160,7 @@ public final class InboundReferenceResultSetIterator implements
     void addUniqueIds(String keyId, UniqueIdPair[] uniqueIds) {
         handleKeyId(keyId);
         for (UniqueIdPair uniqueId : uniqueIds) {
-            DestructuredUniqueIdPair lhs = new DestructuredUniqueIdPair
-                    (uniqueId.getReferenceName(), uniqueId.getProposition());
+            DestructuredUniqueIdPair lhs = new DestructuredUniqueIdPair(uniqueId.getReferenceName(), uniqueId.getProposition());
             if (!this.referenceUniqueIds.containsKey(lhs)) {
                 this.referenceUniqueIds.put(lhs, new HashSet<UniqueId>());
             }
@@ -160,17 +170,14 @@ public final class InboundReferenceResultSetIterator implements
 
     private void createDataStreamingEvent() {
         List<UniqueIdPair> uniqueIds = new ArrayList<UniqueIdPair>();
-        for (Map.Entry<DestructuredUniqueIdPair, Set<UniqueId>> e : this
-                .referenceUniqueIds.entrySet()) {
+        for (Map.Entry<DestructuredUniqueIdPair, Set<UniqueId>> e : this.referenceUniqueIds.entrySet()) {
             for (UniqueId refId : e.getValue()) {
                 uniqueIds.add(new UniqueIdPair(e.getKey().referenceName,
                         e.getKey().proposition, refId));
             }
         }
-        this.dataStreamingEventQueue.offer(new DataStreamingEvent<UniqueIdPair>
-                (this.keyId, uniqueIds));
-        this.referenceUniqueIds = new HashMap<DestructuredUniqueIdPair,
-                Set<UniqueId>>();
+        this.dataStreamingEventQueue.offer(new DataStreamingEvent<UniqueIdPair>(this.keyId, uniqueIds));
+        this.referenceUniqueIds = new HashMap<DestructuredUniqueIdPair, Set<UniqueId>>();
     }
 
     @Override
@@ -178,8 +185,8 @@ public final class InboundReferenceResultSetIterator implements
         this.referenceUniqueIds.clear();
         this.referenceUniqueIds = null;
         if (!this.dataStreamingEventQueue.isEmpty()) {
-            LOGGER.log(Level.WARNING, "Closing non-empty data streaming event" +
-                    " queue. {0} elements remain.",
+            LOGGER.log(Level.WARNING, "Closing non-empty data streaming event"
+                    + " queue. {0} elements remain.",
                     new Object[]{this.dataStreamingEventQueue.size()});
         }
         this.dataStreamingEventQueue.clear();

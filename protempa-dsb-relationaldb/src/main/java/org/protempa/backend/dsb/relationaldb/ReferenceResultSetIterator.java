@@ -43,9 +43,7 @@ import java.util.logging.Logger;
 public final class ReferenceResultSetIterator
         implements DataStreamingEventIterator<UniqueIdPair> {
 
-    private static final Logger LOGGER = Logger.getLogger
-            (ReferenceResultSetIterator.class.getName());
-
+    private static final Logger LOGGER = Logger.getLogger(ReferenceResultSetIterator.class.getName());
     private ResultSet resultSet;
     private final Logger logger;
     private final String[] uniqueIds;
@@ -91,7 +89,7 @@ public final class ReferenceResultSetIterator
     }
 
     @Override
-    public DataStreamingEvent<UniqueIdPair> next() 
+    public DataStreamingEvent<UniqueIdPair> next()
             throws DataSourceReadException {
         DataStreamingEvent<UniqueIdPair> result;
         if (this.dataStreamingEvent != null) {
@@ -104,9 +102,11 @@ public final class ReferenceResultSetIterator
         }
         this.dataStreamingEvent = null;
 
-        LOGGER.log(Level.INFO, "{0}: Current: {1}, Last Delivered: {2}",
-                new Object[]{this.entitySpec.getName(), result.getKeyId(),
-                        this.lastDelivered});
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.log(Level.FINEST, "Iterating over references for {0}: Current: {1}, Last Delivered: {2}",
+                    new Object[]{this.entitySpec.getName(), result.getKeyId(),
+                this.lastDelivered});
+        }
         this.lastDelivered = result.getKeyId();
 
         return result;
