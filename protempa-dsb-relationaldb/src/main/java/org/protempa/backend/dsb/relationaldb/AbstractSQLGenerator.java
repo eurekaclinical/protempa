@@ -530,13 +530,13 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     resultProcessor, executor, true);
             DataStreamingEventIterator<Proposition> results =
                     resultProcessor.getResults();
-//            List<DataStreamingEventIterator<UniqueIdPair>> refResults =
-//                    java.util.Collections.singletonList(resultProcessor
-//                            .getInboundReferenceResults());
-            List<ReferenceResultSetIterator> refResults =
-                    processReferencesStreaming(entitySpec, factory,
-                    dataSourceBackendId,
-                    allEntitySpecs, propIds, filters, keyIds, executor);
+            List<DataStreamingEventIterator<UniqueIdPair>> refResults =
+                    java.util.Collections.singletonList(resultProcessor
+                            .getInboundReferenceResults());
+//            List<ReferenceResultSetIterator> refResults =
+//                    processReferencesStreaming(entitySpec, factory,
+//                    dataSourceBackendId,
+//                    allEntitySpecs, propIds, filters, keyIds, executor);
             result.add(new StreamingIteratorPair(results, refResults));
         }
 

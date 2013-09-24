@@ -27,6 +27,7 @@ import org.protempa.UniqueIdPair;
 import org.protempa.proposition.UniqueId;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -85,12 +86,13 @@ public final class InboundReferenceResultSetIterator implements
                     "empty");
         }
 
-        if (!this.referenceUniqueIds.isEmpty()) {
-            createDataStreamingEvent();
+        DataStreamingEvent<UniqueIdPair> result;
+        if (this.dataStreamingEventQueue.isEmpty()) {
+            result = new DataStreamingEvent<UniqueIdPair>(this.keyId, 
+                    new ArrayList<UniqueIdPair>(0));
+        } else {
+            result = this.dataStreamingEventQueue.remove();
         }
-
-        DataStreamingEvent<UniqueIdPair> result = this
-                .dataStreamingEventQueue.remove();
 
         LOGGER.log(Level.INFO, "{0}: Current: {1}, Last Delivered: {2}",
                 new Object[]{this.entityName, result.getKeyId(),
@@ -110,6 +112,7 @@ public final class InboundReferenceResultSetIterator implements
             this.proposition = proposition;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (o == null) {
                 return false;
@@ -123,6 +126,7 @@ public final class InboundReferenceResultSetIterator implements
             return false;
         }
 
+        @Override
         public int hashCode() {
             int result = 17;
 
