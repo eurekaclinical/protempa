@@ -991,11 +991,10 @@ public class ProtempaTest {
             List<Proposition> props = objectGraph.get(keyId);
             for (Proposition prop : props) {
                 if (prop.getId().equals("PatientAll")) {
-                    System.out.println("Testing for keyId " + keyId + ": " + prop);
                     assertEquals("PatientAll for keyId " + keyId + " failed", 1,
                             prop.getReferences("patientDetails").size());
                 } else if (prop.getId().equals("Patient")) {
-                    assertEquals("Patient for keyId 0 failed", me
+                    assertEquals("Patient for keyId " + keyId + " failed", me
                             .getValue().intValue(), 
                             prop.getReferences("encounters").size());
                 }
