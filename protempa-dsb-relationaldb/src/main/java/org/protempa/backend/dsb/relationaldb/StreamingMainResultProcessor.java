@@ -29,20 +29,20 @@ import org.protempa.proposition.value.ValueType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 abstract class StreamingMainResultProcessor<P extends Proposition>
         extends AbstractResultProcessor implements StreamingResultProcessor<P> {
     private ColumnSpec[] lastColumnSpecs;
     private PropertySpec[] propertySpecs;
-    private SortedMap<String, ReferenceSpec> inboundRefSpecs;
+    private LinkedHashMap<String, ReferenceSpec> inboundRefSpecs;
     private Map<String, ReferenceSpec> bidirectionalRefSpecs;
     private Statement statement;
     
     protected StreamingMainResultProcessor(
-            EntitySpec entitySpec, SortedMap<String,
+            EntitySpec entitySpec, LinkedHashMap<String,
             ReferenceSpec> inboundRefSpecs,
             Map<String, ReferenceSpec> bidirectionalRefSpecs,
             String dataSourceBackendId) {
@@ -125,7 +125,7 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
     abstract  DataStreamingEventIterator<UniqueIdPair>
             getInboundReferenceResults();
 
-    protected SortedMap<String, ReferenceSpec> getInboundRefSpecs() {
+    protected LinkedHashMap<String, ReferenceSpec> getInboundRefSpecs() {
         return this.inboundRefSpecs;
     }
 

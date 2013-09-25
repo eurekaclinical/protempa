@@ -23,15 +23,15 @@ import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 
 abstract class AbstractSelectStatement implements SelectStatement {
 
     private final EntitySpec entitySpec;
     private final ReferenceSpec referenceSpec;
     private final List<EntitySpec> entitySpecs;
-    private final SortedMap<String, ReferenceSpec> inboundReferenceSpecs;
+    private final Map<String, ReferenceSpec> inboundReferenceSpecs;
     private final Set<Filter> filters;
     private final Set<String> propIds;
     private final Set<String> keyIds;
@@ -43,7 +43,7 @@ abstract class AbstractSelectStatement implements SelectStatement {
 
     protected AbstractSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
-            SortedMap<String, ReferenceSpec> inboundReferenceSpecs,
+            Map<String, ReferenceSpec> inboundReferenceSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             StagingSpec[] stagedTables, boolean streamingMode,
@@ -51,7 +51,7 @@ abstract class AbstractSelectStatement implements SelectStatement {
         this.entitySpec = entitySpec;
         this.referenceSpec = referenceSpec;
         this.entitySpecs = Collections.unmodifiableList(entitySpecs);
-        this.inboundReferenceSpecs = Collections.unmodifiableSortedMap(inboundReferenceSpecs);
+        this.inboundReferenceSpecs = Collections.unmodifiableMap(inboundReferenceSpecs);
         this.filters = Collections.unmodifiableSet(filters);
         this.propIds = Collections.unmodifiableSet(propIds);
         this.keyIds = Collections.unmodifiableSet(keyIds);
@@ -74,7 +74,7 @@ abstract class AbstractSelectStatement implements SelectStatement {
         return entitySpecs;
     }
 
-    protected SortedMap<String, ReferenceSpec> getInboundReferenceSpecs() {
+    protected Map<String, ReferenceSpec> getInboundReferenceSpecs() {
         return inboundReferenceSpecs;
     }
 

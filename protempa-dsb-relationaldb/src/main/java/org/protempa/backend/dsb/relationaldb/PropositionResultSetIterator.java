@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,7 +60,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     private String[] propIds;
     private PropertySpec[] propertySpecs;
     private Value[] propertyValues;
-    private SortedMap<String, ReferenceSpec> inboundRefSpecs;
+    private Map<String, ReferenceSpec> inboundRefSpecs;
     private UniqueIdPair[] refUniqueIds;
     private Map<String, ReferenceSpec> bidirectionalRefSpecs;
     private Map<UniqueId, P> props;
@@ -70,7 +69,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     private boolean end;
 
     PropositionResultSetIterator(Statement statement, ResultSet resultSet,
-            EntitySpec entitySpec, SortedMap<String,
+            EntitySpec entitySpec, Map<String,
             ReferenceSpec> inboundRefSpecs,
             Map<String, ReferenceSpec> bidirectionalRefSpecs,
             String dataSourceBackendId)

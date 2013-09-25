@@ -32,6 +32,7 @@ import org.protempa.proposition.value.ValueType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Level;
@@ -43,7 +44,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
     private InboundReferenceResultSetIterator refItr;
 
     PrimitiveParameterStreamingResultProcessor(
-            EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            EntitySpec entitySpec, LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Map<String, ReferenceSpec> bidirectionalRefSpecs, String dataSourceBackendId) {
         super(entitySpec, inboundRefSpecs, bidirectionalRefSpecs,
                 dataSourceBackendId);
@@ -56,7 +57,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
         
 
         PrimParamIterator(Statement statement, ResultSet resultSet, 
-                EntitySpec entitySpec, SortedMap<String, ReferenceSpec> inboundRefSpecs, Map<String,
+                EntitySpec entitySpec, Map<String, ReferenceSpec> inboundRefSpecs, Map<String,
                 ReferenceSpec> bidirectionalRefSpecs)
                 throws SQLException {
             super(statement, resultSet, entitySpec, inboundRefSpecs,

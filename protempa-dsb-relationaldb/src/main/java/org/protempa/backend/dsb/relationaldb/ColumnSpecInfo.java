@@ -27,11 +27,11 @@ final class ColumnSpecInfo {
     private List<ColumnSpec> columnSpecs;
     private int startTimeIndex = -1;
     private int finishTimeIndex = -1;
-    private Map<String, Integer> propertyIndices = null;
+    private Map<String, Integer> propertyIndices;
     private int valueIndex = -1;
     private int codeIndex = -1;
     private int[] uniqueIdIndices;
-    private Map<String, Integer> referenceIndices = null;
+    private Map<String, Integer> referenceIndices;
     private boolean usingKeyIdIndex;
 
     ColumnSpecInfo() {

@@ -25,8 +25,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 
 /**
  * A SQL generator that is compatible with Connector/J 5.x and MySQL 4.1 and
@@ -90,7 +90,7 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
      */
     protected SelectStatement getSelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
-            SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            Map<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             StagingSpec[] stagedTables, boolean wrapKeyId) {

@@ -19,6 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import java.util.LinkedHashMap;
 import org.protempa.proposition.Proposition;
 
 import java.util.Map;
@@ -36,7 +37,7 @@ abstract class SQLGenResultProcessorFactory<P extends Proposition> {
 
     abstract StreamingMainResultProcessor<P> getStreamingInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
-            SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Map<String, ReferenceSpec> bidirectionalRefSpecs);
 
     abstract RefResultProcessor<P> getRefInstance(String dataSourceBackendId,

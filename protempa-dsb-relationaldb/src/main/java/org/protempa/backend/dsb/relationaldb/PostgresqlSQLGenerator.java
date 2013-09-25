@@ -21,8 +21,8 @@ package org.protempa.backend.dsb.relationaldb;
  */
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import org.protempa.backend.dsb.filter.Filter;
 
 /**
@@ -49,7 +49,7 @@ public class PostgresqlSQLGenerator
     @Override
     protected SelectStatement getSelectStatement(EntitySpec entitySpec, 
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs, 
-            SortedMap<String, ReferenceSpec> inboundRefSpecs, 
+            Map<String, ReferenceSpec> inboundRefSpecs, 
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds, 
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, 
             StagingSpec[] stagedTables, boolean wrapKeyId) {

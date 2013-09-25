@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 
 /**
  * Aggregates info for generating the SQL statement.
@@ -39,7 +38,7 @@ import java.util.SortedMap;
 final class ColumnSpecInfoFactory {
 
     ColumnSpecInfo newInstance(Set<String> propIds, EntitySpec entitySpec,
-            Collection<EntitySpec> entitySpecs, SortedMap<String, ReferenceSpec>
+            Collection<EntitySpec> entitySpecs, Map<String, ReferenceSpec>
             inboundRefSpecs, Collection<Filter> filters, ReferenceSpec referenceSpec,
             boolean streamingMode) {
         ColumnSpecInfo columnSpecInfo = new ColumnSpecInfo();

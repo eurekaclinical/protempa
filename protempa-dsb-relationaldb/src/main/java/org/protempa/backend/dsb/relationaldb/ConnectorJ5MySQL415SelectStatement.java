@@ -22,14 +22,14 @@ package org.protempa.backend.dsb.relationaldb;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 
 final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
 
     ConnectorJ5MySQL415SelectStatement(EntitySpec entitySpec,
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
-            SortedMap<String, ReferenceSpec> inboundRefSpecs,
+            Map<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             boolean streamingMode, boolean wrapKeyId) {

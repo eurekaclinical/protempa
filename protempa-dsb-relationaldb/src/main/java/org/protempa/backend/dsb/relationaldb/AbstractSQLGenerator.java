@@ -449,7 +449,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         for (Set<Filter> partition : partitions) {
             generateAndExecuteSelect(entitySpec, null, propIds, partition,
-                    applicableEntitySpecs, new TreeMap<String, ReferenceSpec>(), keyIds, order, resultProcessor,
+                    applicableEntitySpecs, new LinkedHashMap<String, ReferenceSpec>(), keyIds, order, resultProcessor,
                     executor, false);
         }
 
@@ -512,7 +512,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         List<Set<Filter>> partitions = constructPartitions(entitySpec,
                 applicableFilters);
 
-        SortedMap<String, ReferenceSpec> inboundRefSpecs =
+        LinkedHashMap<String, ReferenceSpec> inboundRefSpecs =
                 collectInboundRefSpecs
                 (applicableEntitySpecs, entitySpec);
         Map<String, ReferenceSpec> bidirRefSpecs = collectBidirectionalReferences
@@ -599,7 +599,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     for (Set<Filter> filterSet : refsFilterSets) {
                         generateAndExecuteSelect(entitySpec, referenceSpec,
                                 propIds, filterSet, allEntitySpecsCopyForRefs,
-                                new TreeMap<String, ReferenceSpec>(),
+                                new LinkedHashMap<String, ReferenceSpec>(),
                                 keyIds, order, refResultProcessor, executor,
                                 false);
                     }
@@ -672,7 +672,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                                 referenceSpec,
                                 propIds, filterSet,
                                 allEntitySpecsCopyForRefs,
-                                new TreeMap<String, ReferenceSpec>(),
+                                new LinkedHashMap<String, ReferenceSpec>(),
                                 keyIds, SQLOrderBy.ASCENDING,
                                 refResultProcessor, executor, true);
                         itrs.add(refResultProcessor.getResult());
@@ -1032,9 +1032,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
     }
 
-    private static SortedMap<String, ReferenceSpec> collectInboundRefSpecs
+    private static LinkedHashMap<String, ReferenceSpec> collectInboundRefSpecs
             (Collection<EntitySpec> entitySpecs, EntitySpec referredToSpec) {
-        SortedMap<String, ReferenceSpec> result = new TreeMap<String, ReferenceSpec>();
+        LinkedHashMap<String, ReferenceSpec> result = new LinkedHashMap<String, ReferenceSpec>();
 
         for (EntitySpec es : entitySpecs) {
             if (es.hasReferenceTo(referredToSpec)) {
@@ -1131,7 +1131,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private <P extends Proposition> void generateAndExecuteSelectStreaming(
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
             Set<String> propIds, Set<Filter> filtersCopy,
-            List<EntitySpec> entitySpecsCopy, SortedMap<String,
+            List<EntitySpec> entitySpecsCopy, LinkedHashMap<String,
             ReferenceSpec> inboundRefSpecs, Set<String> keyIds,
             SQLOrderBy order, StreamingResultProcessor<P> resultProcessor,
             StreamingSQLExecutor executor,
@@ -1164,7 +1164,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private <P extends Proposition> void generateAndExecuteSelect(
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
             Set<String> propIds, Set<Filter> filtersCopy,
-            List<EntitySpec> entitySpecsCopy, SortedMap<String,
+            List<EntitySpec> entitySpecsCopy, LinkedHashMap<String,
             ReferenceSpec> inboundRefSpecs,
             Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
@@ -1252,7 +1252,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     protected abstract SelectStatement getSelectStatement(
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
-            List<EntitySpec> entitySpecs, SortedMap<String,
+            List<EntitySpec> entitySpecs, Map<String,
             ReferenceSpec> inboundRefSpecs, Set<Filter> filters,
             Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables,

@@ -34,9 +34,8 @@ import org.protempa.proposition.value.Value;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,7 +45,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
     private InboundReferenceResultSetIterator refItr;
 
     EventStreamingResultProcessor(
-            EntitySpec entitySpec, SortedMap<String,
+            EntitySpec entitySpec, LinkedHashMap<String,
             ReferenceSpec> inboundRefSpecs, Map<String, ReferenceSpec>
             bidirectionalRefSpecs,
             String dataSourceBackendId) {
@@ -62,7 +61,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
         private final JDBCPositionFormat positionParser;
 
         EventIterator(Statement statement, ResultSet resultSet, 
-                EntitySpec entitySpec, SortedMap<String,
+                EntitySpec entitySpec, Map<String,
                 ReferenceSpec> inboundRefSpecs, Map<String,
                 ReferenceSpec> bidirectionalRefSpecs)
                 throws SQLException {
