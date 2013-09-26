@@ -35,6 +35,7 @@ public class SequentialTemporalPatternDefinition extends AbstractAbstractionDefi
     private boolean concatenable;
     private TemporalExtendedPropositionDefinition firstTemporalExtendedPropositionDefinition;
     private SubsequentTemporalExtendedPropositionDefinition[] subsequentTemporalExtendedPropositionDefinitions;
+    private boolean allowPartialMatches;
 
     public static class SubsequentTemporalExtendedPropositionDefinition implements Serializable {
         private static final long serialVersionUID = 1;
@@ -138,6 +139,25 @@ public class SequentialTemporalPatternDefinition extends AbstractAbstractionDefi
      */
     public void setSolid(boolean solid) {
         this.solid = solid;
+    }
+
+    /**
+     * Returns whether an interval will be generated if only the first, first
+     * and second, etc. propositions are present.
+     * @return <code>true</code> or <code>false</code>.
+     */
+    public boolean isAllowPartialMatches() {
+        return allowPartialMatches;
+    }
+
+    /**
+     * Sets whether to match if only the first, first and second, etc. 
+     * propositions are present.
+     * 
+     * @param allowPartialMatches <code>true</code> or <code>false</code>.
+     */
+    public void setAllowPartialMatches(boolean allowPartialMatches) {
+        this.allowPartialMatches = allowPartialMatches;
     }
     
     @Override

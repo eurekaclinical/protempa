@@ -57,12 +57,24 @@ public class PairAbstractionConverter implements AbstractionConverter {
                 backend, extendedParameterCache));
         result.setSourceId(
                 DefaultSourceId.getInstance(backend.getDisplayName()));
+        setRequireSecond(protegeProposition, result, cm);
         return result;
     }
     
     @Override
     public String getClsName() {
         return "PairAbstraction";
+    }
+    
+    private void setRequireSecond(
+            Instance protegeProposition, SequentialTemporalPatternDefinition pd,
+            ConnectionManager cm) 
+            throws KnowledgeSourceReadException {
+        Boolean requireSecond = 
+                (Boolean) cm.getOwnSlotValue(protegeProposition, 
+                cm.getSlot("requireSecond"));
+        assert requireSecond != null : "requireSecond cannot be null!";
+        pd.setAllowPartialMatches(!requireSecond);
     }
 
     /**

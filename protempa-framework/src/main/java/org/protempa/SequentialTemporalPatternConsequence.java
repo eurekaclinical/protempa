@@ -27,11 +27,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.arp.javautil.arrays.Arrays;
+import org.drools.FactException;
 
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
-import org.drools.spi.Tuple;
 import org.protempa.SequentialTemporalPatternDefinition.SubsequentTemporalExtendedPropositionDefinition;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Proposition;
@@ -47,7 +47,6 @@ class SequentialTemporalPatternConsequence implements Consequence {
 
     private static final long serialVersionUID = -833609244124008166L;
     private final SequentialTemporalPatternDefinition def;
-    private final int columns;
     private final TemporalExtendedPropositionDefinition[] epds;
     private final DerivationsBuilder derivationsBuilder;
     private int parameterMapCapacity;
@@ -64,27 +63,33 @@ class SequentialTemporalPatternConsequence implements Consequence {
             DerivationsBuilder derivationsBuilder) {
         assert def != null : "def cannot be null";
         this.def = def;
-        SubsequentTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions = def.getSubsequentTemporalExtendedPropositionDefinitions();
-        TemporalExtendedPropositionDefinition[] epds = new TemporalExtendedPropositionDefinition[relatedTemporalExtendedPropositionDefinitions.length + 1];
+        SubsequentTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions = 
+                def.getSubsequentTemporalExtendedPropositionDefinitions();
+        TemporalExtendedPropositionDefinition[] epds = 
+                new TemporalExtendedPropositionDefinition[relatedTemporalExtendedPropositionDefinitions.length + 1];
         assert epds != null : "epds cannot be null";
-        int col = epds.length;
-        assert col > 0 : "columns must be > 0, was " + col;
+        assert epds.length > 0 : "epds must be > 0";
         epds[0] = def.getFirstTemporalExtendedPropositionDefinition();
         for (int i = 1; i < epds.length; i++) {
-            epds[i] = relatedTemporalExtendedPropositionDefinitions[i - 1].getRelatedTemporalExtendedPropositionDefinition();
+            epds[i] = 
+                    relatedTemporalExtendedPropositionDefinitions[i - 1].getRelatedTemporalExtendedPropositionDefinition();
         }
         this.epds = epds;
-        this.columns = col;
         this.derivationsBuilder = derivationsBuilder;
         this.parameterMapCapacity = this.epds.length * 4 / 3 + 1;
-        this.epdPairs = new ArrayList<List<TemporalExtendedPropositionDefinition>>();
-        this.epdToRelation = new HashMap<List<TemporalExtendedPropositionDefinition>, Relation>(
+        this.epdPairs = 
+                new ArrayList<List<TemporalExtendedPropositionDefinition>>();
+        this.epdToRelation = 
+                new HashMap<List<TemporalExtendedPropositionDefinition>, Relation>(
                 this.parameterMapCapacity);
-        TemporalExtendedPropositionDefinition lhs = def.getFirstTemporalExtendedPropositionDefinition();
-        assert lhs != null : "mainTemporalExtendedPropositionDefinition cannot be null";
+        TemporalExtendedPropositionDefinition lhs = 
+                def.getFirstTemporalExtendedPropositionDefinition();
+        assert lhs != null : 
+                "mainTemporalExtendedPropositionDefinition cannot be null";
         for (SubsequentTemporalExtendedPropositionDefinition rhsr :
                 def.getSubsequentTemporalExtendedPropositionDefinitions()) {
-            TemporalExtendedPropositionDefinition rhs = rhsr.getRelatedTemporalExtendedPropositionDefinition();
+            TemporalExtendedPropositionDefinition rhs = 
+                    rhsr.getRelatedTemporalExtendedPropositionDefinition();
             List<TemporalExtendedPropositionDefinition> asList =
                     Arrays.asList(
                     new TemporalExtendedPropositionDefinition[]{
@@ -100,22 +105,25 @@ class SequentialTemporalPatternConsequence implements Consequence {
     @Override
     public void evaluate(KnowledgeHelper knowledgeHelper, WorkingMemory arg1)
             throws Exception {
-        Logger logger = ProtempaUtil.logger();
         @SuppressWarnings("unchecked")
-        List<TemporalProposition> tps = (List<TemporalProposition>) knowledgeHelper
+        List<TemporalProposition> tps = 
+                (List<TemporalProposition>) knowledgeHelper
                 .get(knowledgeHelper.getDeclaration("result"));
         Collections.sort(tps, ProtempaUtil.TEMP_PROP_COMP);
 
+        int i = 0;
+        Map<TemporalExtendedPropositionDefinition, TemporalProposition> propositionMap =
+                    new HashMap<TemporalExtendedPropositionDefinition, TemporalProposition>(this.parameterMapCapacity);
+        
         TOP_LEVEL:
-        for (int i = 0, l = this.epds.length, n = tps.size() - l + 1; i < n; i++) {
+        for (int l = this.epds.length, n = tps.size() - l + 1; i < n; i++) {
             List<TemporalProposition> subList = tps.subList(i, i + l);
 
             /*
              * For constructing a map of extended proposition definition to actual
              * temporal proposition.
              */
-            Map<TemporalExtendedPropositionDefinition, TemporalProposition> propositionMap =
-                    new HashMap<TemporalExtendedPropositionDefinition, TemporalProposition>(this.parameterMapCapacity);
+            
             /*
              * Populate the map.
              */
@@ -132,19 +140,48 @@ class SequentialTemporalPatternConsequence implements Consequence {
              */
             if (HighLevelAbstractionFinder.find(this.epdToRelation,
                     this.epdPairs, propositionMap)) {
-                Segment<TemporalProposition> segment =
-                        new Segment<TemporalProposition>(
-                        new Sequence<TemporalProposition>(def.getPropositionId(), subList));
-                TemporalPatternOffset temporalOffset = def.getTemporalOffset();
-                AbstractParameter result =
-                        AbstractParameterFactory.getFromAbstraction(def.getPropositionId(),
-                        segment, subList, null, temporalOffset, epds, null);
-                knowledgeHelper.getWorkingMemory().insert(result);
-                for (Proposition proposition : segment) {
-                    this.derivationsBuilder.propositionAsserted(proposition, result);
-                }
-                logger.log(Level.FINER, "Asserted derived proposition {0}", result);
+                assertProposition(subList, knowledgeHelper);
             }
         }
+        
+        if (this.def.isAllowPartialMatches()) {
+            List<TemporalProposition> subList = tps.subList(i, tps.size());
+            propositionMap.clear();
+            for (int j = 0, n = subList.size(); j < n; j++) {
+                propositionMap.put(epds[j], subList.get(j));
+            }
+            for (int j = 0, n = this.epdPairs.size(); j < n; j++) {
+                List<TemporalExtendedPropositionDefinition> pair = 
+                        this.epdPairs.get(j);
+                TemporalProposition a1 = propositionMap.get(pair.get(0));
+                TemporalProposition a2 = propositionMap.get(pair.get(1));
+                if (a1 != null && a2 != null) {
+                    if (!this.epdToRelation.get(pair).hasRelation(
+                            a1.getInterval(), a2.getInterval())) {
+                        return;
+                    }
+                }
+            }
+            assertProposition(subList, knowledgeHelper);
+        }
+    }
+
+    private void assertProposition(List<TemporalProposition> subList, 
+            KnowledgeHelper knowledgeHelper) throws FactException {
+        Logger logger = ProtempaUtil.logger();
+        Segment<TemporalProposition> segment =
+                        new Segment<TemporalProposition>(
+                        new Sequence<TemporalProposition>(
+                        def.getPropositionId(), subList));
+        TemporalPatternOffset temporalOffset = def.getTemporalOffset();
+        AbstractParameter result =
+                AbstractParameterFactory.getFromAbstraction(
+                def.getPropositionId(),
+                segment, subList, null, temporalOffset, epds, null);
+        knowledgeHelper.getWorkingMemory().insert(result);
+        for (Proposition proposition : segment) {
+            this.derivationsBuilder.propositionAsserted(proposition, result);
+        }
+        logger.log(Level.FINER, "Asserted derived proposition {0}", result);
     }
 }

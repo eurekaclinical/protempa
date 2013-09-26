@@ -61,7 +61,8 @@ public final class AbstractParameterFactory {
      */
     public static AbstractParameter getFromAbstraction(String propId,
             Segment<? extends TemporalProposition> segment,
-            List<? extends TemporalProposition> tps, Value value, TemporalPatternOffset temporalOffset,
+            List<? extends TemporalProposition> tps, Value value, 
+            TemporalPatternOffset temporalOffset,
             TemporalExtendedPropositionDefinition[] epds, String contextId) {
         AbstractParameter result = new AbstractParameter(propId);
         result.setDataSourceType(DataSourceType.DERIVED);
