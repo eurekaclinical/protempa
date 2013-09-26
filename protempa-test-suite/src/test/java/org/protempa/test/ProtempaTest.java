@@ -51,6 +51,7 @@ import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Iterators;
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.io.UniqueDirectoryCreator;
+import org.arp.javautil.io.WithBufferedReader;
 import org.arp.javautil.io.WithBufferedReaderByLine;
 import org.drools.WorkingMemory;
 import org.junit.After;
@@ -311,8 +312,8 @@ public class ProtempaTest {
         FileWriter fw = new FileWriter(outputFile);
         QueryResultsHandler handler = new SingleColumnQueryResultsHandler(fw);
         protempa.execute(query(), handler);
-        assertTrue("output doesn't match",
-                outputMatches(outputFile, TRUTH_OUTPUT));
+        boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);
+        assertTrue("output doesn't match", outputMatches);
     
     }
     
@@ -814,8 +815,8 @@ public class ProtempaTest {
             System.err
                     .println("output written to " + 
                     outputFile.getAbsolutePath());
-            assertTrue("output doesn't match",
-                    outputMatches(outputFile, TRUTH_OUTPUT));
+            boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);
+            assertTrue("output doesn't match", outputMatches);
         } catch (FinderException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
@@ -1080,7 +1081,7 @@ public class ProtempaTest {
         Map<Proposition, List<Proposition>> no30DayDerivations = getDerivedPropositionsForKey(
                 "No30DayReadmission", afh.getBackwardDerivations("0"));
         assertEquals(
-                "Found wrong number of 'No30DayReadmissions' for key ID 0", 3,
+                "Found wrong number of 'No30DayReadmissions' for key ID 0", 4,
                 no30DayDerivations.size());
         logger.log(Level.INFO, "Completed No30DayReadmissions test");
     }

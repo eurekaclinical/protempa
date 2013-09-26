@@ -20,12 +20,13 @@ VitalSign
 Encounter
 No30DayReadmissionBefore
 Encounter
-No30DayReadmissionBefore
-Encounter
 30DayReadmission
 No30DayReadmissionBefore
 Encounter
 30DayReadmission
+No30DayReadmissionBefore
+Encounter
+No30DayReadmissionBefore
 No30DayReadmissionBefore
 Encounter
 No30DayReadmissionBefore
@@ -91,6 +92,8 @@ No30DayReadmission
 No30DayReadmissionBefore
 No30DayReadmission
 No30DayReadmissionBefore
+No30DayReadmission
+No30DayReadmissionBefore
 Patient
 PatientAll
 SystolicBloodPressure
@@ -128,6 +131,7 @@ Encounter
 No30DayReadmissionBefore
 Encounter
 No30DayReadmissionBefore
+No30DayReadmissionBefore
 Encounter
 No30DayReadmissionBefore
 No30DayReadmissionBefore
@@ -162,6 +166,8 @@ MyVitalSign
 MyVitalSign
 HeartRate
 MyTemporalPattern
+No30DayReadmission
+No30DayReadmissionBefore
 No30DayReadmission
 No30DayReadmissionBefore
 No30DayReadmission
@@ -217,8 +223,9 @@ MyDiastolicClassification
 MyDiastolicClassification3
 VitalSign
 Encounter
-30DayReadmission
+No30DayReadmissionBefore
 Encounter
+30DayReadmission
 No30DayReadmissionBefore
 Encounter
 30DayReadmission
@@ -271,6 +278,8 @@ No30DayReadmission
 No30DayReadmissionBefore
 No30DayReadmission
 No30DayReadmissionBefore
+No30DayReadmission
+No30DayReadmissionBefore
 Patient
 PatientAll
 SystolicBloodPressure
@@ -313,8 +322,11 @@ LAB:AST
 LAB:AST
 LAB_HELLP_PLATELETS
 Encounter
+No30DayReadmissionBefore
 HELLP_FIRST_RECOVERING_PLATELETS
 HELLP_RECOVERING_PLATELETS
+No30DayReadmission
+No30DayReadmissionBefore
 Patient
 PatientAll
 VitalSign
@@ -335,6 +347,7 @@ Encounter
 30DayReadmission
 Encounter
 30DayReadmission
+No30DayReadmissionBefore
 MyBloodPressureClassification3Any
 MyDiastolicClassification3
 MySystolicClassification3
@@ -399,6 +412,8 @@ SystolicBloodPressure
 MyTwoConsecutiveHighBloodPressure
 MyBloodPressureClassificationConsecutiveAny
 MyBloodPressureClassificationConsecutiveAny
+No30DayReadmission
+No30DayReadmissionBefore
 Patient
 PatientAll
 SystolicBloodPressure
@@ -430,6 +445,7 @@ VitalSign
 Encounter
 No30DayReadmissionBefore
 Encounter
+No30DayReadmissionBefore
 No30DayReadmissionBefore
 MyBloodPressureClassification3Any
 MyDiastolicClassification3
@@ -543,6 +559,8 @@ MyBloodPressureClassificationConsecutiveAny
 MyBloodPressureClassificationConsecutiveAny
 No30DayReadmission
 No30DayReadmissionBefore
+No30DayReadmission
+No30DayReadmissionBefore
 Patient
 PatientAll
 SystolicBloodPressure
@@ -577,6 +595,7 @@ Encounter
 No30DayReadmissionBefore
 Encounter
 No30DayReadmissionBefore
+No30DayReadmissionBefore
 MyBloodPressureClassification3Any
 MyDiastolicClassification3
 MySystolicClassification3
@@ -618,6 +637,8 @@ SystolicBloodPressure
 MySystolicClassification3
 MyBloodPressureClassification3Any
 SystolicBloodPressure
+No30DayReadmission
+No30DayReadmissionBefore
 No30DayReadmission
 No30DayReadmissionBefore
 Patient
@@ -702,8 +723,6 @@ Encounter
 30DayReadmission
 Encounter
 30DayReadmission
-Encounter
-30DayReadmission
 30DayReadmission
 Encounter
 30DayReadmission
@@ -732,6 +751,9 @@ Encounter
 Encounter
 30DayReadmission
 30DayReadmission
+Encounter
+30DayReadmission
+No30DayReadmissionBefore
 MyBloodPressureClassification3Any
 MyDiastolicClassification3
 MyBloodPressureClassification3Any
@@ -1043,6 +1065,8 @@ SystolicBloodPressure
 MyTwoConsecutiveHighBloodPressure
 MyBloodPressureClassificationConsecutiveAny
 MyBloodPressureClassificationConsecutiveAny
+No30DayReadmission
+No30DayReadmissionBefore
 Patient
 PatientAll
 SystolicBloodPressure
@@ -1125,6 +1149,7 @@ MyDiastolicClassification
 MyDiastolicClassification3
 VitalSign
 Encounter
+No30DayReadmissionBefore
 MyAndLikePattern
 ICD9:35.83
 ICD9:V-codes
@@ -1144,6 +1169,8 @@ MyContext1
 MyDiastolicClassification3
 DiastolicBloodPressure
 MyBloodPressureClassification3Any
+No30DayReadmission
+No30DayReadmissionBefore
 Patient
 PatientAll
 VitalSign
@@ -1160,6 +1187,7 @@ VitalSign
 Encounter
 No30DayReadmissionBefore
 Encounter
+No30DayReadmissionBefore
 No30DayReadmissionBefore
 MyBloodPressureClassification3Any
 MyDiastolicClassification3
@@ -1200,6 +1228,8 @@ MyVitalSign
 HeartRate
 No30DayReadmission
 No30DayReadmissionBefore
+No30DayReadmission
+No30DayReadmissionBefore
 Patient
 PatientAll
 SystolicBloodPressure
@@ -1219,6 +1249,7 @@ Encounter
 No30DayReadmissionBefore
 Encounter
 No30DayReadmissionBefore
+No30DayReadmissionBefore
 Encounter
 No30DayReadmissionBefore
 No30DayReadmissionBefore
@@ -1243,6 +1274,8 @@ MyVitalSign
 HeartRate
 MyVitalSign
 HeartRate
+No30DayReadmission
+No30DayReadmissionBefore
 No30DayReadmission
 No30DayReadmissionBefore
 No30DayReadmission
@@ -1306,6 +1339,9 @@ Encounter
 No30DayReadmissionBefore
 Encounter
 No30DayReadmissionBefore
+No30DayReadmissionBefore
+No30DayReadmission
+No30DayReadmissionBefore
 No30DayReadmission
 No30DayReadmissionBefore
 Patient
@@ -1329,6 +1365,7 @@ Encounter
 No30DayReadmissionBefore
 Encounter
 No30DayReadmissionBefore
+No30DayReadmissionBefore
 Encounter
 No30DayReadmissionBefore
 No30DayReadmissionBefore
@@ -1364,6 +1401,8 @@ SystolicBloodPressure
 MySystolicClassification3
 MyBloodPressureClassification3Any
 SystolicBloodPressure
+No30DayReadmission
+No30DayReadmissionBefore
 No30DayReadmission
 No30DayReadmissionBefore
 No30DayReadmission
@@ -1405,12 +1444,13 @@ MyDiastolicClassification
 MyDiastolicClassification3
 VitalSign
 Encounter
-30DayReadmission
-Encounter
 No30DayReadmissionBefore
 Encounter
 30DayReadmission
 30DayReadmission
+Encounter
+30DayReadmission
+No30DayReadmissionBefore
 Encounter
 30DayReadmission
 No30DayReadmissionBefore
@@ -1449,6 +1489,8 @@ MyVitalSign
 HeartRate
 MyVitalSign
 HeartRate
+No30DayReadmission
+No30DayReadmissionBefore
 No30DayReadmission
 No30DayReadmissionBefore
 No30DayReadmission
@@ -1511,6 +1553,9 @@ VitalSign
 Temperature
 8
 Encounter
+No30DayReadmissionBefore
+No30DayReadmission
+No30DayReadmissionBefore
 Patient
 PatientAll
 VitalSign
@@ -1521,6 +1566,7 @@ MyDiastolicClassification
 MyDiastolicClassification3
 VitalSign
 Encounter
+No30DayReadmissionBefore
 MyBloodPressureClassification3Any
 MyDiastolicClassification3
 MyBloodPressureClassificationAll
@@ -1537,6 +1583,8 @@ MyContext1
 MyDiastolicClassification3
 DiastolicBloodPressure
 MyBloodPressureClassification3Any
+No30DayReadmission
+No30DayReadmissionBefore
 Patient
 PatientAll
 VitalSign
