@@ -169,7 +169,7 @@ final class DataStreamerIterator<E extends Proposition> {
         }
     }
 
-    private DataStreamingEvent min(DataStreamingEvent elt1, 
+    private static DataStreamingEvent min(DataStreamingEvent elt1, 
             DataStreamingEvent elt2) {
         if (elt1 == null) {
             return elt2;
