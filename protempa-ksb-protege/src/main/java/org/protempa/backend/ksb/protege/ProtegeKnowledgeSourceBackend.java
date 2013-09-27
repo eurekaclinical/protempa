@@ -137,7 +137,11 @@ public abstract class ProtegeKnowledgeSourceBackend
             throws KnowledgeSourceReadException {
         Instance instance = this.cm.getInstance(name);
         if (instance != null) {
-            return this.instanceConverterFactory.getInstance(instance).convert(instance, this);
+            PropositionConverter converter = 
+                    this.instanceConverterFactory.getInstance(instance);
+            assert converter != null : 
+                    "no converter for proposition definintion " + name;
+            return converter.convert(instance, this);
         } else {
             return null;
         }
