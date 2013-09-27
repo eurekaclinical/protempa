@@ -20,6 +20,7 @@
 package org.protempa;
 
 import java.util.List;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  *
@@ -47,5 +48,12 @@ public final class DataStreamingEvent<E> {
     public List<E> getData() {
         return data;
     }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+    
+    
     
 }
