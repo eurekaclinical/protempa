@@ -19,6 +19,8 @@
  */
 package org.protempa.query.handler.table;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +33,7 @@ import java.util.logging.Level;
 import org.apache.commons.lang.ArrayUtils;
 
 import org.apache.commons.lang.StringUtils;
+import org.arp.javautil.string.StringUtil;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropertyDefinition;
@@ -401,12 +404,13 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     }
 
     @Override
-    public String[] columnValues(String key, Proposition proposition,
+    public void columnValues(String key, Proposition proposition,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource)
-            throws KnowledgeSourceReadException {
+            KnowledgeSource knowledgeSource, Map<String, String> replace,
+            char delimiter, Writer writer) throws KnowledgeSourceReadException, 
+            IOException {
         Collection<Proposition> propositions = this.traverseLinks(this.links,
                 proposition, forwardDerivations, backwardDerivations,
                 references, knowledgeSource);
@@ -429,8 +433,8 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             }
         }
         propositionVisitor.clear();
-
-        return result;
+        
+        StringUtil.escapeAndWriteDelimitedColumns(result, replace, delimiter, writer);
     }
 
     @Override

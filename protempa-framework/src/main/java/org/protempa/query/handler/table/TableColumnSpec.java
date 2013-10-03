@@ -19,6 +19,8 @@
  */
 package org.protempa.query.handler.table;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import org.protempa.KnowledgeSource;
@@ -59,12 +61,13 @@ public interface TableColumnSpec {
      * @throws KnowledgeSourceReadException if an attempt at reading from
      * the knowledge source failed.
      */
-    String[] columnValues(String key, Proposition proposition, 
+    void columnValues(String key, Proposition proposition, 
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource)
-            throws KnowledgeSourceReadException;
+            KnowledgeSource knowledgeSource, Map<String, String> replace,
+            char delimiter, Writer writer)
+            throws KnowledgeSourceReadException, IOException;
     
     /**
      * Validates the fields of this column specification against the

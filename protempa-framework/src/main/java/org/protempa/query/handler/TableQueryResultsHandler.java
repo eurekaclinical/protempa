@@ -171,13 +171,10 @@ public final class TableQueryResultsHandler
                 }
                 for (int i = 0; i < n; i++) {
                     TableColumnSpec columnSpec = this.columnSpecs[i];
-                    String[] colValues = columnSpec.columnValues(keyId, prop,
+                    columnSpec.columnValues(keyId, prop,
                             forwardDerivations, backwardDerivations,
-                            references, this.knowledgeSource);
-
-                    StringUtil.escapeAndWriteDelimitedColumns(colValues,
+                            references, this.knowledgeSource,
                             this.replace, this.columnDelimiter, this.out);
-
                     if (i < n - 1) {
                         this.out.write(this.columnDelimiter);
                     } else {

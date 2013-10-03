@@ -19,6 +19,8 @@
  */
 package org.protempa.query.handler.table;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -28,6 +30,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import java.util.logging.Logger;
+import org.arp.javautil.string.StringUtil;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
@@ -87,11 +90,13 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
     }
 
     @Override
-    public String[] columnValues(String key, Proposition proposition,
+    public void columnValues(String key, Proposition proposition,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+            KnowledgeSource knowledgeSource, Map<String, String> replace,
+            char delimiter, Writer writer) throws KnowledgeSourceReadException, 
+            IOException {
         Logger logger = Util.logger();
         Collection<Proposition> props = traverseLinks(this.links, proposition,
                 forwardDerivations, backwardDerivations, references, 
@@ -107,9 +112,9 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
                             "Adding to count: {0}", pId);
                 }
             }
-            return new String[] { "" + result.size() };
+            StringUtil.escapeAndWriteDelimitedColumn("" + result.size(), delimiter, replace, writer);
         } else {
-            return new String[] { "" + props.size() };
+            StringUtil.escapeAndWriteDelimitedColumn("" + props.size(), delimiter, replace, writer);
         }
     }
     

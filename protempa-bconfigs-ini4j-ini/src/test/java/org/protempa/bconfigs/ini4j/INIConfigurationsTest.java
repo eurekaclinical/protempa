@@ -19,7 +19,6 @@
  */
 package org.protempa.bconfigs.ini4j;
 
-import org.protempa.bconfigs.ini4j.INIConfigurations;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -27,7 +26,6 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
-import org.arp.javautil.io.IOUtil;
 import org.arp.javautil.io.UniqueDirectoryCreator;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -122,7 +120,7 @@ public class INIConfigurationsTest {
         writeTestFileAndClose(new PrintWriter(sw));
         File f = new File(CONFIG_DIR, "test");
         assertEquals("Contents of " + f.getPath() + " not as expected",
-                sw.toString().trim(), IOUtil.readFileAsString(f).trim());
+                sw.toString().trim(), FileUtils.readFileToString(f).trim());
     }
 
     /**

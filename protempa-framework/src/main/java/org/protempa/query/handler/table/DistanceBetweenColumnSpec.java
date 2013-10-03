@@ -19,6 +19,8 @@
  */
 package org.protempa.query.handler.table;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.arp.javautil.string.StringUtil;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
@@ -83,12 +86,13 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
     }
 
     @Override
-    public String[] columnValues(String key, Proposition proposition, 
-            Map<Proposition, List<Proposition>> forwardDerivations, 
-            Map<Proposition, List<Proposition>> backwardDerivations, 
-            Map<UniqueId, Proposition> references, 
-            KnowledgeSource knowledgeSource) 
-            throws KnowledgeSourceReadException {
+    public void columnValues(String key, Proposition proposition,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<UniqueId, Proposition> references,
+            KnowledgeSource knowledgeSource, Map<String, String> replace,
+            char delimiter, Writer writer) throws KnowledgeSourceReadException, 
+            IOException {
         Logger logger = Util.logger();
         List<Proposition> propositions = traverseLinks(this.links,
                 proposition, forwardDerivations, backwardDerivations, 
@@ -101,7 +105,8 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
                 size);
         }
         if (size < 2) {
-            return new String[]{null};
+            StringUtil.escapeAndWriteDelimitedColumn(null, delimiter, replace, writer);
+            return;
         }
         
         Iterator<Proposition> itr = propositions.iterator();
@@ -128,7 +133,8 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
         String distance = PropositionUtil
                             .distanceBetweenFormattedShort(first, second, 
                                 this.units);
-        return new String[] {distance};
+        StringUtil.escapeAndWriteDelimitedColumn(distance, delimiter, replace, 
+                writer);
     }
     
     @Override

@@ -19,12 +19,15 @@
  */
 package org.protempa.query.handler.table;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.arp.javautil.string.StringUtil;
 
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
@@ -75,15 +78,18 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
     }
 
     @Override
-    public String[] columnValues(String key, Proposition proposition,
+    public void columnValues(String key, Proposition proposition,
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+            KnowledgeSource knowledgeSource, Map<String, String> replace,
+            char delimiter, Writer writer) throws KnowledgeSourceReadException, 
+            IOException {
         Collection<Proposition> props = traverseLinks(this.links, proposition,
                 forwardDerivations, backwardDerivations, references,
                 knowledgeSource);
-        return new String[]{props.size() >= this.n ? this.trueOutput : this.falseOutput};
+        String str = props.size() >= this.n ? this.trueOutput : this.falseOutput;
+        StringUtil.escapeAndWriteDelimitedColumn(str, delimiter, replace, writer);
     }
 
     @Override
