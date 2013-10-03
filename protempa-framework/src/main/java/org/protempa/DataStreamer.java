@@ -61,8 +61,9 @@ final class DataStreamer<E> {
         }
         boolean stopOnNext = false;
         while (this.itr.hasNext() && !stopOnNext) {
-            if (processor.getKeyId() != null
-                    && !processor.getKeyId().equals(this.itr.getNextKeyId())) {
+            String keyId = processor.getKeyId();
+            String nextKeyId = this.itr.getNextKeyId();
+            if (keyId != null && !keyId.equals(nextKeyId)) {
                 stopOnNext = true;
             }
             processor.execute(this.itr.next());

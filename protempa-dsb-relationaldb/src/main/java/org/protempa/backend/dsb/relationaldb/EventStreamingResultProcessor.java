@@ -43,6 +43,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
 
     private EventIterator itr;
     private InboundReferenceResultSetIterator refItr;
+    
 
     EventStreamingResultProcessor(
             EntitySpec entitySpec, LinkedHashMap<String,
@@ -59,7 +60,8 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
         private final DataSourceBackendDataSourceType dsType;
         private final IntervalFactory intervalFactory;
         private final JDBCPositionFormat positionParser;
-
+        private EntitySpec entitySpec;
+        
         EventIterator(Statement statement, ResultSet resultSet, 
                 EntitySpec entitySpec, Map<String,
                 ReferenceSpec> inboundRefSpecs, Map<String,
@@ -71,6 +73,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
             this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
             this.intervalFactory = new IntervalFactory();
             this.positionParser = entitySpec.getPositionParser();
+            this.entitySpec = entitySpec;
         }
 
         @Override
@@ -94,6 +97,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
                     logger.log(Level.WARNING,
                             "Unique ids contain null ({0}). Skipping record.",
                             StringUtils.join(uniqueIds, ", "));
+                    refItr.addUniqueIds(kId, null);
                     return;
                 }
             }
@@ -109,6 +113,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
                     String code = resultSet.getString(i++);
                     propId = sqlCodeToPropositionId(codeSpec, code);
                     if (propId == null) {
+                        refItr.addUniqueIds(kId, null);
                         return;
                     }
                 }

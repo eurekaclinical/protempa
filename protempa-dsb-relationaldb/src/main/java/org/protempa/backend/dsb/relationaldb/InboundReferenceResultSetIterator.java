@@ -158,12 +158,16 @@ final class InboundReferenceResultSetIterator implements
 
     void addUniqueIds(String keyId, UniqueIdPair[] uniqueIds) {
         handleKeyId(keyId);
-        for (UniqueIdPair uniqueId : uniqueIds) {
-            DestructuredUniqueIdPair lhs = new DestructuredUniqueIdPair(uniqueId.getReferenceName(), uniqueId.getProposition());
-            if (!this.referenceUniqueIds.containsKey(lhs)) {
-                this.referenceUniqueIds.put(lhs, new HashSet<UniqueId>());
+        if (uniqueIds != null) {
+            for (UniqueIdPair uniqueId : uniqueIds) {
+                if (uniqueId != null) {
+                    DestructuredUniqueIdPair lhs = new DestructuredUniqueIdPair(uniqueId.getReferenceName(), uniqueId.getProposition());
+                    if (!this.referenceUniqueIds.containsKey(lhs)) {
+                        this.referenceUniqueIds.put(lhs, new HashSet<UniqueId>());
+                    }
+                    this.referenceUniqueIds.get(lhs).add(uniqueId.getReference());
+                }
             }
-            this.referenceUniqueIds.get(lhs).add(uniqueId.getReference());
         }
     }
 

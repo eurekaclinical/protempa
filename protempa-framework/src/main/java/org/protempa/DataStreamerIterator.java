@@ -65,7 +65,7 @@ final class DataStreamerIterator<E extends Proposition> {
          * Stores the most recent element retrieved from each iterator.
          */
         for (int j = 0; j < itrsSize; j++) {
-            advance(this.itrs, j, this.currentElt);
+            advance(j);
         }
         /*
          * If the iterators have no elements, cut to the chase and arrange for
@@ -133,7 +133,7 @@ final class DataStreamerIterator<E extends Proposition> {
                                 ? this.currentMin.getKeyId() : null)) {
                             this.result = elt;
                             this.nextKeyId = elt.getKeyId();
-                            advance(this.itrs, i, this.currentElt);
+                            advance(i);
                             i++;
                             break;
                         }
@@ -158,14 +158,14 @@ final class DataStreamerIterator<E extends Proposition> {
         return r;
     }
 
-    private void advance(List<DataStreamingEventIterator<E>> itrs, int j, 
-            List<DataStreamingEvent<E>> currentElt) 
+    private void advance(int j) 
             throws DataSourceReadException {
-        DataStreamingEventIterator<E> itr2 = itrs.get(j);
-        if (itr2.hasNext()) {
-            currentElt.set(j, itr2.next());
+        DataStreamingEventIterator<E> itr = this.itrs.get(j);
+        if (itr.hasNext()) {
+            DataStreamingEvent<E> next = itr.next();
+            this.currentElt.set(j, next);
         } else {
-            currentElt.set(j, null);
+            this.currentElt.set(j, null);
         }
     }
 

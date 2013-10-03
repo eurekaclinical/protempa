@@ -89,6 +89,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                     logger.log(Level.WARNING,
                             "Unique ids contain null ({0}). Skipping record.",
                             StringUtils.join(uniqueIds, ", "));
+                    refItr.addUniqueIds(kId, null);
                     return;
                 }
             }
@@ -104,6 +105,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                     String code = resultSet.getString(i++);
                     propId = sqlCodeToPropositionId(codeSpec, code);
                     if (propId == null) {
+                        refItr.addUniqueIds(kId, null);
                         return;
                     }
                 }
