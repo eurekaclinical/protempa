@@ -38,10 +38,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Iterates over the references. This does not entirely adhere to the 
+ * Iterates over the references. This does not entirely adhere to the
  * {@link java.util.Iterator} contract, because it relies on another class to
  * populate it while iteration is occurring.
- * 
+ *
  * @author Michel Mansour
  */
 final class InboundReferenceResultSetIterator implements
@@ -102,7 +102,7 @@ final class InboundReferenceResultSetIterator implements
         }
 
         if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.log(Level.FINEST, 
+            LOGGER.log(Level.FINEST,
                     "Iterating over references for {0}: Current: {1}, Last Delivered: {2}",
                     new Object[]{this.entityName, result.getKeyId(),
                 this.lastDelivered});
@@ -161,26 +161,37 @@ final class InboundReferenceResultSetIterator implements
         if (uniqueIds != null) {
             for (UniqueIdPair uniqueId : uniqueIds) {
                 if (uniqueId != null) {
-                    DestructuredUniqueIdPair lhs = new DestructuredUniqueIdPair(uniqueId.getReferenceName(), uniqueId.getProposition());
+                    DestructuredUniqueIdPair lhs = 
+                            new DestructuredUniqueIdPair(
+                            uniqueId.getReferenceName(), 
+                            uniqueId.getProposition());
                     if (!this.referenceUniqueIds.containsKey(lhs)) {
-                        this.referenceUniqueIds.put(lhs, new HashSet<UniqueId>());
+                        this.referenceUniqueIds.put(lhs, 
+                                new HashSet<UniqueId>());
                     }
-                    this.referenceUniqueIds.get(lhs).add(uniqueId.getReference());
+                    this.referenceUniqueIds.get(lhs).add(
+                            uniqueId.getReference());
                 }
             }
         }
     }
 
     private void createDataStreamingEvent() {
-        List<UniqueIdPair> uniqueIds = new ArrayList<UniqueIdPair>();
-        for (Map.Entry<DestructuredUniqueIdPair, Set<UniqueId>> e : this.referenceUniqueIds.entrySet()) {
-            for (UniqueId refId : e.getValue()) {
-                uniqueIds.add(new UniqueIdPair(e.getKey().referenceName,
-                        e.getKey().proposition, refId));
+        if (this.keyId != null) {
+            List<UniqueIdPair> uniqueIds = new ArrayList<UniqueIdPair>();
+            for (Map.Entry<DestructuredUniqueIdPair, Set<UniqueId>> e : 
+                    this.referenceUniqueIds.entrySet()) {
+                for (UniqueId refId : e.getValue()) {
+                    uniqueIds.add(new UniqueIdPair(e.getKey().referenceName,
+                            e.getKey().proposition, refId));
+                }
             }
+            this.dataStreamingEventQueue.offer(
+                    new DataStreamingEvent<UniqueIdPair>(
+                    this.keyId, uniqueIds));
         }
-        this.dataStreamingEventQueue.offer(new DataStreamingEvent<UniqueIdPair>(this.keyId, uniqueIds));
-        this.referenceUniqueIds = new HashMap<DestructuredUniqueIdPair, Set<UniqueId>>();
+        this.referenceUniqueIds = 
+                new HashMap<DestructuredUniqueIdPair, Set<UniqueId>>();
     }
 
     @Override
