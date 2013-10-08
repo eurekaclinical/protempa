@@ -514,9 +514,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         LinkedHashMap<String, ReferenceSpec> inboundRefSpecs =
                 collectInboundRefSpecs
-                (applicableEntitySpecs, entitySpec);
+                (applicableEntitySpecs, entitySpec, propIds);
         Map<String, ReferenceSpec> bidirRefSpecs = collectBidirectionalReferences
-                (applicableEntitySpecs, entitySpec);
+                (applicableEntitySpecs, entitySpec, propIds);
 
         String dataSourceBackendId = this.backend.getDataSourceBackendId();
         StreamingMainResultProcessor<Proposition> resultProcessor =
@@ -1033,25 +1033,27 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     private static LinkedHashMap<String, ReferenceSpec> collectInboundRefSpecs
-            (Collection<EntitySpec> entitySpecs, EntitySpec referredToSpec) {
+            (Collection<EntitySpec> entitySpecs, EntitySpec rhsEntitySpec,
+            Set<String> propIds) {
         LinkedHashMap<String, ReferenceSpec> result = new LinkedHashMap<String, ReferenceSpec>();
 
-        for (EntitySpec es : entitySpecs) {
-            if (es.hasReferenceTo(referredToSpec)) {
+        for (EntitySpec lhsReferenceSpec : entitySpecs) {
+            if (lhsReferenceSpec.hasReferenceTo(rhsEntitySpec) && 
+                    Collections.containsAny(propIds, lhsReferenceSpec.getPropositionIds())) {
                 boolean isMany = false;
-                if (referredToSpec.hasReferenceTo(es)) {
-                    for (ReferenceSpec rs : referredToSpec.getReferenceSpecs()) {
-                        if (rs.getEntityName().equals(es.getName()) &&
-                        rs.getType() == ReferenceSpec.Type.MANY) {
+                if (rhsEntitySpec.hasReferenceTo(lhsReferenceSpec)) {
+                    for (ReferenceSpec rhsToLhsReferenceSpec : rhsEntitySpec.getReferenceSpecs()) {
+                        if (rhsToLhsReferenceSpec.getEntityName().equals(lhsReferenceSpec.getName()) &&
+                        rhsToLhsReferenceSpec.getType() == ReferenceSpec.Type.MANY) {
                             isMany = true;
                             break;
                         }
                     }
                 }
                 if (!isMany) {
-                    for (ReferenceSpec rs : es.getReferenceSpecs()) {
-                        if (rs.getEntityName().equals(referredToSpec.getName())) {
-                            result.put(es.getName(), rs);
+                    for (ReferenceSpec lhsToRhsReferenceSpec : lhsReferenceSpec.getReferenceSpecs()) {
+                        if (lhsToRhsReferenceSpec.getEntityName().equals(rhsEntitySpec.getName())) {
+                            result.put(lhsReferenceSpec.getName(), lhsToRhsReferenceSpec);
                         }
                     }
                 }
@@ -1062,19 +1064,21 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     private static Map<String, ReferenceSpec> collectBidirectionalReferences
-            (Collection<EntitySpec> entitySpecs, EntitySpec entitySpec) {
+            (Collection<EntitySpec> entitySpecs, EntitySpec lhsEntitySpec,
+            Set<String> propIds) {
         Map<String, ReferenceSpec> result = new HashMap<String,
                 ReferenceSpec>();
 
-        for (ReferenceSpec rs : entitySpec.getReferenceSpecs()) {
-            for (EntitySpec es : entitySpecs) {
-                if (es.getName().equals(rs.getEntityName())) {
-                    if (es.hasReferenceTo(entitySpec)) {
-                        for (ReferenceSpec referringSpec : es.getReferenceSpecs()) {
-                            if (referringSpec.getEntityName().equals(entitySpec
-                                    .getName()) && referringSpec.getType() ==
+        for (ReferenceSpec lhsToRhsReferenceSpec : lhsEntitySpec.getReferenceSpecs()) {
+            for (EntitySpec rhsEntitySpec : entitySpecs) {
+                if (rhsEntitySpec.getName().equals(lhsToRhsReferenceSpec.getEntityName()) 
+                        && Collections.containsAny(propIds, rhsEntitySpec.getPropositionIds())) {
+                    if (rhsEntitySpec.hasReferenceTo(lhsEntitySpec)) {
+                        for (ReferenceSpec rhsToLhsReferenceSpec : rhsEntitySpec.getReferenceSpecs()) {
+                            if (rhsToLhsReferenceSpec.getEntityName().equals(lhsEntitySpec
+                                    .getName()) && rhsToLhsReferenceSpec.getType() ==
                                     ReferenceSpec.Type.MANY) {
-                                result.put(es.getName(), rs);
+                                result.put(rhsEntitySpec.getName(), lhsToRhsReferenceSpec);
                             }
                         }
                     }
@@ -1150,6 +1154,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 entitySpecsCopy, inboundRefSpecs, filtersCopy, propIds,
                 keyIds, order,
                 resultProcessor, this.stagedTableSpecs, wrapKeyId).generateStatement();
+        System.err.println("query for entity spec " + entitySpecName + ": " + query);
 
         if (logger.isLoggable(Level.FINE)) {
             logger.log(

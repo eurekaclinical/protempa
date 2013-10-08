@@ -245,13 +245,13 @@ final class ColumnSpecInfoFactory {
         return i;
     }
 
-    private static int processReferenceSpecs(EntitySpec referringEntitySpec,
-                                             EntitySpec referredToEntitySpec,
+    private static int processReferenceSpecs(EntitySpec lhsEntitySpec,
+                                             EntitySpec rhsEntitySpec,
                                              List<ColumnSpec> columnSpecs, int refNum,
                                              int i, ColumnSpecInfo columnSpecInfo) {
 
-        if (referringEntitySpec.hasReferenceTo(referredToEntitySpec)) {
-            for (ColumnSpec referringUniqueIdSpec : referringEntitySpec.getUniqueIdSpecs()) {
+        if (lhsEntitySpec.hasReferenceTo(rhsEntitySpec)) {
+            for (ColumnSpec referringUniqueIdSpec : lhsEntitySpec.getUniqueIdSpecs()) {
                 i = processColumnSpec(referringUniqueIdSpec, columnSpecs, i);
             }
 
