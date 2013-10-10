@@ -74,7 +74,7 @@ final class AbstractionFinder {
         assert knowledgeSource != null : "knowledgeSource cannot be null";
         assert algorithmSource != null : "algorithmSource cannot be null";
         assert termSource != null : "termSource cannot be null";
-        
+
         this.dataSource = dataSource;
         this.knowledgeSource = knowledgeSource;
         this.termSource = termSource;
@@ -82,59 +82,59 @@ final class AbstractionFinder {
 
         this.dataSource.addSourceListener(
                 new SourceListener<DataSourceUpdatedEvent>() {
-                    @Override
-                    public void sourceUpdated(DataSourceUpdatedEvent event) {
-                    }
+            @Override
+            public void sourceUpdated(DataSourceUpdatedEvent event) {
+            }
 
-                    @Override
-                    public void closedUnexpectedly(
-                            SourceClosedUnexpectedlyEvent e) {
-                        throw new UnsupportedOperationException(
-                                "Not supported yet.");
-                    }
-                });
+            @Override
+            public void closedUnexpectedly(
+                    SourceClosedUnexpectedlyEvent e) {
+                throw new UnsupportedOperationException(
+                        "Not supported yet.");
+            }
+        });
 
         this.knowledgeSource.addSourceListener(
                 new SourceListener<KnowledgeSourceUpdatedEvent>() {
-                    @Override
-                    public void sourceUpdated(KnowledgeSourceUpdatedEvent event) {
-                    }
+            @Override
+            public void sourceUpdated(KnowledgeSourceUpdatedEvent event) {
+            }
 
-                    @Override
-                    public void closedUnexpectedly(
-                            SourceClosedUnexpectedlyEvent e) {
-                        throw new UnsupportedOperationException(
-                                "Not supported yet.");
-                    }
-                });
+            @Override
+            public void closedUnexpectedly(
+                    SourceClosedUnexpectedlyEvent e) {
+                throw new UnsupportedOperationException(
+                        "Not supported yet.");
+            }
+        });
 
         this.termSource.addSourceListener(
                 new SourceListener<TermSourceUpdatedEvent>() {
-                    @Override
-                    public void sourceUpdated(TermSourceUpdatedEvent event) {
-                    }
+            @Override
+            public void sourceUpdated(TermSourceUpdatedEvent event) {
+            }
 
-                    @Override
-                    public void closedUnexpectedly(
-                            SourceClosedUnexpectedlyEvent e) {
-                        throw new UnsupportedOperationException(
-                                "Not supported yet");
-                    }
-                });
+            @Override
+            public void closedUnexpectedly(
+                    SourceClosedUnexpectedlyEvent e) {
+                throw new UnsupportedOperationException(
+                        "Not supported yet");
+            }
+        });
 
         this.algorithmSource.addSourceListener(
                 new SourceListener<AlgorithmSourceUpdatedEvent>() {
-                    @Override
-                    public void sourceUpdated(AlgorithmSourceUpdatedEvent event) {
-                    }
+            @Override
+            public void sourceUpdated(AlgorithmSourceUpdatedEvent event) {
+            }
 
-                    @Override
-                    public void closedUnexpectedly(
-                            SourceClosedUnexpectedlyEvent e) {
-                        throw new UnsupportedOperationException(
-                                "Not supported yet.");
-                    }
-                });
+            @Override
+            public void closedUnexpectedly(
+                    SourceClosedUnexpectedlyEvent e) {
+                throw new UnsupportedOperationException(
+                        "Not supported yet.");
+            }
+        });
 
         if (cacheFoundAbstractParameters) {
             this.workingMemoryCache = new HashMap<String, StatefulSession>();
@@ -279,7 +279,7 @@ final class AbstractionFinder {
             this.logger = ProtempaUtil.logger();
 
             if (AbstractionFinder.this.closed) {
-                throw new FinderException(query.getId(), 
+                throw new FinderException(query.getId(),
                         new ProtempaAlreadyClosedException());
             }
 
@@ -349,12 +349,12 @@ final class AbstractionFinder {
 
         void execute() throws FinderException {
             if (isLoggable(Level.FINE)) {
-                log(Level.FINE, 
+                log(Level.FINE,
                         "Propositions to be queried for query {0} are {1}",
                         new Object[]{
-                            query.getId(), 
-                            StringUtils.join(this.propIds, ", ")
-                        });
+                    query.getId(),
+                    StringUtils.join(this.propIds, ", ")
+                });
             }
 
             ExecutionStrategy executionStrategy;
@@ -395,9 +395,9 @@ final class AbstractionFinder {
             if (isLoggable(Level.FINE)) {
                 log(Level.FINE, "Asking data source for {0} for query {1}",
                         new Object[]{
-                            StringUtils.join(inDataSourcePropIds, ", "),
-                            query.getId()
-                        });
+                    StringUtils.join(inDataSourcePropIds, ", "),
+                    query.getId()
+                });
             }
             DataStreamingEventIterator<Proposition> itr =
                     getDataSource().readPropositions(this.keyIds,
@@ -588,7 +588,6 @@ final class AbstractionFinder {
             QuerySession qs)
             throws FinderException {
         assert resultsHandler != null : "resultsHandler cannot be null";
-
         ExecutorStrategy strategy;
         if (workingMemoryCache != null) {
             strategy = ExecutorStrategy.STATEFUL;
@@ -647,12 +646,12 @@ final class AbstractionFinder {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations) {
         qs.addPropositionsToCache(propositions);
-        for (Map.Entry<Proposition, List<Proposition>> me :
-                forwardDerivations.entrySet()) {
+        for (Map.Entry<Proposition, List<Proposition>> me
+                : forwardDerivations.entrySet()) {
             qs.addDerivationsToCache(me.getKey(), me.getValue());
         }
-        for (Map.Entry<Proposition, List<Proposition>> me :
-                backwardDerivations.entrySet()) {
+        for (Map.Entry<Proposition, List<Proposition>> me
+                : backwardDerivations.entrySet()) {
             qs.addDerivationsToCache(me.getKey(), me.getValue());
         }
     }
@@ -718,7 +717,6 @@ final class AbstractionFinder {
     void retrieveAndStoreData(Query query, QuerySession qs,
             final String persistentStoreEnvironment) throws FinderException {
         assert query != null : "query cannot be null";
-
         new Executor(query, qs) {
             @Override
             protected void doExecute(Set<String> keyIds,
@@ -731,20 +729,20 @@ final class AbstractionFinder {
                 try {
                     DataStreamingEventProcessor processor =
                             new DataStreamingEventProcessor(newDataIterator()) {
-                                @Override
-                                void doProcess(DataStreamingEvent next,
-                                        Set<String> propIds)
-                                        throws FinderException {
-                                    store.put(next.getKeyId(), next.getData());
-                                }
-                            };
+                        @Override
+                        void doProcess(DataStreamingEvent next,
+                                Set<String> propIds)
+                                throws FinderException {
+                            store.put(next.getKeyId(), next.getData());
+                        }
+                    };
                     processor.process();
                     if (isLoggable(Level.INFO)) {
                         log(Level.INFO,
                                 "Wrote {0} records into store {1} for query {2}",
                                 new Object[]{processor.getCount(),
-                                    persistentStoreEnvironment,
-                                    getQuery().getId()});
+                            persistentStoreEnvironment,
+                            getQuery().getId()});
                     }
                 } finally {
                     store.shutdown();
@@ -757,7 +755,6 @@ final class AbstractionFinder {
             final String propositionStoreEnvironment,
             final String workingMemoryStoreEnvironment) throws FinderException {
         assert query != null : "query cannot be null";
-
         new Executor(query, qs, ExecutorStrategy.STATEFUL) {
             @Override
             protected void doExecute(Set<String> keyIds,
@@ -771,9 +768,9 @@ final class AbstractionFinder {
                     log(Level.INFO,
                             "Found {0} records in store {1} for query {2}",
                             new Object[]{
-                                propStore.size(),
-                                propositionStoreEnvironment,
-                                getQuery().getId()});
+                        propStore.size(),
+                        propositionStoreEnvironment,
+                        getQuery().getId()});
                 }
                 final DataStore<String, WorkingMemory> wmStore =
                         new WorkingMemoryStoreCreator(null,
@@ -809,7 +806,6 @@ final class AbstractionFinder {
             QueryResultsHandler resultsHandler, QuerySession qs,
             final String workingMemoryStoreEnvironment) throws FinderException {
         assert query != null : "query cannot be null";
-
         new ExecutorWithResultsHandler(query, resultsHandler, qs,
                 ExecutorStrategy.STATEFUL) {
             @Override

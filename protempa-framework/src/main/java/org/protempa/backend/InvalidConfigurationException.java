@@ -19,11 +19,13 @@
  */
 package org.protempa.backend;
 
+import org.protempa.ProtempaException;
+
 /**
  *
  * @author Andrew Post
  */
-public class InvalidConfigurationException extends Exception {
+public class InvalidConfigurationException extends ProtempaException {
     private static final long serialVersionUID = 849376696935805014L;
 
     public InvalidConfigurationException(String message) {

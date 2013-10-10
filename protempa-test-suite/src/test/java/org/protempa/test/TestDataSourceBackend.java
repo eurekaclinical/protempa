@@ -668,7 +668,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
     }
 
     @Override
-    public void exceptionOccurred(ProtempaException protempaException) {
+    public void failureOccurred(Throwable throwable) {
 
     }
 }

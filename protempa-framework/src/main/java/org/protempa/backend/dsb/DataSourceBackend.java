@@ -62,6 +62,5 @@ public interface DataSourceBackend extends
             throws DataSourceBackendFailedConfigurationValidationException,
             KnowledgeSourceReadException;
     
-    void exceptionOccurred(ProtempaException protempaException);
-
+    void failureOccurred(Throwable throwable);
 }

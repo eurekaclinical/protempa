@@ -119,17 +119,17 @@ public final class Protempa {
      *
      * @param dataSource a {@link DataSource}. Will be closed when
      * {@link #close()} is called. May be <code>null</code> if you're not
-     * retrieving data from a data source (for example, you're only working 
-     * with a persistent store).
+     * retrieving data from a data source (for example, you're only working with
+     * a persistent store).
      * @param knowledgeSource a {@link KnowledgeSource}. Will be closed when
      * {@link #close()} is called.
      * @param algorithmSource an {@link AlgorithmSource}. Will be closed when
-     * {@link #close()} is called. May be <code>null</code> if you're not 
+     * {@link #close()} is called. May be <code>null</code> if you're not
      * computing any low-level abstractions.
      * @param termSource a {@link TermSource}. Will be closed when
-     * {@link #close()} is called. May be <code>null</code> if you're not 
-     * using terms.
-     * 
+     * {@link #close()} is called. May be <code>null</code> if you're not using
+     * terms.
+     *
      * @throws ProtempaException if an error occur in starting Protempa. There
      * frequently will be a nested exception that provides more detail.
      */
@@ -145,20 +145,20 @@ public final class Protempa {
      *
      * @param dataSource a {@link DataSource}. Will be closed when
      * {@link #close()} is called. May be <code>null</code> if you're not
-     * retrieving data from a data source (for example, you're only working 
-     * with a persistent store).
+     * retrieving data from a data source (for example, you're only working with
+     * a persistent store).
      * @param knowledgeSource a {@link KnowledgeSource}. Will be closed when
      * {@link #close()} is called.
      * @param algorithmSource an {@link AlgorithmSource}. Will be closed when
-     * {@link #close()} is called. May be <code>null</code> if you're not 
+     * {@link #close()} is called. May be <code>null</code> if you're not
      * computing any low-level abstractions.
      * @param termSource a {@link TermSource}. Will be closed when
-     * {@link #close()} is called. May be <code>null</code> if you're not 
-     * using terms.
+     * {@link #close()} is called. May be <code>null</code> if you're not using
+     * terms.
      * @param cacheFoundAbstractParameters <code>true</code> to cache found
      * abstract parameters, <code>false</code> not to cache found abstract
      * parameters.
-     * 
+     *
      * @throws ProtempaException if an error occur in starting Protempa. There
      * frequently will be a nested exception that provides more detail.
      */
@@ -193,7 +193,7 @@ public final class Protempa {
         } else {
             ts = termSource;
         }
-        
+
         try {
             this.abstractionFinder = new AbstractionFinder(ds, ks, as, ts,
                     cacheFoundAbstractParameters);
@@ -295,7 +295,8 @@ public final class Protempa {
      * method.
      *
      * @param query a {@link Query}. Cannot be <code>null</code>.
-     * @param resultsHandler a {@link QueryResultsHandler}. Cannot * *      * be <code>null</code>.
+     * @param resultsHandler a {@link QueryResultsHandler}. Cannot * * * * * *
+     * be <code>null</code>.
      * @throws FinderException if an error occurred during query.
      */
     public void execute(Query query, QueryResultsHandler resultsHandler)
@@ -310,11 +311,16 @@ public final class Protempa {
         if (resultsHandler == null) {
             throw new IllegalArgumentException("resultsHandler cannot be null");
         }
-        Logger logger = ProtempaUtil.logger();
-        logger.log(Level.INFO, "Executing query {0}", query.getId());
-        QuerySession qs = new QuerySession(query, this.abstractionFinder);
-        this.abstractionFinder.doFind(query, resultsHandler, qs);
-        logger.log(Level.INFO, "Query {0} execution complete", query.getId());
+        try {
+            Logger logger = ProtempaUtil.logger();
+            logger.log(Level.INFO, "Executing query {0}", query.getId());
+            QuerySession qs = new QuerySession(query, this.abstractionFinder);
+            this.abstractionFinder.doFind(query, resultsHandler, qs);
+            logger.log(Level.INFO, "Query {0} execution complete", query.getId());
+        } catch (FinderException e) {
+            this.abstractionFinder.getDataSource().failureOccurred(e);
+            throw e;
+        }
     }
 
     /**
@@ -348,26 +354,31 @@ public final class Protempa {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
-        Logger logger = ProtempaUtil.logger();
-        logger.log(
-                Level.INFO,
-                "Executing all PROTEMPA phases. Will store retrieved propositions in {0} and derived propositions in {1}",
-                new String[]{retrievalStoreEnvironment, processStoreName});
+        try {
+            Logger logger = ProtempaUtil.logger();
+            logger.log(
+                    Level.INFO,
+                    "Executing all PROTEMPA phases. Will store retrieved propositions in {0} and derived propositions in {1}",
+                    new String[]{retrievalStoreEnvironment, processStoreName});
 
-        QuerySession qs = new QuerySession(query, this.abstractionFinder);
+            QuerySession qs = new QuerySession(query, this.abstractionFinder);
 
-        logger.log(Level.INFO, "Beginning data retrieval stage");
-        this.abstractionFinder.retrieveAndStoreData(query, qs,
-                retrievalStoreEnvironment);
-        logger.log(Level.INFO, "Data retrieval complete");
-        logger.log(Level.INFO, "Beginning processing stage");
-        this.abstractionFinder.processStoredResults(query, qs,
-                retrievalStoreEnvironment, processStoreName);
-        logger.log(Level.INFO, "Processing complete");
-        logger.log(Level.INFO, "Beginning output stage");
-        this.abstractionFinder.outputStoredResults(query,
-                resultHandler, qs, processStoreName);
-        logger.log(Level.INFO, "Output complete");
+            logger.log(Level.INFO, "Beginning data retrieval stage");
+            this.abstractionFinder.retrieveAndStoreData(query, qs,
+                    retrievalStoreEnvironment);
+            logger.log(Level.INFO, "Data retrieval complete");
+            logger.log(Level.INFO, "Beginning processing stage");
+            this.abstractionFinder.processStoredResults(query, qs,
+                    retrievalStoreEnvironment, processStoreName);
+            logger.log(Level.INFO, "Processing complete");
+            logger.log(Level.INFO, "Beginning output stage");
+            this.abstractionFinder.outputStoredResults(query,
+                    resultHandler, qs, processStoreName);
+            logger.log(Level.INFO, "Output complete");
+        } catch (FinderException e) {
+            this.abstractionFinder.getDataSource().failureOccurred(e);
+            throw e;
+        }
     }
 
     /**
@@ -391,16 +402,21 @@ public final class Protempa {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
-        Logger logger = ProtempaUtil.logger();
-        logger.log(Level.FINE, "Retrieving and persisting data");
-        logger.log(Level.INFO,
-                "Retrieved data will be persisted in store: {0}",
-                retrievalStoreEnvironment);
+        try {
+            Logger logger = ProtempaUtil.logger();
+            logger.log(Level.FINE, "Retrieving and persisting data");
+            logger.log(Level.INFO,
+                    "Retrieved data will be persisted in store: {0}",
+                    retrievalStoreEnvironment);
 
-        QuerySession qs = new QuerySession(query, this.abstractionFinder);
-        this.abstractionFinder.retrieveAndStoreData(query, qs,
-                retrievalStoreEnvironment);
-        logger.log(Level.FINE, "Data retrieval complete");
+            QuerySession qs = new QuerySession(query, this.abstractionFinder);
+            this.abstractionFinder.retrieveAndStoreData(query, qs,
+                    retrievalStoreEnvironment);
+            logger.log(Level.FINE, "Data retrieval complete");
+        } catch (FinderException e) {
+            this.abstractionFinder.getDataSource().failureOccurred(e);
+            throw e;
+        }
     }
 
     /**
@@ -430,19 +446,24 @@ public final class Protempa {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
-        Logger logger = ProtempaUtil.logger();
-        logger.log(Level.FINE, "Processing and persisting results");
-        logger.log(Level.INFO,
-                "Processed results will be persisted in store: {0}",
-                workingMemoryStoreEnvironment);
-        logger.log(Level.INFO,
-                "Pulling previously retrieved data from store: {0}",
-                retrievalStoreEnvironment);
-        QuerySession qs = new QuerySession(query, this.abstractionFinder);
+        try {
+            Logger logger = ProtempaUtil.logger();
+            logger.log(Level.FINE, "Processing and persisting results");
+            logger.log(Level.INFO,
+                    "Processed results will be persisted in store: {0}",
+                    workingMemoryStoreEnvironment);
+            logger.log(Level.INFO,
+                    "Pulling previously retrieved data from store: {0}",
+                    retrievalStoreEnvironment);
+            QuerySession qs = new QuerySession(query, this.abstractionFinder);
 
-        this.abstractionFinder.processStoredResults(query, qs,
-                retrievalStoreEnvironment, workingMemoryStoreEnvironment);
-        logger.log(Level.FINE, "Data processing complete");
+            this.abstractionFinder.processStoredResults(query, qs,
+                    retrievalStoreEnvironment, workingMemoryStoreEnvironment);
+            logger.log(Level.FINE, "Data processing complete");
+        } catch (FinderException e) {
+            this.abstractionFinder.getDataSource().failureOccurred(e);
+            throw e;
+        }
     }
 
     /**
@@ -502,15 +523,20 @@ public final class Protempa {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
-        Logger logger = ProtempaUtil.logger();
-        logger.log(Level.FINE, "Outputting results");
-        logger.log(Level.INFO,
-                "Retrieving processed results from store named: {0}",
-                workingMemoryStoreEnvironment);
-        QuerySession qs = new QuerySession(query, this.abstractionFinder);
-        this.abstractionFinder.outputStoredResults(query, resultHandler, qs,
-                workingMemoryStoreEnvironment);
-        logger.log(Level.FINE, "Output complete");
+        try {
+            Logger logger = ProtempaUtil.logger();
+            logger.log(Level.FINE, "Outputting results");
+            logger.log(Level.INFO,
+                    "Retrieving processed results from store named: {0}",
+                    workingMemoryStoreEnvironment);
+            QuerySession qs = new QuerySession(query, this.abstractionFinder);
+            this.abstractionFinder.outputStoredResults(query, resultHandler, qs,
+                    workingMemoryStoreEnvironment);
+            logger.log(Level.FINE, "Output complete");
+        } catch (FinderException e) {
+            this.abstractionFinder.getDataSource().failureOccurred(e);
+            throw e;
+        }
     }
 
     /**
@@ -535,13 +561,18 @@ public final class Protempa {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
-        QuerySession qs = new QuerySession(query, this.abstractionFinder);
-        this.abstractionFinder.processAndOutputStoredResults(query,
-                resultHandler, qs, propositionStoreEnvironment);
+        try {
+            QuerySession qs = new QuerySession(query, this.abstractionFinder);
+            this.abstractionFinder.processAndOutputStoredResults(query,
+                    resultHandler, qs, propositionStoreEnvironment);
+        } catch (FinderException e) {
+            this.abstractionFinder.getDataSource().failureOccurred(e);
+            throw e;
+        }
     }
-    
-    public void validateDataSourceBackendConfigurations() 
-            throws DataSourceValidationIncompleteException, 
+
+    public void validateDataSourceBackendConfigurations()
+            throws DataSourceValidationIncompleteException,
             DataSourceFailedConfigurationValidationException {
         KnowledgeSource knowledgeSource = getKnowledgeSource();
         try {
@@ -568,11 +599,11 @@ public final class Protempa {
             throws DataSourceFailedDataValidationException,
             DataSourceValidationIncompleteException {
         KnowledgeSource knowledgeSource = getKnowledgeSource();
-        List<DataValidationEvent> validationEvents = 
+        List<DataValidationEvent> validationEvents =
                 new ArrayList<DataValidationEvent>();
         try {
             for (DataSourceBackend backend : getDataSource().getBackends()) {
-                CollectionUtils.addAll(validationEvents, 
+                CollectionUtils.addAll(validationEvents,
                         backend.validateData(knowledgeSource));
             }
         } catch (DataSourceBackendFailedDataValidationException ex) {
@@ -590,11 +621,46 @@ public final class Protempa {
      * source, and algorithm source.
      */
     public void close() throws CloseException {
-        this.abstractionFinder.close();
-        this.abstractionFinder.getAlgorithmSource().close();
-        this.abstractionFinder.getDataSource().close();
-        this.abstractionFinder.getKnowledgeSource().close();
-        this.abstractionFinder.getTermSource().close();
+        boolean abstractionFinderClosed = false;
+        boolean algorithmSourceClosed = false;
+        boolean knowledgeSourceClosed = false;
+        boolean termSourceClosed = false;
+        try {
+            this.abstractionFinder.close();
+            abstractionFinderClosed = true;
+            this.abstractionFinder.getAlgorithmSource().close();
+            algorithmSourceClosed = true;
+            this.abstractionFinder.getKnowledgeSource().close();
+            knowledgeSourceClosed = true;
+            this.abstractionFinder.getTermSource().close();
+            termSourceClosed = true;
+        } catch (CloseException e) {
+            this.abstractionFinder.getDataSource().failureOccurred(e);
+            throw e;
+        } finally {
+            if (!algorithmSourceClosed) {
+                try {
+                    this.abstractionFinder.getAlgorithmSource().close();
+                } catch (CloseException ignored) {}
+            }
+            if (!knowledgeSourceClosed) {
+                try {
+                    this.abstractionFinder.getKnowledgeSource().close();
+                } catch (CloseException ignored) {}
+            }
+            if (!termSourceClosed) {
+                try {
+                    this.abstractionFinder.getTermSource().close();
+                } catch (CloseException ignored) {}
+            }
+        }
+        if (abstractionFinderClosed && algorithmSourceClosed && knowledgeSourceClosed && termSourceClosed) {
+            this.abstractionFinder.getDataSource().close();
+        } else {
+            try {
+                this.abstractionFinder.getDataSource().close();
+            } catch (CloseException ignored) {}
+        }
         ProtempaUtil.logger().info("Protempa closed");
     }
 

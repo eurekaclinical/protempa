@@ -107,4 +107,13 @@ public interface DataSource extends Source<DataSourceUpdatedEvent,
             Set<String> keyIds, Set<String> propIds, Filter filters, 
             QuerySession qs) throws DataSourceReadException;
     
+    /**
+     * Called to signal to the data source backends that the Protempa query
+     * failed for some reason. Data source backends might, for example,
+     * mark datasets as having failed processing.
+     * 
+     * @param e the exception that caused query failure, if any.
+     */
+    void failureOccurred(Throwable e);
+    
 }

@@ -21,7 +21,6 @@ package org.protempa.backend.dsb;
 
 
 import org.protempa.BackendCloseException;
-import org.protempa.ProtempaException;
 import org.protempa.backend.AbstractBackend;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
 
@@ -50,7 +49,7 @@ public abstract class AbstractDataSourceBackend extends
     }
     
     @Override
-    public void exceptionOccurred(ProtempaException protempaException) {
+    public void failureOccurred(Throwable throwable) {
         
     }
     
