@@ -506,12 +506,6 @@ final class AbstractionFinder {
 
                 addAllPropIds(getResultsHandler().getPropositionIdsNeeded());
 
-                if (isLoggable(Level.FINE)) {
-                    log(Level.FINE,
-                            "Propositions to be queried for query {0} are: {1}",
-                            new Object[]{queryId, StringUtils.join(getPropIds(), ", ")});
-                }
-
                 resultsHandler.start();
 
                 super.execute();
