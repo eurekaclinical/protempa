@@ -128,9 +128,12 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Class.forName(className);
             return true;
         } catch (ClassNotFoundException ex) {
-            SQLGenUtil.logger().log(Level.WARNING,
-                    "{0} when trying to load {1}.",
-                    new Object[]{ex.getClass().getName(), className});
+            Logger logger = SQLGenUtil.logger();
+            if (logger.isLoggable(Level.FINE)) {
+                logger.log(Level.FINE,
+                        "{0} when trying to load {1}.",
+                        new Object[]{ex.getClass().getName(), className});
+            }
             return false;
         }
     }
