@@ -392,8 +392,8 @@ final class AbstractionFinder {
             Set<String> inDataSourcePropIds = getKnowledgeSource()
                     .inDataSourcePropositionIds(
                     this.propIds.toArray(new String[this.propIds.size()]));
-            if (isLoggable(Level.FINE)) {
-                log(Level.FINE, "Asking data source for {0} for query {1}",
+            if (isLoggable(Level.FINER)) {
+                log(Level.FINER, "Asking data source for {0} for query {1}",
                         new Object[]{
                     StringUtils.join(inDataSourcePropIds, ", "),
                     query.getId()
