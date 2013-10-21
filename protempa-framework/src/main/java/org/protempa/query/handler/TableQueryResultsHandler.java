@@ -131,8 +131,8 @@ public final class TableQueryResultsHandler
                         logger.log(
                                 Level.FINE,
                                 "Got the following columns for proposition {0}: {1}",
-                                new Object[]{Arrays.toString(this.rowPropositionIds),
-                                    colNames});
+                                new Object[]{StringUtils.join(this.rowPropositionIds, ", "),
+                                    StringUtils.join(colNames, ", ")});
                     }
                     for (String colName : colNames) {
                         columnNames.add(colName);
