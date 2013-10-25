@@ -27,7 +27,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * Represents types of values of propositions and properties, and provides a
@@ -301,9 +300,6 @@ public enum ValueType {
                 try {
                     result = DateValue.getInstance(dateFormat.parse(string));
                 } catch (ParseException ex) {
-                    ValueUtil.logger().log(Level.WARNING,
-                            "String {0} could not be parsed into a date",
-                            string);
                     result = null;
                 }
             } else {
