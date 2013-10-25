@@ -19,6 +19,8 @@
  */
 package org.protempa.proposition.value;
 
+import org.apache.commons.collections.map.ReferenceMap;
+
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -26,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import org.apache.commons.collections.map.ReferenceMap;
 
 /**
  * Represents types of values of propositions and properties, and provides a
@@ -299,10 +300,10 @@ public enum ValueType {
                         .getShortFormat();
                 try {
                     result = DateValue.getInstance(dateFormat.parse(string));
+                } catch (ParseException ex) {
                     ValueUtil.logger().log(Level.WARNING,
                             "String {0} could not be parsed into a date",
                             string);
-                } catch (ParseException ex) {
                     result = null;
                 }
             } else {
