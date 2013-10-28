@@ -486,6 +486,7 @@ final class AbstractionFinder {
         @Override
         void execute() throws FinderException {
             String queryId = getQuery().getId();
+            boolean resultsHandlerClosed = false;
             try {
                 log(Level.FINE,
                         "Initializing query results handler for query {0}",
@@ -508,6 +509,8 @@ final class AbstractionFinder {
                 super.execute();
 
                 resultsHandler.finish();
+                resultsHandlerClosed = true;
+                resultsHandler.close();
             } catch (QueryResultsHandlerProcessingException ex) {
                 throw new FinderException(queryId, ex);
             } catch (QueryResultsHandlerValidationFailedException ex) {
@@ -516,11 +519,14 @@ final class AbstractionFinder {
                 throw new FinderException(queryId, ex);
             } catch (QueryResultsHandlerInitException ex) {
                 throw new FinderException(queryId, ex);
+            } catch (QueryResultsHandlerCloseException ex) {
+                throw new FinderException(queryId, ex);
             } finally {
-                try {
-                    resultsHandler.close();
-                } catch (QueryResultsHandlerCloseException ex) {
-                    throw new FinderException(queryId, ex);
+                if (!resultsHandlerClosed) {
+                    try {
+                       resultsHandler.close();
+                    } catch (QueryResultsHandlerCloseException ex) {
+                    }
                 }
             }
         }
