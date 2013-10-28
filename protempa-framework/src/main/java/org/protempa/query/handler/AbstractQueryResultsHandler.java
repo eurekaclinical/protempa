@@ -44,6 +44,10 @@ public abstract class AbstractQueryResultsHandler
     public void finish() throws QueryResultsHandlerProcessingException {
     }
 
+    @Override
+    public void close() throws QueryResultsHandlerCloseException {
+    }
+
     /**
      * Is a no-op. Override to provide validation functionality.
      * 

@@ -142,4 +142,9 @@ public final class DeidentifyQueryResultsHandler
     public void start() throws QueryResultsHandlerProcessingException {
         this.handler.start();
     }
+
+    @Override
+    public void  close() throws QueryResultsHandlerCloseException {
+        this.handler.close();
+    }
 }

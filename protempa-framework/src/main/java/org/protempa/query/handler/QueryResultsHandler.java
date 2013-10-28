@@ -70,6 +70,14 @@ public interface QueryResultsHandler {
     public void finish() throws QueryResultsHandlerProcessingException;
 
     /**
+     * Called by Protempa after {@link #finish()} to clean up any resources
+     * used by the handler.
+     *
+     * @throws QueryResultsHandlerCloseException if any exceptions occur at a lower level
+     */
+    public void close() throws QueryResultsHandlerCloseException;
+
+    /**
      * Handles a single query result, which is the list of propositions
      * associated with the given key.
      *
