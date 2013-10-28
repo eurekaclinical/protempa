@@ -45,10 +45,7 @@ import org.protempa.query.And;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
-import org.protempa.query.handler.QueryResultsHandler;
-import org.protempa.query.handler.QueryResultsHandlerInitException;
-import org.protempa.query.handler.QueryResultsHandlerProcessingException;
-import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
+import org.protempa.query.handler.*;
 
 /**
  * Class that actually does the abstraction finding.
@@ -519,6 +516,12 @@ final class AbstractionFinder {
                 throw new FinderException(queryId, ex);
             } catch (QueryResultsHandlerInitException ex) {
                 throw new FinderException(queryId, ex);
+            } finally {
+                try {
+                    resultsHandler.close();
+                } catch (QueryResultsHandlerCloseException ex) {
+                    throw new FinderException(queryId, ex);
+                }
             }
         }
 
