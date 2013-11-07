@@ -97,9 +97,9 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
                     logger.log(Level.WARNING,
                             "Unique ids contain null ({0}). Skipping record.",
                             StringUtils.join(uniqueIds, ", "));
-                    refItr.addUniqueIds(kId, null);
-                    return;
                 }
+                refItr.addUniqueIds(kId, null);
+                return;
             }
             UniqueId uniqueId = generateUniqueId(entitySpec.getName(), uniqueIds);
 

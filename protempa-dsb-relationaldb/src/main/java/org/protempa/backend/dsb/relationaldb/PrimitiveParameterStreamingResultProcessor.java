@@ -34,7 +34,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -89,9 +88,9 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                     logger.log(Level.WARNING,
                             "Unique ids contain null ({0}). Skipping record.",
                             StringUtils.join(uniqueIds, ", "));
-                    refItr.addUniqueIds(kId, null);
-                    return;
                 }
+                refItr.addUniqueIds(kId, null);
+                return;
             }
             UniqueId uniqueId = generateUniqueId(entitySpec.getName(), uniqueIds);
 

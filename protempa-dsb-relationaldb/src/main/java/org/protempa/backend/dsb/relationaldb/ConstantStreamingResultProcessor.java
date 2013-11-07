@@ -86,9 +86,9 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
                     logger.log(Level.WARNING,
                             "Unique ids contain null ({0}). Skipping record.",
                             StringUtils.join(uniqueIds, ", "));
-                    refItr.addUniqueIds(kId, null);
-                    return;
                 }
+                refItr.addUniqueIds(kId, null);
+                return;
             }
             UniqueId uniqueId = generateUniqueId(entitySpec.getName(), uniqueIds);
 
