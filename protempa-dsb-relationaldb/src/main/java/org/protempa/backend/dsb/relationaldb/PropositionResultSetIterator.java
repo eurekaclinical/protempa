@@ -68,6 +68,8 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     private String keyId;
     private boolean end;
 
+    private boolean advanceInvoked = false;
+
     PropositionResultSetIterator(Statement statement, ResultSet resultSet,
             EntitySpec entitySpec, Map<String,
             ReferenceSpec> inboundRefSpecs,
@@ -179,6 +181,11 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     }
 
     private DataStreamingEvent<P> advance() throws StreamingSQLException {
+        if (!this.advanceInvoked) {
+            this.advanceInvoked = true;
+            logger.log(Level.INFO, "First invocation of advance() for {0} proposition iterator", this.entitySpec.getName());
+        }
+
         if (this.end) {
             return null;
         }

@@ -60,6 +60,8 @@ final class InboundReferenceResultSetIterator implements
     private boolean end = false;
     private final String entityName;
     private String lastDelivered;
+    private boolean nextInvoked = false;
+    private boolean addUniqueIdsInvoked = false;
 
     InboundReferenceResultSetIterator(String entityName) {
         this.entityName = entityName;
@@ -83,9 +85,18 @@ final class InboundReferenceResultSetIterator implements
 
     @Override
     public DataStreamingEvent<UniqueIdPair> next() throws DataSourceReadException {
+        if (!this.nextInvoked) {
+            this.nextInvoked = true;
+            LOGGER.log(Level.INFO, "First invocation of next() for {0} reference iterator", this.entityName);
+        }
         if (isDone()) {
             throw new NoSuchElementException("dataStreamingEventQueue is "
                     + "empty");
+        }
+        if (this.keyId == null) {
+            LOGGER.log(Level.SEVERE, "Fatal error in reference iterator {0}: keyId is null", this.entityName);
+            LOGGER.log(Level.SEVERE, "Queue has data: {0}", this.dataStreamingEventQueue.isEmpty() ? "no" : "yes");
+            LOGGER.log(Level.SEVERE, "Unique ids waiting: {0}", (this.referenceUniqueIds == null || this.referenceUniqueIds.isEmpty()) ? "no" : "yes");
         }
 
         DataStreamingEvent<UniqueIdPair> result;
@@ -95,6 +106,7 @@ final class InboundReferenceResultSetIterator implements
              * situation, the queue will be empty. If the queue is empty, then
              * send back a DataStreamingEvent with no UniqueIdPairs.
              */
+
             result = new DataStreamingEvent<UniqueIdPair>(this.keyId,
                     new ArrayList<UniqueIdPair>(0));
         } else {
@@ -157,6 +169,13 @@ final class InboundReferenceResultSetIterator implements
     }
 
     void addUniqueIds(String keyId, UniqueIdPair[] uniqueIds) {
+        if (!this.addUniqueIdsInvoked) {
+            this.addUniqueIdsInvoked = true;
+            LOGGER.log(Level.INFO, "First invocation of addUniqueIds for {0}. keyId = {1}", new Object[]{this.entityName, keyId});
+        }
+        if (keyId == null) {
+            LOGGER.log(Level.SEVERE, "Adding unique ids for {0} with null keyId", this.entityName);
+        }
         handleKeyId(keyId);
         if (uniqueIds != null) {
             for (UniqueIdPair uniqueId : uniqueIds) {
