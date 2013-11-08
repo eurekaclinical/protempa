@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> {
 
     private EventIterator itr;
-    private InboundReferenceResultSetIterator refItr;
+//    private InboundReferenceResultSetIterator refItr;
     
 
     EventStreamingResultProcessor(
@@ -65,10 +65,10 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
         EventIterator(Statement statement, ResultSet resultSet, 
                 EntitySpec entitySpec, Map<String,
                 ReferenceSpec> inboundRefSpecs, Map<String,
-                ReferenceSpec> bidirectionalRefSpecs)
+                ReferenceSpec> bidirectionalRefSpecs, InboundReferenceResultSetIterator referenceIterator)
                 throws SQLException {
             super(statement, resultSet, entitySpec, inboundRefSpecs,
-                    bidirectionalRefSpecs, getDataSourceBackendId());
+                    bidirectionalRefSpecs, getDataSourceBackendId(), referenceIterator);
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
             this.intervalFactory = new IntervalFactory();
@@ -98,7 +98,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
                             "Unique ids contain null ({0}). Skipping record.",
                             StringUtils.join(uniqueIds, ", "));
                 }
-                refItr.addUniqueIds(kId, null);
+                this.getReferenceIterator().addUniqueIds(kId, null);
                 return;
             }
             UniqueId uniqueId = generateUniqueId(entitySpec.getName(), uniqueIds);
@@ -113,7 +113,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
                     String code = resultSet.getString(i++);
                     propId = sqlCodeToPropositionId(codeSpec, code);
                     if (propId == null) {
-                        refItr.addUniqueIds(kId, null);
+                        this.getReferenceIterator().addUniqueIds(kId, null);
                         return;
                     }
                 }
@@ -176,7 +176,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
                     columnTypes);
             i = extractReferenceUniqueIdPairs(resultSet, uniqueId,
                     refUniqueIds, i);
-            refItr.addUniqueIds(kId, refUniqueIds);
+            this.getReferenceIterator().addUniqueIds(kId, refUniqueIds);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
@@ -196,7 +196,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
 
         @Override
         void fireResultSetCompleted() {
-            refItr.resultSetComplete();
+            this.getReferenceIterator().resultSetComplete();
         }
     }
 
@@ -204,8 +204,8 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
         this.itr = new EventIterator(getStatement(), resultSet, entitySpec,
-                getInboundRefSpecs(), getBidirectionalRefSpecs());
-        this.refItr = new InboundReferenceResultSetIterator(entitySpec.getName());
+                getInboundRefSpecs(), getBidirectionalRefSpecs(),new InboundReferenceResultSetIterator(entitySpec.getName()) );
+//        this.refItr = new InboundReferenceResultSetIterator(entitySpec.getName());
     }
 
     @Override
@@ -215,6 +215,6 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
 
     @Override
     DataStreamingEventIterator<UniqueIdPair> getInboundReferenceResults() {
-        return this.refItr;
+        return this.itr.getReferenceIterator();
     }
 }

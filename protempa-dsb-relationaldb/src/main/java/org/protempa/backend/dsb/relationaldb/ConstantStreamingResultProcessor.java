@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Constant> {
 
     private ConstantIterator itr;
-    private InboundReferenceResultSetIterator refItr;
+//    private InboundReferenceResultSetIterator refItr;
 
     ConstantStreamingResultProcessor(
             EntitySpec entitySpec, LinkedHashMap<String,ReferenceSpec> inboundRefSpecs,
@@ -57,10 +57,10 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
         ConstantIterator(Statement statement, ResultSet resultSet, 
                 EntitySpec entitySpec, LinkedHashMap<String,
                 ReferenceSpec> inboundRefSpecs,
-                Map<String, ReferenceSpec> bidirectionalRefSpecs)
+                Map<String, ReferenceSpec> bidirectionalRefSpecs, InboundReferenceResultSetIterator referenceIterator)
                 throws SQLException {
             super(statement, resultSet, entitySpec, inboundRefSpecs,
-                    bidirectionalRefSpecs, getDataSourceBackendId());
+                    bidirectionalRefSpecs, getDataSourceBackendId(), referenceIterator);
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
         }
@@ -87,7 +87,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
                             "Unique ids contain null ({0}). Skipping record.",
                             StringUtils.join(uniqueIds, ", "));
                 }
-                refItr.addUniqueIds(kId, null);
+                this.getReferenceIterator().addUniqueIds(kId, null);
                 return;
             }
             UniqueId uniqueId = generateUniqueId(entitySpec.getName(), uniqueIds);
@@ -102,7 +102,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
                     String code = resultSet.getString(i++);
                     propId = sqlCodeToPropositionId(codeSpec, code);
                     if (propId == null) {
-                        refItr.addUniqueIds(kId, null);
+                        this.getReferenceIterator().addUniqueIds(kId, null);
                         return;
                     }
                 }
@@ -114,7 +114,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
                     propertyValues, columnTypes);
             i = extractReferenceUniqueIdPairs(resultSet, uniqueId,
                     refUniqueIds, i);
-            refItr.addUniqueIds(kId, refUniqueIds);
+            this.getReferenceIterator().addUniqueIds(kId, refUniqueIds);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
@@ -133,7 +133,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
 
         @Override
         void fireResultSetCompleted() {
-            refItr.resultSetComplete();
+            this.getReferenceIterator().resultSetComplete();
         }
     }
 
@@ -141,8 +141,8 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
         this.itr = new ConstantIterator(getStatement(), resultSet,
-                entitySpec, getInboundRefSpecs(), getBidirectionalRefSpecs());
-        this.refItr = new InboundReferenceResultSetIterator(entitySpec.getName());
+                entitySpec, getInboundRefSpecs(), getBidirectionalRefSpecs(), new InboundReferenceResultSetIterator(entitySpec.getName()));
+//        this.refItr = new InboundReferenceResultSetIterator(entitySpec.getName());
     }
 
     @Override
@@ -152,6 +152,6 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
 
     @Override
     final DataStreamingEventIterator<UniqueIdPair> getInboundReferenceResults() {
-        return this.refItr;
+        return this.itr.getReferenceIterator();
     }
 }

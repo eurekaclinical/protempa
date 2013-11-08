@@ -64,6 +64,7 @@ final class InboundReferenceResultSetIterator implements
     private boolean addUniqueIdsInvoked = false;
 
     InboundReferenceResultSetIterator(String entityName) {
+        LOGGER.log(Level.INFO, "Creating reference iterator for {0}", new Object[]{entityName});
         this.entityName = entityName;
         this.referenceUniqueIds = new HashMap<DestructuredUniqueIdPair, Set<UniqueId>>();
         this.dataStreamingEventQueue = new LinkedList<DataStreamingEvent<UniqueIdPair>>();
@@ -219,8 +220,8 @@ final class InboundReferenceResultSetIterator implements
         this.referenceUniqueIds = null;
         if (!this.dataStreamingEventQueue.isEmpty()) {
             LOGGER.log(Level.WARNING, "Closing non-empty data streaming event"
-                    + " queue. {0} elements remain.",
-                    new Object[]{this.dataStreamingEventQueue.size()});
+                    + " queue for entity {0}. {1} elements remain.",
+                    new Object[]{this.entityName, this.dataStreamingEventQueue.size()});
         }
         this.dataStreamingEventQueue.clear();
         this.dataStreamingEventQueue = null;

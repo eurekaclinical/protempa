@@ -67,6 +67,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     private DataStreamingEvent<P> dataStreamingEvent;
     private String keyId;
     private boolean end;
+    private InboundReferenceResultSetIterator referenceIterator;
 
     private boolean advanceInvoked = false;
 
@@ -74,13 +75,15 @@ abstract class PropositionResultSetIterator<P extends Proposition>
             EntitySpec entitySpec, Map<String,
             ReferenceSpec> inboundRefSpecs,
             Map<String, ReferenceSpec> bidirectionalRefSpecs,
-            String dataSourceBackendId)
+            String dataSourceBackendId, InboundReferenceResultSetIterator referenceIterator)
             throws SQLException {
         assert resultSet != null : "resultSet cannot be null";
         assert entitySpec != null : "entitySpec cannot be null";
         assert dataSourceBackendId != null : "dataSourceBackendId cannot be null";
+
         this.resultSet = resultSet;
         this.logger = SQLGenUtil.logger();
+        logger.log(Level.INFO, "Creating proposition iterator for {0}", new Object[]{entitySpec.getName()});
         this.uniqueIds =
                 new String[entitySpec.getUniqueIdSpecs().length];
         this.entitySpec = entitySpec;
@@ -98,6 +101,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
         this.codeSpec = localCodeSpec;
         this.propertySpecs = entitySpec.getPropertySpecs();
         this.propertyValues = new Value[this.propertySpecs.length];
+        this.referenceIterator = referenceIterator;
         this.inboundRefSpecs = inboundRefSpecs;
         this.bidirectionalRefSpecs = bidirectionalRefSpecs;
         this.refUniqueIds = new UniqueIdPair[this.inboundRefSpecs.size() + this.bidirectionalRefSpecs.size()];
@@ -107,6 +111,10 @@ abstract class PropositionResultSetIterator<P extends Proposition>
 
     final String getKeyId() {
         return this.keyId;
+    }
+
+    final InboundReferenceResultSetIterator getReferenceIterator() {
+        return this.referenceIterator;
     }
 
     /**
@@ -183,7 +191,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     private DataStreamingEvent<P> advance() throws StreamingSQLException {
         if (!this.advanceInvoked) {
             this.advanceInvoked = true;
-            logger.log(Level.INFO, "First invocation of advance() for {0} proposition iterator", this.entitySpec.getName());
+            logger.log(Level.INFO, "First invocation of advance() for {0} proposition iterator <{1}>", new Object[]{this.entitySpec.getName(), this.hashCode()});
         }
 
         if (this.end) {
@@ -207,6 +215,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
                                 this.refUniqueIds);
                             this.count++;
                         } else {
+                            logger.log(Level.INFO, "Result set complete for {0} proposition iterator", this.entitySpec.getName());
                             this.end = true;
                             fireResultSetCompleted();
                             break;

@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProcessor<PrimitiveParameter> {
 
     private PrimParamIterator itr;
-    private InboundReferenceResultSetIterator refItr;
+//    private InboundReferenceResultSetIterator refItr;
 
     PrimitiveParameterStreamingResultProcessor(
             EntitySpec entitySpec, LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
@@ -57,11 +57,11 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
 
         PrimParamIterator(Statement statement, ResultSet resultSet, 
                 EntitySpec entitySpec, Map<String, ReferenceSpec> inboundRefSpecs, Map<String,
-                ReferenceSpec> bidirectionalRefSpecs)
+                ReferenceSpec> bidirectionalRefSpecs, InboundReferenceResultSetIterator referenceIterator)
                 throws SQLException {
             super(statement, resultSet, entitySpec, inboundRefSpecs,
                     bidirectionalRefSpecs,
-                    getDataSourceBackendId());
+                    getDataSourceBackendId(), referenceIterator);
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
         }
@@ -89,7 +89,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                             "Unique ids contain null ({0}). Skipping record.",
                             StringUtils.join(uniqueIds, ", "));
                 }
-                refItr.addUniqueIds(kId, null);
+                this.getReferenceIterator().addUniqueIds(kId, null);
                 return;
             }
             UniqueId uniqueId = generateUniqueId(entitySpec.getName(), uniqueIds);
@@ -104,7 +104,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                     String code = resultSet.getString(i++);
                     propId = sqlCodeToPropositionId(codeSpec, code);
                     if (propId == null) {
-                        refItr.addUniqueIds(kId, null);
+                        this.getReferenceIterator().addUniqueIds(kId, null);
                         return;
                     }
                 }
@@ -130,7 +130,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                     propertyValues, columnTypes);
             i = extractReferenceUniqueIdPairs(resultSet, uniqueId,
                     refUniqueIds, i);
-            refItr.addUniqueIds(kId, refUniqueIds);
+            this.getReferenceIterator().addUniqueIds(kId, refUniqueIds);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
@@ -152,7 +152,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
 
         @Override
         void fireResultSetCompleted() {
-            refItr.resultSetComplete();
+            this.getReferenceIterator().resultSetComplete();
         }
     }
 
@@ -160,9 +160,10 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
         
+//        this.refItr = new InboundReferenceResultSetIterator(entitySpec.getName());
         this.itr = new PrimParamIterator(getStatement(), resultSet,
-                entitySpec, getInboundRefSpecs(), getBidirectionalRefSpecs());
-        this.refItr = new InboundReferenceResultSetIterator(entitySpec.getName());
+                entitySpec, getInboundRefSpecs(), getBidirectionalRefSpecs(),
+                new InboundReferenceResultSetIterator(entitySpec.getName()));
     }
 
     @Override
@@ -172,6 +173,6 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
 
     @Override
     DataStreamingEventIterator<UniqueIdPair> getInboundReferenceResults() {
-        return this.refItr;
+        return this.itr.getReferenceIterator();
     }
 }
