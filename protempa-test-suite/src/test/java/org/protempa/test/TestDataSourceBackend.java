@@ -32,12 +32,7 @@ import org.protempa.backend.dsb.relationaldb.PropertySpec;
 import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.RelationalDbDataSourceBackend;
 import org.protempa.backend.dsb.relationaldb.StagingSpec;
-import org.protempa.proposition.value.AbsoluteTimeGranularity;
-import org.protempa.proposition.value.AbsoluteTimeGranularityFactory;
-import org.protempa.proposition.value.AbsoluteTimeUnitFactory;
-import org.protempa.proposition.value.GranularityFactory;
-import org.protempa.proposition.value.UnitFactory;
-import org.protempa.proposition.value.ValueType;
+import org.protempa.proposition.value.*;
 
 import java.io.IOException;
 
@@ -651,7 +646,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                         .propertyNameOrPropIdToSqlCodeArray("vitals_result_types_02232012.txt"),
                                 true), null, new ColumnSpec(schemaName,
                                 "VITALS_EVENT", "RESULT_STR"), ValueType.VALUE,
-                        AbsoluteTimeGranularity.MINUTE, dtPositionParser, null),
+                        AbsoluteTimeGranularity.MINUTE, dtPositionParser, AbsoluteTimeUnit.YEAR),
 
         };
         return primitiveParameterSpecs;
