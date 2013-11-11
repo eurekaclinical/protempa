@@ -64,7 +64,9 @@ final class InboundReferenceResultSetIterator implements
     private boolean addUniqueIdsInvoked = false;
 
     InboundReferenceResultSetIterator(String entityName) {
-        LOGGER.log(Level.INFO, "Creating reference iterator for {0}", new Object[]{entityName});
+        if (LOGGER.isLoggable(Level.FINE)) {
+            LOGGER.log(Level.FINE, "Creating reference iterator for {0}", new Object[]{entityName});
+        }
         this.entityName = entityName;
         this.referenceUniqueIds = new HashMap<DestructuredUniqueIdPair, Set<UniqueId>>();
         this.dataStreamingEventQueue = new LinkedList<DataStreamingEvent<UniqueIdPair>>();
@@ -86,10 +88,13 @@ final class InboundReferenceResultSetIterator implements
 
     @Override
     public DataStreamingEvent<UniqueIdPair> next() throws DataSourceReadException {
-        if (!this.nextInvoked) {
-            this.nextInvoked = true;
-            LOGGER.log(Level.INFO, "First invocation of next() for {0} reference iterator", this.entityName);
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            if (!this.nextInvoked) {
+                this.nextInvoked = true;
+                LOGGER.log(Level.FINEST, "First invocation of next() for {0} reference iterator", this.entityName);
+            }
         }
+
         if (isDone()) {
             throw new NoSuchElementException("dataStreamingEventQueue is "
                     + "empty");
@@ -170,9 +175,11 @@ final class InboundReferenceResultSetIterator implements
     }
 
     void addUniqueIds(String keyId, UniqueIdPair[] uniqueIds) {
-        if (!this.addUniqueIdsInvoked) {
-            this.addUniqueIdsInvoked = true;
-            LOGGER.log(Level.INFO, "First invocation of addUniqueIds for {0}. keyId = {1}", new Object[]{this.entityName, keyId});
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            if (!this.addUniqueIdsInvoked) {
+                this.addUniqueIdsInvoked = true;
+                LOGGER.log(Level.FINEST, "First invocation of addUniqueIds for {0}. keyId = {1}", new Object[]{this.entityName, keyId});
+            }
         }
         if (keyId == null) {
             LOGGER.log(Level.SEVERE, "Adding unique ids for {0} with null keyId", this.entityName);
