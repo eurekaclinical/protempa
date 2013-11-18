@@ -19,8 +19,9 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.JDBCDecimalDayParser;
-import org.protempa.backend.dsb.relationaldb.JDBCPositionFormat;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -43,8 +44,6 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Calendar;
 import java.util.Map;
-import org.junit.Test;
-import org.junit.Assert;
 
 /**
  * Tests {@link JDBCDecimalDayParser} with a mock {@link ResultSet}.
@@ -307,6 +306,16 @@ public class JDBCDecimalDayParserTest {
 
         @Override
         public Object getObject(String string) throws SQLException {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public <T> T getObject(String string, Class<T> type) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public <T> T getObject(int i, Class<T> type) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
