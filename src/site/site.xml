@@ -17,9 +17,9 @@
     </custom>
 
     <bannerRight>
-        <name>Emory University Center for Comprehensive Informatics</name>
-        <src>../../images/cci-logo.gif</src>
-        <href>http://cci.emory.edu</href>
+        <name>Emory University Department of Biomedical Informatics</name>
+        <src>../../images/bmi-logo.png</src>
+        <href>http://www.bmi.emory.edu</href>
     </bannerRight>
 
     <body>
