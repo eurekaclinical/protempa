@@ -12,3 +12,8 @@
 img.screenshot {
     padding-bottom: 2em;
 }
+
+#bannerRight img {
+    background-color: #002878;
+    margin-bottom: 20px;
+}
