@@ -19,6 +19,11 @@
  */
 package org.protempa.test;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,11 +33,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * An implementation of the {@link DataProvider} interface, using an Excel
@@ -249,6 +249,9 @@ public class XlsxDataProvider implements DataProvider {
             Row row = rows.next();
             Encounter encounter = new Encounter();
             encounter.setId(XlsxDataProvider.readLongValue(row.getCell(0)));
+            if (encounter.getId() == null) {
+                break;
+            }
             encounter.setPatientId(XlsxDataProvider.readLongValue(row
                     .getCell(1)));
             encounter.setProviderId(XlsxDataProvider.readLongValue(row
@@ -400,6 +403,9 @@ public class XlsxDataProvider implements DataProvider {
             Row row = rows.next();
             Vital vital = new Vital();
             vital.setId(XlsxDataProvider.readStringValue(row.getCell(0)));
+            if (vital.getId() == null) {
+                break;
+            }
             vital.setEncounterId(XlsxDataProvider.readLongValue(row.getCell(1)));
             vital.setTimestamp(XlsxDataProvider.readDateValue(row.getCell(2)));
             vital.setEntityId(XlsxDataProvider.readStringValue(row.getCell(3)));
