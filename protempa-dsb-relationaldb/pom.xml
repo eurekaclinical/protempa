@@ -36,11 +36,13 @@
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-framework</artifactId>
+            <version>2.3-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.protempa</groupId>
             <artifactId>protempa-bp-serviceloader</artifactId>
+            <version>2.3-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
