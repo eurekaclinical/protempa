@@ -19,6 +19,33 @@
  */
 package org.protempa.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.commons.io.FileUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Iterators;
@@ -35,6 +62,7 @@ import org.junit.Test;
 import org.protempa.AbstractionFinderTestHelper;
 import org.protempa.CloseException;
 import org.protempa.CompoundLowLevelAbstractionDefinition;
+import org.protempa.ValueClassification;
 import org.protempa.CompoundLowLevelAbstractionDefinition.ValueDefinitionMatchOperator;
 import org.protempa.ContextDefinition;
 import org.protempa.EventDefinition;
@@ -54,7 +82,6 @@ import org.protempa.SlidingWindowWidthMode;
 import org.protempa.SourceFactory;
 import org.protempa.TemporalExtendedParameterDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
-import org.protempa.ValueClassification;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.ConfigurationsNotFoundException;
@@ -80,31 +107,6 @@ import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.handler.QueryResultsHandler;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static org.junit.Assert.*;
-
 /**
  * Unit tests for Protempa.
  *
@@ -124,8 +126,7 @@ public class ProtempaTest {
     /**
      * Sample data file
      */
-    private static final String SAMPLE_DATA_FILE =
-            "src/test/resources/dsb/sample-data.xlsx";
+    private static final String SAMPLE_DATA_FILE = "src/test/resources/dsb/sample-data.xlsx";
     /**
      * The ground truth results directory for the test data
      */
@@ -223,8 +224,6 @@ public class ProtempaTest {
         // others
         System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
                 "org.protempa.backend.dsb.relationaldb.H2SQLGenerator");
-//        System.setProperty("protempa.dsb.relationaldatabase.skipexecution",
-//                "true");
         SourceFactory sf = new SourceFactory(
                 new INIConfigurations(new File("src/test/resources")),
                 "protege-h2-test-config");
