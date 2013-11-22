@@ -52,6 +52,7 @@
             <item name="Dependency Convergence" href="dependency-convergence.html"/>
             <item name="Plugin Management" href="plugin-management.html"/>
             <item name="Surefire Report" href="surefire-report.html"/>
+            <item name="Checkstyle Results" href="checkstyle-aggregate.html"/>
         </menu>
         <menu name="Internal Resources">
             <item name="Issue Tracking" href="issue-tracking.html"/>
