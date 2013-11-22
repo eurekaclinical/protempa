@@ -8,6 +8,12 @@
     </formats>
     <fileSets>
         <fileSet>
+            <includes>
+                <include>README*</include>
+            </includes>
+            <filtered>true</filtered>
+        </fileSet>
+        <fileSet>
             <directory>${project.basedir}</directory>
             <excludes>
                 <exclude>**/target/**</exclude>
@@ -21,6 +27,7 @@
                 <exclude>**/nbactions.xml</exclude>
                 <exclude>**/nb-configuration.xml</exclude>
                 <exclude>**/.DS_Store</exclude>
+                <exclude>**/.svnignore</exclude>
             </excludes>
         </fileSet>
     </fileSets>
