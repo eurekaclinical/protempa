@@ -17,7 +17,7 @@
             <subsection name="Prerequisites">
                 <p>Required:</p>
                 <ul>
-                    <li>Download and install <a href="http://www.oracle.com/technetwork/java/index.html">Java 1.6</a>, if you don't already have it.</li>
+                    <li>Download and install <a href="http://www.oracle.com/technetwork/java/index.html">Java 1.7</a>, if you don't already have it.</li>
                     <li>Download and install <a href="http://maven.apache.org">Maven</a> (Version 3 is required), if you don't already have it.</li>
                     <li>Get the <a href="index.html">latest source</a>.</li>
                 </ul>
