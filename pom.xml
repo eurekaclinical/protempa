@@ -81,29 +81,29 @@
             <roles>
                 <role>Faculty Project Lead</role>
             </roles>
-            <organization>Center for Comprehensive Informatics, Emory
+            <organization>Department of Biomedical Informatics, Emory
                 University
             </organization>
         </developer>
         <developer>
             <id>hrathod</id>
             <name>Himanshu Rathod</name>
-            <email>Himanshu.Rathod@emory.edu</email>
+            <email>himanshu.rathod@emory.edu</email>
             <roles>
                 <role>Software Developer</role>
             </roles>
-            <organization>Center for Comprehensive Informatics, Emory
+            <organization>Department of Biomedical Informatics, Emory
                 University
             </organization>
         </developer>
         <developer>
             <id>mmansour</id>
             <name>Michel Mansour</name>
-            <email>mmansour@emory.edu</email>
+            <email>michel.mansour@emory.edu</email>
             <roles>
                 <role>Software Developer</role>
             </roles>
-            <organization>Center for Comprehensive Informatics, Emory
+            <organization>Department of Biomedical Informatics, Emory
                 University
             </organization>
         </developer>
@@ -114,7 +114,7 @@
             <roles>
                 <role>Data Warehouse Engineer</role>
             </roles>
-            <organization>Center for Comprehensive Informatics, Emory
+            <organization>Department of Biomedical Informatics, Emory
                 University
             </organization>
         </developer>
@@ -125,7 +125,7 @@
             <roles>
                 <role>Software Engineer</role>
             </roles>
-            <organization>Center for Comprehensive Informatics, Emory
+            <organization>Department of Biomedical Informatics, Emory
                 University
             </organization>
         </developer>
@@ -136,7 +136,7 @@
             <roles>
                 <role>Software Developer</role>
             </roles>
-            <organization>Center for Comprehensive Informatics, Emory
+            <organization>Department of Biomedical Informatics, Emory
                 University
             </organization>
         </developer>
@@ -147,7 +147,7 @@
             <roles>
                 <role>Software Developer</role>
             </roles>
-            <organization>Center for Comprehensive Informatics, Emory
+            <organization>Department of Biomedical Informatics, Emory
                 University
             </organization>
         </developer>
@@ -158,7 +158,7 @@
             <roles>
                 <role>User Interface Designer</role>
             </roles>
-            <organization>Center for Comprehensive Informatics, Emory
+            <organization>Department of Biomedical Informatics, Emory
                 University
             </organization>
         </developer>
@@ -169,7 +169,7 @@
             <roles>
                 <role>Software Developer</role>
             </roles>
-            <organization>Center for Comprehensive Informatics, Emory
+            <organization>Department of Biomedical Informatics, Emory
                 University
             </organization>
         </developer>
@@ -180,7 +180,7 @@
             <roles>
                 <role>Project Manager</role>
             </roles>
-            <organization>Center for Comprehensive Informatics, Emory
+            <organization>Department of Biomedical Informatics, Emory
                 University
             </organization>
         </developer>
@@ -197,6 +197,63 @@
         <module>protempa-test-suite</module>
         <module>protempa-bconfigs-ini4j-ini</module>
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.protempa</groupId>
+                <artifactId>protempa-bconfigs-commons-ini</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.protempa</groupId>
+                <artifactId>protempa-bconfigs-ini4j-ini</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.protempa</groupId>
+                <artifactId>protempa-bcp-serviceloader</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.protempa</groupId>
+                <artifactId>protempa-bp-serviceloader</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.protempa</groupId>
+                <artifactId>protempa-dsb-relationaldb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.protempa</groupId>
+                <artifactId>protempa-framework</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.protempa</groupId>
+                <artifactId>protempa-framework</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>org.protempa</groupId>
+                <artifactId>protempa-ksb-protege</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.protempa</groupId>
+                <artifactId>protempa-test-suite</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.protempa</groupId>
+                <artifactId>protempa-tsb-umls</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -205,6 +262,45 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin
+                </artifactId>
+                <version>2.7</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin
+                </artifactId>
+                <version>2.16</version>
+                <configuration>
+                    <aggregate>true</aggregate>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.11</version>
+                <configuration>
+                    <configLocation>http://aiw.sourceforge.net/dev/aiw-checkstyle-1.0/protempa-checkstyle.xml</configLocation>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
+
     <build>
         <plugins>
             <plugin>
@@ -231,7 +327,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>1.4</version>
+                <version>1.5</version>
                 <configuration>
                     <licenseName>apache_v2</licenseName>
                     <roots>
@@ -290,7 +386,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9</version>
+                <version>2.9.1</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -304,66 +400,29 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.13</version>
+                <version>2.16</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.2</version>
+                <version>3.3</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.wagon</groupId>
                         <artifactId>wagon-ssh</artifactId>
-                        <version>2.3</version>
+                        <version>2.5</version>
                     </dependency>
                 </dependencies>
-                <configuration>
-                    <reportPlugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-project-info-reports-plugin
-                            </artifactId>
-                            <version>2.6</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>2.9</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-jxr-plugin</artifactId>
-                            <version>2.3</version>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-surefire-report-plugin
-                            </artifactId>
-                            <version>2.12.4</version>
-                            <configuration>
-                                <aggregate>true</aggregate>
-                            </configuration>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-checkstyle-plugin</artifactId>
-                            <version>2.9.1</version>
-                            <configuration>  
-                                <configLocation>http://aiw.sourceforge.net/dev/aiw-checkstyle-1.0/protempa-checkstyle.xml</configLocation>  
-                            </configuration>
-                        </plugin>
-                    </reportPlugins>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
-                <version>1.3</version>
+                <version>1.6</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.3</version>
+                <version>2.4</version>
                 <inherited>false</inherited>
                 <configuration>
                     <descriptors>
@@ -381,6 +440,7 @@
             </plugin>
         </plugins>
     </build>
+
     <profiles>
         <profile>
             <!-- For additional tests that are very slow or require resources
