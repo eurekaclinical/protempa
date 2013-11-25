@@ -162,9 +162,7 @@ public class INIConfigurations implements Configurations {
                     if (backendInstanceSpec != null) {
                         try {
                             backendInstanceSpec.parseProperty(string, string1);
-                        } catch (InvalidPropertyNameException ex) {
-                            exceptions.add(ex);
-                        } catch (InvalidPropertyValueException ex) {
+                        } catch (InvalidPropertyNameException | InvalidPropertyValueException ex) {
                             exceptions.add(ex);
                         }
                     }
@@ -192,9 +190,7 @@ public class INIConfigurations implements Configurations {
             return results;
         } catch (FileNotFoundException ex) {
             throw new ConfigurationsNotFoundException(ex);
-        } catch (IOException ex) {
-            throw new ConfigurationsLoadException(ex);
-        } catch (SecurityException ex) {
+        } catch (IOException | SecurityException ex) {
             throw new ConfigurationsLoadException(ex);
         }
     }
@@ -229,11 +225,7 @@ public class INIConfigurations implements Configurations {
             }
 
             ini.store(configurationsPath);
-        } catch (IOException ex) {
-            throw new ConfigurationsSaveException(ex);
-        } catch (InvalidPropertyNameException ex) {
-            throw new ConfigurationsSaveException(ex);
-        } catch (SecurityException ex) {
+        } catch (IOException | SecurityException | InvalidPropertyNameException ex) {
             throw new ConfigurationsSaveException(ex);
         }
     }
@@ -287,9 +279,7 @@ public class INIConfigurations implements Configurations {
             return results;
         } catch (FileNotFoundException ex) {
             throw new ConfigurationsNotFoundException(ex);
-        } catch (IOException ex) {
-            throw new ConfigurationsLoadException(ex);
-        } catch (SecurityException ex) {
+        } catch (IOException | SecurityException ex) {
             throw new ConfigurationsLoadException(ex);
         }
     }
