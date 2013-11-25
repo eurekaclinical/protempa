@@ -19,16 +19,20 @@
  */
 package org.protempa.bp.commons;
 
-import org.protempa.backend.annotations.BackendProperty;
+import org.protempa.backend.Backend;
+import org.protempa.backend.BackendPropertySpec;
+import org.protempa.backend.BackendPropertyValidator;
+import org.protempa.backend.BackendProvider;
+import org.protempa.backend.BackendSpec;
 import org.protempa.backend.annotations.BackendInfo;
-import org.protempa.backend.*;
+import org.protempa.backend.annotations.BackendProperty;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import org.protempa.backend.Backend;
 
 /**
  *
@@ -102,9 +106,7 @@ final class BackendSpecFactory {
                             type,
                             validatorCls != null ? validatorCls.newInstance() :
                                 null));
-                } catch (InstantiationException ex) {
-                    throw new AssertionError(ex);
-                } catch (IllegalAccessException ex) {
+                } catch (InstantiationException | IllegalAccessException ex) {
                     throw new AssertionError(ex);
                 }
             }

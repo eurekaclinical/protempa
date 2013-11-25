@@ -100,11 +100,7 @@ public final class CommonsBackendProvider
             throws BackendNewInstanceException {
         try {
             return Class.forName(resourceId).newInstance();
-        } catch (InstantiationException ex) {
-            throw new BackendNewInstanceException(ex);
-        } catch (IllegalAccessException ex) {
-            throw new BackendNewInstanceException(ex);
-        } catch (ClassNotFoundException ex) {
+        } catch (InstantiationException | ClassNotFoundException | IllegalAccessException ex) {
             throw new BackendNewInstanceException(ex);
         }
     }
