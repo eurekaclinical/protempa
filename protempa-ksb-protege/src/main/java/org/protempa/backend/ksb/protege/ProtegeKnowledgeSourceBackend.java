@@ -19,37 +19,36 @@
  */
 package org.protempa.backend.ksb.protege;
 
+import edu.stanford.smi.protege.event.ProjectEvent;
+import edu.stanford.smi.protege.event.ProjectListener;
+import edu.stanford.smi.protege.model.Cls;
+import edu.stanford.smi.protege.model.Instance;
+import edu.stanford.smi.protege.model.Slot;
+import org.apache.commons.lang3.ArrayUtils;
+import org.drools.util.StringUtils;
+import org.protempa.AbstractionDefinition;
+import org.protempa.ContextDefinition;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
+import org.protempa.TemporalPropositionDefinition;
+import org.protempa.TermSubsumption;
+import org.protempa.ValueSet;
+import org.protempa.backend.AbstractCommonsKnowledgeSourceBackend;
+import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.BackendInstanceSpec;
+import org.protempa.backend.KnowledgeSourceBackendInitializationException;
+import org.protempa.proposition.value.AbsoluteTimeUnit;
+import org.protempa.proposition.value.RelativeHourUnit;
+import org.protempa.proposition.value.Unit;
+import org.protempa.proposition.value.ValueType;
+import org.protempa.query.And;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import org.protempa.AbstractionDefinition;
-import org.protempa.backend.KnowledgeSourceBackendInitializationException;
-import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PropositionDefinition;
-import org.protempa.TermSubsumption;
-import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.backend.AbstractCommonsKnowledgeSourceBackend;
-import org.protempa.proposition.value.AbsoluteTimeUnit;
-import org.protempa.proposition.value.RelativeHourUnit;
-import org.protempa.proposition.value.Unit;
-import org.protempa.ValueSet;
-import org.protempa.proposition.value.ValueType;
-import org.protempa.query.And;
-
-import edu.stanford.smi.protege.event.ProjectEvent;
-import edu.stanford.smi.protege.event.ProjectListener;
-import edu.stanford.smi.protege.model.Cls;
-import edu.stanford.smi.protege.model.Instance;
-import edu.stanford.smi.protege.model.Slot;
-import org.apache.commons.lang.ArrayUtils;
-import org.drools.util.StringUtils;
-import org.protempa.ContextDefinition;
-import org.protempa.TemporalPropositionDefinition;
-import org.protempa.backend.BackendInitializationException;
 
 /**
  * Abstract class for converting a Protege knowledge base into a PROTEMPA
