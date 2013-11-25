@@ -115,11 +115,7 @@ public final class KnowledgeSourceImpl
             throws KnowledgeSourceReadException {
         try {
             initializeIfNeeded();
-        } catch (BackendInitializationException ex) {
-            String action = MessageFormat.format(template, substitution);
-            throw new KnowledgeSourceReadException(
-                    "An error occurred " + action, ex);
-        } catch (BackendNewInstanceException ex) {
+        } catch (BackendInitializationException | BackendNewInstanceException ex) {
             String action = MessageFormat.format(template, substitution);
             throw new KnowledgeSourceReadException(
                     "An error occurred " + action, ex);

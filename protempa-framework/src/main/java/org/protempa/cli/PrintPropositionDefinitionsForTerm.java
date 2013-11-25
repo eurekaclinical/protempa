@@ -71,9 +71,7 @@ public class PrintPropositionDefinitionsForTerm extends CLI {
                     System.out.println(propId);
                 }
             }
-        } catch (KnowledgeSourceReadException ex) {
-            throw new CLIException("Error reading term and its children", ex);
-        } catch (TermSourceReadException ex) {
+        } catch (KnowledgeSourceReadException | TermSourceReadException ex) {
             throw new CLIException("Error reading term and its children", ex);
         }
     }

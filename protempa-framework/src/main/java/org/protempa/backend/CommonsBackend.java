@@ -67,11 +67,7 @@ public class CommonsBackend {
                                     new Object[]{propertyValue
                                 });
                     }
-                } catch (IllegalAccessException ex) {
-                    throw new AssertionError(ex);
-                } catch (InvocationTargetException ex) {
-                    throw new AssertionError(ex);
-                } catch (InvalidPropertyNameException ex) {
+                } catch (IllegalAccessException | InvalidPropertyNameException | InvocationTargetException ex) {
                     throw new AssertionError(ex);
                 }
             }

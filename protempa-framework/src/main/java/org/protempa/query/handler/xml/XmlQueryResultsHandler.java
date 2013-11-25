@@ -190,16 +190,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
             document.appendChild(rootNode);
             printDocument(document);
 
-        } catch (IOException e) {
-            Util.logger().log(Level.SEVERE, e.getMessage(), e);
-            throw new QueryResultsHandlerProcessingException(e);
-        } catch (ProtempaException e) {
-            Util.logger().log(Level.SEVERE, e.getMessage(), e);
-            throw new QueryResultsHandlerProcessingException(e);
-        } catch (ParserConfigurationException e) {
-            Util.logger().log(Level.SEVERE, e.getMessage(), e);
-            throw new QueryResultsHandlerProcessingException(e);
-        } catch (TransformerException e) {
+        } catch (IOException | TransformerException | ParserConfigurationException | ProtempaException e) {
             Util.logger().log(Level.SEVERE, e.getMessage(), e);
             throw new QueryResultsHandlerProcessingException(e);
         }

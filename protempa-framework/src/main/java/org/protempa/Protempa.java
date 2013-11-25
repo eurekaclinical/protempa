@@ -59,13 +59,7 @@ public final class Protempa {
             throws ProtempaStartupException {
         try {
             return newInstance(new SourceFactory(configurationId));
-        } catch (ConfigurationsNotFoundException ex) {
-            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
-        } catch (ConfigurationsLoadException ex) {
-            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
-        } catch (BackendProviderSpecLoaderException ex) {
-            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
-        } catch (InvalidConfigurationException ex) {
+        } catch (ConfigurationsNotFoundException | InvalidConfigurationException | BackendProviderSpecLoaderException | ConfigurationsLoadException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
     }
@@ -77,9 +71,7 @@ public final class Protempa {
                     sourceFactory.newKnowledgeSourceInstance(),
                     sourceFactory.newAlgorithmSourceInstance(),
                     sourceFactory.newTermSourceInstance(), false);
-        } catch (BackendInitializationException ex) {
-            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
-        } catch (BackendNewInstanceException ex) {
+        } catch (BackendInitializationException | BackendNewInstanceException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
     }
@@ -88,13 +80,7 @@ public final class Protempa {
             throws ProtempaStartupException {
         try {
             return newInstance(new SourceFactory(configurationsId), useCache);
-        } catch (ConfigurationsNotFoundException ex) {
-            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
-        } catch (ConfigurationsLoadException ex) {
-            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
-        } catch (BackendProviderSpecLoaderException ex) {
-            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
-        } catch (InvalidConfigurationException ex) {
+        } catch (ConfigurationsNotFoundException | InvalidConfigurationException | BackendProviderSpecLoaderException | ConfigurationsLoadException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
     }
@@ -106,9 +92,7 @@ public final class Protempa {
                     sourceFactory.newKnowledgeSourceInstance(),
                     sourceFactory.newAlgorithmSourceInstance(),
                     sourceFactory.newTermSourceInstance(), useCache);
-        } catch (BackendInitializationException ex) {
-            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
-        } catch (BackendNewInstanceException ex) {
+        } catch (BackendInitializationException | BackendNewInstanceException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
     }

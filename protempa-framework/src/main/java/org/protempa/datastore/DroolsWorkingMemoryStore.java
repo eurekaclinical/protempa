@@ -92,9 +92,7 @@ final class DroolsWorkingMemoryStore implements
             WorkingMemory wm = ruleBase.newStatefulSession(bais, false);
             bais.close();
             return wm;
-        } catch (IOException ex) {
-            throw new IOError(ex);
-        } catch (ClassNotFoundException ex) {
+        } catch (IOException | ClassNotFoundException ex) {
             throw new IOError(ex);
         }
     }

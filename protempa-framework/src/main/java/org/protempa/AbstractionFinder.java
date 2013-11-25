@@ -19,18 +19,8 @@
  */
 package org.protempa;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
-
 import org.arp.javautil.collections.Iterators;
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.log.Logging;
@@ -45,7 +35,21 @@ import org.protempa.query.And;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
-import org.protempa.query.handler.*;
+import org.protempa.query.handler.QueryResultsHandler;
+import org.protempa.query.handler.QueryResultsHandlerCloseException;
+import org.protempa.query.handler.QueryResultsHandlerInitException;
+import org.protempa.query.handler.QueryResultsHandlerProcessingException;
+import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class that actually does the abstraction finding.
@@ -511,15 +515,7 @@ final class AbstractionFinder {
                 resultsHandler.finish();
                 resultsHandlerClosed = true;
                 resultsHandler.close();
-            } catch (QueryResultsHandlerProcessingException ex) {
-                throw new FinderException(queryId, ex);
-            } catch (QueryResultsHandlerValidationFailedException ex) {
-                throw new FinderException(queryId, ex);
-            } catch (KnowledgeSourceReadException ex) {
-                throw new FinderException(queryId, ex);
-            } catch (QueryResultsHandlerInitException ex) {
-                throw new FinderException(queryId, ex);
-            } catch (QueryResultsHandlerCloseException ex) {
+            } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerValidationFailedException | KnowledgeSourceReadException | QueryResultsHandlerInitException | QueryResultsHandlerCloseException ex) {
                 throw new FinderException(queryId, ex);
             } finally {
                 if (!resultsHandlerClosed) {

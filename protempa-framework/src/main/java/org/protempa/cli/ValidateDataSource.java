@@ -45,9 +45,7 @@ public class ValidateDataSource extends CLI {
             protempa.validateDataSourceBackendData();
             System.out.println(
                "Data source validation completed with no validation failures.");
-        } catch (DataSourceFailedDataValidationException ex) {
-            printException(ex);
-        } catch (DataSourceValidationIncompleteException ex) {
+        } catch (DataSourceFailedDataValidationException | DataSourceValidationIncompleteException ex) {
             printException(ex);
         }
     }
