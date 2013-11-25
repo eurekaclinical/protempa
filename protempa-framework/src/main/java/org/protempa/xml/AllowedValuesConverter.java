@@ -19,74 +19,72 @@
  */
 package org.protempa.xml;
 
-import java.util.ArrayList;
-
-import org.mvel.ConversionException;
-import org.protempa.proposition.value.Value;
-
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.mvel.ConversionException;
+import org.protempa.proposition.value.Value;
+
+import java.util.ArrayList;
 
 /**
  * @author mgrand
- * 
  */
 class AllowedValuesConverter extends AbstractConverter {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.
-	 * lang.Class)
-	 */
-	@Override
-	public boolean canConvert(@SuppressWarnings("rawtypes") Class type) {
-		return Value[].class.equals(type);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.
+     * lang.Class)
+     */
+    @Override
+    public boolean canConvert(@SuppressWarnings("rawtypes") Class type) {
+        return Value[].class.equals(type);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.thoughtworks.xstream.converters.Converter#marshal(java.lang.Object,
-	 * com.thoughtworks.xstream.io.HierarchicalStreamWriter,
-	 * com.thoughtworks.xstream.converters.MarshallingContext)
-	 */
-	@Override
-	public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
-		Value[] values = (Value[]) source;
-		if (values == null || values.length == 0) {
-			return;
-		}
-		Class<?> valueClass = values[0].getClass();
-		for (Value value : values) {
-			if (value.getClass() != valueClass) {
-				String msg = "Cannot convert allowed values to XML for mixed types of values that include " //
-					+ value.getClass().getName() + " and " + valueClass.getName();
-				throw new ConversionException(msg);
-			}
-			valueToXML(writer, context, value);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.thoughtworks.xstream.converters.Converter#marshal(java.lang.Object,
+     * com.thoughtworks.xstream.io.HierarchicalStreamWriter,
+     * com.thoughtworks.xstream.converters.MarshallingContext)
+     */
+    @Override
+    public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
+        Value[] values = (Value[]) source;
+        if (values == null || values.length == 0) {
+            return;
+        }
+        Class<?> valueClass = values[0].getClass();
+        for (Value value : values) {
+            if (value.getClass() != valueClass) {
+                String msg = "Cannot convert allowed values to XML for mixed types of values that include " //
+                        + value.getClass().getName() + " and " + valueClass.getName();
+                throw new ConversionException(msg);
+            }
+            valueToXML(writer, context, value);
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.thoughtworks.xstream.converters.Converter#unmarshal(com.thoughtworks
-	 * .xstream.io.HierarchicalStreamReader,
-	 * com.thoughtworks.xstream.converters.UnmarshallingContext)
-	 */
-	@Override
-	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		ArrayList<Value> valueList = new ArrayList<>();
-		while (reader.hasMoreChildren()) {
-			valueList.add((Value)valueFromXML(reader, context)); 
-		}
-		return valueList.toArray(new Value[valueList.size()]);
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.thoughtworks.xstream.converters.Converter#unmarshal(com.thoughtworks
+     * .xstream.io.HierarchicalStreamReader,
+     * com.thoughtworks.xstream.converters.UnmarshallingContext)
+     */
+    @Override
+    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+        ArrayList<Value> valueList = new ArrayList<>();
+        while (reader.hasMoreChildren()) {
+            valueList.add((Value) valueFromXML(reader, context));
+        }
+        return valueList.toArray(new Value[valueList.size()]);
+    }
 
 }

@@ -19,111 +19,110 @@
  */
 package org.protempa.xml;
 
-import java.util.Date;
-
-import org.protempa.backend.dsb.filter.DateTimeFilter;
-import org.protempa.proposition.value.Granularity;
-
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.proposition.interval.Interval.Side;
+import org.protempa.proposition.value.Granularity;
+
+import java.util.Date;
 
 /**
  * Convert a Filter object to/from XML <filters></filters>
- * 
+ *
  * @author mgrand
  */
 class DateTimeFilterConverter extends AbstractConverter {
 
-	private static final String PROPOSITION_IDS = "propositionIDs";
-	private static final String FINISH_SIDE = "finishSide";
-	private static final String START_SIDE = "startSide";
-	private static final String FINISH_GRANULARITY = "finishGranularity";
-	private static final String FINISH = "finish";
-	private static final String START_GRANULARITY = "startGranularity";
-	private static final String START = "start";
-	
-	private MillisecondsValueConverter msConverter = new MillisecondsValueConverter();
+    private static final String PROPOSITION_IDS = "propositionIDs";
+    private static final String FINISH_SIDE = "finishSide";
+    private static final String START_SIDE = "startSide";
+    private static final String FINISH_GRANULARITY = "finishGranularity";
+    private static final String FINISH = "finish";
+    private static final String START_GRANULARITY = "startGranularity";
+    private static final String START = "start";
 
-	/**
-	 * Constructor
-	 */
-	public DateTimeFilterConverter() {
-		super();
-	}
+    private MillisecondsValueConverter msConverter = new MillisecondsValueConverter();
 
-	/**
-	 * This converter is intended to be explicitly called from other converters
-	 * as it corresponds to nothing 
-	 */
-	@Override
-	public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) {
-		return DateTimeFilter.class.equals(clazz);
-	}
+    /**
+     * Constructor
+     */
+    public DateTimeFilterConverter() {
+        super();
+    }
 
-	/**
-	 * @see com.thoughtworks.xstream.converters.Converter#marshal(java.lang.Object,
-	 *      com.thoughtworks.xstream.io.HierarchicalStreamWriter,
-	 *      com.thoughtworks.xstream.converters.MarshallingContext)
-	 */
-	@Override
-	public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
-		DateTimeFilter filter = (DateTimeFilter) value;
-		
-		writer.addAttribute(START, msConverter.toString(filter.getStart()));
-		
-		GranularityValueConverter granularityConverter = new GranularityValueConverter();
-		writer.addAttribute(START_GRANULARITY, granularityConverter.toString(filter.getStartGranularity()));
-		
-		writer.addAttribute(FINISH, msConverter.toString(filter.getFinish()));
-		
-		writer.addAttribute(FINISH_GRANULARITY, granularityConverter.toString(filter.getFinishGranularity()));
-		
-		writer.addAttribute(START_SIDE, filter.getStartSide().name());
-		
-		writer.addAttribute(FINISH_SIDE, filter.getFinishSide().name());
-		
-		writer.startNode(PROPOSITION_IDS);
-		PropIDsConverter propIdsConverter = new PropIDsConverter();
-		context.convertAnother(filter.getPropositionIds(), propIdsConverter);
-		writer.endNode();
-	}
+    /**
+     * This converter is intended to be explicitly called from other converters
+     * as it corresponds to nothing
+     */
+    @Override
+    public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) {
+        return DateTimeFilter.class.equals(clazz);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.thoughtworks.xstream.converters.Converter#unmarshal(com.thoughtworks
-	 * .xstream.io.HierarchicalStreamReader,
-	 * com.thoughtworks.xstream.converters.UnmarshallingContext)
-	 */
-	@Override
-	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		Date start = (Date)XMLConfiguration.STANDARD_DATE_CONVERTER.fromString(reader.getAttribute(START));
-		
-		GranularityValueConverter granularityConverter = new GranularityValueConverter();
-		String startGranularityString = reader.getAttribute(START_GRANULARITY);
-		Granularity startGranularity = (Granularity)granularityConverter.fromString(startGranularityString);
-		
-		Date finish = (Date)XMLConfiguration.STANDARD_DATE_CONVERTER.fromString(reader.getAttribute(FINISH));
+    /**
+     * @see com.thoughtworks.xstream.converters.Converter#marshal(java.lang.Object,
+     *      com.thoughtworks.xstream.io.HierarchicalStreamWriter,
+     *      com.thoughtworks.xstream.converters.MarshallingContext)
+     */
+    @Override
+    public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {
+        DateTimeFilter filter = (DateTimeFilter) value;
 
-		String finishGranularityString = reader.getAttribute(FINISH_GRANULARITY);
-		Granularity finishGranularity = (Granularity)granularityConverter.fromString(finishGranularityString);
+        writer.addAttribute(START, msConverter.toString(filter.getStart()));
 
-		String startSideString = reader.getAttribute(START_SIDE);
-		Side startSide = Side.valueOf(startSideString);
-		
-		String finishSideString = reader.getAttribute(FINISH_SIDE);
-		Side finishSide = Side.valueOf(finishSideString);
-		expectChildren(reader);
+        GranularityValueConverter granularityConverter = new GranularityValueConverter();
+        writer.addAttribute(START_GRANULARITY, granularityConverter.toString(filter.getStartGranularity()));
 
-		reader.moveDown();
-		expect(reader, PROPOSITION_IDS);
-		String[] propostionsIds = (String[])context.convertAnother(null, String[].class, new PropIDsConverter());
-		reader.moveUp();
-		
-		return new DateTimeFilter(propostionsIds, start, startGranularity, finish, finishGranularity, startSide, finishSide);
-	}
+        writer.addAttribute(FINISH, msConverter.toString(filter.getFinish()));
+
+        writer.addAttribute(FINISH_GRANULARITY, granularityConverter.toString(filter.getFinishGranularity()));
+
+        writer.addAttribute(START_SIDE, filter.getStartSide().name());
+
+        writer.addAttribute(FINISH_SIDE, filter.getFinishSide().name());
+
+        writer.startNode(PROPOSITION_IDS);
+        PropIDsConverter propIdsConverter = new PropIDsConverter();
+        context.convertAnother(filter.getPropositionIds(), propIdsConverter);
+        writer.endNode();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.thoughtworks.xstream.converters.Converter#unmarshal(com.thoughtworks
+     * .xstream.io.HierarchicalStreamReader,
+     * com.thoughtworks.xstream.converters.UnmarshallingContext)
+     */
+    @Override
+    public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
+        Date start = (Date) XMLConfiguration.STANDARD_DATE_CONVERTER.fromString(reader.getAttribute(START));
+
+        GranularityValueConverter granularityConverter = new GranularityValueConverter();
+        String startGranularityString = reader.getAttribute(START_GRANULARITY);
+        Granularity startGranularity = (Granularity) granularityConverter.fromString(startGranularityString);
+
+        Date finish = (Date) XMLConfiguration.STANDARD_DATE_CONVERTER.fromString(reader.getAttribute(FINISH));
+
+        String finishGranularityString = reader.getAttribute(FINISH_GRANULARITY);
+        Granularity finishGranularity = (Granularity) granularityConverter.fromString(finishGranularityString);
+
+        String startSideString = reader.getAttribute(START_SIDE);
+        Side startSide = Side.valueOf(startSideString);
+
+        String finishSideString = reader.getAttribute(FINISH_SIDE);
+        Side finishSide = Side.valueOf(finishSideString);
+        expectChildren(reader);
+
+        reader.moveDown();
+        expect(reader, PROPOSITION_IDS);
+        String[] propostionsIds = (String[]) context.convertAnother(null, String[].class, new PropIDsConverter());
+        reader.moveUp();
+
+        return new DateTimeFilter(propostionsIds, start, startGranularity, finish, finishGranularity, startSide, finishSide);
+    }
 }

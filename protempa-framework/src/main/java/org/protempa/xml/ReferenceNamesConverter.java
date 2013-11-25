@@ -22,13 +22,12 @@ package org.protempa.xml;
 
 /**
  * @author mgrand
- *
  */
 class ReferenceNamesConverter extends StringArrayConverter {
-	private static final String REFERENCE_NAME = "referenceName";
+    private static final String REFERENCE_NAME = "referenceName";
 
-	public ReferenceNamesConverter() {
-		super(REFERENCE_NAME);
-	}
+    public ReferenceNamesConverter() {
+        super(REFERENCE_NAME);
+    }
 
 }

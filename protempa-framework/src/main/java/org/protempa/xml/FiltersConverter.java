@@ -19,6 +19,11 @@
  */
 package org.protempa.xml;
 
+import com.thoughtworks.xstream.converters.ConversionException;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.protempa.backend.dsb.filter.AbstractFilter;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.Filter;
@@ -26,15 +31,9 @@ import org.protempa.backend.dsb.filter.PositionFilter;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import org.protempa.proposition.value.ValueComparator;
 
-import com.thoughtworks.xstream.converters.ConversionException;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-
 /**
  * Convert a Filter object to/from XML <filters></filters>
- * 
+ *
  * @author mgrand
  */
 class FiltersConverter extends AbstractConverter {
@@ -88,15 +87,15 @@ class FiltersConverter extends AbstractConverter {
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         Filter firstFilter = null;
         Filter lastFilter = null;
-        while(reader.hasMoreChildren()) {
+        while (reader.hasMoreChildren()) {
             reader.moveDown();
             Class<? extends Filter> childClass = xmlTagToClass(reader.getNodeName());
-            Filter thisFilter = (Filter)context.convertAnother(null, childClass);
+            Filter thisFilter = (Filter) context.convertAnother(null, childClass);
             if (firstFilter == null) {
                 firstFilter = thisFilter;
                 lastFilter = thisFilter;
             } else {
-                ((AbstractFilter)lastFilter).setAnd(thisFilter);
+                ((AbstractFilter) lastFilter).setAnd(thisFilter);
                 lastFilter = thisFilter;
             }
             reader.moveUp();
@@ -115,7 +114,8 @@ class FiltersConverter extends AbstractConverter {
             case POSITION_FILTER:
                 return PositionFilter.class;
             default:
-                throw new ConversionException("<filters> has a child with the unexpected tag " + tag);        }
+                throw new ConversionException("<filters> has a child with the unexpected tag " + tag);
+        }
     }
 
     private String objectToXmlTag(Filter filter) {
@@ -124,7 +124,7 @@ class FiltersConverter extends AbstractConverter {
             return DATE_TIME_FILTER;
         }
         if (clazz == PropertyValueFilter.class) {
-            PropertyValueFilter pvFilter = (PropertyValueFilter)filter;
+            PropertyValueFilter pvFilter = (PropertyValueFilter) filter;
             ValueComparator comparitor = pvFilter.getValueComparator();
             if (comparitor.equals(ValueComparator.IN) || comparitor.equals(ValueComparator.NOT_IN)) {
                 return PROPERTY_VALUES_FILTER;

@@ -19,17 +19,15 @@
  */
 package org.protempa.xml;
 
-import org.protempa.proposition.interval.Relation;
-import org.protempa.proposition.value.Unit;
-
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.proposition.interval.Relation;
+import org.protempa.proposition.value.Unit;
 
 /**
  * @author mgrand
- * 
  */
 class RelationConverter extends AbstractConverter {
 

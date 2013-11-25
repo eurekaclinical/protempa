@@ -22,12 +22,11 @@ package org.protempa.xml;
 
 /**
  * @author mgrand
- *
  */
 class PropertyNamesConverter extends StringArrayConverter {
-	private static final String PROPERTY_NAME = "propertyName";
-	
-	public PropertyNamesConverter() {
-		super(PROPERTY_NAME);
-	}
+    private static final String PROPERTY_NAME = "propertyName";
+
+    public PropertyNamesConverter() {
+        super(PROPERTY_NAME);
+    }
 }
