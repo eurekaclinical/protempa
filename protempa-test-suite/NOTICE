@@ -17,6 +17,7 @@ This project includes:
   Apache POI under The Apache Software License, Version 2.0
   Apache ServiceMix :: Bundles :: xstream under The Apache Software License, Version 2.0
   Commons CLI under The Apache Software License, Version 2.0
+  Commons Codec under The Apache Software License, Version 2.0
   Commons IO under The Apache Software License, Version 2.0
   Commons Lang under The Apache Software License, Version 2.0
   dom4j under BSD License
@@ -39,7 +40,6 @@ This project includes:
   Protempa Test Suite under Apache License, Version 2.0
   Protempa UMLS Term Source Backend under Apache License, Version 2.0
   StAX API under The Apache Software License, Version 2.0
-  Streaming API for XML (STAX API 1.0) under The Apache Software License, Version 2.0
   UMLSQuery under Apache License, Version 2.0
   XML Commons External Components XML APIs under The Apache Software License, Version 2.0
   XmlBeans under The Apache Software License, Version 2.0
