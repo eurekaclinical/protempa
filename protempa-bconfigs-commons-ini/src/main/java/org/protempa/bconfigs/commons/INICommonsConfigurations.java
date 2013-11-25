@@ -184,13 +184,7 @@ public class INICommonsConfigurations implements Configurations {
                 results.add(backendInstanceSpec);
             }
             return results;
-        } catch (InvalidPropertyNameException ex) {
-            throw new ConfigurationsLoadException(ex);
-        } catch (InvalidPropertyValueException ex) {
-            throw new ConfigurationsLoadException(ex);
-        } catch (ConfigurationException ex) {
-            throw new ConfigurationsLoadException(ex);
-        } catch (NumberFormatException ex) {
+        } catch (InvalidPropertyNameException | NumberFormatException | ConfigurationException | InvalidPropertyValueException ex) {
             throw new ConfigurationsLoadException(ex);
         }
     }
@@ -228,9 +222,7 @@ public class INICommonsConfigurations implements Configurations {
             }
 
             config.save(configurationsPath.getPath());
-        } catch (InvalidPropertyNameException ex) {
-            throw new ConfigurationsSaveException(ex);
-        } catch (ConfigurationException ex) {
+        } catch (InvalidPropertyNameException | ConfigurationException ex) {
             throw new ConfigurationsSaveException(ex);
         }
     }
