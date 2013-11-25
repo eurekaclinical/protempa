@@ -137,8 +137,8 @@ public class INIConfigurations implements Configurations {
             File file = new File(this.directory, configurationsId);
             FileReader fr = new FileReader(file);
             final List<BackendInstanceSpec<B>> results =
-                    new ArrayList<BackendInstanceSpec<B>>();
-            final List<Exception> exceptions = new ArrayList<Exception>();
+                    new ArrayList<>();
+            final List<Exception> exceptions = new ArrayList<>();
             parser.parse(fr, new IniHandler() {
                 private BackendInstanceSpec<B> backendInstanceSpec;
 
@@ -257,7 +257,7 @@ public class INIConfigurations implements Configurations {
         IniParser parser = new IniParser();
         try {
             FileReader fr = new FileReader(new File(this.directory, configurationId));
-            final List<String> results = new ArrayList<String>();
+            final List<String> results = new ArrayList<>();
             parser.parse(fr, new IniHandler() {
                 @Override
                 public void endIni() {

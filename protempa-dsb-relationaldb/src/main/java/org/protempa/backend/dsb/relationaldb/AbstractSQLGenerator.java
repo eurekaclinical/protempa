@@ -76,9 +76,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private RelationalDbDataSourceBackend backend;
 
     protected AbstractSQLGenerator() {
-        this.primitiveParameterSpecs = new HashMap<String, List<EntitySpec>>();
-        this.eventSpecs = new HashMap<String, List<EntitySpec>>();
-        this.constantSpecs = new HashMap<String, List<EntitySpec>>();
+        this.primitiveParameterSpecs = new HashMap<>();
+        this.eventSpecs = new HashMap<>();
+        this.constantSpecs = new HashMap<>();
     }
 
     @Override
@@ -171,7 +171,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     "Error getting a database connection", ex);
         }
         final List<StreamingIteratorPair> itrs =
-                new ArrayList<StreamingIteratorPair>();
+                new ArrayList<>();
         //if (transaction) {
         final StreamingSQLExecutor streamingExecutor = new StreamingSQLExecutor(
                 connection, backendNameForMessages(),
@@ -275,10 +275,10 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 //            }
         }
         List<DataStreamingEventIterator<Proposition>> events =
-                new ArrayList<DataStreamingEventIterator<Proposition>>(
+                new ArrayList<>(
                 itrs.size());
         List<DataStreamingEventIterator<UniqueIdPair>> refs =
-                new ArrayList<DataStreamingEventIterator<UniqueIdPair>>();
+                new ArrayList<>();
         for (StreamingIteratorPair pair : itrs) {
             events.add(pair.getProps());
             refs.addAll(pair.getRefs());
@@ -498,7 +498,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Set<String> propIds, Set<String> keyIds,
             StreamingSQLExecutor executor)
             throws DataSourceReadException {
-        List<StreamingIteratorPair> result = new ArrayList<StreamingIteratorPair>();
+        List<StreamingIteratorPair> result = new ArrayList<>();
         Logger logger = SQLGenUtil.logger();
         logProcessingEntitySpec(logger, entitySpec);
 
@@ -597,7 +597,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                             referredToEntitySpec, refsApplicableFilters);
 
                     SortedMap<String, ReferenceSpec> applicableRefSpecs = new
-                            TreeMap<String, ReferenceSpec>();
+                            TreeMap<>();
 
                     for (Set<Filter> filterSet : refsFilterSets) {
                         generateAndExecuteSelect(entitySpec, referenceSpec,
@@ -626,7 +626,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             StreamingSQLExecutor executor)
             throws DataSourceReadException {
         List<ReferenceResultSetIterator> itrs =
-                new ArrayList<ReferenceResultSetIterator>();
+                new ArrayList<>();
         ReferenceSpec[] refSpecs = entitySpec.getReferenceSpecs();
         if (refSpecs != null) {
             Logger logger = SQLGenUtil.logger();
@@ -694,7 +694,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     private static List<EntitySpec> computeApplicableEntitySpecs(
             Collection<EntitySpec> allEntitySpecs, EntitySpec entitySpec) {
-        List<EntitySpec> result = new LinkedList<EntitySpec>(allEntitySpecs);
+        List<EntitySpec> result = new LinkedList<>(allEntitySpecs);
         removeNonApplicableEntitySpecs(entitySpec, result);
         logApplicableEntitySpecs(result);
         assert !result.isEmpty() :
@@ -739,7 +739,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             }
         }
         Unit partitionBy = entitySpec.getPartitionBy();
-        List<Set<Filter>> filterList = new ArrayList<Set<Filter>>();
+        List<Set<Filter>> filterList = new ArrayList<>();
         if (partitionBy == null
                 || positionFilter == null
                 || positionFilter.getStart() == null
@@ -755,7 +755,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Unit finishUnit = finishGran != null ? finishGran.getCorrespondingUnit() : null;
             boolean doLoop = true;
             while (doLoop) {
-                Set<Filter> newFiltersCopy = new HashSet<Filter>(filtersCopy);
+                Set<Filter> newFiltersCopy = new HashSet<>(filtersCopy);
                 newFiltersCopy.remove(positionFilter);
                 Long nextStart = partitionBy.addToPosition(start, 1);
                 Long finish = finishUnit != null ? finishUnit.addToPosition(
@@ -778,7 +778,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     private List<EntitySpec> copyEntitySpecsForRefs(EntitySpec entitySpec,
             Collection<EntitySpec> allEntitySpecs) {
-        List<EntitySpec> allEntitySpecsCopyForRefs = new LinkedList<EntitySpec>();
+        List<EntitySpec> allEntitySpecsCopyForRefs = new LinkedList<>();
         allEntitySpecsCopyForRefs.add(entitySpec);
         for (EntitySpec es : allEntitySpecs) {
             if (es != entitySpec) {
@@ -795,7 +795,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         try {
             stager = getDataStager(this.stagedTableSpecs, null,
-                    new LinkedList<EntitySpec>(allEntitySpecs),
+                    new LinkedList<>(allEntitySpecs),
                     copyFilters(filters), propIds, keyIds, order,
                     this.connectionSpec);
             stager.stageTables();
@@ -850,7 +850,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private ResultCache<Proposition> newResultCache() throws DataSourceReadException {
         ResultCache<Proposition> results;
         try {
-            results = new ResultCache<Proposition>();
+            results = new ResultCache<>();
         } catch (IOException ex) {
             throw new DataSourceReadException(
                     "Could not create the cache", ex);
@@ -879,7 +879,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             String[] propIds = f.getPropositionIds();
             FILTER_LOOP:
             for (String propId : propIds) {
-                List<EntitySpec> entitySpecs = new ArrayList<EntitySpec>();
+                List<EntitySpec> entitySpecs = new ArrayList<>();
                 if (this.constantSpecs.containsKey(propId)) {
                     entitySpecs.addAll(this.constantSpecs.get(propId));
                 }
@@ -1038,7 +1038,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private static LinkedHashMap<String, ReferenceSpec> collectInboundRefSpecs
             (Collection<EntitySpec> entitySpecs, EntitySpec rhsEntitySpec,
             Set<String> propIds) {
-        LinkedHashMap<String, ReferenceSpec> result = new LinkedHashMap<String, ReferenceSpec>();
+        LinkedHashMap<String, ReferenceSpec> result = new LinkedHashMap<>();
 
         for (EntitySpec lhsReferenceSpec : entitySpecs) {
             if (lhsReferenceSpec.hasReferenceTo(rhsEntitySpec) && 
@@ -1069,8 +1069,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private static Map<String, ReferenceSpec> collectBidirectionalReferences
             (Collection<EntitySpec> entitySpecs, EntitySpec lhsEntitySpec,
             Set<String> propIds) {
-        Map<String, ReferenceSpec> result = new HashMap<String,
-                ReferenceSpec>();
+        Map<String, ReferenceSpec> result = new HashMap<>();
 
         for (ReferenceSpec lhsToRhsReferenceSpec : lhsEntitySpec.getReferenceSpecs()) {
             for (EntitySpec rhsEntitySpec : entitySpecs) {
@@ -1102,7 +1101,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
          * The order of the entity specs matters for multiple with the same
          * name. Thus, we use a LinkedHashMap.
          */
-        Map<EntitySpec, SQLGenResultProcessorFactory> result = new LinkedHashMap<EntitySpec, SQLGenResultProcessorFactory>();
+        Map<EntitySpec, SQLGenResultProcessorFactory> result = new LinkedHashMap<>();
         PrimitiveParameterResultProcessorFactory ppFactory = new PrimitiveParameterResultProcessorFactory();
         for (EntitySpec es : this.primitiveParameterEntitySpecs) {
             result.put(es, ppFactory);
@@ -1126,7 +1125,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     private static Set<Filter> copyFilters(Filter filters) {
-        Set<Filter> filtersCopy = new HashSet<Filter>();
+        Set<Filter> filtersCopy = new HashSet<>();
         if (filters != null) {
             for (Iterator<Filter> itr = filters.andIterator(); itr.hasNext();) {
                 filtersCopy.add(itr.next());
@@ -1225,8 +1224,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private static void removeNonApplicableFilters(
             Collection<EntitySpec> entitySpecs, Set<Filter> filtersCopy,
             EntitySpec entitySpec) {
-        Set<EntitySpec> entitySpecsSet = new HashSet<EntitySpec>();
-        Set<String> filterPropIds = new HashSet<String>();
+        Set<EntitySpec> entitySpecsSet = new HashSet<>();
+        Set<String> filterPropIds = new HashSet<>();
         String[] entitySpecPropIds = entitySpec.getPropositionIds();
         for (Iterator<Filter> itr = filtersCopy.iterator(); itr.hasNext();) {
             Filter f = itr.next();
@@ -1298,7 +1297,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         Set<String> entitySpecPropIdsSet = Arrays.asSet(entitySpecPropIds);
 
         // Filter propIds that are not in the entitySpecPropIds array.
-        List<String> filteredPropIds = new ArrayList<String>(
+        List<String> filteredPropIds = new ArrayList<>(
                 entitySpecPropIds.length);
         for (String propId : queryPropIds) {
             if (entitySpecPropIdsSet.contains(propId)) {
@@ -1336,7 +1335,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     private Map<EntitySpec, List<String>> entitySpecToPropIds(
             Set<String> propIds) throws AssertionError {
-        Map<EntitySpec, List<String>> result = new HashMap<EntitySpec, List<String>>();
+        Map<EntitySpec, List<String>> result = new HashMap<>();
         for (String propId : propIds) {
             boolean inDataSource = populateEntitySpecToPropIdMap(
                     new String[]{propId}, result);

@@ -43,7 +43,7 @@ final class SingleColumnQueryResultsHandler
     private final Writer writer;
 
     private final Map<String, Map<Proposition, List<Proposition>>> data = 
-            new HashMap<String, Map<Proposition, List<Proposition>>>();
+            new HashMap<>();
 
     /**
      * Creates a new instance that will write to the given writer. The finish()
@@ -59,12 +59,12 @@ final class SingleColumnQueryResultsHandler
     @Override
     public void finish() throws QueryResultsHandlerProcessingException {
         try {
-            SortedSet<String> sortedKeyIds = new TreeSet<String>(
+            SortedSet<String> sortedKeyIds = new TreeSet<>(
                     this.data.keySet());
             for (String keyId : sortedKeyIds) {
                 writeLine(keyId);
                 List<PropositionWithDerivations> sortedProps = 
-                        new ArrayList<PropositionWithDerivations>();
+                        new ArrayList<>();
                 for (Entry<Proposition, List<Proposition>> pp : this.data.get(
                         keyId).entrySet()) {
                     sortedProps.add(new PropositionWithDerivations(pp.getKey(),
@@ -75,7 +75,7 @@ final class SingleColumnQueryResultsHandler
                 for (PropositionWithDerivations pwd : sortedProps) {
                     writeLine(pwd.getProposition().getId());
                     List<Proposition> sortedDerivations = 
-                            new ArrayList<Proposition>(pwd.getDerivations());
+                            new ArrayList<>(pwd.getDerivations());
                     Collections.sort(sortedDerivations,
                             new PropositionComparator());
                     for (Proposition d : sortedDerivations) {

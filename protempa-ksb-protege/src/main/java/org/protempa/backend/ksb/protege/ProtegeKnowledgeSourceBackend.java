@@ -168,14 +168,14 @@ public abstract class ProtegeKnowledgeSourceBackend
     @Override
     public List<String> getPropositionsByTermSubsumption(
             And<TermSubsumption> termIds) throws KnowledgeSourceReadException {
-        List<String> result = new ArrayList<String>();
-        List<Set<String>> propIdSets = new ArrayList<Set<String>>();
+        List<String> result = new ArrayList<>();
+        List<Set<String>> propIdSets = new ArrayList<>();
 
         Slot termPropositionSlot = this.cm.getSlot("termProposition");
 
         // collects the set of proposition IDs for each term subsumption
         for (TermSubsumption ts : termIds.getAnded()) {
-            Set<String> subsumpPropIds = new HashSet<String>();
+            Set<String> subsumpPropIds = new HashSet<>();
             for (String termId : ts.getTerms()) {
                 Instance termInstance = this.cm.getInstance(termId);
                 if (termInstance != null) {

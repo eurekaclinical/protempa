@@ -75,8 +75,8 @@ public final class CommonsBackendProvider
             getBackendSpecLoader(Class<B> clazz) 
             throws BackendProviderSpecLoaderException {
         ArrayList<BackendSpec<B>> backendSpecs =
-                new ArrayList<BackendSpec<B>>();
-        List<Class<?>> classNamesL = new ArrayList<Class<?>>();
+                new ArrayList<>();
+        List<Class<?>> classNamesL = new ArrayList<>();
         try {
             classNamesL.addAll(ClassServiceLoader.load(clazz));
         } catch (ServiceConfigurationError ex) {
@@ -92,7 +92,7 @@ public final class CommonsBackendProvider
                         + className + " is invalid", ex);
             }
         }
-        return new BackendSpecLoader<B>(backendSpecs);
+        return new BackendSpecLoader<>(backendSpecs);
     }
 
     @Override

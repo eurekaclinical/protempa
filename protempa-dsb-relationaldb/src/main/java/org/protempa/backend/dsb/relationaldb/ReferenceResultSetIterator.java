@@ -79,7 +79,7 @@ public final class ReferenceResultSetIterator
                 new String[referenceSpec.getUniqueIdSpecs().length];
         this.uniqueIdsCopy = new String[uniqueIds.length];
         this.processor = processor;
-        this.props = new ArrayList<UniqueIdPair>();
+        this.props = new ArrayList<>();
         this.statement = processor.getStatement();
     }
 
@@ -248,7 +248,7 @@ public final class ReferenceResultSetIterator
     }
 
     private void createDataStreamingEvent(List<UniqueIdPair> uniqueIds) {
-        this.dataStreamingEvent = new DataStreamingEvent<UniqueIdPair>(this.keyId, uniqueIds);
-        this.props = new ArrayList<UniqueIdPair>();
+        this.dataStreamingEvent = new DataStreamingEvent<>(this.keyId, uniqueIds);
+        this.props = new ArrayList<>();
     }
 }

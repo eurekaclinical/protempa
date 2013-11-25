@@ -381,7 +381,7 @@ public final class ColumnSpec implements Serializable {
         } else {
             this.propIdToSqlCodes = EMPTY_KNOWLEDGE_SOURCE_ID_TO_SQL_CODE_ARRAY;
         }
-        this.propIdForSqlCode = new HashMap<Object, String>();
+        this.propIdForSqlCode = new HashMap<>();
         for (KnowledgeSourceIdToSqlCode k : this.propIdToSqlCodes) {
             propIdForSqlCode.put(k.sqlCode, k.propositionId);
         }
@@ -562,7 +562,7 @@ public final class ColumnSpec implements Serializable {
      * @return a {@link List<ColumnSpec>}.
      */
     List<ColumnSpec> asList() {
-        List<ColumnSpec> columnSpecs = new ArrayList<ColumnSpec>();
+        List<ColumnSpec> columnSpecs = new ArrayList<>();
         ColumnSpec spec = this;
         columnSpecs.add(spec);
         while (spec.getJoin() != null) {

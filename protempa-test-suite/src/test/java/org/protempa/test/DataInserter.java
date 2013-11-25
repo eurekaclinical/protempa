@@ -89,7 +89,7 @@ public final class DataInserter {
      */
     public void truncateTables() throws SQLException {
         final Connection connection = getConnection();
-        final List<String> sqlStatements = new ArrayList<String>();
+        final List<String> sqlStatements = new ArrayList<>();
         for (String table : TABLES) {
             sqlStatements.add("truncate table " + table);
         }

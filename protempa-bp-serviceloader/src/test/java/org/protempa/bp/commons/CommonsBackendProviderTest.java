@@ -79,7 +79,7 @@ public class CommonsBackendProviderTest {
     @Test
     public void testEnumerateDataSourceBackends() 
             throws BackendProviderSpecLoaderException {
-        Set<String> backendIds = new HashSet<String>();
+        Set<String> backendIds = new HashSet<>();
         for (BackendSpec<?> spec :
             backendProvider.getDataSourceBackendSpecLoader()) {
             backendIds.add(spec.getId());
@@ -158,12 +158,12 @@ public class CommonsBackendProviderTest {
     @Test
     public void testEnumerateKnowledgeSourceBackends() 
             throws BackendProviderSpecLoaderException {
-        Set<String> backendIds = new HashSet<String>();
+        Set<String> backendIds = new HashSet<>();
         for (BackendSpec<?> spec :
             backendProvider.getKnowledgeSourceBackendSpecLoader()) {
             backendIds.add(spec.getId());
         }
-        assertEquals(new HashSet<String>(Arrays.asList(new String[] {
+        assertEquals(new HashSet<>(Arrays.asList(new String[] {
                 MockKnowledgeSourceBackend.class.getName()})),
                 backendIds);
     }
@@ -215,12 +215,12 @@ public class CommonsBackendProviderTest {
     @Test
     public void testEnumerateAlgorithmSourceBackends() 
             throws BackendProviderSpecLoaderException {
-        Set<String> backendIds = new HashSet<String>();
+        Set<String> backendIds = new HashSet<>();
         for (BackendSpec<?> spec :
             backendProvider.getAlgorithmSourceBackendSpecLoader()) {
             backendIds.add(spec.getId());
         }
-        assertEquals(new HashSet<String>(Arrays.asList(new String[] {
+        assertEquals(new HashSet<>(Arrays.asList(new String[] {
                 MockAlgorithmSourceBackend.class.getName(),
                 JavaAlgorithmBackend.class.getName()})),
                 backendIds);

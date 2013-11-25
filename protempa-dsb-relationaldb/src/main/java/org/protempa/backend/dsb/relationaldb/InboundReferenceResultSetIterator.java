@@ -68,8 +68,8 @@ final class InboundReferenceResultSetIterator implements
             LOGGER.log(Level.FINE, "Creating reference iterator for {0}", new Object[]{entityName});
         }
         this.entityName = entityName;
-        this.referenceUniqueIds = new HashMap<DestructuredUniqueIdPair, Set<UniqueId>>();
-        this.dataStreamingEventQueue = new LinkedList<DataStreamingEvent<UniqueIdPair>>();
+        this.referenceUniqueIds = new HashMap<>();
+        this.dataStreamingEventQueue = new LinkedList<>();
     }
 
     void resultSetComplete() {
@@ -113,7 +113,7 @@ final class InboundReferenceResultSetIterator implements
              * send back a DataStreamingEvent with no UniqueIdPairs.
              */
 
-            result = new DataStreamingEvent<UniqueIdPair>(this.keyId,
+            result = new DataStreamingEvent<>(this.keyId,
                     new ArrayList<UniqueIdPair>(0));
         } else {
             result = this.dataStreamingEventQueue.remove();
@@ -205,7 +205,7 @@ final class InboundReferenceResultSetIterator implements
 
     private void createDataStreamingEvent() {
         if (this.keyId != null) {
-            List<UniqueIdPair> uniqueIds = new ArrayList<UniqueIdPair>();
+            List<UniqueIdPair> uniqueIds = new ArrayList<>();
             for (Map.Entry<DestructuredUniqueIdPair, Set<UniqueId>> e : 
                     this.referenceUniqueIds.entrySet()) {
                 for (UniqueId refId : e.getValue()) {
@@ -214,11 +214,11 @@ final class InboundReferenceResultSetIterator implements
                 }
             }
             this.dataStreamingEventQueue.offer(
-                    new DataStreamingEvent<UniqueIdPair>(
+                    new DataStreamingEvent<>(
                     this.keyId, uniqueIds));
         }
         this.referenceUniqueIds = 
-                new HashMap<DestructuredUniqueIdPair, Set<UniqueId>>();
+                new HashMap<>();
     }
 
     @Override

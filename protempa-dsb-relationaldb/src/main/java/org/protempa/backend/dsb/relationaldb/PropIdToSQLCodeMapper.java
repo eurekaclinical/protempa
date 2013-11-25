@@ -92,7 +92,7 @@ public final class PropIdToSQLCodeMapper {
             throw new IllegalArgumentException("Invalid colNum: " + colNum);
         }
         resource = this.resourcePrefix + resource;
-        List<String> codes = new ArrayList<String>();
+        List<String> codes = new ArrayList<>();
         SQLGenUtil.logger().log(Level.FINER, "Attempting to get resource: {0}",
                 resource);
         InputStream is = IOUtil.getResourceAsStream(resource, this.cls);
@@ -143,7 +143,7 @@ public final class PropIdToSQLCodeMapper {
         resource = this.resourcePrefix + resource;
         SQLGenUtil.logger().log(Level.FINER, "Attempting to get resource: {0}",
                 resource);
-        List<ColumnSpec.KnowledgeSourceIdToSqlCode> cvs = new ArrayList<ColumnSpec.KnowledgeSourceIdToSqlCode>(
+        List<ColumnSpec.KnowledgeSourceIdToSqlCode> cvs = new ArrayList<>(
                 1000);
         InputStream is = IOUtil.getResourceAsStream(resource, this.cls);
         BufferedReader br = new BufferedReader(new InputStreamReader(is));

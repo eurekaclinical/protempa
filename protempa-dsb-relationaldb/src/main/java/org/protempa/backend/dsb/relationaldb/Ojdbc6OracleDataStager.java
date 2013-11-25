@@ -50,9 +50,9 @@ final class Ojdbc6OracleDataStager implements DataStager {
     private final ConnectionSpec connectionSpec;
 
     private final Map<String, List<EntitySpec>> propIdToEntitySpecs;
-    private final Map<StagingSpec, List<TableSpec>> tempTables = new HashMap<StagingSpec, List<TableSpec>>();
+    private final Map<StagingSpec, List<TableSpec>> tempTables = new HashMap<>();
 
-    private final Map<TableSpec, Integer> indexIds = new HashMap<TableSpec, Integer>();
+    private final Map<TableSpec, Integer> indexIds = new HashMap<>();
 
     private static final Logger logger = SQLGenUtil.logger();
     private final boolean streamingMode;
@@ -70,7 +70,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
         this.keyIds = keyIds;
         this.order = order;
         this.connectionSpec = connectionSpec;
-        this.propIdToEntitySpecs = new HashMap<String, List<EntitySpec>>();
+        this.propIdToEntitySpecs = new HashMap<>();
         populatePropIdEntitySpecMap();
         this.streamingMode = streamingMode;
     }
@@ -101,7 +101,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
     private void execute(String sql) throws SQLException {
         RetryableSQLExecutor operation = new RetryableSQLExecutor(
                 this.connectionSpec, sql, null);
-        Retryer<SQLException> retryer = new Retryer<SQLException>(3);
+        Retryer<SQLException> retryer = new Retryer<>(3);
         if (!retryer.execute(operation)) {
             SQLException ex = SQLExecutor.assembleSQLException(retryer
                     .getErrors());
@@ -134,7 +134,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
         for (StagingSpec stagingSpec : stagingSpecs) {
             int i = 0;
             for (EntitySpec es : stagingSpec.getEntitySpecs()) {
-                Set<Filter> filtersCopy = new HashSet<Filter>(filters);
+                Set<Filter> filtersCopy = new HashSet<>(filters);
                 removeNonApplicableFilters(filtersCopy, es);
                 StagingSpec newTableSpec = StagingSpec.newTableName(
                         stagingSpec, stagingSpec.getStagingArea().getTable()
@@ -212,7 +212,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
 
     private void indexOtherColumns(StagingSpec stagingSpec) throws SQLException {
         for (TableSpec table : this.tempTables.get(stagingSpec)) {
-            HashSet<String> indexed = new HashSet<String>();
+            HashSet<String> indexed = new HashSet<>();
             for (StagedColumnSpec column : stagingSpec.getStagedColumns()) {
                 String realColumn = getRealColumn(column);
                 if (!realColumn.equals(stagingSpec.getUniqueColumn())
@@ -281,8 +281,8 @@ final class Ojdbc6OracleDataStager implements DataStager {
 
     private void removeNonApplicableFilters(Set<Filter> filtersCopy,
             EntitySpec entitySpec) {
-        Set<EntitySpec> entitySpecsSet = new HashSet<EntitySpec>();
-        Set<String> filterPropIds = new HashSet<String>();
+        Set<EntitySpec> entitySpecsSet = new HashSet<>();
+        Set<String> filterPropIds = new HashSet<>();
         String[] entitySpecPropIds = entitySpec.getPropositionIds();
         for (Iterator<Filter> itr = filtersCopy.iterator(); itr.hasNext();) {
             Filter f = itr.next();

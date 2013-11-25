@@ -81,19 +81,19 @@ class Util {
      * Days (24 * 60 * 60 * 1000 milliseconds).
      */
     private static final String DAY = "Day";
-    static final Map<String, AbsoluteTimeUnit> ABSOLUTE_DURATION_MULTIPLIER = new HashMap<String, AbsoluteTimeUnit>();
+    static final Map<String, AbsoluteTimeUnit> ABSOLUTE_DURATION_MULTIPLIER = new HashMap<>();
 
     static {
         ABSOLUTE_DURATION_MULTIPLIER.put(MINUTE, AbsoluteTimeUnit.MINUTE);
         ABSOLUTE_DURATION_MULTIPLIER.put(HOUR, AbsoluteTimeUnit.HOUR);
         ABSOLUTE_DURATION_MULTIPLIER.put(DAY, AbsoluteTimeUnit.DAY);
     }
-    static final Map<String, RelativeHourUnit> RELATIVE_HOURS_DURATION_MULTIPLIER = new HashMap<String, RelativeHourUnit>();
+    static final Map<String, RelativeHourUnit> RELATIVE_HOURS_DURATION_MULTIPLIER = new HashMap<>();
 
     static {
         RELATIVE_HOURS_DURATION_MULTIPLIER.put(HOUR, RelativeHourUnit.HOUR);
     }
-    static final Map<String, ValueType> VALUE_CLASS_NAME_TO_VALUE_TYPE = new HashMap<String, ValueType>();
+    static final Map<String, ValueType> VALUE_CLASS_NAME_TO_VALUE_TYPE = new HashMap<>();
 
     static {
         VALUE_CLASS_NAME_TO_VALUE_TYPE.put("Value", ValueType.VALUE);
@@ -402,7 +402,7 @@ class Util {
                         + " from proposition " + propInstance.getName()
                         + " cannot have no referred-to proposition types!");
             }
-            List<String> propIds = new ArrayList<String>(referenceTos.size());
+            List<String> propIds = new ArrayList<>(referenceTos.size());
             for (Object refToInst : referenceTos) {
                 Instance refToInstInst = (Instance) refToInst;
                 String propId = refToInstInst.getName();
@@ -526,7 +526,7 @@ class Util {
             @SuppressWarnings("rawtypes") Collection propertyConstraints,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        Set<PropertyConstraint> result = new HashSet<PropertyConstraint>();
+        Set<PropertyConstraint> result = new HashSet<>();
 
         ConnectionManager cm = backend.getConnectionManager();
         for (Object o : propertyConstraints) {
@@ -671,7 +671,7 @@ class Util {
 
     private static Set<String> resolveAndLogDuplicates(Collection<?> isas,
             Logger logger, Instance propInstance, String slotName) {
-        Set<String> inverseIsAs = new HashSet<String>();
+        Set<String> inverseIsAs = new HashSet<>();
         for (Object isAInstance : isas) {
             String name = ((Instance) isAInstance).getName();
             if (!inverseIsAs.add(name) && logger.isLoggable(Level.WARNING)) {

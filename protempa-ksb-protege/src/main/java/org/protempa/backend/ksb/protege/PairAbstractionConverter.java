@@ -48,7 +48,7 @@ public class PairAbstractionConverter implements AbstractionConverter {
         Util.setGap(protegeProposition, result, backend, cm);
         Util.setReferences(protegeProposition, result, cm);
         Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache =
-                new HashMap<Instance, TemporalExtendedPropositionDefinition>();
+                new HashMap<>();
         
         addComponentAbstractionDefinitions(protegeProposition, result,
                 extendedParameterCache, backend);

@@ -423,7 +423,7 @@ abstract class AbstractWhereClause implements WhereClause {
             Set<?> propIds, KnowledgeSourceIdToSqlCode[] constraintValues) {
         ColumnSpec.KnowledgeSourceIdToSqlCode[] filteredConstraintValues;
         if (propIds != null) {
-            List<ColumnSpec.KnowledgeSourceIdToSqlCode> constraintValueList = new ArrayList<ColumnSpec.KnowledgeSourceIdToSqlCode>();
+            List<ColumnSpec.KnowledgeSourceIdToSqlCode> constraintValueList = new ArrayList<>();
             for (ColumnSpec.KnowledgeSourceIdToSqlCode constraintValue : constraintValues) {
                 if (propIds.contains(constraintValue.getPropositionId())) {
                     constraintValueList.add(constraintValue);
@@ -512,7 +512,7 @@ abstract class AbstractWhereClause implements WhereClause {
         Set<String> entitySpecPropIdsSet = Arrays.asSet(entitySpecPropIds);
 
         // Filter propIds that are not in the entitySpecPropIds array.
-        List<String> filteredPropIds = new ArrayList<String>(
+        List<String> filteredPropIds = new ArrayList<>(
                 entitySpecPropIds.length);
         for (String propId : propIds) {
             if (entitySpecPropIdsSet.contains(propId)) {
@@ -535,7 +535,7 @@ abstract class AbstractWhereClause implements WhereClause {
 
     private static class ValueExtractor implements ValueVisitor {
 
-        Set<Object> values = new HashSet<Object>();
+        Set<Object> values = new HashSet<>();
 
         @Override
         public void visit(NominalValue nominalValue) {

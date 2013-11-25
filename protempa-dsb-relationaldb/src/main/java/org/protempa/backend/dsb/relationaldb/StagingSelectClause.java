@@ -44,7 +44,7 @@ final class StagingSelectClause implements SelectClause {
 
         result.append("SELECT ");
 
-        List<String> cols = new ArrayList<String>();
+        List<String> cols = new ArrayList<>();
         for (StagedColumnSpec columnSpec : this.stagingSpec.getStagedColumns()) {
             StringBuilder colStr = new StringBuilder(
                     referenceIndices.generateColumnReference(columnSpec

@@ -154,9 +154,9 @@ public class INICommonsConfigurations implements Configurations {
             config.load(configFile.getAbsolutePath());
             Set<String> sectionNames = config.getSections();
             List<BackendInstanceSpec<B>> results =
-                    new ArrayList<BackendInstanceSpec<B>>();
-            List<Integer> sectionIndices = new ArrayList<Integer>();
-            Map<Integer, String> sectionsMap = new HashMap<Integer, String>();
+                    new ArrayList<>();
+            List<Integer> sectionIndices = new ArrayList<>();
+            Map<Integer, String> sectionsMap = new HashMap<>();
             for (String sectionName : sectionNames) {
                 int indexOfSep = sectionName.lastIndexOf('_');
                 String i = sectionName.substring(indexOfSep + 1);

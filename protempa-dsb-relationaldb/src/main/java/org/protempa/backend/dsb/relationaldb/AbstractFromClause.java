@@ -55,7 +55,7 @@ abstract class AbstractFromClause implements FromClause {
             TableAliaser referenceIndices);
 
     public String generateClause() {
-        Map<Integer, ColumnSpec> columnSpecCache = new HashMap<Integer, ColumnSpec>();
+        Map<Integer, ColumnSpec> columnSpecCache = new HashMap<>();
         StringBuilder fromPart = new StringBuilder("FROM ");
         boolean begin = true;
         for (int j = 0, n = columnSpecs.size(); j < n; j++) {

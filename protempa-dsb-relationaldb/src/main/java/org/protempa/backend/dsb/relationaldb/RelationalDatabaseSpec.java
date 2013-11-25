@@ -217,7 +217,7 @@ public final class RelationalDatabaseSpec implements Serializable {
             logger.log(Level.FINER, "Validating entity spec {0}",
                     entitySpecName);
             String[] propIds = entitySpec.getPropositionIds();
-            Set<String> propNamesFromPropSpecs = new HashSet<String>();
+            Set<String> propNamesFromPropSpecs = new HashSet<>();
             PropertySpec[] propSpecs = entitySpec.getPropertySpecs();
             logger.finer("Checking for duplicate properties");
             for (PropertySpec propSpec : propSpecs) {
@@ -230,8 +230,8 @@ public final class RelationalDatabaseSpec implements Serializable {
             }
             logger.finer("No duplicate properties found");
             logger.finer("Checking for invalid proposition ids and properties");
-            Set<String> propNamesFromPropDefs = new HashSet<String>();
-            Set<String> invalidPropIds = new HashSet<String>();
+            Set<String> propNamesFromPropDefs = new HashSet<>();
+            Set<String> invalidPropIds = new HashSet<>();
             for (String propId : propIds) {
                 PropositionDefinition propDef = knowledgeSource
                         .readPropositionDefinition(propId);

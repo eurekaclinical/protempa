@@ -66,7 +66,7 @@ abstract class ConnectionManager {
                     "projectIdentifier cannot be null");
         }
         this.projectIdentifier = projectIdentifier;
-        this.projectListeners = new ArrayList<ProjectListener>();
+        this.projectListeners = new ArrayList<>();
     }
 
     /**
@@ -337,7 +337,7 @@ abstract class ConnectionManager {
                     if (result != null) {
                         return result;
                     } else {
-                        return new ArrayList<Instance>(0);
+                        return new ArrayList<>(0);
                     }
                 }
             };

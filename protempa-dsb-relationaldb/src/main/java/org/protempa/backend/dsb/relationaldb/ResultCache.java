@@ -49,23 +49,23 @@ public class ResultCache<P extends Proposition> {
     private final UniqueIdUniqueIdStoreCreator uniqueIdCreator;
 
     ResultCache() throws IOException {
-        this.inMemoryPatientCache = new HashMap<String, List<P>>();
-        this.patientCache = new ArrayList<DataStore<String, List<P>>>();
+        this.inMemoryPatientCache = new HashMap<>();
+        this.patientCache = new ArrayList<>();
         this.propositionStoreCreator = new PropositionStoreCreator();
         this.uniqueIdCreator = new UniqueIdUniqueIdStoreCreator();
         this.currentPatientCache = this.propositionStoreCreator.newCacheStore();
         this.patientCache.add(this.currentPatientCache);
-        this.refCache = new HashMap<String, List<DataStore<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>>>>();
+        this.refCache = new HashMap<>();
         this.tmpInMemoryRefCache =
-                new HashMap<UniqueId, List<UniqueId>>();
-        this.propIdToEntitySpecNames = new HashMap<String, String>();
-        this.keyIds = new HashSet<String>();
+                new HashMap<>();
+        this.propIdToEntitySpecNames = new HashMap<>();
+        this.keyIds = new HashSet<>();
     }
 
     public BDBDataSourceResultMap<P> getPatientCache() {
         this.inMemoryPatientCache = null;
         this.tmpInMemoryRefCache = null;
-        return new BDBDataSourceResultMap<P>(this.patientCache,
+        return new BDBDataSourceResultMap<>(this.patientCache,
                 this.refCache, this.propIdToEntitySpecNames, this.keyIds);
     }
 
@@ -89,7 +89,7 @@ public class ResultCache<P extends Proposition> {
             UniqueId key = me.getKey();
             List<UniqueId> uids = me.getValue();
             List<UniqueIdUniqueIdStoreCreator.Reference> refs = 
-                    new ArrayList<UniqueIdUniqueIdStoreCreator.Reference>(uids.size());
+                    new ArrayList<>(uids.size());
             for (UniqueId uid : uids) {
                 refs.add(new UniqueIdUniqueIdStoreCreator.Reference(refName, uid));
             }
@@ -161,7 +161,7 @@ public class ResultCache<P extends Proposition> {
         List<P> propList = this.currentPatientCache.remove(keyId);
 
         if (propList == null) {
-            propList = new ArrayList<P>();
+            propList = new ArrayList<>();
         }
         propList.addAll(propositions);
         put(keyId, propList);

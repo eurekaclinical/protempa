@@ -72,7 +72,7 @@ public final class UMLSTermSourceBackend extends
             TerminologyCode code = TerminologyCode.fromStringAndSAB(
                     term.getCode(), sab);
             List<TerminologyCode> children = umls.getChildrenByCode(code);
-            List<String> childTerms = new ArrayList<String>();
+            List<String> childTerms = new ArrayList<>();
             for (TerminologyCode child : children) {
                 childTerms.add(Term.fromTerminologyAndCode(sab.getName(),
                         child.getCode()).getId());
@@ -100,7 +100,7 @@ public final class UMLSTermSourceBackend extends
     @Override
     public Map<String, Term> readTerms(String[] ids)
             throws TermSourceReadException {
-        Map<String, Term> result = new HashMap<String, Term>();
+        Map<String, Term> result = new HashMap<>();
 
         for (String id : ids) {
             result.put(id, readTerm(id));
@@ -117,7 +117,7 @@ public final class UMLSTermSourceBackend extends
     @Override
     public List<String> getSubsumption(String id)
             throws TermSourceReadException {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
 
         try {
             Term term = Term.withId(id);

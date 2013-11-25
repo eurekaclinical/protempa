@@ -148,9 +148,9 @@ final class InstanceConverterFactory {
     }
 
     private void populateConverterMap() throws KnowledgeSourceReadException {
-        this.converterMap = new HashMap<Cls, PropositionConverter>();
-        this.abstractionConverterMap = new HashMap<Cls, AbstractionConverter>();
-        this.temporalPropositionConverterMap = new HashMap<Cls, TemporalPropositionConverter>();
+        this.converterMap = new HashMap<>();
+        this.abstractionConverterMap = new HashMap<>();
+        this.temporalPropositionConverterMap = new HashMap<>();
         populateConverterMap0(this.primitiveParameterConverter.getClsName(), this.primitiveParameterConverter);
         populateTemporalPropositionConverterMap0(this.primitiveParameterConverter.getClsName(), this.primitiveParameterConverter);
         populateConverterMap0(this.lowLevelAbstractionConverter.getClsName(), this.lowLevelAbstractionConverter);

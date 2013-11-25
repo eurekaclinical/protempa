@@ -42,7 +42,7 @@ import edu.stanford.smi.protege.model.Instance;
  */
 class HighLevelAbstractionConverter implements AbstractionConverter {
 
-    static final Map<String, ValueComparator> STRING_TO_VAL_COMP_MAP = new HashMap<String, ValueComparator>();
+    static final Map<String, ValueComparator> STRING_TO_VAL_COMP_MAP = new HashMap<>();
 
     static {
         STRING_TO_VAL_COMP_MAP.put("eq", ValueComparator.EQUAL_TO);
@@ -76,7 +76,7 @@ class HighLevelAbstractionConverter implements AbstractionConverter {
         Util.setConcatenable(complexAbstractionInstance, result, cm);
         Util.setReferences(complexAbstractionInstance, result, cm);
         Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache =
-                new HashMap<Instance, TemporalExtendedPropositionDefinition>();
+                new HashMap<>();
         addComponentAbstractionDefinitions(complexAbstractionInstance, result,
                 extendedParameterCache, backend);
         addRelationships(extendedParameterCache,
@@ -145,7 +145,7 @@ class HighLevelAbstractionConverter implements AbstractionConverter {
             Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        Set<Object> extendedParameters = new HashSet<Object>();
+        Set<Object> extendedParameters = new HashSet<>();
         ConnectionManager cm = backend.getConnectionManager();
         for (Iterator<?> itr = cm.getOwnSlotValues(complexAbstractionInstance,
                 cm.getSlot("withRelations")).iterator(); itr.hasNext();) {

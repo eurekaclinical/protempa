@@ -227,7 +227,7 @@ class LowLevelAbstractionConverter implements AbstractionConverter {
             d.setValueType((ValueType) Util.VALUE_CLASS_NAME_TO_VALUE_TYPE.get(finalValueTypeAF.getName()));
         }
     }
-    private static final Map<String, ValueComparator> STRING_TO_VAL_COMP_MAP = new HashMap<String, ValueComparator>();
+    private static final Map<String, ValueComparator> STRING_TO_VAL_COMP_MAP = new HashMap<>();
 
     static {
         STRING_TO_VAL_COMP_MAP.put("eq", ValueComparator.EQUAL_TO);

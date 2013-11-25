@@ -82,7 +82,7 @@ class InDataSourcePropositionDefinitionGetter {
         if (cachedResult != null) {
             return cachedResult;
         } else {
-            Set<String> result = new HashSet<String>();
+            Set<String> result = new HashSet<>();
             if (propIds != null) {
                 inDataSourcePropositionIdsHelper(propIds, result, null);
                 result = Collections.unmodifiableSet(result);
@@ -106,7 +106,7 @@ class InDataSourcePropositionDefinitionGetter {
             return cachedResult;
         } else {
             Set<PropositionDefinition> propResult =
-                    new HashSet<PropositionDefinition>();
+                    new HashSet<>();
             if (propIds != null) {
                 inDataSourcePropositionIdsHelper(propIds, null, propResult);
                 propResult = Collections.unmodifiableSet(propResult);
@@ -120,7 +120,7 @@ class InDataSourcePropositionDefinitionGetter {
             Set<String> result, Set<PropositionDefinition> propResult)
             throws KnowledgeSourceReadException {
         List<PropositionDefinition> propDefs =
-                new ArrayList<PropositionDefinition>();
+                new ArrayList<>();
         for (String propId : propIds) {
             PropositionDefinition propDef = 
                     this.knowledgeSource.readPropositionDefinition(propId);
@@ -138,7 +138,7 @@ class InDataSourcePropositionDefinitionGetter {
         for (PropositionDefinition propDef : propDefs) {
             String propDefId = propDef.getId();
             List<PropositionDefinition> children =
-                    new ArrayList<PropositionDefinition>();
+                    new ArrayList<>();
             if (propDef instanceof AbstractionDefinition) {
                 for (PropositionDefinition ad : 
                         this.knowledgeSource.readAbstractedFrom(

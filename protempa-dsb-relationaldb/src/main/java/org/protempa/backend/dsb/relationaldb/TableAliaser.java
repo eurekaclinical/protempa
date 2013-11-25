@@ -78,7 +78,7 @@ final class TableAliaser {
     private Map<ColumnSpec, Integer> computeReferenceIndices(
             List<ColumnSpec> columnSpecs) {
 
-        Map<ColumnSpec, Integer> tempIndices = new HashMap<ColumnSpec, Integer>();
+        Map<ColumnSpec, Integer> tempIndices = new HashMap<>();
 
         int index = 1;
         JoinSpec currentJoin = null;

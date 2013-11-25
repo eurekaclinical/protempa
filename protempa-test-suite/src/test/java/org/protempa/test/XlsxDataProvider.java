@@ -190,7 +190,7 @@ public class XlsxDataProvider implements DataProvider {
      */
     private List<Patient> readPatients() {
         XSSFSheet sheet = this.workbook.getSheet("patient");
-        List<Patient> result = new ArrayList<Patient>();
+        List<Patient> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
         while (rows.hasNext()) {
@@ -219,7 +219,7 @@ public class XlsxDataProvider implements DataProvider {
      */
     private List<Provider> readProviders() {
         XSSFSheet sheet = this.workbook.getSheet("provider");
-        List<Provider> result = new ArrayList<Provider>();
+        List<Provider> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
         while (rows.hasNext()) {
@@ -242,7 +242,7 @@ public class XlsxDataProvider implements DataProvider {
      */
     private List<Encounter> readEncounters() {
         XSSFSheet sheet = this.workbook.getSheet("encounter");
-        List<Encounter> result = new ArrayList<Encounter>();
+        List<Encounter> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
         while (rows.hasNext()) {
@@ -270,7 +270,7 @@ public class XlsxDataProvider implements DataProvider {
      */
     private List<CPT> readCpts() {
         XSSFSheet sheet = this.workbook.getSheet("eCPT");
-        List<CPT> result = new ArrayList<CPT>();
+        List<CPT> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
         while (rows.hasNext()) {
@@ -292,7 +292,7 @@ public class XlsxDataProvider implements DataProvider {
      */
     private List<Icd9Diagnosis> readIcd9Diagnoses() {
         XSSFSheet sheet = this.workbook.getSheet("eICD9D");
-        List<Icd9Diagnosis> result = new ArrayList<Icd9Diagnosis>();
+        List<Icd9Diagnosis> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
         while (rows.hasNext()) {
@@ -317,7 +317,7 @@ public class XlsxDataProvider implements DataProvider {
      */
     private List<Icd9Procedure> readIcd9Procedures() {
         XSSFSheet sheet = this.workbook.getSheet("eICD9P");
-        List<Icd9Procedure> result = new ArrayList<Icd9Procedure>();
+        List<Icd9Procedure> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
         while (rows.hasNext()) {
@@ -342,7 +342,7 @@ public class XlsxDataProvider implements DataProvider {
      */
     private List<Medication> readMedications() {
         XSSFSheet sheet = this.workbook.getSheet("eMEDS");
-        List<Medication> result = new ArrayList<Medication>();
+        List<Medication> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
         while (rows.hasNext()) {
@@ -367,7 +367,7 @@ public class XlsxDataProvider implements DataProvider {
      */
     private List<Lab> readLabs() {
         XSSFSheet sheet = this.workbook.getSheet("eLABS");
-        List<Lab> result = new ArrayList<Lab>();
+        List<Lab> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
         while (rows.hasNext()) {
@@ -393,7 +393,7 @@ public class XlsxDataProvider implements DataProvider {
      */
     private List<Vital> readVitals() {
         XSSFSheet sheet = this.workbook.getSheet("eVITALS");
-        List<Vital> result = new ArrayList<Vital>();
+        List<Vital> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
         while (rows.hasNext()) {

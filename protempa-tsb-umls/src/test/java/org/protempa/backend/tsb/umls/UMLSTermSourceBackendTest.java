@@ -57,7 +57,7 @@ public class UMLSTermSourceBackendTest {
         this.backend = new UMLSTermSourceBackend();
         backend.setDatabaseAPI(DatabaseAPI.DRIVERMANAGER);
 
-        List<BackendPropertySpec> propSpecs = new ArrayList<BackendPropertySpec>();
+        List<BackendPropertySpec> propSpecs = new ArrayList<>();
 
         propSpecs.add(new MockBackendPropertySpec("databaseAPI", String.class).getBackendPropertySpec());
         propSpecs.add(new MockBackendPropertySpec("databaseId", String.class).getBackendPropertySpec());
@@ -65,7 +65,7 @@ public class UMLSTermSourceBackendTest {
         propSpecs.add(new MockBackendPropertySpec("password", String.class).getBackendPropertySpec());
 
         MockBackendInstanceSpecFactory<UMLSTermSourceBackend> mbis = 
-                new MockBackendInstanceSpecFactory<UMLSTermSourceBackend>(
+                new MockBackendInstanceSpecFactory<>(
                 propSpecs);
 
         try {

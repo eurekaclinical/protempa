@@ -652,7 +652,7 @@ public class ProtempaTest {
 
     private static Map<String, Integer> getResultCounts(String filename)
             throws NumberFormatException, IOException {
-        final HashMap<String, Integer> result = new HashMap<String, Integer>();
+        final HashMap<String, Integer> result = new HashMap<>();
         new WithBufferedReaderByLine(filename) {
             @Override
             public void readLine(String line) {
@@ -882,8 +882,8 @@ public class ProtempaTest {
     private void assertEncountersRetrieved(
             DataStore<String, List<Proposition>> objectGraph) {
         logger.log(Level.INFO, "Running encounters test...");
-        Map<String, Integer> patientEncounterMap = new HashMap<String, Integer>();
-        Map<String, Encounter> encountersMap = new HashMap<String, Encounter>();
+        Map<String, Integer> patientEncounterMap = new HashMap<>();
+        Map<String, Encounter> encountersMap = new HashMap<>();
         for (Encounter e : this.dataProvider.getEncounters()) {
             encountersMap.put(e.getId().toString(), e);
             if (patientEncounterMap.containsKey(e.getPatientId().toString())) {
@@ -924,7 +924,7 @@ public class ProtempaTest {
     private void assertPatientsRetrieved(
             DataStore<String, List<Proposition>> objectGraph) {
         logger.log(Level.INFO, "Running patients test...");
-        Map<String, Patient> patientMap = new HashMap<String, Patient>();
+        Map<String, Patient> patientMap = new HashMap<>();
 
         for (Patient p : this.dataProvider.getPatients()) {
             patientMap.put(p.getId().toString(), p);
@@ -973,7 +973,7 @@ public class ProtempaTest {
     }
 
     private Map<Long, Long> mapEncountersToPatients() {
-        Map<Long, Long> result = new HashMap<Long, Long>();
+        Map<Long, Long> result = new HashMap<>();
 
         for (Encounter e : this.dataProvider.getEncounters()) {
             result.put(e.getId(), e.getPatientId());
@@ -1020,7 +1020,7 @@ public class ProtempaTest {
             DataStore<String, List<Proposition>> objectGraph) {
         Set<Proposition> retrievedVitals = getPropositionsForKey(
                 keyId.toString(), vitalSign, objectGraph);
-        List<Vital> dataVitals = new ArrayList<Vital>(
+        List<Vital> dataVitals = new ArrayList<>(
                 this.dataProvider.getVitals());
         Map<Long, Long> enc2Pat = mapEncountersToPatients();
         for (Iterator<Vital> it = dataVitals.iterator(); it.hasNext();) {
@@ -1032,11 +1032,11 @@ public class ProtempaTest {
         }
         assertEquals("Wrong number of " + vitalSign + " instances for key ID "
                 + keyId, dataVitals.size(), retrievedVitals.size());
-        Set<String> dataVitalValues = new HashSet<String>();
+        Set<String> dataVitalValues = new HashSet<>();
         for (Vital v : dataVitals) {
             dataVitalValues.add(v.getResultAsStr());
         }
-        Set<String> retrievedVitalValues = new HashSet<String>();
+        Set<String> retrievedVitalValues = new HashSet<>();
         for (Proposition p : retrievedVitals) {
             retrievedVitalValues.add(((PrimitiveParameter) p)
                     .getValueFormatted());
@@ -1188,14 +1188,14 @@ public class ProtempaTest {
                 .asSet(new String[]{icd9Levels[1]});
         Set<String> expectedBackwardDerivationsLevel2 = Arrays
                 .asSet(new String[]{});
-        Map<String, Set<String>> expectedForwardDerivations = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expectedForwardDerivations = new HashMap<>();
         expectedForwardDerivations.put(icd9Levels[0],
                 expectedForwardDerivationsLevel0);
         expectedForwardDerivations.put(icd9Levels[1],
                 expectedForwardDerivationsLevel1);
         expectedForwardDerivations.put(icd9Levels[2],
                 expectedForwardDerivationsLevel2);
-        Map<String, Set<String>> expectedBackwardDerivations = new HashMap<String, Set<String>>();
+        Map<String, Set<String>> expectedBackwardDerivations = new HashMap<>();
         expectedBackwardDerivations.put(icd9Levels[0],
                 expectedBackwardDerivationsLevel0);
         expectedBackwardDerivations.put(icd9Levels[1],
@@ -1204,8 +1204,8 @@ public class ProtempaTest {
                 expectedBackwardDerivationsLevel2);
 
         for (String icd9Code : icd9Levels) {
-            Set<String> foundForwardDerivations = new HashSet<String>();
-            Set<String> foundBackwardDerivations = new HashSet<String>();
+            Set<String> foundForwardDerivations = new HashSet<>();
+            Set<String> foundBackwardDerivations = new HashSet<>();
             for (Entry<Proposition, List<Proposition>> p : getDerivedPropositionsForKey(
                     icd9Code, afh.getForwardDerivations("0")).entrySet()) {
                 for (Proposition p2 : p.getValue()) {
@@ -1259,7 +1259,7 @@ public class ProtempaTest {
     private void assertLdhTrendDerived(
             DataStore<String, WorkingMemory> derivedData) {
         logger.log(Level.INFO, "Running LDH_TREND test...");
-        Set<AbstractParameter> ldhTrends = new HashSet<AbstractParameter>();
+        Set<AbstractParameter> ldhTrends = new HashSet<>();
 
         for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
                 .hasNext();) {
@@ -1326,7 +1326,7 @@ public class ProtempaTest {
     private void assertAstStateDerived(
             DataStore<String, WorkingMemory> derivedData) {
         logger.log(Level.INFO, "Running AST_STATE test...");
-        Set<AbstractParameter> astStates = new HashSet<AbstractParameter>();
+        Set<AbstractParameter> astStates = new HashSet<>();
 
         for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
                 .hasNext();) {
@@ -1435,7 +1435,7 @@ public class ProtempaTest {
             DataStore<String, WorkingMemory> derivedData) {
         logger.log(Level.INFO,
                 "Running HELLP_FIRST_RECOVERING_PLATELETS test...");
-        Set<Proposition> hellpFirstRecoverings = new HashSet<Proposition>();
+        Set<Proposition> hellpFirstRecoverings = new HashSet<>();
         for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("11").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
@@ -1471,7 +1471,7 @@ public class ProtempaTest {
             DataStore<String, WorkingMemory> derivedData) {
         logger.log(Level.INFO,
                 "Running MyBloodPressureClassificationConsecutiveAny test...");
-        Set<Proposition> bps = new HashSet<Proposition>();
+        Set<Proposition> bps = new HashSet<>();
         for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("12").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
@@ -1510,7 +1510,7 @@ public class ProtempaTest {
             DataStore<String, WorkingMemory> derivedData) {
         logger.log(Level.INFO,
                 "Running MyTwoConsecutiveHighBloodPressure test...");
-        Set<Proposition> bps = new HashSet<Proposition>();
+        Set<Proposition> bps = new HashSet<>();
         for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("12").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
@@ -1543,7 +1543,7 @@ public class ProtempaTest {
             DataStore<String, WorkingMemory> derivedData) {
         logger.log(Level.INFO,
                 "Running MyBloodPressureClassificationAll test...");
-        List<AbstractParameter> bps = new ArrayList<AbstractParameter>();
+        List<AbstractParameter> bps = new ArrayList<>();
         for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("13").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
@@ -1612,7 +1612,7 @@ public class ProtempaTest {
         logger.log(Level.INFO,
                 "Running MyBloodPressureClassification3Any test...");
 
-        List<AbstractParameter> bps = new ArrayList<AbstractParameter>();
+        List<AbstractParameter> bps = new ArrayList<>();
         for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("14").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
@@ -1642,7 +1642,7 @@ public class ProtempaTest {
             DataStore<String, WorkingMemory> derivedData) {
         logger.log(Level.INFO,
                 "Running MyBloodPressureClassificationAny with arbitrary intervals test...");
-        List<AbstractParameter> bps = new ArrayList<AbstractParameter>();
+        List<AbstractParameter> bps = new ArrayList<>();
         for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("15").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
@@ -1653,8 +1653,8 @@ public class ProtempaTest {
         assertEquals(
                 "Found wrong number of 'MyBloodPressureClassificationAny'", 3,
                 bps.size());
-        Set<AbstractParameter> normals = new HashSet<AbstractParameter>();
-        Set<AbstractParameter> highs = new HashSet<AbstractParameter>();
+        Set<AbstractParameter> normals = new HashSet<>();
+        Set<AbstractParameter> highs = new HashSet<>();
         for (AbstractParameter p : bps) {
             if (p.getValue().equals(NominalValue.getInstance("MYBP_HIGH"))) {
                 highs.add(p);
@@ -1679,7 +1679,7 @@ public class ProtempaTest {
 
     private Set<Proposition> getPropositionsForKey(String keyId, String propId,
             DataStore<String, List<Proposition>> props) {
-        Set<Proposition> results = new HashSet<Proposition>();
+        Set<Proposition> results = new HashSet<>();
 
         List<Proposition> values = props.get(keyId);
         for (Proposition p : values) {
@@ -1693,7 +1693,7 @@ public class ProtempaTest {
 
     private Map<Proposition, List<Proposition>> getDerivedPropositionsForKey(
             String propId, Map<Proposition, List<Proposition>> derivations) {
-        Map<Proposition, List<Proposition>> results = new HashMap<Proposition, List<Proposition>>();
+        Map<Proposition, List<Proposition>> results = new HashMap<>();
         for (Entry<Proposition, List<Proposition>> prop : derivations
                 .entrySet()) {
             if (prop.getKey().getId().equals(propId)) {

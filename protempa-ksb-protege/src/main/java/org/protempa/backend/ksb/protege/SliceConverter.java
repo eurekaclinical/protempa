@@ -74,7 +74,7 @@ final class SliceConverter implements AbstractionConverter {
         Collection<?> epInstances = cm.getOwnSlotValues(
                 protegeParameter, cm.getSlot("extendedParameters"));
         Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache =
-                new HashMap<Instance, TemporalExtendedPropositionDefinition>();
+                new HashMap<>();
         for (Iterator<?> itr = epInstances.iterator(); itr
                 .hasNext();) {
             Instance extendedParameter = (Instance) itr.next();

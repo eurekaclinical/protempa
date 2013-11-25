@@ -54,7 +54,7 @@ final class ColumnSpecInfoFactory {
         } else {
             columnSpecInfo.setUnique(entitySpec.isUnique());
         }
-        List<ColumnSpec> columnSpecs = new ArrayList<ColumnSpec>();
+        List<ColumnSpec> columnSpecs = new ArrayList<>();
         int i = 0;
         int refNum = 0;
         for (EntitySpec entitySpec2 : entitySpecs) {
@@ -222,7 +222,7 @@ final class ColumnSpecInfoFactory {
             ColumnSpecInfo columnSpecInfo) {
         PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
         Map<String, Integer> propertyIndices =
-                new HashMap<String, Integer>();
+                new HashMap<>();
         for (PropertySpec propertySpec : propertySpecs) {
             ColumnSpec spec = propertySpec.getSpec();
             List<ColumnSpec> specAsList = spec.asList();

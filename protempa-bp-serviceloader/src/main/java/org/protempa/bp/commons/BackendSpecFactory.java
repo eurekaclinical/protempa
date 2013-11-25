@@ -50,7 +50,7 @@ final class BackendSpecFactory {
                     "No @BackendInfo annotation found");
         Method[] methods = backendCls.getMethods();
         List<BackendProperty> backendPropertyAnnotations =
-                new ArrayList<BackendProperty>();
+                new ArrayList<>();
         for (Method method : methods) {
             BackendProperty backendPropertyAnnotation =
                     method.getAnnotation(BackendProperty.class);
@@ -59,7 +59,7 @@ final class BackendSpecFactory {
             }
         }
         ArrayList<BackendPropertySpec> propSpecs =
-                new ArrayList<BackendPropertySpec>(
+                new ArrayList<>(
                 backendPropertyAnnotations.size());
         String baseName = backendAnnotation.propertiesBaseName();
         ResourceBundle bundle = null;
@@ -114,7 +114,7 @@ final class BackendSpecFactory {
             displayName = null;
         }
         
-        return new BackendSpec<B>(backendProvider,
+        return new BackendSpec<>(backendProvider,
                 backendCls.getName(), displayName, propSpecs);
     }
 }

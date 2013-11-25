@@ -207,7 +207,7 @@ public final class EntitySpec implements Serializable {
         }
 
         if (codeToPropIdMap != null) {
-            this.codeToPropIdMap = new HashMap<String, String>(codeToPropIdMap);
+            this.codeToPropIdMap = new HashMap<>(codeToPropIdMap);
         } else {
             this.codeToPropIdMap = Collections.emptyMap();
         }
@@ -376,7 +376,7 @@ public final class EntitySpec implements Serializable {
             throw new IllegalArgumentException("entitySpec cannot be null");
         }
 
-        List<ReferenceSpec> result = new ArrayList<ReferenceSpec>();
+        List<ReferenceSpec> result = new ArrayList<>();
         String entitySpecName = entitySpec.name;
         for (ReferenceSpec refSpec : this.referenceSpecs) {
             if (refSpec.getEntityName().equals(entitySpecName)) {
@@ -395,7 +395,7 @@ public final class EntitySpec implements Serializable {
      */
     public Map<String, String> getCodeToPropIdMap() {
         Map<String, String> result =
-                new HashMap<String, String>(this.codeToPropIdMap);
+                new HashMap<>(this.codeToPropIdMap);
         return result;
     }
 

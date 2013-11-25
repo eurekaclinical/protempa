@@ -57,7 +57,7 @@ final class Ojdbc6OracleStagingSelectStatement extends
                 getPropIds(), getEntitySpec(), getEntitySpecs(), getInboundReferenceSpecs(),
                 getFilters(), getReferenceSpec(), streamingMode);
 
-        List<ColumnSpec> plusStagedSpecs = new ArrayList<ColumnSpec>(
+        List<ColumnSpec> plusStagedSpecs = new ArrayList<>(
                 info.getColumnSpecs());
         for (StagedColumnSpec spec : stagingSpec.getStagedColumns()) {
             plusStagedSpecs.add(spec.toColumnSpec());

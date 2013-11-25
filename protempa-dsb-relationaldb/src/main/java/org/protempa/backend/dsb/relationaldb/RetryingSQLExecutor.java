@@ -64,7 +64,7 @@ final class RetryingSQLExecutor extends SQLExecutor {
 
             RetryableSQLExecutor operation = new RetryableSQLExecutor(
                     getConnectionSpec(), query, resultProcessor, getTimeout());
-            Retryer<SQLException> retryer = new Retryer<SQLException>(
+            Retryer<SQLException> retryer = new Retryer<>(
                     this.retryCount);
             if (!retryer.execute(operation)) {
                 SQLException ex = 

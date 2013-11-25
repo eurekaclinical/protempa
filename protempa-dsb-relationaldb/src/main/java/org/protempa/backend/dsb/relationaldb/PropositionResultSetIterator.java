@@ -105,7 +105,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
         this.inboundRefSpecs = inboundRefSpecs;
         this.bidirectionalRefSpecs = bidirectionalRefSpecs;
         this.refUniqueIds = new UniqueIdPair[this.inboundRefSpecs.size() + this.bidirectionalRefSpecs.size()];
-        this.props = new HashMap<UniqueId, P>();
+        this.props = new HashMap<>();
         this.statement = statement;
     }
 
@@ -162,10 +162,10 @@ abstract class PropositionResultSetIterator<P extends Proposition>
             SQLException;
 
     final void createDataStreamingEvent(String key, Map<UniqueId, P> propositions) {
-        List<P> uniqueProps = new ArrayList<P>
+        List<P> uniqueProps = new ArrayList<>
                 (propositions.values());
-        this.dataStreamingEvent = new DataStreamingEvent<P>(key, uniqueProps);
-        this.props = new HashMap<UniqueId, P>();
+        this.dataStreamingEvent = new DataStreamingEvent<>(key, uniqueProps);
+        this.props = new HashMap<>();
     }
     
     @Override
