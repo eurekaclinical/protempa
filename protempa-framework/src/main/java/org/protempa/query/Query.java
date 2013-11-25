@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.backend.dsb.filter.Filter;

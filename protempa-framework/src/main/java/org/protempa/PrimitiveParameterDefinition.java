@@ -21,7 +21,7 @@ package org.protempa;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 import org.protempa.proposition.value.ValueType;
 

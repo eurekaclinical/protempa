@@ -26,7 +26,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Map;
 import org.apache.commons.collections.map.ReferenceMap;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Represents a number, either integral or floating point, with unbounded

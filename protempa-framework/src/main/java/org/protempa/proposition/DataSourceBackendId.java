@@ -21,7 +21,7 @@ package org.protempa.proposition;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * A unique identifier for a data source backend.

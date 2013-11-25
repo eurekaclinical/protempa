@@ -21,8 +21,8 @@ package org.protempa;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
  * Abstract base class for all knowledge definition classes.

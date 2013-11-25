@@ -26,7 +26,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 import org.apache.commons.collections.map.ReferenceMap;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Represents dates and datetimes.

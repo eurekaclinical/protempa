@@ -21,7 +21,7 @@ package org.protempa;
 
 import java.util.Arrays;
 import java.util.List;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * Thrown when there is an error retrieving data from the data source. To be

@@ -19,7 +19,7 @@
  */
 package org.protempa;
 
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.Value;

@@ -19,7 +19,7 @@
  */
 package org.protempa.proposition;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public final class DerivedSourceId extends SourceId {
 

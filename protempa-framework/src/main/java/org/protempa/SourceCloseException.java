@@ -20,7 +20,7 @@
 package org.protempa;
 
 import java.util.List;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
  * Abstract class for exceptions that are thrown when an error occurs calling

@@ -21,7 +21,7 @@ package org.protempa.backend.dsb.filter;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.value.ValueList;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;

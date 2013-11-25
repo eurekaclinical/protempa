@@ -21,7 +21,7 @@ package org.protempa;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public final class DataSourceBackendDataSourceType extends DataSourceType {
     private static final long serialVersionUID = 1L;

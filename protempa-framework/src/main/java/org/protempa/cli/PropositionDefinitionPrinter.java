@@ -19,7 +19,7 @@
  */
 package org.protempa.cli;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.protempa.AbstractPropositionDefinitionVisitor;
 import org.protempa.CompoundLowLevelAbstractionDefinition;
 import org.protempa.ConstantDefinition;

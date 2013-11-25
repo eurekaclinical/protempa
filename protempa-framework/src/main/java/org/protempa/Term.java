@@ -20,7 +20,7 @@
 package org.protempa;
 
 import java.util.regex.Pattern;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * Represents a term pulled from a terminology in PROTEMPA.

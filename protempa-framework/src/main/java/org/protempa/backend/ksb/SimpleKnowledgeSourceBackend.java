@@ -22,7 +22,7 @@ package org.protempa.backend.ksb;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.arp.javautil.collections.Collections;
 import org.protempa.AbstractionDefinition;
 import org.protempa.ContextDefinition;

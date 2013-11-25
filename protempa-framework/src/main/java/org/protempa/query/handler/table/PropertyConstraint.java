@@ -19,7 +19,7 @@
  */
 package org.protempa.query.handler.table;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 

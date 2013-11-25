@@ -19,7 +19,7 @@
  */
 package org.protempa.backend.dsb.filter;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.Interval.Side;
 import org.protempa.proposition.interval.IntervalFactory;

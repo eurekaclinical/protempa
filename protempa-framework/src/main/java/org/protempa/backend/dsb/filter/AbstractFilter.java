@@ -21,7 +21,7 @@ package org.protempa.backend.dsb.filter;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
 
 /**

@@ -25,8 +25,8 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.*;
 import org.protempa.backend.dsb.filter.Filter;
