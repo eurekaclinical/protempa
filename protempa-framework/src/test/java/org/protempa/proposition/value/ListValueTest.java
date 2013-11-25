@@ -19,25 +19,29 @@
  */
 package org.protempa.proposition.value;
 
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Andrew Post
  * 
  */
-public class ListValueTest extends TestCase {
+public class ListValueTest {
 
+    @Test
     public void testParse() {
         long[] l = {1L, 2L, 3L, 4L};
         @SuppressWarnings("unchecked")
 		ValueList<NumberValue> v = (ValueList<NumberValue>) ValueType.VALUELIST.parse("[1,2,3,4]");
-        Assert.assertEquals(l.length, v.size());
+        assertEquals(l.length, v.size());
         for (int i = 0, n = l.length; i < n; i++) {
-            Assert.assertEquals(l[i], ((NumberValue) v.get(i)).longValue());
+            assertEquals(l[i], (v.get(i)).longValue());
         }
     }
-    
+
+    @Test
     public void testInEquals() {
         ValueList<NominalValue> l = ValueList.getInstance(
                 NominalValue.getInstance("foo"),
@@ -47,7 +51,8 @@ public class ListValueTest extends TestCase {
         NominalValue bar = NominalValue.getInstance("bar");
         assertEquals(ValueComparator.IN, bar.compare(l));
     }
-    
+
+    @Test
     public void testInIs() {
         ValueList<NominalValue> l = ValueList.getInstance(
                 NominalValue.getInstance("foo"),
@@ -57,7 +62,8 @@ public class ListValueTest extends TestCase {
         NominalValue bar = NominalValue.getInstance("bar");
         assertTrue(ValueComparator.IN.test(bar.compare(l)));
     }
-    
+
+    @Test
     public void testNotInEquals() {
         ValueList<NominalValue> l = ValueList.getInstance(
                 NominalValue.getInstance("foo"),
@@ -67,7 +73,8 @@ public class ListValueTest extends TestCase {
         NominalValue foo2 = NominalValue.getInstance("foo2");
         assertEquals(ValueComparator.NOT_IN, foo2.compare(l));
     }
-    
+
+    @Test
     public void testNotInIs() {
         ValueList<NominalValue> l = ValueList.getInstance(
                 NominalValue.getInstance("foo"),
@@ -77,7 +84,8 @@ public class ListValueTest extends TestCase {
         NominalValue foo2 = NominalValue.getInstance("foo2");
         assertTrue(ValueComparator.NOT_IN.test(foo2.compare(l)));
     }
-    
+
+    @Test
     public void testListEquals() {
         ValueList<NominalValue> l1 = ValueList.getInstance(
                 NominalValue.getInstance("foo"),
@@ -91,7 +99,8 @@ public class ListValueTest extends TestCase {
         );
         assertTrue(ValueComparator.NOT_IN.test(l1.compare(l2)));
     }
-    
+
+    @Test
     public void testListNotEqualDifferentOrder() {
         ValueList<NominalValue> l1 = ValueList.getInstance(
                 NominalValue.getInstance("foo"),
@@ -105,7 +114,8 @@ public class ListValueTest extends TestCase {
         );
         assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
     }
-    
+
+    @Test
     public void testListNotEqualDifferentSize1() {
         ValueList<NominalValue> l1 = ValueList.getInstance(
                 NominalValue.getInstance("foo"),
@@ -117,7 +127,8 @@ public class ListValueTest extends TestCase {
         );
         assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
     }
-    
+
+    @Test
     public void testListNotEqualDifferentSize2() {
         ValueList<NominalValue> l2 = ValueList.getInstance(
                 NominalValue.getInstance("foo"),
@@ -129,7 +140,8 @@ public class ListValueTest extends TestCase {
         );
         assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
     }
-    
+
+    @Test
     public void testListNotEqualDifferentSize3() {
         ValueList<NominalValue> l2 = ValueList.getInstance(
                 NominalValue.getInstance("foo"),
@@ -140,7 +152,8 @@ public class ListValueTest extends TestCase {
         );
         assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
     }
-    
+
+    @Test
     public void testListCompareToNull() {
         ValueList<NominalValue> l1 = ValueList.getInstance(
                 NominalValue.getInstance("foo"),
