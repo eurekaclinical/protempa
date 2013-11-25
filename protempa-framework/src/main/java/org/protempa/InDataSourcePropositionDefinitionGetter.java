@@ -19,6 +19,9 @@
  */
 package org.protempa;
 
+import org.apache.commons.collections4.map.ReferenceMap;
+import org.arp.javautil.arrays.Arrays;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,8 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.collections.map.ReferenceMap;
-import org.arp.javautil.arrays.Arrays;
 
 /**
  *
@@ -44,8 +45,8 @@ class InDataSourcePropositionDefinitionGetter {
             KnowledgeSource knowledgeSource) {
         assert knowledgeSource != null : "knowledgeSource cannot be null";
         this.knowledgeSource = knowledgeSource;
-        this.propIdInDataSourceCache = new ReferenceMap();
-        this.propIdPropInDataSourceCache = new ReferenceMap();
+        this.propIdInDataSourceCache = new ReferenceMap<>();
+        this.propIdPropInDataSourceCache = new ReferenceMap<>();
 
     }
     

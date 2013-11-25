@@ -25,7 +25,7 @@ import org.protempa.backend.BackendInitializationException;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.backend.BackendNewInstanceException;

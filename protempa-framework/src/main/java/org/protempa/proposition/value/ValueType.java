@@ -19,7 +19,7 @@
  */
 package org.protempa.proposition.value;
 
-import org.apache.commons.collections.map.ReferenceMap;
+import org.apache.commons.collections4.map.ReferenceMap;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -178,8 +178,7 @@ public enum ValueType {
         }
     },
     NUMBERVALUE {
-        @SuppressWarnings("unchecked")
-        private Map<String, BigDecimal> cache = new ReferenceMap();
+        private Map<String, BigDecimal> cache = new ReferenceMap<>();
 
         @Override
         public Value parse(String val) {

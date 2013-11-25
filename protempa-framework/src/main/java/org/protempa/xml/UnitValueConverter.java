@@ -19,14 +19,13 @@
  */
 package org.protempa.xml;
 
-import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import com.thoughtworks.xstream.converters.SingleValueConverter;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.mvel.ConversionException;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.RelativeDayUnit;
 import org.protempa.proposition.value.RelativeHourUnit;
 import org.protempa.proposition.value.Unit;
-
-import com.thoughtworks.xstream.converters.SingleValueConverter;
 
 /**
  * Convert {@link Unit} objects to/from a string.
@@ -34,7 +33,7 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
  * @author mgrand
  */
 class UnitValueConverter implements SingleValueConverter {
-	private static final DualHashBidiMap unitToStringMap = new DualHashBidiMap();
+	private static final DualHashBidiMap<Unit, String> unitToStringMap = new DualHashBidiMap<>();
 	static {
 		unitToStringMap.put(AbsoluteTimeUnit.SECOND, "absoluteSecond");
 		unitToStringMap.put(AbsoluteTimeUnit.MINUTE, "absoluteMinute");
@@ -60,7 +59,7 @@ class UnitValueConverter implements SingleValueConverter {
 	 */
 	@Override
 	public String toString(Object obj) {
-		String unitString = (String)unitToStringMap.get(obj);
+		String unitString = unitToStringMap.get(obj);
 		if (unitString == null) {
 			String msg = "Unable to convert unexpected Unit object to an unit attribute value: " + obj.toString();
 			throw new ConversionException(msg);
@@ -73,7 +72,7 @@ class UnitValueConverter implements SingleValueConverter {
 	 */
 	@Override
 	public Object fromString(String str) {
-		Unit unit = (Unit)unitToStringMap.getKey(str);
+		Unit unit = unitToStringMap.getKey(str);
 		if (unit == null) {
 			String msg = "Unknown unit value string: " + str;
 			throw new ConversionException(msg);

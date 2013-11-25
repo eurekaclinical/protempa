@@ -24,7 +24,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Map;
-import org.apache.commons.collections.map.ReferenceMap;
+import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
@@ -40,8 +40,7 @@ public final class NominalValue implements Value, Comparable<NominalValue>,
     private String val;
     private transient volatile int hashCode;
 
-    @SuppressWarnings("unchecked")
-    private static final Map<String, NominalValue> cache = new ReferenceMap();
+    private static final Map<String, NominalValue> cache = new ReferenceMap<>();
 
     /**
      * Creates a new nominal value. If <code>val</code>'s length is less

@@ -19,17 +19,18 @@
  */
 package org.protempa.proposition.value;
 
+import org.apache.commons.collections4.map.ReferenceMap;
+
 import java.util.Date;
 import java.util.Map;
-import org.apache.commons.collections.map.ReferenceMap;
 
 /**
  *
  * @author Andrew Post
  */
 public class AbsoluteTimeGranularityUtil {
-    @SuppressWarnings("unchecked")
-    private static final Map<Long, Date> cache = new ReferenceMap();
+
+    private static final Map<Long, Date> cache = new ReferenceMap<>();
     
     private AbsoluteTimeGranularityUtil() {
         

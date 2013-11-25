@@ -19,7 +19,7 @@
  */
 package org.protempa.xml;
 
-import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.mvel.ConversionException;
 import org.protempa.proposition.value.Unit;
 import org.protempa.query.handler.table.PropositionValueColumnSpec.Type;
@@ -32,7 +32,7 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
  * @author mgrand
  */
 class AggregationTypeValueConverter implements SingleValueConverter {
-	private static final DualHashBidiMap aggregationTypeToStringMap = new DualHashBidiMap();
+	private static final DualHashBidiMap<Type, String> aggregationTypeToStringMap = new DualHashBidiMap<>();
 	static {
 		aggregationTypeToStringMap.put(Type.MAX, "max");
 		aggregationTypeToStringMap.put(Type.MIN, "min");
@@ -54,7 +54,7 @@ class AggregationTypeValueConverter implements SingleValueConverter {
 	 */
 	@Override
 	public String toString(Object obj) {
-		String unitString = (String)aggregationTypeToStringMap.get(obj);
+		String unitString = aggregationTypeToStringMap.get(obj);
 		if (unitString == null) {
 			String msg = "Unable to convert unexpected Type object to an aggregationType attribute value: " + obj.toString();
 			throw new ConversionException(msg);
@@ -67,7 +67,7 @@ class AggregationTypeValueConverter implements SingleValueConverter {
 	 */
 	@Override
 	public Object fromString(String str) {
-		Type type = (Type)aggregationTypeToStringMap.getKey(str);
+		Type type = aggregationTypeToStringMap.getKey(str);
 		if (type == null) {
 			String msg = "Unknown aggregation type value string: " + str;
 			throw new ConversionException(msg);

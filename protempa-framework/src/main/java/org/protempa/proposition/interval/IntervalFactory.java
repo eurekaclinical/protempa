@@ -19,12 +19,13 @@
  */
 package org.protempa.proposition.interval;
 
+import org.apache.commons.collections4.map.ReferenceMap;
+import org.protempa.proposition.value.AbsoluteTimeGranularity;
+import org.protempa.proposition.value.Granularity;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.map.ReferenceMap;
-import org.protempa.proposition.value.AbsoluteTimeGranularity;
-import org.protempa.proposition.value.Granularity;
 
 /**
  * A factory for creating {@link Interval} objects. A subclass of
@@ -39,9 +40,9 @@ public final class IntervalFactory {
 
         private static Interval defaultInterval = new DefaultInterval();
     }
-    @SuppressWarnings("unchecked")
+
     private static final Map<List<Object>, Interval> cache =
-            new ReferenceMap();
+            new ReferenceMap<>();
 
     /**
      * Returns an interval specified by the given minimum start, maximum start,

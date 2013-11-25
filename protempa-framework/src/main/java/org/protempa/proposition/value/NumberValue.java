@@ -19,14 +19,15 @@
  */
 package org.protempa.proposition.value;
 
+import org.apache.commons.collections4.map.ReferenceMap;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Map;
-import org.apache.commons.collections.map.ReferenceMap;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Represents a number, either integral or floating point, with unbounded
@@ -39,9 +40,9 @@ public final class NumberValue implements NumericalValue,
         Comparable<NumberValue>, Serializable {
 
     private static final long serialVersionUID = 266750924747111671L;
-    @SuppressWarnings("unchecked")
+
     private static final Map<BigDecimal, NumberValue> cache =
-            new ReferenceMap();
+            new ReferenceMap<>();
     private BigDecimal num;
     private transient volatile int hashCode;
     

@@ -19,14 +19,15 @@
  */
 package org.protempa.proposition.value;
 
+import org.apache.commons.collections4.map.ReferenceMap;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
-import org.apache.commons.collections.map.ReferenceMap;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  * Represents dates and datetimes.
@@ -38,8 +39,8 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
 
     private static final AbsoluteTimeGranularity gran =
             AbsoluteTimeGranularity.DAY;
-    @SuppressWarnings("unchecked")
-    private static final Map<Date, DateValue> cache = new ReferenceMap();
+
+    private static final Map<Date, DateValue> cache = new ReferenceMap<>();
     private static final long serialVersionUID = 7939358587048726659L;
     
     /**

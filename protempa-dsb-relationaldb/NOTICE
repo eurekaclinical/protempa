@@ -13,9 +13,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 This project includes:
+  Apache Commons Collections under The Apache Software License, Version 2.0
   Apache ServiceMix :: Bundles :: xstream under The Apache Software License, Version 2.0
   Commons CLI under The Apache Software License, Version 2.0
-  Commons Collections under The Apache Software License, Version 2.0
   Commons IO under The Apache Software License, Version 2.0
   Commons Lang under The Apache Software License, Version 2.0
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0

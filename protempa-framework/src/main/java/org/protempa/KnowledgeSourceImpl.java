@@ -19,10 +19,16 @@
  */
 package org.protempa;
 
-import java.text.MessageFormat;
+import org.apache.commons.collections4.map.ReferenceMap;
+import org.apache.commons.lang3.StringUtils;
+import org.arp.javautil.arrays.Arrays;
 import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
+import org.protempa.query.And;
+
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,12 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
-import org.apache.commons.collections.map.ReferenceMap;
-import org.apache.commons.lang3.StringUtils;
-import org.arp.javautil.arrays.Arrays;
-
-import org.protempa.backend.BackendNewInstanceException;
-import org.protempa.query.And;
 
 /**
  * A read-only "interface" to an externally-maintained knowledge base. The user
@@ -70,15 +70,14 @@ public final class KnowledgeSourceImpl
     private final Map<TemporalPropositionDefinition, List<ContextDefinition>> inducesCache;
     private InDataSourcePropositionDefinitionGetter inDataSourceGetter;
 
-    @SuppressWarnings("unchecked")
     public KnowledgeSourceImpl(KnowledgeSourceBackend... backends) {
         super(backends);
-        this.propIdPropCache = new ReferenceMap();
-        this.inverseIsACache = new ReferenceMap();
-        this.abstractedFromCache = new ReferenceMap();
-        this.subContextsCache = new ReferenceMap();
-        this.inducedByCache = new ReferenceMap();
-        this.inducesCache = new ReferenceMap();
+        this.propIdPropCache = new ReferenceMap<>();
+        this.inverseIsACache = new ReferenceMap<>();
+        this.abstractedFromCache = new ReferenceMap<>();
+        this.subContextsCache = new ReferenceMap<>();
+        this.inducedByCache = new ReferenceMap<>();
+        this.inducesCache = new ReferenceMap<>();
         this.notFoundAbstractionDefinitionRequests =
                 new WeakHashMap<String, Object>();
         this.notFoundValueSetRequests = new WeakHashMap<String, Object>();

@@ -19,7 +19,7 @@
  */
 package org.protempa.xml;
 
-import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.mvel.ConversionException;
 import org.protempa.proposition.value.Unit;
 import org.protempa.query.handler.table.Derivation;
@@ -33,7 +33,7 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
  * @author mgrand
  */
 class BehaviorValueConverter implements SingleValueConverter {
-	private static final DualHashBidiMap BehaviorToStringMap = new DualHashBidiMap();
+	private static final DualHashBidiMap<Derivation.Behavior, String> BehaviorToStringMap = new DualHashBidiMap<>();
 	static {
 		BehaviorToStringMap.put(Derivation.Behavior.MULT_BACKWARD, "multBackward");
 		BehaviorToStringMap.put(Derivation.Behavior.MULT_FORWARD, "multForward");
@@ -54,7 +54,7 @@ class BehaviorValueConverter implements SingleValueConverter {
 	 */
 	@Override
 	public String toString(Object obj) {
-		String unitString = (String)BehaviorToStringMap.get(obj);
+		String unitString = BehaviorToStringMap.get(obj);
 		if (unitString == null) {
 			String msg = "Unable to convert unexpected Behavior object to an attribute value: " + obj.toString();
 			throw new ConversionException(msg);
@@ -67,7 +67,7 @@ class BehaviorValueConverter implements SingleValueConverter {
 	 */
 	@Override
 	public Object fromString(String str) {
-		Behavior behavior = (Behavior)BehaviorToStringMap.getKey(str);
+		Behavior behavior = BehaviorToStringMap.getKey(str);
 		if (behavior == null) {
 			String msg = "Unknown behavior type value string: " + str;
 			throw new ConversionException(msg);

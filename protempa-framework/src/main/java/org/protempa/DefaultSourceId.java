@@ -19,9 +19,10 @@
  */
 package org.protempa;
 
+import org.apache.commons.collections4.map.ReferenceMap;
+
 import java.io.Serializable;
 import java.util.Map;
-import org.apache.commons.collections.map.ReferenceMap;
 
 /**
  *
@@ -30,7 +31,7 @@ import org.apache.commons.collections.map.ReferenceMap;
 public class DefaultSourceId implements SourceId, Serializable {
     private static final long serialVersionUID = -8057854346978674580L;
     
-    private static final Map<String, DefaultSourceId> CACHE = new ReferenceMap();
+    private static final Map<String, DefaultSourceId> CACHE = new ReferenceMap<>();
     
     public static DefaultSourceId getInstance(String sourceIdStr) {
         if (sourceIdStr == null) {
