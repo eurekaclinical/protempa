@@ -296,19 +296,7 @@ public abstract class RelationalDbDataSourceBackend
                         getConnectionSpecInstance();
                 this.sqlGenerator = new SQLGeneratorFactory(connectionSpecInstance,
                         this).newInstance();
-            } catch (InvalidConnectionSpecArguments ex) {
-                throw new DataSourceReadException(
-                        "Could not initialize data source backend "
-                        + nameForErrors(), ex);
-            } catch (NoCompatibleSQLGeneratorException ex) {
-                throw new DataSourceReadException(
-                        "Could not initialize data source backend "
-                        + nameForErrors(), ex);
-            } catch (SQLGeneratorLoadException ex) {
-                throw new DataSourceReadException(
-                        "Could not initialize data source backend "
-                        + nameForErrors(), ex);
-            } catch (SQLException ex) {
+            } catch (InvalidConnectionSpecArguments | SQLException | SQLGeneratorLoadException | NoCompatibleSQLGeneratorException ex) {
                 throw new DataSourceReadException(
                         "Could not initialize data source backend "
                         + nameForErrors(), ex);
