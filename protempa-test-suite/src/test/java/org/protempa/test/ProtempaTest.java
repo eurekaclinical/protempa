@@ -684,18 +684,10 @@ public class ProtempaTest {
         } catch (FinderException ex) {
             ex.printStackTrace();
             fail(AF_ERROR_MSG);
-        } catch (ParseException ex) {
+        } catch (ParseException | QueryBuildException | KnowledgeSourceReadException ex) {
             ex.printStackTrace();
             fail(QUERY_ERROR_MSG);
-        } catch (KnowledgeSourceReadException ex) {
-            ex.printStackTrace();
-            fail(QUERY_ERROR_MSG);
-        } catch (QueryBuildException ex) {
-            ex.printStackTrace();
-            fail(QUERY_ERROR_MSG);
-        } catch (NumberFormatException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
+        } catch (NumberFormatException | IOException ex) {
             ex.printStackTrace();
         } finally {
             if (results != null) {
@@ -782,9 +774,6 @@ public class ProtempaTest {
         } catch (KnowledgeSourceReadException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
-        } catch (FinderException e) {
-            e.printStackTrace();
-            fail(AF_ERROR_MSG);
         } catch (ProtempaException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
@@ -817,19 +806,10 @@ public class ProtempaTest {
                     outputFile.getAbsolutePath());
             boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);
             assertTrue("output doesn't match", outputMatches);
-        } catch (FinderException e) {
+        } catch (FinderException | IOException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail(AF_ERROR_MSG);
-        } catch (KnowledgeSourceReadException e) {
-            e.printStackTrace();
-            fail(QUERY_ERROR_MSG);
-        } catch (QueryBuildException e) {
-            e.printStackTrace();
-            fail(QUERY_ERROR_MSG);
-        } catch (ParseException e) {
+        } catch (KnowledgeSourceReadException | ParseException | QueryBuildException e) {
             e.printStackTrace();
             fail(QUERY_ERROR_MSG);
         } finally {
