@@ -19,28 +19,26 @@
  */
 package org.protempa.backend.tsb.umls;
 
+import edu.emory.cci.aiw.umls.SAB;
+import edu.emory.cci.aiw.umls.TerminologyCode;
+import edu.emory.cci.aiw.umls.UMLSDatabaseConnection;
+import edu.emory.cci.aiw.umls.UMLSQueryException;
+import edu.emory.cci.aiw.umls.UMLSQueryExecutor;
+import org.arp.javautil.sql.DatabaseAPI;
+import org.protempa.MalformedTermIdException;
+import org.protempa.Term;
+import org.protempa.TermSourceReadException;
+import org.protempa.backend.AbstractCommonsTermSourceBackend;
+import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.BackendInstanceSpec;
+import org.protempa.backend.TermSourceBackendInitializationException;
+import org.protempa.backend.annotations.BackendInfo;
+import org.protempa.backend.annotations.BackendProperty;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.arp.javautil.sql.DatabaseAPI;
-import org.protempa.MalformedTermIdException;
-import org.protempa.Term;
-import org.protempa.backend.TermSourceBackendInitializationException;
-import org.protempa.TermSourceReadException;
-import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.backend.AbstractCommonsTermSourceBackend;
-import org.protempa.backend.annotations.BackendInfo;
-import org.protempa.backend.annotations.BackendProperty;
-
-import edu.emory.cci.aiw.umls.SAB;
-import edu.emory.cci.aiw.umls.TerminologyCode;
-import edu.emory.cci.aiw.umls.UMLSDatabaseConnection;
-import edu.emory.cci.aiw.umls.UMLSNoSuchTermException;
-import edu.emory.cci.aiw.umls.UMLSQueryException;
-import edu.emory.cci.aiw.umls.UMLSQueryExecutor;
-import org.protempa.backend.BackendInitializationException;
 
 @BackendInfo(displayName = "UMLS term source backend")
 public final class UMLSTermSourceBackend extends
@@ -84,10 +82,8 @@ public final class UMLSTermSourceBackend extends
             term.setDescription(umls.getTermDefinition(code));
 
             return term;
-        } catch (UMLSQueryException ue) {
+        } catch (UMLSQueryException | MalformedTermIdException ue) {
             throw new TermSourceReadException(ue);
-        } catch (MalformedTermIdException te) {
-            throw new TermSourceReadException(te);
         }
     }
 
@@ -129,11 +125,7 @@ public final class UMLSTermSourceBackend extends
                 result.add(Term.fromTerminologyAndCode(tc.getSab().getName(),
                         tc.getCode()).getId());
             }
-        } catch (UMLSNoSuchTermException ex) {
-            throw new TermSourceReadException(ex);
-        } catch (UMLSQueryException ex) {
-            throw new TermSourceReadException(ex);
-        } catch (MalformedTermIdException ex) {
+        } catch (MalformedTermIdException | UMLSQueryException ex) {
             throw new TermSourceReadException(ex);
         }
 
