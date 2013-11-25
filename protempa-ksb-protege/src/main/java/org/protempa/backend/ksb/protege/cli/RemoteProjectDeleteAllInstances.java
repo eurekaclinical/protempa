@@ -60,13 +60,7 @@ public class RemoteProjectDeleteAllInstances extends CLI {
         try {
             project = new RemoteProjectFactory().getInstance(configurationId,
                     host, knowledgeBaseName);
-        } catch (ConfigurationsNotFoundException ex) {
-            pdai.printException(ex);
-        } catch (ConfigurationsLoadException ex) {
-            pdai.printException(ex);
-        } catch (BackendProviderSpecLoaderException ex) {
-            pdai.printException(ex);
-        } catch (InvalidPropertyNameException ex) {
+        } catch (ConfigurationsNotFoundException | InvalidPropertyNameException | BackendProviderSpecLoaderException | ConfigurationsLoadException ex) {
             pdai.printException(ex);
         }
         try {
