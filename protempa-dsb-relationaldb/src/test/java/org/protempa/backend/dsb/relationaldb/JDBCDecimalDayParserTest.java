@@ -79,9 +79,12 @@ public class JDBCDecimalDayParserTest {
     }
 
     /**
+     * Deprecation warnings are suppressed because ResultSet defines some
+     * deprecated methods that must be overridden nonetheless.
      *
      * @author Andrew Post
      */
+    @SuppressWarnings("deprecation")
     private static class MockResultSet implements ResultSet {
 
         private boolean hasNext = true;
