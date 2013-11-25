@@ -53,7 +53,7 @@ public final class Sequence<T extends TemporalProposition> implements List<T>,
     }
 
     public Sequence(String propId, int initialCapacity) {
-        l = new ArrayList<T>(initialCapacity);
+        l = new ArrayList<>(initialCapacity);
         this.propIds = Collections.singleton(propId);
     }
 
@@ -70,9 +70,9 @@ public final class Sequence<T extends TemporalProposition> implements List<T>,
      */
     public Sequence(Set<String> propIds, List<T> data) {
         if (data != null) {
-            l = new ArrayList<T>(data);
+            l = new ArrayList<>(data);
         } else {
-            l = new ArrayList<T>();
+            l = new ArrayList<>();
         }
         this.propIds = propIds;
         if (l.size() > 1) {

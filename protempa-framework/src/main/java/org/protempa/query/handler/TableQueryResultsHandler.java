@@ -71,7 +71,7 @@ public final class TableQueryResultsHandler
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
         this.out = out;
-        this.replace = new HashMap<String, String>();
+        this.replace = new HashMap<>();
         this.replace.put(null, "(null)");
         this.replace.put("", "(empty)");
         this.inferPropositionIdsNeeded = inferPropositionIdsNeeded;
@@ -110,7 +110,7 @@ public final class TableQueryResultsHandler
         
         if (this.headerWritten) {
             try {
-                List<String> columnNames = new ArrayList<String>();
+                List<String> columnNames = new ArrayList<>();
                 columnNames.add("KeyId");
                 for (TableColumnSpec columnSpec : this.columnSpecs) {
                     logger.log(Level.FINE, "Processing columnSpec type {0}",
@@ -196,7 +196,7 @@ public final class TableQueryResultsHandler
     public void validate()
             throws QueryResultsHandlerValidationFailedException,
             KnowledgeSourceReadException {
-        List<String> invalidPropIds = new ArrayList<String>();
+        List<String> invalidPropIds = new ArrayList<>();
         for (String propId : this.rowPropositionIds) {
             if (!knowledgeSource.hasPropositionDefinition(propId)) {
                 invalidPropIds.add(propId);
@@ -266,7 +266,7 @@ public final class TableQueryResultsHandler
     public String[] getPropositionIdsNeeded() 
             throws KnowledgeSourceReadException {
         if (this.inferPropositionIdsNeeded) {
-            Set<String> result = new HashSet<String>();
+            Set<String> result = new HashSet<>();
             org.arp.javautil.arrays.Arrays.addAll(result, 
                     this.rowPropositionIds);
             for (TableColumnSpec columnSpec : this.columnSpecs) {

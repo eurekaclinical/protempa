@@ -60,18 +60,18 @@ public class DataSourceResultMapTest extends TestCase {
     @Before
     @Override
     public void setUp() {
-        this.map1 = new HashMap<String, List<String>>();
+        this.map1 = new HashMap<>();
         this.map1.put("foo1", Arrays.asList(new String[]{"bar1", "baz1"}));
-        this.map2 = new HashMap<String, List<String>>();
+        this.map2 = new HashMap<>();
         this.map2.put("foo1", Arrays.asList(new String[]{"bar2", "baz2"}));
-        this.map3 = new HashMap<String, List<String>>();
+        this.map3 = new HashMap<>();
         this.map3.put("foo2", Arrays.asList(new String[]{"bar3", "baz3"}));
         List<Map<String, List<String>>> maps =
-                new ArrayList<Map<String, List<String>>>(3);
+                new ArrayList<>(3);
         maps.add(this.map1);
         maps.add(this.map2);
         maps.add(this.map3);
-        this.map = new DataSourceResultMap<String>(maps);
+        this.map = new DataSourceResultMap<>(maps);
     }
 
     @After
@@ -133,7 +133,7 @@ public class DataSourceResultMapTest extends TestCase {
     }
 
     public void testPutAll() {
-        Map<String, List<String>> aMap = new HashMap<String, List<String>>();
+        Map<String, List<String>> aMap = new HashMap<>();
         aMap.put("shouldNotWork", Arrays.asList(new String[0]));
         try {
             this.map.putAll(aMap);
@@ -151,7 +151,7 @@ public class DataSourceResultMapTest extends TestCase {
     }
 
     public void testKeySet() {
-        Set<String> keys = new HashSet<String>();
+        Set<String> keys = new HashSet<>();
         keys.add("foo1");
         keys.add("foo2");
         assertEquals(keys, this.map.keySet());
@@ -160,16 +160,16 @@ public class DataSourceResultMapTest extends TestCase {
     public void testValues() {
         List<String> values1 = Arrays.asList(new String[]{"bar1", "baz1", "bar2", "baz2"});
         List<String> values3 = Arrays.asList(new String[]{"bar3", "baz3"});
-        Collection<List<String>> expected = new ArrayList<List<String>>();
+        Collection<List<String>> expected = new ArrayList<>();
         expected.add(values1);
         expected.add(values3);
         Collection<List<String>> observed = this.map.values();
-        assertEquals(new HashSet<List<String>>(expected), new HashSet<List<String>>(observed));
+        assertEquals(new HashSet<>(expected), new HashSet<>(observed));
     }
 
     public void testEntrySet() {
         Map<String, List<String>> expectedMap = 
-                new HashMap<String, List<String>>();
+                new HashMap<>();
         expectedMap.put("foo1", Arrays.asList(new String[]{"bar1", "baz1", "bar2", "baz2"}));
         expectedMap.put("foo2", Arrays.asList(new String[]{"bar3", "baz3"}));
         Set<Map.Entry<String, List<String>>> expected = expectedMap.entrySet();

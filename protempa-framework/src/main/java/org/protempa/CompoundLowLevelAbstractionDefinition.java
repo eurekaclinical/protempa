@@ -123,7 +123,7 @@ public final class CompoundLowLevelAbstractionDefinition
      */
     public CompoundLowLevelAbstractionDefinition(String id) {
         super(id);
-        this.lowLevelIds = new HashSet<String>();
+        this.lowLevelIds = new HashSet<>();
         this.minimumNumberOfValues = 1;
         this.skip = -1;
         this.valueDefinitionMatchOperator = ValueDefinitionMatchOperator.ANY;
@@ -133,8 +133,8 @@ public final class CompoundLowLevelAbstractionDefinition
     }
 
     private void initInstance() {
-        this.classificationMatrix = new LinkedHashMap<String, List<ClassificationMatrixValue>>();
-        this.valueClassifications = new ArrayList<ValueClassification>();
+        this.classificationMatrix = new LinkedHashMap<>();
+        this.valueClassifications = new ArrayList<>();
     }
 
     /**

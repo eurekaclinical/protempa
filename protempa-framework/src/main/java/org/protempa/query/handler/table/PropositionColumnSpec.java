@@ -134,7 +134,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     }
 
     protected String[] columnNames(String prefix) {
-        List<String> results = new ArrayList<String>();
+        List<String> results = new ArrayList<>();
         if (this.outputConfig.showId()) {
             results.add(StringUtils.defaultIfEmpty(
                     outputConfig.getIdHeading(),
@@ -555,7 +555,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     @Override
     public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
             String[] inPropIds) throws KnowledgeSourceReadException {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (Link link : this.links) {
             inPropIds = link.getInferredPropositionIds(knowledgeSource, 
                     inPropIds);

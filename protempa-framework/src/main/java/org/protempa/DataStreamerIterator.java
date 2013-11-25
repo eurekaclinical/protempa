@@ -53,7 +53,7 @@ final class DataStreamerIterator<E extends Proposition> {
             throws DataSourceReadException {
         assert itrs != null : "itrs cannot be null";
         this.itrs = itrs;
-        this.currentElt = new ArrayList<DataStreamingEvent<E>>(itrs.size());
+        this.currentElt = new ArrayList<>(itrs.size());
         int itrsSize = itrs.size();
         for (int j = 0; j < itrsSize; j++) {
             this.currentElt.add(null);

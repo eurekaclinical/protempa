@@ -65,7 +65,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
                 this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
                 visitor.getAlgorithms(), listener);
-        List<PropositionDefinition> propDefs = new ArrayList<PropositionDefinition>(
+        List<PropositionDefinition> propDefs = new ArrayList<>(
                 propIds.size());
         for (String propId : propIds) {
             PropositionDefinition propDef;
@@ -83,7 +83,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
             }
         }
         if (propIds != null) {
-            Set<PropositionDefinition> result = new HashSet<PropositionDefinition>();
+            Set<PropositionDefinition> result = new HashSet<>();
             aggregateDescendants(qs.getQuery().getId(), visitor, result, propDefs);
             try {
                 ruleCreator.visit(result);
@@ -165,7 +165,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         private final AlgorithmSource algorithmSource;
 
         ValidateAlgorithmCheckedVisitor(AlgorithmSource algorithmSource) {
-            this.algorithms = new HashMap<LowLevelAbstractionDefinition, Algorithm>();
+            this.algorithms = new HashMap<>();
             this.algorithmSource = algorithmSource;
         }
 

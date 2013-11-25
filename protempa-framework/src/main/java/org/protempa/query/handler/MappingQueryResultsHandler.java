@@ -70,7 +70,7 @@ public class MappingQueryResultsHandler extends AbstractQueryResultsHandler {
      */
     @Override
     public void init(KnowledgeSource knowledgeSource, Query query) {
-        this.resultMap = new HashMap<String, List<Proposition>>();
+        this.resultMap = new HashMap<>();
     }
 
     /**

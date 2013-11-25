@@ -31,15 +31,15 @@ public final class TermSubsumption {
     }
     
     public TermSubsumption() {
-        this.termIds = new HashSet<String>();
+        this.termIds = new HashSet<>();
     }
     
     public static TermSubsumption fromTerms(Collection<String> termIds) {
-        return new TermSubsumption(new HashSet<String>(termIds));
+        return new TermSubsumption(new HashSet<>(termIds));
     }
     
     public static TermSubsumption fromTerms(String... termIds) {
-        HashSet<String> set = new HashSet<String>();
+        HashSet<String> set = new HashSet<>();
         for (String termId : termIds) {
             set.add(termId);
         }

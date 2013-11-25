@@ -71,7 +71,7 @@ public final class BackendSpec<B extends Backend> {
     }
     
     public BackendInstanceSpec<B> newBackendInstanceSpec() {
-        return new BackendInstanceSpec<B>(this, propertySpecs);
+        return new BackendInstanceSpec<>(this, propertySpecs);
     }
 
     @SuppressWarnings("unchecked")

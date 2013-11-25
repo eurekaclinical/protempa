@@ -47,8 +47,8 @@ public final class AlgorithmArguments implements Serializable {
             throw new IllegalArgumentException("algorithm cannot be null");
         }
         this.algorithm = algorithm;
-        this.parameterValues = new HashMap<String, Value>();
-        this.parameterValueComps = new HashMap<String, ValueComparator>();
+        this.parameterValues = new HashMap<>();
+        this.parameterValueComps = new HashMap<>();
         for (AlgorithmParameter d : algorithm.getParameters()) {
             String name = d.getName();
             setArgument(name, def.getParameterComp(name), def.getParameterValue(name));

@@ -134,7 +134,7 @@ final class AbstractionFinder {
         });
 
         if (cacheFoundAbstractParameters) {
-            this.workingMemoryCache = new HashMap<String, StatefulSession>();
+            this.workingMemoryCache = new HashMap<>();
         } else {
             this.workingMemoryCache = null;
         }
@@ -552,7 +552,7 @@ final class AbstractionFinder {
             }
 
             Map<UniqueId, Proposition> refs =
-                    new HashMap<UniqueId, Proposition>();
+                    new HashMap<>();
             if (isLoggable(Level.FINER)) {
                 log(Level.FINER, "References for query {0}: {1}",
                         new Object[]{getQuery().getId(), refs});
@@ -662,7 +662,7 @@ final class AbstractionFinder {
     private static List<Proposition> extractRequestedPropositions(
             Iterator<Proposition> propositions, Set<String> propositionIds,
             Map<UniqueId, Proposition> refs) {
-        List<Proposition> result = new ArrayList<Proposition>();
+        List<Proposition> result = new ArrayList<>();
         while (propositions.hasNext()) {
             Proposition prop = propositions.next();
             refs.put(prop.getUniqueId(), prop);

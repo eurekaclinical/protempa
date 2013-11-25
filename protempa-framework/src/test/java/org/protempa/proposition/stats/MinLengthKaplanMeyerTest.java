@@ -48,7 +48,7 @@ public class MinLengthKaplanMeyerTest extends TestCase {
 
 	@Override
 	protected void setUp() throws Exception {
-		this.propositions = new ArrayList<Proposition>();
+		this.propositions = new ArrayList<>();
 		this.dbDataSourceType = 
                         DataSourceBackendDataSourceType.getInstance("MockTestDatabase");
 		this.derivedDataSourceType = DataSourceType.DERIVED;
@@ -99,13 +99,13 @@ public class MinLengthKaplanMeyerTest extends TestCase {
 	}
 
 	public void testPrimitiveParameter1WithValue() {
-		Map<Long, Integer> expected = new HashMap<Long, Integer>();
+		Map<Long, Integer> expected = new HashMap<>();
 		expected.put(0L, 1);
 		assertEquals(expected, this.mls.get("1", new NumberValue(2)));
 	}
 
 	public void testEvent2() {
-		Map<Long, Integer> expected = new HashMap<Long, Integer>();
+		Map<Long, Integer> expected = new HashMap<>();
 		expected.put(28L, 1);
 		expected.put(31L, 1);
 		expected.put(29L, 1);
@@ -114,7 +114,7 @@ public class MinLengthKaplanMeyerTest extends TestCase {
 	}
 
 	public void testAbstractParameter3() {
-		Map<Long, Integer> expected = new HashMap<Long, Integer>();
+		Map<Long, Integer> expected = new HashMap<>();
 		expected.put(364L, 1);
 		expected.put(1L, 1);
 		expected.put(362L, 1);

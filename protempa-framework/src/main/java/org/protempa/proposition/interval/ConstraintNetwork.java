@@ -67,7 +67,7 @@ final class ConstraintNetwork {
     ConstraintNetwork(int initialCapacity) {
         directedGraph = new DirectedGraph(initialCapacity * 2 + 1);
         directedGraph.add(timeZero);
-        intervals = new ArrayList<Interval>(initialCapacity);
+        intervals = new ArrayList<>(initialCapacity);
     }
 
     void clear() {

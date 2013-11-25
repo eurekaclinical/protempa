@@ -78,11 +78,11 @@ public abstract class IntervalSectioner<E extends TemporalProposition, K extends
                 .getStartGranularity();
         Granularity finishGran = propositions.get(0).getInterval()
                 .getFinishGranularity();
-        List<K> result = new ArrayList<K>();
+        List<K> result = new ArrayList<>();
 
-        Set<Long> startBoundsSet = new HashSet<Long>();
-        Set<Long> finishBoundsSet = new HashSet<Long>();
-        SortedSet<Interval> intervalSet = new TreeSet<Interval>();
+        Set<Long> startBoundsSet = new HashSet<>();
+        Set<Long> finishBoundsSet = new HashSet<>();
+        SortedSet<Interval> intervalSet = new TreeSet<>();
 
         // determining the bounds of all of the abstract parameters will allows
         // us later to decide which new intervals each parameter overlaps
@@ -118,14 +118,14 @@ public abstract class IntervalSectioner<E extends TemporalProposition, K extends
         // these intervals will be further subdivided when we actually assign
         // the propositions
         // to intervals below
-        List<Long> intervalBounds = new ArrayList<Long>(startBoundsSet);
+        List<Long> intervalBounds = new ArrayList<>(startBoundsSet);
         Collections.sort(intervalBounds);
         for (int i = 0; i < intervalBounds.size() - 1; i++) {
             intervalSet.add(intervalFactory.getInstance(intervalBounds.get(i),
                     startGran, intervalBounds.get(i + 1), finishGran));
         }
 
-        SortedMap<Interval, Set<E>> fakeIntervals = new TreeMap<Interval, Set<E>>();
+        SortedMap<Interval, Set<E>> fakeIntervals = new TreeMap<>();
 
         // this loop assigns each proposition to the interval(s) it overlaps,
         // creating new intervals as needed
@@ -171,7 +171,7 @@ public abstract class IntervalSectioner<E extends TemporalProposition, K extends
             }
         }
         for (Entry<Interval, Set<E>> e : fakeIntervals.entrySet()) {
-            Set<E> props = new HashSet<E>();
+            Set<E> props = new HashSet<>();
             for (E p : e.getValue()) {
                 props.add(p);
             }

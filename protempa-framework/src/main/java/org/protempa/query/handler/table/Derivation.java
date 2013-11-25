@@ -141,7 +141,7 @@ public final class Derivation extends Link {
         }
         this.behavior = behavior;
         this.relation = relation;
-        this.internalDerived = new LinkedList<Proposition>();
+        this.internalDerived = new LinkedList<>();
     }
 
     @Override
@@ -151,7 +151,7 @@ public final class Derivation extends Link {
         if (explicitPropIds.length > 0) {
             return explicitPropIds;
         } else {
-            Set<String> result = new HashSet<String>();
+            Set<String> result = new HashSet<>();
             for (String propId : inPropIds) {
                 PropositionDefinition propDef =
                         knowledgeSource.readPropositionDefinition(propId);
@@ -165,7 +165,7 @@ public final class Derivation extends Link {
                         break;
                     case MULT_BACKWARD:
                         Queue<String> backwardProps =
-                                new LinkedList<String>();
+                                new LinkedList<>();
                         Arrays.addAll(backwardProps, propDef.getChildren());
                         String pId;
                         while ((pId = backwardProps.poll()) != null) {
@@ -183,7 +183,7 @@ public final class Derivation extends Link {
                         break;
                     case MULT_FORWARD:
                         Queue<String> forwardProps =
-                                new LinkedList<String>();
+                                new LinkedList<>();
                         for (PropositionDefinition def :
                                 knowledgeSource.readParents(propDef)) {
                             forwardProps.add(def.getId());
@@ -260,7 +260,7 @@ public final class Derivation extends Link {
                      * is much faster than traversing the whole hierarchy in
                      * most cases.
                      */
-                    derived = new ArrayList<Proposition>();
+                    derived = new ArrayList<>();
                     internalDerived.add(proposition);
                     while (!internalDerived.isEmpty()) {
                         Proposition prop = internalDerived.remove();
@@ -284,7 +284,7 @@ public final class Derivation extends Link {
                 }
                 break;
             case MULT_BACKWARD:
-                derived = new ArrayList<Proposition>();
+                derived = new ArrayList<>();
                 internalDerived.add(proposition);
                 while (!internalDerived.isEmpty()) {
                     Proposition prop = internalDerived.remove();
@@ -319,7 +319,7 @@ public final class Derivation extends Link {
     private void populateKnowledgeTree(KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
         if (this.knowledgeTree == null) {
-            this.knowledgeTree = new HashSet<String>();
+            this.knowledgeTree = new HashSet<>();
             for (String propId : getPropositionIds()) {
                 this.knowledgeTree.addAll(
                         knowledgeSource.inDataSourcePropositionIds(propId));
@@ -360,7 +360,7 @@ public final class Derivation extends Link {
                 inTp = (TemporalProposition) inProposition;
             }
         }
-        List<Proposition> result = new ArrayList<Proposition>();
+        List<Proposition> result = new ArrayList<>();
         if (propositions != null) {
             for (Proposition proposition : propositions) {
                 if (cache.add(proposition)

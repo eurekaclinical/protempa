@@ -48,7 +48,7 @@ public class PropositionTest extends TestCase {
     }
     
     public void testHashCode() {
-        Set<Proposition> ps = new HashSet<Proposition>();
+        Set<Proposition> ps = new HashSet<>();
         
         Event e1 = new Event("foo", uid());
         ps.add(e1);
@@ -72,7 +72,7 @@ public class PropositionTest extends TestCase {
             assertTrue(assertOneOf(p, e1, e2, e3, e4, e5));
         }
         
-        Map<Proposition, String> pmap = new HashMap<Proposition, String>();
+        Map<Proposition, String> pmap = new HashMap<>();
         pmap.put(e1, "foo");
         pmap.put(e4, "quux");
         assertNull(pmap.put(e5, "foo"));

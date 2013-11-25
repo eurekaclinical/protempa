@@ -46,7 +46,7 @@ public final class PropositionStoreCreator<P extends Proposition> extends Abstra
         super(environmentName);
         if (environmentName != null) {
             this.storeFactory =
-                    new BdbPersistentStoreFactory<String, List<P>>(environmentName);
+                    new BdbPersistentStoreFactory<>(environmentName);
         } else {
             this.storeFactory = null;
         }

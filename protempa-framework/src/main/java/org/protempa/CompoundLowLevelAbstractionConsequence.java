@@ -99,7 +99,7 @@ final class CompoundLowLevelAbstractionConsequence implements
                 .buildIntervalList(pl);
 
         List<AbstractParameterWithSourceParameters> derivedProps =
-                new ArrayList<AbstractParameterWithSourceParameters>();
+                new ArrayList<>();
         for (CompoundValuedInterval interval : intervals) {
             boolean match = false;
             String lastCheckedValue = null;
@@ -159,12 +159,12 @@ final class CompoundLowLevelAbstractionConsequence implements
                     if (rangeMatches(derivedProps, i, i + rhs,
                             cllad.getGapFunctionBetweenValues())) {
                         Sequence<TemporalParameter> seq =
-                                new Sequence<TemporalParameter>(derivedProps.get(i).parameter.getId());
+                                new Sequence<>(derivedProps.get(i).parameter.getId());
                         for (int k = i; k < i + cllad.getMinimumNumberOfValues(); k++) {
                             seq.add(derivedProps.get(k).parameter);
                         }
                         Segment<TemporalParameter> seg =
-                                new Segment<TemporalParameter>(seq);
+                                new Segment<>(seq);
                         AbstractParameter result =
                                 AbstractParameterFactory.getFromAbstraction(
                                 cllad.getPropositionId(), seg, null,

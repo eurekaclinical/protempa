@@ -60,7 +60,7 @@ public class DataSourceResultMapNullInputTest extends TestCase {
     @Before
     @Override
     public void setUp() {
-        this.map = new DataSourceResultMap<String>(null);
+        this.map = new DataSourceResultMap<>(null);
     }
 
     @After
@@ -121,7 +121,7 @@ public class DataSourceResultMapNullInputTest extends TestCase {
     }
 
     public void testPutAll() {
-        Map<String, List<String>> aMap = new HashMap<String, List<String>>();
+        Map<String, List<String>> aMap = new HashMap<>();
         aMap.put("shouldNotWork", Arrays.asList(new String[0]));
         try {
             this.map.putAll(aMap);
@@ -144,7 +144,7 @@ public class DataSourceResultMapNullInputTest extends TestCase {
 
     public void testValues() {
         Collection<List<String>> observed = this.map.values();
-        assertEquals(Collections.emptySet(), new HashSet<List<String>>(observed));
+        assertEquals(Collections.emptySet(), new HashSet<>(observed));
     }
 
     public void testEntrySet() {

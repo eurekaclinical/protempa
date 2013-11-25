@@ -53,7 +53,7 @@ public class DataSourceBackendMultiplexingDataStreamingEventIterator
     @Override
     public void close() throws DataSourceReadException {
         List<DataSourceReadException> exceptions =
-                new ArrayList<DataSourceReadException>();
+                new ArrayList<>();
         for (DataStreamingEventIterator<UniqueIdPair> it : this.refs) {
             try {
                 it.close();
@@ -71,7 +71,7 @@ public class DataSourceBackendMultiplexingDataStreamingEventIterator
         if (!exceptions.isEmpty()) {
             DataSourceReadException ex = new DataSourceReadException(
                     "Error occurred reading from data source");
-            List<StackTraceElement> elts = new ArrayList<StackTraceElement>();
+            List<StackTraceElement> elts = new ArrayList<>();
             for (DataSourceReadException subex : exceptions) {
                 Arrays.addAll(elts, subex.getStackTrace());
             }

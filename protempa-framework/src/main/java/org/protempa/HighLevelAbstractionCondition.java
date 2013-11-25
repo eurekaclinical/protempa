@@ -52,9 +52,9 @@ class HighLevelAbstractionCondition implements EvalExpression {
         this.def = def;
         this.epds = epds;
         this.parameterMapCapacity = this.epds.length * 4 / 3 + 1;
-        this.epdPairs = new ArrayList<List<TemporalExtendedPropositionDefinition>>(
+        this.epdPairs = new ArrayList<>(
                 def.getTemporalExtendedPropositionDefinitionPairs());
-        this.epdToRelation = new HashMap<List<TemporalExtendedPropositionDefinition>, Relation>(
+        this.epdToRelation = new HashMap<>(
                 this.parameterMapCapacity);
         for (List<TemporalExtendedPropositionDefinition> pair : this.epdPairs) {
             this.epdToRelation.put(pair, this.def.getRelation(pair));
@@ -70,7 +70,7 @@ class HighLevelAbstractionCondition implements EvalExpression {
          * temporal proposition.
          */
         Map<TemporalExtendedPropositionDefinition, TemporalProposition> propositionMap =
-                new HashMap<TemporalExtendedPropositionDefinition, TemporalProposition>(this.parameterMapCapacity);
+                new HashMap<>(this.parameterMapCapacity);
         /*
          * To check for duplicate inputs. We'll only have a few temporal
          * propositions, so using a set for tps probably would be slower.

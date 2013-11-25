@@ -174,7 +174,7 @@ public final class ProtempaUtil {
                             + Arrays.toString(array) + "; " + array[0]);
                 }
             } else {
-                Set<Object> set = new HashSet<Object>();
+                Set<Object> set = new HashSet<>();
                 for (Object obj : array) {
                     if (!set.add(obj)) {
                         throw new IllegalArgumentException(arrayName

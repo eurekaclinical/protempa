@@ -147,7 +147,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
             Map<UniqueId, Proposition> references)
             throws QueryResultsHandlerProcessingException {
         try {
-            Set<UniqueId> handled = new HashSet<UniqueId>();
+            Set<UniqueId> handled = new HashSet<>();
             XmlPropositionVisitor visitor = new XmlPropositionVisitor(this.knowledgeSource);
             Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 
@@ -211,7 +211,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
                 && !this.knowledgeSource.hasPropositionDefinition(this.initialPropId)) {
             throw new QueryResultsHandlerValidationFailedException("initialPropId is invalid: " + this.initialPropId);
         }
-        List<String> invalidPropIds = new ArrayList<String>();
+        List<String> invalidPropIds = new ArrayList<>();
         for (String propId : this.propIds) {
             if (!this.knowledgeSource.hasPropositionDefinition(propId)) {
                 invalidPropIds.add(propId);
@@ -231,7 +231,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
     @Override
     public String[] getPropositionIdsNeeded() {
         if (inferPropositionIdsNeeded) {
-            Set<String> result = new HashSet<String>();
+            Set<String> result = new HashSet<>();
             result.add(this.initialPropId);
             org.arp.javautil.arrays.Arrays.addAll(result, this.propIds);
             return result.toArray(new String[result.size()]);
@@ -241,7 +241,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
     }
 
     private List<Proposition> createReferenceList(List<UniqueId> uids, Map<UniqueId, Proposition> references) {
-        List<Proposition> propositions = new ArrayList<Proposition>();
+        List<Proposition> propositions = new ArrayList<>();
         if (uids != null) {
             for (UniqueId uid : uids) {
                 Proposition refProp = references.get(uid);
@@ -254,7 +254,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
     }
 
     private List<Proposition> filterHandled(Collection<Proposition> propositions, Set<UniqueId> handled) {
-        List<Proposition> filtered = new ArrayList<Proposition>();
+        List<Proposition> filtered = new ArrayList<>();
         if (propositions != null) {
             for (Proposition proposition : propositions) {
                 if (!handled.contains(proposition.getUniqueId())) {
@@ -283,7 +283,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
     }
 
     private List<Element> handleValues(Map<String, String> values, Document document) {
-        List<Element> valueElems = new ArrayList<Element>();
+        List<Element> valueElems = new ArrayList<>();
         for (String key : values.keySet()) {
             Element valElem = document.createElement(key);
             Text valTextElem = document.createTextNode(values.get(key));
@@ -348,7 +348,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
             Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references, Proposition proposition,
             XmlPropositionVisitor visitor, Document document) throws ProtempaException {
         Element derivationsElem = document.createElement("derivations");
-        List<Proposition> derived = new ArrayList<Proposition>();
+        List<Proposition> derived = new ArrayList<>();
 
 //        List<Proposition> fd = forwardDerivations.get(proposition);
 //        if (fd != null) {
@@ -381,7 +381,7 @@ public class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
 
             // create a new set to pass down to the "children" (references and
             // derivations) of this proposition
-            Set<UniqueId> tempHandled = new HashSet<UniqueId>(handled);
+            Set<UniqueId> tempHandled = new HashSet<>(handled);
             tempHandled.add(proposition.getUniqueId());
             Element propElem = document.createElement("proposition");
             propElem.setAttribute("id", proposition.getId());

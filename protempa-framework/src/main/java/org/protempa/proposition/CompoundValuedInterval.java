@@ -52,7 +52,7 @@ public final class CompoundValuedInterval extends CompoundInterval<AbstractParam
     CompoundValuedInterval(Interval interval,
             Set<AbstractParameter> parameters) {
         super(interval, parameters);
-        this.values = new HashMap<String, Value>();
+        this.values = new HashMap<>();
         for (TemporalParameter p : parameters) {
             values.put(p.getId(), p.getValue());
         }

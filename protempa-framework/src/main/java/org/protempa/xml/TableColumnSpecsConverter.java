@@ -92,7 +92,7 @@ class TableColumnSpecsConverter extends AbstractConverter {
 		}
 	}
 
-	private static final HashMap<String, Class<?>> tagToClassMap = new HashMap<String, Class<?>>();
+	private static final HashMap<String, Class<?>> tagToClassMap = new HashMap<>();
 	static {
 		tagToClassMap.put(AT_LEAST_N_COLUMN_SPEC, AtLeastNColumnSpec.class);
 		tagToClassMap.put(COUNT_COLUMN_SPEC, CountColumnSpec.class);
@@ -112,7 +112,7 @@ class TableColumnSpecsConverter extends AbstractConverter {
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		expectChildren(reader);
-		ArrayList<TableColumnSpec> tablecolumnSpecList = new ArrayList<TableColumnSpec>();
+		ArrayList<TableColumnSpec> tablecolumnSpecList = new ArrayList<>();
 		while(reader.hasMoreChildren()) {
 			reader.moveDown();
 			expect(reader, tagToClassMap.keySet());

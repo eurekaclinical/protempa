@@ -97,7 +97,7 @@ public class TabDelimQueryResultsHandler extends AbstractQueryResultsHandler {
             this.comparator = Collections.emptyList();
         } else {
             this.comparator =
-                    new ArrayList<Comparator<Proposition>>(comparator);
+                    new ArrayList<>(comparator);
         }
         this.visitor = new TabDelimHandlerPropositionVisitor(this.writer);
         this.includeDerived = includeDerived;
@@ -119,11 +119,11 @@ public class TabDelimQueryResultsHandler extends AbstractQueryResultsHandler {
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references)
             throws QueryResultsHandlerProcessingException {
-        Set<Proposition> propositionsAsSet = new HashSet<Proposition>();
+        Set<Proposition> propositionsAsSet = new HashSet<>();
         addDerived(propositions, forwardDerivations, 
                 backwardDerivations, propositionsAsSet);
         List<Proposition> propositionsCopy =
-                new ArrayList<Proposition>(propositionsAsSet);
+                new ArrayList<>(propositionsAsSet);
         for (Comparator<Proposition> c : this.comparator) {
             Collections.sort(propositionsCopy, c);
         }
@@ -141,7 +141,7 @@ public class TabDelimQueryResultsHandler extends AbstractQueryResultsHandler {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Set<Proposition> propositionsAsSet) {
-        List<Proposition> derivedProps = new ArrayList<Proposition>();
+        List<Proposition> derivedProps = new ArrayList<>();
         for (Proposition prop : propositions) {
             boolean added = propositionsAsSet.add(prop);
             if (added && this.includeDerived) {

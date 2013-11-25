@@ -153,7 +153,7 @@ public final class PrimitiveParameterDefinition
     @Override
     protected void recalculateChildren() {
         String[] old = this.children;
-        Set<String> c = new HashSet<String>();
+        Set<String> c = new HashSet<>();
         String[] inverseIsA = getInverseIsA();
         if (inverseIsA != null) {
             for (String propId : inverseIsA) {

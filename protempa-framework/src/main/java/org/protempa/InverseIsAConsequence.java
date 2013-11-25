@@ -59,12 +59,12 @@ class InverseIsAConsequence implements Consequence {
         assert inverseIsAPropIdMap != null : 
                 "inverseIsAPropIdMap cannot be null";
         assert listener != null : "listener cannot be null";
-        this.copiersMap = new HashMap<String, List<PropositionCopier>>();
+        this.copiersMap = new HashMap<>();
         for (Map.Entry<String, List<String>> me : 
                 inverseIsAPropIdMap.entrySet()) {
             List<String> targetPropIds = me.getValue();
             List<PropositionCopier> pcs = 
-                    new ArrayList<PropositionCopier>(targetPropIds.size());
+                    new ArrayList<>(targetPropIds.size());
             for (String targetPropId : targetPropIds) {
                 pcs.add(new PropositionCopier(targetPropId, listener));
             }

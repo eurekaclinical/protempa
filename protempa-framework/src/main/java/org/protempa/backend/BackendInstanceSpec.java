@@ -43,9 +43,9 @@ public final class BackendInstanceSpec<B extends Backend> {
         assert backendSpec != null : "backendSpec cannot be null";
         assert propertySpecs != null : "info cannot be null";
         this.backendSpec = backendSpec;
-        this.properties = new HashMap<String, Object>();
+        this.properties = new HashMap<>();
         this.propertySpecs = Collections.unmodifiableList(
-                new ArrayList<BackendPropertySpec>(propertySpecs));
+                new ArrayList<>(propertySpecs));
     }
 
     public BackendSpec<B> getBackendSpec() {

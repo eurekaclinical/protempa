@@ -53,7 +53,7 @@ public class MultiplexingDataStreamingEventIterator
         @Override
         public void handle(String keyId, List<Proposition> propositions) {
             this.event =
-                    new DataStreamingEvent<Proposition>(keyId, propositions);
+                    new DataStreamingEvent<>(keyId, propositions);
         }
     }
     
@@ -142,7 +142,7 @@ public class MultiplexingDataStreamingEventIterator
     @Override
     public void close() throws DataSourceReadException {
         List<DataSourceReadException> exceptions =
-                new ArrayList<DataSourceReadException>();
+                new ArrayList<>();
         for (DataStreamingEventIterator<Proposition> it : this.itrs) {
             try {
                 it.close();
@@ -151,7 +151,7 @@ public class MultiplexingDataStreamingEventIterator
             }
         }
         if (!exceptions.isEmpty()) {
-            List<StackTraceElement> stes = new ArrayList<StackTraceElement>();
+            List<StackTraceElement> stes = new ArrayList<>();
             for (Exception ex : exceptions) {
                 Arrays.addAll(stes, ex.getStackTrace());
             }

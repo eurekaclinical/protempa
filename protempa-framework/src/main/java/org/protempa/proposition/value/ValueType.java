@@ -215,7 +215,7 @@ public enum ValueType {
         }
     },
     ORDINALVALUE {
-        private final List<String> allowedValues = new ArrayList<String>();
+        private final List<String> allowedValues = new ArrayList<>();
 
         @Override
         public Value parse(String val) {
@@ -238,7 +238,7 @@ public enum ValueType {
             }
             if (val.startsWith("[") && val.endsWith("]")) {
                 String[] vals = val.substring(1, val.length() - 1).split(",");
-                List<String> mergedInnerLists = new ArrayList<String>(
+                List<String> mergedInnerLists = new ArrayList<>(
                         vals.length);
                 StringBuilder b = new StringBuilder();
                 int refCount = 0;
@@ -265,7 +265,7 @@ public enum ValueType {
                         mergedInnerLists.add(strTrimmed);
                     }
                 }
-                List<Value> l = new ArrayList<Value>(vals.length);
+                List<Value> l = new ArrayList<>(vals.length);
                 for (String s : mergedInnerLists) {
                     if ((s.startsWith("'") && s.endsWith("'"))
                             || (s.startsWith("\"") && s.endsWith("\""))) {
@@ -275,7 +275,7 @@ public enum ValueType {
                         l.add(ValueType.VALUE.parse(s));
                     }
                 }
-                return new ValueList<Value>(l);
+                return new ValueList<>(l);
             } else {
                 return null;
             }

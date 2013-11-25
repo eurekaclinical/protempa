@@ -76,7 +76,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
     // SimpleDateFormat(resourceBundle.getString("long_date_format_gran_month")),
     // new
     // SimpleDateFormat(resourceBundle.getString("long_date_format_gran_yr"))};
-    private static final List<ThreadLocal<DateFormat>> longDateFormats = new ArrayList<ThreadLocal<DateFormat>>();
+    private static final List<ThreadLocal<DateFormat>> longDateFormats = new ArrayList<>();
     static {
         longDateFormats.add(new ThreadLocal<DateFormat>() {
             @Override
@@ -136,7 +136,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
     // ReprSimpleDateFormat(resourceBundle.getString("long_date_format_gran_month")),
     // new
     // ReprSimpleDateFormat(resourceBundle.getString("long_date_format_gran_yr"))};
-    private static final List<ThreadLocal<DateFormat>> reprFormats = new ArrayList<ThreadLocal<DateFormat>>();
+    private static final List<ThreadLocal<DateFormat>> reprFormats = new ArrayList<>();
     static {
         reprFormats.add(new ThreadLocal<DateFormat>() {
             @Override
@@ -195,7 +195,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
     // SimpleDateFormat(resourceBundle.getString("long_date_format_gran_month_no_yr")),
     // new
     // SimpleDateFormat(resourceBundle.getString("long_date_format_gran_yr_no_yr"))};
-    private static final List<ThreadLocal<DateFormat>> longDateFormatsNoYear = new ArrayList<ThreadLocal<DateFormat>>();
+    private static final List<ThreadLocal<DateFormat>> longDateFormatsNoYear = new ArrayList<>();
     static {
         longDateFormatsNoYear.add(new ThreadLocal<DateFormat>() {
             @Override
@@ -254,7 +254,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
     // SimpleDateFormat(resourceBundle.getString("med_date_format_gran_month")),
     // new
     // SimpleDateFormat(resourceBundle.getString("med_date_format_gran_yr"))};
-    private static final List<ThreadLocal<DateFormat>> mediumDateFormats = new ArrayList<ThreadLocal<DateFormat>>();
+    private static final List<ThreadLocal<DateFormat>> mediumDateFormats = new ArrayList<>();
     static {
         mediumDateFormats.add(new ThreadLocal<DateFormat>() {
             @Override
@@ -313,7 +313,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
     // SimpleDateFormat(resourceBundle.getString("med_date_format_gran_month_no_yr")),
     // new
     // SimpleDateFormat(resourceBundle.getString("med_date_format_gran_yr_no_yr"))};
-    private static final List<ThreadLocal<DateFormat>> mediumDateFormatsNoYear = new ArrayList<ThreadLocal<DateFormat>>();
+    private static final List<ThreadLocal<DateFormat>> mediumDateFormatsNoYear = new ArrayList<>();
     static {
         mediumDateFormatsNoYear.add(new ThreadLocal<DateFormat>() {
             @Override
@@ -372,7 +372,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
     // SimpleDateFormat(resourceBundle.getString("short_date_format_gran_month")),
     // new
     // SimpleDateFormat(resourceBundle.getString("short_date_format_gran_yr"))};
-    private static final List<ThreadLocal<DateFormat>> shortDateFormats = new ArrayList<ThreadLocal<DateFormat>>();
+    private static final List<ThreadLocal<DateFormat>> shortDateFormats = new ArrayList<>();
     static {
         shortDateFormats.add(new ThreadLocal<DateFormat>() {
             @Override
@@ -431,7 +431,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
     // SimpleDateFormat(resourceBundle.getString("short_date_format_gran_month_no_yr")),
     // new
     // SimpleDateFormat(resourceBundle.getString("short_date_format_gran_yr_no_yr"))};
-    private static final List<ThreadLocal<DateFormat>> shortDateFormatsNoYear = new ArrayList<ThreadLocal<DateFormat>>();
+    private static final List<ThreadLocal<DateFormat>> shortDateFormatsNoYear = new ArrayList<>();
     static {
         shortDateFormatsNoYear.add(new ThreadLocal<DateFormat>() {
             @Override
@@ -485,7 +485,7 @@ public final class AbsoluteTimeGranularity implements Granularity {
     // new SimpleDateFormat(resourceBundle.getString("time_format_gran_hr")),
     // new SimpleDateFormat(resourceBundle.getString("time_format_gran_hr")),
     // new SimpleDateFormat(resourceBundle.getString("time_format_gran_hr"))};
-    private static final List<ThreadLocal<DateFormat>> timeFormats = new ArrayList<ThreadLocal<DateFormat>>();
+    private static final List<ThreadLocal<DateFormat>> timeFormats = new ArrayList<>();
     static {
         timeFormats.add(new ThreadLocal<DateFormat>() {
             @Override

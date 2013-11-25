@@ -34,7 +34,7 @@ public final class HierarchicalProjectionChildrenVisitor extends AbstractProposi
 
     public HierarchicalProjectionChildrenVisitor(KnowledgeSource knowledgeSource) {
         this.knowledgeSource = knowledgeSource;
-        this.propDefs = new ArrayList<PropositionDefinition>();
+        this.propDefs = new ArrayList<>();
     }
 
     @Override

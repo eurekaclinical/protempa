@@ -82,7 +82,7 @@ class AllowedValuesConverter extends AbstractConverter {
 	 */
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		ArrayList<Value> valueList = new ArrayList<Value>();
+		ArrayList<Value> valueList = new ArrayList<>();
 		while (reader.hasMoreChildren()) {
 			valueList.add((Value)valueFromXML(reader, context)); 
 		}

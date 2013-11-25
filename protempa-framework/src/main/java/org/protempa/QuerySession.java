@@ -64,8 +64,8 @@ public class QuerySession {
 //        this.finder = abstractionFinder;
         this.id = this.generateId();
         this.query = initialQuery;
-        this.propositionCache = new HashMap<Object, Proposition>();
-        this.derivationCache = new HashMap<Proposition, List<Proposition>>();
+        this.propositionCache = new HashMap<>();
+        this.derivationCache = new HashMap<>();
         this.cachingEnabled = false;
     }
 
@@ -120,8 +120,8 @@ public class QuerySession {
             throws DataSourceReadException {
         if (!this.cachingEnabled)
             throw new UnsupportedOperationException("Caching is disabled.");
-        List<Proposition> references = new LinkedList<Proposition>();
-        List<String> notFound = new LinkedList<String>();
+        List<Proposition> references = new LinkedList<>();
+        List<String> notFound = new LinkedList<>();
         for (Object key : prop.getReferences(name)) {
             if (this.propositionCache.containsKey(key)) {
                 references.add(this.propositionCache.get(key));
@@ -154,9 +154,9 @@ public class QuerySession {
             throw new IllegalArgumentException("proposition cannot be null");
         List<Proposition> derived = this.derivationCache.get(proposition);
         if (derived != null) {
-            return new ArrayList<Proposition>(derived);
+            return new ArrayList<>(derived);
         } else {
-            return new ArrayList<Proposition>(0);
+            return new ArrayList<>(0);
         }
     }
 
@@ -177,7 +177,7 @@ public class QuerySession {
         if (proposition == null)
             throw new IllegalArgumentException("proposition cannot be null");
         List<Proposition> derived = this.derivationCache.get(proposition);
-        List<Proposition> result = new ArrayList<Proposition>(derived.size());
+        List<Proposition> result = new ArrayList<>(derived.size());
         if (derived != null && propId != null) {
             for (Proposition p : derived) {
                 if (Arrays.contains(propId, p.getId()))

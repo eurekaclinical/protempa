@@ -329,7 +329,7 @@ public final class Reference extends Link {
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource, Set<Proposition> cache) {
-        List<Proposition> props = new ArrayList<Proposition>();
+        List<Proposition> props = new ArrayList<>();
         String[] refNames =
                 this.referenceNames.length > 0
                 ? this.referenceNames
@@ -355,7 +355,7 @@ public final class Reference extends Link {
         if (explicitPropIds.length > 0) {
             return explicitPropIds.clone();
         } else {
-            Set<String> result = new HashSet<String>();
+            Set<String> result = new HashSet<>();
             for (String propId : inPropIds) {
                 PropositionDefinition propDef =
                         knowledgeSource.readPropositionDefinition(propId);

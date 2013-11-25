@@ -185,7 +185,7 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
     @Override
     public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
             String[] inPropIds) throws KnowledgeSourceReadException {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (Link link : this.links) {
             inPropIds = link.getInferredPropositionIds(knowledgeSource, 
                     inPropIds);

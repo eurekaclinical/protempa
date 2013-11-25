@@ -70,7 +70,7 @@ class PropertyConstraintsConverter extends AbstractConverter {
 		}
 	}
 	
-	private static final Set<String> propertyConstraintTags = new HashSet<String>();
+	private static final Set<String> propertyConstraintTags = new HashSet<>();
 	static {
 		propertyConstraintTags.add(PROPERTY_CONSTRAINT);
 		propertyConstraintTags.add(PROPERTY_CONSTRAINT_VALUE_LIST);
@@ -83,7 +83,7 @@ class PropertyConstraintsConverter extends AbstractConverter {
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		expectChildren(reader);
 		AbstractConverter converter = new PropertyConstraintConverter();
-		ArrayList<PropertyConstraint> constraints = new ArrayList<PropertyConstraint>();
+		ArrayList<PropertyConstraint> constraints = new ArrayList<>();
 		while (reader.hasMoreChildren()) {
 			reader.moveDown();
 			expect(reader, propertyConstraintTags);

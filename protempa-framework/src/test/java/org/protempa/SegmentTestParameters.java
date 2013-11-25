@@ -40,10 +40,10 @@ final class SegmentTestParameters {
         PrimitiveParameter p1 = new PrimitiveParameter("TEST", uid());
         p1.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
         p1.setPosition(1L);
-        Sequence<PrimitiveParameter> seq = new Sequence<PrimitiveParameter>(
+        Sequence<PrimitiveParameter> seq = new Sequence<>(
                 "TEST", 1);
         seq.add(p1);
-        return new SimpleSegment<PrimitiveParameter>(seq);
+        return new SimpleSegment<>(seq);
     }
 
     static Segment<PrimitiveParameter> getLength2PrimitiveParameterSegment() {
@@ -53,11 +53,11 @@ final class SegmentTestParameters {
         PrimitiveParameter p2 = new PrimitiveParameter("TEST", uid());
         p2.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
         p2.setPosition(2L);
-        Sequence<PrimitiveParameter> seq = new Sequence<PrimitiveParameter>(
+        Sequence<PrimitiveParameter> seq = new Sequence<>(
                 "TEST", 2);
         seq.add(p1);
         seq.add(p2);
-        return new SimpleSegment<PrimitiveParameter>(seq);
+        return new SimpleSegment<>(seq);
     }
     
     private static UniqueId uid() {

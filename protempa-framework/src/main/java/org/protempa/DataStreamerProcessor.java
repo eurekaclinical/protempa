@@ -49,7 +49,7 @@ abstract class DataStreamerProcessor<E> {
      * Constructs an instance of this class.
      */
     protected DataStreamerProcessor() {
-        this.data = new ArrayList<E>();
+        this.data = new ArrayList<>();
     }
 
     /**
@@ -88,7 +88,7 @@ abstract class DataStreamerProcessor<E> {
                         + getKeyId() + "; " 
                         + checkKeyId(this.currentKeyId);
                 fireKeyCompleted(this.currentKeyId, this.data);
-                this.data = new ArrayList<E>();
+                this.data = new ArrayList<>();
                 result = ExecuteStatus.DID_FIRE;
             } else {
                 result = ExecuteStatus.DID_NOT_FIRE_COMPATIBLE;

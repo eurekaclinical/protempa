@@ -143,13 +143,13 @@ public abstract class AbstractKaplanMeyer extends AbstractPropositionVisitor {
     }
 
     AbstractKaplanMeyer(Unit targetLengthUnit) {
-        this.survival = new HashMap<SurvivalKey, Map<Long, Integer>>();
+        this.survival = new HashMap<>();
         this.targetLengthUnit = targetLengthUnit;
     }
 
     public final LengthProportionPair[] getSurvivalCurveData() {
         Collection<Map<Long, Integer>> vals = this.survival.values();
-        List<LengthCountPair> valsSorted = new ArrayList<LengthCountPair>();
+        List<LengthCountPair> valsSorted = new ArrayList<>();
         for (Map<Long, Integer> val : vals) {
             for (Map.Entry<Long, Integer> e : val.entrySet()) {
                 valsSorted.add(new LengthCountPair(e.getKey(), e.getValue()));
@@ -221,7 +221,7 @@ public abstract class AbstractKaplanMeyer extends AbstractPropositionVisitor {
     private void processTemporalProposition(SurvivalKey key, Long length) {
         Map<Long, Integer> val = this.survival.get(key);
         if (val == null) {
-            val = new HashMap<Long, Integer>();
+            val = new HashMap<>();
             val.put(length, 1);
             survival.put(key, val);
         } else {

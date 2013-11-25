@@ -32,7 +32,7 @@ public final class TermSourceImpl extends AbstractSource<TermSourceUpdatedEvent,
 
     public TermSourceImpl(TermSourceBackend[] backends) {
         super(backends != null ? backends : new TermSourceBackend[0]);
-        this.notFoundTerms = new HashSet<String>();
+        this.notFoundTerms = new HashSet<>();
     }
 
     @Override

@@ -32,7 +32,7 @@ public final class BackendSpecLoader<B extends Backend>
     private final List<BackendSpec<B>> backendSpecs;
 
     public BackendSpecLoader(List<BackendSpec<B>> backendSpecs) {
-        this.backendSpecs = new ArrayList<BackendSpec<B>>(backendSpecs);
+        this.backendSpecs = new ArrayList<>(backendSpecs);
     }
 
     public BackendSpec<B> loadSpec(String id)

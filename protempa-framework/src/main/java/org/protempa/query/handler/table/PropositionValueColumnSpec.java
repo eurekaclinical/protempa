@@ -114,7 +114,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
         Value value = null;
         BigDecimal sumTotal = null;
         BigInteger count = BigInteger.ZERO;
-        List<NumberValue> orderStats = new ArrayList<NumberValue>();
+        List<NumberValue> orderStats = new ArrayList<>();
 
         /*
          * Sort if needed.
@@ -122,11 +122,11 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
         if (propositions.size() > 1) {
             switch (this.type) {
                 case FIRST:
-                    propositions = new ArrayList<Proposition>(propositions);
+                    propositions = new ArrayList<>(propositions);
                     Collections.sort(propositions, comp);
                     break;
                 case LAST:
-                    propositions = new ArrayList<Proposition>(propositions);
+                    propositions = new ArrayList<>(propositions);
                     Collections.sort(propositions, reverseComp);
                     break;
                 case SUM:
@@ -353,7 +353,7 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
     @Override
     public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
             String[] inPropIds) throws KnowledgeSourceReadException {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (Link link : this.links) {
             inPropIds = link.getInferredPropositionIds(knowledgeSource,
                     inPropIds);

@@ -30,7 +30,7 @@ public class ContextIntervalSectioner extends IntervalSectioner<Context, Compoun
     
     @Override
     protected CompoundInterval<Context> newCompoundInterval(Interval ival, Set<Context> props) {
-        return new CompoundInterval<Context>(ival, props);
+        return new CompoundInterval<>(ival, props);
     }
     
 }

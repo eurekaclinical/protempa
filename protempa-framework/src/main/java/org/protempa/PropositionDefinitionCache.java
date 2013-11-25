@@ -57,11 +57,11 @@ public final class PropositionDefinitionCache implements Serializable {
     }
 
     private void initialize() {
-        this.idToAbstractionDefinitionMap = new HashMap<String, AbstractionDefinition>();
-        this.idToPropositionDefinitionMap = new HashMap<String, PropositionDefinition>();
-        this.idtoValueSetMap = new HashMap<String, ValueSet>();
-        this.idToContextDefinitionMap = new HashMap<String, ContextDefinition>();
-        this.idToTemporalPropositionDefinitionMap = new HashMap<String, TemporalPropositionDefinition>();
+        this.idToAbstractionDefinitionMap = new HashMap<>();
+        this.idToPropositionDefinitionMap = new HashMap<>();
+        this.idtoValueSetMap = new HashMap<>();
+        this.idToContextDefinitionMap = new HashMap<>();
+        this.idToTemporalPropositionDefinitionMap = new HashMap<>();
     }
 
     /**

@@ -56,7 +56,7 @@ public final class ContextDefinition extends AbstractPropositionDefinition
     @Override
     protected void recalculateChildren() {
         String[] old = this.children;
-        Set<String> newChildren = new HashSet<String>();
+        Set<String> newChildren = new HashSet<>();
         Arrays.addAll(newChildren, getInverseIsA());
         Arrays.addAll(newChildren, this.subContexts);
         for (TemporalExtendedPropositionDefinition tepd : this.inducedBy) {

@@ -147,7 +147,7 @@ public enum ValueComparator {
     };
 
     private static final Map<String, ValueComparator> compStringToComp = 
-            new HashMap<String, ValueComparator>();
+            new HashMap<>();
 
     static {
         compStringToComp.put(LESS_THAN.getComparatorString(), LESS_THAN);

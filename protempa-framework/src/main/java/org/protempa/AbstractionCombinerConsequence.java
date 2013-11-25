@@ -54,10 +54,10 @@ class AbstractionCombinerConsequence implements Consequence {
         String a1Id = a1.getId();
         InternalFactHandle a2f = arg0.getTuple().get(1);
         AbstractParameter a2 = (AbstractParameter) arg1.getObject(a2f);
-        Sequence<AbstractParameter> s = new Sequence<AbstractParameter>(a1Id, 2);
+        Sequence<AbstractParameter> s = new Sequence<>(a1Id, 2);
         s.add(a1);
         s.add(a2);
-        Segment<AbstractParameter> segment = new Segment<AbstractParameter>(s);
+        Segment<AbstractParameter> segment = new Segment<>(s);
         AbstractParameter result = new AbstractParameter(a1Id);
         result.setDataSourceType(DataSourceType.DERIVED);
         result.setInterval(segment.getInterval());

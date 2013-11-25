@@ -66,7 +66,7 @@ public final class LowLevelAbstractionFinder {
             int y = minPatternLength < 1 ? size - 1 : minPatternLength - 1;
             if (x <= y) {
                 return resetSegmentHelper(def, sequence, x, y,
-                        new Segment<PrimitiveParameter>(sequence, x, y),
+                        new Segment<>(sequence, x, y),
                         algorithm, maxPatternLength);
             }
         }
@@ -325,7 +325,7 @@ public final class LowLevelAbstractionFinder {
                                     derivationsBuilder.propositionAsserted(prop, proposition);
                                 }
                             }
-                            lastSeg = new Segment<PrimitiveParameter>(seg);
+                            lastSeg = new Segment<>(seg);
                         }
                         prevFoundValue = foundValue;
                     } while ((nextSeg = nextSegmentAfterMatch(def, seg,

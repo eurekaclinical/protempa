@@ -86,23 +86,23 @@ final class LowLevelAbstractionConsequence implements Consequence {
                 arg0.getDeclaration("result"));
         Declaration declaration = arg0.getDeclaration("result2");
         Sequence<PrimitiveParameter> seq =
-                new Sequence<PrimitiveParameter>(
+                new Sequence<>(
                 this.def.getAbstractedFrom(), pl);
         if (declaration != null) {
             List<Context> contexts =
                     (List<Context>) arg0.get(arg0.getDeclaration("result2"));
 
             Sequence<Context> contextSeq =
-                    new Sequence<Context>(this.def.getContextId(), contexts);
+                    new Sequence<>(this.def.getContextId(), contexts);
             LinkedList<PrimitiveParameter> ll =
-                    new LinkedList<PrimitiveParameter>(seq);
+                    new LinkedList<>(seq);
 
             for (Context context : contextSeq) {
                 boolean in = false;
                 Iterator<PrimitiveParameter> itr = ll.iterator();
                 PrimitiveParameter tp = itr.next();
                 Sequence<PrimitiveParameter> subSeq =
-                        new Sequence<PrimitiveParameter>(seq.getPropositionIds());
+                        new Sequence<>(seq.getPropositionIds());
                 while (true) {
                     if (REL.hasRelation(tp.getInterval(), context.getInterval())) {
                         subSeq.add(tp);

@@ -45,7 +45,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
 
     public DataSourceResultMap(List<? extends Map<String, List<P>>> maps) {
         if (maps != null) {
-           this.maps = new ArrayList<Map<String, List<P>>>(maps);
+           this.maps = new ArrayList<>(maps);
         } else {
             this.maps = Collections.emptyList();
         }
@@ -53,7 +53,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
 
     @Override
     public int size() {
-        Set<String> keys = new HashSet<String>();
+        Set<String> keys = new HashSet<>();
         for (Map<String, List<P>> map : this.maps) {
             keys.addAll(map.keySet());
         }
@@ -105,7 +105,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
             List<P> list = map.get(o);
             if (list != null) {
                 if (lists == null) {
-                    lists = new ArrayList<List<P>>(this.maps.size());
+                    lists = new ArrayList<>(this.maps.size());
                 }
                 lists.add(list);
             }
@@ -113,7 +113,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
         if (lists == null) {
             return null;
         } else {
-            return Collections.unmodifiableList(new CompositeList<P>(lists));
+            return Collections.unmodifiableList(new CompositeList<>(lists));
         }
     }
 
@@ -139,7 +139,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
 
     @Override
     public Set<String> keySet() {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (Map<String, List<P>> map : this.maps) {
             result.addAll(map.keySet());
         }
@@ -148,7 +148,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
 
     @Override
     public Set<Entry<String, List<P>>> entrySet() {
-        Map<String, List<P>> result = new HashMap<String, List<P>>();
+        Map<String, List<P>> result = new HashMap<>();
         if (!this.maps.isEmpty()) {
             int n = this.maps.size();
             for (int i = 0; i < n; i++) {
@@ -156,7 +156,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
                     String key = me.getKey();
                     CompositeList<P> vals = (CompositeList<P>) result.get(key);
                     if (vals == null) {
-                        vals = new CompositeList<P>();
+                        vals = new CompositeList<>();
                         result.put(key, vals);
                     }
                     vals.addList(me.getValue());
@@ -168,7 +168,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
 
     @Override
     public Collection<List<P>> values() {
-        Map<String, List<P>> result = new HashMap<String, List<P>>();
+        Map<String, List<P>> result = new HashMap<>();
         if (!this.maps.isEmpty()) {
             int n = this.maps.size();
             for (int i = 0; i < n; i++) {
@@ -176,7 +176,7 @@ public class DataSourceResultMap<P> implements Map<String, List<P>> {
                     String key = me.getKey();
                     CompositeList<P> vals = (CompositeList<P>) result.get(key);
                     if (vals == null) {
-                        vals = new CompositeList<P>();
+                        vals = new CompositeList<>();
                         result.put(key, vals);
                     }
                     vals.addList(me.getValue());

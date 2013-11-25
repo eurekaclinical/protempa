@@ -52,7 +52,7 @@ public class PrintPropositionDefinitionsForTerm extends CLI {
             TermSubsumption ts = TermSubsumption.fromTerms(termList);
             List<String> propIds =
                     knowledgeSource.getPropositionDefinitionsByTerm(
-                    new And<TermSubsumption>(ts));
+                    new And<>(ts));
             if (propIds.isEmpty()) {
                 System.out.println(
                         "No proposition definitions are associated with term "

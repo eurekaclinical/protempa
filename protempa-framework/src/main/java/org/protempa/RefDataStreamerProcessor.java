@@ -74,7 +74,7 @@ final class RefDataStreamerProcessor
     private final ReferenceAdder adder = new ReferenceAdder();
 
     RefDataStreamerProcessor() {
-        this.uniqueIdToPropositions = new HashMap<UniqueId, Proposition>();
+        this.uniqueIdToPropositions = new HashMap<>();
     }
 
     void setPropositions(List<? extends Proposition> propositions) {

@@ -600,7 +600,7 @@ public final class Protempa {
             DataSourceValidationIncompleteException {
         KnowledgeSource knowledgeSource = getKnowledgeSource();
         List<DataValidationEvent> validationEvents =
-                new ArrayList<DataValidationEvent>();
+                new ArrayList<>();
         try {
             for (DataSourceBackend backend : getDataSource().getBackends()) {
                 CollectionUtils.addAll(validationEvents,

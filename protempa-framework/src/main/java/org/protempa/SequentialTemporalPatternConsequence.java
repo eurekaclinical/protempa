@@ -78,9 +78,9 @@ class SequentialTemporalPatternConsequence implements Consequence {
         this.derivationsBuilder = derivationsBuilder;
         this.parameterMapCapacity = this.epds.length * 4 / 3 + 1;
         this.epdPairs = 
-                new ArrayList<List<TemporalExtendedPropositionDefinition>>();
+                new ArrayList<>();
         this.epdToRelation = 
-                new HashMap<List<TemporalExtendedPropositionDefinition>, Relation>(
+                new HashMap<>(
                 this.parameterMapCapacity);
         TemporalExtendedPropositionDefinition lhs = 
                 def.getFirstTemporalExtendedPropositionDefinition();
@@ -113,7 +113,7 @@ class SequentialTemporalPatternConsequence implements Consequence {
 
         int i = 0;
         Map<TemporalExtendedPropositionDefinition, TemporalProposition> propositionMap =
-                    new HashMap<TemporalExtendedPropositionDefinition, TemporalProposition>(this.parameterMapCapacity);
+                    new HashMap<>(this.parameterMapCapacity);
         
         TOP_LEVEL:
         for (int l = this.epds.length, n = tps.size() - l + 1; i < n; i++) {
@@ -170,8 +170,8 @@ class SequentialTemporalPatternConsequence implements Consequence {
             KnowledgeHelper knowledgeHelper) throws FactException {
         Logger logger = ProtempaUtil.logger();
         Segment<TemporalProposition> segment =
-                        new Segment<TemporalProposition>(
-                        new Sequence<TemporalProposition>(
+                        new Segment<>(
+                        new Sequence<>(
                         def.getPropositionId(), subList));
         TemporalPatternOffset temporalOffset = def.getTemporalOffset();
         AbstractParameter result =

@@ -40,7 +40,7 @@ public final class And<E> implements Serializable, Cloneable {
     private transient PropertyChangeSupport changes;
 
     public And() {
-        this.anded = new ArrayList<E>();
+        this.anded = new ArrayList<>();
         this.changes = new PropertyChangeSupport(this);
     }
     
@@ -51,7 +51,7 @@ public final class And<E> implements Serializable, Cloneable {
 
     public And(E... anded) {
 //        this.anded = anded.clone();
-        this.anded = new ArrayList<E>();
+        this.anded = new ArrayList<>();
         for (E e : anded) {
             this.anded.add(e);
         }
@@ -59,9 +59,9 @@ public final class And<E> implements Serializable, Cloneable {
 
     public void setAnded(List<E> anded) {
         if (anded == null)
-            anded = new ArrayList<E>();
+            anded = new ArrayList<>();
         List<E> old = this.anded;
-        this.anded = new ArrayList<E>();
+        this.anded = new ArrayList<>();
         for (E e : anded) {
             this.anded.add(e);
         }

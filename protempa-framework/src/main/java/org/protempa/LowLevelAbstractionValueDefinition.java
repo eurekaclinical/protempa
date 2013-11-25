@@ -64,8 +64,8 @@ public class LowLevelAbstractionValueDefinition implements Serializable {
                 LowLevelAbstractionValueDefinition.this.algorithmArguments = null;
             }
         });
-        this.parameterValues = new HashMap<String, Value>();
-        this.parameterValueComps = new HashMap<String, ValueComparator>();
+        this.parameterValues = new HashMap<>();
+        this.parameterValueComps = new HashMap<>();
     }
 
     public final void setParameterValue(String str, Value val) {

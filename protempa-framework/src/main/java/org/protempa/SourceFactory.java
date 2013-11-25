@@ -89,28 +89,28 @@ public class SourceFactory {
         }
 
         this.algorithmSourceBackendInstanceSpecs =
-                new ArrayList<BackendInstanceSpec<AlgorithmSourceBackend>>();
+                new ArrayList<>();
 
         for (BackendSpec backendSpec : asl) {
             this.algorithmSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
         }
 
         this.dataSourceBackendInstanceSpecs =
-                new ArrayList<BackendInstanceSpec<DataSourceBackend>>();
+                new ArrayList<>();
 
         for (BackendSpec backendSpec : dsl) {
             this.dataSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
         }
 
         this.knowledgeSourceBackendInstanceSpecs =
-                new ArrayList<BackendInstanceSpec<KnowledgeSourceBackend>>();
+                new ArrayList<>();
 
         for (BackendSpec backendSpec : ksl) {
             this.knowledgeSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
         }
 
         this.termSourceBackendInstanceSpecs =
-                new ArrayList<BackendInstanceSpec<TermSourceBackend>>();
+                new ArrayList<>();
         for (BackendSpec backendSpec : tsl) {
             this.termSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
         }

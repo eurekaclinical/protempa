@@ -50,7 +50,7 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
     public SliceDefinition(String id) {
         super(id);
         this.abstractedFrom = 
-                new HashSet<TemporalExtendedPropositionDefinition>();
+                new HashSet<>();
     }
 
     /**
@@ -124,7 +124,7 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
 
     @Override
     public Set<String> getAbstractedFrom() {
-        Set<String> propIds = new HashSet<String>();
+        Set<String> propIds = new HashSet<>();
         for (TemporalExtendedPropositionDefinition tepd : this.abstractedFrom) {
             propIds.add(tepd.getPropositionId());
         }

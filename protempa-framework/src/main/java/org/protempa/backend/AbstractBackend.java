@@ -38,7 +38,7 @@ public abstract class AbstractBackend<E extends BackendUpdatedEvent>
     private String configurationsId;
 
     public AbstractBackend() {
-        this.listenerList = new ArrayList<BackendListener<E>>();
+        this.listenerList = new ArrayList<>();
     }
 
     @Override

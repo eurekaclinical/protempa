@@ -59,10 +59,10 @@ public final class HighLevelAbstractionDefinition
     }
 
     private void initInstance() {
-        defs = new HashSet<ExtendedPropositionDefinition>();
-        defsAsList = new HashSet<String>();
+        defs = new HashSet<>();
+        defsAsList = new HashSet<>();
         defsAsListOutdated = true;
-        defPairsMap = new HashMap<List<TemporalExtendedPropositionDefinition>, Relation>();
+        defPairsMap = new HashMap<>();
     }
 
     @Override
@@ -353,7 +353,7 @@ public final class HighLevelAbstractionDefinition
     protected void recalculateChildren() {
         String[] old = this.children;
         Set<String> abstractedFrom = getAbstractedFrom();
-        Set<String> directChildrenLocal = new HashSet<String>(abstractedFrom);
+        Set<String> directChildrenLocal = new HashSet<>(abstractedFrom);
         String[] inverseIsA = getInverseIsA();
         for (String propId : inverseIsA) {
             directChildrenLocal.add(propId);

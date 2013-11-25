@@ -202,14 +202,14 @@ public class XMLConfigurationTest extends TestCase {
         PropertyConstraint constraint1 = new PropertyConstraint("foo", ValueComparator.EQUAL_TO, new BooleanValue(Boolean.FALSE));
         PropertyConstraint constraint2 = new PropertyConstraint("bar", ValueComparator.GREATER_THAN, new DateValue(new Date()));
         PropertyConstraint constraint3 = new PropertyConstraint("blech", ValueComparator.GREATER_THAN_OR_EQUAL_TO, new NominalValue("qwerty"));
-        ValueList<NominalValue> valueList1 = new ValueList<NominalValue>();
+        ValueList<NominalValue> valueList1 = new ValueList<>();
         valueList1.add(new NominalValue("fx"));
         valueList1.add(new NominalValue("a1"));
         PropertyConstraint constraint4 = new PropertyConstraint("gobo", ValueComparator.IN, valueList1);
         PropertyConstraint constraint5 = new PropertyConstraint("akwa", ValueComparator.LESS_THAN, new NumberValue(123));
         PropertyConstraint constraint6 = new PropertyConstraint("coom", ValueComparator.LESS_THAN_OR_EQUAL_TO, new InequalityNumberValue(ValueComparator.GREATER_THAN_OR_EQUAL_TO, 34));
         PropertyConstraint constraint7 = new PropertyConstraint("doga", ValueComparator.NOT_EQUAL_TO, new InequalityNumberValue(ValueComparator.LESS_THAN, 34));
-        ValueList<NumberValue> valueList2 = new ValueList<NumberValue>();
+        ValueList<NumberValue> valueList2 = new ValueList<>();
         valueList2.add(new NumberValue(77));
         valueList2.add(new NumberValue(86));
         PropertyConstraint constraint8 = new PropertyConstraint("ekro", ValueComparator.NOT_IN, valueList2);

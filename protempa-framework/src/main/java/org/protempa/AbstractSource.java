@@ -44,7 +44,7 @@ public abstract class AbstractSource<S extends SourceUpdatedEvent,
         assert backends != null : "backends cannot be null";
         ProtempaUtil.checkArrayForNullElement(backends, "backends");
         ProtempaUtil.checkArrayForDuplicates(backends, "backends");
-        this.listenerList = new ArrayList<SourceListener<S>>();
+        this.listenerList = new ArrayList<>();
         this.backends = backends.clone();
         for (Backend backend : this.backends) {
             backend.addBackendListener(this);
@@ -114,7 +114,7 @@ public abstract class AbstractSource<S extends SourceUpdatedEvent,
             backend.removeBackendListener(this);
         }
         List<BackendCloseException> exceptions =
-                new ArrayList<BackendCloseException>();
+                new ArrayList<>();
         for (Backend backend : this.backends) {
             try {
                 backend.close();
@@ -141,6 +141,6 @@ public abstract class AbstractSource<S extends SourceUpdatedEvent,
             close();
         } catch (SourceCloseException ignore) {
         }
-        fireClosedUnexpectedly(new SourceClosedUnexpectedlyEvent<S, B, T>(this));
+        fireClosedUnexpectedly(new SourceClosedUnexpectedlyEvent<>(this));
     }
 }

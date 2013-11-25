@@ -187,7 +187,7 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
         initializeIfNeeded();
         DataSourceBackend[] backends = getBackends();
         List<DataStreamingEventIterator<Proposition>> itrs =
-                new ArrayList<DataStreamingEventIterator<Proposition>>(backends.length);
+                new ArrayList<>(backends.length);
         for (DataSourceBackend backend : backends) {
             itrs.add(backend.readPropositions(notNullKeyIds,
                     notNullPropIds, filters, qs));
@@ -244,15 +244,15 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
 
     private static Set<String> handleKeyIdSetArgument(Set<String> keyIds) {
         if (keyIds == null) {
-            return new HashSet<String>();
+            return new HashSet<>();
         } else {
-            return new HashSet<String>(keyIds);
+            return new HashSet<>(keyIds);
         }
     }
 
     private static Set<String> handlePropIdSetArgument(Set<String> propIds) {
         if (propIds != null) {
-            return new HashSet<String>(propIds);
+            return new HashSet<>(propIds);
         } else {
             throw new IllegalArgumentException("propIds cannot be null");
         }

@@ -435,14 +435,14 @@ public abstract class CLI {
 
     private void checkInvalidArguments(Argument[] arguments) {
         String[] leftOverArgs = commandLine.getArgs();
-        List<Argument> requiredArguments = new ArrayList<Argument>();
+        List<Argument> requiredArguments = new ArrayList<>();
         for (Argument argument : arguments) {
             if (argument.isRequired()) {
                 requiredArguments.add(argument);
             }
         }
 
-        List<String> missingRequiredArgs = new ArrayList<String>();
+        List<String> missingRequiredArgs = new ArrayList<>();
         if (leftOverArgs.length < requiredArguments.size()) {
             for (int i = leftOverArgs.length, n = requiredArguments.size();
                     i < n; i++) {
@@ -457,7 +457,7 @@ public abstract class CLI {
         }
 
         if (leftOverArgs.length > arguments.length) {
-            List<String> extraArgs = new ArrayList<String>();
+            List<String> extraArgs = new ArrayList<>();
             for (int i = arguments.length; i < leftOverArgs.length; i++) {
                 extraArgs.add(leftOverArgs[i]);
             }

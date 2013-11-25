@@ -54,8 +54,8 @@ public class XmlPropositionVisitor extends AbstractPropositionCheckedVisitor {
          * XML schemas define a tag order, so iterators over proposition
          * values should return values in the order that they were added.
          */
-        this.propositionValues = new LinkedHashMap<String, String>();
-        this.properties = new HashMap<String, Map<String, String>>();
+        this.propositionValues = new LinkedHashMap<>();
+        this.properties = new HashMap<>();
     }
 
     public void clear() {
@@ -105,7 +105,7 @@ public class XmlPropositionVisitor extends AbstractPropositionCheckedVisitor {
     private void doProperties(Proposition proposition)
             throws XmlQueryResultsHandlerException {
         for (String propName : proposition.getPropertyNames()) {
-            Map<String, String> propMap = new HashMap<String, String>();
+            Map<String, String> propMap = new HashMap<>();
             Value value = proposition.getProperty(propName);
             if (value != null) {
                 String valueType = value.getType().toString();

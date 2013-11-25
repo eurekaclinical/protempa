@@ -69,7 +69,7 @@ public class PropositionUtil {
     public static <T extends TemporalProposition> Map<String, List<T>> getView(
             Map<String, List<T>> paramsByKey, Long minValid, Long maxValid) {
         if (paramsByKey != null) {
-            Map<String, List<T>> result = new HashMap<String, List<T>>();
+            Map<String, List<T>> result = new HashMap<>();
             for (Map.Entry<String, List<T>> me : paramsByKey.entrySet()) {
                 result.put(me.getKey(), getView(me.getValue(), minValid,
                         maxValid));
@@ -91,7 +91,7 @@ public class PropositionUtil {
      */
     public static <T extends Proposition> Map<String, List<T>> createPropositionMap(
             List<T> propositions) {
-        Map<String, List<T>> result = new HashMap<String, List<T>>();
+        Map<String, List<T>> result = new HashMap<>();
 
         if (propositions != null) {
             for (T prop : propositions) {
@@ -101,7 +101,7 @@ public class PropositionUtil {
                 if (result.containsKey(propId)) {
                     ts = result.get(propId);
                 } else {
-                    ts = new ArrayList<T>();
+                    ts = new ArrayList<>();
                     result.put(propId, ts);
                 }
                 ts.add(prop);

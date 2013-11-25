@@ -102,7 +102,7 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
                 forwardDerivations, backwardDerivations, references, 
                 knowledgeSource);
         if (this.countUnique) {
-            Set<String> result = new HashSet<String>();
+            Set<String> result = new HashSet<>();
             for (Proposition p : props) {
                 String pId = p.getId();
                 logger.log(Level.FINEST,
@@ -180,7 +180,7 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
     @Override
     public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
             String[] inPropIds) throws KnowledgeSourceReadException {
-        Set<String> result = new HashSet<String>();
+        Set<String> result = new HashSet<>();
         for (Link link : this.links) {
             inPropIds = link.getInferredPropositionIds(knowledgeSource, 
                     inPropIds);

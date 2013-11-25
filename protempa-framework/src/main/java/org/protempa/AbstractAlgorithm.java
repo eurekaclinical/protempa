@@ -48,7 +48,7 @@ public abstract class AbstractAlgorithm implements Algorithm {
 
     public AbstractAlgorithm(Algorithms algorithms, String id) {
         this.id = computeId(algorithms, id, false);
-        this.parametersMap = new HashMap<String, AlgorithmParameter>();
+        this.parametersMap = new HashMap<>();
         this.advanceRowSkipEnd = -1;
         if (algorithms != null) {
             algorithms.addAlgorithm(this);

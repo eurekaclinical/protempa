@@ -89,7 +89,7 @@ public class SequentialTemporalPatternDefinition extends AbstractAbstractionDefi
 
     @Override
     public Set<String> getAbstractedFrom() {
-        HashSet<String> set = new HashSet<String>();
+        HashSet<String> set = new HashSet<>();
         if (this.firstTemporalExtendedPropositionDefinition != null) {
             set.add(
                     this.firstTemporalExtendedPropositionDefinition

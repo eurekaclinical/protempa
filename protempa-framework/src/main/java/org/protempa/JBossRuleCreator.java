@@ -102,11 +102,11 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     JBossRuleCreator(Map<LowLevelAbstractionDefinition, Algorithm> algorithms,
             DerivationsBuilder derivationsBuilder) {
         this.algorithms = algorithms;
-        this.rules = new ArrayList<Rule>();
+        this.rules = new ArrayList<>();
         this.ruleToAbstractionDefinition =
-                new HashMap<Rule, TemporalPropositionDefinition>();
+                new HashMap<>();
         this.derivationsBuilder = derivationsBuilder;
-        this.inverseIsAPropIdMap = new HashMap<String, List<String>>();
+        this.inverseIsAPropIdMap = new HashMap<>();
     }
 
     /**
@@ -547,7 +547,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     }
 
     private void logCreatingInverseIsA(Logger logger) {
-        Set<String> propIds = new HashSet<String>();
+        Set<String> propIds = new HashSet<>();
         for (List<String> pIds : this.inverseIsAPropIdMap.values()) {
             propIds.addAll(pIds);
         }

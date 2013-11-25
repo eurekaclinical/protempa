@@ -44,7 +44,7 @@ public class ValueList<V extends Value> extends ArrayList<V> implements Value {
      * @return a list of the provided values.
      */
     public static <V extends Value> ValueList<V> getInstance(V... value) {
-        ValueList<V> result = new ValueList<V>(value.length);
+        ValueList<V> result = new ValueList<>(value.length);
         for (V val : value) {
             result.add(val);
         }
@@ -98,7 +98,7 @@ public class ValueList<V extends Value> extends ArrayList<V> implements Value {
 
     @Override
     public String getFormatted() {
-        List<String> l = new ArrayList<String>(size());
+        List<String> l = new ArrayList<>(size());
         for (Value val : this) {
             if (val instanceof NominalValue) {
                 l.add("'" + val.getFormatted() + "'");

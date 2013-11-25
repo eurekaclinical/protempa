@@ -36,7 +36,7 @@ public class LinkTraverser {
     private final Set<Proposition> cache;
 
     public LinkTraverser() {
-        this.cache = new HashSet<Proposition>();
+        this.cache = new HashSet<>();
     }
 
     /**
@@ -62,7 +62,7 @@ public class LinkTraverser {
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
-        LinkedList<Proposition> result = new LinkedList<Proposition>();
+        LinkedList<Proposition> result = new LinkedList<>();
         Logger logger = Util.logger();
         result.add(proposition);
         if (links != null) {

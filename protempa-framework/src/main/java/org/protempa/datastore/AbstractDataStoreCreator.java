@@ -59,7 +59,7 @@ public abstract class AbstractDataStoreCreator<K, V>
             tempEnvironment = this.environmentName;
         }
         BdbCacheFactory<K, V> bdbCacheFactory =
-                new BdbCacheFactory<K, V>(tempEnvironment, true);
+                new BdbCacheFactory<>(tempEnvironment, true);
         return bdbCacheFactory.newInstance(nextDatabaseName());
     }
 }

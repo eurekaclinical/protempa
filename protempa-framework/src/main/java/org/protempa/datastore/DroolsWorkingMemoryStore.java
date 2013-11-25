@@ -182,7 +182,7 @@ final class DroolsWorkingMemoryStore implements
 
     @Override
     public Collection<WorkingMemory> values() {
-        Collection<WorkingMemory> values = new ArrayList<WorkingMemory>();
+        Collection<WorkingMemory> values = new ArrayList<>();
         for (byte[] barr : this.store.values()) {
             values.add(readWorkingMemory(barr));
         }
@@ -192,7 +192,7 @@ final class DroolsWorkingMemoryStore implements
 
     @Override
     public Set<java.util.Map.Entry<String, WorkingMemory>> entrySet() {
-        Set<java.util.Map.Entry<String, WorkingMemory>> entrySet = new HashSet<java.util.Map.Entry<String, WorkingMemory>>();
+        Set<java.util.Map.Entry<String, WorkingMemory>> entrySet = new HashSet<>();
 
         for (String key : this.store.keySet()) {
             entrySet.add(new LazyEntry(key));

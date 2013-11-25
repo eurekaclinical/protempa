@@ -75,7 +75,7 @@ class TermIDsConverter extends AbstractConverter {
 	 */
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-		ArrayList<And<String>> keyIdList = new ArrayList<And<String>>();
+		ArrayList<And<String>> keyIdList = new ArrayList<>();
 		while(reader.hasMoreChildren()) {
 			reader.moveDown();
 			expect(reader, "and");

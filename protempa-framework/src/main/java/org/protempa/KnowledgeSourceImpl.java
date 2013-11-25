@@ -79,14 +79,14 @@ public final class KnowledgeSourceImpl
         this.inducedByCache = new ReferenceMap<>();
         this.inducesCache = new ReferenceMap<>();
         this.notFoundAbstractionDefinitionRequests =
-                new WeakHashMap<String, Object>();
-        this.notFoundValueSetRequests = new WeakHashMap<String, Object>();
+                new WeakHashMap<>();
+        this.notFoundValueSetRequests = new WeakHashMap<>();
         this.notFoundPropositionDefinitionRequests =
-                new WeakHashMap<String, Object>();
+                new WeakHashMap<>();
         this.notFoundContextDefinitionRequests =
-                new WeakHashMap<String, Object>();
+                new WeakHashMap<>();
         this.notFoundTemporalPropositionDefinitionRequests =
-                new HashMap<String, Object>();
+                new HashMap<>();
 
         this.propDefReader = new PropositionDefinitionReader();
         this.abstractionDefReader = new AbstractionDefinitionReader();
@@ -142,7 +142,7 @@ public final class KnowledgeSourceImpl
         if (result != null) {
             return result;
         } else {
-            result = new ArrayList<PropositionDefinition>();
+            result = new ArrayList<>();
             initializeIfNeeded("reading inverseIsA of {0}", propDef.getId());
             String[] propIds = propDef.getInverseIsA();
             for (String propId : propIds) {
@@ -191,12 +191,12 @@ public final class KnowledgeSourceImpl
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
-        Set<String> isAs = new HashSet<String>();
+        Set<String> isAs = new HashSet<>();
         for (KnowledgeSourceBackend backend : getBackends()) {
             Arrays.addAll(isAs, backend.readIsA(id));
         }
         List<PropositionDefinition> result =
-                new ArrayList<PropositionDefinition>();
+                new ArrayList<>();
         for (String isAPropId : isAs) {
             result.add(readPropositionDefinition(isAPropId));
         }
@@ -216,7 +216,7 @@ public final class KnowledgeSourceImpl
         if (result != null) {
             return result;
         } else {
-            result = new ArrayList<PropositionDefinition>();
+            result = new ArrayList<>();
             initializeIfNeeded("reading abstractedFrom of {0}",
                     propDef.getId());
 
@@ -270,13 +270,13 @@ public final class KnowledgeSourceImpl
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
-        Set<String> abstractedIntos = new HashSet<String>();
+        Set<String> abstractedIntos = new HashSet<>();
         for (KnowledgeSourceBackend backend : getBackends()) {
             Arrays.addAll(abstractedIntos,
                     backend.readAbstractedInto(id));
         }
         List<AbstractionDefinition> result =
-                new ArrayList<AbstractionDefinition>();
+                new ArrayList<>();
         for (String abstractedIntoPropId : abstractedIntos) {
             AbstractionDefinition def =
                     readAbstractionDefinition(abstractedIntoPropId);
@@ -307,13 +307,13 @@ public final class KnowledgeSourceImpl
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
-        Set<String> induces = new HashSet<String>();
+        Set<String> induces = new HashSet<>();
         for (KnowledgeSourceBackend backend : getBackends()) {
             Arrays.addAll(induces,
                     backend.readInduces(id));
         }
         List<ContextDefinition> result =
-                new ArrayList<ContextDefinition>();
+                new ArrayList<>();
         for (String inducesPropId : induces) {
             ContextDefinition def =
                     readContextDefinition(inducesPropId);
@@ -333,13 +333,13 @@ public final class KnowledgeSourceImpl
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
-        Set<String> subContextOfs = new HashSet<String>();
+        Set<String> subContextOfs = new HashSet<>();
         for (KnowledgeSourceBackend backend : getBackends()) {
             Arrays.addAll(subContextOfs,
                     backend.readSubContextOfs(id));
         }
         List<ContextDefinition> result =
-                new ArrayList<ContextDefinition>();
+                new ArrayList<>();
         for (String subContextOfPropId : subContextOfs) {
             ContextDefinition def =
                     readContextDefinition(subContextOfPropId);
@@ -386,7 +386,7 @@ public final class KnowledgeSourceImpl
         if (result != null) {
             return result;
         } else {
-            result = new ArrayList<ContextDefinition>();
+            result = new ArrayList<>();
             initializeIfNeeded("reading subContexts of {0}",
                     contextDef.getId());
 
@@ -430,7 +430,7 @@ public final class KnowledgeSourceImpl
         List<AbstractionDefinition> ad = readAbstractedInto(propDef);
         List<PropositionDefinition> pd = readIsA(propDef);
         Map<String, PropositionDefinition> map =
-                new HashMap<String, PropositionDefinition>();
+                new HashMap<>();
         for (AbstractionDefinition def : ad) {
             assert def != null : "The abstractedInto list for " + propDef.getId() + " cannot have a null element";
             map.put(def.getId(), def);
@@ -485,7 +485,7 @@ public final class KnowledgeSourceImpl
         if (result != null) {
             return result;
         } else {
-            result = new ArrayList<TemporalPropositionDefinition>();
+            result = new ArrayList<>();
             initializeIfNeeded("reading inducedBy of {0}",
                     contextDef.getId());
 
@@ -891,7 +891,7 @@ public final class KnowledgeSourceImpl
     public List<String> getPropositionDefinitionsByTerm(
             And<TermSubsumption> termSubsumptionClause)
             throws KnowledgeSourceReadException {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         initializeIfNeeded("getting proposition definitions by term");
         for (KnowledgeSourceBackend backend : getBackends()) {
             result.addAll(backend.getPropositionsByTermSubsumption(termSubsumptionClause));

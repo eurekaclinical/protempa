@@ -37,7 +37,7 @@ public final class MockBackendProvider implements BackendProvider {
     @Override
     public BackendSpecLoader<DataSourceBackend>
             getDataSourceBackendSpecLoader() {
-        return new BackendSpecLoader<DataSourceBackend>(
+        return new BackendSpecLoader<>(
                 Collections.singletonList(
             new BackendSpec<DataSourceBackend>(
             this, "DSBackendSpec1", "DS Backend Spec 1", null)));
@@ -46,7 +46,7 @@ public final class MockBackendProvider implements BackendProvider {
     @Override
     public BackendSpecLoader<KnowledgeSourceBackend>
             getKnowledgeSourceBackendSpecLoader() {
-        return new BackendSpecLoader<KnowledgeSourceBackend>(
+        return new BackendSpecLoader<>(
             Collections.singletonList(
             new BackendSpec<KnowledgeSourceBackend>(
             this, "KSBackendSpec1",
@@ -56,7 +56,7 @@ public final class MockBackendProvider implements BackendProvider {
     @Override
     public BackendSpecLoader<AlgorithmSourceBackend>
             getAlgorithmSourceBackendSpecLoader() {
-        return new BackendSpecLoader<AlgorithmSourceBackend>(
+        return new BackendSpecLoader<>(
             Collections.singletonList(
             new BackendSpec<AlgorithmSourceBackend>(
             this, "ASBackendSpec1",
@@ -69,7 +69,7 @@ public final class MockBackendProvider implements BackendProvider {
     @Override
     public BackendSpecLoader<TermSourceBackend> getTermSourceBackendSpecLoader()
             throws BackendProviderSpecLoaderException {
-        return new BackendSpecLoader<TermSourceBackend>(
+        return new BackendSpecLoader<>(
                 Collections.singletonList(
                new BackendSpec<TermSourceBackend>(
                this, "TSBackendSpec1", "TS Backend Spec 1", null)));

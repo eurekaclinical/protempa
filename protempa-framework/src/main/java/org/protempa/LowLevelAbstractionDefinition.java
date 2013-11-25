@@ -88,8 +88,8 @@ public final class LowLevelAbstractionDefinition
 
     public LowLevelAbstractionDefinition(String id) {
         super(id);
-        this.paramIds = new LinkedHashSet<String>(1);
-        this.valueDefinitions = new ArrayList<LowLevelAbstractionValueDefinition>(
+        this.paramIds = new LinkedHashSet<>(1);
+        this.valueDefinitions = new ArrayList<>(
                 5);
         this.valueType = DEFAULT_VALUE_TYPE;
         this.gapBtwValues = new MinMaxGapBetweenValues();

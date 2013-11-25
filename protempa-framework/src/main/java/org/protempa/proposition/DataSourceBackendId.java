@@ -31,7 +31,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public final class DataSourceBackendId extends SourceId {
 
     private static Map<String, DataSourceBackendId> cache =
-            new HashMap<String, DataSourceBackendId>();
+            new HashMap<>();
 
     private final String id;
     private transient volatile int hashCode;

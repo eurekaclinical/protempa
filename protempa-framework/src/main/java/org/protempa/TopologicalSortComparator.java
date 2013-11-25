@@ -41,7 +41,7 @@ class TopologicalSortComparator implements Comparator<TemporalPropositionDefinit
     private static final long serialVersionUID = 924247928684751479L;
 
     private final Map<String, Integer> rule2Index =
-            new HashMap<String, Integer>();
+            new HashMap<>();
 
     /**
      * Constructs the topological sort class.
@@ -58,16 +58,16 @@ class TopologicalSortComparator implements Comparator<TemporalPropositionDefinit
             throws KnowledgeSourceReadException {
         // build the graph, a map of node name -> list of neighbors.
         HashMap<String, List<String>> nodes = 
-                new HashMap<String, List<String>>(
+                new HashMap<>(
                 abstractionDefinitions.size() * 4 / 3 + 1);
-        Set<String> abstractionDefPropIds = new HashSet<String>();
+        Set<String> abstractionDefPropIds = new HashSet<>();
         for (TemporalPropositionDefinition apd : abstractionDefinitions) {
             abstractionDefPropIds.add(apd.getId());
         }
         for (TemporalPropositionDefinition tpd : abstractionDefinitions) {
             if (tpd instanceof AbstractionDefinition) {
                 AbstractionDefinition ad = (AbstractionDefinition) tpd;
-                List<String> ads = new ArrayList<String>();
+                List<String> ads = new ArrayList<>();
                 for (String id : ad.getAbstractedFrom()) {
                     if (abstractionDefPropIds.contains(id)) {
                         ads.add(id);
@@ -76,7 +76,7 @@ class TopologicalSortComparator implements Comparator<TemporalPropositionDefinit
                 nodes.put(tpd.getId(), ads);
             } else if (tpd instanceof ContextDefinition) {
                 ContextDefinition cd = (ContextDefinition) tpd;
-                List<String> ibs = new ArrayList<String>();
+                List<String> ibs = new ArrayList<>();
                 for (TemporalExtendedPropositionDefinition tepd : 
                         cd.getInducedBy()) {
                     String propId = tepd.getPropositionId();
@@ -92,8 +92,8 @@ class TopologicalSortComparator implements Comparator<TemporalPropositionDefinit
         }
         // topological sort on graph
         ArrayList<String> sortedAbstractions = 
-                new ArrayList<String>(nodes.size());
-        HashSet<String> toBeRemoved = new HashSet<String>(); // nodes with no
+                new ArrayList<>(nodes.size());
+        HashSet<String> toBeRemoved = new HashSet<>(); // nodes with no
         // neighbors
         String[] zeroOutDegree = new String[nodes.size()];
         while (!nodes.isEmpty()) {

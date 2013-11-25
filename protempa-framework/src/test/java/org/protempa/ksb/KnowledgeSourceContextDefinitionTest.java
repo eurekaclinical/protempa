@@ -157,89 +157,89 @@ public class KnowledgeSourceContextDefinitionTest {
     
     @Test
     public void testInducedByContextId() throws KnowledgeSourceReadException {
-        Assert.assertEquals(Arrays.asSet(new TemporalPropositionDefinition[]{ppd, ed}), new HashSet<TemporalPropositionDefinition>(ks.readInducedBy(cd.getId())));
+        Assert.assertEquals(Arrays.asSet(new TemporalPropositionDefinition[]{ppd, ed}), new HashSet<>(ks.readInducedBy(cd.getId())));
     }
     
     @Test
     public void testInducedByContextIdCached() throws KnowledgeSourceReadException {
         ks.readInducedBy(cd.getId());
-        Assert.assertEquals(Arrays.asSet(new TemporalPropositionDefinition[]{ppd, ed}), new HashSet<TemporalPropositionDefinition>(ks.readInducedBy(cd.getId())));
+        Assert.assertEquals(Arrays.asSet(new TemporalPropositionDefinition[]{ppd, ed}), new HashSet<>(ks.readInducedBy(cd.getId())));
     }
     
     @Test
     public void testInducedByContextDefinition() throws KnowledgeSourceReadException {
-        Assert.assertEquals(Arrays.asSet(new TemporalPropositionDefinition[]{ppd, ed}), new HashSet<TemporalPropositionDefinition>(ks.readInducedBy(cd)));
+        Assert.assertEquals(Arrays.asSet(new TemporalPropositionDefinition[]{ppd, ed}), new HashSet<>(ks.readInducedBy(cd)));
     }
     
     @Test
     public void testInducedByContextDefinitionCached() throws KnowledgeSourceReadException {
         ks.readInducedBy(cd);
-        Assert.assertEquals(Arrays.asSet(new TemporalPropositionDefinition[]{ppd, ed}), new HashSet<TemporalPropositionDefinition>(ks.readInducedBy(cd)));
+        Assert.assertEquals(Arrays.asSet(new TemporalPropositionDefinition[]{ppd, ed}), new HashSet<>(ks.readInducedBy(cd)));
     }
     
     @Test
     public void testSubContextOfFooFooContextDefinition() throws KnowledgeSourceReadException {
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{cd}), new HashSet<ContextDefinition>(ks.readSubContextOfs(subContext1)));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{cd}), new HashSet<>(ks.readSubContextOfs(subContext1)));
     }
     
     @Test
     public void testSubContextOfFooFooContextDefinitionCached() throws KnowledgeSourceReadException {
         ks.readSubContextOfs(subContext1);
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{cd}), new HashSet<ContextDefinition>(ks.readSubContextOfs(subContext1)));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{cd}), new HashSet<>(ks.readSubContextOfs(subContext1)));
     }
     
     @Test
     public void testSubContextOfFooFooContextId() throws KnowledgeSourceReadException {
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{cd}), new HashSet<ContextDefinition>(ks.readSubContextOfs(subContext1.getId())));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{cd}), new HashSet<>(ks.readSubContextOfs(subContext1.getId())));
     }
     
     @Test
     public void testSubContextOfFooFooContextIdCached() throws KnowledgeSourceReadException {
         ks.readSubContextOfs(subContext1.getId());
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{cd}), new HashSet<ContextDefinition>(ks.readSubContextOfs(subContext1.getId())));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{cd}), new HashSet<>(ks.readSubContextOfs(subContext1.getId())));
     }
     
     @Test
     public void testSubContextsContextDefinition() throws KnowledgeSourceReadException {
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{subContext1, subContext2}), new HashSet<ContextDefinition>(ks.readSubContexts(cd)));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{subContext1, subContext2}), new HashSet<>(ks.readSubContexts(cd)));
     }
     
     @Test
     public void testSubContextsContextDefinitionCached() throws KnowledgeSourceReadException {
         ks.readSubContexts(cd);
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{subContext1, subContext2}), new HashSet<ContextDefinition>(ks.readSubContexts(cd)));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{subContext1, subContext2}), new HashSet<>(ks.readSubContexts(cd)));
     }
     
     @Test
     public void testSubContextsContextId() throws KnowledgeSourceReadException {
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{subContext1, subContext2}), new HashSet<ContextDefinition>(ks.readSubContexts(cd.getId())));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{subContext1, subContext2}), new HashSet<>(ks.readSubContexts(cd.getId())));
     }
     
     @Test
     public void testSubContextsContextIdCached() throws KnowledgeSourceReadException {
         ks.readSubContexts(cd.getId());
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{subContext1, subContext2}), new HashSet<ContextDefinition>(ks.readSubContexts(cd.getId())));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{subContext1, subContext2}), new HashSet<>(ks.readSubContexts(cd.getId())));
     }
     
     @Test
     public void testSubContextOfBarContextId() throws KnowledgeSourceReadException {
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{}), new HashSet<ContextDefinition>(ks.readSubContextOfs(cd.getId())));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{}), new HashSet<>(ks.readSubContextOfs(cd.getId())));
     }
     
     @Test
     public void testSubContextOfBarContextIdCached() throws KnowledgeSourceReadException {
         ks.readSubContextOfs(cd.getId());
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{}), new HashSet<ContextDefinition>(ks.readSubContextOfs(cd.getId())));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{}), new HashSet<>(ks.readSubContextOfs(cd.getId())));
     }
     
     @Test
     public void testSubContextOfBarContextDefinition() throws KnowledgeSourceReadException {
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{}), new HashSet<ContextDefinition>(ks.readSubContextOfs(cd)));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{}), new HashSet<>(ks.readSubContextOfs(cd)));
     }
     
     @Test
     public void testSubContextOfBarContextDefinitionCached() throws KnowledgeSourceReadException {
         ks.readSubContextOfs(cd);
-        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{}), new HashSet<ContextDefinition>(ks.readSubContextOfs(cd)));
+        Assert.assertEquals(Arrays.asSet(new ContextDefinition[]{}), new HashSet<>(ks.readSubContextOfs(cd)));
     }
 }

@@ -76,7 +76,7 @@ class LinksConverter extends AbstractConverter {
 		}
 	}
 
-	private static final HashSet<String> linkTags = new HashSet<String>();
+	private static final HashSet<String> linkTags = new HashSet<>();
 	static {
 		linkTags.add(DERIVATION);
 		linkTags.add(REFERENCE);
@@ -93,7 +93,7 @@ class LinksConverter extends AbstractConverter {
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
 		expectChildren(reader);
-		ArrayList<Link> linkList = new ArrayList<Link>();
+		ArrayList<Link> linkList = new ArrayList<>();
 		while (reader.hasMoreChildren()) {
 			reader.moveDown();
 			String tag = expect(reader, linkTags);

@@ -27,7 +27,7 @@ public final class DataSourceBackendDataSourceType extends DataSourceType {
     private static final long serialVersionUID = 1L;
     
     private static Map<String, DataSourceBackendDataSourceType> cache =
-            new HashMap<String, DataSourceBackendDataSourceType>();
+            new HashMap<>();
 
     public static DataSourceBackendDataSourceType getInstance(String id) {
         if (id == null) {

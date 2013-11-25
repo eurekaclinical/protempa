@@ -45,14 +45,14 @@ public final class SimpleKnowledgeSourceBackend
     private final Map<String, List<String>> subContextOfMap;
     
     public SimpleKnowledgeSourceBackend() {
-        this.propDefsMap = new HashMap<String, PropositionDefinition>();
-        this.abstractionDefsMap = new HashMap<String, AbstractionDefinition>();
-        this.isAMap = new HashMap<String, List<String>>();
-        this.abstractedIntoMap = new HashMap<String, List<String>>();
-        this.contextDefsMap = new HashMap<String, ContextDefinition>();
-        this.inducesMap = new HashMap<String, List<String>>();
-        this.subContextOfMap = new HashMap<String, List<String>>();
-        this.tempPropDefsMap = new HashMap<String, TemporalPropositionDefinition>();
+        this.propDefsMap = new HashMap<>();
+        this.abstractionDefsMap = new HashMap<>();
+        this.isAMap = new HashMap<>();
+        this.abstractedIntoMap = new HashMap<>();
+        this.contextDefsMap = new HashMap<>();
+        this.inducesMap = new HashMap<>();
+        this.subContextOfMap = new HashMap<>();
+        this.tempPropDefsMap = new HashMap<>();
     }
     
     public SimpleKnowledgeSourceBackend(PropositionDefinition... propDefs) {

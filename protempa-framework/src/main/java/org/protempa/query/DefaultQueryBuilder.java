@@ -248,7 +248,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     @Override
     public Query build(KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) throws QueryBuildException {
         if (validatePropositionIds) {
-            Set<String> userSpecifiedPropIds = new HashSet<String>();
+            Set<String> userSpecifiedPropIds = new HashSet<>();
             for (PropositionDefinition propDef : this.propDefs) {
                 userSpecifiedPropIds.add(propDef.getId());
             }

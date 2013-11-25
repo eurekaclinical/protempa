@@ -62,7 +62,7 @@ public abstract class AbstractKnowledgeSourceBackend extends
     @Override
     public List<String> getPropositionsByTermSubsumption(
             And<TermSubsumption> termId) throws KnowledgeSourceReadException {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
 
     /**

@@ -35,7 +35,7 @@ public final class MockBackendInstanceSpecFactory<B extends Backend<?>> {
     }
 
     public MockBackendInstanceSpecFactory(List<BackendPropertySpec> propSpecs) {
-        BackendSpec<B> backendSpec = new BackendSpec<B>(
+        BackendSpec<B> backendSpec = new BackendSpec<>(
                 new MockBackendProvider(), "mockSpec", "Mock Spec",
                 new ArrayList<BackendPropertySpec>());
                 

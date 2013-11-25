@@ -46,7 +46,7 @@ public class ExtendedPropositionDefinition implements Serializable {
                     "A propositionId must be specified");
         }
         this.propositionId = propositionId;
-        this.propertyConstraints = new HashSet<PropertyConstraint>();
+        this.propertyConstraints = new HashSet<>();
     }
 
     /**

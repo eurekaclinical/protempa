@@ -89,7 +89,7 @@ public abstract class Link {
         } else {
             ProtempaUtil.checkArrayForNullElement(propositionIds,
                     "propositionIds");
-            this.propIdsAsSet = new HashSet<String>();
+            this.propIdsAsSet = new HashSet<>();
             for (String propId : propositionIds) {
                 this.propIdsAsSet.add(propId.intern());
             }
@@ -205,7 +205,7 @@ public abstract class Link {
      */
     void validate(KnowledgeSource knowledgeSource) throws 
             LinkValidationFailedException, KnowledgeSourceReadException {
-        List<String> invalidPropIds = new ArrayList<String>();
+        List<String> invalidPropIds = new ArrayList<>();
         for (String propId : this.propIdsAsSet) {
             if (!knowledgeSource.hasPropositionDefinition(propId)) {
                 invalidPropIds.add(propId);
@@ -270,7 +270,7 @@ public abstract class Link {
         List<Proposition> result;
         if (propositions != null) {
             if (this.constraints.length > 0) {
-                result = new ArrayList<Proposition>();
+                result = new ArrayList<>();
                 for (Proposition prop : propositions) {
                     applyPropertyConstraints(prop, result);
                 }
@@ -287,7 +287,7 @@ public abstract class Link {
     }
 
     private String constraintHeaderString(PropertyConstraint[] constraints) {
-        List<String> constraintsL = new ArrayList<String>(constraints.length);
+        List<String> constraintsL = new ArrayList<>(constraints.length);
         for (int i = 0; i < constraints.length; i++) {
             PropertyConstraint ccc = constraints[i];
             constraintsL.add(ccc.getFormatted());

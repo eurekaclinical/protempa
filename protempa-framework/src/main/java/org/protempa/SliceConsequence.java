@@ -145,13 +145,13 @@ final class SliceConsequence implements Consequence {
     }
 
     private void mergedInterval(KnowledgeHelper kh, List<TemporalProposition> pl) {
-        List<TemporalProposition> slice = new ArrayList<TemporalProposition>();
+        List<TemporalProposition> slice = new ArrayList<>();
         for (ListIterator<TemporalProposition> itr = pl.listIterator(); itr
                 .hasNext() && itr.nextIndex() < this.maxIndex;) {
             slice.add(itr.next());
         }
-        Segment<TemporalProposition> segment = new Segment<TemporalProposition>(
-                new Sequence<TemporalProposition>(def.getPropositionId(), slice));
+        Segment<TemporalProposition> segment = new Segment<>(
+                new Sequence<>(def.getPropositionId(), slice));
         AbstractParameter result = AbstractParameterFactory.getFromAbstraction(
                 def.getPropositionId(), segment, slice, null, null, null, null);
         kh.getWorkingMemory().insert(result);

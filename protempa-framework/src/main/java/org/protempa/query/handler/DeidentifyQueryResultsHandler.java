@@ -56,7 +56,7 @@ public final class DeidentifyQueryResultsHandler
             throw new IllegalArgumentException("handler cannot be null");
         }
         this.handler = handler;
-        this.keyMapper = new HashMap<String, String>();
+        this.keyMapper = new HashMap<>();
         this.keyIdDisguised = true;
         this.nextDisguisedKey = 1;
     }

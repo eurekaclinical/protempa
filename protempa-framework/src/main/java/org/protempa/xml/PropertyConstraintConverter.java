@@ -83,7 +83,7 @@ class PropertyConstraintConverter extends AbstractConverter {
 
 		Value value;
 		if (isAListComparator(comparator)) {
-			ValueList<Value> vlist = new ValueList<Value>();
+			ValueList<Value> vlist = new ValueList<>();
 			do {
 				vlist.add((Value) valueFromXML(reader, context));
 			} while (reader.hasMoreChildren());

@@ -130,7 +130,7 @@ public final class ValueSet {
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
         this.valueSetElements = EMPTY_VALUE_SET_ELT_ARRAY;
-        this.values = new HashMap<Value, ValueSetElement>();
+        this.values = new HashMap<>();
         this.valuesKeySet = this.values.keySet();
         if (sourceId == null) {
             this.sourceId = NotRecordedSourceId.getInstance();
@@ -157,7 +157,7 @@ public final class ValueSet {
         this.id = id.intern();
         this.valueSetElements = valueSetElements.clone();
 
-        this.values = new HashMap<Value, ValueSetElement>();
+        this.values = new HashMap<>();
         for (ValueSetElement vse : this.valueSetElements) {
             if (this.values.containsKey(vse.value)) {
                 if (logger.isLoggable(Level.WARNING)) {

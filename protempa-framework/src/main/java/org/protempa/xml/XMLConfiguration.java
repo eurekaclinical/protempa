@@ -88,7 +88,7 @@ public class XMLConfiguration implements QueryBuilder {
 
 	private static Logger myLogger = Logger.getLogger(XMLConfiguration.class.getName());
 
-	private static ThreadLocal<Boolean> surpressSchemaReference = new ThreadLocal<Boolean>();
+	private static ThreadLocal<Boolean> surpressSchemaReference = new ThreadLocal<>();
 
 	private File file;
 

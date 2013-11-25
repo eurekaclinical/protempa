@@ -104,13 +104,13 @@ public abstract class AbstractProposition implements Proposition {
 
     protected void initializeProperties() {
         if (this.properties == null) {
-            this.properties = new LinkedHashMap<String, Value>();
+            this.properties = new LinkedHashMap<>();
         }
     }
 
     protected void initializeReferences() {
         if (this.references == null) {
-            this.references = new LinkedHashMap<String, List<UniqueId>>();
+            this.references = new LinkedHashMap<>();
         }
     }
 
@@ -177,7 +177,7 @@ public abstract class AbstractProposition implements Proposition {
             throw new IllegalArgumentException("name cannot be null");
         }
         initializeReferences();
-        this.references.put(name.intern(), new ArrayList<UniqueId>(refs));
+        this.references.put(name.intern(), new ArrayList<>(refs));
     }
 
     public final void addReference(String name, UniqueId ref) {
@@ -190,7 +190,7 @@ public abstract class AbstractProposition implements Proposition {
         initializeReferences();
         List<UniqueId> refs = this.references.get(name);
         if (refs == null) {
-            refs = new ArrayList<UniqueId>(DEFAULT_REFERENCE_LIST_SIZE);
+            refs = new ArrayList<>(DEFAULT_REFERENCE_LIST_SIZE);
             refs.add(ref);
             this.references.put(name.intern(), refs);
         } else {
@@ -380,7 +380,7 @@ public abstract class AbstractProposition implements Proposition {
                     throw new InvalidObjectException(
                             "Negative unique identifier count. Can't restore");
                 }
-                List<UniqueId> uids = new ArrayList<UniqueId>(numUids);
+                List<UniqueId> uids = new ArrayList<>(numUids);
                 for (int j = 0; j < numUids; j++) {
                     uids.add((UniqueId) s.readObject());
                 }

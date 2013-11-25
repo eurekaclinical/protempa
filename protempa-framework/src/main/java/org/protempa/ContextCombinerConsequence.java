@@ -54,10 +54,10 @@ class ContextCombinerConsequence implements Consequence {
         String a1Id = a1.getId();
         InternalFactHandle a2f = arg0.getTuple().get(1);
         Context a2 = (Context) arg1.getObject(a2f);
-        Sequence<Context> s = new Sequence<Context>(a1Id, 2);
+        Sequence<Context> s = new Sequence<>(a1Id, 2);
         s.add(a1);
         s.add(a2);
-        Segment<Context> segment = new Segment<Context>(s);
+        Segment<Context> segment = new Segment<>(s);
         Context result = new Context(a1Id, new UniqueId(DerivedSourceId.getInstance(), new DerivedUniqueId(UUID.randomUUID().toString())));
         result.setDataSourceType(DataSourceType.DERIVED);
         result.setInterval(segment.getInterval());

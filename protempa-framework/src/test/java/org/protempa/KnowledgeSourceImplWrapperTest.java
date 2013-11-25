@@ -83,7 +83,7 @@ public class KnowledgeSourceImplWrapperTest {
         Set<ConstantDefinition> expected = 
                 Arrays.asSet(new ConstantDefinition[]{barDef, bazDef});
         Set<PropositionDefinition> actual =
-                new HashSet<PropositionDefinition>(wrapper.readIsA("foo"));
+                new HashSet<>(wrapper.readIsA("foo"));
         Assert.assertEquals(expected, actual);
     }
 
@@ -102,7 +102,7 @@ public class KnowledgeSourceImplWrapperTest {
         Set<ConstantDefinition> expected = 
                 Arrays.asSet(new ConstantDefinition[]{barDef, bazDef});
         Set<PropositionDefinition> actual =
-                new HashSet<PropositionDefinition>(wrapper.readIsA("foo"));
+                new HashSet<>(wrapper.readIsA("foo"));
         Assert.assertEquals(expected, actual);
     }
 
@@ -121,7 +121,7 @@ public class KnowledgeSourceImplWrapperTest {
         Set<ConstantDefinition> expected = 
                 Arrays.asSet(new ConstantDefinition[]{barDef, bazDef});
         Set<PropositionDefinition> actual =
-                new HashSet<PropositionDefinition>(wrapper.readIsA("foo"));
+                new HashSet<>(wrapper.readIsA("foo"));
         Assert.assertEquals(expected, actual);
     }
 
@@ -141,7 +141,7 @@ public class KnowledgeSourceImplWrapperTest {
         Set<ConstantDefinition> expected = 
                 Arrays.asSet(new ConstantDefinition[]{barDef, bazDef});
         Set<PropositionDefinition> actual =
-                new HashSet<PropositionDefinition>(wrapper.readIsA("foo"));
+                new HashSet<>(wrapper.readIsA("foo"));
         Assert.assertEquals(expected, actual);
     }
     
@@ -240,7 +240,7 @@ public class KnowledgeSourceImplWrapperTest {
                 Arrays.asSet(
                 new LowLevelAbstractionDefinition[]{barDef, bazDef});
         Set<PropositionDefinition> actual =
-                new HashSet<PropositionDefinition>(wrapper.readIsA("foo"));
+                new HashSet<>(wrapper.readIsA("foo"));
         Assert.assertEquals(expected, actual);
     }
 

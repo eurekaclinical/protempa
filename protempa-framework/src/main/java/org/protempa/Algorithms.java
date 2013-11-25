@@ -60,7 +60,7 @@ public final class Algorithms implements Serializable {
 	 * Initializes the object.
 	 */
 	private void initialize() {
-		idsToAlgorithms = new HashMap<String, Algorithm>();
+		idsToAlgorithms = new HashMap<>();
 	}
 
 	/**
@@ -101,7 +101,7 @@ public final class Algorithms implements Serializable {
 	 */
 	public Set<Algorithm> getAlgorithms() {
 		if (algorithms == null) {
-			algorithms = Collections.unmodifiableSet(new HashSet<Algorithm>(
+			algorithms = Collections.unmodifiableSet(new HashSet<>(
 					this.idsToAlgorithms.values()));
 		}
 		return algorithms;
