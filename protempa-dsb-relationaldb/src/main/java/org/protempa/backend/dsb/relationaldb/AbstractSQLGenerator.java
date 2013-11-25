@@ -19,7 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
 import org.arp.javautil.sql.ConnectionSpec;

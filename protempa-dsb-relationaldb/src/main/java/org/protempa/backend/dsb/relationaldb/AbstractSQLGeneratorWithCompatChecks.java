@@ -25,7 +25,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * Abstract class for constructing a SQL generator with useful compatibility

@@ -20,7 +20,7 @@
 package org.protempa.backend.dsb.relationaldb;
 
 import java.io.Serializable;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
 
 /**

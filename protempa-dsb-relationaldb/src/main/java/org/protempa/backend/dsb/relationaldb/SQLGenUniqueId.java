@@ -24,8 +24,8 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.LocalUniqueId;
 
 final class SQLGenUniqueId implements LocalUniqueId {

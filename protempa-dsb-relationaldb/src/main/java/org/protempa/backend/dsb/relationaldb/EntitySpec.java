@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Unit;
