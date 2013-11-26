@@ -46,7 +46,7 @@
             <item name="Project Plugins" href="plugins.html"/>
             <item name="Dependency Convergence" href="dependency-convergence.html"/>
             <item name="Plugin Management" href="plugin-management.html"/>
-            <item name="Surefire Report" href="surefire-report.html"/>
+            <!--<item name="Surefire Report" href="surefire-report.html"/>-->
             <item name="Checkstyle Results" href="checkstyle.html"/>
         </menu>
         <menu name="Internal Resources">
