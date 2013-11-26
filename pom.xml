@@ -71,6 +71,12 @@
             <id>aiw</id>
             <url>http://maven.cci.emory.edu/nexus/content/repositories/aiw/</url>
         </repository>
+        <repository>
+            <id>oracleReleases</id>
+            <name>Oracle Released Java Packages</name>
+            <url>http://download.oracle.com/maven</url>
+            <layout>default</layout>
+        </repository>
     </repositories>
     
     <developers>
