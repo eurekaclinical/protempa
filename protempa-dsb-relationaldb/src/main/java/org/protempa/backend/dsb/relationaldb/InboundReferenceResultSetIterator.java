@@ -167,7 +167,7 @@ final class InboundReferenceResultSetIterator implements
         }
     }
 
-    void handleKeyId(String keyId) {
+    private void handleKeyId(String keyId) {
         if (this.keyId != null && !this.keyId.equals(keyId)) {
             createDataStreamingEvent();
         }

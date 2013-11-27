@@ -161,7 +161,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
             Value[] propertyValues, UniqueIdPair[] refUniqueIds) throws
             SQLException;
 
-    final void createDataStreamingEvent(String key, Map<UniqueId, P> propositions) {
+    private void createDataStreamingEvent(String key, Map<UniqueId, P> propositions) {
         List<P> uniqueProps = new ArrayList<>
                 (propositions.values());
         this.dataStreamingEvent = new DataStreamingEvent<>(key, uniqueProps);
