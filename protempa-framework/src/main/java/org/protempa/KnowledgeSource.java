@@ -115,4 +115,7 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
     List<PropositionDefinition> readParents(String propId)
             throws KnowledgeSourceReadException;
     
+    List<List<String>> getMatchingPropositionDefinitions(String searchKey)
+    	throws KnowledgeSourceReadException;
+    
 }

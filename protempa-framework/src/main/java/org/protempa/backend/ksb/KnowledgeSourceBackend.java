@@ -114,4 +114,7 @@ public interface KnowledgeSourceBackend extends
     String[] readInduces(String propId) throws KnowledgeSourceReadException;
     
     String[] readSubContextOfs(String propId) throws KnowledgeSourceReadException;
+    
+    List<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException;
+   
 }

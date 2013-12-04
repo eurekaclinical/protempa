@@ -169,4 +169,11 @@ public final class SimpleKnowledgeSourceBackend
             return propIds.toArray(new String[propIds.size()]);
         }
     }
+
+	@Override
+	public List<String> getKnowledgeSourceSearchResults(String searchKey)
+			throws KnowledgeSourceReadException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

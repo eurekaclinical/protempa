@@ -19,6 +19,8 @@
  */
 package org.protempa.bp.commons;
 
+import java.util.List;
+
 import org.protempa.backend.AbstractCommonsKnowledgeSourceBackend;
 import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.annotations.BackendProperty;
@@ -87,5 +89,12 @@ public class MockKnowledgeSourceBackend
     public String[] readSubContextOfs(String propId) throws KnowledgeSourceReadException {
         return StringUtils.EMPTY_STRING_ARRAY;
     }
+
+	@Override
+	public List<String> getKnowledgeSourceSearchResults(String searchKey)
+			throws KnowledgeSourceReadException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

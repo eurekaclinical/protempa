@@ -691,4 +691,11 @@ class KnowledgeSourceImplWrapper
     protected void throwCloseException(List<BackendCloseException> exceptions) throws SourceCloseException {
         throw new KnowledgeSourceCloseException(exceptions);
     }
+
+	@Override
+	public List<List<String>> getMatchingPropositionDefinitions(String searchKey)
+			throws KnowledgeSourceReadException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

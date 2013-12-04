@@ -351,4 +351,10 @@ public abstract class ProtegeKnowledgeSourceBackend
     public String[] readSubContextOfs(String propId) throws KnowledgeSourceReadException {
         return ArrayUtils.EMPTY_STRING_ARRAY;
     }
+    
+    
+    public List<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException {
+    	return this.cm.searchInstancesContainingKey(searchKey);
+       
+    }
 }
