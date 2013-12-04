@@ -814,7 +814,6 @@ abstract class ConnectionManager {
 							}
 
 						} catch (KnowledgeSourceReadException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 

@@ -695,7 +695,6 @@ class KnowledgeSourceImplWrapper
 	@Override
 	public List<List<String>> getMatchingPropositionDefinitions(String searchKey)
 			throws KnowledgeSourceReadException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

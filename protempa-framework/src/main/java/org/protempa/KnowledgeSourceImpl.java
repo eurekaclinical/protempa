@@ -971,7 +971,7 @@ public final class KnowledgeSourceImpl
 			List<String> currentParentList,
 			List<List<String>> allParentListsSoFar)
 			throws KnowledgeSourceReadException {
-		// TODO Auto-generated method stub
+
 		ProtempaUtil.logger().log(
 				Level.INFO,
 				"Looping through parents of " + propositionDefinition.getId()
