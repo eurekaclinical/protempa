@@ -30,6 +30,39 @@ import org.protempa.query.Query;
  */
 public abstract class AbstractQueryResultsHandler 
         implements QueryResultsHandler {
+    
+    public class DefaultStatistics implements Statistics {
+        private final int numberOfKeys;
+        
+        private DefaultStatistics(int numberOfKeys) {
+            if (numberOfKeys < 0) {
+                throw new IllegalArgumentException("Cannot have numberOfKeys < 0");
+            }
+            this.numberOfKeys = numberOfKeys;
+        }
+
+        @Override
+        public int getNumberOfKeys() {
+            return numberOfKeys;
+        }
+        
+    }
+    
+    public class DefaultStatisticsBuilder {
+        private int numberOfKeys;
+
+        public int getNumberOfKeys() {
+            return numberOfKeys;
+        }
+
+        public void setNumberOfKeys(int numberOfKeys) {
+            this.numberOfKeys = numberOfKeys;
+        }
+        
+        public DefaultStatistics toDefaultStatistics() {
+            return new DefaultStatistics(this.numberOfKeys);
+        }
+    }
 
     @Override
     public void init(KnowledgeSource knowledgeSource, Query query)
@@ -72,4 +105,15 @@ public abstract class AbstractQueryResultsHandler
         return ArrayUtils.EMPTY_STRING_ARRAY;
     }
     
+    /**
+     * Default implementation, returns <code>null</code>.
+     * 
+     * @return <code>null</code>.
+     * @throws QueryResultsHandlerCollectStatisticsException (the default
+     * implementation never throws this exception).
+     */
+    @Override
+    public Statistics collectStatistics() throws QueryResultsHandlerCollectStatisticsException {
+        return null;
+    }
 }

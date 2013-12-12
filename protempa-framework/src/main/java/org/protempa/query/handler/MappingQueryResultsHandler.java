@@ -87,4 +87,11 @@ public class MappingQueryResultsHandler extends AbstractQueryResultsHandler {
             Map<UniqueId, Proposition> references) {
         resultMap.put(key, propositions);
     }
+
+    @Override
+    public Statistics collectStatistics() {
+        DefaultStatisticsBuilder builder = new DefaultStatisticsBuilder();
+        builder.setNumberOfKeys(this.resultMap.size());
+        return builder.toDefaultStatistics();
+    }
 }

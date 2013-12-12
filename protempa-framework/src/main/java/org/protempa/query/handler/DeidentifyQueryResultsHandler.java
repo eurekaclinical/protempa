@@ -104,6 +104,12 @@ public final class DeidentifyQueryResultsHandler
         this.keyMapper.clear();
     }
 
+    @Override
+    public Statistics collectStatistics() 
+            throws QueryResultsHandlerCollectStatisticsException {
+        return this.handler.collectStatistics();
+    }
+    
     private String disguiseKeyIds(String keyId) {
         if (this.keyIdDisguised) {
             if (this.keyMapper.containsKey(keyId)) {

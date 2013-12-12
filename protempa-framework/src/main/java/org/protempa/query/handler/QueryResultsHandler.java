@@ -22,7 +22,6 @@ package org.protempa.query.handler;
 import java.util.List;
 import java.util.Map;
 
-import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
@@ -37,6 +36,20 @@ import org.protempa.query.Query;
  * 
  */
 public interface QueryResultsHandler {
+    
+    /**
+     * Collect various statistics about the data in the dataset previously
+     * written out.
+     */
+    public interface Statistics {
+        
+        /**
+         * Returns the number of keys in the dataset.
+         * @return the number of keys.
+         */
+        int getNumberOfKeys();
+
+    }
 
     /**
      * Performs all initialization functions to prepare the handler. This 
@@ -133,4 +146,16 @@ public interface QueryResultsHandler {
      */
     public String[] getPropositionIdsNeeded() 
             throws KnowledgeSourceReadException;
+    
+    /**
+     * Collects statistics on the dataset specified in the constructor. This
+     * method can be called any time.
+     * 
+     * @return Returns various statistics about the data in the dataset 
+     * previously written out. If <code>null</code>, statistics are not
+     * supported by this query results handler.
+     * @throws QueryResultsHandlerCollectStatisticsException if statistics
+     * collection fails for some reason.
+     */
+    public Statistics collectStatistics() throws QueryResultsHandlerCollectStatisticsException;
 }
