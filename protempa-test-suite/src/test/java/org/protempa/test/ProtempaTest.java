@@ -106,6 +106,7 @@ import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.handler.QueryResultsHandler;
+import org.protempa.query.handler.QueryResultsHandlerFactory;
 
 /**
  * Unit tests for Protempa.
@@ -246,7 +247,7 @@ public class ProtempaTest {
     @Before
     public void setUp() throws DataProviderException, SQLException,
             ProtempaStartupException, BackendProviderSpecLoaderException,
-            ConfigurationsLoadException, InvalidConfigurationException, 
+            ConfigurationsLoadException, InvalidConfigurationException,
             ConfigurationsNotFoundException {
         logger.log(Level.INFO, "Populating database");
         this.dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
@@ -309,27 +310,29 @@ public class ProtempaTest {
             ParseException, KnowledgeSourceReadException, QueryBuildException,
             IOException {
         File outputFile = File.createTempFile("protempa-test", null);
-        FileWriter fw = new FileWriter(outputFile);
-        QueryResultsHandler handler = new SingleColumnQueryResultsHandler(fw);
-        protempa.execute(query(), handler);
+        try (FileWriter fw = new FileWriter(outputFile)) {
+            QueryResultsHandlerFactory handler
+                    = new SingleColumnQueryResultsHandlerFactory(fw);
+            protempa.execute(query(), handler);
+        }
         boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);
         assertTrue("output doesn't match", outputMatches);
-    
+
     }
-    
+
     private ContextDefinition context1() {
         ContextDefinition cd = new ContextDefinition("MyContext1");
-        TemporalExtendedParameterDefinition tepd =
-                new TemporalExtendedParameterDefinition("MyDiastolicClassification");
+        TemporalExtendedParameterDefinition tepd
+                = new TemporalExtendedParameterDefinition("MyDiastolicClassification");
         tepd.setValue(NominalValue.getInstance("My Diastolic High"));
         cd.setInducedBy(new TemporalExtendedPropositionDefinition[]{tepd});
         return cd;
     }
-    
+
     private PropositionDefinition systolicClassificationMyContext1() {
-        LowLevelAbstractionDefinition systolic = 
-                new LowLevelAbstractionDefinition(
-                "MySystolicClassificationMyContext1");
+        LowLevelAbstractionDefinition systolic
+                = new LowLevelAbstractionDefinition(
+                        "MySystolicClassificationMyContext1");
         systolic.setPropositionId("MySystolicClassification");
         systolic.setContextId("MyContext1");
         systolic.setDisplayName("My Systolic Classification");
@@ -631,12 +634,12 @@ public class ProtempaTest {
         highBp.setRelation(highBpTpd, highBpTpd, highBpRel);
 
         q.setPropositionDefinitions(new PropositionDefinition[]{ed, pd, hd,
-                    hd2, systolicClassification(), diastolicClassification(),
-                    bloodPressureClassificationAny(),
-                    bloodPressureClassificationConsecutiveAny(), highBp,
-                    bloodPressureClassificationAll(), systolicClassification3(),
-                    diastolicClassification3(), bloodPressureClassification3Any(),
-                    context1(), systolicClassificationMyContext1()});
+            hd2, systolicClassification(), diastolicClassification(),
+            bloodPressureClassificationAny(),
+            bloodPressureClassificationConsecutiveAny(), highBp,
+            bloodPressureClassificationAll(), systolicClassification3(),
+            diastolicClassification3(), bloodPressureClassification3Any(),
+            context1(), systolicClassificationMyContext1()});
 
         DateFormat shortFormat = AbsoluteTimeGranularity.DAY.getShortFormat();
         DateTimeFilter timeRange = new DateTimeFilter(
@@ -730,10 +733,10 @@ public class ProtempaTest {
                     environmentName);
             assertEquals("Wrong number of working memories generated",
                     this.patientCount, results.size());
-            Map<String, Integer> forwardDerivCounts = 
-                    getResultCounts(FORWARD_DERIVATION_COUNTS_FILE);
-            Map<String, Integer> backwardDerivCounts = 
-                    getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
+            Map<String, Integer> forwardDerivCounts
+                    = getResultCounts(FORWARD_DERIVATION_COUNTS_FILE);
+            Map<String, Integer> backwardDerivCounts
+                    = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
             for (String keyId : results.keySet()) {
                 if (keyId.equals("12")) {
                     System.err.println("OUTPUT FOR " + keyId + " IS " + Iterators.asList(results.get(keyId).iterateObjects()));
@@ -744,7 +747,7 @@ public class ProtempaTest {
                     derivCount += derivs.size();
                 }
                 assertEquals("wrong number of forward derivations for key "
-                        + keyId, forwardDerivCounts.get(keyId).intValue(), 
+                        + keyId, forwardDerivCounts.get(keyId).intValue(),
                         derivCount);
 
                 derivCount = 0;
@@ -753,7 +756,7 @@ public class ProtempaTest {
                     derivCount += derivs.size();
                 }
                 assertEquals("wrong number of backward derivations for key "
-                        + keyId, backwardDerivCounts.get(keyId).intValue(), 
+                        + keyId, backwardDerivCounts.get(keyId).intValue(),
                         derivCount);
 
                 assert30DayReadmissionDerived(afh);
@@ -793,17 +796,17 @@ public class ProtempaTest {
      * Tests Protempa's output method
      */
     private void testOutputResults(String environmentName) {
-        FileWriter fw = null;
         File outputFile = null;
         try {
             outputFile = File.createTempFile("protempa-test", null);
-            fw = new FileWriter(outputFile);
-            QueryResultsHandler handler = new SingleColumnQueryResultsHandler(
-                    fw);
-            protempa.outputResults(query(), handler, environmentName);
-            System.err
-                    .println("output written to " + 
-                    outputFile.getAbsolutePath());
+            try (FileWriter fw = new FileWriter(outputFile)) {
+                QueryResultsHandlerFactory handler
+                        = new SingleColumnQueryResultsHandlerFactory(fw);
+                protempa.outputResults(query(), handler, environmentName);
+                System.err
+                        .println("output written to "
+                                + outputFile.getAbsolutePath());
+            }
             boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);
             assertTrue("output doesn't match", outputMatches);
         } catch (FinderException | IOException e) {
@@ -812,14 +815,6 @@ public class ProtempaTest {
         } catch (KnowledgeSourceReadException | ParseException | QueryBuildException e) {
             e.printStackTrace();
             fail(QUERY_ERROR_MSG);
-        } finally {
-            try {
-                if (fw != null) {
-                    fw.close();
-                }
-            } catch (IOException ex) {
-                System.err.println("Failed to close file: " + outputFile);
-            }
         }
     }
 
@@ -880,7 +875,7 @@ public class ProtempaTest {
             Set<Proposition> encounters = getPropositionsForKey(e.getKey(),
                     "Encounter", objectGraph);
             assertEquals("Wrong number of encounters for key ID " + e.getKey(),
-                    patientEncounterMap.get(e.getKey()).intValue(), 
+                    patientEncounterMap.get(e.getKey()).intValue(),
                     encounters.size());
             for (Proposition enc : encounters) {
                 Event event = (Event) enc;
@@ -976,7 +971,7 @@ public class ProtempaTest {
                             prop.getReferences("patientDetails").size());
                 } else if (prop.getId().equals("Patient")) {
                     assertEquals("Patient for keyId " + keyId + " failed", me
-                            .getValue().intValue(), 
+                            .getValue().intValue(),
                             prop.getReferences("encounters").size());
                 }
             }
@@ -1144,13 +1139,13 @@ public class ProtempaTest {
                 + "' should not have any forward derivations",
                 0,
                 getDerivedPropositionsForKey(ICD9_013_82,
-                afh.getForwardDerivations("0")).size());
+                        afh.getForwardDerivations("0")).size());
         assertEquals(
                 "Proposition '" + ICD9_013_82
                 + "' should not have any backward derivations",
                 0,
                 getDerivedPropositionsForKey(ICD9_013_82,
-                afh.getBackwardDerivations("0")).size());
+                        afh.getBackwardDerivations("0")).size());
         assertTrue("Proposition '" + ICD9_804 + "' not found", icd9d804Derived);
 
         // matched at higher level - should be derivations
@@ -1690,7 +1685,7 @@ public class ProtempaTest {
             assertEquals(
                     "Wrong number of raw propositions retrieved for key "
                     + r.getKey(),
-                    propCounts.get(r.getKey()).intValue(), 
+                    propCounts.get(r.getKey()).intValue(),
                     r.getValue().size());
         }
     }
