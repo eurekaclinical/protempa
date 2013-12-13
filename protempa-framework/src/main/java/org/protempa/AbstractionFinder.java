@@ -50,6 +50,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.protempa.query.handler.QueryResultsHandler.UsingKnowledgeSource;
+import org.protempa.query.handler.QueryResultsHandler.UsingKnowledgeSource.ForQuery;
+import org.protempa.query.handler.QueryResultsHandlerFactory;
 
 /**
  * Class that actually does the abstraction finding.
@@ -83,59 +86,59 @@ final class AbstractionFinder {
 
         this.dataSource.addSourceListener(
                 new SourceListener<DataSourceUpdatedEvent>() {
-            @Override
-            public void sourceUpdated(DataSourceUpdatedEvent event) {
-            }
+                    @Override
+                    public void sourceUpdated(DataSourceUpdatedEvent event) {
+                    }
 
-            @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
-                throw new UnsupportedOperationException(
-                        "Not supported yet.");
-            }
-        });
+                    @Override
+                    public void closedUnexpectedly(
+                            SourceClosedUnexpectedlyEvent e) {
+                                throw new UnsupportedOperationException(
+                                        "Not supported yet.");
+                            }
+                });
 
         this.knowledgeSource.addSourceListener(
                 new SourceListener<KnowledgeSourceUpdatedEvent>() {
-            @Override
-            public void sourceUpdated(KnowledgeSourceUpdatedEvent event) {
-            }
+                    @Override
+                    public void sourceUpdated(KnowledgeSourceUpdatedEvent event) {
+                    }
 
-            @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
-                throw new UnsupportedOperationException(
-                        "Not supported yet.");
-            }
-        });
+                    @Override
+                    public void closedUnexpectedly(
+                            SourceClosedUnexpectedlyEvent e) {
+                                throw new UnsupportedOperationException(
+                                        "Not supported yet.");
+                            }
+                });
 
         this.termSource.addSourceListener(
                 new SourceListener<TermSourceUpdatedEvent>() {
-            @Override
-            public void sourceUpdated(TermSourceUpdatedEvent event) {
-            }
+                    @Override
+                    public void sourceUpdated(TermSourceUpdatedEvent event) {
+                    }
 
-            @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
-                throw new UnsupportedOperationException(
-                        "Not supported yet");
-            }
-        });
+                    @Override
+                    public void closedUnexpectedly(
+                            SourceClosedUnexpectedlyEvent e) {
+                                throw new UnsupportedOperationException(
+                                        "Not supported yet");
+                            }
+                });
 
         this.algorithmSource.addSourceListener(
                 new SourceListener<AlgorithmSourceUpdatedEvent>() {
-            @Override
-            public void sourceUpdated(AlgorithmSourceUpdatedEvent event) {
-            }
+                    @Override
+                    public void sourceUpdated(AlgorithmSourceUpdatedEvent event) {
+                    }
 
-            @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
-                throw new UnsupportedOperationException(
-                        "Not supported yet.");
-            }
-        });
+                    @Override
+                    public void closedUnexpectedly(
+                            SourceClosedUnexpectedlyEvent e) {
+                                throw new UnsupportedOperationException(
+                                        "Not supported yet.");
+                            }
+                });
 
         if (cacheFoundAbstractParameters) {
             this.workingMemoryCache = new HashMap<>();
@@ -353,9 +356,9 @@ final class AbstractionFinder {
                 log(Level.FINE,
                         "Propositions to be queried for query {0} are {1}",
                         new Object[]{
-                    query.getId(),
-                    StringUtils.join(this.propIds, ", ")
-                });
+                            query.getId(),
+                            StringUtils.join(this.propIds, ", ")
+                        });
             }
 
             ExecutionStrategy executionStrategy;
@@ -392,17 +395,17 @@ final class AbstractionFinder {
             log(Level.INFO, "Retrieving data for query {0}", query.getId());
             Set<String> inDataSourcePropIds = getKnowledgeSource()
                     .inDataSourcePropositionIds(
-                    this.propIds.toArray(new String[this.propIds.size()]));
+                            this.propIds.toArray(new String[this.propIds.size()]));
             if (isLoggable(Level.FINER)) {
                 log(Level.FINER, "Asking data source for {0} for query {1}",
                         new Object[]{
-                    StringUtils.join(inDataSourcePropIds, ", "),
-                    query.getId()
-                });
+                            StringUtils.join(inDataSourcePropIds, ", "),
+                            query.getId()
+                        });
             }
-            DataStreamingEventIterator<Proposition> itr =
-                    getDataSource().readPropositions(this.keyIds,
-                    inDataSourcePropIds, this.filters, getQuerySession());
+            DataStreamingEventIterator<Proposition> itr
+                    = getDataSource().readPropositions(this.keyIds,
+                            inDataSourcePropIds, this.filters, getQuerySession());
             return itr;
         }
 
@@ -420,10 +423,10 @@ final class AbstractionFinder {
         final void logNumProcessed(int numProcessed)
                 throws DataSourceReadException {
             if (isLoggable(Level.FINE)) {
-                String keyTypeSingDisplayName =
-                        getDataSource().getKeyTypeDisplayName();
-                String keyTypePluralDisplayName =
-                        getDataSource().getKeyTypePluralDisplayName();
+                String keyTypeSingDisplayName
+                        = getDataSource().getKeyTypeDisplayName();
+                String keyTypePluralDisplayName
+                        = getDataSource().getKeyTypePluralDisplayName();
                 String queryId = query.getId();
                 logCount(Level.FINE, numProcessed,
                         "Processed {0} {1} for query {2}",
@@ -439,10 +442,10 @@ final class AbstractionFinder {
 
         private StatelessExecutionStrategy newStatelessStrategy()
                 throws FinderException {
-            StatelessExecutionStrategy result =
-                    new StatelessExecutionStrategy(
-                    AbstractionFinder.this, getKnowledgeSource(),
-                    getAlgorithmSource());
+            StatelessExecutionStrategy result
+                    = new StatelessExecutionStrategy(
+                            AbstractionFinder.this, getKnowledgeSource(),
+                            getAlgorithmSource());
 
             createRuleBase(result);
             result.initialize();
@@ -451,9 +454,9 @@ final class AbstractionFinder {
 
         private StatefulExecutionStrategy newStatefulStrategy()
                 throws FinderException {
-            StatefulExecutionStrategy result =
-                    new StatefulExecutionStrategy(getKnowledgeSource(),
-                    getAlgorithmSource());
+            StatefulExecutionStrategy result
+                    = new StatefulExecutionStrategy(getKnowledgeSource(),
+                            getAlgorithmSource());
 
             createRuleBase(result);
             result.initialize();
@@ -472,58 +475,55 @@ final class AbstractionFinder {
 
     private abstract class ExecutorWithResultsHandler extends Executor {
 
-        private final QueryResultsHandler resultsHandler;
+        private final QueryResultsHandlerFactory resultsHandlerFactory;
+
+        private QueryResultsHandler.UsingKnowledgeSource.ForQuery forQuery;
 
         public ExecutorWithResultsHandler(Query query,
-                QueryResultsHandler resultsHandler, QuerySession querySession,
+                QueryResultsHandlerFactory resultsHandlerFactory, QuerySession querySession,
                 ExecutorStrategy strategy)
                 throws FinderException {
             super(query, querySession, strategy);
-            assert resultsHandler != null : "resultsHandler cannot be null";
-            this.resultsHandler = resultsHandler;
-        }
-
-        QueryResultsHandler getResultsHandler() {
-            return resultsHandler;
+            assert resultsHandlerFactory != null : "resultsHandlerFactory cannot be null";
+            this.resultsHandlerFactory = resultsHandlerFactory;
         }
 
         @Override
         void execute() throws FinderException {
             String queryId = getQuery().getId();
-            boolean resultsHandlerClosed = false;
-            try {
+            
                 log(Level.FINE,
                         "Initializing query results handler for query {0}",
                         queryId);
-                resultsHandler.init(getKnowledgeSource(), getQuery());
+            try (QueryResultsHandler resultsHandler = this.resultsHandlerFactory.getInstance()) {
                 log(Level.FINE,
                         "Done initalizing query results handler for query {0}",
                         queryId);
-                log(Level.FINE, "Validating query results handler for query {0}",
-                        queryId);
-                resultsHandler.validate();
-                log(Level.FINE,
-                        "Query results handler validated successfully for query {0}",
-                        queryId);
+                try (UsingKnowledgeSource usingKnowledgeSource
+                        = resultsHandler.usingKnowledgeSource(
+                                getKnowledgeSource())) {
+                    log(Level.FINE, "Validating query results handler for query {0}",
+                            queryId);
+                    usingKnowledgeSource.validate();
+                    log(Level.FINE,
+                            "Query results handler validated successfully for query {0}",
+                            queryId);
+                    try (ForQuery forQuery = usingKnowledgeSource.forQuery(getQuery())) {
+                        this.forQuery = forQuery;
+                        addAllPropIds(this.forQuery.getPropositionIdsNeeded());
+                        this.forQuery.start();
 
-                addAllPropIds(getResultsHandler().getPropositionIdsNeeded());
+                        super.execute();
 
-                resultsHandler.start();
-
-                super.execute();
-
-                resultsHandler.finish();
-                resultsHandlerClosed = true;
-                resultsHandler.close();
-            } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerValidationFailedException | KnowledgeSourceReadException | QueryResultsHandlerInitException | QueryResultsHandlerCloseException ex) {
-                throw new FinderException(queryId, ex);
-            } finally {
-                if (!resultsHandlerClosed) {
-                    try {
-                       resultsHandler.close();
-                    } catch (QueryResultsHandlerCloseException ex) {
+                        this.forQuery.finish();
+                    } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerCloseException ex) {
+                        throw new FinderException(queryId, ex);
                     }
+                } catch (QueryResultsHandlerInitException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerCloseException ex) {
+                    throw new FinderException(queryId, ex);
                 }
+            } catch (QueryResultsHandlerInitException | QueryResultsHandlerCloseException ex) {
+                throw new FinderException(queryId, ex);
             }
         }
 
@@ -533,10 +533,10 @@ final class AbstractionFinder {
             if (derivationsBuilder == null) {
                 derivationsBuilder = getDerivationsBuilder();
             }
-            Map<Proposition, List<Proposition>> forwardDerivations =
-                    derivationsBuilder.toForwardDerivations();
-            Map<Proposition, List<Proposition>> backwardDerivations =
-                    derivationsBuilder.toBackwardDerivations();
+            Map<Proposition, List<Proposition>> forwardDerivations
+                    = derivationsBuilder.toForwardDerivations();
+            Map<Proposition, List<Proposition>> backwardDerivations
+                    = derivationsBuilder.toBackwardDerivations();
             Set<String> propositionIds = getPropIds();
             QuerySession qs = getQuerySession();
             if (qs.isCachingEnabled()) {
@@ -547,15 +547,15 @@ final class AbstractionFinder {
                 propositions = props.iterator();
             }
 
-            Map<UniqueId, Proposition> refs =
-                    new HashMap<>();
+            Map<UniqueId, Proposition> refs
+                    = new HashMap<>();
             if (isLoggable(Level.FINER)) {
                 log(Level.FINER, "References for query {0}: {1}",
                         new Object[]{getQuery().getId(), refs});
             }
             List<Proposition> filteredPropositions = // a newly created list
                     extractRequestedPropositions(propositions,
-                    propositionIds, refs);
+                            propositionIds, refs);
             if (isLoggable(Level.FINER)) {
                 String queryId = getQuery().getId();
                 log(Level.FINER, "Proposition ids for query {0}: {1}",
@@ -568,7 +568,7 @@ final class AbstractionFinder {
                         new Object[]{queryId, backwardDerivations});
             }
             try {
-                this.resultsHandler.handleQueryResult(keyId,
+                this.forQuery.handleQueryResult(keyId,
                         filteredPropositions,
                         forwardDerivations, backwardDerivations, refs);
             } catch (QueryResultsHandlerProcessingException ex) {
@@ -583,7 +583,7 @@ final class AbstractionFinder {
         }
     }
 
-    void doFind(Query query, QueryResultsHandler resultsHandler,
+    void doFind(Query query, QueryResultsHandlerFactory resultsHandler,
             QuerySession qs)
             throws FinderException {
         assert resultsHandler != null : "resultsHandler cannot be null";
@@ -700,8 +700,8 @@ final class AbstractionFinder {
 //    }
     private void clearWorkingMemoryCache() {
         if (workingMemoryCache != null) {
-            for (Iterator<StatefulSession> itr =
-                    workingMemoryCache.values().iterator(); itr.hasNext();) {
+            for (Iterator<StatefulSession> itr
+                    = workingMemoryCache.values().iterator(); itr.hasNext();) {
                 try {
                     itr.next().dispose();
                     itr.remove();
@@ -722,26 +722,26 @@ final class AbstractionFinder {
                     final DerivationsBuilder derivationsBuilder,
                     final ExecutionStrategy executionStrategy)
                     throws ProtempaException {
-                final DataStore<String, List<Proposition>> store =
-                        new PropositionStoreCreator(
-                        persistentStoreEnvironment).getPersistentStore();
+                final DataStore<String, List<Proposition>> store
+                        = new PropositionStoreCreator(
+                                persistentStoreEnvironment).getPersistentStore();
                 try {
-                    DataStreamingEventProcessor processor =
-                            new DataStreamingEventProcessor(newDataIterator()) {
-                        @Override
-                        void doProcess(DataStreamingEvent next,
-                                Set<String> propIds)
+                    DataStreamingEventProcessor processor
+                            = new DataStreamingEventProcessor(newDataIterator()) {
+                                @Override
+                                void doProcess(DataStreamingEvent next,
+                                        Set<String> propIds)
                                 throws FinderException {
-                            store.put(next.getKeyId(), next.getData());
-                        }
-                    };
+                                    store.put(next.getKeyId(), next.getData());
+                                }
+                            };
                     processor.process();
                     if (isLoggable(Level.INFO)) {
                         log(Level.INFO,
                                 "Wrote {0} records into store {1} for query {2}",
                                 new Object[]{processor.getCount(),
-                            persistentStoreEnvironment,
-                            getQuery().getId()});
+                                    persistentStoreEnvironment,
+                                    getQuery().getId()});
                     }
                 } finally {
                     store.shutdown();
@@ -760,23 +760,23 @@ final class AbstractionFinder {
                     final DerivationsBuilder derivationsBuilder,
                     final ExecutionStrategy strategy)
                     throws ProtempaException {
-                final DataStore<String, List<Proposition>> propStore =
-                        new PropositionStoreCreator(
-                        propositionStoreEnvironment).getPersistentStore();
+                final DataStore<String, List<Proposition>> propStore
+                        = new PropositionStoreCreator(
+                                propositionStoreEnvironment).getPersistentStore();
                 if (isLoggable(Level.INFO)) {
                     log(Level.INFO,
                             "Found {0} records in store {1} for query {2}",
                             new Object[]{
-                        propStore.size(),
-                        propositionStoreEnvironment,
-                        getQuery().getId()});
+                                propStore.size(),
+                                propositionStoreEnvironment,
+                                getQuery().getId()});
                 }
-                final DataStore<String, WorkingMemory> wmStore =
-                        new WorkingMemoryStoreCreator(null,
-                        workingMemoryStoreEnvironment).getPersistentStore();
-                final DataStore<String, DerivationsBuilder> dbStore =
-                        new DerivationsBuilderStoreCreator(
-                        workingMemoryStoreEnvironment).getPersistentStore();
+                final DataStore<String, WorkingMemory> wmStore
+                        = new WorkingMemoryStoreCreator(null,
+                                workingMemoryStoreEnvironment).getPersistentStore();
+                final DataStore<String, DerivationsBuilder> dbStore
+                        = new DerivationsBuilderStoreCreator(
+                                workingMemoryStoreEnvironment).getPersistentStore();
                 try {
                     new KeyIdProcessor(keysToProcess(keyIds, propStore)) {
                         @Override
@@ -802,89 +802,89 @@ final class AbstractionFinder {
     }
 
     void outputStoredResults(Query query,
-            QueryResultsHandler resultsHandler, QuerySession qs,
+            QueryResultsHandlerFactory resultsHandler, QuerySession qs,
             final String workingMemoryStoreEnvironment) throws FinderException {
         assert query != null : "query cannot be null";
         new ExecutorWithResultsHandler(query, resultsHandler, qs,
                 ExecutorStrategy.STATEFUL) {
-            @Override
-            protected void doExecute(Set<String> keyIds,
-                    final DerivationsBuilder ignored,
-                    final ExecutionStrategy strategy)
+                    @Override
+                    protected void doExecute(Set<String> keyIds,
+                            final DerivationsBuilder ignored,
+                            final ExecutionStrategy strategy)
                     throws ProtempaException {
-                final DataStore<String, DerivationsBuilder> dbStore =
-                        new DerivationsBuilderStoreCreator(
-                        workingMemoryStoreEnvironment).getPersistentStore();
-                DataStore<String, WorkingMemory> wmStore = null;
-                try {
-                    wmStore = new WorkingMemoryStoreCreator(
-                            strategy.getRuleBase(),
-                            workingMemoryStoreEnvironment)
+                        final DataStore<String, DerivationsBuilder> dbStore
+                        = new DerivationsBuilderStoreCreator(
+                                workingMemoryStoreEnvironment).getPersistentStore();
+                        DataStore<String, WorkingMemory> wmStore = null;
+                        try {
+                            wmStore = new WorkingMemoryStoreCreator(
+                                    strategy.getRuleBase(),
+                                    workingMemoryStoreEnvironment)
                             .getPersistentStore();
 
-                    final DataStore<String, WorkingMemory> fwmStore = wmStore;
+                            final DataStore<String, WorkingMemory> fwmStore = wmStore;
 
-                    new KeyIdProcessor(keysToProcess(keyIds, wmStore)) {
-                        @Override
-                        void doProcess(String keyId, Set<String> propIds)
+                            new KeyIdProcessor(keysToProcess(keyIds, wmStore)) {
+                                @Override
+                                void doProcess(String keyId, Set<String> propIds)
                                 throws FinderException {
-                            if (isLoggable(Level.FINEST)) {
-                                log(Level.FINEST,
-                                        "Determining output for key {0} for query {1}",
-                                        new Object[]{keyId, getQuery().getId()});
-                            }
-                            if (fwmStore.containsKey(keyId)) {
-                                WorkingMemory wm = fwmStore.get(keyId);
-                                DerivationsBuilder derivationsBuilder = dbStore.get(keyId);
+                                    if (isLoggable(Level.FINEST)) {
+                                        log(Level.FINEST,
+                                                "Determining output for key {0} for query {1}",
+                                                new Object[]{keyId, getQuery().getId()});
+                                    }
+                                    if (fwmStore.containsKey(keyId)) {
+                                        WorkingMemory wm = fwmStore.get(keyId);
+                                        DerivationsBuilder derivationsBuilder = dbStore.get(keyId);
 
-                                @SuppressWarnings("unchecked")
-                                Iterator<Proposition> propositions =
-                                        wm.iterateObjects();
-                                processResults(propositions,
-                                        derivationsBuilder, keyId);
-                            }
+                                        @SuppressWarnings("unchecked")
+                                        Iterator<Proposition> propositions
+                                        = wm.iterateObjects();
+                                        processResults(propositions,
+                                                derivationsBuilder, keyId);
+                                    }
+                                }
+                            }.process();
+                        } finally {
+                            dbStore.shutdown();
+                            wmStore.shutdown();
                         }
-                    }.process();
-                } finally {
-                    dbStore.shutdown();
-                    wmStore.shutdown();
-                }
-            }
-        }.execute();
+                    }
+                }.execute();
     }
 
     void processAndOutputStoredResults(Query query,
-            QueryResultsHandler resultsHandler,
+            QueryResultsHandlerFactory resultsHandler,
             QuerySession qs, final String propositionStoreEnvironment)
             throws FinderException {
         new ExecutorWithResultsHandler(query, resultsHandler, qs,
                 ExecutorStrategy.STATELESS) {
-            @Override
-            protected void doExecute(Set<String> keyIds,
-                    final DerivationsBuilder derivationsBuilder,
-                    final ExecutionStrategy strategy)
+                    @Override
+                    protected void doExecute(Set<String> keyIds,
+                            final DerivationsBuilder derivationsBuilder,
+                            final ExecutionStrategy strategy)
                     throws ProtempaException {
-                final DataStore<String, List<Proposition>> propStore =
-                        new PropositionStoreCreator(
-                        propositionStoreEnvironment).getPersistentStore();
-                try {
-                    new KeyIdProcessor(keysToProcess(keyIds, propStore)) {
-                        @Override
-                        void doProcess(String keyId, Set<String> propIds)
+                        final DataStore<String, List<Proposition>> propStore
+                        = new PropositionStoreCreator(
+                                propositionStoreEnvironment).getPersistentStore();
+                        try {
+                            new KeyIdProcessor(keysToProcess(keyIds, propStore)) {
+                                @Override
+                                void doProcess(String keyId, Set<String> propIds)
                                 throws FinderException {
-                            if (propStore.containsKey(keyId)) {
-                                Iterator<Proposition> propositions =
-                                        strategy.execute(keyId, propIds,
-                                        propStore.get(keyId), null);
-                                processResults(propositions, keyId);
-                                derivationsBuilder.reset();
-                            }
+                                    if (propStore.containsKey(keyId)) {
+                                        Iterator<Proposition> propositions
+                                        = strategy.execute(keyId, propIds,
+                                                propStore.get(keyId), null);
+                                        processResults(propositions, keyId);
+                                        derivationsBuilder.reset();
+                                    }
+                                }
+                            }.process();
+                        } finally {
+                            propStore.shutdown();
                         }
-                    }.process();
-                } finally {
-                    propStore.shutdown();
-                }
-            }
-        }.execute();
+                    }
+                }.execute();
     }
 }

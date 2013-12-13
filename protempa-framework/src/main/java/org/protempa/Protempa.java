@@ -44,6 +44,7 @@ import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
 import org.protempa.query.handler.QueryResultsHandler;
+import org.protempa.query.handler.QueryResultsHandlerFactory;
 
 /**
  * Main PROTEMPA API.
@@ -283,7 +284,7 @@ public final class Protempa {
      * be <code>null</code>.
      * @throws FinderException if an error occurred during query.
      */
-    public void execute(Query query, QueryResultsHandler resultsHandler)
+    public void execute(Query query, QueryResultsHandlerFactory resultsHandler)
             throws FinderException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
@@ -328,7 +329,7 @@ public final class Protempa {
      * @throws FinderException if PROTEMPA fails to complete for any reason
      */
     public void executeWithPersistence(Query query,
-            QueryResultsHandler resultHandler,
+            QueryResultsHandlerFactory resultHandler,
             String retrievalStoreEnvironment,
             String processStoreName) throws FinderException {
         if (query == null) {
@@ -466,7 +467,7 @@ public final class Protempa {
      * provided to {@link #processResultsAndPersist}.
      * @throws FinderException if the output fails to complete
      */
-    public void outputResults(Query query, QueryResultsHandler resultHandler,
+    public void outputResults(Query query, QueryResultsHandlerFactory resultHandler,
             String workingMemoryEnvironment) throws FinderException {
         outputResults(query, Arrays.asSet(query.getKeyIds()),
                 Arrays.asSet(query.getPropositionIds()), resultHandler,
@@ -498,7 +499,7 @@ public final class Protempa {
      * @throws FinderException if the output fails to complete
      */
     public void outputResults(Query query, Set<String> keyIds,
-            Set<String> propositionIds, QueryResultsHandler resultHandler,
+            Set<String> propositionIds, QueryResultsHandlerFactory resultHandler,
             String workingMemoryStoreEnvironment) throws FinderException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
@@ -536,7 +537,7 @@ public final class Protempa {
      * @throws FinderException if the processing and output fail to complete
      */
     public void processResultsAndOutput(Query query,
-            QueryResultsHandler resultHandler,
+            QueryResultsHandlerFactory resultHandler,
             String propositionStoreEnvironment) throws FinderException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");

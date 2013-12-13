@@ -20,20 +20,19 @@
 package org.protempa.query.handler;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.query.Query;
 
 /**
  *
  * @author Andrew Post
  */
-public abstract class AbstractQueryResultsHandler 
+public abstract class AbstractQueryResultsHandler
         implements QueryResultsHandler {
-    
+
     public class DefaultStatistics implements Statistics {
+
         private final int numberOfKeys;
-        
+
         private DefaultStatistics(int numberOfKeys) {
             if (numberOfKeys < 0) {
                 throw new IllegalArgumentException("Cannot have numberOfKeys < 0");
@@ -45,10 +44,11 @@ public abstract class AbstractQueryResultsHandler
         public int getNumberOfKeys() {
             return numberOfKeys;
         }
-        
+
     }
-    
+
     public class DefaultStatisticsBuilder {
+
         private int numberOfKeys;
 
         public int getNumberOfKeys() {
@@ -58,23 +58,56 @@ public abstract class AbstractQueryResultsHandler
         public void setNumberOfKeys(int numberOfKeys) {
             this.numberOfKeys = numberOfKeys;
         }
-        
+
         public DefaultStatistics toDefaultStatistics() {
             return new DefaultStatistics(this.numberOfKeys);
         }
     }
 
-    @Override
-    public void init(KnowledgeSource knowledgeSource, Query query)
-            throws QueryResultsHandlerInitException {
-    }
+    public abstract class AbstractUsingKnowledgeSource implements UsingKnowledgeSource {
 
-    @Override
-    public void start() throws QueryResultsHandlerProcessingException {
-    }
+        public abstract class AbstractForQuery implements ForQuery {
 
-    @Override
-    public void finish() throws QueryResultsHandlerProcessingException {
+            /**
+             * Returns an empty string array, because this method cannot return
+             * inferred proposition ids.
+             *
+             * @return an empty {@link String} array. Guaranteed not
+             * <code>null</code>.
+             */
+            @Override
+            public String[] getPropositionIdsNeeded() throws QueryResultsHandlerProcessingException {
+                return ArrayUtils.EMPTY_STRING_ARRAY;
+            }
+
+            @Override
+            public void start() throws QueryResultsHandlerProcessingException {
+            }
+
+            @Override
+            public void finish() throws QueryResultsHandlerProcessingException {
+            }
+
+            @Override
+            public void close() throws QueryResultsHandlerCloseException {
+            }
+
+        }
+
+        /**
+         * Is a no-op. Override to provide validation functionality.
+         *
+         * @throws QueryResultsHandlerValidationFailedException
+         * @throws KnowledgeSourceReadException
+         */
+        @Override
+        public void validate() throws QueryResultsHandlerValidationFailedException {
+        }
+
+        @Override
+        public void close() {
+        }
+
     }
 
     @Override
@@ -82,32 +115,8 @@ public abstract class AbstractQueryResultsHandler
     }
 
     /**
-     * Is a no-op. Override to provide validation functionality.
-     * 
-     * @throws QueryResultsHandlerValidationFailedException
-     * @throws KnowledgeSourceReadException 
-     */
-    @Override
-    public void validate() 
-            throws QueryResultsHandlerValidationFailedException,
-            KnowledgeSourceReadException {
-    }
-    
-    /**
-     * Returns an empty string array, because this method cannot return 
-     * inferred proposition ids.
-     * 
-     * @return an empty {@link String} array. Guaranteed not <code>null</code>.
-     */
-    @Override
-    public String[] getPropositionIdsNeeded() 
-            throws KnowledgeSourceReadException {
-        return ArrayUtils.EMPTY_STRING_ARRAY;
-    }
-    
-    /**
      * Default implementation, returns <code>null</code>.
-     * 
+     *
      * @return <code>null</code>.
      * @throws QueryResultsHandlerCollectStatisticsException (the default
      * implementation never throws this exception).

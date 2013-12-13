@@ -24,9 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
-import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;
@@ -39,118 +37,165 @@ import org.protempa.query.Query;
 public final class DeidentifyQueryResultsHandler
         implements QueryResultsHandler {
 
-    private static final long serialVersionUID = 4289223507110468993L;
     private static final ThreadLocal<NumberFormat> disguisedKeyFormat = new ThreadLocal<NumberFormat>() {
         @Override
         protected NumberFormat initialValue() {
             return NumberFormat.getInstance();
         }
     };
-    private boolean keyIdDisguised;
-    private final QueryResultsHandler handler;
-    private final Map<String, String> keyMapper;
-    private int nextDisguisedKey;
 
-    public DeidentifyQueryResultsHandler(QueryResultsHandler handler) {
+    private DeidentifyUsingKnowledgeSource usingKnowledgeSource;
+    private final QueryResultsHandler handler;
+
+    public class DeidentifyUsingKnowledgeSource implements UsingKnowledgeSource {
+
+        private DeidentifyForQuery forQuery;
+        private UsingKnowledgeSource usingKnowledgeSource;
+
+        public class DeidentifyForQuery implements ForQuery {
+
+            private final ForQuery forQuery;
+            private final Map<String, String> keyMapper;
+            private boolean keyIdDisguised;
+            private int nextDisguisedKey;
+
+            /**
+             * Initializes the map returned by {@link #getResultMap()}.
+             */
+            private DeidentifyForQuery(ForQuery forQuery) {
+                this.forQuery = forQuery;
+                this.nextDisguisedKey = 1;
+                this.keyIdDisguised = true;
+                this.keyMapper = new HashMap<>();
+            }
+
+            /**
+             * Returns whether key ids will be disguised. Default is
+             * <code>true</code>.
+             *
+             * @return <code>true</code> or <code>false</code>.
+             */
+            public boolean isKeyIdDisguised() {
+                return keyIdDisguised;
+            }
+
+            /**
+             * Sets whether to disguise key ids.
+             *
+             * @param keyDisguised <code>true</code> or <code>false</code>.
+             */
+            public void setKeyIdDisguised(boolean keyDisguised) {
+                this.keyIdDisguised = keyDisguised;
+            }
+
+            /**
+             * Puts handled keys and propositions into the map returned by
+             * {@link #getResultMap()}.
+             *
+             * @param key a key id {@link String}.
+             * @param propositions a {@link List<Proposition>} of propositions.
+             */
+            @Override
+            public void handleQueryResult(String keyId,
+                    List<Proposition> propositions,
+                    Map<Proposition, List<Proposition>> forwardDerivations,
+                    Map<Proposition, List<Proposition>> backwardDerivations,
+                    Map<UniqueId, Proposition> references)
+                    throws QueryResultsHandlerProcessingException {
+                keyId = disguiseKeyIds(keyId);
+                this.forQuery.handleQueryResult(keyId, propositions, forwardDerivations, backwardDerivations, references);
+            }
+
+            /**
+             * Delegates to the query results handler passed into the
+             * constructor.
+             *
+             * @return an array of proposition id {@link String}s.
+             */
+            @Override
+            public String[] getPropositionIdsNeeded() throws QueryResultsHandlerProcessingException {
+                return this.forQuery.getPropositionIdsNeeded();
+            }
+
+            @Override
+            public void start() throws QueryResultsHandlerProcessingException {
+                this.forQuery.start();
+            }
+
+            @Override
+            public void finish() throws QueryResultsHandlerProcessingException {
+                this.forQuery.finish();
+                this.keyMapper.clear();
+            }
+
+            @Override
+            public void close() throws QueryResultsHandlerCloseException {
+                this.forQuery.close();
+            }
+
+            private String disguiseKeyIds(String keyId) {
+                if (this.keyIdDisguised) {
+                    if (this.keyMapper.containsKey(keyId)) {
+                        keyId = this.keyMapper.get(keyId);
+                    } else {
+                        keyId = disguisedKeyFormat.get().format(nextDisguisedKey++);
+                    }
+                }
+                return keyId;
+            }
+
+        }
+
+        private DeidentifyUsingKnowledgeSource(UsingKnowledgeSource usingKnowledgeSource) {
+            this.usingKnowledgeSource = usingKnowledgeSource;
+        }
+
+        /**
+         * Delegates to the query results handler passed into the constructor.
+         *
+         * @throws QueryResultsHandlerValidationFailedException if the query
+         * results handler passed into the constructor is invalid.
+         */
+        @Override
+        public void validate() throws QueryResultsHandlerValidationFailedException {
+            this.usingKnowledgeSource.validate();
+        }
+
+        @Override
+        public DeidentifyForQuery forQuery(Query query) throws QueryResultsHandlerInitException {
+            this.forQuery = new DeidentifyForQuery(
+                    this.usingKnowledgeSource.forQuery(query));
+            return this.forQuery;
+        }
+
+        @Override
+        public void close() throws QueryResultsHandlerCloseException {
+            this.usingKnowledgeSource.close();
+        }
+
+    }
+
+    DeidentifyQueryResultsHandler(QueryResultsHandler handler) {
         if (handler == null) {
             throw new IllegalArgumentException("handler cannot be null");
         }
         this.handler = handler;
-        this.keyMapper = new HashMap<>();
-        this.keyIdDisguised = true;
-        this.nextDisguisedKey = 1;
-    }
-
-    /**
-     * Returns whether key ids will be disguised. Default is
-     * <code>true</code>.
-     *
-     * @return <code>true</code> or <code>false</code>.
-     */
-    public boolean isKeyIdDisguised() {
-        return keyIdDisguised;
-    }
-
-    /**
-     * Sets whether to disguise key ids.
-     *
-     * @param keyDisguised <code>true</code> or <code>false</code>.
-     */
-    public void setKeyIdDisguised(boolean keyDisguised) {
-        this.keyIdDisguised = keyDisguised;
     }
 
     @Override
-    public void handleQueryResult(String keyId, List<Proposition> propositions,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueId, Proposition> references)
-            throws QueryResultsHandlerProcessingException {
-        keyId = disguiseKeyIds(keyId);
-        this.handler.handleQueryResult(keyId, propositions, forwardDerivations,
-                backwardDerivations, references);
+    public DeidentifyUsingKnowledgeSource usingKnowledgeSource(KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+        return new DeidentifyUsingKnowledgeSource(
+                this.handler.usingKnowledgeSource(knowledgeSource));
     }
 
     @Override
-    public void init(KnowledgeSource knowledgeSource, Query query) 
-            throws QueryResultsHandlerInitException {
-        this.handler.init(knowledgeSource, query);
-        this.nextDisguisedKey = 1;
-    }
-
-    @Override
-    public void finish() throws QueryResultsHandlerProcessingException {
-        this.handler.finish();
-        this.keyMapper.clear();
-    }
-
-    @Override
-    public Statistics collectStatistics() 
+    public Statistics collectStatistics()
             throws QueryResultsHandlerCollectStatisticsException {
         return this.handler.collectStatistics();
     }
-    
-    private String disguiseKeyIds(String keyId) {
-        if (this.keyIdDisguised) {
-            if (this.keyMapper.containsKey(keyId)) {
-                keyId = this.keyMapper.get(keyId);
-            } else {
-                keyId = disguisedKeyFormat.get().format(nextDisguisedKey++);
-            }
-        }
-        return keyId;
-    }
-
-    /**
-     * Delegates to the query results handler passed into the constructor.
-     * 
-     * @throws QueryResultsHandlerValidationFailedException if the query 
-     * results handler passed into the constructor is invalid.
-     */
-    @Override
-    public void validate() throws QueryResultsHandlerValidationFailedException, 
-            KnowledgeSourceReadException {
-        this.handler.validate();
-    }
-
-    /**
-     * Delegates to the query results handler passed into the constructor.
-     *
-     * @return an array of proposition id {@link String}s.
-     */
-    @Override
-    public String[] getPropositionIdsNeeded() 
-            throws KnowledgeSourceReadException {
-        return this.handler.getPropositionIdsNeeded();
-    }
 
     @Override
-    public void start() throws QueryResultsHandlerProcessingException {
-        this.handler.start();
-    }
-
-    @Override
-    public void  close() throws QueryResultsHandlerCloseException {
+    public void close() throws QueryResultsHandlerCloseException {
         this.handler.close();
     }
 }

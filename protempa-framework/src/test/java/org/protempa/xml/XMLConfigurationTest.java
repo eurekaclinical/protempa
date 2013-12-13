@@ -38,6 +38,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import junit.framework.TestCase;
+import static org.junit.Assert.assertArrayEquals;
 
 import org.protempa.AlgorithmSource;
 import org.protempa.AlgorithmSourceImpl;
@@ -193,9 +194,12 @@ public class XMLConfigurationTest extends TestCase {
         XMLConfiguration.writeTableQueryResultsHandlerAsXML(resultsHandler, file, true);
         checkXMLValid(file, "protempa_tableQueryResultsHandler.xsd");
         TableQueryResultsHandler reconstitutedResultsHandler = XMLConfiguration.readTableQueryResultsHandlerAsXML(file, dataWriter);
-        assertTrue("Deserialized query is equal to the original query", reconstitutedResultsHandler.equals(resultsHandler));
+        assertEquals("Delimiter is the same", reconstitutedResultsHandler.getColumnDelimiter(), resultsHandler.getColumnDelimiter());
+        assertArrayEquals("Column specs are the same", reconstitutedResultsHandler.getColumnSpecs(), resultsHandler.getColumnSpecs());
+        assertArrayEquals("Row proposition ids are the same", reconstitutedResultsHandler.getRowPropositionIds(), resultsHandler.getRowPropositionIds());
+        assertEquals("headerWritten is the same", reconstitutedResultsHandler.isHeaderWritten(), resultsHandler.isHeaderWritten());
     }
-
+    
     private TableQueryResultsHandler createTestTableResultsQueryHandler(BufferedWriter dataWriter) {
         String[] propIds1 = {"p1", "p2", "p3", "p4"};
         String[] propIds2 = {"q1", "q2", "q3"};

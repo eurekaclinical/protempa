@@ -23,9 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.ArrayUtils;
-
-import org.protempa.FinderException;
 import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
@@ -36,62 +33,84 @@ import org.protempa.query.Query;
  * that may be accessed later for post-processing. As each call to
  * handleQueryResult is made, each key-proposition list argument pair is added
  * to the map.
- * 
+ *
  * @author Michel Mansour
  *
  */
 public class MappingQueryResultsHandler extends AbstractQueryResultsHandler {
 
-    private Map<String, List<Proposition>> resultMap;
+    private MappingUsingKnowledgeSource usingKnowledgeSource;
 
-//	private QueryResults queryResults;
+    public class MappingUsingKnowledgeSource extends AbstractUsingKnowledgeSource {
 
-    /**
-     * Gets the map of query results that have been handled.
-     * 
-     * @return the resultMap
-     */
-    public final Map<String, List<Proposition>> getResultMap() {
-        return Collections.unmodifiableMap(resultMap);
-    }
+        private MappingForQuery forQuery;
 
-    /**
-     * @return the queryResults
-     */
-//	public QueryResults getQueryResults() {
-//		if (queryResults == null) {
-//			return new QueryResults(resultMap);
-//		}
-//		return queryResults;
-//	}
+        public class MappingForQuery extends AbstractForQuery {
 
-    /**
-     * Initializes the map returned by {@link #getResultMap()}.
-     */
-    @Override
-    public void init(KnowledgeSource knowledgeSource, Query query) {
-        this.resultMap = new HashMap<>();
-    }
+            private final Map<String, List<Proposition>> resultMap;
 
-    /**
-     * Puts handled keys and propositions into the map returned by
-     * {@link #getResultMap()}.
-     *
-     * @param key a key id {@link String}.
-     * @param propositions a {@link List<Proposition>} of propositions.
-     */
-    @Override
-    public void handleQueryResult(String key, List<Proposition> propositions,
-            Map<Proposition,List<Proposition>> forwardDerivations,
-            Map<Proposition,List<Proposition>> backwardDerivations,
-            Map<UniqueId, Proposition> references) {
-        resultMap.put(key, propositions);
+            /**
+             * Initializes the map returned by {@link #getResultMap()}.
+             */
+            private MappingForQuery(Query query) {
+                this.resultMap = new HashMap<>();
+            }
+
+            /**
+             * Puts handled keys and propositions into the map returned by
+             * {@link #getResultMap()}.
+             *
+             * @param key a key id {@link String}.
+             * @param propositions a {@link List<Proposition>} of propositions.
+             */
+            @Override
+            public void handleQueryResult(String keyId, 
+                    List<Proposition> propositions, 
+                    Map<Proposition, List<Proposition>> forwardDerivations, 
+                    Map<Proposition, List<Proposition>> backwardDerivations, 
+                    Map<UniqueId, Proposition> references) 
+                    throws QueryResultsHandlerProcessingException {
+                resultMap.put(keyId, propositions);
+            }
+
+            /**
+             * Gets the map of query results that have been handled.
+             *
+             * @return the resultMap
+             */
+            public final Map<String, List<Proposition>> getResultMap() {
+                return Collections.unmodifiableMap(resultMap);
+            }
+
+        }
+
+        private MappingUsingKnowledgeSource(KnowledgeSource knowledgeSource) {
+
+        }
+        
+        @Override
+        public MappingForQuery forQuery(Query query) throws QueryResultsHandlerInitException {
+            this.forQuery = new MappingForQuery(query);
+            return this.forQuery;
+        }
+
     }
 
     @Override
     public Statistics collectStatistics() {
         DefaultStatisticsBuilder builder = new DefaultStatisticsBuilder();
-        builder.setNumberOfKeys(this.resultMap.size());
+        if (this.usingKnowledgeSource != null) {
+            if (this.usingKnowledgeSource.forQuery != null) {
+                builder.setNumberOfKeys(
+                        this.usingKnowledgeSource.forQuery.resultMap.size());
+            }
+        }
         return builder.toDefaultStatistics();
+    }
+
+    @Override
+    public MappingUsingKnowledgeSource usingKnowledgeSource(KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+        this.usingKnowledgeSource = new MappingUsingKnowledgeSource(knowledgeSource);
+        return this.usingKnowledgeSource;
     }
 }

@@ -41,15 +41,183 @@ import org.protempa.query.handler.table.TableColumnSpecValidationFailedException
  *
  * @author Andrew Post
  */
-public final class TableQueryResultsHandler 
+public final class TableQueryResultsHandler
         extends AbstractQueryResultsHandler {
+
+    public class TableUsingKnowledgeSource extends AbstractUsingKnowledgeSource {
+
+        private KnowledgeSource knowledgeSource;
+
+        public class TableForQuery extends AbstractForQuery {
+
+            private TableForQuery(Query query) {
+
+            }
+
+            @Override
+            public void start() throws QueryResultsHandlerProcessingException {
+                Logger logger = Util.logger();
+
+                if (headerWritten) {
+                    try {
+                        List<String> columnNames = new ArrayList<>();
+                        columnNames.add("KeyId");
+                        for (TableColumnSpec columnSpec : columnSpecs) {
+                            logger.log(Level.FINE, "Processing columnSpec type {0}",
+                                    columnSpec.getClass().getName());
+                            String[] colNames
+                                    = columnSpec.columnNames(knowledgeSource);
+                            assert colNames.length > 0 :
+                                    "colNames must have length > 0";
+
+                            for (int index = 0; index < colNames.length; index++) {
+                                String colName = colNames[index];
+                                if (replace.containsKey(colName)) {
+                                    colNames[index] = replace.get(colName);
+                                }
+                            }
+
+                            if (logger.isLoggable(Level.FINE)) {
+                                logger.log(
+                                        Level.FINE,
+                                        "Got the following columns for proposition {0}: {1}",
+                                        new Object[]{StringUtils.join(rowPropositionIds, ", "),
+                                            StringUtils.join(colNames, ", ")});
+                            }
+                            for (String colName : colNames) {
+                                columnNames.add(colName);
+                            }
+                        }
+                        StringUtil.escapeAndWriteDelimitedColumns(columnNames,
+                                columnDelimiter, out);
+                        out.newLine();
+                    } catch (KnowledgeSourceReadException ex1) {
+                        throw new QueryResultsHandlerProcessingException("Error reading knowledge source", ex1);
+                    } catch (IOException ex) {
+                        throw new QueryResultsHandlerProcessingException("Could not write header", ex);
+                    }
+                }
+
+            }
+
+            @Override
+            public void handleQueryResult(String keyId, List<Proposition> propositions,
+                    Map<Proposition, List<Proposition>> forwardDerivations,
+                    Map<Proposition, List<Proposition>> backwardDerivations,
+                    Map<UniqueId, Proposition> references)
+                    throws QueryResultsHandlerProcessingException {
+                int n = columnSpecs.length;
+                Util.logger().log(Level.FINER, "Processing keyId {0}", keyId);
+                for (Proposition prop : propositions) {
+                    if (!org.arp.javautil.arrays.Arrays.contains(
+                            rowPropositionIds, prop.getId())) {
+                        continue;
+                    }
+                    try {
+                        StringUtil.escapeAndWriteDelimitedColumn(keyId,
+                                columnDelimiter, out);
+                        if (n > 0) {
+                            out.write(columnDelimiter);
+                        }
+                        for (int i = 0; i < n; i++) {
+                            TableColumnSpec columnSpec = columnSpecs[i];
+                            columnSpec.columnValues(keyId, prop,
+                                    forwardDerivations, backwardDerivations,
+                                    references, knowledgeSource,
+                                    replace, columnDelimiter, out);
+                            if (i < n - 1) {
+                                out.write(columnDelimiter);
+                            } else {
+                                out.newLine();
+                            }
+
+                        }
+                    } catch (KnowledgeSourceReadException ex1) {
+                        throw new QueryResultsHandlerProcessingException(
+                                "Could not read knowledge source", ex1);
+                    } catch (IOException ex) {
+                        throw new QueryResultsHandlerProcessingException(
+                                "Could not write row" + ex);
+                    }
+                }
+            }
+
+            /**
+             * Infers a list of propositions to populate all of the specified
+             * columns.
+             *
+             * @return an array of proposition id {@link String}s.
+             */
+            @Override
+            public String[] getPropositionIdsNeeded() throws QueryResultsHandlerProcessingException {
+                if (inferPropositionIdsNeeded) {
+                    Set<String> result = new HashSet<>();
+                    org.arp.javautil.arrays.Arrays.addAll(result,
+                            rowPropositionIds);
+                    for (TableColumnSpec columnSpec : columnSpecs) {
+                        String[] inferredPropIds;
+                        try {
+                            inferredPropIds = columnSpec.getInferredPropositionIds(
+                                    knowledgeSource, rowPropositionIds);
+                        } catch (KnowledgeSourceReadException ex) {
+                            throw new QueryResultsHandlerProcessingException("Error getting proposition ids needed", ex);
+                        }
+                        org.arp.javautil.arrays.Arrays.addAll(result, inferredPropIds);
+                    }
+                    return result.toArray(new String[result.size()]);
+                } else {
+                    return ArrayUtils.EMPTY_STRING_ARRAY;
+                }
+            }
+
+        }
+
+        private TableUsingKnowledgeSource(KnowledgeSource knowledgeSource) {
+            this.knowledgeSource = knowledgeSource;
+        }
+
+        @Override
+        public void validate()
+                throws QueryResultsHandlerValidationFailedException {
+            List<String> invalidPropIds = new ArrayList<>();
+            try {
+                for (String propId : rowPropositionIds) {
+                    if (!knowledgeSource.hasPropositionDefinition(propId)) {
+                        invalidPropIds.add(propId);
+                    }
+                }
+                if (!invalidPropIds.isEmpty()) {
+                    throw new QueryResultsHandlerValidationFailedException(
+                            "Invalid row proposition id(s): "
+                            + StringUtils.join(invalidPropIds, ", "));
+                }
+                int i = 1;
+                for (TableColumnSpec columnSpec : columnSpecs) {
+                    try {
+                        columnSpec.validate(knowledgeSource);
+                    } catch (TableColumnSpecValidationFailedException ex) {
+                        throw new QueryResultsHandlerValidationFailedException(
+                                "Validation of column spec " + i + " failed", ex);
+                    }
+                    i++;
+                }
+            } catch (KnowledgeSourceReadException ex) {
+                throw new QueryResultsHandlerValidationFailedException("Error during validation", ex);
+            }
+        }
+
+        @Override
+        public TableForQuery forQuery(Query query) throws QueryResultsHandlerInitException {
+            return new TableForQuery(query);
+        }
+
+    }
 
     private static final long serialVersionUID = -1503401944818776787L;
     private final char columnDelimiter;
     private final String[] rowPropositionIds;
     private final TableColumnSpec[] columnSpecs;
     private final boolean headerWritten;
-    private KnowledgeSource knowledgeSource;
     private final BufferedWriter out;
     private final Map<String, String> replace;
     private final boolean inferPropositionIdsNeeded;
@@ -77,12 +245,6 @@ public final class TableQueryResultsHandler
         this.inferPropositionIdsNeeded = inferPropositionIdsNeeded;
     }
 
-    private void checkConstructorArgs(String[] rowPropositionIds,
-            TableColumnSpec[] columnSpecs) {
-        ProtempaUtil.checkArray(rowPropositionIds, "rowPropositionIds");
-        ProtempaUtil.checkArray(columnSpecs, "columnSpecs");
-    }
-
     public String[] getRowPropositionIds() {
         return this.rowPropositionIds.clone();
     }
@@ -100,184 +262,14 @@ public final class TableQueryResultsHandler
     }
 
     @Override
-    public void init(KnowledgeSource knowledgeSource, Query query) {
-        this.knowledgeSource = knowledgeSource;
-    }
-    
-    @Override
-    public void start() throws QueryResultsHandlerProcessingException {
-        Logger logger = Util.logger();
-        
-        if (this.headerWritten) {
-            try {
-                List<String> columnNames = new ArrayList<>();
-                columnNames.add("KeyId");
-                for (TableColumnSpec columnSpec : this.columnSpecs) {
-                    logger.log(Level.FINE, "Processing columnSpec type {0}",
-                            columnSpec.getClass().getName());
-                    String[] colNames =
-                            columnSpec.columnNames(knowledgeSource);
-                    assert colNames.length > 0 :
-                            "colNames must have length > 0";
-
-                    for (int index = 0; index < colNames.length; index++) {
-                        String colName = colNames[index];
-                        if (this.replace.containsKey(colName)) {
-                            colNames[index] = this.replace.get(colName);
-                        }
-                    }
-
-                    if (logger.isLoggable(Level.FINE)) {
-                        logger.log(
-                                Level.FINE,
-                                "Got the following columns for proposition {0}: {1}",
-                                new Object[]{StringUtils.join(this.rowPropositionIds, ", "),
-                                    StringUtils.join(colNames, ", ")});
-                    }
-                    for (String colName : colNames) {
-                        columnNames.add(colName);
-                    }
-                }
-                StringUtil.escapeAndWriteDelimitedColumns(columnNames,
-                        this.columnDelimiter, this.out);
-                this.out.newLine();
-            } catch (KnowledgeSourceReadException ex1) {
-                throw new QueryResultsHandlerProcessingException("Error reading knowledge source", ex1);
-            } catch (IOException ex) {
-                throw new QueryResultsHandlerProcessingException("Could not write header", ex);
-            }
-        }
-
+    public TableUsingKnowledgeSource usingKnowledgeSource(KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+        return new TableUsingKnowledgeSource(knowledgeSource);
     }
 
-    @Override
-    public void handleQueryResult(String keyId, List<Proposition> propositions,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
-            Map<UniqueId, Proposition> references)
-            throws QueryResultsHandlerProcessingException {
-        int n = this.columnSpecs.length;
-        Util.logger().log(Level.FINER, "Processing keyId {0}", keyId);
-        for (Proposition prop : propositions) {
-            if (!org.arp.javautil.arrays.Arrays.contains(
-                    this.rowPropositionIds, prop.getId())) {
-                continue;
-            }
-            try {
-                StringUtil.escapeAndWriteDelimitedColumn(keyId,
-                        this.columnDelimiter, this.out);
-                if (n > 0) {
-                    this.out.write(this.columnDelimiter);
-                }
-                for (int i = 0; i < n; i++) {
-                    TableColumnSpec columnSpec = this.columnSpecs[i];
-                    columnSpec.columnValues(keyId, prop,
-                            forwardDerivations, backwardDerivations,
-                            references, this.knowledgeSource,
-                            this.replace, this.columnDelimiter, this.out);
-                    if (i < n - 1) {
-                        this.out.write(this.columnDelimiter);
-                    } else {
-                        this.out.newLine();
-                    }
-
-                }
-            } catch (KnowledgeSourceReadException ex1) {
-                throw new QueryResultsHandlerProcessingException(
-                        "Could not read knowledge source", ex1);
-            } catch (IOException ex) {
-                throw new QueryResultsHandlerProcessingException(
-                        "Could not write row" + ex);
-            }
-        }
+    private void checkConstructorArgs(String[] rowPropositionIds,
+            TableColumnSpec[] columnSpecs) {
+        ProtempaUtil.checkArray(rowPropositionIds, "rowPropositionIds");
+        ProtempaUtil.checkArray(columnSpecs, "columnSpecs");
     }
 
-    @Override
-    public void validate()
-            throws QueryResultsHandlerValidationFailedException,
-            KnowledgeSourceReadException {
-        List<String> invalidPropIds = new ArrayList<>();
-        for (String propId : this.rowPropositionIds) {
-            if (!knowledgeSource.hasPropositionDefinition(propId)) {
-                invalidPropIds.add(propId);
-            }
-        }
-        if (!invalidPropIds.isEmpty()) {
-            throw new QueryResultsHandlerValidationFailedException(
-                    "Invalid row proposition id(s): "
-                    + StringUtils.join(invalidPropIds, ", "));
-        }
-        int i = 1;
-        for (TableColumnSpec columnSpec : this.columnSpecs) {
-            try {
-                columnSpec.validate(knowledgeSource);
-            } catch (TableColumnSpecValidationFailedException ex) {
-                throw new QueryResultsHandlerValidationFailedException(
-                        "Validation of column spec " + i + " failed", ex);
-            }
-            i++;
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + columnDelimiter;
-        result = prime * result + Arrays.hashCode(columnSpecs);
-        result = prime * result + (headerWritten ? 1231 : 1237);
-        result = prime * result + Arrays.hashCode(rowPropositionIds);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        TableQueryResultsHandler other = (TableQueryResultsHandler) obj;
-        if (columnDelimiter != other.columnDelimiter) {
-            return false;
-        }
-        if (!Arrays.equals(columnSpecs, other.columnSpecs)) {
-            return false;
-        }
-        if (headerWritten != other.headerWritten) {
-            return false;
-        }
-        if (!Arrays.equals(rowPropositionIds, other.rowPropositionIds)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Infers a list of propositions to populate all of the specified columns.
-     *
-     * @return an array of proposition id {@link String}s.
-     */
-    @Override
-    public String[] getPropositionIdsNeeded() 
-            throws KnowledgeSourceReadException {
-        if (this.inferPropositionIdsNeeded) {
-            Set<String> result = new HashSet<>();
-            org.arp.javautil.arrays.Arrays.addAll(result, 
-                    this.rowPropositionIds);
-            for (TableColumnSpec columnSpec : this.columnSpecs) {
-                String[] inferredPropIds = 
-                        columnSpec.getInferredPropositionIds(
-                        this.knowledgeSource, this.rowPropositionIds);
-                org.arp.javautil.arrays.Arrays.addAll(result, inferredPropIds);
-            }
-            return result.toArray(new String[result.size()]);
-        } else {
-            return ArrayUtils.EMPTY_STRING_ARRAY;
-        }
-    }
 }
