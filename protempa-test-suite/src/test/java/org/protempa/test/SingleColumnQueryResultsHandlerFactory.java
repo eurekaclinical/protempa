@@ -21,15 +21,19 @@ package org.protempa.test;
  */
 
 import java.io.Writer;
+import org.protempa.KnowledgeSource;
+import org.protempa.query.Query;
 import org.protempa.query.handler.QueryResultsHandler;
 import org.protempa.query.handler.QueryResultsHandlerFactory;
 import org.protempa.query.handler.QueryResultsHandlerInitException;
+import org.protempa.query.handler.StatisticsCollector;
+import org.protempa.query.handler.StatisticsCollectorInitException;
 
 /**
  *
  * @author Andrew Post
  */
-public class SingleColumnQueryResultsHandlerFactory implements QueryResultsHandlerFactory {
+public final class SingleColumnQueryResultsHandlerFactory implements QueryResultsHandlerFactory {
     private final Writer writer;
     
     SingleColumnQueryResultsHandlerFactory(Writer writer) {
@@ -37,8 +41,13 @@ public class SingleColumnQueryResultsHandlerFactory implements QueryResultsHandl
     }
 
     @Override
-    public QueryResultsHandler getInstance() throws QueryResultsHandlerInitException {
+    public QueryResultsHandler getInstance(Query query, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
         return new SingleColumnQueryResultsHandler(writer);
+    }
+
+    @Override
+    public StatisticsCollector getStatisticsCollector() throws StatisticsCollectorInitException {
+        return null;
     }
     
 }

@@ -19,33 +19,28 @@
  */
 package org.protempa.query.handler;
 
-import org.apache.commons.lang3.ArrayUtils;
+import org.protempa.ProtempaException;
 
 /**
- *
+ * Thrown if an error occurs during collection of data statistics.
+ * 
  * @author Andrew Post
  */
-public abstract class AbstractQueryResultsHandler
-        implements QueryResultsHandler {
+public class CollectStatisticsException extends ProtempaException {
+
+    public CollectStatisticsException() {
+    }
+
+    public CollectStatisticsException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public CollectStatisticsException(String message) {
+        super(message);
+    }
+
+    public CollectStatisticsException(Throwable cause) {
+        super(cause);
+    }
     
-    @Override
-    public void validate() throws QueryResultsHandlerValidationFailedException {
-    }
-
-    @Override
-    public String[] getPropositionIdsNeeded() throws QueryResultsHandlerProcessingException {
-        return ArrayUtils.EMPTY_STRING_ARRAY;
-    }
-
-    @Override
-    public void start() throws QueryResultsHandlerProcessingException {
-    }
-
-    @Override
-    public void finish() throws QueryResultsHandlerProcessingException {
-    }
-
-    @Override
-    public void close() throws QueryResultsHandlerCloseException {
-    }
 }

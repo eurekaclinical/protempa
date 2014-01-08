@@ -29,12 +29,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.arp.javautil.string.StringUtil;
-import org.protempa.KnowledgeSource;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.visitor.AbstractPropositionCheckedVisitor;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.Parameter;
@@ -42,7 +39,7 @@ import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.UniqueId;
-import org.protempa.query.Query;
+import org.protempa.proposition.visitor.AbstractPropositionCheckedVisitor;
 
 /**
  * An implementation of QueryResultsHandler providing functionality for writing
@@ -51,88 +48,11 @@ import org.protempa.query.Query;
  * @author Michel Mansour
  *
  */
-public class TabDelimQueryResultsHandler extends AbstractQueryResultsHandler {
-
+public final class TabDelimQueryResultsHandler extends AbstractQueryResultsHandler {
     private static final char COLUMN_DELIMITER = '\t';
-    private final BufferedWriter writer;
     private final List<Comparator<Proposition>> comparator;
     private final boolean includeDerived;
-
-    public class TabDelimUsingKnowledgeSource extends AbstractUsingKnowledgeSource {
-
-        public class TabDelimForQuery extends AbstractForQuery {
-
-            private final TabDelimHandlerPropositionVisitor visitor;
-
-            private TabDelimForQuery(Query query) {
-                this.visitor = new TabDelimHandlerPropositionVisitor(writer);
-
-            }
-
-            /**
-             * Writes a keys worth of data in tab delimited format optionally
-             * sorted.
-             *
-             * @param key a key id {@link String}.
-             * @param propositions a {@link List<Proposition>}.
-             * @throws QueryResultsHandlerProcessingException if an error
-             * occurred writing to the specified file, output stream or writer.
-             */
-            @Override
-            public void handleQueryResult(String key, List<Proposition> propositions,
-                    Map<Proposition, List<Proposition>> forwardDerivations,
-                    Map<Proposition, List<Proposition>> backwardDerivations,
-                    Map<UniqueId, Proposition> references)
-                    throws QueryResultsHandlerProcessingException {
-                Set<Proposition> propositionsAsSet = new HashSet<>();
-                addDerived(propositions, forwardDerivations,
-                        backwardDerivations, propositionsAsSet);
-                List<Proposition> propositionsCopy
-                        = new ArrayList<>(propositionsAsSet);
-                for (Comparator<Proposition> c : comparator) {
-                    Collections.sort(propositionsCopy, c);
-                }
-                this.visitor.setKeyId(key);
-                try {
-                    this.visitor.visit(propositionsCopy);
-                } catch (TabDelimHandlerProtempaException pe) {
-                    throw new QueryResultsHandlerProcessingException(pe);
-                } catch (ProtempaException pe) {
-                    throw new AssertionError(pe);
-                }
-            }
-
-            private void addDerived(List<Proposition> propositions,
-                    Map<Proposition, List<Proposition>> forwardDerivations,
-                    Map<Proposition, List<Proposition>> backwardDerivations,
-                    Set<Proposition> propositionsAsSet) {
-                List<Proposition> derivedProps = new ArrayList<>();
-                for (Proposition prop : propositions) {
-                    boolean added = propositionsAsSet.add(prop);
-                    if (added && includeDerived) {
-                        derivedProps.addAll(forwardDerivations.get(prop));
-                        derivedProps.addAll(backwardDerivations.get(prop));
-                        if (derivedProps != null) {
-                            addDerived(derivedProps, forwardDerivations,
-                                    backwardDerivations, propositionsAsSet);
-                        }
-                        derivedProps.clear();
-                    }
-                }
-            }
-
-        }
-
-        private TabDelimUsingKnowledgeSource(KnowledgeSource knowledgeSource) {
-
-        }
-
-        @Override
-        public TabDelimForQuery forQuery(Query query) throws QueryResultsHandlerInitException {
-            return new TabDelimForQuery(query);
-        }
-
-    }
+    private final TabDelimHandlerPropositionVisitor visitor;
 
     /**
      * Instantiates this handler to write to a {@link Writer}. No sorting will
@@ -163,10 +83,10 @@ public class TabDelimQueryResultsHandler extends AbstractQueryResultsHandler {
         this(out, comparator, false);
     }
 
-    public TabDelimQueryResultsHandler(BufferedWriter out,
+    public TabDelimQueryResultsHandler(BufferedWriter writer,
             List<? extends Comparator<Proposition>> comparator,
             boolean includeDerived) {
-        this.writer = out;
+        this.visitor = new TabDelimHandlerPropositionVisitor(writer);
         this.includeDerived = includeDerived;
         if (comparator == null) {
             this.comparator = Collections.emptyList();
@@ -176,11 +96,46 @@ public class TabDelimQueryResultsHandler extends AbstractQueryResultsHandler {
         }
     }
 
+    /**
+     * Writes a keys worth of data in tab delimited format optionally
+     * sorted.
+     *
+     * @param key a key id {@link String}.
+     * @param propositions a {@link List<Proposition>}.
+     * @throws QueryResultsHandlerProcessingException if an error
+     * occurred writing to the specified file, output stream or writer.
+     */
     @Override
-    public TabDelimUsingKnowledgeSource usingKnowledgeSource(KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
-        return new TabDelimUsingKnowledgeSource(knowledgeSource);
+    public void handleQueryResult(String key, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
+        Set<Proposition> propositionsAsSet = new HashSet<>();
+        addDerived(propositions, forwardDerivations, backwardDerivations, propositionsAsSet);
+        List<Proposition> propositionsCopy = new ArrayList<>(propositionsAsSet);
+        for (Comparator<Proposition> c : this.comparator) {
+            Collections.sort(propositionsCopy, c);
+        }
+        this.visitor.setKeyId(key);
+        try {
+            this.visitor.visit(propositionsCopy);
+        } catch (TabDelimHandlerProtempaException pe) {
+            throw new QueryResultsHandlerProcessingException(pe);
+        } catch (ProtempaException pe) {
+            throw new AssertionError(pe);
+        }
     }
 
+    private void addDerived(List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Set<Proposition> propositionsAsSet) {
+        List<Proposition> derivedProps = new ArrayList<>();
+        for (Proposition prop : propositions) {
+            boolean added = propositionsAsSet.add(prop);
+            if (added && this.includeDerived) {
+                derivedProps.addAll(forwardDerivations.get(prop));
+                derivedProps.addAll(backwardDerivations.get(prop));
+                addDerived(derivedProps, forwardDerivations, backwardDerivations, propositionsAsSet);
+                derivedProps.clear();
+            }
+        }
+    }
+    
     private final static class TabDelimHandlerProtempaException
             extends ProtempaException {
 
@@ -295,4 +250,6 @@ public class TabDelimQueryResultsHandler extends AbstractQueryResultsHandler {
             }
         }
     }
+
+    
 }

@@ -1,5 +1,8 @@
 package org.protempa.query.handler;
 
+import org.protempa.KnowledgeSource;
+import org.protempa.query.Query;
+
 /*
  * #%L
  * Protempa Framework
@@ -32,8 +35,13 @@ public class DeidentifyQueryResultsHandlerFactory implements QueryResultsHandler
     }
 
     @Override
-    public QueryResultsHandler getInstance() throws QueryResultsHandlerInitException {
-       return this.factory.getInstance();
+    public QueryResultsHandler getInstance(Query query, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+       return new DeidentifyQueryResultsHandler(this.factory.getInstance(query, knowledgeSource));
+    }
+
+    @Override
+    public StatisticsCollector getStatisticsCollector() throws StatisticsCollectorInitException {
+        return this.factory.getStatisticsCollector();
     }
     
 }

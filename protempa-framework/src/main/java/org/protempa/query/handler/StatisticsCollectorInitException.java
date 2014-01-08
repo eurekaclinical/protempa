@@ -22,24 +22,23 @@ package org.protempa.query.handler;
 import org.protempa.ProtempaException;
 
 /**
- * Thrown if an error occurs during collection of data statistics.
- * 
+ *
  * @author Andrew Post
  */
-public class QueryResultsHandlerCollectStatisticsException extends ProtempaException {
+public class StatisticsCollectorInitException extends ProtempaException {
 
-    public QueryResultsHandlerCollectStatisticsException() {
+    public StatisticsCollectorInitException() {
     }
 
-    public QueryResultsHandlerCollectStatisticsException(String message, Throwable cause) {
+    public StatisticsCollectorInitException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public QueryResultsHandlerCollectStatisticsException(String message) {
+    public StatisticsCollectorInitException(String message) {
         super(message);
     }
 
-    public QueryResultsHandlerCollectStatisticsException(Throwable cause) {
+    public StatisticsCollectorInitException(Throwable cause) {
         super(cause);
     }
     

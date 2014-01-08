@@ -1,13 +1,10 @@
 package org.protempa.query.handler;
 
-import org.protempa.KnowledgeSource;
-import org.protempa.query.Query;
-
 /*
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2014 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,21 +21,21 @@ import org.protempa.query.Query;
  */
 
 /**
- *
+ * For query results handlers that implement statistics collection.
+ * 
  * @author Andrew Post
  */
-public final class MappingQueryResultsHandlerFactory implements QueryResultsHandlerFactory {
+public interface StatisticsCollector {
     
-    MappingQueryResultsHandlerFactory() {}
-
-    @Override
-    public QueryResultsHandler getInstance(Query query, KnowledgeSource knowledgeSource) {
-        return new MappingQueryResultsHandler();
-    }
-
-    @Override
-    public StatisticsCollector getStatisticsCollector() throws StatisticsCollectorInitException {
-        return new MappingQueryResultsHandler();
-    }
-    
+    /**
+     * Collects statistics on the dataset specified in the constructor. This
+     * method can be called any time.
+     *
+     * @return Returns various statistics about the data in the dataset
+     * previously written out. If <code>null</code>, statistics are not
+     * supported by this query results handler.
+     * @throws CollectStatisticsException if statistics
+     * collection fails for some reason.
+     */
+    Statistics collectStatistics() throws CollectStatisticsException;
 }

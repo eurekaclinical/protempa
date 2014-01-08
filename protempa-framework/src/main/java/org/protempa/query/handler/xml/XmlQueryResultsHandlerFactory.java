@@ -22,9 +22,14 @@ package org.protempa.query.handler.xml;
 
 import java.io.Writer;
 import java.util.Map;
+import org.protempa.KnowledgeSource;
+import org.protempa.query.Query;
+import org.protempa.query.handler.CollectStatisticsException;
 import org.protempa.query.handler.QueryResultsHandler;
 import org.protempa.query.handler.QueryResultsHandlerFactory;
 import org.protempa.query.handler.QueryResultsHandlerInitException;
+import org.protempa.query.handler.StatisticsCollector;
+import org.protempa.query.handler.StatisticsCollectorInitException;
 
 /**
  *
@@ -75,8 +80,15 @@ public class XmlQueryResultsHandlerFactory implements QueryResultsHandlerFactory
     }
 
     @Override
-    public QueryResultsHandler getInstance() throws QueryResultsHandlerInitException {
-        return new XmlQueryResultsHandler(writer, propOrder, initialPropId, propIds, inferPropositionIdsNeeded);
+    public QueryResultsHandler getInstance(Query query, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+        return new XmlQueryResultsHandler(this.writer, this.propOrder, this.initialPropId, this.propIds, this.inferPropositionIdsNeeded, knowledgeSource);
     }
+
+    @Override
+    public StatisticsCollector getStatisticsCollector() throws StatisticsCollectorInitException {
+        return null;
+    }
+
+    
     
 }

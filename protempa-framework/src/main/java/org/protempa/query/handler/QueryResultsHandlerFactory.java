@@ -1,5 +1,8 @@
 package org.protempa.query.handler;
 
+import org.protempa.KnowledgeSource;
+import org.protempa.query.Query;
+
 /*
  * #%L
  * Protempa Framework
@@ -32,9 +35,20 @@ public interface QueryResultsHandlerFactory {
      * Protempa before 
      * {@link #handleKnowledgeSource(org.protempa.KnowledgeSource) }.
      *
+     * @return a query results handler.
      * @throws org.protempa.query.handler.QueryResultsHandlerInitException if
      * any exceptions occur. There may be a nested exception with more
      * information.
      */
-    QueryResultsHandler getInstance() throws QueryResultsHandlerInitException;
+    QueryResultsHandler getInstance(Query query, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException;
+    
+    /**
+     * Returns an instance that can be used to discover information about 
+     * previous runs of data.
+     * 
+     * @return a statistics collector, or <code>null</code> if statistics
+     * collection is not supported by this kind of query results handler.
+     * @throws CollectStatisticsException if an error occurred.
+     */
+    StatisticsCollector getStatisticsCollector() throws StatisticsCollectorInitException;
 }

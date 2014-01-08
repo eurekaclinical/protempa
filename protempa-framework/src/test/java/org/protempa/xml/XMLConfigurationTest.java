@@ -38,6 +38,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
 import junit.framework.TestCase;
+import org.apache.commons.io.FileUtils;
 import static org.junit.Assert.assertArrayEquals;
 
 import org.protempa.AlgorithmSource;
@@ -49,7 +50,6 @@ import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
-import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.Interval.Side;
 import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
@@ -66,7 +66,8 @@ import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.value.ValueList;
 import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
-import org.protempa.query.handler.TableQueryResultsHandler;
+import org.protempa.query.handler.QueryResultsHandlerInitException;
+import org.protempa.query.handler.TableQueryResultsHandlerFactory;
 import org.protempa.query.handler.table.AtLeastNColumnSpec;
 import org.protempa.query.handler.table.CountColumnSpec;
 import org.protempa.query.handler.table.Derivation;
@@ -89,7 +90,8 @@ import org.xml.sax.SAXException;
  */
 public class XMLConfigurationTest extends TestCase {
 
-    private DateTimeFilter timeRange = new DateTimeFilter(new String[]{"Encounter"}, new GregorianCalendar(2010, 11, 1).getTime(),
+    private final DateTimeFilter timeRange = 
+            new DateTimeFilter(new String[]{"Encounter"}, new GregorianCalendar(2010, 11, 1).getTime(),
             AbsoluteTimeGranularity.DAY, new GregorianCalendar(2011, 2, 31).getTime(), AbsoluteTimeGranularity.DAY, Side.FINISH,
             Side.START);
 
@@ -189,18 +191,19 @@ public class XMLConfigurationTest extends TestCase {
 
     public void testTableResultsQueryHandler() throws Throwable {
         BufferedWriter dataWriter = new BufferedWriter(new StringWriter());
-        TableQueryResultsHandler resultsHandler = createTestTableResultsQueryHandler(dataWriter);
+        TableQueryResultsHandlerFactory resultsHandler = createTestTableResultsQueryHandler(dataWriter);
         File file = File.createTempFile("testTableResultsQueryHandler", ".xml");
         XMLConfiguration.writeTableQueryResultsHandlerAsXML(resultsHandler, file, true);
+        System.err.println(FileUtils.readFileToString(file));
         checkXMLValid(file, "protempa_tableQueryResultsHandler.xsd");
-        TableQueryResultsHandler reconstitutedResultsHandler = XMLConfiguration.readTableQueryResultsHandlerAsXML(file, dataWriter);
+        TableQueryResultsHandlerFactory reconstitutedResultsHandler = XMLConfiguration.readTableQueryResultsHandlerFactoryAsXML(file, dataWriter);
         assertEquals("Delimiter is the same", reconstitutedResultsHandler.getColumnDelimiter(), resultsHandler.getColumnDelimiter());
         assertArrayEquals("Column specs are the same", reconstitutedResultsHandler.getColumnSpecs(), resultsHandler.getColumnSpecs());
         assertArrayEquals("Row proposition ids are the same", reconstitutedResultsHandler.getRowPropositionIds(), resultsHandler.getRowPropositionIds());
         assertEquals("headerWritten is the same", reconstitutedResultsHandler.isHeaderWritten(), resultsHandler.isHeaderWritten());
     }
     
-    private TableQueryResultsHandler createTestTableResultsQueryHandler(BufferedWriter dataWriter) {
+    private TableQueryResultsHandlerFactory createTestTableResultsQueryHandler(BufferedWriter dataWriter) throws QueryResultsHandlerInitException {
         String[] propIds1 = {"p1", "p2", "p3", "p4"};
         String[] propIds2 = {"q1", "q2", "q3"};
         PropertyConstraint constraint1 = new PropertyConstraint("foo", ValueComparator.EQUAL_TO, new BooleanValue(Boolean.FALSE));
@@ -260,6 +263,6 @@ public class XMLConfigurationTest extends TestCase {
             maxPropositionValueColumnSpec, minPropositionValueColumnSpec, sumPropositionValueColumnSpec
         };
         String[] rowPropositionIds = {"alpha", "beta", "gamma"};
-        return new TableQueryResultsHandler(dataWriter, '\t', rowPropositionIds, columnSpecs, true, false);
+        return new TableQueryResultsHandlerFactory(dataWriter, '\t', rowPropositionIds, columnSpecs, true, false);
     }
 }

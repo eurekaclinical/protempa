@@ -19,11 +19,10 @@
  */
 package org.protempa.query.handler;
 
+
 import java.util.List;
 import java.util.Map;
-
 import org.protempa.KnowledgeSource;
-import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;
@@ -52,160 +51,80 @@ import org.protempa.query.Query;
 public interface QueryResultsHandler extends AutoCloseable {
 
     /**
-     * Collect various statistics about the data in the dataset previously
-     * written out.
-     */
-    public interface Statistics {
-
-        /**
-         * Returns the number of keys in the dataset.
-         *
-         * @return the number of keys.
-         */
-        int getNumberOfKeys();
-
-    }
-
-    public interface UsingKnowledgeSource extends AutoCloseable {
-
-        public interface ForQuery extends AutoCloseable {
-
-            /**
-             * Infers from the query results handler's specification what
-             * propositions need to be queried in order to populate the query
-             * result handler's output.
-             *
-             * When executing a processing job, Protempa takes the union of the
-             * proposition ids returned from this API and the proposition ids
-             * specified in the Protempa {@link Query} when determining what
-             * propositions to retrieve from the underlying data sources and
-             * what propositions to compute.
-             *
-             * Implementations of {@link QueryResultsHandler} for which such
-             * inference does not make sense may return an empty array.
-             *
-             * This method may not be called until after {@link #handleInit(org.protempa.KnowledgeSource, org.protempa.query.Query)
-             * }
-             * is, and it may not be called after {@link #close() }.
-             *
-             * @return an array of proposition id {@link String}. Guaranteed not
-             * <code>null</code>.
-             *
-             */
-            String[] getPropositionIdsNeeded() throws QueryResultsHandlerProcessingException;
-
-            /**
-             * Called by Protempa prior to the first invocation of
-             * {@link #handleQueryResult}. Implementers of this method may
-             * perform arbitrary processing related to the output of the
-             * handler, such as printing out headers of a file or extracting
-             * metadata from the knowledge source for the handler's output.
-             *
-             * @throws QueryResultsHandlerProcessingException if any exceptions
-             * occur at a lower level.
-             */
-            void start() throws QueryResultsHandlerProcessingException;
-
-            /**
-             * Handles a single query result, which is the list of propositions
-             * associated with the given key.
-             *
-             * @param keyId the identifying key id for the result
-             * @param propositions the proposition results for the given key as
-             * a newly created {@link List<Proposition>}.
-             * @param derivationsList a mapping from propositions to derived
-             * abstractions. and propositions.
-             */
-            void handleQueryResult(String keyId,
-                    List<Proposition> propositions,
-                    Map<Proposition, List<Proposition>> forwardDerivations,
-                    Map<Proposition, List<Proposition>> backwardDerivations,
-                    Map<UniqueId, Proposition> references)
-                    throws QueryResultsHandlerProcessingException;
-
-            /**
-             * Called by Protempa as soon as all query results have been
-             * retrieved from the data source.
-             *
-             * @throws QueryResultsHandlerProcessingException if any exceptions
-             * occur at a lower level
-             */
-            void finish() throws QueryResultsHandlerProcessingException;
-
-            /**
-             * Called by Protempa after {@link #handleFinish()} to clean up any
-             * resources used by the handler.
-             *
-             * @throws QueryResultsHandlerCloseException if any exceptions occur
-             * at a lower level
-             */
-            void close() throws QueryResultsHandlerCloseException;
-        }
-
-        /**
-         * Validates this query results handler's specification against the
-         * provided knowledge source. This method cannot be called until after 
+     * Validates this query results handler's specification against the provided
+     * knowledge source. This method cannot be called until after 
      * {@link #knowledgeSourceInit(org.protempa.KnowledgeSource) }
-         * is, and it may not be called after {@link #close() }.
-         *
-         * @throws QueryResultsHandlerValidationFailedException if validation
-         * failed.
-         * @throws KnowledgeSourceReadException if the knowledge source could
-         * not be read.
-         */
-        void validate()
-                throws QueryResultsHandlerValidationFailedException;
-
-        /**
-         * Performs all initialization functions to prepare for handling the
-         * results of a query. After calling this method, calls to
-     * {@link #handleStart() }, {@link #getPropositionIdsNeeded() } will
-         * work. This method is called by Protempa before {@link #handleStart()
-         * }.
-         *
-         * @param query the query.
-         * @throws QueryResultsHandlerInitException if any exceptions occur
-         * during initialization.
-         */
-        ForQuery forQuery(Query query) throws QueryResultsHandlerInitException;
-
-        /**
-         * Called by Protempa after {@link #handleFinish()} to clean up any
-         * resources used by the handler.
-         *
-         * @throws QueryResultsHandlerCloseException if any exceptions occur at
-         * a lower level
-         */
-        void close() throws QueryResultsHandlerCloseException;
-    }
+     * is, and it may not be called after {@link #close() }.
+     *
+     * @throws QueryResultsHandlerValidationFailedException if validation
+     * failed.
+     * @throws KnowledgeSourceReadException if the knowledge source could not be
+     * read.
+     */
+    void validate()
+            throws QueryResultsHandlerValidationFailedException;
 
     /**
-     * Initializes the handler with the knowledge source. To be called after
-     * {@link #configurationInit() } and before 
-     * {@link #handleInit(org.protempa.query.Query) }. After calling this
-     * method, calls to {@link #validate() } will work. There may be a nested
-     * exception with more information. This should be the only method that
-     * deals directly with the knowledge source. This method should save off any
-     * information needed from the knowledge source for subsequent operations.
+     * Infers from the query results handler's specification what propositions
+     * need to be queried in order to populate the query result handler's
+     * output.
      *
-     * @param knowledgeSource a knowledge source.
-     * @throws QueryResultsHandlerInitException if any exceptions occur.
+     * When executing a processing job, Protempa takes the union of the
+     * proposition ids returned from this API and the proposition ids specified
+     * in the Protempa {@link Query} when determining what propositions to
+     * retrieve from the underlying data sources and what propositions to
+     * compute.
+     *
+     * Implementations of {@link QueryResultsHandler} for which such inference
+     * does not make sense may return an empty array.
+     *
+     * This method may not be called until after {@link #handleInit(org.protempa.KnowledgeSource, org.protempa.query.Query)
+     * }
+     * is, and it may not be called after {@link #close() }.
+     *
+     * @return an array of proposition id {@link String}. Guaranteed not
+     * <code>null</code>.
+     *
      */
-    UsingKnowledgeSource usingKnowledgeSource(KnowledgeSource knowledgeSource)
-            throws QueryResultsHandlerInitException;
+    String[] getPropositionIdsNeeded() throws QueryResultsHandlerProcessingException;
 
     /**
-     * Collects statistics on the dataset specified in the constructor. This
-     * method can be called any time.
+     * Called by Protempa prior to the first invocation of
+     * {@link #handleQueryResult}. Implementers of this method may perform
+     * arbitrary processing related to the output of the handler, such as
+     * printing out headers of a file or extracting metadata from the knowledge
+     * source for the handler's output.
      *
-     * @return Returns various statistics about the data in the dataset
-     * previously written out. If <code>null</code>, statistics are not
-     * supported by this query results handler.
-     * @throws QueryResultsHandlerCollectStatisticsException if statistics
-     * collection fails for some reason.
+     * @throws QueryResultsHandlerProcessingException if any exceptions occur at
+     * a lower level.
      */
-    Statistics collectStatistics()
-            throws QueryResultsHandlerCollectStatisticsException;
+    void start() throws QueryResultsHandlerProcessingException;
+
+    /**
+     * Handles a single query result, which is the list of propositions
+     * associated with the given key.
+     *
+     * @param keyId the identifying key id for the result
+     * @param propositions the proposition results for the given key as a newly
+     * created {@link List<Proposition>}.
+     * @param derivationsList a mapping from propositions to derived
+     * abstractions. and propositions.
+     */
+    void handleQueryResult(String keyId,
+            List<Proposition> propositions,
+            Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<UniqueId, Proposition> references)
+            throws QueryResultsHandlerProcessingException;
+
+    /**
+     * Called by Protempa as soon as all query results have been retrieved from
+     * the data source.
+     *
+     * @throws QueryResultsHandlerProcessingException if any exceptions occur at
+     * a lower level
+     */
+    void finish() throws QueryResultsHandlerProcessingException;
 
     /**
      * Called by Protempa after {@link #handleFinish()} to clean up any

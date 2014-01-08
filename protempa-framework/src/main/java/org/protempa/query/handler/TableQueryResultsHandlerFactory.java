@@ -1,5 +1,10 @@
 package org.protempa.query.handler;
 
+import java.io.BufferedWriter;
+import org.protempa.KnowledgeSource;
+import org.protempa.query.Query;
+import org.protempa.query.handler.table.TableColumnSpec;
+
 /*
  * #%L
  * Protempa Framework
@@ -25,10 +30,57 @@ package org.protempa.query.handler;
  * @author Andrew Post
  */
 public class TableQueryResultsHandlerFactory implements QueryResultsHandlerFactory {
+    private final boolean inferPropositionIdsNeeded;
+    private final boolean headerWritten;
+    private final TableColumnSpec[] columnSpecs;
+    private final String[] rowPropositionIds;
+    private final char columnDelimiter;
+    private final BufferedWriter out;
+
+    public TableQueryResultsHandlerFactory(BufferedWriter out, char columnDelimiter,
+            String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
+            boolean headerWritten) {
+        this(out, columnDelimiter, rowPropositionIds, columnSpecs,
+                headerWritten, true);
+    }
+    
+    public TableQueryResultsHandlerFactory(BufferedWriter out, char columnDelimiter,
+            String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
+            boolean headerWritten, boolean inferPropositionIdsNeeded) {
+        this.out = out;
+        this.columnDelimiter = columnDelimiter;
+        this.rowPropositionIds = rowPropositionIds.clone();
+        this.columnSpecs = columnSpecs.clone();
+        this.headerWritten = headerWritten;
+        this.inferPropositionIdsNeeded = inferPropositionIdsNeeded;
+    }
+    
+    public String[] getRowPropositionIds() {
+        return this.rowPropositionIds.clone();
+    }
+
+    public char getColumnDelimiter() {
+        return this.columnDelimiter;
+    }
+
+    public TableColumnSpec[] getColumnSpecs() {
+        return this.columnSpecs.clone();
+    }
+
+    public boolean isHeaderWritten() {
+        return this.headerWritten;
+    }
+    
+    @Override
+    public TableQueryResultsHandler getInstance(Query query, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+        return new TableQueryResultsHandler(this.out, this.columnDelimiter, 
+                this.rowPropositionIds, this.columnSpecs, this.headerWritten, 
+                this.inferPropositionIdsNeeded, knowledgeSource);
+    }
 
     @Override
-    public QueryResultsHandler getInstance() throws QueryResultsHandlerInitException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public StatisticsCollector getStatisticsCollector() throws StatisticsCollectorInitException {
+        return null;
     }
     
 }

@@ -27,105 +27,18 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.protempa.KnowledgeSource;
-
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
-import org.protempa.query.Query;
+
 import org.protempa.query.handler.AbstractQueryResultsHandler;
 import org.protempa.query.handler.QueryResultsHandlerCloseException;
-import org.protempa.query.handler.QueryResultsHandlerInitException;
 import org.protempa.query.handler.QueryResultsHandlerProcessingException;
 
 final class SingleColumnQueryResultsHandler
         extends AbstractQueryResultsHandler {
-
-    class SingleColumnUsingKnowledgeSource extends AbstractUsingKnowledgeSource {
-
-        class SingleColumnForQuery extends AbstractForQuery {
-
-            private final Map<String, Map<Proposition, List<Proposition>>> data;
-            
-            private SingleColumnForQuery(Query query) {
-                this.data = new HashMap<>();
-            }
-
-            @Override
-            public void handleQueryResult(String keyId, List<Proposition> propositions,
-                    Map<Proposition, List<Proposition>> forwardDerivations,
-                    Map<Proposition, List<Proposition>> backwardDerivations,
-                    Map<UniqueId, Proposition> references)
-                    throws QueryResultsHandlerProcessingException {
-                try {
-                    this.data.put(keyId,
-                            new HashMap<Proposition, List<Proposition>>());
-                    for (Proposition p : propositions) {
-                        this.data.get(keyId).put(p, new ArrayList<Proposition>());
-                        storeDerivations(forwardDerivations.get(p), this.data
-                                .get(keyId).get(p));
-                        storeDerivations(backwardDerivations.get(p),
-                                this.data.get(keyId).get(p));
-                    }
-                } catch (IOException ex) {
-                    throw new QueryResultsHandlerProcessingException(ex);
-                }
-            }
-
-            @Override
-            public void finish() throws QueryResultsHandlerProcessingException {
-                try {
-                    SortedSet<String> sortedKeyIds = new TreeSet<>(
-                            this.data.keySet());
-                    for (String keyId : sortedKeyIds) {
-                        writeLine(keyId);
-                        List<PropositionWithDerivations> sortedProps
-                                = new ArrayList<>();
-                        for (Entry<Proposition, List<Proposition>> pp : this.data.get(
-                                keyId).entrySet()) {
-                            sortedProps.add(new PropositionWithDerivations(pp.getKey(),
-                                    pp.getValue()));
-                        }
-                        Collections.sort(sortedProps,
-                                new PropositionWithDerivationsComparator());
-                        for (PropositionWithDerivations pwd : sortedProps) {
-                            writeLine(pwd.getProposition().getId());
-                            List<Proposition> sortedDerivations
-                                    = new ArrayList<>(pwd.getDerivations());
-                            Collections.sort(sortedDerivations,
-                                    new PropositionComparator());
-                            for (Proposition d : sortedDerivations) {
-                                writeLine(d.getId());
-                            }
-                        }
-                    }
-                } catch (IOException e) {
-                    throw new QueryResultsHandlerProcessingException(e);
-                }
-            }
-
-            @Override
-            public void close() throws QueryResultsHandlerCloseException {
-                this.data.clear();
-            }
-            
-            
-
-        }
-        
-        private SingleColumnUsingKnowledgeSource(KnowledgeSource knowledgeSource) {
-        }
-
-        @Override
-        public SingleColumnForQuery forQuery(Query query) 
-                throws QueryResultsHandlerInitException {
-            return new SingleColumnForQuery(query);
-        }
-        
-    }
-
+    private final Map<String, Map<Proposition, List<Proposition>>> data;
     private final Writer writer;
 
     /**
@@ -135,12 +48,52 @@ final class SingleColumnQueryResultsHandler
      * @param writer the {@link Writer} to output to
      */
     SingleColumnQueryResultsHandler(Writer writer) {
+        this.data = new HashMap<>();
         this.writer = writer;
     }
     
     @Override
-    public SingleColumnUsingKnowledgeSource usingKnowledgeSource(KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
-        return new SingleColumnUsingKnowledgeSource(knowledgeSource);
+    public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
+        try {
+            this.data.put(keyId, new HashMap<Proposition, List<Proposition>>());
+            for (Proposition p : propositions) {
+                this.data.get(keyId).put(p, new ArrayList<Proposition>());
+                storeDerivations(forwardDerivations.get(p), this.data.get(keyId).get(p));
+                storeDerivations(backwardDerivations.get(p), this.data.get(keyId).get(p));
+            }
+        } catch (IOException ex) {
+            throw new QueryResultsHandlerProcessingException(ex);
+        }
+    }
+
+    @Override
+    public void finish() throws QueryResultsHandlerProcessingException {
+        try {
+            SortedSet<String> sortedKeyIds = new TreeSet<>(this.data.keySet());
+            for (String keyId : sortedKeyIds) {
+                writeLine(keyId);
+                List<PropositionWithDerivations> sortedProps = new ArrayList<>();
+                for (Map.Entry<Proposition, List<Proposition>> pp : this.data.get(keyId).entrySet()) {
+                    sortedProps.add(new PropositionWithDerivations(pp.getKey(), pp.getValue()));
+                }
+                Collections.sort(sortedProps, new PropositionWithDerivationsComparator());
+                for (PropositionWithDerivations pwd : sortedProps) {
+                    writeLine(pwd.getProposition().getId());
+                    List<Proposition> sortedDerivations = new ArrayList<>(pwd.getDerivations());
+                    Collections.sort(sortedDerivations, new PropositionComparator());
+                    for (Proposition d : sortedDerivations) {
+                        writeLine(d.getId());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new QueryResultsHandlerProcessingException(e);
+        }
+    }
+
+    @Override
+    public void close() throws QueryResultsHandlerCloseException {
+        this.data.clear();
     }
     
     private void writeLine(String str) throws IOException {

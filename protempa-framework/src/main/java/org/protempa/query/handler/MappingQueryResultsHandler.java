@@ -23,10 +23,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.drools.util.StringUtils;
 import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
-import org.protempa.query.Query;
 
 /**
  * An implementation of QueryResultsHandler that stores the results in a map
@@ -37,80 +37,43 @@ import org.protempa.query.Query;
  * @author Michel Mansour
  *
  */
-public class MappingQueryResultsHandler extends AbstractQueryResultsHandler {
+public class MappingQueryResultsHandler extends AbstractQueryResultsHandler
+        implements StatisticsCollector {
 
-    private MappingUsingKnowledgeSource usingKnowledgeSource;
+    final Map<String, List<Proposition>> resultMap;
 
-    public class MappingUsingKnowledgeSource extends AbstractUsingKnowledgeSource {
-
-        private MappingForQuery forQuery;
-
-        public class MappingForQuery extends AbstractForQuery {
-
-            private final Map<String, List<Proposition>> resultMap;
-
-            /**
-             * Initializes the map returned by {@link #getResultMap()}.
-             */
-            private MappingForQuery(Query query) {
-                this.resultMap = new HashMap<>();
-            }
-
-            /**
-             * Puts handled keys and propositions into the map returned by
-             * {@link #getResultMap()}.
-             *
-             * @param key a key id {@link String}.
-             * @param propositions a {@link List<Proposition>} of propositions.
-             */
-            @Override
-            public void handleQueryResult(String keyId, 
-                    List<Proposition> propositions, 
-                    Map<Proposition, List<Proposition>> forwardDerivations, 
-                    Map<Proposition, List<Proposition>> backwardDerivations, 
-                    Map<UniqueId, Proposition> references) 
-                    throws QueryResultsHandlerProcessingException {
-                resultMap.put(keyId, propositions);
-            }
-
-            /**
-             * Gets the map of query results that have been handled.
-             *
-             * @return the resultMap
-             */
-            public final Map<String, List<Proposition>> getResultMap() {
-                return Collections.unmodifiableMap(resultMap);
-            }
-
-        }
-
-        private MappingUsingKnowledgeSource(KnowledgeSource knowledgeSource) {
-
-        }
-        
-        @Override
-        public MappingForQuery forQuery(Query query) throws QueryResultsHandlerInitException {
-            this.forQuery = new MappingForQuery(query);
-            return this.forQuery;
-        }
-
+    MappingQueryResultsHandler() {
+        this.resultMap = new HashMap<>();
     }
 
     @Override
     public Statistics collectStatistics() {
         DefaultStatisticsBuilder builder = new DefaultStatisticsBuilder();
-        if (this.usingKnowledgeSource != null) {
-            if (this.usingKnowledgeSource.forQuery != null) {
-                builder.setNumberOfKeys(
-                        this.usingKnowledgeSource.forQuery.resultMap.size());
-            }
-        }
+        builder.setNumberOfKeys(this.resultMap.size());
         return builder.toDefaultStatistics();
     }
+    
+    
 
+    /**
+     * Puts handled keys and propositions into the map returned by
+     * {@link #getResultMap()}.
+     *
+     * @param keyId a key id {@link String}.
+     * @param propositions a {@link List<Proposition>} of propositions.
+     */
     @Override
-    public MappingUsingKnowledgeSource usingKnowledgeSource(KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
-        this.usingKnowledgeSource = new MappingUsingKnowledgeSource(knowledgeSource);
-        return this.usingKnowledgeSource;
+    public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
+        resultMap.put(keyId, propositions);
     }
+
+    /**
+     * Gets the map of query results that have been handled.
+     *
+     * @return the resultMap
+     */
+    public final Map<String, List<Proposition>> getResultMap() {
+        return Collections.unmodifiableMap(resultMap);
+    }
+
 }

@@ -1,13 +1,10 @@
 package org.protempa.query.handler;
 
-import org.protempa.KnowledgeSource;
-import org.protempa.query.Query;
-
 /*
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2014 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,21 +21,16 @@ import org.protempa.query.Query;
  */
 
 /**
- *
- * @author Andrew Post
+ * Collect various statistics about the data in the dataset previously
+ * written out.
  */
-public final class MappingQueryResultsHandlerFactory implements QueryResultsHandlerFactory {
-    
-    MappingQueryResultsHandlerFactory() {}
+public interface Statistics {
 
-    @Override
-    public QueryResultsHandler getInstance(Query query, KnowledgeSource knowledgeSource) {
-        return new MappingQueryResultsHandler();
-    }
-
-    @Override
-    public StatisticsCollector getStatisticsCollector() throws StatisticsCollectorInitException {
-        return new MappingQueryResultsHandler();
-    }
+    /**
+     * Returns the number of keys in the dataset.
+     *
+     * @return the number of keys.
+     */
+    int getNumberOfKeys();
     
 }

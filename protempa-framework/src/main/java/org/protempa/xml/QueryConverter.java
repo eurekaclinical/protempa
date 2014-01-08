@@ -46,7 +46,7 @@ class QueryConverter extends AbstractConverter {
     private static final String KEY_IDS = "keyIDs";
     private static final String KEY_ID = "keyID";
     public static URL querySchemaUrl = null;
-    private static Logger myLogger = Logger.getLogger(TableQueryResultshandlerConverter.class.getName());
+    private static Logger myLogger = Logger.getLogger(TableQueryResultsHandlerConverter.class.getName());
 
     private KnowledgeSource knowledgeSource;
     private AlgorithmSource algorithmSource;

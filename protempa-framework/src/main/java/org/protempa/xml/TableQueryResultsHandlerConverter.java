@@ -29,13 +29,14 @@ import org.protempa.query.handler.table.TableColumnSpec;
 
 import java.io.BufferedWriter;
 import java.net.URL;
+import org.protempa.query.handler.TableQueryResultsHandlerFactory;
 
 /**
  * Convert Protempa Query object to/from XML
  *
  * @author mgrand
  */
-class TableQueryResultshandlerConverter extends AbstractConverter {
+class TableQueryResultsHandlerConverter extends AbstractConverter {
     private static final String TABLE_QUERY_RESULTS_HANDLER = "tableQueryResultsHandler";
 
     public static URL querySchemaUrl = null;
@@ -48,7 +49,7 @@ class TableQueryResultshandlerConverter extends AbstractConverter {
     /**
      * Constructor
      */
-    public TableQueryResultshandlerConverter() {
+    public TableQueryResultsHandlerConverter() {
         super();
     }
 
@@ -57,7 +58,7 @@ class TableQueryResultshandlerConverter extends AbstractConverter {
      */
     @Override
     public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) {
-        return TableQueryResultsHandler.class.equals(clazz);
+        return TableQueryResultsHandlerFactory.class.equals(clazz);
     }
 
     /**
@@ -73,7 +74,7 @@ class TableQueryResultshandlerConverter extends AbstractConverter {
             writer.addAttribute("xsi:noNamespaceSchemaLocation", getTableQueryResultsHandlerUrl().toExternalForm());
         }
 
-        TableQueryResultsHandler resultsHandler = (TableQueryResultsHandler) value;
+        TableQueryResultsHandlerFactory resultsHandler = (TableQueryResultsHandlerFactory) value;
 
         writer.addAttribute("columnDelimiter", Character.toString(resultsHandler.getColumnDelimiter()));
 
@@ -120,7 +121,7 @@ class TableQueryResultshandlerConverter extends AbstractConverter {
         expectNoMore(reader);
 
         BufferedWriter dataWriter = (BufferedWriter) context.get("writer");
-        return new TableQueryResultsHandler(dataWriter, columnDelimiter.charAt(0), propIds, tableColumnSpecs, true);
+        return new TableQueryResultsHandlerFactory(dataWriter, columnDelimiter.charAt(0), propIds, tableColumnSpecs, true);
     }
 
     URL getTableQueryResultsHandlerUrl() {

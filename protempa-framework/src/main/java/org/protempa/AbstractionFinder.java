@@ -50,8 +50,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.protempa.query.handler.QueryResultsHandler.UsingKnowledgeSource;
-import org.protempa.query.handler.QueryResultsHandler.UsingKnowledgeSource.ForQuery;
 import org.protempa.query.handler.QueryResultsHandlerFactory;
 
 /**
@@ -476,8 +474,7 @@ final class AbstractionFinder {
     private abstract class ExecutorWithResultsHandler extends Executor {
 
         private final QueryResultsHandlerFactory resultsHandlerFactory;
-
-        private QueryResultsHandler.UsingKnowledgeSource.ForQuery forQuery;
+        private QueryResultsHandler resultsHandler;
 
         public ExecutorWithResultsHandler(Query query,
                 QueryResultsHandlerFactory resultsHandlerFactory, QuerySession querySession,
@@ -491,38 +488,28 @@ final class AbstractionFinder {
         @Override
         void execute() throws FinderException {
             String queryId = getQuery().getId();
-            
-                log(Level.FINE,
-                        "Initializing query results handler for query {0}",
-                        queryId);
-            try (QueryResultsHandler resultsHandler = this.resultsHandlerFactory.getInstance()) {
+
+            log(Level.FINE,
+                    "Initializing query results handler for query {0}",
+                    queryId);
+            try (QueryResultsHandler resultsHandler = this.resultsHandlerFactory.getInstance(getQuery(), getKnowledgeSource())) {
                 log(Level.FINE,
                         "Done initalizing query results handler for query {0}",
                         queryId);
-                try (UsingKnowledgeSource usingKnowledgeSource
-                        = resultsHandler.usingKnowledgeSource(
-                                getKnowledgeSource())) {
-                    log(Level.FINE, "Validating query results handler for query {0}",
-                            queryId);
-                    usingKnowledgeSource.validate();
-                    log(Level.FINE,
-                            "Query results handler validated successfully for query {0}",
-                            queryId);
-                    try (ForQuery forQuery = usingKnowledgeSource.forQuery(getQuery())) {
-                        this.forQuery = forQuery;
-                        addAllPropIds(this.forQuery.getPropositionIdsNeeded());
-                        this.forQuery.start();
+                log(Level.FINE, "Validating query results handler for query {0}",
+                        queryId);
+                this.resultsHandler = resultsHandler;
+                this.resultsHandler.validate();
+                log(Level.FINE,
+                        "Query results handler validated successfully for query {0}",
+                        queryId);
+                addAllPropIds(resultsHandler.getPropositionIdsNeeded());
+                this.resultsHandler.start();
 
-                        super.execute();
+                super.execute();
 
-                        this.forQuery.finish();
-                    } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerCloseException ex) {
-                        throw new FinderException(queryId, ex);
-                    }
-                } catch (QueryResultsHandlerInitException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerCloseException ex) {
-                    throw new FinderException(queryId, ex);
-                }
-            } catch (QueryResultsHandlerInitException | QueryResultsHandlerCloseException ex) {
+                this.resultsHandler.finish();
+            } catch (QueryResultsHandlerInitException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerProcessingException | QueryResultsHandlerCloseException ex) {
                 throw new FinderException(queryId, ex);
             }
         }
@@ -568,7 +555,7 @@ final class AbstractionFinder {
                         new Object[]{queryId, backwardDerivations});
             }
             try {
-                this.forQuery.handleQueryResult(keyId,
+                this.resultsHandler.handleQueryResult(keyId,
                         filteredPropositions,
                         forwardDerivations, backwardDerivations, refs);
             } catch (QueryResultsHandlerProcessingException ex) {
