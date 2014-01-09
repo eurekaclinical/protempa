@@ -27,8 +27,8 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.mvel.ConversionException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
-import org.protempa.query.handler.table.PropertyConstraint;
-import org.protempa.query.handler.table.Reference;
+import org.protempa.dest.table.PropertyConstraint;
+import org.protempa.dest.table.Reference;
 
 import java.util.Comparator;
 

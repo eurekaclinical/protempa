@@ -23,8 +23,8 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import org.protempa.query.handler.table.AtLeastNColumnSpec;
-import org.protempa.query.handler.table.Link;
+import org.protempa.dest.table.AtLeastNColumnSpec;
+import org.protempa.dest.table.Link;
 
 /**
  * Convert {@link AtLeastNColumnSpec} object to/from XML

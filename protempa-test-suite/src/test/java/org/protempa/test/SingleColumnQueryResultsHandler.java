@@ -32,9 +32,9 @@ import java.util.TreeSet;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 
-import org.protempa.query.handler.AbstractQueryResultsHandler;
-import org.protempa.query.handler.QueryResultsHandlerCloseException;
-import org.protempa.query.handler.QueryResultsHandlerProcessingException;
+import org.protempa.dest.AbstractQueryResultsHandler;
+import org.protempa.dest.QueryResultsHandlerCloseException;
+import org.protempa.dest.QueryResultsHandlerProcessingException;
 
 final class SingleColumnQueryResultsHandler
         extends AbstractQueryResultsHandler {

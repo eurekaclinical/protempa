@@ -35,11 +35,11 @@ import org.protempa.query.And;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
-import org.protempa.query.handler.QueryResultsHandler;
-import org.protempa.query.handler.QueryResultsHandlerCloseException;
-import org.protempa.query.handler.QueryResultsHandlerInitException;
-import org.protempa.query.handler.QueryResultsHandlerProcessingException;
-import org.protempa.query.handler.QueryResultsHandlerValidationFailedException;
+import org.protempa.dest.QueryResultsHandler;
+import org.protempa.dest.QueryResultsHandlerCloseException;
+import org.protempa.dest.QueryResultsHandlerInitException;
+import org.protempa.dest.QueryResultsHandlerProcessingException;
+import org.protempa.dest.QueryResultsHandlerValidationFailedException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +50,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.protempa.query.handler.QueryResultsHandlerFactory;
+import org.protempa.dest.Destination;
 
 /**
  * Class that actually does the abstraction finding.
@@ -473,16 +473,16 @@ final class AbstractionFinder {
 
     private abstract class ExecutorWithResultsHandler extends Executor {
 
-        private final QueryResultsHandlerFactory resultsHandlerFactory;
+        private final Destination destination;
         private QueryResultsHandler resultsHandler;
 
         public ExecutorWithResultsHandler(Query query,
-                QueryResultsHandlerFactory resultsHandlerFactory, QuerySession querySession,
+                Destination resultsHandlerFactory, QuerySession querySession,
                 ExecutorStrategy strategy)
                 throws FinderException {
             super(query, querySession, strategy);
             assert resultsHandlerFactory != null : "resultsHandlerFactory cannot be null";
-            this.resultsHandlerFactory = resultsHandlerFactory;
+            this.destination = resultsHandlerFactory;
         }
 
         @Override
@@ -492,7 +492,7 @@ final class AbstractionFinder {
             log(Level.FINE,
                     "Initializing query results handler for query {0}",
                     queryId);
-            try (QueryResultsHandler resultsHandler = this.resultsHandlerFactory.getInstance(getQuery(), getKnowledgeSource())) {
+            try (QueryResultsHandler resultsHandler = this.destination.getQueryResultsHandler(getQuery(), getKnowledgeSource())) {
                 log(Level.FINE,
                         "Done initalizing query results handler for query {0}",
                         queryId);
@@ -570,17 +570,17 @@ final class AbstractionFinder {
         }
     }
 
-    void doFind(Query query, QueryResultsHandlerFactory resultsHandler,
+    void doFind(Query query, Destination destination,
             QuerySession qs)
             throws FinderException {
-        assert resultsHandler != null : "resultsHandler cannot be null";
+        assert destination != null : "destination cannot be null";
         ExecutorStrategy strategy;
         if (workingMemoryCache != null) {
             strategy = ExecutorStrategy.STATEFUL;
         } else {
             strategy = ExecutorStrategy.STATELESS;
         }
-        new ExecutorWithResultsHandler(query, resultsHandler, qs, strategy) {
+        new ExecutorWithResultsHandler(query, destination, qs, strategy) {
             @Override
             protected void doExecute(Set<String> keyIds,
                     final DerivationsBuilder derivationsBuilder,
@@ -789,10 +789,10 @@ final class AbstractionFinder {
     }
 
     void outputStoredResults(Query query,
-            QueryResultsHandlerFactory resultsHandler, QuerySession qs,
+            Destination destination, QuerySession qs,
             final String workingMemoryStoreEnvironment) throws FinderException {
         assert query != null : "query cannot be null";
-        new ExecutorWithResultsHandler(query, resultsHandler, qs,
+        new ExecutorWithResultsHandler(query, destination, qs,
                 ExecutorStrategy.STATEFUL) {
                     @Override
                     protected void doExecute(Set<String> keyIds,
@@ -841,10 +841,10 @@ final class AbstractionFinder {
     }
 
     void processAndOutputStoredResults(Query query,
-            QueryResultsHandlerFactory resultsHandler,
+            Destination destination,
             QuerySession qs, final String propositionStoreEnvironment)
             throws FinderException {
-        new ExecutorWithResultsHandler(query, resultsHandler, qs,
+        new ExecutorWithResultsHandler(query, destination, qs,
                 ExecutorStrategy.STATELESS) {
                     @Override
                     protected void doExecute(Set<String> keyIds,

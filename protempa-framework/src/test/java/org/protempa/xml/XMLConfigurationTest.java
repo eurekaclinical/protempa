@@ -66,20 +66,20 @@ import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.value.ValueList;
 import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
-import org.protempa.query.handler.QueryResultsHandlerInitException;
-import org.protempa.query.handler.TableQueryResultsHandlerFactory;
-import org.protempa.query.handler.table.AtLeastNColumnSpec;
-import org.protempa.query.handler.table.CountColumnSpec;
-import org.protempa.query.handler.table.Derivation;
-import org.protempa.query.handler.table.DistanceBetweenColumnSpec;
-import org.protempa.query.handler.table.Link;
-import org.protempa.query.handler.table.OutputConfig;
-import org.protempa.query.handler.table.PropertyConstraint;
-import org.protempa.query.handler.table.PropositionColumnSpec;
-import org.protempa.query.handler.table.PropositionValueColumnSpec;
-import org.protempa.query.handler.table.Reference;
-import org.protempa.query.handler.table.TableColumnSpec;
-import org.protempa.query.handler.table.ValueOutputConfig;
+import org.protempa.dest.QueryResultsHandlerInitException;
+import org.protempa.dest.table.TableDestination;
+import org.protempa.dest.table.AtLeastNColumnSpec;
+import org.protempa.dest.table.CountColumnSpec;
+import org.protempa.dest.table.Derivation;
+import org.protempa.dest.table.DistanceBetweenColumnSpec;
+import org.protempa.dest.table.Link;
+import org.protempa.dest.table.OutputConfig;
+import org.protempa.dest.table.PropertyConstraint;
+import org.protempa.dest.table.PropositionColumnSpec;
+import org.protempa.dest.table.PropositionValueColumnSpec;
+import org.protempa.dest.table.Reference;
+import org.protempa.dest.table.TableColumnSpec;
+import org.protempa.dest.table.ValueOutputConfig;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -191,19 +191,19 @@ public class XMLConfigurationTest extends TestCase {
 
     public void testTableResultsQueryHandler() throws Throwable {
         BufferedWriter dataWriter = new BufferedWriter(new StringWriter());
-        TableQueryResultsHandlerFactory resultsHandler = createTestTableResultsQueryHandler(dataWriter);
+        TableDestination destination = createTestTableDestination(dataWriter);
         File file = File.createTempFile("testTableResultsQueryHandler", ".xml");
-        XMLConfiguration.writeTableQueryResultsHandlerAsXML(resultsHandler, file, true);
+        XMLConfiguration.writeTableDestinationAsXML(destination, file, true);
         System.err.println(FileUtils.readFileToString(file));
         checkXMLValid(file, "protempa_tableQueryResultsHandler.xsd");
-        TableQueryResultsHandlerFactory reconstitutedResultsHandler = XMLConfiguration.readTableQueryResultsHandlerFactoryAsXML(file, dataWriter);
-        assertEquals("Delimiter is the same", reconstitutedResultsHandler.getColumnDelimiter(), resultsHandler.getColumnDelimiter());
-        assertArrayEquals("Column specs are the same", reconstitutedResultsHandler.getColumnSpecs(), resultsHandler.getColumnSpecs());
-        assertArrayEquals("Row proposition ids are the same", reconstitutedResultsHandler.getRowPropositionIds(), resultsHandler.getRowPropositionIds());
-        assertEquals("headerWritten is the same", reconstitutedResultsHandler.isHeaderWritten(), resultsHandler.isHeaderWritten());
+        TableDestination reconstitutedResultsHandler = XMLConfiguration.readTableQueryResultsHandlerFactoryAsXML(file, dataWriter);
+        assertEquals("Delimiter is the same", reconstitutedResultsHandler.getColumnDelimiter(), destination.getColumnDelimiter());
+        assertArrayEquals("Column specs are the same", reconstitutedResultsHandler.getColumnSpecs(), destination.getColumnSpecs());
+        assertArrayEquals("Row proposition ids are the same", reconstitutedResultsHandler.getRowPropositionIds(), destination.getRowPropositionIds());
+        assertEquals("headerWritten is the same", reconstitutedResultsHandler.isHeaderWritten(), destination.isHeaderWritten());
     }
     
-    private TableQueryResultsHandlerFactory createTestTableResultsQueryHandler(BufferedWriter dataWriter) throws QueryResultsHandlerInitException {
+    private TableDestination createTestTableDestination(BufferedWriter dataWriter) throws QueryResultsHandlerInitException {
         String[] propIds1 = {"p1", "p2", "p3", "p4"};
         String[] propIds2 = {"q1", "q2", "q3"};
         PropertyConstraint constraint1 = new PropertyConstraint("foo", ValueComparator.EQUAL_TO, new BooleanValue(Boolean.FALSE));
@@ -263,6 +263,6 @@ public class XMLConfigurationTest extends TestCase {
             maxPropositionValueColumnSpec, minPropositionValueColumnSpec, sumPropositionValueColumnSpec
         };
         String[] rowPropositionIds = {"alpha", "beta", "gamma"};
-        return new TableQueryResultsHandlerFactory(dataWriter, '\t', rowPropositionIds, columnSpecs, true, false);
+        return new TableDestination(dataWriter, '\t', rowPropositionIds, columnSpecs, true, false);
     }
 }

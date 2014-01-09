@@ -24,8 +24,8 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.protempa.proposition.value.Unit;
-import org.protempa.query.handler.table.DistanceBetweenColumnSpec;
-import org.protempa.query.handler.table.Link;
+import org.protempa.dest.table.DistanceBetweenColumnSpec;
+import org.protempa.dest.table.Link;
 
 /**
  * Convert {@link DistanceBetweenColumnSpec} object to/from XML

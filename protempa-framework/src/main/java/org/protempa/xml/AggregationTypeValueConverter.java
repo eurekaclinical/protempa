@@ -23,7 +23,7 @@ import com.thoughtworks.xstream.converters.SingleValueConverter;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.mvel.ConversionException;
 import org.protempa.proposition.value.Unit;
-import org.protempa.query.handler.table.PropositionValueColumnSpec.Type;
+import org.protempa.dest.table.PropositionValueColumnSpec.Type;
 
 /**
  * Convert {@link Unit} objects to/from a string.

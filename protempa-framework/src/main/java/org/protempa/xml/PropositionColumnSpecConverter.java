@@ -23,10 +23,10 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import org.protempa.query.handler.table.Link;
-import org.protempa.query.handler.table.OutputConfig;
-import org.protempa.query.handler.table.PropositionColumnSpec;
-import org.protempa.query.handler.table.ValueOutputConfig;
+import org.protempa.dest.table.Link;
+import org.protempa.dest.table.OutputConfig;
+import org.protempa.dest.table.PropositionColumnSpec;
+import org.protempa.dest.table.ValueOutputConfig;
 
 /**
  * @author mgrand

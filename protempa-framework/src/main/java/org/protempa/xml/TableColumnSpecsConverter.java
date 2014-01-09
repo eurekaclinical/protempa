@@ -24,12 +24,12 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import org.protempa.query.handler.table.AtLeastNColumnSpec;
-import org.protempa.query.handler.table.CountColumnSpec;
-import org.protempa.query.handler.table.DistanceBetweenColumnSpec;
-import org.protempa.query.handler.table.PropositionColumnSpec;
-import org.protempa.query.handler.table.PropositionValueColumnSpec;
-import org.protempa.query.handler.table.TableColumnSpec;
+import org.protempa.dest.table.AtLeastNColumnSpec;
+import org.protempa.dest.table.CountColumnSpec;
+import org.protempa.dest.table.DistanceBetweenColumnSpec;
+import org.protempa.dest.table.PropositionColumnSpec;
+import org.protempa.dest.table.PropositionValueColumnSpec;
+import org.protempa.dest.table.TableColumnSpec;
 
 import java.util.ArrayList;
 import java.util.HashMap;

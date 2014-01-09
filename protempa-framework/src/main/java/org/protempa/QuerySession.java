@@ -31,7 +31,7 @@ import org.arp.javautil.collections.Collections;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
-import org.protempa.query.handler.QueryResultsHandler;
+import org.protempa.dest.QueryResultsHandler;
 
 /**
  * Models a query followed by data exploration.

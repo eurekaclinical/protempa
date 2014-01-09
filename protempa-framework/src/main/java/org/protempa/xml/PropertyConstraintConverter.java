@@ -27,7 +27,7 @@ import org.mvel.ConversionException;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.value.ValueList;
-import org.protempa.query.handler.table.PropertyConstraint;
+import org.protempa.dest.table.PropertyConstraint;
 
 class PropertyConstraintConverter extends AbstractConverter {
 

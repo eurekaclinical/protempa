@@ -51,7 +51,6 @@ import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Iterators;
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.io.UniqueDirectoryCreator;
-import org.arp.javautil.io.WithBufferedReader;
 import org.arp.javautil.io.WithBufferedReaderByLine;
 import org.drools.WorkingMemory;
 import org.junit.After;
@@ -105,8 +104,7 @@ import org.protempa.proposition.value.ValueComparator;
 import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
-import org.protempa.query.handler.QueryResultsHandler;
-import org.protempa.query.handler.QueryResultsHandlerFactory;
+import org.protempa.dest.Destination;
 
 /**
  * Unit tests for Protempa.
@@ -311,9 +309,9 @@ public class ProtempaTest {
             IOException {
         File outputFile = File.createTempFile("protempa-test", null);
         try (FileWriter fw = new FileWriter(outputFile)) {
-            QueryResultsHandlerFactory handler
-                    = new SingleColumnQueryResultsHandlerFactory(fw);
-            protempa.execute(query(), handler);
+            Destination destination
+                    = new SingleColumnDestination(fw);
+            protempa.execute(query(), destination);
         }
         boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);
         assertTrue("output doesn't match", outputMatches);
@@ -800,11 +798,9 @@ public class ProtempaTest {
         try {
             outputFile = File.createTempFile("protempa-test", null);
             try (FileWriter fw = new FileWriter(outputFile)) {
-                QueryResultsHandlerFactory handler
-                        = new SingleColumnQueryResultsHandlerFactory(fw);
-                protempa.outputResults(query(), handler, environmentName);
-                System.err
-                        .println("output written to "
+                Destination destination = new SingleColumnDestination(fw);
+                protempa.outputResults(query(), destination, environmentName);
+                System.err.println("output written to "
                                 + outputFile.getAbsolutePath());
             }
             boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);

@@ -43,16 +43,16 @@ import org.protempa.proposition.value.NumberValue;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
-import org.protempa.query.handler.table.AtLeastNColumnSpec;
-import org.protempa.query.handler.table.CountColumnSpec;
-import org.protempa.query.handler.table.Derivation;
-import org.protempa.query.handler.table.DistanceBetweenColumnSpec;
-import org.protempa.query.handler.table.Link;
-import org.protempa.query.handler.table.OutputConfig;
-import org.protempa.query.handler.table.PropositionColumnSpec;
-import org.protempa.query.handler.table.PropositionValueColumnSpec;
-import org.protempa.query.handler.table.Reference;
-import org.protempa.query.handler.table.ValueOutputConfig;
+import org.protempa.dest.table.AtLeastNColumnSpec;
+import org.protempa.dest.table.CountColumnSpec;
+import org.protempa.dest.table.Derivation;
+import org.protempa.dest.table.DistanceBetweenColumnSpec;
+import org.protempa.dest.table.Link;
+import org.protempa.dest.table.OutputConfig;
+import org.protempa.dest.table.PropositionColumnSpec;
+import org.protempa.dest.table.PropositionValueColumnSpec;
+import org.protempa.dest.table.Reference;
+import org.protempa.dest.table.ValueOutputConfig;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -64,7 +64,7 @@ import java.io.Writer;
 import java.net.URL;
 import java.util.TimeZone;
 import java.util.logging.Logger;
-import org.protempa.query.handler.TableQueryResultsHandlerFactory;
+import org.protempa.dest.table.TableDestination;
 
 /**
  * This class takes a Protempa configuration information such as a query and
@@ -182,7 +182,7 @@ public class XMLConfiguration implements QueryBuilder {
         xstream.useAttributeFor(PositionFilter.class, "startSide");
 
         // tableQueryResultsHandler
-        xstream.alias("tableQueryResultsHandler", TableQueryResultsHandlerFactory.class);
+        xstream.alias("tableQueryResultsHandler", TableDestination.class);
         xstream.registerConverter(new TableQueryResultsHandlerConverter());
 
         return xstream;
@@ -384,9 +384,9 @@ public class XMLConfiguration implements QueryBuilder {
      * @return The described TableQueryResultsHandler.
      * @throws IOException If there is a problem.
      */
-    public static TableQueryResultsHandlerFactory readTableQueryResultsHandlerFactoryAsXML(File file, BufferedWriter dataWriter) throws IOException {
+    public static TableDestination readTableQueryResultsHandlerFactoryAsXML(File file, BufferedWriter dataWriter) throws IOException {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
-        return (TableQueryResultsHandlerFactory) getTableQueryResultsHandlerXStream().fromXML(file);
+        return (TableDestination) getTableQueryResultsHandlerXStream().fromXML(file);
     }
 
     /**
@@ -401,9 +401,9 @@ public class XMLConfiguration implements QueryBuilder {
      * @return The described TableQueryResultsHandler.
      * @throws IOException If there is a problem.
      */
-    public static TableQueryResultsHandlerFactory readTableQueryResultsHandlerAsXML(URL url, BufferedWriter dataWriter) throws IOException {
+    public static TableDestination readTableQueryResultsHandlerAsXML(URL url, BufferedWriter dataWriter) throws IOException {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
-        return (TableQueryResultsHandlerFactory) getTableQueryResultsHandlerXStream().fromXML(url);
+        return (TableDestination) getTableQueryResultsHandlerXStream().fromXML(url);
     }
 
     /**
@@ -418,9 +418,9 @@ public class XMLConfiguration implements QueryBuilder {
      * @return The described TableQueryResultsHandler.
      * @throws IOException If there is a problem.
      */
-    public static TableQueryResultsHandlerFactory readTableQueryResultsHandlerAsXML(Reader reader, BufferedWriter dataWriter) throws IOException {
+    public static TableDestination readTableQueryResultsHandlerAsXML(Reader reader, BufferedWriter dataWriter) throws IOException {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
-        return (TableQueryResultsHandlerFactory) getTableQueryResultsHandlerXStream().fromXML(reader);
+        return (TableDestination) getTableQueryResultsHandlerXStream().fromXML(reader);
     }
 
     /**
@@ -435,9 +435,9 @@ public class XMLConfiguration implements QueryBuilder {
      * @return The described TableQueryResultsHandler.
      * @throws IOException If there is a problem.
      */
-    public static TableQueryResultsHandlerFactory readTableQueryResultsHandlerAsXML(InputStream inputStream, BufferedWriter dataWriter) throws IOException {
+    public static TableDestination readTableQueryResultsHandlerAsXML(InputStream inputStream, BufferedWriter dataWriter) throws IOException {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
-        return (TableQueryResultsHandlerFactory) getTableQueryResultsHandlerXStream().fromXML(inputStream);
+        return (TableDestination) getTableQueryResultsHandlerXStream().fromXML(inputStream);
     }
 
     /**
@@ -452,78 +452,78 @@ public class XMLConfiguration implements QueryBuilder {
      * @return The described TableQueryResultsHandler.
      * @throws IOException If there is a problem.
      */
-    public static TableQueryResultsHandlerFactory readTableQueryResultsHandlerAsXML(String str, BufferedWriter dataWriter) throws IOException {
+    public static TableDestination readTableQueryResultsHandlerAsXML(String str, BufferedWriter dataWriter) throws IOException {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
-        return (TableQueryResultsHandlerFactory) getTableQueryResultsHandlerXStream().fromXML(str);
+        return (TableDestination) getTableQueryResultsHandlerXStream().fromXML(str);
     }
 
     /**
      * Read XML from the specified HierarchicalStreamReader that describes a
-     * Protempa TableQueryResultsHandler and create the
-     * {@link TableQueryResultsHandler}.
+     * Protempa TableDestination and create the
+     * {@link TableDestination}.
      *
      * @param hsr        The hierarchical stream from which to read the XML. The top
      *                   level element of the XML must be "tableQueryResultsHandler"
      *                   and the XML must conform to the Protempa XML schema.
      * @param dataWriter The Writer that the described TableQueryResultsHandler will
      *                   use to write its output.
-     * @return The described TableQueryResultsHandler.
+     * @return The described TableDestination.
      * @throws IOException If there is a problem.
      */
-    static TableQueryResultsHandlerFactory readTableQueryResultsHandlerAsXML(HierarchicalStreamReader hsr, BufferedWriter dataWriter) {
+    static TableDestination readTableDestinationAsXML(HierarchicalStreamReader hsr, BufferedWriter dataWriter) {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
         DataHolder dataHolder = new MapBackedDataHolder();
         dataHolder.put("writer", dataWriter);
-        TableQueryResultsHandlerFactory resultsHandler = (TableQueryResultsHandlerFactory) getTableQueryResultsHandlerXStream().unmarshal(hsr, null, dataHolder);
+        TableDestination destination = (TableDestination) getTableQueryResultsHandlerXStream().unmarshal(hsr, null, dataHolder);
         myLogger.exiting(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
-        return resultsHandler;
+        return destination;
     }
 
     /**
-     * Write the given {@link TableQueryResultsHandler} query to the specified
+     * Write the given {@link TableDestination} query to the specified
      * file.
      *
-     * @param resultsHandler The TableQueryResultsHandler to be written as XML.
+     * @param destination The TableDestination to be written as XML.
      * @param file           The file to write the XML to.
      * @throws IOException If there is a problem writing the file.
      */
-    public static void writeTableQueryResultsHandlerAsXML(TableQueryResultsHandlerFactory resultsHandler, File file) throws IOException {
-        writeTableQueryResultsHandlerAsXML(resultsHandler, file, false);
+    public static void writeTableDestinationAsXML(TableDestination destination, File file) throws IOException {
+        writeTableDestinationAsXML(destination, file, false);
     }
 
     /**
-     * Write the given {@link TableQueryResultsHandler} query to the specified
+     * Write the given {@link TableDestination} query to the specified
      * file.
      *
-     * @param resultsHandler          The TableQueryResultsHandler to be written as XML.
+     * @param destination          The TableDestination to be written as XML.
      * @param file                    The file to write the XML to.
      * @param surpressSchemaReference If true, don't include a reference to the schema in the
      *                                generated XML file.
      * @throws IOException If there is a problem writing the file.
      */
-    public static void writeTableQueryResultsHandlerAsXML(TableQueryResultsHandlerFactory resultsHandler, File file, boolean surpressSchemaReference)
+    public static void writeTableDestinationAsXML(TableDestination destination, File file, boolean surpressSchemaReference)
             throws IOException {
         Writer writer = new FileWriter(file);
-        writeTableQueryResultsHandlerAsXML(resultsHandler, writer, surpressSchemaReference);
+        writeTableDestinationAsXML(destination, writer, surpressSchemaReference);
     }
 
     /**
-     * Write the given {@link TableQueryResultsHandler} query using the
+     * Write the given {@link TableDestination} query using the
      * specified {@link Writer}.
      *
-     * @param resultsHandler          The TableQueryResultsHandler to be written as XML.
+     * @param destination          The TableDestination to be written as XML.
      * @param writer                  The Writer to us to write the XML.
      * @param surpressSchemaReference If true, don't include a reference to the schema in the
      *                                generated XML file.
      * @throws IOException If there is a problem writing the file.
      */
-    public static void writeTableQueryResultsHandlerAsXML(TableQueryResultsHandlerFactory resultsHandler, Writer writer, boolean surpressSchemaReference)
+    public static void writeTableDestinationAsXML(TableDestination destination, Writer writer, boolean surpressSchemaReference)
             throws IOException {
         XMLConfiguration.surpressSchemaReference.set(Boolean.valueOf(surpressSchemaReference));
         myLogger.entering(XMLConfiguration.class.getName(), "writeQueryAsXML");
         XStream xstream = getTableQueryResultsHandlerXStream();
         CharacterToReferenceWriter ctrw = new CharacterToReferenceWriter(writer);
-        xstream.toXML(resultsHandler, ctrw);
+        xstream.toXML(destination, ctrw);
         ctrw.close();
         myLogger.exiting(XMLConfiguration.class.getName(), "writeQueryAsXML");
     }

@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.protempa.proposition.value.ValueComparator;
-import org.protempa.query.handler.table.PropertyConstraint;
+import org.protempa.dest.table.PropertyConstraint;
 
 import java.util.ArrayList;
 import java.util.HashSet;

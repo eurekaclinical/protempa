@@ -43,8 +43,8 @@ import org.protempa.backend.tsb.TermSourceBackend;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
-import org.protempa.query.handler.QueryResultsHandler;
-import org.protempa.query.handler.QueryResultsHandlerFactory;
+import org.protempa.dest.QueryResultsHandler;
+import org.protempa.dest.Destination;
 
 /**
  * Main PROTEMPA API.
@@ -280,11 +280,10 @@ public final class Protempa {
      * method.
      *
      * @param query a {@link Query}. Cannot be <code>null</code>.
-     * @param resultsHandler a {@link QueryResultsHandler}. Cannot * * * * * *
-     * be <code>null</code>.
+     * @param destination a destination. Cannot be <code>null</code>.
      * @throws FinderException if an error occurred during query.
      */
-    public void execute(Query query, QueryResultsHandlerFactory resultsHandler)
+    public void execute(Query query, Destination destination)
             throws FinderException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
@@ -293,14 +292,14 @@ public final class Protempa {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
-        if (resultsHandler == null) {
+        if (destination == null) {
             throw new IllegalArgumentException("resultsHandler cannot be null");
         }
         try {
             Logger logger = ProtempaUtil.logger();
             logger.log(Level.INFO, "Executing query {0}", query.getId());
             QuerySession qs = new QuerySession(query, this.abstractionFinder);
-            this.abstractionFinder.doFind(query, resultsHandler, qs);
+            this.abstractionFinder.doFind(query, destination, qs);
             logger.log(Level.INFO, "Query {0} execution complete", query.getId());
         } catch (FinderException e) {
             this.abstractionFinder.getDataSource().failureOccurred(e);
@@ -320,7 +319,7 @@ public final class Protempa {
      * method.
      *
      * @param query the query to execute
-     * @param resultHandler a result handler specifying how the output should be
+     * @param destination a destination specifying how the output should be
      * produced
      * @param retrievalStoreEnvironment the name of the persistent store that
      * will hold the propositions retrieved from the data source
@@ -329,7 +328,7 @@ public final class Protempa {
      * @throws FinderException if PROTEMPA fails to complete for any reason
      */
     public void executeWithPersistence(Query query,
-            QueryResultsHandlerFactory resultHandler,
+            Destination destination,
             String retrievalStoreEnvironment,
             String processStoreName) throws FinderException {
         if (query == null) {
@@ -358,7 +357,7 @@ public final class Protempa {
             logger.log(Level.INFO, "Processing complete");
             logger.log(Level.INFO, "Beginning output stage");
             this.abstractionFinder.outputStoredResults(query,
-                    resultHandler, qs, processStoreName);
+                    destination, qs, processStoreName);
             logger.log(Level.INFO, "Output complete");
         } catch (FinderException e) {
             this.abstractionFinder.getDataSource().failureOccurred(e);
@@ -460,17 +459,17 @@ public final class Protempa {
      * stages.
      *
      * @param query the original query used to retrieve the data
-     * @param resultHandler a result handler that specifies how the output
+     * @param destination a destination that specifies how the output
      * should be produced
      * @param workingMemoryEnvironment the name of the persistent store
      * containing the processed propositions; should be the same as the one
      * provided to {@link #processResultsAndPersist}.
      * @throws FinderException if the output fails to complete
      */
-    public void outputResults(Query query, QueryResultsHandlerFactory resultHandler,
+    public void outputResults(Query query, Destination destination,
             String workingMemoryEnvironment) throws FinderException {
         outputResults(query, Arrays.asSet(query.getKeyIds()),
-                Arrays.asSet(query.getPropositionIds()), resultHandler,
+                Arrays.asSet(query.getPropositionIds()), destination,
                 workingMemoryEnvironment);
     }
 
@@ -499,7 +498,7 @@ public final class Protempa {
      * @throws FinderException if the output fails to complete
      */
     public void outputResults(Query query, Set<String> keyIds,
-            Set<String> propositionIds, QueryResultsHandlerFactory resultHandler,
+            Set<String> propositionIds, Destination resultHandler,
             String workingMemoryStoreEnvironment) throws FinderException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
@@ -529,15 +528,14 @@ public final class Protempa {
      * life cycle without storing the processed results.
      *
      * @param newQuery the query to execute.
-     * @param resultHandler a result handler that specifies how the output
+     * @param destination a destination that specifies how the output
      * should be produced
      * @param propositionStoreEnvironment the name of the persistent store
      * containing the retrieved propositions; should be the same as the one
      * provided to {@link #retrieveDataAndPersist(Query, String)}
      * @throws FinderException if the processing and output fail to complete
      */
-    public void processResultsAndOutput(Query query,
-            QueryResultsHandlerFactory resultHandler,
+    public void processResultsAndOutput(Query query, Destination destination,
             String propositionStoreEnvironment) throws FinderException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
@@ -549,7 +547,7 @@ public final class Protempa {
         try {
             QuerySession qs = new QuerySession(query, this.abstractionFinder);
             this.abstractionFinder.processAndOutputStoredResults(query,
-                    resultHandler, qs, propositionStoreEnvironment);
+                    destination, qs, propositionStoreEnvironment);
         } catch (FinderException e) {
             this.abstractionFinder.getDataSource().failureOccurred(e);
             throw e;

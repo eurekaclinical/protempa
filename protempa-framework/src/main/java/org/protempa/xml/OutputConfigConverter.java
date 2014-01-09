@@ -23,7 +23,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import org.protempa.query.handler.table.OutputConfig;
+import org.protempa.dest.table.OutputConfig;
 
 /**
  * @author mgrand

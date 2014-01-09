@@ -24,12 +24,12 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.mvel.ConversionException;
-import org.protempa.query.handler.TableQueryResultsHandler;
-import org.protempa.query.handler.table.TableColumnSpec;
+import org.protempa.dest.table.TableQueryResultsHandler;
+import org.protempa.dest.table.TableColumnSpec;
 
 import java.io.BufferedWriter;
 import java.net.URL;
-import org.protempa.query.handler.TableQueryResultsHandlerFactory;
+import org.protempa.dest.table.TableDestination;
 
 /**
  * Convert Protempa Query object to/from XML
@@ -58,7 +58,7 @@ class TableQueryResultsHandlerConverter extends AbstractConverter {
      */
     @Override
     public boolean canConvert(@SuppressWarnings("rawtypes") Class clazz) {
-        return TableQueryResultsHandlerFactory.class.equals(clazz);
+        return TableDestination.class.equals(clazz);
     }
 
     /**
@@ -74,7 +74,7 @@ class TableQueryResultsHandlerConverter extends AbstractConverter {
             writer.addAttribute("xsi:noNamespaceSchemaLocation", getTableQueryResultsHandlerUrl().toExternalForm());
         }
 
-        TableQueryResultsHandlerFactory resultsHandler = (TableQueryResultsHandlerFactory) value;
+        TableDestination resultsHandler = (TableDestination) value;
 
         writer.addAttribute("columnDelimiter", Character.toString(resultsHandler.getColumnDelimiter()));
 
@@ -121,7 +121,7 @@ class TableQueryResultsHandlerConverter extends AbstractConverter {
         expectNoMore(reader);
 
         BufferedWriter dataWriter = (BufferedWriter) context.get("writer");
-        return new TableQueryResultsHandlerFactory(dataWriter, columnDelimiter.charAt(0), propIds, tableColumnSpecs, true);
+        return new TableDestination(dataWriter, columnDelimiter.charAt(0), propIds, tableColumnSpecs, true);
     }
 
     URL getTableQueryResultsHandlerUrl() {

@@ -27,9 +27,9 @@ import org.mvel.ConversionException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.Value;
-import org.protempa.query.handler.table.Derivation;
-import org.protempa.query.handler.table.Derivation.Behavior;
-import org.protempa.query.handler.table.PropertyConstraint;
+import org.protempa.dest.table.Derivation;
+import org.protempa.dest.table.Derivation.Behavior;
+import org.protempa.dest.table.PropertyConstraint;
 
 import java.util.Comparator;
 

@@ -23,9 +23,9 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import org.protempa.query.handler.table.Derivation;
-import org.protempa.query.handler.table.Link;
-import org.protempa.query.handler.table.Reference;
+import org.protempa.dest.table.Derivation;
+import org.protempa.dest.table.Link;
+import org.protempa.dest.table.Reference;
 
 import java.util.ArrayList;
 import java.util.HashSet;
