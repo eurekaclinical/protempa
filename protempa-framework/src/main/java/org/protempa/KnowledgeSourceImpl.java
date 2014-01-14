@@ -980,9 +980,17 @@ public final class KnowledgeSourceImpl
 
 		if (parentsForPropositionDefinition != null
 				&& parentsForPropositionDefinition.size() == 0) {
+			if(currentParentList==null){
+			/*this case is met when the root element is the search element eg:Vital Sign. The current parent list is null in that case*/
+				currentParentList = new ArrayList<String>();
+				currentParentList.add(propositionDefinition.getId());
+			}
 			if (!allParentListsSoFar.contains(currentParentList)
-					&& currentParentList != null)
-				allParentListsSoFar.add(currentParentList);
+					&& currentParentList != null){
+				allParentListsSoFar.add(currentParentList)  ;
+				currentParentList = null;
+			}
+
 		} else if (parentsForPropositionDefinition.size() >= 2) {
 			for (int i = 0; i < parentsForPropositionDefinition.size(); i++) {
 				if (currentParentList != null) {
