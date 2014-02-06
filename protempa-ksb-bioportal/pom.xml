@@ -14,6 +14,10 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.protempa</groupId>
+                <artifactId>protempa-framework</artifactId>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
             </dependency>
