@@ -25,10 +25,8 @@ This project includes:
   commons-beanutils under Apache License, Version 2.0
   Digester under The Apache Software License, Version 2.0
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
-  Hamcrest Core under New BSD License
   JavaUtil under Apache License, Version 2.0
   je under Sleepycat License
-  JUnit under Common Public License Version 1.0
   kXML 2 is a small XML pull parser based on the common XML pull API under BSD style or Public Domain
   mvel under The Apache Software License, Version 2.0
   Protempa Commons INI Backend Configurations under Apache License, Version 2.0
