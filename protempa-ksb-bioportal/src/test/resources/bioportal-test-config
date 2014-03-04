@@ -1,0 +1,8 @@
+[org.protempa.dsb.MockDataSourceBackend]
+
+[org.protempa.backend.asb.java.JavaAlgorithmBackend]
+
+[org.protempa.tsb.MockTermSourceBackend]
+
+[org.protempa.backend.ksb.bioportal.BioportalKnowledgeSourceBackend]
+databaseId = jdbc:h2:src/test/resources/bioportal.h2.db;USER=sa
