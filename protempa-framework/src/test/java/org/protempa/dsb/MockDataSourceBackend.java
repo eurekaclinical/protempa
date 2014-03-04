@@ -19,30 +19,36 @@
  */
 package org.protempa.dsb;
 
+import org.protempa.DataSourceReadException;
+import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.MultiplexingDataStreamingEventIterator;
-import java.util.Set;
-import org.protempa.*;
-import org.protempa.backend.dsb.AbstractDataSourceBackend;
+import org.protempa.QuerySession;
 import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.DataSourceBackendFailedConfigurationValidationException;
 import org.protempa.backend.DataSourceBackendFailedDataValidationException;
+import org.protempa.backend.annotations.BackendInfo;
+import org.protempa.backend.dsb.AbstractDataSourceBackend;
 import org.protempa.backend.dsb.DataValidationEvent;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
+
+import java.util.Set;
 
 
 /**
  *
  * @author Andrew Post
  */
-class MockDataSourceBackend extends AbstractDataSourceBackend {
+@BackendInfo(displayName = "Mock Data Source Backend")
+public class MockDataSourceBackend extends AbstractDataSourceBackend {
 
     @Override
     public void initialize(BackendInstanceSpec config)
             throws BackendInitializationException {
-        throw new UnsupportedOperationException("Not supported yet.");
+//        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
