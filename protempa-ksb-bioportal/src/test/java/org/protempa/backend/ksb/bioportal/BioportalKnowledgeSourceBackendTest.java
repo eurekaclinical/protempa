@@ -53,7 +53,7 @@ public class BioportalKnowledgeSourceBackendTest {
             assertNotNull(ksb);
             assertEquals(BioportalKnowledgeSourceBackend.class, ksb.getClass());
             BioportalKnowledgeSourceBackend bpksb = (BioportalKnowledgeSourceBackend) ksb;
-            assertEquals("jdbc:h2:src/test/resources/bioportal.h2.db;USER=sa", bpksb.getDatabaseId());
+            assertEquals("jdbc:h2:src/test/resources/bioportal;USER=sa", bpksb.getDatabaseId());
         } catch (ConfigurationsLoadException | BackendProviderSpecLoaderException | InvalidConfigurationException | ConfigurationsNotFoundException | ProtempaStartupException e) {
             e.printStackTrace();
             fail();
