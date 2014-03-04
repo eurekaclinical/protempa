@@ -5,4 +5,4 @@
 [org.protempa.tsb.MockTermSourceBackend]
 
 [org.protempa.backend.ksb.bioportal.BioportalKnowledgeSourceBackend]
-databaseId = jdbc:h2:src/test/resources/bioportal.h2.db;USER=sa
+databaseId = jdbc:h2:src/test/resources/bioportal;USER=sa
