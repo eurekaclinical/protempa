@@ -20,7 +20,10 @@ package org.protempa.backend.ksb.bioportal;
  * #L%
  */
 
+import org.junit.Before;
 import org.junit.Test;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.Protempa;
 import org.protempa.ProtempaStartupException;
 import org.protempa.SourceFactory;
@@ -42,22 +45,65 @@ import static org.junit.Assert.fail;
  */
 public class BioportalKnowledgeSourceBackendTest {
 
-    @Test
-    public void testConnection() {
+    private BioportalKnowledgeSourceBackend ksb;
+
+    @Before
+    public void setUp() {
+        SourceFactory sf = null;
         try {
-            SourceFactory sf = new SourceFactory(new INIConfigurations(new File("src/test/resources")),
+            sf = new SourceFactory(new INIConfigurations(new File("src/test/resources")),
                     "bioportal-test-config");
             Protempa p = Protempa.newInstance(sf);
-            assertEquals(1, p.getKnowledgeSource().getBackends().length);
             KnowledgeSourceBackend ksb = p.getKnowledgeSource().getBackends()[0];
-            assertNotNull(ksb);
-            assertEquals(BioportalKnowledgeSourceBackend.class, ksb.getClass());
-            BioportalKnowledgeSourceBackend bpksb = (BioportalKnowledgeSourceBackend) ksb;
-            assertEquals("jdbc:h2:src/test/resources/bioportal;USER=sa", bpksb.getDatabaseId());
-        } catch (ConfigurationsLoadException | BackendProviderSpecLoaderException | InvalidConfigurationException | ConfigurationsNotFoundException | ProtempaStartupException e) {
+            this.ksb = (BioportalKnowledgeSourceBackend) ksb;
+        } catch (BackendProviderSpecLoaderException | ConfigurationsLoadException | InvalidConfigurationException | ConfigurationsNotFoundException | ProtempaStartupException e) {
             e.printStackTrace();
             fail();
         }
-
     }
+
+    @Test
+    public void testReadPropositionDefinition() throws KnowledgeSourceReadException {
+        PropositionDefinition propDef = this.ksb.readPropositionDefinition("http://purl.bioontology.org/ontology/ICD9CM/250");
+        assertNotNull(propDef);
+        assertEquals("http://purl.bioontology.org/ontology/ICD9CM/250", propDef.getId());
+        assertEquals("Diabetes milletus", propDef.getDisplayName());
+        assertEquals("Diabetes milletus", propDef.getAbbreviatedDisplayName());
+    }
+
+    @Test
+    public void testReadAbstractionDefinition() {
+        fail();
+    }
+
+    @Test
+    public void testReadContextDefinition() {
+        fail();
+    }
+
+    @Test
+    public void testReadTemporalPropositionDefinition() {
+        fail();
+    }
+
+    @Test
+    public void testReadAbstractedInto() {
+        fail();
+    }
+
+    @Test
+    public void testReadIsA() {
+      fail();
+    }
+
+    @Test
+    public void testReadSubContextsOf() {
+        fail();
+    }
+
+    @Test
+    public void testGetKnowledgeSourceSearchResults() {
+        fail();
+    }
+
 }
