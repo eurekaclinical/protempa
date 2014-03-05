@@ -153,6 +153,7 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
             EventDefinition result = new EventDefinition(id);
             result.setDisplayName(term.displayName);
             result.setAbbreviatedDisplayName(term.code);
+            result.setInDataSource(true);
 
             Set<String> children = readChildrenFromDatabase(id);
             String[] iia = new String[children.size()];

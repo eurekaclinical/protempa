@@ -76,6 +76,7 @@ public class BioportalKnowledgeSourceBackendTest {
         assertEquals("http://purl.bioontology.org/ontology/ICD9CM/250", propDef.getId());
         assertEquals("Diabetes mellitus", propDef.getDisplayName());
         assertEquals("250", propDef.getAbbreviatedDisplayName());
+        assertTrue(propDef.getInDataSource());
     }
 
     @Test
