@@ -38,8 +38,10 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -47,6 +49,7 @@ import static org.junit.Assert.fail;
  */
 public class BioportalKnowledgeSourceBackendTest {
 
+    private static final String ICD9CM_250_ID = "http://purl.bioontology.org/ontology/ICD9CM/250";
     private BioportalKnowledgeSourceBackend ksb;
 
     @Before
@@ -89,32 +92,7 @@ public class BioportalKnowledgeSourceBackendTest {
     }
 
     @Test
-    public void testReadAbstractionDefinition() {
-        fail();
-    }
-
-    @Test
-    public void testReadContextDefinition() {
-        fail();
-    }
-
-    @Test
-    public void testReadTemporalPropositionDefinition() {
-        fail();
-    }
-
-    @Test
-    public void testReadAbstractedInto() {
-        fail();
-    }
-
-    @Test
     public void testReadIsA() {
-      fail();
-    }
-
-    @Test
-    public void testReadSubContextsOf() {
         fail();
     }
 
@@ -123,4 +101,33 @@ public class BioportalKnowledgeSourceBackendTest {
         fail();
     }
 
+    @Test
+    public void testReadAbstractionDefinition() throws KnowledgeSourceReadException {
+        assertNull(this.ksb.readAbstractionDefinition(ICD9CM_250_ID));
+    }
+
+    @Test
+    public void testReadContextDefinition() throws KnowledgeSourceReadException {
+        assertNull(this.ksb.readContextDefinition(ICD9CM_250_ID));
+    }
+
+    @Test
+    public void testReadTemporalPropositionDefinition() throws KnowledgeSourceReadException {
+        assertNull(this.ksb.readTemporalPropositionDefinition(ICD9CM_250_ID));
+    }
+
+    @Test
+    public void testReadAbstractedInto() throws KnowledgeSourceReadException {
+        assertArrayEquals(new String[0], this.ksb.readAbstractedInto(ICD9CM_250_ID));
+    }
+
+    @Test
+    public void testReadInduces() throws KnowledgeSourceReadException {
+        assertArrayEquals(new String[0], this.ksb.readInduces(ICD9CM_250_ID));
+    }
+
+    @Test
+    public void testReadSubContextsOf() throws KnowledgeSourceReadException {
+        assertArrayEquals(new String[0], this.ksb.readSubContextOfs(ICD9CM_250_ID));
+    }
 }
