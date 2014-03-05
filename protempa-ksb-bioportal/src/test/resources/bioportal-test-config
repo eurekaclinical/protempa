@@ -6,3 +6,4 @@
 
 [org.protempa.backend.ksb.bioportal.BioportalKnowledgeSourceBackend]
 databaseId = jdbc:h2:src/test/resources/bioportal;USER=sa
+ontologiesTable = bioportal

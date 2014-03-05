@@ -46,6 +46,10 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
     /* the ID of the database that holds the ontologies */
     private String databaseId;
 
+    /* name of the table that holds the ontologies */
+    private String ontologiesTable;
+
+    /* connection to the database that holds the ontologies */
     private Connection conn;
 
     public String getDatabaseId() {
@@ -55,6 +59,15 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
     @BackendProperty
     public void setDatabaseId(String databaseId) {
         this.databaseId = databaseId;
+    }
+
+    public String getOntologiesTable() {
+        return ontologiesTable;
+    }
+
+    @BackendProperty
+    public void setOntologiesTable(String ontologiesTable) {
+        this.ontologiesTable = ontologiesTable;
     }
 
     @Override
