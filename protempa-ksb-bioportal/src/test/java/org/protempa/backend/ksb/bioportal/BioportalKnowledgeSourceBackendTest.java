@@ -36,12 +36,14 @@ import org.protempa.bconfigs.ini4j.INIConfigurations;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -98,8 +100,16 @@ public class BioportalKnowledgeSourceBackendTest {
     }
 
     @Test
-    public void testGetKnowledgeSourceSearchResults() {
-        fail();
+    public void testGetKnowledgeSourceSearchResults() throws KnowledgeSourceReadException {
+        List<String> results = this.ksb.getKnowledgeSourceSearchResults("diabetes");
+        assertEquals(95, results.size());
+        assertTrue(results.contains(ICD9CM_250_ID));
+
+        // uppercase "Diabetes"
+        assertTrue(results.contains("http://purl.bioontology.org/ontology/ICD9CM/250.93"));
+
+        // lowercase "diabetes"
+        assertTrue(results.contains("http://purl.bioontology.org/ontology/ICD9CM/249.71"));
     }
 
     @Test
