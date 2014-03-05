@@ -38,7 +38,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -57,6 +59,9 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
 
     /* prepared statement for retrieving terms from the database */
     private PreparedStatement findStmt;
+
+    /* prepared statement for retrieving the children of a term */
+    private PreparedStatement childrenStmt;
 
     public String getDatabaseId() {
         return databaseId;
@@ -83,6 +88,7 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
             try {
                 this.conn = DriverManager.getConnection(this.databaseId);
                 this.findStmt = conn.prepareStatement("SELECT display_name, code, ontology FROM " + this.ontologiesTable + " WHERE purl_id = ?");
+                this.childrenStmt = conn.prepareStatement("SELECT purl_id FROM " + this.ontologiesTable + " WHERE parent_id = ?");
             } catch (SQLException e) {
                 throw new KnowledgeSourceBackendInitializationException("Failed to initialize BioPortal knowledge source backend", e);
             }
@@ -116,6 +122,21 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
         return null;
     }
 
+    private Set<String> readChildrenFromDatabase(String id) throws KnowledgeSourceReadException {
+        Set<String> result = new HashSet<>();
+        try {
+            this.childrenStmt.setString(1, id);
+            ResultSet rs = this.childrenStmt.executeQuery();
+            while (rs.next()) {
+                result.add(rs.getString(1));
+            }
+        } catch (SQLException e) {
+            throw new KnowledgeSourceReadException(e);
+        }
+
+        return result;
+    }
+
     @Override
     public PropositionDefinition readPropositionDefinition(String id) throws KnowledgeSourceReadException {
         BioportalTerm term = readFromDatabase(id);
@@ -123,6 +144,16 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
             EventDefinition result = new EventDefinition(id);
             result.setDisplayName(term.displayName);
             result.setAbbreviatedDisplayName(term.code);
+
+            Set<String> children = readChildrenFromDatabase(id);
+            String[] iia = new String[children.size()];
+
+            int i = 0;
+            for (String child : children) {
+                iia[i] = child;
+                i++;
+            }
+            result.setInverseIsA(iia);
 
             return result;
         }

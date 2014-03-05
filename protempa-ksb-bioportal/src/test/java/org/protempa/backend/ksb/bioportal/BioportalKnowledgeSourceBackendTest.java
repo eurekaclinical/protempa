@@ -35,6 +35,8 @@ import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.bconfigs.ini4j.INIConfigurations;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -69,6 +71,21 @@ public class BioportalKnowledgeSourceBackendTest {
         assertEquals("http://purl.bioontology.org/ontology/ICD9CM/250", propDef.getId());
         assertEquals("Diabetes mellitus", propDef.getDisplayName());
         assertEquals("250", propDef.getAbbreviatedDisplayName());
+    }
+
+    @Test
+    public void testReadPropositionDefinitionInverseIsA() throws KnowledgeSourceReadException {
+        PropositionDefinition propDef = this.ksb.readPropositionDefinition("http://purl.bioontology.org/ontology/ICD9CM/250");
+        assertEquals(10, propDef.getChildren().length);
+        Set<String> expectedChildren = new HashSet<>();
+        for (int i = 0; i < 10; i++) {
+            expectedChildren.add("http://purl.bioontology.org/ontology/ICD9CM/250." + i);
+        }
+        Set<String> actualChildren = new HashSet<>();
+        for (String child : propDef.getChildren()) {
+            actualChildren.add(child);
+        }
+        assertEquals(expectedChildren, actualChildren);
     }
 
     @Test
