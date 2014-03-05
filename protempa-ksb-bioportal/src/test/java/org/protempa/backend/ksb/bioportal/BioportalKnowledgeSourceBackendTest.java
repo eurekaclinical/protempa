@@ -67,8 +67,8 @@ public class BioportalKnowledgeSourceBackendTest {
         PropositionDefinition propDef = this.ksb.readPropositionDefinition("http://purl.bioontology.org/ontology/ICD9CM/250");
         assertNotNull(propDef);
         assertEquals("http://purl.bioontology.org/ontology/ICD9CM/250", propDef.getId());
-        assertEquals("Diabetes milletus", propDef.getDisplayName());
-        assertEquals("Diabetes milletus", propDef.getAbbreviatedDisplayName());
+        assertEquals("Diabetes mellitus", propDef.getDisplayName());
+        assertEquals("250", propDef.getAbbreviatedDisplayName());
     }
 
     @Test

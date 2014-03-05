@@ -22,6 +22,7 @@ package org.protempa.backend.ksb.bioportal;
 
 import org.protempa.AbstractionDefinition;
 import org.protempa.ContextDefinition;
+import org.protempa.EventDefinition;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
 import org.protempa.TemporalPropositionDefinition;
@@ -34,6 +35,8 @@ import org.protempa.backend.annotations.BackendProperty;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -51,6 +54,9 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
 
     /* connection to the database that holds the ontologies */
     private Connection conn;
+
+    /* prepared statement for retrieving terms from the database */
+    private PreparedStatement findStmt;
 
     public String getDatabaseId() {
         return databaseId;
@@ -76,14 +82,50 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
         if (this.conn == null) {
             try {
                 this.conn = DriverManager.getConnection(this.databaseId);
+                this.findStmt = conn.prepareStatement("SELECT display_name, code, ontology FROM " + this.ontologiesTable + " WHERE purl_id = ?");
             } catch (SQLException e) {
                 throw new KnowledgeSourceBackendInitializationException("Failed to initialize BioPortal knowledge source backend", e);
             }
         }
     }
 
+    private static class BioportalTerm {
+        String id;
+        String displayName;
+        String code;
+        String ontology;
+    }
+
+    private BioportalTerm readFromDatabase(String id) throws KnowledgeSourceReadException {
+        try {
+            this.findStmt.setString(1, id);
+            ResultSet rs = this.findStmt.executeQuery();
+            if (rs.next()) {
+                BioportalTerm result = new BioportalTerm();
+                result.id = id;
+                result.displayName = rs.getString(1);
+                result.code = rs.getString(2);
+                result.ontology = rs.getString(3);
+
+                return result;
+            }
+        } catch (SQLException e) {
+            throw new KnowledgeSourceReadException(e);
+        }
+
+        return null;
+    }
+
     @Override
     public PropositionDefinition readPropositionDefinition(String id) throws KnowledgeSourceReadException {
+        BioportalTerm term = readFromDatabase(id);
+        if (term != null) {
+            EventDefinition result = new EventDefinition(id);
+            result.setDisplayName(term.displayName);
+            result.setAbbreviatedDisplayName(term.code);
+
+            return result;
+        }
         return null;
     }
 
