@@ -92,8 +92,9 @@ public class BioportalKnowledgeSourceBackendTest {
     }
 
     @Test
-    public void testReadIsA() {
-        fail();
+    public void testReadIsA() throws KnowledgeSourceReadException {
+        String[] isa = this.ksb.readIsA(ICD9CM_250_ID + ".1");
+        assertArrayEquals(new String[]{ICD9CM_250_ID}, isa);
     }
 
     @Test

@@ -38,6 +38,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -62,6 +63,9 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
 
     /* prepared statement for retrieving the children of a term */
     private PreparedStatement childrenStmt;
+
+    /* prepared statement for retrieving the parent of a term */
+    private PreparedStatement parentStmt;
 
     public String getDatabaseId() {
         return databaseId;
@@ -89,6 +93,7 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
                 this.conn = DriverManager.getConnection(this.databaseId);
                 this.findStmt = conn.prepareStatement("SELECT display_name, code, ontology FROM " + this.ontologiesTable + " WHERE purl_id = ?");
                 this.childrenStmt = conn.prepareStatement("SELECT purl_id FROM " + this.ontologiesTable + " WHERE parent_id = ?");
+                this.parentStmt = conn.prepareStatement("SELECT parent_id FROM " + this.ontologiesTable + " WHERE purl_id = ?");
             } catch (SQLException e) {
                 throw new KnowledgeSourceBackendInitializationException("Failed to initialize BioPortal knowledge source backend", e);
             }
@@ -161,6 +166,21 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
     }
 
     @Override
+    public String[] readIsA(String propId) throws KnowledgeSourceReadException {
+        try {
+            List<String> result = new ArrayList<>();
+            this.parentStmt.setString(1, propId);
+            ResultSet rs = this.parentStmt.executeQuery();
+            while (rs.next()) {
+                result.add(rs.getString(1));
+            }
+            return result.toArray(new String[result.size()]);
+        } catch (SQLException e) {
+            throw new KnowledgeSourceReadException(e);
+        }
+    }
+
+    @Override
     public AbstractionDefinition readAbstractionDefinition(String id) throws KnowledgeSourceReadException {
         return null;
     }
@@ -177,11 +197,6 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
 
     @Override
     public String[] readAbstractedInto(String propId) throws KnowledgeSourceReadException {
-        return new String[0];
-    }
-
-    @Override
-    public String[] readIsA(String propId) throws KnowledgeSourceReadException {
         return new String[0];
     }
 
