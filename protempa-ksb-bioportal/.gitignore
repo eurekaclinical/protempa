@@ -1,2 +1,3 @@
 *.trace.db
+*.lock.db
 
