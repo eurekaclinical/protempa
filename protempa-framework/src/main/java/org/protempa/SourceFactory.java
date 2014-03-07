@@ -20,26 +20,28 @@
 package org.protempa;
 
 import org.protempa.backend.BackendInitializationException;
-import org.protempa.backend.tsb.TermSourceBackend;
-import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.backend.asb.AlgorithmSourceBackend;
-import org.protempa.backend.dsb.DataSourceBackend;
-import org.protempa.backend.InvalidConfigurationException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.BackendProvider;
-import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.BackendProviderManager;
+import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
-import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.Configurations;
+import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.ConfigurationsNotFoundException;
 import org.protempa.backend.ConfigurationsProviderManager;
+import org.protempa.backend.InvalidConfigurationException;
+import org.protempa.backend.asb.AlgorithmSourceBackend;
+import org.protempa.backend.dsb.DataSourceBackend;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
+import org.protempa.backend.tsb.TermSourceBackend;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -127,6 +129,7 @@ public class SourceFactory {
     public final DataSource newDataSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         DataSourceBackend[] backends = new DataSourceBackend[this.dataSourceBackendInstanceSpecs.size()];
+        Collections.sort(this.dataSourceBackendInstanceSpecs);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.dataSourceBackendInstanceSpecs.get(i).getInstance();
         }
@@ -136,6 +139,7 @@ public class SourceFactory {
     public final KnowledgeSource newKnowledgeSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         KnowledgeSourceBackend[] backends = new KnowledgeSourceBackend[this.knowledgeSourceBackendInstanceSpecs.size()];
+        Collections.sort(this.knowledgeSourceBackendInstanceSpecs);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.knowledgeSourceBackendInstanceSpecs.get(i).getInstance();
         }
@@ -145,6 +149,7 @@ public class SourceFactory {
     public final AlgorithmSource newAlgorithmSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         AlgorithmSourceBackend[] backends = new AlgorithmSourceBackend[this.algorithmSourceBackendInstanceSpecs.size()];
+        Collections.sort(this.algorithmSourceBackendInstanceSpecs);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.algorithmSourceBackendInstanceSpecs.get(i).getInstance();
         }
@@ -154,6 +159,7 @@ public class SourceFactory {
     public final TermSource newTermSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         TermSourceBackend[] backends = new TermSourceBackend[this.termSourceBackendInstanceSpecs.size()];
+        Collections.sort(this.termSourceBackendInstanceSpecs);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.termSourceBackendInstanceSpecs.get(i).getInstance();
         }

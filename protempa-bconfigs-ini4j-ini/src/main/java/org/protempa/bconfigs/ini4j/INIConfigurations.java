@@ -141,6 +141,7 @@ public class INIConfigurations implements Configurations {
             final List<Exception> exceptions = new ArrayList<>();
             parser.parse(fr, new IniHandler() {
                 private BackendInstanceSpec<B> backendInstanceSpec;
+                private int order = 0;
 
                 @Override
                 public void endIni() {
@@ -174,9 +175,10 @@ public class INIConfigurations implements Configurations {
 
                 @Override
                 public void startSection(String string) {
+                    order++;
                     if (backendSpec.getId().equals(string)) {
                         backendInstanceSpec =
-                                backendSpec.newBackendInstanceSpec();
+                                backendSpec.newBackendInstanceSpec(order);
                         backendInstanceSpec.setConfigurationsId(
                                 configurationsId);
                     } else {

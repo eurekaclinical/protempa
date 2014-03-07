@@ -19,22 +19,32 @@
  */
 package org.protempa.bconfigs.ini4j;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Collections;
-import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.arp.javautil.io.UniqueDirectoryCreator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.protempa.backend.BackendInstanceSpec;
+import org.protempa.backend.BackendProviderManager;
+import org.protempa.backend.BackendProviderSpecLoaderException;
+import org.protempa.backend.BackendSpec;
+import org.protempa.backend.BackendSpecLoader;
+import org.protempa.backend.BackendSpecNotFoundException;
+import org.protempa.backend.ConfigurationsLoadException;
+import org.protempa.backend.ConfigurationsNotFoundException;
+import org.protempa.backend.InvalidPropertyNameException;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
-import static org.junit.Assert.*;
-import org.protempa.backend.*;
 import org.protempa.backend.test.MockBackendProvider;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -111,7 +121,7 @@ public class INIConfigurationsTest {
         BackendSpec backendSpec =
                 LOADER.loadSpec("ASBackendSpec1");
         BackendInstanceSpec backendInstanceSpec =
-                backendSpec.newBackendInstanceSpec();
+                backendSpec.newBackendInstanceSpec(0);
         backendInstanceSpec.setProperty("url", "http://localhost");
         configurations.save("test",
                 Collections.singletonList(backendInstanceSpec));

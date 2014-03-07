@@ -19,8 +19,9 @@
  */
 package org.protempa.backend;
 
-import java.util.List;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.util.List;
 
 /**
  *
@@ -70,8 +71,8 @@ public final class BackendSpec<B extends Backend> {
         return this.displayName;
     }
     
-    public BackendInstanceSpec<B> newBackendInstanceSpec() {
-        return new BackendInstanceSpec<>(this, propertySpecs);
+    public BackendInstanceSpec<B> newBackendInstanceSpec(int loadOrder) {
+        return new BackendInstanceSpec<>(this, propertySpecs, loadOrder);
     }
 
     @SuppressWarnings("unchecked")

@@ -19,13 +19,13 @@
  */
 package org.protempa.backend.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.protempa.backend.Backend;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.BackendPropertySpec;
 import org.protempa.backend.BackendSpec;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class MockBackendInstanceSpecFactory<B extends Backend<?>> {
     private BackendInstanceSpec<B> backendInstSpec;
@@ -39,6 +39,6 @@ public final class MockBackendInstanceSpecFactory<B extends Backend<?>> {
                 new MockBackendProvider(), "mockSpec", "Mock Spec",
                 new ArrayList<BackendPropertySpec>());
                 
-        backendInstSpec = backendSpec.newBackendInstanceSpec();
+        backendInstSpec = backendSpec.newBackendInstanceSpec(0);
     }
 }

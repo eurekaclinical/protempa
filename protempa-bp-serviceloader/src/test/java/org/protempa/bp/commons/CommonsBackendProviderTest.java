@@ -19,15 +19,6 @@
  */
 package org.protempa.bp.commons;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,7 +31,15 @@ import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
 import org.protempa.backend.BackendSpecNotFoundException;
 import org.protempa.backend.asb.java.JavaAlgorithmBackend;
-import org.protempa.backend.ksb.SimpleKnowledgeSourceBackend;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  *
@@ -139,7 +138,7 @@ public class CommonsBackendProviderTest {
                 backendProvider.getDataSourceBackendSpecLoader();
         BackendSpec<?> spec = 
                 loader.loadSpec(MockDataSourceBackend.class.getName());
-        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
+        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec(0);
         List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
         assertEquals(1, bps.size());
     }
@@ -207,7 +206,7 @@ public class CommonsBackendProviderTest {
                 backendProvider.getKnowledgeSourceBackendSpecLoader();
         BackendSpec<?> spec = 
                 loader.loadSpec(MockKnowledgeSourceBackend.class.getName());
-        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
+        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec(0);
         List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
         assertEquals(1, bps.size());
     }
@@ -276,7 +275,7 @@ public class CommonsBackendProviderTest {
                 backendProvider.getAlgorithmSourceBackendSpecLoader();
         BackendSpec<?> spec = 
                 loader.loadSpec(MockAlgorithmSourceBackend.class.getName());
-        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
+        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec(0);
         List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
         assertEquals(0, bps.size());
     }

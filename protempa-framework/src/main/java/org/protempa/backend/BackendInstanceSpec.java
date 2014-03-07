@@ -30,19 +30,21 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  *
  * @author Andrew Post
  */
-public final class BackendInstanceSpec<B extends Backend> {
+public final class BackendInstanceSpec<B extends Backend> implements Comparable<BackendInstanceSpec<B>> {
 
     private final BackendSpec<B> backendSpec;
     private String configurationsId;
     private final Map<String, Object> properties;
     private final List<BackendPropertySpec> propertySpecs;
+    private final int loadOrder;
 
     BackendInstanceSpec(
             BackendSpec<B> backendSpec,
-            List<BackendPropertySpec> propertySpecs) {
+            List<BackendPropertySpec> propertySpecs, int loadOrder) {
         assert backendSpec != null : "backendSpec cannot be null";
         assert propertySpecs != null : "info cannot be null";
         this.backendSpec = backendSpec;
+        this.loadOrder = loadOrder;
         this.properties = new HashMap<>();
         this.propertySpecs = Collections.unmodifiableList(
                 new ArrayList<>(propertySpecs));
@@ -50,6 +52,10 @@ public final class BackendInstanceSpec<B extends Backend> {
 
     public BackendSpec<B> getBackendSpec() {
         return this.backendSpec;
+    }
+
+    public int getLoadOrder() {
+        return this.loadOrder;
     }
 
     public void setConfigurationsId(String configurationsId) {
@@ -135,5 +141,10 @@ public final class BackendInstanceSpec<B extends Backend> {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    @Override
+    public int compareTo(BackendInstanceSpec<B> b) {
+        return this.loadOrder - b.loadOrder;
     }
 }
