@@ -94,14 +94,24 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
         if (this.conn == null) {
             try {
                 this.conn = DriverManager.getConnection(this.databaseId);
-                this.findStmt = conn.prepareStatement("SELECT display_name, code, ontology FROM " + this.ontologiesTable + " WHERE purl_id = ?");
-                this.childrenStmt = conn.prepareStatement("SELECT purl_id FROM " + this.ontologiesTable + " WHERE parent_id = ?");
-                this.parentStmt = conn.prepareStatement("SELECT parent_id FROM " + this.ontologiesTable + " WHERE purl_id = ?");
-                this.searchStmt = conn.prepareStatement("SELECT purl_id FROM " + this.ontologiesTable + " WHERE UPPER(display_name) LIKE UPPER(?)");
+                this.findStmt = conn.prepareStatement("SELECT display_name, code, ontology FROM " + this.ontologiesTable + " WHERE term_id = ?");
+                this.childrenStmt = conn.prepareStatement("SELECT term_id FROM " + this.ontologiesTable + " WHERE parent_id = ?");
+                this.parentStmt = conn.prepareStatement("SELECT parent_id FROM " + this.ontologiesTable + " WHERE term_id = ?");
+                this.searchStmt = conn.prepareStatement("SELECT term_id FROM " + this.ontologiesTable + " WHERE UPPER(display_name) LIKE UPPER(?)");
             } catch (SQLException e) {
                 throw new KnowledgeSourceBackendInitializationException("Failed to initialize BioPortal knowledge source backend", e);
             }
         }
+    }
+
+    @Override
+    public void close() {
+        try {
+            this.conn.close();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Failed to close BioPortal database", e);
+        }
+        super.close();
     }
 
     private static class BioportalTerm {
