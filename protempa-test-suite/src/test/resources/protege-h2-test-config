@@ -7,6 +7,10 @@ databaseId = jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
 [org.protempa.backend.tsb.umls.UMLSTermSourceBackend]
 databaseAPI = DRIVERMANAGER
 
+[org.protempa.backend.ksb.bioportal.BioportalKnowledgeSourceBackend]
+databaseId = jdbc:h2:/Users/mmansou/dev/protempa/protempa-git/protempa-test-suite/src/test/resources/ksb/bioportal;USER=sa
+ontologiesTable = bioportal
+
 [org.protempa.backend.ksb.protege.LocalKnowledgeSourceBackend]
 projectString = src/test/resources/ksb/ProtempaTest.pprj
 units = ABSOLUTE
