@@ -51,7 +51,7 @@ import static org.junit.Assert.fail;
  */
 public class BioportalKnowledgeSourceBackendTest {
 
-    private static final String ICD9CM_250_ID = "http://purl.bioontology.org/ontology/ICD9CM/250";
+    private static final String ICD9_250_ID = "ICD9:250";
     private BioportalKnowledgeSourceBackend ksb;
 
     @Before
@@ -71,9 +71,9 @@ public class BioportalKnowledgeSourceBackendTest {
 
     @Test
     public void testReadPropositionDefinition() throws KnowledgeSourceReadException {
-        PropositionDefinition propDef = this.ksb.readPropositionDefinition("http://purl.bioontology.org/ontology/ICD9CM/250");
+        PropositionDefinition propDef = this.ksb.readPropositionDefinition(ICD9_250_ID);
         assertNotNull(propDef);
-        assertEquals("http://purl.bioontology.org/ontology/ICD9CM/250", propDef.getId());
+        assertEquals("ICD9:250", propDef.getId());
         assertEquals("Diabetes mellitus", propDef.getDisplayName());
         assertEquals("250", propDef.getAbbreviatedDisplayName());
         assertTrue(propDef.getInDataSource());
@@ -81,11 +81,11 @@ public class BioportalKnowledgeSourceBackendTest {
 
     @Test
     public void testReadPropositionDefinitionInverseIsA() throws KnowledgeSourceReadException {
-        PropositionDefinition propDef = this.ksb.readPropositionDefinition("http://purl.bioontology.org/ontology/ICD9CM/250");
+        PropositionDefinition propDef = this.ksb.readPropositionDefinition(ICD9_250_ID);
         assertEquals(10, propDef.getChildren().length);
         Set<String> expectedChildren = new HashSet<>();
         for (int i = 0; i < 10; i++) {
-            expectedChildren.add("http://purl.bioontology.org/ontology/ICD9CM/250." + i);
+            expectedChildren.add(ICD9_250_ID + "." + i);
         }
         Set<String> actualChildren = new HashSet<>();
         for (String child : propDef.getChildren()) {
@@ -96,50 +96,50 @@ public class BioportalKnowledgeSourceBackendTest {
 
     @Test
     public void testReadIsA() throws KnowledgeSourceReadException {
-        String[] isa = this.ksb.readIsA(ICD9CM_250_ID + ".1");
-        assertArrayEquals(new String[]{ICD9CM_250_ID}, isa);
+        String[] isa = this.ksb.readIsA(ICD9_250_ID + ".1");
+        assertArrayEquals(new String[]{ICD9_250_ID}, isa);
     }
 
     @Test
     public void testGetKnowledgeSourceSearchResults() throws KnowledgeSourceReadException {
         List<String> results = this.ksb.getKnowledgeSourceSearchResults("diabetes");
         assertEquals(95, results.size());
-        assertTrue(results.contains(ICD9CM_250_ID));
+        assertTrue(results.contains(ICD9_250_ID));
 
         // uppercase "Diabetes"
-        assertTrue(results.contains("http://purl.bioontology.org/ontology/ICD9CM/250.93"));
+        assertTrue(results.contains("ICD9:250.93"));
 
         // lowercase "diabetes"
-        assertTrue(results.contains("http://purl.bioontology.org/ontology/ICD9CM/249.71"));
+        assertTrue(results.contains("ICD9:249.71"));
     }
 
     @Test
     public void testReadAbstractionDefinition() throws KnowledgeSourceReadException {
-        assertNull(this.ksb.readAbstractionDefinition(ICD9CM_250_ID));
+        assertNull(this.ksb.readAbstractionDefinition(ICD9_250_ID));
     }
 
     @Test
     public void testReadContextDefinition() throws KnowledgeSourceReadException {
-        assertNull(this.ksb.readContextDefinition(ICD9CM_250_ID));
+        assertNull(this.ksb.readContextDefinition(ICD9_250_ID));
     }
 
     @Test
     public void testReadTemporalPropositionDefinition() throws KnowledgeSourceReadException {
-        assertNull(this.ksb.readTemporalPropositionDefinition(ICD9CM_250_ID));
+        assertNull(this.ksb.readTemporalPropositionDefinition(ICD9_250_ID));
     }
 
     @Test
     public void testReadAbstractedInto() throws KnowledgeSourceReadException {
-        assertArrayEquals(new String[0], this.ksb.readAbstractedInto(ICD9CM_250_ID));
+        assertArrayEquals(new String[0], this.ksb.readAbstractedInto(ICD9_250_ID));
     }
 
     @Test
     public void testReadInduces() throws KnowledgeSourceReadException {
-        assertArrayEquals(new String[0], this.ksb.readInduces(ICD9CM_250_ID));
+        assertArrayEquals(new String[0], this.ksb.readInduces(ICD9_250_ID));
     }
 
     @Test
     public void testReadSubContextsOf() throws KnowledgeSourceReadException {
-        assertArrayEquals(new String[0], this.ksb.readSubContextOfs(ICD9CM_250_ID));
+        assertArrayEquals(new String[0], this.ksb.readSubContextOfs(ICD9_250_ID));
     }
 }
