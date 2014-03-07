@@ -8,7 +8,8 @@ databaseId = jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
 databaseAPI = DRIVERMANAGER
 
 [org.protempa.backend.ksb.bioportal.BioportalKnowledgeSourceBackend]
-databaseId = jdbc:h2:/Users/mmansou/dev/protempa/protempa-git/protempa-test-suite/src/test/resources/ksb/bioportal;USER=sa
+databaseId = jdbc:h2:/Users/mmansou/dev/protempa/protempa-git/protempa-test-suite/src/test/resources/ksb/bioportal
+username = sa
 ontologiesTable = bioportal
 
 [org.protempa.backend.ksb.protege.LocalKnowledgeSourceBackend]

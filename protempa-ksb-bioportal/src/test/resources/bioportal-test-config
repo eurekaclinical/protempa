@@ -5,5 +5,7 @@
 [org.protempa.tsb.MockTermSourceBackend]
 
 [org.protempa.backend.ksb.bioportal.BioportalKnowledgeSourceBackend]
-databaseId = jdbc:h2:src/test/resources/bioportal;USER=sa
+databaseId = jdbc:h2:src/test/resources/bioportal
+username = sa
+password =
 ontologiesTable = bioportal

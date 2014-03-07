@@ -20,6 +20,8 @@ package org.protempa.backend.ksb.bioportal;
  * #L%
  */
 
+import org.arp.javautil.sql.DatabaseAPI;
+import org.arp.javautil.sql.InvalidConnectionSpecArguments;
 import org.protempa.AbstractionDefinition;
 import org.protempa.ContextDefinition;
 import org.protempa.EventDefinition;
@@ -34,7 +36,6 @@ import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.annotations.BackendProperty;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,8 +50,17 @@ import java.util.Set;
 @BackendInfo(displayName = "BioPortal Knowledge Source Backend")
 public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBackend {
 
+    /* database API to use */
+    private DatabaseAPI databaseApi;
+
     /* the ID of the database that holds the ontologies */
     private String databaseId;
+
+    /* the database username */
+    private String username;
+
+    /* the database password */
+    private String password;
 
     /* name of the table that holds the ontologies */
     private String ontologiesTable;
@@ -70,6 +80,48 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
     /* prepared statement for searching the database by keyword */
     private PreparedStatement searchStmt;
 
+    public BioportalKnowledgeSourceBackend() {
+        this.databaseApi = DatabaseAPI.DRIVERMANAGER;
+    }
+
+    /**
+     * Returns which Java database API this backend is configured to use.
+     *
+     * @return a {@link DatabaseAPI}. The default value is
+     * {@link org.arp.javautil.sql.DatabaseAPI}<code>.DRIVERMANAGER</code>
+     */
+    public DatabaseAPI getDatabaseApi() {
+        return databaseApi;
+    }
+
+    /**
+     * Configures which Java database API to use ({@link java.sql.DriverManager}
+     * or {@link javax.sql.DataSource}. If
+     * <code>null</code>, the default is assigned
+     * ({@link org.arp.javautil.sql.DatabaseAPI}<code>.DRIVERMANAGER</code>).
+     *
+     * @param databaseApi a {@link DatabaseAPI}.
+     */
+    public void setDatabaseApi(DatabaseAPI databaseApi) {
+        if (databaseApi == null) {
+            this.databaseApi = DatabaseAPI.DRIVERMANAGER;
+        } else {
+            this.databaseApi = databaseApi;
+        }
+    }
+
+    /**
+     * Configures which Java database API to use ({@link java.sql.DriverManager}
+     * or {@link javax.sql.DataSource} by parsing a {@link DatabaseAPI}'s name.
+     * Cannot be null.
+     *
+     * @param databaseApiString a {@link DatabaseAPI}'s name.
+     */
+    @BackendProperty(propertyName = "databaseAPI")
+    public void parseDatabaseApi(String databaseApiString) {
+        setDatabaseApi(DatabaseAPI.valueOf(databaseApiString));
+    }
+
     public String getDatabaseId() {
         return databaseId;
     }
@@ -77,6 +129,24 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
     @BackendProperty
     public void setDatabaseId(String databaseId) {
         this.databaseId = databaseId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    @BackendProperty
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    @BackendProperty
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getOntologiesTable() {
@@ -88,17 +158,24 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
         this.ontologiesTable = ontologiesTable;
     }
 
+    /**
+     * Initializes this backend by attempting to create the database connection based on
+     * the configuration parameters.
+     *
+     * @param config the backend instance specification to use
+     * @throws BackendInitializationException if the database connection cannot be established
+     */
     @Override
     public void initialize(BackendInstanceSpec config) throws BackendInitializationException {
         super.initialize(config);
         if (this.conn == null) {
             try {
-                this.conn = DriverManager.getConnection(this.databaseId);
+                this.conn = this.databaseApi.newConnectionSpecInstance(this.databaseId, this.username, this.password).getOrCreate();
                 this.findStmt = conn.prepareStatement("SELECT display_name, code, ontology FROM " + this.ontologiesTable + " WHERE term_id = ?");
                 this.childrenStmt = conn.prepareStatement("SELECT term_id FROM " + this.ontologiesTable + " WHERE parent_id = ?");
                 this.parentStmt = conn.prepareStatement("SELECT parent_id FROM " + this.ontologiesTable + " WHERE term_id = ?");
                 this.searchStmt = conn.prepareStatement("SELECT term_id FROM " + this.ontologiesTable + " WHERE UPPER(display_name) LIKE UPPER(?)");
-            } catch (SQLException e) {
+            } catch (SQLException | InvalidConnectionSpecArguments e) {
                 throw new KnowledgeSourceBackendInitializationException("Failed to initialize BioPortal knowledge source backend", e);
             }
         }
