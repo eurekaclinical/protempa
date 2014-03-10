@@ -29,9 +29,6 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
 import org.protempa.TemporalPropositionDefinition;
 import org.protempa.backend.AbstractCommonsKnowledgeSourceBackend;
-import org.protempa.backend.BackendInitializationException;
-import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.backend.KnowledgeSourceBackendInitializationException;
 import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.annotations.BackendProperty;
 
@@ -50,6 +47,8 @@ import java.util.Set;
 @BackendInfo(displayName = "BioPortal Knowledge Source Backend")
 public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBackend {
 
+    private static final String DEFAULT_TABLE_NAME = "bioportal";
+
     /* database API to use */
     private DatabaseAPI databaseApi;
 
@@ -65,23 +64,9 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
     /* name of the table that holds the ontologies */
     private String ontologiesTable;
 
-    /* connection to the database that holds the ontologies */
-    private Connection conn;
-
-    /* prepared statement for retrieving terms from the database */
-    private PreparedStatement findStmt;
-
-    /* prepared statement for retrieving the children of a term */
-    private PreparedStatement childrenStmt;
-
-    /* prepared statement for retrieving the parent of a term */
-    private PreparedStatement parentStmt;
-
-    /* prepared statement for searching the database by keyword */
-    private PreparedStatement searchStmt;
-
     public BioportalKnowledgeSourceBackend() {
         this.databaseApi = DatabaseAPI.DRIVERMANAGER;
+        this.ontologiesTable = DEFAULT_TABLE_NAME;
     }
 
     /**
@@ -103,11 +88,7 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
      * @param databaseApi a {@link DatabaseAPI}.
      */
     public void setDatabaseApi(DatabaseAPI databaseApi) {
-        if (databaseApi == null) {
-            this.databaseApi = DatabaseAPI.DRIVERMANAGER;
-        } else {
-            this.databaseApi = databaseApi;
-        }
+        this.databaseApi = databaseApi;
     }
 
     /**
@@ -158,37 +139,18 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
         this.ontologiesTable = ontologiesTable;
     }
 
-    /**
-     * Initializes this backend by attempting to create the database connection based on
-     * the configuration parameters.
-     *
-     * @param config the backend instance specification to use
-     * @throws BackendInitializationException if the database connection cannot be established
-     */
-    @Override
-    public void initialize(BackendInstanceSpec config) throws BackendInitializationException {
-        super.initialize(config);
-        if (this.conn == null) {
-            try {
-                this.conn = this.databaseApi.newConnectionSpecInstance(this.databaseId, this.username, this.password).getOrCreate();
-                this.findStmt = conn.prepareStatement("SELECT display_name, code, ontology FROM " + this.ontologiesTable + " WHERE term_id = ?");
-                this.childrenStmt = conn.prepareStatement("SELECT term_id FROM " + this.ontologiesTable + " WHERE parent_id = ?");
-                this.parentStmt = conn.prepareStatement("SELECT parent_id FROM " + this.ontologiesTable + " WHERE term_id = ?");
-                this.searchStmt = conn.prepareStatement("SELECT term_id FROM " + this.ontologiesTable + " WHERE UPPER(display_name) LIKE UPPER(?)");
-            } catch (SQLException | InvalidConnectionSpecArguments e) {
-                throw new KnowledgeSourceBackendInitializationException("Failed to initialize BioPortal knowledge source backend", e);
-            }
-        }
+    private Connection openConnection() throws InvalidConnectionSpecArguments, SQLException {
+        return this.databaseApi.newConnectionSpecInstance(this.databaseId, this.username, this.password).getOrCreate();
     }
 
-    @Override
-    public void close() {
+    private void closeConnection(Connection conn) {
         try {
-            this.conn.close();
+            if (conn.isClosed()) {
+                conn.close();
+            }
         } catch (SQLException e) {
             throw new IllegalStateException("Failed to close BioPortal database", e);
         }
-        super.close();
     }
 
     private static class BioportalTerm {
@@ -199,9 +161,10 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
     }
 
     private BioportalTerm readFromDatabase(String id) throws KnowledgeSourceReadException {
-        try {
-            this.findStmt.setString(1, id);
-            ResultSet rs = this.findStmt.executeQuery();
+        try (Connection conn = openConnection();
+             PreparedStatement findStmt = conn.prepareStatement("SELECT display_name, code, ontology FROM " + this.ontologiesTable + " WHERE term_id = ?")) {
+            findStmt.setString(1, id);
+            ResultSet rs = findStmt.executeQuery();
             if (rs.next()) {
                 BioportalTerm result = new BioportalTerm();
                 result.id = id;
@@ -211,7 +174,7 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
 
                 return result;
             }
-        } catch (SQLException e) {
+        } catch (InvalidConnectionSpecArguments | SQLException e) {
             throw new KnowledgeSourceReadException(e);
         }
 
@@ -220,13 +183,14 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
 
     private Set<String> readChildrenFromDatabase(String id) throws KnowledgeSourceReadException {
         Set<String> result = new HashSet<>();
-        try {
-            this.childrenStmt.setString(1, id);
-            ResultSet rs = this.childrenStmt.executeQuery();
+        try (Connection conn = openConnection();
+             PreparedStatement childrenStmt = conn.prepareStatement("SELECT term_id FROM " + this.ontologiesTable + " WHERE parent_id = ?")) {
+            childrenStmt.setString(1, id);
+            ResultSet rs = childrenStmt.executeQuery();
             while (rs.next()) {
                 result.add(rs.getString(1));
             }
-        } catch (SQLException e) {
+        } catch (InvalidConnectionSpecArguments | SQLException e) {
             throw new KnowledgeSourceReadException(e);
         }
 
@@ -259,30 +223,32 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
 
     @Override
     public String[] readIsA(String propId) throws KnowledgeSourceReadException {
-        try {
+        try (Connection conn = openConnection();
+             PreparedStatement parentStmt = conn.prepareStatement("SELECT parent_id FROM " + this.ontologiesTable + " WHERE term_id = ?")) {
             List<String> result = new ArrayList<>();
-            this.parentStmt.setString(1, propId);
-            ResultSet rs = this.parentStmt.executeQuery();
+            parentStmt.setString(1, propId);
+            ResultSet rs = parentStmt.executeQuery();
             while (rs.next()) {
                 result.add(rs.getString(1));
             }
             return result.toArray(new String[result.size()]);
-        } catch (SQLException e) {
+        } catch (InvalidConnectionSpecArguments | SQLException e) {
             throw new KnowledgeSourceReadException(e);
         }
     }
 
     @Override
     public List<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException {
-        try {
+        try (Connection conn = openConnection();
+             PreparedStatement searchStmt = conn.prepareStatement("SELECT term_id FROM " + this.ontologiesTable + " WHERE UPPER(display_name) LIKE UPPER(?)")) {
             List<String> result = new ArrayList<>();
-            this.searchStmt.setString(1, "%" + searchKey + "%");
-            ResultSet rs = this.searchStmt.executeQuery();
+            searchStmt.setString(1, "%" + searchKey + "%");
+            ResultSet rs = searchStmt.executeQuery();
             while (rs.next()) {
                 result.add(rs.getString(1));
             }
             return result;
-        } catch (SQLException e) {
+        } catch (InvalidConnectionSpecArguments | SQLException e) {
             throw new KnowledgeSourceReadException(e);
         }
     }

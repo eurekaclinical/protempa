@@ -8,4 +8,3 @@
 databaseId = jdbc:h2:src/test/resources/bioportal
 username = sa
 password =
-ontologiesTable = bioportal
