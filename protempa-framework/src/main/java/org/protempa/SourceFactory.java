@@ -39,6 +39,7 @@ import org.protempa.backend.tsb.TermSourceBackend;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -129,7 +130,7 @@ public class SourceFactory {
     public final DataSource newDataSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         DataSourceBackend[] backends = new DataSourceBackend[this.dataSourceBackendInstanceSpecs.size()];
-        Collections.sort(this.dataSourceBackendInstanceSpecs);
+        Collections.sort(this.dataSourceBackendInstanceSpecs, BIS_CMP);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.dataSourceBackendInstanceSpecs.get(i).getInstance();
         }
@@ -139,7 +140,7 @@ public class SourceFactory {
     public final KnowledgeSource newKnowledgeSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         KnowledgeSourceBackend[] backends = new KnowledgeSourceBackend[this.knowledgeSourceBackendInstanceSpecs.size()];
-        Collections.sort(this.knowledgeSourceBackendInstanceSpecs);
+        Collections.sort(this.knowledgeSourceBackendInstanceSpecs, BIS_CMP);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.knowledgeSourceBackendInstanceSpecs.get(i).getInstance();
         }
@@ -149,7 +150,7 @@ public class SourceFactory {
     public final AlgorithmSource newAlgorithmSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         AlgorithmSourceBackend[] backends = new AlgorithmSourceBackend[this.algorithmSourceBackendInstanceSpecs.size()];
-        Collections.sort(this.algorithmSourceBackendInstanceSpecs);
+        Collections.sort(this.algorithmSourceBackendInstanceSpecs, BIS_CMP);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.algorithmSourceBackendInstanceSpecs.get(i).getInstance();
         }
@@ -159,11 +160,21 @@ public class SourceFactory {
     public final TermSource newTermSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         TermSourceBackend[] backends = new TermSourceBackend[this.termSourceBackendInstanceSpecs.size()];
-        Collections.sort(this.termSourceBackendInstanceSpecs);
+        Collections.sort(this.termSourceBackendInstanceSpecs, BIS_CMP);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.termSourceBackendInstanceSpecs.get(i).getInstance();
         }
         return new TermSourceImpl(backends);
 
     }
+
+    private static class BackendInstanceSpecComparator implements Comparator<BackendInstanceSpec> {
+
+        @Override
+        public int compare(BackendInstanceSpec o1, BackendInstanceSpec o2) {
+            return o1.getLoadOrder() - o2.getLoadOrder();
+        }
+    }
+
+    private static final Comparator<BackendInstanceSpec> BIS_CMP = new BackendInstanceSpecComparator();
 }

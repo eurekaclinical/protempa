@@ -30,7 +30,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  *
  * @author Andrew Post
  */
-public final class BackendInstanceSpec<B extends Backend> implements Comparable<BackendInstanceSpec<B>> {
+public final class BackendInstanceSpec<B extends Backend> {
 
     private final BackendSpec<B> backendSpec;
     private String configurationsId;
@@ -141,10 +141,5 @@ public final class BackendInstanceSpec<B extends Backend> implements Comparable<
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
-    }
-
-    @Override
-    public int compareTo(BackendInstanceSpec<B> b) {
-        return this.loadOrder - b.loadOrder;
     }
 }
