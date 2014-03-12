@@ -19,7 +19,9 @@ This project includes:
   Commons IO under The Apache Software License, Version 2.0
   Commons Lang under The Apache Software License, Version 2.0
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
+  H2 Database Engine under The H2 License, Version 1.0
   Hamcrest Core under New BSD License
+  ini4j under Apache 2
   JavaUtil under Apache License, Version 2.0
   je under Sleepycat License
   JUnit under Common Public License Version 1.0
@@ -27,4 +29,7 @@ This project includes:
   mvel under The Apache Software License, Version 2.0
   Protempa BioPortal Knowledge Source Backend under Apache License, Version 2.0
   Protempa Framework under Apache License, Version 2.0
+  Protempa Ini4j INI Backend Configurations under Apache License, Version 2.0
+  Protempa ServiceLoader Backend Configurations Provider under Apache License, Version 2.0
+  Protempa ServiceLoader Backend Provider under Apache License, Version 2.0
 
