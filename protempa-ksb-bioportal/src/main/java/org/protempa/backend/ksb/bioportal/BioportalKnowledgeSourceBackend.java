@@ -238,10 +238,10 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
     }
 
     @Override
-    public List<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException {
+    public Set<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException {
         try (Connection conn = openConnection();
              PreparedStatement searchStmt = conn.prepareStatement("SELECT term_id FROM " + this.ontologiesTable + " WHERE UPPER(display_name) LIKE UPPER(?)")) {
-            List<String> result = new ArrayList<>();
+            Set<String> result = new HashSet<>();
             searchStmt.setString(1, "%" + searchKey + "%");
             ResultSet rs = searchStmt.executeQuery();
             while (rs.next()) {

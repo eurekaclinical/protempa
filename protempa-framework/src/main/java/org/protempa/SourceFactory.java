@@ -45,19 +45,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author Andrew Post
  */
 public class SourceFactory {
+
+    private static final Comparator<BackendInstanceSpec> BIS_CMP = new BackendInstanceSpecComparator();
 
     private final List<BackendInstanceSpec<AlgorithmSourceBackend>> algorithmSourceBackendInstanceSpecs;
     private final List<BackendInstanceSpec<DataSourceBackend>> dataSourceBackendInstanceSpecs;
     private final List<BackendInstanceSpec<KnowledgeSourceBackend>> knowledgeSourceBackendInstanceSpecs;
     private final List<BackendInstanceSpec<TermSourceBackend>> termSourceBackendInstanceSpecs;
 
-    public SourceFactory(Configurations configurations, String configurationId) 
-            throws BackendProviderSpecLoaderException, 
-            ConfigurationsLoadException, 
+    public SourceFactory(Configurations configurations, String configurationId)
+            throws BackendProviderSpecLoaderException,
+            ConfigurationsLoadException,
             InvalidConfigurationException,
             ConfigurationsNotFoundException {
         Logger logger = ProtempaUtil.logger();
@@ -122,7 +123,7 @@ public class SourceFactory {
 
     public SourceFactory(String configurationId)
             throws ConfigurationsLoadException,
-            BackendProviderSpecLoaderException, InvalidConfigurationException, 
+            BackendProviderSpecLoaderException, InvalidConfigurationException,
             ConfigurationsNotFoundException {
         this(null, configurationId);
     }
@@ -175,6 +176,4 @@ public class SourceFactory {
             return o1.getLoadOrder() - o2.getLoadOrder();
         }
     }
-
-    private static final Comparator<BackendInstanceSpec> BIS_CMP = new BackendInstanceSpecComparator();
 }

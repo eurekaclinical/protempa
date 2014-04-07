@@ -102,7 +102,7 @@ public class BioportalKnowledgeSourceBackendTest {
 
     @Test
     public void testGetKnowledgeSourceSearchResults() throws KnowledgeSourceReadException {
-        List<String> results = this.ksb.getKnowledgeSourceSearchResults("diabetes");
+        Set<String> results = this.ksb.getKnowledgeSourceSearchResults("diabetes");
         assertEquals(95, results.size());
         assertTrue(results.contains(ICD9_250_ID));
 

@@ -46,6 +46,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Iterators;
@@ -105,6 +106,10 @@ import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.dest.Destination;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 /**
  * Unit tests for Protempa.
@@ -246,7 +251,22 @@ public class ProtempaTest {
     public void setUp() throws DataProviderException, SQLException,
             ProtempaStartupException, BackendProviderSpecLoaderException,
             ConfigurationsLoadException, InvalidConfigurationException,
-            ConfigurationsNotFoundException {
+            ConfigurationsNotFoundException, NamingException {
+        BasicDataSource bds = new BasicDataSource();
+        bds.setDriverClassName("org.h2.Driver");
+        bds.setUrl("jdbc:h2:src/test/resources/ksb/bioportal;USER=sa");
+        bds.setMinIdle(1);
+        bds.setMaxIdle(5);
+        bds.setMaxTotal(5);
+        System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.naming.java.javaURLContextFactory");
+        System.setProperty(Context.URL_PKG_PREFIXES, "org.apache.naming");
+        InitialContext ic = new InitialContext();
+        ic.createSubcontext("java:");
+        ic.createSubcontext("java:/comp");
+        ic.createSubcontext("java:/comp/env");
+        ic.createSubcontext("java:/comp/env/jdbc");
+        ic.bind("java:/comp/env/jdbc/BioPortalDS", bds);
+
         logger.log(Level.INFO, "Populating database");
         this.dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
         inserter = new DataInserter("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
