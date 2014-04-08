@@ -651,7 +651,7 @@ public class ProtempaTest {
                 "MyAndLikePattern");
         hd.setDisplayName("My Or-like Pattern");
         ExtendedPropositionDefinition epd1 = new ExtendedPropositionDefinition(
-                "ICD9:V-codes");
+                "ICD9:V01-V91.99");
         ExtendedPropositionDefinition epd2 = new ExtendedPropositionDefinition(
                 "ICD9:35.83");
         hd2.add(epd1);

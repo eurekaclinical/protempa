@@ -1152,7 +1152,7 @@ Encounter
 No30DayReadmissionBefore
 MyAndLikePattern
 ICD9:35.83
-ICD9:V-codes
+ICD9:V01-V91.99
 MyBloodPressureClassification3Any
 MyDiastolicClassification3
 MyBloodPressureClassificationAll
