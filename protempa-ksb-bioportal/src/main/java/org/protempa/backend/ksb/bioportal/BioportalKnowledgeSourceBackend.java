@@ -40,12 +40,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  */
 @BackendInfo(displayName = "BioPortal Knowledge Source Backend")
 public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBackend {
+
+    private static final Logger logger = Logger.getLogger(BioportalKnowledgeSourceBackend.class.getName());
 
     private static final String DEFAULT_TABLE_NAME = "bioportal";
 
@@ -199,8 +203,10 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
 
     @Override
     public PropositionDefinition readPropositionDefinition(String id) throws KnowledgeSourceReadException {
+        logger.log(Level.FINEST, "Looking for proposition in {0}: {1}", new Object[]{ this.ontologiesTable, id });
         BioportalTerm term = readFromDatabase(id);
         if (term != null) {
+            logger.log(Level.FINEST, "Found proposition id: {0}", id);
             EventDefinition result = new EventDefinition(id);
             result.setDisplayName(term.displayName);
             result.setAbbreviatedDisplayName(term.code);
@@ -218,6 +224,7 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
 
             return result;
         }
+        logger.log(Level.FINER, "Failed to find proposition id: {0}", id);
         return null;
     }
 
