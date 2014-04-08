@@ -211,6 +211,11 @@ public class ProtempaTest {
     private int patientCount;
     private DataInserter inserter;
 
+    /*
+     * Binding for the BioPortal H2 database connection pool
+     */
+    InitialContext initialContext;
+
     /**
      * Performs set up operations required for all testing (eg, setting up the
      * in-memory database).
@@ -252,6 +257,8 @@ public class ProtempaTest {
             ProtempaStartupException, BackendProviderSpecLoaderException,
             ConfigurationsLoadException, InvalidConfigurationException,
             ConfigurationsNotFoundException, NamingException {
+
+        // set up a data source/connection pool for accessing the BioPortal H2 database
         BasicDataSource bds = new BasicDataSource();
         bds.setDriverClassName("org.h2.Driver");
         bds.setUrl("jdbc:h2:src/test/resources/ksb/bioportal;USER=sa");
@@ -260,12 +267,12 @@ public class ProtempaTest {
         bds.setMaxTotal(5);
         System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.naming.java.javaURLContextFactory");
         System.setProperty(Context.URL_PKG_PREFIXES, "org.apache.naming");
-        InitialContext ic = new InitialContext();
-        ic.createSubcontext("java:");
-        ic.createSubcontext("java:/comp");
-        ic.createSubcontext("java:/comp/env");
-        ic.createSubcontext("java:/comp/env/jdbc");
-        ic.bind("java:/comp/env/jdbc/BioPortalDS", bds);
+        this.initialContext = new InitialContext();
+        this.initialContext.createSubcontext("java:");
+        this.initialContext.createSubcontext("java:/comp");
+        this.initialContext.createSubcontext("java:/comp/env");
+        this.initialContext.createSubcontext("java:/comp/env/jdbc");
+        this.initialContext.bind("java:/comp/env/jdbc/BioPortalDS", bds);
 
         logger.log(Level.INFO, "Populating database");
         this.dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
@@ -288,7 +295,7 @@ public class ProtempaTest {
      * @throws Exception
      */
     @After
-    public void tearDown() throws SQLException, CloseException {
+    public void tearDown() throws SQLException, CloseException, NamingException {
         if (this.protempa != null) {
             this.protempa.close();
         }
@@ -297,6 +304,15 @@ public class ProtempaTest {
         } finally {
             this.inserter.close();
         }
+
+        // Tear down the context binding to the BioPortal h2 connection pool
+        this.initialContext.unbind("java:/comp/env/jdbc/BioPortalDS");
+        this.initialContext.destroySubcontext("java:/comp/env/jdbc");
+        this.initialContext.destroySubcontext("java:/comp/env");
+        this.initialContext.destroySubcontext("java:/comp");
+        this.initialContext.destroySubcontext("java:");
+        this.initialContext.close();
+
     }
 
     /**
