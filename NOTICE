@@ -14,6 +14,8 @@ limitations under the License.
 
 This project includes:
   Apache Commons Collections under The Apache Software License, Version 2.0
+  Apache Commons DBCP under The Apache Software License, Version 2.0
+  Apache Commons Pool under The Apache Software License, Version 2.0
   Apache POI under The Apache Software License, Version 2.0
   Apache ServiceMix :: Bundles :: xstream under The Apache Software License, Version 2.0
   Commons BeanUtils Core under The Apache Software License, Version 2.0
@@ -50,6 +52,18 @@ This project includes:
   Protempa Test Suite under Apache License, Version 2.0
   Protempa UMLS Term Source Backend under Apache License, Version 2.0
   StAX API under The Apache Software License, Version 2.0
+  tomcat-annotations-api under Apache License, Version 2.0
+  tomcat-api under Apache License, Version 2.0
+  tomcat-catalina under Apache License, Version 2.0
+  tomcat-coyote under Apache License, Version 2.0
+  tomcat-el-api under Apache License, Version 2.0
+  tomcat-jni under Apache License, Version 2.0
+  tomcat-jsp-api under Apache License, Version 2.0
+  tomcat-juli under Apache License, Version 2.0
+  tomcat-servlet-api under Apache License, Version 2.0 and
+        Common Development And Distribution License (CDDL) Version 1.0
+  tomcat-util under Apache License, Version 2.0
+  tomcat-util-scan under Apache License, Version 2.0
   UMLSQuery under Apache License, Version 2.0
   XML Commons External Components XML APIs under The Apache Software License, Version 2.0
   XmlBeans under The Apache Software License, Version 2.0
