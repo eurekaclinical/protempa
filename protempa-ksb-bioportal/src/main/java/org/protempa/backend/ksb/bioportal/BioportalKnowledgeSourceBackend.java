@@ -205,7 +205,9 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
 
     @Override
     public PropositionDefinition readPropositionDefinition(String id) throws KnowledgeSourceReadException {
-        logger.log(Level.FINEST, "Looking for proposition in {0}: {1}", new Object[]{ this.ontologiesTable, id });
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "Looking for proposition in {0}: {1}", new Object[]{this.ontologiesTable, id});
+        }
         BioportalTerm term = readFromDatabase(id);
         if (term != null) {
             logger.log(Level.FINEST, "Found proposition id: {0}", id);
