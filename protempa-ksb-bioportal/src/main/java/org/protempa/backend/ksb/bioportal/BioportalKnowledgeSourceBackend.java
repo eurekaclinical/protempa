@@ -168,15 +168,16 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
         try (Connection conn = openConnection();
              PreparedStatement findStmt = conn.prepareStatement("SELECT display_name, code, ontology FROM " + this.ontologiesTable + " WHERE term_id = ?")) {
             findStmt.setString(1, id);
-            ResultSet rs = findStmt.executeQuery();
-            if (rs.next()) {
-                BioportalTerm result = new BioportalTerm();
-                result.id = id;
-                result.displayName = rs.getString(1);
-                result.code = rs.getString(2);
-                result.ontology = rs.getString(3);
+            try (ResultSet rs = findStmt.executeQuery()) {
+                if (rs.next()) {
+                    BioportalTerm result = new BioportalTerm();
+                    result.id = id;
+                    result.displayName = rs.getString(1);
+                    result.code = rs.getString(2);
+                    result.ontology = rs.getString(3);
 
-                return result;
+                    return result;
+                }
             }
         } catch (InvalidConnectionSpecArguments | SQLException e) {
             throw new KnowledgeSourceReadException(e);
@@ -190,9 +191,10 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
         try (Connection conn = openConnection();
              PreparedStatement childrenStmt = conn.prepareStatement("SELECT term_id FROM " + this.ontologiesTable + " WHERE parent_id = ?")) {
             childrenStmt.setString(1, id);
-            ResultSet rs = childrenStmt.executeQuery();
-            while (rs.next()) {
-                result.add(rs.getString(1));
+            try (ResultSet rs = childrenStmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(rs.getString(1));
+                }
             }
         } catch (InvalidConnectionSpecArguments | SQLException e) {
             throw new KnowledgeSourceReadException(e);
@@ -234,9 +236,10 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
              PreparedStatement parentStmt = conn.prepareStatement("SELECT parent_id FROM " + this.ontologiesTable + " WHERE term_id = ?")) {
             List<String> result = new ArrayList<>();
             parentStmt.setString(1, propId);
-            ResultSet rs = parentStmt.executeQuery();
-            while (rs.next()) {
-                result.add(rs.getString(1));
+            try (ResultSet rs = parentStmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(rs.getString(1));
+                }
             }
             return result.toArray(new String[result.size()]);
         } catch (InvalidConnectionSpecArguments | SQLException e) {
@@ -250,9 +253,10 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
              PreparedStatement searchStmt = conn.prepareStatement("SELECT term_id FROM " + this.ontologiesTable + " WHERE UPPER(display_name) LIKE UPPER(?)")) {
             Set<String> result = new HashSet<>();
             searchStmt.setString(1, "%" + searchKey + "%");
-            ResultSet rs = searchStmt.executeQuery();
-            while (rs.next()) {
-                result.add(rs.getString(1));
+            try (ResultSet rs = searchStmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(rs.getString(1));
+                }
             }
             return result;
         } catch (InvalidConnectionSpecArguments | SQLException e) {
