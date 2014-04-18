@@ -217,14 +217,7 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
             result.setInDataSource(true);
 
             Set<String> children = readChildrenFromDatabase(id);
-            String[] iia = new String[children.size()];
-
-            int i = 0;
-            for (String child : children) {
-                iia[i] = child;
-                i++;
-            }
-            result.setInverseIsA(iia);
+            result.setInverseIsA(children.toArray(new String[children.size()]));
 
             return result;
         }
