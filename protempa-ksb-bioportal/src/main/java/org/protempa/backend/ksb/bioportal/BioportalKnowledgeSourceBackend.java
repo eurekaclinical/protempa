@@ -31,6 +31,7 @@ import org.protempa.TemporalPropositionDefinition;
 import org.protempa.backend.AbstractCommonsKnowledgeSourceBackend;
 import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.annotations.BackendProperty;
+import org.protempa.proposition.Event;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -157,24 +158,16 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
         }
     }
 
-    private static class BioportalTerm {
-        String id;
-        String displayName;
-        String code;
-        String ontology;
-    }
-
-    private BioportalTerm readFromDatabase(String id) throws KnowledgeSourceReadException {
+    private EventDefinition readFromDatabase(String id) throws KnowledgeSourceReadException {
         try (Connection conn = openConnection();
-             PreparedStatement findStmt = conn.prepareStatement("SELECT display_name, code, ontology FROM " + this.ontologiesTable + " WHERE term_id = ?")) {
+             PreparedStatement findStmt = conn.prepareStatement("SELECT display_name, code FROM " + this.ontologiesTable + " WHERE term_id = ?")) {
             findStmt.setString(1, id);
             try (ResultSet rs = findStmt.executeQuery()) {
                 if (rs.next()) {
-                    BioportalTerm result = new BioportalTerm();
-                    result.id = id;
-                    result.displayName = rs.getString(1);
-                    result.code = rs.getString(2);
-                    result.ontology = rs.getString(3);
+                    EventDefinition result = new EventDefinition(id);
+                    result.setDisplayName(rs.getString(1));
+                    result.setAbbreviatedDisplayName(rs.getString(2));
+                    result.setInDataSource(true);
 
                     return result;
                 }
@@ -208,13 +201,9 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Looking for proposition in {0}: {1}", new Object[]{this.ontologiesTable, id});
         }
-        BioportalTerm term = readFromDatabase(id);
-        if (term != null) {
+        EventDefinition result = readFromDatabase(id);
+        if (result != null) {
             logger.log(Level.FINEST, "Found proposition id: {0}", id);
-            EventDefinition result = new EventDefinition(id);
-            result.setDisplayName(term.displayName);
-            result.setAbbreviatedDisplayName(term.code);
-            result.setInDataSource(true);
 
             Set<String> children = readChildrenFromDatabase(id);
             result.setInverseIsA(children.toArray(new String[children.size()]));
