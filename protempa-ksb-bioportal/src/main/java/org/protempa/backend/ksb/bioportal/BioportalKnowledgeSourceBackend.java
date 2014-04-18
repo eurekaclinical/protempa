@@ -46,7 +46,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Implements a knowledge source backend based on a database export of BioPortal
+ * ontologies. Since BioPortal only has standard ontologies (eg, ICD-9, CPT,
+ * LOINC), all of the KnowledgeSourceBackend methods that look for higher
+ * level abstractions return null or empty arrays. All terms in BioPortal
+ * ontologies are assumed to be {@link org.protempa.EventDefinition} objects
+ * in Protempa.
  */
 @BackendInfo(displayName = "BioPortal Knowledge Source Backend")
 public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBackend {
