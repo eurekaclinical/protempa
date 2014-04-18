@@ -20,6 +20,7 @@ package org.protempa.backend.ksb.bioportal;
  * #L%
  */
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.arp.javautil.sql.DatabaseAPI;
 import org.arp.javautil.sql.InvalidConnectionSpecArguments;
 import org.protempa.AbstractionDefinition;
@@ -265,16 +266,16 @@ public class BioportalKnowledgeSourceBackend extends AbstractCommonsKnowledgeSou
 
     @Override
     public String[] readAbstractedInto(String propId) throws KnowledgeSourceReadException {
-        return new String[0];
+        return ArrayUtils.EMPTY_STRING_ARRAY;
     }
 
     @Override
     public String[] readInduces(String propId) throws KnowledgeSourceReadException {
-        return new String[0];
+        return ArrayUtils.EMPTY_STRING_ARRAY;
     }
 
     @Override
     public String[] readSubContextOfs(String propId) throws KnowledgeSourceReadException {
-        return new String[0];
+        return ArrayUtils.EMPTY_STRING_ARRAY;
     }
 }
