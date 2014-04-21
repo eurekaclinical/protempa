@@ -28,7 +28,7 @@ import java.util.List;
 public interface Configurations {
     /**
      * Reads all of the backend specifications from the specified 
-     * configurations.
+     * configurations conforming to the given backend spec.
      * @param <B>
      * @param configurationsId
      * @param backendSpec
@@ -39,7 +39,21 @@ public interface Configurations {
     <B extends Backend> List<BackendInstanceSpec<B>>
             load(String configurationsId, BackendSpec<B> backendSpec)
             throws ConfigurationsNotFoundException, ConfigurationsLoadException;
-    
+
+    /**
+     * Reads all of the backend specifications from the specified
+     * configurations. The implementation is free to decide how
+     * the list is ordered.
+     * @param <B> the returned list can contain any type of backend
+     * @param configurationsId the id of the configurations to read
+     * @return a list of {@link org.protempa.backend.BackendInstanceSpec} read
+     * from the configurations.
+     * @throws ConfigurationsNotFoundException if the configurations are not found
+     * @throws ConfigurationsLoadException if there is a problem loading the configurations
+     */
+    <B extends Backend> List<BackendInstanceSpec<B>> load(String configurationsId)
+        throws ConfigurationsNotFoundException, ConfigurationsLoadException;
+
     /**
      * Writes the provided backend specifications to the configurations with
      * the specified id. The passed-in objects will have their 
