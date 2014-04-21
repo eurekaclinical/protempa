@@ -174,7 +174,7 @@ public class INICommonsConfigurations implements Configurations {
                 }
                 Configuration section = config.subset(sectionName);
                 BackendInstanceSpec<B> backendInstanceSpec =
-                        backendSpec.newBackendInstanceSpec(sectionIndex);
+                        backendSpec.newBackendInstanceSpec();
                 backendInstanceSpec.setConfigurationsId(configurationsId);
                 for (Iterator<String> itr = section.getKeys(); itr.hasNext();) {
                     String key = itr.next();

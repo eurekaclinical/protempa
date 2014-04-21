@@ -121,7 +121,7 @@ public class INICommonsConfigurationsTest {
         BackendSpec backendSpec =
                 LOADER.loadSpec("ASBackendSpec1");
         BackendInstanceSpec backendInstanceSpec =
-                backendSpec.newBackendInstanceSpec(0);
+                backendSpec.newBackendInstanceSpec();
         backendInstanceSpec.setProperty("url", "http://localhost");
         configurations.save("test",
                 Collections.singletonList(backendInstanceSpec));

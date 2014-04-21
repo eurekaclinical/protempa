@@ -27,6 +27,7 @@ import org.protempa.backend.BackendProviderManager;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
+import org.protempa.backend.BackendSpecNotFoundException;
 import org.protempa.backend.Configurations;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.ConfigurationsNotFoundException;
@@ -38,8 +39,6 @@ import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.backend.tsb.TermSourceBackend;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,8 +47,6 @@ import java.util.logging.Logger;
  * @author Andrew Post
  */
 public class SourceFactory {
-
-    private static final Comparator<BackendInstanceSpec> BIS_CMP = new BackendInstanceSpecComparator();
 
     private final List<BackendInstanceSpec<AlgorithmSourceBackend>> algorithmSourceBackendInstanceSpecs;
     private final List<BackendInstanceSpec<DataSourceBackend>> dataSourceBackendInstanceSpecs;
@@ -83,10 +80,27 @@ public class SourceFactory {
         BackendSpecLoader<TermSourceBackend> tsl =
                 backendProvider.getTermSourceBackendSpecLoader();
 
+        List<BackendSpec<AlgorithmSourceBackend>> asbSpecs = new ArrayList<>();
+        List<BackendSpec<DataSourceBackend>> dsbSpecs = new ArrayList<>();
+        List<BackendSpec<KnowledgeSourceBackend>> ksbSpecs = new ArrayList<>();
+        List<BackendSpec<TermSourceBackend>> tsbSpecs = new ArrayList<>();
+
         for (String specId :
                 configurations.loadConfigurationIds(configurationId)) {
-            if (!asl.hasSpec(specId) && !dsl.hasSpec(specId)
-                    && !ksl.hasSpec(specId) && !tsl.hasSpec(specId)) {
+            try {
+                if (asl.hasSpec(specId)) {
+                    asbSpecs.add(asl.loadSpec(specId));
+                } else if (dsl.hasSpec(specId)) {
+                    dsbSpecs.add(dsl.loadSpec(specId));
+                } else if (ksl.hasSpec(specId)) {
+                    ksbSpecs.add(ksl.loadSpec(specId));
+                } else if (tsl.hasSpec(specId)) {
+                    tsbSpecs.add(tsl.loadSpec(specId));
+                } else {
+                    throw new InvalidConfigurationException(
+                            "The backend " + specId + " was not found");
+                }
+            } catch (BackendSpecNotFoundException e) {
                 throw new InvalidConfigurationException(
                         "The backend " + specId + " was not found");
             }
@@ -95,27 +109,27 @@ public class SourceFactory {
         this.algorithmSourceBackendInstanceSpecs =
                 new ArrayList<>();
 
-        for (BackendSpec<AlgorithmSourceBackend> backendSpec : asl) {
+        for (BackendSpec<AlgorithmSourceBackend> backendSpec : asbSpecs) {
             this.algorithmSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
         }
 
         this.dataSourceBackendInstanceSpecs =
                 new ArrayList<>();
 
-        for (BackendSpec<DataSourceBackend> backendSpec : dsl) {
+        for (BackendSpec<DataSourceBackend> backendSpec : dsbSpecs) {
             this.dataSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
         }
 
         this.knowledgeSourceBackendInstanceSpecs =
                 new ArrayList<>();
 
-        for (BackendSpec<KnowledgeSourceBackend> backendSpec : ksl) {
+        for (BackendSpec<KnowledgeSourceBackend> backendSpec : ksbSpecs) {
             this.knowledgeSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
         }
 
         this.termSourceBackendInstanceSpecs =
                 new ArrayList<>();
-        for (BackendSpec<TermSourceBackend> backendSpec : tsl) {
+        for (BackendSpec<TermSourceBackend> backendSpec : tsbSpecs) {
             this.termSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
         }
         logger.log(Level.FINE, "Configuration {0} loaded", configurationId);
@@ -131,7 +145,6 @@ public class SourceFactory {
     public final DataSource newDataSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         DataSourceBackend[] backends = new DataSourceBackend[this.dataSourceBackendInstanceSpecs.size()];
-        Collections.sort(this.dataSourceBackendInstanceSpecs, BIS_CMP);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.dataSourceBackendInstanceSpecs.get(i).getInstance();
         }
@@ -141,7 +154,6 @@ public class SourceFactory {
     public final KnowledgeSource newKnowledgeSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         KnowledgeSourceBackend[] backends = new KnowledgeSourceBackend[this.knowledgeSourceBackendInstanceSpecs.size()];
-        Collections.sort(this.knowledgeSourceBackendInstanceSpecs, BIS_CMP);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.knowledgeSourceBackendInstanceSpecs.get(i).getInstance();
         }
@@ -151,7 +163,6 @@ public class SourceFactory {
     public final AlgorithmSource newAlgorithmSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         AlgorithmSourceBackend[] backends = new AlgorithmSourceBackend[this.algorithmSourceBackendInstanceSpecs.size()];
-        Collections.sort(this.algorithmSourceBackendInstanceSpecs, BIS_CMP);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.algorithmSourceBackendInstanceSpecs.get(i).getInstance();
         }
@@ -161,19 +172,10 @@ public class SourceFactory {
     public final TermSource newTermSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         TermSourceBackend[] backends = new TermSourceBackend[this.termSourceBackendInstanceSpecs.size()];
-        Collections.sort(this.termSourceBackendInstanceSpecs, BIS_CMP);
         for (int i = 0; i < backends.length; i++) {
             backends[i] = this.termSourceBackendInstanceSpecs.get(i).getInstance();
         }
         return new TermSourceImpl(backends);
 
-    }
-
-    private static class BackendInstanceSpecComparator implements Comparator<BackendInstanceSpec> {
-
-        @Override
-        public int compare(BackendInstanceSpec o1, BackendInstanceSpec o2) {
-            return o1.getLoadOrder() - o2.getLoadOrder();
-        }
     }
 }

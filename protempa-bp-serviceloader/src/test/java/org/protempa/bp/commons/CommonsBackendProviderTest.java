@@ -138,7 +138,7 @@ public class CommonsBackendProviderTest {
                 backendProvider.getDataSourceBackendSpecLoader();
         BackendSpec<?> spec = 
                 loader.loadSpec(MockDataSourceBackend.class.getName());
-        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec(0);
+        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
         List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
         assertEquals(1, bps.size());
     }
@@ -206,7 +206,7 @@ public class CommonsBackendProviderTest {
                 backendProvider.getKnowledgeSourceBackendSpecLoader();
         BackendSpec<?> spec = 
                 loader.loadSpec(MockKnowledgeSourceBackend.class.getName());
-        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec(0);
+        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
         List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
         assertEquals(1, bps.size());
     }
@@ -275,7 +275,7 @@ public class CommonsBackendProviderTest {
                 backendProvider.getAlgorithmSourceBackendSpecLoader();
         BackendSpec<?> spec = 
                 loader.loadSpec(MockAlgorithmSourceBackend.class.getName());
-        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec(0);
+        BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
         List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
         assertEquals(0, bps.size());
     }

@@ -178,7 +178,7 @@ public class INIConfigurations implements Configurations {
                     order++;
                     if (backendSpec.getId().equals(string)) {
                         backendInstanceSpec =
-                                backendSpec.newBackendInstanceSpec(order);
+                                backendSpec.newBackendInstanceSpec();
                         backendInstanceSpec.setConfigurationsId(
                                 configurationsId);
                     } else {

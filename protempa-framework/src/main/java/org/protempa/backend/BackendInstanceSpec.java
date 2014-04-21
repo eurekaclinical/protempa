@@ -36,15 +36,13 @@ public final class BackendInstanceSpec<B extends Backend> {
     private String configurationsId;
     private final Map<String, Object> properties;
     private final List<BackendPropertySpec> propertySpecs;
-    private final int loadOrder;
 
     BackendInstanceSpec(
             BackendSpec<B> backendSpec,
-            List<BackendPropertySpec> propertySpecs, int loadOrder) {
+            List<BackendPropertySpec> propertySpecs) {
         assert backendSpec != null : "backendSpec cannot be null";
         assert propertySpecs != null : "info cannot be null";
         this.backendSpec = backendSpec;
-        this.loadOrder = loadOrder;
         this.properties = new HashMap<>();
         this.propertySpecs = Collections.unmodifiableList(
                 new ArrayList<>(propertySpecs));
@@ -52,10 +50,6 @@ public final class BackendInstanceSpec<B extends Backend> {
 
     public BackendSpec<B> getBackendSpec() {
         return this.backendSpec;
-    }
-
-    public int getLoadOrder() {
-        return this.loadOrder;
     }
 
     public void setConfigurationsId(String configurationsId) {

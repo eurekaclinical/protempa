@@ -39,6 +39,6 @@ public final class MockBackendInstanceSpecFactory<B extends Backend<?>> {
                 new MockBackendProvider(), "mockSpec", "Mock Spec",
                 new ArrayList<BackendPropertySpec>());
                 
-        backendInstSpec = backendSpec.newBackendInstanceSpec(0);
+        backendInstSpec = backendSpec.newBackendInstanceSpec();
     }
 }
