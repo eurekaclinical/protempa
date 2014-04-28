@@ -756,71 +756,71 @@ abstract class ConnectionManager {
     }
 
 
-	List<String> searchInstancesContainingKey(String searchKey)
-			throws KnowledgeSourceReadException {
-		// return getFromProtege(matchString, INSTANCE_SEARCHER);
-		return getFromProtege(searchKey,
-				new ProtegeCommand<List<String>, String>(
-						"search instance in a given  slot") {
-					@Override
-					List<String> get(String matchString) {
-						List<String> searchResults = new ArrayList<String>();
-						Collection<Frame> displayNameMatches = protegeKnowledgeBase
-								.getMatchingFrames(protegeKnowledgeBase
-										.getSlot("displayName"), null, false,
-										"*" + matchString.trim() + "*", -1);
-						Collection<Frame> nameMatches = protegeKnowledgeBase
-								.getMatchingFrames(protegeKnowledgeBase
-										.getSlot(":NAME"), null, false, "*"
-										+ matchString.trim() + "*", -1);
-						Slot nameSlot = protegeKnowledgeBase.getSlot(":NAME");
+    List<String> searchInstancesContainingKey(String searchKey)
+            throws KnowledgeSourceReadException {
+        // return getFromProtege(matchString, INSTANCE_SEARCHER);
+        return getFromProtege(searchKey,
+                new ProtegeCommand<List<String>, String>(
+                        "search instance in a given  slot") {
+                    @Override
+                    List<String> get(String matchString) {
+                        List<String> searchResults = new ArrayList<String>();
+                        Collection<Frame> displayNameMatches = protegeKnowledgeBase
+                                .getMatchingFrames(protegeKnowledgeBase
+                                        .getSlot("displayName"), null, false,
+                                        "*" + matchString.trim() + "*", -1);
+                        Collection<Frame> nameMatches = protegeKnowledgeBase
+                                .getMatchingFrames(protegeKnowledgeBase
+                                        .getSlot(":NAME"), null, false, "*"
+                                        + matchString.trim() + "*", -1);
+                        Slot nameSlot = protegeKnowledgeBase.getSlot(":NAME");
 
-						// Protect against Protege returning null (its API
-						// doesn't guarantee
-						// a non-null return value) If the name slot or the
-						// display name slot contains the search string then
-						// return that.
-						try {
-							Cls propositionCls = protegeKnowledgeBase
-									.getCls("Proposition");
-							if (displayNameMatches != null) {
+                        // Protect against Protege returning null (its API
+                        // doesn't guarantee
+                        // a non-null return value) If the name slot or the
+                        // display name slot contains the search string then
+                        // return that.
+                        try {
+                            Cls propositionCls = protegeKnowledgeBase
+                                    .getCls("Proposition");
+                            if (displayNameMatches != null) {
 
-								for (Frame match : displayNameMatches) {
+                                for (Frame match : displayNameMatches) {
 
-									if (match instanceof Instance) {
-										Instance temp = (Instance) match;
-										if (temp.hasType(propositionCls)) {
-											searchResults
-													.add((String) getOwnSlotValue(
-															match, nameSlot));
-										}
-									}
+                                    if (match instanceof Instance) {
+                                        Instance temp = (Instance) match;
+                                        if (temp.hasType(propositionCls)) {
+                                            searchResults
+                                                    .add((String) getOwnSlotValue(
+                                                            match, nameSlot));
+                                        }
+                                    }
 
-								}
-							}
-							if (nameMatches != null) {
-								for (Frame match : nameMatches) {
-									if (match instanceof Instance) {
-										Instance temp = (Instance) match;
-										if (temp.hasType(propositionCls)) {
-											String result = (String) getOwnSlotValue(
-													match, nameSlot);
-											if (!searchResults.contains(result))
-												searchResults.add(result);
-										}
-									}
+                                }
+                            }
+                            if (nameMatches != null) {
+                                for (Frame match : nameMatches) {
+                                    if (match instanceof Instance) {
+                                        Instance temp = (Instance) match;
+                                        if (temp.hasType(propositionCls)) {
+                                            String result = (String) getOwnSlotValue(
+                                                    match, nameSlot);
+                                            if (!searchResults.contains(result))
+                                                searchResults.add(result);
+                                        }
+                                    }
 
-								}
-							}
+                                }
+                            }
 
-						} catch (KnowledgeSourceReadException e) {
-							e.printStackTrace();
-						}
+                        } catch (KnowledgeSourceReadException e) {
+                            e.printStackTrace();
+                        }
 
                         /* also get protege elements that match the Name slot */
-						return searchResults;
-					}
-				});
-	}
+                        return searchResults;
+                    }
+                });
+    }
 }
 

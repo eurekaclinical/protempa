@@ -914,120 +914,120 @@ public final class KnowledgeSourceImpl
         fireSourceUpdated(new KnowledgeSourceUpdatedEvent(this));
     }
 
-	public List<List<String>> getMatchingPropositionDefinitions(String searchKey)
-			throws KnowledgeSourceReadException {
+    public List<List<String>> getMatchingPropositionDefinitions(String searchKey)
+            throws KnowledgeSourceReadException {
 
-		ProtempaUtil.logger().log(Level.INFO,
-				"Searching Backend For search String " + searchKey);
-		List<String> matchingElements = getSearchResultsFromBackend(searchKey);
+        ProtempaUtil.logger().log(Level.INFO,
+                "Searching Backend For search String " + searchKey);
+        List<String> matchingElements = getSearchResultsFromBackend(searchKey);
 
-		ProtempaUtil.logger().log(
-				Level.INFO,
-				"There are " + matchingElements.size()
-						+ " terms in the backend matching search string = "
-						+ searchKey);
-		return readParentsToListHierarchy(matchingElements);
+        ProtempaUtil.logger().log(
+                Level.INFO,
+                "There are " + matchingElements.size()
+                        + " terms in the backend matching search string = "
+                        + searchKey);
+        return readParentsToListHierarchy(matchingElements);
 
-	}
+    }
 
-	private List<String> getSearchResultsFromBackend(String searchKey)
-			throws KnowledgeSourceReadException {
-		for (KnowledgeSourceBackend backend : getBackends()) {
-			return backend.getKnowledgeSourceSearchResults(searchKey);
-		}
-		return null;
-	}
+    private List<String> getSearchResultsFromBackend(String searchKey)
+            throws KnowledgeSourceReadException {
+        for (KnowledgeSourceBackend backend : getBackends()) {
+            return backend.getKnowledgeSourceSearchResults(searchKey);
+        }
+        return null;
+    }
 
-	private List<List<String>> readParentsToListHierarchy(
-			List<String> searchResults) throws KnowledgeSourceReadException {
-		List<List<String>> hierarchyListOfSearchResults = new ArrayList<List<String>>();
+    private List<List<String>> readParentsToListHierarchy(
+            List<String> searchResults) throws KnowledgeSourceReadException {
+        List<List<String>> hierarchyListOfSearchResults = new ArrayList<List<String>>();
 
-		if (searchResults != null) {
-			for (int i = 0; i < searchResults.size(); i++) {
-				ProtempaUtil.logger().log(
-						Level.INFO,
-						"Reading parents for search term "
-								+ searchResults.get(i));
-				PropositionDefinition propDefinition = readPropositionDefinition(searchResults
-						.get(i));
-				if (propDefinition != null) {
-					readParentsUntilRoot(propDefinition, null,
-							hierarchyListOfSearchResults);
-				}
-			}
-		}
-		ProtempaUtil
-				.logger()
-				.log(
-						Level.INFO,
-						"Returning "
-								+ hierarchyListOfSearchResults.size()
-								+ " complete heirarchy of nodes that contain the search string ");
-		return hierarchyListOfSearchResults;
-	}
+        if (searchResults != null) {
+            for (int i = 0; i < searchResults.size(); i++) {
+                ProtempaUtil.logger().log(
+                        Level.INFO,
+                        "Reading parents for search term "
+                                + searchResults.get(i));
+                PropositionDefinition propDefinition = readPropositionDefinition(searchResults
+                        .get(i));
+                if (propDefinition != null) {
+                    readParentsUntilRoot(propDefinition, null,
+                            hierarchyListOfSearchResults);
+                }
+            }
+        }
+        ProtempaUtil
+                .logger()
+                .log(
+                        Level.INFO,
+                        "Returning "
+                                + hierarchyListOfSearchResults.size()
+                                + " complete heirarchy of nodes that contain the search string ");
+        return hierarchyListOfSearchResults;
+    }
 
-	private void readParentsUntilRoot(
-			PropositionDefinition propositionDefinition,
-			List<String> currentParentList,
-			List<List<String>> allParentListsSoFar)
-			throws KnowledgeSourceReadException {
+    private void readParentsUntilRoot(
+            PropositionDefinition propositionDefinition,
+            List<String> currentParentList,
+            List<List<String>> allParentListsSoFar)
+            throws KnowledgeSourceReadException {
 
-		ProtempaUtil.logger().log(
-				Level.INFO,
-				"Looping through parents of " + propositionDefinition.getId()
-						+ "until root node ");
-		List<PropositionDefinition> parentsForPropositionDefinition = readParents(propositionDefinition);
+        ProtempaUtil.logger().log(
+                Level.INFO,
+                "Looping through parents of " + propositionDefinition.getId()
+                        + "until root node ");
+        List<PropositionDefinition> parentsForPropositionDefinition = readParents(propositionDefinition);
 
-		if (parentsForPropositionDefinition != null
-				&& parentsForPropositionDefinition.size() == 0) {
-			if(currentParentList==null){
-			/*this case is met when the root element is the search element eg:Vital Sign. The current parent list is null in that case*/
-				currentParentList = new ArrayList<String>();
-				currentParentList.add(propositionDefinition.getId());
-			}
-			if (!allParentListsSoFar.contains(currentParentList)
-					&& currentParentList != null){
-				allParentListsSoFar.add(currentParentList)  ;
-				currentParentList = null;
-			}
+        if (parentsForPropositionDefinition != null
+                && parentsForPropositionDefinition.size() == 0) {
+            if (currentParentList == null) {
+            /*this case is met when the root element is the search element eg:Vital Sign. The current parent list is null in that case*/
+                currentParentList = new ArrayList<String>();
+                currentParentList.add(propositionDefinition.getId());
+            }
+            if (!allParentListsSoFar.contains(currentParentList)
+                    && currentParentList != null) {
+                allParentListsSoFar.add(currentParentList);
+                currentParentList = null;
+            }
 
-		} else if (parentsForPropositionDefinition.size() >= 2) {
-			for (int i = 0; i < parentsForPropositionDefinition.size(); i++) {
-				if (currentParentList != null) {
-					List<String> oneSetOfParents = new ArrayList<String>();
-					for (int j = 0; j < currentParentList.size(); j++) {
-						oneSetOfParents.add(currentParentList.get(j));
-					}
-					oneSetOfParents.add(parentsForPropositionDefinition.get(i)
-							.getId());
-					readParentsUntilRoot(
-							parentsForPropositionDefinition.get(i),
-							oneSetOfParents, allParentListsSoFar);
-				} else {
-					currentParentList = new ArrayList<String>();
-					currentParentList.add(propositionDefinition.getId());
-					currentParentList.add(parentsForPropositionDefinition
-							.get(i).getId());
-					readParentsUntilRoot(
-							parentsForPropositionDefinition.get(i),
-							currentParentList, allParentListsSoFar);
-					currentParentList = null;
-				}
-			}
-		} else {
-			if (currentParentList == null) {
-				currentParentList = new ArrayList<String>();
-				currentParentList.add(propositionDefinition.getId());
-			}
+        } else if (parentsForPropositionDefinition.size() > 1) {
+            for (int i = 0; i < parentsForPropositionDefinition.size(); i++) {
+                if (currentParentList != null) {
+                    List<String> oneSetOfParents = new ArrayList<String>();
+                    for (int j = 0; j < currentParentList.size(); j++) {
+                        oneSetOfParents.add(currentParentList.get(j));
+                    }
+                    oneSetOfParents.add(parentsForPropositionDefinition.get(i)
+                            .getId());
+                    readParentsUntilRoot(
+                            parentsForPropositionDefinition.get(i),
+                            oneSetOfParents, allParentListsSoFar);
+                } else {
+                    currentParentList = new ArrayList<String>();
+                    currentParentList.add(propositionDefinition.getId());
+                    currentParentList.add(parentsForPropositionDefinition
+                            .get(i).getId());
+                    readParentsUntilRoot(
+                            parentsForPropositionDefinition.get(i),
+                            currentParentList, allParentListsSoFar);
+                    currentParentList = null;
+                }
+            }
+        } else {
+            if (currentParentList == null) {
+                currentParentList = new ArrayList<String>();
+                currentParentList.add(propositionDefinition.getId());
+            }
 
-			if (!currentParentList.contains(parentsForPropositionDefinition
-					.get(0).getId()))
-				currentParentList.add(parentsForPropositionDefinition.get(0)
-						.getId());
+            if (!currentParentList.contains(parentsForPropositionDefinition
+                    .get(0).getId()))
+                currentParentList.add(parentsForPropositionDefinition.get(0)
+                        .getId());
 
-			readParentsUntilRoot(parentsForPropositionDefinition.get(0),
-					currentParentList, allParentListsSoFar);
-			currentParentList = null;
-		}
-	}
+            readParentsUntilRoot(parentsForPropositionDefinition.get(0),
+                    currentParentList, allParentListsSoFar);
+            currentParentList = null;
+        }
+    }
 }
