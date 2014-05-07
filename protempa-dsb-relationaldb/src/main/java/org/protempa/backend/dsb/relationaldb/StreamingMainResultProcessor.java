@@ -120,8 +120,16 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
         return i;
     }
 
+    /**
+     * 
+     * @return cannot be <code>null</code>.
+     */
     abstract DataStreamingEventIterator<P> getResults();
 
+    /**
+     * 
+     * @return cannot be <code>null</code>.
+     */
     abstract  DataStreamingEventIterator<UniqueIdPair>
             getInboundReferenceResults();
 

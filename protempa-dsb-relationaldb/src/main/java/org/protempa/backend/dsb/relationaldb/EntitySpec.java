@@ -23,8 +23,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.value.Granularity;
@@ -33,18 +35,18 @@ import org.protempa.proposition.value.ValueType;
 
 /**
  * Defines a mapping from propositions to entities in a relational database.
- * 
+ *
  * @author Andrew Post
  */
 public final class EntitySpec implements Serializable {
 
     private static final long serialVersionUID = -1935588032831088001L;
-    private static final PropertySpec[] EMPTY_PROPERTY_SPEC_ARRAY =
-            new PropertySpec[0];
-    private static final ReferenceSpec[] EMPTY_REFERENCE_SPEC_ARRAY =
-            new ReferenceSpec[0];
-    private static final ColumnSpec[] EMPTY_COLUMN_SPEC_ARRAY =
-            new ColumnSpec[0];
+    private static final PropertySpec[] EMPTY_PROPERTY_SPEC_ARRAY
+            = new PropertySpec[0];
+    private static final ReferenceSpec[] EMPTY_REFERENCE_SPEC_ARRAY
+            = new ReferenceSpec[0];
+    private static final ColumnSpec[] EMPTY_COLUMN_SPEC_ARRAY
+            = new ColumnSpec[0];
     private final String name;
     private final String description;
     private final String[] propositionIds;
@@ -66,49 +68,49 @@ public final class EntitySpec implements Serializable {
 
     /**
      * Creates an entity spec instance.
-     * 
+     *
      * @param name a {@link String}. Cannot be <code>null</code>.
      * @param description a {@link String}. The constructor replaces a
      * <code>null</code> argument with a {@link String} of length zero.
-     * @param propositionIds the proposition id {@link String[]}s to which
-     * this entity spec applies. Cannot contain <code>null</code> values.
-     * These propositions must all have the same set of properties.
+     * @param propositionIds the proposition id {@link String[]}s to which this
+     * entity spec applies. Cannot contain <code>null</code> values. These
+     * propositions must all have the same set of properties.
      * @param unique <code>true</code> if every row in the database table
      * specified by the <code>baseSpec</code> argument contains a unique
      * instance of this entity, <code>false</code> otherwise.
      * @param baseSpec a {@link ColumnSpec} representing the path through the
      * database from the key's main table to this entity's main table.
-     * @param uniqueIdSpec a {@link ColumnSpec[]} representing the paths
-     * through the database from this entity's main table to
-     * the tables and columns that together form an unique identifier for this
-     * entity. The columns comprising the unique identifier cannot have null 
-     * values with one exception: if the column is also used for the PROTEMPA 
-     * keyId, then it can have a null value (because records with a null keyId
-     * are discarded with just a logged warning).
-     * @param startTimeOrTimestampSpec a {@link ColumnSpec} representing
-     * the path through the database from this entity's main table to
-     * the table and column where the entity's start time (or timestamp, if
-     * no finish time is defined) is located, or <code>null</code> if this
-     * entity has no start time or timestamp.
-     * @param finishTimeSpec a {@link ColumnSpec} representing
-     * the path through the database from this entity's main table to
-     * the table and column where the entity's finish time is located, or
-     * <code>null</code> if this entity has no finish time.
+     * @param uniqueIdSpec a {@link ColumnSpec[]} representing the paths through
+     * the database from this entity's main table to the tables and columns that
+     * together form an unique identifier for this entity. The columns
+     * comprising the unique identifier cannot have null values with one
+     * exception: if the column is also used for the PROTEMPA keyId, then it can
+     * have a null value (because records with a null keyId are discarded with
+     * just a logged warning).
+     * @param startTimeOrTimestampSpec a {@link ColumnSpec} representing the
+     * path through the database from this entity's main table to the table and
+     * column where the entity's start time (or timestamp, if no finish time is
+     * defined) is located, or <code>null</code> if this entity has no start
+     * time or timestamp.
+     * @param finishTimeSpec a {@link ColumnSpec} representing the path through
+     * the database from this entity's main table to the table and column where
+     * the entity's finish time is located, or <code>null</code> if this entity
+     * has no finish time.
      * @param propertySpecs a {@link PropertySpec[]} defining the entity's
      * properties. These properties should be the same as the corresponding
      * propositions' properties. Cannot contain <code>null</code> values.
-     * @param codeToPropIdMap a one-to-one {@link Map<String,String>} from
-     * code to proposition id. If <code>null</code> or a mapping for a code
-     * is not defined, it is assumed that the code in the database is the
-     * same as the proposition id.
-     * @param codeSpec a {@link ColumnSpec} representing the path through
-     * the database from this entity's main table to the table and column
-     * where the entity's code is located, or <code>null</code> if this entity
-     * has no code.
-     * @param constraintSpecs zero or more {@link ColumnSpec[]} paths from
-     * this instance's main table to another table and column whose value
-     * will constrain which rows in the database are members of this entity.
-     * Cannot contain <code>null</code> values.
+     * @param codeToPropIdMap a one-to-one {@link Map<String,String>} from code
+     * to proposition id. If <code>null</code> or a mapping for a code is not
+     * defined, it is assumed that the code in the database is the same as the
+     * proposition id.
+     * @param codeSpec a {@link ColumnSpec} representing the path through the
+     * database from this entity's main table to the table and column where the
+     * entity's code is located, or <code>null</code> if this entity has no
+     * code.
+     * @param constraintSpecs zero or more {@link ColumnSpec[]} paths from this
+     * instance's main table to another table and column whose value will
+     * constrain which rows in the database are members of this entity. Cannot
+     * contain <code>null</code> values.
      * @param valueType if this entity has a value, its {@link ValueType}.
      * @param granularity the granularity for interpreting this entity' start
      * and finish times.
@@ -116,13 +118,13 @@ public final class EntitySpec implements Serializable {
      * entity's start and finish times. Cannot be <code>null</code>.
      * @param partitionBy a hint to the relational data source backend to
      * partition queries for this entity spec by the given {@link Unit}. For
-     * example, if a time unit of MONTH is specified, the backend may only
-     * query data one month at a time. In order for this to work, at least one
+     * example, if a time unit of MONTH is specified, the backend may only query
+     * data one month at a time. In order for this to work, at least one
      * {@link org.protempa.dsb.filter.PositionFilter} must be specified that
-     * defines both upper and lower bounds on the same side of a
-     * proposition's intervals. If multiple position filters are specified,
-     * then one of these will be used to partition queries (which one is
-     * undefined!). If <code>null</code>, no partitioning will occur.
+     * defines both upper and lower bounds on the same side of a proposition's
+     * intervals. If multiple position filters are specified, then one of these
+     * will be used to partition queries (which one is undefined!). If
+     * <code>null</code>, no partitioning will occur.
      */
     public EntitySpec(String name,
             String description,
@@ -172,7 +174,6 @@ public final class EntitySpec implements Serializable {
             throw new IllegalArgumentException("baseSpec cannot be null");
         }
         this.baseSpec = baseSpec;
-
 
         if (description == null) {
             description = "";
@@ -267,8 +268,7 @@ public final class EntitySpec implements Serializable {
     }
 
     /**
-     * Returns whether each row corresponds to its own instance of this
-     * entity.
+     * Returns whether each row corresponds to its own instance of this entity.
      *
      * @return <code>true</code> if rows each correspond to their own instance
      * of this entity, <code>false</code> otherwise.
@@ -288,8 +288,8 @@ public final class EntitySpec implements Serializable {
     }
 
     /**
-     * Gets the paths through the database from this entity's main table to
-     * the tables and columns that together form an unique identifier for this
+     * Gets the paths through the database from this entity's main table to the
+     * tables and columns that together form an unique identifier for this
      * entity.
      *
      * @return a {@link ColumnSpec[]} representing these paths.
@@ -299,25 +299,24 @@ public final class EntitySpec implements Serializable {
     }
 
     /**
-     * Gets the path through the database from this entity's main table to
-     * the table and column where the entity's start time (or timestamp, if
-     * no finish time is defined) is located, or <code>null</code> if this
-     * entity has no start time or timestamp.
+     * Gets the path through the database from this entity's main table to the
+     * table and column where the entity's start time (or timestamp, if no
+     * finish time is defined) is located, or <code>null</code> if this entity
+     * has no start time or timestamp.
      *
-     * @return a {@link ColumnSpec} representing this path, or
-     * <code>null</code> if this entity has no start time or timestamp.
+     * @return a {@link ColumnSpec} representing this path, or <code>null</code>
+     * if this entity has no start time or timestamp.
      */
     public ColumnSpec getStartTimeSpec() {
         return this.startTimeOrTimestampSpec;
     }
 
     /**
-     * Gets the path through the database from this entity's main table to
-     * the table and column where the entity's finish time (if defined) is
-     * located.
+     * Gets the path through the database from this entity's main table to the
+     * table and column where the entity's finish time (if defined) is located.
      *
-     * @return a {@link ColumnSpec} representing this path, or
-     * <code>null</code> if this entity has no finish time.
+     * @return a {@link ColumnSpec} representing this path, or <code>null</code>
+     * if this entity has no finish time.
      */
     public ColumnSpec getFinishTimeSpec() {
         return this.finishTimeSpec;
@@ -325,9 +324,9 @@ public final class EntitySpec implements Serializable {
 
     /**
      * The entity's properties.
-     * 
-     * @return a {@link PropertySpec[]} of the entity's properties.
-     * Guaranteed not <code>null</code>.
+     *
+     * @return a {@link PropertySpec[]} of the entity's properties. Guaranteed
+     * not <code>null</code>.
      */
     public PropertySpec[] getPropertySpecs() {
         return this.propertySpecs.clone();
@@ -345,7 +344,7 @@ public final class EntitySpec implements Serializable {
 
     /**
      * Returns whether this entity spec has a reference to another entity spec.
-     * 
+     *
      * @param entitySpec another entity spec.
      * @return <code>true</code> or <code>false</code>.
      */
@@ -394,15 +393,14 @@ public final class EntitySpec implements Serializable {
      * @return a {@link Map<String,String>}. Guaranteed not <code>null</code>.
      */
     public Map<String, String> getCodeToPropIdMap() {
-        Map<String, String> result =
-                new HashMap<>(this.codeToPropIdMap);
+        Map<String, String> result
+                = new HashMap<>(this.codeToPropIdMap);
         return result;
     }
 
     /**
-     * Gets the path through the database from this entity's main table to
-     * the table and column where the a code representing this entity is
-     * located.
+     * Gets the path through the database from this entity's main table to the
+     * table and column where the a code representing this entity is located.
      *
      * @return a {@link ColumnSpec}.
      */
@@ -411,11 +409,11 @@ public final class EntitySpec implements Serializable {
     }
 
     /**
-     * Returns zero or more {@link ColumnSpec[]} paths from
-     * this instance's main table to another table and column whose value
-     * will constrain which rows in the database are members of this entity.
-     * Cannot contain <code>null</code> values.
-     * 
+     * Returns zero or more {@link ColumnSpec[]} paths from this instance's main
+     * table to another table and column whose value will constrain which rows
+     * in the database are members of this entity. Cannot contain
+     * <code>null</code> values.
+     *
      * @return a {@link ColumnSpec[]}.
      */
     public ColumnSpec[] getConstraintSpecs() {
@@ -424,17 +422,17 @@ public final class EntitySpec implements Serializable {
 
     /**
      * Returns this entity's value.
-     * 
-     * @return a {@link ValueType}, or <code>null</code> if this
-     * entity does not have a value.
+     *
+     * @return a {@link ValueType}, or <code>null</code> if this entity does not
+     * have a value.
      */
     public ValueType getValueType() {
         return this.valueType;
     }
 
     /**
-     * Gets the path through the database from this entity's main table to
-     * the table and column where this entity's value is located.
+     * Gets the path through the database from this entity's main table to the
+     * table and column where this entity's value is located.
      *
      * @return a {@link ColumnSpec}.
      */
@@ -455,6 +453,7 @@ public final class EntitySpec implements Serializable {
     /**
      * Returns a parser for dates/times/timestamps for this entity's start and
      * finish times in the database.
+     *
      * @return a {@link PositionParser}. Cannot be <code>null</code>.
      */
     public JDBCPositionFormat getPositionParser() {
@@ -462,21 +461,52 @@ public final class EntitySpec implements Serializable {
     }
 
     /**
-     * Returns a hint to the relational data source backend to partition
-     * queries for this entity spec by the given units. For example, if a
-     * time unit of MONTH is specified, the backend may only query data one
-     * month at a time. In order for this to work, at least one
+     * Returns a hint to the relational data source backend to partition queries
+     * for this entity spec by the given units. For example, if a time unit of
+     * MONTH is specified, the backend may only query data one month at a time.
+     * In order for this to work, at least one
      * {@link org.protempa.dsb.filter.PositionFilter} must be specified that
-     * defines both upper and lower bounds on the same side of a
-     * proposition's intervals. If multiple position filters are specified,
-     * then one of these will be used to partition queries (which one is
-     * undefined!).
-     * 
+     * defines both upper and lower bounds on the same side of a proposition's
+     * intervals. If multiple position filters are specified, then one of these
+     * will be used to partition queries (which one is undefined!).
+     *
      * @return a {@link Unit} to partition by. If <code>null</code>, no
      * partitioning will occur.
      */
     public Unit getPartitionBy() {
         return this.partitionBy;
+    }
+
+    /**
+     * Returns the distinct tables specified in this entity spec, not including
+     * references to other entity specs.
+     *
+     * @return an array of {@link TableSpec}s. Guaranteed not 
+     * <code>null</code>.
+     */
+    public TableSpec[] getTableSpecs() {
+        Set<TableSpec> results = new HashSet<>();
+        addTo(results, this.baseSpec);
+        addTo(results, this.codeSpec);
+        addTo(results, this.constraintSpecs);
+        addTo(results, this.finishTimeSpec);
+        addTo(results, this.startTimeOrTimestampSpec);
+        addTo(results, this.uniqueIdSpecs);
+        addTo(results, this.valueSpec);
+        for (PropertySpec propertySpec : this.propertySpecs) {
+            addTo(results, propertySpec.getSpec());
+        }
+        return results.toArray(new TableSpec[results.size()]);
+    }
+
+    private void addTo(Set<TableSpec> tableSpecs, ColumnSpec... colSpecs) {
+        for (ColumnSpec colSpec : colSpecs) {
+            if (colSpec != null) {
+                for (ColumnSpec cs : colSpec.asList()) {
+                    tableSpecs.add(TableSpec.fromColumnSpec(cs));
+                }
+            }
+        }
     }
 
     @Override

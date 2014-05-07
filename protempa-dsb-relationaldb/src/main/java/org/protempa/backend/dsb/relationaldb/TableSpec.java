@@ -83,6 +83,7 @@ public final class TableSpec {
         return spec.getTable();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (null == o) {
             return false;
@@ -98,6 +99,7 @@ public final class TableSpec {
         return false;
     }
 
+    @Override
     public int hashCode() {
         int result = 17;
 
@@ -107,6 +109,7 @@ public final class TableSpec {
         return result;
     }
 
+    @Override
     public String toString() {
         return spec.getSchema() + "." + spec.getTable();
     }

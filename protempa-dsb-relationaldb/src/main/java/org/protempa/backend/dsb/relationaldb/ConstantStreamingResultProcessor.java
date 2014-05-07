@@ -37,9 +37,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Constant> {
-
+    private static final DataStreamingEventIterator<UniqueIdPair> 
+            EMPTY_UNIQUE_ID_PAIR_ITR = new EmptyDataStreamingEventIterator<>();
+    private static final DataStreamingEventIterator<Constant>
+            EMPTY_CONSTANT_ITR = new EmptyDataStreamingEventIterator<>();
+    
     private ConstantIterator itr;
-//    private InboundReferenceResultSetIterator refItr;
 
     ConstantStreamingResultProcessor(
             EntitySpec entitySpec, LinkedHashMap<String,ReferenceSpec> inboundRefSpecs,
@@ -142,16 +145,23 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
         EntitySpec entitySpec = getEntitySpec();
         this.itr = new ConstantIterator(getStatement(), resultSet,
                 entitySpec, getInboundRefSpecs(), getBidirectionalRefSpecs(), new InboundReferenceResultSetIterator(entitySpec.getName()));
-//        this.refItr = new InboundReferenceResultSetIterator(entitySpec.getName());
     }
 
     @Override
     final DataStreamingEventIterator<Constant> getResults() {
-        return this.itr;
+        if (this.itr != null) {
+            return this.itr;
+        } else {
+            return EMPTY_CONSTANT_ITR;
+        }
     }
 
     @Override
     final DataStreamingEventIterator<UniqueIdPair> getInboundReferenceResults() {
-        return this.itr.getReferenceIterator();
+        if (this.itr != null) {
+            return this.itr.getReferenceIterator();
+        } else {
+            return EMPTY_UNIQUE_ID_PAIR_ITR;
+        }
     }
 }

@@ -243,8 +243,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 /*
  * End multithreaded implementation.
  */
-
-       for (EntitySpec entitySpec : entitySpecToPropIds.keySet()) {
+        Set<TableSpec> tableSpecs = new HashSet<>();
+        for (EntitySpec entitySpec : entitySpecToPropIds.keySet()) {
+           Arrays.addAll(tableSpecs, entitySpec.getTableSpecs());
 //            boolean partitionUsed = false;
 //            boolean partitionUsed = entitySpec.getPartitionBy() != null;
 //            if (!partitionUsed) {
@@ -274,6 +275,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 //                        keyIds, null, nonStreamingExecutor);
 //            }
         }
+        logTableList(tableSpecs);
         List<DataStreamingEventIterator<Proposition>> events =
                 new ArrayList<>(
                 itrs.size());
@@ -293,6 +295,25 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 //        } else {
         return streamingResults;
 //        }
+    }
+
+    private void logTableList(Set<TableSpec> tableSpecs) {
+        Logger logger = SQLGenUtil.logger();
+        if (logger.isLoggable(Level.FINE)) {
+            List<String> tableList = new ArrayList<>(tableSpecs.size());
+            for (TableSpec tableSpec : tableSpecs) {
+                String schema = tableSpec.getSchema();
+                StringBuilder sb = new StringBuilder();
+                if (schema != null) {
+                    sb.append(schema);
+                    sb.append('.');
+                }
+                sb.append(tableSpec.getTable());
+                tableList.add(sb.toString());
+            }
+            logger.log(Level.FINE, "Tables to be accessed: {0}",
+                    StringUtils.join(tableList, ", "));
+        }
     }
 
 //    /*

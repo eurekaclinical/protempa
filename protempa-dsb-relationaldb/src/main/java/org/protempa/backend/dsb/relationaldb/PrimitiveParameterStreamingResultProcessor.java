@@ -38,9 +38,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProcessor<PrimitiveParameter> {
+    
+    private static final DataStreamingEventIterator<UniqueIdPair> 
+            EMPTY_UNIQUE_ID_PAIR_ITR = new EmptyDataStreamingEventIterator<>();
+    private static final DataStreamingEventIterator<PrimitiveParameter>
+            EMPTY_PRIMPARAM_ITR = new EmptyDataStreamingEventIterator<>();
 
     private PrimParamIterator itr;
-//    private InboundReferenceResultSetIterator refItr;
 
     PrimitiveParameterStreamingResultProcessor(
             EntitySpec entitySpec, LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
@@ -159,8 +163,6 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
     @Override
     public void process(ResultSet resultSet) throws SQLException {
         EntitySpec entitySpec = getEntitySpec();
-        
-//        this.refItr = new InboundReferenceResultSetIterator(entitySpec.getName());
         this.itr = new PrimParamIterator(getStatement(), resultSet,
                 entitySpec, getInboundRefSpecs(), getBidirectionalRefSpecs(),
                 new InboundReferenceResultSetIterator(entitySpec.getName()));
@@ -168,11 +170,19 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
 
     @Override
     final DataStreamingEventIterator<PrimitiveParameter> getResults() {
-        return this.itr;
+        if (this.itr != null) {
+            return this.itr;
+        } else {
+            return EMPTY_PRIMPARAM_ITR;
+        }
     }
 
     @Override
     DataStreamingEventIterator<UniqueIdPair> getInboundReferenceResults() {
-        return this.itr.getReferenceIterator();
+        if (this.itr != null) {
+            return this.itr.getReferenceIterator();
+        } else {
+            return EMPTY_UNIQUE_ID_PAIR_ITR;
+        }
     }
 }

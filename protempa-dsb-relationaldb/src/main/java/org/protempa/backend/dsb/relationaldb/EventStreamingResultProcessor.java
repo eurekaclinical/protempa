@@ -40,9 +40,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> {
+    private static final DataStreamingEventIterator<UniqueIdPair> 
+            EMPTY_UNIQUE_ID_PAIR_ITR = new EmptyDataStreamingEventIterator<>();
+    private static final DataStreamingEventIterator<Event>
+            EMPTY_EVENT_ITR = new EmptyDataStreamingEventIterator<>();
 
     private EventIterator itr;
-//    private InboundReferenceResultSetIterator refItr;
     
 
     EventStreamingResultProcessor(
@@ -205,16 +208,23 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
         EntitySpec entitySpec = getEntitySpec();
         this.itr = new EventIterator(getStatement(), resultSet, entitySpec,
                 getInboundRefSpecs(), getBidirectionalRefSpecs(),new InboundReferenceResultSetIterator(entitySpec.getName()) );
-//        this.refItr = new InboundReferenceResultSetIterator(entitySpec.getName());
     }
 
     @Override
     final DataStreamingEventIterator<Event> getResults() {
-        return this.itr;
+        if (this.itr != null) {
+            return this.itr;
+        } else {
+            return EMPTY_EVENT_ITR;
+        }
     }
 
     @Override
     DataStreamingEventIterator<UniqueIdPair> getInboundReferenceResults() {
-        return this.itr.getReferenceIterator();
+        if (this.itr != null) {
+            return this.itr.getReferenceIterator();
+        } else {
+            return EMPTY_UNIQUE_ID_PAIR_ITR;
+        }
     }
 }
