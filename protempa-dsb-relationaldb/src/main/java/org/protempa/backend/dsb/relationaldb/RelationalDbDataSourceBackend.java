@@ -79,6 +79,11 @@ public abstract class RelationalDbDataSourceBackend
     private SQLGenerator sqlGenerator;
     private Integer queryTimeout;
     private boolean dryRun;
+    private String schemaName;
+    private String keyIdTable;
+    private String keyIdColumn;
+    private String keyIdSchema;
+    private String keyIdJoinKey;
 
     public RelationalDbDataSourceBackend() {
         this(null);
@@ -109,18 +114,55 @@ public abstract class RelationalDbDataSourceBackend
         this.databaseAPI = databaseAPI;
     }
 
-    public abstract String getSchemaName();
-
-    public String getKeyIdSchema() {
-        return getSchemaName();
+    @BackendProperty
+    public final void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
+    
+    public final String getSchemaName() {
+        return this.schemaName;
     }
 
-    public abstract String getKeyIdTable();
+    @BackendProperty
+    public final void setKeyIdTable(String keyIdTable) {
+        this.keyIdTable = keyIdTable;
+    }
+    
+    public final String getKeyIdTable() {
+        return keyIdTable;
+    }
 
-    public abstract String getKeyIdColumn();
+    @BackendProperty
+    public final void setKeyIdColumn(String keyIdColumn) {
+        this.keyIdColumn = keyIdColumn;
+    }
+    
+    public final String getKeyIdColumn() {
+        return keyIdColumn;
+    }
 
-    public abstract String getKeyIdJoinKey();
+    @BackendProperty
+    public final void setKeyIdSchema(String keyIdSchema) {
+        this.keyIdSchema = keyIdSchema;
+    }
+    
+    public final String getKeyIdSchema() {
+        if (this.keyIdSchema != null) {
+            return this.keyIdSchema;
+        } else {
+            return this.schemaName;
+        }
+    }
 
+    @BackendProperty
+    public final void setKeyIdJoinKey(String keyIdJoinKey) {
+        this.keyIdJoinKey = keyIdJoinKey;
+    }
+
+    public final String getKeyIdJoinKey() {
+        return keyIdJoinKey;
+    }
+    
     /**
      * Collects the database connection information specified in this backend's
      * configuration, and uses it to try and get a SQL generator with which to

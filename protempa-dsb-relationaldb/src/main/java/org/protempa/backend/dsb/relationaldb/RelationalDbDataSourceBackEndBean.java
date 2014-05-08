@@ -118,68 +118,6 @@ public class RelationalDbDataSourceBackEndBean extends RelationalDbDataSourceBac
      * (non-Javadoc)
      * 
      * @see
-     * org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend#getSchemaName()
-     */
-    @Override
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend#getKeyIdTable()
-     */
-    @Override
-    public String getKeyIdTable() {
-        return keyIdTable;
-    }
-
-    public void setKeyIdTable(String keyIdTable) {
-        this.keyIdTable = keyIdTable;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend#getKeyIdColumn
-     * ()
-     */
-    @Override
-    public String getKeyIdColumn() {
-        return keyIdColumn;
-    }
-
-    public void setKeyIdColumn(String keyIdColumn) {
-        this.keyIdColumn = keyIdColumn;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend#getKeyIdJoinKey
-     * ()
-     */
-    @Override
-    public String getKeyIdJoinKey() {
-        return keyIdJoinKey;
-    }
-
-    public void setKeyIdJoinKey(String keyIdJoinKey) {
-        this.keyIdJoinKey = keyIdJoinKey;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
      * org.protempa.bp.commons.dsb.RelationalDbDataSourceBackend#constantSpecs()
      */
     @Override

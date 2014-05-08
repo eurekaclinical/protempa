@@ -44,9 +44,9 @@ import java.io.IOException;
 @BackendInfo(displayName = "Protempa Test Database")
 public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
 
-    private static AbsoluteTimeUnitFactory absTimeUnitFactory = new AbsoluteTimeUnitFactory();
-    private static AbsoluteTimeGranularityFactory absTimeGranularityFactory = new AbsoluteTimeGranularityFactory();
-    private static JDBCPositionFormat dtPositionParser = new JDBCDateTimeTimestampPositionParser();
+    private static final AbsoluteTimeUnitFactory absTimeUnitFactory = new AbsoluteTimeUnitFactory();
+    private static final AbsoluteTimeGranularityFactory absTimeGranularityFactory = new AbsoluteTimeGranularityFactory();
+    private static final JDBCPositionFormat dtPositionParser = new JDBCDateTimeTimestampPositionParser();
 
     private final PropIdToSQLCodeMapper mapper;
 
@@ -56,30 +56,15 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
     public TestDataSourceBackend() {
         this.mapper = new PropIdToSQLCodeMapper("/etc/mappings/",
                 getClass());
+        setSchemaName("TEST");
+        setKeyIdTable("PATIENT");
+        setKeyIdColumn("PATIENT_KEY");
+        setKeyIdJoinKey("PATIENT_KEY");
     }
 
+    @Override
     protected StagingSpec[] stagedSpecs() throws IOException {
         return null;
-    }
-
-    @Override
-    public String getSchemaName() {
-        return "TEST";
-    }
-
-    @Override
-    public String getKeyIdTable() {
-        return "PATIENT";
-    }
-
-    @Override
-    public String getKeyIdColumn() {
-        return "PATIENT_KEY";
-    }
-
-    @Override
-    public String getKeyIdJoinKey() {
-        return "PATIENT_KEY";
     }
 
     @Override
