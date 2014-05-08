@@ -41,8 +41,8 @@ import org.arp.javautil.sql.ConnectionSpec;
  */
 public final class SQLGeneratorFactory {
 
-    private ConnectionSpec connectionSpec;
-    private RelationalDbDataSourceBackend backend;
+    private final ConnectionSpec connectionSpec;
+    private final RelationalDbDataSourceBackend backend;
 
     /**
      * Creates a new instance with a connection spec.
@@ -103,8 +103,8 @@ public final class SQLGeneratorFactory {
                                 "Forcing use of SQL generator {0}",
                                 candidateInstance.getClass().getName());
                         candidateInstance.initialize(
-                                this.backend.getRelationalDatabaseSpec(),
-                                this.connectionSpec, this.backend);
+                                this.backend.isDryRun() ? null : this.connectionSpec, 
+                                this.backend);
                         logger.log(Level.FINE, "SQL generator {0} is loaded",
                                 candidateInstance.getClass().getName());
                         return candidateInstance;
@@ -121,8 +121,8 @@ public final class SQLGeneratorFactory {
                             logCompatibility(logger, candidateInstance,
                                     metaData);
                             candidateInstance.initialize(
-                                    this.backend.getRelationalDatabaseSpec(),
-                                    this.connectionSpec, this.backend);
+                                    this.backend.isDryRun() ? null : this.connectionSpec, 
+                                    this.backend);
                             logger.log(Level.FINE, "SQL generator {0} is loaded",
                                     candidateInstance.getClass().getName());
                             return candidateInstance;

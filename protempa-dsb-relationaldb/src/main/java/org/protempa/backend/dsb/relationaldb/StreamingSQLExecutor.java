@@ -46,7 +46,7 @@ public class StreamingSQLExecutor {
             StreamingResultProcessor<?> resultProcessor)
             throws DataSourceReadException {
         Logger logger = SQLGenUtil.logger();
-        if (Boolean.getBoolean(SQLGenUtil.SYSTEM_PROPERTY_SKIP_EXECUTION)) {
+        if (this.connection == null) {
             if (logger.isLoggable(Level.INFO)) {
                 logger.log(Level.INFO,
                         "Data source backend {0} is skipping query for {1}",

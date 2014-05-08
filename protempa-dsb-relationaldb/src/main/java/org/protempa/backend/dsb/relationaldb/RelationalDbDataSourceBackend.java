@@ -78,9 +78,13 @@ public abstract class RelationalDbDataSourceBackend
     private RelationalDatabaseSpec relationalDatabaseSpec;
     private SQLGenerator sqlGenerator;
     private Integer queryTimeout;
+    private boolean dryRun;
 
     public RelationalDbDataSourceBackend() {
         this(null);
+        
+        this.dryRun = 
+                Boolean.getBoolean(SQLGenUtil.SYSTEM_PROPERTY_SKIP_EXECUTION);
     }
 
     /**
@@ -148,6 +152,19 @@ public abstract class RelationalDbDataSourceBackend
         return this.relationalDatabaseSpec;
     }
 
+    public boolean isDryRun() {
+        return dryRun;
+    }
+
+    public void setDryRun(boolean dryRun) {
+        this.dryRun = dryRun;
+    }
+    
+    @BackendProperty(propertyName = "dryRun")
+    public void parseDryRun(String dryRunString) {
+        setDryRun(Boolean.parseBoolean(dryRunString));
+    }
+    
     /**
      * Returns which Java database API this backend is configured to use.
      *

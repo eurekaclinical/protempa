@@ -82,8 +82,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     @Override
-    public void initialize(RelationalDatabaseSpec relationalDatabaseSpec,
+    public void initialize(
             ConnectionSpec connectionSpec, RelationalDbDataSourceBackend backend) {
+        RelationalDatabaseSpec relationalDatabaseSpec = backend.getRelationalDatabaseSpec();
         if (relationalDatabaseSpec != null) {
             this.primitiveParameterEntitySpecs = relationalDatabaseSpec.getPrimitiveParameterSpecs();
             populatePropositionMap(this.primitiveParameterSpecs,
@@ -103,7 +104,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         this.backend = backend;
     }
-
+    
     boolean getStreamingMode() {
         return true;
     }
@@ -154,21 +155,23 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         boolean transaction = true;
         Connection connection = null;
-        try {
-            connection = this.connectionSpec.getOrCreate();
+        if (this.connectionSpec != null) {
             try {
-                connection.setAutoCommit(!transaction);
-            } catch (SQLException ex) {
+                connection = this.connectionSpec.getOrCreate();
                 try {
-                    connection.close();
-                } catch (SQLException ignore) {
+                    connection.setAutoCommit(!transaction);
+                } catch (SQLException ex) {
+                    try {
+                        connection.close();
+                    } catch (SQLException ignore) {
+                    }
+                    throw new DataSourceReadException(
+                            "Error setting auto commit", ex);
                 }
+            } catch (SQLException ex) {
                 throw new DataSourceReadException(
-                        "Error setting auto commit", ex);
+                        "Error getting a database connection", ex);
             }
-        } catch (SQLException ex) {
-            throw new DataSourceReadException(
-                    "Error getting a database connection", ex);
         }
         final List<StreamingIteratorPair> itrs =
                 new ArrayList<>();

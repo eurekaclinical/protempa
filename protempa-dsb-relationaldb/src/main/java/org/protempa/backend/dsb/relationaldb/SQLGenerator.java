@@ -84,12 +84,10 @@ public interface SQLGenerator {
      * called after {@link #loadDriverIfNeeded()} and
      * {@link #checkCompatibility(java.sql.Connection)}.
      *
-     * @param relationalDatabaseSpec a {@link RelationalDatabaseSpec}.
      * @param connectionSpec a {@link ConnectionSpec}.
      * @param backend a {@link RelationalDatabaseDataSourceBackend}.
      */
-    void initialize(RelationalDatabaseSpec relationalDatabaseSpec,
-            ConnectionSpec connectionSpec,
+    void initialize(ConnectionSpec connectionSpec,
             RelationalDbDataSourceBackend backend);
 
     /**

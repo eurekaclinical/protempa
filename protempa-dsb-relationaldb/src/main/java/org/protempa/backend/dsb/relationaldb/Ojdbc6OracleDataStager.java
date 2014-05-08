@@ -99,13 +99,15 @@ final class Ojdbc6OracleDataStager implements DataStager {
     }
 
     private void execute(String sql) throws SQLException {
-        RetryableSQLExecutor operation = new RetryableSQLExecutor(
-                this.connectionSpec, sql, null);
-        Retryer<SQLException> retryer = new Retryer<>(3);
-        if (!retryer.execute(operation)) {
-            SQLException ex = SQLExecutor.assembleSQLException(retryer
-                    .getErrors());
-            throw ex;
+        if (this.connectionSpec != null) {
+            RetryableSQLExecutor operation = new RetryableSQLExecutor(
+                    this.connectionSpec, sql, null);
+            Retryer<SQLException> retryer = new Retryer<>(3);
+            if (!retryer.execute(operation)) {
+                SQLException ex = SQLExecutor.assembleSQLException(retryer
+                        .getErrors());
+                throw ex;
+            }
         }
     }
 
