@@ -19,6 +19,8 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import org.arp.javautil.string.StringUtil;
+
 /**
  * Wrapper for {@link ColumnSpec} that only allows a schema and table.
  * 
@@ -93,7 +95,7 @@ public final class TableSpec {
         }
         if (o instanceof TableSpec) {
             TableSpec other = (TableSpec) o;
-            return other.getSchema().equals(getSchema())
+            return StringUtil.equals(other.getSchema(), getSchema())
                     && other.getTable().equals(getTable());
         }
         return false;
@@ -103,7 +105,9 @@ public final class TableSpec {
     public int hashCode() {
         int result = 17;
 
-        result = 31 * result + spec.getSchema().hashCode();
+        if (spec.getSchema() != null) {
+            result = 31 * result + spec.getSchema().hashCode();
+        }
         result = 31 * result + spec.getTable().hashCode();
 
         return result;
@@ -111,6 +115,7 @@ public final class TableSpec {
 
     @Override
     public String toString() {
-        return spec.getSchema() + "." + spec.getTable();
+        String schema = spec.getSchema();
+        return (schema != null ? schema + "." : "") + spec.getTable();
     }
 }

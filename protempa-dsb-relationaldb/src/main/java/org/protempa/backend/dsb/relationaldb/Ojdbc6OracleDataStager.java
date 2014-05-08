@@ -112,24 +112,28 @@ final class Ojdbc6OracleDataStager implements DataStager {
     }
 
     private void dropTables(StagingSpec stagingSpec) throws SQLException {
-        String dropView = "DROP VIEW "
-                + stagingSpec.getStagingArea().getSchema() + "."
-                + stagingSpec.getStagingArea().getTable();
+        String dropView = "DROP VIEW IF EXISTS "
+                + TableSpec.withSchemaAndTable(stagingSpec.getStagingArea().getSchema(), stagingSpec.getStagingArea().getTable());
 
         logger.log(Level.INFO, "Dropping view {0}: {1}", new Object[] {
                 stagingSpec.getStagingArea(), dropView });
 
         execute(dropView);
-
+        
         for (TableSpec table : this.tempTables.get(stagingSpec)) {
-            String dropTable = "DROP TABLE " + table.getSchema() + "."
-                    + table.getTable();
-
-            logger.log(Level.INFO, "Dropping table {0}: {1}", new Object[] {
-                    table, dropTable });
-
-            execute(dropTable);
+            doDropForStagingSpec(table);
         }
+    }
+
+    private void doDropForStagingSpec(TableSpec table) throws SQLException {
+        String dropTable = "DROP TABLE IF EXISTS " + TableSpec.withSchemaAndTable(table.getSchema(),
+                table.getTable());
+
+        logger.log(Level.INFO, "Dropping table {0}: {1}", new Object[] {
+            table, dropTable });
+
+        execute(dropTable);
+        
     }
 
     private void createTables() throws SQLException {
@@ -138,11 +142,15 @@ final class Ojdbc6OracleDataStager implements DataStager {
             for (EntitySpec es : stagingSpec.getEntitySpecs()) {
                 Set<Filter> filtersCopy = new HashSet<>(filters);
                 removeNonApplicableFilters(filtersCopy, es);
-                StagingSpec newTableSpec = StagingSpec.newTableName(
-                        stagingSpec, stagingSpec.getStagingArea().getTable()
-                                + "_" + i);
+                String stgTableName = stagingSpec.getStagingArea().getTable()
+                                + "_" + i;
+                StagingSpec newStagingSpec = StagingSpec.newTableName(
+                        stagingSpec, stgTableName);
+                
+                doDropForStagingSpec(newStagingSpec.getStagingArea());
+                
                 CreateStatement stmt = new Ojdbc6OracleStagingCreateStatement(
-                        newTableSpec,
+                        newStagingSpec,
                         es,
                         referenceSpec,
                         Arrays.<EntitySpec> asList(stagingSpec.getEntitySpecs()),
@@ -153,9 +161,11 @@ final class Ojdbc6OracleDataStager implements DataStager {
                         "Creating staging area for entity spec {0}: {1}",
                         new Object[] { es.getName(), sql });
                 execute(sql);
+                
                 putList(this.tempTables, stagingSpec,
-                        newTableSpec.getStagingArea());
-                this.indexIds.put(newTableSpec.getStagingArea(), 0);
+                        newStagingSpec.getStagingArea());
+                
+                this.indexIds.put(newStagingSpec.getStagingArea(), 0);
                 i++;
             }
         }

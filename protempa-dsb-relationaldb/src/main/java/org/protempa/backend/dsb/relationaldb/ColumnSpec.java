@@ -361,7 +361,11 @@ public final class ColumnSpec implements Serializable {
         if (table == null) {
             throw new IllegalArgumentException("table cannot be null");
         }
-        this.schema = schema.intern();
+        if (schema != null) {
+            this.schema = schema.intern();
+        } else {
+            this.schema = null;
+        }
         this.table = table.intern();
         this.column = column;
         this.joinSpec = joinSpec;
