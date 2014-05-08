@@ -200,8 +200,10 @@ final class Ojdbc6OracleDataStager implements DataStager {
             sql.append(" (");
             sql.append(stagingSpec.getUniqueColumn());
             sql.append(")");
-            sql.append(" TABLESPACE ");
-            sql.append(stagingSpec.getIndexTablespace());
+            if (stagingSpec.getIndexTablespace() != null) {
+                sql.append(" TABLESPACE ");
+                sql.append(stagingSpec.getIndexTablespace());
+            }
             sql.append(" NOLOGGING ");
 
             logger.log(Level.INFO,
@@ -231,8 +233,10 @@ final class Ojdbc6OracleDataStager implements DataStager {
                     sql.append(" (");
                     sql.append(realColumn);
                     sql.append(")");
-                    sql.append(" TABLESPACE ");
-                    sql.append(stagingSpec.getIndexTablespace());
+                    if (stagingSpec.getIndexTablespace() != null) {
+                        sql.append(" TABLESPACE ");
+                        sql.append(stagingSpec.getIndexTablespace());
+                    }
                     sql.append(" NOLOGGING");
 
                     logger.log(
