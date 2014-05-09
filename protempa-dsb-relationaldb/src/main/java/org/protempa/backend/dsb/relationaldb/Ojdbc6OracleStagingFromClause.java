@@ -20,13 +20,12 @@
 package org.protempa.backend.dsb.relationaldb;
 
 import java.util.List;
+import java.util.Map;
 
 final class Ojdbc6OracleStagingFromClause extends Ojdbc6OracleFromClause {
 
-    public Ojdbc6OracleStagingFromClause(EntitySpec currentSpec,
-            List<ColumnSpec> columnSpecs, TableAliaser referenceIndices,
-            StagingSpec[] stagedTables) {
-        super(currentSpec, columnSpecs, referenceIndices, stagedTables);
+    Ojdbc6OracleStagingFromClause(EntitySpec entitySpec, Map<String, ReferenceSpec> inboundReferenceSpecs, List<ColumnSpec> columnSpecs, TableAliaser referenceIndices, StagingSpec[] stagedTables) {
+        super(entitySpec, inboundReferenceSpecs, columnSpecs, referenceIndices, stagedTables);
     }
 
     @Override

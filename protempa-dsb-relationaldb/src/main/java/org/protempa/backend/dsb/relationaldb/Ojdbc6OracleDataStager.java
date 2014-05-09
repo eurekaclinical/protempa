@@ -112,8 +112,9 @@ final class Ojdbc6OracleDataStager implements DataStager {
     }
 
     private void dropTables(StagingSpec stagingSpec) throws SQLException {
-        String dropView = "DROP VIEW IF EXISTS "
-                + TableSpec.withSchemaAndTable(stagingSpec.getStagingArea().getSchema(), stagingSpec.getStagingArea().getTable());
+        String dropView = "BEGIN EXECUTE IMMEDIATE 'DROP VIEW "
+                + TableSpec.withSchemaAndTable(stagingSpec.getStagingArea().getSchema(), stagingSpec.getStagingArea().getTable())
+                 + "'; EXCEPTION WHEN OTHERS THEN IF sqlcode != -0942 THEN RAISE; END IF; END;";
 
         logger.log(Level.INFO, "Dropping view {0}: {1}", new Object[] {
                 stagingSpec.getStagingArea(), dropView });
@@ -126,8 +127,8 @@ final class Ojdbc6OracleDataStager implements DataStager {
     }
 
     private void doDropForStagingSpec(TableSpec table) throws SQLException {
-        String dropTable = "DROP TABLE IF EXISTS " + TableSpec.withSchemaAndTable(table.getSchema(),
-                table.getTable());
+        String dropTable = "BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + TableSpec.withSchemaAndTable(table.getSchema(),
+                table.getTable()) + "'; EXCEPTION WHEN OTHERS THEN IF sqlcode != -0942 THEN RAISE; END IF; END;";
 
         logger.log(Level.INFO, "Dropping table {0}: {1}", new Object[] {
             table, dropTable });

@@ -57,7 +57,7 @@ class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
     @Override
     FromClause getFromClause(List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices, StagingSpec[] stagedTables) {
-        return new Ojdbc6OracleFromClause(getEntitySpec(), columnSpecs, referenceIndices, stagedTables);
+        return new Ojdbc6OracleFromClause(getEntitySpec(), getInboundReferenceSpecs(), columnSpecs, referenceIndices, stagedTables);
     }
 
     /*

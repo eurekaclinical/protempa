@@ -19,43 +19,51 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
+import java.util.Map;
 import org.protempa.backend.dsb.relationaldb.JoinSpec.JoinType;
 
 class Ojdbc6OracleFromClause extends AbstractFromClause {
 
     private final StagingSpec[] stagedTables;
+    private final Map<String, ReferenceSpec> inboundReferenceSpecs;
 
     Ojdbc6OracleFromClause(EntitySpec currentSpec,
+            Map<String, ReferenceSpec> inboundReferenceSpecs,
             List<ColumnSpec> columnSpecs, TableAliaser referenceIndices,
             StagingSpec[] stagedTables) {
         super(currentSpec, columnSpecs, referenceIndices);
         this.stagedTables = stagedTables;
+        this.inboundReferenceSpecs = inboundReferenceSpecs;
     }
 
     protected StagingSpec[] getStagedTables() {
         return stagedTables;
     }
+    
+    private static List<String> toEntitySpecNames(EntitySpec[] entitySpecs) {
+        List<String> result = new ArrayList<>(entitySpecs.length);
+        for (EntitySpec entitySpec : entitySpecs) {
+            result.add(entitySpec.getName());
+        }
+        return result;
+    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.protempa.bp.commons.dsb.relationaldb.FromClause#generateFromTable
-     * (java.lang.String, java.lang.String, int)
-     */
     @Override
     protected String generateFromTable(ColumnSpec columnSpec) {
         StringBuilder fromPart = new StringBuilder();
         boolean foundStagedTable = false;
-        String schemaToAppend = "";
+        String schemaToAppend = null;
         String tableToAppend = "";
-
-        if (stagedTables != null) {
-            for (StagingSpec sspec : stagedTables) {
+        
+        if (this.stagedTables != null) {
+            List<String> entitySpecNames = new ArrayList<>(this.inboundReferenceSpecs.keySet());
+            entitySpecNames.add(getCurrentSpec().getName());
+            for (StagingSpec sspec : this.stagedTables) {
                 if (!foundStagedTable
-//                        && noPropIdsMatch(getCurrentSpec(), sspec.getEntitySpec())
+                        && !Collections.disjoint(toEntitySpecNames(sspec.getEntitySpecs()), entitySpecNames)
                         && columnSpec.isSameSchemaAndTable(sspec
                                 .getReplacedTable())) {
                     foundStagedTable = true;
@@ -73,8 +81,10 @@ class Ojdbc6OracleFromClause extends AbstractFromClause {
             tableToAppend = columnSpec.getTable();
         }
 
-        fromPart.append(schemaToAppend);
-        fromPart.append('.');
+        if (schemaToAppend != null) {
+            fromPart.append(schemaToAppend);
+            fromPart.append('.');
+        }
         fromPart.append(tableToAppend);
         fromPart.append(" ");
         fromPart.append(getReferenceIndices()
@@ -83,28 +93,11 @@ class Ojdbc6OracleFromClause extends AbstractFromClause {
         return fromPart.toString();
     }
 
-    private static boolean noPropIdsMatch(EntitySpec es1, EntitySpec es2) {
-        return !SQLGenUtil.somePropIdsMatch(es1, es2);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.protempa.bp.commons.dsb.relationaldb.FromClause#getJoinClause(org
-     * .protempa.bp.commons.dsb.relationaldb.JoinSpec.JoinType)
-     */
     @Override
     protected AbstractJoinClause getJoinClause(JoinType joinType) {
         return new DefaultJoinClause(joinType);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.protempa.bp.commons.dsb.relationaldb.FromClause#getOnClause(int,
-     * int, java.lang.String, java.lang.String)
-     */
     @Override
     protected AbstractOnClause getOnClause(JoinSpec joinSpec,
             TableAliaser referenceIndices) {

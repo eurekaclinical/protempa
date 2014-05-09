@@ -89,7 +89,8 @@ final class Ojdbc6OracleStagingSelectStatement extends
     @Override
     FromClause getFromClause(List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices, StagingSpec[] stagedTables) {
-        return new Ojdbc6OracleStagingFromClause(getEntitySpec(), columnSpecs,
+        return new Ojdbc6OracleStagingFromClause(getEntitySpec(), 
+                getInboundReferenceSpecs(), columnSpecs,
                 referenceIndices, stagedTables);
     }
 
