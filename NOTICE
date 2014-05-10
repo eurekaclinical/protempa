@@ -39,6 +39,7 @@ This project includes:
   kXML 2 is a small XML pull parser based on the common XML pull API under BSD style or Public Domain
   mvel under The Apache Software License, Version 2.0
   MySQL java connector under The GNU General Public License, Version 2
+  opencsv under Apache 2
   protege under Mozilla Public License
   Protempa under Apache License, Version 2.0
   Protempa BioPortal Knowledge Source Backend under Apache License, Version 2.0

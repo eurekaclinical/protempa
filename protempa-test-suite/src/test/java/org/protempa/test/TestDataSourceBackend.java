@@ -378,7 +378,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         "Diagnosis Codes",
                         null,
                         this.mapper.readCodes("icd9_diagnosis_02232012.txt",
-                                "\t", 0),
+                                0),
                         true,
                         new ColumnSpec(
                                 getKeyIdSchema(),
@@ -423,7 +423,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         "ICD9 Procedure Codes",
                         null,
                         this.mapper.readCodes("icd9_procedure_02232012.txt",
-                                "\t", 0),
+                                0),
                         true,
                         new ColumnSpec(
                                 getKeyIdSchema(),
@@ -468,7 +468,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         "CPT Procedure Codes",
                         null,
                         this.mapper.readCodes("cpt_procedure_02232012.txt",
-                                "\t", 0),
+                                0),
                         true,
                         new ColumnSpec(getKeyIdSchema(), getKeyIdTable(),
                                 getKeyIdColumn(), new JoinSpec("PATIENT_KEY",
@@ -508,7 +508,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                 new EntitySpec(
                         "Medication Orders",
                         null,
-                        this.mapper.readCodes("meds_02232012.txt", "\t", 0),
+                        this.mapper.readCodes("meds_02232012.txt", 0),
                         true,
                         new ColumnSpec(
                                 getKeyIdSchema(),
@@ -548,7 +548,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                 new EntitySpec(
                         "Labs",
                         null,
-                        this.mapper.readCodes("labs_02232012.txt", "\t", 0),
+                        this.mapper.readCodes("labs_02232012.txt", 0),
                         true,
                         new ColumnSpec(
                                 getKeyIdSchema(),
@@ -590,7 +590,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         "Vitals",
                         null,
                         this.mapper.readCodes(
-                                "vitals_result_types_02232012.txt", "\t", 0),
+                                "vitals_result_types_02232012.txt", 0),
                         true,
                         new ColumnSpec(
                                 getKeyIdSchema(),

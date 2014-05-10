@@ -19,7 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import java.io.BufferedReader;
+import au.com.bytecode.opencsv.CSVReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -64,14 +64,12 @@ public final class PropIdToSQLCodeMapper {
     /**
      * Reads codes in a resource. The resource is prefixed by the resource
      * prefix specified at construction. Each mapping must be on a separate
-     * line, and each line must be delimited by a separator. A column number
-     * indicates which column holds the knowledge source code for the mapping.
+     * tab-delimited line. A column number indicates which column holds the 
+     * knowledge source code for the mapping.
      * 
      * @param resource
      *            the name of the resource, as a {@link String}. Will be
      *            prefixed by the prefix indicated at construction.
-     * @param sep
-     *            a {@link String} delimiting the lines of the resource
      * @param colNum
      *            an integer indicating which column of the mapping holds the
      *            knowledge source version of a code
@@ -80,13 +78,10 @@ public final class PropIdToSQLCodeMapper {
      * @throws IOException
      *             if something goes wrong while accessing the resource
      */
-    public String[] readCodes(String resource, String sep, int colNum)
+    public String[] readCodes(String resource, int colNum)
             throws IOException {
         if (resource == null) {
             throw new IllegalArgumentException("resource cannot be null");
-        }
-        if (sep == null) {
-            throw new IllegalArgumentException("sep cannot be null");
         }
         if (colNum < 0 || colNum > 1) {
             throw new IllegalArgumentException("Invalid colNum: " + colNum);
@@ -96,25 +91,18 @@ public final class PropIdToSQLCodeMapper {
         SQLGenUtil.logger().log(Level.FINER, "Attempting to get resource: {0}",
                 resource);
         InputStream is = IOUtil.getResourceAsStream(resource, this.cls);
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        try {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] cols = line.split(sep, -1); // -1 preserves trailing empty string
-                if (cols.length != 2) {
-                    throw new AssertionError("Invalid mapping in " + resource
-                            + ": " + line + "; mapping has length " + cols.length);
+        try (CSVReader reader = new CSVReader(new InputStreamReader(is), '\t')) {
+            String[] cols;
+            int i = 1;
+            while ((cols = reader.readNext()) != null) {
+                if (cols.length > 0) {
+                    if (cols.length < colNum) {
+                        throw new AssertionError("Invalid mapping in " + resource
+                                + " line " + i + ": mapping has length " + cols.length);
+                    }
+                    codes.add(cols[colNum].trim());
                 }
-                codes.add(cols[colNum].trim());
-            }
-            br.close();
-            br = null;
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ioe) {
-                }
+                i++;
             }
         }
         return codes.toArray(new String[codes.size()]);
@@ -146,28 +134,21 @@ public final class PropIdToSQLCodeMapper {
         List<ColumnSpec.KnowledgeSourceIdToSqlCode> cvs = new ArrayList<>(
                 1000);
         InputStream is = IOUtil.getResourceAsStream(resource, this.cls);
-        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        String line = null;
-        int i = 0;
-        try {
-            while ((line = br.readLine()) != null) {
-                String[] cols = line.split("\t", -1); // -1 preserves trailing empty string
-                if (cols.length != 2) {
+        try (CSVReader reader = new CSVReader(new InputStreamReader(is), '\t')) {
+            String[] cols;
+            int i = 1;
+            while ((cols = reader.readNext()) != null) {
+                if (cols.length > 2) {
                     throw new AssertionError("Invalid mapping in " + resource
-                            + ": " + line + "; mapping has length " + cols.length);
-                }
-                cvs.add(new ColumnSpec.KnowledgeSourceIdToSqlCode(cols[0],
+                            + " line " + i + ": mapping has length " + cols.length);
+                } else if (cols.length == 1) {
+                    cvs.add(new ColumnSpec.KnowledgeSourceIdToSqlCode(cols[0],
+                        ""));
+                } else if (cols.length == 2) {
+                    cvs.add(new ColumnSpec.KnowledgeSourceIdToSqlCode(cols[0],
                         cols[1]));
-                i++;
-            }
-            br.close();
-            br = null;
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException ioe) {
                 }
+                i++;
             }
         }
         return cvs

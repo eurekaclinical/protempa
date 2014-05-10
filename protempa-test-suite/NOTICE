@@ -33,6 +33,7 @@ This project includes:
   JUnit under Common Public License Version 1.0
   kXML 2 is a small XML pull parser based on the common XML pull API under BSD style or Public Domain
   mvel under The Apache Software License, Version 2.0
+  opencsv under Apache 2
   protege under Mozilla Public License
   Protempa BioPortal Knowledge Source Backend under Apache License, Version 2.0
   Protempa Framework under Apache License, Version 2.0
