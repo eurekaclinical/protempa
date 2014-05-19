@@ -20,6 +20,7 @@
 package org.protempa.bp.commons;
 
 import java.util.List;
+import java.util.Set;
 
 import org.protempa.backend.AbstractCommonsKnowledgeSourceBackend;
 import org.protempa.backend.annotations.BackendInfo;
@@ -32,10 +33,10 @@ import org.protempa.PropositionDefinition;
 import org.protempa.TemporalPropositionDefinition;
 
 @BackendInfo(displayName = "Mock Knowledge Source Backend")
-public class MockKnowledgeSourceBackend 
+public class MockKnowledgeSourceBackend
         extends AbstractCommonsKnowledgeSourceBackend {
 
-    
+
     private String url;
 
     public String getUrl() {
@@ -43,8 +44,8 @@ public class MockKnowledgeSourceBackend
     }
 
     @BackendProperty(
-        displayName = "URL",
-        description = "The URL to the knowledge base"
+            displayName = "URL",
+            description = "The URL to the knowledge base"
     )
     public void setUrl(String url) {
         this.url = url;
@@ -90,11 +91,11 @@ public class MockKnowledgeSourceBackend
         return StringUtils.EMPTY_STRING_ARRAY;
     }
 
-	@Override
-	public List<String> getKnowledgeSourceSearchResults(String searchKey)
-			throws KnowledgeSourceReadException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Set<String> getKnowledgeSourceSearchResults(String searchKey)
+            throws KnowledgeSourceReadException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

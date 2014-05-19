@@ -22,6 +22,8 @@ package org.protempa.backend.ksb;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.arp.javautil.collections.Collections;
 import org.protempa.AbstractionDefinition;
@@ -43,7 +45,7 @@ public final class SimpleKnowledgeSourceBackend
     private final Map<String, List<String>> abstractedIntoMap;
     private final Map<String, List<String>> inducesMap;
     private final Map<String, List<String>> subContextOfMap;
-    
+
     public SimpleKnowledgeSourceBackend() {
         this.propDefsMap = new HashMap<>();
         this.abstractionDefsMap = new HashMap<>();
@@ -54,7 +56,7 @@ public final class SimpleKnowledgeSourceBackend
         this.subContextOfMap = new HashMap<>();
         this.tempPropDefsMap = new HashMap<>();
     }
-    
+
     public SimpleKnowledgeSourceBackend(PropositionDefinition... propDefs) {
         this();
         for (PropositionDefinition propDef : propDefs) {
@@ -96,6 +98,7 @@ public final class SimpleKnowledgeSourceBackend
 
     /**
      * Make public so that tests can call it.
+     *
      * @see AbstractKnowledgeSourceBackend
      */
     @Override
@@ -109,13 +112,13 @@ public final class SimpleKnowledgeSourceBackend
     }
 
     @Override
-    public PropositionDefinition readPropositionDefinition(String id) 
+    public PropositionDefinition readPropositionDefinition(String id)
             throws KnowledgeSourceReadException {
         return this.propDefsMap.get(id);
     }
 
     @Override
-    public AbstractionDefinition readAbstractionDefinition(String id) 
+    public AbstractionDefinition readAbstractionDefinition(String id)
             throws KnowledgeSourceReadException {
         return this.abstractionDefsMap.get(id);
     }
@@ -170,10 +173,10 @@ public final class SimpleKnowledgeSourceBackend
         }
     }
 
-	@Override
-	public List<String> getKnowledgeSourceSearchResults(String searchKey)
-			throws KnowledgeSourceReadException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Set<String> getKnowledgeSourceSearchResults(String searchKey)
+            throws KnowledgeSourceReadException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

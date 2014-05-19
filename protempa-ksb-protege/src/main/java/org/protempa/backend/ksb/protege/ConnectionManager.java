@@ -19,10 +19,7 @@
  */
 package org.protempa.backend.ksb.protege;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 
 import edu.stanford.smi.protege.event.ProjectListener;
@@ -38,9 +35,9 @@ import org.protempa.KnowledgeSourceReadException;
 /**
  * Implements a wrapper around a connection to a remote Protege project.
  * Implements retry capability if something happens to the connection.
- * 
- * @author Andrew Post
+ *
  * @param <T>
+ * @author Andrew Post
  */
 abstract class ConnectionManager {
 
@@ -56,9 +53,8 @@ abstract class ConnectionManager {
     /**
      * Constructor with an identifier for the Protege project.
      *
-     * @param projectIdentifier
-     *      a name {@link String} for a knowledge base, cannot be
-     *      <code>null</code>.
+     * @param projectIdentifier a name {@link String} for a knowledge base, cannot be
+     *                          <code>null</code>.
      */
     protected ConnectionManager(String projectIdentifier) {
         if (projectIdentifier == null) {
@@ -82,11 +78,11 @@ abstract class ConnectionManager {
      * Opens the project.
      *
      * @throws KnowledgeSourceBackendInitializationException if an error
-     * occurs.
+     *                                                       occurs.
      */
     void init() throws KnowledgeSourceBackendInitializationException {
         if (this.project == null) {
-            Util.logger().log(Level.FINE, "Opening Protege project {0}", 
+            Util.logger().log(Level.FINE, "Opening Protege project {0}",
                     this.projectIdentifier);
             this.project = initProject();
             if (this.project == null) {
@@ -94,7 +90,7 @@ abstract class ConnectionManager {
                         "Could not load project " + this.projectIdentifier);
             } else {
                 this.protegeKnowledgeBase = this.project.getKnowledgeBase();
-                Util.logger().log(Level.FINE, 
+                Util.logger().log(Level.FINE,
                         "Project {0} opened successfully",
                         this.projectIdentifier);
             }
@@ -117,8 +113,8 @@ abstract class ConnectionManager {
             Util.logger().log(Level.FINE, "Closing Protege project {0}",
                     this.projectIdentifier);
 
-            for (Iterator<ProjectListener> itr = 
-                    this.projectListeners.iterator(); itr.hasNext();) {
+            for (Iterator<ProjectListener> itr =
+                         this.projectListeners.iterator(); itr.hasNext(); ) {
                 this.project.removeProjectListener(itr.next());
                 itr.remove();
             }
@@ -145,8 +141,7 @@ abstract class ConnectionManager {
     /**
      * Adds a listener for changes in the project.
      *
-     * @param listener
-     *            a <code>ProjectListener</code>.
+     * @param listener a <code>ProjectListener</code>.
      */
     void addProjectListener(ProjectListener listener) {
         if (listener != null) {
@@ -157,8 +152,7 @@ abstract class ConnectionManager {
     /**
      * Removes a listener for changes in the project.
      *
-     * @param listener
-     *            a <code>ProjectListener</code>.
+     * @param listener a <code>ProjectListener</code>.
      */
     void removeProjectListener(ProjectListener listener) {
         this.project.removeProjectListener(listener);
@@ -168,15 +162,13 @@ abstract class ConnectionManager {
     /*
      * GETTERS FOR THE PROJECT'S KNOWLEDGE BASE, WITH RETRY SUPPORT.
      */
+
     /**
      * Template for executing various commands upon the project's knowledge base.
      *
+     * @param <S> The type of what is returned by the getter.
+     * @param <T> The type of what is passed to Protege as a parameter.
      * @author Andrew Post
-     *
-     * @param <S>
-     *            The type of what is returned by the getter.
-     * @param <T>
-     *            The type of what is passed to Protege as a parameter.
      */
     private abstract class ProtegeCommand<S, T> {
 
@@ -185,8 +177,7 @@ abstract class ConnectionManager {
         /**
          * Constructor.
          *
-         * @param what
-         *            what the command is doing, used for debugging.
+         * @param what what the command is doing, used for debugging.
          */
         ProtegeCommand(String what) {
             this.what = what;
@@ -196,8 +187,7 @@ abstract class ConnectionManager {
          * Implement this with the protege command. This may assume that
          * <code>protegeKnowledgeBase</code> is not <code>null</code>.
          *
-         * @param obj
-         *            the parameter to send to Protege.
+         * @param obj the parameter to send to Protege.
          * @return the object returned from Protege.
          */
         abstract S get(T obj);
@@ -207,12 +197,11 @@ abstract class ConnectionManager {
          * and <code>obj</code> before calling the {@link #get(Object)}
          * method.
          *
-         * @param obj
-         *            the parameter to pass to the Protege command.
+         * @param obj the parameter to pass to the Protege command.
          * @return the object returned from Protege, or <code>null</code> if
-         *         <code>protegeKnowledgeBase</code> or <code>obj</code> is
-         *         <code>null</code>, or if <code>null</code> is returned
-         *         from the Protege command.
+         * <code>protegeKnowledgeBase</code> or <code>obj</code> is
+         * <code>null</code>, or if <code>null</code> is returned
+         * from the Protege command.
          */
         final S getHelper(T obj) {
             if (protegeKnowledgeBase != null && obj != null) {
@@ -235,14 +224,10 @@ abstract class ConnectionManager {
     /**
      * Executes a command upon the Protege knowledge base, retrying if needed.
      *
-     * @param <S>
-     *            The type of what is returned by the getter.
-     * @param <T>
-     *            The type of what is passed to protege as a parameter.
-     * @param obj
-     *            What is passed to Protege as a parameter.
-     * @param getter
-     *            the <code>ProtegeCommand</code>.
+     * @param <S>    The type of what is returned by the getter.
+     * @param <T>    The type of what is passed to protege as a parameter.
+     * @param obj    What is passed to Protege as a parameter.
+     * @param getter the <code>ProtegeCommand</code>.
      * @return what is returned from the Protege command.
      */
     private <S, T> S getFromProtege(T obj, ProtegeCommand<S, T> getter)
@@ -258,7 +243,7 @@ abstract class ConnectionManager {
                     Util.logger().log(
                             Level.WARNING,
                             "Exception attempting to "
-                            + getter.getWhat() + " " + obj, e);
+                                    + getter.getWhat() + " " + obj, e);
                     tries--;
                 }
                 close();
@@ -267,16 +252,17 @@ abstract class ConnectionManager {
                 } catch (KnowledgeSourceBackendInitializationException e) {
                     throw new KnowledgeSourceReadException(
                             "Exception attempting to "
-                            + getter.getWhat() + " " + obj, e);
+                                    + getter.getWhat() + " " + obj, e);
                 }
             } while (tries > 0);
             throw new KnowledgeSourceReadException(
                     "Failed to " + getter.getWhat() + " "
-                    + obj + " after "
-                    + TRIES + " tries", lastException);
+                            + obj + " after "
+                            + TRIES + " tries", lastException);
         }
         return null;
     }
+
     /**
      * Command for retrieving instances from the knowledge base.
      *
@@ -303,15 +289,15 @@ abstract class ConnectionManager {
     /**
      * Retrieves a specified instance from the knowledge base.
      *
-     * @param name
-     *            the instance's name <code>String</code>.
+     * @param name the instance's name <code>String</code>.
      * @return the <code>Instance</code>, or <code>null</code> if not
-     *         found.
+     * found.
      * @see ConnectionManager#INSTANCE_GETTER
      */
     Instance getInstance(String name) throws KnowledgeSourceReadException {
         return getFromProtege(name, INSTANCE_GETTER);
     }
+
     /**
      * Command for retrieving instances of a cls from the knowledge base.
      *
@@ -345,16 +331,16 @@ abstract class ConnectionManager {
     /**
      * Gets all instances of the specified cls from the knowledge base.
      *
-     * @param cls
-     *            a <code>Cls</code>
+     * @param cls a <code>Cls</code>
      * @return a <code>Collection</code> of <code>Instance</code>s.
-     *         Guaranteed not to be <code>null</code>.
+     * Guaranteed not to be <code>null</code>.
      * @see ConnectionManager#INSTANCES_GETTER
      */
     Collection<Instance> getInstances(Cls cls)
             throws KnowledgeSourceReadException {
         return getFromProtege(cls, INSTANCES_GETTER);
     }
+
     /**
      * Command for getting clses from the knowledge base.
      *
@@ -381,15 +367,15 @@ abstract class ConnectionManager {
     /**
      * Gets the specified cls from the knowledge base.
      *
-     * @param name
-     *            the name <code>String</code> of the cls.
+     * @param name the name <code>String</code> of the cls.
      * @return the <code>Cls</code>, or <code>null</code> if no cls with
-     *         that name was found.
+     * that name was found.
      * @see ConnectionManager#CLS_GETTER
      */
     Cls getCls(String name) throws KnowledgeSourceReadException {
         return getFromProtege(name, CLS_GETTER);
     }
+
     /**
      * Command for getting slots from the knowledge base.
      *
@@ -416,10 +402,9 @@ abstract class ConnectionManager {
     /**
      * Gets the specified slot from the knowledge base.
      *
-     * @param name
-     *            the name <code>String</code> of the slot.
+     * @param name the name <code>String</code> of the slot.
      * @return the <code>Slot</code>, or <code>null</code> if no slot with
-     *         that name was found.
+     * that name was found.
      * @see ConnectionManager#SLOT_GETTER
      */
     Slot getSlot(String name) throws KnowledgeSourceReadException {
@@ -444,16 +429,15 @@ abstract class ConnectionManager {
         Cls cls;
 
         /**
-         * @param name
-         *            the name <code>String</code> of the instance.
-         * @param cls
-         *            the <code>Cls</code> of the instance.
+         * @param name the name <code>String</code> of the instance.
+         * @param cls  the <code>Cls</code> of the instance.
          */
         InstanceSpec(String name, Cls cls) {
             this.name = name;
             this.cls = cls;
         }
     }
+
     /**
      * Command for creating new instances.
      *
@@ -482,18 +466,17 @@ abstract class ConnectionManager {
     /**
      * Creates a new instance in the knowledge base.
      *
-     * @param name
-     *            the name <code>String</code> of the instance.
-     * @param cls
-     *            the <code>Cls</code> of the instance.
+     * @param name the name <code>String</code> of the instance.
+     * @param cls  the <code>Cls</code> of the instance.
      * @return a new <code>Instance</code>, or <code>null</code> if an
-     *         invalid class specification was provided.
+     * invalid class specification was provided.
      * @see ConnectionManager#INSTANCE_CREATOR
      */
     Instance createInstance(String name, Cls cls)
             throws KnowledgeSourceReadException {
         return getFromProtege(new InstanceSpec(name, cls), INSTANCE_CREATOR);
     }
+
     /**
      * Command for deleting an instance from the knowledge base.
      *
@@ -520,8 +503,7 @@ abstract class ConnectionManager {
     /**
      * Deletes an instance from the knowledge base.
      *
-     * @param instance
-     *            an <code>Instance</code>.
+     * @param instance an <code>Instance</code>.
      * @see ConnectionManager#INSTANCE_DELETER
      */
     void deleteInstance(Instance instance) throws KnowledgeSourceReadException {
@@ -542,6 +524,7 @@ abstract class ConnectionManager {
             this.clses = clses;
         }
     }
+
     private final ProtegeCommand<Cls, ClsSpec> CLS_CREATOR =
             new ProtegeCommand<Cls, ClsSpec>("create cls") {
 
@@ -551,7 +534,7 @@ abstract class ConnectionManager {
                 }
             };
 
-    <E extends Collection<Cls>>     Cls createCls(String name, E clses)
+    <E extends Collection<Cls>> Cls createCls(String name, E clses)
             throws KnowledgeSourceReadException {
         return getFromProtege(new ClsSpec(name, clses), CLS_CREATOR);
     }
@@ -574,19 +557,18 @@ abstract class ConnectionManager {
         Collection<Cls> clses;
 
         /**
-         * @param name
-         *            the name <code>String</code> of the instance.
-         * @param clses
-         *            the <code>Cls</code> of the instance.
+         * @param name  the name <code>String</code> of the instance.
+         * @param clses the <code>Cls</code> of the instance.
          */
         InstanceSpecMultipleInheritance(String name, Collection<Cls> clses) {
             this.name = name;
             this.clses = clses;
         }
     }
+
     private final ProtegeCommand<Instance, InstanceSpecMultipleInheritance> INSTANCE_CREATOR_MULTIPLE_INHERITANCE =
             new ProtegeCommand<Instance, InstanceSpecMultipleInheritance>(
-            "create instance multiple inheritance") {
+                    "create instance multiple inheritance") {
 
                 @Override
                 Instance get(InstanceSpecMultipleInheritance clsSpec) {
@@ -594,7 +576,7 @@ abstract class ConnectionManager {
                 }
             };
 
-    <E extends Collection<Cls>>     Instance createInstance(String name, E clses)
+    <E extends Collection<Cls>> Instance createInstance(String name, E clses)
             throws KnowledgeSourceReadException {
         return getFromProtege(new InstanceSpecMultipleInheritance(name, clses),
                 INSTANCE_CREATOR_MULTIPLE_INHERITANCE);
@@ -614,6 +596,7 @@ abstract class ConnectionManager {
             this.slot = slot;
         }
     }
+
     private final ProtegeCommand<Object, SlotValueSpec> OWN_SLOT_VALUE_GETTER =
             new ProtegeCommand<Object, SlotValueSpec>("get own slot value") {
 
@@ -629,6 +612,7 @@ abstract class ConnectionManager {
         return getFromProtege(new SlotValueSpec(frame, slot),
                 OWN_SLOT_VALUE_GETTER);
     }
+
     private final ProtegeCommand<Collection<?>, SlotValueSpec> OWN_SLOT_VALUES_GETTER = new ProtegeCommand<Collection<?>, SlotValueSpec>("get own slot values") {
 
         @Override
@@ -643,11 +627,12 @@ abstract class ConnectionManager {
         return getFromProtege(new SlotValueSpec(frame, slot),
                 OWN_SLOT_VALUES_GETTER);
     }
-    
-    Collection<?> getOwnSlotValues(Frame frame, String slotName) 
+
+    Collection<?> getOwnSlotValues(Frame frame, String slotName)
             throws KnowledgeSourceReadException {
         return getOwnSlotValues(frame, getSlot(slotName));
     }
+
     private final ProtegeCommand<Collection<Cls>, Instance> DIRECT_TYPES_GETTER = new ProtegeCommand<Collection<Cls>, Instance>(
             "get direct types") {
 
@@ -672,6 +657,7 @@ abstract class ConnectionManager {
             this.value = value;
         }
     }
+
     private final ProtegeCommand<Object, SetSlotValueSpec> OWN_SLOT_VALUE_SETTER = new ProtegeCommand<Object, SetSlotValueSpec>("set own slot value") {
 
         @Override
@@ -697,6 +683,7 @@ abstract class ConnectionManager {
             this.value = value;
         }
     }
+
     private final ProtegeCommand<Object, SetSlotValuesSpec> OWN_SLOT_VALUES_SETTER = new ProtegeCommand<Object, SetSlotValuesSpec>("set own slot value") {
 
         @Override
@@ -727,9 +714,10 @@ abstract class ConnectionManager {
             this.type = type;
         }
     }
+
     private final ProtegeCommand<Boolean, HasTypeSpec> HAS_TYPE_GETTER =
             new ProtegeCommand<Boolean, HasTypeSpec>(
-            "has type") {
+                    "has type") {
 
                 @Override
                 Boolean get(HasTypeSpec hasTypeSpec) {
@@ -742,6 +730,7 @@ abstract class ConnectionManager {
             throws KnowledgeSourceReadException {
         return getFromProtege(new HasTypeSpec(instance, type), HAS_TYPE_GETTER);
     }
+
     private final ProtegeCommand<String, Frame> NAME_GETTER =
             new ProtegeCommand<String, Frame>("get name") {
 
@@ -755,69 +744,56 @@ abstract class ConnectionManager {
         return getFromProtege(frame, NAME_GETTER);
     }
 
-
-    List<String> searchInstancesContainingKey(String searchKey)
+    /**
+     * gets all propositions from Protege that have a name or display name containing the search criteria
+     *
+     * @param searchKey
+     * @return searchResults
+     * @throws KnowledgeSourceReadException
+     */
+    Set<String> searchInstancesContainingKey(String searchKey)
             throws KnowledgeSourceReadException {
-        // return getFromProtege(matchString, INSTANCE_SEARCHER);
         return getFromProtege(searchKey,
-                new ProtegeCommand<List<String>, String>(
+                new ProtegeCommand<Set<String>, String>(
                         "search instance in a given  slot") {
                     @Override
-                    List<String> get(String matchString) {
-                        List<String> searchResults = new ArrayList<String>();
-                        Collection<Frame> displayNameMatches = protegeKnowledgeBase
-                                .getMatchingFrames(protegeKnowledgeBase
-                                        .getSlot("displayName"), null, false,
-                                        "*" + matchString.trim() + "*", -1);
-                        Collection<Frame> nameMatches = protegeKnowledgeBase
-                                .getMatchingFrames(protegeKnowledgeBase
-                                        .getSlot(":NAME"), null, false, "*"
-                                        + matchString.trim() + "*", -1);
-                        Slot nameSlot = protegeKnowledgeBase.getSlot(":NAME");
-
-                        // Protect against Protege returning null (its API
-                        // doesn't guarantee
-                        // a non-null return value) If the name slot or the
-                        // display name slot contains the search string then
-                        // return that.
+                    Set<String> get(String matchString) {
+                        Set<String> searchResults = new HashSet<>();
                         try {
-                            Cls propositionCls = protegeKnowledgeBase
-                                    .getCls("Proposition");
+                            Collection<Frame> displayNameMatches = protegeKnowledgeBase
+                                    .getMatchingFrames(protegeKnowledgeBase
+                                            .getSlot("displayName"), null, false,
+                                            "*" + matchString.trim() + "*", -1);
+                            Collection<Frame> nameMatches = protegeKnowledgeBase
+                                    .getMatchingFrames(protegeKnowledgeBase
+                                            .getSlot(":NAME"), null, false, "*"
+                                            + matchString.trim() + "*", -1);
+                            Slot nameSlot = protegeKnowledgeBase.getSlot(":NAME");
+                            Cls propositionCls = protegeKnowledgeBase.getCls("Proposition");
                             if (displayNameMatches != null) {
-
-                                for (Frame match : displayNameMatches) {
-
+                                for (Frame match : displayNameMatches)
                                     if (match instanceof Instance) {
                                         Instance temp = (Instance) match;
                                         if (temp.hasType(propositionCls)) {
-                                            searchResults
-                                                    .add((String) getOwnSlotValue(
-                                                            match, nameSlot));
+                                            searchResults.add((String) getOwnSlotValue(match, nameSlot));
                                         }
                                     }
-
-                                }
                             }
                             if (nameMatches != null) {
                                 for (Frame match : nameMatches) {
                                     if (match instanceof Instance) {
                                         Instance temp = (Instance) match;
                                         if (temp.hasType(propositionCls)) {
-                                            String result = (String) getOwnSlotValue(
-                                                    match, nameSlot);
+                                            String result = (String) getOwnSlotValue(match, nameSlot);
                                             if (!searchResults.contains(result))
                                                 searchResults.add(result);
                                         }
                                     }
-
                                 }
                             }
-
                         } catch (KnowledgeSourceReadException e) {
                             e.printStackTrace();
                         }
-
-                        /* also get protege elements that match the Name slot */
                         return searchResults;
                     }
                 });

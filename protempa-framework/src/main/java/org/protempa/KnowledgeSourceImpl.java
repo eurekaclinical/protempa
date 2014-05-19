@@ -147,8 +147,8 @@ public final class KnowledgeSourceImpl
                 PropositionDefinition pd = readPropositionDefinition(propId);
                 assert pd != null :
                         "Proposition definition " + propId
-                        + ", which is specified as a child of "
-                        + propDef.getId() + ", does not exist";
+                                + ", which is specified as a child of "
+                                + propDef.getId() + ", does not exist";
                 if (pd != null) {
                     result.add(pd);
                 }
@@ -223,8 +223,8 @@ public final class KnowledgeSourceImpl
                 PropositionDefinition pd = readPropositionDefinition(propId);
                 assert pd != null :
                         "Proposition definition " + propId
-                        + ", which " + propDef.getId()
-                        + "is specified as abstracted from, does not exist";
+                                + ", which " + propDef.getId()
+                                + "is specified as abstracted from, does not exist";
                 if (pd != null) {
                     result.add(pd);
                 }
@@ -393,8 +393,8 @@ public final class KnowledgeSourceImpl
                 ContextDefinition pd = readContextDefinition(propId);
                 assert pd != null :
                         "Context definition " + propId
-                        + ", which " + contextDef.getId()
-                        + "is specified as abstracted from, does not exist";
+                                + ", which " + contextDef.getId()
+                                + "is specified as abstracted from, does not exist";
                 if (pd != null) {
                     result.add(pd);
                 }
@@ -424,7 +424,7 @@ public final class KnowledgeSourceImpl
             subContextOfs = Collections.emptyList();
             induces = Collections.emptyList();
         }
-        
+
         List<AbstractionDefinition> ad = readAbstractedInto(propDef);
         List<PropositionDefinition> pd = readIsA(propDef);
         Map<String, PropositionDefinition> map =
@@ -492,8 +492,8 @@ public final class KnowledgeSourceImpl
                 TemporalPropositionDefinition pd = readTemporalPropositionDefinition(tepd.getPropositionId());
                 assert pd != null :
                         "Proposition definition " + tepd.getPropositionId()
-                        + ", which " + contextDef.getId()
-                        + "is specified as induced by, does not exist";
+                                + ", which " + contextDef.getId()
+                                + "is specified as induced by, does not exist";
                 if (pd != null) {
                     result.add(pd);
                 }
@@ -565,7 +565,7 @@ public final class KnowledgeSourceImpl
         protected abstract E readFromKnowledgeBase(String id);
 
         protected abstract E readFromBackend(String id,
-                KnowledgeSourceBackend backend)
+                                             KnowledgeSourceBackend backend)
                 throws KnowledgeSourceReadException;
 
         protected abstract void putInKnowledgeBase(E propDef)
@@ -581,7 +581,7 @@ public final class KnowledgeSourceImpl
 
         @Override
         protected PropositionDefinition readFromBackend(String id,
-                KnowledgeSourceBackend backend)
+                                                        KnowledgeSourceBackend backend)
                 throws KnowledgeSourceReadException {
             return backend.readPropositionDefinition(id);
         }
@@ -627,7 +627,7 @@ public final class KnowledgeSourceImpl
 
         @Override
         protected AbstractionDefinition readFromBackend(String id,
-                KnowledgeSourceBackend backend)
+                                                        KnowledgeSourceBackend backend)
                 throws KnowledgeSourceReadException {
             return backend.readAbstractionDefinition(id);
         }
@@ -747,7 +747,7 @@ public final class KnowledgeSourceImpl
      * @return a {@link PropositionDefinition}, or <code>null</code> if none was
      * found with the given <code>id</code>.
      * @throws KnowledgeSourceReadException if an error occurred reading from
-     * the knowledge base.
+     *                                      the knowledge base.
      */
     @Override
     public PropositionDefinition readPropositionDefinition(String id)
@@ -837,7 +837,7 @@ public final class KnowledgeSourceImpl
         this.propositionDefinitionCache = null;
         super.close();
     }
-    
+
     @Override
     protected void throwCloseException(List<BackendCloseException> exceptions) throws SourceCloseException {
         throw new KnowledgeSourceCloseException(exceptions);
@@ -914,120 +914,23 @@ public final class KnowledgeSourceImpl
         fireSourceUpdated(new KnowledgeSourceUpdatedEvent(this));
     }
 
-    public List<List<String>> getMatchingPropositionDefinitions(String searchKey)
+    public List<PropositionDefinition> getMatchingPropositionDefinitions(String searchKey)
             throws KnowledgeSourceReadException {
-
         ProtempaUtil.logger().log(Level.INFO,
                 "Searching Backend For search String " + searchKey);
-        List<String> matchingElements = getSearchResultsFromBackend(searchKey);
-
-        ProtempaUtil.logger().log(
-                Level.INFO,
-                "There are " + matchingElements.size()
-                        + " terms in the backend matching search string = "
-                        + searchKey);
-        return readParentsToListHierarchy(matchingElements);
-
+        List<PropositionDefinition> searchResultsPropDef = new ArrayList<>();
+        Set<String> searchResults = getSearchResultsFromBackend(searchKey);
+        for (String result : searchResults) {
+            searchResultsPropDef.add(readPropositionDefinition(result));
+        }
+        return searchResultsPropDef;
     }
 
-    private List<String> getSearchResultsFromBackend(String searchKey)
+    private Set<String> getSearchResultsFromBackend(String searchKey)
             throws KnowledgeSourceReadException {
         for (KnowledgeSourceBackend backend : getBackends()) {
             return backend.getKnowledgeSourceSearchResults(searchKey);
         }
         return null;
-    }
-
-    private List<List<String>> readParentsToListHierarchy(
-            List<String> searchResults) throws KnowledgeSourceReadException {
-        List<List<String>> hierarchyListOfSearchResults = new ArrayList<List<String>>();
-
-        if (searchResults != null) {
-            for (int i = 0; i < searchResults.size(); i++) {
-                ProtempaUtil.logger().log(
-                        Level.INFO,
-                        "Reading parents for search term "
-                                + searchResults.get(i));
-                PropositionDefinition propDefinition = readPropositionDefinition(searchResults
-                        .get(i));
-                if (propDefinition != null) {
-                    readParentsUntilRoot(propDefinition, null,
-                            hierarchyListOfSearchResults);
-                }
-            }
-        }
-        ProtempaUtil
-                .logger()
-                .log(
-                        Level.INFO,
-                        "Returning "
-                                + hierarchyListOfSearchResults.size()
-                                + " complete heirarchy of nodes that contain the search string ");
-        return hierarchyListOfSearchResults;
-    }
-
-    private void readParentsUntilRoot(
-            PropositionDefinition propositionDefinition,
-            List<String> currentParentList,
-            List<List<String>> allParentListsSoFar)
-            throws KnowledgeSourceReadException {
-
-        ProtempaUtil.logger().log(
-                Level.INFO,
-                "Looping through parents of " + propositionDefinition.getId()
-                        + "until root node ");
-        List<PropositionDefinition> parentsForPropositionDefinition = readParents(propositionDefinition);
-
-        if (parentsForPropositionDefinition != null
-                && parentsForPropositionDefinition.size() == 0) {
-            if (currentParentList == null) {
-            /*this case is met when the root element is the search element eg:Vital Sign. The current parent list is null in that case*/
-                currentParentList = new ArrayList<String>();
-                currentParentList.add(propositionDefinition.getId());
-            }
-            if (!allParentListsSoFar.contains(currentParentList)
-                    && currentParentList != null) {
-                allParentListsSoFar.add(currentParentList);
-                currentParentList = null;
-            }
-
-        } else if (parentsForPropositionDefinition.size() > 1) {
-            for (int i = 0; i < parentsForPropositionDefinition.size(); i++) {
-                if (currentParentList != null) {
-                    List<String> oneSetOfParents = new ArrayList<String>();
-                    for (int j = 0; j < currentParentList.size(); j++) {
-                        oneSetOfParents.add(currentParentList.get(j));
-                    }
-                    oneSetOfParents.add(parentsForPropositionDefinition.get(i)
-                            .getId());
-                    readParentsUntilRoot(
-                            parentsForPropositionDefinition.get(i),
-                            oneSetOfParents, allParentListsSoFar);
-                } else {
-                    currentParentList = new ArrayList<String>();
-                    currentParentList.add(propositionDefinition.getId());
-                    currentParentList.add(parentsForPropositionDefinition
-                            .get(i).getId());
-                    readParentsUntilRoot(
-                            parentsForPropositionDefinition.get(i),
-                            currentParentList, allParentListsSoFar);
-                    currentParentList = null;
-                }
-            }
-        } else {
-            if (currentParentList == null) {
-                currentParentList = new ArrayList<String>();
-                currentParentList.add(propositionDefinition.getId());
-            }
-
-            if (!currentParentList.contains(parentsForPropositionDefinition
-                    .get(0).getId()))
-                currentParentList.add(parentsForPropositionDefinition.get(0)
-                        .getId());
-
-            readParentsUntilRoot(parentsForPropositionDefinition.get(0),
-                    currentParentList, allParentListsSoFar);
-            currentParentList = null;
-        }
     }
 }

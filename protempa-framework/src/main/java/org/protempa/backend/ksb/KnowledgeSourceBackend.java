@@ -20,6 +20,7 @@
 package org.protempa.backend.ksb;
 
 import java.util.List;
+import java.util.Set;
 
 import org.protempa.AbstractionDefinition;
 import org.protempa.ContextDefinition;
@@ -115,6 +116,6 @@ public interface KnowledgeSourceBackend extends
     
     String[] readSubContextOfs(String propId) throws KnowledgeSourceReadException;
     
-    List<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException;
+    Set<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException;
    
 }

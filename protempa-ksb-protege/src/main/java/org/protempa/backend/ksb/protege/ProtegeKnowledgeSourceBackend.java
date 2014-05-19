@@ -76,7 +76,9 @@ public abstract class ProtegeKnowledgeSourceBackend
         Class<? extends Unit> getUnitClass() {
             return this.unitClass;
         }
-    };
+    }
+
+    ;
 
     protected ProtegeKnowledgeSourceBackend() {
     }
@@ -136,9 +138,9 @@ public abstract class ProtegeKnowledgeSourceBackend
             throws KnowledgeSourceReadException {
         Instance instance = this.cm.getInstance(name);
         if (instance != null) {
-            PropositionConverter converter = 
+            PropositionConverter converter =
                     this.instanceConverterFactory.getInstance(instance);
-            assert converter != null : 
+            assert converter != null :
                     "no converter for proposition definintion " + name;
             return converter.convert(instance, this);
         } else {
@@ -193,7 +195,7 @@ public abstract class ProtegeKnowledgeSourceBackend
 
         Set<String> matchingPropIds =
                 org.arp.javautil.collections.Collections.intersection(
-                propIdSets);
+                        propIdSets);
         result.addAll(matchingPropIds);
 
         return result;
@@ -203,7 +205,7 @@ public abstract class ProtegeKnowledgeSourceBackend
      * Returns the Cls from Protege if a matching Cls is found with the given
      * ancestor
      *
-     * @param name Name of the class to fetch
+     * @param name       Name of the class to fetch
      * @param superClass name of the anscestor
      * @return A Cls containing the given class name
      * @throws KnowledgeSourceReadException
@@ -239,7 +241,7 @@ public abstract class ProtegeKnowledgeSourceBackend
     private String[] collectInstanceNames(Collection<Instance> instances) {
         String[] result = new String[instances.size()];
         int i = 0;
-        for (Iterator<?> itr = instances.iterator(); itr.hasNext();) {
+        for (Iterator<?> itr = instances.iterator(); itr.hasNext(); ) {
             Instance child = (Instance) itr.next();
             result[i++] = child.getName();
         }
@@ -324,7 +326,7 @@ public abstract class ProtegeKnowledgeSourceBackend
         }
         return result;
     }
-    
+
     @Override
     public ContextDefinition readContextDefinition(String id) throws KnowledgeSourceReadException {
         return null;
@@ -351,10 +353,10 @@ public abstract class ProtegeKnowledgeSourceBackend
     public String[] readSubContextOfs(String propId) throws KnowledgeSourceReadException {
         return ArrayUtils.EMPTY_STRING_ARRAY;
     }
-    
-    
-    public List<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException {
-    	return this.cm.searchInstancesContainingKey(searchKey);
-       
+
+
+    public Set<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException {
+        return this.cm.searchInstancesContainingKey(searchKey);
+
     }
 }

@@ -25,15 +25,15 @@ package org.protempa;
 
 import java.util.List;
 import java.util.Set;
+
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.query.And;
 
 /**
- *
  * @author Andrew Post
  */
-public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, KnowledgeSourceBackend, KnowledgeSourceBackendUpdatedEvent>{
+public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, KnowledgeSourceBackend, KnowledgeSourceBackendUpdatedEvent> {
 
     /**
      * Gets the mappings from term IDs to proposition IDs for each backend.
@@ -47,9 +47,9 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
     boolean hasAbstractionDefinition(String id) throws KnowledgeSourceReadException;
 
     boolean hasPropositionDefinition(String id) throws KnowledgeSourceReadException;
-    
+
     boolean hasTemporalPropositionDefinition(String id) throws KnowledgeSourceReadException;
-    
+
     boolean hasContextDefinition(String id) throws KnowledgeSourceReadException;
 
     boolean hasValueSet(String id) throws KnowledgeSourceReadException;
@@ -63,35 +63,35 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
     List<PropositionDefinition> readAbstractedFrom(String id) throws KnowledgeSourceReadException;
 
     List<AbstractionDefinition> readAbstractedInto(PropositionDefinition propDef) throws KnowledgeSourceReadException;
-    
+
     List<AbstractionDefinition> readAbstractedInto(String propId) throws KnowledgeSourceReadException;
-    
+
     AbstractionDefinition readAbstractionDefinition(String id) throws KnowledgeSourceReadException;
-    
+
     ContextDefinition readContextDefinition(String id) throws KnowledgeSourceReadException;
 
     List<PropositionDefinition> readInverseIsA(PropositionDefinition propDef) throws KnowledgeSourceReadException;
 
     List<PropositionDefinition> readInverseIsA(String id) throws KnowledgeSourceReadException;
-    
+
     List<PropositionDefinition> readIsA(PropositionDefinition propDef) throws KnowledgeSourceReadException;
-    
+
     List<PropositionDefinition> readIsA(String id) throws KnowledgeSourceReadException;
-    
+
     List<ContextDefinition> readSubContexts(String id) throws KnowledgeSourceReadException;
-    
+
     List<ContextDefinition> readSubContexts(ContextDefinition contextDef) throws KnowledgeSourceReadException;
-    
+
     List<ContextDefinition> readSubContextOfs(String id) throws KnowledgeSourceReadException;
-    
+
     List<ContextDefinition> readSubContextOfs(ContextDefinition contextDef) throws KnowledgeSourceReadException;
-    
+
     List<ContextDefinition> readInduces(String tempPropDef) throws KnowledgeSourceReadException;
-    
+
     List<ContextDefinition> readInduces(TemporalPropositionDefinition tempPropDef) throws KnowledgeSourceReadException;
-    
+
     List<TemporalPropositionDefinition> readInducedBy(String contextId) throws KnowledgeSourceReadException;
-    
+
     List<TemporalPropositionDefinition> readInducedBy(ContextDefinition contextDef) throws KnowledgeSourceReadException;
 
     /**
@@ -101,21 +101,21 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
      * @return a {@link PropositionDefinition}, or <code>null</code> if none was
      * found with the given <code>id</code>.
      * @throws KnowledgeSourceReadException if an error occurred reading from
-     * the knowledge base.
+     *                                      the knowledge base.
      */
     PropositionDefinition readPropositionDefinition(String id) throws KnowledgeSourceReadException;
-    
+
     TemporalPropositionDefinition readTemporalPropositionDefinition(String id) throws KnowledgeSourceReadException;
 
     ValueSet readValueSet(String id) throws KnowledgeSourceReadException;
-    
+
     List<PropositionDefinition> readParents(PropositionDefinition propDef)
             throws KnowledgeSourceReadException;
-    
+
     List<PropositionDefinition> readParents(String propId)
             throws KnowledgeSourceReadException;
-    
-    List<List<String>> getMatchingPropositionDefinitions(String searchKey)
-    	throws KnowledgeSourceReadException;
-    
+
+    List<PropositionDefinition> getMatchingPropositionDefinitions(String searchKey)
+            throws KnowledgeSourceReadException;
+
 }
