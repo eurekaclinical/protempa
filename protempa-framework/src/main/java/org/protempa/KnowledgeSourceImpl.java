@@ -914,6 +914,13 @@ public final class KnowledgeSourceImpl
         fireSourceUpdated(new KnowledgeSourceUpdatedEvent(this));
     }
 
+    /**
+     * Gets the proposition Definitions from each backend that match the searchKey
+     * @param searchKey
+     * @return
+     * @throws KnowledgeSourceReadException
+     */
+
     public List<PropositionDefinition> getMatchingPropositionDefinitions(String searchKey)
             throws KnowledgeSourceReadException {
         ProtempaUtil.logger().log(Level.INFO,
@@ -928,9 +935,10 @@ public final class KnowledgeSourceImpl
 
     private Set<String> getSearchResultsFromBackend(String searchKey)
             throws KnowledgeSourceReadException {
+        Set<String> results = new HashSet<>();
         for (KnowledgeSourceBackend backend : getBackends()) {
-            return backend.getKnowledgeSourceSearchResults(searchKey);
+            results.addAll(backend.getKnowledgeSourceSearchResults(searchKey));
         }
-        return null;
+        return results;
     }
 }
