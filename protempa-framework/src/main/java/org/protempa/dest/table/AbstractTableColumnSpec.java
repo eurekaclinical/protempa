@@ -42,7 +42,7 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
             String propName = ccc.getPropertyName();
             Value value = proposition.getProperty(propName);
             ValueComparator vc = ccc.getValueComparator();
-            if (!vc.test(value.compare(ccc.getValue()))) {
+            if (!vc.compare(value, ccc.getValue())) {
                 return false;
             }
         }

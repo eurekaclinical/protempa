@@ -242,13 +242,13 @@ public final class ValueSet {
             result = this.valuesKeySet.contains(value);
         } else if (this.lowerBound != null || this.upperBound != null) {
             if (this.lowerBound != null
-                    && !ValueComparator.GREATER_THAN_OR_EQUAL_TO.test(
-                    value.compare(this.lowerBound))) {
+                    && !ValueComparator.GREATER_THAN_OR_EQUAL_TO.compare(
+                    value, this.lowerBound)) {
                 result = false;
             }
             if (this.upperBound != null
-                    && !ValueComparator.LESS_THAN_OR_EQUAL_TO.test(
-                    value.compare(this.upperBound))) {
+                    && !ValueComparator.LESS_THAN_OR_EQUAL_TO.compare(
+                    value, this.upperBound)) {
                 result = false;
             }
         }

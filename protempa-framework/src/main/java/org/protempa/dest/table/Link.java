@@ -357,7 +357,7 @@ public abstract class Link {
                                 new Object[] { proposition.getId(), propName,
                                         value, vc });
                 }
-                if (!vc.test(value.compare(ccc.getValue()))) {
+                if (!vc.compare(value, ccc.getValue())) {
                     return false;
                 }
             } else {

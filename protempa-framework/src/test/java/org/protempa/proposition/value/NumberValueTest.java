@@ -112,7 +112,7 @@ public class NumberValueTest extends TestCase {
     }
     
     public void testCompareDateValue() {
-        assertEquals(ValueComparator.UNKNOWN, 
+        assertEquals(ValueComparator.NOT_EQUAL_TO, 
                 val.compare(DateValue.getInstance(new Date())));
     }
     

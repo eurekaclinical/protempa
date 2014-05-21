@@ -90,7 +90,7 @@ public class ValueList<V extends Value> extends ArrayList<V> implements Value {
     @Override
     public ValueComparator compare(Value val) {
         if (val == null || val.getType() != ValueType.VALUELIST) {
-            return ValueComparator.UNKNOWN;
+            return ValueComparator.NOT_EQUAL_TO;
         }
         ValueList<?> vl = (ValueList<?>) val;
         return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;

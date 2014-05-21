@@ -25,6 +25,18 @@ import java.util.Map;
 /**
  * Represents the possible valid comparisons between two {@link Value} objects.
  * 
+ * Some rules:
+ * <ul>
+ *  <li>Values are always {@link ValueComparator#NOT_EQUAL_TO} 
+ * <code>null</code>.
+ *  <li>Values are always {@link ValueComparator#NOT_EQUAL_TO} a value of 
+ * another type, except for the numeric types.
+ *  <li>Two <code>null</code> values are {@link ValueComparator#EQUAL_TO}
+ * each other.
+ *  <li>A <code>null</code> value is {@link ValueComparator#NOT_EQUAL_TO} any
+ * non-<code>null</code> value.
+ * </ul>
+ * 
  * @author Andrew Post
  */
 public enum ValueComparator {
@@ -32,11 +44,10 @@ public enum ValueComparator {
     /**
      * The first value is greater than (>) the second.
      */
-    GREATER_THAN(">", new CompatibleTypes(ValueType.ORDEREDVALUE,
-            ValueType.ORDEREDVALUE)) {
+    GREATER_THAN(">") {
 
         @Override
-        public boolean test(ValueComparator comparator) {
+        public boolean includes(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
             return GREATER_THAN == comparator;
@@ -45,11 +56,10 @@ public enum ValueComparator {
     /**
      * The first value is less than (<) the second.
      */
-    LESS_THAN("<", new CompatibleTypes(ValueType.ORDEREDVALUE,
-            ValueType.ORDEREDVALUE)) {
+    LESS_THAN("<") {
 
         @Override
-        public boolean test(ValueComparator comparator) {
+        public boolean includes(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
             return LESS_THAN == comparator;
@@ -58,10 +68,10 @@ public enum ValueComparator {
     /**
      * The two values are equal (=).
      */
-    EQUAL_TO("=", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
+    EQUAL_TO("=") {
 
         @Override
-        public boolean test(ValueComparator comparator) {
+        public boolean includes(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
             return EQUAL_TO == comparator;
@@ -70,36 +80,38 @@ public enum ValueComparator {
     /**
      * The two values are not equal (!=).
      */
-    NOT_EQUAL_TO("!=", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
+    NOT_EQUAL_TO("!=") {
 
         @Override
-        public boolean test(ValueComparator comparator) {
+        public boolean includes(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
             return EQUAL_TO != comparator;
         }
     },
     /**
-     * Unknown, meaning that the two values are not comparable, for example,
-     * comparing a number to a string.
+     * Unknown, meaning that Protempa cannot tell, for example, if a value
+     * may be less than another value but Protempa cannot tell with complete
+     * certainty.
      */
-    UNKNOWN("?", new CompatibleTypes(ValueType.VALUE, ValueType.VALUE)) {
+    UNKNOWN("?") {
 
         @Override
-        public boolean test(ValueComparator comparator) {
+        public boolean includes(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
             return UNKNOWN == comparator;
         }
     },
     /**
-     * The first value is greater than or equal to (>=) the second.
+     * The first value is greater than or equal to (>=) the second. Includes
+     * {@link ValueComparator#EQUAL_TO} and 
+     * {@link ValueComparator#GREATER_THAN}.
      */
-    GREATER_THAN_OR_EQUAL_TO(">=", new CompatibleTypes(ValueType.ORDEREDVALUE,
-            ValueType.ORDEREDVALUE)) {
+    GREATER_THAN_OR_EQUAL_TO(">=") {
 
         @Override
-        public boolean test(ValueComparator comparator) {
+        public boolean includes(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
             return EQUAL_TO == comparator
@@ -108,13 +120,14 @@ public enum ValueComparator {
         }
     },
     /**
-     * The first value is less than or equal to (<=) the second.
+     * The first value is less than or equal to (<=) the second. Includes
+     * {@link ValueComparator#EQUAL_TO} and 
+     * {@link ValueComparator#LESS_THAN}.
      */
-    LESS_THAN_OR_EQUAL_TO("<=", new CompatibleTypes(ValueType.ORDEREDVALUE,
-            ValueType.ORDEREDVALUE)) {
+    LESS_THAN_OR_EQUAL_TO("<=") {
 
         @Override
-        public boolean test(ValueComparator comparator) {
+        public boolean includes(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
             return EQUAL_TO == comparator || LESS_THAN == comparator
@@ -124,10 +137,10 @@ public enum ValueComparator {
     /**
      * The value is in the list.
      */
-    IN("IN", new CompatibleTypes(ValueType.VALUE, ValueType.VALUELIST)) {
+    IN("IN") {
 
         @Override
-        public boolean test(ValueComparator comparator) {
+        public boolean includes(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
             return IN == comparator;
@@ -136,10 +149,10 @@ public enum ValueComparator {
     /**
      * The value is not in the list.
      */
-    NOT_IN("NOT_IN", new CompatibleTypes(ValueType.VALUE, ValueType.VALUELIST)) {
+    NOT_IN("NOT_IN") {
 
         @Override
-        public boolean test(ValueComparator comparator) {
+        public boolean includes(ValueComparator comparator) {
             if (comparator == null)
                 throw new IllegalArgumentException("comparator cannot be null");
             return NOT_IN == comparator;
@@ -191,25 +204,10 @@ public enum ValueComparator {
         return compStringToComp.get(compString);
     }
 
-    private static class CompatibleTypes {
-        ValueType type1;
-        ValueType type2;
-
-        CompatibleTypes(ValueType type1, ValueType type2) {
-            this.type1 = type1;
-            this.type2 = type2;
-        }
-    }
-
     /**
      * The string associated with this comparator object.
      */
     private final String name;
-
-    /*
-     * The types that are applicable to this comparator.
-     */
-    private final CompatibleTypes compatibleTypes;
 
     /**
      * Creates a comparison object with the given string.
@@ -220,13 +218,12 @@ public enum ValueComparator {
      *            a {@link ValueFactory[]} for the types that are applicable to
      *            this comparator..
      */
-    private ValueComparator(String name, CompatibleTypes compatibleTypes) {
+    private ValueComparator(String name) {
         this.name = name;
-        this.compatibleTypes = compatibleTypes;
     }
 
     /**
-     * Returns whether this {@link ValueComparator} is the same as or contains
+     * Returns whether this {@link ValueComparator} is the same as or includes
      * the specified {@link ValueComparator}.
      * 
      * @param comparator
@@ -235,27 +232,27 @@ public enum ValueComparator {
      *         the specified {@link ValueComparator}, <code>false</code>
      *         otherwise.
      */
-    public abstract boolean test(ValueComparator comparator);
+    public abstract boolean includes(ValueComparator comparator);
     
     /**
-     * Returns whether this {@link ValueComparator} is compatible with the
-     * specified values.
+     * Returns whether two values have the relationship specified by this
+     * value comparator. It returns the same result as calling a value's
+     * {@link Value#compare(org.protempa.proposition.value.Value) } method,
+     * except it also handles gracefully the value being <code>null</code>.
      * 
-     * @param value1
-     *            the {@link Value} preceding the comparator.
-     * @param value2
-     *            the {@link Value} following the comparator.
-     * @return <code>true</code> if this {@link ValueComparator} is compatible
-     *         with the specified values, <code>false</code> if not.
+     * @param lhsValue the left-hand-side value. May be <code>null</code>.
+     * @param rhsValue the right-hand-side value. May be <code>null</code>.
+     * @return <code>true</code> if the two values have the relationship
+     * specified by this value comparator, <code>false</code> if not.
      */
-    public boolean isCompatible(Value value1, Value value2) {
-        if (value1 == null)
-            throw new IllegalArgumentException("value1 cannot be null");
-        if (value2 == null)
-            throw new IllegalArgumentException("value2 cannot be null");
-
-        return this.compatibleTypes.type1.isInstance(value1)
-                && this.compatibleTypes.type2.isInstance(value2);
+    public boolean compare(Value lhsValue, Value rhsValue) {
+        if (lhsValue != null) {
+            return includes(lhsValue.compare(rhsValue));
+        } else if (rhsValue != null) {
+            return ValueComparator.NOT_EQUAL_TO.includes(this);
+        } else {
+            return ValueComparator.EQUAL_TO.includes(this);
+        }
     }
 
     /**

@@ -214,25 +214,25 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
                         switch (this.type) {
                             case MAX:
                                 ValueComparator c = val.compare(value);
-                                if (c.test(ValueComparator.UNKNOWN)) {
+                                if (c.includes(ValueComparator.UNKNOWN)) {
                                     c = ((NumericalValue) val).getNumberValue()
                                             .compare(
                                             ((NumericalValue) value)
                                             .getNumberValue());
                                 }
-                                if (c.test(ValueComparator.GREATER_THAN)) {
+                                if (c.includes(ValueComparator.GREATER_THAN)) {
                                     value = val;
                                 }
                                 break;
                             case MIN:
                                 c = val.compare(value);
-                                if (c.test(ValueComparator.UNKNOWN)) {
+                                if (c.includes(ValueComparator.UNKNOWN)) {
                                     c = ((NumericalValue) val).getNumberValue()
                                             .compare(
                                             ((NumericalValue) value)
                                             .getNumberValue());
                                 }
-                                if (c.test(ValueComparator.LESS_THAN)) {
+                                if (c.includes(ValueComparator.LESS_THAN)) {
                                     value = val;
                                 }
                                 break;

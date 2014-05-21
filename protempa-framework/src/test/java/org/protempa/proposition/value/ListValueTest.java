@@ -60,7 +60,7 @@ public class ListValueTest {
                 NominalValue.getInstance("baz")
         );
         NominalValue bar = NominalValue.getInstance("bar");
-        assertTrue(ValueComparator.IN.test(bar.compare(l)));
+        assertTrue(ValueComparator.IN.compare(bar, l));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class ListValueTest {
                 NominalValue.getInstance("baz")
         );
         NominalValue foo2 = NominalValue.getInstance("foo2");
-        assertTrue(ValueComparator.NOT_IN.test(foo2.compare(l)));
+        assertTrue(ValueComparator.NOT_IN.compare(foo2, l));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class ListValueTest {
                 NominalValue.getInstance("bar"),
                 NominalValue.getInstance("baz")
         );
-        assertTrue(ValueComparator.NOT_IN.test(l1.compare(l2)));
+        assertTrue(ValueComparator.NOT_IN.compare(l1, l2));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class ListValueTest {
                 NominalValue.getInstance("baz"),
                 NominalValue.getInstance("bar")
         );
-        assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
+        assertTrue(ValueComparator.NOT_EQUAL_TO.compare(l1, l2));
     }
 
     @Test
@@ -125,7 +125,8 @@ public class ListValueTest {
         ValueList<NominalValue> l2 = ValueList.getInstance(
                 NominalValue.getInstance("foo")
         );
-        assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
+        System.out.println(l1.compare(l2));
+        assertTrue(ValueComparator.NOT_EQUAL_TO.compare(l1, l2));
     }
 
     @Test
@@ -138,7 +139,7 @@ public class ListValueTest {
         ValueList<NominalValue> l1 = ValueList.getInstance(
                 NominalValue.getInstance("foo")
         );
-        assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
+        assertTrue(ValueComparator.NOT_EQUAL_TO.compare(l1, l2));
     }
 
     @Test
@@ -148,9 +149,8 @@ public class ListValueTest {
                 NominalValue.getInstance("bar"),
                 NominalValue.getInstance("baz")
         );
-        ValueList<NominalValue> l1 = ValueList.getInstance(
-        );
-        assertTrue(ValueComparator.NOT_EQUAL_TO.test(l1.compare(l2)));
+        ValueList<NominalValue> l1 = ValueList.getInstance();
+        assertTrue(ValueComparator.NOT_EQUAL_TO.compare(l1, l2));
     }
 
     @Test
@@ -160,6 +160,6 @@ public class ListValueTest {
                 NominalValue.getInstance("bar"),
                 NominalValue.getInstance("baz")
         );
-        assertTrue(ValueComparator.UNKNOWN.test(l1.compare(null)));
+        assertTrue(ValueComparator.NOT_EQUAL_TO.compare(l1, null));
     }
 }

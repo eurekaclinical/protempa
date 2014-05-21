@@ -161,11 +161,22 @@ public final class BooleanValue implements Value, Serializable {
      */
     @Override
     public ValueComparator compare(Value val) {
-        if (val == null || val != ValueType.VALUELIST) {
-            return ValueComparator.UNKNOWN;
+        if (val == null) {
+            return ValueComparator.NOT_EQUAL_TO;
         }
-        ValueList<?> vl = (ValueList<?>) val;
-        return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;
+        switch (val.getType()) {
+            case BOOLEANVALUE:
+                if (this.val == ((BooleanValue) val).val) {
+                    return ValueComparator.EQUAL_TO;
+                } else {
+                    return ValueComparator.NOT_EQUAL_TO;
+                }
+            case VALUELIST:
+                ValueList<?> vl = (ValueList<?>) val;
+                return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;
+            default:
+                return ValueComparator.NOT_EQUAL_TO;
+        }
     }
     
     private void writeObject(ObjectOutputStream s) throws IOException {

@@ -105,7 +105,7 @@ public final class OrdinalValue implements OrderedValue, Serializable {
     @Override
     public ValueComparator compare(Value o) {
         if (o == null) {
-            return ValueComparator.UNKNOWN;
+            return ValueComparator.NOT_EQUAL_TO;
         }
         switch (o.getType()) {
             case ORDINALVALUE:
@@ -131,7 +131,7 @@ public final class OrdinalValue implements OrderedValue, Serializable {
                 return equals(vl) ? ValueComparator.EQUAL_TO 
                         : ValueComparator.NOT_EQUAL_TO;
             default:
-                return ValueComparator.UNKNOWN;
+                return ValueComparator.NOT_EQUAL_TO;
         }
     }
     

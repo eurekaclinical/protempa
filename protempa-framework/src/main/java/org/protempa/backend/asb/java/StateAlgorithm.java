@@ -82,8 +82,8 @@ public final class StateAlgorithm extends AbstractAlgorithm {
                 TemporalParameter param = segment.get(i);
                 Value val = param.getValue();
                 if (val == null
-                        || (minComparator != null && !minComparator.test(val.compare(minThreshold)))
-                        || (maxComparator != null && !maxComparator.test(val.compare(maxThreshold)))) {
+                        || (minComparator != null && !minComparator.compare(val, minThreshold))
+                        || (maxComparator != null && !maxComparator.compare(val, maxThreshold))) {
                     return null;
                 }
             }

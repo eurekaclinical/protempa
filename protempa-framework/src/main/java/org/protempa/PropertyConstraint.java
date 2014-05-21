@@ -20,7 +20,7 @@
 package org.protempa;
 
 import java.io.Serializable;
-
+import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 
@@ -29,9 +29,9 @@ public final class PropertyConstraint implements Serializable {
     private static final long serialVersionUID = 3853678590231245224L;
 
     private String propertyName;
-    
+
     private Value value;
-    
+
     private ValueComparator valueComp;
 
     public String getPropertyName() {
@@ -57,6 +57,26 @@ public final class PropertyConstraint implements Serializable {
     public void setValueComp(ValueComparator valueComp) {
         this.valueComp = valueComp;
     }
-    
-    
+
+    /**
+     * Returns whether a proposition satisfies this constraint. If no
+     * property name or value comparator are specified, this method always
+     * returns <code>true</code>.
+     * 
+     * @param proposition a proposition. Cannot be <code>null</code>.
+     * @return <code>true</code> if the proposition satisfies this constraint,
+     * <code>false</code> if not.
+     */
+    public boolean isSatisfiedBy(Proposition proposition) {
+        if (proposition == null) {
+            throw new IllegalArgumentException("proposition cannot be null");
+        }
+        if (this.valueComp != null && this.propertyName != null) {
+            Value value = proposition.getProperty(this.propertyName);
+            if (!valueComp.compare(value, this.value)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

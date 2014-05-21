@@ -22,7 +22,6 @@ package org.protempa;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.Proposition;
 
@@ -53,14 +52,14 @@ public class ExtendedPropositionDefinition implements Serializable {
      * @return the proposition id <code>String</code>.
      */
     public String getPropositionId() {
-        return propositionId;
+        return this.propositionId;
     }
 
     /**
      * @return the <code>Set</code> of property constraints
      */
     public Set<PropertyConstraint> getPropertyConstraints() {
-        return propertyConstraints;
+        return this.propertyConstraints;
     }
 
     /**
@@ -80,20 +79,14 @@ public class ExtendedPropositionDefinition implements Serializable {
             return false;
         } else {
             String pId = proposition.getId();
-            if (propositionId != pId && !propositionId.equals(pId)) {
+            if (this.propositionId != pId && !this.propositionId.equals(pId)) {
                 return false;
             }
             // check that all property constraints are met
-            if (propertyConstraints.size() > 0) {
-                for (PropertyConstraint pc : propertyConstraints) {
-                    for (String propertyName : proposition.getPropertyNames()) {
-                        if (pc.getPropertyName().equals(propertyName)) {
-                            if (!proposition.getProperty(propertyName)
-                                    .compare(pc.getValue())
-                                    .equals(pc.getValueComp())) {
-                                return false;
-                            }
-                        }
+            if (!this.propertyConstraints.isEmpty()) {
+                for (PropertyConstraint pc : this.propertyConstraints) {
+                    if (!pc.isSatisfiedBy(proposition)) {
+                        return false;
                     }
                 }
             }
@@ -103,11 +96,11 @@ public class ExtendedPropositionDefinition implements Serializable {
     }
 
     public String getDisplayName() {
-        return displayName;
+        return this.displayName;
     }
 
     public String getAbbreviatedDisplayName() {
-        return abbreviatedDisplayName;
+        return this.abbreviatedDisplayName;
     }
 
     public String getShortDisplayName() {
@@ -127,11 +120,6 @@ public class ExtendedPropositionDefinition implements Serializable {
         this.displayName = displayName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         if (this.hashCode == 0) {

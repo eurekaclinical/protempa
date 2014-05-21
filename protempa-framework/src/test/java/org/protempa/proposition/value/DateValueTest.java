@@ -44,13 +44,13 @@ public class DateValueTest extends TestCase {
     public void testCompareNumberValue() {
         DateValue now = DateValue.getInstance(this.nowDate);
         NumberValue num = NumberValue.getInstance(0L);
-        assertEquals(ValueComparator.UNKNOWN, now.compare(num));
+        assertEquals(ValueComparator.NOT_EQUAL_TO, now.compare(num));
     }
     
     public void testCompareNominalValue() {
         DateValue now = DateValue.getInstance(this.nowDate);
         Value str = NominalValue.getInstance("foo");
-        assertEquals(ValueComparator.UNKNOWN, now.compare(str));
+        assertEquals(ValueComparator.NOT_EQUAL_TO, now.compare(str));
     }
     
     public void testCompareListValue() {

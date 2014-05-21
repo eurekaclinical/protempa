@@ -153,7 +153,7 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
     @Override
     public ValueComparator compare(Value o) {
         if (o == null) {
-            return ValueComparator.UNKNOWN;
+            return ValueComparator.NOT_EQUAL_TO;
         }
         switch (o.getType()) {
             case DATEVALUE:
@@ -166,7 +166,7 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
                 ValueList<?> vl = (ValueList<?>) o;
                 return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;
             default:
-                return ValueComparator.UNKNOWN;
+                return ValueComparator.NOT_EQUAL_TO;
         }
     }
 

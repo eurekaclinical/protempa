@@ -75,27 +75,11 @@ public final class MinAlgorithm extends AbstractAlgorithm {
         }
 
         if (minVal != null
-                && (minThresholdComp == null || minThreshold == null || minThresholdComp.test(minVal.compare(minThreshold)))
-                && (maxThresholdComp == null || maxThreshold == null || maxThresholdComp.test(minVal.compare(maxThreshold)))) {
+                && (minThresholdComp == null || minThreshold == null || minThresholdComp.compare(minVal, minThreshold))
+                && (maxThresholdComp == null || maxThreshold == null || maxThresholdComp.compare(minVal, maxThreshold))) {
             return BooleanValue.TRUE;
         } else {
             return null;
         }
     }
-    // @Override
-    // public DataSourceConstraint createDataSourceConstraint() {
-    // ThresholdConstraint dataSourceConstraint1 = new ThresholdConstraint();
-    // dataSourceConstraint1
-    // .setComparator(getParameterComparator("maxThreshold"));
-    // dataSourceConstraint1.setValue(getParameterValue("maxThreshold"));
-    //
-    // ThresholdConstraint dataSourceConstraint2 = new ThresholdConstraint();
-    // dataSourceConstraint2
-    // .setComparator(getParameterComparator("minThreshold"));
-    // dataSourceConstraint2.setValue(getParameterValue("minThreshold"));
-    //
-    // dataSourceConstraint1.setAnd(dataSourceConstraint2);
-    //
-    // return dataSourceConstraint1;
-    // }
 }

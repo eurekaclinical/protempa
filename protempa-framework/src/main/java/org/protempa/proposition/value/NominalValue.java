@@ -160,7 +160,7 @@ public final class NominalValue implements Value, Comparable<NominalValue>,
     @Override
     public ValueComparator compare(Value o) {
         if (o == null) {
-            return ValueComparator.UNKNOWN;
+            return ValueComparator.NOT_EQUAL_TO;
         }
         switch (o.getType()) {
             case NOMINALVALUE:
@@ -173,7 +173,7 @@ public final class NominalValue implements Value, Comparable<NominalValue>,
                 ValueList<?> vl = (ValueList<?>) o;
                 return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;
             default:
-                return ValueComparator.UNKNOWN;
+                return ValueComparator.NOT_EQUAL_TO;
         }
         
     }

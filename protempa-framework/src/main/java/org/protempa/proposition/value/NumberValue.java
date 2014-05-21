@@ -195,7 +195,7 @@ public final class NumberValue implements NumericalValue,
     @Override
     public ValueComparator compare(Value o) {
         if (o == null) {
-            return ValueComparator.UNKNOWN;
+            return ValueComparator.NOT_EQUAL_TO;
         }
         switch (o.getType()) {
             case NUMBERVALUE:
@@ -224,7 +224,7 @@ public final class NumberValue implements NumericalValue,
                 return equals(vl) ? ValueComparator.EQUAL_TO 
                         : ValueComparator.NOT_EQUAL_TO;
             default:
-                return ValueComparator.UNKNOWN;
+                return ValueComparator.NOT_EQUAL_TO;
 }
     }
 

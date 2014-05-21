@@ -190,7 +190,7 @@ public final class InequalityNumberValue implements
     @Override
     public ValueComparator compare(Value d2) {
         if (d2 == null) {
-            return ValueComparator.UNKNOWN;
+            return ValueComparator.NOT_EQUAL_TO;
         }
         switch (d2.getType()) {
             case NUMBERVALUE:
@@ -239,7 +239,7 @@ public final class InequalityNumberValue implements
                 ValueList<?> vl = (ValueList<?>) d2;
                 return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;
             default:
-                return ValueComparator.UNKNOWN;
+                return ValueComparator.NOT_EQUAL_TO;
         }
     }
 

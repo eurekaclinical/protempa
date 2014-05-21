@@ -146,8 +146,8 @@ public final class TrendAlgorithm extends AbstractAlgorithm {
 
             NumberValue slope = NumberValue.getInstance(slopeAsDouble);
 
-            if ((minSlopeThresholdComparator != null && !minSlopeThresholdComparator.test(slope.compare(minSlopeThreshold)))
-                    || (maxSlopeThresholdComparator != null && !maxSlopeThresholdComparator.test(slope.compare(maxSlopeThreshold)))) {
+            if ((minSlopeThresholdComparator != null && !minSlopeThresholdComparator.compare(slope, minSlopeThreshold))
+                    || (maxSlopeThresholdComparator != null && !maxSlopeThresholdComparator.compare(slope, maxSlopeThreshold))) {
                 return null;
             }
         }

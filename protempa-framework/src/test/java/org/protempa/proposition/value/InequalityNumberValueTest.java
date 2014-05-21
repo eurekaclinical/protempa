@@ -88,6 +88,6 @@ public class InequalityNumberValueTest extends TestCase {
         InequalityNumberValue val = new InequalityNumberValue(
                 ValueComparator.LESS_THAN, .4);
         DateValue dateValue = DateValue.getInstance();
-        assertEquals(ValueComparator.UNKNOWN, val.compare(dateValue));
+        assertEquals(ValueComparator.NOT_EQUAL_TO, val.compare(dateValue));
     }
 }
