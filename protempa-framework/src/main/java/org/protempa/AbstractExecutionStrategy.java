@@ -64,7 +64,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
                 this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
-                visitor.getAlgorithms(), listener);
+                visitor.getAlgorithms(), listener, this.knowledgeSource);
         List<PropositionDefinition> propDefs = new ArrayList<>(
                 propIds.size());
         for (String propId : propIds) {

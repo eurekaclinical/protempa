@@ -57,6 +57,8 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
     Set<PropositionDefinition> inDataSourcePropositionDefinitions(String... propIds) throws KnowledgeSourceReadException;
 
     Set<String> inDataSourcePropositionIds(String... propIds) throws KnowledgeSourceReadException;
+    
+    Set<String> collectSubtrees(String... propIds) throws KnowledgeSourceReadException;
 
     List<PropositionDefinition> readAbstractedFrom(AbstractionDefinition propDef) throws KnowledgeSourceReadException;
 

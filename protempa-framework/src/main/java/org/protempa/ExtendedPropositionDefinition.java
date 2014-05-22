@@ -20,7 +20,7 @@
 package org.protempa;
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.Proposition;
@@ -28,6 +28,9 @@ import org.protempa.proposition.Proposition;
 public class ExtendedPropositionDefinition implements Serializable {
 
     private static final long serialVersionUID = 3835638971180620664L;
+    
+    private static final PropertyConstraint[] EMPTY_PROP_CONSTRAINT_ARR =
+            new PropertyConstraint[0];
 
     private String propositionId;
 
@@ -35,7 +38,7 @@ public class ExtendedPropositionDefinition implements Serializable {
 
     private String abbreviatedDisplayName;
 
-    private Set<PropertyConstraint> propertyConstraints;
+    private PropertyConstraint[] propertyConstraints;
 
     private volatile int hashCode;
 
@@ -45,21 +48,30 @@ public class ExtendedPropositionDefinition implements Serializable {
                     "A propositionId must be specified");
         }
         this.propositionId = propositionId;
-        this.propertyConstraints = new HashSet<>();
+        this.propertyConstraints = EMPTY_PROP_CONSTRAINT_ARR;
     }
 
     /**
      * @return the proposition id <code>String</code>.
      */
-    public String getPropositionId() {
+    public final String getPropositionId() {
         return this.propositionId;
     }
 
+    public final void setPropertyConstraints(PropertyConstraint[] propertyConstraints) {
+        if (propertyConstraints != null) {
+            ProtempaUtil.checkArrayForNullElement(propertyConstraints, "propertyConstraints");
+            this.propertyConstraints = propertyConstraints.clone();
+        } else {
+            this.propertyConstraints = EMPTY_PROP_CONSTRAINT_ARR;
+        }
+    }
+    
     /**
      * @return the <code>Set</code> of property constraints
      */
-    public Set<PropertyConstraint> getPropertyConstraints() {
-        return this.propertyConstraints;
+    public final PropertyConstraint[] getPropertyConstraints() {
+        return this.propertyConstraints.clone();
     }
 
     /**
@@ -74,20 +86,18 @@ public class ExtendedPropositionDefinition implements Serializable {
      *         definition, or <code>false</code> if not, or if
      *         <code>proposition</code> is <code>null</code>.
      */
-    public boolean getMatches(Proposition proposition) {
+    boolean getMatches(Proposition proposition, Collection<String> propIds) throws KnowledgeSourceReadException {
         if (proposition == null) {
             return false;
         } else {
             String pId = proposition.getId();
-            if (this.propositionId != pId && !this.propositionId.equals(pId)) {
+            if (this.propositionId != null && !propIds.contains(pId)) {
                 return false;
             }
             // check that all property constraints are met
-            if (!this.propertyConstraints.isEmpty()) {
-                for (PropertyConstraint pc : this.propertyConstraints) {
-                    if (!pc.isSatisfiedBy(proposition)) {
-                        return false;
-                    }
+            for (PropertyConstraint pc : this.propertyConstraints) {
+                if (!pc.isSatisfiedBy(proposition)) {
+                    return false;
                 }
             }
 
@@ -95,15 +105,15 @@ public class ExtendedPropositionDefinition implements Serializable {
         }
     }
 
-    public String getDisplayName() {
+    public final String getDisplayName() {
         return this.displayName;
     }
 
-    public String getAbbreviatedDisplayName() {
+    public final String getAbbreviatedDisplayName() {
         return this.abbreviatedDisplayName;
     }
 
-    public String getShortDisplayName() {
+    public final String getShortDisplayName() {
         String abbrevDisplayName = this.getAbbreviatedDisplayName();
         if (abbrevDisplayName != null && abbrevDisplayName.length() > 0) {
             return abbrevDisplayName;
@@ -112,11 +122,11 @@ public class ExtendedPropositionDefinition implements Serializable {
         }
     }
 
-    public void setAbbreviatedDisplayName(String abbreviatedDisplayName) {
+    public final void setAbbreviatedDisplayName(String abbreviatedDisplayName) {
         this.abbreviatedDisplayName = abbreviatedDisplayName;
     }
 
-    public void setDisplayName(String displayName) {
+    public final void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 

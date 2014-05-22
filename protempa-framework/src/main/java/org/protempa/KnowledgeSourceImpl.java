@@ -19,27 +19,26 @@
  */
 package org.protempa;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.logging.Level;
 import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
-import org.protempa.backend.Backend;
 import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.query.And;
-
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.logging.Level;
 
 /**
  * A read-only "interface" to an externally-maintained knowledge base. The user
@@ -183,6 +182,28 @@ public final class KnowledgeSourceImpl
         }
     }
 
+    @Override
+    public Set<String> collectSubtrees(String... propIds) throws KnowledgeSourceReadException {
+        if (propIds == null) {
+            throw new IllegalArgumentException("propIds cannot be null");
+        }
+        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
+        
+        Queue<String> queue = new LinkedList<>();
+        Arrays.addAll(queue, propIds);
+        Set<String> result = new HashSet<>();
+        Arrays.addAll(result, propIds);
+        String propId;
+        while ((propId = queue.poll()) != null) {
+            List<PropositionDefinition> propDefs = readInverseIsA(propId);
+            for (PropositionDefinition propDef : propDefs) {
+                result.add(propDef.getId());
+                queue.add(propDef.getId());
+            }
+        }
+        return result;
+    }
+    
     @Override
     public List<PropositionDefinition> readIsA(String id)
             throws KnowledgeSourceReadException {

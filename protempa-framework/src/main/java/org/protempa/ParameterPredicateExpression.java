@@ -29,8 +29,8 @@ import org.protempa.proposition.value.Value;
 class ParameterPredicateExpression implements PredicateExpression {
 
     private static final long serialVersionUID = -8276489182248585309L;
-    private String parameterId;
-    private Value value;
+    private final String parameterId;
+    private final Value value;
 
     ParameterPredicateExpression(String parameterId, Value value) {
         this.parameterId = parameterId;

@@ -19,8 +19,8 @@
  */
 package org.protempa;
 
+import java.util.Collection;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.value.Unit;
@@ -63,20 +63,10 @@ public class TemporalExtendedPropositionDefinition extends ExtendedPropositionDe
         this.maxLengthUnit = units;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.protempa.TemporalExtendedDefinition#getMinDurationTime()
-     */
     public Integer getMinLength() {
         return minLength;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.protempa.TemporalExtendedDefinition#getMinDurationUnits()
-     */
     public Unit getMinLengthUnit() {
         return minLengthUnit;
     }
@@ -96,14 +86,9 @@ public class TemporalExtendedPropositionDefinition extends ExtendedPropositionDe
         this.minLengthUnit = units;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.protempa.TemporalExtendedDefinition#getMatches(org.virginia.pbhs.parameters.Proposition)
-     */
     @Override
-    public boolean getMatches(Proposition proposition) {
-        if (!super.getMatches(proposition)) {
+    boolean getMatches(Proposition proposition, Collection<String> propIds) throws KnowledgeSourceReadException {
+        if (!super.getMatches(proposition, propIds)) {
             return false;
         }
 
@@ -125,11 +110,6 @@ public class TemporalExtendedPropositionDefinition extends ExtendedPropositionDe
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.protempa.TemporalExtendedDefinition#hasEqualFields(org.protempa.ExtendedPropositionDefinition)
-     */
     @Override
     public boolean hasEqualFields(ExtendedPropositionDefinition obj) {
         if (!super.hasEqualFields(obj)) {

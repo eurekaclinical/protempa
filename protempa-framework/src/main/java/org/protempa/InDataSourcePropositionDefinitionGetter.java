@@ -38,8 +38,7 @@ class InDataSourcePropositionDefinitionGetter {
 
     private KnowledgeSource knowledgeSource;
     private final Map<Set<String>, Set<String>> propIdInDataSourceCache;
-    private final Map<Set<String>, Set<PropositionDefinition>> 
-            propIdPropInDataSourceCache;
+    private final Map<Set<String>, Set<PropositionDefinition>> propIdPropInDataSourceCache;
 
     InDataSourcePropositionDefinitionGetter(
             KnowledgeSource knowledgeSource) {
@@ -49,7 +48,7 @@ class InDataSourcePropositionDefinitionGetter {
         this.propIdPropInDataSourceCache = new ReferenceMap<>();
 
     }
-    
+
     Set<String> inDataSourcePropositionIds(String... propIds)
             throws KnowledgeSourceReadException {
         Set<String> propIdsAsSet = Arrays.asSet(propIds);
@@ -69,7 +68,7 @@ class InDataSourcePropositionDefinitionGetter {
         this.propIdPropInDataSourceCache.clear();
 
     }
-    
+
     private Set<String> inDataSourcePropositionIds(Set<String> propIds,
             Map<Set<String>, Set<String>> cache)
             throws KnowledgeSourceReadException {
@@ -83,11 +82,9 @@ class InDataSourcePropositionDefinitionGetter {
             return cachedResult;
         } else {
             Set<String> result = new HashSet<>();
-            if (propIds != null) {
-                inDataSourcePropositionIdsHelper(propIds, result, null);
-                result = Collections.unmodifiableSet(result);
-                cache.put(propIds, result);
-            }
+            inDataSourcePropositionIdsHelper(propIds, result, null);
+            result = Collections.unmodifiableSet(result);
+            cache.put(propIds, result);
             return result;
         }
     }
@@ -105,8 +102,8 @@ class InDataSourcePropositionDefinitionGetter {
         if (cachedResult != null) {
             return cachedResult;
         } else {
-            Set<PropositionDefinition> propResult =
-                    new HashSet<>();
+            Set<PropositionDefinition> propResult
+                    = new HashSet<>();
             if (propIds != null) {
                 inDataSourcePropositionIdsHelper(propIds, null, propResult);
                 propResult = Collections.unmodifiableSet(propResult);
@@ -119,11 +116,11 @@ class InDataSourcePropositionDefinitionGetter {
     private void inDataSourcePropositionIdsHelper(Collection<String> propIds,
             Set<String> result, Set<PropositionDefinition> propResult)
             throws KnowledgeSourceReadException {
-        List<PropositionDefinition> propDefs =
-                new ArrayList<>();
+        List<PropositionDefinition> propDefs
+                = new ArrayList<>();
         for (String propId : propIds) {
-            PropositionDefinition propDef = 
-                    this.knowledgeSource.readPropositionDefinition(propId);
+            PropositionDefinition propDef
+                    = this.knowledgeSource.readPropositionDefinition(propId);
             if (propDef != null) {
                 propDefs.add(propDef);
             }
@@ -137,17 +134,17 @@ class InDataSourcePropositionDefinitionGetter {
             throws KnowledgeSourceReadException {
         for (PropositionDefinition propDef : propDefs) {
             String propDefId = propDef.getId();
-            List<PropositionDefinition> children =
-                    new ArrayList<>();
+            List<PropositionDefinition> children
+                    = new ArrayList<>();
             if (propDef instanceof AbstractionDefinition) {
-                for (PropositionDefinition ad : 
-                        this.knowledgeSource.readAbstractedFrom(
-                        (AbstractionDefinition) propDef)) {
+                for (PropositionDefinition ad
+                        : this.knowledgeSource.readAbstractedFrom(
+                                (AbstractionDefinition) propDef)) {
                     children.add(ad);
                 }
             }
-            for (PropositionDefinition propId : 
-                    this.knowledgeSource.readInverseIsA(propDef)) {
+            for (PropositionDefinition propId
+                    : this.knowledgeSource.readInverseIsA(propDef)) {
                 children.add(propId);
             }
 

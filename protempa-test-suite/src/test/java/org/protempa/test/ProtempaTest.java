@@ -349,6 +349,7 @@ public class ProtempaTest {
                     = new SingleColumnDestination(fw);
             protempa.execute(query(), destination);
         }
+        System.out.println("OUTPUT: " + FileUtils.readFileToString(outputFile));
         boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);
         assertTrue("output doesn't match", outputMatches);
 
@@ -799,8 +800,6 @@ public class ProtempaTest {
                 assertLdhTrendDerived(results);
                 assertAstStateDerived(results);
                 assertFirstHellpRecoveringSliceDerived(results);
-                assertMyDiagnosisDerived(results);
-                assertMyLabTestDerived(results);
                 assertOrLikePatternDerived(results);
                 assertCompoundBloodPressureHighAllDerived(results);
                 assertConsecutiveCompoundBloodPressureAnyDerived(results);
@@ -1088,23 +1087,9 @@ public class ProtempaTest {
         Map<Proposition, List<Proposition>> no30DayDerivations = getDerivedPropositionsForKey(
                 "No30DayReadmission", afh.getBackwardDerivations("0"));
         assertEquals(
-                "Found wrong number of 'No30DayReadmissions' for key ID 0", 4,
+                "Found wrong number of 'No30DayReadmissions' for key ID 0", 0,
                 no30DayDerivations.size());
         logger.log(Level.INFO, "Completed No30DayReadmissions test");
-    }
-
-    private void assertMyDiagnosisDerived(
-            DataStore<String, WorkingMemory> derivedData) {
-        boolean myDiagnosisDerived = false;
-        for (Iterator<Proposition> it = derivedData.get("1").iterateObjects(); it
-                .hasNext();) {
-            Proposition p = it.next();
-            if (p.getId().equals("MyDiagnosis")) {
-                myDiagnosisDerived = true;
-                break;
-            }
-        }
-        assertTrue("Proposition 'MyDiagnosis' not found", myDiagnosisDerived);
     }
 
     private void assertOrLikePatternDerived(
@@ -1127,38 +1112,17 @@ public class ProtempaTest {
         }
     }
 
-    private void assertMyLabTestDerived(
-            DataStore<String, WorkingMemory> derivedData) {
-        boolean myLabTestDerived = false;
-        for (Iterator<Proposition> it = derivedData.get("3").iterateObjects(); it
-                .hasNext();) {
-            Proposition p = it.next();
-            if (p.getId().equals("MyVitalSign")) {
-                myLabTestDerived = true;
-                break;
-            }
-        }
-        assertTrue("Proposition 'MyVitalSign' not found", myLabTestDerived);
-    }
-
-    private void assertMyBloodPressureDerived(
-            DataStore<String, WorkingMemory> derivedData) {
-    }
-
     private void assertChildIcd9Derived(
             DataStore<String, WorkingMemory> derivedData,
             AbstractionFinderTestHelper afh) {
         logger.log(Level.INFO, "Running ICD9 test...");
         boolean icd9d01382Derived = false;
-        boolean icd9d804Derived = false;
 
         for (@SuppressWarnings("unchecked") Iterator<Proposition> it = derivedData.get("0").iterateObjects(); it
                 .hasNext();) {
             Proposition p = it.next();
             if (p.getId().equals(ICD9_013_82)) {
                 icd9d01382Derived = true;
-            } else if (p.getId().equals(ICD9_804)) {
-                icd9d804Derived = true;
             }
 
         }
@@ -1178,62 +1142,7 @@ public class ProtempaTest {
                 0,
                 getDerivedPropositionsForKey(ICD9_013_82,
                         afh.getBackwardDerivations("0")).size());
-        assertTrue("Proposition '" + ICD9_804 + "' not found", icd9d804Derived);
-
-        // matched at higher level - should be derivations
-        String[] icd9Levels = new String[]{"ICD9:804", "ICD9:804.3",
-            "ICD9:804.34"};
-        Set<String> expectedForwardDerivationsLevel0 = Arrays
-                .asSet(new String[]{});
-        Set<String> expectedBackwardDerivationsLevel0 = Arrays
-                .asSet(new String[]{icd9Levels[1]});
-        Set<String> expectedForwardDerivationsLevel1 = Arrays
-                .asSet(new String[]{icd9Levels[0]});
-        Set<String> expectedBackwardDerivationsLevel1 = Arrays
-                .asSet(new String[]{icd9Levels[2]});
-        Set<String> expectedForwardDerivationsLevel2 = Arrays
-                .asSet(new String[]{icd9Levels[1]});
-        Set<String> expectedBackwardDerivationsLevel2 = Arrays
-                .asSet(new String[]{});
-        Map<String, Set<String>> expectedForwardDerivations = new HashMap<>();
-        expectedForwardDerivations.put(icd9Levels[0],
-                expectedForwardDerivationsLevel0);
-        expectedForwardDerivations.put(icd9Levels[1],
-                expectedForwardDerivationsLevel1);
-        expectedForwardDerivations.put(icd9Levels[2],
-                expectedForwardDerivationsLevel2);
-        Map<String, Set<String>> expectedBackwardDerivations = new HashMap<>();
-        expectedBackwardDerivations.put(icd9Levels[0],
-                expectedBackwardDerivationsLevel0);
-        expectedBackwardDerivations.put(icd9Levels[1],
-                expectedBackwardDerivationsLevel1);
-        expectedBackwardDerivations.put(icd9Levels[2],
-                expectedBackwardDerivationsLevel2);
-
-        for (String icd9Code : icd9Levels) {
-            Set<String> foundForwardDerivations = new HashSet<>();
-            Set<String> foundBackwardDerivations = new HashSet<>();
-            for (Entry<Proposition, List<Proposition>> p : getDerivedPropositionsForKey(
-                    icd9Code, afh.getForwardDerivations("0")).entrySet()) {
-                for (Proposition p2 : p.getValue()) {
-                    foundForwardDerivations.add(p2.getId());
-                }
-            }
-            for (Entry<Proposition, List<Proposition>> p : getDerivedPropositionsForKey(
-                    icd9Code, afh.getBackwardDerivations("0")).entrySet()) {
-                for (Proposition p2 : p.getValue()) {
-                    foundBackwardDerivations.add(p2.getId());
-                }
-            }
-
-            assertEquals("Wrong forward derivations found for proposition '"
-                    + icd9Code + "'", expectedForwardDerivations.get(icd9Code),
-                    foundForwardDerivations);
-            assertEquals("Wrong backward derivations found for proposition '"
-                    + icd9Code + "'",
-                    expectedBackwardDerivations.get(icd9Code),
-                    foundBackwardDerivations);
-        }
+        
         logger.log(Level.INFO, "Completed ICD9 test");
     }
 

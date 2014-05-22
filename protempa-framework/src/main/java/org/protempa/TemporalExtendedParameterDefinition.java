@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import java.util.Collection;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalParameter;
@@ -57,8 +58,8 @@ public class TemporalExtendedParameterDefinition extends TemporalExtendedProposi
      * is <code>null</code>.
      */
     @Override
-    public boolean getMatches(Proposition proposition) {
-        if (!super.getMatches(proposition)) {
+    boolean getMatches(Proposition proposition, Collection<String> propIds) throws KnowledgeSourceReadException {
+        if (!super.getMatches(proposition, propIds)) {
             return false;
         }
 

@@ -23,9 +23,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import org.arp.javautil.arrays.Arrays;
 
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
@@ -477,6 +480,28 @@ class KnowledgeSourceImplWrapper
         } else {
             return Collections.emptyList();
         }
+    }
+    
+    @Override
+    public Set<String> collectSubtrees(String... propIds) throws KnowledgeSourceReadException {
+        if (propIds == null) {
+            throw new IllegalArgumentException("propIds cannot be null");
+        }
+        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
+        
+        Queue<String> queue = new LinkedList<>();
+        Arrays.addAll(queue, propIds);
+        Set<String> result = new HashSet<>();
+        Arrays.addAll(result, propIds);
+        String propId;
+        while ((propId = queue.poll()) != null) {
+            List<PropositionDefinition> propDefs = readInverseIsA(propId);
+            for (PropositionDefinition propDef : propDefs) {
+                result.add(propDef.getId());
+                queue.add(propDef.getId());
+            }
+        }
+        return result;
     }
 
     @Override

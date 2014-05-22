@@ -78,11 +78,11 @@ final class SingleColumnQueryResultsHandler
                 }
                 Collections.sort(sortedProps, new PropositionWithDerivationsComparator());
                 for (PropositionWithDerivations pwd : sortedProps) {
-                    writeLine(pwd.getProposition().getId());
+                    writeLine("PROPOSITION " + pwd.getProposition().getId());
                     List<Proposition> sortedDerivations = new ArrayList<>(pwd.getDerivations());
                     Collections.sort(sortedDerivations, new PropositionComparator());
                     for (Proposition d : sortedDerivations) {
-                        writeLine(d.getId());
+                        writeLine("DERIVATION " + d.getId());
                     }
                 }
             }

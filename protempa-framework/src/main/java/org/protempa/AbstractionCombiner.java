@@ -20,32 +20,16 @@
 package org.protempa;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.drools.WorkingMemory;
 import org.drools.base.ClassObjectType;
 import org.drools.base.SalienceInteger;
-import org.drools.common.InternalFactHandle;
-import org.drools.rule.Declaration;
 import org.drools.rule.EvalCondition;
 import org.drools.rule.InvalidRuleException;
 import org.drools.rule.Pattern;
 import org.drools.rule.PredicateConstraint;
 import org.drools.rule.Rule;
-import org.drools.spi.Consequence;
 import org.drools.spi.Constraint;
-import org.drools.spi.EvalExpression;
-import org.drools.spi.KnowledgeHelper;
-import org.drools.spi.Tuple;
 import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.DerivedSourceId;
-import org.protempa.proposition.DerivedUniqueId;
-import org.protempa.proposition.Proposition;
-import org.protempa.proposition.Segment;
-import org.protempa.proposition.Sequence;
-import org.protempa.proposition.UniqueId;
 
 /**
  * Represents rules that combine two abstract parameters with 1) the same

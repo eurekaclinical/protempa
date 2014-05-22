@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import java.util.Collections;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.NumberValue;
 
@@ -63,15 +64,15 @@ public class TemporalExtendedParameterMaxDurationTest extends TestCase {
         this.def1 = null;
     }
 
-    public void testDoesBarelyMatchMinDuration12Hours() {
-        assertTrue(this.def1.getMatches(ExtendedParameterDurationTestParameters.twelveHourParameter()));
+    public void testDoesBarelyMatchMinDuration12Hours() throws KnowledgeSourceReadException {
+        assertTrue(this.def1.getMatches(ExtendedParameterDurationTestParameters.twelveHourParameter(), Collections.singleton("TEST")));
     }
 
-    public void testDoesNotMatchMinDuration12Hours() {
-        assertFalse(this.def1.getMatches(ExtendedParameterDurationTestParameters.thirteenHourParameter()));
+    public void testDoesNotMatchMinDuration12Hours() throws KnowledgeSourceReadException {
+        assertFalse(this.def1.getMatches(ExtendedParameterDurationTestParameters.thirteenHourParameter(), Collections.singleton("TEST")));
     }
 
-    public void testDoesMatchMinDuration12Hours() {
-        assertTrue(this.def1.getMatches(ExtendedParameterDurationTestParameters.elevenHourParameter()));
+    public void testDoesMatchMinDuration12Hours() throws KnowledgeSourceReadException {
+        assertTrue(this.def1.getMatches(ExtendedParameterDurationTestParameters.elevenHourParameter(), Collections.singleton("TEST")));
     }
 }

@@ -514,7 +514,7 @@ class Util {
                     "Ontology does not have a propertyConstraints slot, skipping for extended proposition definition {0}",
                     result.getDisplayName());
         } else {
-            result.getPropertyConstraints().addAll(
+            result.setPropertyConstraints(
                     instanceToPropertyConstraints(
                     cm.getOwnSlotValues(extendedProposition,
                     cm.getSlot("propertyConstraints")), backend));
@@ -522,12 +522,12 @@ class Util {
         return result;
     }
 
-    static Set<PropertyConstraint> instanceToPropertyConstraints(
+    private static PropertyConstraint[] instanceToPropertyConstraints(
             @SuppressWarnings("rawtypes") Collection propertyConstraints,
             ProtegeKnowledgeSourceBackend backend)
             throws KnowledgeSourceReadException {
-        Set<PropertyConstraint> result = new HashSet<>();
-
+        PropertyConstraint[] result = new PropertyConstraint[propertyConstraints.size()];
+        int i = 0;
         ConnectionManager cm = backend.getConnectionManager();
         for (Object o : propertyConstraints) {
             Instance pci = (Instance) o;
@@ -539,7 +539,7 @@ class Util {
                     .getOwnSlotValue(pci, cm.getSlot("valComp"))));
             pc.setValue(ValueType.VALUE.parse((String) cm.getOwnSlotValue(pci,
                     cm.getSlot("value"))));
-            result.add(pc);
+            result[i++] = pc;
         }
 
         return result;

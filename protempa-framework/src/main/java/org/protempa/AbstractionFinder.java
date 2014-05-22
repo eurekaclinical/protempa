@@ -19,6 +19,16 @@
  */
 package org.protempa;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Iterators;
@@ -29,28 +39,18 @@ import org.drools.WorkingMemory;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.datastore.PropositionStoreCreator;
 import org.protempa.datastore.WorkingMemoryStoreCreator;
+import org.protempa.dest.Destination;
+import org.protempa.dest.QueryResultsHandler;
+import org.protempa.dest.QueryResultsHandlerCloseException;
+import org.protempa.dest.QueryResultsHandlerInitException;
+import org.protempa.dest.QueryResultsHandlerProcessingException;
+import org.protempa.dest.QueryResultsHandlerValidationFailedException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.And;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
-import org.protempa.dest.QueryResultsHandler;
-import org.protempa.dest.QueryResultsHandlerCloseException;
-import org.protempa.dest.QueryResultsHandlerInitException;
-import org.protempa.dest.QueryResultsHandlerProcessingException;
-import org.protempa.dest.QueryResultsHandlerValidationFailedException;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.protempa.dest.Destination;
 
 /**
  * Class that actually does the abstraction finding.
@@ -540,25 +540,26 @@ final class AbstractionFinder {
                 log(Level.FINER, "References for query {0}: {1}",
                         new Object[]{getQuery().getId(), refs});
             }
-            List<Proposition> filteredPropositions = // a newly created list
-                    extractRequestedPropositions(propositions,
-                            propositionIds, refs);
-            if (isLoggable(Level.FINER)) {
-                String queryId = getQuery().getId();
-                log(Level.FINER, "Proposition ids for query {0}: {1}",
-                        new Object[]{queryId, propositionIds});
-                log(Level.FINER, "Filtered propositions for query {0}: {1}",
-                        new Object[]{queryId, filteredPropositions});
-                log(Level.FINER, "Forward derivations for query {0}: {1}",
-                        new Object[]{queryId, forwardDerivations});
-                log(Level.FINER, "Backward derivations for query {0}: {1}",
-                        new Object[]{queryId, backwardDerivations});
-            }
             try {
+                List<Proposition> filteredPropositions = extractRequestedPropositions(propositions,
+                            knowledgeSource.collectSubtrees(propositionIds.toArray(new String[propositionIds.size()])), refs);
+                if (isLoggable(Level.FINER)) {
+                    String queryId = getQuery().getId();
+                    log(Level.FINER, "Proposition ids for query {0}: {1}",
+                            new Object[]{queryId, propositionIds});
+                    log(Level.FINER, "Filtered propositions for query {0}: {1}",
+                            new Object[]{queryId, filteredPropositions});
+                    log(Level.FINER, "Forward derivations for query {0}: {1}",
+                            new Object[]{queryId, forwardDerivations});
+                    log(Level.FINER, "Backward derivations for query {0}: {1}",
+                            new Object[]{queryId, backwardDerivations});
+                }
                 this.resultsHandler.handleQueryResult(keyId,
                         filteredPropositions,
                         forwardDerivations, backwardDerivations, refs);
             } catch (QueryResultsHandlerProcessingException ex) {
+                throw new FinderException(getQuery().getId(), ex);
+            } catch (KnowledgeSourceReadException ex) {
                 throw new FinderException(getQuery().getId(), ex);
             }
         }

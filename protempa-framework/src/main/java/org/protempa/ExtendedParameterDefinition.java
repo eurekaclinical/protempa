@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import java.util.Collection;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.Value;
@@ -26,75 +27,74 @@ import org.protempa.proposition.value.Value;
 /**
  * Represents an instance of an abstraction definition with optional constraints
  * on the instance's duration.
- * 
+ *
  * @author Andrew Post
  */
 public class ExtendedParameterDefinition extends ExtendedPropositionDefinition {
-	
-	private static final long serialVersionUID = -3587086756622794815L;
 
-	private Value value;
+    private static final long serialVersionUID = -3587086756622794815L;
 
-	public ExtendedParameterDefinition(String parameterId) {
-		super(parameterId);
-	}
+    private Value value;
 
-	public Value getValue() {
-		return value;
-	}
+    public ExtendedParameterDefinition(String parameterId) {
+        super(parameterId);
+    }
 
-	/**
-	 * Returns whether a parameter has the same id and value, and consistent
-	 * duration as specified by this extended parameter definition.
-	 * 
-	 * @param parameter
-	 *            a <code>Parameter</code>
-	 * @return <code>true</code> if <code>parameter</code> has the same id
-	 *         and value, and consistent duration as specified by this extended
-	 *         parameter definition, or <code>false</code> if not, or if
-	 *         <code>parameter</code> is <code>null</code>.
-	 */
-	@Override
-	public boolean getMatches(Proposition proposition) {
-		if (!super.getMatches(proposition)) {
-			return false;
-		}
+    public Value getValue() {
+        return value;
+    }
 
-		if (!(proposition instanceof Parameter)) {
-			return false;
-		}
+    /**
+     * Returns whether a parameter has the same id and value, and consistent
+     * duration as specified by this extended parameter definition.
+     *
+     * @param parameter a <code>Parameter</code>
+     * @return <code>true</code> if <code>parameter</code> has the same id and
+     * value, and consistent duration as specified by this extended parameter
+     * definition, or <code>false</code> if not, or if <code>parameter</code> is
+     * <code>null</code>.
+     */
+    @Override
+    boolean getMatches(Proposition proposition, Collection<String> propIds) throws KnowledgeSourceReadException {
+        if (!super.getMatches(proposition, propIds)) {
+            return false;
+        }
 
-		if (this.value != null) {
-			Value pValue = ((Parameter) proposition).getValue();
-			if (this.value != pValue && !this.value.equals(pValue)) {
-				return false;
-			}
-		}
+        if (!(proposition instanceof Parameter)) {
+            return false;
+        }
 
-		return true;
-	}
+        if (this.value != null) {
+            Value pValue = ((Parameter) proposition).getValue();
+            if (this.value != pValue && !this.value.equals(pValue)) {
+                return false;
+            }
+        }
 
-	public void setValue(Value value) {
-		this.value = value;
-	}
+        return true;
+    }
 
-	@Override
-	public boolean hasEqualFields(ExtendedPropositionDefinition obj) {
-		if (!super.hasEqualFields(obj)) {
-			return false;
-		}
+    public void setValue(Value value) {
+        this.value = value;
+    }
 
-		if (!(obj instanceof ExtendedParameterDefinition)) {
-			return false;
-		}
+    @Override
+    public boolean hasEqualFields(ExtendedPropositionDefinition obj) {
+        if (!super.hasEqualFields(obj)) {
+            return false;
+        }
 
-		ExtendedParameterDefinition other = (ExtendedParameterDefinition) obj;
-		return (value == other.value || value.equals(other.value));
-	}
+        if (!(obj instanceof ExtendedParameterDefinition)) {
+            return false;
+        }
 
-	@Override
-	public String toString() {
-		return "Extended parameter: " + this.getPropositionId() + "; " + value;
-	}
+        ExtendedParameterDefinition other = (ExtendedParameterDefinition) obj;
+        return (value == other.value || value.equals(other.value));
+    }
+
+    @Override
+    public String toString() {
+        return "Extended parameter: " + this.getPropositionId() + "; " + value;
+    }
 
 }

@@ -19,15 +19,10 @@
  */
 package org.protempa;
 
-import java.util.UUID;
-
+import java.util.Collections;
 import junit.framework.TestCase;
-
 import org.protempa.proposition.AbstractParameter;
-import org.protempa.proposition.DerivedSourceId;
-import org.protempa.proposition.DerivedUniqueId;
 import org.protempa.proposition.interval.IntervalFactory;
-import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.NumberValue;
 
 /**
@@ -35,8 +30,8 @@ import org.protempa.proposition.value.NumberValue;
  */
 public class ExtendedParameterDefinitionValueTest extends TestCase {
 
-    private static final IntervalFactory intervalFactory =
-            new IntervalFactory();
+    private static final IntervalFactory intervalFactory
+            = new IntervalFactory();
     private LowLevelAbstractionDefinition llad;
 
     @Override
@@ -51,61 +46,61 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         llad = null;
     }
 
-    public void testMatches() {
+    public void testMatches() throws KnowledgeSourceReadException {
         ExtendedParameterDefinition completeDef = new ExtendedParameterDefinition(
                 llad.getId());
         completeDef.setAbbreviatedDisplayName("t");
         completeDef.setDisplayName("test");
         completeDef.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter("TEST");
+        AbstractParameter param = new AbstractParameter(llad.getId());
         param.setDataSourceType(DataSourceType.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
 
-        assertTrue(completeDef.getMatches(param));
+        assertTrue(completeDef.getMatches(param, Collections.singleton(llad.getId())));
     }
 
-    public void testDoesMatchValue() {
+    public void testDoesMatchValue() throws KnowledgeSourceReadException {
         ExtendedParameterDefinition completeDef = new ExtendedParameterDefinition(
                 llad.getId());
         completeDef.setAbbreviatedDisplayName("t");
         completeDef.setDisplayName("test");
         completeDef.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter("TEST");
+        AbstractParameter param = new AbstractParameter(llad.getId());
         param.setDataSourceType(DataSourceType.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
 
-        assertTrue(completeDef.getMatches(param));
+        assertTrue(completeDef.getMatches(param, Collections.singleton(llad.getId())));
     }
 
-    public void testDoesMatchNullValue() {
+    public void testDoesMatchNullValue() throws KnowledgeSourceReadException {
         ExtendedParameterDefinition nullValueDef = new ExtendedParameterDefinition(
                 llad.getId());
         nullValueDef.setAbbreviatedDisplayName("t");
         nullValueDef.setDisplayName("test");
 
-        AbstractParameter param = new AbstractParameter("TEST");
+        AbstractParameter param = new AbstractParameter(llad.getId());
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
         param.setDataSourceType(DataSourceType.DERIVED);
 
-        assertTrue(nullValueDef.getMatches(param));
+        assertTrue(nullValueDef.getMatches(param, Collections.singleton(llad.getId())));
     }
 
-    public void testDoesNotMatchOnValue() {
+    public void testDoesNotMatchOnValue() throws KnowledgeSourceReadException {
         ExtendedParameterDefinition def1 = new ExtendedParameterDefinition(llad.getId());
         def1.setAbbreviatedDisplayName("t");
         def1.setDisplayName("test");
         def1.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter("TEST");
+        AbstractParameter param = new AbstractParameter(llad.getId());
         param.setDataSourceType(DataSourceType.DERIVED);
         param.setValue(new NumberValue(12));
         param.setInterval(intervalFactory.getInstance());
 
-        assertFalse(def1.getMatches(param));
+        assertFalse(def1.getMatches(param, Collections.singleton(llad.getId())));
     }
 }

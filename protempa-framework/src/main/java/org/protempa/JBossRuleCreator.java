@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
-import org.arp.javautil.collections.Collections;
 
 import org.drools.WorkingMemory;
 import org.drools.base.ClassObjectType;
@@ -61,8 +60,7 @@ import org.protempa.proposition.TemporalProposition;
  * }
  * method with this instance. The abstraction finder then calls
  * {@link #getRules()} to retrieve the rules thus created. Turn on logging at
- * the
- * <code>FINER</code> level to see what rules get created during PROTEMPA
+ * the <code>FINER</code> level to see what rules get created during PROTEMPA
  * execution.
  *
  * @author Andrew Post
@@ -76,8 +74,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             ArrayList.class);
     private static final ClassObjectType TEMP_PROP_OT = new ClassObjectType(
             TemporalProposition.class);
-    private static final ClassObjectType ABSTRACT_PARAM_OT =
-            new ClassObjectType(AbstractParameter.class);
+    private static final ClassObjectType ABSTRACT_PARAM_OT
+            = new ClassObjectType(AbstractParameter.class);
     private static final ClassObjectType PROP_OT = new ClassObjectType(
             Proposition.class);
     private static final ClassObjectType CONTEXT_OT = new ClassObjectType(
@@ -98,15 +96,18 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     private final Map<String, List<String>> inverseIsAPropIdMap;
     private int inverseIsAIndex = -1;
     private boolean getRulesCalled;
+    private final KnowledgeSource knowledgeSource;
 
     JBossRuleCreator(Map<LowLevelAbstractionDefinition, Algorithm> algorithms,
-            DerivationsBuilder derivationsBuilder) {
+            DerivationsBuilder derivationsBuilder, KnowledgeSource knowledgeSource) {
+        assert knowledgeSource != null : "knowledgeSource cannot be null";
         this.algorithms = algorithms;
         this.rules = new ArrayList<>();
-        this.ruleToAbstractionDefinition =
-                new HashMap<>();
+        this.ruleToAbstractionDefinition
+                = new HashMap<>();
         this.derivationsBuilder = derivationsBuilder;
         this.inverseIsAPropIdMap = new HashMap<>();
+        this.knowledgeSource = knowledgeSource;
     }
 
     /**
@@ -136,12 +137,12 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 for (int i = 0; i < tepds.length; i++) {
                     Pattern sourceP = new Pattern(i, TEMP_PROP_OT);
                     sourceP.addConstraint(new PredicateConstraint(
-                            new GetMatchesPredicateExpression(tepds[i])));
+                            new GetMatchesPredicateExpression(tepds[i], this.knowledgeSource)));
                     inducedByRule.addPattern(sourceP);
                 }
                 inducedByRule.setConsequence(
                         new ContextDefinitionInducedByConsequence(def,
-                        this.derivationsBuilder));
+                                this.derivationsBuilder));
                 inducedByRule.setSalience(MINUS_THREE_SALIENCE);
                 this.rules.add(inducedByRule);
                 this.ruleToAbstractionDefinition.put(inducedByRule, def);
@@ -181,9 +182,12 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             if (!def.getValueDefinitions().isEmpty()) {
                 Rule rule = new Rule(def.getId());
                 Pattern sourceP = new Pattern(2, 1, PRIM_PARAM_OT, "");
+                Set<String> abstractedFrom = def.getAbstractedFrom();
+                String[] abstractedFromArr = 
+                        abstractedFrom.toArray(new String[abstractedFrom.size()]);
+                Set<String> subtrees = this.knowledgeSource.collectSubtrees(abstractedFromArr);
                 sourceP.addConstraint(new PredicateConstraint(
-                        new PropositionPredicateExpression(def
-                        .getAbstractedFrom())));
+                        new PropositionPredicateExpression(subtrees)));
                 Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
                 resultP.setSource(new Collect(sourceP, new Pattern(1, 1,
                         ARRAY_LIST_OT, "result")));
@@ -219,26 +223,29 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     }
 
     @Override
-    public void visit(CompoundLowLevelAbstractionDefinition def) {
+    public void visit(CompoundLowLevelAbstractionDefinition def) throws KnowledgeSourceReadException {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
             if (!def.getLowLevelAbstractionIds().isEmpty()) {
                 Rule rule = new Rule(def.getId());
                 Pattern sourceP = new Pattern(2, 1, ABSTRACT_PARAM_OT, "");
+                Set<String> abstractedFrom = def.getAbstractedFrom();
+                String[] abstractedFromArr = 
+                        abstractedFrom.toArray(new String[abstractedFrom.size()]);
+                Set<String> subtrees = this.knowledgeSource.collectSubtrees(abstractedFromArr);
                 sourceP.addConstraint(new PredicateConstraint(
-                        new AbstractParameterPredicateExpression(def
-                        .getAbstractedFrom(), def.getContextId())));
+                        new AbstractParameterPredicateExpression(subtrees, def.getContextId())));
                 Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
                 resultP.setSource(new Collect(sourceP,
                         new Pattern(1, 1, ARRAY_LIST_OT, "result")));
                 resultP.addConstraint(
                         new PredicateConstraint(
-                        new CollectionSizeExpression(1)));
+                                new CollectionSizeExpression(1)));
                 rule.addPattern(resultP);
                 rule.setConsequence(
                         new CompoundLowLevelAbstractionConsequence(def,
-                        this.derivationsBuilder));
+                                this.derivationsBuilder));
                 rule.setSalience(ONE_SALIENCE);
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
@@ -256,18 +263,24 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             PredicateExpression {
 
         private static final long serialVersionUID = -6225160728904051528L;
-        private ExtendedPropositionDefinition epd;
+        private final ExtendedPropositionDefinition epd;
+        private final Set<String> subtrees;
 
-        private GetMatchesPredicateExpression(ExtendedPropositionDefinition epd) {
+        private GetMatchesPredicateExpression(ExtendedPropositionDefinition epd, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
             assert epd != null : "epd cannot be null";
             this.epd = epd;
+            this.subtrees = knowledgeSource.collectSubtrees(epd.getPropositionId());
+        }
+
+        Set<String> getSubtrees() {
+            return subtrees;
         }
 
         @Override
         public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
                 Declaration[] arg3, WorkingMemory arg4, Object context)
                 throws Exception {
-            return epd.getMatches((Proposition) arg0);
+            return epd.getMatches((Proposition) arg0, subtrees);
         }
 
         @Override
@@ -285,7 +298,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * knowledge source during rule creation.
      */
     @Override
-    public void visit(HighLevelAbstractionDefinition def) {
+    public void visit(HighLevelAbstractionDefinition def) throws KnowledgeSourceReadException {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
@@ -302,10 +315,13 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 rule.setSalience(TWO_SALIENCE);
                 ExtendedPropositionDefinition[] epds = epdsC
                         .toArray(new ExtendedPropositionDefinition[epdsC.size()]);
+                Set<String> propIds = new HashSet<>();
                 for (int i = 0; i < epds.length; i++) {
                     Pattern p = new Pattern(i, PROP_OT);
+                    GetMatchesPredicateExpression matchesPredicateExpression = new GetMatchesPredicateExpression(epds[i], this.knowledgeSource);
+                    propIds.addAll(matchesPredicateExpression.getSubtrees());
                     Constraint c = new PredicateConstraint(
-                            new GetMatchesPredicateExpression(epds[i]));
+                            matchesPredicateExpression);
                     p.addConstraint(c);
                     rule.addPattern(p);
                 }
@@ -333,7 +349,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * knowledge source during rule creation.
      */
     @Override
-    public void visit(SliceDefinition def) {
+    public void visit(SliceDefinition def) throws KnowledgeSourceReadException {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
@@ -346,9 +362,9 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
                 Pattern sourceP = new Pattern(2, 1, TEMP_PROP_OT, "");
                 for (int i = 0; i < epds.length; i++) {
-                    Constraint c =
-                            new PredicateConstraint(
-                            new GetMatchesPredicateExpression(epds[i]));
+                    GetMatchesPredicateExpression matchesPredicateExpression = new GetMatchesPredicateExpression(epds[i], this.knowledgeSource);
+                    Constraint c = new PredicateConstraint(
+                            matchesPredicateExpression);
                     sourceP.addConstraint(c);
                 }
 
@@ -395,16 +411,17 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             if (lhs != null) {
                 Rule rule = new Rule("SEQ_TP_" + def.getId());
                 Pattern sourceP = new Pattern(2, TEMP_PROP_OT);
-
+                GetMatchesPredicateExpression matchesPredicateExpression = new GetMatchesPredicateExpression(lhs, this.knowledgeSource);
                 sourceP.addConstraint(new PredicateConstraint(
-                        new GetMatchesPredicateExpression(lhs)));
+                        matchesPredicateExpression));
                 SubsequentTemporalExtendedPropositionDefinition[] relatedTemporalExtendedPropositionDefinitions = def.getSubsequentTemporalExtendedPropositionDefinitions();
                 for (int i = 0; i < relatedTemporalExtendedPropositionDefinitions.length; i++) {
-                    SubsequentTemporalExtendedPropositionDefinition rtepd = 
-                            relatedTemporalExtendedPropositionDefinitions[i];
+                    SubsequentTemporalExtendedPropositionDefinition rtepd
+                            = relatedTemporalExtendedPropositionDefinitions[i];
+                    GetMatchesPredicateExpression matchesPredicateExpression1 = new GetMatchesPredicateExpression(
+                            rtepd.getRelatedTemporalExtendedPropositionDefinition(), this.knowledgeSource);
                     Constraint c = new PredicateConstraint(
-                            new GetMatchesPredicateExpression(
-                            rtepd.getRelatedTemporalExtendedPropositionDefinition()));
+                            matchesPredicateExpression1);
                     sourceP.addConstraint(c);
                 }
 
@@ -422,7 +439,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 new AbstractionCombiner()
                         .toRules(def, rules, this.derivationsBuilder);
             }
-            
+
             addInverseIsARule(def);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
@@ -507,10 +524,10 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * @param def a {@link PropositionDefinition}.
      */
     private void addInverseIsARule(PropositionDefinition def) {
-        String[] inverseIsA = def.getInverseIsA();
-        for (String propId : inverseIsA) {
-            Collections.putList(this.inverseIsAPropIdMap, propId, def.getId());
-        }
+//        String[] inverseIsA = def.getInverseIsA();
+//        for (String propId : inverseIsA) {
+//            Collections.putList(this.inverseIsAPropIdMap, propId, def.getId());
+//        }
     }
 
     /**
@@ -520,30 +537,30 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * rule for each inverseIsA relationship in the knowledge source.
      */
     private void constructInverseIsARule() {
-        Logger logger = ProtempaUtil.logger();
-        if (this.inverseIsAIndex > -1) {
-            this.rules.remove(this.inverseIsAIndex);
-            this.inverseIsAIndex = -1;
-        }
-        if (!this.inverseIsAPropIdMap.isEmpty()) {
-            if (logger.isLoggable(Level.FINER)) {
-                logCreatingInverseIsA(logger);
-            }
-            Constraint c = new PredicateConstraint(
-                    new PropositionPredicateExpression(
-                    this.inverseIsAPropIdMap.keySet()));
-            Pattern p = new Pattern(0, PROP_OT);
-            p.addConstraint(c);
-            Rule rule = new Rule("INVERSEISA_GLOBAL");
-            rule.addPattern(p);
-            rule.setConsequence(new InverseIsAConsequence(
-                    this.inverseIsAPropIdMap, this.derivationsBuilder));
-            rule.setSalience(ZERO_SALIENCE);
-            this.inverseIsAIndex = rules.size();
-            rules.add(rule);
-        } else {
-            logger.log(Level.FINER, "No inverseIsA rule created");
-        }
+//        Logger logger = ProtempaUtil.logger();
+//        if (this.inverseIsAIndex > -1) {
+//            this.rules.remove(this.inverseIsAIndex);
+//            this.inverseIsAIndex = -1;
+//        }
+//        if (!this.inverseIsAPropIdMap.isEmpty()) {
+//            if (logger.isLoggable(Level.FINER)) {
+//                logCreatingInverseIsA(logger);
+//            }
+//            Constraint c = new PredicateConstraint(
+//                    new PropositionPredicateExpression(
+//                    this.inverseIsAPropIdMap.keySet()));
+//            Pattern p = new Pattern(0, PROP_OT);
+//            p.addConstraint(c);
+//            Rule rule = new Rule("INVERSEISA_GLOBAL");
+//            rule.addPattern(p);
+//            rule.setConsequence(new InverseIsAConsequence(
+//                    this.inverseIsAPropIdMap, this.derivationsBuilder));
+//            rule.setSalience(ZERO_SALIENCE);
+//            this.inverseIsAIndex = rules.size();
+//            rules.add(rule);
+//        } else {
+//            logger.log(Level.FINER, "No inverseIsA rule created");
+//        }
     }
 
     private void logCreatingInverseIsA(Logger logger) {

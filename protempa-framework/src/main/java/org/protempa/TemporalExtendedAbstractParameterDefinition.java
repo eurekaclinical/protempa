@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import java.util.Collection;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Proposition;
@@ -54,13 +55,13 @@ public class TemporalExtendedAbstractParameterDefinition
     }
 
     @Override
-    public boolean getMatches(Proposition proposition) {
+    boolean getMatches(Proposition proposition, Collection<String> propIds) throws KnowledgeSourceReadException {
         if (!(proposition instanceof AbstractParameter)) {
             return false;
         }
         AbstractParameter ap = (AbstractParameter) proposition;
         
-        if (!super.getMatches(proposition)) {
+        if (!super.getMatches(proposition, propIds)) {
             return false;
         }
         
