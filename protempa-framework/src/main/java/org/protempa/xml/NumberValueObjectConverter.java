@@ -27,6 +27,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.protempa.proposition.value.NumberValue;
 
 import java.math.BigDecimal;
+import org.protempa.KnowledgeSource;
 
 /**
  * Convert a NumberValue object to/from XML
@@ -36,8 +37,8 @@ import java.math.BigDecimal;
 class NumberValueObjectConverter extends AbstractConverter {
     private final BigDecimalConverter bdconv = new BigDecimalConverter();
 
-    public NumberValueObjectConverter() {
-        super();
+    NumberValueObjectConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
     }
 
     /**

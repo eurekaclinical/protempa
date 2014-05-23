@@ -24,15 +24,15 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.protempa.KnowledgeSource;
 import org.protempa.dest.table.AtLeastNColumnSpec;
 import org.protempa.dest.table.CountColumnSpec;
 import org.protempa.dest.table.DistanceBetweenColumnSpec;
 import org.protempa.dest.table.PropositionColumnSpec;
 import org.protempa.dest.table.PropositionValueColumnSpec;
 import org.protempa.dest.table.TableColumnSpec;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Convert {@link TableColumnSpec} array object to/from XML
@@ -51,8 +51,8 @@ class TableColumnSpecsConverter extends AbstractConverter {
     /**
      * Constructor
      */
-    public TableColumnSpecsConverter() {
-        super();
+    TableColumnSpecsConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
     }
 
     /**

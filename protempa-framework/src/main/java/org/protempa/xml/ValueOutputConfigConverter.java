@@ -23,6 +23,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.KnowledgeSource;
 import org.protempa.dest.table.ValueOutputConfig;
 
 /**
@@ -35,6 +36,10 @@ class ValueOutputConfigConverter extends AbstractConverter {
     private static final String SHOW_PROPERTY_VALUE_ABBREV_DISPLAY_NAME = "showPropertyValueAbbrevDisplayName";
     private static final String SHOW_PROPERTY_VALUE_DISPLAY_NAME = "showPropertyValueDisplayName";
 
+    ValueOutputConfigConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
+    
     /*
      * (non-Javadoc)
      *

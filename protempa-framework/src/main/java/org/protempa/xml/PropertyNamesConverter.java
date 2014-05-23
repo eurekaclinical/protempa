@@ -19,6 +19,8 @@
  */
 package org.protempa.xml;
 
+import org.protempa.KnowledgeSource;
+
 
 /**
  * @author mgrand
@@ -26,7 +28,7 @@ package org.protempa.xml;
 class PropertyNamesConverter extends StringArrayConverter {
     private static final String PROPERTY_NAME = "propertyName";
 
-    public PropertyNamesConverter() {
-        super(PROPERTY_NAME);
+    public PropertyNamesConverter(KnowledgeSource knowledgeSource) {
+        super(PROPERTY_NAME, knowledgeSource);
     }
 }

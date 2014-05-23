@@ -93,7 +93,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     private final List<Rule> rules;
     private final Map<Rule, TemporalPropositionDefinition> ruleToAbstractionDefinition;
     private final DerivationsBuilder derivationsBuilder;
-    private final Map<String, List<String>> inverseIsAPropIdMap;
     private int inverseIsAIndex = -1;
     private boolean getRulesCalled;
     private final KnowledgeSource knowledgeSource;
@@ -106,7 +105,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         this.ruleToAbstractionDefinition
                 = new HashMap<>();
         this.derivationsBuilder = derivationsBuilder;
-        this.inverseIsAPropIdMap = new HashMap<>();
         this.knowledgeSource = knowledgeSource;
     }
 
@@ -152,7 +150,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             if (ruleCreated) {
                 new ContextCombiner()
                         .toRules(def, rules, this.derivationsBuilder);
-                addInverseIsARule(def);
             }
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
@@ -215,7 +212,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
             }
-            addInverseIsARule(def);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -252,7 +248,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 new AbstractionCombiner()
                         .toRules(def, rules, this.derivationsBuilder);
             }
-            addInverseIsARule(def);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -334,7 +329,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 new AbstractionCombiner()
                         .toRules(def, rules, this.derivationsBuilder);
             }
-            addInverseIsARule(def);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -388,7 +382,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
             }
-            addInverseIsARule(def);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -439,8 +432,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 new AbstractionCombiner()
                         .toRules(def, rules, this.derivationsBuilder);
             }
-
-            addInverseIsARule(def);
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
@@ -457,12 +448,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(EventDefinition def) {
         this.getRulesCalled = false;
-        try {
-            addInverseIsARule(def);
-        } catch (InvalidRuleException e) {
-            throw new AssertionError(e.getClass().getName() + ": "
-                    + e.getMessage());
-        }
 
     }
 
@@ -476,12 +461,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(ConstantDefinition def) {
         this.getRulesCalled = false;
-        try {
-            addInverseIsARule(def);
-        } catch (InvalidRuleException e) {
-            throw new AssertionError(e.getClass().getName() + ": "
-                    + e.getMessage());
-        }
     }
 
     /**
@@ -495,12 +474,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(PrimitiveParameterDefinition def) {
         this.getRulesCalled = false;
-        try {
-            addInverseIsARule(def);
-        } catch (InvalidRuleException e) {
-            throw new AssertionError(e.getClass().getName() + ": "
-                    + e.getMessage());
-        }
     }
 
     /**
@@ -509,66 +482,8 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * @return a {@link Rule[]}. Guaranteed not <code>null</code>.
      */
     Rule[] getRules() {
-        if (!getRulesCalled) {
-            constructInverseIsARule();
-        }
         this.getRulesCalled = true;
         return this.rules.toArray(new Rule[this.rules.size()]);
     }
 
-    /**
-     * Populates a map of isA relationships between proposition ids. When
-     * {@link #getRules()} is called, this mapping is used to create a single
-     * Drools rule for deriving such propositions.
-     *
-     * @param def a {@link PropositionDefinition}.
-     */
-    private void addInverseIsARule(PropositionDefinition def) {
-//        String[] inverseIsA = def.getInverseIsA();
-//        for (String propId : inverseIsA) {
-//            Collections.putList(this.inverseIsAPropIdMap, propId, def.getId());
-//        }
-    }
-
-    /**
-     * Constructs a Drools rule for deriving propositions based on inverseIsA
-     * relationships. There is one rule that computes all such derived
-     * propositions, which performs much much better than creating a separate
-     * rule for each inverseIsA relationship in the knowledge source.
-     */
-    private void constructInverseIsARule() {
-//        Logger logger = ProtempaUtil.logger();
-//        if (this.inverseIsAIndex > -1) {
-//            this.rules.remove(this.inverseIsAIndex);
-//            this.inverseIsAIndex = -1;
-//        }
-//        if (!this.inverseIsAPropIdMap.isEmpty()) {
-//            if (logger.isLoggable(Level.FINER)) {
-//                logCreatingInverseIsA(logger);
-//            }
-//            Constraint c = new PredicateConstraint(
-//                    new PropositionPredicateExpression(
-//                    this.inverseIsAPropIdMap.keySet()));
-//            Pattern p = new Pattern(0, PROP_OT);
-//            p.addConstraint(c);
-//            Rule rule = new Rule("INVERSEISA_GLOBAL");
-//            rule.addPattern(p);
-//            rule.setConsequence(new InverseIsAConsequence(
-//                    this.inverseIsAPropIdMap, this.derivationsBuilder));
-//            rule.setSalience(ZERO_SALIENCE);
-//            this.inverseIsAIndex = rules.size();
-//            rules.add(rule);
-//        } else {
-//            logger.log(Level.FINER, "No inverseIsA rule created");
-//        }
-    }
-
-    private void logCreatingInverseIsA(Logger logger) {
-        Set<String> propIds = new HashSet<>();
-        for (List<String> pIds : this.inverseIsAPropIdMap.values()) {
-            propIds.addAll(pIds);
-        }
-        logger.log(Level.FINER, "Creating inverseIsA rule for {0}",
-                StringUtils.join(propIds, ", "));
-    }
 }

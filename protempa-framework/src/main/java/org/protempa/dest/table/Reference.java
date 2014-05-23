@@ -55,8 +55,8 @@ public final class Reference extends Link {
      * or <code>null</code> array specifies that all references should be
      * traversed.
      */
-    public Reference(String[] referenceNames) {
-        this(referenceNames, null);
+    public Reference(String[] referenceNames, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+        this(referenceNames, null, knowledgeSource);
     }
 
     /**
@@ -70,8 +70,9 @@ public final class Reference extends Link {
      * or <code>null</code> array specifies that all propositions on the
      * right-hand-side of the reference should be used.
      */
-    public Reference(String[] referenceNames, String[] propositionIds) {
-        this(referenceNames, propositionIds, null);
+    public Reference(String[] referenceNames, String[] propositionIds,
+            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+        this(referenceNames, propositionIds, null, knowledgeSource);
     }
 
     /**
@@ -90,8 +91,9 @@ public final class Reference extends Link {
      * null array specifies that no constraints should be applied.
      */
     public Reference(String[] referenceNames, String[] propositionIds,
-            PropertyConstraint[] constraints) {
-        this(referenceNames, propositionIds, constraints, null, -1, -1);
+            PropertyConstraint[] constraints, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+        this(referenceNames, propositionIds, constraints, null, -1, -1,
+                knowledgeSource);
     }
 
     /**
@@ -121,9 +123,10 @@ public final class Reference extends Link {
      */
     public Reference(String[] referenceNames, String[] propositionIds,
             PropertyConstraint[] constraints,
-            Comparator<Proposition> comparator, int index) {
+            Comparator<Proposition> comparator, int index,
+            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
         this(referenceNames, propositionIds, constraints, comparator, index,
-                index >= 0 ? index + 1 : -1);
+                index >= 0 ? index + 1 : -1, knowledgeSource);
     }
 
     /**
@@ -159,8 +162,10 @@ public final class Reference extends Link {
      */
     public Reference(String[] referenceNames, String[] propositionIds,
             PropertyConstraint[] constraints,
-            Comparator<Proposition> comparator, int fromIndex, int toIndex) {
-        super(propositionIds, constraints, comparator, fromIndex, toIndex);
+            Comparator<Proposition> comparator, int fromIndex, int toIndex,
+            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+        super(propositionIds, constraints, comparator, fromIndex, toIndex,
+                knowledgeSource);
         if (referenceNames != null) {
             ProtempaUtil.checkArrayForNullElement(referenceNames,
                     "referenceNames");
@@ -181,8 +186,8 @@ public final class Reference extends Link {
      * @param referenceName a reference name {@link String} A value of
      * <code>null</code> specifies that all references should be traversed.
      */
-    public Reference(String referenceName) {
-        this(referenceName, null);
+    public Reference(String referenceName, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+        this(referenceName, null, knowledgeSource);
     }
 
     /**
@@ -195,8 +200,9 @@ public final class Reference extends Link {
      * or <code>null</code> array specifies that all propositions on the
      * right-hand-side of the reference should be used.
      */
-    public Reference(String referenceName, String[] propositionIds) {
-        this(referenceName, propositionIds, null);
+    public Reference(String referenceName, String[] propositionIds,
+            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+        this(referenceName, propositionIds, null, knowledgeSource);
     }
 
     /**
@@ -214,8 +220,10 @@ public final class Reference extends Link {
      * null array specifies that no constraints should be applied.
      */
     public Reference(String referenceName, String[] propositionIds,
-            PropertyConstraint[] constraints) {
-        this(referenceName, propositionIds, constraints, null, -1, -1);
+            PropertyConstraint[] constraints, 
+            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+        this(referenceName, propositionIds, constraints, null, -1, -1, 
+                knowledgeSource);
     }
 
     /**
@@ -244,9 +252,10 @@ public final class Reference extends Link {
      */
     public Reference(String referenceName, String[] propositionIds,
             PropertyConstraint[] constraints,
-            Comparator<Proposition> comparator, int index) {
+            Comparator<Proposition> comparator, int index, 
+            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
         this(referenceName, propositionIds, constraints, comparator, index,
-                index >= 0 ? index + 1 : -1);
+                index >= 0 ? index + 1 : -1, knowledgeSource);
     }
 
     /**
@@ -279,8 +288,10 @@ public final class Reference extends Link {
      */
     public Reference(String referenceName, String[] propositionIds,
             PropertyConstraint[] constraints,
-            Comparator<Proposition> comparator, int fromIndex, int toIndex) {
-        super(propositionIds, constraints, comparator, fromIndex, toIndex);
+            Comparator<Proposition> comparator, int fromIndex, int toIndex,
+            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+        super(propositionIds, constraints, comparator, fromIndex, toIndex,
+                knowledgeSource);
         if (referenceName == null) {
             throw new IllegalArgumentException("referenceName cannot be null");
         }

@@ -23,6 +23,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.KnowledgeSource;
 import org.protempa.dest.table.Link;
 import org.protempa.dest.table.PropositionValueColumnSpec;
 import org.protempa.dest.table.PropositionValueColumnSpec.Type;
@@ -34,6 +35,10 @@ class PropositionValueColumnSpecConverter extends AbstractConverter {
     private static final String AGGREGATION_TYPE = "aggregationType";
     private static final String COLUMN_NAME_PREFIX_OVERRIDE = "columnNamePrefixOverride";
     private static final String LINKS = "links";
+
+    PropositionValueColumnSpecConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
 
     /*
      * (non-Javadoc)

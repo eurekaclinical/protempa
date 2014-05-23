@@ -81,7 +81,6 @@ import org.protempa.dest.table.TableDestination;
  * @author mgrand
  */
 public class XMLConfiguration implements QueryBuilder {
-    private static final TableColumnSpecsConverter TABLE_COLUMN_SPECS_CONVERTER = new TableColumnSpecsConverter();
 
     static final DateConverter STANDARD_DATE_CONVERTER = new DateConverter("yyyy-MM-dd'T'HH:mm:ss.S", new String[0], TimeZone.getDefault());
 
@@ -101,14 +100,14 @@ public class XMLConfiguration implements QueryBuilder {
         this.file = file;
     }
 
-    private static synchronized XStream getXStream() {
+    private static synchronized XStream getXStream(KnowledgeSource knowledgeSource) {
         XStream xstream = new XStream(new StaxDriver());
         xstream.setMode(XStream.NO_REFERENCES);
         xstream.registerConverter(STANDARD_DATE_CONVERTER, XStream.PRIORITY_VERY_HIGH);
 
         // booleanValue
         xstream.alias("booleanValue", BooleanValue.class);
-        xstream.registerConverter(new BooleanValueObjectConverter());
+        xstream.registerConverter(new BooleanValueObjectConverter(knowledgeSource));
 
         // comparator
         xstream.useAttributeFor(PropertyValueFilter.class, "valueComparator");
@@ -117,7 +116,7 @@ public class XMLConfiguration implements QueryBuilder {
 
         // dateTimeFilter
         xstream.alias("dateTimeFilter", DateTimeFilter.class);
-        xstream.registerConverter(new DateTimeFilterConverter());
+        xstream.registerConverter(new DateTimeFilterConverter(knowledgeSource));
 
         // dateValue
         xstream.alias("dateValue", DateValue.class);
@@ -129,7 +128,7 @@ public class XMLConfiguration implements QueryBuilder {
         // "and" field.
         xstream.omitField(AbstractFilter.class, "and");
         xstream.aliasField("propositionIDs", AbstractFilter.class, "propositionIds");
-        xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new PropIDsConverter());
+        xstream.registerLocalConverter(AbstractFilter.class, "propositionIds", new PropIDsConverter(knowledgeSource));
 
         // finish
         xstream.useAttributeFor(PositionFilter.class, "finish");
@@ -146,15 +145,15 @@ public class XMLConfiguration implements QueryBuilder {
 
         // incomparableNumberValue
         xstream.alias("incomparableNumberValue", InequalityNumberValue.class);
-        xstream.registerConverter(new InequalityValueObjectConverter());
+        xstream.registerConverter(new InequalityValueObjectConverter(knowledgeSource));
 
         // nominialValue
         xstream.alias("nominalValue", NominalValue.class);
-        xstream.registerConverter(new NominalValueObjectConverter());
+        xstream.registerConverter(new NominalValueObjectConverter(knowledgeSource));
 
         // numberValue
         xstream.alias("numberValue", NumberValue.class);
-        xstream.registerConverter(new NumberValueObjectConverter());
+        xstream.registerConverter(new NumberValueObjectConverter(knowledgeSource));
 
         // positionFilter
         xstream.omitField(PositionFilter.class, "ival");
@@ -183,13 +182,13 @@ public class XMLConfiguration implements QueryBuilder {
 
         // tableQueryResultsHandler
         xstream.alias("tableQueryResultsHandler", TableDestination.class);
-        xstream.registerConverter(new TableQueryResultsHandlerConverter());
+        xstream.registerConverter(new TableQueryResultsHandlerConverter(knowledgeSource));
 
         return xstream;
     }
 
     private static synchronized XStream getXStream(KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) {
-        XStream xstream = getXStream();
+        XStream xstream = getXStream(knowledgeSource);
         // protempaQuery
         xstream.alias("protempaQuery", Query.class);
         xstream.registerConverter(new QueryConverter(knowledgeSource, algorithmSource));
@@ -330,43 +329,43 @@ public class XMLConfiguration implements QueryBuilder {
 
     private static XStream tableQueryResultsHandlerXStream;
 
-    static XStream getTableQueryResultsHandlerXStream() {
+    static XStream getTableQueryResultsHandlerXStream(KnowledgeSource knowledgeSource) {
         if (tableQueryResultsHandlerXStream != null) {
             return tableQueryResultsHandlerXStream;
         }
-        XStream xstream = getXStream();
+        XStream xstream = getXStream(knowledgeSource);
 
-        xstream.registerLocalConverter(AbstractFilter.class, "rowPropositionIds", TABLE_COLUMN_SPECS_CONVERTER);
+        xstream.registerLocalConverter(AbstractFilter.class, "rowPropositionIds", new TableColumnSpecsConverter(knowledgeSource));
 
         xstream.alias("atLeastNColumnSpec", AtLeastNColumnSpec.class);
-        xstream.registerConverter(new AtLeastNColumnSpecConverter());
+        xstream.registerConverter(new AtLeastNColumnSpecConverter(knowledgeSource));
 
         xstream.alias("countColumnSpec", CountColumnSpec.class);
-        xstream.registerConverter(new CountColumnSpecConverter());
+        xstream.registerConverter(new CountColumnSpecConverter(knowledgeSource));
 
         xstream.alias("distanceBetweenColumnSpec", DistanceBetweenColumnSpec.class);
-        xstream.registerConverter(new DistanceBetweenColumnSpecConverter());
+        xstream.registerConverter(new DistanceBetweenColumnSpecConverter(knowledgeSource));
 
         xstream.alias("propositionColumnSpec", PropositionColumnSpec.class);
-        xstream.registerConverter(new PropositionColumnSpecConverter());
+        xstream.registerConverter(new PropositionColumnSpecConverter(knowledgeSource));
 
         xstream.alias("propositionValueColumnSpec", PropositionValueColumnSpec.class);
-        xstream.registerConverter(new PropositionValueColumnSpecConverter());
+        xstream.registerConverter(new PropositionValueColumnSpecConverter(knowledgeSource));
 
         xstream.alias("links", Link[].class);
-        xstream.registerConverter(new LinksConverter());
+        xstream.registerConverter(new LinksConverter(knowledgeSource));
 
         xstream.alias("outputConfig", OutputConfig.class);
-        xstream.registerConverter(new OutputConfigConverter());
+        xstream.registerConverter(new OutputConfigConverter(knowledgeSource));
 
         xstream.alias("valueOutputConfig", ValueOutputConfig.class);
-        xstream.registerConverter(new ValueOutputConfigConverter());
+        xstream.registerConverter(new ValueOutputConfigConverter(knowledgeSource));
 
         xstream.alias("derivation", Derivation.class);
-        xstream.registerConverter(new DerivationConverter());
+        xstream.registerConverter(new DerivationConverter(knowledgeSource));
 
         xstream.alias("reference", Reference.class);
-        xstream.registerConverter(new ReferenceConverter());
+        xstream.registerConverter(new ReferenceConverter(knowledgeSource));
 
         tableQueryResultsHandlerXStream = new XStreamWrapper(xstream);
         return tableQueryResultsHandlerXStream;
@@ -384,9 +383,9 @@ public class XMLConfiguration implements QueryBuilder {
      * @return The described TableQueryResultsHandler.
      * @throws IOException If there is a problem.
      */
-    public static TableDestination readTableQueryResultsHandlerFactoryAsXML(File file, BufferedWriter dataWriter) throws IOException {
+    public static TableDestination readTableQueryResultsHandlerFactoryAsXML(File file, BufferedWriter dataWriter, KnowledgeSource knowledgeSource) throws IOException {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
-        return (TableDestination) getTableQueryResultsHandlerXStream().fromXML(file);
+        return (TableDestination) getTableQueryResultsHandlerXStream(knowledgeSource).fromXML(file);
     }
 
     /**
@@ -401,9 +400,9 @@ public class XMLConfiguration implements QueryBuilder {
      * @return The described TableQueryResultsHandler.
      * @throws IOException If there is a problem.
      */
-    public static TableDestination readTableQueryResultsHandlerAsXML(URL url, BufferedWriter dataWriter) throws IOException {
+    public static TableDestination readTableQueryResultsHandlerAsXML(URL url, BufferedWriter dataWriter, KnowledgeSource knowledgeSource) throws IOException {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
-        return (TableDestination) getTableQueryResultsHandlerXStream().fromXML(url);
+        return (TableDestination) getTableQueryResultsHandlerXStream(knowledgeSource).fromXML(url);
     }
 
     /**
@@ -418,9 +417,9 @@ public class XMLConfiguration implements QueryBuilder {
      * @return The described TableQueryResultsHandler.
      * @throws IOException If there is a problem.
      */
-    public static TableDestination readTableQueryResultsHandlerAsXML(Reader reader, BufferedWriter dataWriter) throws IOException {
+    public static TableDestination readTableQueryResultsHandlerAsXML(Reader reader, BufferedWriter dataWriter, KnowledgeSource knowledgeSource) throws IOException {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
-        return (TableDestination) getTableQueryResultsHandlerXStream().fromXML(reader);
+        return (TableDestination) getTableQueryResultsHandlerXStream(knowledgeSource).fromXML(reader);
     }
 
     /**
@@ -435,9 +434,9 @@ public class XMLConfiguration implements QueryBuilder {
      * @return The described TableQueryResultsHandler.
      * @throws IOException If there is a problem.
      */
-    public static TableDestination readTableQueryResultsHandlerAsXML(InputStream inputStream, BufferedWriter dataWriter) throws IOException {
+    public static TableDestination readTableQueryResultsHandlerAsXML(InputStream inputStream, BufferedWriter dataWriter, KnowledgeSource knowledgeSource) throws IOException {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
-        return (TableDestination) getTableQueryResultsHandlerXStream().fromXML(inputStream);
+        return (TableDestination) getTableQueryResultsHandlerXStream(knowledgeSource).fromXML(inputStream);
     }
 
     /**
@@ -452,9 +451,9 @@ public class XMLConfiguration implements QueryBuilder {
      * @return The described TableQueryResultsHandler.
      * @throws IOException If there is a problem.
      */
-    public static TableDestination readTableQueryResultsHandlerAsXML(String str, BufferedWriter dataWriter) throws IOException {
+    public static TableDestination readTableQueryResultsHandlerAsXML(String str, BufferedWriter dataWriter, KnowledgeSource knowledgeSource) throws IOException {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
-        return (TableDestination) getTableQueryResultsHandlerXStream().fromXML(str);
+        return (TableDestination) getTableQueryResultsHandlerXStream(knowledgeSource).fromXML(str);
     }
 
     /**
@@ -470,11 +469,11 @@ public class XMLConfiguration implements QueryBuilder {
      * @return The described TableDestination.
      * @throws IOException If there is a problem.
      */
-    static TableDestination readTableDestinationAsXML(HierarchicalStreamReader hsr, BufferedWriter dataWriter) {
+    static TableDestination readTableDestinationAsXML(HierarchicalStreamReader hsr, BufferedWriter dataWriter, KnowledgeSource knowledgeSource) {
         myLogger.entering(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
         DataHolder dataHolder = new MapBackedDataHolder();
         dataHolder.put("writer", dataWriter);
-        TableDestination destination = (TableDestination) getTableQueryResultsHandlerXStream().unmarshal(hsr, null, dataHolder);
+        TableDestination destination = (TableDestination) getTableQueryResultsHandlerXStream(knowledgeSource).unmarshal(hsr, null, dataHolder);
         myLogger.exiting(XMLConfiguration.class.getName(), "readTableQueryResultsHandlerAsXML");
         return destination;
     }
@@ -487,8 +486,8 @@ public class XMLConfiguration implements QueryBuilder {
      * @param file           The file to write the XML to.
      * @throws IOException If there is a problem writing the file.
      */
-    public static void writeTableDestinationAsXML(TableDestination destination, File file) throws IOException {
-        writeTableDestinationAsXML(destination, file, false);
+    public static void writeTableDestinationAsXML(TableDestination destination, File file, KnowledgeSource knowledgeSource) throws IOException {
+        writeTableDestinationAsXML(destination, file, false, knowledgeSource);
     }
 
     /**
@@ -501,10 +500,10 @@ public class XMLConfiguration implements QueryBuilder {
      *                                generated XML file.
      * @throws IOException If there is a problem writing the file.
      */
-    public static void writeTableDestinationAsXML(TableDestination destination, File file, boolean surpressSchemaReference)
+    public static void writeTableDestinationAsXML(TableDestination destination, File file, boolean surpressSchemaReference, KnowledgeSource knowledgeSource)
             throws IOException {
         Writer writer = new FileWriter(file);
-        writeTableDestinationAsXML(destination, writer, surpressSchemaReference);
+        writeTableDestinationAsXML(destination, writer, surpressSchemaReference, knowledgeSource);
     }
 
     /**
@@ -517,11 +516,11 @@ public class XMLConfiguration implements QueryBuilder {
      *                                generated XML file.
      * @throws IOException If there is a problem writing the file.
      */
-    public static void writeTableDestinationAsXML(TableDestination destination, Writer writer, boolean surpressSchemaReference)
+    public static void writeTableDestinationAsXML(TableDestination destination, Writer writer, boolean surpressSchemaReference, KnowledgeSource knowledgeSource)
             throws IOException {
         XMLConfiguration.surpressSchemaReference.set(Boolean.valueOf(surpressSchemaReference));
         myLogger.entering(XMLConfiguration.class.getName(), "writeQueryAsXML");
-        XStream xstream = getTableQueryResultsHandlerXStream();
+        XStream xstream = getTableQueryResultsHandlerXStream(knowledgeSource);
         CharacterToReferenceWriter ctrw = new CharacterToReferenceWriter(writer);
         xstream.toXML(destination, ctrw);
         ctrw.close();

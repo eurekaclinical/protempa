@@ -23,6 +23,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.KnowledgeSource;
 import org.protempa.dest.table.AtLeastNColumnSpec;
 import org.protempa.dest.table.Link;
 
@@ -39,6 +40,10 @@ class AtLeastNColumnSpecConverter extends AbstractConverter {
     private static final String COLUMN_NAME_OVERRIDE = "columnNameOverride";
     private static final String LINKS = "links";
     private static final String N = "n";
+    
+    AtLeastNColumnSpecConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
 
     /* (non-Javadoc)
      * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)

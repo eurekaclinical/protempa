@@ -19,6 +19,8 @@
  */
 package org.protempa.xml;
 
+import org.protempa.KnowledgeSource;
+
 
 /**
  * Convert String array object to/from XML <keyIDs></keyIDs>
@@ -32,7 +34,7 @@ class AndConverter extends StringArrayConverter {
     /**
      * Constructor
      */
-    public AndConverter() {
-        super(TERM_ID);
+    AndConverter(KnowledgeSource knowledgeSource) {
+        super(TERM_ID, knowledgeSource);
     }
 }

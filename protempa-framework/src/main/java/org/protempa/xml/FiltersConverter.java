@@ -24,6 +24,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.KnowledgeSource;
 import org.protempa.backend.dsb.filter.AbstractFilter;
 import org.protempa.backend.dsb.filter.DateTimeFilter;
 import org.protempa.backend.dsb.filter.Filter;
@@ -43,11 +44,8 @@ class FiltersConverter extends AbstractConverter {
     private static final String POSITION_FILTER = "positionFilter";
     private static final String DATE_TIME_FILTER = "dateTimeFilter";
 
-    /**
-     * Constructor
-     */
-    public FiltersConverter() {
-        super();
+    FiltersConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
     }
 
     /**

@@ -23,6 +23,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.KnowledgeSource;
 import org.protempa.dest.table.Link;
 import org.protempa.dest.table.OutputConfig;
 import org.protempa.dest.table.PropositionColumnSpec;
@@ -39,6 +40,9 @@ class PropositionColumnSpecConverter extends AbstractConverter {
     private static final String LINKS = "links";
     private static final String NUM_INSTANCES = "numInstances";
 
+    PropositionColumnSpecConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
 
     /* (non-Javadoc)
      * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
@@ -62,7 +66,7 @@ class PropositionColumnSpecConverter extends AbstractConverter {
         writer.addAttribute(NUM_INSTANCES, Integer.toString(columnSpec.getNumInstances()));
 
         writer.startNode(PROPERTY_NAMES);
-        context.convertAnother(columnSpec.getPropertyNames(), new PropertyNamesConverter());
+        context.convertAnother(columnSpec.getPropertyNames(), new PropertyNamesConverter(getKnowledgeSource()));
         writer.endNode();
 
         OutputConfig outputConfig = columnSpec.getOutputConfig();
@@ -95,7 +99,7 @@ class PropositionColumnSpecConverter extends AbstractConverter {
 
         reader.moveDown();
         expect(reader, PROPERTY_NAMES);
-        PropertyNamesConverter converter = new PropertyNamesConverter();
+        PropertyNamesConverter converter = new PropertyNamesConverter(getKnowledgeSource());
         String[] propertyNames = (String[]) context.convertAnother(null, String[].class, converter);
         reader.moveUp();
 

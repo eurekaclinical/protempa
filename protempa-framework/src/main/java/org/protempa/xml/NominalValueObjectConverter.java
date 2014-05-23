@@ -23,6 +23,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.KnowledgeSource;
 import org.protempa.proposition.value.NominalValue;
 
 /**
@@ -31,10 +32,11 @@ import org.protempa.proposition.value.NominalValue;
  * @author mgrand
  */
 class NominalValueObjectConverter extends AbstractConverter {
-    public NominalValueObjectConverter() {
-        super();
-    }
 
+    NominalValueObjectConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
+    
     /**
      * Determine this class can convert the given object.
      */

@@ -48,15 +48,13 @@ class QueryConverter extends AbstractConverter {
     public static URL querySchemaUrl = null;
     private static Logger myLogger = Logger.getLogger(TableQueryResultsHandlerConverter.class.getName());
 
-    private KnowledgeSource knowledgeSource;
     private AlgorithmSource algorithmSource;
 
     /**
      * Constructor
      */
     public QueryConverter(KnowledgeSource knowledgeSource, AlgorithmSource algorithmSource) {
-        super();
-        this.knowledgeSource = knowledgeSource;
+        super(knowledgeSource);
         this.algorithmSource = algorithmSource;
     }
 
@@ -88,20 +86,20 @@ class QueryConverter extends AbstractConverter {
         // TODO marshal termSourceBackend
         String[] keyIDs = query.getKeyIds();
         if (keyIDs != null && keyIDs.length > 0) {
-            StringArrayConverter keyIDsConverter = new StringArrayConverter(KEY_ID);
+            StringArrayConverter keyIDsConverter = new StringArrayConverter(KEY_ID, getKnowledgeSource());
             writer.startNode(KEY_IDS);
             context.convertAnother(keyIDs, keyIDsConverter);
             writer.endNode();
         }
         String[] propIDs = query.getPropositionIds();
-        PropIDsConverter propIDsConverter = new PropIDsConverter();
+        PropIDsConverter propIDsConverter = new PropIDsConverter(getKnowledgeSource());
         writer.startNode(PROPOSITION_IDS);
         context.convertAnother(propIDs, propIDsConverter);
         writer.endNode();
 
         Filter filters = query.getFilters();
         if (filters != null) {
-            FiltersConverter filtersConverter = new FiltersConverter();
+            FiltersConverter filtersConverter = new FiltersConverter(getKnowledgeSource());
             writer.startNode("filters");
             filtersConverter.marshal(filters, writer, context);
             writer.endNode();
@@ -109,7 +107,7 @@ class QueryConverter extends AbstractConverter {
 
         And<String>[] termIds = query.getTermIds();
         if (termIds != null && termIds.length > 0) {
-            TermIDsConverter termIDsConverter = new TermIDsConverter();
+            TermIDsConverter termIDsConverter = new TermIDsConverter(getKnowledgeSource());
             writer.startNode("termIDs");
             termIDsConverter.marshal(termIds, writer, context);
             writer.endNode();
@@ -138,14 +136,14 @@ class QueryConverter extends AbstractConverter {
         DefaultQueryBuilder queryBuilder = new DefaultQueryBuilder();
 
         if (KEY_IDS.equals(reader.getNodeName())) {
-            StringArrayConverter keyIDsConverter = new StringArrayConverter(KEY_ID);
+            StringArrayConverter keyIDsConverter = new StringArrayConverter(KEY_ID, getKnowledgeSource());
             String[] keyIds = (String[]) context.convertAnother(null, String[].class, keyIDsConverter);
             queryBuilder.setKeyIds(keyIds);
             reader.moveUp();
             reader.moveDown();
         }
         expect(reader, PROPOSITION_IDS);
-        PropIDsConverter propIDsConverter = new PropIDsConverter();
+        PropIDsConverter propIDsConverter = new PropIDsConverter(getKnowledgeSource());
         String[] propIds = (String[]) context.convertAnother(null, String[].class, propIDsConverter);
         queryBuilder.setPropositionIds(propIds);
         reader.moveUp();
@@ -154,7 +152,7 @@ class QueryConverter extends AbstractConverter {
             do { // do loop to allow break; not for iteration
                 reader.moveDown();
                 if (reader.getNodeName().equals("filters")) {
-                    FiltersConverter filtersConverter = new FiltersConverter();
+                    FiltersConverter filtersConverter = new FiltersConverter(getKnowledgeSource());
                     Filter filters = (Filter) context.convertAnother(null, Filter.class, filtersConverter);
                     queryBuilder.setFilters(filters);
                     reader.moveUp();
@@ -170,7 +168,7 @@ class QueryConverter extends AbstractConverter {
             } while (false);
         }
         try {
-            return queryBuilder.build(knowledgeSource, algorithmSource);
+            return queryBuilder.build(getKnowledgeSource(), algorithmSource);
         } catch (QueryBuildException e) {
             myLogger.log(Level.SEVERE, "Error building query", e);
             return null;
@@ -179,7 +177,7 @@ class QueryConverter extends AbstractConverter {
 
     @SuppressWarnings("unchecked")
     private And<String>[] unmarshalTermIds(HierarchicalStreamReader reader, UnmarshallingContext context) {
-        TermIDsConverter termIDsConverter = new TermIDsConverter();
+        TermIDsConverter termIDsConverter = new TermIDsConverter(getKnowledgeSource());
         return (And<String>[]) context.convertAnother(null, And[].class, termIDsConverter);
     }
 

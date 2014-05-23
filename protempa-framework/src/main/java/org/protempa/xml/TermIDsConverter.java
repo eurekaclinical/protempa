@@ -26,6 +26,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.protempa.query.And;
 
 import java.util.ArrayList;
+import org.protempa.KnowledgeSource;
 
 /**
  * Convert String array object to/from XML <keyIDs></keyIDs>
@@ -34,11 +35,8 @@ import java.util.ArrayList;
  */
 class TermIDsConverter extends AbstractConverter {
 
-    /**
-     * Constructor
-     */
-    public TermIDsConverter() {
-        super();
+    TermIDsConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
     }
 
     /**

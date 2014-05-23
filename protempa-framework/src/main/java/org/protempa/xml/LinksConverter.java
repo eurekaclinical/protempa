@@ -29,6 +29,7 @@ import org.protempa.dest.table.Reference;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import org.protempa.KnowledgeSource;
 
 /**
  * Convert between an array of Link objects and XML.
@@ -40,6 +41,10 @@ class LinksConverter extends AbstractConverter {
     private static final String REFERENCE = "reference";
     private static final String DERIVATION = "derivation";
 
+    LinksConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
+    
     /*
      * (non-Javadoc)
      *

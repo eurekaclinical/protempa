@@ -23,8 +23,8 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-
 import java.util.ArrayList;
+import org.protempa.KnowledgeSource;
 
 /**
  * Convert String array object to/from XML. The tag for the nested elements is
@@ -44,7 +44,8 @@ class StringArrayConverter extends AbstractConverter {
      * @param elementName The name of the elements that are nested elements
      *                    corresponding to array elements.
      */
-    public StringArrayConverter(String elementName) {
+    StringArrayConverter(String elementName, KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
         this.elementName = elementName;
     }
 

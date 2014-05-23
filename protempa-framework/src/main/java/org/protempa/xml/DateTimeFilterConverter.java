@@ -28,6 +28,7 @@ import org.protempa.proposition.interval.Interval.Side;
 import org.protempa.proposition.value.Granularity;
 
 import java.util.Date;
+import org.protempa.KnowledgeSource;
 
 /**
  * Convert a Filter object to/from XML <filters></filters>
@@ -46,11 +47,8 @@ class DateTimeFilterConverter extends AbstractConverter {
 
     private MillisecondsValueConverter msConverter = new MillisecondsValueConverter();
 
-    /**
-     * Constructor
-     */
-    public DateTimeFilterConverter() {
-        super();
+    DateTimeFilterConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
     }
 
     /**
@@ -85,7 +83,7 @@ class DateTimeFilterConverter extends AbstractConverter {
         writer.addAttribute(FINISH_SIDE, filter.getFinishSide().name());
 
         writer.startNode(PROPOSITION_IDS);
-        PropIDsConverter propIdsConverter = new PropIDsConverter();
+        PropIDsConverter propIdsConverter = new PropIDsConverter(getKnowledgeSource());
         context.convertAnother(filter.getPropositionIds(), propIdsConverter);
         writer.endNode();
     }
@@ -120,7 +118,7 @@ class DateTimeFilterConverter extends AbstractConverter {
 
         reader.moveDown();
         expect(reader, PROPOSITION_IDS);
-        String[] propostionsIds = (String[]) context.convertAnother(null, String[].class, new PropIDsConverter());
+        String[] propostionsIds = (String[]) context.convertAnother(null, String[].class, new PropIDsConverter(getKnowledgeSource()));
         reader.moveUp();
 
         return new DateTimeFilter(propostionsIds, start, startGranularity, finish, finishGranularity, startSide, finishSide);

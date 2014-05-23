@@ -29,6 +29,7 @@ import org.protempa.dest.table.TableColumnSpec;
 
 import java.io.BufferedWriter;
 import java.net.URL;
+import org.protempa.KnowledgeSource;
 import org.protempa.dest.table.TableDestination;
 
 /**
@@ -44,13 +45,14 @@ class TableQueryResultsHandlerConverter extends AbstractConverter {
 
     private static final String TABLE_COLUMN_SPECS = "tableColumnSpecs";
 
-    private final TableColumnSpecsConverter columnSpecsConverter = new TableColumnSpecsConverter();
+    private final TableColumnSpecsConverter columnSpecsConverter;
 
     /**
      * Constructor
      */
-    public TableQueryResultsHandlerConverter() {
-        super();
+    TableQueryResultsHandlerConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+        this.columnSpecsConverter = new TableColumnSpecsConverter(getKnowledgeSource());
     }
 
     /**
@@ -79,7 +81,7 @@ class TableQueryResultsHandlerConverter extends AbstractConverter {
         writer.addAttribute("columnDelimiter", Character.toString(resultsHandler.getColumnDelimiter()));
 
         String[] propIDs = resultsHandler.getRowPropositionIds();
-        PropIDsConverter propIDsConverter = new PropIDsConverter();
+        PropIDsConverter propIDsConverter = new PropIDsConverter(getKnowledgeSource());
         writer.startNode("rowPropositionIDs");
         context.convertAnother(propIDs, propIDsConverter);
         writer.endNode();
@@ -109,7 +111,7 @@ class TableQueryResultsHandlerConverter extends AbstractConverter {
 
         reader.moveDown();
         expect(reader, "rowPropositionIDs");
-        PropIDsConverter propIDsConverter = new PropIDsConverter();
+        PropIDsConverter propIDsConverter = new PropIDsConverter(getKnowledgeSource());
         String[] propIds = (String[]) context.convertAnother(null, String[].class, propIDsConverter);
         reader.moveUp();
 

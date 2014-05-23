@@ -26,14 +26,14 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
-import org.protempa.proposition.value.Unit;
-import org.protempa.proposition.value.Value;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 import java.util.Set;
+import org.protempa.KnowledgeSource;
+import org.protempa.proposition.value.Unit;
+import org.protempa.proposition.value.Value;
 
 /**
  * Base class for implementing XStream converters.
@@ -41,7 +41,16 @@ import java.util.Set;
  * @author mgrand
  */
 abstract class AbstractConverter implements Converter {
+    private final KnowledgeSource knowledgeSource;
+    
+    AbstractConverter(KnowledgeSource knowledgeSource) {
+        this.knowledgeSource = knowledgeSource;
+    }
 
+    KnowledgeSource getKnowledgeSource() {
+        return knowledgeSource;
+    }
+    
     /**
      * Throw an exception if the current XML element does not have the expected
      * name.
@@ -240,7 +249,7 @@ abstract class AbstractConverter implements Converter {
      * @param value   The {@link Value} object to be written as XML.
      */
     protected void valueToXML(HierarchicalStreamWriter writer, MarshallingContext context, Value value) {
-        Mapper mapper = XMLConfiguration.getTableQueryResultsHandlerXStream().getMapper();
+        Mapper mapper = XMLConfiguration.getTableQueryResultsHandlerXStream(this.knowledgeSource).getMapper();
         String valueElementTag = mapper.serializedClass(value.getClass());
         writer.startNode(valueElementTag);
         context.convertAnother(value);
@@ -259,7 +268,7 @@ abstract class AbstractConverter implements Converter {
     protected Value valueFromXML(HierarchicalStreamReader reader, UnmarshallingContext context) {
         Value value;
         reader.moveDown();
-        Mapper mapper = XMLConfiguration.getTableQueryResultsHandlerXStream().getMapper();
+        Mapper mapper = XMLConfiguration.getTableQueryResultsHandlerXStream(this.knowledgeSource).getMapper();
         @SuppressWarnings("unchecked")
         Class<Value> type = (Class<Value>) mapper.realClass(reader.getNodeName());
         value = (Value) context.convertAnother(null, type);

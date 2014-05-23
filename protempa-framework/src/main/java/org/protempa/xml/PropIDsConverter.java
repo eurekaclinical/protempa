@@ -19,6 +19,8 @@
  */
 package org.protempa.xml;
 
+import org.protempa.KnowledgeSource;
+
 
 /**
  * @author mgrand
@@ -26,7 +28,7 @@ package org.protempa.xml;
 class PropIDsConverter extends StringArrayConverter {
     private static final String PROPOSITION_ID = "propositionID";
 
-    public PropIDsConverter() {
-        super(PROPOSITION_ID);
+    PropIDsConverter(KnowledgeSource knowledgeSource) {
+        super(PROPOSITION_ID, knowledgeSource);
     }
 }

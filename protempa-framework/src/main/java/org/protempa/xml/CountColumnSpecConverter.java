@@ -23,6 +23,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.KnowledgeSource;
 import org.protempa.dest.table.CountColumnSpec;
 import org.protempa.dest.table.Link;
 
@@ -37,6 +38,10 @@ class CountColumnSpecConverter extends AbstractConverter {
     private static final String COLUMN_NAME_OVERRIDE = "columnNameOverride";
     private static final String LINKS = "links";
 
+    CountColumnSpecConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
+    
     /*
      * (non-Javadoc) Convert {@link CountColumnSpec} object to/from XML
      * <countColumnSpec></countColumnSpec>

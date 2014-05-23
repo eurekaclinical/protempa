@@ -19,6 +19,8 @@
  */
 package org.protempa.xml;
 
+import org.protempa.KnowledgeSource;
+
 
 /**
  * @author mgrand
@@ -26,8 +28,8 @@ package org.protempa.xml;
 class ReferenceNamesConverter extends StringArrayConverter {
     private static final String REFERENCE_NAME = "referenceName";
 
-    public ReferenceNamesConverter() {
-        super(REFERENCE_NAME);
+    ReferenceNamesConverter(KnowledgeSource knowledgeSource) {
+        super(REFERENCE_NAME, knowledgeSource);
     }
 
 }

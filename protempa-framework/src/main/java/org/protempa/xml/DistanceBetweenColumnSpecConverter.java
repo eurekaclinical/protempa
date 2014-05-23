@@ -23,6 +23,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.KnowledgeSource;
 import org.protempa.proposition.value.Unit;
 import org.protempa.dest.table.DistanceBetweenColumnSpec;
 import org.protempa.dest.table.Link;
@@ -38,6 +39,10 @@ class DistanceBetweenColumnSpecConverter extends AbstractConverter {
     private static final String COLUMN_NAME_PREFIX_OVERRIDE = "columnNamePrefixOverride";
     private static final String LINKS = "links";
 
+    DistanceBetweenColumnSpecConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
+    
     /* (non-Javadoc)
      * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
      */

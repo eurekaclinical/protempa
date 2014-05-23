@@ -24,6 +24,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.converters.basic.BooleanConverter;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.KnowledgeSource;
 import org.protempa.proposition.value.BooleanValue;
 
 /**
@@ -34,8 +35,8 @@ import org.protempa.proposition.value.BooleanValue;
 class BooleanValueObjectConverter extends AbstractConverter {
     private final BooleanConverter bconv = new BooleanConverter();
 
-    public BooleanValueObjectConverter() {
-        super();
+    BooleanValueObjectConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
     }
 
     /**

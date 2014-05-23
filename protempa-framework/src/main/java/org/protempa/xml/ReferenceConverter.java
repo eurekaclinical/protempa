@@ -24,13 +24,14 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import java.util.Comparator;
 import org.mvel.ConversionException;
-import org.protempa.proposition.Proposition;
-import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
+import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.dest.table.PropertyConstraint;
 import org.protempa.dest.table.Reference;
-
-import java.util.Comparator;
+import org.protempa.proposition.Proposition;
+import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
 
 class ReferenceConverter extends AbstractConverter implements Converter {
 
@@ -41,6 +42,12 @@ class ReferenceConverter extends AbstractConverter implements Converter {
     private static final String PROPOSITION_COMPARATOR = "propositionComparator";
     private static final String TO_INDEX = "toIndex";
     private static final String FROM_INDEX = "fromIndex";
+    private final KnowledgeSource knowledgeSource;
+    
+    ReferenceConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+        this.knowledgeSource = knowledgeSource;
+    }
 
     @Override
     public boolean canConvert(@SuppressWarnings("rawtypes") Class type) {
@@ -64,21 +71,21 @@ class ReferenceConverter extends AbstractConverter implements Converter {
         String[] referenceNames = reference.getReferenceNames();
         if (referenceNames != null && referenceNames.length > 0) {
             writer.startNode(REFERENCE_NAMES);
-            ReferenceNamesConverter converter = new ReferenceNamesConverter();
+            ReferenceNamesConverter converter = new ReferenceNamesConverter(getKnowledgeSource());
             context.convertAnother(referenceNames, converter);
             writer.endNode();
         }
         String[] propositionIDs = reference.getPropositionIds();
         if (propositionIDs != null && propositionIDs.length > 0) {
             writer.startNode(PROPOSITION_IDS);
-            PropIDsConverter converter = new PropIDsConverter();
+            PropIDsConverter converter = new PropIDsConverter(getKnowledgeSource());
             context.convertAnother(propositionIDs, converter);
             writer.endNode();
         }
         PropertyConstraint[] constraints = reference.getConstraints();
         if (constraints != null && constraints.length > 0) {
             writer.startNode(PROPERTY_CONSTRAINTS);
-            PropertyConstraintsConverter converter = new PropertyConstraintsConverter();
+            PropertyConstraintsConverter converter = new PropertyConstraintsConverter(getKnowledgeSource());
             context.convertAnother(constraints, converter);
             writer.endNode();
         }
@@ -112,14 +119,14 @@ class ReferenceConverter extends AbstractConverter implements Converter {
                     String msg = REFERENCE_NAMES + " element is specified more than once.";
                     throw new ConversionException(msg);
                 }
-                ReferenceNamesConverter converter = new ReferenceNamesConverter();
+                ReferenceNamesConverter converter = new ReferenceNamesConverter(getKnowledgeSource());
                 referenceNames = (String[]) context.convertAnother(null, String[].class, converter);
             } else if (PROPOSITION_IDS.equals(reader.getNodeName())) {
                 if (propositionIds != null) {
                     String msg = PROPOSITION_IDS + " element is specified more than once.";
                     throw new ConversionException(msg);
                 }
-                PropIDsConverter converter = new PropIDsConverter();
+                PropIDsConverter converter = new PropIDsConverter(getKnowledgeSource());
                 propositionIds = (String[]) context.convertAnother(null, String[].class, converter);
 
             } else if (PROPERTY_CONSTRAINTS.equals(reader.getNodeName())) {
@@ -127,13 +134,17 @@ class ReferenceConverter extends AbstractConverter implements Converter {
                     String msg = PROPERTY_CONSTRAINTS + " element is specified more than once.";
                     throw new ConversionException(msg);
                 }
-                PropertyConstraintsConverter converter = new PropertyConstraintsConverter();
+                PropertyConstraintsConverter converter = new PropertyConstraintsConverter(getKnowledgeSource());
                 constraints = (PropertyConstraint[]) context.convertAnother(null, PropertyConstraint[].class, converter);
 
             }
             reader.moveUp();
         }
-        return new Reference(referenceNames, propositionIds, constraints, comparator, fromIndex, toIndex);
+        try {
+            return new Reference(referenceNames, propositionIds, constraints, comparator, fromIndex, toIndex, this.knowledgeSource);
+        } catch (KnowledgeSourceReadException ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
 }

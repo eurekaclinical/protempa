@@ -29,6 +29,7 @@ import org.protempa.dest.table.PropertyConstraint;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import org.protempa.KnowledgeSource;
 
 /**
  * @author mgrand
@@ -37,6 +38,10 @@ class PropertyConstraintsConverter extends AbstractConverter {
 
     private static final String PROPERTY_CONSTRAINT_VALUE_LIST = "propertyConstraintValueList";
     private static final String PROPERTY_CONSTRAINT = "propertyConstraint";
+
+    PropertyConstraintsConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
 
     /* (non-Javadoc)
      * @see com.thoughtworks.xstream.converters.ConverterMatcher#canConvert(java.lang.Class)
@@ -55,7 +60,7 @@ class PropertyConstraintsConverter extends AbstractConverter {
         if (constraints.length == 0) {
             return;
         }
-        AbstractConverter converter = new PropertyConstraintConverter();
+        AbstractConverter converter = new PropertyConstraintConverter(getKnowledgeSource());
         for (PropertyConstraint constraint : constraints) {
             ValueComparator comparator = constraint.getValueComparator();
             if (comparator.equals(ValueComparator.IN) || comparator.equals(ValueComparator.NOT_IN)) {
@@ -81,7 +86,7 @@ class PropertyConstraintsConverter extends AbstractConverter {
     @Override
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
         expectChildren(reader);
-        AbstractConverter converter = new PropertyConstraintConverter();
+        AbstractConverter converter = new PropertyConstraintConverter(getKnowledgeSource());
         ArrayList<PropertyConstraint> constraints = new ArrayList<>();
         while (reader.hasMoreChildren()) {
             reader.moveDown();

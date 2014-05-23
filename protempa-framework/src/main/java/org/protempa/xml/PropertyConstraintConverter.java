@@ -24,6 +24,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import org.mvel.ConversionException;
+import org.protempa.KnowledgeSource;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.value.ValueList;
@@ -33,6 +34,10 @@ class PropertyConstraintConverter extends AbstractConverter {
 
     private static final String COMPARATOR = "comparator";
     private static final String PROPERTY_NAME = "propertyName";
+
+    PropertyConstraintConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
 
     @Override
     public boolean canConvert(@SuppressWarnings("rawtypes") Class type) {

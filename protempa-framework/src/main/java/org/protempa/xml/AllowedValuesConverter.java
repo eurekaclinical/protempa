@@ -23,15 +23,19 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-import org.mvel.ConversionException;
-import org.protempa.proposition.value.Value;
-
 import java.util.ArrayList;
+import org.mvel.ConversionException;
+import org.protempa.KnowledgeSource;
+import org.protempa.proposition.value.Value;
 
 /**
  * @author mgrand
  */
 class AllowedValuesConverter extends AbstractConverter {
+    
+    AllowedValuesConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
 
     /*
      * (non-Javadoc)

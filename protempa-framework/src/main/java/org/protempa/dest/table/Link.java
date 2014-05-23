@@ -58,6 +58,7 @@ public abstract class Link {
             new PropertyConstraint[0];
     
     private final Set<String> propIdsAsSet;
+    private final Set<String> subtrees;
     private final PropertyConstraint[] constraints;
     private final Comparator<Proposition> comparator;
     private final int fromIndex;
@@ -83,9 +84,11 @@ public abstract class Link {
      *            interpreted as the end of the list).
      */
     Link(String[] propositionIds, PropertyConstraint[] constraints,
-            Comparator<Proposition> comparator, int fromIndex, int toIndex) {
+            Comparator<Proposition> comparator, int fromIndex, int toIndex,
+            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
         if (propositionIds == null) {
             this.propIdsAsSet = Collections.emptySet();
+            this.subtrees = Collections.emptySet();
         } else {
             ProtempaUtil.checkArrayForNullElement(propositionIds,
                     "propositionIds");
@@ -93,6 +96,8 @@ public abstract class Link {
             for (String propId : propositionIds) {
                 this.propIdsAsSet.add(propId.intern());
             }
+            this.subtrees = knowledgeSource.collectSubtrees(
+                    this.propIdsAsSet.toArray(new String[this.propIdsAsSet.size()]));
         }
         if (constraints == null) {
             this.constraints = EMPTY_PROPERTY_CONSTRAINT_ARR;

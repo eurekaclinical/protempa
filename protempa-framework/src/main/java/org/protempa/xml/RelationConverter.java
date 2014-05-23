@@ -23,6 +23,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.KnowledgeSource;
 import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.Unit;
 
@@ -43,6 +44,10 @@ class RelationConverter extends AbstractConverter {
     private static final String MIN_DISTANCE_BETWEEN_STARTS = "minDistanceBetweenStarts";
 
     private UnitValueConverter unitConverter = new UnitValueConverter();
+
+    RelationConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
+    }
 
     /*
      * (non-Javadoc)

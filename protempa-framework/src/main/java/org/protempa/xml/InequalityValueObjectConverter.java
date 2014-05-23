@@ -23,6 +23,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.protempa.KnowledgeSource;
 import org.protempa.proposition.value.InequalityNumberValue;
 
 /**
@@ -32,8 +33,8 @@ import org.protempa.proposition.value.InequalityNumberValue;
  */
 class InequalityValueObjectConverter extends AbstractConverter {
 
-    public InequalityValueObjectConverter() {
-        super();
+    InequalityValueObjectConverter(KnowledgeSource knowledgeSource) {
+        super(knowledgeSource);
     }
 
     /**
