@@ -187,6 +187,7 @@ final class AbstractionFinder {
         private final QuerySession qs;
         private DerivationsBuilder derivationsBuilder;
         private final ExecutorStrategy strategy;
+        private Set<String> subtrees;
 
         private class ExecutorCounter {
 
@@ -309,9 +310,17 @@ final class AbstractionFinder {
         protected final Set<String> getPropIds() {
             return propIds;
         }
+        
+        protected final Set<String> getSubtrees() throws KnowledgeSourceReadException {
+            if (subtrees == null) {
+                this.subtrees = knowledgeSource.collectSubtrees(this.propIds.toArray(new String[this.propIds.size()]));
+            }
+            return subtrees;
+        }
 
         protected final void addAllPropIds(String[] propIds) {
             org.arp.javautil.arrays.Arrays.addAll(this.propIds, propIds);
+            this.subtrees = null;
         }
 
         protected final DerivationsBuilder getDerivationsBuilder() {
@@ -542,7 +551,7 @@ final class AbstractionFinder {
             }
             try {
                 List<Proposition> filteredPropositions = extractRequestedPropositions(propositions,
-                            knowledgeSource.collectSubtrees(propositionIds.toArray(new String[propositionIds.size()])), refs);
+                            getSubtrees(), refs);
                 if (isLoggable(Level.FINER)) {
                     String queryId = getQuery().getId();
                     log(Level.FINER, "Proposition ids for query {0}: {1}",
