@@ -1180,7 +1180,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 entitySpecsCopy, inboundRefSpecs, filtersCopy, propIds,
                 keyIds, order,
                 resultProcessor, this.stagedTableSpecs, wrapKeyId).generateStatement();
-        System.err.println("query for entity spec " + entitySpecName + ": " + query);
 
         if (logger.isLoggable(Level.FINE)) {
             logger.log(
