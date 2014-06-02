@@ -29,7 +29,7 @@
     </properties>
 
     <scm>
-        <developerConnection>scm:git:ssh://git.cci.emory.edu/opt/git/aiw/${project.name}</developerConnection>
+        <developerConnection>scm:git:ssh://git.cci.emory.edu/opt/git/aiw/protempa</developerConnection>
     </scm>
     
     <issueManagement>
