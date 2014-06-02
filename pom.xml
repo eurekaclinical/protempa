@@ -29,8 +29,7 @@
     </properties>
 
     <scm>
-        <developerConnection>scm:svn:https://scm.cci.emory.edu/svn/protempa/trunk</developerConnection>
-        <url>https://scm.cci.emory.edu/svn/protempa/trunk</url>
+        <developerConnection>scm:git:ssh://git.cci.emory.edu/opt/git/aiw/{projectName}</developerConnection>
     </scm>
     
     <issueManagement>
