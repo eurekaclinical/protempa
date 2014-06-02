@@ -29,7 +29,8 @@
     </properties>
 
     <scm>
-        <developerConnection>scm:git:ssh://git.cci.emory.edu/opt/git/aiw/protempa</developerConnection>
+		<developerConnection>scm:git:ssh://git.cci.emory.edu/opt/git/aiw/protempa.git</developerConnection>
+		<tag>HEAD</tag>
     </scm>
     
     <issueManagement>
