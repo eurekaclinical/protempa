@@ -30,8 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 
 import org.arp.javautil.log.Logging;
-import org.protempa.DataSourceBackendDataSourceType;
-import org.protempa.DataSourceType;
+import org.protempa.DataSourceBackendSourceSystem;
+import org.protempa.SourceSystem;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.IntervalFactory;
@@ -73,8 +73,8 @@ class EventResultProcessor extends MainResultProcessor<Event> {
         }
         String[] uniqueIds =
                 new String[entitySpec.getUniqueIdSpecs().length];
-        DataSourceType dsType =
-                DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
+        SourceSystem dsType =
+                DataSourceBackendSourceSystem.getInstance(getDataSourceBackendId());
         JDBCPositionFormat positionParser = entitySpec.getPositionParser();
 
         while (resultSet.next()) {
@@ -172,7 +172,7 @@ class EventResultProcessor extends MainResultProcessor<Event> {
             }
 
             Event event = new Event(propId, uniqueId);
-            event.setDataSourceType(dsType);
+            event.setSourceSystem(dsType);
             event.setInterval(interval);
             for (int j = 0; j < propertySpecs.length; j++) {
                 PropertySpec propertySpec = propertySpecs[j];

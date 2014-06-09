@@ -54,7 +54,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         completeDef.setValue(new NumberValue(13));
 
         AbstractParameter param = new AbstractParameter(llad.getId());
-        param.setDataSourceType(DataSourceType.DERIVED);
+        param.setSourceSystem(SourceSystem.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
 
@@ -69,7 +69,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         completeDef.setValue(new NumberValue(13));
 
         AbstractParameter param = new AbstractParameter(llad.getId());
-        param.setDataSourceType(DataSourceType.DERIVED);
+        param.setSourceSystem(SourceSystem.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
 
@@ -85,7 +85,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         AbstractParameter param = new AbstractParameter(llad.getId());
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
-        param.setDataSourceType(DataSourceType.DERIVED);
+        param.setSourceSystem(SourceSystem.DERIVED);
 
         assertTrue(nullValueDef.getMatches(param, Collections.singleton(llad.getId())));
     }
@@ -97,7 +97,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         def1.setValue(new NumberValue(13));
 
         AbstractParameter param = new AbstractParameter(llad.getId());
-        param.setDataSourceType(DataSourceType.DERIVED);
+        param.setSourceSystem(SourceSystem.DERIVED);
         param.setValue(new NumberValue(12));
         param.setInterval(intervalFactory.getInstance());
 

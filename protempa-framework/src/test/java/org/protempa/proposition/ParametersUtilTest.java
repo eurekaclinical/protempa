@@ -25,7 +25,7 @@ import java.util.UUID;
 
 import junit.framework.TestCase;
 
-import org.protempa.DataSourceBackendDataSourceType;
+import org.protempa.DataSourceBackendSourceSystem;
 
 /**
  * JUnit tests for the <code>ParametersUtil</code> class.
@@ -40,16 +40,16 @@ public class ParametersUtilTest extends TestCase {
 		PrimitiveParameter[] paramsArr = new PrimitiveParameter[4];
 		paramsArr[3] = new PrimitiveParameter("TEST", uid());
 		paramsArr[3].setPosition(6L);
-		paramsArr[3].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
+		paramsArr[3].setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
 		paramsArr[2] = new PrimitiveParameter("TEST", uid());
 		paramsArr[2].setPosition(4L);
-		paramsArr[2].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
+		paramsArr[2].setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
 		paramsArr[1] = new PrimitiveParameter("TEST", uid());
 		paramsArr[1].setPosition(2L);
-		paramsArr[1].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
+		paramsArr[1].setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
 		paramsArr[0] = new PrimitiveParameter("TEST", uid());
 		paramsArr[0].setPosition(0L);
-		paramsArr[0].setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
+		paramsArr[0].setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
 
 		params = Arrays.asList(paramsArr);
 	}

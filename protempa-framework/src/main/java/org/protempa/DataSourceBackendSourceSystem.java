@@ -23,19 +23,19 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public final class DataSourceBackendDataSourceType extends DataSourceType {
+public final class DataSourceBackendSourceSystem extends SourceSystem {
     private static final long serialVersionUID = 1L;
     
-    private static Map<String, DataSourceBackendDataSourceType> cache =
+    private static Map<String, DataSourceBackendSourceSystem> cache =
             new HashMap<>();
 
-    public static DataSourceBackendDataSourceType getInstance(String id) {
+    public static DataSourceBackendSourceSystem getInstance(String id) {
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
-        DataSourceBackendDataSourceType result = cache.get(id);
+        DataSourceBackendSourceSystem result = cache.get(id);
         if (result == null) {
-            result = new DataSourceBackendDataSourceType(id);
+            result = new DataSourceBackendSourceSystem(id);
             cache.put(id, result);
         }
         return result;
@@ -43,7 +43,7 @@ public final class DataSourceBackendDataSourceType extends DataSourceType {
     
     private final String id;
 
-    private DataSourceBackendDataSourceType(String id) {
+    private DataSourceBackendSourceSystem(String id) {
         this.id = id;
     }
 
@@ -74,7 +74,7 @@ public final class DataSourceBackendDataSourceType extends DataSourceType {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final DataSourceBackendDataSourceType other = (DataSourceBackendDataSourceType) obj;
+        final DataSourceBackendSourceSystem other = (DataSourceBackendSourceSystem) obj;
         if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
             return false;
         }

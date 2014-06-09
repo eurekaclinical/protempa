@@ -65,7 +65,7 @@ public final class AbstractParameterFactory {
             TemporalPatternOffset temporalOffset,
             TemporalExtendedPropositionDefinition[] epds, String contextId) {
         AbstractParameter result = new AbstractParameter(propId);
-        result.setDataSourceType(DataSourceType.DERIVED);
+        result.setSourceSystem(SourceSystem.DERIVED);
         result.setContextId(contextId);
 
         Long minStart = null;

@@ -19,14 +19,14 @@
  */
 package org.protempa.proposition;
 
-import org.protempa.proposition.visitor.PropositionVisitable;
-import org.protempa.proposition.visitor.PropositionCheckedVisitable;
 import java.beans.PropertyChangeListener;
+import java.util.Date;
 import java.util.List;
-
-import org.protempa.DataSourceType;
 import org.protempa.QuerySession;
+import org.protempa.SourceSystem;
 import org.protempa.proposition.value.Value;
+import org.protempa.proposition.visitor.PropositionCheckedVisitable;
+import org.protempa.proposition.visitor.PropositionVisitable;
 
 /**
  * A data element. All implementations of this have property change support
@@ -53,9 +53,9 @@ public interface Proposition extends PropositionVisitable,
 
     /**
      * Returns the data source type of the Proposition.
-     * @return a {@link DataSourceType}.
+     * @return a {@link SourceSystem}.
      */
-    DataSourceType getDataSourceType();
+    SourceSystem getSourceSystem();
 
     /**
      * Adds a {@link PropertyChangeListener} to the listener list. The listener
@@ -133,4 +133,32 @@ public interface Proposition extends PropositionVisitable,
      * @return a {@link UniqueIdentifier}.
      */
     UniqueId getUniqueId();
+    
+    /**
+     * Gets the date this proposition was downloaded from the source system. If
+     * this proposition was derived, gets the date it was derived.
+     * 
+     * @return a date, <code>null</code> if the proposition was not downloaded
+     * from a source system.
+     */
+    Date getDownloadDate();
+    
+    /**
+     * Gets the date this proposition was created according to the source
+     * system from which it was obtained, or for derived propositions, the
+     * date it was created through the temporal abstraction process.
+     * 
+     * @return a date, <code>null</code> means the create date is not recorded.
+     */
+    Date getCreateDate();
+    
+    /**
+     * Gets the date this proposition was last updated according to the source
+     * system from which it was obtained, or for derived propositions, the
+     * date it was last updated through the temporal abstraction process.
+     * 
+     * @return a date, <code>null</code> means the proposition has never been
+     * updated.
+     */
+    Date getUpdateDate();
 }

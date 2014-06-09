@@ -59,7 +59,7 @@ class ContextCombinerConsequence implements Consequence {
         s.add(a2);
         Segment<Context> segment = new Segment<>(s);
         Context result = new Context(a1Id, new UniqueId(DerivedSourceId.getInstance(), new DerivedUniqueId(UUID.randomUUID().toString())));
-        result.setDataSourceType(DataSourceType.DERIVED);
+        result.setSourceSystem(SourceSystem.DERIVED);
         result.setInterval(segment.getInterval());
         Logger logger = ProtempaUtil.logger();
         if (logger.isLoggable(Level.FINEST)) {

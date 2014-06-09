@@ -25,7 +25,7 @@ import java.util.UUID;
 
 import junit.framework.TestCase;
 
-import org.protempa.DataSourceBackendDataSourceType;
+import org.protempa.DataSourceBackendSourceSystem;
 
 public class PropositionVisitorTest extends TestCase {
 	private static class PrimitiveParameterVisitor extends AbstractPropositionVisitor {
@@ -40,7 +40,7 @@ public class PropositionVisitorTest extends TestCase {
 	public void testPrimitiveParameter() throws Exception {
 		PrimitiveParameterVisitor v = new PrimitiveParameterVisitor();
 		PrimitiveParameter p = new PrimitiveParameter("test", uid());
-		p.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
+		p.setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
 		v.visit(Collections.singleton(p));
 		assertTrue(v.found);
 	}

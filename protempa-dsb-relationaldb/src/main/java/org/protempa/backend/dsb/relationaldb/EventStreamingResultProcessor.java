@@ -21,7 +21,7 @@ package org.protempa.backend.dsb.relationaldb;
 
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
-import org.protempa.DataSourceBackendDataSourceType;
+import org.protempa.DataSourceBackendSourceSystem;
 import org.protempa.DataStreamingEventIterator;
 import org.protempa.UniqueIdPair;
 import org.protempa.proposition.Event;
@@ -60,7 +60,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
     class EventIterator extends PropositionResultSetIterator<Event> {
 
         private final Logger logger;
-        private final DataSourceBackendDataSourceType dsType;
+        private final DataSourceBackendSourceSystem dsType;
         private final IntervalFactory intervalFactory;
         private final JDBCPositionFormat positionParser;
         private EntitySpec entitySpec;
@@ -73,7 +73,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
             super(statement, resultSet, entitySpec, inboundRefSpecs,
                     bidirectionalRefSpecs, getDataSourceBackendId(), referenceIterator);
             this.logger = SQLGenUtil.logger();
-            this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
+            this.dsType = DataSourceBackendSourceSystem.getInstance(getDataSourceBackendId());
             this.intervalFactory = new IntervalFactory();
             this.positionParser = entitySpec.getPositionParser();
             this.entitySpec = entitySpec;
@@ -186,7 +186,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
             }
 
             Event event = new Event(propId, uniqueId);
-            event.setDataSourceType(dsType);
+            event.setSourceSystem(dsType);
             event.setInterval(interval);
             for (int j = 0; j < propertySpecs.length; j++) {
                 PropertySpec propertySpec = propertySpecs[j];

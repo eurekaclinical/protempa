@@ -214,7 +214,7 @@ final class CompoundLowLevelAbstractionConsequence implements
         AbstractParameter result = new AbstractParameter(propId);
         result.setInterval(interval);
         result.setValue(value);
-        result.setDataSourceType(DataSourceType.DERIVED);
+        result.setSourceSystem(SourceSystem.DERIVED);
         result.setContextId(contextId);
 
         return result;

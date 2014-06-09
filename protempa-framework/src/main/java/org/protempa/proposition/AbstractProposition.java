@@ -27,14 +27,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
-import org.protempa.DataSourceType;
+import org.protempa.SourceSystem;
 import org.protempa.proposition.value.Value;
 
 /**
@@ -45,8 +45,8 @@ import org.protempa.proposition.value.Value;
 public abstract class AbstractProposition implements Proposition {
 
     private static final int DEFAULT_REFERENCE_LIST_SIZE = 100;
-    private static final DataSourceType DEFAULT_DATA_SOURCE_TYPE =
-            DataSourceType.UNKNOWN;
+    private static final SourceSystem DEFAULT_SOURCE_SYSTEM =
+            SourceSystem.UNKNOWN;
     /**
      * An identification
      * <code>String</code> for this proposition.
@@ -57,7 +57,10 @@ public abstract class AbstractProposition implements Proposition {
     private Map<String, List<UniqueId>> references;
     private UniqueId uniqueId; // not final because of custom deserialization
     // but there is no public modification access
-    private DataSourceType dataSourceType;
+    private SourceSystem sourceSystem;
+    private Date downloadDate;
+    private Date createDate;
+    private Date updateDate;
 
     /**
      * Creates a proposition with an id and unique identifier. The unique
@@ -82,7 +85,7 @@ public abstract class AbstractProposition implements Proposition {
      * }.
      */
     protected AbstractProposition() {
-        this.dataSourceType = DEFAULT_DATA_SOURCE_TYPE;
+        this.sourceSystem = DEFAULT_SOURCE_SYSTEM;
     }
 
     /**
@@ -155,15 +158,15 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     @Override
-    public DataSourceType getDataSourceType() {
-        return this.dataSourceType;
+    public SourceSystem getSourceSystem() {
+        return this.sourceSystem;
     }
 
-    public void setDataSourceType(DataSourceType type) {
-        if (type != null) {
-            this.dataSourceType = type;
+    public void setSourceSystem(SourceSystem sourceSystem) {
+        if (sourceSystem != null) {
+            this.sourceSystem = sourceSystem;
         } else {
-            this.dataSourceType = DEFAULT_DATA_SOURCE_TYPE;
+            this.sourceSystem = DEFAULT_SOURCE_SYSTEM;
         }
     }
 
@@ -337,7 +340,7 @@ public abstract class AbstractProposition implements Proposition {
             }
         }
 
-        s.writeObject(this.dataSourceType);
+        s.writeObject(this.sourceSystem);
         s.writeObject(this.changes);
     }
 
@@ -387,7 +390,54 @@ public abstract class AbstractProposition implements Proposition {
                 setReferences(refName, uids);
             }
         }
-        setDataSourceType((DataSourceType) s.readObject());
+        setSourceSystem((SourceSystem) s.readObject());
         this.changes = (PropertyChangeSupport) s.readObject();
+    }
+
+    @Override
+    public final Date getCreateDate() {
+        return createDate;
+    }
+
+    /**
+     * Sets the date this proposition was created according to the source
+     * system from which it was obtained, or for derived propositions, the
+     * date it was created through the temporal abstraction process.
+     * 
+     * @param createDate a date.
+     */
+    public final void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+    
+    @Override
+    public final Date getUpdateDate() {
+        return this.updateDate;
+    }
+    
+    /**
+     * Sets the date this proposition was last updated according to the source
+     * system from which it was obtained, or for derived propositions, the
+     * date it was last updated through the temporal abstraction process.
+     * 
+     * @param updateDate a date.
+     */
+    public final void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
+    }
+    
+    @Override
+    public final Date getDownloadDate() {
+        return this.downloadDate;
+    }
+    
+    /**
+     * Sets the date this proposition was downloaded from the source system. If
+     * this proposition was derived, sets the date it was derived.
+     * 
+     * @param downloadDate a date.
+     */
+    public final void setDownloadDate(Date downloadDate) {
+        this.downloadDate = downloadDate;
     }
 }

@@ -23,7 +23,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
-import org.protempa.DataSourceType;
+import org.protempa.SourceSystem;
 
 import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
@@ -68,7 +68,7 @@ public final class TemporalAbstractParameterFactory {
 
     private AbstractParameter getInstance(String id, Long start, Long finish) {
         AbstractParameter e = new AbstractParameter(id);
-        e.setDataSourceType(DataSourceType.DERIVED);
+        e.setSourceSystem(SourceSystem.DERIVED);
         e.setInterval(intervalFactory.getInstance(start,
                 this.granularity, finish, this.granularity));
         return e;

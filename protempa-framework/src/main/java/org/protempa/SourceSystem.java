@@ -22,9 +22,9 @@ package org.protempa;
 import java.io.Serializable;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
-public abstract class DataSourceType implements Serializable {
+public abstract class SourceSystem implements Serializable {
     
-    public static final DataSourceType UNKNOWN = new DataSourceType() {
+    public static final SourceSystem UNKNOWN = new SourceSystem() {
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -43,7 +43,7 @@ public abstract class DataSourceType implements Serializable {
         }
     };
     
-    public static final DataSourceType DERIVED = new DataSourceType() {
+    public static final SourceSystem DERIVED = new SourceSystem() {
         private static final long serialVersionUID = 1L;
 
         @Override
@@ -62,7 +62,7 @@ public abstract class DataSourceType implements Serializable {
         }
     };
 
-    DataSourceType() {}
+    SourceSystem() {}
 
     public abstract boolean isDerived();
 

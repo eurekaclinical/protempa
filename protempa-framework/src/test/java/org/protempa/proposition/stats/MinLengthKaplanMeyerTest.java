@@ -27,8 +27,8 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.protempa.DataSourceType;
-import org.protempa.DataSourceBackendDataSourceType;
+import org.protempa.SourceSystem;
+import org.protempa.DataSourceBackendSourceSystem;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
@@ -43,15 +43,15 @@ import org.protempa.proposition.value.NumberValue;
 public class MinLengthKaplanMeyerTest extends TestCase {
 	private List<Proposition> propositions;
 	private MinLengthKaplanMeyer mls;
-	private DataSourceType dbDataSourceType;
-	private DataSourceType derivedDataSourceType;
+	private SourceSystem dbDataSourceType;
+	private SourceSystem derivedDataSourceType;
 
 	@Override
 	protected void setUp() throws Exception {
 		this.propositions = new ArrayList<>();
 		this.dbDataSourceType = 
-                        DataSourceBackendDataSourceType.getInstance("MockTestDatabase");
-		this.derivedDataSourceType = DataSourceType.DERIVED;
+                        DataSourceBackendSourceSystem.getInstance("MockTestDatabase");
+		this.derivedDataSourceType = SourceSystem.DERIVED;
 		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
 
 		TemporalPrimitiveParameterFactory tppf = new TemporalPrimitiveParameterFactory(

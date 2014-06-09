@@ -24,7 +24,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 
-import org.protempa.DataSourceType;
+import org.protempa.SourceSystem;
 import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Value;
@@ -50,31 +50,31 @@ public final class TemporalPrimitiveParameterFactory {
     }
 
     public PrimitiveParameter getInstance(String id, String timestamp,
-            DataSourceType dataSourceType) throws ParseException {
+            SourceSystem dataSourceType) throws ParseException {
         return getInstance(id,
                 timestamp != null ? this.dateFormat.parse(timestamp) : null,
                 dataSourceType);
     }
 
     public PrimitiveParameter getInstance(String id, String timestamp,
-            Value value, DataSourceType dataSourceType) throws ParseException {
+            Value value, SourceSystem dataSourceType) throws ParseException {
         PrimitiveParameter result = getInstance(id, timestamp, dataSourceType);
         result.setValue(value);
         return result;
     }
 
     public PrimitiveParameter getInstance(String id, Date timestamp,
-            DataSourceType dataSourceType) {
+            SourceSystem dataSourceType) {
         Long tstampAsPos = AbsoluteTimeGranularityUtil.asPosition(timestamp);
         return getInstance(id, tstampAsPos, dataSourceType);
     }
 
     private PrimitiveParameter getInstance(String id, Long pos,
-            DataSourceType dataSourceType) {
+            SourceSystem dataSourceType) {
         PrimitiveParameter pp = new PrimitiveParameter(id, new UniqueId(
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())));
-        pp.setDataSourceType(dataSourceType);
+        pp.setSourceSystem(dataSourceType);
         if (pos != null) {
             pp.setPosition(pos);
         }

@@ -38,7 +38,7 @@ final class SegmentTestParameters {
 
     static Segment<PrimitiveParameter> getLength1PrimitiveParameterSegment() {
         PrimitiveParameter p1 = new PrimitiveParameter("TEST", uid());
-        p1.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
+        p1.setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
         p1.setPosition(1L);
         Sequence<PrimitiveParameter> seq = new Sequence<>(
                 "TEST", 1);
@@ -48,10 +48,10 @@ final class SegmentTestParameters {
 
     static Segment<PrimitiveParameter> getLength2PrimitiveParameterSegment() {
         PrimitiveParameter p1 = new PrimitiveParameter("TEST", uid());
-        p1.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
+        p1.setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
         p1.setPosition(1L);
         PrimitiveParameter p2 = new PrimitiveParameter("TEST", uid());
-        p2.setDataSourceType(DataSourceBackendDataSourceType.getInstance("TEST"));
+        p2.setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
         p2.setPosition(2L);
         Sequence<PrimitiveParameter> seq = new Sequence<>(
                 "TEST", 2);

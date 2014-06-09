@@ -24,7 +24,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 
-import org.protempa.DataSourceType;
+import org.protempa.SourceSystem;
 import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
 import org.protempa.proposition.value.Granularity;
@@ -53,19 +53,19 @@ public final class TemporalEventFactory {
     }
 
     public Event getInstance(String id, String timestamp,
-            DataSourceType dataSourceType) throws ParseException {
+            SourceSystem dataSourceType) throws ParseException {
         return getInstance(id, timestamp != null ?
             this.dateFormat.parse(timestamp) : null, dataSourceType);
     }
 
     public Event getInstance(String id, Date timestamp,
-            DataSourceType dataSourceType) {
+            SourceSystem dataSourceType) {
         Long tstampAsPos = AbsoluteTimeGranularityUtil.asPosition(timestamp);
         return getInstance(id, tstampAsPos, dataSourceType);
     }
 
     public Event getInstance(String id, String start, String finish,
-            DataSourceType dataSourceType)
+            SourceSystem dataSourceType)
             throws ParseException {
 
         return getInstance(id, start != null ? this.dateFormat.parse(start)
@@ -74,7 +74,7 @@ public final class TemporalEventFactory {
     }
 
     public Event getInstance(String id, Date start, Date finish,
-            DataSourceType dataSourceType) {
+            SourceSystem dataSourceType) {
         Long startAsPos = AbsoluteTimeGranularityUtil.asPosition(start);
         Long finishAsPos = AbsoluteTimeGranularityUtil.asPosition(finish);
         return getInstance(id, startAsPos, finishAsPos, 
@@ -82,22 +82,22 @@ public final class TemporalEventFactory {
     }
     
     private Event getInstance(String id, Long pos,
-            DataSourceType dataSourceType) {
+            SourceSystem dataSourceType) {
         Event pp = new Event(id, new UniqueId(
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())));
-        pp.setDataSourceType(dataSourceType);
+        pp.setSourceSystem(dataSourceType);
         pp.setInterval(intervalFactory.getInstance(pos, this.granularity,
                 pos, this.granularity));
         return pp;
     }
 
     private Event getInstance(String id, Long start, Long finish,
-            DataSourceType dataSourceType) {
+            SourceSystem dataSourceType) {
         Event e = new Event(id, new UniqueId(
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())));
-        e.setDataSourceType(dataSourceType);
+        e.setSourceSystem(dataSourceType);
         e.setInterval(intervalFactory.getInstance(start,
                 this.granularity, finish, this.granularity));
         return e;

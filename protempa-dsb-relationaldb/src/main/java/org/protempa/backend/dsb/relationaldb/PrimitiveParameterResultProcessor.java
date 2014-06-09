@@ -29,8 +29,8 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.log.Logging;
-import org.protempa.DataSourceBackendDataSourceType;
-import org.protempa.DataSourceType;
+import org.protempa.DataSourceBackendSourceSystem;
+import org.protempa.SourceSystem;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
@@ -69,8 +69,8 @@ class PrimitiveParameterResultProcessor extends
         for (int i = 0; i < columnTypes.length; i++) {
             columnTypes[i] = resultSetMetaData.getColumnType(i + 1);
         }
-        DataSourceType dsType =
-                DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
+        SourceSystem dsType =
+                DataSourceBackendSourceSystem.getInstance(getDataSourceBackendId());
         
         while (resultSet.next()) {
             int i = 1;
@@ -138,7 +138,7 @@ class PrimitiveParameterResultProcessor extends
                 PropertySpec propertySpec = propertySpecs[j];
                 p.setProperty(propertySpec.getName(), propertyValues[j]);
             }
-            p.setDataSourceType(dsType);
+            p.setSourceSystem(dsType);
 
             logger.log(Level.FINEST, "Created primitive parameter {0}", p);
             results.add(keyId, p);

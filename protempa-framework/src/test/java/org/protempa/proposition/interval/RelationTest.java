@@ -25,8 +25,8 @@ import java.util.Locale;
 
 import junit.framework.TestCase;
 
-import org.protempa.DataSourceType;
-import org.protempa.DataSourceBackendDataSourceType;
+import org.protempa.SourceSystem;
+import org.protempa.DataSourceBackendSourceSystem;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
@@ -64,10 +64,10 @@ public class RelationTest extends TestCase {
                 null, null, null);
         assertTrue(r.hasRelation(i1, i2));
     }
-	private static final DataSourceType dbDataSourceType =
-                DataSourceBackendDataSourceType.getInstance("MockTestDatabase");
-	private static final DataSourceType derivedDataSourceType =
-                DataSourceType.DERIVED;
+	private static final SourceSystem dbDataSourceType =
+                DataSourceBackendSourceSystem.getInstance("MockTestDatabase");
+	private static final SourceSystem derivedDataSourceType =
+                SourceSystem.DERIVED;
 
     public void test1MinuteApartHours() {
         Interval i1 = new DefaultInterval(0L, RelativeHourGranularity.HOUR, 0L,

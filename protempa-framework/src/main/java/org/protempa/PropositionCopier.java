@@ -111,7 +111,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
     public void visit(AbstractParameter abstractParameter) {
         assert this.workingMemory != null : "workingMemory wasn't set";
         AbstractParameter param = new AbstractParameter(propId);
-        param.setDataSourceType(DataSourceType.DERIVED);
+        param.setSourceSystem(SourceSystem.DERIVED);
         param.setInterval(abstractParameter.getInterval());
         param.setValue(abstractParameter.getValue());
         this.workingMemory.insert(param);
@@ -133,7 +133,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())));
         e.setInterval(event.getInterval());
-        e.setDataSourceType(DataSourceType.DERIVED);
+        e.setSourceSystem(SourceSystem.DERIVED);
         this.workingMemory.insert(e);
         this.derivationsBuilder.propositionAsserted(event, e);
         ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", e);
@@ -156,7 +156,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         param.setPosition(primitiveParameter.getPosition());
         param.setGranularity(primitiveParameter.getGranularity());
         param.setValue(primitiveParameter.getValue());
-        param.setDataSourceType(DataSourceType.DERIVED);
+        param.setSourceSystem(SourceSystem.DERIVED);
         this.workingMemory.insert(param);
         this.derivationsBuilder.propositionAsserted(primitiveParameter, param);
         ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", param);
@@ -175,7 +175,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         Constant newConstant = new Constant(propId, new UniqueId(
                 DerivedSourceId.getInstance(),
                 new DerivedUniqueId(UUID.randomUUID().toString())));
-        newConstant.setDataSourceType(DataSourceType.DERIVED);
+        newConstant.setSourceSystem(SourceSystem.DERIVED);
         this.workingMemory.insert(newConstant);
         this.derivationsBuilder.propositionAsserted(constant, newConstant);
         ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", newConstant);

@@ -30,8 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 
 import org.arp.javautil.log.Logging;
-import org.protempa.DataSourceBackendDataSourceType;
-import org.protempa.DataSourceType;
+import org.protempa.DataSourceBackendSourceSystem;
+import org.protempa.SourceSystem;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
@@ -63,8 +63,8 @@ class ConstantResultProcessor extends MainResultProcessor<Constant> {
         int count = 0;
         String[] uniqueIds =
                 new String[entitySpec.getUniqueIdSpecs().length];
-        DataSourceType dsType =
-                DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
+        SourceSystem dsType =
+                DataSourceBackendSourceSystem.getInstance(getDataSourceBackendId());
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         int[] columnTypes = new int[resultSetMetaData.getColumnCount()];
         for (int i = 0; i < columnTypes.length; i++) {
@@ -119,7 +119,7 @@ class ConstantResultProcessor extends MainResultProcessor<Constant> {
                 PropertySpec propertySpec = propertySpecs[j];
                 cp.setProperty(propertySpec.getName(), propertyValues[j]);
             }
-            cp.setDataSourceType(dsType);
+            cp.setSourceSystem(dsType);
             logger.log(Level.FINEST, "Created constant {0}", cp);
             results.add(keyId, cp);
             if (++count % FLUSH_SIZE == 0) {

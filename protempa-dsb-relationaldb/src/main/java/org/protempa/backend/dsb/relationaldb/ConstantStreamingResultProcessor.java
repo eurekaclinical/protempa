@@ -21,7 +21,7 @@ package org.protempa.backend.dsb.relationaldb;
 
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
-import org.protempa.DataSourceBackendDataSourceType;
+import org.protempa.DataSourceBackendSourceSystem;
 import org.protempa.DataStreamingEventIterator;
 import org.protempa.UniqueIdPair;
 import org.protempa.proposition.Constant;
@@ -55,7 +55,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
     class ConstantIterator extends PropositionResultSetIterator<Constant> {
 
         private final Logger logger;
-        private final DataSourceBackendDataSourceType dsType;
+        private final DataSourceBackendSourceSystem dsType;
 
         ConstantIterator(Statement statement, ResultSet resultSet, 
                 EntitySpec entitySpec, LinkedHashMap<String,
@@ -65,7 +65,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
             super(statement, resultSet, entitySpec, inboundRefSpecs,
                     bidirectionalRefSpecs, getDataSourceBackendId(), referenceIterator);
             this.logger = SQLGenUtil.logger();
-            this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
+            this.dsType = DataSourceBackendSourceSystem.getInstance(getDataSourceBackendId());
         }
 
         @Override
@@ -128,7 +128,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
                 PropertySpec propertySpec = propertySpecs[j];
                 cp.setProperty(propertySpec.getName(), propertyValues[j]);
             }
-            cp.setDataSourceType(dsType);
+            cp.setSourceSystem(dsType);
             handleProposition(cp);
 
             logger.log(Level.FINEST, "Created constant {0}", cp);

@@ -21,7 +21,7 @@ package org.protempa.backend.dsb.relationaldb;
 
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
-import org.protempa.DataSourceBackendDataSourceType;
+import org.protempa.DataSourceBackendSourceSystem;
 import org.protempa.DataStreamingEventIterator;
 import org.protempa.UniqueIdPair;
 import org.protempa.proposition.PrimitiveParameter;
@@ -56,7 +56,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
     class PrimParamIterator extends PropositionResultSetIterator<PrimitiveParameter> {
 
         private final Logger logger;
-        private final DataSourceBackendDataSourceType dsType;
+        private final DataSourceBackendSourceSystem dsType;
         
 
         PrimParamIterator(Statement statement, ResultSet resultSet, 
@@ -67,7 +67,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                     bidirectionalRefSpecs,
                     getDataSourceBackendId(), referenceIterator);
             this.logger = SQLGenUtil.logger();
-            this.dsType = DataSourceBackendDataSourceType.getInstance(getDataSourceBackendId());
+            this.dsType = DataSourceBackendSourceSystem.getInstance(getDataSourceBackendId());
         }
 
         @Override
@@ -148,7 +148,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                 PropertySpec propertySpec = propertySpecs[j];
                 p.setProperty(propertySpec.getName(), propertyValues[j]);
             }
-            p.setDataSourceType(this.dsType);
+            p.setSourceSystem(this.dsType);
             handleProposition(p);
 
             logger.log(Level.FINEST, "Created primitive parameter {0}", p);

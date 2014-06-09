@@ -59,7 +59,7 @@ class AbstractionCombinerConsequence implements Consequence {
         s.add(a2);
         Segment<AbstractParameter> segment = new Segment<>(s);
         AbstractParameter result = new AbstractParameter(a1Id);
-        result.setDataSourceType(DataSourceType.DERIVED);
+        result.setSourceSystem(SourceSystem.DERIVED);
         result.setInterval(segment.getInterval());
         result.setValue(a1.getValue());
         Logger logger = ProtempaUtil.logger();
