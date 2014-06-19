@@ -18,7 +18,9 @@ from http://aiw.sourceforge.net.
 
 WHAT'S NEW
 
-Version 2.3 now requires Java 7 compatibility.
+Version 2.3 now requires Java 7 compatibility. Ability to search for 
+propositions from knowledge sources was added.  A new module for using 
+BioPortal as a knowledge source was added.
 
 Version 2.2 eliminates the need to run separate queries to hook up references
 between propositions, significantly reducing the number of quries generated
