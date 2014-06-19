@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.protempa</groupId>
     <artifactId>protempa</artifactId>
-    <version>2.3-SNAPSHOT</version>
+    <version>2.3</version>
     <packaging>pom</packaging>
     <name>Protempa</name>
     <url>http://aiw.sourceforge.net/dev/protempa-${project.version}</url>
@@ -30,7 +30,7 @@
 
     <scm>
 		<developerConnection>scm:git:ssh://git.cci.emory.edu/opt/git/aiw/protempa.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>protempa-2.3</tag>
     </scm>
     
     <issueManagement>
