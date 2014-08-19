@@ -56,6 +56,41 @@ public final class Relation implements Serializable {
             0, null, 0, null, 
             null, null, null, null);
     public static final Relation MET_BY = MEETS.inverse();
+    
+    public static final Relation EQUALS = new Relation(0, null, 0, null, 
+            null, null, null, null,
+            null, null, null, null, 
+            0, null, 0, null);
+    
+    public static final Relation CONTAINS = new Relation(
+            1, null, null, null,
+            null, null, null, null,
+            null, null, null, null,
+            null, null, -1, null);
+    
+    public static final Relation CONTAINS_OR_EQUALS = new Relation(
+            0, null, null, null,
+            null, null, null, null,
+            null, null, null, null,
+            null, null, 0, null);
+    
+    public static final Relation DURING = CONTAINS.inverse();
+    
+    public static final Relation STARTS = new Relation(
+            0, null, 0, null,
+            null, null, null, null,
+            null, null, null, null,
+            0, null, -1, null);
+    
+    public static final Relation STARTED_BY = STARTS.inverse();
+    
+    public static final Relation FINISHES = new Relation(
+            1, null, null, null,
+            null, null, null, null,
+            null, null, null, null,
+            0, null, 0, null);
+    
+    public static final Relation FINISHED_BY = STARTS.inverse();
 
     public Relation() {
         this(null, null, null, null, null, null, null, null, null, null, null,

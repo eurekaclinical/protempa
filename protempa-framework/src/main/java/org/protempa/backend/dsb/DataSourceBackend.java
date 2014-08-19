@@ -19,13 +19,14 @@
  */
 package org.protempa.backend.dsb;
 
-import org.protempa.backend.dsb.filter.Filter;
+import java.util.List;
 import java.util.Set;
 import org.protempa.*;
 import org.protempa.backend.Backend;
 import org.protempa.backend.DataSourceBackendFailedConfigurationValidationException;
 import org.protempa.backend.DataSourceBackendFailedDataValidationException;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
+import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
@@ -63,4 +64,8 @@ public interface DataSourceBackend extends
             KnowledgeSourceReadException;
     
     void failureOccurred(Throwable throwable);
+    
+    void deleteAllKeys() throws DataSourceWriteException;
+
+    void writeKeys(List<Proposition> propositions) throws DataSourceWriteException;
 }

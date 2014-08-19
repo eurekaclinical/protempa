@@ -20,22 +20,28 @@
 package org.protempa.backend.dsb.relationaldb;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.DatabaseAPI;
 import org.arp.javautil.sql.InvalidConnectionSpecArguments;
 import org.protempa.*;
-import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.backend.DataSourceBackendFailedDataValidationException;
-import org.protempa.backend.DataSourceBackendInitializationException;
-import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.AbstractCommonsDataSourceBackend;
 import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.DataSourceBackendFailedConfigurationValidationException;
+import org.protempa.backend.DataSourceBackendFailedDataValidationException;
+import org.protempa.backend.DataSourceBackendInitializationException;
 import org.protempa.backend.annotations.BackendProperty;
 import org.protempa.backend.dsb.DataValidationEvent;
+import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.proposition.Proposition;
 
 /**
@@ -335,15 +341,6 @@ public abstract class RelationalDbDataSourceBackend
         this.password = password;
     }
 
-//    @Override
-//    public Map<String, List<Proposition>> readPropositions(
-//            Set<String> keyIds, Set<String> paramIds,
-//            Filter filters,
-//            QuerySession qs)
-//            throws DataSourceReadException {
-//        return this.sqlGenerator.readPropositions(keyIds, paramIds,
-//                filters, null).getPatientCache();
-//    }
     @Override
     public DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds, Filter filters,
@@ -364,7 +361,89 @@ public abstract class RelationalDbDataSourceBackend
         return this.sqlGenerator.readPropositionsStreaming(keyIds, propIds,
                 filters);
     }
+    
+    @Override
+    public void deleteAllKeys() throws DataSourceWriteException {
+        if (this.keyIdTable != null && this.keyIdColumn != null) {
+            try {
+                ConnectionSpec connectionSpecInstance =
+                            getConnectionSpecInstance();
+                try (Connection con = connectionSpecInstance.getOrCreate()) {
+                    try (Statement stmt = con.createStatement()) {
+                        StringBuilder stmtBuilder = new StringBuilder();
+                        stmtBuilder.append("DELETE FROM ");
+                        if (this.keyIdSchema != null) {
+                            stmtBuilder.append(this.keyIdSchema);
+                            stmtBuilder.append('.');
+                        }
+                        stmtBuilder.append(this.keyIdTable);
+                        stmt.execute(stmtBuilder.toString());
+                    }
+                }
+            } catch (InvalidConnectionSpecArguments | SQLException ex) {
+                throw new DataSourceWriteException("Could not delete all key ids in data source backend " + nameForErrors(), ex);
+            }
+        } else {
+            SQLGenUtil.logger().log(Level.FINER, 
+                    "Unable to delete all keys in keyIdSchema{0}, keyIdTable={1} and keyIdColumn={2}", 
+                    new Object[]{this.keyIdSchema, this.keyIdTable, this.keyIdColumn});
+        }
+    }
 
+    @Override
+    public void writeKeys(List<Proposition> propositions) throws DataSourceWriteException {
+        if (this.keyIdTable != null && this.keyIdColumn != null) {
+            int batchSize = 1000;
+            try {
+                ConnectionSpec connectionSpecInstance =
+                        getConnectionSpecInstance();
+                String stmt = buildWriteKeysInsertStmt();
+                try (Connection con = connectionSpecInstance.getOrCreate();
+                        PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
+                    int i = 0;
+                    for (Proposition proposition : propositions) {
+                        if (proposition.getId().equals(getKeyType())) {
+                            String[] dbIds = ((SQLGenUniqueId) proposition.getUniqueId().getLocalUniqueId()).getDbIds();
+                            if (dbIds.length != 1) {
+                                throw new DataSourceWriteException("Only one database key is allowed for " + this.getKeyTypePluralDisplayName());
+                            }
+                            prepareStatement.setObject(0, dbIds[0]);
+                            prepareStatement.addBatch();
+                            i++;
+                            if (i % batchSize == 0) {
+                                prepareStatement.executeBatch();
+                            }
+                        }
+                    }
+                    if (i % batchSize == 0) {
+                        prepareStatement.executeBatch();
+                    }
+                }
+            } catch (InvalidConnectionSpecArguments | SQLException ex) {
+                throw new DataSourceWriteException("Could not write key ids in data source backend " + nameForErrors(), ex);
+            }
+        } else {
+            SQLGenUtil.logger().log(Level.FINER, 
+                    "Unable to write keys to keyIdSchema{0}, keyIdTable={1} and keyIdColumn={2}", 
+                    new Object[]{this.keyIdSchema, this.keyIdTable, this.keyIdColumn});
+        }
+    }
+
+    private String buildWriteKeysInsertStmt() {
+        StringBuilder stmtBuilder = new StringBuilder();
+        stmtBuilder.append("INSERT INTO ");
+        if (this.keyIdSchema != null) {
+            stmtBuilder.append(this.keyIdSchema);
+            stmtBuilder.append('.');
+        }
+        stmtBuilder.append(this.keyIdTable);
+        stmtBuilder.append('(');
+        stmtBuilder.append(this.keyIdColumn);
+        stmtBuilder.append(") VALUES (?)");
+        String stmt = stmtBuilder.toString();
+        return stmt;
+    }
+    
     @Override
     public DataValidationEvent[] validateData(KnowledgeSource knowledgeSource)
             throws DataSourceBackendFailedDataValidationException,

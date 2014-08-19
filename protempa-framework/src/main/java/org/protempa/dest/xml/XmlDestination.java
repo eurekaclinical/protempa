@@ -22,11 +22,12 @@ package org.protempa.dest.xml;
 
 import java.io.Writer;
 import java.util.Map;
+import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
-import org.protempa.query.Query;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerInitException;
+import org.protempa.query.Query;
 
 /**
  *
@@ -77,7 +78,7 @@ public final class XmlDestination extends AbstractDestination {
     }
 
     @Override
-    public QueryResultsHandler getQueryResultsHandler(Query query, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
         return new XmlQueryResultsHandler(this.writer, this.propOrder, this.initialPropId, this.propIds, this.inferPropositionIdsNeeded, knowledgeSource);
     }
 

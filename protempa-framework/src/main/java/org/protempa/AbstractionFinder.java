@@ -501,7 +501,7 @@ final class AbstractionFinder {
             log(Level.FINE,
                     "Initializing query results handler for query {0}",
                     queryId);
-            try (QueryResultsHandler resultsHandler = this.destination.getQueryResultsHandler(getQuery(), getKnowledgeSource())) {
+            try (QueryResultsHandler resultsHandler = this.destination.getQueryResultsHandler(getQuery(), getDataSource(), getKnowledgeSource())) {
                 log(Level.FINE,
                         "Done initalizing query results handler for query {0}",
                         queryId);

@@ -46,6 +46,10 @@ final class SQLGenUniqueId implements LocalUniqueId {
         
         this.dbIds = dbIds.clone();
     }
+    
+    String[] getDbIds() {
+        return this.dbIds.clone();
+    }
 
     @Override
     public boolean equals(Object obj) {

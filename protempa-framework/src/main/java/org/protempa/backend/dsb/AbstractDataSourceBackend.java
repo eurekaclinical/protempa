@@ -20,9 +20,12 @@
 package org.protempa.backend.dsb;
 
 
+import java.util.List;
 import org.protempa.BackendCloseException;
+import org.protempa.DataSourceWriteException;
 import org.protempa.backend.AbstractBackend;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
+import org.protempa.proposition.Proposition;
 
 
 /**
@@ -51,6 +54,14 @@ public abstract class AbstractDataSourceBackend extends
     @Override
     public void failureOccurred(Throwable throwable) {
         
+    }
+
+    @Override
+    public void deleteAllKeys() throws DataSourceWriteException {
+    }
+    
+    @Override
+    public void writeKeys(List<Proposition> propositions) throws DataSourceWriteException {
     }
     
 }

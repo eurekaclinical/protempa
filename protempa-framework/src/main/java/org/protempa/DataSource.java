@@ -23,6 +23,7 @@
  */
 package org.protempa;
 
+import java.util.List;
 import java.util.Set;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
 import org.protempa.backend.dsb.DataSourceBackend;
@@ -106,6 +107,10 @@ public interface DataSource extends Source<DataSourceUpdatedEvent,
     DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds, Filter filters, 
             QuerySession qs) throws DataSourceReadException;
+    
+    void deleteAllKeys() throws DataSourceWriteException;
+    
+    void writeKeys(List<Proposition> propositions) throws DataSourceWriteException;
     
     /**
      * Called to signal to the data source backends that the Protempa query

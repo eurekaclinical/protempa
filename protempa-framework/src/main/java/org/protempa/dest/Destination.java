@@ -1,5 +1,6 @@
 package org.protempa.dest;
 
+import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
 import org.protempa.query.Query;
 
@@ -40,7 +41,7 @@ public interface Destination {
      * any exceptions occur. There may be a nested exception with more
      * information.
      */
-    QueryResultsHandler getQueryResultsHandler(Query query, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException;
+    QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException;
     
     /**
      * Returns an instance that can be used to discover information about 

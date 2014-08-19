@@ -1,5 +1,6 @@
 package org.protempa.dest.map;
 
+import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.QueryResultsHandler;
@@ -34,7 +35,7 @@ public final class MapDestination extends AbstractDestination {
     MapDestination() {}
 
     @Override
-    public QueryResultsHandler getQueryResultsHandler(Query query, KnowledgeSource knowledgeSource) {
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) {
         return new MapQueryResultsHandler();
     }
 

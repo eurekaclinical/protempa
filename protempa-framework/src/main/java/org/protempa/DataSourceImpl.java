@@ -197,6 +197,20 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
     }
 
     @Override
+    public void deleteAllKeys() throws DataSourceWriteException {
+        for (DataSourceBackend backend : getBackends()) {
+            backend.deleteAllKeys();
+        }
+    }
+    
+    @Override
+    public void writeKeys(List<Proposition> propositions) throws DataSourceWriteException {
+        for (DataSourceBackend backend : getBackends()) {
+            backend.writeKeys(propositions);
+        }
+    }
+
+    @Override
     public void backendUpdated(DataSourceBackendUpdatedEvent evt) {
         clear();
         fireDataSourceUpdated();

@@ -1,6 +1,7 @@
 package org.protempa.dest.table;
 
 import java.io.BufferedWriter;
+import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.QueryResultsHandlerInitException;
@@ -73,7 +74,7 @@ public final class TableDestination extends AbstractDestination {
     }
     
     @Override
-    public TableQueryResultsHandler getQueryResultsHandler(Query query, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+    public TableQueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
         return new TableQueryResultsHandler(this.out, this.columnDelimiter, 
                 this.rowPropositionIds, this.columnSpecs, this.headerWritten, 
                 this.inferPropositionIdsNeeded, knowledgeSource);

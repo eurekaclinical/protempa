@@ -78,6 +78,14 @@ public final class UniqueId implements Serializable {
         this.sourceId = newSourceId;
         this.localUniqueId = localUniqueId.clone();
     }
+    
+    public SourceId getSourceId() {
+        return this.sourceId;
+    }
+    
+    public LocalUniqueId getLocalUniqueId() {
+        return this.localUniqueId;
+    }
 
     @Override
     public boolean equals(Object obj) {

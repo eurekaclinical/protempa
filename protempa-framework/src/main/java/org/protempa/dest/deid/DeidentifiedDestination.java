@@ -1,5 +1,6 @@
 package org.protempa.dest.deid;
 
+import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.Destination;
@@ -34,15 +35,15 @@ import org.protempa.query.Query;
  * @author Andrew Post
  */
 public final class DeidentifiedDestination extends AbstractDestination {
-    private Destination destination;
+    private final Destination destination;
     
     public DeidentifiedDestination(Destination destination) {
         this.destination = destination;
     }
 
     @Override
-    public QueryResultsHandler getQueryResultsHandler(Query query, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
-       return new DeidentifiedQueryResultsHandler(this.destination.getQueryResultsHandler(query, knowledgeSource));
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+       return new DeidentifiedQueryResultsHandler(this.destination.getQueryResultsHandler(query, dataSource, knowledgeSource));
     }
 
     @Override
