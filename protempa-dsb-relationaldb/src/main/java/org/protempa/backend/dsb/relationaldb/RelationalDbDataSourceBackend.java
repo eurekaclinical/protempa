@@ -151,7 +151,7 @@ public abstract class RelationalDbDataSourceBackend
     public final void setKeyIdSchema(String keyIdSchema) {
         this.keyIdSchema = keyIdSchema;
     }
-    
+
     public final String getKeyIdSchema() {
         if (this.keyIdSchema != null) {
             return this.keyIdSchema;
@@ -159,7 +159,7 @@ public abstract class RelationalDbDataSourceBackend
             return this.schemaName;
         }
     }
-
+    
     @BackendProperty
     public final void setKeyIdJoinKey(String keyIdJoinKey) {
         this.keyIdJoinKey = keyIdJoinKey;
@@ -392,7 +392,7 @@ public abstract class RelationalDbDataSourceBackend
 
     @Override
     public void writeKeys(List<Proposition> propositions) throws DataSourceWriteException {
-        if (this.keyIdTable != null && this.keyIdColumn != null) {
+        if (this.keyIdSchema != null && this.keyIdTable != null && this.keyIdColumn != null) {
             int batchSize = 1000;
             try {
                 ConnectionSpec connectionSpecInstance =
