@@ -398,28 +398,29 @@ public abstract class RelationalDbDataSourceBackend
                 ConnectionSpec connectionSpecInstance =
                         getConnectionSpecInstance();
                 String stmt = buildWriteKeysInsertStmt();
-                try (Connection con = connectionSpecInstance.getOrCreate();
-                        PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
-                    int i = 0;
-                    for (Proposition proposition : propositions) {
-                        if (proposition.getId().equals(getKeyType())) {
-                            String[] dbIds = ((SQLGenUniqueId) proposition.getUniqueId().getLocalUniqueId()).getDbIds();
-                            if (dbIds.length != 1) {
-                                throw new DataSourceWriteException("Only one database key is allowed for " + this.getKeyTypePluralDisplayName());
-                            }
-                            prepareStatement.setObject(0, dbIds[0]);
-                            prepareStatement.addBatch();
-                            i++;
-                            if (i % batchSize == 0) {
-                                prepareStatement.executeBatch();
-                            }
-                        }
-                    }
-                    if (i % batchSize == 0) {
-                        prepareStatement.executeBatch();
-                    }
-                }
-            } catch (InvalidConnectionSpecArguments | SQLException ex) {
+                SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
+//                try (Connection con = connectionSpecInstance.getOrCreate();
+//                        PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
+//                    int i = 0;
+//                    for (Proposition proposition : propositions) {
+//                        if (proposition.getId().equals(getKeyType())) {
+//                            String[] dbIds = ((SQLGenUniqueId) proposition.getUniqueId().getLocalUniqueId()).getDbIds();
+//                            if (dbIds.length != 1) {
+//                                throw new DataSourceWriteException("Only one database key is allowed for " + this.getKeyTypePluralDisplayName());
+//                            }
+//                            prepareStatement.setObject(0, dbIds[0]);
+//                            prepareStatement.addBatch();
+//                            i++;
+//                            if (i % batchSize == 0) {
+//                                prepareStatement.executeBatch();
+//                            }
+//                        }
+//                    }
+//                    if (i % batchSize == 0) {
+//                        prepareStatement.executeBatch();
+//                    }
+//                }
+            } catch (InvalidConnectionSpecArguments/* | SQLException*/ ex) {
                 throw new DataSourceWriteException("Could not write key ids in data source backend " + nameForErrors(), ex);
             }
         } else {
