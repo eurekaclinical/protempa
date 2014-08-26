@@ -19,7 +19,6 @@
  */
 package org.protempa.backend.dsb;
 
-import java.util.List;
 import java.util.Set;
 import org.protempa.*;
 import org.protempa.backend.Backend;
@@ -27,6 +26,7 @@ import org.protempa.backend.DataSourceBackendFailedConfigurationValidationExcept
 import org.protempa.backend.DataSourceBackendFailedDataValidationException;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
 import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.dest.QueryResultsHandler;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
@@ -42,7 +42,8 @@ public interface DataSourceBackend extends
     
     DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds,
-            Set<String> propIds, Filter filters, QuerySession qs) 
+            Set<String> propIds, Filter filters, QuerySession qs,
+            QueryResultsHandler queryResultsHandler) 
             throws DataSourceReadException;
 
     GranularityFactory getGranularityFactory();
@@ -67,5 +68,6 @@ public interface DataSourceBackend extends
     
     void deleteAllKeys() throws DataSourceWriteException;
 
-    void writeKeys(List<Proposition> propositions) throws DataSourceWriteException;
+    void writeKeys(Set<String> keyIds) throws DataSourceWriteException;
+
 }

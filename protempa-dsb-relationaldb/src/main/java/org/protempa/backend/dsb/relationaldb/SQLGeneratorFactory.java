@@ -43,6 +43,7 @@ public final class SQLGeneratorFactory {
 
     private final ConnectionSpec connectionSpec;
     private final RelationalDbDataSourceBackend backend;
+    private final RelationalDatabaseSpec relationalDatabaseSpec;
 
     /**
      * Creates a new instance with a connection spec.
@@ -52,11 +53,14 @@ public final class SQLGeneratorFactory {
      * @param backend an initialized {@link RelationalDbDataSourceBackend}.
      */
     public SQLGeneratorFactory(ConnectionSpec connectionSpec,
+            RelationalDatabaseSpec relationalDatabaseSpec,
             RelationalDbDataSourceBackend backend) {
         assert connectionSpec != null : "connectionSpec cannot be null!";
         assert backend != null : "backend cannot be null!";
+        assert relationalDatabaseSpec != null : "relationalDatabaseSpec cannot be null";
         this.connectionSpec = connectionSpec;
         this.backend = backend;
+        this.relationalDatabaseSpec = relationalDatabaseSpec;
     }
 
     /**
@@ -104,6 +108,7 @@ public final class SQLGeneratorFactory {
                                 candidateInstance.getClass().getName());
                         candidateInstance.initialize(
                                 this.backend.isDryRun() ? null : this.connectionSpec, 
+                                this.relationalDatabaseSpec,
                                 this.backend);
                         logger.log(Level.FINE, "SQL generator {0} is loaded",
                                 candidateInstance.getClass().getName());
@@ -122,6 +127,7 @@ public final class SQLGeneratorFactory {
                                     metaData);
                             candidateInstance.initialize(
                                     this.backend.isDryRun() ? null : this.connectionSpec, 
+                                    this.relationalDatabaseSpec,
                                     this.backend);
                             logger.log(Level.FINE, "SQL generator {0} is loaded",
                                     candidateInstance.getClass().getName());

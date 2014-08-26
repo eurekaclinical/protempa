@@ -40,7 +40,7 @@ public class KeyLoaderDestination extends AbstractDestination {
     
     @Override
     public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
-        return new KeyLoaderQueryResultsHandler(dataSource, this.criteria);
+        return new KeyLoaderQueryResultsHandler(dataSource, knowledgeSource, this.criteria);
     }
     
 }

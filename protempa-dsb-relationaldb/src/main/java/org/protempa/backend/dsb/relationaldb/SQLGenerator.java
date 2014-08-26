@@ -88,6 +88,7 @@ public interface SQLGenerator {
      * @param backend a {@link RelationalDatabaseDataSourceBackend}.
      */
     void initialize(ConnectionSpec connectionSpec,
+            RelationalDatabaseSpec relationalDatabaseSpec,
             RelationalDbDataSourceBackend backend);
 
     /**

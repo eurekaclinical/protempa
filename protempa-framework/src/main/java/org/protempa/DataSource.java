@@ -28,6 +28,7 @@ import java.util.Set;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.dest.QueryResultsHandler;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
@@ -106,11 +107,12 @@ public interface DataSource extends Source<DataSourceUpdatedEvent,
     
     DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds, Filter filters, 
-            QuerySession qs) throws DataSourceReadException;
+            QuerySession qs, QueryResultsHandler queryResultsHandler) 
+            throws DataSourceReadException;
     
     void deleteAllKeys() throws DataSourceWriteException;
     
-    void writeKeys(List<Proposition> propositions) throws DataSourceWriteException;
+    void writeKeys(Set<String> keyIds) throws DataSourceWriteException;
     
     /**
      * Called to signal to the data source backends that the Protempa query
@@ -120,5 +122,5 @@ public interface DataSource extends Source<DataSourceUpdatedEvent,
      * @param e the exception that caused query failure, if any.
      */
     void failureOccurred(Throwable e);
-    
+
 }

@@ -36,6 +36,7 @@ import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 
 import java.util.Set;
+import org.protempa.dest.QueryResultsHandler;
 
 
 /**
@@ -83,7 +84,7 @@ public class MockDataSourceBackend extends AbstractDataSourceBackend {
     }
 
     @Override
-    public MultiplexingDataStreamingEventIterator readPropositions(Set<String> keyIds, Set<String> propIds, Filter filters, QuerySession qs) throws DataSourceReadException {
+    public MultiplexingDataStreamingEventIterator readPropositions(Set<String> keyIds, Set<String> propIds, Filter filters, QuerySession qs, QueryResultsHandler queryResultsHandler) throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

@@ -19,13 +19,14 @@
  */
 package org.protempa;
 
-import org.protempa.backend.DataSourceBackendUpdatedEvent;
-import org.protempa.backend.dsb.DataSourceBackend;
 import java.util.ArrayList;
-import org.protempa.backend.dsb.filter.Filter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.protempa.backend.DataSourceBackendUpdatedEvent;
+import org.protempa.backend.dsb.DataSourceBackend;
+import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.dest.QueryResultsHandler;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
@@ -39,6 +40,8 @@ import org.protempa.proposition.value.UnitFactory;
  */
 public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent, DataSourceBackend, 
         DataSourceUpdatedEvent, DataSourceBackendUpdatedEvent> implements DataSource {
+    
+    private QueryResultsHandler queryResultsHandler;
 
     public DataSourceImpl(DataSourceBackend[] backends) {
         super(backends != null ? backends : new DataSourceBackend[0]);
@@ -179,7 +182,8 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
     @Override
     public DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds,
-            Filter filters, QuerySession qs)
+            Filter filters, QuerySession qs, 
+            QueryResultsHandler queryResultsHandler)
             throws DataSourceReadException {
         Set<String> notNullKeyIds = handleKeyIdSetArgument(keyIds);
         Set<String> notNullPropIds = handlePropIdSetArgument(propIds);
@@ -190,7 +194,7 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
                 new ArrayList<>(backends.length);
         for (DataSourceBackend backend : backends) {
             itrs.add(backend.readPropositions(notNullKeyIds,
-                    notNullPropIds, filters, qs));
+                    notNullPropIds, filters, qs, queryResultsHandler));
         }
         return new MultiplexingDataStreamingEventIterator(itrs,
                 new PropositionDataStreamerProcessor());
@@ -204,9 +208,9 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
     }
     
     @Override
-    public void writeKeys(List<Proposition> propositions) throws DataSourceWriteException {
+    public void writeKeys(Set<String> keyIds) throws DataSourceWriteException {
         for (DataSourceBackend backend : getBackends()) {
-            backend.writeKeys(propositions);
+            backend.writeKeys(keyIds);
         }
     }
 

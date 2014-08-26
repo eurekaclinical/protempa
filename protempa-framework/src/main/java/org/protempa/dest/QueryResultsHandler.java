@@ -22,7 +22,7 @@ package org.protempa.dest;
 
 import java.util.List;
 import java.util.Map;
-import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;

@@ -19,7 +19,6 @@
  */
 package org.protempa.backend;
 
-import org.protempa.ProtempaException;
 import org.protempa.backend.annotations.BackendProperty;
 import org.protempa.backend.dsb.AbstractDataSourceBackend;
 

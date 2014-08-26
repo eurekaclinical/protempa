@@ -19,7 +19,6 @@
  */
 package org.protempa.test;
 
-import org.protempa.ProtempaException;
 import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.dsb.relationaldb.ColumnSpec;
 import org.protempa.backend.dsb.relationaldb.EntitySpec;
@@ -57,13 +56,13 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
         this.mapper = new PropIdToSQLCodeMapper("/etc/mappings/",
                 getClass());
         setSchemaName("TEST");
-        setKeyIdTable("PATIENT");
-        setKeyIdColumn("PATIENT_KEY");
-        setKeyIdJoinKey("PATIENT_KEY");
+        setDefaultKeyIdTable("PATIENT");
+        setDefaultKeyIdColumn("PATIENT_KEY");
+        setDefaultKeyIdJoinKey("PATIENT_KEY");
     }
 
     @Override
-    protected StagingSpec[] stagedSpecs() throws IOException {
+    protected StagingSpec[] stagedSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException {
         return null;
     }
 
@@ -78,7 +77,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
     }
 
     @Override
-    protected EntitySpec[] constantSpecs() throws IOException {
+    protected EntitySpec[] constantSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException {
         String schemaName = getSchemaName();
         EntitySpec[] constantSpecs = new EntitySpec[] {
 
@@ -87,23 +86,23 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         null,
                         new String[] { "PatientAll" },
                         false,
-                        new ColumnSpec(getKeyIdSchema(), getKeyIdTable(),
-                                getKeyIdColumn()),
-                        new ColumnSpec[] { new ColumnSpec(getKeyIdSchema(),
-                                getKeyIdTable(), getKeyIdColumn()) },
+                        new ColumnSpec(keyIdSchema, keyIdTable,
+                                keyIdColumn),
+                        new ColumnSpec[] { new ColumnSpec(keyIdSchema,
+                                keyIdTable, keyIdColumn) },
                         null,
                         null,
                         new PropertySpec[] { new PropertySpec("patientId",
-                                null, new ColumnSpec(getKeyIdSchema(),
-                                        getKeyIdTable(), "PATIENT_KEY"),
+                                null, new ColumnSpec(keyIdSchema,
+                                        keyIdTable, "PATIENT_KEY"),
                                 ValueType.NOMINALVALUE) },
                         new ReferenceSpec[] {
                                 new ReferenceSpec(
                                         "encounters",
                                         "Encounters",
                                         new ColumnSpec[] { new ColumnSpec(
-                                                getKeyIdSchema(),
-                                                getKeyIdTable(),
+                                                keyIdSchema,
+                                                keyIdTable,
                                                 new JoinSpec(
                                                         "PATIENT_KEY",
                                                         "PATIENT_KEY",
@@ -116,8 +115,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                         "patientDetails",
                                         "Patient Details",
                                         new ColumnSpec[] { new ColumnSpec(
-                                                getKeyIdSchema(),
-                                                getKeyIdTable(), "PATIENT_KEY") },
+                                                keyIdSchema,
+                                                keyIdTable, "PATIENT_KEY") },
                                         ReferenceSpec.Type.MANY)
                         }, null, null,
                         null, null, null, null, null, null),
@@ -126,25 +125,25 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         null,
                         new String[] { "Patient" },
                         true,
-                        new ColumnSpec(getKeyIdSchema(), getKeyIdTable(),
-                                getKeyIdColumn()),
+                        new ColumnSpec(keyIdSchema, keyIdTable,
+                                keyIdColumn),
                         new ColumnSpec[] { new ColumnSpec(schemaName,
-                                getKeyIdTable(), "PATIENT_KEY") },
+                                keyIdTable, "PATIENT_KEY") },
                         null,
                         null,
                         new PropertySpec[] {
                                 new PropertySpec(
                                         "dateOfBirth",
                                         null,
-                                        new ColumnSpec(getKeyIdSchema(),
-                                                getKeyIdTable(), "DOB"),
+                                        new ColumnSpec(keyIdSchema,
+                                                keyIdTable, "DOB"),
                                         ValueType.DATEVALUE,
                                         new JDBCDateTimeTimestampDateValueFormat()),
                                 new PropertySpec(
                                         "patientId",
                                         null,
-                                        new ColumnSpec(getKeyIdSchema(),
-                                                getKeyIdTable(), "PATIENT_KEY"),
+                                        new ColumnSpec(keyIdSchema,
+                                                keyIdTable, "PATIENT_KEY"),
                                         ValueType.NOMINALVALUE),
                                 new PropertySpec("firstName", null,
                                         new ColumnSpec(schemaName, "PATIENT",
@@ -213,8 +212,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         null,
                         new String[] { "AttendingPhysician" },
                         false,
-                        new ColumnSpec(getKeyIdSchema(), getKeyIdTable(),
-                                getKeyIdColumn(), new JoinSpec("PATIENT_KEY",
+                        new ColumnSpec(keyIdSchema, keyIdTable,
+                                keyIdColumn, new JoinSpec("PATIENT_KEY",
                                         "PATIENT_KEY", new ColumnSpec(
                                                 schemaName, "ENCOUNTER",
                                                 new JoinSpec("PROVIDER_KEY",
@@ -239,7 +238,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
     }
 
     @Override
-    protected EntitySpec[] eventSpecs() throws IOException {
+    protected EntitySpec[] eventSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException {
         String schemaName = getSchemaName();
         EntitySpec[] eventSpecs = new EntitySpec[] {
                 new EntitySpec(
@@ -247,8 +246,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         null,
                         new String[] { "Encounter" },
                         true,
-                        new ColumnSpec(getKeyIdSchema(), getKeyIdTable(),
-                                getKeyIdColumn(), new JoinSpec("PATIENT_KEY",
+                        new ColumnSpec(keyIdSchema, keyIdTable,
+                                keyIdColumn, new JoinSpec("PATIENT_KEY",
                                         "PATIENT_KEY", new ColumnSpec(
                                                 schemaName, "ENCOUNTER"))),
                         new ColumnSpec[] { new ColumnSpec(schemaName,
@@ -381,9 +380,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 0),
                         true,
                         new ColumnSpec(
-                                getKeyIdSchema(),
-                                getKeyIdTable(),
-                                getKeyIdColumn(),
+                                keyIdSchema,
+                                keyIdTable,
+                                keyIdColumn,
                                 new JoinSpec(
                                         "PATIENT_KEY",
                                         "PATIENT_KEY",
@@ -426,9 +425,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 0),
                         true,
                         new ColumnSpec(
-                                getKeyIdSchema(),
-                                getKeyIdTable(),
-                                getKeyIdColumn(),
+                                keyIdSchema,
+                                keyIdTable,
+                                keyIdColumn,
                                 new JoinSpec(
                                         "PATIENT_KEY",
                                         "PATIENT_KEY",
@@ -470,8 +469,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         this.mapper.readCodes("cpt_procedure_02232012.txt",
                                 0),
                         true,
-                        new ColumnSpec(getKeyIdSchema(), getKeyIdTable(),
-                                getKeyIdColumn(), new JoinSpec("PATIENT_KEY",
+                        new ColumnSpec(keyIdSchema, keyIdTable,
+                                keyIdColumn, new JoinSpec("PATIENT_KEY",
                                         "PATIENT_KEY", new ColumnSpec(
                                                 schemaName, "ENCOUNTER",
                                                 new JoinSpec("ENCOUNTER_KEY",
@@ -511,9 +510,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         this.mapper.readCodes("meds_02232012.txt", 0),
                         true,
                         new ColumnSpec(
-                                getKeyIdSchema(),
-                                getKeyIdTable(),
-                                getKeyIdColumn(),
+                                keyIdSchema,
+                                keyIdTable,
+                                keyIdColumn,
                                 new JoinSpec("PATIENT_KEY", "PATIENT_KEY",
                                         new ColumnSpec(schemaName, "ENCOUNTER",
                                                 new JoinSpec("ENCOUNTER_KEY",
@@ -542,7 +541,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
     }
 
     @Override
-    protected EntitySpec[] primitiveParameterSpecs() throws IOException {
+    protected EntitySpec[] primitiveParameterSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException {
         String schemaName = getSchemaName();
         EntitySpec[] primitiveParameterSpecs = new EntitySpec[] {
                 new EntitySpec(
@@ -551,9 +550,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         this.mapper.readCodes("labs_02232012.txt", 0),
                         true,
                         new ColumnSpec(
-                                getKeyIdSchema(),
-                                getKeyIdTable(),
-                                getKeyIdColumn(),
+                                keyIdSchema,
+                                keyIdTable,
+                                keyIdColumn,
                                 new JoinSpec("PATIENT_KEY", "PATIENT_KEY",
                                         new ColumnSpec(schemaName, "ENCOUNTER",
                                                 new JoinSpec("ENCOUNTER_KEY",
@@ -593,9 +592,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 "vitals_result_types_02232012.txt", 0),
                         true,
                         new ColumnSpec(
-                                getKeyIdSchema(),
-                                getKeyIdTable(),
-                                getKeyIdColumn(),
+                                keyIdSchema,
+                                keyIdTable,
+                                keyIdColumn,
                                 new JoinSpec(
                                         "PATIENT_KEY",
                                         "PATIENT_KEY",

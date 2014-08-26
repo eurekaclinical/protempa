@@ -21,6 +21,7 @@ package org.protempa.dest.keyloader;
  */
 
 import java.util.List;
+import org.protempa.KnowledgeSource;
 import org.protempa.proposition.Proposition;
 
 /**
@@ -28,7 +29,9 @@ import org.protempa.proposition.Proposition;
  * @author Andrew Post
  */
 public interface Criteria {
-    boolean evaluate(List<Proposition> propositions);
+    boolean evaluate(List<Proposition> propositions) throws CriteriaEvaluateException;
     
     String[] getPropositionIdsSpecified();
+    
+    void init(KnowledgeSource knowledgeSource) throws CriteriaInitException;
 }

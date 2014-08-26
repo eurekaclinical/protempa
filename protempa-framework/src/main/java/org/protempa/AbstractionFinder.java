@@ -22,7 +22,6 @@ package org.protempa;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -311,6 +310,14 @@ final class AbstractionFinder {
             return propIds;
         }
         
+        protected final Filter getFilters() {
+            return this.filters;
+        }
+        
+        protected final Set<String> getKeyIds() {
+            return this.keyIds;
+        }
+        
         protected final Set<String> getSubtrees() throws KnowledgeSourceReadException {
             if (subtrees == null) {
                 this.subtrees = knowledgeSource.collectSubtrees(this.propIds.toArray(new String[this.propIds.size()]));
@@ -397,7 +404,7 @@ final class AbstractionFinder {
             }
         }
 
-        final DataStreamingEventIterator<Proposition> newDataIterator()
+        DataStreamingEventIterator<Proposition> newDataIterator()
                 throws KnowledgeSourceReadException, DataSourceReadException {
             log(Level.INFO, "Retrieving data for query {0}", query.getId());
             Set<String> inDataSourcePropIds = getKnowledgeSource()
@@ -412,7 +419,8 @@ final class AbstractionFinder {
             }
             DataStreamingEventIterator<Proposition> itr
                     = getDataSource().readPropositions(this.keyIds,
-                            inDataSourcePropIds, this.filters, getQuerySession());
+                            inDataSourcePropIds, this.filters, 
+                            getQuerySession(), null);
             return itr;
         }
 
@@ -492,6 +500,26 @@ final class AbstractionFinder {
             super(query, querySession, strategy);
             assert resultsHandlerFactory != null : "resultsHandlerFactory cannot be null";
             this.destination = resultsHandlerFactory;
+        }
+        
+        DataStreamingEventIterator<Proposition> newDataIterator()
+                throws KnowledgeSourceReadException, DataSourceReadException {
+            log(Level.INFO, "Retrieving data for query {0}", getQuery().getId());
+            Set<String> inDataSourcePropIds = getKnowledgeSource()
+                    .inDataSourcePropositionIds(
+                            getPropIds().toArray(new String[getPropIds().size()]));
+            if (isLoggable(Level.FINER)) {
+                log(Level.FINER, "Asking data source for {0} for query {1}",
+                        new Object[]{
+                            StringUtils.join(inDataSourcePropIds, ", "),
+                            getQuery().getId()
+                        });
+            }
+            DataStreamingEventIterator<Proposition> itr
+                    = getDataSource().readPropositions(getKeyIds(),
+                            inDataSourcePropIds, getFilters(), 
+                            getQuerySession(), this.resultsHandler);
+            return itr;
         }
 
         @Override

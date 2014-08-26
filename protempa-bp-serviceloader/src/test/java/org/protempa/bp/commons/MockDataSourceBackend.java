@@ -19,17 +19,18 @@
  */
 package org.protempa.bp.commons;
 
-import org.protempa.MultiplexingDataStreamingEventIterator;
 import java.util.Set;
 import org.protempa.*;
+import org.protempa.MultiplexingDataStreamingEventIterator;
 import org.protempa.backend.AbstractCommonsDataSourceBackend;
 import org.protempa.backend.BackendInitializationException;
-import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.DataSourceBackendFailedConfigurationValidationException;
 import org.protempa.backend.DataSourceBackendFailedDataValidationException;
+import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.dsb.DataValidationEvent;
 import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.dest.QueryResultsHandler;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 
@@ -64,7 +65,7 @@ public class MockDataSourceBackend extends AbstractCommonsDataSourceBackend {
     }
 
     @Override
-    public MultiplexingDataStreamingEventIterator readPropositions(Set<String> keyIds, Set<String> propIds, Filter filters, QuerySession qs) throws DataSourceReadException {
+    public MultiplexingDataStreamingEventIterator readPropositions(Set<String> keyIds, Set<String> propIds, Filter filters, QuerySession qs, QueryResultsHandler queryResultsHandler) throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

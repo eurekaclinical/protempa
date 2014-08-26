@@ -83,8 +83,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     @Override
     public void initialize(
-            ConnectionSpec connectionSpec, RelationalDbDataSourceBackend backend) {
-        RelationalDatabaseSpec relationalDatabaseSpec = backend.getRelationalDatabaseSpec();
+            ConnectionSpec connectionSpec, RelationalDatabaseSpec relationalDatabaseSpec, RelationalDbDataSourceBackend backend) {
+        
         if (relationalDatabaseSpec != null) {
             this.primitiveParameterEntitySpecs = relationalDatabaseSpec.getPrimitiveParameterSpecs();
             populatePropositionMap(this.primitiveParameterSpecs,

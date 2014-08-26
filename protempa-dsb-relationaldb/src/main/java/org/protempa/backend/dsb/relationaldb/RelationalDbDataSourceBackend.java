@@ -24,11 +24,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import org.apache.commons.lang3.StringUtils;
+import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.DatabaseAPI;
 import org.arp.javautil.sql.InvalidConnectionSpecArguments;
@@ -42,6 +46,8 @@ import org.protempa.backend.DataSourceBackendInitializationException;
 import org.protempa.backend.annotations.BackendProperty;
 import org.protempa.backend.dsb.DataValidationEvent;
 import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.dest.QueryResultsHandler;
+import org.protempa.dest.keyloader.KeyLoaderQueryResultsHandler;
 import org.protempa.proposition.Proposition;
 
 /**
@@ -53,14 +59,12 @@ import org.protempa.proposition.Proposition;
  * and Oracle 10g using the ojdbc6 driver.
  *
  * Two system properties control the behavior of the backend and are useful for
- * debugging. The
- * <code>protempa.dsb.relationaldatabase.sqlgenerator</code> property can be set
- * with the full class name of a {@link SQLGenerator} service provider to force
- * its use. This circumvents the built-in algorithm for picking a service
- * provider to use. The
+ * debugging. The <code>protempa.dsb.relationaldatabase.sqlgenerator</code>
+ * property can be set with the full class name of a {@link SQLGenerator}
+ * service provider to force its use. This circumvents the built-in algorithm
+ * for picking a service provider to use. The
  * <code>protempa.dsb.relationaldatabase.skipexecution</code> property can be
- * set to
- * <code>true</code> to cause the backend to generate SQL queries but not
+ * set to <code>true</code> to cause the backend to generate SQL queries but not
  * execute them. Together with turning on logging to see the SQL queries, this
  * can be useful for debugging the generated SQL without having to wait for them
  * to execute.
@@ -75,100 +79,120 @@ import org.protempa.proposition.Proposition;
 public abstract class RelationalDbDataSourceBackend
         extends AbstractCommonsDataSourceBackend {
 
-    private static final DataValidationEvent[] EMPTY_VALIDATION_EVENT_ARRAY =
-            new DataValidationEvent[0];
+    private static final DataValidationEvent[] EMPTY_VALIDATION_EVENT_ARRAY
+            = new DataValidationEvent[0];
     private DatabaseAPI databaseAPI;
     private String databaseId;
     protected String username;
     private String password;
-    private RelationalDatabaseSpec relationalDatabaseSpec;
     private SQLGenerator sqlGenerator;
     private Integer queryTimeout;
     private boolean dryRun;
     private String schemaName;
-    private String keyIdTable;
-    private String keyIdColumn;
-    private String keyIdSchema;
-    private String keyIdJoinKey;
+    private String defaultKeyIdTable;
+    private String defaultKeyIdColumn;
+    private String defaultKeyIdJoinKey;
+    private String keyLoaderKeyIdSchema;
+    private String keyLoaderKeyIdTable;
+    private String keyLoaderKeyIdColumn;
+    private String keyLoaderKeyIdJoinKey;
+    private FromBackendRelationalDatabaseSpecBuilder relationalDatabaseSpecBuilder;
 
     public RelationalDbDataSourceBackend() {
-        this(null);
-        
-        this.dryRun = 
-                Boolean.getBoolean(SQLGenUtil.SYSTEM_PROPERTY_SKIP_EXECUTION);
-    }
+        this.databaseAPI = DatabaseAPI.DRIVERMANAGER;
 
-    /**
-     * Instantiates the backend with the specification of a mapping from
-     * propositions to where they are stored in the database.
-     *
-     * @param relationalDatabaseSpec a {@link RelationalDatabaseSpec}, the
-     * specification of where propositions are stored in the database.
-     */
-    public RelationalDbDataSourceBackend(
-            RelationalDatabaseSpec relationalDatabaseSpec) {
-        this(relationalDatabaseSpec, null);
-    }
-
-    public RelationalDbDataSourceBackend(
-            RelationalDatabaseSpec relationalDatabaseSpec,
-            DatabaseAPI databaseAPI) {
-        this.relationalDatabaseSpec = relationalDatabaseSpec;
-        if (databaseAPI == null) {
-            databaseAPI = DatabaseAPI.DRIVERMANAGER;
-        }
-        this.databaseAPI = databaseAPI;
+        this.dryRun
+                = Boolean.getBoolean(SQLGenUtil.SYSTEM_PROPERTY_SKIP_EXECUTION);
     }
 
     @BackendProperty
     public final void setSchemaName(String schemaName) {
         this.schemaName = schemaName;
     }
-    
+
     public final String getSchemaName() {
         return this.schemaName;
     }
 
     @BackendProperty
-    public final void setKeyIdTable(String keyIdTable) {
-        this.keyIdTable = keyIdTable;
+    public final void setDefaultKeyIdTable(String defaultKeyIdTable) {
+        this.defaultKeyIdTable = defaultKeyIdTable;
     }
-    
-    public final String getKeyIdTable() {
-        return keyIdTable;
+
+    public final String getDefaultKeyIdTable() {
+        return defaultKeyIdTable;
     }
 
     @BackendProperty
-    public final void setKeyIdColumn(String keyIdColumn) {
-        this.keyIdColumn = keyIdColumn;
+    public final void setDefaultKeyIdColumn(String defaultKeyIdColumn) {
+        this.defaultKeyIdColumn = defaultKeyIdColumn;
     }
-    
-    public final String getKeyIdColumn() {
-        return keyIdColumn;
+
+    public final String getDefaultKeyIdColumn() {
+        return defaultKeyIdColumn;
     }
 
     @BackendProperty
-    public final void setKeyIdSchema(String keyIdSchema) {
-        this.keyIdSchema = keyIdSchema;
+    public final void setKeyLoaderKeyIdSchema(String keyLoaderKeyIdSchema) {
+        this.keyLoaderKeyIdSchema = keyLoaderKeyIdSchema;
     }
 
-    public final String getKeyIdSchema() {
-        if (this.keyIdSchema != null) {
-            return this.keyIdSchema;
+    public final String getKeyLoaderKeyIdSchema() {
+        if (this.keyLoaderKeyIdSchema != null) {
+            return this.keyLoaderKeyIdSchema;
         } else {
             return this.schemaName;
         }
     }
-    
+
     @BackendProperty
-    public final void setKeyIdJoinKey(String keyIdJoinKey) {
-        this.keyIdJoinKey = keyIdJoinKey;
+    public final void setDefaultKeyIdJoinKey(String defaultKeyIdJoinKey) {
+        this.defaultKeyIdJoinKey = defaultKeyIdJoinKey;
     }
 
-    public final String getKeyIdJoinKey() {
-        return keyIdJoinKey;
+    public final String getDefaultKeyIdJoinKey() {
+        return defaultKeyIdJoinKey;
     }
-    
+
+    public String getKeyLoaderKeyIdTable() {
+        if (this.keyLoaderKeyIdTable != null) {
+            return this.keyLoaderKeyIdTable;
+        } else {
+            return this.defaultKeyIdTable;
+        }
+    }
+
+    @BackendProperty
+    public void setKeyLoaderKeyIdTable(String keyLoaderKeyIdTable) {
+        this.keyLoaderKeyIdTable = keyLoaderKeyIdTable;
+    }
+
+    public String getKeyLoaderKeyIdColumn() {
+        if (this.keyLoaderKeyIdColumn != null) {
+            return this.keyLoaderKeyIdColumn;
+        } else {
+            return this.defaultKeyIdColumn;
+        }
+    }
+
+    @BackendProperty
+    public void setKeyLoaderKeyIdColumn(String keyLoaderKeyIdColumn) {
+        this.keyLoaderKeyIdColumn = keyLoaderKeyIdColumn;
+    }
+
+    public String getKeyLoaderKeyIdJoinKey() {
+        if (this.keyLoaderKeyIdJoinKey != null) {
+            return this.keyLoaderKeyIdJoinKey;
+        } else {
+            return this.defaultKeyIdJoinKey;
+        }
+    }
+
+    @BackendProperty
+    public void setKeyLoaderKeyIdJoinKey(String keyLoaderKeyIdJoinKey) {
+        this.keyLoaderKeyIdJoinKey = keyLoaderKeyIdJoinKey;
+    }
+
     /**
      * Collects the database connection information specified in this backend's
      * configuration, and uses it to try and get a SQL generator with which to
@@ -186,18 +210,8 @@ public abstract class RelationalDbDataSourceBackend
             throws BackendInitializationException {
         super.initialize(config);
 
-        this.relationalDatabaseSpec = createRelationalDatabaseSpec();
-
-
-    }
-
-    public void setRelationalDatabaseSpec(RelationalDatabaseSpec spec) {
-        this.sqlGenerator = null;
-        this.relationalDatabaseSpec = spec;
-    }
-
-    public RelationalDatabaseSpec getRelationalDatabaseSpec() {
-        return this.relationalDatabaseSpec;
+        this.relationalDatabaseSpecBuilder
+                = this.createRelationalDatabaseSpecBuilder();
     }
 
     public boolean isDryRun() {
@@ -207,12 +221,12 @@ public abstract class RelationalDbDataSourceBackend
     public void setDryRun(boolean dryRun) {
         this.dryRun = dryRun;
     }
-    
+
     @BackendProperty(propertyName = "dryRun")
     public void parseDryRun(String dryRunString) {
         setDryRun(Boolean.parseBoolean(dryRunString));
     }
-    
+
     /**
      * Returns which Java database API this backend is configured to use.
      *
@@ -225,9 +239,8 @@ public abstract class RelationalDbDataSourceBackend
 
     /**
      * Configures which Java database API to use ({@link java.sql.DriverManager}
-     * or {@link javax.sql.DataSource}. If
-     * <code>null</code>, the default is assigned
-     * ({@link DatabaseAPI.DRIVERMANAGER}).
+     * or {@link javax.sql.DataSource}. If <code>null</code>, the default is
+     * assigned ({@link DatabaseAPI.DRIVERMANAGER}).
      *
      * @param databaseAPI a {@link DatabaseAPI}.
      */
@@ -273,8 +286,8 @@ public abstract class RelationalDbDataSourceBackend
     }
 
     /**
-     * Sets the query timeout. If
-     * <code>null</code>, no timeout will be set (the default).
+     * Sets the query timeout. If <code>null</code>, no timeout will be set (the
+     * default).
      *
      * @param seconds the timeout in seconds, or <code>null</code> to disable
      * query timeout.
@@ -290,9 +303,8 @@ public abstract class RelationalDbDataSourceBackend
     /**
      * Returns the query timeout in seconds. The query timeout setting halts
      * query execution if execution does not complete within the specified
-     * number of seconds. A value of
-     * <code>0</code> or a negative number (the default) means that no query
-     * timeout is set.
+     * number of seconds. A value of <code>0</code> or a negative number (the
+     * default) means that no query timeout is set.
      *
      * @return the query timeout in seconds, or <code>null</code> if query
      * timeout is disabled.
@@ -344,13 +356,14 @@ public abstract class RelationalDbDataSourceBackend
     @Override
     public DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds, Filter filters,
-            QuerySession qs)
+            QuerySession qs, QueryResultsHandler queryResultsHandler)
             throws DataSourceReadException {
         if (this.sqlGenerator == null) {
             try {
-                ConnectionSpec connectionSpecInstance =
-                        getConnectionSpecInstance();
+                ConnectionSpec connectionSpecInstance
+                        = getConnectionSpecInstance();
                 this.sqlGenerator = new SQLGeneratorFactory(connectionSpecInstance,
+                        this.relationalDatabaseSpecBuilder.build(queryResultsHandler),
                         this).newInstance();
             } catch (InvalidConnectionSpecArguments | SQLException | SQLGeneratorLoadException | NoCompatibleSQLGeneratorException ex) {
                 throw new DataSourceReadException(
@@ -361,22 +374,22 @@ public abstract class RelationalDbDataSourceBackend
         return this.sqlGenerator.readPropositionsStreaming(keyIds, propIds,
                 filters);
     }
-    
+
     @Override
     public void deleteAllKeys() throws DataSourceWriteException {
-        if (this.keyIdTable != null && this.keyIdColumn != null) {
+        if (this.keyLoaderKeyIdSchema != null || this.keyLoaderKeyIdTable != null) {
             try {
-                ConnectionSpec connectionSpecInstance =
-                            getConnectionSpecInstance();
+                ConnectionSpec connectionSpecInstance
+                        = getConnectionSpecInstance();
                 try (Connection con = connectionSpecInstance.getOrCreate()) {
                     try (Statement stmt = con.createStatement()) {
                         StringBuilder stmtBuilder = new StringBuilder();
                         stmtBuilder.append("DELETE FROM ");
-                        if (this.keyIdSchema != null) {
-                            stmtBuilder.append(this.keyIdSchema);
+                        if (getKeyLoaderKeyIdSchema() != null) {
+                            stmtBuilder.append(getKeyLoaderKeyIdSchema());
                             stmtBuilder.append('.');
                         }
-                        stmtBuilder.append(this.keyIdTable);
+                        stmtBuilder.append(getKeyLoaderKeyIdTable());
                         stmt.execute(stmtBuilder.toString());
                     }
                 }
@@ -384,67 +397,91 @@ public abstract class RelationalDbDataSourceBackend
                 throw new DataSourceWriteException("Could not delete all key ids in data source backend " + nameForErrors(), ex);
             }
         } else {
-            SQLGenUtil.logger().log(Level.FINER, 
-                    "Unable to delete all keys in keyIdSchema{0}, keyIdTable={1} and keyIdColumn={2}", 
-                    new Object[]{this.keyIdSchema, this.keyIdTable, this.keyIdColumn});
+            SQLGenUtil.logger().log(Level.FINER,
+                    "Unable to delete all keys in keyIdSchema{0}, keyIdTable={1} and keyIdColumn={2}",
+                    new Object[]{this.keyLoaderKeyIdSchema, this.defaultKeyIdTable, this.defaultKeyIdColumn});
         }
     }
 
     @Override
-    public void writeKeys(List<Proposition> propositions) throws DataSourceWriteException {
-        if (this.keyIdSchema != null && this.keyIdTable != null && this.keyIdColumn != null) {
+    public void writeKeys(Set<String> keyIds) throws DataSourceWriteException {
+        if (this.keyLoaderKeyIdSchema != null || this.keyLoaderKeyIdTable != null) {
             int batchSize = 1000;
             try {
-                ConnectionSpec connectionSpecInstance =
-                        getConnectionSpecInstance();
-                String stmt = buildWriteKeysInsertStmt();
-                SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
-//                try (Connection con = connectionSpecInstance.getOrCreate();
-//                        PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
-//                    int i = 0;
-//                    for (Proposition proposition : propositions) {
-//                        if (proposition.getId().equals(getKeyType())) {
-//                            String[] dbIds = ((SQLGenUniqueId) proposition.getUniqueId().getLocalUniqueId()).getDbIds();
-//                            if (dbIds.length != 1) {
-//                                throw new DataSourceWriteException("Only one database key is allowed for " + this.getKeyTypePluralDisplayName());
-//                            }
-//                            prepareStatement.setObject(0, dbIds[0]);
-//                            prepareStatement.addBatch();
-//                            i++;
-//                            if (i % batchSize == 0) {
-//                                prepareStatement.executeBatch();
-//                            }
-//                        }
-//                    }
-//                    if (i % batchSize == 0) {
-//                        prepareStatement.executeBatch();
-//                    }
-//                }
-            } catch (InvalidConnectionSpecArguments/* | SQLException*/ ex) {
+                ConnectionSpec connectionSpecInstance
+                        = getConnectionSpecInstance();
+
+                try (Connection con = connectionSpecInstance.getOrCreate()) {
+                    int i = 0;
+                    List<String> subKeyIds = new ArrayList<>(batchSize);
+                    String stmt = buildWriteKeysInsertStmt(batchSize);
+                    SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
+                    try (PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
+                        for (String keyId : keyIds) {
+                            subKeyIds.add(keyId);
+                            if (++i % batchSize == 0) {
+                                for (int j = 0, n = subKeyIds.size(); j < n; j++) {
+                                    prepareStatement.setObject(j + 1, subKeyIds.get(j));
+                                }
+                                prepareStatement.execute();
+                            }
+                        }
+                    }
+                    if (!subKeyIds.isEmpty()) {
+                        stmt = buildWriteKeysInsertStmt(subKeyIds.size());
+                        SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
+                        i = 0;
+                        try (PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
+                            for (String subKeyId : subKeyIds) {
+                                prepareStatement.setObject(++i, subKeyId);
+                            }
+                            prepareStatement.execute();
+                        }
+                    }
+                }
+            } catch (InvalidConnectionSpecArguments | SQLException ex) {
                 throw new DataSourceWriteException("Could not write key ids in data source backend " + nameForErrors(), ex);
             }
         } else {
-            SQLGenUtil.logger().log(Level.FINER, 
-                    "Unable to write keys to keyIdSchema{0}, keyIdTable={1} and keyIdColumn={2}", 
-                    new Object[]{this.keyIdSchema, this.keyIdTable, this.keyIdColumn});
+            SQLGenUtil.logger().log(Level.FINER,
+                    "Unable to write keys to keyIdSchema{0}, keyIdTable={1} and keyIdColumn={2}",
+                    new Object[]{this.keyLoaderKeyIdSchema, this.defaultKeyIdTable, this.defaultKeyIdColumn});
         }
     }
 
-    private String buildWriteKeysInsertStmt() {
+    private String buildWriteKeysInsertStmt(int size) {
         StringBuilder stmtBuilder = new StringBuilder();
         stmtBuilder.append("INSERT INTO ");
-        if (this.keyIdSchema != null) {
-            stmtBuilder.append(this.keyIdSchema);
+        if (getKeyLoaderKeyIdSchema() != null) {
+            stmtBuilder.append(getKeyLoaderKeyIdSchema());
             stmtBuilder.append('.');
         }
-        stmtBuilder.append(this.keyIdTable);
-        stmtBuilder.append('(');
-        stmtBuilder.append(this.keyIdColumn);
-        stmtBuilder.append(") VALUES (?)");
+        stmtBuilder.append(getKeyLoaderKeyIdTable());
+        stmtBuilder.append(" (");
+        stmtBuilder.append(getKeyLoaderKeyIdColumn());
+        stmtBuilder.append(", ");
+        stmtBuilder.append(getKeyLoaderKeyIdJoinKey());
+        stmtBuilder.append(") ");
+        stmtBuilder.append(" SELECT ");
+        stmtBuilder.append(getDefaultKeyIdColumn());
+        stmtBuilder.append(", ");
+        stmtBuilder.append(getDefaultKeyIdJoinKey());
+        stmtBuilder.append(" FROM ");
+        if (getSchemaName() != null) {
+            stmtBuilder.append(getSchemaName());
+            stmtBuilder.append('.');
+        }
+        stmtBuilder.append(getDefaultKeyIdTable());
+        stmtBuilder.append(" WHERE ");
+        stmtBuilder.append(getDefaultKeyIdColumn());
+        stmtBuilder.append(" IN (");
+        stmtBuilder.append(StringUtils.join(Collections.nCopies(size, "?"), ','));
+        stmtBuilder.append(')');
         String stmt = stmtBuilder.toString();
+        System.out.println("stmt generated: " + stmt);
         return stmt;
     }
-    
+
     @Override
     public DataValidationEvent[] validateData(KnowledgeSource knowledgeSource)
             throws DataSourceBackendFailedDataValidationException,
@@ -456,7 +493,64 @@ public abstract class RelationalDbDataSourceBackend
     public void validateConfiguration(KnowledgeSource knowledgeSource)
             throws DataSourceBackendFailedConfigurationValidationException,
             KnowledgeSourceReadException {
-        this.relationalDatabaseSpec.validate(knowledgeSource);
+        validate(knowledgeSource);
+    }
+
+    private void validate(KnowledgeSource knowledgeSource)
+            throws KnowledgeSourceReadException,
+            DataSourceBackendFailedConfigurationValidationException {
+        List<EntitySpec> allSpecs = Arrays.asList(
+                this.relationalDatabaseSpecBuilder.getEventSpecs(),
+                this.relationalDatabaseSpecBuilder.getConstantSpecs(),
+                this.relationalDatabaseSpecBuilder.getPrimitiveParameterSpecs());
+
+        Logger logger = SQLGenUtil.logger();
+        for (EntitySpec entitySpec : allSpecs) {
+            String entitySpecName = entitySpec.getName();
+            logger.log(Level.FINER, "Validating entity spec {0}",
+                    entitySpecName);
+            String[] propIds = entitySpec.getPropositionIds();
+            Set<String> propNamesFromPropSpecs = new HashSet<>();
+            PropertySpec[] propSpecs = entitySpec.getPropertySpecs();
+            logger.finer("Checking for duplicate properties");
+            for (PropertySpec propSpec : propSpecs) {
+                String propSpecName = propSpec.getName();
+                if (!propNamesFromPropSpecs.add(propSpecName)) {
+                    throw new DataSourceBackendFailedConfigurationValidationException(
+                            "Duplicate property name " + propSpecName
+                            + " in entity spec " + entitySpecName);
+                }
+            }
+            logger.finer("No duplicate properties found");
+            logger.finer("Checking for invalid proposition ids and properties");
+            Set<String> propNamesFromPropDefs = new HashSet<>();
+            Set<String> invalidPropIds = new HashSet<>();
+            for (String propId : propIds) {
+                PropositionDefinition propDef = knowledgeSource
+                        .readPropositionDefinition(propId);
+                if (propDef == null) {
+                    invalidPropIds.add(propId);
+                }
+                PropertyDefinition[] propertyDefs = propDef
+                        .getPropertyDefinitions();
+                for (PropertyDefinition propertyDef : propertyDefs) {
+                    String propName = propertyDef.getName();
+                    propNamesFromPropDefs.add(propName);
+                }
+            }
+            if (!invalidPropIds.isEmpty()) {
+                throw new DataSourceBackendFailedConfigurationValidationException(
+                        "Invalid proposition id(s) named in entity spec "
+                        + entitySpecName + ": '" + StringUtils.join(invalidPropIds, "', '") + "'");
+            }
+            if (!propNamesFromPropSpecs.removeAll(propNamesFromPropDefs)) {
+                throw new DataSourceBackendFailedConfigurationValidationException(
+                        "Data model entity spec " + entitySpec.getName()
+                        + " has properties '" + StringUtils.join(propNamesFromPropSpecs, "', '")
+                        + "' that are not in the knowledge source's corresponding proposition definitions");
+            }
+            logger.finer("No invalid proposition ids or properties found");
+        }
     }
 
     @Override
@@ -470,34 +564,77 @@ public abstract class RelationalDbDataSourceBackend
                 this.databaseId, this.username, this.password);
     }
 
-    protected abstract EntitySpec[] constantSpecs() throws IOException;
+    protected abstract EntitySpec[] constantSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException;
 
-    protected abstract EntitySpec[] eventSpecs() throws IOException;
+    protected abstract EntitySpec[] eventSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException;
 
-    protected abstract EntitySpec[] primitiveParameterSpecs() throws IOException;
+    protected abstract EntitySpec[] primitiveParameterSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException;
 
-    protected abstract StagingSpec[] stagedSpecs() throws IOException;
+    protected abstract StagingSpec[] stagedSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException;
 
-    private RelationalDatabaseSpec createRelationalDatabaseSpec() {
-        RelationalDatabaseSpec result = new RelationalDatabaseSpec();
-        result.setUnits(getUnitFactory());
-        result.setGranularities(getGranularityFactory());
-        try {
-            EntitySpec[] constantSpecs = constantSpecs();
-            result.setConstantSpecs(constantSpecs);
+    private FromBackendRelationalDatabaseSpecBuilder createRelationalDatabaseSpecBuilder() {
+        return new FromBackendRelationalDatabaseSpecBuilder();
+    }
 
-            EntitySpec[] eventSpecs = eventSpecs();
-            result.setEventSpecs(eventSpecs);
+    private class FromBackendRelationalDatabaseSpecBuilder
+            extends RelationalDatabaseSpecBuilder {
 
-            EntitySpec[] primParamSpecs = primitiveParameterSpecs();
-            result.setPrimitiveParameterSpecs(primParamSpecs);
+        private String keyIdSchema;
+        private String keyIdTable;
+        private String keyIdColumn;
+        private String keyIdJoinKey;
 
-            StagingSpec[] stagedSpecs = stagedSpecs();
-            result.setStagedSpecs(stagedSpecs);
-
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+        @Override
+        public StagingSpec[] getStagedSpecs() {
+            try {
+                return stagedSpecs(this.keyIdSchema, this.keyIdTable, this.keyIdColumn, this.keyIdJoinKey);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
-        return result;
+
+        @Override
+        public EntitySpec[] getPrimitiveParameterSpecs() {
+            try {
+                return primitiveParameterSpecs(this.keyIdSchema, this.keyIdTable, this.keyIdColumn, this.keyIdJoinKey);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        @Override
+        public EntitySpec[] getEventSpecs() {
+            try {
+                return eventSpecs(this.keyIdSchema, this.keyIdTable, this.keyIdColumn, this.keyIdJoinKey);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        @Override
+        public EntitySpec[] getConstantSpecs() {
+            try {
+                return constantSpecs(this.keyIdSchema, this.keyIdTable, this.keyIdColumn, this.keyIdJoinKey);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+
+        RelationalDatabaseSpec build(QueryResultsHandler queryResultsHandler) {
+            if (queryResultsHandler instanceof KeyLoaderQueryResultsHandler) {
+                this.keyIdSchema = getSchemaName();
+                this.keyIdTable = getDefaultKeyIdTable();
+                this.keyIdColumn = getDefaultKeyIdColumn();
+                this.keyIdJoinKey = getDefaultKeyIdJoinKey();
+            } else {
+                this.keyIdSchema = getKeyLoaderKeyIdSchema();
+                this.keyIdTable = getKeyLoaderKeyIdTable();
+                this.keyIdColumn = getKeyLoaderKeyIdColumn();
+                this.keyIdJoinKey = getKeyLoaderKeyIdJoinKey();
+            }
+
+            return super.build();
+        }
+
     }
 }
