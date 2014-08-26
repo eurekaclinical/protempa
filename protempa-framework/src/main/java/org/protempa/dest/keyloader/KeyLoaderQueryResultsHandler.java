@@ -77,16 +77,13 @@ public class KeyLoaderQueryResultsHandler extends AbstractQueryResultsHandler {
 
     @Override
     public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
-        System.out.println("KeyId: " + keyId + ": " + propositions);
         try {
             if (this.criteria == null || this.criteria.evaluate(propositions)) {
                 i++;
                 if (this.i % this.batchSize == 0) {
-                    System.out.println("Writing keys 1 " + this.keyIds);
                     this.dataSource.writeKeys(this.keyIds);
                     this.keyIds = new HashSet<>();
                 } else {
-                    System.out.println("Adding keyId " + keyId);
                     this.keyIds.add(keyId);
                 }
             }
@@ -97,7 +94,6 @@ public class KeyLoaderQueryResultsHandler extends AbstractQueryResultsHandler {
 
     @Override
     public void finish() throws QueryResultsHandlerProcessingException {
-        System.out.println("Finish writing keys " + this.keyIds);
         if (!this.keyIds.isEmpty()) {
             try {
                 this.dataSource.writeKeys(this.keyIds);

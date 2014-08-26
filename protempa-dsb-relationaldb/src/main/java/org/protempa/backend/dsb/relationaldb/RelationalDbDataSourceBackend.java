@@ -478,7 +478,6 @@ public abstract class RelationalDbDataSourceBackend
         stmtBuilder.append(StringUtils.join(Collections.nCopies(size, "?"), ','));
         stmtBuilder.append(')');
         String stmt = stmtBuilder.toString();
-        System.out.println("stmt generated: " + stmt);
         return stmt;
     }
 
