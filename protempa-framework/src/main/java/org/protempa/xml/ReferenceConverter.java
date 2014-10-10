@@ -27,7 +27,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import java.util.Comparator;
 import org.mvel.ConversionException;
 import org.protempa.KnowledgeSource;
-import org.protempa.KnowledgeSourceReadException;
 import org.protempa.dest.table.PropertyConstraint;
 import org.protempa.dest.table.Reference;
 import org.protempa.proposition.Proposition;
@@ -140,11 +139,7 @@ class ReferenceConverter extends AbstractConverter implements Converter {
             }
             reader.moveUp();
         }
-        try {
-            return new Reference(referenceNames, propositionIds, constraints, comparator, fromIndex, toIndex, this.knowledgeSource);
-        } catch (KnowledgeSourceReadException ex) {
-            throw new IllegalStateException(ex);
-        }
+        return new Reference(referenceNames, propositionIds, constraints, comparator, fromIndex, toIndex);
     }
 
 }

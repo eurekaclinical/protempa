@@ -173,8 +173,8 @@ public final class HighLevelAbstractionDefinition
      */
     public boolean add(ExtendedPropositionDefinition def) {
         if (def != null && this.defs.add(def)) {
-            recalculateChildren();
             this.defsAsListOutdated = true;
+            recalculateChildren();
             return true;
         } else {
             return false;

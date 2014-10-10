@@ -24,11 +24,8 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import java.util.Comparator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.mvel.ConversionException;
 import org.protempa.KnowledgeSource;
-import org.protempa.KnowledgeSourceReadException;
 import org.protempa.dest.table.Derivation;
 import org.protempa.dest.table.Derivation.Behavior;
 import org.protempa.dest.table.PropertyConstraint;
@@ -167,11 +164,7 @@ class DerivationConverter extends AbstractConverter {
                 throw new ConversionException("Encountered unexpected element: " + reader.getNodeName());
             }
         }
-        try {
-            return new Derivation(propositionIds, constraints, comparator, fromIndex, toIndex, allowedValues, behavior, relation, getKnowledgeSource());
-        } catch (KnowledgeSourceReadException ex) {
-            throw new IllegalStateException(ex);
-        }
+        return new Derivation(propositionIds, constraints, comparator, fromIndex, toIndex, allowedValues, behavior, relation);
     }
 
     @SuppressWarnings("unchecked")

@@ -77,62 +77,60 @@ public final class Derivation extends Link {
     private final Relation relation;
     private final Queue<Proposition> internalDerived;
 
-    public Derivation(String[] propositionIds, Behavior behavior, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
-        this(propositionIds, null, null, behavior, null, knowledgeSource);
+    public Derivation(String[] propositionIds, Behavior behavior) {
+        this(propositionIds, null, null, behavior, null);
     }
 
     public Derivation(String[] propositionIds,
-            PropertyConstraint[] constraints, Behavior behavior, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+            PropertyConstraint[] constraints, Behavior behavior) {
         this(propositionIds, constraints, null, -1, -1, null,
-                behavior, null, knowledgeSource);
+                behavior, null);
     }
 
     public Derivation(String[] propositionIds,
             PropertyConstraint[] constraints, Value[] allowedValues,
-            Behavior behavior, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+            Behavior behavior) throws KnowledgeSourceReadException {
         this(propositionIds, constraints, null, -1, -1, allowedValues,
-                behavior, null, knowledgeSource);
+                behavior, null);
     }
 
     public Derivation(String[] propositionIds,
             PropertyConstraint[] constraints, Value[] allowedValues,
-            Behavior behavior, Relation relation, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+            Behavior behavior, Relation relation) {
         this(propositionIds, constraints, null, -1, -1, allowedValues,
-                behavior, relation, knowledgeSource);
+                behavior, relation);
     }
 
     public Derivation(String[] propositionIds,
             PropertyConstraint[] constraints,
             Comparator<Proposition> comparator, int index,
-            Behavior behavior, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+            Behavior behavior) throws KnowledgeSourceReadException {
         this(propositionIds, constraints, comparator, index,
-                index >= 0 ? index + 1 : -1, null, behavior, null, knowledgeSource);
+                index >= 0 ? index + 1 : -1, null, behavior, null);
     }
 
     public Derivation(String[] propositionIds,
             PropertyConstraint[] constraints,
             Comparator<Proposition> comparator, int index,
-            Value[] allowedValues, Behavior behavior, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+            Value[] allowedValues, Behavior behavior) {
         this(propositionIds, constraints, comparator, index,
-                index >= 0 ? index + 1 : -1, allowedValues, behavior, null, knowledgeSource);
+                index >= 0 ? index + 1 : -1, allowedValues, behavior, null);
     }
 
     public Derivation(String[] propositionIds,
             PropertyConstraint[] constraints,
             Comparator<Proposition> comparator, int fromIndex, int toIndex,
-            Behavior behavior, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+            Behavior behavior) throws KnowledgeSourceReadException {
         this(propositionIds, constraints, comparator, fromIndex, toIndex,
-                null, behavior, null, knowledgeSource);
+                null, behavior, null);
 
     }
 
     public Derivation(String[] propositionIds,
             PropertyConstraint[] constraints,
             Comparator<Proposition> comparator, int fromIndex, int toIndex,
-            Value[] allowedValues, Behavior behavior, Relation relation,
-            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
-        super(propositionIds, constraints, comparator, fromIndex, toIndex,
-                knowledgeSource);
+            Value[] allowedValues, Behavior behavior, Relation relation) {
+        super(propositionIds, constraints, comparator, fromIndex, toIndex);
         if (allowedValues == null) {
             this.allowedValues = EMPTY_VALUE_ARRAY;
         } else {
