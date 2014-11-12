@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.value.Granularity;
@@ -197,9 +198,10 @@ public final class EntitySpec implements Serializable {
         }
 
         if (referenceSpecs != null) {
-            this.referenceSpecs = referenceSpecs.clone();
-            ProtempaUtil.checkArrayForNullElement(this.referenceSpecs,
+            ProtempaUtil.checkArrayForNullElement(referenceSpecs,
                     "referenceSpecs");
+            checkReferenceSpecArrayForDuplicates(referenceSpecs);
+            this.referenceSpecs = referenceSpecs.clone();
             for (ReferenceSpec rs : this.referenceSpecs) {
                 rs.setReferringEntitySpec(this);
             }
@@ -512,5 +514,21 @@ public final class EntitySpec implements Serializable {
     @Override
     public String toString() {
         return new ToStringBuilder(this).append("name", this.name).append("description", this.description).append("propositionIds", this.propositionIds).append("unique", this.unique).append("baseSpec", this.baseSpec).append("uniqueIdSpecs", this.uniqueIdSpecs).append("startTimeOrTimestampSpec", this.startTimeOrTimestampSpec).append("finishTimeSpec", this.finishTimeSpec).append("propertySpecs", this.propertySpecs).append("referenceSpecs", this.referenceSpecs).append("codeToPropIdMap", this.codeToPropIdMap).append("codeSpec", this.codeSpec).append("constraintSpecs", this.constraintSpecs).append("valueType", this.valueType).append("valueSpec", this.valueSpec).append("granularity", this.granularity).append("positionParser", this.positionParser).append("partitionBy", this.partitionBy).toString();
+    }
+
+    private static void checkReferenceSpecArrayForDuplicates(
+            ReferenceSpec[] refSpecs) {
+        Set<String> duplicates = new HashSet<>();
+        Set<String> refNames = new HashSet<>();
+        for (ReferenceSpec refSpec : refSpecs) {
+            String refName = refSpec.getReferenceName();
+            if (!refNames.add(refName)) {
+                duplicates.add(refName);
+            }
+        }
+        if (!duplicates.isEmpty()) {
+            throw new IllegalArgumentException("Duplicate reference names " + 
+                    StringUtils.join(duplicates, ", "));
+        }
     }
 }
