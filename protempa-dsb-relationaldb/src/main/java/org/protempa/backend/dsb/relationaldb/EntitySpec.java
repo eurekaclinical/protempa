@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -515,15 +516,62 @@ public final class EntitySpec implements Serializable {
     public String toString() {
         return new ToStringBuilder(this).append("name", this.name).append("description", this.description).append("propositionIds", this.propositionIds).append("unique", this.unique).append("baseSpec", this.baseSpec).append("uniqueIdSpecs", this.uniqueIdSpecs).append("startTimeOrTimestampSpec", this.startTimeOrTimestampSpec).append("finishTimeSpec", this.finishTimeSpec).append("propertySpecs", this.propertySpecs).append("referenceSpecs", this.referenceSpecs).append("codeToPropIdMap", this.codeToPropIdMap).append("codeSpec", this.codeSpec).append("constraintSpecs", this.constraintSpecs).append("valueType", this.valueType).append("valueSpec", this.valueSpec).append("granularity", this.granularity).append("positionParser", this.positionParser).append("partitionBy", this.partitionBy).toString();
     }
+    
+    private static class RefSpecUID {
+        String refName;
+        String entitySpecName;
+
+        RefSpecUID(String refName, String entitySpecName) {
+            this.refName = refName;
+            this.entitySpecName = entitySpecName;
+        }
+        
+        @Override
+        public int hashCode() {
+            int result = 17;
+
+            int c = this.refName.hashCode();
+            result = 31 * result + c;
+            c = this.entitySpecName.hashCode();
+            result = 31 * result + c;
+
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final RefSpecUID other = (RefSpecUID) obj;
+            if (!Objects.equals(this.refName, other.refName)) {
+                return false;
+            }
+            if (!Objects.equals(this.entitySpecName, other.entitySpecName)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return refName + " to entity " + entitySpecName;
+        }
+    }
 
     private static void checkReferenceSpecArrayForDuplicates(
             ReferenceSpec[] refSpecs) {
-        Set<String> duplicates = new HashSet<>();
-        Set<String> refNames = new HashSet<>();
+        Set<RefSpecUID> duplicates = new HashSet<>();
+        Set<RefSpecUID> refNames = new HashSet<>();
         for (ReferenceSpec refSpec : refSpecs) {
             String refName = refSpec.getReferenceName();
-            if (!refNames.add(refName)) {
-                duplicates.add(refName);
+            String entitySpecName = refSpec.getEntityName();
+            RefSpecUID uid = new RefSpecUID(refName, entitySpecName);
+            if (!refNames.add(uid)) {
+                duplicates.add(uid);
             }
         }
         if (!duplicates.isEmpty()) {
