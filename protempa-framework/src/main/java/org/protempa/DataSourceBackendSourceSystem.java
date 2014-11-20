@@ -58,7 +58,7 @@ public final class DataSourceBackendSourceSystem extends SourceSystem {
 
     @Override
     public String getStringRepresentation() {
-        return ("Data source backend - " + this.id);
+        return this.id;
     }
 
     @Override
