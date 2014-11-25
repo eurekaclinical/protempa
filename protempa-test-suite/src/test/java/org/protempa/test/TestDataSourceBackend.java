@@ -34,6 +34,7 @@ import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.proposition.value.*;
 
 import java.io.IOException;
+import org.protempa.backend.dsb.relationaldb.Operator;
 
 /**
  * Test data source backend (based on RegistryVM).
@@ -160,7 +161,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 schemaName,
                                                 "PATIENT",
                                                 "GENDER",
-                                                ColumnSpec.Constraint.EQUAL_TO,
+                                                Operator.EQUAL_TO,
                                                 this.mapper
                                                         .propertyNameOrPropIdToSqlCodeArray("gender_02232012.txt"),
                                                 true), ValueType.NOMINALVALUE),
@@ -171,7 +172,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 schemaName,
                                                 "PATIENT",
                                                 "RACE",
-                                                ColumnSpec.Constraint.EQUAL_TO,
+                                                Operator.EQUAL_TO,
                                                 this.mapper
                                                         .propertyNameOrPropIdToSqlCodeArray("race_02232012.txt"),
                                                 true), ValueType.NOMINALVALUE),
@@ -182,7 +183,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 schemaName,
                                                 "PATIENT",
                                                 "RACE",
-                                                ColumnSpec.Constraint.EQUAL_TO,
+                                                Operator.EQUAL_TO,
                                                 this.mapper
                                                         .propertyNameOrPropIdToSqlCodeArray("ethnicity_02232012.txt"),
                                                 true), ValueType.NOMINALVALUE) },
@@ -266,7 +267,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 schemaName,
                                                 "ENCOUNTER",
                                                 "ENCOUNTER_TYPE",
-                                                ColumnSpec.Constraint.EQUAL_TO,
+                                                Operator.EQUAL_TO,
                                                 this.mapper
                                                         .propertyNameOrPropIdToSqlCodeArray("type_encounter_02232012.txt"),
                                                 true), ValueType.NOMINALVALUE),
@@ -277,7 +278,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 schemaName,
                                                 "ENCOUNTER",
                                                 "DISCHARGE_DISP",
-                                                ColumnSpec.Constraint.EQUAL_TO,
+                                                Operator.EQUAL_TO,
                                                 this.mapper
                                                         .propertyNameOrPropIdToSqlCodeArray("disposition_discharge_02232012.txt"),
                                                 true), ValueType.NOMINALVALUE), },
@@ -403,7 +404,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                         schemaName,
                                         "ICD9D_EVENT",
                                         "ENTITY_ID",
-                                        ColumnSpec.Constraint.EQUAL_TO,
+                                        Operator.EQUAL_TO,
                                         this.mapper
                                                 .propertyNameOrPropIdToSqlCodeArray("icd9_diagnosis_02232012.txt")),
                                 ValueType.NOMINALVALUE), },
@@ -413,7 +414,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 schemaName,
                                 "ICD9D_EVENT",
                                 "ENTITY_ID",
-                                ColumnSpec.Constraint.EQUAL_TO,
+                                Operator.EQUAL_TO,
                                 this.mapper
                                         .propertyNameOrPropIdToSqlCodeArray("icd9_diagnosis_02232012.txt"),
                                 true), null, null, null,
@@ -448,7 +449,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                         schemaName,
                                         "ICD9P_EVENT",
                                         "ENTITY_ID",
-                                        ColumnSpec.Constraint.EQUAL_TO,
+                                        Operator.EQUAL_TO,
                                         this.mapper
                                                 .propertyNameOrPropIdToSqlCodeArray("icd9_procedure_02232012.txt")),
                                 ValueType.NOMINALVALUE) },
@@ -458,7 +459,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 schemaName,
                                 "ICD9P_EVENT",
                                 "ENTITY_ID",
-                                ColumnSpec.Constraint.EQUAL_TO,
+                                Operator.EQUAL_TO,
                                 this.mapper
                                         .propertyNameOrPropIdToSqlCodeArray("icd9_procedure_02232012.txt"),
                                 true), null, null, null,
@@ -489,7 +490,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                         schemaName,
                                         "CPT_EVENT",
                                         "ENTITY_ID",
-                                        ColumnSpec.Constraint.EQUAL_TO,
+                                        Operator.EQUAL_TO,
                                         this.mapper
                                                 .propertyNameOrPropIdToSqlCodeArray("cpt_procedure_02232012.txt")),
                                 ValueType.NOMINALVALUE) },
@@ -499,7 +500,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 schemaName,
                                 "CPT_EVENT",
                                 "ENTITY_ID",
-                                ColumnSpec.Constraint.EQUAL_TO,
+                                Operator.EQUAL_TO,
                                 this.mapper
                                         .propertyNameOrPropIdToSqlCodeArray("cpt_procedure_02232012.txt"),
                                 true), null, null, null,
@@ -531,7 +532,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 schemaName,
                                 "MEDS_EVENT",
                                 "ENTITY_ID",
-                                ColumnSpec.Constraint.EQUAL_TO,
+                                Operator.EQUAL_TO,
                                 this.mapper
                                         .propertyNameOrPropIdToSqlCodeArray("meds_02232012.txt"),
                                 true), null, null, null,
@@ -579,7 +580,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 schemaName,
                                 "LABS_EVENT",
                                 "ENTITY_ID",
-                                ColumnSpec.Constraint.EQUAL_TO,
+                                Operator.EQUAL_TO,
                                 this.mapper
                                         .propertyNameOrPropIdToSqlCodeArray("labs_02232012.txt"),
                                 true), null, new ColumnSpec(schemaName,
@@ -625,7 +626,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 schemaName,
                                 "VITALS_EVENT",
                                 "ENTITY_ID",
-                                ColumnSpec.Constraint.EQUAL_TO,
+                                Operator.EQUAL_TO,
                                 this.mapper
                                         .propertyNameOrPropIdToSqlCodeArray("vitals_result_types_02232012.txt"),
                                 true), null, new ColumnSpec(schemaName,

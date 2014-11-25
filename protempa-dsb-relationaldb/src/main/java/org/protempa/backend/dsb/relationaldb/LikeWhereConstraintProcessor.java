@@ -19,11 +19,11 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.Constraint;
+import org.protempa.backend.dsb.relationaldb.Operator;
 
 final class LikeWhereConstraintProcessor extends WhereConstraintProcessor {
 
-    LikeWhereConstraintProcessor(ColumnSpec columnSpec, Constraint constraint,
+    LikeWhereConstraintProcessor(ColumnSpec columnSpec, Operator constraint,
             WhereClause whereClause, Object[] sqlCodes,
             TableAliaser referenceIndices) {
         super(columnSpec, constraint, whereClause, sqlCodes, referenceIndices);

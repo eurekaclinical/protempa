@@ -19,7 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
+import org.protempa.backend.dsb.relationaldb.KnowledgeSourceIdToSqlCode;
 
 class DefaultCaseClause extends AbstractCaseClause {
 

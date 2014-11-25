@@ -19,12 +19,12 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.Constraint;
+import org.protempa.backend.dsb.relationaldb.Operator;
 
 final class EqualToWhereConstraintProcessor extends WhereConstraintProcessor {
 
     EqualToWhereConstraintProcessor(ColumnSpec columnSpec,
-            Constraint constraint, WhereClause whereClause, Object[] sqlCodes,
+            Operator constraint, WhereClause whereClause, Object[] sqlCodes,
             TableAliaser referenceIndices) {
         super(columnSpec, constraint, whereClause, sqlCodes, referenceIndices);
     }

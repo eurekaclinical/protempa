@@ -19,7 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
+import org.protempa.backend.dsb.relationaldb.KnowledgeSourceIdToSqlCode;
 
 import java.util.Map;
 
@@ -121,7 +121,7 @@ abstract class AbstractSelectClause implements SelectClause {
 
         boolean unique = info.isUnique();
         for (int j = 0; j < indices.length; j++) {
-            ColumnSpec cs = info.getColumnSpecs().get(indices[j]);
+            ColumnSpec cs = info.getColumnSpecs().get(indices[j]).getColumnSpec();
             String name = names[j];
             boolean distinctRequested = (j == 0 && !unique);
             boolean hasNext = j < indices.length - 1;

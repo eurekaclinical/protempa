@@ -57,7 +57,7 @@ final class Ojdbc6OracleStagingSelectStatement extends
                 getPropIds(), getEntitySpec(), getEntitySpecs(), getInboundReferenceSpecs(),
                 getFilters(), getReferenceSpec(), streamingMode);
 
-        List<ColumnSpec> plusStagedSpecs = new ArrayList<>(
+        List<IntColumnSpecWrapper> plusStagedSpecs = new ArrayList<>(
                 info.getColumnSpecs());
         for (StagedColumnSpec spec : stagingSpec.getStagedColumns()) {
             plusStagedSpecs.add(spec.toColumnSpec());
@@ -66,7 +66,7 @@ final class Ojdbc6OracleStagingSelectStatement extends
 
         SelectClause select = getSelectClause(info, referenceIndices,
                 getEntitySpec(), this.wrapKeyId);
-        FromClause from = getFromClause(info.getColumnSpecs(),
+        FromClause from = getFromClause(toColumnSpecs(info.getColumnSpecs()),
                 referenceIndices, EMPTY_SSPEC_ARR);
         WhereClause where = getWhereClause(getPropIds(), info,
                 getEntitySpecs(), getFilters(), referenceIndices, getKeyIds(),

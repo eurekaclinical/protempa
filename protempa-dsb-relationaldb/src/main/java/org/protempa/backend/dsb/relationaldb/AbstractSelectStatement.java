@@ -19,6 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import java.util.ArrayList;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.Collections;
@@ -125,7 +126,7 @@ abstract class AbstractSelectStatement implements SelectStatement {
 
         SelectClause select = getSelectClause(info, referenceIndices,
                 this.entitySpec, wrapKeyId);
-        FromClause from = getFromClause(info.getColumnSpecs(),
+        FromClause from = getFromClause(toColumnSpecs(info.getColumnSpecs()),
                 referenceIndices, this.stagedTables);
         WhereClause where = getWhereClause(propIds, info, this.entitySpecs,
                 this.filters, referenceIndices, this.keyIds, this.order,
@@ -136,5 +137,13 @@ abstract class AbstractSelectStatement implements SelectStatement {
                 .append(where.generateClause());
 
         return result.toString();
+    }
+    
+    final List<ColumnSpec> toColumnSpecs(List<IntColumnSpecWrapper> columnSpecWrappers) {
+        List<ColumnSpec> result = new ArrayList<ColumnSpec>();
+        for (IntColumnSpecWrapper icsw : columnSpecWrappers) {
+            result.add(icsw.getColumnSpec());
+        }
+        return result;
     }
 }

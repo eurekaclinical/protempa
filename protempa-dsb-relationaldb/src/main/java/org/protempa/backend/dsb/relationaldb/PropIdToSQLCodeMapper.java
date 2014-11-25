@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import org.arp.javautil.io.IOUtil;
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
+import org.protempa.backend.dsb.relationaldb.KnowledgeSourceIdToSqlCode;
 
 /**
  * Maps proposition IDs from the knowledge source to SQL. Looks for mapping
@@ -131,7 +131,7 @@ public final class PropIdToSQLCodeMapper {
         resource = this.resourcePrefix + resource;
         SQLGenUtil.logger().log(Level.FINER, "Attempting to get resource: {0}",
                 resource);
-        List<ColumnSpec.KnowledgeSourceIdToSqlCode> cvs = new ArrayList<>(
+        List<KnowledgeSourceIdToSqlCode> cvs = new ArrayList<>(
                 1000);
         InputStream is = IOUtil.getResourceAsStream(resource, this.cls);
         try (CSVReader reader = new CSVReader(new InputStreamReader(is), '\t')) {
@@ -142,16 +142,16 @@ public final class PropIdToSQLCodeMapper {
                     throw new AssertionError("Invalid mapping in " + resource
                             + " line " + i + ": mapping has length " + cols.length);
                 } else if (cols.length == 1) {
-                    cvs.add(new ColumnSpec.KnowledgeSourceIdToSqlCode(cols[0],
+                    cvs.add(new KnowledgeSourceIdToSqlCode(cols[0],
                         ""));
                 } else if (cols.length == 2) {
-                    cvs.add(new ColumnSpec.KnowledgeSourceIdToSqlCode(cols[0],
+                    cvs.add(new KnowledgeSourceIdToSqlCode(cols[0],
                         cols[1]));
                 }
                 i++;
             }
         }
         return cvs
-                .toArray(new ColumnSpec.KnowledgeSourceIdToSqlCode[cvs.size()]);
+                .toArray(new KnowledgeSourceIdToSqlCode[cvs.size()]);
     }
 }

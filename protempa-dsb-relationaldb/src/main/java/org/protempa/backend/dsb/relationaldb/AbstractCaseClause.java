@@ -21,7 +21,7 @@ package org.protempa.backend.dsb.relationaldb;
 
 import static org.protempa.backend.dsb.relationaldb.SqlGeneratorUtil.prepareValue;
 
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
+import org.protempa.backend.dsb.relationaldb.KnowledgeSourceIdToSqlCode;
 
 abstract class AbstractCaseClause implements CaseClause {
 

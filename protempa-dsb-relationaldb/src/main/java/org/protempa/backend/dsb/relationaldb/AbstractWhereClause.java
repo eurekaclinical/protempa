@@ -28,8 +28,6 @@ import java.util.Set;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.Constraint;
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
 import org.protempa.proposition.value.BooleanValue;
 import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.InequalityNumberValue;
@@ -194,7 +192,7 @@ abstract class AbstractWhereClause implements WhereClause {
             if (wherePart.length() > 0) {
                 wherePart.append(" AND ");
             }
-            ColumnSpec keySpec = info.getColumnSpecs().get(0);
+            ColumnSpec keySpec = info.getColumnSpecs().get(0).getColumnSpec();
 
             wherePart.append(getInClause(keySpec, keyIds.toArray(), false)
                     .generateClause());
@@ -328,7 +326,7 @@ abstract class AbstractWhereClause implements WhereClause {
         if (hasConstraint(columnSpec)) {
             if (resultProcessor != null) {
                 resultProcessor
-                        .setCasePresent(columnSpec.getConstraint() == ColumnSpec.Constraint.LIKE);
+                        .setCasePresent(columnSpec.getConstraint() == Operator.LIKE);
                 KnowledgeSourceIdToSqlCode[] filteredConstraintValues = filterKnowledgeSourceIdToSqlCodesById(
                         propIds, columnSpec.getPropositionIdToSqlCodes());
                 ;
@@ -345,8 +343,8 @@ abstract class AbstractWhereClause implements WhereClause {
     private boolean hasConstraint(ColumnSpec columnSpec) {
         if (columnSpec != null) {
             List<ColumnSpec> columnSpecL = columnSpec.asList();
-            columnSpec = columnSpecL.get(columnSpecL.size() - 1);
-            return columnSpec.getConstraint() != null;
+            ColumnSpec cs = columnSpecL.get(columnSpecL.size() - 1);
+            return cs.getConstraint() != null;
         }
 
         return false;
@@ -373,7 +371,7 @@ abstract class AbstractWhereClause implements WhereClause {
         List<ColumnSpec> columnSpecL = columnSpec.asList();
         ColumnSpec lastColumnSpec = columnSpecL.get(columnSpecL.size() - 1);
 
-        Constraint constraint = valueComparatorToSqlOp(comparator);
+        Operator constraint = valueComparatorToSqlOp(comparator);
 
         if (columnSpec != null && constraint != null) {
             ValueExtractor ve = new ValueExtractor();
@@ -387,30 +385,30 @@ abstract class AbstractWhereClause implements WhereClause {
         return wherePart.toString();
     }
 
-    private static Constraint valueComparatorToSqlOp(
+    private static Operator valueComparatorToSqlOp(
             ValueComparator valueComparator) throws IllegalStateException {
-        ColumnSpec.Constraint constraint = null;
+        Operator constraint = null;
         switch (valueComparator) {
             case GREATER_THAN:
-                constraint = ColumnSpec.Constraint.GREATER_THAN;
+                constraint = Operator.GREATER_THAN;
                 break;
             case LESS_THAN:
-                constraint = ColumnSpec.Constraint.LESS_THAN;
+                constraint = Operator.LESS_THAN;
                 break;
             case EQUAL_TO:
-                constraint = ColumnSpec.Constraint.EQUAL_TO;
+                constraint = Operator.EQUAL_TO;
                 break;
             case GREATER_THAN_OR_EQUAL_TO:
-                constraint = ColumnSpec.Constraint.GREATER_THAN_OR_EQUAL_TO;
+                constraint = Operator.GREATER_THAN_OR_EQUAL_TO;
                 break;
             case LESS_THAN_OR_EQUAL_TO:
-                constraint = ColumnSpec.Constraint.LESS_THAN_OR_EQUAL_TO;
+                constraint = Operator.LESS_THAN_OR_EQUAL_TO;
                 break;
             case IN:
-                constraint = ColumnSpec.Constraint.EQUAL_TO;
+                constraint = Operator.EQUAL_TO;
                 break;
             case NOT_IN:
-                constraint = ColumnSpec.Constraint.NOT_EQUAL_TO;
+                constraint = Operator.NOT_EQUAL_TO;
                 break;
             default:
                 throw new AssertionError("invalid valueComparator: "
@@ -421,10 +419,10 @@ abstract class AbstractWhereClause implements WhereClause {
 
     private static KnowledgeSourceIdToSqlCode[] filterKnowledgeSourceIdToSqlCodesById(
             Set<?> propIds, KnowledgeSourceIdToSqlCode[] constraintValues) {
-        ColumnSpec.KnowledgeSourceIdToSqlCode[] filteredConstraintValues;
+        KnowledgeSourceIdToSqlCode[] filteredConstraintValues;
         if (propIds != null) {
-            List<ColumnSpec.KnowledgeSourceIdToSqlCode> constraintValueList = new ArrayList<>();
-            for (ColumnSpec.KnowledgeSourceIdToSqlCode constraintValue : constraintValues) {
+            List<KnowledgeSourceIdToSqlCode> constraintValueList = new ArrayList<>();
+            for (KnowledgeSourceIdToSqlCode constraintValue : constraintValues) {
                 if (propIds.contains(constraintValue.getPropositionId())) {
                     constraintValueList.add(constraintValue);
                 }
@@ -433,7 +431,7 @@ abstract class AbstractWhereClause implements WhereClause {
                 filteredConstraintValues = constraintValues;
             } else {
                 filteredConstraintValues = constraintValueList
-                        .toArray(new ColumnSpec.KnowledgeSourceIdToSqlCode[constraintValueList
+                        .toArray(new KnowledgeSourceIdToSqlCode[constraintValueList
                                 .size()]);
             }
         } else {
@@ -443,13 +441,13 @@ abstract class AbstractWhereClause implements WhereClause {
     }
 
     private String processConstraint(ColumnSpec columnSpec, Set<?> propIds,
-            Constraint constraintOverride, boolean first) {
+            Operator constraintOverride, boolean first) {
         StringBuilder wherePart = new StringBuilder();
-        Constraint constraint = columnSpec.getConstraint();
+        Operator constraint = columnSpec.getConstraint();
         if (constraintOverride != null) {
             constraint = constraintOverride;
         }
-        ColumnSpec.KnowledgeSourceIdToSqlCode[] propIdToSqlCodes = columnSpec
+        KnowledgeSourceIdToSqlCode[] propIdToSqlCodes = columnSpec
                 .getPropositionIdToSqlCodes();
         if (constraint != null) {
             KnowledgeSourceIdToSqlCode[] filteredConstraintValues = filterConstraintValues(
@@ -482,7 +480,7 @@ abstract class AbstractWhereClause implements WhereClause {
     }
 
     private KnowledgeSourceIdToSqlCode[] filterConstraintValues(Set<?> propIds,
-            ColumnSpec.KnowledgeSourceIdToSqlCode[] propIdToSqlCodes) {
+            KnowledgeSourceIdToSqlCode[] propIdToSqlCodes) {
         KnowledgeSourceIdToSqlCode[] filteredConstraintValues = filterKnowledgeSourceIdToSqlCodesById(
                 propIds, propIdToSqlCodes);
         return filteredConstraintValues;
@@ -526,7 +524,7 @@ abstract class AbstractWhereClause implements WhereClause {
     private String processOrder(ColumnSpecInfo info) {
         StringBuilder wherePart = new StringBuilder();
         if (order != null && info.isUsingKeyIdIndex()) {
-            ColumnSpec keyIdSpec = info.getColumnSpecs().get(0);
+            ColumnSpec keyIdSpec = info.getColumnSpecs().get(0).getColumnSpec();
             wherePart.append(getOrderByClause(keyIdSpec)
                     .generateClause());
         }

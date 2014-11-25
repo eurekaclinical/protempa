@@ -28,7 +28,7 @@ import org.protempa.DataStreamingEventIterator;
 import org.protempa.UniqueIdPair;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.dsb.filter.PositionFilter;
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.Constraint;
+import org.protempa.backend.dsb.relationaldb.Operator;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.GranularityFactory;
@@ -961,7 +961,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     List<ColumnSpec> codeSpecL = codeSpec.asList();
                     ColumnSpec last = codeSpecL.get(codeSpecL.size() - 1);
                     if (last.getConstraint() != null
-                            && (last.getConstraint() != Constraint.EQUAL_TO
+                            && (last.getConstraint() != Operator.EQUAL_TO
                             || !last.isPropositionIdsComplete() || needsPropIdInClause(
                             propIds, es.getPropositionIds()))) {
                         return;

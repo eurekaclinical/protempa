@@ -24,7 +24,7 @@ import java.util.Map;
 
 final class ColumnSpecInfo {
     private boolean unique;
-    private List<ColumnSpec> columnSpecs;
+    private List<IntColumnSpecWrapper> columnSpecs;
     private int startTimeIndex = -1;
     private int finishTimeIndex = -1;
     private Map<String, Integer> propertyIndices;
@@ -54,11 +54,11 @@ final class ColumnSpecInfo {
         this.codeIndex = codeIndex;
     }
 
-    List<ColumnSpec> getColumnSpecs() {
+    List<IntColumnSpecWrapper> getColumnSpecs() {
         return columnSpecs;
     }
 
-    void setColumnSpecs(List<ColumnSpec> columnSpecs) {
+    void setColumnSpecs(List<IntColumnSpecWrapper> columnSpecs) {
         this.columnSpecs = columnSpecs;
     }
 

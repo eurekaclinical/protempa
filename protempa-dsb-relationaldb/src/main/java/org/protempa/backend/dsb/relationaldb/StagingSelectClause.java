@@ -20,7 +20,7 @@
 package org.protempa.backend.dsb.relationaldb;
 
 import org.apache.commons.lang3.StringUtils;
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.KnowledgeSourceIdToSqlCode;
+import org.protempa.backend.dsb.relationaldb.KnowledgeSourceIdToSqlCode;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.ProtempaUtil;
 
@@ -34,144 +33,18 @@ import org.protempa.ProtempaUtil;
  * 
  * @author Andrew Post
  */
-public final class ColumnSpec implements Serializable {
+public final class ColumnSpec implements Serializable, IColumnSpec {
 
     private static final long serialVersionUID = 2254623617064935923L;
 
     private static KnowledgeSourceIdToSqlCode[] EMPTY_KNOWLEDGE_SOURCE_ID_TO_SQL_CODE_ARRAY = new KnowledgeSourceIdToSqlCode[0];
 
-    public static enum ColumnOp {
-
-        UPPER
-    }
-
-    /**
-     * SQL comparison operators.
-     */
-    public static enum Constraint {
-
-        EQUAL_TO("="), LIKE("LIKE"), GREATER_THAN(">"), GREATER_THAN_OR_EQUAL_TO(
-                ">="), LESS_THAN("<"), LESS_THAN_OR_EQUAL_TO("<="), NOT_EQUAL_TO(
-                "<>");
-        private String sqlOperator;
-
-        private Constraint(String sqlOperator) {
-            this.sqlOperator = sqlOperator;
-        }
-
-        /**
-         * Gets the {@link String} operator.
-         * 
-         * @return
-         */
-        public String getSqlOperator() {
-            return this.sqlOperator;
-        }
-    }
-
-    /**
-     * Represents a mapping from a proposition id to a value of the column
-     * specified by a column spec. Pass an array of instances of this class into
-     * a {@link ColumnSpec}'s constructor.
-     */
-    public static class KnowledgeSourceIdToSqlCode {
-
-        private final String propositionId;
-        private final Object sqlCode;
-
-        /**
-         * Instantiates a mapping between a proposition id and the value of the
-         * column specified by a column spec.
-         * 
-         * @param propositionId
-         *            a proposition id {@link String}. Cannot be
-         *            <code>null</code>.
-         * @param sqlCode
-         *            a value {@link Object} in a column in a table in a
-         *            database. Cannot be <code>null</code>.
-         */
-        public KnowledgeSourceIdToSqlCode(String propositionId, Object sqlCode) {
-            if (propositionId == null) {
-                throw new IllegalArgumentException(
-                        "propositionId cannot be null");
-            }
-            if (sqlCode == null) {
-                throw new IllegalArgumentException("sqlCode cannot be null");
-            }
-            this.propositionId = propositionId.intern();
-            this.sqlCode = sqlCode;
-        }
-
-        /**
-         * Returns the proposition id in the mapping.
-         * 
-         * @return a proposition id {@link String}. Guaranteed not
-         *         <code>null</code>.
-         */
-        public String getPropositionId() {
-            return this.propositionId;
-        }
-
-        /**
-         * Returns the value {@link Object} in the mapping.
-         * 
-         * @return a code {@link Object} in a relational database. Guaranteed
-         *         not <code>null</code>.
-         */
-        public Object getSqlCode() {
-            return this.sqlCode;
-        }
-
-        /**
-         * Compares the proposition id and value for equality.
-         * 
-         * @param obj
-         *            another {@link Object}.
-         * @return <code>true</code> if the proposition ids and values are
-         *         equal, <code>false</code> otherwise.
-         */
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final KnowledgeSourceIdToSqlCode other = (KnowledgeSourceIdToSqlCode) obj;
-            if (!this.propositionId.equals(other.propositionId)) {
-                return false;
-            }
-            if (!this.sqlCode.equals(other.sqlCode)) {
-                return false;
-            }
-            return true;
-        }
-
-        /**
-         * Generates a hash from the proposition id and value.
-         * 
-         * @return an <code>int</code> hash.
-         */
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 17 * hash + this.propositionId.hashCode();
-            hash = 17 * hash + this.sqlCode.hashCode();
-            return hash;
-        }
-
-        @Override
-        public String toString() {
-            return ToStringBuilder.reflectionToString(this);
-        }
-    }
 
     private final String schema;
     private final String table;
     private final String column;
     private final JoinSpec joinSpec;
-    private final Constraint constraint;
+    private final Operator constraint;
     private final KnowledgeSourceIdToSqlCode[] propIdToSqlCodes;
     private final Map<Object, String> propIdForSqlCode;
     private final ColumnOp columnOp;
@@ -219,7 +92,7 @@ public final class ColumnSpec implements Serializable {
      *            a column {@link String}. Cannot be <code>null</code> unless
      *            <code>constraint</code> is also <code>null</code>.
      * @param constraint
-     *            a {@link Constraint}.
+     *            a {@link Operator}.
      * @param propIdToSqlCodes
      *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
      *            from a proposition id to a value of the specified column. If
@@ -236,7 +109,7 @@ public final class ColumnSpec implements Serializable {
      *            the column.
      */
     public ColumnSpec(String schema, String table, String column,
-            Constraint constraint,
+            Operator constraint,
             KnowledgeSourceIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp,
             boolean propositionIdsComplete) {
         this(schema, table, column, null, constraint, propIdToSqlCodes,
@@ -256,7 +129,7 @@ public final class ColumnSpec implements Serializable {
      *            a column {@link String}. Cannot be <code>null</code> unless
      *            <code>constraint</code> is also <code>null</code>.
      * @param constraint
-     *            a {@link Constraint}.
+     *            a {@link Operator}.
      * @param propIdToSqlCodes
      *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
      *            from a proposition id to a value of the specified column. If
@@ -264,7 +137,7 @@ public final class ColumnSpec implements Serializable {
      *            argument cannot be <code>null</code> either.
      */
     public ColumnSpec(String schema, String table, String column,
-            Constraint constraint,
+            Operator constraint,
             KnowledgeSourceIdToSqlCode[] propIdToSqlCodes,
             boolean propositionIdsComplete) {
         this(schema, table, column, null, constraint, propIdToSqlCodes, null,
@@ -284,7 +157,7 @@ public final class ColumnSpec implements Serializable {
      *            a column {@link String}. Cannot be <code>null</code> unless
      *            <code>constraint</code> is also <code>null</code>.
      * @param constraint
-     *            a {@link Constraint}.
+     *            a {@link Operator}.
      * @param propIdToSqlCodes
      *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
      *            from a proposition id to a value of the specified column. If
@@ -292,7 +165,7 @@ public final class ColumnSpec implements Serializable {
      *            argument cannot be <code>null</code> either.
      */
     public ColumnSpec(String schema, String table, String column,
-            Constraint constraint, KnowledgeSourceIdToSqlCode[] propIdToSqlCodes) {
+            Operator constraint, KnowledgeSourceIdToSqlCode[] propIdToSqlCodes) {
         this(schema, table, column, null, constraint, propIdToSqlCodes, null,
                 false);
     }
@@ -347,7 +220,7 @@ public final class ColumnSpec implements Serializable {
      * @param joinSpec
      *            a {@link JoinSpec}.
      * @param constraint
-     *            a {@link Constraint}.
+     *            a {@link Operator}.
      * @param propIdToSqlCodes
      *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
      *            from a proposition id to a value of the specified column. If
@@ -355,7 +228,7 @@ public final class ColumnSpec implements Serializable {
      *            argument cannot be <code>null</code> either.
      */
     private ColumnSpec(String schema, String table, String column,
-            JoinSpec joinSpec, Constraint constraint,
+            JoinSpec joinSpec, Operator constraint,
             KnowledgeSourceIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp,
             boolean propositionIdsComplete) {
         if (table == null) {
@@ -402,6 +275,7 @@ public final class ColumnSpec implements Serializable {
      * 
      * @return a schema name {@link String}.
      */
+    @Override
     public String getSchema() {
         return this.schema;
     }
@@ -411,6 +285,7 @@ public final class ColumnSpec implements Serializable {
      * 
      * @return a table name {@link String}. Guaranteed not <code>null</code>.
      */
+    @Override
     public String getTable() {
         return this.table;
     }
@@ -420,6 +295,7 @@ public final class ColumnSpec implements Serializable {
      * 
      * @return a column name {@link String}.
      */
+    @Override
     public String getColumn() {
         return this.column;
     }
@@ -430,6 +306,7 @@ public final class ColumnSpec implements Serializable {
      * 
      * @return a {@link JoinSpec}.
      */
+    @Override
     public JoinSpec getJoin() {
         return this.joinSpec;
     }
@@ -437,9 +314,10 @@ public final class ColumnSpec implements Serializable {
     /**
      * Returns a constraint on this column spec's column.
      * 
-     * @return a {@link Constraint} or <code>null</code> if none is specified.
+     * @return a {@link Operator} or <code>null</code> if none is specified.
      */
-    public Constraint getConstraint() {
+    @Override
+    public Operator getConstraint() {
         return this.constraint;
     }
 
@@ -464,6 +342,7 @@ public final class ColumnSpec implements Serializable {
      * 
      * @return a {@link PropositionIdToSqlCode[]}.
      */
+    @Override
     public KnowledgeSourceIdToSqlCode[] getPropositionIdToSqlCodes() {
         return this.propIdToSqlCodes.clone();
     }
@@ -475,6 +354,7 @@ public final class ColumnSpec implements Serializable {
      * 
      * @return a {@link ColumnOp}.
      */
+    @Override
     public ColumnOp getColumnOp() {
         return this.columnOp;
     }
@@ -486,6 +366,7 @@ public final class ColumnSpec implements Serializable {
      * 
      * @return <code>true</code> or <code>false</code>.
      */
+    @Override
     public boolean isPropositionIdsComplete() {
         return this.propositionIdsComplete;
     }

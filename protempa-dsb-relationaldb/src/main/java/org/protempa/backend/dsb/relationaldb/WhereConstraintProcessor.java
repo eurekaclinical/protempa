@@ -19,18 +19,18 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.Constraint;
+import org.protempa.backend.dsb.relationaldb.Operator;
 
 abstract class WhereConstraintProcessor {
 
     private final ColumnSpec columnSpec;
-    private final Constraint constraint;
+    private final Operator constraint;
     private final WhereClause whereClause;
     private final Object[] sqlCodes;
     private final TableAliaser referenceIndices;
 
     protected WhereConstraintProcessor(ColumnSpec columnSpec,
-            Constraint constraint, WhereClause whereClause, Object[] sqlCodes,
+            Operator constraint, WhereClause whereClause, Object[] sqlCodes,
             TableAliaser referenceIndices) {
         this.columnSpec = columnSpec;
         this.constraint = constraint;
@@ -40,7 +40,7 @@ abstract class WhereConstraintProcessor {
     }
 
     static WhereConstraintProcessor getInstance(ColumnSpec columnSpec,
-            Constraint constraint, WhereClause whereClause, Object[] sqlCodes,
+            Operator constraint, WhereClause whereClause, Object[] sqlCodes,
             TableAliaser referenceIndices) {
         switch (constraint) {
             case EQUAL_TO:
@@ -67,7 +67,7 @@ abstract class WhereConstraintProcessor {
         return columnSpec;
     }
 
-    protected Constraint getConstraint() {
+    protected Operator getConstraint() {
         return constraint;
     }
 

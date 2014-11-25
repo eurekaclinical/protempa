@@ -21,7 +21,6 @@ package org.protempa.backend.dsb.relationaldb;
 
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
-import org.protempa.backend.dsb.relationaldb.ColumnSpec.Constraint;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +53,7 @@ final class ColumnSpecInfoFactory {
         } else {
             columnSpecInfo.setUnique(entitySpec.isUnique());
         }
-        List<ColumnSpec> columnSpecs = new ArrayList<>();
+        List<IntColumnSpecWrapper> columnSpecs = new ArrayList<>();
         int i = 0;
         int refNum = 0;
         for (EntitySpec entitySpec2 : entitySpecs) {
@@ -118,7 +117,7 @@ final class ColumnSpecInfoFactory {
     }
 
     private static int processUniqueIds(EntitySpec entitySpec,
-            EntitySpec entitySpec2, List<ColumnSpec> columnSpecs, int i,
+            EntitySpec entitySpec2, List<IntColumnSpecWrapper> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
         ColumnSpec[] codeSpecs = entitySpec.getUniqueIdSpecs();
         ColumnSpec[] refSpecs = null;
@@ -153,7 +152,7 @@ final class ColumnSpecInfoFactory {
     }
 
     private static int processCodeSpec(Set<String> propIds, EntitySpec entitySpec,
-            EntitySpec entitySpec2, List<ColumnSpec> columnSpecs, int i,
+            EntitySpec entitySpec2, List<IntColumnSpecWrapper> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
         ColumnSpec codeSpec = entitySpec2.getCodeSpec();
         if (codeSpec != null) {
@@ -161,7 +160,7 @@ final class ColumnSpecInfoFactory {
             int specAsListSize = specAsList.size();
             ColumnSpec lastColumnSpec = specAsList.get(specAsListSize - 1);
             if (referenceSpec == null
-                    || !(lastColumnSpec.getConstraint() == Constraint.EQUAL_TO
+                    || !(lastColumnSpec.getConstraint() == Operator.EQUAL_TO
                     && lastColumnSpec.isPropositionIdsComplete()
                     && !AbstractSQLGenerator.needsPropIdInClause(propIds,
                     entitySpec2.getPropositionIds()))) {
@@ -179,7 +178,7 @@ final class ColumnSpecInfoFactory {
     }
 
     private static int processConstraintSpecs(EntitySpec entitySpec,
-            List<ColumnSpec> columnSpecs, int i) {
+            List<IntColumnSpecWrapper> IntColumnSpecWrapper, int i) {
         ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
         for (ColumnSpec spec : constraintSpecs) {
             i = processColumnSpec(spec, columnSpecs, i);
@@ -189,7 +188,7 @@ final class ColumnSpecInfoFactory {
 
     private static int processFilters(EntitySpec entitySpec,
             Collection<Filter> filters,
-            List<ColumnSpec> columnSpecs, int i) {
+            List<IntColumnSpecWrapper> columnSpecs, int i) {
         for (Filter filter : filters) {
             if (filter instanceof PropertyValueFilter) {
                 PropertyValueFilter pvf = (PropertyValueFilter) filter;
@@ -208,7 +207,7 @@ final class ColumnSpecInfoFactory {
     }
 
     private static int processColumnSpec(ColumnSpec spec,
-            List<ColumnSpec> columnSpecs, int i) {
+            List<IntColumnSpecWrapper> columnSpecs, int i) {
         if (spec != null) {
             List<ColumnSpec> specAsList = spec.asList();
             columnSpecs.addAll(specAsList);
@@ -218,7 +217,7 @@ final class ColumnSpecInfoFactory {
     }
 
     private static int processPropertyAndValueSpecs(EntitySpec entitySpec,
-            List<ColumnSpec> columnSpecs, int i,
+            List<IntColumnSpecWrapper> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo) {
         PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
         Map<String, Integer> propertyIndices =
@@ -247,7 +246,7 @@ final class ColumnSpecInfoFactory {
 
     private static int processReferenceSpecs(EntitySpec lhsEntitySpec,
                                              EntitySpec rhsEntitySpec,
-                                             List<ColumnSpec> columnSpecs, int refNum,
+                                             List<IntColumnSpecWrapper> columnSpecs, int refNum,
                                              int i, ColumnSpecInfo columnSpecInfo) {
 
         if (lhsEntitySpec.hasReferenceTo(rhsEntitySpec)) {
@@ -265,7 +264,7 @@ final class ColumnSpecInfoFactory {
     }
 
     private static int processFinishTimeSpec(EntitySpec queryEntitySpec,
-            EntitySpec entitySpec, List<ColumnSpec> columnSpecs, int i,
+            EntitySpec entitySpec, List<IntColumnSpecWrapper> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
         ColumnSpec spec = entitySpec.getFinishTimeSpec();
         if (spec != null) {
@@ -280,7 +279,7 @@ final class ColumnSpecInfoFactory {
     }
 
     private static int processStartTimeOrTimestamp(EntitySpec queryEntitySpec,
-            EntitySpec entitySpec, List<ColumnSpec> columnSpecs, int i,
+            EntitySpec entitySpec, List<IntColumnSpecWrapper> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
         ColumnSpec spec = entitySpec.getStartTimeSpec();
         if (spec != null) {
@@ -295,7 +294,7 @@ final class ColumnSpecInfoFactory {
     }
 
     private static int processBaseSpec(EntitySpec entitySpec,
-            List<ColumnSpec> columnSpecs, int i) {
+            List<IntColumnSpecWrapper> columnSpecs, int i) {
         ColumnSpec spec = entitySpec.getBaseSpec();
         List<ColumnSpec> specAsList = spec.asList();
         /*
