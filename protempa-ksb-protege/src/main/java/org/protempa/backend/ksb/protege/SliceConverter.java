@@ -27,6 +27,7 @@ import edu.stanford.smi.protege.model.Slot;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import org.protempa.DefaultSourceId;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.SliceDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
@@ -84,6 +85,7 @@ final class SliceConverter implements AbstractionConverter {
             extendedParameterCache.put(extendedParameter, tepd);
             ad.add(tepd);
         }
+        ad.setSourceId(DefaultSourceId.getInstance(backend.getId()));
         return ad;
     }
 
