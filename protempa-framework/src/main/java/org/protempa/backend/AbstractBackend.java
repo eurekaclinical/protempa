@@ -36,6 +36,8 @@ public abstract class AbstractBackend<E extends BackendUpdatedEvent>
     private final List<BackendListener<E>> listenerList;
     
     private String configurationsId;
+    
+    private String id;
 
     public AbstractBackend() {
         this.listenerList = new ArrayList<>();
@@ -45,6 +47,18 @@ public abstract class AbstractBackend<E extends BackendUpdatedEvent>
     public void initialize(BackendInstanceSpec<?> config) 
             throws BackendInitializationException {
         this.configurationsId = config.getConfigurationsId();
+        if (this.id == null) {
+            this.id = config.getBackendSpec().getId();
+        }
+    }
+    
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
     
     @Override

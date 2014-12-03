@@ -84,7 +84,7 @@ class HighLevelAbstractionConverter implements AbstractionConverter {
         Util.setInverseIsAs(complexAbstractionInstance, result, cm);
         result.setTemporalOffset(Util.temporalOffsets(
                 complexAbstractionInstance, backend, extendedParameterCache));
-        result.setSourceId(DefaultSourceId.getInstance(backend.getDisplayName()));
+        result.setSourceId(DefaultSourceId.getInstance(backend.getId()));
         return result;
     }
 

@@ -22,7 +22,6 @@ package org.protempa.backend;
 import org.protempa.BackendCloseException;
 import org.protempa.BackendListener;
 import org.protempa.Source;
-import org.protempa.backend.BackendInstanceSpec;
 
 /**
  * Common interface for PROTEMPA backends.
@@ -59,6 +58,8 @@ public interface Backend<E extends BackendUpdatedEvent> {
     String getDisplayName();
     
     String getConfigurationsId();
+    
+    String getId();
 
     /**
      * Releases any resources allocated by this backend.

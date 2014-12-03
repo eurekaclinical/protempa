@@ -83,4 +83,9 @@ public class MockTermSourceBackend implements TermSourceBackend {
     public void removeBackendListener(BackendListener<TermSourceBackendUpdatedEvent> listener) {
 
     }
+
+    @Override
+    public String getId() {
+        return "mocktsb";
+    }
 }

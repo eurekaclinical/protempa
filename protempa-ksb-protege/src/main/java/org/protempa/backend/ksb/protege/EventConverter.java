@@ -53,7 +53,7 @@ class EventConverter implements TemporalPropositionConverter {
                     hasPartInstance, "offset", cm);
         }
         result.setSourceId(
-                DefaultSourceId.getInstance(backend.getDisplayName()));
+                DefaultSourceId.getInstance(backend.getId()));
         return result;
     }
 

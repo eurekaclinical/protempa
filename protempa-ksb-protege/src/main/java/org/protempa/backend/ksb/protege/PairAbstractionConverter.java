@@ -55,8 +55,7 @@ public class PairAbstractionConverter implements AbstractionConverter {
         Util.setInverseIsAs(protegeProposition, result, cm);
         result.setTemporalOffset(Util.temporalOffsets(protegeProposition, 
                 backend, extendedParameterCache));
-        result.setSourceId(
-                DefaultSourceId.getInstance(backend.getDisplayName()));
+        result.setSourceId(DefaultSourceId.getInstance(backend.getId()));
         setRequireSecond(protegeProposition, result, cm);
         return result;
     }

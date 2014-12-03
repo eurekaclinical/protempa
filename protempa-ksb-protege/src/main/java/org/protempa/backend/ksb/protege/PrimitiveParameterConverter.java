@@ -51,8 +51,7 @@ class PrimitiveParameterConverter implements TemporalPropositionConverter {
         if (valueType != null) {
             result.setValueType(Util.parseValueType(valueType));
         }
-        result.setSourceId(
-                DefaultSourceId.getInstance(backend.getDisplayName()));
+        result.setSourceId(DefaultSourceId.getInstance(backend.getId()));
         return result;
     }
 

@@ -29,16 +29,11 @@ import org.protempa.backend.dsb.AbstractDataSourceBackend;
 public abstract class AbstractCommonsDataSourceBackend
         extends AbstractDataSourceBackend  {
 
-    private String dataSourceBackendId;
-
     @Override
     public void initialize(BackendInstanceSpec config)
         throws BackendInitializationException {
         super.initialize(config);
         CommonsBackend.initialize(this, config);
-        if (this.dataSourceBackendId == null)
-            throw new DataSourceBackendInitializationException(
-                    "dataSourceBackendId is not set");
     }
 
     @Override
@@ -51,12 +46,25 @@ public abstract class AbstractCommonsDataSourceBackend
     }
 
     @BackendProperty
+    @Deprecated
     public final void setDataSourceBackendId(String id) {
-        this.dataSourceBackendId = id;
+        setId(id);
     }
 
+    @Deprecated
     public final String getDataSourceBackendId () {
-        return this.dataSourceBackendId;
+        return getId();
+    }
+    
+    @BackendProperty
+    @Override
+    public final void setId(String id) {
+        super.setId(id);
+    }
+    
+    @Override
+    public final String getId() {
+        return super.getId();
     }
     
 }

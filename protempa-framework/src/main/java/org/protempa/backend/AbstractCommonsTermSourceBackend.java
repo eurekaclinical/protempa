@@ -19,6 +19,7 @@
  */
 package org.protempa.backend;
 
+import org.protempa.backend.annotations.BackendProperty;
 import org.protempa.backend.tsb.AbstractTermSourceBackend;
 
 public abstract class AbstractCommonsTermSourceBackend extends
@@ -38,6 +39,17 @@ public abstract class AbstractCommonsTermSourceBackend extends
     
     protected final String nameForErrors() {
         return CommonsBackend.nameForErrors(this);
+    }
+    
+    @BackendProperty
+    @Override
+    public final void setId(String id) {
+        super.setId(id);
+    }
+    
+    @Override
+    public final String getId() {
+        return super.getId();
     }
 
 }

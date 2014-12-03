@@ -37,8 +37,7 @@ class ConstantConverter implements PropositionConverter {
         Util.setTerms(protegeProposition, result, cm);
         Util.setInverseIsAs(protegeProposition, result, cm);
         Util.setReferences(protegeProposition, result, cm);
-        result.setSourceId(DefaultSourceId.getInstance(
-                backend.getDisplayName()));
+        result.setSourceId(DefaultSourceId.getInstance(backend.getId()));
         return result;
     }
     

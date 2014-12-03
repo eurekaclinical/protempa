@@ -62,7 +62,7 @@ class LowLevelAbstractionConverter implements AbstractionConverter {
                 constructValue(d, allowedValue, cm);
             }
         }
-        d.setSourceId(DefaultSourceId.getInstance(backend.getDisplayName()));
+        d.setSourceId(DefaultSourceId.getInstance(backend.getId()));
         return d;
     }
 
