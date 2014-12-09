@@ -38,6 +38,7 @@ abstract class AbstractSelectClause implements SelectClause {
         this.entitySpec = entitySpec;
         this.caseClause = null;
         this.wrapKeyId = wrapKeyId;
+        System.err.println("referenceIndices: " + this.referenceIndices);
     }
 
     protected TableAliaser getReferenceIndices() {

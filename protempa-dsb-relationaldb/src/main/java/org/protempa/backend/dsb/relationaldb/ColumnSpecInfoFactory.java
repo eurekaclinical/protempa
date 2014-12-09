@@ -135,13 +135,13 @@ final class ColumnSpecInfoFactory {
         int j = 0;
         if (codeSpecs != null && uniqueIndices != null) {
             for (ColumnSpec uniqueIdSpec : codeSpecs) {
-                i = processColumnSpec(uniqueIdSpec, columnSpecs, i);
+                i = processColumnSpec(uniqueIdSpec, columnSpecs, i, entitySpec);
                 uniqueIndices[j++] = i - 1;
             }
         }
         if (refSpecs != null && uniqueIndices != null) {
             for (ColumnSpec uniqueIdSpec : refSpecs) {
-                i = processColumnSpec(uniqueIdSpec, columnSpecs, i);
+                i = processColumnSpec(uniqueIdSpec, columnSpecs, i, entitySpec);
                 uniqueIndices[j++] = i - 1;
             }
         }
@@ -164,8 +164,7 @@ final class ColumnSpecInfoFactory {
                     && lastColumnSpec.isPropositionIdsComplete()
                     && !AbstractSQLGenerator.needsPropIdInClause(propIds,
                     entitySpec2.getPropositionIds()))) {
-                columnSpecs.addAll(specAsList);
-                i += specAsListSize;
+                i += wrapColumnSpecs(codeSpec, entitySpec, columnSpecs);
             } else {
                 codeSpec = null;
             }
@@ -178,10 +177,10 @@ final class ColumnSpecInfoFactory {
     }
 
     private static int processConstraintSpecs(EntitySpec entitySpec,
-            List<IntColumnSpecWrapper> IntColumnSpecWrapper, int i) {
+            List<IntColumnSpecWrapper> columnSpecs, int i) {
         ColumnSpec[] constraintSpecs = entitySpec.getConstraintSpecs();
         for (ColumnSpec spec : constraintSpecs) {
-            i = processColumnSpec(spec, columnSpecs, i);
+            i = processColumnSpec(spec, columnSpecs, i, entitySpec);
         }
         return i;
     }
@@ -195,10 +194,7 @@ final class ColumnSpecInfoFactory {
                 for (PropertySpec propertySpec :
                         entitySpec.getPropertySpecs()) {
                     if (propertySpec.getName().equals(pvf.getProperty())) {
-                        List<ColumnSpec> specAsList =
-                                propertySpec.getSpec().asList();
-                        columnSpecs.addAll(specAsList);
-                        i += specAsList.size();
+                        i += wrapColumnSpecs(propertySpec.getSpec(), entitySpec, columnSpecs);
                     }
                 }
             }
@@ -207,11 +203,9 @@ final class ColumnSpecInfoFactory {
     }
 
     private static int processColumnSpec(ColumnSpec spec,
-            List<IntColumnSpecWrapper> columnSpecs, int i) {
+            List<IntColumnSpecWrapper> columnSpecs, int i, EntitySpec entitySpec) {
         if (spec != null) {
-            List<ColumnSpec> specAsList = spec.asList();
-            columnSpecs.addAll(specAsList);
-            i += specAsList.size();
+            i += wrapColumnSpecs(spec, entitySpec, columnSpecs);
         }
         return i;
     }
@@ -224,9 +218,7 @@ final class ColumnSpecInfoFactory {
                 new HashMap<>();
         for (PropertySpec propertySpec : propertySpecs) {
             ColumnSpec spec = propertySpec.getSpec();
-            List<ColumnSpec> specAsList = spec.asList();
-            columnSpecs.addAll(specAsList);
-            i += specAsList.size();
+            i += wrapColumnSpecs(spec, entitySpec, columnSpecs);
             propertyIndices.put(propertySpec.getName(), i - 1);
         }
         if (propertySpecs.length > 0) {
@@ -235,9 +227,7 @@ final class ColumnSpecInfoFactory {
 
         ColumnSpec valueSpec = entitySpec.getValueSpec();
         if (valueSpec != null) {
-            List<ColumnSpec> specAsList = valueSpec.asList();
-            columnSpecs.addAll(specAsList);
-            i += specAsList.size();
+            i += wrapColumnSpecs(valueSpec, entitySpec, columnSpecs);
             columnSpecInfo.setValueIndex(i - 1);
         }
 
@@ -251,7 +241,7 @@ final class ColumnSpecInfoFactory {
 
         if (lhsEntitySpec.hasReferenceTo(rhsEntitySpec)) {
             for (ColumnSpec referringUniqueIdSpec : lhsEntitySpec.getUniqueIdSpecs()) {
-                i = processColumnSpec(referringUniqueIdSpec, columnSpecs, i);
+                i = processColumnSpec(referringUniqueIdSpec, columnSpecs, i, lhsEntitySpec);
             }
 
             if (columnSpecInfo.getReferenceIndices() == null) {
@@ -268,9 +258,7 @@ final class ColumnSpecInfoFactory {
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
         ColumnSpec spec = entitySpec.getFinishTimeSpec();
         if (spec != null) {
-            List<ColumnSpec> specAsList = spec.asList();
-            columnSpecs.addAll(specAsList);
-            i += specAsList.size();
+            i += wrapColumnSpecs(spec, entitySpec, columnSpecs);
             if (queryEntitySpec == entitySpec && referenceSpec == null) {
                 columnSpecInfo.setFinishTimeIndex(i - 1);
             }
@@ -283,9 +271,7 @@ final class ColumnSpecInfoFactory {
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
         ColumnSpec spec = entitySpec.getStartTimeSpec();
         if (spec != null) {
-            List<ColumnSpec> specAsList = spec.asList();
-            columnSpecs.addAll(specAsList);
-            i += specAsList.size();
+            i += wrapColumnSpecs(spec, entitySpec, columnSpecs);
             if (queryEntitySpec == entitySpec && referenceSpec == null) {
                 columnSpecInfo.setStartTimeIndex(i - 1);
             }
@@ -293,6 +279,20 @@ final class ColumnSpecInfoFactory {
         return i;
     }
 
+    private static int wrapColumnSpecs(ColumnSpec spec, EntitySpec entitySpec, List<IntColumnSpecWrapper> columnSpecs) {
+        boolean first = true;
+        ColumnSpec lastSpec = entitySpec.getBaseSpec().getLastSpec();
+        List<ColumnSpec> asList = spec.asList();
+        for (ColumnSpec cs : asList) {
+            IntColumnSpecWrapper w = new IntColumnSpecWrapper(cs);
+            if (first) {
+                w.setIsSameAs(lastSpec);
+            }
+            columnSpecs.add(w);
+        }
+        return asList.size();
+    }
+    
     private static int processBaseSpec(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i) {
         ColumnSpec spec = entitySpec.getBaseSpec();
@@ -301,9 +301,11 @@ final class ColumnSpecInfoFactory {
          * We assume that the first column spec of the base spec is the
          * patient id/key.
          */
-        int specAsListSize = specAsList.size();
-        columnSpecs.addAll(specAsList);
-        i += specAsListSize;
+        for (ColumnSpec cs : specAsList) {
+            IntColumnSpecWrapper w = new IntColumnSpecWrapper(cs);
+            columnSpecs.add(w);
+        }
+        i += specAsList.size();
 
         return i;
     }

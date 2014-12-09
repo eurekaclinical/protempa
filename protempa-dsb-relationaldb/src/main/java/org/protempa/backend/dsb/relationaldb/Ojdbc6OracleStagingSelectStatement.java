@@ -22,6 +22,7 @@ package org.protempa.backend.dsb.relationaldb;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -60,7 +61,9 @@ final class Ojdbc6OracleStagingSelectStatement extends
         List<IntColumnSpecWrapper> plusStagedSpecs = new ArrayList<>(
                 info.getColumnSpecs());
         for (StagedColumnSpec spec : stagingSpec.getStagedColumns()) {
-            plusStagedSpecs.add(spec.toColumnSpec());
+            IntColumnSpecWrapper icsw = new IntColumnSpecWrapper(spec.toColumnSpec());
+            icsw.setIsSameAs(getEntitySpec().getBaseSpec().getLastSpec());
+            plusStagedSpecs.add(icsw);
         }
         TableAliaser referenceIndices = new TableAliaser(plusStagedSpecs, "a");
 

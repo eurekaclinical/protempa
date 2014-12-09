@@ -19,6 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -53,69 +54,32 @@ abstract class AbstractFromClause implements FromClause {
 
     protected abstract OnClause getOnClause(JoinSpec joinSpec,
             TableAliaser referenceIndices);
-
+    
+    @Override
     public String generateClause() {
-        Map<Integer, ColumnSpec> columnSpecCache = new HashMap<>();
-        StringBuilder fromPart = new StringBuilder("FROM ");
-        boolean begin = true;
-        for (int j = 0, n = columnSpecs.size(); j < n; j++) {
-            ColumnSpec columnSpec = columnSpecs.get(j);
-
-            JoinSpec currentJoin = null;
-
-            /*
-             * To find something to join to, first we see if there is a join to
-             * it.
-             */
-            for (int k = j - 1; k >= 0; k--) {
-                ColumnSpec prevColumnSpec = columnSpecs.get(k);
-                JoinSpec js = prevColumnSpec.getJoin();
-                if (js != null && js.getNextColumnSpec() == columnSpec) {
-                    currentJoin = js;
-                    break;
-                }
-            }
-
-            /*
-             * Next, if there is not a join, we see if there is a join specified
-             * to another column spec with the same schema and table as this
-             * one.
-             */
-            if (currentJoin == null) {
-                for (int k = 0; k < j; k++) {
-                    ColumnSpec prevColumnSpec = columnSpecs.get(k);
-                    JoinSpec js = prevColumnSpec.getJoin();
-                    if (js != null
-                            && js.getNextColumnSpec().isSameSchemaAndTable(
-                                    columnSpec)) {
-                        currentJoin = js;
-                        break;
-                    }
-                }
-            }
-
-            Integer i = referenceIndices.getIndex(columnSpec);
-            if (i >= 0 && !columnSpecCache.containsKey(i)) {
-                assert begin || currentJoin != null : "No 'on' clause can be generated for "
-                        + columnSpec + " because there is no incoming join.";
+         StringBuilder fromPart = new StringBuilder("FROM ");
+         boolean begin = true;
+         JoinSpec currentJoin = null;
+         for (ColumnSpec columnSpec : this.columnSpecs) {
+             if (begin || currentJoin != null) {
                 if (!begin) {
                     fromPart.append(getJoinClause(currentJoin.getJoinType())
                             .generateClause());
                 }
                 fromPart.append(generateFromTable(columnSpec));
                 fromPart.append(' ');
-                columnSpecCache.put(i, columnSpec);
-
-                if (currentJoin != null) {
-                    fromPart.append(getOnClause(currentJoin, referenceIndices)
+                if (!begin) {
+                    fromPart.append(
+                            getOnClause(currentJoin, this.referenceIndices)
                             .generateClause());
                 }
-                begin = false;
-            }
-        }
-        return fromPart.toString();
+             }
+             currentJoin = columnSpec.getJoin();
+             begin = false;
+         }
+         return fromPart.toString();
     }
-
+    
     protected abstract String generateFromTable(ColumnSpec columnSpec);
 
 }
