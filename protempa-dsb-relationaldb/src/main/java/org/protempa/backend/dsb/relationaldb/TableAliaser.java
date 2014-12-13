@@ -22,10 +22,10 @@ package org.protempa.backend.dsb.relationaldb;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 final class TableAliaser {
-
     private static final String DEFAULT_PREFIX = "a";
     
     private final String prefix;
@@ -81,25 +81,29 @@ final class TableAliaser {
 
         int index = 1;
         JoinSpec currentJoin = null;
-        ColumnSpec lastBaseSpec = 
-                columnSpecs.get(0).getColumnSpec().getLastSpec();
+        List<ColumnSpec> baseSpecs = 
+                columnSpecs.get(0).getColumnSpec().asList();
         boolean first = true;
         for (IntColumnSpecWrapper columnSpec : columnSpecs) {
-            /*
-             * Only generate a table if we're the first table or there is an
-             * inbound join.
-             */
             if (currentJoin == null && !first) {
-                Integer previousInstanceIndex = tempIndices.get(lastBaseSpec);
-                assert previousInstanceIndex != null : "previousInstanceIndex cannot be null";
-                tempIndices.put(columnSpec.getColumnSpec(), previousInstanceIndex);
+                ColumnSpec cs = null;
+                for (ColumnSpec bs : baseSpecs) {
+                    if (bs.isSameSchemaAndTable(columnSpec.getColumnSpec())) {
+                        cs = bs;
+                        break;
+                    }
+                }
+                if (cs != null) {
+                    Integer previousInstanceIndex = tempIndices.get(cs);
+                    tempIndices.put(columnSpec.getColumnSpec(), previousInstanceIndex);
+                }
             } else {
                 tempIndices.put(columnSpec.getColumnSpec(), index++);
                 first = false;
             }
             currentJoin = columnSpec.getJoin();
         }
-
+        SQLGenUtil.logger().log(Level.SEVERE, "table aliases: {0}", tempIndices);
         this.indices = tempIndices;
     }
     

@@ -48,7 +48,7 @@ abstract class AbstractTimeSpecProcessor {
         this.referenceIndices = referenceIndices;
     }
 
-    protected EntitySpec getEntitySpec() {
+    protected final EntitySpec getEntitySpec() {
         return this.entitySpec;
     }
 
@@ -63,10 +63,10 @@ abstract class AbstractTimeSpecProcessor {
         ColumnSpec ts = getTimeSpec();
         if (ts != null) {
             ColumnSpec timeSpec = ts.getLastSpec();
-            if (timeSpec != null && referenceIndices.getIndex(timeSpec) > -1) {
+            if (referenceIndices.getIndex(timeSpec) > -1) {
+                Set<String> entitySpecPropIds = Arrays.asSet(entitySpec.getPropositionIds());
                 for (Filter filter : filters) {
                     if (filter instanceof PositionFilter) {
-                        Set<String> entitySpecPropIds = Arrays.asSet(entitySpec.getPropositionIds());
                         if (Collections.containsAny(entitySpecPropIds, filter.getPropositionIds())) {
                             PositionFilter pdsc2 = (PositionFilter) filter;
                             boolean outputStart = outputStart(pdsc2);
