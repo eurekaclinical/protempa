@@ -70,7 +70,7 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
             } else {
                 ColumnSpec columnSpec = this.lastColumnSpecs[j];
                 if (columnSpec == null) {
-                    ColumnSpec cs = propertySpec.getSpec();
+                    ColumnSpec cs = propertySpec.getCodeSpec();
                     List<ColumnSpec> codeSpecL = cs.asList();
                     columnSpec = codeSpecL.get(codeSpecL.size() - 1);
                     this.lastColumnSpecs[j] = columnSpec;

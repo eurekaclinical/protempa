@@ -497,7 +497,7 @@ public final class EntitySpec implements Serializable {
         addTo(results, this.uniqueIdSpecs);
         addTo(results, this.valueSpec);
         for (PropertySpec propertySpec : this.propertySpecs) {
-            addTo(results, propertySpec.getSpec());
+            addTo(results, propertySpec.getCodeSpec());
         }
         return results.toArray(new TableSpec[results.size()]);
     }

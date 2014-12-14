@@ -26,8 +26,9 @@ import java.util.logging.Level;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 final class TableAliaser {
+
     private static final String DEFAULT_PREFIX = "a";
-    
+
     private final String prefix;
     private Map<ColumnSpec, Integer> indices;
 
@@ -48,7 +49,7 @@ final class TableAliaser {
             return -1;
         }
     }
-    
+
     String generateTableReference(ColumnSpec columnSpec) {
         return prefix + getIndex(columnSpec);
     }
@@ -81,16 +82,19 @@ final class TableAliaser {
 
         int index = 1;
         JoinSpec currentJoin = null;
-        List<ColumnSpec> baseSpecs = 
-                columnSpecs.get(0).getColumnSpec().asList();
+        List<ColumnSpec> baseSpecs
+                = columnSpecs.get(0).getColumnSpec().asList();
         boolean first = true;
         for (IntColumnSpecWrapper columnSpec : columnSpecs) {
             if (currentJoin == null && !first) {
-                ColumnSpec cs = null;
-                for (ColumnSpec bs : baseSpecs) {
-                    if (bs.isSameSchemaAndTable(columnSpec.getColumnSpec())) {
-                        cs = bs;
-                        break;
+                ColumnSpec cs = columnSpec.getIsSameAs();
+                //ColumnSpec cs = null;
+                if (cs == null) {
+                    for (ColumnSpec bs : baseSpecs) {
+                        if (bs.isSameSchemaAndTable(columnSpec.getColumnSpec())) {
+                            cs = bs;
+                            break;
+                        }
                     }
                 }
                 if (cs != null) {
@@ -106,7 +110,7 @@ final class TableAliaser {
         SQLGenUtil.logger().log(Level.SEVERE, "table aliases: {0}", tempIndices);
         this.indices = tempIndices;
     }
-    
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);

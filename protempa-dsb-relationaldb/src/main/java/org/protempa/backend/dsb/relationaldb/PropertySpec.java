@@ -36,6 +36,7 @@ public final class PropertySpec implements Serializable {
     private final String name;
     private final Map<String, String> codeToPropIdMap;
     private final ColumnSpec codeSpec;
+    private final ColumnSpec constraintSpec;
     private final ValueType valueType;
     private final JDBCValueFormat jdbcValueFormat;
 
@@ -60,7 +61,23 @@ public final class PropertySpec implements Serializable {
             Map<String, String> codeToPropIdMap,
             ColumnSpec codeSpec,
             ValueType valueType) {
-        this(name, codeToPropIdMap, codeSpec, valueType, null);
+        this(name, codeToPropIdMap, codeSpec, null, valueType, null);
+    }
+    
+    public PropertySpec(String name,
+            Map<String, String> codeToPropIdMap,
+            ColumnSpec codeSpec,
+            ColumnSpec constraintSpec,
+            ValueType valueType) {
+        this(name, codeToPropIdMap, codeSpec, constraintSpec, valueType, null);
+    }
+    
+    public PropertySpec(String name,
+            Map<String, String> codeToPropIdMap,
+            ColumnSpec codeSpec,
+            ValueType valueType, 
+            JDBCValueFormat jdbcValueFormat) {
+        this(name, codeToPropIdMap, codeSpec, null, valueType, jdbcValueFormat);
     }
     
     /**
@@ -82,6 +99,7 @@ public final class PropertySpec implements Serializable {
     public PropertySpec(String name,
             Map<String, String> codeToPropIdMap,
             ColumnSpec codeSpec,
+            ColumnSpec constraintSpec,
             ValueType valueType, 
             JDBCValueFormat jdbcValueFormat) {
         if (name == null)
@@ -98,9 +116,10 @@ public final class PropertySpec implements Serializable {
         }
         this.codeSpec = codeSpec;
         this.valueType = valueType;
+        this.constraintSpec = constraintSpec;
         this.jdbcValueFormat = jdbcValueFormat;
     }
-
+    
     /**
      * Returns the property's name. Guaranteed not <code>null</code>.
      *
@@ -124,8 +143,12 @@ public final class PropertySpec implements Serializable {
      *
      * @return a {@link ColumnSpec}.
      */
-    public ColumnSpec getSpec() {
+    public ColumnSpec getCodeSpec() {
         return this.codeSpec;
+    }
+    
+    public ColumnSpec getConstraintSpec() {
+        return this.constraintSpec;
     }
 
     /**

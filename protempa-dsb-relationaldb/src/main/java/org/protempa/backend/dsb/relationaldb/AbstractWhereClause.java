@@ -254,13 +254,24 @@ abstract class AbstractWhereClause implements WhereClause {
             boolean first) {
         StringBuilder wherePart = new StringBuilder();
         
+        for (PropertySpec ps : propertySpecs) {
+            ColumnSpec constraintSpec = ps.getConstraintSpec();
+            if (constraintSpec != null) {
+                int wherePartLength = wherePart.length();
+                wherePart.append(processConstraint(constraintSpec, null, null, first));
+                if (wherePart.length() > wherePartLength) {
+                    first = false;
+                }
+            }
+        }
+        
         for (Filter filter : filters) {
             for (PropertySpec ps : propertySpecs) {
                 if (filter instanceof PropertyValueFilter) {
                     PropertyValueFilter pvf = (PropertyValueFilter) filter;
 
                     if (pvf.getProperty().equals(ps.getName())) {
-                        ColumnSpec colSpec = ps.getSpec();
+                        ColumnSpec colSpec = ps.getCodeSpec();
                         int wherePartLength = wherePart.length();
                         wherePart.append(processPropertyValueFilter(colSpec,
                                 pvf.getValueComparator(), pvf.getValues(),
