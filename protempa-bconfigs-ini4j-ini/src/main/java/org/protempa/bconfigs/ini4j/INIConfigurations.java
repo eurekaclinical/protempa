@@ -133,15 +133,13 @@ public class INIConfigurations implements Configurations {
         }
 
         IniParser parser = new IniParser();
-        try {
-            File file = new File(this.directory, configurationsId);
-            FileReader fr = new FileReader(file);
+        File file = new File(this.directory, configurationsId);
+        try (FileReader fr = new FileReader(file)) {
             final List<BackendInstanceSpec<B>> results =
                     new ArrayList<>();
             final List<Exception> exceptions = new ArrayList<>();
             parser.parse(fr, new IniHandler() {
                 private BackendInstanceSpec<B> backendInstanceSpec;
-                private int order = 0;
 
                 @Override
                 public void endIni() {
@@ -175,7 +173,6 @@ public class INIConfigurations implements Configurations {
 
                 @Override
                 public void startSection(String string) {
-                    order++;
                     if (backendSpec.getId().equals(string)) {
                         backendInstanceSpec =
                                 backendSpec.newBackendInstanceSpec();
@@ -249,8 +246,7 @@ public class INIConfigurations implements Configurations {
                     "configurationId cannot be null");
         }
         IniParser parser = new IniParser();
-        try {
-            FileReader fr = new FileReader(new File(this.directory, configurationId));
+        try (FileReader fr = new FileReader(new File(this.directory, configurationId))) {
             final List<String> results = new ArrayList<>();
             parser.parse(fr, new IniHandler() {
                 @Override
