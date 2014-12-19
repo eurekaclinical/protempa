@@ -55,10 +55,14 @@ final class TableAliaser {
     }
 
     String generateColumnReference(ColumnSpec columnSpec) {
-        return generateTableReference(columnSpec) + "."
+        String expr = columnSpec.getExpr();
+        if (expr == null) {
+            expr = generateTableReference(columnSpec) + "."
                 + columnSpec.getColumn();
+        }
+        return expr;
     }
-
+    
     String generateColumnReferenceWithOp(ColumnSpec columnSpec) {
         StringBuilder result = new StringBuilder();
         result.append(generateColumnReference(columnSpec));
@@ -86,24 +90,26 @@ final class TableAliaser {
                 = columnSpecs.get(0).getColumnSpec().asList();
         boolean first = true;
         for (IntColumnSpecWrapper columnSpec : columnSpecs) {
-            if (currentJoin == null && !first) {
-                ColumnSpec cs = columnSpec.getIsSameAs();
-                //ColumnSpec cs = null;
-                if (cs == null) {
-                    for (ColumnSpec bs : baseSpecs) {
-                        if (bs.isSameSchemaAndTable(columnSpec.getColumnSpec())) {
-                            cs = bs;
-                            break;
+            if (columnSpec.getColumnSpec().getExpr() == null) {
+                if (currentJoin == null && !first) {
+                    ColumnSpec cs = columnSpec.getIsSameAs();
+                    //ColumnSpec cs = null;
+                    if (cs == null) {
+                        for (ColumnSpec bs : baseSpecs) {
+                            if (bs.isSameSchemaAndTable(columnSpec.getColumnSpec())) {
+                                cs = bs;
+                                break;
+                            }
                         }
                     }
+                    if (cs != null) {
+                        Integer previousInstanceIndex = tempIndices.get(cs);
+                        tempIndices.put(columnSpec.getColumnSpec(), previousInstanceIndex);
+                    }
+                } else {
+                    tempIndices.put(columnSpec.getColumnSpec(), index++);
+                    first = false;
                 }
-                if (cs != null) {
-                    Integer previousInstanceIndex = tempIndices.get(cs);
-                    tempIndices.put(columnSpec.getColumnSpec(), previousInstanceIndex);
-                }
-            } else {
-                tempIndices.put(columnSpec.getColumnSpec(), index++);
-                first = false;
             }
             currentJoin = columnSpec.getJoin();
         }

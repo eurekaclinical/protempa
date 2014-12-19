@@ -20,7 +20,6 @@
 package org.protempa.backend.dsb.relationaldb;
 
 abstract class AbstractOnClause implements OnClause {
-
     private final JoinSpec joinSpec;
     private final TableAliaser referenceIndices;
 
@@ -31,14 +30,25 @@ abstract class AbstractOnClause implements OnClause {
 
     @Override
     public String generateClause() {
-        return new StringBuilder("ON (")
-                .append(referenceIndices.generateTableReference(joinSpec
-                        .getPrevColumnSpec()))
-                .append("." + joinSpec.getFromKey())
-                .append(" = ")
-                .append(referenceIndices.generateTableReference(joinSpec
-                        .getNextColumnSpec()))
-                .append("." + joinSpec.getToKey()).append(") ").toString();
+        String onClause = joinSpec.getOnClause();
+        
+        if (onClause != null) {
+            return "ON (" + onClause + ") ";
+        } else {
+            String fromRef = referenceIndices.generateTableReference(joinSpec
+                        .getPrevColumnSpec());
+            String toRef = referenceIndices.generateTableReference(joinSpec
+                        .getNextColumnSpec());
+            return new StringBuilder("ON (")
+                    .append(fromRef)
+                    .append('.')
+                    .append(joinSpec.getFromKey())
+                    .append(" = ")
+                    .append(toRef)
+                    .append('.')
+                    .append(joinSpec.getToKey())
+                    .append(") ").toString();
+        }
     }
 
 }

@@ -69,7 +69,7 @@ final class IntColumnSpecWrapper implements IColumnSpec {
     public String getTable() {
         return this.columnSpec.getTable();
     }
-
+    
     @Override
     public boolean isPropositionIdsComplete() {
         return this.columnSpec.isPropositionIdsComplete();

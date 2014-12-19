@@ -53,21 +53,6 @@ public final class TableSpec {
     }
 
     /**
-     * Creates and returns a new {@link TableSpec} from the given
-     * {@link ColumnSpec}. The <tt>TableSpec</tt> will have the same schema and
-     * table name as the <tt>ColumnSpec</tt>.
-     * 
-     * @param columnSpec
-     *            the {@link ColumnSpec} the new {@link TableSpec} will be based
-     *            upon
-     * @return a new {@link TableSpec} with the same schema and table as the
-     *         given {@link ColumnSpec}.
-     */
-    public static TableSpec fromColumnSpec(ColumnSpec columnSpec) {
-        return new TableSpec(columnSpec);
-    }
-
-    /**
      * Gets the schema
      * 
      * @return the schema name

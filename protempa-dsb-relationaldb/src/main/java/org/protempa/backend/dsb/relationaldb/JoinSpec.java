@@ -27,7 +27,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  *
  * @author Andrew Post
  */
-public final class JoinSpec implements Serializable {
+public class JoinSpec implements Serializable {
 
     public static enum JoinType {
         INNER,
@@ -39,8 +39,29 @@ public final class JoinSpec implements Serializable {
     private final String toKey;
     private final ColumnSpec nextColumnSpec;
     private final JoinType joinType;
+    private final String onClause;
     private ColumnSpec prevColumnSpec;
-
+    
+    public JoinSpec(String onClause, ColumnSpec nextColumnSpec) {
+        this(onClause, (JoinType) null, nextColumnSpec);
+    }
+    
+    public JoinSpec(String onClause, JoinType joinType, ColumnSpec nextColumnSpec) {
+        if (onClause == null) {
+            throw new IllegalArgumentException("onClause cannot be null");
+        }
+        if (nextColumnSpec == null)
+            throw new IllegalArgumentException(
+                    "nextColumnSpec cannot be null");
+        if (joinType == null)
+            joinType = JoinType.INNER;
+        this.onClause = onClause;
+        this.joinType = joinType;
+        this.nextColumnSpec = nextColumnSpec;
+        this.fromKey = null;
+        this.toKey = null;
+    }
+    
     /**
      * Instantiates a join specification with the join keys of the two tables,
      * the path through the database from the corresponding entity's
@@ -71,19 +92,24 @@ public final class JoinSpec implements Serializable {
      */
     public JoinSpec(String fromKey, String toKey, JoinType joinType,
             ColumnSpec nextColumnSpec) {
-        if (fromKey == null)
-            throw new IllegalArgumentException("fromKey cannot be null");
-        if (toKey == null)
-            throw new IllegalArgumentException("toKey cannot be null");
-        if (nextColumnSpec == null)
+        if (nextColumnSpec == null) {
             throw new IllegalArgumentException(
                     "nextColumnSpec cannot be null");
-        if (joinType == null)
+        }
+        if (joinType == null) {
             joinType = JoinType.INNER;
+        }
+        if (fromKey == null) {
+            throw new IllegalArgumentException("fromKey cannot be null");
+        }
+        if (toKey == null) {
+            throw new IllegalArgumentException("toKey cannot be null");
+        }
+        this.joinType = joinType;
+        this.nextColumnSpec = nextColumnSpec;
         this.fromKey = fromKey;
         this.toKey = toKey;
-        this.nextColumnSpec = nextColumnSpec;
-        this.joinType = joinType;
+        this.onClause = null;
     }
 
     /**
@@ -184,6 +210,10 @@ public final class JoinSpec implements Serializable {
         }
         return true;
     }
+    
+    public String getOnClause() {
+        return this.onClause;
+    }
 
     /**
      * Computes a hash code from all of this instance's fields.
@@ -202,35 +232,6 @@ public final class JoinSpec implements Serializable {
             this.prevColumnSpec.hashCode() : 0);
         hash = 59 * hash + this.joinType.hashCode();
         return hash;
-    }
-
-    boolean isSameJoin(JoinSpec other) {
-        if (other == null)
-            return false;
-        if ((this.fromKey == null) ? (other.fromKey != null) :
-            !this.fromKey.equals(other.fromKey)) {
-            return false;
-        }
-        if ((this.toKey == null) ? (other.toKey != null) :
-            !this.toKey.equals(other.toKey)) {
-            return false;
-        }
-        if (this.nextColumnSpec == null && other.nextColumnSpec != null) {
-            return false;
-        }
-        if (this.nextColumnSpec != null && other.nextColumnSpec == null) {
-            return false;
-        }
-        if (!this.nextColumnSpec.isSameSchemaAndTable(other.nextColumnSpec)) {
-            return false;
-        }
-        if (!this.prevColumnSpec.isSameSchemaAndTable(other.prevColumnSpec)) {
-            return false;
-        }
-        if (this.joinType != other.joinType) {
-            return false;
-        }
-        return true;
     }
 
     @Override

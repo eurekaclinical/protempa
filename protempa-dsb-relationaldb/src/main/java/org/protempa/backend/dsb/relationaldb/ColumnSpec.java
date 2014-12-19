@@ -33,7 +33,7 @@ import org.protempa.ProtempaUtil;
  * 
  * @author Andrew Post
  */
-public final class ColumnSpec implements Serializable, IColumnSpec {
+public class ColumnSpec implements Serializable, IColumnSpec {
 
     private static final long serialVersionUID = 2254623617064935923L;
 
@@ -49,7 +49,21 @@ public final class ColumnSpec implements Serializable, IColumnSpec {
     private final Map<Object, String> propIdForSqlCode;
     private final ColumnOp columnOp;
     private final boolean propositionIdsComplete;
-
+    private final String expr;
+    
+    public ColumnSpec(String expr) {
+        this.expr = expr;
+        this.schema = null;
+        this.table = null;
+        this.column = null;
+        this.joinSpec = null;
+        this.constraint = null;
+        this.propIdForSqlCode = null;
+        this.propIdToSqlCodes = null;
+        this.columnOp = null;
+        this.propositionIdsComplete = false;
+    }
+    
     /**
      * Instantiates part of a path using a schema, table and join.
      * 
@@ -268,6 +282,11 @@ public final class ColumnSpec implements Serializable, IColumnSpec {
         }
         this.columnOp = columnOp;
         this.propositionIdsComplete = propositionIdsComplete;
+        this.expr = null;
+    }
+    
+    public String getExpr() {
+        return this.expr;
     }
 
     /**
@@ -397,32 +416,6 @@ public final class ColumnSpec implements Serializable, IColumnSpec {
     boolean isSameSchemaAndTable(TableSpec tableSpec) {
         return StringUtil.equals(tableSpec.getSchema(), this.schema)
                 && StringUtil.equals(tableSpec.getTable(), this.table);
-    }
-
-    /**
-     * Returns whether the specified column spec has a join {@link #getJoin() })
-     * that uses the same columns as this one.
-     * 
-     * @param columnSpec
-     *            the {@link ColumnSpec} to compare.
-     * @return <code>true</code> or <code>false</code>.
-     */
-    boolean isSameJoin(ColumnSpec columnSpec) {
-        JoinSpec otherJoinSpec = columnSpec.getJoin();
-        if (this.joinSpec == null) {
-            return otherJoinSpec == null;
-        } else if (otherJoinSpec == null) {
-            return false;
-        } else {
-            String joinSpecFromKey = this.joinSpec.getFromKey();
-            String joinSpecToKey = this.joinSpec.getToKey();
-            String otherJoinSpecFromKey = otherJoinSpec.getFromKey();
-            String otherJoinSpecToKey = otherJoinSpec.getToKey();
-            return joinSpecFromKey.equals(otherJoinSpecFromKey)
-                    && joinSpecToKey.equals(otherJoinSpecToKey)
-                    && this.joinSpec.getNextColumnSpec().isSameSchemaAndTable(
-                            otherJoinSpec.getNextColumnSpec());
-        }
     }
     
     /**

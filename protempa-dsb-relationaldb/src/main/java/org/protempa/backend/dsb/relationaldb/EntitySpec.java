@@ -487,8 +487,8 @@ public final class EntitySpec implements Serializable {
      * @return an array of {@link TableSpec}s. Guaranteed not 
      * <code>null</code>.
      */
-    public TableSpec[] getTableSpecs() {
-        Set<TableSpec> results = new HashSet<>();
+    public ColumnSpec[] getColumnSpecs() {
+        Set<ColumnSpec> results = new HashSet<>();
         addTo(results, this.baseSpec);
         addTo(results, this.codeSpec);
         addTo(results, this.constraintSpecs);
@@ -499,14 +499,14 @@ public final class EntitySpec implements Serializable {
         for (PropertySpec propertySpec : this.propertySpecs) {
             addTo(results, propertySpec.getCodeSpec());
         }
-        return results.toArray(new TableSpec[results.size()]);
+        return results.toArray(new ColumnSpec[results.size()]);
     }
 
-    private void addTo(Set<TableSpec> tableSpecs, ColumnSpec... colSpecs) {
+    private void addTo(Set<ColumnSpec> tableSpecs, ColumnSpec... colSpecs) {
         for (ColumnSpec colSpec : colSpecs) {
             if (colSpec != null) {
                 for (ColumnSpec cs : colSpec.asList()) {
-                    tableSpecs.add(TableSpec.fromColumnSpec(cs));
+                    tableSpecs.add(cs);
                 }
             }
         }
