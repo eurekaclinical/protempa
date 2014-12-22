@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -256,12 +258,18 @@ public class ProtempaTest {
     public void setUp() throws DataProviderException, SQLException,
             ProtempaStartupException, BackendProviderSpecLoaderException,
             ConfigurationsLoadException, InvalidConfigurationException,
-            ConfigurationsNotFoundException, NamingException {
+            ConfigurationsNotFoundException, NamingException, IOException {
 
+        // Create the bioportal ksb database
+        File ksbBioportalDb = File.createTempFile("bioportal-dsb", ".db");
+        try (Connection connection = DriverManager.getConnection("jdbc:h2:" + ksbBioportalDb.getAbsolutePath() +  ";USER=sa;INIT=RUNSCRIPT FROM 'src/test/resources/ksb/bioportal.sql'")) {
+            
+        }
+        
         // set up a data source/connection pool for accessing the BioPortal H2 database
         BasicDataSource bds = new BasicDataSource();
         bds.setDriverClassName("org.h2.Driver");
-        bds.setUrl("jdbc:h2:src/test/resources/ksb/bioportal;USER=sa");
+        bds.setUrl("jdbc:h2:" + ksbBioportalDb.getAbsolutePath() +  ";USER=sa");
         bds.setMinIdle(1);
         bds.setMaxIdle(5);
         bds.setMaxTotal(5);
@@ -276,8 +284,7 @@ public class ProtempaTest {
 
         logger.log(Level.INFO, "Populating database");
         this.dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
-        inserter = new DataInserter("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
-        inserter.createTables("src/test/resources/dsb/test-schema.sql");
+        inserter = new DataInserter("jdbc:h2:mem:test;INIT=RUNSCRIPT FROM 'src/test/resources/dsb/test-schema.sql';DB_CLOSE_DELAY=-1");
         this.patientCount = dataProvider.getPatients().size();
         inserter.insertPatients(dataProvider.getPatients());
         inserter.insertEncounters(dataProvider.getEncounters());
@@ -295,23 +302,50 @@ public class ProtempaTest {
      * @throws Exception
      */
     @After
-    public void tearDown() throws SQLException, CloseException, NamingException {
-        if (this.protempa != null) {
-            this.protempa.close();
+    public void tearDown() throws Exception {
+        Exception exceptionToThrow = null;
+        
+        try {
+            if (this.protempa != null) {
+                this.protempa.close();
+            }
+        } catch (CloseException ex) {
+            exceptionToThrow = ex;
         }
+        
         try {
             this.inserter.truncateTables();
-        } finally {
+        } catch (SQLException ex) {
+            if (exceptionToThrow == null) {
+                exceptionToThrow = ex;
+            }
+        }
+        
+        try {
             this.inserter.close();
+        } catch (SQLException ex) {
+            if (exceptionToThrow == null) {
+                exceptionToThrow = ex;
+            }
+        }
+        
+        try {
+            // Tear down the context binding to the BioPortal h2 connection pool
+            this.initialContext.unbind("java:/comp/env/jdbc/BioPortalDS");
+            this.initialContext.destroySubcontext("java:/comp/env/jdbc");
+            this.initialContext.destroySubcontext("java:/comp/env");
+            this.initialContext.destroySubcontext("java:/comp");
+            this.initialContext.destroySubcontext("java:");
+            this.initialContext.close();
+        } catch (NamingException ex) {
+            if (exceptionToThrow == null) {
+                exceptionToThrow = ex;
+            }
         }
 
-        // Tear down the context binding to the BioPortal h2 connection pool
-        this.initialContext.unbind("java:/comp/env/jdbc/BioPortalDS");
-        this.initialContext.destroySubcontext("java:/comp/env/jdbc");
-        this.initialContext.destroySubcontext("java:/comp/env");
-        this.initialContext.destroySubcontext("java:/comp");
-        this.initialContext.destroySubcontext("java:");
-        this.initialContext.close();
+        if (exceptionToThrow != null) {
+            throw exceptionToThrow;
+        }
 
     }
 
