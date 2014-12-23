@@ -385,14 +385,23 @@ public class I2b2KnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBa
     }
 
     private String newFullName(String fullName, int offset) {
-        if (fullName.endsWith(ONT_PATH_SEP)) {
-            fullName = fullName.substring(0, fullName.length() - 1);
+        String newFullName = fullName;
+        if (newFullName.length() == 0) {
+            return newFullName;
+        }
+        if (newFullName.endsWith(ONT_PATH_SEP)) {
+            newFullName = newFullName.substring(0, newFullName.length() - 1);
         }
         if (offset == -1) {
-            fullName = fullName.substring(0, fullName.lastIndexOf(ONT_PATH_SEP));
+            int lastIndexOf = newFullName.lastIndexOf(ONT_PATH_SEP);
+            if (lastIndexOf == -1) {
+                newFullName = "";
+            } else {
+                newFullName = newFullName.substring(0, lastIndexOf);
+            }
         }
-        fullName = escapeLike(fullName);
-        return fullName;
+        newFullName = escapeLike(newFullName);
+        return newFullName;
     }
     
     private static String escapeLike(String str) {
