@@ -1,0 +1,7 @@
+[org.protempa.dsb.MockDataSourceBackend]
+
+[org.protempa.backend.asb.java.JavaAlgorithmBackend]
+
+[org.protempa.backend.ksb.i2b2.I2b2KnowledgeSourceBackend]
+databaseAPI = DATASOURCE
+databaseId = java:/comp/env/jdbc/I2b2DS
