@@ -35,9 +35,18 @@ import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.bconfigs.ini4j.INIConfigurations;
 
 import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.After;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -53,12 +62,37 @@ public class BioportalKnowledgeSourceBackendTest {
 
     private static final String ICD9_250_ID = "ICD9:250";
     private BioportalKnowledgeSourceBackend ksb;
+    /*
+     * Binding for the BioPortal H2 database connection pool
+     */
+    InitialContext initialContext;
 
     @Before
-    public void setUp() {
-        SourceFactory sf = null;
+    public void setUp() throws IOException, SQLException, NamingException {
+        // Create the bioportal ksb database
+        File ksbBioportalDb = File.createTempFile("bioportal-dsb", ".db");
+        try (Connection connection = DriverManager.getConnection("jdbc:h2:" + ksbBioportalDb.getAbsolutePath() +  ";INIT=RUNSCRIPT FROM 'src/test/resources/bioportal.sql'")) {
+            
+        }
+        
+        // set up a data source/connection pool for accessing the BioPortal H2 database
+        BasicDataSource bds = new BasicDataSource();
+        bds.setDriverClassName("org.h2.Driver");
+        bds.setUrl("jdbc:h2:" + ksbBioportalDb.getAbsolutePath());
+        bds.setMinIdle(1);
+        bds.setMaxIdle(5);
+        bds.setMaxTotal(5);
+        System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.naming.java.javaURLContextFactory");
+        System.setProperty(Context.URL_PKG_PREFIXES, "org.apache.naming");
+        this.initialContext = new InitialContext();
+        this.initialContext.createSubcontext("java:");
+        this.initialContext.createSubcontext("java:/comp");
+        this.initialContext.createSubcontext("java:/comp/env");
+        this.initialContext.createSubcontext("java:/comp/env/jdbc");
+        this.initialContext.bind("java:/comp/env/jdbc/BioPortalDS", bds);
+        
         try {
-            sf = new SourceFactory(new INIConfigurations(new File("src/test/resources")),
+            SourceFactory sf = new SourceFactory(new INIConfigurations(new File("src/test/resources")),
                     "bioportal-test-config");
             Protempa p = Protempa.newInstance(sf);
             KnowledgeSourceBackend ksb = p.getKnowledgeSource().getBackends()[0];
@@ -67,6 +101,17 @@ public class BioportalKnowledgeSourceBackendTest {
             e.printStackTrace();
             fail();
         }
+    }
+    
+    @After
+    public void tearDown() throws NamingException {
+        // Tear down the context binding to the BioPortal h2 connection pool
+        this.initialContext.unbind("java:/comp/env/jdbc/BioPortalDS");
+        this.initialContext.destroySubcontext("java:/comp/env/jdbc");
+        this.initialContext.destroySubcontext("java:/comp/env");
+        this.initialContext.destroySubcontext("java:/comp");
+        this.initialContext.destroySubcontext("java:");
+        this.initialContext.close();
     }
 
     @Test
