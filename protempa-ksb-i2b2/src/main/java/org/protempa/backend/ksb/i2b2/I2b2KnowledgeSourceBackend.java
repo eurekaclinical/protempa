@@ -143,17 +143,7 @@ public class I2b2KnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBa
 
     @Override
     public PropositionDefinition readPropositionDefinition(String id) throws KnowledgeSourceReadException {
-        if (logger.isLoggable(Level.FINEST)) {
-            logger.log(Level.FINEST, "Looking for proposition {0}", id);
-        }
-        PropositionDefinition result = readFromDatabase(id);
-        if (result != null) {
-            logger.log(Level.FINEST, "Found proposition id: {0}", id);
-
-            return result;
-        }
-        logger.log(Level.FINER, "Failed to find proposition id: {0}", id);
-        return null;
+        return readTemporalPropositionDefinition(id);
     }
 
     @Override
@@ -211,6 +201,16 @@ public class I2b2KnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBa
 
     @Override
     public TemporalPropositionDefinition readTemporalPropositionDefinition(String id) throws KnowledgeSourceReadException {
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.log(Level.FINEST, "Looking for proposition {0}", id);
+        }
+        TemporalPropositionDefinition result = readFromDatabase(id);
+        if (result != null) {
+            logger.log(Level.FINEST, "Found proposition id: {0}", id);
+
+            return result;
+        }
+        logger.log(Level.FINER, "Failed to find proposition id: {0}", id);
         return null;
     }
 
@@ -247,7 +247,7 @@ public class I2b2KnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBa
         }
     }
 
-    private PropositionDefinition readFromDatabase(String id) throws KnowledgeSourceReadException {
+    private TemporalPropositionDefinition readFromDatabase(String id) throws KnowledgeSourceReadException {
         try (Connection conn = openConnection()) {
             StringBuilder sql = new StringBuilder();
             List<String> ontTables = readOntologyTables(conn);
@@ -278,6 +278,8 @@ public class I2b2KnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBa
                             result.setDescription(rs.getString(5));
                             result.setInDataSource(true);
                             result.setValueType(ValueType.VALUE);
+                            Set<String> children = readLevelFromDatabaseHelper(rs.getInt(1), rs.getString(3), 1);
+                            result.setInverseIsA(children.toArray(new String[children.size()]));
                             return result;
                         } else {
                             EventDefinition result = new EventDefinition(id);
