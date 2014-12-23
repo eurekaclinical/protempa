@@ -47,6 +47,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.PrimitiveParameterDefinition;
+import org.protempa.PropertyDefinition;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -280,6 +281,8 @@ public class I2b2KnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBa
                             result.setValueType(ValueType.VALUE);
                             Set<String> children = readLevelFromDatabaseHelper(rs.getInt(1), rs.getString(3), 1);
                             result.setInverseIsA(children.toArray(new String[children.size()]));
+                            PropertyDefinition[] propDefs = readPropertyDefinitions(rs.getString(3));
+                            result.setPropertyDefinitions(propDefs);
                             return result;
                         } else {
                             EventDefinition result = new EventDefinition(id);
@@ -288,6 +291,8 @@ public class I2b2KnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBa
                             result.setInDataSource(true);
                             Set<String> children = readLevelFromDatabaseHelper(rs.getInt(1), rs.getString(3), 1);
                             result.setInverseIsA(children.toArray(new String[children.size()]));
+                            PropertyDefinition[] propDefs = readPropertyDefinitions(rs.getString(3));
+                            result.setPropertyDefinitions(propDefs);
                             return result;
                         }
                         
@@ -341,6 +346,41 @@ public class I2b2KnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBa
         } catch (InvalidConnectionSpecArguments | SQLException e) {
             throw new KnowledgeSourceReadException(e);
         }
+    }
+    
+    private PropertyDefinition[] readPropertyDefinitions(String fullName) throws KnowledgeSourceReadException {
+        List<PropertyDefinition> result = new ArrayList<>();
+        try (Connection conn = openConnection()) {
+            StringBuilder sql = new StringBuilder();
+            List<String> ontTables = readOntologyTables(conn);
+            if (ontTables.size() > 1) {
+                sql.append('(');
+            }
+            for (String table : ontTables) {
+                if (sql.length() > 0) {
+                    sql.append(") UNION (");
+                }
+                sql.append("SELECT C_BASECODE FROM ");
+                sql.append(table);
+                sql.append(" WHERE ? LIKE M_APPLIED_PATH");
+            }
+            if (ontTables.size() > 1) {
+                sql.append(')');
+            }
+            try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+                for (int i = 0, n = ontTables.size(); i < n; i++) {
+                    stmt.setString(i + 1, fullName);
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(new PropertyDefinition(rs.getString(1), ValueType.VALUE));
+                    }
+                }
+            }
+        } catch (InvalidConnectionSpecArguments | SQLException e) {
+            throw new KnowledgeSourceReadException(e);
+        }
+        return result.toArray(new PropertyDefinition[result.size()]);
     }
     
     private Set<String> readLevelFromDatabaseHelper(int c_hlevel, String fullName, int offset) throws KnowledgeSourceReadException {

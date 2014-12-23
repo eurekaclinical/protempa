@@ -175,7 +175,7 @@ public class I2b2KnowledgeSourceBackendTest {
 
     @Test
     public void testReadTemporalPropositionDefinition() throws KnowledgeSourceReadException {
-        assertNull(this.ksb.readTemporalPropositionDefinition(ICD9_250_ID));
+        assertNotNull(this.ksb.readTemporalPropositionDefinition(ICD9_250_ID));
     }
 
     @Test
