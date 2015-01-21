@@ -20,7 +20,10 @@
 package org.protempa.backend.ksb.protege;
 
 import edu.stanford.smi.protege.model.Instance;
-import org.protempa.*;
+import java.util.Date;
+import org.protempa.ConstantDefinition;
+import org.protempa.DefaultSourceId;
+import org.protempa.KnowledgeSourceReadException;
 
 class ConstantConverter implements PropositionConverter {
 
@@ -38,6 +41,7 @@ class ConstantConverter implements PropositionConverter {
         Util.setInverseIsAs(protegeProposition, result, cm);
         Util.setReferences(protegeProposition, result, cm);
         result.setSourceId(DefaultSourceId.getInstance(backend.getId()));
+        result.setAccessed(new Date());
         return result;
     }
     

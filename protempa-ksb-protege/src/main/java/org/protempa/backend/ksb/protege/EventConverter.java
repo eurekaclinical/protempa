@@ -24,8 +24,10 @@ import java.util.Iterator;
 
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
-import org.arp.javautil.graph.WeightFactory;
-import org.protempa.*;
+import java.util.Date;
+import org.protempa.DefaultSourceId;
+import org.protempa.EventDefinition;
+import org.protempa.KnowledgeSourceReadException;
 
 class EventConverter implements TemporalPropositionConverter {
 
@@ -42,6 +44,7 @@ class EventConverter implements TemporalPropositionConverter {
         Util.setTerms(protegeProposition, result, cm);
         Util.setInverseIsAs(protegeProposition, result, cm);
         Util.setReferences(protegeProposition, result, cm);
+        result.setAccessed(new Date());
 
         Collection<?> hasParts = cm.getOwnSlotValues(protegeProposition,
                 cm.getSlot("hasPart"));

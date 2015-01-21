@@ -21,6 +21,7 @@ package org.protempa.backend.ksb.protege;
 
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
+import java.util.Date;
 import org.protempa.*;
 
 /**
@@ -47,6 +48,7 @@ class PrimitiveParameterConverter implements TemporalPropositionConverter {
         Util.setProperties(instance, result, cm);
         Util.setTerms(instance, result, cm);
         Util.setReferences(instance, result, cm);
+        result.setAccessed(new Date());
         Cls valueType = (Cls) cm.getOwnSlotValue(instance, cm.getSlot("valueType"));
         if (valueType != null) {
             result.setValueType(Util.parseValueType(valueType));

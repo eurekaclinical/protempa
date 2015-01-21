@@ -25,9 +25,10 @@ import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.proposition.interval.Relation;
 
 import edu.stanford.smi.protege.model.Instance;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.protempa.*;
+import org.protempa.DefaultSourceId;
 import org.protempa.SequentialTemporalPatternDefinition.SubsequentTemporalExtendedPropositionDefinition;
 
 public class PairAbstractionConverter implements AbstractionConverter {
@@ -47,6 +48,7 @@ public class PairAbstractionConverter implements AbstractionConverter {
         Util.setConcatenable(protegeProposition, result, cm);
         Util.setGap(protegeProposition, result, backend, cm);
         Util.setReferences(protegeProposition, result, cm);
+        result.setAccessed(new Date());
         Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache =
                 new HashMap<>();
         

@@ -33,6 +33,7 @@ import org.protempa.proposition.interval.Relation;
 import org.protempa.proposition.value.ValueComparator;
 
 import edu.stanford.smi.protege.model.Instance;
+import java.util.Date;
 
 /**
  * Converts and adds Protege complex abstraction instances to a PROTEMPA
@@ -75,6 +76,7 @@ class HighLevelAbstractionConverter implements AbstractionConverter {
         Util.setSolid(complexAbstractionInstance, result, cm);
         Util.setConcatenable(complexAbstractionInstance, result, cm);
         Util.setReferences(complexAbstractionInstance, result, cm);
+        result.setAccessed(new Date());
         Map<Instance, TemporalExtendedPropositionDefinition> extendedParameterCache =
                 new HashMap<>();
         addComponentAbstractionDefinitions(complexAbstractionInstance, result,

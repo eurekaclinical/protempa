@@ -21,6 +21,7 @@ package org.protempa;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Date;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
@@ -72,6 +73,9 @@ public abstract class AbstractPropositionDefinition implements
     private boolean inDataSource;
     protected PropertyChangeSupport changes;
     private SourceId sourceId;
+    private Date accessed;
+    private Date created;
+    private Date updated;
 
     /**
      * Creates a new knowledge definition.
@@ -320,6 +324,33 @@ public abstract class AbstractPropositionDefinition implements
     }
 
     @Override
+    public Date getAccessed() {
+        return this.accessed;
+    }
+
+    @Override
+    public Date getCreated() {
+        return this.created;
+    }
+
+    @Override
+    public Date getUpdated() {
+        return this.updated;
+    }
+
+    public void setAccessed(Date accessed) {
+        this.accessed = accessed;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+    
+    @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         if (this.changes == null) {
             this.changes = new PropertyChangeSupport(this);
@@ -365,6 +396,9 @@ public abstract class AbstractPropositionDefinition implements
         setPropertyDefinitions(new PropertyDefinition[]{});
         setReferenceDefinitions(new ReferenceDefinition[]{});
         setInDataSource(false);
+        setAccessed(null);
+        setCreated(null);
+        setUpdated(null);
     }
 
     protected abstract void recalculateChildren();

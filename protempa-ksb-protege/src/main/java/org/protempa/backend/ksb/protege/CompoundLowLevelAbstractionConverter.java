@@ -29,6 +29,7 @@ import org.protempa.MinMaxGapFunction;
 import org.protempa.proposition.value.Unit;
 
 import edu.stanford.smi.protege.model.Instance;
+import java.util.Date;
 
 public final class CompoundLowLevelAbstractionConverter implements
         AbstractionConverter {
@@ -53,7 +54,8 @@ public final class CompoundLowLevelAbstractionConverter implements
         Util.setReferences(protegeProposition, d, cm);
         Util.setGap(protegeProposition, d, backend, cm);
         setGapBetweenValues(protegeProposition, d, backend);
-
+        d.setAccessed(new Date());
+        
         Integer minValues = (Integer) cm.getOwnSlotValue(protegeProposition,
                 cm.getSlot("minValues"));
         if (minValues != null) {

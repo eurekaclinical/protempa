@@ -24,6 +24,7 @@ import java.util.Iterator;
 
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -49,6 +50,7 @@ final class SliceConverter implements AbstractionConverter {
         Util.setInverseIsAs(protegeParameter, ad, cm);
         Util.setProperties(protegeParameter, ad, cm);
         Util.setTerms(protegeParameter, ad, cm);
+        ad.setAccessed(new Date());
         Integer maxIndexInt = (Integer) cm.getOwnSlotValue(protegeParameter,
                 cm.getSlot("maxIndex"));
         if (maxIndexInt != null) {

@@ -27,6 +27,7 @@ import java.util.Map;
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
+import java.util.Date;
 import org.protempa.*;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.ValueComparator;
@@ -63,6 +64,7 @@ class LowLevelAbstractionConverter implements AbstractionConverter {
             }
         }
         d.setSourceId(DefaultSourceId.getInstance(backend.getId()));
+        d.setAccessed(new Date());
         return d;
     }
 

@@ -21,6 +21,7 @@ package org.protempa;
 
 import java.beans.PropertyChangeListener;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Foundation type for all objects that go in a Knowledge Base. Since knowledge
@@ -138,4 +139,11 @@ public interface PropositionDefinition extends Serializable,
             PropertyChangeListener listener);
 
     SourceId getSourceId();
+    
+    Date getAccessed();
+    
+    Date getCreated();
+    
+    Date getUpdated();
+    
 }
