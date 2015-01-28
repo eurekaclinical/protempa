@@ -57,6 +57,10 @@ import org.protempa.proposition.value.ValueType;
 import edu.stanford.smi.protege.model.Cls;
 import edu.stanford.smi.protege.model.Instance;
 import edu.stanford.smi.protege.model.Slot;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Utility class for classes in
@@ -352,27 +356,88 @@ class Util {
             throws KnowledgeSourceReadException {
         Slot propertySlot = cm.getSlot("property");
         Slot valueTypeSlot = cm.getSlot("valueType");
-        Collection<?> properties = cm.getOwnSlotValues(propInstance,
-                propertySlot);
-        PropertyDefinition[] propDefs = new PropertyDefinition[properties
+        Deque<Instance> stack = new ArrayDeque<>();
+        createInheritanceStack(propInstance, cm, stack);
+        System.out.println("stack for " + propInstance.getName() + ": " + stack);
+        Map<String, PropertyInstance> inheritedProperties = 
+                assembleInheritedProperties(stack, cm, propertySlot);
+        System.out.println("properties for " + propInstance.getName() + ": " + inheritedProperties);
+        PropertyDefinition[] propDefs = new PropertyDefinition[inheritedProperties
                 .size()];
         int i = 0;
-        for (Object propertyInstance : properties) {
-            Instance inst = (Instance) propertyInstance;
-            Cls valueTypeCls = (Cls) cm.getOwnSlotValue(inst, valueTypeSlot);
+        for (Map.Entry<String, PropertyInstance> propertyInstance : inheritedProperties.entrySet()) {
+            String key = propertyInstance.getKey();
+            PropertyInstance value = propertyInstance.getValue();
+            Cls valueTypeCls = (Cls) cm.getOwnSlotValue(value.getPropertyInstance(), valueTypeSlot);
             if (valueTypeCls == null) {
-                throw new AssertionError("property " + inst.getName()
+                throw new AssertionError("property " + key
                         + " cannot have a null value type");
             }
             ValueType valueType = parseValueType(valueTypeCls);
-            PropertyDefinition propDef = new PropertyDefinition(inst.getName(),
-                    valueType, valueTypeCls.getName());
+            PropertyDefinition propDef = new PropertyDefinition(propInstance.getName(),
+                    key, valueType, valueTypeCls.getName(), value.getPropositionId());
             propDefs[i] = propDef;
             i++;
         }
         d.setPropertyDefinitions(propDefs);
     }
+    
+    private static class PropertyInstance {
+        Instance propertyInstance;
+        String propositionId;
 
+        public PropertyInstance(Instance propertyInstance, String propositionId) {
+            this.propertyInstance = propertyInstance;
+            this.propositionId = propositionId;
+        }
+
+        public Instance getPropertyInstance() {
+            return propertyInstance;
+        }
+
+        public String getPropositionId() {
+            return propositionId;
+        }
+        
+    }
+
+    private static Map<String, PropertyInstance> assembleInheritedProperties(Deque<Instance> stack, ConnectionManager cm, Slot propertySlot) throws KnowledgeSourceReadException {
+        Slot valueTypeSlot = cm.getSlot("valueType");
+        Map<String, PropertyInstance> inheritedProperties = new HashMap<>();
+        Instance currentInst = stack.pollFirst();
+        while (currentInst != null) {
+            Collection<?> properties = cm.getOwnSlotValues(currentInst,
+                    propertySlot);
+            for (Object propertyInstance : properties) {
+                Instance inst = (Instance) propertyInstance;
+                PropertyInstance superPropertyInst = inheritedProperties.get(inst.getName());
+                if (superPropertyInst != null && !superPropertyInst.getPropositionId().equals(currentInst.getName())) {
+                    Cls valueTypeCls = (Cls) cm.getOwnSlotValue(inst, valueTypeSlot);
+                    Cls superValueTypeCls = (Cls) cm.getOwnSlotValue(superPropertyInst.getPropertyInstance(), valueTypeSlot);
+                    if (!valueTypeCls.hasSuperclass(superValueTypeCls)) {
+                        throw new KnowledgeSourceReadException("Conflicting subclass: proposition " + currentInst.getName() + " with property " + inst.getName() + " has a superclass " + superPropertyInst.getPropositionId() + " with the same property with a conflicting type");
+                    }
+                }
+                inheritedProperties.put(inst.getName(), new PropertyInstance(inst, currentInst.getName()));
+            }
+            currentInst = stack.pollFirst();
+        }
+        return inheritedProperties;
+    }
+
+    private static void createInheritanceStack(Instance propInstance, ConnectionManager cm, Deque<Instance> stack) throws KnowledgeSourceReadException {
+        Slot isASlot = cm.getSlot("isA");
+        Queue<Instance> q = new LinkedList<>();
+        q.add(propInstance);
+        while (!q.isEmpty()) {
+            Instance instance = q.poll();
+            stack.push(instance);
+            for (Object parent : cm.getOwnSlotValues(instance, isASlot)) {
+                q.add((Instance) parent);
+            }
+        }
+    }
+    
     static void setReferences(Instance propInstance,
             AbstractPropositionDefinition d, ConnectionManager cm)
             throws KnowledgeSourceReadException {

@@ -360,7 +360,7 @@ public class I2b2KnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBa
                 if (sql.length() > 0) {
                     sql.append(") UNION (");
                 }
-                sql.append("SELECT C_BASECODE FROM ");
+                sql.append("SELECT C_BASECODE, C_NAME FROM ");
                 sql.append(table);
                 sql.append(" WHERE ? LIKE M_APPLIED_PATH");
             }
@@ -373,7 +373,7 @@ public class I2b2KnowledgeSourceBackend extends AbstractCommonsKnowledgeSourceBa
                 }
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
-                        result.add(new PropertyDefinition(rs.getString(1), ValueType.VALUE));
+                        result.add(new PropertyDefinition(rs.getString(1), rs.getString(2), ValueType.VALUE, null, rs.getString(1)));
                     }
                 }
             }

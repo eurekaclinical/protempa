@@ -34,17 +34,8 @@ public final class PropertyDefinition implements Serializable {
     private final String name;
     private final ValueType valueType;
     private final String valueSetId;
-
-    /**
-     * Initializes the property definition with a name, a value type and a
-     * <code>null</code> value set.
-     * 
-     * @param name a name {@link String}. Cannot be <code>null</code>.
-     * @param valueType a {@link ValueType}. Cannot be <code>null</code>.
-     */
-    public PropertyDefinition(String name, ValueType valueType) {
-        this(name, valueType, null);
-    }
+    private final String declaringPropId;
+    private final String propId;
 
     /**
      * Initializes the property definition with a name, a value type and a
@@ -57,17 +48,31 @@ public final class PropertyDefinition implements Serializable {
      *
      * @see ValueType#isCompatible(ValueSet) 
      */
-    public PropertyDefinition(String name, ValueType valueType,
-            String valueSetId) {
-        if (name == null)
+    public PropertyDefinition(String propId, String name, ValueType valueType,
+            String valueSetId, String declaringPropId) {
+        if (propId == null) {
+            throw new IllegalArgumentException("propId cannot be null");
+        }
+        if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
-        if (valueType == null)
+        }
+        if (valueType == null) {
             throw new IllegalArgumentException("valueType cannot be null");
+        }
+        if (declaringPropId == null) {
+            throw new IllegalArgumentException("declaringPropId cannot be null");
+        }
         this.name = name.intern();
+        this.propId = propId;
         this.valueType = valueType;
         this.valueSetId = valueSetId;
+        this.declaringPropId = declaringPropId;
     }
 
+    public String getPropId() {
+        return propId;
+    }
+    
     /**
      * Returns the property's name.
      *
@@ -96,6 +101,14 @@ public final class PropertyDefinition implements Serializable {
         return this.valueSetId;
     }
 
+    public String getDeclaringPropId() {
+        return this.declaringPropId;
+    }
+    
+    public boolean isInherited() {
+        return !this.propId.equals(this.declaringPropId);
+    }
+    
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
