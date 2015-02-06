@@ -20,8 +20,10 @@
 package org.protempa;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -187,6 +189,7 @@ final class AbstractionFinder {
         private DerivationsBuilder derivationsBuilder;
         private final ExecutorStrategy strategy;
         private Set<String> subtrees;
+        private Collection<PropositionDefinition> allNarrowerDescendants;
 
         private class ExecutorCounter {
 
@@ -310,6 +313,10 @@ final class AbstractionFinder {
             return propIds;
         }
         
+        protected final Collection<PropositionDefinition> getAllNarrowerDescendants() {
+            return allNarrowerDescendants;
+        }
+        
         protected final Filter getFilters() {
             return this.filters;
         }
@@ -367,25 +374,25 @@ final class AbstractionFinder {
                             StringUtils.join(this.propIds, ", ")
                         });
             }
-
-            ExecutionStrategy executionStrategy;
-            if (strategy == null) {
-                executionStrategy = null;
-            } else {
-                switch (strategy) {
-                    case STATELESS:
-                        executionStrategy = newStatelessStrategy();
-                        break;
-                    case STATEFUL:
-                        executionStrategy = newStatefulStrategy();
-                        break;
-                    default:
-                        throw new AssertionError("Invalid execution strategy: "
-                                + strategy);
-                }
-            }
-
+            
+            ExecutionStrategy executionStrategy = null;
             try {
+                allNarrowerDescendants = ks.collectPropDefDescendantsUsingAllNarrower(false, propIds.toArray(new String[propIds.size()]));
+                
+                if (strategy != null) {
+                    switch (strategy) {
+                        case STATELESS:
+                            executionStrategy = newStatelessStrategy();
+                            break;
+                        case STATEFUL:
+                            executionStrategy = newStatefulStrategy();
+                            break;
+                        default:
+                            throw new AssertionError("Invalid execution strategy: "
+                                    + strategy);
+                    }
+                }
+
                 doExecute(this.keyIds, this.derivationsBuilder,
                         executionStrategy);
             } catch (ProtempaException e) {
@@ -400,9 +407,12 @@ final class AbstractionFinder {
         DataStreamingEventIterator<Proposition> newDataIterator()
                 throws KnowledgeSourceReadException, DataSourceReadException {
             log(Level.INFO, "Retrieving data for query {0}", query.getId());
-            Set<String> inDataSourcePropIds = getKnowledgeSource()
-                    .collectPropIdDescendantsUsingAllNarrower(true,
-                            this.propIds.toArray(new String[this.propIds.size()]));
+            Set<String> inDataSourcePropIds = new HashSet<>();
+            for (PropositionDefinition pd : allNarrowerDescendants) {
+                if (pd.getInDataSource()) {
+                    inDataSourcePropIds.add(pd.getId());
+                }
+            }
             if (isLoggable(Level.FINER)) {
                 log(Level.FINER, "Asking data source for {0} for query {1}",
                         new Object[]{
@@ -474,7 +484,7 @@ final class AbstractionFinder {
         private void createRuleBase(ExecutionStrategy result) throws FinderException {
             log(Level.FINEST, "Initializing rule base for query {0}",
                     query.getId());
-            result.createRuleBase(this.propIds, derivationsBuilder, qs);
+            result.createRuleBase(allNarrowerDescendants, derivationsBuilder, qs);
             AbstractionFinder.this.clearNeeded = true;
             log(Level.FINEST, "Rule base initialized for query {0}",
                     query.getId());
@@ -495,12 +505,16 @@ final class AbstractionFinder {
             this.destination = resultsHandlerFactory;
         }
         
+        @Override
         DataStreamingEventIterator<Proposition> newDataIterator()
                 throws KnowledgeSourceReadException, DataSourceReadException {
             log(Level.INFO, "Retrieving data for query {0}", getQuery().getId());
-            Set<String> inDataSourcePropIds = getKnowledgeSource()
-                    .collectPropIdDescendantsUsingAllNarrower(true,
-                            getPropIds().toArray(new String[getPropIds().size()]));
+            Set<String> inDataSourcePropIds = new HashSet<>();
+            for (PropositionDefinition pd : getAllNarrowerDescendants()) {
+                if (pd.getInDataSource()) {
+                    inDataSourcePropIds.add(pd.getId());
+                }
+            }
             if (isLoggable(Level.FINER)) {
                 log(Level.FINER, "Asking data source for {0} for query {1}",
                         new Object[]{

@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +39,8 @@ interface ExecutionStrategy {
 
     void cleanup();
 
-    void createRuleBase(Set<String> propIds, DerivationsBuilder listener,
+    void createRuleBase(Collection<PropositionDefinition> allNarrowerDescendants, 
+            DerivationsBuilder listener,
             QuerySession qs) throws FinderException;
     
     RuleBase getRuleBase();

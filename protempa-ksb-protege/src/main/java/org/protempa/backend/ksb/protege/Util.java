@@ -358,10 +358,8 @@ class Util {
         Slot valueTypeSlot = cm.getSlot("valueType");
         Deque<Instance> stack = new ArrayDeque<>();
         createInheritanceStack(propInstance, cm, stack);
-        System.out.println("stack for " + propInstance.getName() + ": " + stack);
         Map<String, PropertyInstance> inheritedProperties = 
                 assembleInheritedProperties(stack, cm, propertySlot);
-        System.out.println("properties for " + propInstance.getName() + ": " + inheritedProperties);
         PropertyDefinition[] propDefs = new PropertyDefinition[inheritedProperties
                 .size()];
         int i = 0;

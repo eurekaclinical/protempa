@@ -381,7 +381,6 @@ public class ProtempaTest {
                     = new SingleColumnDestination(fw);
             protempa.execute(query(), destination);
         }
-        System.out.println("OUTPUT: " + FileUtils.readFileToString(outputFile));
         boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);
         assertTrue("output doesn't match", outputMatches);
 

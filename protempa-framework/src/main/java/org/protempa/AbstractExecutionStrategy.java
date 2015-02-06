@@ -57,16 +57,15 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
     }
 
     @Override
-    public void createRuleBase(Set<String> propIds,
+    public void createRuleBase(Collection<PropositionDefinition> allNarrowerDescendants,
             DerivationsBuilder listener, QuerySession qs)
             throws FinderException {
         ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
                 this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
                 visitor.getAlgorithms(), listener, this.knowledgeSource);
-        if (propIds != null) {
+        if (allNarrowerDescendants != null) {
             try {
-                Collection<PropositionDefinition> allNarrowerDescendants = this.knowledgeSource.collectPropDefDescendantsUsingAllNarrower(false, propIds.toArray(new String[propIds.size()]));
                 for (PropositionDefinition pd : allNarrowerDescendants) {
                     pd.acceptChecked(visitor);
                 }

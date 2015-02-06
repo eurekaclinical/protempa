@@ -42,8 +42,8 @@ class SubtreePropositionDefinitionGetterForWrapper {
         assert propositionDefinitionMap != null : "propositionDefinitionMap cannot be null";
         assert knowledgeSource != null : "knowledgeSource cannot be null";
         this.propositionDefinitionMap = propositionDefinitionMap;
-        this.inDataSourceSlowStrategy = new CollectSubtreeGetterSlowStrategy(this.propositionDefinitionMap, true, true);
-        this.collectSubtreeSlowStrategy = new CollectSubtreeGetterSlowStrategy(this.propositionDefinitionMap, false, false);
+        this.inDataSourceSlowStrategy = new CollectSubtreeGetterSlowStrategy(this.propositionDefinitionMap, true);
+        this.collectSubtreeSlowStrategy = new CollectSubtreeGetterSlowStrategy(this.propositionDefinitionMap, false);
         this.knowledgeSource = knowledgeSource;
         this.allNarrower = allNarrower;
     }
@@ -52,9 +52,9 @@ class SubtreePropositionDefinitionGetterForWrapper {
             throws KnowledgeSourceReadException {
         Set<String> propIdsAsSet = Arrays.asSet(propIds);
         InDataSourceResult<String> partialResult = 
-                inDataSource ? 
-                    this.inDataSourceSlowStrategy.collectPropIds(propIdsAsSet) :
-                    this.collectSubtreeSlowStrategy.collectPropIds(propIdsAsSet);
+                this.allNarrower ? 
+                    this.inDataSourceSlowStrategy.collectPropIds(inDataSource, propIdsAsSet) :
+                    this.collectSubtreeSlowStrategy.collectPropIds(inDataSource, propIdsAsSet);
         Set<String> result = new HashSet<>(partialResult.getResult());
         Set<String> missing = partialResult.getMissing();
         if (this.allNarrower) {
@@ -68,9 +68,9 @@ class SubtreePropositionDefinitionGetterForWrapper {
     Set<PropositionDefinition> collectPropDefs(boolean inDataSource, String... propIds) throws KnowledgeSourceReadException {
         Set<String> propIdsAsSet = Arrays.asSet(propIds);
         InDataSourceResult<PropositionDefinition> partialResult = 
-                inDataSource ?
-                    this.inDataSourceSlowStrategy.collectPropDefs(propIdsAsSet) :
-                    this.collectSubtreeSlowStrategy.collectPropDefs(propIdsAsSet);
+                this.allNarrower ?
+                    this.inDataSourceSlowStrategy.collectPropDefs(inDataSource, propIdsAsSet) :
+                    this.collectSubtreeSlowStrategy.collectPropDefs(inDataSource, propIdsAsSet);
         Set<PropositionDefinition> result = new HashSet<>(partialResult.getResult());
         Set<String> missing = partialResult.getMissing();
         String[] partialResultArr = missing.toArray(new String[missing.size()]);

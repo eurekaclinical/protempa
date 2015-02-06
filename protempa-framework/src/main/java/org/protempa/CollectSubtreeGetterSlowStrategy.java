@@ -37,17 +37,15 @@ class CollectSubtreeGetterSlowStrategy {
     private final Map<Set<String>, InDataSourceResult<String>> propIdInDataSourceCache;
     private final Map<Set<String>, InDataSourceResult<PropositionDefinition>> propIdPropInDataSourceCache;
     private final Map<String, PropositionDefinition> propositionDefinitionMap;
-    private final boolean inDataSource;
     private final PropositionDefinitionWalker propDefWalker;
     private final PropIdWalker propIdWalker;
     private final boolean narrower;
 
-    CollectSubtreeGetterSlowStrategy(Map<String, PropositionDefinition> propositionDefinitionMap, boolean narrower, boolean inDataSource) {
+    CollectSubtreeGetterSlowStrategy(Map<String, PropositionDefinition> propositionDefinitionMap, boolean narrower) {
         assert propositionDefinitionMap != null : "propositionDefinitionMap cannot be null";
         this.propIdInDataSourceCache = new ReferenceMap<>();
         this.propIdPropInDataSourceCache = new ReferenceMap<>();
         this.propositionDefinitionMap = propositionDefinitionMap;
-        this.inDataSource = inDataSource;
         this.narrower = narrower;
         this.propDefWalker = new PropositionDefinitionWalker();
         this.propIdWalker = new PropIdWalker();
@@ -78,7 +76,7 @@ class CollectSubtreeGetterSlowStrategy {
         
     }
     
-    InDataSourceResult<String> collectPropIds(Set<String> propIds)
+    InDataSourceResult<String> collectPropIds(boolean inDataSourceOnly, Set<String> propIds)
             throws KnowledgeSourceReadException {
         if (propIds.contains(null)) {
             throw new IllegalArgumentException(
@@ -89,13 +87,13 @@ class CollectSubtreeGetterSlowStrategy {
         if (cachedResult != null) {
             return cachedResult;
         } else {
-            InDataSourceResult<String> inDataSourceResult = this.propIdWalker.walkNarrowerPropDefs(propIds);
+            InDataSourceResult<String> inDataSourceResult = this.propIdWalker.walkNarrowerPropDefs(inDataSourceOnly, propIds);
             propIdInDataSourceCache.put(propIds, inDataSourceResult);
             return inDataSourceResult;
         }
     }
 
-    InDataSourceResult<PropositionDefinition> collectPropDefs(Set<String> propIds)
+    InDataSourceResult<PropositionDefinition> collectPropDefs(boolean inDataSourceOnly, Set<String> propIds)
             throws KnowledgeSourceReadException {
         if (propIds.contains(null)) {
             throw new IllegalArgumentException(
@@ -106,14 +104,14 @@ class CollectSubtreeGetterSlowStrategy {
         if (cachedResult != null) {
             return cachedResult;
         } else {
-            InDataSourceResult<PropositionDefinition> inDataSourceResult = this.propDefWalker.walkNarrowerPropDefs(propIds);
+            InDataSourceResult<PropositionDefinition> inDataSourceResult = this.propDefWalker.walkNarrowerPropDefs(inDataSourceOnly, propIds);
             propIdPropInDataSourceCache.put(propIds, inDataSourceResult);
             return inDataSourceResult;
         }
     }
     
     private abstract class Walker<E> {
-        InDataSourceResult<E> walkNarrowerPropDefs(Set<String> propIds) {
+        InDataSourceResult<E> walkNarrowerPropDefs(boolean inDataSource, Set<String> propIds) {
             Set<E> found = new HashSet<>();
             Set<String> missing = new HashSet<>();
             Queue<String> queue = new LinkedList<>(propIds);

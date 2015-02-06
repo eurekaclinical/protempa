@@ -113,7 +113,6 @@ final class TableAliaser {
             }
             currentJoin = columnSpec.getJoin();
         }
-        SQLGenUtil.logger().log(Level.SEVERE, "table aliases: {0}", tempIndices);
         this.indices = tempIndices;
     }
 

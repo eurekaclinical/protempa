@@ -99,8 +99,8 @@ public final class AbstractionFinderTestHelper {
                 propositionStorePathname, this.wmStorePathname);
         StatefulExecutionStrategy strategy = new StatefulExecutionStrategy(
                 ks, af.getAlgorithmSource());
-        Set<String> propositionIds = Arrays.asSet(query.getPropositionIds());
-        strategy.createRuleBase(propositionIds, new DerivationsBuilder(), qs);
+        Set<PropositionDefinition> allNarrowerDescendants = ks.collectPropDefDescendantsUsingAllNarrower(false, query.getPropositionIds());
+        strategy.createRuleBase(allNarrowerDescendants, new DerivationsBuilder(), qs);
 
         // The derivations builder store needs to be acquired here instead of in
         // the constructor because AbstractionFinder.processStoredResults() uses

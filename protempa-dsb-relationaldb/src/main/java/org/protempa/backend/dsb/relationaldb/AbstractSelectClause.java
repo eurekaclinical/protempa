@@ -19,8 +19,6 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.KnowledgeSourceIdToSqlCode;
-
 import java.util.Map;
 
 abstract class AbstractSelectClause implements SelectClause {
@@ -29,7 +27,7 @@ abstract class AbstractSelectClause implements SelectClause {
     private final TableAliaser referenceIndices;
     private final EntitySpec entitySpec;
     private CaseClause caseClause;
-    private boolean wrapKeyId;
+    private final boolean wrapKeyId;
 
     AbstractSelectClause(ColumnSpecInfo info, TableAliaser referenceIndices,
             EntitySpec entitySpec, boolean wrapKeyId) {
@@ -38,7 +36,6 @@ abstract class AbstractSelectClause implements SelectClause {
         this.entitySpec = entitySpec;
         this.caseClause = null;
         this.wrapKeyId = wrapKeyId;
-        System.err.println("referenceIndices: " + this.referenceIndices);
     }
 
     protected TableAliaser getReferenceIndices() {
