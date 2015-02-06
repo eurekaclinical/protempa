@@ -23,7 +23,7 @@ import org.protempa.backend.Backend;
 import org.protempa.backend.BackendUpdatedEvent;
 
 public interface Source<S extends SourceUpdatedEvent, B extends Backend, T extends BackendUpdatedEvent> 
-        extends BackendListener<T> {
+        extends BackendListener<T>, AutoCloseable {
 
     B[] getBackends();
 
@@ -31,6 +31,7 @@ public interface Source<S extends SourceUpdatedEvent, B extends Backend, T exten
 
     void removeSourceListener(SourceListener<S> sourceListener);
 
+    @Override
     void close() throws SourceCloseException;
     
     void clear();

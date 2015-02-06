@@ -19,13 +19,13 @@
  */
 package org.protempa.backend.ksb;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import org.protempa.AbstractionDefinition;
 import org.protempa.ContextDefinition;
 import org.protempa.backend.Backend;
-import org.protempa.KnowledgeSource;
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
@@ -117,5 +117,13 @@ public interface KnowledgeSourceBackend extends
     String[] readSubContextOfs(String propId) throws KnowledgeSourceReadException;
     
     Set<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException;
+
+    Collection<String> collectPropIdDescendantsUsingAllNarrower(boolean inDataSourceOnly, String[] propIds) throws KnowledgeSourceReadException;
+
+    Collection<PropositionDefinition> collectPropDefDescendantsUsingAllNarrower(boolean inDataSourceOnly, String[] propIds) throws KnowledgeSourceReadException;
+
+    Collection<PropositionDefinition> collectPropDefDescendantsUsingInverseIsA(String[] propIds) throws KnowledgeSourceReadException;
+    
+    Collection<String> collectPropIdDescendantsUsingInverseIsA(String[] propIds) throws KnowledgeSourceReadException;
    
 }

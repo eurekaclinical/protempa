@@ -182,7 +182,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 Set<String> abstractedFrom = def.getAbstractedFrom();
                 String[] abstractedFromArr = 
                         abstractedFrom.toArray(new String[abstractedFrom.size()]);
-                Set<String> subtrees = this.knowledgeSource.collectSubtrees(abstractedFromArr);
+                Set<String> subtrees = this.knowledgeSource.collectPropIdDescendantsUsingInverseIsA(abstractedFromArr);
                 sourceP.addConstraint(new PredicateConstraint(
                         new PropositionPredicateExpression(subtrees)));
                 Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
@@ -229,7 +229,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 Set<String> abstractedFrom = def.getAbstractedFrom();
                 String[] abstractedFromArr = 
                         abstractedFrom.toArray(new String[abstractedFrom.size()]);
-                Set<String> subtrees = this.knowledgeSource.collectSubtrees(abstractedFromArr);
+                Set<String> subtrees = this.knowledgeSource.collectPropIdDescendantsUsingInverseIsA(abstractedFromArr);
                 sourceP.addConstraint(new PredicateConstraint(
                         new AbstractParameterPredicateExpression(subtrees, def.getContextId())));
                 Pattern resultP = new Pattern(1, 1, ARRAY_LIST_OT, "result");
@@ -264,7 +264,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         private GetMatchesPredicateExpression(ExtendedPropositionDefinition epd, KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
             assert epd != null : "epd cannot be null";
             this.epd = epd;
-            this.subtrees = knowledgeSource.collectSubtrees(epd.getPropositionId());
+            this.subtrees = knowledgeSource.collectPropIdDescendantsUsingInverseIsA(epd.getPropositionId());
         }
 
         Set<String> getSubtrees() {

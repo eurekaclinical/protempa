@@ -19,9 +19,8 @@
  */
 package org.protempa;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,28 +64,13 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
                 this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
                 visitor.getAlgorithms(), listener, this.knowledgeSource);
-        List<PropositionDefinition> propDefs = new ArrayList<>(
-                propIds.size());
-        for (String propId : propIds) {
-            PropositionDefinition propDef;
-            try {
-                propDef = this.knowledgeSource
-                        .readPropositionDefinition(propId);
-            } catch (KnowledgeSourceReadException ex) {
-                throw new FinderException(qs.getQuery().getId(), ex);
-            }
-            if (propDef != null) {
-                propDefs.add(propDef);
-            } else {
-                throw new FinderException(qs.getQuery().getId(), 
-                        new InvalidPropositionIdException(propId));
-            }
-        }
         if (propIds != null) {
-            Set<PropositionDefinition> result = new HashSet<>();
-            aggregateDescendants(qs.getQuery().getId(), visitor, result, propDefs);
             try {
-                ruleCreator.visit(result);
+                Collection<PropositionDefinition> allNarrowerDescendants = this.knowledgeSource.collectPropDefDescendantsUsingAllNarrower(false, propIds.toArray(new String[propIds.size()]));
+                for (PropositionDefinition pd : allNarrowerDescendants) {
+                    pd.acceptChecked(visitor);
+                }
+                ruleCreator.visit(allNarrowerDescendants);
             } catch (ProtempaException ex) {
                 throw new FinderException(qs.getQuery().getId(), ex);
             }

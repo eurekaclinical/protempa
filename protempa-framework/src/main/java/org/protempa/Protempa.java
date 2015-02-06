@@ -51,7 +51,7 @@ import org.protempa.dest.Destination;
  *
  * @author Andrew Post
  */
-public final class Protempa {
+public final class Protempa implements AutoCloseable {
 
     private static final String STARTUP_FAILURE_MSG = "PROTEMPA could not start up";
     private final AbstractionFinder abstractionFinder;

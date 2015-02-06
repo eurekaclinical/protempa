@@ -322,7 +322,7 @@ public final class Derivation extends Link {
             this.knowledgeTree = new HashSet<>();
             for (String propId : getPropositionIds()) {
                 this.knowledgeTree.addAll(
-                        knowledgeSource.inDataSourcePropositionIds(propId));
+                        knowledgeSource.collectPropIdDescendantsUsingAllNarrower(true, propId));
             }
         }
     }

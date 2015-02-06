@@ -318,13 +318,6 @@ final class AbstractionFinder {
             return this.keyIds;
         }
         
-        protected final Set<String> getSubtrees() throws KnowledgeSourceReadException {
-            if (subtrees == null) {
-                this.subtrees = knowledgeSource.collectSubtrees(this.propIds.toArray(new String[this.propIds.size()]));
-            }
-            return subtrees;
-        }
-
         protected final void addAllPropIds(String[] propIds) {
             org.arp.javautil.arrays.Arrays.addAll(this.propIds, propIds);
             this.subtrees = null;
@@ -408,7 +401,7 @@ final class AbstractionFinder {
                 throws KnowledgeSourceReadException, DataSourceReadException {
             log(Level.INFO, "Retrieving data for query {0}", query.getId());
             Set<String> inDataSourcePropIds = getKnowledgeSource()
-                    .inDataSourcePropositionIds(
+                    .collectPropIdDescendantsUsingAllNarrower(true,
                             this.propIds.toArray(new String[this.propIds.size()]));
             if (isLoggable(Level.FINER)) {
                 log(Level.FINER, "Asking data source for {0} for query {1}",
@@ -506,7 +499,7 @@ final class AbstractionFinder {
                 throws KnowledgeSourceReadException, DataSourceReadException {
             log(Level.INFO, "Retrieving data for query {0}", getQuery().getId());
             Set<String> inDataSourcePropIds = getKnowledgeSource()
-                    .inDataSourcePropositionIds(
+                    .collectPropIdDescendantsUsingAllNarrower(true,
                             getPropIds().toArray(new String[getPropIds().size()]));
             if (isLoggable(Level.FINER)) {
                 log(Level.FINER, "Asking data source for {0} for query {1}",
@@ -578,8 +571,9 @@ final class AbstractionFinder {
                         new Object[]{getQuery().getId(), refs});
             }
             try {
-                List<Proposition> filteredPropositions = extractRequestedPropositions(propositions,
-                            getSubtrees(), refs);
+                List<Proposition> filteredPropositions = 
+                        extractRequestedPropositions(propositions,
+                            propositionIds, refs);
                 if (isLoggable(Level.FINER)) {
                     String queryId = getQuery().getId();
                     log(Level.FINER, "Proposition ids for query {0}: {1}",
@@ -595,8 +589,6 @@ final class AbstractionFinder {
                         filteredPropositions,
                         forwardDerivations, backwardDerivations, refs);
             } catch (QueryResultsHandlerProcessingException ex) {
-                throw new FinderException(getQuery().getId(), ex);
-            } catch (KnowledgeSourceReadException ex) {
                 throw new FinderException(getQuery().getId(), ex);
             }
         }

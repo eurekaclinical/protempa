@@ -50,8 +50,6 @@ import java.util.logging.Logger;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
-import org.arp.javautil.arrays.Arrays;
-import org.arp.javautil.collections.Iterators;
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.io.UniqueDirectoryCreator;
 import org.arp.javautil.io.WithBufferedReaderByLine;
@@ -686,7 +684,7 @@ public class ProtempaTest {
                 "MyAndLikePattern");
         hd.setDisplayName("My Or-like Pattern");
         ExtendedPropositionDefinition epd1 = new ExtendedPropositionDefinition(
-                "ICD9:V01-V91.99");
+                "ICD9:V-codes");
         ExtendedPropositionDefinition epd2 = new ExtendedPropositionDefinition(
                 "ICD9:35.83");
         hd2.add(epd1);
@@ -807,9 +805,6 @@ public class ProtempaTest {
             Map<String, Integer> backwardDerivCounts
                     = getResultCounts(BACKWARD_DERIVATION_COUNTS_FILE);
             for (String keyId : results.keySet()) {
-                if (keyId.equals("12")) {
-                    System.err.println("OUTPUT FOR " + keyId + " IS " + Iterators.asList(results.get(keyId).iterateObjects()));
-                }
                 int derivCount = 0;
                 for (List<Proposition> derivs : afh
                         .getForwardDerivations(keyId).values()) {
@@ -1664,4 +1659,5 @@ public class ProtempaTest {
                     r.getValue().size());
         }
     }
+    
 }

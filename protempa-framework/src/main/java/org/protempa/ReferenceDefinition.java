@@ -33,7 +33,7 @@ public class ReferenceDefinition implements Serializable {
     private final String name;
     private final String[] propositionIds;
 
-    public ReferenceDefinition(String name, String[] propositionIds) {
+    public ReferenceDefinition(String name, String... propositionIds) {
         if (name == null)
             throw new IllegalArgumentException("name cannot be null");
         ProtempaUtil.checkArray(propositionIds, "propositionIds");

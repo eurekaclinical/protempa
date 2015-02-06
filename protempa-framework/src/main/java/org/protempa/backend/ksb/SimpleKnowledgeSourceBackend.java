@@ -19,24 +19,32 @@
  */
 package org.protempa.backend.ksb;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.collections.Collections;
 import org.protempa.AbstractionDefinition;
 import org.protempa.ContextDefinition;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
+import org.protempa.ProtempaUtil;
 import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.TemporalPropositionDefinition;
 import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
+import org.protempa.proposition.Context;
 
 public final class SimpleKnowledgeSourceBackend
         extends AbstractKnowledgeSourceBackend {
+
     private Map<String, PropositionDefinition> propDefsMap;
     private Map<String, AbstractionDefinition> abstractionDefsMap;
     private Map<String, TemporalPropositionDefinition> tempPropDefsMap;
@@ -178,5 +186,66 @@ public final class SimpleKnowledgeSourceBackend
             throws KnowledgeSourceReadException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public Collection<String> collectPropIdDescendantsUsingAllNarrower(boolean inDataSourceOnly, String[] propIds) {
+        return collectSubtreePropositionIdsInt(propIds, true, inDataSourceOnly);
+    }
+    
+    @Override
+    public Collection<String> collectPropIdDescendantsUsingInverseIsA(String[] propIds) {
+        return collectSubtreePropositionIdsInt(propIds, false, false);
+    }
+
+    private Collection<String> collectSubtreePropositionIdsInt(String[] propIds, boolean narrower, boolean inDataSource) {
+        Set<String> result = new HashSet<>(Arrays.asSet(propIds));
+        Queue<String> queue = new LinkedList<>();
+        queue.addAll(result);
+        while (!queue.isEmpty()) {
+            String propId = queue.poll();
+            PropositionDefinition pd = this.propDefsMap.get(propId);
+            if (!inDataSource || pd.getInDataSource()) {
+                result.add(propId);
+            }
+            if (narrower) {
+                Arrays.addAll(queue, pd.getChildren());
+            } else {
+                Arrays.addAll(queue, pd.getInverseIsA());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Collection<PropositionDefinition> collectPropDefDescendantsUsingAllNarrower(boolean inDataSourceOnly, String[] propIds) {
+        return collectSubtreePropositionDefinitionsInt(propIds, true, inDataSourceOnly);
+    }
+    
+    @Override
+    public Collection<PropositionDefinition> collectPropDefDescendantsUsingInverseIsA(String[] propIds) {
+        return collectSubtreePropositionDefinitionsInt(propIds, false, false);
+    }
+
+    private Collection<PropositionDefinition> collectSubtreePropositionDefinitionsInt(String[] propIds, boolean narrower, boolean inDataSource) {
+        ProtempaUtil.checkArray(propIds, "propDefs");
+        Set<PropositionDefinition> propResult = new HashSet<>();
+        Queue<String> queue = new LinkedList<>();
+        for (String pd : propIds) {
+            queue.add(pd);
+        }
+        while (!queue.isEmpty()) {
+            String propId = queue.poll();
+            PropositionDefinition pd = this.propDefsMap.get(propId);
+            if (!inDataSource || pd.getInDataSource()) {
+                propResult.add(pd);
+            }
+            if (narrower) {
+                Arrays.addAll(queue, pd.getChildren());
+            } else {
+                Arrays.addAll(queue, pd.getInverseIsA());
+            }
+        }
+        return propResult;
     }
 }

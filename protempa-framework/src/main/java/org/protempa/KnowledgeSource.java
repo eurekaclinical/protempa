@@ -54,11 +54,13 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
 
     boolean hasValueSet(String id) throws KnowledgeSourceReadException;
 
-    Set<PropositionDefinition> inDataSourcePropositionDefinitions(String... propIds) throws KnowledgeSourceReadException;
-
-    Set<String> inDataSourcePropositionIds(String... propIds) throws KnowledgeSourceReadException;
+    Set<PropositionDefinition> collectPropDefDescendantsUsingAllNarrower(boolean inDataSourceOnly, String... propIds) throws KnowledgeSourceReadException;
     
-    Set<String> collectSubtrees(String... propIds) throws KnowledgeSourceReadException;
+    Set<String> collectPropIdDescendantsUsingAllNarrower(boolean inDataSourceOnly, String... propIds) throws KnowledgeSourceReadException;
+    
+    Set<PropositionDefinition> collectPropDefDescendantsUsingInverseIsA(String... propIds) throws KnowledgeSourceReadException;
+    
+    Set<String> collectPropIdDescendantsUsingInverseIsA(String... propIds) throws KnowledgeSourceReadException;
 
     List<PropositionDefinition> readAbstractedFrom(AbstractionDefinition propDef) throws KnowledgeSourceReadException;
 

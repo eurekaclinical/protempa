@@ -51,8 +51,9 @@ class KnowledgeSourceImplWrapper
     private final Map<String, List<String>> inducesMap;
     private final Map<String, List<String>> subContextOfMap;
     private final Map<String, List<String>> termIdMap;
-    private InDataSourcePropositionDefinitionGetter inDataSourceGetter;
+    private SubtreePropositionDefinitionGetterForWrapper inDataSourceGetter;
     private boolean initialized;
+    private SubtreePropositionDefinitionGetterForWrapper collectSubtreeGetter;
 
     KnowledgeSourceImplWrapper(KnowledgeSource knowledgeSource,
                                PropositionDefinition... propositionDefinitions) {
@@ -127,7 +128,9 @@ class KnowledgeSourceImplWrapper
     private void initializeIfNeeded() {
         if (!this.initialized) {
             this.inDataSourceGetter =
-                    new InDataSourcePropositionDefinitionGetter(this);
+                    new SubtreePropositionDefinitionGetterForWrapper(this.propositionDefinitionsMap, this.knowledgeSource, true);
+            this.collectSubtreeGetter =
+                    new SubtreePropositionDefinitionGetterForWrapper(this.propositionDefinitionsMap, this.knowledgeSource, false);
             this.initialized = true;
         }
     }
@@ -238,20 +241,31 @@ class KnowledgeSourceImplWrapper
     }
 
     @Override
-    public Set<PropositionDefinition> inDataSourcePropositionDefinitions(
-            String... propIds) throws KnowledgeSourceReadException {
+    public Set<PropositionDefinition> collectPropDefDescendantsUsingAllNarrower(
+            boolean inDataSourceOnly, String... propIds) throws KnowledgeSourceReadException {
         initializeIfNeeded();
-        return this.inDataSourceGetter.inDataSourcePropositionDefinitions(
-                propIds);
+        return this.inDataSourceGetter.collectPropDefs(inDataSourceOnly, propIds);
     }
 
     @Override
-    public Set<String> inDataSourcePropositionIds(String... propIds)
+    public Set<String> collectPropIdDescendantsUsingAllNarrower(boolean inDataSourceOnly, String... propIds)
             throws KnowledgeSourceReadException {
         initializeIfNeeded();
-        return this.inDataSourceGetter.inDataSourcePropositionIds(propIds);
+        return this.inDataSourceGetter.collectPropIds(inDataSourceOnly, propIds);
     }
 
+    @Override
+    public Set<PropositionDefinition> collectPropDefDescendantsUsingInverseIsA(String... propIds) throws KnowledgeSourceReadException {
+       initializeIfNeeded();
+        return this.collectSubtreeGetter.collectPropDefs(false, propIds);
+    }
+    
+    @Override
+    public Set<String> collectPropIdDescendantsUsingInverseIsA(String... propIds) throws KnowledgeSourceReadException {
+        initializeIfNeeded();
+        return this.collectSubtreeGetter.collectPropIds(false, propIds);
+    }
+    
     @Override
     public List<TemporalPropositionDefinition> readInducedBy(String id) throws KnowledgeSourceReadException {
         if (id == null) {
@@ -483,28 +497,6 @@ class KnowledgeSourceImplWrapper
     }
     
     @Override
-    public Set<String> collectSubtrees(String... propIds) throws KnowledgeSourceReadException {
-        if (propIds == null) {
-            throw new IllegalArgumentException("propIds cannot be null");
-        }
-        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
-        
-        Queue<String> queue = new LinkedList<>();
-        Arrays.addAll(queue, propIds);
-        Set<String> result = new HashSet<>();
-        Arrays.addAll(result, propIds);
-        String propId;
-        while ((propId = queue.poll()) != null) {
-            List<PropositionDefinition> propDefs = readInverseIsA(propId);
-            for (PropositionDefinition propDef : propDefs) {
-                result.add(propDef.getId());
-                queue.add(propDef.getId());
-            }
-        }
-        return result;
-    }
-
-    @Override
     public List<PropositionDefinition> readIsA(PropositionDefinition propDef)
             throws KnowledgeSourceReadException {
         if (propDef == null) {
@@ -564,6 +556,18 @@ class KnowledgeSourceImplWrapper
         if (result == null) {
             result = this.knowledgeSource.readPropositionDefinition(id);
         }
+        return result;
+    }
+    
+    PropositionDefinition readPropositionDefinitionInt(String id)
+            throws KnowledgeSourceReadException {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+        initializeIfNeeded();
+        PropositionDefinition result =
+                this.propositionDefinitionsMap.get(id);
+
         return result;
     }
 

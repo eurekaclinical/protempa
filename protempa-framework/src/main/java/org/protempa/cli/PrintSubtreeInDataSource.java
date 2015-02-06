@@ -52,8 +52,8 @@ public class PrintSubtreeInDataSource extends CLI {
         } else {
             try {
                 Set<PropositionDefinition> result = 
-                        knowledgeSource.inDataSourcePropositionDefinitions(
-                        propDef.getId());
+                        knowledgeSource.collectPropDefDescendantsUsingAllNarrower(
+                        true, propDef.getId());
                 PropositionDefinitionPrinter printer =
                     new PropositionDefinitionPrinter();
                 printer.visit(result);

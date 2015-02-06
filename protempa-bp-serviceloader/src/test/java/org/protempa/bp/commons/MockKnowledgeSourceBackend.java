@@ -19,6 +19,8 @@
  */
 package org.protempa.bp.commons;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -98,4 +100,24 @@ public class MockKnowledgeSourceBackend
         return null;
     }
 
+    @Override
+    public Collection<String> collectPropIdDescendantsUsingAllNarrower(boolean inDataSourceOnly, String[] propIds) throws KnowledgeSourceReadException {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<PropositionDefinition> collectPropDefDescendantsUsingAllNarrower(boolean inDataSourceOnly, String[] propIds) throws KnowledgeSourceReadException {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<PropositionDefinition> collectPropDefDescendantsUsingInverseIsA(String[] propIds) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<String> collectPropIdDescendantsUsingInverseIsA(String[] propIds) {
+        return Collections.emptyList();
+    }
+    
 }

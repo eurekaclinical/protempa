@@ -74,7 +74,7 @@ public class KnowledgeSourceImplTest {
                 Arrays.asSet(new String[] {"bar", "foo", "baz", "oof"});
         Assert.assertEquals("collectSubtree failed", 
                 expected, 
-                knowledgeSource.collectSubtrees("bar"));
+                knowledgeSource.collectPropIdDescendantsUsingInverseIsA("bar"));
     }
     
     @Test
@@ -82,7 +82,7 @@ public class KnowledgeSourceImplTest {
         Set<String> expected = Collections.singleton("zab");
         Assert.assertEquals("collectSubtree failed", 
                 expected, 
-                knowledgeSource.collectSubtrees("zab"));
+                knowledgeSource.collectPropIdDescendantsUsingInverseIsA("zab"));
     }
     
     @Test
@@ -91,6 +91,6 @@ public class KnowledgeSourceImplTest {
                 Arrays.asSet(new String[] {"bar", "foo", "baz", "oof", "rab", "zab"});
         Assert.assertEquals("collectSubtree failed", 
                 expected, 
-                knowledgeSource.collectSubtrees("bar", "rab"));
+                knowledgeSource.collectPropIdDescendantsUsingInverseIsA("bar", "rab"));
     }
 }

@@ -69,7 +69,8 @@ public final class KnowledgeSourceImpl
     private final Map<ContextDefinition, List<ContextDefinition>> subContextsCache;
     private final Map<ContextDefinition, List<TemporalPropositionDefinition>> inducedByCache;
     private final Map<TemporalPropositionDefinition, List<ContextDefinition>> inducesCache;
-    private InDataSourcePropositionDefinitionGetter inDataSourceGetter;
+    private SubtreePropositionDefinitionGetterRegular inDataSourceGetter;
+    private SubtreePropositionDefinitionGetterRegular collectSubtreeGetter;
 
     public KnowledgeSourceImpl(KnowledgeSourceBackend... backends) {
         super(backends);
@@ -108,7 +109,11 @@ public final class KnowledgeSourceImpl
         }
         if (this.inDataSourceGetter == null) {
             this.inDataSourceGetter =
-                    new InDataSourcePropositionDefinitionGetter(this);
+                    new SubtreePropositionDefinitionGetterRegular(this, true);
+        }
+        if (this.collectSubtreeGetter == null) {
+            this.collectSubtreeGetter =
+                    new SubtreePropositionDefinitionGetterRegular(this, false);
         }
     }
 
@@ -182,28 +187,6 @@ public final class KnowledgeSourceImpl
         }
     }
 
-    @Override
-    public Set<String> collectSubtrees(String... propIds) throws KnowledgeSourceReadException {
-        if (propIds == null) {
-            throw new IllegalArgumentException("propIds cannot be null");
-        }
-        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
-        
-        Queue<String> queue = new LinkedList<>();
-        Arrays.addAll(queue, propIds);
-        Set<String> result = new HashSet<>();
-        Arrays.addAll(result, propIds);
-        String propId;
-        while ((propId = queue.poll()) != null) {
-            List<PropositionDefinition> propDefs = readInverseIsA(propId);
-            for (PropositionDefinition propDef : propDefs) {
-                result.add(propDef.getId());
-                queue.add(propDef.getId());
-            }
-        }
-        return result;
-    }
-    
     @Override
     public List<PropositionDefinition> readIsA(String id)
             throws KnowledgeSourceReadException {
@@ -877,26 +860,42 @@ public final class KnowledgeSourceImpl
             this.notFoundValueSetRequests.clear();
             this.notFoundPropositionDefinitionRequests.clear();
             this.inDataSourceGetter.clear();
+            this.collectSubtreeGetter.clear();
         }
     }
 
     @Override
-    public Set<String> inDataSourcePropositionIds(String... propIds)
+    public Set<String> collectPropIdDescendantsUsingAllNarrower(boolean inDataSourceOnly, String... propIds)
             throws KnowledgeSourceReadException {
         initializeIfNeeded(
                 "Getting proposition ids for {0} with inDataSource set to true",
                 StringUtils.join(propIds, ","));
-        return this.inDataSourceGetter.inDataSourcePropositionIds(propIds);
+        return this.inDataSourceGetter.subtreePropIds(inDataSourceOnly, propIds);
     }
 
     @Override
-    public Set<PropositionDefinition> inDataSourcePropositionDefinitions(
-            String... propIds) throws KnowledgeSourceReadException {
+    public Set<PropositionDefinition> collectPropDefDescendantsUsingAllNarrower(
+            boolean inDataSourceOnly, String... propIds) throws KnowledgeSourceReadException {
         initializeIfNeeded(
                 "Getting proposition definitions for {0} with inDataSource set to true",
                 StringUtils.join(propIds, ","));
-        return this.inDataSourceGetter.inDataSourcePropositionDefinitions(
-                propIds);
+        return this.inDataSourceGetter.subtreePropDefs(inDataSourceOnly, propIds);
+    }
+    
+    @Override
+    public Set<String> collectPropIdDescendantsUsingInverseIsA(String... propIds) throws KnowledgeSourceReadException {
+        initializeIfNeeded(
+                "Getting proposition ids for {0}",
+                StringUtils.join(propIds, ","));
+        return this.collectSubtreeGetter.subtreePropIds(false, propIds);
+    }
+    
+    @Override
+    public Set<PropositionDefinition> collectPropDefDescendantsUsingInverseIsA(String... propIds) throws KnowledgeSourceReadException {
+        initializeIfNeeded(
+                "Getting proposition definitions for {0}",
+                StringUtils.join(propIds, ","));
+        return this.collectSubtreeGetter.subtreePropDefs(false, propIds);
     }
 
     /**

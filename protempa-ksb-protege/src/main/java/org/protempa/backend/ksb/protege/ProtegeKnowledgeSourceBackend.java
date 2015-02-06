@@ -45,10 +45,16 @@ import org.protempa.query.And;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.logging.Level;
+import org.arp.javautil.arrays.Arrays;
+import org.protempa.ProtempaUtil;
 
 /**
  * Abstract class for converting a Protege knowledge base into a PROTEMPA
@@ -355,8 +361,81 @@ public abstract class ProtegeKnowledgeSourceBackend
     }
 
 
+    @Override
     public Set<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException {
         return this.cm.searchInstancesContainingKey(searchKey);
-
     }
+
+    @Override
+    public Collection<String> collectPropIdDescendantsUsingAllNarrower(boolean inDataSourceOnly, String[] propIds) throws KnowledgeSourceReadException {
+        ProtempaUtil.checkArray(propIds, "propIds");
+        return collectPropDescendantsInt(inDataSourceOnly, true, propIds);
+    }
+
+    @Override
+    public Collection<PropositionDefinition> collectPropDefDescendantsUsingAllNarrower(boolean inDataSourceOnly, String[] propIds) throws KnowledgeSourceReadException {
+        ProtempaUtil.checkArray(propIds, "propIds");
+        Collection<String> resultPropIds = collectPropDescendantsInt(inDataSourceOnly, true, propIds);
+        List<PropositionDefinition> result = new ArrayList<>(resultPropIds.size());
+        for (String propId : resultPropIds) {
+            result.add(readPropositionDefinition(propId));
+        }
+        return result;
+    }
+    
+    @Override
+    public Collection<String> collectPropIdDescendantsUsingInverseIsA(String[] propIds) throws KnowledgeSourceReadException {
+        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
+        return collectPropDescendantsInt(false, false, propIds);
+    }
+
+    @Override
+    public Collection<PropositionDefinition> collectPropDefDescendantsUsingInverseIsA(String[] propIds) throws KnowledgeSourceReadException {
+        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
+        Collection<String> resultPropIds = collectPropDescendantsInt(false, false, propIds);
+        List<PropositionDefinition> result = new ArrayList<>(resultPropIds.size());
+        for (String propId : resultPropIds) {
+            result.add(readPropositionDefinition(propId));
+        }
+        return result;
+    }
+    
+    private Collection<String> collectPropDescendantsInt(boolean inDataSourceOnly, boolean narrower, String[] propIds) throws KnowledgeSourceReadException {
+        Slot inverseIsASlot = this.cm.getSlot("inverseIsA");
+        Slot abstractedFromSlot = this.cm.getSlot("abstractedFrom");
+        Slot inDataSourceSlot = this.cm.getSlot("inDataSource");
+        Set<String> result = new HashSet<>();
+        Arrays.addAll(result, propIds);
+        Queue<Instance> queue = new LinkedList<>();
+        for (String propId : result) {
+            Instance instance = this.cm.getInstance(propId);
+            if (instance == null) {
+                throw new KnowledgeSourceReadException("unknown proposition id " + propId);
+            } else {
+                queue.add(instance);
+            }
+        }
+        while (!queue.isEmpty()) {
+            Instance instance = queue.poll();
+            if (inDataSourceOnly) {
+                Boolean inDataSource = (Boolean) this.cm.getOwnSlotValue(instance, inDataSourceSlot);
+                if (inDataSource != null && inDataSource.booleanValue()) {
+                    result.add(instance.getName());
+                }
+            } else {
+                result.add(instance.getName());
+            }
+            Collection<?> inverseIsAs = this.cm.getOwnSlotValues(instance, inverseIsASlot);
+            for (Object obj : inverseIsAs) {
+                queue.add((Instance) obj);
+            }
+            Collection<?> abstractedFroms = narrower ? this.cm.getOwnSlotValues(instance, abstractedFromSlot) : Collections.emptyList();
+            for (Object obj : abstractedFroms) {
+                queue.add((Instance) obj);
+            }
+            
+        }
+        return result;
+    }
+    
 }

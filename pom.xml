@@ -202,8 +202,6 @@
         <module>protempa-dsb-relationaldb</module>
         <module>protempa-test-suite</module>
         <module>protempa-bconfigs-ini4j-ini</module>
-	<module>protempa-ksb-bioportal</module>
-        <module>protempa-ksb-i2b2</module>
     </modules>
 
     <dependencyManagement>
