@@ -22,6 +22,7 @@ package org.protempa.dest.table;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
@@ -102,7 +104,7 @@ public final class TableQueryResultsHandler
     }
     
     @Override
-    public void start() throws QueryResultsHandlerProcessingException {
+    public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
         Logger logger = Util.logger();
         if (this.headerWritten) {
             try {

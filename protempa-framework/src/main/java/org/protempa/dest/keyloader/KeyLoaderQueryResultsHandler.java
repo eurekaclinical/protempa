@@ -19,16 +19,16 @@ package org.protempa.dest.keyloader;
  * limitations under the License.
  * #L%
  */
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.ArrayUtils;
 import org.protempa.DataSource;
 import org.protempa.DataSourceWriteException;
 import org.protempa.KnowledgeSource;
+import org.protempa.PropositionDefinition;
 import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.proposition.Proposition;
@@ -60,7 +60,7 @@ public class KeyLoaderQueryResultsHandler extends AbstractQueryResultsHandler {
     }
 
     @Override
-    public void start() throws QueryResultsHandlerProcessingException {
+    public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
         try {
             this.dataSource.deleteAllKeys();
         } catch (DataSourceWriteException ex) {

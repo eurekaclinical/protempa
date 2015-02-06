@@ -43,6 +43,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
@@ -122,7 +123,7 @@ public final class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
     }
 
     @Override
-    public void start() throws QueryResultsHandlerProcessingException {
+    public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
         try {
             this.out.write("<patients>");
             this.out.flush();

@@ -19,7 +19,9 @@
  */
 package org.protempa.dest;
 
+import java.util.Collection;
 import org.apache.commons.lang3.ArrayUtils;
+import org.protempa.PropositionDefinition;
 
 /**
  *
@@ -38,7 +40,7 @@ public abstract class AbstractQueryResultsHandler
     }
 
     @Override
-    public void start() throws QueryResultsHandlerProcessingException {
+    public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
     }
 
     @Override

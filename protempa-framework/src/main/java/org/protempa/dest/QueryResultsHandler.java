@@ -20,9 +20,11 @@
 package org.protempa.dest;
 
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;
@@ -98,7 +100,7 @@ public interface QueryResultsHandler extends AutoCloseable {
      * @throws QueryResultsHandlerProcessingException if any exceptions occur at
      * a lower level.
      */
-    void start() throws QueryResultsHandlerProcessingException;
+    void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException;
 
     /**
      * Handles a single query result, which is the list of propositions

@@ -20,9 +20,11 @@
 package org.protempa.dest.deid;
 
 import java.text.NumberFormat;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.protempa.PropositionDefinition;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
@@ -90,8 +92,8 @@ public final class DeidentifiedQueryResultsHandler
     }
 
     @Override
-    public void start() throws QueryResultsHandlerProcessingException {
-        this.handler.start();
+    public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
+        this.handler.start(cache);
     }
 
     @Override
