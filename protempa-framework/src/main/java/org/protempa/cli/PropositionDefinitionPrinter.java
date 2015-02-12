@@ -158,7 +158,7 @@ class PropositionDefinitionPrinter extends AbstractPropositionDefinitionVisitor 
         if (valueSetId != null) {
             valueSetId = ", " + valueSetId;
         }
-        System.out.println("\t\t" + propDef.getName() + ": "
+        System.out.println("\t\t" + propDef.getDisplayName() + ": "
                 + propDef.getValueType() + valueSetId);
     }
 

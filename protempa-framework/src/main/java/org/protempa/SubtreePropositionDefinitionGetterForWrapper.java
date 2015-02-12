@@ -24,6 +24,8 @@ import java.util.Map;
 import org.arp.javautil.arrays.Arrays;
 
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.protempa.CollectSubtreeGetterSlowStrategy.InDataSourceResult;
 
 /**
@@ -56,11 +58,13 @@ class SubtreePropositionDefinitionGetterForWrapper {
                     this.inDataSourceSlowStrategy.collectPropIds(inDataSource, propIdsAsSet) :
                     this.collectSubtreeSlowStrategy.collectPropIds(inDataSource, propIdsAsSet);
         Set<String> result = new HashSet<>(partialResult.getResult());
-        Set<String> missing = partialResult.getMissing();
+        propIdsAsSet.removeAll(result);
+        propIdsAsSet.addAll(partialResult.getMissing());
+        String[] partialResultArr = propIdsAsSet.toArray(new String[propIdsAsSet.size()]);
         if (this.allNarrower) {
-            result.addAll(this.knowledgeSource.collectPropIdDescendantsUsingAllNarrower(inDataSource, missing.toArray(new String[missing.size()])));
+            result.addAll(this.knowledgeSource.collectPropIdDescendantsUsingAllNarrower(inDataSource, partialResultArr));
         } else {
-            result.addAll(this.knowledgeSource.collectPropIdDescendantsUsingInverseIsA(missing.toArray(new String[missing.size()])));
+            result.addAll(this.knowledgeSource.collectPropIdDescendantsUsingInverseIsA(partialResultArr));
         }
         return result;
     }
@@ -72,8 +76,11 @@ class SubtreePropositionDefinitionGetterForWrapper {
                     this.inDataSourceSlowStrategy.collectPropDefs(inDataSource, propIdsAsSet) :
                     this.collectSubtreeSlowStrategy.collectPropDefs(inDataSource, propIdsAsSet);
         Set<PropositionDefinition> result = new HashSet<>(partialResult.getResult());
-        Set<String> missing = partialResult.getMissing();
-        String[] partialResultArr = missing.toArray(new String[missing.size()]);
+        for (PropositionDefinition pd : result) {
+            propIdsAsSet.remove(pd.getId());
+        }
+        propIdsAsSet.addAll(partialResult.getMissing());
+        String[] partialResultArr = propIdsAsSet.toArray(new String[propIdsAsSet.size()]);
         if (this.allNarrower) {
             result.addAll(this.knowledgeSource.collectPropDefDescendantsUsingAllNarrower(inDataSource, partialResultArr));
         } else {

@@ -31,30 +31,33 @@ import org.protempa.proposition.value.ValueType;
 public final class PropertyDefinition implements Serializable {
     private static final long serialVersionUID = 5258018980150529695L;
 
-    private final String name;
+    private final String id;
+    private final String displayName;
     private final ValueType valueType;
     private final String valueSetId;
     private final String declaringPropId;
     private final String propId;
 
     /**
-     * Initializes the property definition with a name, a value type and a
-     * value set.
+     * Initializes the property definition with a displayName, a value type and a
+ value set.
      * 
-     * @param name a name {@link String}. Cannot be <code>null</code>.
+     * @param id an unique id {@link String}. Cannot be <code>null</code>.
+     * @param displayName a displayName {@link String}. If <code>null</code>, 
+     * the <code>displayName</code> field is set to the value of the 
+     * <code>id</code> field.
      * @param valueType a {@link ValueType}. Cannot be <code>null</code>.
-     * @param valueSet a {@link EnumeratedValueSet} that is compatible with
-     * the given <code>valueType</code>.
+     * @param valueSetId the unique id of this property's {@link ValueSet}.
      *
      * @see ValueType#isCompatible(ValueSet) 
      */
-    public PropertyDefinition(String propId, String name, ValueType valueType,
-            String valueSetId, String declaringPropId) {
+    public PropertyDefinition(String propId, String id, String displayName, 
+            ValueType valueType, String valueSetId, String declaringPropId) {
         if (propId == null) {
             throw new IllegalArgumentException("propId cannot be null");
         }
-        if (name == null) {
-            throw new IllegalArgumentException("name cannot be null");
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
         }
         if (valueType == null) {
             throw new IllegalArgumentException("valueType cannot be null");
@@ -62,7 +65,8 @@ public final class PropertyDefinition implements Serializable {
         if (declaringPropId == null) {
             throw new IllegalArgumentException("declaringPropId cannot be null");
         }
-        this.name = name.intern();
+        this.id = id.intern();
+        this.displayName = displayName != null ? displayName.intern() : this.id;
         this.propId = propId;
         this.valueType = valueType;
         this.valueSetId = valueSetId;
@@ -72,14 +76,24 @@ public final class PropertyDefinition implements Serializable {
     public String getPropId() {
         return propId;
     }
+
+    /**
+     * Returns the property's id, which is unique in combination with a 
+     * proposition id.
+     * 
+     * @return the id {@link String}. Guaranteed not <code>null</code>.
+     */
+    public String getId() {
+        return id;
+    }
     
     /**
-     * Returns the property's name.
+     * Returns the property's displayName. Guaranteed not <code>null</code>.
      *
      * @return a {@link String}.
      */
-    public String getName() {
-        return this.name;
+    public String getDisplayName() {
+        return this.displayName;
     }
 
     /**

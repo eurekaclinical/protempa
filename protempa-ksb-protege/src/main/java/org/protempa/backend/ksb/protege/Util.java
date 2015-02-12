@@ -373,7 +373,7 @@ class Util {
             }
             ValueType valueType = parseValueType(valueTypeCls);
             PropertyDefinition propDef = new PropertyDefinition(propInstance.getName(),
-                    key, valueType, valueTypeCls.getName(), value.getPropositionId());
+                    key, null, valueType, valueTypeCls.getName(), value.getPropositionId());
             propDefs[i] = propDef;
             i++;
         }

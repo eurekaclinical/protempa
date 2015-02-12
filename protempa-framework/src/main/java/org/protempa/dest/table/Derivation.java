@@ -320,10 +320,8 @@ public final class Derivation extends Link {
             throws KnowledgeSourceReadException {
         if (this.knowledgeTree == null) {
             this.knowledgeTree = new HashSet<>();
-            for (String propId : getPropositionIds()) {
-                this.knowledgeTree.addAll(
-                        knowledgeSource.collectPropIdDescendantsUsingAllNarrower(true, propId));
-            }
+            this.knowledgeTree.addAll(
+                knowledgeSource.collectPropIdDescendantsUsingAllNarrower(true, getPropositionIds()));
         }
     }
 

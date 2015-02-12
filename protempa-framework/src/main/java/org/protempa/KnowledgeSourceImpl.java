@@ -868,6 +868,7 @@ public final class KnowledgeSourceImpl
         initializeIfNeeded(
                 "Getting proposition ids for {0} with inDataSource set to true",
                 StringUtils.join(propIds, ","));
+        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
         return this.inDataSourceGetter.subtreePropIds(inDataSourceOnly, propIds);
     }
 
@@ -877,6 +878,7 @@ public final class KnowledgeSourceImpl
         initializeIfNeeded(
                 "Getting proposition definitions for {0} with inDataSource set to true",
                 StringUtils.join(propIds, ","));
+        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
         return this.inDataSourceGetter.subtreePropDefs(inDataSourceOnly, propIds);
     }
     
@@ -885,6 +887,7 @@ public final class KnowledgeSourceImpl
         initializeIfNeeded(
                 "Getting proposition ids for {0}",
                 StringUtils.join(propIds, ","));
+        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
         return this.collectSubtreeGetter.subtreePropIds(false, propIds);
     }
     
@@ -893,6 +896,7 @@ public final class KnowledgeSourceImpl
         initializeIfNeeded(
                 "Getting proposition definitions for {0}",
                 StringUtils.join(propIds, ","));
+        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
         return this.collectSubtreeGetter.subtreePropDefs(false, propIds);
     }
 

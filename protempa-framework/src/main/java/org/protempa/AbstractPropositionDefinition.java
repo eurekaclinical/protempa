@@ -76,6 +76,8 @@ public abstract class AbstractPropositionDefinition implements
     private Date accessed;
     private Date created;
     private Date updated;
+    private Date downloaded;
+    private String version;
 
     /**
      * Creates a new knowledge definition.
@@ -241,10 +243,10 @@ public abstract class AbstractPropositionDefinition implements
     }
 
     @Override
-    public final PropertyDefinition propertyDefinition(String name) {
+    public final PropertyDefinition propertyDefinition(String id) {
         for (PropertyDefinition propertyDefinition :
                 this.propertyDefinitions) {
-            if (propertyDefinition.getName().equals(name)) {
+            if (propertyDefinition.getId().equals(id)) {
                 return propertyDefinition;
             }
         }
@@ -348,6 +350,24 @@ public abstract class AbstractPropositionDefinition implements
 
     public void setUpdated(Date updated) {
         this.updated = updated;
+    }
+
+    @Override
+    public String getVersion() {
+        return this.version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+    
+    @Override
+    public Date getDownloaded() {
+        return this.downloaded;
+    }
+
+    public void setDownloaded(Date downloaded) {
+        this.downloaded = downloaded;
     }
     
     @Override

@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.collections.Iterators;
 import org.protempa.dest.Destination;
 import org.protempa.dest.QueryResultsHandler;
+import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerInitException;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
@@ -48,6 +49,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
     private final Destination destination;
     private QueryResultsHandler resultsHandler;
     private final AbstractionFinder abstractionFinder;
+    private boolean failed;
 
     public ExecutorWithResultsHandler(Query query, Destination resultsHandlerFactory, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws FinderException {
         super(query, querySession, strategy, abstractionFinder);
@@ -83,9 +85,15 @@ abstract class ExecutorWithResultsHandler extends Executor {
             this.resultsHandler.validate();
             log(Level.FINE, "Query results handler validated successfully for query {0}", queryId);
             addAllPropIds(resultsHandler.getPropositionIdsNeeded());
-            super.init();
+            try {
+                super.init();
+            } catch (FinderException fe) {
+                this.failed = true;
+                throw fe;
+            }
             this.resultsHandler.start(getAllNarrowerDescendants());
         } catch (QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException ex) {
+            this.failed = true;
             throw new FinderException(getQuery().getId(), ex);
         }
     }
@@ -93,9 +101,21 @@ abstract class ExecutorWithResultsHandler extends Executor {
     @Override
     public void close() throws FinderException {
         try {
-            this.resultsHandler.finish();
-        } catch (QueryResultsHandlerProcessingException ex) {
+            if (!this.failed) {
+                this.resultsHandler.finish();
+            }
+            this.resultsHandler.close();
+            this.resultsHandler = null;
+        } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerCloseException ex) {
             throw new FinderException(getQuery().getId(), ex);
+        } finally {
+            if (this.resultsHandler != null) {
+                try {
+                    this.resultsHandler.close();
+                } catch (QueryResultsHandlerCloseException ignore) {
+                    
+                }
+            }
         }
     }
 
@@ -127,6 +147,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
             }
             this.resultsHandler.handleQueryResult(keyId, filteredPropositions, forwardDerivations, backwardDerivations, refs);
         } catch (QueryResultsHandlerProcessingException ex) {
+            this.failed = true;
             throw new FinderException(getQuery().getId(), ex);
         }
     }

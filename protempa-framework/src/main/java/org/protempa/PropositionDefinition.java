@@ -124,6 +124,13 @@ public interface PropositionDefinition extends Serializable,
 
     ReferenceDefinition[] getReferenceDefinitions();
 
+    /**
+     * Returns the reference definition with the given name.
+     * @param name a reference definition name {@link String}.
+     * @return the {@link ReferenceDefinition} with the given name, or
+     * <code>null</code> if this proposition definition has no reference 
+     * definition with the given name
+     */
     ReferenceDefinition referenceDefinition(String name);
 
     boolean getInDataSource();
@@ -140,10 +147,50 @@ public interface PropositionDefinition extends Serializable,
 
     SourceId getSourceId();
     
+    /**
+     * Returns the version number of this proposition definition, for 
+     * knowledge source backends that maintain version information.
+     * 
+     * @return a version {@link String}, or <code>null</code> if the 
+     * knowledge source backend does not maintain version information. The 
+     * string's format is specified to the knowledge source backend and the
+     * original information source.
+     */
+    String getVersion();
+    
+    /**
+     * Returns the timestamp of when this proposition definition's information
+     * was downloaded from its source, e.g., a terminology standard, if such
+     * information is available.
+     * 
+     * @return a {@link Date}, or <code>null</code> if no download timestamp
+     * information is available.
+     */
+    Date getDownloaded();
+    
+    /**
+     * Returns the timestamp of when this proposition definition was accessed from the knowledge source.
+     * 
+     * @return a {@link Date}. Guaranteed not <code>null</code>.
+     */
     Date getAccessed();
     
+    /**
+     * Returns the timestamp of when this proposition definition was created,
+     * if the knowledge source backend maintains this information.
+     * 
+     * @return a {@link Date}, or <code>null</code> if the knowledge source
+     * backend does not maintain created timestamp information.
+     */
     Date getCreated();
     
+    /**
+     * Returns the timestamp of when this proposition definition was last 
+     * updated, if the knowledge source backend maintains this information.
+     * 
+     * @return a {@link Date}, or <code>null</code> if the knowledge source
+     * backend does not maintain last updated timestamp information.
+     */
     Date getUpdated();
     
 }

@@ -121,7 +121,7 @@ public interface QueryResultsHandler extends AutoCloseable {
 
     /**
      * Called by Protempa as soon as all query results have been retrieved from
-     * the data source.
+     * the data source. Will not be called if a previous step failed.
      *
      * @throws QueryResultsHandlerProcessingException if any exceptions occur at
      * a lower level
@@ -130,10 +130,12 @@ public interface QueryResultsHandler extends AutoCloseable {
 
     /**
      * Called by Protempa after {@link #handleFinish()} to clean up any
-     * resources used by the handler.
+     * resources used by the handler. It is called always, even if a previous 
+     * step failed.
      *
      * @throws QueryResultsHandlerCloseException if any exceptions occur at a
      * lower level
      */
+    @Override
     void close() throws QueryResultsHandlerCloseException;
 }

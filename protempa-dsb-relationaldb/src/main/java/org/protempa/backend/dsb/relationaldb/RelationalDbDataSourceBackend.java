@@ -533,7 +533,7 @@ public abstract class RelationalDbDataSourceBackend
                 PropertyDefinition[] propertyDefs = propDef
                         .getPropertyDefinitions();
                 for (PropertyDefinition propertyDef : propertyDefs) {
-                    String propName = propertyDef.getName();
+                    String propName = propertyDef.getId();
                     propNamesFromPropDefs.add(propName);
                 }
             }

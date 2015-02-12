@@ -742,7 +742,6 @@ public class ProtempaTest {
             results = new PropositionStoreCreator(environmentName)
                     .getPersistentStore();
             protempa.retrieveDataAndPersist(query(), environmentName);
-
             assertEquals("Wrong number of keys retrieved", this.patientCount,
                     results.size());
             assertRawPropositionCount(results);
