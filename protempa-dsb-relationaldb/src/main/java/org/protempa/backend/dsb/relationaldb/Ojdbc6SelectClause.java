@@ -19,7 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.KnowledgeSourceIdToSqlCode;
+import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
 
 final class Ojdbc6SelectClause extends AbstractSelectClause {
@@ -31,9 +31,9 @@ final class Ojdbc6SelectClause extends AbstractSelectClause {
 
     @Override
     protected CaseClause getCaseClause(Object[] sqlCodes, ColumnSpec columnSpec,
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
+            Mappings mappings) {
         return new DefaultCaseClause(sqlCodes, getReferenceIndices(), columnSpec,
-                filteredConstraintValues);
+                mappings);
     }
 
     @Override

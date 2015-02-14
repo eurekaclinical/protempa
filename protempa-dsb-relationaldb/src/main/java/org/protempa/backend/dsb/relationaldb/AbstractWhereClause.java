@@ -28,6 +28,7 @@ import java.util.Set;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.dsb.filter.PropertyValueFilter;
+import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 import org.protempa.proposition.value.BooleanValue;
 import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.InequalityNumberValue;
@@ -338,15 +339,15 @@ abstract class AbstractWhereClause implements WhereClause {
             if (resultProcessor != null) {
                 resultProcessor
                         .setCasePresent(columnSpec.getConstraint() == Operator.LIKE);
-                KnowledgeSourceIdToSqlCode[] filteredConstraintValues = filterKnowledgeSourceIdToSqlCodesById(
-                        propIds, columnSpec.getPropositionIdToSqlCodes());
+                Mappings filteredMappings = filterMappingsByTarget(
+                        propIds, columnSpec.getMappings());
                 ;
                 selectClause.setCaseClause(
                         filteredSqlCodes(
                                 propIds,
                                 filterConstraintValues(propIds,
-                                        filteredConstraintValues)), columnSpec,
-                        filteredConstraintValues);
+                                        filteredMappings)), columnSpec,
+                        filteredMappings);
             }
         }
     }
@@ -423,27 +424,15 @@ abstract class AbstractWhereClause implements WhereClause {
         return constraint;
     }
 
-    private static KnowledgeSourceIdToSqlCode[] filterKnowledgeSourceIdToSqlCodesById(
-            Set<?> propIds, KnowledgeSourceIdToSqlCode[] constraintValues) {
-        KnowledgeSourceIdToSqlCode[] filteredConstraintValues;
+    private static Mappings filterMappingsByTarget(
+            Set<?> propIds, Mappings mappings) {
+        Mappings filteredMappings;
         if (propIds != null) {
-            List<KnowledgeSourceIdToSqlCode> constraintValueList = new ArrayList<>();
-            for (KnowledgeSourceIdToSqlCode constraintValue : constraintValues) {
-                if (propIds.contains(constraintValue.getPropositionId())) {
-                    constraintValueList.add(constraintValue);
-                }
-            }
-            if (constraintValueList.isEmpty()) {
-                filteredConstraintValues = constraintValues;
-            } else {
-                filteredConstraintValues = constraintValueList
-                        .toArray(new KnowledgeSourceIdToSqlCode[constraintValueList
-                                .size()]);
-            }
+            filteredMappings = mappings.subMappingsByTargets(propIds.toArray(new String[propIds.size()]));
         } else {
-            filteredConstraintValues = constraintValues;
+            filteredMappings = mappings;
         }
-        return filteredConstraintValues;
+        return filteredMappings;
     }
 
     private String processConstraint(ColumnSpec columnSpec, Set<?> propIds,
@@ -454,10 +443,9 @@ abstract class AbstractWhereClause implements WhereClause {
         if (constraintOverride != null) {
             constraint = constraintOverride;
         }
-        KnowledgeSourceIdToSqlCode[] propIdToSqlCodes = cs
-                .getPropositionIdToSqlCodes();
+        Mappings propIdToSqlCodes = cs.getMappings();
         if (constraint != null && referenceIndices.getIndex(cs) > -1) {
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues = 
+            Mappings filteredConstraintValues = 
                     filterConstraintValues(propIds, propIdToSqlCodes);
             if (!first) {
                 wherePart.append(" AND ");
@@ -476,31 +464,22 @@ abstract class AbstractWhereClause implements WhereClause {
     }
 
     private Object[] filteredSqlCodes(Set<?> propIds,
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
+            Mappings mappings) {
         Object[] sqlCodes = null;
-        if (filteredConstraintValues.length > 0) {
-            sqlCodes = extractSqlCodes(filteredConstraintValues);
+        if (!mappings.isEmpty()) {
+            sqlCodes = mappings.readSources();
         } else {
             sqlCodes = propIds.toArray();
         }
         return sqlCodes;
     }
 
-    private KnowledgeSourceIdToSqlCode[] filterConstraintValues(Set<?> propIds,
-            KnowledgeSourceIdToSqlCode[] propIdToSqlCodes) {
-        KnowledgeSourceIdToSqlCode[] filteredConstraintValues = 
-                filterKnowledgeSourceIdToSqlCodesById(
-                propIds, propIdToSqlCodes);
+    private Mappings filterConstraintValues(Set<?> propIds,
+            Mappings mappings) {
+        Mappings filteredConstraintValues = 
+                filterMappingsByTarget(
+                propIds, mappings);
         return filteredConstraintValues;
-    }
-
-    private Object[] extractSqlCodes(
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
-        Object[] sqlCodes = new Object[filteredConstraintValues.length];
-        for (int i = 0; i < sqlCodes.length; i++) {
-            sqlCodes[i] = filteredConstraintValues[i].getSqlCode();
-        }
-        return sqlCodes;
     }
 
     /**

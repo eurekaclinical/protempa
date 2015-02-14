@@ -55,7 +55,7 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
 
     protected static String sqlCodeToPropositionId(ColumnSpec codeSpec,
             String code) throws SQLException {
-        return codeSpec.propositionIdFor(code);
+        return codeSpec.getTarget(code);
     }
 
     protected int extractPropertyValues(ResultSet resultSet, int i, 
@@ -76,7 +76,7 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
                     this.lastColumnSpecs[j] = columnSpec;
                 }
                 String valAsString = resultSet.getString(i);
-                String propId = columnSpec.propositionIdFor(valAsString);
+                String propId = columnSpec.getTarget(valAsString);
                 if (propId != null) {
                     valAsString = propId;
                 }

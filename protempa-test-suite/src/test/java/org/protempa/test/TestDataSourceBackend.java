@@ -26,7 +26,6 @@ import org.protempa.backend.dsb.relationaldb.JDBCDateTimeTimestampDateValueForma
 import org.protempa.backend.dsb.relationaldb.JDBCDateTimeTimestampPositionParser;
 import org.protempa.backend.dsb.relationaldb.JDBCPositionFormat;
 import org.protempa.backend.dsb.relationaldb.JoinSpec;
-import org.protempa.backend.dsb.relationaldb.PropIdToSQLCodeMapper;
 import org.protempa.backend.dsb.relationaldb.PropertySpec;
 import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.RelationalDbDataSourceBackend;
@@ -35,6 +34,9 @@ import org.protempa.proposition.value.*;
 
 import java.io.IOException;
 import org.protempa.backend.dsb.relationaldb.Operator;
+import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
+import org.protempa.backend.dsb.relationaldb.mappings.ResourceMappings;
+import org.protempa.backend.dsb.relationaldb.mappings.ResourceMappingsFactory;
 
 /**
  * Test data source backend (based on RegistryVM).
@@ -48,18 +50,15 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
     private static final AbsoluteTimeGranularityFactory absTimeGranularityFactory = new AbsoluteTimeGranularityFactory();
     private static final JDBCPositionFormat dtPositionParser = new JDBCDateTimeTimestampPositionParser();
 
-    private final PropIdToSQLCodeMapper mapper;
-
     /**
      * Initializes a new backend.
      */
     public TestDataSourceBackend() {
-        this.mapper = new PropIdToSQLCodeMapper("/etc/mappings/",
-                getClass());
         setSchemaName("TEST");
         setDefaultKeyIdTable("PATIENT");
         setDefaultKeyIdColumn("PATIENT_KEY");
         setDefaultKeyIdJoinKey("PATIENT_KEY");
+        setMappingsFactory(new ResourceMappingsFactory("/etc/mappings/", getClass()));
     }
 
     @Override
@@ -161,8 +160,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 "PATIENT",
                                                 "GENDER",
                                                 Operator.EQUAL_TO,
-                                                this.mapper
-                                                        .propertyNameOrPropIdToSqlCodeArray("gender_02232012.txt"),
+                                                getMappingsFactory()
+                                                        .getInstance("gender_02232012.txt"),
                                                 true), ValueType.NOMINALVALUE),
                                 new PropertySpec(
                                         "race",
@@ -172,8 +171,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 "PATIENT",
                                                 "RACE",
                                                 Operator.EQUAL_TO,
-                                                this.mapper
-                                                        .propertyNameOrPropIdToSqlCodeArray("race_02232012.txt"),
+                                                getMappingsFactory()
+                                                        .getInstance("race_02232012.txt"),
                                                 true), ValueType.NOMINALVALUE),
                                 new PropertySpec(
                                         "ethnicity",
@@ -183,8 +182,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 "PATIENT",
                                                 "RACE",
                                                 Operator.EQUAL_TO,
-                                                this.mapper
-                                                        .propertyNameOrPropIdToSqlCodeArray("ethnicity_02232012.txt"),
+                                                getMappingsFactory()
+                                                        .getInstance("ethnicity_02232012.txt"),
                                                 true), ValueType.NOMINALVALUE) },
                         new ReferenceSpec[] {
                                 new ReferenceSpec(
@@ -240,6 +239,10 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
     @Override
     protected EntitySpec[] eventSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException {
         String schemaName = getSchemaName();
+        Mappings icd9DiagnosesMappings = getMappingsFactory().getInstance("icd9_diagnosis_02232012.txt");
+        Mappings icd9ProcedureMappings = getMappingsFactory().getInstance("icd9_procedure_02232012.txt");
+        Mappings cptMappings = getMappingsFactory().getInstance("cpt_procedure_02232012.txt");
+        Mappings medsMappings = getMappingsFactory().getInstance("meds_02232012.txt");
         EntitySpec[] eventSpecs = new EntitySpec[] {
                 new EntitySpec(
                         "Encounters",
@@ -263,8 +266,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 "ENCOUNTER",
                                                 "ENCOUNTER_TYPE",
                                                 Operator.EQUAL_TO,
-                                                this.mapper
-                                                        .propertyNameOrPropIdToSqlCodeArray("type_encounter_02232012.txt"),
+                                                getMappingsFactory()
+                                                        .getInstance("type_encounter_02232012.txt"),
                                                 true), ValueType.NOMINALVALUE),
                                 new PropertySpec(
                                         "dischargeDisposition",
@@ -274,8 +277,8 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 "ENCOUNTER",
                                                 "DISCHARGE_DISP",
                                                 Operator.EQUAL_TO,
-                                                this.mapper
-                                                        .propertyNameOrPropIdToSqlCodeArray("disposition_discharge_02232012.txt"),
+                                                getMappingsFactory()
+                                                        .getInstance("disposition_discharge_02232012.txt"),
                                                 true), ValueType.NOMINALVALUE), },
                         new ReferenceSpec[] {
                                 new ReferenceSpec("patient", "Patients",
@@ -372,8 +375,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                 new EntitySpec(
                         "Diagnosis Codes",
                         null,
-                        this.mapper.readCodes("icd9_diagnosis_02232012.txt",
-                                0),
+                        icd9DiagnosesMappings.readTargets(),
                         true,
                         new ColumnSpec(
                                 keyIdSchema,
@@ -400,8 +402,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                         "ICD9D_EVENT",
                                         "ENTITY_ID",
                                         Operator.EQUAL_TO,
-                                        this.mapper
-                                                .propertyNameOrPropIdToSqlCodeArray("icd9_diagnosis_02232012.txt")),
+                                        icd9DiagnosesMappings),
                                 ValueType.NOMINALVALUE), },
                         null,
                         null,
@@ -410,15 +411,13 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 "ICD9D_EVENT",
                                 "ENTITY_ID",
                                 Operator.EQUAL_TO,
-                                this.mapper
-                                        .propertyNameOrPropIdToSqlCodeArray("icd9_diagnosis_02232012.txt"),
+                                icd9DiagnosesMappings,
                                 true), null, null, null,
                         AbsoluteTimeGranularity.MINUTE, dtPositionParser, null),
                 new EntitySpec(
                         "ICD9 Procedure Codes",
                         null,
-                        this.mapper.readCodes("icd9_procedure_02232012.txt",
-                                0),
+                        icd9ProcedureMappings.readTargets(),
                         true,
                         new ColumnSpec(
                                 keyIdSchema,
@@ -446,8 +445,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                         "ICD9P_EVENT",
                                         "ENTITY_ID",
                                         Operator.EQUAL_TO,
-                                        this.mapper
-                                                .propertyNameOrPropIdToSqlCodeArray("icd9_procedure_02232012.txt")),
+                                        icd9ProcedureMappings),
                                 ValueType.NOMINALVALUE) },
                         null,
                         null,
@@ -456,15 +454,13 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 "ICD9P_EVENT",
                                 "ENTITY_ID",
                                 Operator.EQUAL_TO,
-                                this.mapper
-                                        .propertyNameOrPropIdToSqlCodeArray("icd9_procedure_02232012.txt"),
+                                icd9ProcedureMappings,
                                 true), null, null, null,
                         AbsoluteTimeGranularity.MINUTE, dtPositionParser, null),
                 new EntitySpec(
                         "CPT Procedure Codes",
                         null,
-                        this.mapper.readCodes("cpt_procedure_02232012.txt",
-                                0),
+                        cptMappings.readTargets(),
                         true,
                         new ColumnSpec(keyIdSchema, keyIdTable,
                                 keyIdColumn, 
@@ -489,8 +485,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                         "CPT_EVENT",
                                         "ENTITY_ID",
                                         Operator.EQUAL_TO,
-                                        this.mapper
-                                                .propertyNameOrPropIdToSqlCodeArray("cpt_procedure_02232012.txt")),
+                                        cptMappings),
                                 ValueType.NOMINALVALUE) },
                         null,
                         null,
@@ -499,14 +494,13 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 "CPT_EVENT",
                                 "ENTITY_ID",
                                 Operator.EQUAL_TO,
-                                this.mapper
-                                        .propertyNameOrPropIdToSqlCodeArray("cpt_procedure_02232012.txt"),
+                                cptMappings,
                                 true), null, null, null,
                         AbsoluteTimeGranularity.MINUTE, dtPositionParser, null),
                 new EntitySpec(
                         "Medication Orders",
                         null,
-                        this.mapper.readCodes("meds_02232012.txt", 0),
+                        medsMappings.readTargets(),
                         true,
                         new ColumnSpec(
                                 keyIdSchema,
@@ -532,8 +526,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 "MEDS_EVENT",
                                 "ENTITY_ID",
                                 Operator.EQUAL_TO,
-                                this.mapper
-                                        .propertyNameOrPropIdToSqlCodeArray("meds_02232012.txt"),
+                                medsMappings,
                                 true), null, null, null,
                         AbsoluteTimeGranularity.MINUTE, dtPositionParser, null),
 };
@@ -543,11 +536,13 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
     @Override
     protected EntitySpec[] primitiveParameterSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException {
         String schemaName = getSchemaName();
+        Mappings labsMappings = getMappingsFactory().getInstance("labs_02232012.txt");
+        Mappings vitalsMappings = getMappingsFactory().getInstance("vitals_result_types_02232012.txt");
         EntitySpec[] primitiveParameterSpecs = new EntitySpec[] {
                 new EntitySpec(
                         "Labs",
                         null,
-                        this.mapper.readCodes("labs_02232012.txt", 0),
+                        labsMappings.readTargets(),
                         true,
                         new ColumnSpec(
                                 keyIdSchema,
@@ -582,16 +577,14 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 "LABS_EVENT",
                                 "ENTITY_ID",
                                 Operator.EQUAL_TO,
-                                this.mapper
-                                        .propertyNameOrPropIdToSqlCodeArray("labs_02232012.txt"),
+                                labsMappings,
                                 true), null, new ColumnSpec(schemaName,
                                 "LABS_EVENT", "RESULT_STR"), ValueType.VALUE,
                         AbsoluteTimeGranularity.MINUTE, dtPositionParser, null),
                 new EntitySpec(
                         "Vitals",
                         null,
-                        this.mapper.readCodes(
-                                "vitals_result_types_02232012.txt", 0),
+                        vitalsMappings.readTargets(),
                         true,
                         new ColumnSpec(
                                 keyIdSchema,
@@ -630,8 +623,7 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 "VITALS_EVENT",
                                 "ENTITY_ID",
                                 Operator.EQUAL_TO,
-                                this.mapper
-                                        .propertyNameOrPropIdToSqlCodeArray("vitals_result_types_02232012.txt"),
+                                vitalsMappings,
                                 true), null, new ColumnSpec(schemaName,
                                 "VITALS_EVENT", "RESULT_STR"), ValueType.VALUE,
                         AbsoluteTimeGranularity.MINUTE, dtPositionParser, AbsoluteTimeUnit.YEAR),

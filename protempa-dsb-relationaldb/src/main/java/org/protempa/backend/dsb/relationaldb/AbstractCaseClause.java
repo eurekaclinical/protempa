@@ -21,22 +21,21 @@ package org.protempa.backend.dsb.relationaldb;
 
 import static org.protempa.backend.dsb.relationaldb.SqlGeneratorUtil.prepareValue;
 
-import org.protempa.backend.dsb.relationaldb.KnowledgeSourceIdToSqlCode;
+import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
 abstract class AbstractCaseClause implements CaseClause {
 
     private final Object[] sqlCodes;
     private final TableAliaser referenceIndices;
     private final ColumnSpec columnSpec;
-    private final KnowledgeSourceIdToSqlCode[] filteredConstraintValues;
+    private final Mappings mappings;
 
     AbstractCaseClause(Object[] sqlCodes, TableAliaser referenceIndices,
-            ColumnSpec columnSpec,
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
+            ColumnSpec columnSpec, Mappings mappings) {
         this.sqlCodes = sqlCodes;
         this.referenceIndices = referenceIndices;
         this.columnSpec = columnSpec;
-        this.filteredConstraintValues = filteredConstraintValues;
+        this.mappings = mappings;
     }
 
     @Override
@@ -51,8 +50,7 @@ abstract class AbstractCaseClause implements CaseClause {
             selectPart.append(" like ");
             selectPart.append(prepareValue(sqlCodes[k]));
             selectPart.append(" then ");
-            selectPart.append(prepareValue(filteredConstraintValues[k]
-                    .getPropositionId()));
+            selectPart.append(prepareValue(this.mappings.getTarget(sqlCodes[k])));
             if (k < sqlCodes.length - 1) {
                 selectPart.append(" ");
             }

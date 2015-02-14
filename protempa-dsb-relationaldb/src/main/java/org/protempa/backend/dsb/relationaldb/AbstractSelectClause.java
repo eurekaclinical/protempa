@@ -20,6 +20,7 @@
 package org.protempa.backend.dsb.relationaldb;
 
 import java.util.Map;
+import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
 abstract class AbstractSelectClause implements SelectClause {
 
@@ -42,6 +43,7 @@ abstract class AbstractSelectClause implements SelectClause {
         return referenceIndices;
     }
 
+    @Override
     public String generateClause() {
         StringBuilder selectClause = new StringBuilder("SELECT ");
         int i = 0;
@@ -159,8 +161,7 @@ abstract class AbstractSelectClause implements SelectClause {
     }
 
     protected abstract CaseClause getCaseClause(Object[] sqlCodes,
-            ColumnSpec columnSpec,
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues);
+            ColumnSpec columnSpec, Mappings mappings);
 
     private void setCaseClause(CaseClause caseClause) {
         this.caseClause = caseClause;
@@ -168,9 +169,8 @@ abstract class AbstractSelectClause implements SelectClause {
 
     @Override
     public void setCaseClause(Object[] sqlCodes, ColumnSpec columnSpec,
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
-        setCaseClause(getCaseClause(sqlCodes, columnSpec,
-                filteredConstraintValues));
+            Mappings mappings) {
+        setCaseClause(getCaseClause(sqlCodes, columnSpec, mappings));
 
     }
 }

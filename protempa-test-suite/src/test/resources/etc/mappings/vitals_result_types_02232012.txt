@@ -2,8 +2,6 @@ BodyMassIndex	BodyMassIndex
 DiastolicBloodPressure	DiastolicBloodPressure
 HeartRate	HeartRate
 O2Saturation	O2Saturation
-O2Saturation	O2Saturation
-RespiratoryRate	RespiratoryRate
 RespiratoryRate	RespiratoryRate
 SystolicBloodPressure	SystolicBloodPressure
 TemperatureAxillary	TemperatureAxillary
@@ -12,3 +10,4 @@ TemperatureNOS	TemperatureNOS
 TemperatureOral	TemperatureOral
 TemperatureRectal	TemperatureRectal
 TemperatureTympanic	TemperatureTympanic
+VS:DescriptionMissing	*

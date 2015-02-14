@@ -32,6 +32,7 @@ import org.protempa.proposition.value.ValueType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -57,6 +58,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
 
         private final Logger logger;
         private final DataSourceBackendSourceSystem dsType;
+        private final Date now;
         
 
         PrimParamIterator(Statement statement, ResultSet resultSet, 
@@ -68,6 +70,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                     getDataSourceBackendId(), referenceIterator);
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendSourceSystem.getInstance(getDataSourceBackendId());
+            this.now = new Date();
         }
 
         @Override
@@ -149,6 +152,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                 p.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             p.setSourceSystem(this.dsType);
+            p.setDownloadDate(this.now);
             handleProposition(p);
 
             logger.log(Level.FINEST, "Created primitive parameter {0}", p);

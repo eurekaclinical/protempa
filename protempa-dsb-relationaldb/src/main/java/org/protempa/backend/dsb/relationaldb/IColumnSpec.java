@@ -1,5 +1,7 @@
 package org.protempa.backend.dsb.relationaldb;
 
+import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
+
 /*
  * #%L
  * Protempa Relational Database Data Source Backend
@@ -36,7 +38,7 @@ public interface IColumnSpec {
     /**
      * Returns the name of a SQL function to apply to values of this column
      * spec's column prior to attempting to map a value to a proposition id (see
-     * {@link #getPropositionIdToSqlCodes() }).
+     * {@link #getMappings() }).
      *
      * @return a {@link ColumnOp}.
      */
@@ -63,7 +65,7 @@ public interface IColumnSpec {
      *
      * @return a {@link PropositionIdToSqlCode[]}.
      */
-    KnowledgeSourceIdToSqlCode[] getPropositionIdToSqlCodes();
+    Mappings getMappings();
 
     /**
      * Gets the schema name.
@@ -81,7 +83,7 @@ public interface IColumnSpec {
 
     /**
      * Indicates whether the codes in the mappings of proposition ids to codes (
-     * {@link #getPropositionIdToSqlCodes() }) represent all of the unique codes
+     * {@link #getMappings() }) represent all of the unique codes
      * in the database table.
      *
      * @return <code>true</code> or <code>false</code>.

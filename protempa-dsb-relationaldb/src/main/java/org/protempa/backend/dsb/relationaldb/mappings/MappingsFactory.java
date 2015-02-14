@@ -1,8 +1,10 @@
+package org.protempa.backend.dsb.relationaldb.mappings;
+
 /*
  * #%L
- * Protempa Commons Backend Provider
+ * Protempa Relational Database Data Source Backend
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +19,17 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
+import java.io.IOException;
 
-class DefaultCaseClause extends AbstractCaseClause {
-
-    public DefaultCaseClause(Object[] sqlCodes,
-            TableAliaser referenceIndices, ColumnSpec columnSpec,
-            Mappings mappings) {
-        super(sqlCodes, referenceIndices, columnSpec, mappings);
-    }
-
+/**
+ *
+ * @author Andrew Post
+ */
+public interface MappingsFactory {
+    
+    void closeAll() throws IOException;
+    
+    Mappings getInstance(String resource) throws IOException;
+    
 }

@@ -34,6 +34,7 @@ import org.protempa.proposition.value.Value;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -64,6 +65,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
         private final IntervalFactory intervalFactory;
         private final JDBCPositionFormat positionParser;
         private EntitySpec entitySpec;
+        private final Date now;
         
         EventIterator(Statement statement, ResultSet resultSet, 
                 EntitySpec entitySpec, Map<String,
@@ -77,6 +79,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
             this.intervalFactory = new IntervalFactory();
             this.positionParser = entitySpec.getPositionParser();
             this.entitySpec = entitySpec;
+            this.now = new Date();
         }
 
         @Override
@@ -192,6 +195,7 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
                 PropertySpec propertySpec = propertySpecs[j];
                 event.setProperty(propertySpec.getName(), propertyValues[j]);
             }
+            event.setDownloadDate(this.now);
             handleProposition(event);
 
             logger.log(Level.FINEST, "Created event {0}", event);

@@ -19,9 +19,9 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.KnowledgeSourceIdToSqlCode;
+import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
 interface SelectClause extends SqlClause {
     void setCaseClause(Object[] sqlCodes, ColumnSpec columnSpec,
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues);
+            Mappings filteredConstraintValues);
 }

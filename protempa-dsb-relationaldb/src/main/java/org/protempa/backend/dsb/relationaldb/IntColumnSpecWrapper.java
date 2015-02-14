@@ -22,6 +22,7 @@ package org.protempa.backend.dsb.relationaldb;
 
 import java.util.List;
 import org.arp.javautil.string.StringUtil;
+import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
 /**
  *
@@ -56,8 +57,8 @@ final class IntColumnSpecWrapper implements IColumnSpec {
     }
 
     @Override
-    public KnowledgeSourceIdToSqlCode[] getPropositionIdToSqlCodes() {
-        return this.columnSpec.getPropositionIdToSqlCodes();
+    public Mappings getMappings() {
+        return this.columnSpec.getMappings();
     }
 
     @Override

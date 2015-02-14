@@ -20,10 +20,10 @@
 package org.protempa.backend.dsb.relationaldb;
 
 import org.apache.commons.lang3.StringUtils;
-import org.protempa.backend.dsb.relationaldb.KnowledgeSourceIdToSqlCode;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
 final class StagingSelectClause implements SelectClause {
 
@@ -74,7 +74,7 @@ final class StagingSelectClause implements SelectClause {
 
     @Override
     public void setCaseClause(Object[] sqlCodes, ColumnSpec columnSpec,
-            KnowledgeSourceIdToSqlCode[] filteredConstraintValues) {
+            Mappings mappings) {
         throw new UnsupportedOperationException();
     }
 

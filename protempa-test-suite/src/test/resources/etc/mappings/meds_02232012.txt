@@ -39071,7 +39071,7 @@ MED:CDW:Levofloxacin 750mg Desensitization Rx Protocol- initiate	MED:CDW:Levoflo
 MED:CDW:insulin aspart-insulin aspart protamine 30 u-70 u/ml	MED:CDW:insulin aspart-insulin aspart protamine 30 u-70 u/ml
 MED:CDW:Remicade ivpb	MED:CDW:Remicade ivpb
 MED:CDW:AmBisome ivpb	MED:CDW:AmBisome ivpb
-MED:CDW:Description Missing	MED:CDW:Description Missing
+MED:DescriptionMissing	*
 MED:CDW:acetylcysteine inhale 10%	MED:CDW:acetylcysteine inhale 10%
 MED:CDW:Diprivan drip std*	MED:CDW:Diprivan drip std*
 MED:CDW:Reopro Bolus	MED:CDW:Reopro Bolus

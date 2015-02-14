@@ -21,11 +21,9 @@ package org.protempa.backend.dsb.relationaldb;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.arp.javautil.string.StringUtil;
-import org.protempa.ProtempaUtil;
+import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
 /**
  * Specifies part of a path through relational database tables via joins.
@@ -37,16 +35,12 @@ public class ColumnSpec implements Serializable, IColumnSpec {
 
     private static final long serialVersionUID = 2254623617064935923L;
 
-    private static KnowledgeSourceIdToSqlCode[] EMPTY_KNOWLEDGE_SOURCE_ID_TO_SQL_CODE_ARRAY = new KnowledgeSourceIdToSqlCode[0];
-
-
     private final String schema;
     private final String table;
     private final String column;
     private final JoinSpec joinSpec;
     private final Operator constraint;
-    private final KnowledgeSourceIdToSqlCode[] propIdToSqlCodes;
-    private final Map<Object, String> propIdForSqlCode;
+    private final Mappings mappings;
     private final ColumnOp columnOp;
     private final boolean propositionIdsComplete;
     private final String expr;
@@ -58,8 +52,7 @@ public class ColumnSpec implements Serializable, IColumnSpec {
         this.column = null;
         this.joinSpec = null;
         this.constraint = null;
-        this.propIdForSqlCode = null;
-        this.propIdToSqlCodes = null;
+        this.mappings = null;
         this.columnOp = null;
         this.propositionIdsComplete = false;
     }
@@ -107,7 +100,7 @@ public class ColumnSpec implements Serializable, IColumnSpec {
      *            <code>constraint</code> is also <code>null</code>.
      * @param constraint
      *            a {@link Operator}.
-     * @param propIdToSqlCodes
+     * @param mappings
      *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
      *            from a proposition id to a value of the specified column. If
      *            <code>constraint</code> is not <code>null</code>, then this
@@ -124,9 +117,9 @@ public class ColumnSpec implements Serializable, IColumnSpec {
      */
     public ColumnSpec(String schema, String table, String column,
             Operator constraint,
-            KnowledgeSourceIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp,
+            Mappings mappings, ColumnOp columnOp,
             boolean propositionIdsComplete) {
-        this(schema, table, column, null, constraint, propIdToSqlCodes,
+        this(schema, table, column, null, constraint, mappings,
                 columnOp, propositionIdsComplete);
     }
 
@@ -144,7 +137,7 @@ public class ColumnSpec implements Serializable, IColumnSpec {
      *            <code>constraint</code> is also <code>null</code>.
      * @param constraint
      *            a {@link Operator}.
-     * @param propIdToSqlCodes
+     * @param mappings
      *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
      *            from a proposition id to a value of the specified column. If
      *            <code>constraint</code> is not <code>null</code>, then this
@@ -152,9 +145,9 @@ public class ColumnSpec implements Serializable, IColumnSpec {
      */
     public ColumnSpec(String schema, String table, String column,
             Operator constraint,
-            KnowledgeSourceIdToSqlCode[] propIdToSqlCodes,
+            Mappings mappings,
             boolean propositionIdsComplete) {
-        this(schema, table, column, null, constraint, propIdToSqlCodes, null,
+        this(schema, table, column, null, constraint, mappings, null,
                 propositionIdsComplete);
     }
 
@@ -172,15 +165,15 @@ public class ColumnSpec implements Serializable, IColumnSpec {
      *            <code>constraint</code> is also <code>null</code>.
      * @param constraint
      *            a {@link Operator}.
-     * @param propIdToSqlCodes
+     * @param mappings
      *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
      *            from a proposition id to a value of the specified column. If
      *            <code>constraint</code> is not <code>null</code>, then this
      *            argument cannot be <code>null</code> either.
      */
     public ColumnSpec(String schema, String table, String column,
-            Operator constraint, KnowledgeSourceIdToSqlCode[] propIdToSqlCodes) {
-        this(schema, table, column, null, constraint, propIdToSqlCodes, null,
+            Operator constraint, Mappings mappings) {
+        this(schema, table, column, null, constraint, mappings, null,
                 false);
     }
 
@@ -235,7 +228,7 @@ public class ColumnSpec implements Serializable, IColumnSpec {
      *            a {@link JoinSpec}.
      * @param constraint
      *            a {@link Operator}.
-     * @param propIdToSqlCodes
+     * @param mappings
      *            a {@link KnowledgeSourceIdToSqlCode[]}. An array of mappings
      *            from a proposition id to a value of the specified column. If
      *            <code>constraint</code> is not <code>null</code>, then this
@@ -243,7 +236,7 @@ public class ColumnSpec implements Serializable, IColumnSpec {
      */
     private ColumnSpec(String schema, String table, String column,
             JoinSpec joinSpec, Operator constraint,
-            KnowledgeSourceIdToSqlCode[] propIdToSqlCodes, ColumnOp columnOp,
+            Mappings mappings, ColumnOp columnOp,
             boolean propositionIdsComplete) {
         if (table == null) {
             throw new IllegalArgumentException("table cannot be null");
@@ -261,21 +254,12 @@ public class ColumnSpec implements Serializable, IColumnSpec {
             throw new IllegalArgumentException(
                     "A column must be specified if a constraint is specified.");
         }
-        if (this.constraint != null && propIdToSqlCodes == null) {
+        if (this.constraint != null && mappings == null) {
             throw new IllegalArgumentException(
-                    "propIdToSqlCodes must be specified if a constraint is specified.");
+                    "mappings must be specified if a constraint is specified.");
         }
-        if (propIdToSqlCodes != null) {
-            this.propIdToSqlCodes = propIdToSqlCodes.clone();
-            ProtempaUtil.checkArrayForNullElement(this.propIdToSqlCodes,
-                    "propIdToSqlCodes");
-        } else {
-            this.propIdToSqlCodes = EMPTY_KNOWLEDGE_SOURCE_ID_TO_SQL_CODE_ARRAY;
-        }
-        this.propIdForSqlCode = new HashMap<>();
-        for (KnowledgeSourceIdToSqlCode k : this.propIdToSqlCodes) {
-            propIdForSqlCode.put(k.sqlCode, k.propositionId);
-        }
+        
+        this.mappings = mappings;
 
         if (this.joinSpec != null) {
             this.joinSpec.setPrevColumnSpec(this);
@@ -344,15 +328,19 @@ public class ColumnSpec implements Serializable, IColumnSpec {
      * Returns the proposition id corresponding to a specified value in this
      * column spec's column.
      * 
-     * @param sqlCode
+     * @param source
      *            the value.
      * @return a proposition id {@link String} or <code>null</code> if a value
      *         is specified that is not in this column spec's mappings from
-     *         proposition ids to values ({@link #getPropositionIdToSqlCodes() }
+     *         proposition ids to values ({@link #getMappings() }
      *         ).
      */
-    String propositionIdFor(String sqlCode) {
-        return this.propIdForSqlCode.get(sqlCode);
+    String getTarget(Object source) {
+        if (this.mappings != null) {
+            return this.mappings.getTarget(source);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -362,14 +350,14 @@ public class ColumnSpec implements Serializable, IColumnSpec {
      * @return a {@link PropositionIdToSqlCode[]}.
      */
     @Override
-    public KnowledgeSourceIdToSqlCode[] getPropositionIdToSqlCodes() {
-        return this.propIdToSqlCodes.clone();
+    public Mappings getMappings() {
+        return this.mappings;
     }
 
     /**
      * Returns the name of a SQL function to apply to values of this column
      * spec's column prior to attempting to map a value to a proposition id (see
-     * {@link #getPropositionIdToSqlCodes() }).
+     * {@link #getMappings() }).
      * 
      * @return a {@link ColumnOp}.
      */
@@ -380,7 +368,7 @@ public class ColumnSpec implements Serializable, IColumnSpec {
 
     /**
      * Indicates whether the codes in the mappings of proposition ids to codes (
-     * {@link #getPropositionIdToSqlCodes() }) represent all of the unique codes
+     * {@link #getMappings() }) represent all of the unique codes
      * in the database table.
      * 
      * @return <code>true</code> or <code>false</code>.

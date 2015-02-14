@@ -31,6 +31,7 @@ import org.protempa.proposition.value.Value;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -56,6 +57,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
 
         private final Logger logger;
         private final DataSourceBackendSourceSystem dsType;
+        private final Date now;
 
         ConstantIterator(Statement statement, ResultSet resultSet, 
                 EntitySpec entitySpec, LinkedHashMap<String,
@@ -66,6 +68,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
                     bidirectionalRefSpecs, getDataSourceBackendId(), referenceIterator);
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendSourceSystem.getInstance(getDataSourceBackendId());
+            this.now = new Date();
         }
 
         @Override
@@ -129,6 +132,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
                 cp.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             cp.setSourceSystem(dsType);
+            cp.setDownloadDate(this.now);
             handleProposition(cp);
 
             logger.log(Level.FINEST, "Created constant {0}", cp);

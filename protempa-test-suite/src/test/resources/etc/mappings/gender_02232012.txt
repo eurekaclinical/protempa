@@ -2,6 +2,5 @@ Male	Male
 Female	Female
 Unknown	Unknown
 NotRecorded	NotRecorded
-NotRecorded	NotRecorded
-DescriptionMissing	DescriptionMissing
+DescriptionMissing	*
 Unspecified	Unspecified

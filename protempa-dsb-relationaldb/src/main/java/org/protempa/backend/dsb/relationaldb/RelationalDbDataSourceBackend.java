@@ -46,6 +46,12 @@ import org.protempa.backend.DataSourceBackendInitializationException;
 import org.protempa.backend.annotations.BackendProperty;
 import org.protempa.backend.dsb.DataValidationEvent;
 import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.backend.dsb.relationaldb.mappings.DelimFileMappings;
+import org.protempa.backend.dsb.relationaldb.mappings.DelimFileMappingsFactory;
+import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
+import org.protempa.backend.dsb.relationaldb.mappings.MappingsFactory;
+import org.protempa.backend.dsb.relationaldb.mappings.ResourceMappings;
+import org.protempa.backend.dsb.relationaldb.mappings.ResourceMappingsFactory;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.keyloader.KeyLoaderQueryResultsHandler;
 import org.protempa.proposition.Proposition;
@@ -97,12 +103,30 @@ public abstract class RelationalDbDataSourceBackend
     private String keyLoaderKeyIdColumn;
     private String keyLoaderKeyIdJoinKey;
     private FromBackendRelationalDatabaseSpecBuilder relationalDatabaseSpecBuilder;
+    private MappingsFactory mappingsFactory;
 
     public RelationalDbDataSourceBackend() {
         this.databaseAPI = DatabaseAPI.DRIVERMANAGER;
 
         this.dryRun
                 = Boolean.getBoolean(SQLGenUtil.SYSTEM_PROPERTY_SKIP_EXECUTION);
+    }
+    
+    public MappingsFactory getMappingsFactory() {
+        return mappingsFactory;
+    }
+
+    public void setMappingsFactory(MappingsFactory mappingsFactory) {
+        if (mappingsFactory == null) {
+            this.mappingsFactory = new ResourceMappingsFactory("/etc/i2b2dsb/", getClass());
+        } else {
+            this.mappingsFactory = mappingsFactory;
+        }
+    }
+    
+    @BackendProperty(propertyName = "mappings")
+    public void parseMappingsFactory(String pathname) {
+        this.mappingsFactory = new DelimFileMappingsFactory(pathname);
     }
 
     @BackendProperty
@@ -209,7 +233,9 @@ public abstract class RelationalDbDataSourceBackend
     public void initialize(BackendInstanceSpec config)
             throws BackendInitializationException {
         super.initialize(config);
-
+        if (this.mappingsFactory == null) {
+            setMappingsFactory(null);
+        }
         this.relationalDatabaseSpecBuilder
                 = this.createRelationalDatabaseSpecBuilder();
     }
@@ -555,6 +581,13 @@ public abstract class RelationalDbDataSourceBackend
     @Override
     public void close() throws BackendCloseException {
         this.sqlGenerator = null;
+        if (this.mappingsFactory != null) {
+            try {
+                this.mappingsFactory.closeAll();
+            } catch (IOException ex) {
+                throw new DataSourceBackendCloseException(ex);
+            }
+        }
     }
 
     protected ConnectionSpec getConnectionSpecInstance()

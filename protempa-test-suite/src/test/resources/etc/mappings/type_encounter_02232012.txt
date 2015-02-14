@@ -1,5 +1,5 @@
 NotRecorded	NotRecorded
-DescriptionMissing	DescriptionMissing
+DescriptionMissing	*
 VIPRECURRING	VIPRECURRING
 IPCANCEL	IPCANCEL
 INSTITUTIONAL	INSTITUTIONAL
