@@ -27,7 +27,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.arp.javautil.arrays.Arrays;
 import org.protempa.*;
 import org.protempa.backend.dsb.filter.Filter;
 
@@ -40,6 +39,10 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     private static final long serialVersionUID = -3920993703423486485L;
     private static final PropositionDefinition[] EMPTY_PROP_DEF_ARRAY =
             new PropositionDefinition[0];
+    // Flag to control validation of proposition IDs. Should only be turned off
+    // for testing.
+    private static boolean validatePropositionIds = true;
+    
     private String[] keyIds;
     private Filter filters;
     private String[] propIds;
@@ -48,9 +51,8 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     private PropositionDefinition[] propDefs;
     private String id;
     private final PropertyChangeSupport changes;
-    // Flag to control validation of proposition IDs. Should only be turned off
-    // for testing.
-    private static boolean validatePropositionIds = true;
+    
+    private QueryMode queryMode;
 
     public DefaultQueryBuilder() {
         this.changes = new PropertyChangeSupport(this);
@@ -58,6 +60,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         this.keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
         this.termIds = new And[0];
+        this.queryMode = Query.DEFAULT_QUERY_MODE;
     }
 
     public String getId() {
@@ -68,6 +71,20 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         this.id = id;
     }
 
+    public QueryMode getQueryMode() {
+        return queryMode;
+    }
+
+    public void setQueryMode(QueryMode queryMode) {
+        QueryMode old = this.queryMode;
+        if (queryMode == null) {
+            this.queryMode = Query.DEFAULT_QUERY_MODE;
+        } else {
+            this.queryMode = queryMode;
+        }
+        this.changes.firePropertyChange("queryMode", old, this.queryMode);
+    }
+    
     /**
      * Gets the filters to be applied to this query.
      *
@@ -181,6 +198,8 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         this.termIds = (And<String>[]) termIds.clone();
         this.changes.firePropertyChange("termIds", old, this.termIds);
     }
+    
+    
 
     /**
      * Returns an optional set of user-specified proposition definitions.
@@ -281,7 +300,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
             }
         }
         return new Query(this.id, this.keyIds, this.filters, this.propIds, 
-                this.termIds, this.propDefs);
+                this.termIds, this.propDefs, this.queryMode);
     }
 
     @Override

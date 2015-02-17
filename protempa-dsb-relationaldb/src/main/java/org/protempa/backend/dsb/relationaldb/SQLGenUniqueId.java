@@ -33,6 +33,7 @@ final class SQLGenUniqueId implements LocalUniqueId {
     private static final long serialVersionUID = 3956023315666447630L;
     private String entitySpecName;
     private String[] dbIds;
+    private String id;
     private volatile int hashCode;
 
     SQLGenUniqueId(String entitySpecName, String[] dbIds) {
@@ -51,6 +52,20 @@ final class SQLGenUniqueId implements LocalUniqueId {
         return this.dbIds.clone();
     }
 
+    @Override
+    public String getId() {
+        if (this.id == null) {
+            StringBuilder builder = new StringBuilder();
+            builder.append(entitySpecName);
+            for (String dbId : dbIds) {
+                builder.append('^');
+                builder.append(dbId);
+            }
+            this.id = builder.toString();
+        }
+        return this.id;
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

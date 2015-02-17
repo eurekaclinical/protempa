@@ -143,7 +143,7 @@ public final class ContextDefinition extends AbstractPropositionDefinition
     }
 
     /**
-     * Sets the ids of other context definintions that, together with this one,
+     * Sets the ids of other context definitions that, together with this one,
      * have a specific meaning when their intervals intersect.
      *
      * @param subContextOf an array of context proposition ids.

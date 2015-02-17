@@ -86,6 +86,10 @@ public final class UniqueId implements Serializable {
     public LocalUniqueId getLocalUniqueId() {
         return this.localUniqueId;
     }
+    
+    public String getStringRepresentation() {
+        return this.sourceId.getId() + "^" + this.localUniqueId.getId(); 
+    }
 
     @Override
     public boolean equals(Object obj) {

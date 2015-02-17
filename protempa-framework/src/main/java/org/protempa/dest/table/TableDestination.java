@@ -5,6 +5,7 @@ import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.QueryResultsHandlerInitException;
+import org.protempa.query.QueryMode;
 import org.protempa.query.Query;
 
 /*
@@ -75,6 +76,9 @@ public final class TableDestination extends AbstractDestination {
     
     @Override
     public TableQueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+        if (query.getQueryMode() == QueryMode.UPDATE) {
+            throw new QueryResultsHandlerInitException("Update mode not supported");
+        }
         return new TableQueryResultsHandler(this.out, this.columnDelimiter, 
                 this.rowPropositionIds, this.columnSpecs, this.headerWritten, 
                 this.inferPropositionIdsNeeded, knowledgeSource);

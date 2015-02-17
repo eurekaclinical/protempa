@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.backend.dsb.filter.Filter;
@@ -37,7 +38,8 @@ import org.protempa.backend.dsb.filter.Filter;
  * @author Andrew Post
  */
 public class Query implements Serializable {
-
+    public static QueryMode DEFAULT_QUERY_MODE = QueryMode.REPLACE;
+    
     private static final long serialVersionUID = -9007995369064299652L;
     private static final PropositionDefinition[] EMPTY_PROP_DEF_ARRAY =
             new PropositionDefinition[0];
@@ -47,6 +49,7 @@ public class Query implements Serializable {
     private final And<String>[] termIds;
     private final PropositionDefinition[] propDefs;
     private String id;
+    private QueryMode queryMode;
     
     /**
      * Creates new Query instance with a default identifier.
@@ -59,8 +62,9 @@ public class Query implements Serializable {
      * @param termIds
      */
     public Query(String[] keyIds, Filter filters, String[] propIds,
-            And<String>[] termIds, PropositionDefinition[] propDefs) {
-        this(null, keyIds, filters, propIds, termIds, propDefs);
+            And<String>[] termIds, PropositionDefinition[] propDefs,
+            QueryMode queryMode) {
+        this(null, keyIds, filters, propIds, termIds, propDefs, queryMode);
     }
 
     /**
@@ -76,7 +80,8 @@ public class Query implements Serializable {
      * @param termIds
      */
     public Query(String id, String[] keyIds, Filter filters, String[] propIds,
-            And<String>[] termIds, PropositionDefinition[] propDefs) {
+            And<String>[] termIds, PropositionDefinition[] propDefs,
+            QueryMode queryMode) {
         if (keyIds == null) {
             keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         }
@@ -105,6 +110,11 @@ public class Query implements Serializable {
             id = UUID.randomUUID().toString();
         }
         this.id = id;
+        if (queryMode == null) {
+            this.queryMode = DEFAULT_QUERY_MODE;
+        } else {
+            this.queryMode = queryMode;
+        }
     }
 
     /**
@@ -182,6 +192,10 @@ public class Query implements Serializable {
         return filters.filterChainToArray();
     }
 
+    public QueryMode getQueryMode() {
+        return queryMode;
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -190,6 +204,7 @@ public class Query implements Serializable {
         result = prime * result + Arrays.hashCode(propIds);
         result = prime * result + Arrays.hashCode(termIds);
         result = prime * result + Arrays.hashCode(propDefs);
+        result = prime * result + this.queryMode.hashCode();
         return result;
     }
 
@@ -224,6 +239,16 @@ public class Query implements Serializable {
         if (!Arrays.equals(propDefs, other.propDefs)) {
             return false;
         }
+        if (!this.queryMode.equals(other.queryMode)) {
+            return false;
+        }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+    
+    
 }

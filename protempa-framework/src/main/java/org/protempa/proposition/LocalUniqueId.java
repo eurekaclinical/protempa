@@ -38,4 +38,6 @@ public interface LocalUniqueId extends Cloneable, Serializable {
      * @return a {@link LocalUniqueIdentifier} that is equal to this instance.
      */
     LocalUniqueId clone();
+    
+    String getId();
 }

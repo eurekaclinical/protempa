@@ -25,6 +25,7 @@ import org.protempa.KnowledgeSource;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerInitException;
+import org.protempa.query.QueryMode;
 import org.protempa.query.Query;
 
 /**
@@ -40,6 +41,9 @@ public class KeyLoaderDestination extends AbstractDestination {
     
     @Override
     public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+        if (query.getQueryMode() == QueryMode.UPDATE) {
+            throw new QueryResultsHandlerInitException("Update mode not supported");
+        }
         return new KeyLoaderQueryResultsHandler(dataSource, knowledgeSource, this.criteria);
     }
     
