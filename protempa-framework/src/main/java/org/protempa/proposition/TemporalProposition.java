@@ -28,7 +28,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.Format;
 import java.text.NumberFormat;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Unit;
@@ -128,7 +127,7 @@ public abstract class TemporalProposition extends AbstractProposition {
         return formatLength(lengthUnit != null ? lengthUnit.getShortFormat()
                 : null);
     }
-
+    
     /**
      * Returns the latest valid time of this proposition as a long string.
      * 

@@ -23,7 +23,6 @@
  */
 package org.protempa;
 
-import java.util.List;
 import java.util.Set;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
 import org.protempa.backend.dsb.DataSourceBackend;

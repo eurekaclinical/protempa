@@ -25,6 +25,10 @@ import org.protempa.BackendCloseException;
 import org.protempa.DataSourceWriteException;
 import org.protempa.backend.AbstractBackend;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
+import org.protempa.proposition.value.AbsoluteTimeGranularityFactory;
+import org.protempa.proposition.value.AbsoluteTimeUnitFactory;
+import org.protempa.proposition.value.GranularityFactory;
+import org.protempa.proposition.value.UnitFactory;
 
 
 /**
@@ -35,6 +39,54 @@ import org.protempa.backend.DataSourceBackendUpdatedEvent;
 public abstract class AbstractDataSourceBackend extends
 		AbstractBackend<DataSourceBackendUpdatedEvent> 
                 implements DataSourceBackend {
+    private static AbsoluteTimeUnitFactory absTimeUnitFactory
+            = new AbsoluteTimeUnitFactory();
+    private static AbsoluteTimeGranularityFactory absTimeGranularityFactory
+            = new AbsoluteTimeGranularityFactory();
+    
+    private String keyType;
+    private GranularityFactory granularityFactory;
+    private UnitFactory unitFactory;
+
+    protected AbstractDataSourceBackend() {
+        this.granularityFactory = absTimeGranularityFactory;
+        this.unitFactory = absTimeUnitFactory;
+    }
+    
+    @Override
+    public String getKeyType() {
+        return keyType;
+    }
+
+    public void setKeyType(String keyType) {
+        this.keyType = keyType;
+    }
+
+    @Override
+    public GranularityFactory getGranularityFactory() {
+        return granularityFactory;
+    }
+
+    public void setGranularityFactory(GranularityFactory granularityFactory) {
+        if (granularityFactory == null) {
+            this.granularityFactory = absTimeGranularityFactory;
+        } else {
+            this.granularityFactory = granularityFactory;
+        }
+    }
+
+    @Override
+    public UnitFactory getUnitFactory() {
+        return unitFactory;
+    }
+
+    public void setUnitFactory(UnitFactory unitFactory) {
+        if (unitFactory == null) {
+            this.unitFactory = absTimeUnitFactory;
+        } else {
+            this.unitFactory = unitFactory;
+        }
+    }
     
     @Override
     public void close() throws BackendCloseException {

@@ -19,12 +19,15 @@
  */
 package org.protempa.backend;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.arp.javautil.arrays.Arrays;
 
 /**
  *
@@ -36,6 +39,7 @@ public final class BackendInstanceSpec<B extends Backend> {
     private String configurationsId;
     private final Map<String, Object> properties;
     private final List<BackendPropertySpec> propertySpecs;
+    private final Map<String, BackendPropertySpec> propertyMap;
 
     BackendInstanceSpec(
             BackendSpec<B> backendSpec,
@@ -46,6 +50,10 @@ public final class BackendInstanceSpec<B extends Backend> {
         this.properties = new HashMap<>();
         this.propertySpecs = Collections.unmodifiableList(
                 new ArrayList<>(propertySpecs));
+        this.propertyMap = new HashMap<>();
+        for (BackendPropertySpec bps : this.propertySpecs) {
+            this.propertyMap.put(bps.getName(), bps);
+        }
     }
 
     public BackendSpec<B> getBackendSpec() {
@@ -55,7 +63,7 @@ public final class BackendInstanceSpec<B extends Backend> {
     public void setConfigurationsId(String configurationsId) {
         this.configurationsId = configurationsId;
     }
-    
+
     public String getConfigurationsId() {
         return this.configurationsId;
     }
@@ -66,55 +74,117 @@ public final class BackendInstanceSpec<B extends Backend> {
 
     public void parseProperty(String name, String valueStr)
             throws InvalidPropertyNameException, InvalidPropertyValueException {
-        for (BackendPropertySpec spec : this.propertySpecs) {
-            if (spec.getName().equals(name)) {
-                Class cls = spec.getType();
-                if (String.class.equals(cls)) {
-                    setProperty(name, valueStr);
-                } else if (Double.class.equals(cls)) {
-                    setProperty(name, Double.valueOf(valueStr));
-                } else if (Float.class.equals(cls)) {
-                    setProperty(name, Float.valueOf(valueStr));
-                } else if (Integer.class.equals(cls)) {
-                    setProperty(name, Integer.valueOf(valueStr));
-                } else if (Long.class.equals(cls)) {
-                    setProperty(name, Long.valueOf(valueStr));
-                } else if (Boolean.class.equals(cls)) {
-                    setProperty(name, Boolean.valueOf(valueStr));
-                } else {
-                    throw new AssertionError("name's type, " + cls.getName()
-                            + ", is invalid, must be one of "
-                            + BackendPropertySpec.allowedClassesPrettyPrint());
-                }
-                return;
+        BackendPropertySpec spec = this.propertyMap.get(name);
+        if (spec != null) {
+            Class cls = spec.getType();
+            if (String.class.equals(cls)) {
+                setProperty(spec, valueStr);
+            } else if (Double.class.equals(cls)) {
+                setProperty(spec, Double.valueOf(valueStr));
+            } else if (Float.class.equals(cls)) {
+                setProperty(spec, Float.valueOf(valueStr));
+            } else if (Integer.class.equals(cls)) {
+                setProperty(spec, Integer.valueOf(valueStr));
+            } else if (Long.class.equals(cls)) {
+                setProperty(spec, Long.valueOf(valueStr));
+            } else if (Boolean.class.equals(cls)) {
+                setProperty(spec, Boolean.valueOf(valueStr));
+            } else if (String[].class.equals(cls)) {
+                addProperty(spec, valueStr, String.class);
+            } else if (Double[].class.equals(cls)) {
+                addProperty(spec, Double.valueOf(valueStr), Double.class);
+            } else if (Float[].class.equals(cls)) {
+                addProperty(spec, Float.valueOf(valueStr), Float.class);
+            } else if (Integer[].class.equals(cls)) {
+                addProperty(spec, Integer.valueOf(valueStr), Integer.class);
+            } else if (Long[].class.equals(cls)) {
+                addProperty(spec, Long.valueOf(valueStr), Long.class);
+            } else if (Boolean[].class.equals(cls)) {
+                addProperty(spec, Boolean.valueOf(valueStr), Boolean.class);
+            } else {
+                throw new AssertionError("name's type, " + cls.getName()
+                        + ", is invalid, must be one of "
+                        + BackendPropertySpec.allowedClassesPrettyPrint());
             }
+        } else {
+            throw new InvalidPropertyNameException(name);
         }
     }
+    
+    public <E> void addProperty(String name, E value, Class<E> cls) throws InvalidPropertyNameException, InvalidPropertyValueException {
+        if (name == null) {
+            throw new IllegalArgumentException("name cannot be null");
+        }
+        BackendPropertySpec spec = this.propertyMap.get(name);
+        if (spec == null) {
+            throw new InvalidPropertyNameException(name);
+        }
+        addProperty(spec, value, cls);
+    }
 
-    public void setProperty(String name, Object value)
-            throws InvalidPropertyNameException, InvalidPropertyValueException {
-        for (BackendPropertySpec spec : this.propertySpecs) {
-            if (spec.getName().equals(name)) {
-                if (value != null && !spec.getType().isInstance(value)) {
-                    throw new IllegalArgumentException("value should be "
-                            + spec.getType() + " but was " + value.getClass());
-                }
-                spec.validate(value);
-                this.properties.put(name, value);
-                return;
+    public <E> void addProperty(BackendPropertySpec spec, E value, Class<E> cls) throws InvalidPropertyValueException {
+        if (spec == null) {
+            throw new IllegalArgumentException("spec cannot be null");
+        }
+        if (cls == null) {
+            throw new IllegalArgumentException("cls cannot be null");
+        }
+        if (value != null) {
+            Class<?> componentType = spec.getType().getComponentType();
+            if (componentType == null) {
+                throw new AssertionError("property must have an array type");
+            }
+            if (!componentType.isInstance(value)) {
+                throw new IllegalArgumentException("value should be "
+                        + componentType + " but was " + value.getClass());
             }
         }
-        throw new InvalidPropertyNameException(name);
+        spec.validate(value);
+        Object arrValue = this.properties.get(spec.getName());
+        if (arrValue == null) {
+            E[] arrValue2 = (E[]) Array.newInstance(cls, 1);
+            arrValue2[0] = value;
+            arrValue = arrValue2;
+        } else {
+            List<E> lValue = Arrays.asList((E[]) arrValue);
+            lValue.add(value);
+            arrValue = lValue.toArray((E[]) Array.newInstance(cls, lValue.size()));
+        }
+        this.properties.put(spec.getName(), arrValue);
+    }
+    
+    public void setProperty(String name, Object value) throws InvalidPropertyNameException, InvalidPropertyValueException {
+        if (name == null) {
+            throw new IllegalArgumentException("name cannot be null");
+        }
+        BackendPropertySpec spec = this.propertyMap.get(name);
+        if (spec == null) {
+            throw new InvalidPropertyNameException(name);
+        }
+        setProperty(spec, value);
+    }
+
+    public void setProperty(BackendPropertySpec spec, Object value)
+            throws InvalidPropertyValueException {
+        if (spec == null) {
+            throw new IllegalArgumentException("spec cannot be null");
+        }
+        if (value != null && !spec.getType().isInstance(value)) {
+            throw new IllegalArgumentException("value should be "
+                    + spec.getType() + " but was " + value.getClass());
+        }
+        spec.validate(value);
+        this.properties.put(spec.getName(), value);
     }
 
     public Object getProperty(String name)
             throws InvalidPropertyNameException {
-        for (BackendPropertySpec spec : this.propertySpecs) {
-            if (spec.getName().equals(name)) {
-                return this.properties.get(name);
-            }
+        BackendPropertySpec get = this.propertyMap.get(name);
+        if (get == null) {
+            throw new InvalidPropertyNameException(name);
+        } else {
+            return this.properties.get(name);
         }
-        throw new InvalidPropertyNameException(name);
     }
 
     /**

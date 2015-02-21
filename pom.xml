@@ -200,6 +200,7 @@
         <module>protempa-ksb-protege</module>
         <module>protempa-tsb-umls</module>
         <module>protempa-dsb-relationaldb</module>
+        <module>protempa-dsb-file</module>
         <module>protempa-test-suite</module>
         <module>protempa-bconfigs-ini4j-ini</module>
     </modules>

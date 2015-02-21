@@ -20,7 +20,8 @@
 package org.protempa.proposition.value;
 
 /**
- * Access to the granularity of data provided by a data source.
+ * Access to the granularity of data provided by a data source. Must have a zero
+ * argument constructor.
  * 
  * @author Andrew Post
  * @see org.protempa.DataSource#getGranularityFactory()

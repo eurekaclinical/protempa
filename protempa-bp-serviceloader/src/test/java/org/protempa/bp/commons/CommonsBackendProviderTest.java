@@ -140,7 +140,7 @@ public class CommonsBackendProviderTest {
                 loader.loadSpec(MockDataSourceBackend.class.getName());
         BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
         List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
-        assertEquals(2, bps.size());
+        assertEquals(5, bps.size());
     }
 
     /**

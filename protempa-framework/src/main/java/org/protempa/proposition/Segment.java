@@ -31,19 +31,19 @@ import org.protempa.proposition.value.Granularity;
 
 /**
  * A segment of a sequence of <code>Parameter</code> objects provided to
- * <code>Detector</code> instances' <code>satisfiedBy()</code> method. Do
- * not attempt to cache a <code>Segment</code> object! <code>Segment</code>
- * objects may be reused by PROTEMPA for performance reasons, and the value of a
+ * <code>Detector</code> instances' <code>satisfiedBy()</code> method. Do not
+ * attempt to cache a <code>Segment</code> object! <code>Segment</code> objects
+ * may be reused by PROTEMPA for performance reasons, and the value of a
  * <code>Segment</code> object is only guaranteed to be consistent until
  * <code>satisfiedBy()</code> ends.
- * 
+ *
  * @author Andrew Post
  */
 public class Segment<T extends TemporalProposition> extends AbstractList<T>
         implements RandomAccess {
 
-    private static final IntervalFactory intervalFactory =
-            new IntervalFactory();
+    private static final IntervalFactory intervalFactory
+            = new IntervalFactory();
     private Sequence<T> ts;
     private int x = -1;
     private int y = -1;
@@ -225,14 +225,22 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
          */
         return segment.first().getInterval().getMinStart();
     }
-    private Comparator<TemporalProposition> MAX_START_COMP =
-            new Comparator<TemporalProposition>() {
+    private Comparator<TemporalProposition> MAX_START_COMP
+            = new Comparator<TemporalProposition>() {
 
                 @Override
                 public int compare(TemporalProposition p0, TemporalProposition p1) {
                     Long p0MaxStart = p0.getInterval().getMaximumStart();
                     Long p1MaxStart = p1.getInterval().getMaximumStart();
-                    return p0MaxStart.compareTo(p1MaxStart);
+                    if (p0MaxStart != null && p1MaxStart != null) {
+                        return p0MaxStart.compareTo(p1MaxStart);
+                    } else if (p0MaxStart != null) {
+                        return -1;
+                    } else if (p1MaxStart != null) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
                 }
             };
 
@@ -240,14 +248,22 @@ public class Segment<T extends TemporalProposition> extends AbstractList<T>
             Segment<T> segment) {
         return Collections.min(segment, MAX_START_COMP).getInterval().getMaxStart();
     }
-    private Comparator<TemporalProposition> MIN_FINISH_COMP =
-            new Comparator<TemporalProposition>() {
+    private Comparator<TemporalProposition> MIN_FINISH_COMP
+            = new Comparator<TemporalProposition>() {
 
                 @Override
                 public int compare(TemporalProposition p0, TemporalProposition p1) {
                     Long p0MinFinish = p0.getInterval().getMinimumFinish();
                     Long p1MinFinish = p1.getInterval().getMinimumFinish();
-                    return p0MinFinish.compareTo(p1MinFinish);
+                    if (p0MinFinish != null && p1MinFinish != null) {
+                        return p0MinFinish.compareTo(p1MinFinish);
+                    } else if (p0MinFinish != null) {
+                        return 1;
+                    } else if (p1MinFinish != null) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
                 }
             };
 

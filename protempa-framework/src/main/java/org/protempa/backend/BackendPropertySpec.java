@@ -34,7 +34,8 @@ public final class BackendPropertySpec {
         Integer.class,
         Long.class,
         Float.class,
-        Double.class
+        Double.class,
+        String[].class
     };
 
     static String allowedClassesPrettyPrint() {

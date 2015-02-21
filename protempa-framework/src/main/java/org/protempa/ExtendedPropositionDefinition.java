@@ -21,7 +21,6 @@ package org.protempa;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.Proposition;
 
@@ -75,7 +74,7 @@ public class ExtendedPropositionDefinition implements Serializable {
     }
 
     /**
-     * Returns whether a parameter has the same id and value, and consistent
+     * Returns whether a proposition has the same id and value, and consistent
      * duration as specified by this extended parameter definition.
      * 
      * @param proposition

@@ -276,7 +276,7 @@ public abstract class AbstractPropositionDefinition implements
     public final ReferenceDefinition referenceDefinition(String name) {
         for (ReferenceDefinition referenceDefinition :
                 this.referenceDefinitions) {
-            if (referenceDefinition.getName().equals(name)) {
+            if (referenceDefinition.getId().equals(name)) {
                 return referenceDefinition;
             }
         }

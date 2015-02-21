@@ -23,38 +23,46 @@ import java.io.Serializable;
 
 /**
  * Defines a proposition definition's references.
- * 
+ *
  * @author Andrew Post
  * @see {@link PropertyDefinition}.
  */
 public class ReferenceDefinition implements Serializable {
-    private static final long serialVersionUID = -8746451343197890264L;
-    
-    private final String name;
-    private final String[] propositionIds;
 
-    public ReferenceDefinition(String name, String... propositionIds) {
-        if (name == null)
-            throw new IllegalArgumentException("name cannot be null");
+    private static final long serialVersionUID = -8746451343197890264L;
+
+    private final String id;
+    private final String[] propositionIds;
+    private final String displayName;
+
+    public ReferenceDefinition(String id, String displayName, String[] propositionIds) {
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
         ProtempaUtil.checkArray(propositionIds, "propositionIds");
-        if (propositionIds.length == 0)
+        if (propositionIds == null || propositionIds.length == 0) {
             throw new IllegalArgumentException(
                     "propositionIds must have at least one element");
-        
-        this.name = name.intern();
+        }
+
+        this.id = id.intern();
+        this.displayName = displayName;
         this.propositionIds = propositionIds.clone();
     }
 
     /**
-     * Gets the name of the reference.
+     * Gets the id of the reference.
      *
-     * @return a reference name {@link String}.
-     * Guaranteed not <code>null</code>.
+     * @return a reference id {@link String}. Guaranteed not <code>null</code>.
      */
-    public String getName() {
-        return this.name;
+    public String getId() {
+        return this.id;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+    
     /**
      * Gets the allowed proposition ids for this reference.
      *

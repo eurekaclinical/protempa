@@ -40,23 +40,27 @@ class TopologicalSortComparator implements Comparator<TemporalPropositionDefinit
 
     private static final long serialVersionUID = 924247928684751479L;
 
-    private final Map<String, Integer> rule2Index =
-            new HashMap<>();
+    private final Map<String, Integer> rule2Index = new HashMap<>();
 
     /**
-     * Constructs the topological sort class.
+     * Constructs the topological sort class. The constructor sorts the 
+     * provided abstraction definitions.
      *
-     * @param knowledgeSource a {@link KnowledgeSource} (cannot be
-     * <code>null</code>.
+     * @param allNarrowerDescendants cache of all possible proposition definitions
+     * involved in the current query.
      * @param abstractionDefinitions the {@link Set} of all
      * {@link AbstractionDefinition}s.
-     * @throws KnowledgeSourceReadException if an error occurs in reading
-     * from the knowledge source.
+     * @throws CycleDetectedException if a cycle in the abstraction
+     * definitions is detected.
      */
-    TopologicalSortComparator(KnowledgeSource knowledgeSource,
+    TopologicalSortComparator(Collection<PropositionDefinition> allNarrowerDescendants,
             Collection<? extends TemporalPropositionDefinition> abstractionDefinitions)
-            throws KnowledgeSourceReadException {
+            throws CycleDetectedException {
         // build the graph, a map of node name -> list of neighbors.
+        Map<String, PropositionDefinition> andMap = new HashMap<>();
+        for (PropositionDefinition pd : allNarrowerDescendants) {
+            andMap.put(pd.getId(), pd);
+        }
         HashMap<String, List<String>> nodes = 
                 new HashMap<>(
                 abstractionDefinitions.size() * 4 / 3 + 1);
@@ -80,8 +84,7 @@ class TopologicalSortComparator implements Comparator<TemporalPropositionDefinit
                 for (TemporalExtendedPropositionDefinition tepd : 
                         cd.getInducedBy()) {
                     String propId = tepd.getPropositionId();
-                    TemporalPropositionDefinition propDef = 
-                            knowledgeSource.readTemporalPropositionDefinition(propId);
+                    PropositionDefinition propDef = andMap.get(propId);
                     if (propDef instanceof AbstractionDefinition 
                             || propDef instanceof ContextDefinition) {
                         ibs.add(propId);
@@ -108,9 +111,7 @@ class TopologicalSortComparator implements Comparator<TemporalPropositionDefinit
                 }
             }
             if (toBeRemoved.isEmpty()) {
-                throw new IllegalStateException(
-                        "Circular definition of low-level abstractions! "
-                        + nodes);
+                throw new CycleDetectedException(nodes.keySet());
             }
             // lexicographical sort between those at the same level
             Arrays.sort(zeroOutDegree, 0, pos, null);

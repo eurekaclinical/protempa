@@ -21,6 +21,8 @@ package org.protempa.backend;
 
 import org.protempa.backend.annotations.BackendProperty;
 import org.protempa.backend.dsb.AbstractDataSourceBackend;
+import org.protempa.proposition.value.GranularityFactory;
+import org.protempa.proposition.value.UnitFactory;
 
 /**
  *
@@ -65,6 +67,27 @@ public abstract class AbstractCommonsDataSourceBackend
     @Override
     public final String getId() {
         return super.getId();
+    }
+
+    @BackendProperty
+    @Override
+    public void setKeyType(String keyType) {
+        super.setKeyType(keyType);
+    }
+
+    @Override
+    public String getKeyType() {
+        return super.getKeyType();
+    }
+    
+    @BackendProperty(propertyName = "unitFactory")
+    public void parseUnitFactory(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        setUnitFactory((UnitFactory) Class.forName(className).newInstance());
+    }
+    
+    @BackendProperty(propertyName = "granularityFactory")
+    public void parseGranularityFactory(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        setGranularityFactory((GranularityFactory) Class.forName(className).newInstance());
     }
     
 }

@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.drools.conflict.AbstractConflictResolver;
@@ -64,11 +65,11 @@ final class PROTEMPAConflictResolver extends AbstractConflictResolver {
      * @throws KnowledgeSourceReadException if an error occurs reading from
      * the knowledge source.
      */
-    PROTEMPAConflictResolver(KnowledgeSource knowledgeSource,
+    PROTEMPAConflictResolver(Collection<PropositionDefinition> allNarrowerDescendants,
             Map<Rule, ? extends TemporalPropositionDefinition> ruleToTPD)
-            throws KnowledgeSourceReadException {
-        assert knowledgeSource != null : "knowledgeSource cannot be null";
-        this.topSortComp = new TopologicalSortComparator(knowledgeSource,
+            throws CycleDetectedException {
+        assert allNarrowerDescendants != null : "allNarrowerDescendants cannot be null";
+        this.topSortComp = new TopologicalSortComparator(allNarrowerDescendants,
                 ruleToTPD.values());
         this.ruleToTPD = ruleToTPD;
     }

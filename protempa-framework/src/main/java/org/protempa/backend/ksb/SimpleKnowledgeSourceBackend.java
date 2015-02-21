@@ -19,6 +19,7 @@
  */
 package org.protempa.backend.ksb;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,7 +41,6 @@ import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.TemporalPropositionDefinition;
 import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.proposition.Context;
 
 public final class SimpleKnowledgeSourceBackend
         extends AbstractKnowledgeSourceBackend {
@@ -126,11 +126,37 @@ public final class SimpleKnowledgeSourceBackend
     }
 
     @Override
+    public List<PropositionDefinition> readPropositionDefinitions(String[] ids) throws KnowledgeSourceReadException {
+        List<PropositionDefinition> result = new ArrayList<>();
+        for (String id : ids) {
+            PropositionDefinition ad = this.propDefsMap.get(id);
+            if (ad == null) {
+                throw new KnowledgeSourceReadException("No proposition definition with id " + id);
+            }
+            result.add(ad);
+        }
+        return result;
+    }
+
+    @Override
     public AbstractionDefinition readAbstractionDefinition(String id)
             throws KnowledgeSourceReadException {
         return this.abstractionDefsMap.get(id);
     }
 
+    @Override
+    public List<AbstractionDefinition> readAbstractionDefinitions(String[] ids) throws KnowledgeSourceReadException {
+        List<AbstractionDefinition> result = new ArrayList<>();
+        for (String id : ids) {
+            AbstractionDefinition ad = this.abstractionDefsMap.get(id);
+            if (ad == null) {
+                throw new KnowledgeSourceReadException("No abstraction definition with id " + id);
+            }
+            result.add(ad);
+        }
+        return result;
+    }
+    
     @Override
     public String[] readAbstractedInto(String propId) {
         List<String> propIds = this.abstractedIntoMap.get(propId);
@@ -157,8 +183,34 @@ public final class SimpleKnowledgeSourceBackend
     }
 
     @Override
+    public List<ContextDefinition> readContextDefinitions(String[] ids) throws KnowledgeSourceReadException {
+        List<ContextDefinition> result = new ArrayList<>();
+        for (String id : ids) {
+            ContextDefinition ad = this.contextDefsMap.get(id);
+            if (ad == null) {
+                throw new KnowledgeSourceReadException("No context definition with id " + id);
+            }
+            result.add(ad);
+        }
+        return result;
+    }
+
+    @Override
     public TemporalPropositionDefinition readTemporalPropositionDefinition(String id) throws KnowledgeSourceReadException {
         return this.tempPropDefsMap.get(id);
+    }
+
+    @Override
+    public List<TemporalPropositionDefinition> readTemporalPropositionDefinitions(String[] ids) throws KnowledgeSourceReadException {
+        List<TemporalPropositionDefinition> result = new ArrayList<>();
+        for (String id : ids) {
+            TemporalPropositionDefinition ad = this.tempPropDefsMap.get(id);
+            if (ad == null) {
+                throw new KnowledgeSourceReadException("No temporal proposition definition with id " + id);
+            }
+            result.add(ad);
+        }
+        return result;
     }
 
     @Override

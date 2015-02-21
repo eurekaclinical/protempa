@@ -125,5 +125,13 @@ public interface KnowledgeSourceBackend extends
     Collection<PropositionDefinition> collectPropDefDescendantsUsingInverseIsA(String[] propIds) throws KnowledgeSourceReadException;
     
     Collection<String> collectPropIdDescendantsUsingInverseIsA(String[] propIds) throws KnowledgeSourceReadException;
+
+    List<PropositionDefinition> readPropositionDefinitions(String[] ids) throws KnowledgeSourceReadException;
+    
+    List<AbstractionDefinition> readAbstractionDefinitions(String[] ids) throws KnowledgeSourceReadException;
+
+    List<ContextDefinition> readContextDefinitions(String[] toArray) throws KnowledgeSourceReadException;
+
+    List<TemporalPropositionDefinition> readTemporalPropositionDefinitions(String[] toArray) throws KnowledgeSourceReadException;
    
 }

@@ -35,9 +35,8 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
     private final AbstractionFinder abstractionFinder;
 
     StatelessExecutionStrategy(AbstractionFinder abstractionFinder, 
-            KnowledgeSource knowledgeSource, 
             AlgorithmSource algorithmSource) {
-        super(knowledgeSource, algorithmSource);
+        super(algorithmSource);
         this.abstractionFinder = abstractionFinder;
     }
     

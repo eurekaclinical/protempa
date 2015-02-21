@@ -52,7 +52,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.logging.Level;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.ProtempaUtil;
 
@@ -152,6 +151,42 @@ public abstract class ProtegeKnowledgeSourceBackend
         } else {
             return null;
         }
+    }
+
+    @Override
+    public List<PropositionDefinition> readPropositionDefinitions(String[] ids) throws KnowledgeSourceReadException {
+        List<PropositionDefinition> result = new ArrayList<>();
+        for (String id : ids) {
+            result.add(readPropositionDefinition(id));
+        }
+        return result;
+    }
+
+    @Override
+    public List<AbstractionDefinition> readAbstractionDefinitions(String[] ids) throws KnowledgeSourceReadException {
+        List<AbstractionDefinition> result = new ArrayList<>();
+        for (String id : ids) {
+            result.add(readAbstractionDefinition(id));
+        }
+        return result;
+    }
+
+    @Override
+    public List<ContextDefinition> readContextDefinitions(String[] ids) throws KnowledgeSourceReadException {
+        List<ContextDefinition> result = new ArrayList<>();
+        for (String id : ids) {
+            result.add(readContextDefinition(id));
+        }
+        return result;
+    }
+
+    @Override
+    public List<TemporalPropositionDefinition> readTemporalPropositionDefinitions(String[] ids) throws KnowledgeSourceReadException {
+        List<TemporalPropositionDefinition> result = new ArrayList<>();
+        for (String id : ids) {
+            result.add(readTemporalPropositionDefinition(id));
+        }
+        return result;
     }
 
     @Override

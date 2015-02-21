@@ -98,7 +98,7 @@ public final class AbstractionFinderTestHelper {
         af.processStoredResults(query, qs,
                 propositionStorePathname, this.wmStorePathname);
         StatefulExecutionStrategy strategy = new StatefulExecutionStrategy(
-                ks, af.getAlgorithmSource());
+                af.getAlgorithmSource());
         Set<PropositionDefinition> allNarrowerDescendants = ks.collectPropDefDescendantsUsingAllNarrower(false, query.getPropositionIds());
         strategy.createRuleBase(allNarrowerDescendants, new DerivationsBuilder(), qs);
 

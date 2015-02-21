@@ -21,9 +21,7 @@ package org.protempa;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.drools.RuleBase;
 import org.drools.RuleBaseConfiguration;
@@ -31,10 +29,6 @@ import org.drools.RuleBaseConfiguration.AssertBehaviour;
 
 abstract class AbstractExecutionStrategy implements ExecutionStrategy {
 
-    /**
-     * The {@link AbstractionFinder} using this execution strategy.
-     */
-    private final KnowledgeSource knowledgeSource;
     private final AlgorithmSource algorithmSource;
     protected RuleBase ruleBase;
 
@@ -42,14 +36,8 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
      * @param abstractionFinder
      *            the {@link AbstractionFinder} using this execution strategy
      */
-    AbstractExecutionStrategy(KnowledgeSource knowledgeSource,
-            AlgorithmSource algorithmSource) {
-        this.knowledgeSource = knowledgeSource;
+    AbstractExecutionStrategy(AlgorithmSource algorithmSource) {
         this.algorithmSource = algorithmSource;
-    }
-
-    protected final KnowledgeSource getKnowledgeSource() {
-        return this.knowledgeSource;
     }
 
     protected final AlgorithmSource getAlgorithmSource() {
@@ -63,7 +51,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
                 this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
-                visitor.getAlgorithms(), listener, this.knowledgeSource);
+                visitor.getAlgorithms(), listener, allNarrowerDescendants);
         if (allNarrowerDescendants != null) {
             try {
                 for (PropositionDefinition pd : allNarrowerDescendants) {
@@ -76,8 +64,8 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         }
         try {
             this.ruleBase = new JBossRuleBaseFactory(ruleCreator,
-                    createRuleBaseConfiguration(ruleCreator)).newInstance();
-        } catch (PropositionDefinitionInstantiationException ex) {
+                    createRuleBaseConfiguration(ruleCreator, allNarrowerDescendants)).newInstance();
+        } catch (RuleBaseInstantiationException ex) {
             throw new FinderException(qs.getQuery().getId(), ex);
         }
     }
@@ -88,57 +76,20 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
     }
 
     protected RuleBaseConfiguration createRuleBaseConfiguration(
-            JBossRuleCreator ruleCreator)
-            throws PropositionDefinitionInstantiationException {
+            JBossRuleCreator ruleCreator, 
+            Collection<PropositionDefinition> allNarrowerDescendants)
+            throws RuleBaseInstantiationException {
         RuleBaseConfiguration config = new RuleBaseConfiguration();
         config.setShadowProxy(false);
         try {
             config.setConflictResolver(new PROTEMPAConflictResolver(
-                    this.knowledgeSource, ruleCreator
-                            .getRuleToTPDMap()));
-        } catch (KnowledgeSourceReadException ex) {
-            throw new PropositionDefinitionInstantiationException(
+                    allNarrowerDescendants, ruleCreator.getRuleToTPDMap()));
+        } catch (CycleDetectedException ex) {
+            throw new RuleBaseInstantiationException(
                     "Problem creating data processing rules", ex);
         }
         config.setAssertBehaviour(AssertBehaviour.EQUALITY);
         return config;
-    }
-
-    /**
-     * Collect all of the propositions for which we need to create rules.
-     * 
-     * @param algorithms
-     *            an empty {@link Map} that will be populated with algorithms
-     *            for each proposition definition for which a rule will be
-     *            created.
-     * @param result
-     *            an empty {@link Set} that will be populated with the
-     *            proposition definitions for which rules will be created.
-     * @param propIds
-     *            the proposition id {@link String}s to be found.
-     * @throws org.protempa.ProtempaException
-     *             if an error occurs reading the algorithm specified by a
-     *             proposition definition.
-     */
-    private void aggregateDescendants(String queryId,
-            ValidateAlgorithmCheckedVisitor validatorVisitor,
-            Set<PropositionDefinition> result,
-            List<PropositionDefinition> propDefs) throws FinderException {
-        HierarchicalProjectionChildrenVisitor dcVisitor = 
-                new HierarchicalProjectionChildrenVisitor(knowledgeSource);
-        for (PropositionDefinition propDef : propDefs) {
-            assert propDef != null : "propDef cannot be null";
-            try {
-                propDef.acceptChecked(validatorVisitor);
-                propDef.acceptChecked(dcVisitor);
-                result.add(propDef);
-                aggregateDescendants(queryId, validatorVisitor, result,
-                        dcVisitor.getChildren());
-                dcVisitor.clear();
-            } catch (ProtempaException ex) {
-                throw new FinderException(queryId, ex);
-            }
-        }
     }
 
     private class ValidateAlgorithmCheckedVisitor extends

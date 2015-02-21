@@ -29,7 +29,7 @@ import java.util.NoSuchElementException;
  * 
  * @author Andrew Post
  */
-public interface DataStreamingEventIterator<E> {
+public interface DataStreamingEventIterator<E> extends AutoCloseable {
 
     /**
      * Returns <code>true</code> if the iteration has more 

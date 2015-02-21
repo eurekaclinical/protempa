@@ -119,5 +119,27 @@ public class MockKnowledgeSourceBackend
     public Collection<String> collectPropIdDescendantsUsingInverseIsA(String[] propIds) {
         return Collections.emptyList();
     }
+
+    @Override
+    public List<PropositionDefinition> readPropositionDefinitions(String[] ids) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<AbstractionDefinition> readAbstractionDefinitions(String[] ids) {
+       return Collections.emptyList();
+    }
+
+    @Override
+    public List<ContextDefinition> readContextDefinitions(String[] toArray) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<TemporalPropositionDefinition> readTemporalPropositionDefinitions(String[] toArray) {
+        return Collections.emptyList();
+    }
+    
+    
     
 }

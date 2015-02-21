@@ -122,4 +122,12 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
     List<PropositionDefinition> getMatchingPropositionDefinitions(String searchKey)
             throws KnowledgeSourceReadException;
 
+    List<PropositionDefinition> readPropositionDefinitions(String... propIds) throws KnowledgeSourceReadException;
+    
+    List<AbstractionDefinition> readAbstractionDefinitions(String... propIds) throws KnowledgeSourceReadException;
+    
+    List<TemporalPropositionDefinition> readTemporalPropositionDefinitions(String... propIds) throws KnowledgeSourceReadException;
+    
+    List<ContextDefinition> readContextDefinitions(String... propIds) throws KnowledgeSourceReadException;
+
 }

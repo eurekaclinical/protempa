@@ -1,8 +1,10 @@
+package org.protempa;
+
 /*
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +19,18 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa;
+
+import java.util.Collection;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
  * @author Andrew Post
  */
-public class PropositionDefinitionInstantiationException 
-        extends ProtempaException {
-    private static final long serialVersionUID = 478415270332626688L;
+public class CycleDetectedException extends ProtempaException {
 
-    public PropositionDefinitionInstantiationException(Throwable cause) {
-        super(cause);
+    public CycleDetectedException(Collection<String> propIds) {
+        super("Cycle detected: " + StringUtils.join(propIds, "->"));
     }
 
-    public PropositionDefinitionInstantiationException(String message) {
-        super(message);
-    }
-
-    public PropositionDefinitionInstantiationException(String message,
-            Throwable cause) {
-        super(message, cause);
-    }
-
-    public PropositionDefinitionInstantiationException() {
-    }
-    
 }

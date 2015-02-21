@@ -472,7 +472,7 @@ class Util {
                 propIds.add(propId);
             }
             ReferenceDefinition refDef = new ReferenceDefinition(
-                    inst.getName(), propIds.toArray(new String[propIds.size()]));
+                    inst.getName(), inst.getName(), propIds.toArray(new String[propIds.size()]));
             refDefs[i] = refDef;
             i++;
         }

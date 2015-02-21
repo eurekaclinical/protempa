@@ -288,14 +288,14 @@ abstract class Executor implements AutoCloseable {
     protected abstract void doExecute(Set<String> keyIds, final DerivationsBuilder derivationsBuilder, final ExecutionStrategy strategy) throws ProtempaException;
 
     private StatelessExecutionStrategy newStatelessStrategy() throws FinderException {
-        StatelessExecutionStrategy result = new StatelessExecutionStrategy(abstractionFinder, getKnowledgeSource(), abstractionFinder.getAlgorithmSource());
+        StatelessExecutionStrategy result = new StatelessExecutionStrategy(abstractionFinder, abstractionFinder.getAlgorithmSource());
         createRuleBase(result);
         result.initialize();
         return result;
     }
 
     private StatefulExecutionStrategy newStatefulStrategy() throws FinderException {
-        StatefulExecutionStrategy result = new StatefulExecutionStrategy(getKnowledgeSource(), abstractionFinder.getAlgorithmSource());
+        StatefulExecutionStrategy result = new StatefulExecutionStrategy(abstractionFinder.getAlgorithmSource());
         createRuleBase(result);
         result.initialize();
         return result;

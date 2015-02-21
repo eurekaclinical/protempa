@@ -50,7 +50,7 @@ class JBossRuleBaseFactory {
         this.ruleBaseConfiguration = ruleBaseConfiguration;
     }
 
-    RuleBase newInstance() throws PropositionDefinitionInstantiationException {
+    RuleBase newInstance() throws RuleBaseInstantiationException {
         return newRuleBase(this.ruleBaseConfiguration, newPackage());
     }
 
@@ -65,12 +65,12 @@ class JBossRuleBaseFactory {
 
     private static RuleBase newRuleBase(RuleBaseConfiguration config,
             Package rules)
-            throws PropositionDefinitionInstantiationException {
+            throws RuleBaseInstantiationException {
         RuleBase ruleBase = RuleBaseFactory.newRuleBase(config);
         try {
             ruleBase.addPackage(rules);
         } catch (Exception e) {
-            throw new PropositionDefinitionInstantiationException(
+            throw new RuleBaseInstantiationException(
                     "Could not instantiate proposition definitions", e);
         }
         return ruleBase;

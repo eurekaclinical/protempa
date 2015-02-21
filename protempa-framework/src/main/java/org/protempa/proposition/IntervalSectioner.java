@@ -90,9 +90,9 @@ public abstract class IntervalSectioner<E extends TemporalProposition, K extends
         // two start bounds between different parameters that are
         // chronologically adjacent will form an interval
         for (E p : propositions) {
-            assert p.getInterval().getStartGranularity().equals(startGran)
-                    && p.getInterval().getFinishGranularity()
-                            .equals(finishGran) : "all intervals must have the same start and finish granularities to be combined";
+            assert (p.getInterval().getStartGranularity() != null ? p.getInterval().getStartGranularity().equals(startGran) : startGran == null) &&
+                   (p.getInterval().getFinishGranularity() != null ? p.getInterval().getFinishGranularity().equals(finishGran) : finishGran == null) : 
+                    "all intervals must have the same start and finish granularities to be combined";
             startBoundsSet.add(p.getInterval().getMinStart());
             finishBoundsSet.add(p.getInterval().getMaxFinish());
 
@@ -149,23 +149,30 @@ public abstract class IntervalSectioner<E extends TemporalProposition, K extends
             // point/timestamp intervals
             Long ivalFinish = p.getInterval().getMaximumFinish();
             for (Interval interval : intervalSet) {
-                if (ivalStart <= interval.getMinStart()
-                        && ivalFinish > interval.getMinStart()) {
+                if ((ivalStart == null || (interval.getMinStart() != null && ivalStart <= interval.getMinStart()))
+                        && (ivalFinish == null || interval.getMinStart() == null || ivalFinish > interval.getMinStart())) {
                     // the finish of the new interval should be the finish of
                     // the target interval if the proposition's interval
                     // extends beyond it, and it should be the finish of the
                     // proposition's interval otherwise
+                    Long minMaxFinish;
+                    if (p.getInterval().getMaxFinish() == null) {
+                        minMaxFinish = interval.getMaxFinish();
+                    } else if (interval.getMaxFinish() == null) {
+                        minMaxFinish = p.getInterval().getMaxFinish();
+                    } else {
+                        minMaxFinish = Math.min(p.getInterval().getMaxFinish(),
+                                    interval.getMaxFinish());
+                    }
                     Interval ival = intervalFactory.getInstance(
-                            interval.getMinStart(),
-                            startGran,
-                            Math.min(p.getInterval().getMaxFinish(),
-                                    interval.getMaxFinish()), finishGran);
+                            interval.getMinStart(), startGran,
+                            minMaxFinish, finishGran);
                     if (!fakeIntervals.containsKey(ival)) {
                         fakeIntervals.put(ival, new HashSet<E>());
                     }
                     fakeIntervals.get(ival).add(p);
                 }
-                if (ivalFinish <= interval.getMinStart()) {
+                if ((ivalFinish == null && interval.getMinStart() == null) || (ivalFinish != null && interval.getMinStart() != null && ivalFinish <= interval.getMinStart())) {
                     break;
                 }
             }
