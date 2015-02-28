@@ -48,12 +48,17 @@ public class CSVSupport {
             String[] cols;
             int i = 1;
             while ((cols = r.readNext()) != null) {
-                if (cols.length > 2) {
-                    throw new AssertionError("Invalid mapping in line " + i + ": mapping has length " + cols.length);
-                } else if (cols.length == 1) {
-                    cvs.put(cols[1], "");
-                } else if (cols.length == 2) {
-                    cvs.put(cols[1], cols[0]);
+                switch (cols.length) {
+                    case 0:
+                        break;
+                    case 1:
+                        cvs.put(cols[0], "");
+                        break;
+                    case 2:
+                        cvs.put(cols[1], cols[0]);
+                        break;
+                    default:
+                        throw new AssertionError("Invalid mapping in line " + i + ": mapping has length " + cols.length);
                 }
                 i++;
             }

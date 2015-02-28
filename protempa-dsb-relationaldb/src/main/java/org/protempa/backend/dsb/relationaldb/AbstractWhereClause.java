@@ -109,11 +109,14 @@ abstract class AbstractWhereClause implements WhereClause {
         return stagedTables;
     }
 
+    @Override
     public abstract InClause getInClause(ColumnSpec columnSpec,
             Object[] elements, boolean not);
 
+    @Override
     public abstract OrderByClause getOrderByClause(ColumnSpec keyIdSpec);
 
+    @Override
     public String generateClause() {
         StringBuilder wherePart = new StringBuilder();
 
@@ -242,7 +245,7 @@ abstract class AbstractWhereClause implements WhereClause {
             }
             int wherePartLength = wherePart.length();
             wherePart.append(processConstraintSpecForWhereClause(
-                    constraintSpec, first));
+                    constraintSpec, null, first));
             if (wherePart.length() > wherePartLength) {
                 first = false;
             }
@@ -298,11 +301,11 @@ abstract class AbstractWhereClause implements WhereClause {
             List<ColumnSpec> codeSpecL = codeSpec.asList();
             if (codeSpecL.get(codeSpecL.size() - 1).isPropositionIdsComplete()
                     && !needsPropIdInClause(entitySpec.getPropositionIds())) {
-                setCaseClauseIfNeeded(codeSpec);
+                setCaseClauseIfNeeded(codeSpec, this.propIds);
             } else {
                 int wherePartLength = wherePart.length();
                 wherePart.append(processConstraintSpecForWhereClause(codeSpec,
-                        first));
+                        this.propIds, first));
                 if (wherePart.length() > wherePartLength) {
                     first = false;
                 }
@@ -334,40 +337,26 @@ abstract class AbstractWhereClause implements WhereClause {
         return wherePart.toString();
     }
 
-    private void setCaseClauseIfNeeded(ColumnSpec columnSpec) {
+    private void setCaseClauseIfNeeded(ColumnSpec columnSpec, Set<?> propIds) {
         if (hasConstraint(columnSpec)) {
             if (resultProcessor != null) {
                 resultProcessor
                         .setCasePresent(columnSpec.getConstraint() == Operator.LIKE);
                 Mappings filteredMappings = filterMappingsByTarget(
-                        propIds, columnSpec.getMappings());
-                ;
+                        this.propIds, columnSpec.getMappings());
                 selectClause.setCaseClause(
-                        filteredSqlCodes(
-                                propIds,
-                                filterConstraintValues(propIds,
-                                        filteredMappings)), columnSpec,
-                        filteredMappings);
+                        filteredSqlCodes(propIds, filteredMappings), 
+                        columnSpec, filteredMappings);
             }
         }
     }
 
-    private boolean hasConstraint(ColumnSpec columnSpec) {
-        if (columnSpec != null) {
-            List<ColumnSpec> columnSpecL = columnSpec.asList();
-            ColumnSpec cs = columnSpecL.get(columnSpecL.size() - 1);
-            return cs.getConstraint() != null;
-        }
-
-        return false;
-    }
-
     private String processConstraintSpecForWhereClause(ColumnSpec columnSpec,
-            boolean first) {
+            Set<?> propIds, boolean first) {
 
         StringBuilder wherePart = new StringBuilder();
         if (hasConstraint(columnSpec)) {
-            setCaseClauseIfNeeded(columnSpec);
+            setCaseClauseIfNeeded(columnSpec, null);
             wherePart
                     .append(processConstraint(columnSpec, propIds, null, first));
         }
@@ -392,49 +381,6 @@ abstract class AbstractWhereClause implements WhereClause {
         return wherePart.toString();
     }
 
-    private static Operator valueComparatorToSqlOp(
-            ValueComparator valueComparator) throws IllegalStateException {
-        Operator constraint = null;
-        switch (valueComparator) {
-            case GREATER_THAN:
-                constraint = Operator.GREATER_THAN;
-                break;
-            case LESS_THAN:
-                constraint = Operator.LESS_THAN;
-                break;
-            case EQUAL_TO:
-                constraint = Operator.EQUAL_TO;
-                break;
-            case GREATER_THAN_OR_EQUAL_TO:
-                constraint = Operator.GREATER_THAN_OR_EQUAL_TO;
-                break;
-            case LESS_THAN_OR_EQUAL_TO:
-                constraint = Operator.LESS_THAN_OR_EQUAL_TO;
-                break;
-            case IN:
-                constraint = Operator.EQUAL_TO;
-                break;
-            case NOT_IN:
-                constraint = Operator.NOT_EQUAL_TO;
-                break;
-            default:
-                throw new AssertionError("invalid valueComparator: "
-                        + valueComparator);
-        }
-        return constraint;
-    }
-
-    private static Mappings filterMappingsByTarget(
-            Set<?> propIds, Mappings mappings) {
-        Mappings filteredMappings;
-        if (propIds != null) {
-            filteredMappings = mappings.subMappingsByTargets(propIds.toArray(new String[propIds.size()]));
-        } else {
-            filteredMappings = mappings;
-        }
-        return filteredMappings;
-    }
-
     private String processConstraint(ColumnSpec columnSpec, Set<?> propIds,
             Operator constraintOverride, boolean first) {
         StringBuilder wherePart = new StringBuilder();
@@ -446,7 +392,7 @@ abstract class AbstractWhereClause implements WhereClause {
         Mappings propIdToSqlCodes = cs.getMappings();
         if (constraint != null && referenceIndices.getIndex(cs) > -1) {
             Mappings filteredConstraintValues = 
-                    filterConstraintValues(propIds, propIdToSqlCodes);
+                    filterMappingsByTarget(propIds, propIdToSqlCodes);
             if (!first) {
                 wherePart.append(" AND ");
             }
@@ -461,25 +407,6 @@ abstract class AbstractWhereClause implements WhereClause {
         }
 
         return wherePart.toString();
-    }
-
-    private Object[] filteredSqlCodes(Set<?> propIds,
-            Mappings mappings) {
-        Object[] sqlCodes = null;
-        if (!mappings.isEmpty()) {
-            sqlCodes = mappings.readSources();
-        } else {
-            sqlCodes = propIds.toArray();
-        }
-        return sqlCodes;
-    }
-
-    private Mappings filterConstraintValues(Set<?> propIds,
-            Mappings mappings) {
-        Mappings filteredConstraintValues = 
-                filterMappingsByTarget(
-                propIds, mappings);
-        return filteredConstraintValues;
     }
 
     /**
@@ -560,4 +487,67 @@ abstract class AbstractWhereClause implements WhereClause {
             values.add(dateValue.getDate());
         }
     }
+    
+    private static Operator valueComparatorToSqlOp(
+            ValueComparator valueComparator) throws IllegalStateException {
+        Operator constraint = null;
+        switch (valueComparator) {
+            case GREATER_THAN:
+                constraint = Operator.GREATER_THAN;
+                break;
+            case LESS_THAN:
+                constraint = Operator.LESS_THAN;
+                break;
+            case EQUAL_TO:
+                constraint = Operator.EQUAL_TO;
+                break;
+            case GREATER_THAN_OR_EQUAL_TO:
+                constraint = Operator.GREATER_THAN_OR_EQUAL_TO;
+                break;
+            case LESS_THAN_OR_EQUAL_TO:
+                constraint = Operator.LESS_THAN_OR_EQUAL_TO;
+                break;
+            case IN:
+                constraint = Operator.EQUAL_TO;
+                break;
+            case NOT_IN:
+                constraint = Operator.NOT_EQUAL_TO;
+                break;
+            default:
+                throw new AssertionError("invalid valueComparator: "
+                        + valueComparator);
+        }
+        return constraint;
+    }
+
+    private static Mappings filterMappingsByTarget(Set<?> propIds, Mappings mappings) {
+        Mappings filteredMappings;
+        if (propIds != null && mappings != null) {
+            filteredMappings = mappings.subMappingsByTargets(propIds.toArray(new String[propIds.size()]));
+        } else {
+            filteredMappings = mappings;
+        }
+        return filteredMappings;
+    }
+    
+    private static Object[] filteredSqlCodes(Set<?> codes, Mappings mappings) {
+        Object[] sqlCodes = null;
+        if (mappings != null && !mappings.isEmpty()) {
+            sqlCodes = mappings.readSources();
+        } else if (codes != null) {
+            sqlCodes = codes.toArray();
+        }
+        return sqlCodes;
+    }
+    
+    private static boolean hasConstraint(ColumnSpec columnSpec) {
+        if (columnSpec != null) {
+            List<ColumnSpec> columnSpecL = columnSpec.asList();
+            ColumnSpec cs = columnSpecL.get(columnSpecL.size() - 1);
+            return cs.getConstraint() != null;
+        }
+
+        return false;
+    }
+    
 }

@@ -99,6 +99,18 @@ abstract class ExecutorWithResultsHandler extends Executor {
     }
 
     @Override
+    void execute() throws FinderException {
+        try {
+            super.execute();
+        } catch (FinderException ex) {
+            this.failed = true;
+            throw ex;
+        }
+    }
+    
+    
+
+    @Override
     public void close() throws FinderException {
         try {
             if (!this.failed) {

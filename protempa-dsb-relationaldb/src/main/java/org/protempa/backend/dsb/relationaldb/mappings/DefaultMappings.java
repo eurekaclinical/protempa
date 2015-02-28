@@ -37,22 +37,24 @@ public class DefaultMappings implements Mappings {
 
     private static final Logger LOGGER = Logger.getLogger(DefaultMappings.class.toString());
     private static final String DEFAULT_DESCRIPTION_MISSING_TARGET = "DescriptionMissing";
-    
+
     private final Map<Object, String> cache;
-    
+    private final Set<Object> descriptionsMissing;
+
     public DefaultMappings(Map<Object, String> mappings) {
         if (mappings == null) {
             throw new IllegalArgumentException("mappings cannot be null");
         }
         this.cache = mappings;
+        this.descriptionsMissing = new HashSet<>();
     }
-    
+
     @Override
     public Object[] readSources() {
         Set<Object> keySet = this.cache.keySet();
         return keySet.toArray(new Object[keySet.size()]);
     }
-    
+
     @Override
     public String[] readTargets() throws IOException {
         Collection<String> targetColl = this.cache.values();
@@ -62,7 +64,7 @@ public class DefaultMappings implements Mappings {
         }
         return targets.toArray(new String[targets.size()]);
     }
-    
+
     @Override
     public String getTarget(Object source) {
         String result = this.cache.get(source);
@@ -70,24 +72,24 @@ public class DefaultMappings implements Mappings {
             result = this.cache.get("*");
             if (result == null) {
                 result = DEFAULT_DESCRIPTION_MISSING_TARGET;
-            }
-            if (LOGGER.isLoggable(Level.WARNING)) {
-                LOGGER.log(Level.WARNING, "No mapping for source {0}; this value will be loaded as {1}", new Object[]{source, result});
+                if (descriptionsMissing.add(source) && LOGGER.isLoggable(Level.WARNING)) {
+                    LOGGER.log(Level.WARNING, "No mapping for source {0}; this value will be loaded as {1}", new Object[]{source, result});
+                }
             }
         }
         return result;
     }
-    
+
     @Override
     public int size() {
         return this.cache.size();
     }
-    
+
     @Override
     public boolean isEmpty() {
         return this.cache.isEmpty();
     }
-    
+
     @Override
     public Mappings subMappingsBySources(Object[] sources) {
         Map<Object, String> newMappings = new HashMap<>();
@@ -96,7 +98,7 @@ public class DefaultMappings implements Mappings {
         }
         return new DefaultMappings(newMappings);
     }
-    
+
     @Override
     public Mappings subMappingsByTargets(String[] targets) {
         Map<Object, String> newMappings = new HashMap<>();
@@ -108,7 +110,7 @@ public class DefaultMappings implements Mappings {
         }
         return new DefaultMappings(newMappings);
     }
-    
+
     @Override
     public void close() {
         this.cache.clear();

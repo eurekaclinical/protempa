@@ -22,7 +22,6 @@ package org.protempa.backend.dsb.relationaldb;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;

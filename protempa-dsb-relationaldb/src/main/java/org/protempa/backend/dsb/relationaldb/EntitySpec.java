@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
@@ -163,7 +164,7 @@ public final class EntitySpec implements Serializable {
             ProtempaUtil.checkArrayForNullElement(this.propositionIds,
                     "propositionIds");
             if (this.propositionIds.length == 0) {
-                throw new IllegalArgumentException("propositionIds must have at least one element");
+                SQLGenUtil.logger().log(Level.WARNING, "No mappings are specified for entity spec {0}", name);
             }
             if (this.propositionIds.length > 1 && codeSpec == null) {
                 throw new IllegalArgumentException("if propositionIds has multiple proposition ids, there must be a codeSpec to differentiate between them");

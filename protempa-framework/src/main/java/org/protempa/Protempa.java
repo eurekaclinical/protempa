@@ -603,6 +603,7 @@ public final class Protempa implements AutoCloseable {
      * Closes resources created by this object and the data source, knowledge
      * source, and algorithm source.
      */
+    @Override
     public void close() throws CloseException {
         boolean abstractionFinderClosed = false;
         boolean algorithmSourceClosed = false;
