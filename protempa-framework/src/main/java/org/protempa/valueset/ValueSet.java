@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa;
+package org.protempa.valueset;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +26,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.protempa.NotRecordedSourceId;
+import org.protempa.ProtempaUtil;
+import org.protempa.SourceId;
 import org.protempa.proposition.value.OrderedValue;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
@@ -36,83 +39,12 @@ import org.protempa.proposition.value.ValueComparator;
  * @author Andrew Post
  */
 public final class ValueSet {
+    
+    private static final Logger LOGGER = Logger.getLogger(ValueSet.class.getName());
 
     private static final ValueSetElement[] EMPTY_VALUE_SET_ELT_ARRAY =
             new ValueSetElement[0];
 
-    /**
-     * For specifying the values of a value set.
-     */
-    public static class ValueSetElement {
-
-        private final Value value;
-        private final String displayName;
-        private final String abbrevDisplayName;
-
-        /**
-         * Instantiates a value of a value set.
-         *
-         * @param value the {@link Value}. Cannot be <code>null</code>.
-         * @param displayName the value's display name {@link String}. If
-         * <code>null</code> is specified, {@link #getDisplayName()} will
-         * return the empty string.
-         * @param abbrevDisplayName the value's abbreviated display name
-         * {@link String}. If <code>null</code> is specified,
-         * {@link #getAbbrevDisplayName()} will return the empty string.
-         */
-        public ValueSetElement(Value value, String displayName,
-                String abbrevDisplayName) {
-            if (value == null) {
-                throw new IllegalArgumentException("value cannot be null");
-            }
-            if (displayName == null) {
-                displayName = "";
-            } else {
-                displayName = displayName.intern();
-            }
-            if (abbrevDisplayName == null) {
-                abbrevDisplayName = "";
-            } else {
-                abbrevDisplayName = abbrevDisplayName.intern();
-            }
-            this.value = value;
-            this.displayName = displayName;
-            this.abbrevDisplayName = abbrevDisplayName;
-        }
-
-        /**
-         * Returns the value's abbreviated display name. Guaranteed not
-         * <code>null</code>.
-         *
-         * @return a {@link String}.
-         */
-        public String getAbbrevDisplayName() {
-            return abbrevDisplayName;
-        }
-
-        /**
-         * Returns the value's display name. Guaranteed not <code>null</code>.
-         *
-         * @return a {@link String}.
-         */
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        /**
-         * Returns the value. Guaranteed not <code>null</code>.
-         * 
-         * @return a {@link Value}.
-         */
-        public Value getValue() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return ToStringBuilder.reflectionToString(this);
-        }
-    }
     private final String id;
     private final ValueSetElement[] valueSetElements;
     private final Map<Value, ValueSetElement> values;
@@ -151,7 +83,6 @@ public final class ValueSet {
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
-        Logger logger = ProtempaUtil.logger();
         ProtempaUtil.checkArray(valueSetElements, "valueSetElements");
 
         this.id = id.intern();
@@ -159,16 +90,14 @@ public final class ValueSet {
 
         this.values = new HashMap<>();
         for (ValueSetElement vse : this.valueSetElements) {
-            if (this.values.containsKey(vse.value)) {
-                if (logger.isLoggable(Level.WARNING)) {
-                    logger.log(Level.WARNING,
+            if (this.values.containsKey(vse.getValue())) {
+                if (LOGGER.isLoggable(Level.WARNING)) {
+                    LOGGER.log(Level.WARNING,
                             "Ignoring duplicate value {0} for id {1}",
-                            new Object[]{vse.value.getFormatted(), id});
+                            new Object[]{vse.getValue().getFormatted(), id});
                 }
-//                throw new IllegalArgumentException(
-//                        "No duplicate values allowed: " + vse.value.getFormatted());
             } else {
-                this.values.put(vse.value, vse);
+                this.values.put(vse.getValue(), vse);
             }
         }
         this.valuesKeySet = this.values.keySet();
@@ -268,7 +197,7 @@ public final class ValueSet {
 
         ValueSetElement vse = this.values.get(value);
         if (vse != null) {
-            return vse.displayName;
+            return vse.getDisplayName();
         } else {
             return "";
         }
@@ -288,7 +217,7 @@ public final class ValueSet {
 
         ValueSetElement vse = this.values.get(value);
         if (vse != null) {
-            return vse.abbrevDisplayName;
+            return vse.getAbbrevDisplayName();
         } else {
             return "";
         }

@@ -22,6 +22,8 @@ package org.protempa;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 

@@ -215,11 +215,9 @@ public enum ValueType {
         }
     },
     ORDINALVALUE {
-        private final List<String> allowedValues = new ArrayList<>();
-
         @Override
         public Value parse(String val) {
-            return new OrdinalValue(val, allowedValues);
+            throw new UnsupportedOperationException("Can't parse an ordinal value");
         }
 
         @Override

@@ -210,4 +210,10 @@ public final class NominalValue implements Value, Comparable<NominalValue>,
     public int compareTo(NominalValue t) {
         return this.val.compareTo(t.val);
     }
+
+    @Override
+    public NominalValueBuilder asBuilder() {
+        return new NominalValueBuilder(this);
+    }
+    
 }

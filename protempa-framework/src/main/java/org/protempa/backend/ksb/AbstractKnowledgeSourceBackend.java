@@ -27,7 +27,7 @@ import org.protempa.backend.AbstractBackend;
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.TermSubsumption;
-import org.protempa.ValueSet;
+import org.protempa.valueset.ValueSet;
 import org.protempa.query.And;
 
 /**

@@ -267,4 +267,9 @@ public final class InequalityNumberValue implements
     public NumberValue getNumberValue() {
         return this.val;
     }
+
+    @Override
+    public ValueBuilder asBuilder() {
+        return new InequalityNumberValueBuilder(this);
+    }
 }

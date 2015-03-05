@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import org.protempa.valueset.ValueSet;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;

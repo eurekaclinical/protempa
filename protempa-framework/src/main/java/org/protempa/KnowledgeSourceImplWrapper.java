@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import org.protempa.valueset.ValueSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

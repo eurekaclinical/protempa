@@ -22,6 +22,7 @@ package org.protempa;
 
 import java.io.Serializable;
 import java.util.Objects;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -144,6 +145,11 @@ public final class PropertyDefinitionBuilder implements Serializable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
     
 }

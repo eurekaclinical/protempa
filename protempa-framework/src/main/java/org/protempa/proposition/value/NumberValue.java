@@ -263,4 +263,9 @@ public final class NumberValue implements NumericalValue,
     public NumberValue getNumberValue() {
         return this;
     }
+
+    @Override
+    public ValueBuilder asBuilder() {
+        return new NumberValueBuilder(this);
+    }
 }

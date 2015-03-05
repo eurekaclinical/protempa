@@ -39,7 +39,7 @@ import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.value.Value;
-import org.protempa.ValueSet;
+import org.protempa.valueset.ValueSet;
 
 public class XmlPropositionVisitor extends AbstractPropositionCheckedVisitor {
 

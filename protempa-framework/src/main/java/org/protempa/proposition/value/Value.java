@@ -82,4 +82,6 @@ public interface Value extends ValueVisitable {
      * is true.
      */
     Value replace();
+    
+    ValueBuilder asBuilder();
 }

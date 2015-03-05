@@ -25,6 +25,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -37,13 +38,9 @@ public final class OrdinalValue implements OrderedValue, Serializable {
 
     private static final long serialVersionUID = -1605459658420554439L;
     private String val;
-    private List<String> allowedValues;
+    private int index;
     private transient volatile int hashCode;
     
-    public static OrdinalValue parse(String str) {
-        return (OrdinalValue) ValueType.ORDINALVALUE.parse(str);
-    }
-
     /**
      * Creates an ordinal value of a type with allowed values.
      *
@@ -52,10 +49,9 @@ public final class OrdinalValue implements OrderedValue, Serializable {
      * @param sortedAllowedValues
      *            the allowed values {@link List<String}.
      */
-    OrdinalValue(String value, List<String> sortedAllowedValues) {
-        throw new UnsupportedOperationException("Not implemented");
-//        this.val = value;
-//        this.allowedValues = new ArrayList<String>(sortedAllowedValues);
+    OrdinalValue(String value, int index) {
+        this.val = value;
+        this.index = index;
     }
     
     @Override
@@ -86,6 +82,10 @@ public final class OrdinalValue implements OrderedValue, Serializable {
     public String getValue() {
         return val;
     }
+
+    public int getIndex() {
+        return index;
+    }
     
     /**
      * Compares this value and another according to the defined order, or 
@@ -110,15 +110,11 @@ public final class OrdinalValue implements OrderedValue, Serializable {
         switch (o.getType()) {
             case ORDINALVALUE:
                 OrdinalValue other = (OrdinalValue) o;
-                if (allowedValues == null
-                        || val == null
-                        || other.allowedValues == null
-                        || other.val == null
-                        || !(allowedValues == other.allowedValues || allowedValues.equals(other.allowedValues))) {
+                if (val == null || other.val == null) {
                     return ValueComparator.UNKNOWN;
                 }
 
-                int c = allowedValues.indexOf(val) - allowedValues.indexOf(other.val);
+                int c = this.index - other.index;
                 if (c == 0) {
                     return ValueComparator.EQUAL_TO;
                 } else if (c > 0) {
@@ -137,24 +133,14 @@ public final class OrdinalValue implements OrderedValue, Serializable {
     
     @Override
     public int hashCode() {
-        if (hashCode == 0) {
-            int result = 17;
-            if (val != null) {
-                result = result * 37 + val.hashCode();
-            }
-            if (allowedValues != null) {
-                result = result * 37 + allowedValues.hashCode();
-            }
-            hashCode = result;
-        }
-        return hashCode;
+        int hash = 3;
+        hash = 67 * hash + Objects.hashCode(this.val);
+        hash = 67 * hash + this.index;
+        return hash;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
         if (obj == null) {
             return false;
         }
@@ -162,16 +148,15 @@ public final class OrdinalValue implements OrderedValue, Serializable {
             return false;
         }
         final OrdinalValue other = (OrdinalValue) obj;
-        if (!this.val.equals(other.val)) {
+        if (!Objects.equals(this.val, other.val)) {
             return false;
         }
-        if (this.allowedValues != other.allowedValues &&
-                !this.allowedValues.equals(other.allowedValues)) {
+        if (this.index != other.index) {
             return false;
         }
         return true;
     }
-
+    
     @Override
     public void accept(ValueVisitor valueVisitor) {
         if (valueVisitor == null) {
@@ -186,13 +171,18 @@ public final class OrdinalValue implements OrderedValue, Serializable {
     }
     
     private void writeObject(ObjectOutputStream s) throws IOException {
-        //s.writeObject(this.val);
-        throw new UnsupportedOperationException("Not implemented");
+        s.writeObject(this.val);
+        s.writeInt(this.index);
     }
     
     private void readObject(ObjectInputStream s) throws IOException,
             ClassNotFoundException {
-        //String tmpVal = (String) s.readObject();
-        throw new InvalidObjectException("Can't restore. Not implemented");
+        this.val = (String) s.readObject();
+        this.index = s.readInt();
+    }
+
+    @Override
+    public ValueBuilder asBuilder() {
+        return new OrdinalValueBuilder(this);
     }
 }

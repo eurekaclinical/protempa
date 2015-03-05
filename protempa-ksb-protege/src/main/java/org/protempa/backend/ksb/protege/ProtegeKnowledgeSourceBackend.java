@@ -32,7 +32,7 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
 import org.protempa.TemporalPropositionDefinition;
 import org.protempa.TermSubsumption;
-import org.protempa.ValueSet;
+import org.protempa.valueset.ValueSet;
 import org.protempa.backend.AbstractCommonsKnowledgeSourceBackend;
 import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;

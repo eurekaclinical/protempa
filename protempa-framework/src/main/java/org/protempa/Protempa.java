@@ -602,49 +602,13 @@ public final class Protempa implements AutoCloseable {
     /**
      * Closes resources created by this object and the data source, knowledge
      * source, and algorithm source.
+     * 
+     * @throws org.protempa.CloseException if an error occurs while closing
+     * resources.
      */
     @Override
     public void close() throws CloseException {
-        boolean abstractionFinderClosed = false;
-        boolean algorithmSourceClosed = false;
-        boolean knowledgeSourceClosed = false;
-        boolean termSourceClosed = false;
-        try {
-            this.abstractionFinder.close();
-            abstractionFinderClosed = true;
-            this.abstractionFinder.getAlgorithmSource().close();
-            algorithmSourceClosed = true;
-            this.abstractionFinder.getKnowledgeSource().close();
-            knowledgeSourceClosed = true;
-            this.abstractionFinder.getTermSource().close();
-            termSourceClosed = true;
-        } catch (CloseException e) {
-            this.abstractionFinder.getDataSource().failureOccurred(e);
-            throw e;
-        } finally {
-            if (!algorithmSourceClosed) {
-                try {
-                    this.abstractionFinder.getAlgorithmSource().close();
-                } catch (CloseException ignored) {}
-            }
-            if (!knowledgeSourceClosed) {
-                try {
-                    this.abstractionFinder.getKnowledgeSource().close();
-                } catch (CloseException ignored) {}
-            }
-            if (!termSourceClosed) {
-                try {
-                    this.abstractionFinder.getTermSource().close();
-                } catch (CloseException ignored) {}
-            }
-        }
-        if (abstractionFinderClosed && algorithmSourceClosed && knowledgeSourceClosed && termSourceClosed) {
-            this.abstractionFinder.getDataSource().close();
-        } else {
-            try {
-                this.abstractionFinder.getDataSource().close();
-            } catch (CloseException ignored) {}
-        }
+        this.abstractionFinder.close();
         ProtempaUtil.logger().info("Protempa closed");
     }
 

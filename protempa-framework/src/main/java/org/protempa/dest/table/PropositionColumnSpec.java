@@ -49,7 +49,7 @@ import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
-import org.protempa.ValueSet;
+import org.protempa.valueset.ValueSet;
 
 public class PropositionColumnSpec extends AbstractTableColumnSpec {
 

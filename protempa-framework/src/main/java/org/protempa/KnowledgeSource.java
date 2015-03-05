@@ -23,6 +23,7 @@
  */
 package org.protempa;
 
+import org.protempa.valueset.ValueSet;
 import java.util.List;
 import java.util.Set;
 

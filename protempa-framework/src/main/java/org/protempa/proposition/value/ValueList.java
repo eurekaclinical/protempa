@@ -142,4 +142,9 @@ public class ValueList<V extends Value> extends ArrayList<V> implements Value {
             add((V) s.readObject());
         }
     }
+
+    @Override
+    public ValueBuilder asBuilder() {
+        return new ValueListBuilder(this);
+    }
 }

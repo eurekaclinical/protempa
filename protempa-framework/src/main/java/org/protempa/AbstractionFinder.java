@@ -185,8 +185,49 @@ final class AbstractionFinder {
         }
     }
 
-    void close() {
+    void close() throws CloseException {
         clear();
+        boolean algorithmSourceClosed = false;
+        boolean knowledgeSourceClosed = false;
+        boolean termSourceClosed = false;
+        CloseException exception = null;
+        try {
+            this.algorithmSource.close();
+            algorithmSourceClosed = true;
+            this.knowledgeSource.close();
+            knowledgeSourceClosed = true;
+            this.termSource.close();
+            termSourceClosed = true;
+        } catch (CloseException e) {
+            this.dataSource.failureOccurred(e);
+            exception = e;
+        } finally {
+            if (!algorithmSourceClosed) {
+                try {
+                    this.algorithmSource.close();
+                } catch (CloseException ignored) {}
+            }
+            if (!knowledgeSourceClosed) {
+                try {
+                    this.knowledgeSource.close();
+                } catch (CloseException ignored) {}
+            }
+            if (!termSourceClosed) {
+                try {
+                    this.termSource.close();
+                } catch (CloseException ignored) {}
+            }
+        }
+        try {
+            this.dataSource.close();
+        } catch (CloseException ex) {
+            if (exception == null) {
+                exception = ex;
+            }
+        }
+        if (exception != null) {
+            throw exception;
+        }
         this.closed = true;
     }
 

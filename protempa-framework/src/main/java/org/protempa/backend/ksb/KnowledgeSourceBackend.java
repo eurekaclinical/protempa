@@ -31,7 +31,7 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
 import org.protempa.TemporalPropositionDefinition;
 import org.protempa.TermSubsumption;
-import org.protempa.ValueSet;
+import org.protempa.valueset.ValueSet;
 import org.protempa.query.And;
 
 /**

@@ -232,5 +232,10 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
 			return false;
 		return true;
 	}
+
+    @Override
+    public ValueBuilder asBuilder() {
+        return new DateValueBuilder(this);
+    }
     
 }

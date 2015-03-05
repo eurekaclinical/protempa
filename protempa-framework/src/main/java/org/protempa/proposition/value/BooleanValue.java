@@ -187,4 +187,9 @@ public final class BooleanValue implements Value, Serializable {
             ClassNotFoundException {
         this.val = s.readBoolean();
     }
+
+    @Override
+    public ValueBuilder asBuilder() {
+        return new BooleanValueBuilder(this);
+    }
 }
