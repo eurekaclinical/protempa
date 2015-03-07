@@ -139,6 +139,20 @@ abstract class AbstractSelectClause implements SelectClause {
         return selectClause.toString();
     }
     
+    /**
+     * Implementations of this should convert non-strings to strings and ensure
+     * that the database orders the stringified key ids by their natural order 
+     * as defined in Java (by comparing each character's numerical code). If
+     * the database implements locale-specific string ordering, this likely can 
+     * be achieved by using the "C" locale for this column.
+     * 
+     * @param columnStr the name of the column containing the key id.
+     * @return the name of the column wrapped in a conversion to string if
+     * needed and any locale information needed for ordering to be
+     * consistent with Java.
+     * 
+     * @see java.util.Character#compareTo
+     */
     protected abstract String wrapKeyIdInConversion(String columnStr);
 
     StringBuilder generateColumn(boolean distinctRequested,

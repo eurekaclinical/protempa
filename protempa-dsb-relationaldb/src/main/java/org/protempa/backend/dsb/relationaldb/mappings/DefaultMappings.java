@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.arp.javautil.arrays.Arrays;
 
 /**
@@ -45,7 +46,7 @@ public class DefaultMappings implements Mappings {
         if (mappings == null) {
             throw new IllegalArgumentException("mappings cannot be null");
         }
-        this.cache = mappings;
+        this.cache = new HashMap<>(mappings);
         this.descriptionsMissing = new HashSet<>();
     }
 
@@ -115,4 +116,10 @@ public class DefaultMappings implements Mappings {
     public void close() {
         this.cache.clear();
     }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
+    
 }

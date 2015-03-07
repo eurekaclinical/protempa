@@ -36,9 +36,14 @@ final class PostgresqlSelectClause extends AbstractSelectClause {
                 mappings);
     }
 
+    /**
+     * We sort key ids in Java by strings' natural order. To get the same 
+     * behavior in postgresql, we need to add COLLATE "C" to the column
+     * specification. Only works in Postgresql version 9.1 or greater.
+     */
     @Override
     protected String wrapKeyIdInConversion(String columnStr) {
-        return "CAST(" + columnStr + " AS VARCHAR)";
+        return "(CAST(" + columnStr + " AS VARCHAR) COLLATE \"C\")";
     }
 
 }

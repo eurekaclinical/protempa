@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.collections.Iterators;
 import org.protempa.dest.Destination;
@@ -82,7 +83,11 @@ abstract class ExecutorWithResultsHandler extends Executor {
             this.resultsHandler = this.destination.getQueryResultsHandler(getQuery(), this.abstractionFinder.getDataSource(), getKnowledgeSource());
             log(Level.FINE, "Done initalizing query results handler for query {0}", queryId);
             log(Level.FINE, "Validating query results handler for query {0}", queryId);
-            this.resultsHandler.validate();
+            try {
+                this.resultsHandler.validate();
+            } catch (QueryResultsHandlerValidationFailedException ex) {
+                throw new QueryResultsHandlerInitException(ex);
+            }
             log(Level.FINE, "Query results handler validated successfully for query {0}", queryId);
             addAllPropIds(resultsHandler.getPropositionIdsNeeded());
             try {
@@ -92,7 +97,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
                 throw fe;
             }
             this.resultsHandler.start(getAllNarrowerDescendants());
-        } catch (QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException ex) {
+        } catch (QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | Error | RuntimeException ex) {
             this.failed = true;
             throw new FinderException(getQuery().getId(), ex);
         }
@@ -105,6 +110,9 @@ abstract class ExecutorWithResultsHandler extends Executor {
         } catch (FinderException ex) {
             this.failed = true;
             throw ex;
+        } catch (Error | RuntimeException ex) {
+            this.failed = true;
+            throw new FinderException(getQuery().getId(), ex);
         }
     }
     
@@ -118,7 +126,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
             }
             this.resultsHandler.close();
             this.resultsHandler = null;
-        } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerCloseException ex) {
+        } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerCloseException | Error | RuntimeException ex) {
             throw new FinderException(getQuery().getId(), ex);
         } finally {
             if (this.resultsHandler != null) {

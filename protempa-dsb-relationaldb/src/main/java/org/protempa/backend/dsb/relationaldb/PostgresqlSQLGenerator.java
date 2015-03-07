@@ -26,7 +26,8 @@ import java.util.Set;
 import org.protempa.backend.dsb.filter.Filter;
 
 /**
- * PostgreSQL driver for Protempa.
+ * PostgreSQL driver for Protempa. Supports version 9.1 or greater because we
+ * rely on COLLATE to ensure that key id sorting works correctly.
  * 
  * @author Andrew Post
  */
@@ -36,7 +37,7 @@ public class PostgresqlSQLGenerator
     private static final String DRIVER_NAME = "PostgreSQL Native Driver";
     private static final int[] SUPPORTED_DRIVER_MAJOR_VERSIONS = {9};
     private static final String DATABASE_PRODUCT_NAME = "PostgreSQL";
-    private static final int[] SUPPORTED_DATABASE_MAJOR_VERSIONS = {8, 9};
+    private static final int[] SUPPORTED_DATABASE_MAJOR_VERSIONS = {9};
     
     public PostgresqlSQLGenerator() {
         super(DRIVER_CLASS_NAME, 

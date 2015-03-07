@@ -27,29 +27,55 @@ import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
 
 /**
- * Implements parsing of dates/times into a PROTEMPA position using an 
- * appropriate call to {@link ResultSet}. 
- * 
+ * Implements parsing of dates/times into a PROTEMPA position using an
+ * appropriate call to {@link ResultSet}.
+ *
  * @author Andrew Post
  */
 public final class JDBCDateTimeTimestampPositionParser
         implements JDBCPositionFormat {
 
+    private final Long defaultDate;
+
     /**
-     * Parses a date/time into a PROTEMPA position. For types date, time and 
-     * timestamp it calls the corresponding method in {@link ResultSet}. For 
-     * other types, it calls {@link ResultSet#getTimestamp(int)} and lets the 
-     * JDBC driver attempt to parse a date.
+     * Constructs a date-time "parser" that calls the appropriate date, time
+     * or timestamp result set getter.
+     */
+    public JDBCDateTimeTimestampPositionParser() {
+        this(null);
+    }
+
+    /**
+     * Constructs a JDBC date-time parser. Optionally allows specifying a
+     * default date to use when the date column of interest has value 
+     * <code>null</code>.
      * 
+     * @param defaultDate default date to use when the date column of interest
+     * is <code>null</code>.
+     */
+    public JDBCDateTimeTimestampPositionParser(Date defaultDate) {
+        if (defaultDate != null) {
+            this.defaultDate = defaultDate.getTime();
+        } else {
+            this.defaultDate = null;
+        }
+    }
+
+    /**
+     * Parses a date/time into a PROTEMPA position. For types date, time and
+     * timestamp it calls the corresponding method in {@link ResultSet}. For
+     * other types, it calls {@link ResultSet#getTimestamp(int)} and lets the
+     * JDBC driver attempt to parse a date.
+     *
      * @param resultSet a {@link ResultSet}. Cannot be <code>null</code>.
      * @param columnIndex the index of the column to retrieve from the result
      * set.
      * @param colType the SQL type of the column as a {@link Types}.
      * @return a PROTEMPA position or <code>null</code> if the column in the
      * database is <code>NULL</code>.
-     * 
-     * @throws SQLException if there is an error accessing the result set or 
-     * the column cannot be parsed into a date.
+     *
+     * @throws SQLException if there is an error accessing the result set or the
+     * column cannot be parsed into a date.
      */
     @Override
     public Long toPosition(ResultSet resultSet, int columnIndex, int colType)
@@ -73,15 +99,15 @@ public final class JDBCDateTimeTimestampPositionParser
         if (result != null) {
             return AbsoluteTimeGranularityUtil.asPosition(result);
         } else {
-            return null;
+            return this.defaultDate;
         }
 
     }
 
     /**
-     * Formats a PROTEMPA long as a JDBC timestamp string suitable for
-     * inclusion in a SELECT statement executed via JDBC.
-     * 
+     * Formats a PROTEMPA long as a JDBC timestamp string suitable for inclusion
+     * in a SELECT statement executed via JDBC.
+     *
      * @param position a PROTEMPA position.
      * @return a JDBC timestamp {@link String}.
      */
