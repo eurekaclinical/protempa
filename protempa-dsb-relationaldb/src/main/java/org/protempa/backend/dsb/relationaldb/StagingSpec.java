@@ -78,7 +78,7 @@ public final class StagingSpec {
         this.entitySpecs = entitySpecs;
     }
 
-    static StagingSpec newTableName(StagingSpec stagingSpec, String newTableName) {
+    public static StagingSpec newTableName(StagingSpec stagingSpec, String newTableName) {
         return new StagingSpec(TableSpec.withSchemaAndTable(stagingSpec
                 .getStagingArea().getSchema(), newTableName),
                 stagingSpec.getIndexTablespace(),

@@ -17,16 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.mysql;
 
 import org.protempa.backend.dsb.filter.Filter;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.arp.javautil.version.MajorMinorVersion;
+import org.protempa.backend.dsb.relationaldb.AbstractSQLGeneratorWithCompatChecks;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
+import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
+import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
+import org.protempa.backend.dsb.relationaldb.SelectStatement;
+import org.protempa.backend.dsb.relationaldb.StagingSpec;
 
 /**
  * A SQL generator that is compatible with Connector/J 5.x and MySQL 4.1 and
@@ -34,48 +39,24 @@ import java.util.Set;
  *
  * @author Andrew Post
  */
-public class ConnectorJ5MySQL415Generator extends AbstractSQLGenerator {
+public class ConnectorJ5MySQL415Generator extends AbstractSQLGeneratorWithCompatChecks {
+    
+    private static final String DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
+    private static final String DRIVER_NAME = "MySQL-AB JDBC Driver";
+    private static final MajorMinorVersion MIN_DRIVER_VERSION = new MajorMinorVersion(5, 0);
+    private static final MajorMinorVersion MAX_DRIVER_VERSION = new MajorMinorVersion(5, Integer.MAX_VALUE);
+    private static final String DATABASE_PRODUCT_NAME = "MySQL";
+    private static final MajorMinorVersion MIN_DATABASE_VERSION = new MajorMinorVersion(4, 1);
+    private static final MajorMinorVersion MAX_DATABASE_VERSION = new MajorMinorVersion(5, Integer.MAX_VALUE);
 
-    private static final String driverName = "com.mysql.jdbc.Driver";
-
-    @Override
-    public boolean checkCompatibility(Connection connection)
-            throws SQLException {
-        if (!checkDriverCompatibility(connection))
-            return false;
-        if (!checkDatabaseCompatibility(connection))
-            return false;
-
-        return true;
+    public ConnectorJ5MySQL415Generator() {
+        super(DRIVER_CLASS_NAME,
+                DRIVER_NAME,
+                MIN_DRIVER_VERSION, MAX_DRIVER_VERSION,
+                DATABASE_PRODUCT_NAME,
+                MIN_DATABASE_VERSION, MAX_DATABASE_VERSION);
     }
-
-    private boolean checkDriverCompatibility(Connection connection)
-            throws SQLException {
-        DatabaseMetaData metaData = connection.getMetaData();
-        String name = metaData.getDriverName();
-        if (!name.equals("MySQL-AB JDBC Driver"))
-            return false;
-        if (metaData.getDriverMajorVersion() != 5)
-            return false;
-        return true;
-    }
-
-    private boolean checkDatabaseCompatibility(Connection connection)
-            throws SQLException {
-        DatabaseMetaData metaData = connection.getMetaData();
-        if (!metaData.getDatabaseProductName().toUpperCase().contains("MYSQL"))
-            return false;
-        int dbMajorVersion = metaData.getDatabaseMajorVersion();
-        if (dbMajorVersion != 4 && dbMajorVersion != 5)
-            return false;
-        return true;
-    }
-
-    @Override
-    protected String getDriverClassNameToLoad() {
-        return driverName;
-    }
-
+    
     @Override
     /*
      * MySQL SQL generator does not currently support staging data (non-Javadoc)

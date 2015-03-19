@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.oracle;
 
 import org.protempa.backend.dsb.filter.Filter;
 
@@ -25,6 +25,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+import org.protempa.backend.dsb.relationaldb.ColumnSpec;
+import org.protempa.backend.dsb.relationaldb.ColumnSpecInfo;
+import org.protempa.backend.dsb.relationaldb.ColumnSpecInfoFactory;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.FromClause;
+import org.protempa.backend.dsb.relationaldb.IntColumnSpecWrapper;
+import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
+import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
+import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
+import org.protempa.backend.dsb.relationaldb.SelectClause;
+import org.protempa.backend.dsb.relationaldb.StagedColumnSpec;
+import org.protempa.backend.dsb.relationaldb.StagingSelectClause;
+import org.protempa.backend.dsb.relationaldb.StagingSpec;
+import org.protempa.backend.dsb.relationaldb.TableAliaser;
+import org.protempa.backend.dsb.relationaldb.WhereClause;
 
 final class Ojdbc6OracleStagingSelectStatement extends
         Ojdbc6OracleSelectStatement {
@@ -82,14 +97,14 @@ final class Ojdbc6OracleStagingSelectStatement extends
     }
 
     @Override
-    SelectClause getSelectClause(ColumnSpecInfo info,
+    protected SelectClause getSelectClause(ColumnSpecInfo info,
             TableAliaser referenceIndices, EntitySpec entitySpec,
             boolean wrapKeyId) {
         return new StagingSelectClause(stagingSpec, entitySpec, referenceIndices);
     }
 
     @Override
-    FromClause getFromClause(List<ColumnSpec> columnSpecs,
+    protected FromClause getFromClause(List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices, StagingSpec[] stagedTables) {
         return new Ojdbc6OracleStagingFromClause(getEntitySpec(), 
                 getInboundReferenceSpecs(), columnSpecs,
@@ -97,7 +112,7 @@ final class Ojdbc6OracleStagingSelectStatement extends
     }
 
     @Override
-    WhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
+    protected WhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,

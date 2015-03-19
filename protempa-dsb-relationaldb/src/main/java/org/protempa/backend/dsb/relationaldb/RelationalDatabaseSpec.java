@@ -30,7 +30,7 @@ import org.protempa.proposition.value.UnitFactory;
  * 
  * @author Andrew Post
  */
-final class RelationalDatabaseSpec implements Serializable {
+public final class RelationalDatabaseSpec implements Serializable {
 
     private static final long serialVersionUID = -7404642542962229266L;
     private static final EntitySpec[] EMPTY_ES_ARR = new EntitySpec[0];

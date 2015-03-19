@@ -28,7 +28,7 @@ import java.util.Set;
 /**
  * Class for creating staging areas
  */
-abstract class AbstractStagingCreateStatement implements CreateStatement {
+public abstract class AbstractStagingCreateStatement implements CreateStatement {
 
     private final StagingSpec stagingSpec;
 

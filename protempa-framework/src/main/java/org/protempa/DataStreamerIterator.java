@@ -19,7 +19,9 @@
  */
 package org.protempa;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.protempa.proposition.Proposition;
 
@@ -111,7 +113,7 @@ final class DataStreamerIterator<E extends Proposition> {
                 if (i == 0) {
                     this.currentMin = null;
                     for (DataStreamingEvent<E> elt : this.currentElt) {
-                        currentMin = min(currentMin, elt);
+                        currentMin = min(elt);
                     }
                 }
                 /*
@@ -169,15 +171,14 @@ final class DataStreamerIterator<E extends Proposition> {
         }
     }
 
-    private static DataStreamingEvent min(DataStreamingEvent elt1, 
-            DataStreamingEvent elt2) {
+    private DataStreamingEvent min(DataStreamingEvent elt2) {
+        DataStreamingEvent elt1 = this.currentMin;
         if (elt1 == null) {
             return elt2;
         } else if (elt2 == null) {
             return elt1;
         } else {
-            String keyId = elt1.getKeyId();
-            return keyId.compareTo(elt2.getKeyId()) < 0 ? elt1 : elt2;
+            return elt1.getKeyId().compareTo(elt2.getKeyId()) < 0 ? elt1 : elt2;
         }
     }
 }

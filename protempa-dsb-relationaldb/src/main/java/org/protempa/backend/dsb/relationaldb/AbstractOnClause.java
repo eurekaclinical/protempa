@@ -19,11 +19,11 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-abstract class AbstractOnClause implements OnClause {
+public abstract class AbstractOnClause implements OnClause {
     private final JoinSpec joinSpec;
     private final TableAliaser referenceIndices;
 
-    AbstractOnClause(JoinSpec joinSpec, TableAliaser referenceIndices) {
+    protected AbstractOnClause(JoinSpec joinSpec, TableAliaser referenceIndices) {
         this.joinSpec = joinSpec;
         this.referenceIndices = referenceIndices;
     }

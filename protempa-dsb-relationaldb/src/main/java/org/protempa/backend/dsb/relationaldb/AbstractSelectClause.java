@@ -22,7 +22,7 @@ package org.protempa.backend.dsb.relationaldb;
 import java.util.Map;
 import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
-abstract class AbstractSelectClause implements SelectClause {
+public abstract class AbstractSelectClause implements SelectClause {
 
     private final ColumnSpecInfo info;
     private final TableAliaser referenceIndices;
@@ -30,7 +30,7 @@ abstract class AbstractSelectClause implements SelectClause {
     private CaseClause caseClause;
     private final boolean wrapKeyId;
 
-    AbstractSelectClause(ColumnSpecInfo info, TableAliaser referenceIndices,
+    protected AbstractSelectClause(ColumnSpecInfo info, TableAliaser referenceIndices,
             EntitySpec entitySpec, boolean wrapKeyId) {
         this.info = info;
         this.referenceIndices = referenceIndices;

@@ -19,14 +19,14 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-abstract class AbstractInClause implements InClause {
+public abstract class AbstractInClause implements InClause {
 
     private final ColumnSpec columnSpec;
     private final Object[] elements;
     private final boolean not;
     private final TableAliaser referenceIndices;
 
-    AbstractInClause(ColumnSpec columnSpec, Object[] elements, boolean not,
+    protected AbstractInClause(ColumnSpec columnSpec, Object[] elements, boolean not,
             TableAliaser referenceIndices) {
         this.columnSpec = columnSpec;
         this.elements = elements;

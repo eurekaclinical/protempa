@@ -28,7 +28,6 @@ import org.protempa.DataStreamingEventIterator;
 import org.protempa.UniqueIdPair;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.dsb.filter.PositionFilter;
-import org.protempa.backend.dsb.relationaldb.Operator;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.GranularityFactory;
@@ -49,8 +48,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -105,7 +102,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         this.backend = backend;
     }
     
-    boolean getStreamingMode() {
+    public boolean getStreamingMode() {
         return true;
     }
 
@@ -598,9 +595,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     List<Set<Filter>> refsFilterSets = constructPartitions(
                             referredToEntitySpec, refsApplicableFilters);
 
-                    SortedMap<String, ReferenceSpec> applicableRefSpecs = new
-                            TreeMap<>();
-
                     for (Set<Filter> filterSet : refsFilterSets) {
                         generateAndExecuteSelect(entitySpec, referenceSpec,
                                 propIds, filterSet, allEntitySpecsCopyForRefs,
@@ -647,7 +641,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                         allEntitySpecsCopyForRefs,
                         referenceSpec.getEntityName());
                 assert referredToEntitySpec != null :
-                        "refferedToEntitySpec should not be null";
+                        "referredToEntitySpec should not be null";
                 refResultProcessor =
                         factory.getStreamingRefInstance(referenceSpec,
                         entitySpec, dataSourceBackendId);

@@ -23,7 +23,6 @@ import java.util.LinkedHashMap;
 import org.protempa.proposition.Event;
 
 import java.util.Map;
-import java.util.SortedMap;
 
 /**
  * 

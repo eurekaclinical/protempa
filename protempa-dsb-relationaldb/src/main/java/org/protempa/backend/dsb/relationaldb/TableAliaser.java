@@ -22,21 +22,20 @@ package org.protempa.backend.dsb.relationaldb;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-final class TableAliaser {
+public final class TableAliaser {
 
     private static final String DEFAULT_PREFIX = "a";
 
     private final String prefix;
     private Map<ColumnSpec, Integer> indices;
 
-    TableAliaser(List<IntColumnSpecWrapper> columnSpecs) {
+    public TableAliaser(List<IntColumnSpecWrapper> columnSpecs) {
         this(columnSpecs, DEFAULT_PREFIX);
     }
 
-    TableAliaser(List<IntColumnSpecWrapper> columnSpecs, String prefix) {
+    public TableAliaser(List<IntColumnSpecWrapper> columnSpecs, String prefix) {
         this.prefix = prefix;
         assert !columnSpecs.isEmpty() : "columnSpecs cannot be empty";
         computeReferenceIndices(columnSpecs);
@@ -50,11 +49,11 @@ final class TableAliaser {
         }
     }
 
-    String generateTableReference(ColumnSpec columnSpec) {
+    public String generateTableReference(ColumnSpec columnSpec) {
         return prefix + getIndex(columnSpec);
     }
 
-    String generateColumnReference(ColumnSpec columnSpec) {
+    public String generateColumnReference(ColumnSpec columnSpec) {
         String expr = columnSpec.getExpr();
         if (expr == null) {
             expr = generateTableReference(columnSpec) + "."

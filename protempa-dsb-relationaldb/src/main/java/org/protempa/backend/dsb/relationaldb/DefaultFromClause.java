@@ -23,9 +23,9 @@ import java.util.List;
 
 import org.protempa.backend.dsb.relationaldb.JoinSpec.JoinType;
 
-final class DefaultFromClause extends AbstractFromClause {
+public final class DefaultFromClause extends AbstractFromClause {
 
-    DefaultFromClause(EntitySpec currentSpec, List<ColumnSpec> columnSpecs,
+    public DefaultFromClause(EntitySpec currentSpec, List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices) {
         super(currentSpec, columnSpecs, referenceIndices);
     }

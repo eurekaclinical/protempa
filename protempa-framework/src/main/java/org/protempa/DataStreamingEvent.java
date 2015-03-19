@@ -54,6 +54,4 @@ public final class DataStreamingEvent<E> {
         return ToStringBuilder.reflectionToString(this);
     }
     
-    
-    
 }

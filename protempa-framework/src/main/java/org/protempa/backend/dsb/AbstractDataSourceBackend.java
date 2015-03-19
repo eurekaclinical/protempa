@@ -20,6 +20,7 @@
 package org.protempa.backend.dsb;
 
 
+import java.util.Comparator;
 import java.util.Set;
 import org.protempa.BackendCloseException;
 import org.protempa.DataSourceWriteException;
@@ -47,6 +48,7 @@ public abstract class AbstractDataSourceBackend extends
     private String keyType;
     private GranularityFactory granularityFactory;
     private UnitFactory unitFactory;
+    private Comparator<Object> keyIdComparator;
 
     protected AbstractDataSourceBackend() {
         this.granularityFactory = absTimeGranularityFactory;
@@ -86,6 +88,15 @@ public abstract class AbstractDataSourceBackend extends
         } else {
             this.unitFactory = unitFactory;
         }
+    }
+    
+    public void setKeyIdComparator(Comparator<Object> keyIdComparator) {
+        this.keyIdComparator = keyIdComparator;
+    }
+
+    @Override
+    public Comparator<Object> getKeyIdComparator() {
+        return this.keyIdComparator;
     }
     
     @Override

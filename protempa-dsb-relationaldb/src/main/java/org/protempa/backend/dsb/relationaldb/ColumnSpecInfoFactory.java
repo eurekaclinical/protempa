@@ -39,9 +39,9 @@ import org.protempa.proposition.interval.Interval.Side;
  *
  * @author Andrew Post
  */
-final class ColumnSpecInfoFactory {
+public final class ColumnSpecInfoFactory {
 
-    ColumnSpecInfo newInstance(Set<String> propIds, EntitySpec entitySpec,
+    public ColumnSpecInfo newInstance(Set<String> propIds, EntitySpec entitySpec,
             Collection<EntitySpec> entitySpecs, Map<String, ReferenceSpec>
             inboundRefSpecs, Collection<Filter> filters, ReferenceSpec referenceSpec,
             boolean streamingMode) {

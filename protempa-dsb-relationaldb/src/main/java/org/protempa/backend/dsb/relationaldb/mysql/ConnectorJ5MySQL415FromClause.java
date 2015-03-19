@@ -17,11 +17,20 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.mysql;
 
 import java.util.List;
+import org.protempa.backend.dsb.relationaldb.AbstractFromClause;
+import org.protempa.backend.dsb.relationaldb.ColumnSpec;
+import org.protempa.backend.dsb.relationaldb.DefaultJoinClause;
+import org.protempa.backend.dsb.relationaldb.DefaultOnClause;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.JoinClause;
+import org.protempa.backend.dsb.relationaldb.JoinSpec;
 
 import org.protempa.backend.dsb.relationaldb.JoinSpec.JoinType;
+import org.protempa.backend.dsb.relationaldb.OnClause;
+import org.protempa.backend.dsb.relationaldb.TableAliaser;
 
 
 final class ConnectorJ5MySQL415FromClause extends AbstractFromClause {

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-abstract class AbstractSelectStatement implements SelectStatement {
+public abstract class AbstractSelectStatement implements SelectStatement {
 
     private final EntitySpec entitySpec;
     private final ReferenceSpec referenceSpec;
@@ -103,13 +103,13 @@ abstract class AbstractSelectStatement implements SelectStatement {
         return stagedTables;
     }
 
-    abstract SelectClause getSelectClause(ColumnSpecInfo info,
+    protected abstract SelectClause getSelectClause(ColumnSpecInfo info,
             TableAliaser referenceIndices, EntitySpec entitySpec, boolean wrapKeyId);
 
-    abstract FromClause getFromClause(List<ColumnSpec> columnSpecs,
+    protected abstract FromClause getFromClause(List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices, StagingSpec[] stagedTables);
 
-    abstract WhereClause getWhereClause(Set<String> propIds,
+    protected abstract WhereClause getWhereClause(Set<String> propIds,
             ColumnSpecInfo info, List<EntitySpec> entitySpecs,
             Set<Filter> filters, TableAliaser referenceIndices,
             Set<String> keyIds, SQLOrderBy order,
@@ -139,7 +139,7 @@ abstract class AbstractSelectStatement implements SelectStatement {
         return result.toString();
     }
     
-    final List<ColumnSpec> toColumnSpecs(List<IntColumnSpecWrapper> columnSpecWrappers) {
+    protected final List<ColumnSpec> toColumnSpecs(List<IntColumnSpecWrapper> columnSpecWrappers) {
         List<ColumnSpec> result = new ArrayList<ColumnSpec>();
         for (IntColumnSpecWrapper icsw : columnSpecWrappers) {
             result.add(icsw.getColumnSpec());

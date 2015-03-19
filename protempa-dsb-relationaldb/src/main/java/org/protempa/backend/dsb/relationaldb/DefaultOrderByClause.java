@@ -19,7 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-class DefaultOrderByClause extends AbstractOrderByClause {
+public final class DefaultOrderByClause extends AbstractOrderByClause {
 
     public DefaultOrderByClause(ColumnSpec keyIdSpec, SQLOrderBy order,
             TableAliaser referenceIndices) {

@@ -41,7 +41,6 @@ import org.protempa.proposition.value.UnitFactory;
 public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent, DataSourceBackend, 
         DataSourceUpdatedEvent, DataSourceBackendUpdatedEvent> implements DataSource {
     
-    private QueryResultsHandler queryResultsHandler;
 
     public DataSourceImpl(DataSourceBackend[] backends) {
         super(backends != null ? backends : new DataSourceBackend[0]);

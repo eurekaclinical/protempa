@@ -17,10 +17,15 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.oracle;
 
 import java.util.List;
 import java.util.Map;
+import org.protempa.backend.dsb.relationaldb.ColumnSpec;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
+import org.protempa.backend.dsb.relationaldb.StagingSpec;
+import org.protempa.backend.dsb.relationaldb.TableAliaser;
 
 final class Ojdbc6OracleStagingFromClause extends Ojdbc6OracleFromClause {
 

@@ -17,13 +17,27 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.psql;
 
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.protempa.backend.dsb.relationaldb.AbstractSelectStatement;
+import org.protempa.backend.dsb.relationaldb.ColumnSpec;
+import org.protempa.backend.dsb.relationaldb.ColumnSpecInfo;
+import org.protempa.backend.dsb.relationaldb.DefaultFromClause;
+import org.protempa.backend.dsb.relationaldb.DefaultWhereClause;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.FromClause;
+import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
+import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
+import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
+import org.protempa.backend.dsb.relationaldb.SelectClause;
+import org.protempa.backend.dsb.relationaldb.StagingSpec;
+import org.protempa.backend.dsb.relationaldb.TableAliaser;
+import org.protempa.backend.dsb.relationaldb.WhereClause;
 
 final class PostgresqlSelectStatement extends AbstractSelectStatement {
 
@@ -38,7 +52,7 @@ final class PostgresqlSelectStatement extends AbstractSelectStatement {
     }
 
     @Override
-    SelectClause getSelectClause(ColumnSpecInfo info,
+    protected SelectClause getSelectClause(ColumnSpecInfo info,
             TableAliaser referenceIndices, EntitySpec entitySpec,
             boolean wrapKeyId) {
         return new PostgresqlSelectClause(info, referenceIndices, entitySpec,
@@ -46,13 +60,13 @@ final class PostgresqlSelectStatement extends AbstractSelectStatement {
     }
 
     @Override
-    FromClause getFromClause(List<ColumnSpec> columnSpecs,
+    protected FromClause getFromClause(List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices, StagingSpec[] stagedTables) {
         return new DefaultFromClause(getEntitySpec(), columnSpecs, referenceIndices);
     }
 
     @Override
-    WhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
+    protected WhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,

@@ -19,11 +19,11 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-abstract class AbstractJoinClause implements JoinClause {
+public abstract class AbstractJoinClause implements JoinClause {
 
     private final JoinSpec.JoinType joinType;
     
-    AbstractJoinClause(JoinSpec.JoinType joinType) {
+    protected AbstractJoinClause(JoinSpec.JoinType joinType) {
         this.joinType = joinType;
     }
     

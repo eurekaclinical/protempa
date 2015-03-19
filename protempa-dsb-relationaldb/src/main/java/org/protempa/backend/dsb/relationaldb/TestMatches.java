@@ -1,8 +1,15 @@
 /*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package org.protempa.backend.dsb.relationaldb;
+
+/*
  * #%L
- * Protempa Commons Backend Provider
+ * Protempa Relational Database Data Source Backend
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +24,13 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
 
-public interface JoinClause extends SqlClause {
-
+/**
+ *
+ * @author arpost
+ */
+public class TestMatches {
+    public static void main(String[] args) {
+        System.out.println("MATCHES: " + "Hello world".matches("Hello world"));
+    }
 }

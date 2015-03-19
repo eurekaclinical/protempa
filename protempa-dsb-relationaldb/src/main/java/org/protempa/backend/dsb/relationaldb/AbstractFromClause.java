@@ -19,13 +19,10 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-abstract class AbstractFromClause implements FromClause {
+public abstract class AbstractFromClause implements FromClause {
 
     private final EntitySpec currentSpec;
     private final List<ColumnSpec> columnSpecs;

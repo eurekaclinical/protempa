@@ -17,14 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.psql;
 
+import org.protempa.backend.dsb.relationaldb.AbstractSelectClause;
+import org.protempa.backend.dsb.relationaldb.CaseClause;
+import org.protempa.backend.dsb.relationaldb.ColumnSpec;
+import org.protempa.backend.dsb.relationaldb.ColumnSpecInfo;
+import org.protempa.backend.dsb.relationaldb.DefaultCaseClause;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.TableAliaser;
 import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
 
-final class Ojdbc6SelectClause extends AbstractSelectClause {
+final class PostgresqlSelectClause extends AbstractSelectClause {
 
-    Ojdbc6SelectClause(ColumnSpecInfo info, TableAliaser referenceIndices,
+    PostgresqlSelectClause(ColumnSpecInfo info, TableAliaser referenceIndices,
             EntitySpec entitySpec, boolean wrapKeyId) {
         super(info, referenceIndices, entitySpec, wrapKeyId);
     }
@@ -36,9 +43,14 @@ final class Ojdbc6SelectClause extends AbstractSelectClause {
                 mappings);
     }
 
+    /**
+     * We sort key ids in Java by strings' natural order. To get the same 
+     * behavior in postgresql, we need to add COLLATE "C" to the column
+     * specification. Only works in Postgresql version 9.1 or greater.
+     */
     @Override
     protected String wrapKeyIdInConversion(String columnStr) {
-        return "to_char(" + columnStr + ")";
+        return "(CAST(" + columnStr + " AS VARCHAR) COLLATE \"C\")";
     }
 
 }

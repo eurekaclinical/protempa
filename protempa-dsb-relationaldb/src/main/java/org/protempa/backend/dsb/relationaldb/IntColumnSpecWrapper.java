@@ -28,7 +28,7 @@ import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
  *
  * @author Andrew Post
  */
-final class IntColumnSpecWrapper implements IColumnSpec {
+public final class IntColumnSpecWrapper implements IColumnSpec {
     private final ColumnSpec columnSpec;
     private ColumnSpec isSameAs;
 

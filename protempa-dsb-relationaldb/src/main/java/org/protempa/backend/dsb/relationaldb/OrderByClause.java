@@ -19,6 +19,6 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-interface OrderByClause extends SqlClause {
+public interface OrderByClause extends SqlClause {
 
 }

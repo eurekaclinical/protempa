@@ -23,9 +23,8 @@ package org.protempa.backend.dsb.relationaldb;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.apache.commons.lang3.ArrayUtils;
+import org.arp.javautil.sql.DatabaseMetaDataWrapper;
+import org.arp.javautil.version.MajorMinorVersion;
 
 /**
  * Abstract class for constructing a SQL generator with useful compatibility
@@ -36,9 +35,11 @@ import org.apache.commons.lang3.ArrayUtils;
 public abstract class AbstractSQLGeneratorWithCompatChecks extends AbstractSQLGenerator {
     private final String driverClassName;
     private final String driverName;
-    private final int[] driverMajorVersions;
+    private final MajorMinorVersion minDriverVersion;
+    private final MajorMinorVersion maxDriverVersion;
     private final String databaseProductName;
-    private final int[] databaseMajorVersions;
+    private final MajorMinorVersion minDatabaseVersion;
+    private final MajorMinorVersion maxDatabaseVersion;
 
     /**
      * Creates a SQL generator with the specified driver class name and 
@@ -61,38 +62,30 @@ public abstract class AbstractSQLGeneratorWithCompatChecks extends AbstractSQLGe
      * <code>null</code>.
      */
     public AbstractSQLGeneratorWithCompatChecks(String driverClassName, 
-            String driverName, int[] driverMajorVersions, 
-            String databaseProductName, int[] databaseMajorVersions) {
+            String driverName, MajorMinorVersion minDriverVersion,
+            MajorMinorVersion maxDriverVersion,
+            String databaseProductName, MajorMinorVersion minDatabaseVersion,
+            MajorMinorVersion maxDatabaseVersion) {
         if (driverName == null) {
             throw new IllegalArgumentException("driverName cannot be null");
         }
-        if (driverMajorVersions == null) {
-            throw new IllegalArgumentException("driverMajorVersions cannot be null");
-        }
         if (databaseProductName == null) {
             throw new IllegalArgumentException("databaseProductName cannot be null");
-        }
-        if (databaseMajorVersions == null) {
-            throw new IllegalArgumentException("databaseMajorVersions cannot be null");
-        }
-        
+        }        
         this.driverClassName = driverClassName;
         this.driverName = driverName;
-        this.driverMajorVersions = driverMajorVersions.clone();
+        this.minDriverVersion = minDriverVersion;
+        this.maxDriverVersion = maxDriverVersion;
         this.databaseProductName = databaseProductName;
-        this.databaseMajorVersions = databaseMajorVersions.clone();
+        this.minDatabaseVersion = minDatabaseVersion;
+        this.maxDatabaseVersion = maxDatabaseVersion;
     }
     
     @Override
     public final boolean checkCompatibility(Connection connection) throws SQLException {
-        if (!checkDriverCompatibilitiy(connection)) {
-            return false;
-        }
-        if (!checkDatabaseCompatibility(connection)) {
-            return false;
-        }
-
-        return true;
+        DatabaseMetaDataWrapper metaDataWrapper = new DatabaseMetaDataWrapper(connection.getMetaData());
+        return metaDataWrapper.isDatabaseCompatible(this.databaseProductName, this.minDatabaseVersion, this.maxDatabaseVersion) && 
+                metaDataWrapper.isDriverCompatible(this.driverName, this.minDriverVersion, this.maxDriverVersion);
     }
     
     @Override
@@ -100,39 +93,4 @@ public abstract class AbstractSQLGeneratorWithCompatChecks extends AbstractSQLGe
         return this.driverClassName;
     }
     
-    private boolean checkDriverCompatibilitiy(Connection connection)
-            throws SQLException {
-        Logger logger = SQLGenUtil.logger();
-        DatabaseMetaData metaData = connection.getMetaData();
-        String name = metaData.getDriverName();
-        logger.log(Level.FINER, "Database driver name: {0}", name);
-        if (!name.equals(this.driverName)) {
-            return false;
-        }
-        int driverMajorVersion = metaData.getDriverMajorVersion();
-        logger.log(Level.FINER, "Driver version: {0}", driverMajorVersion);
-        if (!ArrayUtils.contains(this.driverMajorVersions, driverMajorVersion)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean checkDatabaseCompatibility(Connection connection)
-            throws SQLException {
-        Logger logger = SQLGenUtil.logger();
-        DatabaseMetaData metaData = connection.getMetaData();
-        String databaseProductName = metaData.getDatabaseProductName();
-        logger.log(Level.FINER, "Database product name: {0}", databaseProductName);
-        if (!databaseProductName.equalsIgnoreCase(this.databaseProductName)) {
-            return false;
-        }
-        int databaseMajorVersion = metaData.getDatabaseMajorVersion();
-        logger.log(Level.FINER, "Database major version: {0}", databaseMajorVersion);
-        if (!ArrayUtils.contains(this.databaseMajorVersions, databaseMajorVersion)) {
-            return false;
-        }
-
-        return true;
-    }
 }

@@ -17,14 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.h2;
 
+import org.protempa.backend.dsb.relationaldb.AbstractSelectClause;
+import org.protempa.backend.dsb.relationaldb.CaseClause;
+import org.protempa.backend.dsb.relationaldb.ColumnSpec;
+import org.protempa.backend.dsb.relationaldb.ColumnSpecInfo;
+import org.protempa.backend.dsb.relationaldb.DefaultCaseClause;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.TableAliaser;
 import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
 
-final class ConnectorJ5MySQL415SelectClause extends AbstractSelectClause {
+final class H2SelectClause extends AbstractSelectClause {
 
-    ConnectorJ5MySQL415SelectClause(ColumnSpecInfo info, TableAliaser referenceIndices,
+    H2SelectClause(ColumnSpecInfo info, TableAliaser referenceIndices,
             EntitySpec entitySpec, boolean wrapKeyId) {
         super(info, referenceIndices, entitySpec, wrapKeyId);
     }
@@ -38,7 +45,7 @@ final class ConnectorJ5MySQL415SelectClause extends AbstractSelectClause {
 
     @Override
     protected String wrapKeyIdInConversion(String columnStr) {
-        return "CONVERT(" + columnStr + ", CHAR)";
+        return "CONVERT(" + columnStr + ", VARCHAR)";
     }
 
 }

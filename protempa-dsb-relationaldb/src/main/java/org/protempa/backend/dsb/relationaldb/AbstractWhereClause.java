@@ -24,8 +24,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.backend.dsb.filter.Filter;
@@ -42,7 +40,7 @@ import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.value.ValueList;
 import org.protempa.proposition.value.ValueVisitor;
 
-abstract class AbstractWhereClause implements WhereClause {
+public abstract class AbstractWhereClause implements WhereClause {
     private final Set<String> propIds;
     private final ColumnSpecInfo info;
     private final List<EntitySpec> entitySpecs;

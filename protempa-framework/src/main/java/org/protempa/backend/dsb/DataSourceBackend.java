@@ -19,6 +19,7 @@
  */
 package org.protempa.backend.dsb;
 
+import java.util.Comparator;
 import java.util.Set;
 import org.protempa.*;
 import org.protempa.backend.Backend;
@@ -69,5 +70,7 @@ public interface DataSourceBackend extends
     void deleteAllKeys() throws DataSourceWriteException;
 
     void writeKeys(Set<String> keyIds) throws DataSourceWriteException;
+    
+    Comparator<Object> getKeyIdComparator();
 
 }

@@ -28,8 +28,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -48,7 +46,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.io.FileUtils;
 import org.arp.javautil.datastore.DataStore;
 import org.arp.javautil.io.UniqueDirectoryCreator;
@@ -60,7 +57,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.protempa.AbstractionFinderTestHelper;
-import org.protempa.CloseException;
 import org.protempa.CompoundLowLevelAbstractionDefinition;
 import org.protempa.ValueClassification;
 import org.protempa.CompoundLowLevelAbstractionDefinition.ValueDefinitionMatchOperator;
@@ -106,10 +102,6 @@ import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.dest.Destination;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 /**
  * Unit tests for Protempa.
@@ -203,18 +195,13 @@ public class ProtempaTest {
     /*
      * Spreadsheet reader and data provider
      */
-    private DataProvider dataProvider;
+    private static DataProvider dataProvider;
 
     /*
      * Number of patients in the dataset
      */
-    private int patientCount;
-    private DataInserter inserter;
-
-    /*
-     * Binding for the BioPortal H2 database connection pool
-     */
-    InitialContext initialContext;
+    private static int patientCount;
+    private static DataInserter inserter;
 
     /**
      * Performs set up operations required for all testing (eg, setting up the
@@ -224,19 +211,18 @@ public class ProtempaTest {
      */
     @BeforeClass
     public static void setUpAll() throws Exception {
-    }
-
-    private void initializeProtempa() throws ProtempaStartupException,
-            BackendProviderSpecLoaderException, ConfigurationsLoadException,
-            InvalidConfigurationException, ConfigurationsNotFoundException {
-        // force the use of the H2 driver so we don't bother trying to load
-        // others
-        System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
-                "org.protempa.backend.dsb.relationaldb.H2SQLGenerator");
-        SourceFactory sf = new SourceFactory(
-                new INIConfigurations(new File("src/test/resources")),
-                "protege-h2-test-config");
-        protempa = Protempa.newInstance(sf);
+        logger.log(Level.INFO, "Populating database");
+        dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
+        inserter = new DataInserter("jdbc:h2:mem:test;INIT=RUNSCRIPT FROM 'src/test/resources/dsb/test-schema.sql';DB_CLOSE_DELAY=-1");
+        patientCount = dataProvider.getPatients().size();
+        inserter.insertPatients(dataProvider.getPatients());
+        inserter.insertEncounters(dataProvider.getEncounters());
+        inserter.insertProviders(dataProvider.getProviders());
+        inserter.insertIcd9Diagnoses(dataProvider.getIcd9Diagnoses());
+        inserter.insertIcd9Procedures(dataProvider.getIcd9Procedures());
+        inserter.insertLabs(dataProvider.getLabs());
+        inserter.insertVitals(dataProvider.getVitals());
+        logger.log(Level.INFO, "Database populated");
     }
 
     /**
@@ -247,95 +233,18 @@ public class ProtempaTest {
      */
     @AfterClass
     public static void tearDownAll() throws Exception {
-    }
-
-    /**
-     * @throws Exception
-     */
-    @Before
-    public void setUp() throws DataProviderException, SQLException,
-            ProtempaStartupException, BackendProviderSpecLoaderException,
-            ConfigurationsLoadException, InvalidConfigurationException,
-            ConfigurationsNotFoundException, NamingException, IOException {
-
-        // Create the bioportal ksb database
-        File ksbBioportalDb = File.createTempFile("bioportal-dsb", ".db");
-        try (Connection connection = DriverManager.getConnection("jdbc:h2:" + ksbBioportalDb.getAbsolutePath() +  ";USER=sa;INIT=RUNSCRIPT FROM 'src/test/resources/ksb/bioportal.sql'")) {
-            
-        }
-        
-        // set up a data source/connection pool for accessing the BioPortal H2 database
-        BasicDataSource bds = new BasicDataSource();
-        bds.setDriverClassName("org.h2.Driver");
-        bds.setUrl("jdbc:h2:" + ksbBioportalDb.getAbsolutePath() +  ";USER=sa");
-        bds.setMinIdle(1);
-        bds.setMaxIdle(5);
-        bds.setMaxTotal(5);
-        System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.apache.naming.java.javaURLContextFactory");
-        System.setProperty(Context.URL_PKG_PREFIXES, "org.apache.naming");
-        this.initialContext = new InitialContext();
-        this.initialContext.createSubcontext("java:");
-        this.initialContext.createSubcontext("java:/comp");
-        this.initialContext.createSubcontext("java:/comp/env");
-        this.initialContext.createSubcontext("java:/comp/env/jdbc");
-        this.initialContext.bind("java:/comp/env/jdbc/BioPortalDS", bds);
-
-        logger.log(Level.INFO, "Populating database");
-        this.dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
-        inserter = new DataInserter("jdbc:h2:mem:test;INIT=RUNSCRIPT FROM 'src/test/resources/dsb/test-schema.sql';DB_CLOSE_DELAY=-1");
-        this.patientCount = dataProvider.getPatients().size();
-        inserter.insertPatients(dataProvider.getPatients());
-        inserter.insertEncounters(dataProvider.getEncounters());
-        inserter.insertProviders(dataProvider.getProviders());
-        inserter.insertIcd9Diagnoses(dataProvider.getIcd9Diagnoses());
-        inserter.insertIcd9Procedures(dataProvider.getIcd9Procedures());
-        inserter.insertLabs(dataProvider.getLabs());
-        inserter.insertVitals(dataProvider.getVitals());
-        logger.log(Level.INFO, "Database populated");
-
-        initializeProtempa();
-    }
-
-    /**
-     * @throws Exception
-     */
-    @After
-    public void tearDown() throws Exception {
         Exception exceptionToThrow = null;
-        
         try {
-            if (this.protempa != null) {
-                this.protempa.close();
-            }
-        } catch (CloseException ex) {
-            exceptionToThrow = ex;
-        }
-        
-        try {
-            this.inserter.truncateTables();
+            inserter.truncateTables();
         } catch (SQLException ex) {
             if (exceptionToThrow == null) {
                 exceptionToThrow = ex;
             }
         }
-        
+
         try {
-            this.inserter.close();
+            inserter.close();
         } catch (SQLException ex) {
-            if (exceptionToThrow == null) {
-                exceptionToThrow = ex;
-            }
-        }
-        
-        try {
-            // Tear down the context binding to the BioPortal h2 connection pool
-            this.initialContext.unbind("java:/comp/env/jdbc/BioPortalDS");
-            this.initialContext.destroySubcontext("java:/comp/env/jdbc");
-            this.initialContext.destroySubcontext("java:/comp/env");
-            this.initialContext.destroySubcontext("java:/comp");
-            this.initialContext.destroySubcontext("java:");
-            this.initialContext.close();
-        } catch (NamingException ex) {
             if (exceptionToThrow == null) {
                 exceptionToThrow = ex;
             }
@@ -344,7 +253,31 @@ public class ProtempaTest {
         if (exceptionToThrow != null) {
             throw exceptionToThrow;
         }
+    }
 
+    /**
+     * @throws Exception
+     */
+    @Before
+    public void setUp() throws Exception {
+        // force the use of the H2 driver so we don't bother trying to load
+        // others
+        System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
+                "org.protempa.backend.dsb.relationaldb.h2.H2SQLGenerator");
+        SourceFactory sf = new SourceFactory(
+                new INIConfigurations(new File("src/test/resources")),
+                "protege-h2-test-config");
+        protempa = Protempa.newInstance(sf);
+    }
+
+    /**
+     * @throws Exception
+     */
+    @After
+    public void tearDown() throws Exception {
+        if (this.protempa != null) {
+            this.protempa.close();
+        }
     }
 
     /**
@@ -353,8 +286,7 @@ public class ProtempaTest {
      * processing, and output.
      */
     @Test
-    public void testProtempaWithPersistence() throws IOException,
-            ParseException {
+    public void testProtempaWithPersistence() throws Exception {
         File dir = new UniqueDirectoryCreator().create("test-protempa", null,
                 FileUtils.getTempDirectory());
         try {
@@ -372,9 +304,7 @@ public class ProtempaTest {
      * verifies that the final output is correct.
      */
     @Test
-    public void testProtempaWithoutPersistence() throws FinderException,
-            ParseException, KnowledgeSourceReadException, QueryBuildException,
-            IOException {
+    public void testProtempaWithoutPersistence() throws Exception {
         File outputFile = File.createTempFile("protempa-test", null);
         try (FileWriter fw = new FileWriter(outputFile)) {
             Destination destination
@@ -863,7 +793,7 @@ public class ProtempaTest {
                 Destination destination = new SingleColumnDestination(fw);
                 protempa.outputResults(query(), destination, environmentName);
                 System.err.println("output written to "
-                                + outputFile.getAbsolutePath());
+                        + outputFile.getAbsolutePath());
             }
             boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);
             assertTrue("output doesn't match", outputMatches);
@@ -1169,7 +1099,7 @@ public class ProtempaTest {
                 0,
                 getDerivedPropositionsForKey(ICD9_013_82,
                         afh.getBackwardDerivations("0")).size());
-        
+
         logger.log(Level.INFO, "Completed ICD9 test");
     }
 
@@ -1657,5 +1587,5 @@ public class ProtempaTest {
                     r.getValue().size());
         }
     }
-    
+
 }

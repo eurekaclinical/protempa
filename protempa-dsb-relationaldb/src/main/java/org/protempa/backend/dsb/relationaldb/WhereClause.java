@@ -20,7 +20,7 @@
 package org.protempa.backend.dsb.relationaldb;
 
 
-interface WhereClause extends SqlClause {
+public interface WhereClause extends SqlClause {
     InClause getInClause(ColumnSpec columnSpec, Object[] elements, boolean not);
 
     OrderByClause getOrderByClause(ColumnSpec keyIdSpec);

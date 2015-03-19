@@ -35,7 +35,7 @@ import org.arp.javautil.sql.SQLExecutor.ResultProcessor;
  * 
  * @author Andrew Post
  */
-class RetryableSQLExecutor implements
+public class RetryableSQLExecutor implements
         Retryable<SQLException> {
 
     private static final long THREE_SECONDS = 3 * 1000L;
@@ -59,7 +59,7 @@ class RetryableSQLExecutor implements
      * the specified timeout. If <code>null</code> is specified, no timeout is 
      * set.
      */
-    RetryableSQLExecutor(ConnectionSpec connectionSpec, String query,
+    public RetryableSQLExecutor(ConnectionSpec connectionSpec, String query,
             ResultProcessor resultProcessor, Integer queryTimeout) {
         assert connectionSpec != null : "connectionSpec cannot be null";
         this.connectionSpec = connectionSpec;
@@ -81,7 +81,7 @@ class RetryableSQLExecutor implements
      * <code>null</code>.
      * @param resultProcessor a {@link ResultProcessor}.
      */
-    RetryableSQLExecutor(ConnectionSpec connectionSpec, String query,
+    public RetryableSQLExecutor(ConnectionSpec connectionSpec, String query,
             ResultProcessor resultProcessor) {
         this(connectionSpec, query, resultProcessor, null);
     }

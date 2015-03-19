@@ -21,7 +21,7 @@ package org.protempa.backend.dsb.relationaldb;
 
 import java.sql.SQLException;
 
-interface DataStager {
+public interface DataStager {
 
     /**
      * Builds staging areas for SQL tables.

@@ -92,7 +92,7 @@ public class MultiplexingDataStreamingEventIterator
     public boolean hasNext() throws DataSourceReadException {
         if (this.next == null) {
             if (this.itr == null) {
-                this.itr = new DataStreamerIterator(itrs);
+                this.itr = new DataStreamerIterator(this.itrs);
             }
             boolean stopOnNext = false;
             while (this.itr.hasNext() && !stopOnNext) {

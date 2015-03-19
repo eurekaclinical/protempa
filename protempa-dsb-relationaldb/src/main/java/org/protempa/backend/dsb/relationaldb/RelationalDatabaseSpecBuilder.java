@@ -21,7 +21,6 @@ package org.protempa.backend.dsb.relationaldb;
  */
 
 import java.io.Serializable;
-import org.protempa.dest.QueryResultsHandler;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
 

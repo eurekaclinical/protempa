@@ -19,6 +19,6 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-interface InClause extends SqlClause {
+public interface InClause extends SqlClause {
 
 }

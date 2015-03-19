@@ -19,6 +19,6 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-interface CaseClause extends SqlClause {
+public interface CaseClause extends SqlClause {
 
 }

@@ -401,7 +401,7 @@ public class ColumnSpec implements Serializable, IColumnSpec {
      * @return <code>true</code> if the given table specification has the same
      *         schema and table as this one, <code>false</code> if not.
      */
-    boolean isSameSchemaAndTable(TableSpec tableSpec) {
+    public boolean isSameSchemaAndTable(TableSpec tableSpec) {
         return StringUtil.equals(tableSpec.getSchema(), this.schema)
                 && StringUtil.equals(tableSpec.getTable(), this.table);
     }
@@ -411,7 +411,7 @@ public class ColumnSpec implements Serializable, IColumnSpec {
      * 
      * @return a {@link ColumnSpec}
      */
-    ColumnSpec getLastSpec() {
+    public ColumnSpec getLastSpec() {
         if (this.joinSpec == null) {
             return this;
         } else {

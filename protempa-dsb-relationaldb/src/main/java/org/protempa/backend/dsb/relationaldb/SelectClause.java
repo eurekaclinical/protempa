@@ -21,7 +21,7 @@ package org.protempa.backend.dsb.relationaldb;
 
 import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
-interface SelectClause extends SqlClause {
+public interface SelectClause extends SqlClause {
     void setCaseClause(Object[] sqlCodes, ColumnSpec columnSpec,
             Mappings filteredConstraintValues);
 }

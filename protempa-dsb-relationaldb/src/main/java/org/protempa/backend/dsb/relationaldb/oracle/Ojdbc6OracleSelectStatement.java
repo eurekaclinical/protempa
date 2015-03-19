@@ -17,13 +17,25 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.oracle;
 
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.protempa.backend.dsb.relationaldb.AbstractSelectStatement;
+import org.protempa.backend.dsb.relationaldb.ColumnSpec;
+import org.protempa.backend.dsb.relationaldb.ColumnSpecInfo;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.FromClause;
+import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
+import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
+import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
+import org.protempa.backend.dsb.relationaldb.SelectClause;
+import org.protempa.backend.dsb.relationaldb.StagingSpec;
+import org.protempa.backend.dsb.relationaldb.TableAliaser;
+import org.protempa.backend.dsb.relationaldb.WhereClause;
 
 class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
 
@@ -40,7 +52,7 @@ class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
     }
 
     @Override
-    SelectClause getSelectClause(ColumnSpecInfo info,
+    protected SelectClause getSelectClause(ColumnSpecInfo info,
             TableAliaser referenceIndices, EntitySpec entitySpec,
             boolean wrapKeyId) {
         return new Ojdbc6SelectClause(info, referenceIndices, entitySpec,
@@ -55,7 +67,7 @@ class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
      * (java.util.List, java.util.Map)
      */
     @Override
-    FromClause getFromClause(List<ColumnSpec> columnSpecs,
+    protected FromClause getFromClause(List<ColumnSpec> columnSpecs,
             TableAliaser referenceIndices, StagingSpec[] stagedTables) {
         return new Ojdbc6OracleFromClause(getEntitySpec(), getInboundReferenceSpecs(), columnSpecs, referenceIndices, stagedTables);
     }
@@ -71,7 +83,7 @@ class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
      * org.protempa.bp.commons.dsb.relationaldb.SQLGenResultProcessor)
      */
     @Override
-    WhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
+    protected WhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, SelectClause selectClause, StagingSpec[] stagedTables) {

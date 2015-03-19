@@ -24,7 +24,7 @@ import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
 
-final class DefaultWhereClause extends AbstractWhereClause {
+public final class DefaultWhereClause extends AbstractWhereClause {
 
     public DefaultWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,

@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
-final class StagingSelectClause implements SelectClause {
+public final class StagingSelectClause implements SelectClause {
 
     private final StagingSpec stagingSpec;
     private final EntitySpec entitySpec;

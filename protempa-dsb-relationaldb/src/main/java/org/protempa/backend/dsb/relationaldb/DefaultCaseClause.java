@@ -21,7 +21,7 @@ package org.protempa.backend.dsb.relationaldb;
 
 import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 
-class DefaultCaseClause extends AbstractCaseClause {
+public class DefaultCaseClause extends AbstractCaseClause {
 
     public DefaultCaseClause(Object[] sqlCodes,
             TableAliaser referenceIndices, ColumnSpec columnSpec,

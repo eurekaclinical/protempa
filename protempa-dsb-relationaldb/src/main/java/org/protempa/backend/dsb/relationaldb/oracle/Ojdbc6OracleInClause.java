@@ -17,7 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.oracle;
+
+import org.protempa.backend.dsb.relationaldb.AbstractInClause;
+import org.protempa.backend.dsb.relationaldb.ColumnSpec;
+import org.protempa.backend.dsb.relationaldb.SqlGeneratorUtil;
+import org.protempa.backend.dsb.relationaldb.TableAliaser;
 
 
 final class Ojdbc6OracleInClause extends AbstractInClause {

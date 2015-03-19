@@ -17,12 +17,24 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.oracle;
 
 import java.util.List;
 import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.backend.dsb.relationaldb.AbstractWhereClause;
+import org.protempa.backend.dsb.relationaldb.ColumnSpec;
+import org.protempa.backend.dsb.relationaldb.ColumnSpecInfo;
+import org.protempa.backend.dsb.relationaldb.DefaultOrderByClause;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.InClause;
+import org.protempa.backend.dsb.relationaldb.OrderByClause;
+import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
+import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
+import org.protempa.backend.dsb.relationaldb.SelectClause;
+import org.protempa.backend.dsb.relationaldb.StagingSpec;
+import org.protempa.backend.dsb.relationaldb.TableAliaser;
 
 final class Ojdbc6OracleWhereClause extends AbstractWhereClause {
 

@@ -21,6 +21,7 @@ package org.protempa.backend.dsb.relationaldb;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.Set;
 import org.arp.javautil.sql.ConnectionSpec;
 
@@ -61,7 +62,7 @@ public interface SQLGenerator {
     GranularityFactory getGranularities();
 
     UnitFactory getUnits();
-
+    
     /**
      * Checks the compatibility of this generator with the database that
      * is connected to. Call {@link #loadDriverIfNeeded()} before calling this
@@ -87,7 +88,8 @@ public interface SQLGenerator {
      * @param connectionSpec a {@link ConnectionSpec}.
      * @param backend a {@link RelationalDatabaseDataSourceBackend}.
      */
-    void initialize(ConnectionSpec connectionSpec,
+    void initialize(
+            ConnectionSpec connectionSpec,
             RelationalDatabaseSpec relationalDatabaseSpec,
             RelationalDbDataSourceBackend backend);
 
@@ -100,4 +102,5 @@ public interface SQLGenerator {
      * <code>false</code> if not.
      */
     boolean loadDriverIfNeeded();
+    
 }

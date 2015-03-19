@@ -234,7 +234,7 @@ public abstract class RelationalDbDataSourceBackend
             setMappingsFactory(null);
         }
         this.relationalDatabaseSpecBuilder
-                = this.createRelationalDatabaseSpecBuilder();
+                = createRelationalDatabaseSpecBuilder();
     }
 
     public boolean isDryRun() {
@@ -385,7 +385,8 @@ public abstract class RelationalDbDataSourceBackend
             try {
                 ConnectionSpec connectionSpecInstance
                         = getConnectionSpecInstance();
-                this.sqlGenerator = new SQLGeneratorFactory(connectionSpecInstance,
+                this.sqlGenerator = new SQLGeneratorFactory(
+                        connectionSpecInstance,
                         this.relationalDatabaseSpecBuilder.build(queryResultsHandler),
                         this).newInstance();
             } catch (InvalidConnectionSpecArguments | SQLException | SQLGeneratorLoadException | NoCompatibleSQLGeneratorException ex) {

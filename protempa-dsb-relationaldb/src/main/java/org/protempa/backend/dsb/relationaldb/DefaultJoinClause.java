@@ -19,8 +19,8 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-final class DefaultJoinClause extends AbstractJoinClause {
-    DefaultJoinClause(JoinSpec.JoinType joinType) {
+public final class DefaultJoinClause extends AbstractJoinClause {
+    public DefaultJoinClause(JoinSpec.JoinType joinType) {
         super(joinType);
     }
 }

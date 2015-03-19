@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.oracle;
 
 import static org.arp.javautil.collections.Collections.containsAny;
 import static org.arp.javautil.collections.Collections.putList;
@@ -37,8 +37,19 @@ import org.arp.javautil.io.Retryer;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.SQLExecutor;
 import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.backend.dsb.relationaldb.CreateStatement;
+import org.protempa.backend.dsb.relationaldb.DataStager;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
+import org.protempa.backend.dsb.relationaldb.RetryableSQLExecutor;
+import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
+import org.protempa.backend.dsb.relationaldb.StagedColumnSpec;
+import org.protempa.backend.dsb.relationaldb.StagingSpec;
+import org.protempa.backend.dsb.relationaldb.TableSpec;
 
 final class Ojdbc6OracleDataStager implements DataStager {
+    
+    private static final Logger LOGGER = Logger.getLogger(Ojdbc6OracleDataStager.class.getName());
 
     private final StagingSpec[] stagingSpecs;
     private final ReferenceSpec referenceSpec;
@@ -54,7 +65,6 @@ final class Ojdbc6OracleDataStager implements DataStager {
 
     private final Map<TableSpec, Integer> indexIds = new HashMap<>();
 
-    private static final Logger logger = SQLGenUtil.logger();
     private final boolean streamingMode;
 
     Ojdbc6OracleDataStager(StagingSpec[] stagingSpecs,
@@ -116,7 +126,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
                 + TableSpec.withSchemaAndTable(stagingSpec.getStagingArea().getSchema(), stagingSpec.getStagingArea().getTable())
                  + "'; EXCEPTION WHEN OTHERS THEN IF sqlcode != -0942 THEN RAISE; END IF; END;";
 
-        logger.log(Level.INFO, "Dropping view {0}: {1}", new Object[] {
+        LOGGER.log(Level.INFO, "Dropping view {0}: {1}", new Object[] {
                 stagingSpec.getStagingArea(), dropView });
 
         execute(dropView);
@@ -130,7 +140,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
         String dropTable = "BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + TableSpec.withSchemaAndTable(table.getSchema(),
                 table.getTable()) + "'; EXCEPTION WHEN OTHERS THEN IF sqlcode != -0942 THEN RAISE; END IF; END;";
 
-        logger.log(Level.INFO, "Dropping table {0}: {1}", new Object[] {
+        LOGGER.log(Level.INFO, "Dropping table {0}: {1}", new Object[] {
             table, dropTable });
 
         execute(dropTable);
@@ -158,7 +168,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
                         filters, propIds, keyIds, order, null,
                         this.streamingMode);
                 String sql = stmt.generateStatement();
-                logger.log(Level.INFO,
+                LOGGER.log(Level.INFO,
                         "Creating staging area for entity spec {0}: {1}",
                         new Object[] { es.getName(), sql });
                 execute(sql);
@@ -178,7 +188,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
                 String sql = "begin DBMS_STATS.gather_table_stats('"
                         + tableSpec.getSchema() + "', '" + tableSpec.getTable()
                         + "'); end;";
-                logger.log(Level.INFO, "Analyzing staging table {0}: {1}",
+                LOGGER.log(Level.INFO, "Analyzing staging table {0}: {1}",
                         new Object[] { tableSpec, sql });
                 execute(sql);
             }
@@ -217,7 +227,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
             }
             sql.append(" NOLOGGING ");
 
-            logger.log(Level.INFO,
+            LOGGER.log(Level.INFO,
                     "Indexing primary key {0} for staging table {1}: {2}",
                     new Object[] { stagingSpec.getUniqueColumn(), tableSpec,
                             sql });
@@ -250,7 +260,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
                     }
                     sql.append(" NOLOGGING");
 
-                    logger.log(
+                    LOGGER.log(
                             Level.INFO,
                             "Indexing column {0} (as {1}) for staging table {2}: {3}",
                             new Object[] { column.getColumn(), realColumn,
@@ -289,7 +299,7 @@ final class Ojdbc6OracleDataStager implements DataStager {
                 }
             }
 
-            logger.log(Level.INFO,
+            LOGGER.log(Level.INFO,
                     "Merging staging tables for staging area {0}: {1}",
                     new Object[] { ss.getStagingArea(), sql });
             execute(sql.toString());

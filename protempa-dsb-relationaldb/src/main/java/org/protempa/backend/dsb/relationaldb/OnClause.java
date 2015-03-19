@@ -19,6 +19,6 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-interface OnClause extends SqlClause {
+public interface OnClause extends SqlClause {
 
 }

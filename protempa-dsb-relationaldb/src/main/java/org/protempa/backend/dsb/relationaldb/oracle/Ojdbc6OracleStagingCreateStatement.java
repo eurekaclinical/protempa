@@ -17,12 +17,19 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend.dsb.relationaldb;
+package org.protempa.backend.dsb.relationaldb.oracle;
 
 import java.util.List;
 import java.util.Set;
 
 import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.backend.dsb.relationaldb.AbstractStagingCreateStatement;
+import org.protempa.backend.dsb.relationaldb.EntitySpec;
+import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
+import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
+import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
+import org.protempa.backend.dsb.relationaldb.SelectStatement;
+import org.protempa.backend.dsb.relationaldb.StagingSpec;
 
 final class Ojdbc6OracleStagingCreateStatement extends
         AbstractStagingCreateStatement {

@@ -22,7 +22,7 @@ package org.protempa.backend.dsb.relationaldb;
 import java.util.List;
 import java.util.Map;
 
-final class ColumnSpecInfo {
+public final class ColumnSpecInfo {
     private boolean unique;
     private List<IntColumnSpecWrapper> columnSpecs;
     private int startTimeIndex = -1;
@@ -54,7 +54,7 @@ final class ColumnSpecInfo {
         this.codeIndex = codeIndex;
     }
 
-    List<IntColumnSpecWrapper> getColumnSpecs() {
+    public List<IntColumnSpecWrapper> getColumnSpecs() {
         return columnSpecs;
     }
 
