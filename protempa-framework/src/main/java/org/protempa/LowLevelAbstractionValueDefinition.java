@@ -54,8 +54,10 @@ public class LowLevelAbstractionValueDefinition implements Serializable {
                     "A low level abstraction definition must be specified");
         }
         this.lowLevelAbstractionDefinition = lowLevelAbstractionDefinition;
-
-        this.id = setId0(lowLevelAbstractionDefinition, id, false);
+        if (id == null) {
+            throw new IllegalArgumentException("id cannot be null");
+        }
+        this.id = id.intern();
         this.lowLevelAbstractionDefinition.addValueDefinition(this);
         this.lowLevelAbstractionDefinition.addPropertyChangeListener(
                 "algorithmId", new PropertyChangeListener() {
@@ -128,22 +130,6 @@ public class LowLevelAbstractionValueDefinition implements Serializable {
             result = BooleanValue.TRUE;
         }
         return result != null;
-    }
-
-    private static String setId0(LowLevelAbstractionDefinition def, String id,
-            boolean fail) {
-        if (id == null || id.length() == 0) {
-            return def.getNextLowLevelAbstractionValueDefinitionId();
-        } else if (!def.isUniqueLowLevelAbstractionValueDefinitionId(id)) {
-            if (fail) {
-                throw new IllegalArgumentException("id " + id
-                        + " is not unique in this knowledge base.");
-            } else {
-                return def.getNextLowLevelAbstractionValueDefinitionId();
-            }
-        } else {
-            return id;
-        }
     }
 
     public final void setValue(Value value) {

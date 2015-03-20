@@ -49,7 +49,6 @@ public final class LowLevelAbstractionDefinition
     private final List<LowLevelAbstractionValueDefinition> valueDefinitions;
     private ValueType valueType;
     private String algorithmId;
-    private int currentValueDefinitionId;
     private String contextId;
     
     /**
@@ -89,8 +88,7 @@ public final class LowLevelAbstractionDefinition
     public LowLevelAbstractionDefinition(String id) {
         super(id);
         this.paramIds = new LinkedHashSet<>(1);
-        this.valueDefinitions = new ArrayList<>(
-                5);
+        this.valueDefinitions = new ArrayList<>(3);
         this.valueType = DEFAULT_VALUE_TYPE;
         this.gapBtwValues = new MinMaxGapBetweenValues();
         this.slidingWindowWidthMode = SlidingWindowWidthMode.ALL;
@@ -365,14 +363,15 @@ public final class LowLevelAbstractionDefinition
         return Collections.unmodifiableList(this.valueDefinitions);
     }
 
-    public LowLevelAbstractionValueDefinition getValueDefinition(String id) {
+    public LowLevelAbstractionValueDefinition[] getValueDefinitions(String id) {
+        List<LowLevelAbstractionValueDefinition> result = new ArrayList<>();
         for (int i = 0, n = this.valueDefinitions.size(); i < n; i++) {
             LowLevelAbstractionValueDefinition def = (LowLevelAbstractionValueDefinition) valueDefinitions.get(i);
             if (def.getId().equals(id)) {
-                return def;
+                result.add(def);
             }
         }
-        return null;
+        return result.toArray(new LowLevelAbstractionValueDefinition[result.size()]);
     }
 
     /**
@@ -514,23 +513,6 @@ public final class LowLevelAbstractionDefinition
         this.valueDefinitions.clear();
         setValueType(null);
         recalculateChildren();
-    }
-
-    String getNextLowLevelAbstractionValueDefinitionId() {
-        if (valueDefinitions.size() == Integer.MAX_VALUE) {
-            throw new IllegalArgumentException(
-                    "Maximum number of value definitions reached");
-        }
-        while (true) {
-            String candidate = getId() + "_VAL_" + currentValueDefinitionId++;
-            if (isUniqueLowLevelAbstractionValueDefinitionId(candidate)) {
-                return candidate;
-            }
-        }
-    }
-
-    boolean isUniqueLowLevelAbstractionValueDefinitionId(String id) {
-        return getValueDefinition(id) == null;
     }
 
     private boolean satisfiesGapBetweenValues(
