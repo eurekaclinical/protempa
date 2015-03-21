@@ -32,12 +32,18 @@ import org.protempa.proposition.Proposition;
  */
 public class DelimitedFileLineIterator extends AbstractFileLineIterator {
 
+    private final int[] rowSpecs;
     private final DelimitedColumnSpec[] columnSpecs;
+    private final String keyId;
+    private final DelimitedColumnSpec[] keyIdColumnSpecs;
     private int keyIdIndex;
-    private int[] rowSpecs;
     private final CSVParser csvParser;
 
-    public DelimitedFileLineIterator(File file, int skipLines, int keyIdIndex, char delimiter, DelimitedColumnSpec[] columnSpecs, int[] rowSpecs, String id) throws DataSourceReadException {
+    public DelimitedFileLineIterator(File file, int skipLines, String keyId,
+            int keyIdIndex, char delimiter,
+            DelimitedColumnSpec[] keyIdColumnSpecs,
+            DelimitedColumnSpec[] columnSpecs, int[] rowSpecs, String id)
+            throws DataSourceReadException {
         super(file, skipLines, id);
         if (columnSpecs == null) {
             throw new IllegalArgumentException("columnSpecs cannot be null");
@@ -48,16 +54,33 @@ public class DelimitedFileLineIterator extends AbstractFileLineIterator {
         this.columnSpecs = columnSpecs.clone();
         if (rowSpecs != null) {
             this.rowSpecs = rowSpecs.clone();
+        } else {
+            this.rowSpecs = null;
         }
         this.keyIdIndex = keyIdIndex;
         this.csvParser = new CSVParser(delimiter);
+        this.keyId = keyId;
+        if (keyIdColumnSpecs != null) {
+            this.keyIdColumnSpecs = keyIdColumnSpecs.clone();
+        } else {
+            this.keyIdColumnSpecs = null;
+        }
     }
 
     @Override
-    protected DataStreamingEvent<Proposition> dataStreamingEvent() throws DataSourceReadException {
+    protected DataStreamingEvent<Proposition> dataStreamingEvent()
+            throws DataSourceReadException {
         try {
             String[] line = this.csvParser.parseLine(getCurrentLine());
-            String keyId = line[this.keyIdIndex];
+            String kId = this.keyIdIndex > -1 ? line[this.keyIdIndex] : this.keyId;
+            if (kId == null) {
+                throw new DataSourceReadException("keyId was never set");
+            }
+            if (this.keyIdColumnSpecs != null) {
+                for (DelimitedColumnSpec colSpec : this.keyIdColumnSpecs) {
+                    parseLinks(colSpec.getLinks(), this.keyId, -1);
+                }
+            }
             int colNum = 0;
             for (int i = 0; i < this.columnSpecs.length; i++) {
                 if (this.rowSpecs == null || this.rowSpecs[i] == getLineNumber()) {
@@ -67,10 +90,7 @@ public class DelimitedFileLineIterator extends AbstractFileLineIterator {
                     parseLinks(links, column, colNum++);
                 }
             }
-            if (keyId == null) {
-                throw new DataSourceReadException("keyId was never set");
-            }
-            return new DataStreamingEvent(keyId, getData());
+            return new DataStreamingEvent(kId, getData());
         } catch (IOException ex) {
             throw new DataSourceReadException(ex);
         }

@@ -21,7 +21,6 @@ package org.protempa.backend.dsb.file;
  */
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.protempa.KnowledgeSource;
@@ -43,9 +42,19 @@ public abstract class AbstractFileDataSourceBackend extends AbstractCommonsDataS
     private int skipLines;
     private Class<? extends PropositionDefinition> rowPropositionType;
     private int[] rowSpecs;
+    private String keyId;
 
     protected AbstractFileDataSourceBackend() {
         this.files = EMPTY_FILE_ARRAY;
+    }
+
+    public String getKeyId() {
+        return keyId;
+    }
+
+    @BackendProperty
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
     }
 
     public File[] getFiles() {

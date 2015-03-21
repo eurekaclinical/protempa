@@ -21,8 +21,6 @@ package org.protempa.backend.dsb.file;
  */
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import org.protempa.DataSourceReadException;
 import org.protempa.DataStreamingEventIterator;
@@ -38,41 +36,52 @@ import org.protempa.proposition.Proposition;
  * @author Andrew Post
  */
 @BackendInfo(displayName = "Fixed Width Flat File Data Source Backend")
-public class DelimitedFileDataSourceBackend 
+public class DelimitedFileDataSourceBackend
         extends AbstractFileDataSourceBackend {
+
+    private static final DelimitedColumnSpec[] DEFAULT_DELIMITED_COLUMN_SPEC_ARR = new DelimitedColumnSpec[0];
     private static final Character DEFAULT_DELIMITER = '\t';
 
     private DelimitedColumnSpec[] delimitedColumnSpecs;
     private Integer keyIdIndex;
     private Character delimiter;
+    private DelimitedColumnSpec[] keyIdDelimitedColumnSpecs;
 
     public DelimitedFileDataSourceBackend() {
         this.delimiter = DEFAULT_DELIMITER;
+        this.keyIdIndex = -1;
+        this.delimitedColumnSpecs = DEFAULT_DELIMITED_COLUMN_SPEC_ARR;
+        this.keyIdDelimitedColumnSpecs = DEFAULT_DELIMITED_COLUMN_SPEC_ARR;
     }
 
     @Override
     public DataStreamingEventIterator<Proposition> readPropositions(
-            Set<String> keyIds, Set<String> propIds, Filter filters, 
-            QuerySession qs, QueryResultsHandler queryResultsHandler) 
+            Set<String> keyIds, Set<String> propIds, Filter filters,
+            QuerySession qs, QueryResultsHandler queryResultsHandler)
             throws DataSourceReadException {
         File[] files = getFiles();
-        DelimitedFileLineIterator[] result = 
-                new DelimitedFileLineIterator[files.length];
+        DelimitedFileLineIterator[] result
+                = new DelimitedFileLineIterator[files.length];
         for (int i = 0; i < files.length; i++) {
-            result[i] = new DelimitedFileLineIterator(files[i], getSkipLines(), 
-                    this.keyIdIndex, this.delimiter, this.delimitedColumnSpecs, 
+            result[i] = new DelimitedFileLineIterator(files[i], getSkipLines(),
+                    getKeyId(), this.keyIdIndex, this.delimiter, 
+                    this.keyIdDelimitedColumnSpecs, this.delimitedColumnSpecs,
                     getRowSpecs(), getId());
         }
         return new CloseableIteratorChain(result);
     }
 
     public DelimitedColumnSpec[] getDelimitedColumnSpecs() {
-        return delimitedColumnSpecs;
+        return delimitedColumnSpecs.clone();
     }
 
     public void setDelimitedColumnSpecs(
             DelimitedColumnSpec[] delimitedColumnSpecs) {
-        this.delimitedColumnSpecs = delimitedColumnSpecs;
+        if (delimitedColumnSpecs != null) {
+            this.delimitedColumnSpecs = delimitedColumnSpecs.clone();
+        } else {
+            this.delimitedColumnSpecs = DEFAULT_DELIMITED_COLUMN_SPEC_ARR;
+        }
     }
 
     public Integer getKeyIdIndex() {
@@ -102,16 +111,44 @@ public class DelimitedFileDataSourceBackend
     }
 
     @BackendProperty(propertyName = "columns")
-    public void parseDelimitedColumnSpecs(String[] specStrings) 
+    public void parseDelimitedColumnSpecs(String[] specStrings)
             throws IOException {
-        List<DelimitedColumnSpec> specs = new ArrayList<>();
-        for (String specString : specStrings) {
-            DelimitedColumnSpec spec = new DelimitedColumnSpec();
-            spec.parseDescriptor(specString);
-            specs.add(spec);
+        if (specStrings != null) {
+            DelimitedColumnSpec[] result = new DelimitedColumnSpec[specStrings.length];
+            for (int i = 0; i < specStrings.length; i++) {
+                String specString = specStrings[i];
+                DelimitedColumnSpec spec = new DelimitedColumnSpec();
+                spec.parseDescriptor(specString);
+                result[i] = spec;
+            }
+            this.delimitedColumnSpecs = result;
         }
-        this.delimitedColumnSpecs = 
-                specs.toArray(new DelimitedColumnSpec[specs.size()]);
+    }
+
+    public DelimitedColumnSpec[] getKeyIdDelimitedColumnSpec() {
+        return keyIdDelimitedColumnSpecs.clone();
+    }
+
+    public void setKeyIdDelimitedColumnSpec(DelimitedColumnSpec[] keyIdDelimitedColumnSpecs) {
+        if (keyIdDelimitedColumnSpecs != null) {
+            this.keyIdDelimitedColumnSpecs = keyIdDelimitedColumnSpecs.clone();
+        } else {
+            this.keyIdDelimitedColumnSpecs = DEFAULT_DELIMITED_COLUMN_SPEC_ARR;
+        }
+    }
+
+    @BackendProperty(propertyName = "keyIdSpecs")
+    public void parseKeyId(String[] specStrings) throws IOException {
+        if (specStrings != null) {
+            DelimitedColumnSpec[] result = new DelimitedColumnSpec[specStrings.length];
+            for (int i = 0; i < specStrings.length; i++) {
+                String specString = specStrings[i];
+                DelimitedColumnSpec spec = new DelimitedColumnSpec();
+                spec.parseDescriptor(specString);
+                result[i] = spec;
+            }
+            this.keyIdDelimitedColumnSpecs = result;
+        }
     }
 
 }

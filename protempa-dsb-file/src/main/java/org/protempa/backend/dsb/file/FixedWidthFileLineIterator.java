@@ -30,11 +30,17 @@ import org.protempa.proposition.Proposition;
  */
 public class FixedWidthFileLineIterator extends AbstractFileLineIterator {
     private final FixedWidthColumnSpec[] columnSpecs;
+    private final int[] rowSpecs;
+    private final String keyId;
+    private final FixedWidthColumnSpec[] keyIdColumnSpecs;
     private int keyIdLength;
     private int keyIdOffset;
-    private int[] rowSpecs;
 
-    public FixedWidthFileLineIterator(File file, int skipLines, int keyIdOffset, int keyIdLength, FixedWidthColumnSpec[] columnSpecs, int[] rowSpecs, String id) throws DataSourceReadException {
+    public FixedWidthFileLineIterator(File file, int skipLines, String keyId, 
+            int keyIdOffset, int keyIdLength, 
+            FixedWidthColumnSpec[] keyIdColumnSpecs, 
+            FixedWidthColumnSpec[] columnSpecs, int[] rowSpecs, String id) 
+            throws DataSourceReadException {
         super(file, skipLines, id);
         if (columnSpecs == null) {
             throw new IllegalArgumentException("columnSpecs cannot be null");
@@ -45,6 +51,8 @@ public class FixedWidthFileLineIterator extends AbstractFileLineIterator {
         this.columnSpecs = columnSpecs.clone();
         if (rowSpecs != null) {
             this.rowSpecs = rowSpecs.clone();
+        } else {
+            this.rowSpecs = null;
         }
         this.keyIdOffset = keyIdOffset;
         this.keyIdLength = keyIdLength;
@@ -57,12 +65,26 @@ public class FixedWidthFileLineIterator extends AbstractFileLineIterator {
              */
             setRequiredRowLength(Math.max(spec.getOffset() + 1, getRequiredRowLength()));
         }
+        this.keyId = keyId;
+        if (keyIdColumnSpecs != null) {
+            this.keyIdColumnSpecs = keyIdColumnSpecs.clone();
+        } else {
+            this.keyIdColumnSpecs = null;
+        }
     }
 
     @Override
     protected DataStreamingEvent<Proposition> dataStreamingEvent() throws DataSourceReadException {
         char[] charArray = getCurrentLine().toCharArray();
-        String keyId = String.copyValueOf(charArray, this.keyIdOffset, this.keyIdLength);
+        String kId = this.keyIdOffset > -1 ? String.copyValueOf(charArray, this.keyIdOffset, this.keyIdLength) : this.keyId;
+        if (kId == null) {
+            throw new DataSourceReadException("keyId was never set");
+        }
+        if (this.keyIdColumnSpecs != null) {
+            for (FixedWidthColumnSpec colSpec : this.keyIdColumnSpecs) {
+                parseLinks(colSpec.getLinks(), this.keyId, -1);
+            }
+        }
         int colNum = 0;
         for (int i = 0; i < this.columnSpecs.length; i++) {
             if (this.rowSpecs == null || this.rowSpecs[i] == getLineNumber()) {
@@ -76,10 +98,7 @@ public class FixedWidthFileLineIterator extends AbstractFileLineIterator {
                 parseLinks(links, column, colNum++);
             }
         }
-        if (keyId == null) {
-            throw new DataSourceReadException("keyId was never set");
-        }
-        return new DataStreamingEvent(keyId, getData());
+        return new DataStreamingEvent(kId, getData());
     }
 
 }

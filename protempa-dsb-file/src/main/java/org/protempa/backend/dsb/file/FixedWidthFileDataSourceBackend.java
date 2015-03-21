@@ -19,11 +19,8 @@ package org.protempa.backend.dsb.file;
  * limitations under the License.
  * #L%
  */
-
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import org.protempa.DataSourceReadException;
 import org.protempa.DataStreamingEventIterator;
@@ -40,11 +37,18 @@ import org.protempa.proposition.Proposition;
  */
 @BackendInfo(displayName = "Fixed Width Flat File Data Source Backend")
 public class FixedWidthFileDataSourceBackend extends AbstractFileDataSourceBackend {
+
+    private static final FixedWidthColumnSpec[] DEFAULT_FIXED_WIDTH_COLUMN_SPEC_ARR = new FixedWidthColumnSpec[0];
+
     private FixedWidthColumnSpec[] fixedWidthColumnSpecs;
     private int keyIdOffset;
     private int keyIdLength;
+    private FixedWidthColumnSpec[] keyIdFixedWidthColumnSpecs;
 
     public FixedWidthFileDataSourceBackend() {
+        this.keyIdOffset = -1;
+        this.fixedWidthColumnSpecs = DEFAULT_FIXED_WIDTH_COLUMN_SPEC_ARR;
+        this.keyIdFixedWidthColumnSpecs = DEFAULT_FIXED_WIDTH_COLUMN_SPEC_ARR;
     }
 
     @Override
@@ -52,19 +56,35 @@ public class FixedWidthFileDataSourceBackend extends AbstractFileDataSourceBacke
         File[] files = getFiles();
         FixedWidthFileLineIterator[] result = new FixedWidthFileLineIterator[files.length];
         for (int i = 0; i < files.length; i++) {
-            result[i] = new FixedWidthFileLineIterator(files[i], getSkipLines(), getKeyIdOffset(), getKeyIdLength(), this.fixedWidthColumnSpecs, getRowSpecs(), getId());
+            result[i] = new FixedWidthFileLineIterator(files[i], getSkipLines(), getKeyId(), this.keyIdOffset, this.keyIdLength, this.keyIdFixedWidthColumnSpecs, this.fixedWidthColumnSpecs, getRowSpecs(), getId());
         }
         return new CloseableIteratorChain(result);
     }
 
     public FixedWidthColumnSpec[] getFixedWidthColumnSpecs() {
-        return fixedWidthColumnSpecs;
+        return this.fixedWidthColumnSpecs.clone();
     }
 
     public void setFixedWidthColumnSpecs(FixedWidthColumnSpec[] fixedWidthColumnSpecs) {
-        this.fixedWidthColumnSpecs = fixedWidthColumnSpecs;
+        if (fixedWidthColumnSpecs != null) {
+            this.fixedWidthColumnSpecs = fixedWidthColumnSpecs.clone();
+        } else {
+            this.fixedWidthColumnSpecs = DEFAULT_FIXED_WIDTH_COLUMN_SPEC_ARR;
+        }
     }
     
+    public FixedWidthColumnSpec[] getKeyIdFixedWidthColumnSpecs() {
+        return this.keyIdFixedWidthColumnSpecs.clone();
+    }
+
+    public void setKeyIdFixedWidthColumnSpecs(FixedWidthColumnSpec[] keyIdFixedWidthColumnSpecs) {
+        if (fixedWidthColumnSpecs != null) {
+            this.keyIdFixedWidthColumnSpecs = keyIdFixedWidthColumnSpecs.clone();
+        } else {
+            this.keyIdFixedWidthColumnSpecs = DEFAULT_FIXED_WIDTH_COLUMN_SPEC_ARR;
+        }
+    }
+
     public Integer getKeyIdOffset() {
         return keyIdOffset;
     }
@@ -90,16 +110,33 @@ public class FixedWidthFileDataSourceBackend extends AbstractFileDataSourceBacke
             this.keyIdLength = keyIdLength;
         }
     }
-    
+
     @BackendProperty(propertyName = "columns")
     public void parseFixedWidthColumnSpecs(String[] specStrings) throws IOException {
-        List<FixedWidthColumnSpec> specs = new ArrayList<>();
-        for (String specString : specStrings) {
-            FixedWidthColumnSpec spec = new FixedWidthColumnSpec();
-            spec.parseDescriptor(specString);
-            specs.add(spec);
+        if (specStrings != null) {
+            FixedWidthColumnSpec[] result = new FixedWidthColumnSpec[specStrings.length];
+            for (int i = 0; i < specStrings.length; i++) {
+                String specString = specStrings[i];
+                FixedWidthColumnSpec spec = new FixedWidthColumnSpec();
+                spec.parseDescriptor(specString);
+                result[i] = spec;
+            }
+            this.fixedWidthColumnSpecs = result;
         }
-        this.fixedWidthColumnSpecs = specs.toArray(new FixedWidthColumnSpec[specs.size()]);
+    }
+    
+    @BackendProperty(propertyName = "keyIdSpecs")
+    public void parseKeyId(String[] specStrings) throws IOException {
+        if (specStrings != null) {
+            FixedWidthColumnSpec[] result = new FixedWidthColumnSpec[specStrings.length];
+            for (int i = 0; i < specStrings.length; i++) {
+                String specString = specStrings[i];
+                FixedWidthColumnSpec spec = new FixedWidthColumnSpec();
+                spec.parseDescriptor(specString);
+                result[i] = spec;
+            }
+            this.keyIdFixedWidthColumnSpecs = result;
+        }
     }
 
 }
