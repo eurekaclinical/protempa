@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.arp.javautil.arrays.Arrays;
 
@@ -74,43 +73,65 @@ public final class BackendInstanceSpec<B extends Backend> {
 
     public void parseProperty(String name, String valueStr)
             throws InvalidPropertyNameException, InvalidPropertyValueException {
+        if (name == null) {
+            throw new IllegalArgumentException("name cannot be null");
+        }
+        if (valueStr == null) {
+            throw new IllegalArgumentException("valueStr cannot be null");
+        }
         BackendPropertySpec spec = this.propertyMap.get(name);
         if (spec != null) {
             Class cls = spec.getType();
-            if (String.class.equals(cls)) {
-                setProperty(spec, valueStr);
-            } else if (Double.class.equals(cls)) {
-                setProperty(spec, Double.valueOf(valueStr));
-            } else if (Float.class.equals(cls)) {
-                setProperty(spec, Float.valueOf(valueStr));
-            } else if (Integer.class.equals(cls)) {
-                setProperty(spec, Integer.valueOf(valueStr));
-            } else if (Long.class.equals(cls)) {
-                setProperty(spec, Long.valueOf(valueStr));
-            } else if (Boolean.class.equals(cls)) {
-                setProperty(spec, Boolean.valueOf(valueStr));
-            } else if (String[].class.equals(cls)) {
-                addProperty(spec, valueStr, String.class);
-            } else if (Double[].class.equals(cls)) {
-                addProperty(spec, Double.valueOf(valueStr), Double.class);
-            } else if (Float[].class.equals(cls)) {
-                addProperty(spec, Float.valueOf(valueStr), Float.class);
-            } else if (Integer[].class.equals(cls)) {
-                addProperty(spec, Integer.valueOf(valueStr), Integer.class);
-            } else if (Long[].class.equals(cls)) {
-                addProperty(spec, Long.valueOf(valueStr), Long.class);
-            } else if (Boolean[].class.equals(cls)) {
-                addProperty(spec, Boolean.valueOf(valueStr), Boolean.class);
-            } else {
-                throw new AssertionError("name's type, " + cls.getName()
-                        + ", is invalid, must be one of "
-                        + BackendPropertySpec.allowedClassesPrettyPrint());
+            try {
+                if (String.class.equals(cls)) {
+                    setProperty(spec, valueStr);
+                } else if (Double.class.equals(cls)) {
+                    setProperty(spec, Double.valueOf(valueStr));
+                } else if (Float.class.equals(cls)) {
+                    setProperty(spec, Float.valueOf(valueStr));
+                } else if (Integer.class.equals(cls)) {
+                    setProperty(spec, Integer.valueOf(valueStr));
+                } else if (Long.class.equals(cls)) {
+                    setProperty(spec, Long.valueOf(valueStr));
+                } else if (Boolean.class.equals(cls)) {
+                    setProperty(spec, Boolean.valueOf(valueStr));
+                } else if (Character.class.equals(cls)) {
+                    if (valueStr.length() > 1) {
+                        throw new InvalidPropertyValueException(valueStr);
+                    }
+                    setProperty(spec, valueStr.charAt(0));
+                } else if (String[].class.equals(cls)) {
+                    addProperty(spec, valueStr, String.class);
+                } else if (Double[].class.equals(cls)) {
+                    addProperty(spec, Double.valueOf(valueStr), Double.class);
+                } else if (Float[].class.equals(cls)) {
+                    addProperty(spec, Float.valueOf(valueStr), Float.class);
+                } else if (Integer[].class.equals(cls)) {
+                    addProperty(spec, Integer.valueOf(valueStr), Integer.class);
+                } else if (Long[].class.equals(cls)) {
+                    addProperty(spec, Long.valueOf(valueStr), Long.class);
+                } else if (Boolean[].class.equals(cls)) {
+                    addProperty(spec, Boolean.valueOf(valueStr), Boolean.class);
+                } else if (Character[].class.equals(cls)) {
+                    if (valueStr.length() > 0) {
+                        throw new InvalidPropertyValueException(valueStr);
+                    }
+                    addProperty(spec, valueStr.charAt(0), Character.class);
+                } else {
+                    throw new AssertionError("name's type, " + cls.getName()
+                            + ", is invalid, must be one of "
+                            + BackendPropertySpec.allowedClassesPrettyPrint());
+                }
+            } catch (InvalidPropertyValueException ex) {
+                throw ex;
+            } catch (Exception ex) {
+                throw new InvalidPropertyValueException(valueStr, ex);
             }
         } else {
             throw new InvalidPropertyNameException(name);
         }
     }
-    
+
     public <E> void addProperty(String name, E value, Class<E> cls) throws InvalidPropertyNameException, InvalidPropertyValueException {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
@@ -152,7 +173,7 @@ public final class BackendInstanceSpec<B extends Backend> {
         }
         this.properties.put(spec.getName(), arrValue);
     }
-    
+
     public void setProperty(String name, Object value) throws InvalidPropertyNameException, InvalidPropertyValueException {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");

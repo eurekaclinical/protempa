@@ -29,25 +29,16 @@ import java.io.StringReader;
  *
  * @author Andrew Post
  */
-public class FixedWidthColumnSpec extends ColumnSpec {
+public class DelimitedColumnSpec extends ColumnSpec {
 
-    private int offset;
-    private int length;
+    private int index;
 
-    public int getOffset() {
-        return offset;
+    public int getIndex() {
+        return index;
     }
 
-    public void setOffset(int offset) {
-        this.offset = offset;
-    }
-
-    public int getLength() {
-        return length;
-    }
-
-    public void setLength(int length) {
-        this.length = length;
+    public void setIndex(int index) {
+        this.index = index;
     }
 
     @Override
@@ -55,9 +46,8 @@ public class FixedWidthColumnSpec extends ColumnSpec {
         try (Reader reader = new StringReader(descriptor);
             CSVReader r = new CSVReader(reader, '|')) {
             String[] readNext = r.readNext();
-            this.offset = Integer.parseInt(readNext[0]);
-            this.length = Integer.parseInt(readNext[1]);
-            setLinks(readNext[2]);
+            this.index = Integer.parseInt(readNext[0]);
+            setLinks(readNext[1]);
         }
     }
 

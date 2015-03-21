@@ -1,1 +1,2 @@
 org.protempa.backend.dsb.file.FixedWidthFileDataSourceBackend
+org.protempa.backend.dsb.file.DelimitedFileDataSourceBackend

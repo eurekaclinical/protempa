@@ -35,6 +35,7 @@ public final class BackendPropertySpec {
         Long.class,
         Float.class,
         Double.class,
+        Character.class,
         String[].class
     };
 

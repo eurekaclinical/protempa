@@ -1,8 +1,10 @@
+package org.protempa.backend.dsb.file;
+
 /*
  * #%L
- * Protempa Framework
+ * Protempa File Data Source Backend
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +19,23 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend;
 
-import org.protempa.ProtempaException;
+import java.io.IOException;
 
 /**
- * Thrown if a property value in a configuration is invalid.
  *
  * @author Andrew Post
  */
-public class InvalidPropertyValueException extends ProtempaException {
-
-    private static final long serialVersionUID = -5960840541202474047L;
-
-    public InvalidPropertyValueException(String value) {
-        super("Invalid property value in configuration: " + value);
-    }
+public abstract class ColumnSpec {
+    private String links;
     
-    public InvalidPropertyValueException(String value, Throwable throwable) {
-        super("Invalid property value in configuration: " + value, throwable);
+    public String getLinks() {
+        return links;
     }
+
+    public void setLinks(String links) {
+        this.links = links;
+    }
+
+    abstract void parseDescriptor(String descriptor) throws IOException;
 }
