@@ -113,7 +113,7 @@ public final class BackendInstanceSpec<B extends Backend> {
                 } else if (Boolean[].class.equals(cls)) {
                     addProperty(spec, Boolean.valueOf(valueStr), Boolean.class);
                 } else if (Character[].class.equals(cls)) {
-                    if (valueStr.length() > 0) {
+                    if (valueStr.length() > 1) {
                         throw new InvalidPropertyValueException(valueStr);
                     }
                     addProperty(spec, valueStr.charAt(0), Character.class);
