@@ -19,11 +19,9 @@ package org.protempa.backend.dsb.file;
  * limitations under the License.
  * #L%
  */
-
-import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVParser;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -33,6 +31,11 @@ public class FixedWidthColumnSpec extends ColumnSpec {
 
     private int offset;
     private int length;
+    private final CSVParser parser;
+
+    public FixedWidthColumnSpec() {
+        this.parser = new CSVParser('|');
+    }
 
     public int getOffset() {
         return offset;
@@ -52,13 +55,11 @@ public class FixedWidthColumnSpec extends ColumnSpec {
 
     @Override
     void parseDescriptor(String descriptor) throws IOException {
-        try (Reader reader = new StringReader(descriptor);
-            CSVReader r = new CSVReader(reader, '|')) {
-            String[] readNext = r.readNext();
-            this.offset = Integer.parseInt(readNext[0]);
-            this.length = Integer.parseInt(readNext[1]);
-            setLinks(readNext[2]);
-        }
+        String[] parseLine = this.parser.parseLine(descriptor);
+        this.offset = Integer.parseInt(parseLine[0]);
+        this.length = Integer.parseInt(parseLine[1]);
+        String rest = StringUtils.join(parseLine, '|', 2, parseLine.length);
+        setLinks(rest);
     }
 
 }

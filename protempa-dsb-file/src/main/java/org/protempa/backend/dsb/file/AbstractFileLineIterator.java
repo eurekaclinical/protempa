@@ -19,7 +19,7 @@ package org.protempa.backend.dsb.file;
  * limitations under the License.
  * #L%
  */
-
+import au.com.bytecode.opencsv.CSVParser;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -28,8 +28,8 @@ import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +41,7 @@ import org.arp.javautil.collections.Collections;
 import org.protempa.DataSourceReadException;
 import org.protempa.DataStreamingEvent;
 import org.protempa.DataStreamingEventIterator;
+import org.protempa.SourceSystem;
 import org.protempa.proposition.AbstractProposition;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.DataSourceBackendId;
@@ -48,6 +49,8 @@ import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.interval.IntervalFactory;
+import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -55,6 +58,7 @@ import org.protempa.proposition.value.ValueType;
  * @author Andrew Post
  */
 abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Proposition> {
+
     private final LineNumberReader reader;
     private String currentLine;
     private int requiredRowLength;
@@ -65,19 +69,18 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
     private Date updateDate;
     private Date creationDate;
     private Date downloadDate;
-    
-    protected AbstractFileLineIterator(File file, int skipLines, String id) throws DataSourceReadException {
-        if (file == null) {
-            throw new IllegalArgumentException("file cannot be null");
-        }
-        if (id == null) {
-            throw new IllegalArgumentException("id cannot be null");
-        }
-        this.id = id;
+    private final CSVParser referenceNameParser;
+    private final SourceSystem sourceSystem;
+    private final Long defaultPosition;
+    private final Granularity defaultGranularity;
+    private final IntervalFactory intervalFactory;
+
+    protected AbstractFileLineIterator(FileDataSourceBackend backend, File file, Long defaultPosition) throws DataSourceReadException {
+        this.id = backend.getId();
 
         try {
             this.reader = new LineNumberReader(new FileReader(file));
-            while (this.reader.getLineNumber() < skipLines) {
+            while (this.reader.getLineNumber() < backend.getSkipLines()) {
                 this.reader.readLine();
             }
         } catch (IOException ex) {
@@ -96,8 +99,14 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
         } catch (IOException ex) {
             throw new DataSourceReadException(ex);
         }
-        
+
         this.lineNo = 1;
+
+        this.referenceNameParser = new CSVParser(',');
+        this.sourceSystem = backend.getSourceSystem();
+        this.defaultPosition = defaultPosition;
+        this.defaultGranularity = backend.getDefaultGranularity();
+        this.intervalFactory = new IntervalFactory();
     }
 
     @Override
@@ -113,7 +122,7 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
             throw new DataSourceReadException(ex);
         }
     }
-    
+
     @Override
     public DataStreamingEvent<Proposition> next() throws DataSourceReadException {
         if (!hasNext()) {
@@ -127,13 +136,13 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
             return dse;
         }
     }
-    
+
     protected abstract DataStreamingEvent<Proposition> dataStreamingEvent() throws DataSourceReadException;
-    
+
     public int getLineNumber() {
         return this.lineNo;
     }
-    
+
     public String getCurrentLine() {
         return this.currentLine;
     }
@@ -145,7 +154,7 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
     public void setRequiredRowLength(int requiredRowLength) {
         this.requiredRowLength = requiredRowLength;
     }
-    
+
     protected void parseLinks(String links, String column, int colNum) throws DataSourceReadException {
         if (links != null) {
             String tokens = "[ ]>.$";
@@ -155,7 +164,7 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
             String propId = null;
             String propType = null;
             Proposition lastProposition = null;
-            String referenceName = null;
+            String referenceNames = null;
             String propertyName = null;
             boolean inPropSpec = false;
             int index = 0;
@@ -175,12 +184,14 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
                                 UniqueId uniqueId = new UniqueId(
                                         DataSourceBackendId.getInstance(this.id),
                                         new FileUniqueId(this.lineNo, colNum, propId, index));
+                                assert propType != null : "propType cannot be null";
                                 switch (propType) {
                                     case "Constant":
                                         Constant c = new Constant(propId, uniqueId);
                                         c.setCreateDate(this.creationDate);
                                         c.setDownloadDate(this.downloadDate);
                                         c.setUpdateDate(this.updateDate);
+                                        c.setSourceSystem(this.sourceSystem);
                                         tempProp = c;
                                         break;
                                     case "Observation":
@@ -188,6 +199,9 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
                                         pp.setCreateDate(this.creationDate);
                                         pp.setDownloadDate(this.downloadDate);
                                         pp.setUpdateDate(this.updateDate);
+                                        pp.setSourceSystem(this.sourceSystem);
+                                        pp.setPosition(this.defaultPosition);
+                                        pp.setGranularity(this.defaultGranularity);
                                         tempProp = pp;
                                         break;
                                     case "Event":
@@ -195,6 +209,8 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
                                         e.setCreateDate(this.creationDate);
                                         e.setDownloadDate(this.downloadDate);
                                         e.setUpdateDate(this.updateDate);
+                                        e.setSourceSystem(this.sourceSystem);
+                                        e.setInterval(this.intervalFactory.getInstance(this.defaultPosition, this.defaultGranularity));
                                         tempProp = e;
                                         break;
                                     default:
@@ -204,22 +220,18 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
                             }
                             propId = null;
                             propType = null;
-                            if (referenceName != null) {
-                                UniqueId tempPropUid = tempProp.getUniqueId();
-                                Map<String, Set<UniqueId>> refToUids = refs.get(lastProposition);
-                                Set<UniqueId> uids;
-                                if (refToUids == null) {
-                                    refToUids = new HashMap<>();
-                                    refs.put(lastProposition, refToUids);
-                                    uids = null;
-                                } else {
-                                    uids = refToUids.get(referenceName);
+                            if (referenceNames != null) {
+                                try {
+                                    String[] parseLine = this.referenceNameParser.parseLine(referenceNames);
+                                    if (parseLine.length < 1 || parseLine.length > 2) {
+                                        String msg = MessageFormat.format("Invalid reference in line {0}: expected referenceName[,backReferenceName] but was {1}", new Object[]{this.lineNo, referenceNames});
+                                        throw new DataSourceReadException(msg);
+                                    }
+                                    setReferences(tempProp, lastProposition, parseLine[0], parseLine.length > 1 ? parseLine[1] : null);
+                                } catch (IOException ioe) {
+                                    throw new DataSourceReadException(ioe);
                                 }
-                                if (uids == null || !uids.contains(tempPropUid)) {
-                                    Collections.putSet(refToUids, referenceName, tempPropUid);
-                                    ((AbstractProposition) lastProposition).addReference(referenceName, tempPropUid);
-                                }
-                                referenceName = null;
+                                referenceNames = null;
                             }
                             lastProposition = tempProp;
                         }
@@ -241,7 +253,7 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
                         }
                         break;
                     case ">":
-                        referenceName = nextToken;
+                        referenceNames = nextToken;
                         break;
                     case ".":
                         propertyName = nextToken;
@@ -251,13 +263,36 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
                         if ("value".equals(propertyName) && lastProposition instanceof PrimitiveParameter) {
                             ((PrimitiveParameter) lastProposition).setValue(vt.parse(column));
                         } else {
+                            assert lastProposition != null : "lastProposition cannot be null";
                             ((AbstractProposition) lastProposition).setProperty(propertyName, vt.parse(column));
                         }
                 }
             }
         }
     }
-    
+
+    private void setReferences(Proposition tempProp, Proposition lastProposition, String referenceName, String backReferenceName) {
+        assert tempProp != null : "tempProp cannot be null";
+        assert lastProposition != null : "lastProposition cannot be null";
+        UniqueId tempPropUid = tempProp.getUniqueId();
+        Map<String, Set<UniqueId>> refToUids = refs.get(lastProposition);
+        Set<UniqueId> uids;
+        if (refToUids == null) {
+            refToUids = new HashMap<>();
+            refs.put(lastProposition, refToUids);
+            uids = null;
+        } else {
+            uids = refToUids.get(referenceName);
+        }
+        if (uids == null || !uids.contains(tempPropUid)) {
+            Collections.putSet(refToUids, referenceName, tempPropUid);
+            ((AbstractProposition) lastProposition).addReference(referenceName, tempPropUid);
+            if (backReferenceName != null) {
+                ((AbstractProposition) tempProp).addReference(backReferenceName, lastProposition.getUniqueId());
+            }
+        }
+    }
+
     public List<Proposition> getData() {
         List<Proposition> data = new ArrayList<>();
         for (List<Proposition> ps : this.props.values()) {
@@ -265,7 +300,7 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
         }
         return data;
     }
-    
+
     @Override
     public void close() throws DataSourceReadException {
         try {
@@ -274,5 +309,5 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
             throw new DataSourceReadException(ex);
         }
     }
-    
+
 }

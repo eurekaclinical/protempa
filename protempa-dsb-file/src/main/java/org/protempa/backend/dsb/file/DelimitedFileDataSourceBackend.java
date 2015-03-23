@@ -40,18 +40,19 @@ public class DelimitedFileDataSourceBackend
         extends AbstractFileDataSourceBackend {
 
     private static final DelimitedColumnSpec[] DEFAULT_DELIMITED_COLUMN_SPEC_ARR = new DelimitedColumnSpec[0];
+    private static final PlainColumnSpec[] DEFAULT_PLAIN_COLUMN_SPEC_ARR = new PlainColumnSpec[0];
     private static final Character DEFAULT_DELIMITER = '\t';
 
     private DelimitedColumnSpec[] delimitedColumnSpecs;
     private Integer keyIdIndex;
     private Character delimiter;
-    private DelimitedColumnSpec[] keyIdDelimitedColumnSpecs;
+    private PlainColumnSpec[] keyIdColumnSpecs;
 
     public DelimitedFileDataSourceBackend() {
         this.delimiter = DEFAULT_DELIMITER;
         this.keyIdIndex = -1;
         this.delimitedColumnSpecs = DEFAULT_DELIMITED_COLUMN_SPEC_ARR;
-        this.keyIdDelimitedColumnSpecs = DEFAULT_DELIMITED_COLUMN_SPEC_ARR;
+        this.keyIdColumnSpecs = DEFAULT_PLAIN_COLUMN_SPEC_ARR;
     }
 
     @Override
@@ -63,10 +64,11 @@ public class DelimitedFileDataSourceBackend
         DelimitedFileLineIterator[] result
                 = new DelimitedFileLineIterator[files.length];
         for (int i = 0; i < files.length; i++) {
-            result[i] = new DelimitedFileLineIterator(files[i], getSkipLines(),
-                    getKeyId(), this.keyIdIndex, this.delimiter, 
-                    this.keyIdDelimitedColumnSpecs, this.delimitedColumnSpecs,
-                    getRowSpecs(), getId());
+            try {
+                result[i] = new DelimitedFileLineIterator(this, files[i], getDefaultPositionPerFile(files[i]));
+            } catch (IOException ex) {
+                throw new DataSourceReadException(ex);
+            }
         }
         return new CloseableIteratorChain(result);
     }
@@ -125,29 +127,29 @@ public class DelimitedFileDataSourceBackend
         }
     }
 
-    public DelimitedColumnSpec[] getKeyIdDelimitedColumnSpec() {
-        return keyIdDelimitedColumnSpecs.clone();
+    public PlainColumnSpec[] getKeyIdColumnSpecs() {
+        return keyIdColumnSpecs.clone();
     }
 
-    public void setKeyIdDelimitedColumnSpec(DelimitedColumnSpec[] keyIdDelimitedColumnSpecs) {
-        if (keyIdDelimitedColumnSpecs != null) {
-            this.keyIdDelimitedColumnSpecs = keyIdDelimitedColumnSpecs.clone();
+    public void setKeyIdColumnSpecs(PlainColumnSpec[] keyIdColumnSpecs) {
+        if (keyIdColumnSpecs != null) {
+            this.keyIdColumnSpecs = keyIdColumnSpecs.clone();
         } else {
-            this.keyIdDelimitedColumnSpecs = DEFAULT_DELIMITED_COLUMN_SPEC_ARR;
+            this.keyIdColumnSpecs = DEFAULT_PLAIN_COLUMN_SPEC_ARR;
         }
     }
 
     @BackendProperty(propertyName = "keyIdSpecs")
     public void parseKeyId(String[] specStrings) throws IOException {
         if (specStrings != null) {
-            DelimitedColumnSpec[] result = new DelimitedColumnSpec[specStrings.length];
+            PlainColumnSpec[] result = new PlainColumnSpec[specStrings.length];
             for (int i = 0; i < specStrings.length; i++) {
                 String specString = specStrings[i];
-                DelimitedColumnSpec spec = new DelimitedColumnSpec();
+                PlainColumnSpec spec = new PlainColumnSpec();
                 spec.parseDescriptor(specString);
                 result[i] = spec;
             }
-            this.keyIdDelimitedColumnSpecs = result;
+            this.keyIdColumnSpecs = result;
         }
     }
 

@@ -39,16 +39,17 @@ import org.protempa.proposition.Proposition;
 public class FixedWidthFileDataSourceBackend extends AbstractFileDataSourceBackend {
 
     private static final FixedWidthColumnSpec[] DEFAULT_FIXED_WIDTH_COLUMN_SPEC_ARR = new FixedWidthColumnSpec[0];
+    private static final PlainColumnSpec[] DEFAULT_PLAIN_COLUMN_SPEC_ARR = new PlainColumnSpec[0];
 
     private FixedWidthColumnSpec[] fixedWidthColumnSpecs;
     private int keyIdOffset;
     private int keyIdLength;
-    private FixedWidthColumnSpec[] keyIdFixedWidthColumnSpecs;
+    private PlainColumnSpec[] keyIdColumnSpecs;
 
     public FixedWidthFileDataSourceBackend() {
         this.keyIdOffset = -1;
         this.fixedWidthColumnSpecs = DEFAULT_FIXED_WIDTH_COLUMN_SPEC_ARR;
-        this.keyIdFixedWidthColumnSpecs = DEFAULT_FIXED_WIDTH_COLUMN_SPEC_ARR;
+        this.keyIdColumnSpecs = DEFAULT_PLAIN_COLUMN_SPEC_ARR;
     }
 
     @Override
@@ -56,11 +57,15 @@ public class FixedWidthFileDataSourceBackend extends AbstractFileDataSourceBacke
         File[] files = getFiles();
         FixedWidthFileLineIterator[] result = new FixedWidthFileLineIterator[files.length];
         for (int i = 0; i < files.length; i++) {
-            result[i] = new FixedWidthFileLineIterator(files[i], getSkipLines(), getKeyId(), this.keyIdOffset, this.keyIdLength, this.keyIdFixedWidthColumnSpecs, this.fixedWidthColumnSpecs, getRowSpecs(), getId());
+            try {
+                result[i] = new FixedWidthFileLineIterator(this, files[i], getDefaultPositionPerFile(files[i]));
+            } catch (IOException ex) {
+                throw new DataSourceReadException(ex);
+            }
         }
         return new CloseableIteratorChain(result);
     }
-
+    
     public FixedWidthColumnSpec[] getFixedWidthColumnSpecs() {
         return this.fixedWidthColumnSpecs.clone();
     }
@@ -73,15 +78,15 @@ public class FixedWidthFileDataSourceBackend extends AbstractFileDataSourceBacke
         }
     }
     
-    public FixedWidthColumnSpec[] getKeyIdFixedWidthColumnSpecs() {
-        return this.keyIdFixedWidthColumnSpecs.clone();
+    public PlainColumnSpec[] getKeyIdColumnSpecs() {
+        return this.keyIdColumnSpecs.clone();
     }
 
-    public void setKeyIdFixedWidthColumnSpecs(FixedWidthColumnSpec[] keyIdFixedWidthColumnSpecs) {
+    public void setKeyIdColumnSpecs(PlainColumnSpec[] keyIdColumnSpecs) {
         if (fixedWidthColumnSpecs != null) {
-            this.keyIdFixedWidthColumnSpecs = keyIdFixedWidthColumnSpecs.clone();
+            this.keyIdColumnSpecs = keyIdColumnSpecs.clone();
         } else {
-            this.keyIdFixedWidthColumnSpecs = DEFAULT_FIXED_WIDTH_COLUMN_SPEC_ARR;
+            this.keyIdColumnSpecs = DEFAULT_PLAIN_COLUMN_SPEC_ARR;
         }
     }
 
@@ -128,14 +133,14 @@ public class FixedWidthFileDataSourceBackend extends AbstractFileDataSourceBacke
     @BackendProperty(propertyName = "keyIdSpecs")
     public void parseKeyId(String[] specStrings) throws IOException {
         if (specStrings != null) {
-            FixedWidthColumnSpec[] result = new FixedWidthColumnSpec[specStrings.length];
+            PlainColumnSpec[] result = new PlainColumnSpec[specStrings.length];
             for (int i = 0; i < specStrings.length; i++) {
                 String specString = specStrings[i];
-                FixedWidthColumnSpec spec = new FixedWidthColumnSpec();
+                PlainColumnSpec spec = new PlainColumnSpec();
                 spec.parseDescriptor(specString);
                 result[i] = spec;
             }
-            this.keyIdFixedWidthColumnSpecs = result;
+            this.keyIdColumnSpecs = result;
         }
     }
 

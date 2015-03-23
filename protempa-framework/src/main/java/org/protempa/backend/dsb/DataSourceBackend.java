@@ -72,5 +72,7 @@ public interface DataSourceBackend extends
     void writeKeys(Set<String> keyIds) throws DataSourceWriteException;
     
     Comparator<Object> getKeyIdComparator();
+    
+    DataSourceBackendSourceSystem getSourceSystem();
 
 }

@@ -20,37 +20,17 @@ package org.protempa.backend.dsb.file;
  * #L%
  */
 
-import au.com.bytecode.opencsv.CSVParser;
 import java.io.IOException;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  *
  * @author Andrew Post
  */
-public class DelimitedColumnSpec extends ColumnSpec {
-
-    private int index;
-    private final CSVParser parser;
-
-    public DelimitedColumnSpec() {
-        this.parser = new CSVParser('|');
-    }
-    
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-    }
+public class PlainColumnSpec extends ColumnSpec {
 
     @Override
     void parseDescriptor(String descriptor) throws IOException {
-        String[] parseLine = this.parser.parseLine(descriptor);
-        this.index = Integer.parseInt(parseLine[0]);
-        String rest = StringUtils.join(parseLine, '|', 1, parseLine.length);
-        setLinks(rest);
+        setLinks(descriptor);
     }
-
+    
 }

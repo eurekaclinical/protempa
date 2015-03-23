@@ -30,41 +30,25 @@ import org.protempa.proposition.Proposition;
  *
  * @author Andrew Post
  */
-public class DelimitedFileLineIterator extends AbstractFileLineIterator {
+class DelimitedFileLineIterator extends AbstractFileLineIterator {
 
     private final int[] rowSpecs;
     private final DelimitedColumnSpec[] columnSpecs;
     private final String keyId;
-    private final DelimitedColumnSpec[] keyIdColumnSpecs;
-    private int keyIdIndex;
+    private final PlainColumnSpec[] keyIdColumnSpecs;
+    private final int keyIdIndex;
     private final CSVParser csvParser;
 
-    public DelimitedFileLineIterator(File file, int skipLines, String keyId,
-            int keyIdIndex, char delimiter,
-            DelimitedColumnSpec[] keyIdColumnSpecs,
-            DelimitedColumnSpec[] columnSpecs, int[] rowSpecs, String id)
+    DelimitedFileLineIterator(DelimitedFileDataSourceBackend backend, 
+            File file, Long defaultPosition)
             throws DataSourceReadException {
-        super(file, skipLines, id);
-        if (columnSpecs == null) {
-            throw new IllegalArgumentException("columnSpecs cannot be null");
-        }
-        if (rowSpecs != null && rowSpecs.length != columnSpecs.length) {
-            throw new IllegalArgumentException("if rowSpecs is not null, it must have the same length as columnSpecs");
-        }
-        this.columnSpecs = columnSpecs.clone();
-        if (rowSpecs != null) {
-            this.rowSpecs = rowSpecs.clone();
-        } else {
-            this.rowSpecs = null;
-        }
-        this.keyIdIndex = keyIdIndex;
-        this.csvParser = new CSVParser(delimiter);
-        this.keyId = keyId;
-        if (keyIdColumnSpecs != null) {
-            this.keyIdColumnSpecs = keyIdColumnSpecs.clone();
-        } else {
-            this.keyIdColumnSpecs = null;
-        }
+        super(backend, file, defaultPosition);
+        this.columnSpecs = backend.getDelimitedColumnSpecs();
+        this.rowSpecs = backend.getRowSpecs();
+        this.keyIdIndex = backend.getKeyIdIndex();
+        this.csvParser = new CSVParser(backend.getDelimiter());
+        this.keyId = backend.getKeyId();
+        this.keyIdColumnSpecs = backend.getKeyIdColumnSpecs();
     }
 
     @Override
@@ -77,15 +61,15 @@ public class DelimitedFileLineIterator extends AbstractFileLineIterator {
                 throw new DataSourceReadException("keyId was never set");
             }
             if (this.keyIdColumnSpecs != null) {
-                for (DelimitedColumnSpec colSpec : this.keyIdColumnSpecs) {
+                for (PlainColumnSpec colSpec : this.keyIdColumnSpecs) {
                     parseLinks(colSpec.getLinks(), this.keyId, -1);
                 }
             }
             int colNum = 0;
             for (int i = 0; i < this.columnSpecs.length; i++) {
-                if (this.rowSpecs == null || this.rowSpecs[i] == getLineNumber()) {
+                if (this.rowSpecs.length == 0 || this.rowSpecs[i] == getLineNumber()) {
                     DelimitedColumnSpec colSpec = this.columnSpecs[i];
-                    String column = line[colSpec.getIndex()].trim();
+                    String column = line[colSpec.getIndex() - 1].trim();
                     String links = colSpec.getLinks();
                     parseLinks(links, column, colNum++);
                 }

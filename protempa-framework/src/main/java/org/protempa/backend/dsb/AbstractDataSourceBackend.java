@@ -23,6 +23,7 @@ package org.protempa.backend.dsb;
 import java.util.Comparator;
 import java.util.Set;
 import org.protempa.BackendCloseException;
+import org.protempa.DataSourceBackendSourceSystem;
 import org.protempa.DataSourceWriteException;
 import org.protempa.backend.AbstractBackend;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
@@ -124,6 +125,11 @@ public abstract class AbstractDataSourceBackend extends
     
     @Override
     public void writeKeys(Set<String> keyIds) throws DataSourceWriteException {
+    }
+
+    @Override
+    public DataSourceBackendSourceSystem getSourceSystem() {
+        return DataSourceBackendSourceSystem.getInstance(getId());
     }
     
 }

@@ -28,34 +28,22 @@ import org.protempa.proposition.Proposition;
  *
  * @author Andrew Post
  */
-public class FixedWidthFileLineIterator extends AbstractFileLineIterator {
+class FixedWidthFileLineIterator extends AbstractFileLineIterator {
     private final FixedWidthColumnSpec[] columnSpecs;
     private final int[] rowSpecs;
     private final String keyId;
-    private final FixedWidthColumnSpec[] keyIdColumnSpecs;
-    private int keyIdLength;
-    private int keyIdOffset;
+    private final PlainColumnSpec[] keyIdColumnSpecs;
+    private final int keyIdLength;
+    private final int keyIdOffset;
 
-    public FixedWidthFileLineIterator(File file, int skipLines, String keyId, 
-            int keyIdOffset, int keyIdLength, 
-            FixedWidthColumnSpec[] keyIdColumnSpecs, 
-            FixedWidthColumnSpec[] columnSpecs, int[] rowSpecs, String id) 
+    FixedWidthFileLineIterator(FixedWidthFileDataSourceBackend backend, 
+            File file, Long defaultPosition) 
             throws DataSourceReadException {
-        super(file, skipLines, id);
-        if (columnSpecs == null) {
-            throw new IllegalArgumentException("columnSpecs cannot be null");
-        }
-        if (rowSpecs != null && rowSpecs.length != columnSpecs.length) {
-            throw new IllegalArgumentException("if rowSpecs is not null, it must have the same length as columnSpecs");
-        }
-        this.columnSpecs = columnSpecs.clone();
-        if (rowSpecs != null) {
-            this.rowSpecs = rowSpecs.clone();
-        } else {
-            this.rowSpecs = null;
-        }
-        this.keyIdOffset = keyIdOffset;
-        this.keyIdLength = keyIdLength;
+        super(backend, file, defaultPosition);
+        this.columnSpecs = backend.getFixedWidthColumnSpecs();
+        this.rowSpecs = backend.getRowSpecs();
+        this.keyIdOffset = backend.getKeyIdOffset();
+        this.keyIdLength = backend.getKeyIdLength();
 
         for (FixedWidthColumnSpec spec : columnSpecs) {
             /*
@@ -65,12 +53,8 @@ public class FixedWidthFileLineIterator extends AbstractFileLineIterator {
              */
             setRequiredRowLength(Math.max(spec.getOffset() + 1, getRequiredRowLength()));
         }
-        this.keyId = keyId;
-        if (keyIdColumnSpecs != null) {
-            this.keyIdColumnSpecs = keyIdColumnSpecs.clone();
-        } else {
-            this.keyIdColumnSpecs = null;
-        }
+        this.keyId = backend.getKeyId();
+        this.keyIdColumnSpecs = backend.getKeyIdColumnSpecs();
     }
 
     @Override
@@ -80,14 +64,14 @@ public class FixedWidthFileLineIterator extends AbstractFileLineIterator {
         if (kId == null) {
             throw new DataSourceReadException("keyId was never set");
         }
-        if (this.keyIdColumnSpecs != null) {
-            for (FixedWidthColumnSpec colSpec : this.keyIdColumnSpecs) {
+        if (this.keyIdColumnSpecs.length > 0) {
+            for (PlainColumnSpec colSpec : this.keyIdColumnSpecs) {
                 parseLinks(colSpec.getLinks(), this.keyId, -1);
             }
         }
         int colNum = 0;
         for (int i = 0; i < this.columnSpecs.length; i++) {
-            if (this.rowSpecs == null || this.rowSpecs[i] == getLineNumber()) {
+            if (this.rowSpecs.length == 0 || this.rowSpecs[i] == getLineNumber()) {
                 FixedWidthColumnSpec colSpec = this.columnSpecs[i];
                 /**
                  * Some files don't pad the last column with trailing
