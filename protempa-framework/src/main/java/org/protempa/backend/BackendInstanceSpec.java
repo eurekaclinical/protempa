@@ -21,12 +21,12 @@ package org.protempa.backend;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.arp.javautil.arrays.Arrays;
 
 /**
  *
@@ -37,38 +37,32 @@ public final class BackendInstanceSpec<B extends Backend> {
     private final BackendSpec<B> backendSpec;
     private String configurationsId;
     private final Map<String, Object> properties;
-    private final List<BackendPropertySpec> propertySpecs;
     private final Map<String, BackendPropertySpec> propertyMap;
+    private final Set<String> propertyRequiredOverrides;
+    private final Map<String, String> propertyDisplayNameOverrides;
 
-    BackendInstanceSpec(
-            BackendSpec<B> backendSpec,
-            List<BackendPropertySpec> propertySpecs) {
+    BackendInstanceSpec(BackendSpec<B> backendSpec) {
         assert backendSpec != null : "backendSpec cannot be null";
-        assert propertySpecs != null : "info cannot be null";
         this.backendSpec = backendSpec;
         this.properties = new HashMap<>();
-        this.propertySpecs = Collections.unmodifiableList(
-                new ArrayList<>(propertySpecs));
         this.propertyMap = new HashMap<>();
-        for (BackendPropertySpec bps : this.propertySpecs) {
+        for (BackendPropertySpec bps : backendSpec.getPropertySpecs()) {
             this.propertyMap.put(bps.getName(), bps);
         }
+        this.propertyRequiredOverrides = new HashSet<>();
+        this.propertyDisplayNameOverrides = new HashMap<>();
     }
 
     public BackendSpec<B> getBackendSpec() {
         return this.backendSpec;
     }
-
+    
     public void setConfigurationsId(String configurationsId) {
         this.configurationsId = configurationsId;
     }
 
     public String getConfigurationsId() {
         return this.configurationsId;
-    }
-
-    public List<BackendPropertySpec> getBackendPropertySpecs() {
-        return this.propertySpecs;
     }
 
     public void parseProperty(String name, String valueStr)
@@ -81,97 +75,10 @@ public final class BackendInstanceSpec<B extends Backend> {
         }
         BackendPropertySpec spec = this.propertyMap.get(name);
         if (spec != null) {
-            Class cls = spec.getType();
-            try {
-                if (String.class.equals(cls)) {
-                    setProperty(spec, valueStr);
-                } else if (Double.class.equals(cls)) {
-                    setProperty(spec, Double.valueOf(valueStr));
-                } else if (Float.class.equals(cls)) {
-                    setProperty(spec, Float.valueOf(valueStr));
-                } else if (Integer.class.equals(cls)) {
-                    setProperty(spec, Integer.valueOf(valueStr));
-                } else if (Long.class.equals(cls)) {
-                    setProperty(spec, Long.valueOf(valueStr));
-                } else if (Boolean.class.equals(cls)) {
-                    setProperty(spec, Boolean.valueOf(valueStr));
-                } else if (Character.class.equals(cls)) {
-                    if (valueStr.length() > 1) {
-                        throw new InvalidPropertyValueException(valueStr);
-                    }
-                    setProperty(spec, valueStr.charAt(0));
-                } else if (String[].class.equals(cls)) {
-                    addProperty(spec, valueStr, String.class);
-                } else if (Double[].class.equals(cls)) {
-                    addProperty(spec, Double.valueOf(valueStr), Double.class);
-                } else if (Float[].class.equals(cls)) {
-                    addProperty(spec, Float.valueOf(valueStr), Float.class);
-                } else if (Integer[].class.equals(cls)) {
-                    addProperty(spec, Integer.valueOf(valueStr), Integer.class);
-                } else if (Long[].class.equals(cls)) {
-                    addProperty(spec, Long.valueOf(valueStr), Long.class);
-                } else if (Boolean[].class.equals(cls)) {
-                    addProperty(spec, Boolean.valueOf(valueStr), Boolean.class);
-                } else if (Character[].class.equals(cls)) {
-                    if (valueStr.length() > 1) {
-                        throw new InvalidPropertyValueException(valueStr);
-                    }
-                    addProperty(spec, valueStr.charAt(0), Character.class);
-                } else {
-                    throw new AssertionError("name's type, " + cls.getName()
-                            + ", is invalid, must be one of "
-                            + BackendPropertySpec.allowedClassesPrettyPrint());
-                }
-            } catch (InvalidPropertyValueException ex) {
-                throw ex;
-            } catch (Exception ex) {
-                throw new InvalidPropertyValueException(valueStr, ex);
-            }
+            spec.getType().parseProperty(this, spec, valueStr);
         } else {
             throw new InvalidPropertyNameException(name);
         }
-    }
-
-    public <E> void addProperty(String name, E value, Class<E> cls) throws InvalidPropertyNameException, InvalidPropertyValueException {
-        if (name == null) {
-            throw new IllegalArgumentException("name cannot be null");
-        }
-        BackendPropertySpec spec = this.propertyMap.get(name);
-        if (spec == null) {
-            throw new InvalidPropertyNameException(name);
-        }
-        addProperty(spec, value, cls);
-    }
-
-    public <E> void addProperty(BackendPropertySpec spec, E value, Class<E> cls) throws InvalidPropertyValueException {
-        if (spec == null) {
-            throw new IllegalArgumentException("spec cannot be null");
-        }
-        if (cls == null) {
-            throw new IllegalArgumentException("cls cannot be null");
-        }
-        if (value != null) {
-            Class<?> componentType = spec.getType().getComponentType();
-            if (componentType == null) {
-                throw new AssertionError("property must have an array type");
-            }
-            if (!componentType.isInstance(value)) {
-                throw new IllegalArgumentException("value should be "
-                        + componentType + " but was " + value.getClass());
-            }
-        }
-        spec.validate(value);
-        Object arrValue = this.properties.get(spec.getName());
-        if (arrValue == null) {
-            E[] arrValue2 = (E[]) Array.newInstance(cls, 1);
-            arrValue2[0] = value;
-            arrValue = arrValue2;
-        } else {
-            List<E> lValue = Arrays.asList((E[]) arrValue);
-            lValue.add(value);
-            arrValue = lValue.toArray((E[]) Array.newInstance(cls, lValue.size()));
-        }
-        this.properties.put(spec.getName(), arrValue);
     }
 
     public void setProperty(String name, Object value) throws InvalidPropertyNameException, InvalidPropertyValueException {
@@ -190,12 +97,16 @@ public final class BackendInstanceSpec<B extends Backend> {
         if (spec == null) {
             throw new IllegalArgumentException("spec cannot be null");
         }
-        if (value != null && !spec.getType().isInstance(value)) {
-            throw new IllegalArgumentException("value should be "
-                    + spec.getType() + " but was " + value.getClass());
+        if (spec.getType().getCls().isArray()) {
+            addArrayProperty(spec, value);
+        } else {
+            if (value != null && !spec.getType().isInstance(value)) {
+                throw new IllegalArgumentException("value should be "
+                        + spec.getType() + " but was " + value.getClass());
+            }
+            spec.validate(value);
+            this.properties.put(spec.getName(), value);
         }
-        spec.validate(value);
-        this.properties.put(spec.getName(), value);
     }
 
     public Object getProperty(String name)
@@ -204,8 +115,86 @@ public final class BackendInstanceSpec<B extends Backend> {
         if (get == null) {
             throw new InvalidPropertyNameException(name);
         } else {
-            return this.properties.get(name);
+            Object value = this.properties.get(name);
+            if (value != null && value instanceof List) {
+                List<?> l = (List<?>) value;
+                Object result = Array.newInstance(get.getType().getCls().getComponentType(), l.size());
+                for (int i = 0, n = l.size(); i < n; i++) {
+                    Array.set(result, i, l.get(i));
+                }
+                return result;
+            } else {
+                return this.properties.get(name);
+            }
         }
+    }
+
+    public String[] getPropertyNames() {
+        return this.properties.keySet().toArray(new String[this.properties.size()]);
+    }
+    
+    public void addRequiredOverride(String propertyName) 
+            throws InvalidPropertyNameException {
+        if (propertyName == null) {
+            throw new IllegalArgumentException("propertyName cannot be null");
+        }
+        if (!this.propertyMap.containsKey(propertyName)) {
+            throw new InvalidPropertyNameException(propertyName);
+        }
+        this.propertyRequiredOverrides.add(propertyName);
+    }
+    
+    public void removeRequiredOverride(String propertyName) throws InvalidPropertyNameException {
+        if (propertyName == null) {
+            throw new IllegalArgumentException("propertyName cannot be null");
+        }
+        if (!this.propertyMap.containsKey(propertyName)) {
+            throw new InvalidPropertyNameException(propertyName);
+        }
+        this.propertyRequiredOverrides.remove(propertyName);
+    }
+    
+    public boolean isRequired(String propertyName) throws InvalidPropertyNameException {
+        if (propertyName == null) {
+            throw new IllegalArgumentException("propertyName cannot be null");
+        }
+        if (!this.propertyMap.containsKey(propertyName)) {
+            throw new InvalidPropertyNameException(propertyName);
+        }
+        return this.propertyRequiredOverrides.contains(propertyName) || this.propertyMap.get(propertyName).isRequired();
+    }
+    
+    public void addDisplayNameOverride(String propertyName, String displayName) 
+            throws InvalidPropertyNameException {
+        if (propertyName == null) {
+            throw new IllegalArgumentException("propertyName cannot be null");
+        }
+        if (!this.propertyMap.containsKey(propertyName)) {
+            throw new InvalidPropertyNameException(propertyName);
+        }
+        this.propertyDisplayNameOverrides.put(propertyName, displayName);
+    }
+    
+    public void removeDisplayNameOverride(String propertyName) throws InvalidPropertyNameException {
+        if (propertyName == null) {
+            throw new IllegalArgumentException("propertyName cannot be null");
+        }
+        if (!this.propertyMap.containsKey(propertyName)) {
+            throw new InvalidPropertyNameException(propertyName);
+        }
+        this.propertyDisplayNameOverrides.remove(propertyName);
+    }
+    
+    public String getDisplayName(String propertyName) throws InvalidPropertyNameException {
+        if (propertyName == null) {
+            throw new IllegalArgumentException("propertyName cannot be null");
+        }
+        if (!this.propertyMap.containsKey(propertyName)) {
+            throw new InvalidPropertyNameException(propertyName);
+        }
+        return this.propertyDisplayNameOverrides.containsKey(propertyName) ? 
+                this.propertyDisplayNameOverrides.get(propertyName) : 
+                this.propertyMap.get(propertyName).getDisplayName();
     }
 
     /**
@@ -226,5 +215,31 @@ public final class BackendInstanceSpec<B extends Backend> {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    private void addArrayProperty(BackendPropertySpec spec, Object value) throws InvalidPropertyValueException {
+        if (spec == null) {
+            throw new IllegalArgumentException("spec cannot be null");
+        }
+        Class<?> cls = spec.getType().getCls();
+        if (value != null) {
+            if (!cls.isArray()) {
+                throw new AssertionError("property must have an array type");
+            }
+            Class<?> componentType = cls.getComponentType();
+            if (!componentType.isInstance(value)) {
+                throw new IllegalArgumentException("value should be "
+                        + componentType + " but was " + value.getClass());
+            }
+        }
+        spec.validate(value);
+        List<Object> lValue = (List<Object>) this.properties.get(spec.getName());
+        if (lValue == null) {
+            List<Object> l = new ArrayList<>();
+            l.add(value);
+            this.properties.put(spec.getName(), l);
+        } else {
+            lValue.add(value);
+        }
     }
 }

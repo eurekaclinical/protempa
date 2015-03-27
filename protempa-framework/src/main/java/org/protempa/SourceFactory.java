@@ -25,9 +25,6 @@ import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.BackendProvider;
 import org.protempa.backend.BackendProviderManager;
 import org.protempa.backend.BackendProviderSpecLoaderException;
-import org.protempa.backend.BackendSpec;
-import org.protempa.backend.BackendSpecLoader;
-import org.protempa.backend.BackendSpecNotFoundException;
 import org.protempa.backend.Configurations;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.ConfigurationsNotFoundException;
@@ -38,10 +35,10 @@ import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.backend.tsb.TermSourceBackend;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.protempa.backend.Configuration;
 
 /**
  * @author Andrew Post
@@ -52,6 +49,16 @@ public class SourceFactory {
     private final List<BackendInstanceSpec<DataSourceBackend>> dataSourceBackendInstanceSpecs;
     private final List<BackendInstanceSpec<KnowledgeSourceBackend>> knowledgeSourceBackendInstanceSpecs;
     private final List<BackendInstanceSpec<TermSourceBackend>> termSourceBackendInstanceSpecs;
+    
+    public SourceFactory(Configuration configuration) {
+        if (configuration == null) {
+            throw new IllegalArgumentException("configuration cannot be null");
+        }
+        this.algorithmSourceBackendInstanceSpecs = configuration.getAlgorithmSourceBackendSections();
+        this.dataSourceBackendInstanceSpecs = configuration.getDataSourceBackendSections();
+        this.knowledgeSourceBackendInstanceSpecs = configuration.getKnowledgeSourceBackendSections();
+        this.termSourceBackendInstanceSpecs = configuration.getTermSourceBackendSections();
+    }
 
     public SourceFactory(Configurations configurations, String configurationId)
             throws BackendProviderSpecLoaderException,
@@ -70,68 +77,13 @@ public class SourceFactory {
                     ConfigurationsProviderManager.getConfigurations();
             logger.fine("Got available configurations");
         }
+        
         logger.log(Level.FINE, "Loading configuration {0}", configurationId);
-        BackendSpecLoader<AlgorithmSourceBackend> asl =
-                backendProvider.getAlgorithmSourceBackendSpecLoader();
-        BackendSpecLoader<DataSourceBackend> dsl =
-                backendProvider.getDataSourceBackendSpecLoader();
-        BackendSpecLoader<KnowledgeSourceBackend> ksl =
-                backendProvider.getKnowledgeSourceBackendSpecLoader();
-        BackendSpecLoader<TermSourceBackend> tsl =
-                backendProvider.getTermSourceBackendSpecLoader();
-
-        List<BackendSpec<AlgorithmSourceBackend>> asbSpecs = new ArrayList<>();
-        List<BackendSpec<DataSourceBackend>> dsbSpecs = new ArrayList<>();
-        List<BackendSpec<KnowledgeSourceBackend>> ksbSpecs = new ArrayList<>();
-        List<BackendSpec<TermSourceBackend>> tsbSpecs = new ArrayList<>();
-
-        for (String specId :
-                configurations.loadConfigurationIds(configurationId)) {
-            try {
-                if (asl.hasSpec(specId)) {
-                    asbSpecs.add(asl.loadSpec(specId));
-                } else if (dsl.hasSpec(specId)) {
-                    dsbSpecs.add(dsl.loadSpec(specId));
-                } else if (ksl.hasSpec(specId)) {
-                    ksbSpecs.add(ksl.loadSpec(specId));
-                } else if (tsl.hasSpec(specId)) {
-                    tsbSpecs.add(tsl.loadSpec(specId));
-                } else {
-                    throw new InvalidConfigurationException(
-                            "The backend " + specId + " was not found");
-                }
-            } catch (BackendSpecNotFoundException e) {
-                throw new InvalidConfigurationException(
-                        "The backend " + specId + " was not found");
-            }
-        }
-
-        this.algorithmSourceBackendInstanceSpecs =
-                new ArrayList<>();
-
-        for (BackendSpec<AlgorithmSourceBackend> backendSpec : asbSpecs) {
-            this.algorithmSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
-        }
-
-        this.dataSourceBackendInstanceSpecs =
-                new ArrayList<>();
-
-        for (BackendSpec<DataSourceBackend> backendSpec : dsbSpecs) {
-            this.dataSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
-        }
-
-        this.knowledgeSourceBackendInstanceSpecs =
-                new ArrayList<>();
-
-        for (BackendSpec<KnowledgeSourceBackend> backendSpec : ksbSpecs) {
-            this.knowledgeSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
-        }
-
-        this.termSourceBackendInstanceSpecs =
-                new ArrayList<>();
-        for (BackendSpec<TermSourceBackend> backendSpec : tsbSpecs) {
-            this.termSourceBackendInstanceSpecs.addAll(configurations.load(configurationId, backendSpec));
-        }
+        Configuration configuration = configurations.load(configurationId);
+        this.algorithmSourceBackendInstanceSpecs = configuration.getAlgorithmSourceBackendSections();
+        this.dataSourceBackendInstanceSpecs = configuration.getDataSourceBackendSections();
+        this.knowledgeSourceBackendInstanceSpecs = configuration.getKnowledgeSourceBackendSections();
+        this.termSourceBackendInstanceSpecs = configuration.getTermSourceBackendSections();
         logger.log(Level.FINE, "Configuration {0} loaded", configurationId);
     }
 
@@ -141,7 +93,7 @@ public class SourceFactory {
             ConfigurationsNotFoundException {
         this(null, configurationId);
     }
-
+    
     public final DataSource newDataSourceInstance()
             throws BackendInitializationException, BackendNewInstanceException {
         DataSourceBackend[] backends = new DataSourceBackend[this.dataSourceBackendInstanceSpecs.size()];

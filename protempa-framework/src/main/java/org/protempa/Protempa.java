@@ -295,16 +295,11 @@ public final class Protempa implements AutoCloseable {
         if (destination == null) {
             throw new IllegalArgumentException("resultsHandler cannot be null");
         }
-        try {
-            Logger logger = ProtempaUtil.logger();
-            logger.log(Level.INFO, "Executing query {0}", query.getId());
-            QuerySession qs = new QuerySession(query, this.abstractionFinder);
-            this.abstractionFinder.doFind(query, destination, qs);
-            logger.log(Level.INFO, "Query {0} execution complete", query.getId());
-        } catch (FinderException e) {
-            this.abstractionFinder.getDataSource().failureOccurred(e);
-            throw e;
-        }
+        Logger logger = ProtempaUtil.logger();
+        logger.log(Level.INFO, "Executing query {0}", query.getId());
+        QuerySession qs = new QuerySession(query, this.abstractionFinder);
+        this.abstractionFinder.doFind(query, destination, qs);
+        logger.log(Level.INFO, "Query {0} execution complete", query.getId());
     }
 
     /**
@@ -338,31 +333,26 @@ public final class Protempa implements AutoCloseable {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
-        try {
-            Logger logger = ProtempaUtil.logger();
-            logger.log(
-                    Level.INFO,
-                    "Executing all PROTEMPA phases. Will store retrieved propositions in {0} and derived propositions in {1}",
-                    new String[]{retrievalStoreEnvironment, processStoreName});
+        Logger logger = ProtempaUtil.logger();
+        logger.log(
+                Level.INFO,
+                "Executing all PROTEMPA phases. Will store retrieved propositions in {0} and derived propositions in {1}",
+                new String[]{retrievalStoreEnvironment, processStoreName});
 
-            QuerySession qs = new QuerySession(query, this.abstractionFinder);
+        QuerySession qs = new QuerySession(query, this.abstractionFinder);
 
-            logger.log(Level.INFO, "Beginning data retrieval stage");
-            this.abstractionFinder.retrieveAndStoreData(query, qs,
-                    retrievalStoreEnvironment);
-            logger.log(Level.INFO, "Data retrieval complete");
-            logger.log(Level.INFO, "Beginning processing stage");
-            this.abstractionFinder.processStoredResults(query, qs,
-                    retrievalStoreEnvironment, processStoreName);
-            logger.log(Level.INFO, "Processing complete");
-            logger.log(Level.INFO, "Beginning output stage");
-            this.abstractionFinder.outputStoredResults(query,
-                    destination, qs, processStoreName);
-            logger.log(Level.INFO, "Output complete");
-        } catch (FinderException e) {
-            this.abstractionFinder.getDataSource().failureOccurred(e);
-            throw e;
-        }
+        logger.log(Level.INFO, "Beginning data retrieval stage");
+        this.abstractionFinder.retrieveAndStoreData(query, qs,
+                retrievalStoreEnvironment);
+        logger.log(Level.INFO, "Data retrieval complete");
+        logger.log(Level.INFO, "Beginning processing stage");
+        this.abstractionFinder.processStoredResults(query, qs,
+                retrievalStoreEnvironment, processStoreName);
+        logger.log(Level.INFO, "Processing complete");
+        logger.log(Level.INFO, "Beginning output stage");
+        this.abstractionFinder.outputStoredResults(query,
+                destination, qs, processStoreName);
+        logger.log(Level.INFO, "Output complete");
     }
 
     /**
@@ -386,21 +376,16 @@ public final class Protempa implements AutoCloseable {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
-        try {
-            Logger logger = ProtempaUtil.logger();
-            logger.log(Level.FINE, "Retrieving and persisting data");
-            logger.log(Level.INFO,
-                    "Retrieved data will be persisted in store: {0}",
-                    retrievalStoreEnvironment);
+        Logger logger = ProtempaUtil.logger();
+        logger.log(Level.FINE, "Retrieving and persisting data");
+        logger.log(Level.INFO,
+                "Retrieved data will be persisted in store: {0}",
+                retrievalStoreEnvironment);
 
-            QuerySession qs = new QuerySession(query, this.abstractionFinder);
-            this.abstractionFinder.retrieveAndStoreData(query, qs,
-                    retrievalStoreEnvironment);
-            logger.log(Level.FINE, "Data retrieval complete");
-        } catch (FinderException e) {
-            this.abstractionFinder.getDataSource().failureOccurred(e);
-            throw e;
-        }
+        QuerySession qs = new QuerySession(query, this.abstractionFinder);
+        this.abstractionFinder.retrieveAndStoreData(query, qs,
+                retrievalStoreEnvironment);
+        logger.log(Level.FINE, "Data retrieval complete");
     }
 
     /**
@@ -430,24 +415,19 @@ public final class Protempa implements AutoCloseable {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
-        try {
-            Logger logger = ProtempaUtil.logger();
-            logger.log(Level.FINE, "Processing and persisting results");
-            logger.log(Level.INFO,
-                    "Processed results will be persisted in store: {0}",
-                    workingMemoryStoreEnvironment);
-            logger.log(Level.INFO,
-                    "Pulling previously retrieved data from store: {0}",
-                    retrievalStoreEnvironment);
-            QuerySession qs = new QuerySession(query, this.abstractionFinder);
+        Logger logger = ProtempaUtil.logger();
+        logger.log(Level.FINE, "Processing and persisting results");
+        logger.log(Level.INFO,
+                "Processed results will be persisted in store: {0}",
+                workingMemoryStoreEnvironment);
+        logger.log(Level.INFO,
+                "Pulling previously retrieved data from store: {0}",
+                retrievalStoreEnvironment);
+        QuerySession qs = new QuerySession(query, this.abstractionFinder);
 
-            this.abstractionFinder.processStoredResults(query, qs,
-                    retrievalStoreEnvironment, workingMemoryStoreEnvironment);
-            logger.log(Level.FINE, "Data processing complete");
-        } catch (FinderException e) {
-            this.abstractionFinder.getDataSource().failureOccurred(e);
-            throw e;
-        }
+        this.abstractionFinder.processStoredResults(query, qs,
+                retrievalStoreEnvironment, workingMemoryStoreEnvironment);
+        logger.log(Level.FINE, "Data processing complete");
     }
 
     /**
@@ -459,8 +439,8 @@ public final class Protempa implements AutoCloseable {
      * stages.
      *
      * @param query the original query used to retrieve the data
-     * @param destination a destination that specifies how the output
-     * should be produced
+     * @param destination a destination that specifies how the output should be
+     * produced
      * @param workingMemoryEnvironment the name of the persistent store
      * containing the processed propositions; should be the same as the one
      * provided to {@link #processResultsAndPersist}.
@@ -507,20 +487,15 @@ public final class Protempa implements AutoCloseable {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
-        try {
-            Logger logger = ProtempaUtil.logger();
-            logger.log(Level.FINE, "Outputting results");
-            logger.log(Level.INFO,
-                    "Retrieving processed results from store named: {0}",
-                    workingMemoryStoreEnvironment);
-            QuerySession qs = new QuerySession(query, this.abstractionFinder);
-            this.abstractionFinder.outputStoredResults(query, resultHandler, qs,
-                    workingMemoryStoreEnvironment);
-            logger.log(Level.FINE, "Output complete");
-        } catch (FinderException e) {
-            this.abstractionFinder.getDataSource().failureOccurred(e);
-            throw e;
-        }
+        Logger logger = ProtempaUtil.logger();
+        logger.log(Level.FINE, "Outputting results");
+        logger.log(Level.INFO,
+                "Retrieving processed results from store named: {0}",
+                workingMemoryStoreEnvironment);
+        QuerySession qs = new QuerySession(query, this.abstractionFinder);
+        this.abstractionFinder.outputStoredResults(query, resultHandler, qs,
+                workingMemoryStoreEnvironment);
+        logger.log(Level.FINE, "Output complete");
     }
 
     /**
@@ -528,8 +503,8 @@ public final class Protempa implements AutoCloseable {
      * life cycle without storing the processed results.
      *
      * @param newQuery the query to execute.
-     * @param destination a destination that specifies how the output
-     * should be produced
+     * @param destination a destination that specifies how the output should be
+     * produced
      * @param propositionStoreEnvironment the name of the persistent store
      * containing the retrieved propositions; should be the same as the one
      * provided to {@link #retrieveDataAndPersist(Query, String)}
@@ -544,14 +519,9 @@ public final class Protempa implements AutoCloseable {
             throw new UnsupportedOperationException(
                     "term id support has not been implemented yet.");
         }
-        try {
-            QuerySession qs = new QuerySession(query, this.abstractionFinder);
-            this.abstractionFinder.processAndOutputStoredResults(query,
-                    destination, qs, propositionStoreEnvironment);
-        } catch (FinderException e) {
-            this.abstractionFinder.getDataSource().failureOccurred(e);
-            throw e;
-        }
+        QuerySession qs = new QuerySession(query, this.abstractionFinder);
+        this.abstractionFinder.processAndOutputStoredResults(query,
+                destination, qs, propositionStoreEnvironment);
     }
 
     public void validateDataSourceBackendConfigurations()
@@ -582,8 +552,8 @@ public final class Protempa implements AutoCloseable {
             throws DataSourceFailedDataValidationException,
             DataSourceValidationIncompleteException {
         KnowledgeSource knowledgeSource = getKnowledgeSource();
-        List<DataValidationEvent> validationEvents =
-                new ArrayList<>();
+        List<DataValidationEvent> validationEvents
+                = new ArrayList<>();
         try {
             for (DataSourceBackend backend : getDataSource().getBackends()) {
                 CollectionUtils.addAll(validationEvents,
@@ -602,7 +572,7 @@ public final class Protempa implements AutoCloseable {
     /**
      * Closes resources created by this object and the data source, knowledge
      * source, and algorithm source.
-     * 
+     *
      * @throws org.protempa.CloseException if an error occurs while closing
      * resources.
      */

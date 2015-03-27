@@ -21,53 +21,41 @@ package org.protempa.backend;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.arp.javautil.arrays.Arrays;
 
 /**
  *
  * @author Andrew Post
  */
 public final class BackendPropertySpec {
-    static final Class<?>[] ALLOWED_CLASSES = {
-        String.class,
-        Boolean.class,
-        Integer.class,
-        Long.class,
-        Float.class,
-        Double.class,
-        Character.class,
-        String[].class
-    };
 
     static String allowedClassesPrettyPrint() {
-        String[] allowedClassesStringArray = new String[ALLOWED_CLASSES.length];
-        for (int i = 0; i < ALLOWED_CLASSES.length; i++)
-            allowedClassesStringArray[i] = ALLOWED_CLASSES[i].getName();
-        return StringUtils.join(allowedClassesStringArray, ", ");
+        return StringUtils.join(BackendPropertyType.values(), ", ");
     }
 
     private final String name;
-//    private final String displayName;
+    private final String displayName;
     private final String description;
-    private final Class<?> type;
+    private final BackendPropertyType type;
+    private final boolean required;
     private final BackendPropertyValidator validator;
 
     public BackendPropertySpec(String name,
             String displayName,
-            String description, Class<?> type,
+            String description, BackendPropertyType type, boolean required,
             BackendPropertyValidator validator) {
-        if (name == null)
+        if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
-        if (type == null)
+        }
+        if (type == null) {
             throw new IllegalArgumentException("type cannot be null");
-        if (!Arrays.contains(ALLOWED_CLASSES, type))
-            throw new IllegalArgumentException("type must be one of " +
-                    allowedClassesPrettyPrint() + " but was " + type);
+        }
+        
         this.name = name;
-//        this.displayName = displayName;
+        this.displayName = displayName;
         this.description = description;
         this.type = type;
         this.validator = validator;
+        this.required = required;
     }
 
     public String getDescription() {
@@ -78,13 +66,36 @@ public final class BackendPropertySpec {
         return this.name;
     }
 
-    public Class<?> getType() {
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public BackendPropertyType getType() {
         return this.type;
     }
 
+    public boolean isRequired() {
+        return required;
+    }
+
+    public BackendPropertyValidator getValidator() {
+        return validator;
+    }
+
+    /**
+     * Checks if the value null but required, then checks if the value has the
+     * right type, then calls the specified validator's 
+     * {@link BackendPropertyValidator#validate(java.lang.String, java.lang.Object) } method.
+     * @param value a value.
+     * @throws InvalidPropertyValueException 
+     */
     public void validate(Object value) throws InvalidPropertyValueException {
-        if (this.validator != null)
+        if (value != null && !this.type.isInstance(value)) {
+            throw new InvalidPropertyValueException("wrong type: expected " + this.type.getCls() + " but was " + value.getClass());
+        }
+        if (this.validator != null) {
             this.validator.validate(this.name, value);
+        }
     }
 
     @Override

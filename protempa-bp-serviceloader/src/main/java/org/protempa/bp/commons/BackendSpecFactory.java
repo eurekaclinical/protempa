@@ -28,11 +28,14 @@ import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.annotations.BackendProperty;
 
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import org.apache.commons.lang3.StringUtils;
+import org.protempa.backend.BackendPropertyType;
 
 /**
  *
@@ -80,9 +83,9 @@ final class BackendSpecFactory {
             BackendProperty backendPropertyAnnotation =
                     method.getAnnotation(BackendProperty.class);
             if (backendPropertyAnnotation != null) {
-                Class<? extends BackendPropertyValidator> validatorCls =
+                Class<? extends BackendPropertyValidator> validatorCls = 
                         backendPropertyAnnotation.validator();
-                String name = null;
+                String name;
                 String propertyName = backendPropertyAnnotation.propertyName();
                 if (propertyName.isEmpty()) {
                     name = method.getName();
@@ -95,7 +98,10 @@ final class BackendSpecFactory {
                 name = String.valueOf(nameArr);
                 String displayName = backendPropertyAnnotation.displayName();
                 String description = backendPropertyAnnotation.description();
-                Class<?> type = method.getParameterTypes()[0];
+                Class<?> cls = method.getParameterTypes()[0];
+                if (!BackendPropertyType.isAllowed(cls)) {
+                    throw new InvalidBackendException(MessageFormat.format("@BackendProperty cannot annotate method with parameter type {0}; allowed types are {1}", cls.getName(), StringUtils.join(BackendPropertyType.values(), ", ")));
+                }
                 try {
                     propSpecs.add(new BackendPropertySpec(
                             name,
@@ -103,7 +109,8 @@ final class BackendSpecFactory {
                                 displayName,
                             bundle != null ? bundle.getString(description) :
                                 description,
-                            type,
+                            BackendPropertyType.fromCls(cls),
+                            backendPropertyAnnotation.required(),
                             validatorCls != null ? validatorCls.newInstance() :
                                 null));
                 } catch (InstantiationException | IllegalAccessException ex) {
@@ -117,6 +124,6 @@ final class BackendSpecFactory {
         }
         
         return new BackendSpec<>(backendProvider,
-                backendCls.getName(), displayName, propSpecs);
+                backendCls.getName(), displayName, propSpecs.toArray(new BackendPropertySpec[propSpecs.size()]));
     }
 }

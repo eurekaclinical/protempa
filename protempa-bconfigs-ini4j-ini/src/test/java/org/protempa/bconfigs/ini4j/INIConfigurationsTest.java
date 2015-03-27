@@ -26,16 +26,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.backend.BackendProviderManager;
-import org.protempa.backend.BackendProviderSpecLoaderException;
-import org.protempa.backend.BackendSpec;
-import org.protempa.backend.BackendSpecLoader;
-import org.protempa.backend.BackendSpecNotFoundException;
-import org.protempa.backend.ConfigurationsLoadException;
-import org.protempa.backend.ConfigurationsNotFoundException;
-import org.protempa.backend.InvalidPropertyNameException;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
-import org.protempa.backend.test.MockBackendProvider;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,35 +36,34 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.protempa.backend.Configuration;
 
 /**
  *
  * @author Andrew Post
  */
-public class INIConfigurationsTest {
+public class INIConfigurationsTest extends AbstractINIConfigurationsTest {
 
     private static File CONFIG_DIR;
-    private static BackendSpecLoader<AlgorithmSourceBackend> LOADER;
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         UniqueDirectoryCreator dirCreator = new UniqueDirectoryCreator();
         CONFIG_DIR = dirCreator.create("INI4JConfigurationsTest", "ini",
                 FileUtils.getTempDirectory());
-        System.setProperty("protempa.ini4jconfigurations.pathname",
-                CONFIG_DIR.getAbsolutePath());
-
-        MockBackendProvider mbp = new MockBackendProvider();
-        LOADER = mbp.getAlgorithmSourceBackendSpecLoader();
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
-        LOADER = null;
-        BackendProviderManager.setBackendProvider(null);
         FileUtils.deleteDirectory(CONFIG_DIR);
-        
-        System.clearProperty("protempa.ini4jconfigurations.pathname");
+    }
+
+    private INIConfigurations configurations;
+
+    @Before
+    public void setUp() {
+        configurations = new INIConfigurations(CONFIG_DIR);
     }
 
     @After
@@ -83,11 +73,9 @@ public class INIConfigurationsTest {
             f.delete();
         }
     }
-    
+
     @Test
     public void testPathname() {
-        INIConfigurations configurations =
-                new INIConfigurations();
         assertEquals(CONFIG_DIR, configurations.getDirectory());
     }
 
@@ -95,20 +83,28 @@ public class INIConfigurationsTest {
      * Test of load method, of class INICommonsConfigurations.
      */
     @Test
-    public void testLoad() throws FileNotFoundException,
-            BackendSpecNotFoundException, ConfigurationsLoadException,
-            InvalidPropertyNameException, BackendProviderSpecLoaderException, 
-            ConfigurationsNotFoundException {
+    public void testLoadSize() throws Exception {
         writeTestFile();
-        INIConfigurations configurations =
-                new INIConfigurations();
-        BackendSpec<AlgorithmSourceBackend> backendSpec =
-                LOADER.loadSpec("ASBackendSpec1");
-        List<BackendInstanceSpec<AlgorithmSourceBackend>> result =
-                configurations.load("test", backendSpec);
-        assertEquals(1, result.size());
-        BackendInstanceSpec bis = result.get(0);
-        assertEquals("http://localhost", bis.getProperty("url"));
+        Configuration configuration = configurations.load("test");
+        List<BackendInstanceSpec<AlgorithmSourceBackend>> algorithmSourceBackendSections = configuration.getAlgorithmSourceBackendSections();
+        assertEquals(1, algorithmSourceBackendSections.size());
+    }
+
+    /**
+     * Test of load method, of class INICommonsConfigurations.
+     */
+    @Test
+    public void testLoadUrlProperty() throws Exception {
+        writeTestFile();
+        Configuration configuration = configurations.load("test");
+        List<BackendInstanceSpec<AlgorithmSourceBackend>> algorithmSourceBackendSections = configuration.getAlgorithmSourceBackendSections();
+        BackendInstanceSpec<AlgorithmSourceBackend> theBis = null;
+        for (BackendInstanceSpec<AlgorithmSourceBackend> bis : algorithmSourceBackendSections) {
+            if (bis.getBackendSpec().getId().equals("ASBackendSpec1")) {
+                theBis = bis;
+            }
+        }
+        assertEquals("http://localhost", theBis.getProperty("url"));
     }
 
     /**
@@ -116,15 +112,13 @@ public class INIConfigurationsTest {
      */
     @Test
     public void testSave() throws Exception {
-        INIConfigurations configurations =
-                new INIConfigurations();
-        BackendSpec backendSpec =
-                LOADER.loadSpec("ASBackendSpec1");
-        BackendInstanceSpec backendInstanceSpec =
-                backendSpec.newBackendInstanceSpec();
+        BackendInstanceSpec<AlgorithmSourceBackend> backendInstanceSpec
+                = this.configurations.newAlgorithmSourceBackendSection("ASBackendSpec1");
         backendInstanceSpec.setProperty("url", "http://localhost");
-        configurations.save("test",
-                Collections.singletonList(backendInstanceSpec));
+        Configuration configuration = new Configuration();
+        configuration.setConfigurationId("test");
+        configuration.setAlgorithmSourceBackendSections(Collections.singletonList(backendInstanceSpec));
+        configurations.save(configuration);
 
         StringWriter sw = new StringWriter();
         writeTestFileAndClose(new PrintWriter(sw));
@@ -133,22 +127,11 @@ public class INIConfigurationsTest {
                 sw.toString().trim(), FileUtils.readFileToString(f).trim());
     }
 
-    /**
-     * Test of loadConfigurationIds method, of class INICommonsConfigurations.
-     */
-    @Test
-    public void testLoadConfigurationIds() throws Exception {
-        writeTestFile();
-        INIConfigurations instance = new INIConfigurations();
-        List<String> result = instance.loadConfigurationIds("test");
-        assertEquals(Collections.singletonList("ASBackendSpec1"), result);
-    }
-    
     private static void writeTestFile() throws FileNotFoundException {
         writeTestFileAndClose(new PrintWriter(new File(CONFIG_DIR, "test")));
-        
+
     }
-    
+
     private static void writeTestFileAndClose(PrintWriter pw) {
         pw.println("[ASBackendSpec1]");
         pw.println("url = http://localhost");

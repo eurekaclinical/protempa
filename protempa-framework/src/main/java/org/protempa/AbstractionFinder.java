@@ -199,7 +199,6 @@ final class AbstractionFinder {
             this.termSource.close();
             termSourceClosed = true;
         } catch (CloseException e) {
-            this.dataSource.failureOccurred(e);
             exception = e;
         } finally {
             if (!algorithmSourceClosed) {

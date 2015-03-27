@@ -65,8 +65,6 @@ public interface DataSourceBackend extends
             throws DataSourceBackendFailedConfigurationValidationException,
             KnowledgeSourceReadException;
     
-    void failureOccurred(Throwable throwable);
-    
     void deleteAllKeys() throws DataSourceWriteException;
 
     void writeKeys(Set<String> keyIds) throws DataSourceWriteException;

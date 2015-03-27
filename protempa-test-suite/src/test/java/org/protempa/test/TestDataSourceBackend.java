@@ -642,8 +642,4 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
         return absTimeUnitFactory;
     }
 
-    @Override
-    public void failureOccurred(Throwable throwable) {
-
-    }
 }

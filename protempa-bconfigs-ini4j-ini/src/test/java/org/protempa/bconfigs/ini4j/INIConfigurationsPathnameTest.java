@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  *
  * @author Andrew Post
  */
-public class INIConfigurationsPathnameTest {
+public class INIConfigurationsPathnameTest extends AbstractINIConfigurationsTest {
 
     @Test
     public void testDefault() {
@@ -56,4 +56,5 @@ public class INIConfigurationsPathnameTest {
         INIConfigurations configs = new INIConfigurations(dir);
         assertEquals(dir, configs.getDirectory());
     }
+    
 }

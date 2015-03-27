@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.protempa.Term;
 import org.protempa.TermSourceReadException;
 import org.protempa.backend.BackendPropertySpec;
+import org.protempa.backend.BackendPropertyType;
 import org.protempa.backend.test.MockBackendInstanceSpecFactory;
 import org.protempa.backend.test.MockBackendPropertySpec;
 
@@ -59,10 +60,10 @@ public class UMLSTermSourceBackendTest {
 
         List<BackendPropertySpec> propSpecs = new ArrayList<>();
 
-        propSpecs.add(new MockBackendPropertySpec("databaseAPI", String.class).getBackendPropertySpec());
-        propSpecs.add(new MockBackendPropertySpec("databaseId", String.class).getBackendPropertySpec());
-        propSpecs.add(new MockBackendPropertySpec("username", String.class).getBackendPropertySpec());
-        propSpecs.add(new MockBackendPropertySpec("password", String.class).getBackendPropertySpec());
+        propSpecs.add(new MockBackendPropertySpec("databaseAPI", BackendPropertyType.STRING).getBackendPropertySpec());
+        propSpecs.add(new MockBackendPropertySpec("databaseId", BackendPropertyType.STRING).getBackendPropertySpec());
+        propSpecs.add(new MockBackendPropertySpec("username", BackendPropertyType.STRING).getBackendPropertySpec());
+        propSpecs.add(new MockBackendPropertySpec("password", BackendPropertyType.STRING).getBackendPropertySpec());
 
         MockBackendInstanceSpecFactory<UMLSTermSourceBackend> mbis = 
                 new MockBackendInstanceSpecFactory<>(

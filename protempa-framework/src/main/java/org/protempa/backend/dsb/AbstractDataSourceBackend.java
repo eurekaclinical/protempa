@@ -115,11 +115,6 @@ public abstract class AbstractDataSourceBackend extends
     }
     
     @Override
-    public void failureOccurred(Throwable throwable) {
-        
-    }
-
-    @Override
     public void deleteAllKeys() throws DataSourceWriteException {
     }
     

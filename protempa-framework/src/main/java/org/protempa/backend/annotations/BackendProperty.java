@@ -19,11 +19,12 @@
  */
 package org.protempa.backend.annotations;
 
-import org.protempa.backend.*;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.protempa.backend.BackendPropertyValidator;
+import org.protempa.backend.DefaultBackendPropertyValidator;
 
 /**
  *
@@ -35,6 +36,7 @@ public @interface BackendProperty {
     String propertyName() default "";
     String displayName() default "";
     String description() default "";
-    Class<? extends BackendPropertyValidator> validator()
+    boolean required() default false;
+    Class<? extends BackendPropertyValidator> validator() 
             default DefaultBackendPropertyValidator.class;
 }

@@ -19,6 +19,7 @@
  */
 package org.protempa.backend.test;
 
+import org.protempa.backend.BackendPropertyType;
 import org.protempa.backend.BackendPropertySpec;
 import org.protempa.backend.DefaultBackendPropertyValidator;
 
@@ -29,8 +30,8 @@ public class MockBackendPropertySpec {
         return propSpec;
     }
 
-    public MockBackendPropertySpec(String name, Class<?> type) {
+    public MockBackendPropertySpec(String name, BackendPropertyType type) {
         this.propSpec = new BackendPropertySpec(name, name, name, type,
-                new DefaultBackendPropertyValidator());
+                false, new DefaultBackendPropertyValidator());
     }
 }

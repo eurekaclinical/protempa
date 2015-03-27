@@ -39,31 +39,31 @@ public final class MockBackendProvider implements BackendProvider {
             getDataSourceBackendSpecLoader() {
         return new BackendSpecLoader<>(
                 Collections.singletonList(
-            new BackendSpec<DataSourceBackend>(
-            this, "DSBackendSpec1", "DS Backend Spec 1", null)));
+                        new BackendSpec<DataSourceBackend>(
+                                this, "DSBackendSpec1", "DS Backend Spec 1", null)));
     }
 
     @Override
     public BackendSpecLoader<KnowledgeSourceBackend>
             getKnowledgeSourceBackendSpecLoader() {
         return new BackendSpecLoader<>(
-            Collections.singletonList(
-            new BackendSpec<KnowledgeSourceBackend>(
-            this, "KSBackendSpec1",
-            "KS Backend Spec 1", null)));
+                Collections.singletonList(
+                        new BackendSpec<KnowledgeSourceBackend>(
+                                this, "KSBackendSpec1",
+                                "KS Backend Spec 1", null)));
     }
 
     @Override
     public BackendSpecLoader<AlgorithmSourceBackend>
             getAlgorithmSourceBackendSpecLoader() {
         return new BackendSpecLoader<>(
-            Collections.singletonList(
-            new BackendSpec<AlgorithmSourceBackend>(
-            this, "ASBackendSpec1",
-            "AS Backend Spec 1", Collections.singletonList(
-            new BackendPropertySpec("url", "URL",
-            "The URL to the knowledge base", String.class,
-            new DefaultBackendPropertyValidator())))));
+                Collections.singletonList(
+                        new BackendSpec<AlgorithmSourceBackend>(
+                                this, "ASBackendSpec1",
+                                "AS Backend Spec 1", new BackendPropertySpec[]{
+                                    new BackendPropertySpec("url", "URL",
+                                            "The URL to the knowledge base", BackendPropertyType.STRING,
+                                            false, new DefaultBackendPropertyValidator())})));
     }
 
     @Override
@@ -71,8 +71,8 @@ public final class MockBackendProvider implements BackendProvider {
             throws BackendProviderSpecLoaderException {
         return new BackendSpecLoader<>(
                 Collections.singletonList(
-               new BackendSpec<TermSourceBackend>(
-               this, "TSBackendSpec1", "TS Backend Spec 1", null)));
+                        new BackendSpec<TermSourceBackend>(
+                                this, "TSBackendSpec1", "TS Backend Spec 1", null)));
     }
 
     @Override

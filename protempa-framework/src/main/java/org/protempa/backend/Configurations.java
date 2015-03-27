@@ -19,7 +19,10 @@
  */
 package org.protempa.backend;
 
-import java.util.List;
+import org.protempa.backend.asb.AlgorithmSourceBackend;
+import org.protempa.backend.dsb.DataSourceBackend;
+import org.protempa.backend.ksb.KnowledgeSourceBackend;
+import org.protempa.backend.tsb.TermSourceBackend;
 
 /**
  *
@@ -30,37 +33,41 @@ public interface Configurations {
      * Reads all of the backend specifications from the specified 
      * configurations conforming to the given backend spec.
      * @param <B>
-     * @param configurationsId
+     * @param configurationId
      * @param backendSpec
      * @return
      * @throws ConfigurationsNotFoundException
      * @throws ConfigurationsLoadException 
      */
-    <B extends Backend> List<BackendInstanceSpec<B>>
-            load(String configurationsId, BackendSpec<B> backendSpec)
-            throws ConfigurationsNotFoundException, ConfigurationsLoadException;
-
+    Configuration load(String configurationId)
+        throws ConfigurationsNotFoundException, ConfigurationsLoadException;
+    
+    BackendInstanceSpec<AlgorithmSourceBackend> newAlgorithmSourceBackendSection(String backendSpecId) throws BackendSpecNotFoundException, BackendProviderSpecLoaderException;
+    
+    BackendInstanceSpec<DataSourceBackend> newDataSourceBackendSection(String backendSpecId) throws BackendSpecNotFoundException, BackendProviderSpecLoaderException;
+    
+    BackendInstanceSpec<KnowledgeSourceBackend> newKnowledgeSourceBackendSection(String backendSpecId) throws BackendSpecNotFoundException, BackendProviderSpecLoaderException;
+    
+    BackendInstanceSpec<TermSourceBackend> newTermSourceBackendSection(String backendSpecId) throws BackendSpecNotFoundException, BackendProviderSpecLoaderException;
+        
     /**
      * Writes the provided backend specifications to the configurations with
      * the specified id. The passed-in objects will have their 
      * <code>configurationsId</code> field set to the provided value.
      * 
-     * @param configurationsId
+     * @param configurationId
      * @param backendInstanceSpec
      * @throws ConfigurationsSaveException 
      */
-    void save(String configurationsId, 
-            List<BackendInstanceSpec> backendInstanceSpec)
+    void save(Configuration configuration)
             throws ConfigurationsSaveException;
     /**
      * Deletes the configurations with the specified id.
      * 
-     * @param configurationsId
+     * @param configurationId
      * @throws ConfigurationRemoveException 
      */
-    void remove(String configurationsId)
+    void remove(String configurationId)
             throws ConfigurationRemoveException;
-    List<String> loadConfigurationIds(String configurationsId)
-            throws ConfigurationsNotFoundException, 
-            ConfigurationsLoadException;
+    
 }

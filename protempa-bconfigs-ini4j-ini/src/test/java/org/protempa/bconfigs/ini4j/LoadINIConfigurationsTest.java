@@ -19,7 +19,6 @@
  */
 package org.protempa.bconfigs.ini4j;
 
-import org.protempa.bconfigs.ini4j.INIConfigurations;
 import org.junit.After;
 import org.junit.Test;
 import org.protempa.backend.Configurations;
@@ -31,9 +30,9 @@ import org.junit.Before;
  *
  * @author Andrew Post
  */
-public class LoadINIConfigurationsTest {
+public class LoadINIConfigurationsTest extends AbstractINIConfigurationsTest {
     private CommonsConfigurationsProvider configurationsProvider;
-    
+
     @Before
     public void setUp() {
         this.configurationsProvider = 

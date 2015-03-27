@@ -30,11 +30,15 @@ public class InvalidPropertyValueException extends ProtempaException {
 
     private static final long serialVersionUID = -5960840541202474047L;
 
-    public InvalidPropertyValueException(String value) {
-        super("Invalid property value in configuration: " + value);
+    public InvalidPropertyValueException(String msg) {
+        super(msg);
     }
     
-    public InvalidPropertyValueException(String value, Throwable throwable) {
-        super("Invalid property value in configuration: " + value, throwable);
+    public InvalidPropertyValueException(String msg, Throwable throwable) {
+        super(msg, throwable);
+    }
+    
+    public InvalidPropertyValueException(String name, Object value, Throwable throwable) {
+        super("Invalid value " + value + " for property " + name, throwable);
     }
 }

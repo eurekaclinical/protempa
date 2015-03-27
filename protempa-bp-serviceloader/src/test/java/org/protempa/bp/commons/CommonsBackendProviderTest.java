@@ -35,7 +35,6 @@ import org.protempa.backend.asb.java.JavaAlgorithmBackend;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -139,8 +138,8 @@ public class CommonsBackendProviderTest {
         BackendSpec<?> spec = 
                 loader.loadSpec(MockDataSourceBackend.class.getName());
         BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
-        List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
-        assertEquals(5, bps.size());
+        BackendPropertySpec[] bps = iSpec.getBackendSpec().getPropertySpecs();
+        assertEquals(5, bps.length);
     }
 
     /**
@@ -207,8 +206,8 @@ public class CommonsBackendProviderTest {
         BackendSpec<?> spec = 
                 loader.loadSpec(MockKnowledgeSourceBackend.class.getName());
         BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
-        List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
-        assertEquals(2, bps.size());
+        BackendPropertySpec[] bps = iSpec.getBackendSpec().getPropertySpecs();
+        assertEquals(2, bps.length);
     }
 
     @Test
@@ -276,8 +275,8 @@ public class CommonsBackendProviderTest {
         BackendSpec<?> spec = 
                 loader.loadSpec(MockAlgorithmSourceBackend.class.getName());
         BackendInstanceSpec<?> iSpec = spec.newBackendInstanceSpec();
-        List<BackendPropertySpec> bps = iSpec.getBackendPropertySpecs();
-        assertEquals(1, bps.size());
+        BackendPropertySpec[] bps = iSpec.getBackendSpec().getPropertySpecs();
+        assertEquals(1, bps.length);
     }
 
 }

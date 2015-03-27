@@ -113,13 +113,4 @@ public interface DataSource extends Source<DataSourceUpdatedEvent,
     
     void writeKeys(Set<String> keyIds) throws DataSourceWriteException;
     
-    /**
-     * Called to signal to the data source backends that the Protempa query
-     * failed for some reason. Data source backends might, for example,
-     * mark datasets as having failed processing.
-     * 
-     * @param e the exception that caused query failure, if any.
-     */
-    void failureOccurred(Throwable e);
-
 }

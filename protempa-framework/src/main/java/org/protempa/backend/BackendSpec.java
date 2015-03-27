@@ -21,18 +21,18 @@ package org.protempa.backend;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.util.List;
 
 /**
  *
  * @author Andrew Post
  */
 public final class BackendSpec<B extends Backend> {
+    private static final BackendPropertySpec[] EMPTY_BACKEND_PROPERTY_SPEC_ARR = new BackendPropertySpec[0];
 
     private BackendProvider backendProvider;
     private String id;
     private String displayName;
-    private List<BackendPropertySpec> propertySpecs;
+    private final BackendPropertySpec[] propertySpecs;
 
     /**
      *
@@ -43,7 +43,7 @@ public final class BackendSpec<B extends Backend> {
      */
     public BackendSpec(BackendProvider backendProvider, String id,
             String displayName,
-            List<BackendPropertySpec> propertySpecs) {
+            BackendPropertySpec[] propertySpecs) {
         if (backendProvider == null) {
             throw new IllegalArgumentException("backendProvider cannot be null");
         }
@@ -56,7 +56,11 @@ public final class BackendSpec<B extends Backend> {
         this.id = id;
         this.backendProvider = backendProvider;
         this.displayName = displayName;
-        this.propertySpecs = propertySpecs;
+        if (propertySpecs != null) {
+            this.propertySpecs = propertySpecs.clone();
+        } else {
+            this.propertySpecs = EMPTY_BACKEND_PROPERTY_SPEC_ARR;
+        }
     }
 
     public String getId() {
@@ -70,9 +74,13 @@ public final class BackendSpec<B extends Backend> {
     public String getDisplayName() {
         return this.displayName;
     }
-    
+
+    public BackendPropertySpec[] getPropertySpecs() {
+        return this.propertySpecs.clone();
+    }
+
     public BackendInstanceSpec<B> newBackendInstanceSpec() {
-        return new BackendInstanceSpec<>(this, propertySpecs);
+        return new BackendInstanceSpec<>(this);
     }
 
     @SuppressWarnings("unchecked")

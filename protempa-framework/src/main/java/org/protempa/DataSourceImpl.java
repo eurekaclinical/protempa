@@ -236,13 +236,6 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
     public void clear() {
     }
 
-    @Override
-    public void failureOccurred(Throwable e) {
-        for (DataSourceBackend dsb : getBackends()) {
-            dsb.failureOccurred(e);
-        }
-    }
-    
     private void initializeIfNeeded() throws DataSourceReadException {
         if (isClosed()) {
             throw new DataSourceReadException("Data source already closed!");

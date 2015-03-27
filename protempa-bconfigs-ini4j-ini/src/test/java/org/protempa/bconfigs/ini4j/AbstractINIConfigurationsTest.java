@@ -1,8 +1,10 @@
+package org.protempa.bconfigs.ini4j;
+
 /*
  * #%L
- * Protempa Framework
+ * Protempa Ini4j INI Backend Configurations
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +19,24 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.backend;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.protempa.backend.BackendProviderManager;
+import org.protempa.backend.test.MockBackendProvider;
 
 /**
  *
  * @author Andrew Post
  */
-public class DefaultBackendPropertyValidator 
-        implements BackendPropertyValidator<Object> {
-
-    @Override
-    public void validate(String name, Object value)
-            throws InvalidPropertyValueException {
-        // Do nothing.
+public abstract class AbstractINIConfigurationsTest {
+    @BeforeClass
+    public static void beforeClass() {
+        BackendProviderManager.setBackendProvider(new MockBackendProvider());
     }
-
+    
+    @AfterClass
+    public static void afterClass() {
+        BackendProviderManager.setBackendProvider(null);
+    }
 }
