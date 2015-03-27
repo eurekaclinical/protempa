@@ -194,7 +194,6 @@
 
     <modules>
         <module>protempa-framework</module>
-        <module>protempa-bconfigs-commons-ini</module>
         <module>protempa-bcp-serviceloader</module>
         <module>protempa-bp-serviceloader</module>
         <module>protempa-ksb-protege</module>
