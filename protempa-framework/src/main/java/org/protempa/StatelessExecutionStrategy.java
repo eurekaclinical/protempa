@@ -50,6 +50,7 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
     public Iterator<Proposition> execute(String keyId,
             Set<String> propositionIds, List<?> objects,
             DataStore<String, WorkingMemory> wm) {
+        this.statelessSession.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
         StatelessSessionResult result = this.statelessSession
                 .executeWithResults(objects);
         return result.iterateObjects();

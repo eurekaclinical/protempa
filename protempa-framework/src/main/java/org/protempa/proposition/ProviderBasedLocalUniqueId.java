@@ -25,21 +25,30 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public final class DerivedUniqueId implements LocalUniqueId {
+public final class ProviderBasedLocalUniqueId implements LocalUniqueId {
 
     private static final long serialVersionUID = -7548400029812453768L;
     private String id;
+    private long numericalId;
     private transient volatile int hashCode;
 
-    public DerivedUniqueId(String newId) {
-        if (newId == null) {
-            throw new IllegalArgumentException("newId cannot be null");
+    public ProviderBasedLocalUniqueId(LocalUniqueIdValuesProvider provider) {
+        if (provider == null) {
+            throw new IllegalArgumentException("provider cannot be null");
         }
-        this.id = newId;
+        provider.incr();
+        this.id = provider.getId();
+        this.numericalId = provider.getNumericalId();
     }
 
+    @Override
     public String getId() {
         return this.id;
+    }
+
+    @Override
+    public long getNumericalId() {
+        return numericalId;
     }
 
     @Override
@@ -53,8 +62,11 @@ public final class DerivedUniqueId implements LocalUniqueId {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final DerivedUniqueId other = (DerivedUniqueId) obj;
+        final ProviderBasedLocalUniqueId other = (ProviderBasedLocalUniqueId) obj;
         if (!this.id.equals(other.id)) {
+            return false;
+        }
+        if (this.numericalId != other.numericalId) {
             return false;
         }
         return true;
@@ -65,6 +77,7 @@ public final class DerivedUniqueId implements LocalUniqueId {
         if (this.hashCode == 0) {
             int hash = 3;
             hash = 53 * hash + this.id.hashCode();
+            hash = 53 * hash + (int) ((this.numericalId >> 32) ^ this.numericalId);
             this.hashCode = hash;
         }
         return this.hashCode;
@@ -78,7 +91,7 @@ public final class DerivedUniqueId implements LocalUniqueId {
     @Override
     public LocalUniqueId clone() {
         try {
-            DerivedUniqueId clone = (DerivedUniqueId) super.clone();
+            ProviderBasedLocalUniqueId clone = (ProviderBasedLocalUniqueId) super.clone();
             // TODO:  Do we need to copy the ID?  Or is the cloned object 
             // a new object without a proper ID?
             // clone.id = this.id;
@@ -90,6 +103,7 @@ public final class DerivedUniqueId implements LocalUniqueId {
 
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.writeObject(this.id);
+        s.writeLong(this.numericalId);
     }
 
     private void readObject(ObjectInputStream s) throws IOException,
@@ -98,5 +112,6 @@ public final class DerivedUniqueId implements LocalUniqueId {
         if (this.id == null) {
             throw new InvalidObjectException("Can't restore. Null id");
         }
+        this.numericalId = s.readLong();
     }
 }

@@ -21,6 +21,8 @@ package org.protempa;
 
 
 import org.protempa.proposition.AbstractParameter;
+import org.protempa.proposition.DefaultUniqueIdFactory;
+import org.protempa.proposition.UniqueIdFactory;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
@@ -36,12 +38,14 @@ final class ExtendedParameterDurationTestParameters {
 
     private static final IntervalFactory intervalFactory =
             new IntervalFactory();
+    private static final UniqueIdFactory factory = 
+            new DefaultUniqueIdFactory();
 
     private ExtendedParameterDurationTestParameters() {
     }
 
     static AbstractParameter twelveHourParameter() {
-        AbstractParameter param = new AbstractParameter("TEST");
+        AbstractParameter param = new AbstractParameter("TEST", factory.getInstance());
         param.setSourceSystem(SourceSystem.DERIVED);
         param.setValue(new NumberValue(13));
         Interval ival = intervalFactory.getInstance(0L,
@@ -52,7 +56,7 @@ final class ExtendedParameterDurationTestParameters {
     }
 
     static AbstractParameter thirteenHourParameter() {
-        AbstractParameter param = new AbstractParameter("TEST");
+        AbstractParameter param = new AbstractParameter("TEST", factory.getInstance());
         param.setSourceSystem(SourceSystem.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance(0L,
@@ -62,7 +66,7 @@ final class ExtendedParameterDurationTestParameters {
     }
 
     static AbstractParameter elevenHourParameter() {
-        AbstractParameter param = new AbstractParameter("TEST");
+        AbstractParameter param = new AbstractParameter("TEST", factory.getInstance());
         param.setSourceSystem(SourceSystem.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance(0L,

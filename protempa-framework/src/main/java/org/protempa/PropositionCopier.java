@@ -20,9 +20,6 @@
 package org.protempa;
 
 import java.io.Serializable;
-import org.protempa.proposition.DerivedSourceId;
-import org.protempa.proposition.UniqueId;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import org.drools.WorkingMemory;
@@ -30,9 +27,10 @@ import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.visitor.AbstractPropositionVisitor;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Context;
-import org.protempa.proposition.DerivedUniqueId;
 import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
+import org.protempa.proposition.ProviderBasedUniqueIdFactory;
+import org.protempa.proposition.UniqueIdFactory;
 
 /**
  * Creates derived propositions when discovered by PROTEMPA that have the same
@@ -57,6 +55,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
     private final String propId;
     private final DerivationsBuilder derivationsBuilder;
     private WorkingMemory workingMemory;
+    private UniqueIdFactory uniqueIdProvider;
 
     /**
      * Instances a copier with the id of the proposition to derive, and a
@@ -90,6 +89,9 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
                     "The previous user of this copier forgot to call release. This causes a memory leak!");
         }
         this.workingMemory = workingMemory;
+        this.uniqueIdProvider = 
+                new ProviderBasedUniqueIdFactory(new JBossRulesDerivedLocalUniqueIdValuesProvider(this.workingMemory, 
+                        this.propId));
     }
     
     /**
@@ -110,7 +112,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
     @Override
     public void visit(AbstractParameter abstractParameter) {
         assert this.workingMemory != null : "workingMemory wasn't set";
-        AbstractParameter param = new AbstractParameter(propId);
+        AbstractParameter param = new AbstractParameter(propId, this.uniqueIdProvider.getInstance());
         param.setSourceSystem(SourceSystem.DERIVED);
         param.setInterval(abstractParameter.getInterval());
         param.setValue(abstractParameter.getValue());
@@ -129,9 +131,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
     @Override
     public void visit(Event event) {
         assert this.workingMemory != null : "workingMemory wasn't set";
-        Event e = new Event(propId, new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString())));
+        Event e = new Event(propId, this.uniqueIdProvider.getInstance());
         e.setInterval(event.getInterval());
         e.setSourceSystem(SourceSystem.DERIVED);
         this.workingMemory.insert(e);
@@ -150,9 +150,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
     @Override
     public void visit(PrimitiveParameter primitiveParameter) {
         assert this.workingMemory != null : "workingMemory wasn't set";
-        PrimitiveParameter param = new PrimitiveParameter(propId, new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString())));
+        PrimitiveParameter param = new PrimitiveParameter(propId, this.uniqueIdProvider.getInstance());
         param.setPosition(primitiveParameter.getPosition());
         param.setGranularity(primitiveParameter.getGranularity());
         param.setValue(primitiveParameter.getValue());
@@ -172,9 +170,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
     @Override
     public void visit(Constant constant) {
         assert this.workingMemory != null : "workingMemory wasn't set";
-        Constant newConstant = new Constant(propId, new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString())));
+        Constant newConstant = new Constant(propId, this.uniqueIdProvider.getInstance());
         newConstant.setSourceSystem(SourceSystem.DERIVED);
         this.workingMemory.insert(newConstant);
         this.derivationsBuilder.propositionAsserted(constant, newConstant);

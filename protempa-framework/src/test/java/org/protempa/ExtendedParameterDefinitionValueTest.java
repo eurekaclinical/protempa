@@ -28,7 +28,7 @@ import org.protempa.proposition.value.NumberValue;
 /**
  * @author Andrew Post
  */
-public class ExtendedParameterDefinitionValueTest extends TestCase {
+public class ExtendedParameterDefinitionValueTest extends ProtempaTestCase {
 
     private static final IntervalFactory intervalFactory
             = new IntervalFactory();
@@ -53,7 +53,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         completeDef.setDisplayName("test");
         completeDef.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter(llad.getId());
+        AbstractParameter param = new AbstractParameter(llad.getId(), getUid());
         param.setSourceSystem(SourceSystem.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
@@ -68,7 +68,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         completeDef.setDisplayName("test");
         completeDef.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter(llad.getId());
+        AbstractParameter param = new AbstractParameter(llad.getId(), getUid());
         param.setSourceSystem(SourceSystem.DERIVED);
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
@@ -82,7 +82,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         nullValueDef.setAbbreviatedDisplayName("t");
         nullValueDef.setDisplayName("test");
 
-        AbstractParameter param = new AbstractParameter(llad.getId());
+        AbstractParameter param = new AbstractParameter(llad.getId(), getUid());
         param.setValue(new NumberValue(13));
         param.setInterval(intervalFactory.getInstance());
         param.setSourceSystem(SourceSystem.DERIVED);
@@ -96,7 +96,7 @@ public class ExtendedParameterDefinitionValueTest extends TestCase {
         def1.setDisplayName("test");
         def1.setValue(new NumberValue(13));
 
-        AbstractParameter param = new AbstractParameter(llad.getId());
+        AbstractParameter param = new AbstractParameter(llad.getId(), getUid());
         param.setSourceSystem(SourceSystem.DERIVED);
         param.setValue(new NumberValue(12));
         param.setInterval(intervalFactory.getInstance());

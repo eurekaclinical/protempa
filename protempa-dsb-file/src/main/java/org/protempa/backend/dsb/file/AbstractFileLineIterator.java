@@ -41,6 +41,7 @@ import org.arp.javautil.collections.Collections;
 import org.protempa.DataSourceReadException;
 import org.protempa.DataStreamingEvent;
 import org.protempa.DataStreamingEventIterator;
+import org.protempa.proposition.DefaultLocalUniqueId;
 import org.protempa.SourceSystem;
 import org.protempa.proposition.AbstractProposition;
 import org.protempa.proposition.Constant;
@@ -183,7 +184,7 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
                             } else {
                                 UniqueId uniqueId = new UniqueId(
                                         DataSourceBackendId.getInstance(this.id),
-                                        new FileUniqueId(this.lineNo, colNum, propId, index));
+                                        new DefaultLocalUniqueId());
                                 assert propType != null : "propType cannot be null";
                                 switch (propType) {
                                     case "Constant":

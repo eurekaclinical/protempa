@@ -30,9 +30,11 @@ import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.ProviderBasedUniqueIdFactory;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalProposition;
+import org.protempa.proposition.UniqueIdFactory;
 
 /**
  * The consequence part of a rule for computing a temporal slice.
@@ -145,6 +147,9 @@ final class SliceConsequence implements Consequence {
     }
 
     private void mergedInterval(KnowledgeHelper kh, List<TemporalProposition> pl) {
+        JBossRulesDerivedLocalUniqueIdValuesProvider provider = 
+                new JBossRulesDerivedLocalUniqueIdValuesProvider(kh.getWorkingMemory(), def.getPropositionId());
+        UniqueIdFactory factory = new ProviderBasedUniqueIdFactory(provider);
         List<TemporalProposition> slice = new ArrayList<>();
         for (ListIterator<TemporalProposition> itr = pl.listIterator(); itr
                 .hasNext() && itr.nextIndex() < this.maxIndex;) {
@@ -153,7 +158,7 @@ final class SliceConsequence implements Consequence {
         Segment<TemporalProposition> segment = new Segment<>(
                 new Sequence<>(def.getPropositionId(), slice));
         AbstractParameter result = AbstractParameterFactory.getFromAbstraction(
-                def.getPropositionId(), segment, slice, null, null, null, null);
+                def.getPropositionId(), factory.getInstance(), segment, slice, null, null, null, null);
         kh.getWorkingMemory().insert(result);
         for (Proposition p : segment) {
             this.derivationsBuilder.propositionAsserted(p, result);

@@ -33,7 +33,7 @@ import org.protempa.proposition.value.RelativeHourGranularity;
  * 
  * @author Andrew Post
  */
-public class SimpleGapFunctionTest extends TestCase {
+public class SimpleGapFunctionTest extends ProtempaTestCase {
     private static final IntervalFactory intervalFactory =
             new IntervalFactory();
 
@@ -51,8 +51,8 @@ public class SimpleGapFunctionTest extends TestCase {
         gapFunction = null;
     }
 
-    private static AbstractParameter hours1() {
-        AbstractParameter p1 = new AbstractParameter("TEST");
+    private AbstractParameter hours1() {
+        AbstractParameter p1 = new AbstractParameter("TEST", getUid());
         p1.setSourceSystem(SourceSystem.DERIVED);
         p1.setInterval(intervalFactory.getInstance(0L,
                 RelativeHourGranularity.HOUR, 12L * 60 * 60 * 1000,
@@ -60,8 +60,8 @@ public class SimpleGapFunctionTest extends TestCase {
         return p1;
     }
 
-    private static AbstractParameter hours2() {
-        AbstractParameter p2 = new AbstractParameter("TEST");
+    private AbstractParameter hours2() {
+        AbstractParameter p2 = new AbstractParameter("TEST", getUid());
         p2.setSourceSystem(SourceSystem.DERIVED);
         p2.setInterval(intervalFactory.getInstance(
                 24L * 60 * 60 * 1000, RelativeHourGranularity.HOUR,
@@ -69,12 +69,12 @@ public class SimpleGapFunctionTest extends TestCase {
         return p2;
     }
 
-    private static AbstractParameter notHours1() {
+    private AbstractParameter notHours1() {
         return hours1();
     }
 
-    private static AbstractParameter notHours2() {
-        AbstractParameter p2 = new AbstractParameter("TEST");
+    private AbstractParameter notHours2() {
+        AbstractParameter p2 = new AbstractParameter("TEST", getUid());
         p2.setSourceSystem(SourceSystem.DERIVED);
         p2.setInterval(intervalFactory.getInstance(
                 240L * 60 * 60 * 1000, RelativeHourGranularity.HOUR,
@@ -83,12 +83,12 @@ public class SimpleGapFunctionTest extends TestCase {
     }
     
     public void testGapOverlapping() {
-        AbstractParameter p1 = new AbstractParameter("TEST");
+        AbstractParameter p1 = new AbstractParameter("TEST", getUid());
         p1.setSourceSystem(SourceSystem.DERIVED);
         p1.setInterval(intervalFactory.getInstance(0L,
                 RelativeHourGranularity.HOUR, 12L * 60 * 60 * 1000,
                 RelativeHourGranularity.HOUR));
-        AbstractParameter p2 = new AbstractParameter("TEST");
+        AbstractParameter p2 = new AbstractParameter("TEST", getUid());
         p2.setSourceSystem(SourceSystem.DERIVED);
         p2.setInterval(intervalFactory.getInstance(
                 6L * 60 * 60 * 1000, RelativeHourGranularity.HOUR,
@@ -97,12 +97,12 @@ public class SimpleGapFunctionTest extends TestCase {
     }
     
     public void testGapDuring() {
-        AbstractParameter p1 = new AbstractParameter("TEST");
+        AbstractParameter p1 = new AbstractParameter("TEST", getUid());
         p1.setSourceSystem(SourceSystem.DERIVED);
         p1.setInterval(intervalFactory.getInstance(8L * 60 * 60 * 1000,
                 RelativeHourGranularity.HOUR, 16L * 60 * 60 * 1000,
                 RelativeHourGranularity.HOUR));
-        AbstractParameter p2 = new AbstractParameter("TEST");
+        AbstractParameter p2 = new AbstractParameter("TEST", getUid());
         p2.setSourceSystem(SourceSystem.DERIVED);
         p2.setInterval(intervalFactory.getInstance(
                 6L * 60 * 60 * 1000, RelativeHourGranularity.HOUR,
@@ -111,12 +111,12 @@ public class SimpleGapFunctionTest extends TestCase {
     }
     
     public void testGapContains() {
-        AbstractParameter p1 = new AbstractParameter("TEST");
+        AbstractParameter p1 = new AbstractParameter("TEST", getUid());
         p1.setSourceSystem(SourceSystem.DERIVED);
         p1.setInterval(intervalFactory.getInstance(8L * 60 * 60 * 1000,
                 RelativeHourGranularity.HOUR, 16L * 60 * 60 * 1000,
                 RelativeHourGranularity.HOUR));
-        AbstractParameter p2 = new AbstractParameter("TEST");
+        AbstractParameter p2 = new AbstractParameter("TEST", getUid());
         p2.setSourceSystem(SourceSystem.DERIVED);
         p2.setInterval(intervalFactory.getInstance(
                 6L * 60 * 60 * 1000, RelativeHourGranularity.HOUR,
@@ -168,11 +168,11 @@ public class SimpleGapFunctionTest extends TestCase {
 
     public void testNotGap0HourPrimitiveParameters() {
         gapFunction.setMaximumGap(0);
-        AbstractParameter p1 = new AbstractParameter("TEST");
+        AbstractParameter p1 = new AbstractParameter("TEST", getUid());
         p1.setSourceSystem(SourceSystem.DERIVED);
         p1.setInterval(intervalFactory.getInstance(0L, RelativeHourGranularity.HOUR, 0L,
                 RelativeHourGranularity.HOUR));
-        AbstractParameter p2 = new AbstractParameter("TEST");
+        AbstractParameter p2 = new AbstractParameter("TEST", getUid());
         long one = 1 * 60 * 60 * 1000;
         p2.setSourceSystem(SourceSystem.DERIVED);
         p2.setInterval(intervalFactory.getInstance(one, RelativeHourGranularity.HOUR,

@@ -20,11 +20,14 @@
 package org.protempa;
 
 
+import org.drools.WorkingMemory;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.ProviderBasedUniqueIdFactory;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
+import org.protempa.proposition.UniqueIdFactory;
 import org.protempa.proposition.value.Unit;
 
 /**
@@ -283,7 +286,8 @@ public final class LowLevelAbstractionFinder {
 
     static void process(Sequence<PrimitiveParameter> seq,
             LowLevelAbstractionDefinition def, Algorithm algorithm,
-            ObjectAsserter objAsserter, DerivationsBuilder derivationsBuilder)
+            ObjectAsserter objAsserter, DerivationsBuilder derivationsBuilder,
+            WorkingMemory workingMemory)
             throws AlgorithmInitializationException,
             AlgorithmProcessingException {
         if (def == null || seq == null) {
@@ -295,6 +299,8 @@ public final class LowLevelAbstractionFinder {
                 maxPatternLength);
 
         String id = def.getPropositionId();
+        JBossRulesDerivedLocalUniqueIdValuesProvider provider = new JBossRulesDerivedLocalUniqueIdValuesProvider(workingMemory, id);
+        UniqueIdFactory factory = new ProviderBasedUniqueIdFactory(provider);
         GapFunction gf = def.getGapFunction();
 
         if (seg != null) {
@@ -317,6 +323,7 @@ public final class LowLevelAbstractionFinder {
                         } else {
                             if (lastSeg != null) {
                                 Proposition proposition = AbstractParameterFactory.getFromAbstraction(id,
+                                        factory.getInstance(),
                                         lastSeg, null, prevFoundValue.getValue(),
                                         null, null, def.getContextId());
                                 
@@ -338,6 +345,7 @@ public final class LowLevelAbstractionFinder {
             if (lastSeg != null) {
                 Proposition proposition = 
                         AbstractParameterFactory.getFromAbstraction(id,
+                                factory.getInstance(),
                         lastSeg, null, prevFoundValue.getValue(), null, null,
                         def.getContextId());
                 

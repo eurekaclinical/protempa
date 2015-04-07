@@ -19,19 +19,20 @@
  */
 package org.protempa;
 
-import java.util.UUID;
+import org.protempa.proposition.DefaultUniqueIdFactory;
 
-import org.protempa.proposition.DerivedSourceId;
-import org.protempa.proposition.DerivedUniqueId;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.UniqueIdFactory;
 
 /**
  * @author Andrew Post
  */
 final class SegmentTestParameters {
+    private static final UniqueIdFactory factory = 
+            new DefaultUniqueIdFactory();
 
     private SegmentTestParameters() {
     }
@@ -61,8 +62,6 @@ final class SegmentTestParameters {
     }
     
     private static UniqueId uid() {
-        return new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString()));
+        return factory.getInstance();
     }
 }

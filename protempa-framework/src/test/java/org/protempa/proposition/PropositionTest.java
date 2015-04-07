@@ -23,47 +23,45 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
+import org.protempa.ProtempaTestCase;
 
-import junit.framework.TestCase;
-
-public class PropositionTest extends TestCase {
+public class PropositionTest extends ProtempaTestCase {
     
     public void testEqualsSameUid() {
-        UniqueId uid = uid();
+        UniqueId uid = getUid();
         Event e1 = new Event("foo", uid);
         Event e2 = new Event("bar", uid);
         assertTrue(e1.equals(e2));
     }
     
     public void testEqualsDifferentUid() {
-        Event e1 = new Event("foo", uid());
-        Event e2 = new Event("foo", uid());
+        Event e1 = new Event("foo", getUid());
+        Event e2 = new Event("foo", getUid());
         assertFalse(e1.equals(e2));
     }
     
     public void testEqualsNull() {
-        Event e1 = new Event("foo", uid());
+        Event e1 = new Event("foo", getUid());
         assertFalse(e1.equals(null));
     }
     
     public void testHashCode() {
         Set<Proposition> ps = new HashSet<>();
         
-        Event e1 = new Event("foo", uid());
+        Event e1 = new Event("foo", getUid());
         ps.add(e1);
-        Event e2 = new Event("bar", uid());
+        Event e2 = new Event("bar", getUid());
         ps.add(e2);
-        Event e3 = new Event("baz", uid());
+        Event e3 = new Event("baz", getUid());
         ps.add(e3);
-        UniqueId quuxUid = uid();
+        UniqueId quuxUid = getUid();
         Event e4 = new Event("quux", quuxUid);
         ps.add(e4);
         
         assertEquals(4, ps.size());
         assertEquals(new Event("quux", quuxUid), e4);
         
-        Event e5 = new Event("foo", uid());
+        Event e5 = new Event("foo", getUid());
         ps.add(e5);
         
         assertEquals(5, ps.size());
@@ -89,9 +87,4 @@ public class PropositionTest extends TestCase {
         return false;
     }
     
-    public static UniqueId uid() {
-        return new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString()));
-    }
 }

@@ -48,11 +48,11 @@ final class LowLevelAbstractionConsequence implements Consequence {
     private final DerivationsBuilder derivationsBuilder;
     private transient MyObjectAsserter objAsserter;
 
-    private void doProcess(WorkingMemory arg1, Sequence<PrimitiveParameter> subSeq) throws AlgorithmProcessingException, AlgorithmInitializationException {
-        objAsserter.workingMemory = arg1;
+    private void doProcess(WorkingMemory workingMemory, Sequence<PrimitiveParameter> subSeq) throws AlgorithmProcessingException, AlgorithmInitializationException {
+        objAsserter.workingMemory = workingMemory;
         LowLevelAbstractionFinder.process(subSeq, this.def,
                 this.algorithm,
-                objAsserter, this.derivationsBuilder);
+                objAsserter, this.derivationsBuilder, workingMemory);
         objAsserter.workingMemory = null;
     }
 

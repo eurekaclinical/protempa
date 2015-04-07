@@ -21,11 +21,9 @@ package org.protempa.proposition;
 
 import org.protempa.proposition.interval.Interval;
 import java.util.Calendar;
-import java.util.UUID;
-
-import junit.framework.TestCase;
 
 import org.protempa.DataSourceBackendSourceSystem;
+import org.protempa.ProtempaTestCase;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.NumberValue;
 import static 
@@ -34,15 +32,10 @@ import static
 /**
  * @author Andrew Post
  */
-public class PrimitiveParameterTest extends TestCase {
+public class PrimitiveParameterTest extends ProtempaTestCase {
 
     private PrimitiveParameter p;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see junit.framework.TestCase#setUp()
-     */
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -50,24 +43,13 @@ public class PrimitiveParameterTest extends TestCase {
         cal.clear();
         cal.set(2007, Calendar.MARCH, 1, 15, 11);
 
-        p = new PrimitiveParameter("TEST", uid());
+        p = new PrimitiveParameter("TEST", getUid());
         p.setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
         p.setValue(new NumberValue(13));
         p.setPosition(asPosition(cal.getTime()));
         p.setGranularity(AbsoluteTimeGranularity.MINUTE);
     }
     
-    private static UniqueId uid() {
-        return new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString()));
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see junit.framework.TestCase#tearDown()
-     */
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
@@ -105,7 +87,7 @@ public class PrimitiveParameterTest extends TestCase {
     }
 
     public void testEqualAll() {
-        PrimitiveParameter p2 = new PrimitiveParameter("TEST", uid());
+        PrimitiveParameter p2 = new PrimitiveParameter("TEST", getUid());
         p2.setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();
@@ -117,7 +99,7 @@ public class PrimitiveParameterTest extends TestCase {
     }
 
     public void testIdsNotEqual() {
-        PrimitiveParameter p2 = new PrimitiveParameter("TEST2", uid());
+        PrimitiveParameter p2 = new PrimitiveParameter("TEST2", getUid());
         p2.setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();
@@ -129,7 +111,7 @@ public class PrimitiveParameterTest extends TestCase {
     }
 
     public void testTimestampsNotEqual() {
-        PrimitiveParameter p2 = new PrimitiveParameter("TEST2", uid());
+        PrimitiveParameter p2 = new PrimitiveParameter("TEST2", getUid());
         p2.setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();
@@ -141,7 +123,7 @@ public class PrimitiveParameterTest extends TestCase {
     }
 
     public void testGranularitiesNotEqual() {
-        PrimitiveParameter p2 = new PrimitiveParameter("TEST2", uid());
+        PrimitiveParameter p2 = new PrimitiveParameter("TEST2", getUid());
         p2.setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
         p2.setValue(new NumberValue(13));
         Calendar cal = Calendar.getInstance();

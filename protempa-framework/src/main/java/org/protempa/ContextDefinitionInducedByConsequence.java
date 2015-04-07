@@ -24,15 +24,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.UUID;
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
 import org.protempa.proposition.Context;
-import org.protempa.proposition.DerivedSourceId;
-import org.protempa.proposition.DerivedUniqueId;
+import org.protempa.proposition.ProviderBasedUniqueIdFactory;
 import org.protempa.proposition.TemporalProposition;
-import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.UniqueIdFactory;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.value.Granularity;
@@ -69,7 +67,6 @@ class ContextDefinitionInducedByConsequence implements Consequence {
                 cal.getMinimum(Calendar.SECOND));
         this.earliestTime = cal.getTimeInMillis();
         this.latestTime = Long.MAX_VALUE;
-
     }
 
     private void readObject(ObjectInputStream ois) throws IOException,
@@ -82,9 +79,9 @@ class ContextDefinitionInducedByConsequence implements Consequence {
     public void evaluate(KnowledgeHelper kh, WorkingMemory wm) throws Exception {
         TemporalProposition prop = (TemporalProposition) wm.getObject(
                 kh.getTuple().get(0));
-        Context context = new Context(this.def.getPropositionId(), new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString())));
+        JBossRulesDerivedLocalUniqueIdValuesProvider provider = new JBossRulesDerivedLocalUniqueIdValuesProvider(wm, this.def.getPropositionId());
+        UniqueIdFactory factory = new ProviderBasedUniqueIdFactory(provider);
+        Context context = new Context(this.def.getPropositionId(), factory.getInstance());
         ContextOffset temporalOffset = this.def.getOffset();
         Interval oldInterval = prop.getInterval();
 

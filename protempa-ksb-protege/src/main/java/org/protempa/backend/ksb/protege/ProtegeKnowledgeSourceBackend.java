@@ -403,13 +403,13 @@ public abstract class ProtegeKnowledgeSourceBackend
 
     @Override
     public Collection<String> collectPropIdDescendantsUsingAllNarrower(boolean inDataSourceOnly, String[] propIds) throws KnowledgeSourceReadException {
-        ProtempaUtil.checkArray(propIds, "propIds");
+        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
         return collectPropDescendantsInt(inDataSourceOnly, true, propIds);
     }
 
     @Override
     public Collection<PropositionDefinition> collectPropDefDescendantsUsingAllNarrower(boolean inDataSourceOnly, String[] propIds) throws KnowledgeSourceReadException {
-        ProtempaUtil.checkArray(propIds, "propIds");
+        ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
         Collection<String> resultPropIds = collectPropDescendantsInt(inDataSourceOnly, true, propIds);
         List<PropositionDefinition> result = new ArrayList<>(resultPropIds.size());
         for (String propId : resultPropIds) {

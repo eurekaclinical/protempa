@@ -21,7 +21,7 @@ package org.protempa.proposition;
 
 import org.protempa.proposition.interval.IntervalFactory;
 
-import junit.framework.TestCase;
+import org.protempa.ProtempaTestCase;
 import org.protempa.SourceSystem;
 
 import org.protempa.proposition.value.RelativeHourGranularity;
@@ -30,7 +30,7 @@ import org.protempa.proposition.value.RelativeHourGranularity;
  * @author Andrew Post
  * 
  */
-public class AbstractParameterTest extends TestCase {
+public class AbstractParameterTest extends ProtempaTestCase {
 
     private static final IntervalFactory intervalFactory =
             new IntervalFactory();
@@ -39,7 +39,7 @@ public class AbstractParameterTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        p = new AbstractParameter("TEST");
+        p = new AbstractParameter("TEST", getUid());
         p.setSourceSystem(SourceSystem.DERIVED);
         p.setInterval(intervalFactory.getInstance(0L,
                 RelativeHourGranularity.HOUR, 12L,

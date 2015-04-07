@@ -28,6 +28,7 @@ import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.TemporalProposition;
+import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Value;
 
@@ -59,12 +60,12 @@ public final class AbstractParameterFactory {
      * @param temporalOffset
      * @return
      */
-    public static AbstractParameter getFromAbstraction(String propId,
+    public static AbstractParameter getFromAbstraction(String propId, UniqueId uniqueId,
             Segment<? extends TemporalProposition> segment,
             List<? extends TemporalProposition> tps, Value value, 
             TemporalPatternOffset temporalOffset,
             TemporalExtendedPropositionDefinition[] epds, String contextId) {
-        AbstractParameter result = new AbstractParameter(propId);
+        AbstractParameter result = new AbstractParameter(propId, uniqueId);
         result.setSourceSystem(SourceSystem.DERIVED);
         result.setContextId(contextId);
 

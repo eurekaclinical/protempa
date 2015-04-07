@@ -35,9 +35,12 @@ import org.drools.spi.KnowledgeHelper;
 import org.protempa.SequentialTemporalPatternDefinition.SubsequentTemporalExtendedPropositionDefinition;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.ProviderBasedUniqueIdFactory;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalProposition;
+import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.UniqueIdFactory;
 import org.protempa.proposition.interval.Relation;
 
 /**
@@ -115,6 +118,9 @@ class SequentialTemporalPatternConsequence implements Consequence {
         Map<TemporalExtendedPropositionDefinition, TemporalProposition> propositionMap =
                     new HashMap<>(this.parameterMapCapacity);
         
+        JBossRulesDerivedLocalUniqueIdValuesProvider provider = new JBossRulesDerivedLocalUniqueIdValuesProvider(arg1, def.getPropositionId());
+        UniqueIdFactory factory = new ProviderBasedUniqueIdFactory(provider);
+        
         TOP_LEVEL:
         for (int l = this.epds.length, n = tps.size() - l + 1; i < n; i++) {
             List<TemporalProposition> subList = tps.subList(i, i + l);
@@ -140,7 +146,7 @@ class SequentialTemporalPatternConsequence implements Consequence {
              */
             if (HighLevelAbstractionFinder.find(this.epdToRelation,
                     this.epdPairs, propositionMap)) {
-                assertProposition(subList, knowledgeHelper);
+                assertProposition(subList, knowledgeHelper, factory.getInstance());
             }
         }
         
@@ -162,12 +168,12 @@ class SequentialTemporalPatternConsequence implements Consequence {
                     }
                 }
             }
-            assertProposition(subList, knowledgeHelper);
+            assertProposition(subList, knowledgeHelper, factory.getInstance());
         }
     }
 
     private void assertProposition(List<TemporalProposition> subList, 
-            KnowledgeHelper knowledgeHelper) throws FactException {
+            KnowledgeHelper knowledgeHelper, UniqueId uniqueId) throws FactException {
         Logger logger = ProtempaUtil.logger();
         Segment<TemporalProposition> segment =
                         new Segment<>(
@@ -176,7 +182,7 @@ class SequentialTemporalPatternConsequence implements Consequence {
         TemporalPatternOffset temporalOffset = def.getTemporalOffset();
         AbstractParameter result =
                 AbstractParameterFactory.getFromAbstraction(
-                def.getPropositionId(),
+                def.getPropositionId(), uniqueId,
                 segment, subList, null, temporalOffset, epds, null);
         knowledgeHelper.getWorkingMemory().insert(result);
         for (Proposition proposition : segment) {

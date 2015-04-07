@@ -30,15 +30,17 @@ import org.drools.spi.KnowledgeHelper;
 import org.drools.spi.Tuple;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.ProviderBasedUniqueIdFactory;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalProposition;
+import org.protempa.proposition.UniqueIdFactory;
 
 /**
  * @author Andrew Post
  */
 class HighLevelAbstractionConsequence implements Consequence {
-    
+
     private static final long serialVersionUID = -833609244124008166L;
     private final HighLevelAbstractionDefinition cad;
     private final int columns;
@@ -63,42 +65,45 @@ class HighLevelAbstractionConsequence implements Consequence {
         this.epds = epds;
         this.derivationsBuilder = derivationsBuilder;
     }
-    
+
     @Override
     public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
             throws Exception {
         Logger logger = ProtempaUtil.logger();
         List<Proposition> ps = parameters(arg0.getTuple(), arg1);
         List<TemporalProposition> tps = extractTemporalPropositions(ps);
-        List<TemporalExtendedPropositionDefinition> tepdsL =
-                extractTemporalExtendedPropositionDefinitions();
-        TemporalExtendedPropositionDefinition[] tepds =
-                tepdsL.toArray(
-                new TemporalExtendedPropositionDefinition[tepdsL.size()]);
-        Segment<TemporalProposition> segment =
-                new Segment<>(
-                new Sequence<>(cad.getPropositionId(), tps));
+        List<TemporalExtendedPropositionDefinition> tepdsL
+                = extractTemporalExtendedPropositionDefinitions();
+        TemporalExtendedPropositionDefinition[] tepds
+                = tepdsL.toArray(
+                        new TemporalExtendedPropositionDefinition[tepdsL.size()]);
+        Segment<TemporalProposition> segment
+                = new Segment<>(
+                        new Sequence<>(cad.getPropositionId(), tps));
         TemporalPatternOffset temporalOffset = cad.getTemporalOffset();
-        AbstractParameter result =
-                AbstractParameterFactory.getFromAbstraction(cad.getPropositionId(),
-                segment, tps, null, temporalOffset, tepds, null);
+        JBossRulesDerivedLocalUniqueIdValuesProvider provider = new JBossRulesDerivedLocalUniqueIdValuesProvider(arg1, cad.getPropositionId());
+        UniqueIdFactory factory = new ProviderBasedUniqueIdFactory(provider);
+        AbstractParameter result
+                = AbstractParameterFactory.getFromAbstraction(cad.getPropositionId(), 
+                        factory.getInstance(),
+                        segment, tps, null, temporalOffset, tepds, null);
         arg0.getWorkingMemory().insert(result);
         for (Proposition proposition : segment) {
             this.derivationsBuilder.propositionAsserted(proposition, result);
         }
         logger.log(Level.FINER, "Asserted derived proposition {0}", result);
     }
-    
+
     private List<Proposition> parameters(Tuple arg0,
             WorkingMemory arg1) {
-        List<Proposition> sequences =
-                new ArrayList<>(columns);
+        List<Proposition> sequences
+                = new ArrayList<>(columns);
         for (int i = 0; i < columns; i++) {
             sequences.add((Proposition) arg1.getObject(arg0.get(i)));
         }
         return sequences;
     }
-    
+
     private List<TemporalProposition> extractTemporalPropositions(
             List<Proposition> ps) {
         List<TemporalProposition> tps = new ArrayList<>();
@@ -109,10 +114,10 @@ class HighLevelAbstractionConsequence implements Consequence {
         }
         return tps;
     }
-    
+
     private List<TemporalExtendedPropositionDefinition> extractTemporalExtendedPropositionDefinitions() {
-        List<TemporalExtendedPropositionDefinition> tepdsL =
-                new ArrayList<>();
+        List<TemporalExtendedPropositionDefinition> tepdsL
+                = new ArrayList<>();
         for (ExtendedPropositionDefinition epd : epds) {
             if (epd instanceof TemporalExtendedPropositionDefinition) {
                 tepdsL.add((TemporalExtendedPropositionDefinition) epd);

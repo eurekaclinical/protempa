@@ -21,33 +21,29 @@ package org.protempa.proposition;
 
 import org.protempa.proposition.visitor.AbstractPropositionVisitor;
 import java.util.Collections;
-import java.util.UUID;
-
-import junit.framework.TestCase;
 
 import org.protempa.DataSourceBackendSourceSystem;
+import org.protempa.ProtempaTestCase;
 
-public class PropositionVisitorTest extends TestCase {
-	private static class PrimitiveParameterVisitor extends AbstractPropositionVisitor {
-		boolean found;
-		
-		@Override
-		public void visit(PrimitiveParameter primitiveParameter) {
-			this.found = true;
-		}
-		
-	}
-	public void testPrimitiveParameter() throws Exception {
-		PrimitiveParameterVisitor v = new PrimitiveParameterVisitor();
-		PrimitiveParameter p = new PrimitiveParameter("test", uid());
-		p.setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
-		v.visit(Collections.singleton(p));
-		assertTrue(v.found);
-	}
-	
-    private static UniqueId uid() {
-        return new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString()));
+public class PropositionVisitorTest extends ProtempaTestCase {
+
+    private static class PrimitiveParameterVisitor extends AbstractPropositionVisitor {
+
+        boolean found;
+
+        @Override
+        public void visit(PrimitiveParameter primitiveParameter) {
+            this.found = true;
+        }
+
     }
+
+    public void testPrimitiveParameter() throws Exception {
+        PrimitiveParameterVisitor v = new PrimitiveParameterVisitor();
+        PrimitiveParameter p = new PrimitiveParameter("test", getUid());
+        p.setSourceSystem(DataSourceBackendSourceSystem.getInstance("TEST"));
+        v.visit(Collections.singleton(p));
+        assertTrue(v.found);
+    }
+
 }

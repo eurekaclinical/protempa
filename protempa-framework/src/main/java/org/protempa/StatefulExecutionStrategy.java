@@ -41,6 +41,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
     private StatefulSession applyRules(String keyId, List<?> objects) {
         StatefulSession workingMemory = ruleBase.newStatefulSession(false);
+        workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
         ProtempaUtil.logger().log(Level.FINEST,
                 "Adding {0} objects for key ID {1}",
                 new Object[] { objects.size(), keyId });

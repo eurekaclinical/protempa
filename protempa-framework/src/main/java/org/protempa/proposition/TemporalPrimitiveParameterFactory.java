@@ -22,7 +22,6 @@ package org.protempa.proposition;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.UUID;
 
 import org.protempa.SourceSystem;
 import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
@@ -38,15 +37,21 @@ public final class TemporalPrimitiveParameterFactory {
 
     private final DateFormat dateFormat;
     private final Granularity granularity;
+    private final UniqueIdFactory uniqueIdFactory;
 
     public TemporalPrimitiveParameterFactory(DateFormat dateFormat,
-            Granularity granularity) {
+            Granularity granularity, UniqueIdFactory uniqueIdFactory) {
         if (dateFormat == null) {
             this.dateFormat = DateFormat.getDateTimeInstance();
         } else {
             this.dateFormat = dateFormat;
         }
         this.granularity = granularity;
+        if (uniqueIdFactory != null) {
+            this.uniqueIdFactory = uniqueIdFactory;
+        } else {
+            this.uniqueIdFactory = new DefaultUniqueIdFactory();
+        }
     }
 
     public PrimitiveParameter getInstance(String id, String timestamp,
@@ -71,9 +76,8 @@ public final class TemporalPrimitiveParameterFactory {
 
     private PrimitiveParameter getInstance(String id, Long pos,
             SourceSystem dataSourceType) {
-        PrimitiveParameter pp = new PrimitiveParameter(id, new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString())));
+        PrimitiveParameter pp = new PrimitiveParameter(id, 
+                this.uniqueIdFactory.getInstance());
         pp.setSourceSystem(dataSourceType);
         if (pos != null) {
             pp.setPosition(pos);

@@ -66,6 +66,8 @@ class JBossRuleBaseFactory {
     private static RuleBase newRuleBase(RuleBaseConfiguration config,
             Package rules)
             throws RuleBaseInstantiationException {
+        WorkingMemoryGlobals.addAll(rules);
+        
         RuleBase ruleBase = RuleBaseFactory.newRuleBase(config);
         try {
             ruleBase.addPackage(rules);

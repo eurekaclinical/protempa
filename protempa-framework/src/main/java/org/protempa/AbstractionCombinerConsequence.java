@@ -32,8 +32,10 @@ import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.ProviderBasedUniqueIdFactory;
 import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
+import org.protempa.proposition.UniqueIdFactory;
 
 /**
  *
@@ -58,7 +60,9 @@ class AbstractionCombinerConsequence implements Consequence {
         s.add(a1);
         s.add(a2);
         Segment<AbstractParameter> segment = new Segment<>(s);
-        AbstractParameter result = new AbstractParameter(a1Id);
+        JBossRulesDerivedLocalUniqueIdValuesProvider provider = new JBossRulesDerivedLocalUniqueIdValuesProvider(arg1, a1Id);
+        UniqueIdFactory factory = new ProviderBasedUniqueIdFactory(provider);
+        AbstractParameter result = new AbstractParameter(a1Id, factory.getInstance());
         result.setSourceSystem(SourceSystem.DERIVED);
         result.setInterval(segment.getInterval());
         result.setValue(a1.getValue());

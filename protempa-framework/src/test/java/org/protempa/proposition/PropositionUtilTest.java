@@ -19,7 +19,6 @@
  */
 package org.protempa.proposition;
 
-import java.util.UUID;
 import org.protempa.proposition.interval.AbstractIntervalUtilTestBase;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 
@@ -71,20 +70,15 @@ public class PropositionUtilTest extends AbstractIntervalUtilTestBase {
     }
     
     private TemporalProposition tp1() {
-        TemporalProposition tp1 = new Event("foo", uid());
+        TemporalProposition tp1 = new Event("foo", getUid());
         tp1.setInterval(ival1());
         return tp1;
     }
     
     private TemporalProposition tp2() {
-        TemporalProposition tp2 = new Event("foo", uid());
+        TemporalProposition tp2 = new Event("foo", getUid());
         tp2.setInterval(ival2());
         return tp2;
     }
     
-    private static UniqueId uid() {
-        return new UniqueId(
-                DerivedSourceId.getInstance(),
-                new DerivedUniqueId(UUID.randomUUID().toString()));
-    }
 }

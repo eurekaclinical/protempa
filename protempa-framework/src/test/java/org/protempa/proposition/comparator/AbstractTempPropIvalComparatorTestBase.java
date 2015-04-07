@@ -22,9 +22,8 @@ package org.protempa.proposition.comparator;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
-import junit.framework.TestCase;
+import org.protempa.ProtempaTestCase;
 import org.protempa.proposition.Event;
-import org.protempa.proposition.PropositionTest;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.interval.AbsoluteTimeIntervalFactory;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
@@ -35,7 +34,7 @@ import org.protempa.proposition.value.AbsoluteTimeGranularity;
  * 
  * @author Andrew Post
  */
-abstract class AbstractTempPropIvalComparatorTestBase extends TestCase {
+abstract class AbstractTempPropIvalComparatorTestBase extends ProtempaTestCase {
     private static Calendar cal = Calendar.getInstance();
     private AbsoluteTimeIntervalFactory ivalFactory;
     private Comparator<? super TemporalProposition> comp;
@@ -122,11 +121,11 @@ abstract class AbstractTempPropIvalComparatorTestBase extends TestCase {
         Date date3 = cal.getTime();
         cal.set(2011, Calendar.JANUARY, dayOfMonth4);
         Date date4 = cal.getTime();
-        Event prop1 = new Event("foo", PropositionTest.uid());
+        Event prop1 = new Event("foo", getUid());
         prop1.setInterval(this.ivalFactory.getInstance(
                 date1, AbsoluteTimeGranularity.DAY, 
                 date2, AbsoluteTimeGranularity.DAY));
-        Event prop2 = new Event("bar", PropositionTest.uid());
+        Event prop2 = new Event("bar", getUid());
         prop2.setInterval(this.ivalFactory.getInstance(
                 date3, AbsoluteTimeGranularity.DAY,
                 date4, AbsoluteTimeGranularity.DAY));

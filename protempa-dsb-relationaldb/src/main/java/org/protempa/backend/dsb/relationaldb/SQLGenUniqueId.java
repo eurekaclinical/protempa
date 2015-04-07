@@ -35,6 +35,7 @@ final class SQLGenUniqueId implements LocalUniqueId {
     private String[] dbIds;
     private String id;
     private volatile int hashCode;
+    private long numericalId;
 
     SQLGenUniqueId(String entitySpecName, String[] dbIds) {
         assert entitySpecName != null : "entitySpecName cannot be null";
@@ -46,6 +47,15 @@ final class SQLGenUniqueId implements LocalUniqueId {
         this.entitySpecName = entitySpecName;
         
         this.dbIds = dbIds.clone();
+        if (this.dbIds.length == 1) {
+            try {
+                this.numericalId = Long.parseLong(this.dbIds[0]);
+            } catch (NumberFormatException ex) {
+                this.numericalId = 1L;
+            }
+        } else {
+            this.numericalId = 1L;
+        }
     }
     
     String[] getDbIds() {
@@ -64,6 +74,11 @@ final class SQLGenUniqueId implements LocalUniqueId {
             this.id = builder.toString();
         }
         return this.id;
+    }
+
+    @Override
+    public long getNumericalId() {
+        return this.numericalId;
     }
     
     @Override

@@ -22,7 +22,6 @@ package org.protempa.proposition;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.UUID;
 import org.protempa.SourceSystem;
 
 import org.protempa.proposition.interval.IntervalFactory;
@@ -30,26 +29,33 @@ import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
 import org.protempa.proposition.value.Granularity;
 
 /**
- * Generate instances of {@link AbstractParameter} based on the provided date 
- * format, and time granularity.  
- * <b>NOTE:</b> This class is not thread-safe, as it uses a {@link DateFormat} 
+ * Generate instances of {@link AbstractParameter} based on the provided date
+ * format, and time granularity.
+ * <b>NOTE:</b> This class is not thread-safe, as it uses a {@link DateFormat}
  * instance field to parse dates from strings.
  */
 public final class TemporalAbstractParameterFactory {
-    private static final IntervalFactory intervalFactory =
-            new IntervalFactory();
+
+    private static final IntervalFactory intervalFactory
+            = new IntervalFactory();
 
     private final DateFormat dateFormat;
     private final Granularity granularity;
+    private final UniqueIdFactory factory;
 
     public TemporalAbstractParameterFactory(DateFormat dateFormat,
-            Granularity granularity) {
+            Granularity granularity, UniqueIdFactory factory) {
         if (dateFormat == null) {
             this.dateFormat = DateFormat.getDateTimeInstance();
         } else {
             this.dateFormat = dateFormat;
         }
         this.granularity = granularity;
+        if (factory != null) {
+            this.factory = factory;
+        } else {
+            this.factory = new DefaultUniqueIdFactory();
+        }
     }
 
     public AbstractParameter getInstance(String id, String start,
@@ -67,7 +73,8 @@ public final class TemporalAbstractParameterFactory {
     }
 
     private AbstractParameter getInstance(String id, Long start, Long finish) {
-        AbstractParameter e = new AbstractParameter(id);
+        AbstractParameter e = new AbstractParameter(id, 
+                this.factory.getInstance());
         e.setSourceSystem(SourceSystem.DERIVED);
         e.setInterval(intervalFactory.getInstance(start,
                 this.granularity, finish, this.granularity));

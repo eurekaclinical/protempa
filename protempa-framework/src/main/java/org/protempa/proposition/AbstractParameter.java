@@ -26,8 +26,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.UUID;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import org.protempa.ProtempaException;
@@ -57,10 +55,8 @@ public final class AbstractParameter extends TemporalParameter implements
      *            a <code>UniqueId</code> that uniquely identifies this
      *            parameter.
      */
-    public AbstractParameter(String id) {
-        super(id, new UniqueId(
-                DerivedSourceId.getInstance(), new DerivedUniqueId(UUID
-                .randomUUID().toString())));
+    public AbstractParameter(String id, UniqueId uniqueId) {
+        super(id, uniqueId);
     }
 
     @Override

@@ -34,6 +34,9 @@ import org.protempa.proposition.Segment;
 import org.protempa.proposition.Sequence;
 import org.protempa.proposition.TemporalParameter;
 import org.protempa.proposition.AbstractParameterIntervalSectioner;
+import org.protempa.proposition.ProviderBasedUniqueIdFactory;
+import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.UniqueIdFactory;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.Value;
@@ -93,6 +96,9 @@ final class CompoundLowLevelAbstractionConsequence implements
         @SuppressWarnings("unchecked")
         List<AbstractParameter> pl = (List<AbstractParameter>) knowledgeHelper
                 .get(knowledgeHelper.getDeclaration("result"));
+        
+        JBossRulesDerivedLocalUniqueIdValuesProvider provider = new JBossRulesDerivedLocalUniqueIdValuesProvider(workingMemory, cllad.getPropositionId());
+        UniqueIdFactory factory = new ProviderBasedUniqueIdFactory(provider);
 
         List<CompoundValuedInterval> intervals =
                 new AbstractParameterIntervalSectioner()
@@ -121,7 +127,7 @@ final class CompoundLowLevelAbstractionConsequence implements
                     AbstractParameter result = createAbstractParameter(
                             cllad.getPropositionId(),
                             NominalValue.getInstance(e.getKey()),
-                            interval.getInterval(), this.cllad.getContextId());
+                            interval.getInterval(), this.cllad.getContextId(), factory.getInstance());
                     derivedProps.add(new AbstractParameterWithSourceParameters(
                             result, interval.getTemporalPropositions()));
                     // found a matching value, so don't look for any more and
@@ -167,7 +173,7 @@ final class CompoundLowLevelAbstractionConsequence implements
                                 new Segment<>(seq);
                         AbstractParameter result =
                                 AbstractParameterFactory.getFromAbstraction(
-                                cllad.getPropositionId(), seg, null,
+                                cllad.getPropositionId(), factory.getInstance(), seg, null,
                                 derivedProps.get(i).parameter.getValue(),
                                 null, null, cllad.getContextId());
                         assertDerivedProposition(workingMemory, result,
@@ -210,8 +216,8 @@ final class CompoundLowLevelAbstractionConsequence implements
     }
 
     private static AbstractParameter createAbstractParameter(String propId,
-            Value value, Interval interval, String contextId) {
-        AbstractParameter result = new AbstractParameter(propId);
+            Value value, Interval interval, String contextId, UniqueId uniqueId) {
+        AbstractParameter result = new AbstractParameter(propId, uniqueId);
         result.setInterval(interval);
         result.setValue(value);
         result.setSourceSystem(SourceSystem.DERIVED);

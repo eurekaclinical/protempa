@@ -30,7 +30,7 @@ import org.drools.WorkingMemory;
 import org.protempa.proposition.Proposition;
 
 interface ExecutionStrategy {
-
+    
     void initialize();
 
     Iterator<Proposition> execute(String keyIds,
