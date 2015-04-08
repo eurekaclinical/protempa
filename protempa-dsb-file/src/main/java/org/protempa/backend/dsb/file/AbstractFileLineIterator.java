@@ -75,8 +75,9 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
     private final Long defaultPosition;
     private final Granularity defaultGranularity;
     private final IntervalFactory intervalFactory;
+    private final boolean oneKeyId;
 
-    protected AbstractFileLineIterator(FileDataSourceBackend backend, File file, Long defaultPosition) throws DataSourceReadException {
+    protected AbstractFileLineIterator(FileDataSourceBackend backend, File file, Long defaultPosition, boolean oneKeyId) throws DataSourceReadException {
         this.id = backend.getId();
 
         try {
@@ -108,6 +109,8 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
         this.defaultPosition = defaultPosition;
         this.defaultGranularity = backend.getDefaultGranularity();
         this.intervalFactory = new IntervalFactory();
+
+        this.oneKeyId = oneKeyId;
     }
 
     @Override
@@ -132,8 +135,10 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
             DataStreamingEvent<Proposition> dse = dataStreamingEvent();
             this.currentLine = null;
             this.lineNo++;
-            this.props.clear();
-            this.refs.clear();
+            if (!this.oneKeyId) {
+                this.props.clear();
+                this.refs.clear();
+            }
             return dse;
         }
     }

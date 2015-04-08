@@ -68,6 +68,32 @@ public final class EntitySpec implements Serializable {
     private final Granularity granularity;
     private final JDBCPositionFormat positionParser;
     private final Unit partitionBy;
+    private final int[] maxWidths;
+    
+    public EntitySpec(String name,
+            String description,
+            String[] propositionIds,
+            boolean unique,
+            ColumnSpec baseSpec,
+            ColumnSpec[] uniqueIdSpecs,
+            ColumnSpec startTimeOrTimestampSpec,
+            ColumnSpec finishTimeSpec,
+            PropertySpec[] propertySpecs,
+            ReferenceSpec[] referenceSpecs,
+            Map<String, String> codeToPropIdMap,
+            ColumnSpec codeSpec,
+            ColumnSpec[] constraintSpecs,
+            ColumnSpec valueSpec,
+            ValueType valueType,
+            Granularity granularity,
+            JDBCPositionFormat positionParser,
+            Unit partitionBy) {
+        this(name, description, propositionIds, unique, baseSpec, 
+                uniqueIdSpecs, startTimeOrTimestampSpec, finishTimeSpec, 
+                propertySpecs, referenceSpecs, codeToPropIdMap, codeSpec, 
+                constraintSpecs, valueSpec, valueType, granularity, 
+                positionParser, partitionBy, null);
+    }
 
     /**
      * Creates an entity spec instance.
@@ -146,7 +172,8 @@ public final class EntitySpec implements Serializable {
             ValueType valueType,
             Granularity granularity,
             JDBCPositionFormat positionParser,
-            Unit partitionBy) {
+            Unit partitionBy,
+            int[] maxWidths) {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
         }
@@ -242,6 +269,15 @@ public final class EntitySpec implements Serializable {
         this.granularity = granularity;
         this.positionParser = positionParser;
         this.partitionBy = partitionBy;
+        if (maxWidths == null) {
+            this.maxWidths = null;
+        } else {
+            if (maxWidths.length != this.uniqueIdSpecs.length) {
+                throw new IllegalArgumentException(
+                        "maxWidths, if not null, must have the same number of values as uniqueIdSpecs");
+            }
+            this.maxWidths = maxWidths.clone();
+        }
     }
 
     /**
@@ -481,6 +517,14 @@ public final class EntitySpec implements Serializable {
         return this.partitionBy;
     }
 
+    public int[] getMaxWidths() {
+        if (this.maxWidths == null) {
+            return null;
+        } else {
+            return maxWidths.clone();
+        }
+    }
+    
     /**
      * Returns the distinct tables specified in this entity spec, not including
      * references to other entity specs.

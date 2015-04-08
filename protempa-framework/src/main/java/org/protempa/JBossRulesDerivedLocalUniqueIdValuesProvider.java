@@ -34,7 +34,7 @@ class JBossRulesDerivedLocalUniqueIdValuesProvider implements LocalUniqueIdValue
     private static final long serialVersionUID = 1;
     
     private final String propId;
-    private long instanceNum;
+    private int instanceNum;
     private final String keyId;
     private final WorkingMemory workingMemory;
 
@@ -46,14 +46,14 @@ class JBossRulesDerivedLocalUniqueIdValuesProvider implements LocalUniqueIdValue
 
     @Override
     public void incr() {
-        Map<String, Long> counts = (Map<String, Long>) workingMemory.getGlobal(WorkingMemoryGlobals.DERIVED_UNIQUE_ID_COUNTS);
+        Map<String, Integer> counts = (Map<String, Integer>) workingMemory.getGlobal(WorkingMemoryGlobals.DERIVED_UNIQUE_ID_COUNTS);
         if (counts == null) {
             counts = new HashMap<>();
             workingMemory.setGlobal(WorkingMemoryGlobals.DERIVED_UNIQUE_ID_COUNTS, counts);
         }
-        Long count = counts.get(propId);
+        Integer count = counts.get(propId);
         if (count == null) {
-            count = 0L;
+            count = 0;
         } else {
             count++;
         }
@@ -67,7 +67,7 @@ class JBossRulesDerivedLocalUniqueIdValuesProvider implements LocalUniqueIdValue
     }
 
     @Override
-    public long getNumericalId() {
+    public int getNumericalId() {
         return this.instanceNum;
     }
 

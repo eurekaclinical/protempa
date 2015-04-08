@@ -75,6 +75,6 @@ abstract class AbstractResultProcessor implements SQLGenResultProcessor {
             String[] uniqueIds) {
         return new UniqueId(
                 DataSourceBackendId.getInstance(this.dataSourceBackendId),
-                new SQLGenUniqueId(name, uniqueIds));
+                new SQLGenLocalUniqueId(name, uniqueIds, this.entitySpec.getMaxWidths()));
     }
 }

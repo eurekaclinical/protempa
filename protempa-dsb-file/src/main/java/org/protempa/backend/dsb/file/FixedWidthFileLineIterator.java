@@ -39,7 +39,7 @@ class FixedWidthFileLineIterator extends AbstractFileLineIterator {
     FixedWidthFileLineIterator(FixedWidthFileDataSourceBackend backend, 
             File file, Long defaultPosition) 
             throws DataSourceReadException {
-        super(backend, file, defaultPosition);
+        super(backend, file, defaultPosition, backend.getKeyId() != null);
         this.columnSpecs = backend.getFixedWidthColumnSpecs();
         this.rowSpecs = backend.getRowSpecs();
         this.keyIdOffset = backend.getKeyIdOffset();

@@ -29,7 +29,7 @@ public final class ProviderBasedLocalUniqueId implements LocalUniqueId {
 
     private static final long serialVersionUID = -7548400029812453768L;
     private String id;
-    private long numericalId;
+    private int numericalId;
     private transient volatile int hashCode;
 
     public ProviderBasedLocalUniqueId(LocalUniqueIdValuesProvider provider) {
@@ -47,7 +47,7 @@ public final class ProviderBasedLocalUniqueId implements LocalUniqueId {
     }
 
     @Override
-    public long getNumericalId() {
+    public int getNumericalId() {
         return numericalId;
     }
 
@@ -77,7 +77,7 @@ public final class ProviderBasedLocalUniqueId implements LocalUniqueId {
         if (this.hashCode == 0) {
             int hash = 3;
             hash = 53 * hash + this.id.hashCode();
-            hash = 53 * hash + (int) ((this.numericalId >> 32) ^ this.numericalId);
+            hash = 53 * hash + this.numericalId;
             this.hashCode = hash;
         }
         return this.hashCode;
@@ -103,7 +103,7 @@ public final class ProviderBasedLocalUniqueId implements LocalUniqueId {
 
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.writeObject(this.id);
-        s.writeLong(this.numericalId);
+        s.writeInt(this.numericalId);
     }
 
     private void readObject(ObjectInputStream s) throws IOException,
@@ -112,6 +112,6 @@ public final class ProviderBasedLocalUniqueId implements LocalUniqueId {
         if (this.id == null) {
             throw new InvalidObjectException("Can't restore. Null id");
         }
-        this.numericalId = s.readLong();
+        this.numericalId = s.readInt();
     }
 }

@@ -25,8 +25,8 @@ package org.protempa.proposition;
  * @author Andrew Post
  */
 public class DefaultLocalUniqueId implements LocalUniqueId {
-    private static long ID = Long.MIN_VALUE;
-    private final long id;
+    private static int ID = 0;
+    private final int id;
 
     public DefaultLocalUniqueId() {
         synchronized (DefaultLocalUniqueId.class) {
@@ -40,7 +40,7 @@ public class DefaultLocalUniqueId implements LocalUniqueId {
     }
 
     @Override
-    public long getNumericalId() {
+    public int getNumericalId() {
         return this.id;
     }
     

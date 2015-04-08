@@ -60,7 +60,7 @@ public interface LocalUniqueId extends Cloneable, Serializable {
      * 
      * @return a numerical value unique to propositions with this id.
      */
-    long getNumericalId();
+    int getNumericalId();
     
     /**
      * Makes a shallow copy of this instance.

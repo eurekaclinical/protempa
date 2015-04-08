@@ -42,7 +42,7 @@ class DelimitedFileLineIterator extends AbstractFileLineIterator {
     DelimitedFileLineIterator(DelimitedFileDataSourceBackend backend, 
             File file, Long defaultPosition)
             throws DataSourceReadException {
-        super(backend, file, defaultPosition);
+        super(backend, file, defaultPosition, backend.getKeyId() != null);
         this.columnSpecs = backend.getDelimitedColumnSpecs();
         this.rowSpecs = backend.getRowSpecs();
         this.keyIdIndex = backend.getKeyIdIndex();

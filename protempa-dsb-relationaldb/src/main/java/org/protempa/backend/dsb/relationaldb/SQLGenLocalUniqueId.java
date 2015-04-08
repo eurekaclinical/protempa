@@ -25,39 +25,58 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.LocalUniqueId;
 
-final class SQLGenUniqueId implements LocalUniqueId {
+final class SQLGenLocalUniqueId implements LocalUniqueId {
 
     private static final long serialVersionUID = 3956023315666447630L;
     private String entitySpecName;
     private String[] dbIds;
     private String id;
     private volatile int hashCode;
-    private long numericalId;
+    private int numericalId;
 
-    SQLGenUniqueId(String entitySpecName, String[] dbIds) {
+    SQLGenLocalUniqueId(String entitySpecName, String[] dbIds, int[] maxWidths) {
         assert entitySpecName != null : "entitySpecName cannot be null";
         assert dbIds != null : "dbIds cannot be null";
         assert !ArrayUtils.contains(dbIds, null) :
-            "dbIds cannot contain a null element";
-        
+                "dbIds cannot contain a null element";
+
         //The entity spec name is already interned, so don't bother redoing it.
         this.entitySpecName = entitySpecName;
-        
+
         this.dbIds = dbIds.clone();
         if (this.dbIds.length == 1) {
             try {
-                this.numericalId = Long.parseLong(this.dbIds[0]);
+                this.numericalId = Integer.parseInt(this.dbIds[0]);
             } catch (NumberFormatException ex) {
-                this.numericalId = 1L;
+                this.numericalId = 1;
             }
         } else {
-            this.numericalId = 1L;
+            if (maxWidths == null) {
+                this.numericalId = 1;
+            } else {
+                assert dbIds.length == maxWidths.length : "maxWidths, if not null, must have the same number of values as dbIds";
+                StringBuilder db = new StringBuilder();
+                try {
+                    for (int i = 0; i < this.dbIds.length; i++) {
+                        if (i == 0) {
+                            db.append(this.dbIds[i]);
+                        } else {
+                            db.append(StringUtils.leftPad(this.dbIds[i], maxWidths[i], '0'));
+                        }
+                    }
+                    this.numericalId = Integer.parseInt(db.toString());
+                } catch (NumberFormatException ex) {
+                    this.numericalId = 1;
+                    return;
+                }
+            }
         }
     }
-    
+
     String[] getDbIds() {
         return this.dbIds.clone();
     }
@@ -77,10 +96,10 @@ final class SQLGenUniqueId implements LocalUniqueId {
     }
 
     @Override
-    public long getNumericalId() {
+    public int getNumericalId() {
         return this.numericalId;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -89,7 +108,7 @@ final class SQLGenUniqueId implements LocalUniqueId {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final SQLGenUniqueId other = (SQLGenUniqueId) obj;
+        final SQLGenLocalUniqueId other = (SQLGenLocalUniqueId) obj;
         if (!this.entitySpecName.equals(other.entitySpecName)) {
             return false;
         }
@@ -113,7 +132,7 @@ final class SQLGenUniqueId implements LocalUniqueId {
     @Override
     public LocalUniqueId clone() {
         try {
-            return (SQLGenUniqueId) super.clone();
+            return (SQLGenLocalUniqueId) super.clone();
         } catch (CloneNotSupportedException ex) {
             throw new AssertionError("Never reached!");
         }
@@ -139,14 +158,14 @@ final class SQLGenUniqueId implements LocalUniqueId {
             throw new InvalidObjectException(
                     "name cannot be null. Can't restore");
         }
-        
+
         // We intern entity spec names elsewhere, so let's do it here too.
         this.entitySpecName = this.entitySpecName.intern();
-        
+
         int dbIdsLen = s.readInt();
         if (dbIdsLen < 0) {
-            throw new InvalidObjectException("dbIds length invalid (" +
-                    dbIdsLen + "). Can't restore");
+            throw new InvalidObjectException("dbIds length invalid ("
+                    + dbIdsLen + "). Can't restore");
         }
         this.dbIds = new String[dbIdsLen];
         for (int i = 0; i < dbIdsLen; i++) {

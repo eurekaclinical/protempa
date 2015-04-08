@@ -29,5 +29,5 @@ public interface LocalUniqueIdValuesProvider {
     
     String getId();
     
-    long getNumericalId();
+    int getNumericalId();
 }
