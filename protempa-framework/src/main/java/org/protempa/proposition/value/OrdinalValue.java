@@ -20,7 +20,6 @@
 package org.protempa.proposition.value;
 
 import java.io.IOException;
-import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -182,7 +181,7 @@ public final class OrdinalValue implements OrderedValue, Serializable {
     }
 
     @Override
-    public ValueBuilder asBuilder() {
+    public OrdinalValueBuilder asBuilder() {
         return new OrdinalValueBuilder(this);
     }
 }

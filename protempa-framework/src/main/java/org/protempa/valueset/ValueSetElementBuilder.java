@@ -19,11 +19,12 @@ package org.protempa.valueset;
  * limitations under the License.
  * #L%
  */
-
+import java.util.Arrays;
 import java.util.Objects;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.protempa.proposition.value.Value;
+import org.protempa.Attribute;
+import org.protempa.AttributeBuilder;
+import org.protempa.ProtempaUtil;
 import org.protempa.proposition.value.ValueBuilder;
 
 /**
@@ -31,19 +32,15 @@ import org.protempa.proposition.value.ValueBuilder;
  * @author Andrew Post
  */
 public class ValueSetElementBuilder {
+
+    private static final AttributeBuilder[] EMPTY_ATTR_BUILDER_ARR = new AttributeBuilder[0];
     private ValueBuilder valueBuilder;
     private String displayName;
     private String abbrevDisplayName;
-    
+    private AttributeBuilder[] attributeBuilders;
+
     public ValueSetElementBuilder() {
-        
-    }
-    
-    public ValueSetElementBuilder(ValueSetElement valueSetElement) {
-        Value value = valueSetElement.getValue();
-        this.valueBuilder = value.asBuilder();
-        this.displayName = valueSetElement.getDisplayName();
-        this.abbrevDisplayName = valueSetElement.getAbbrevDisplayName();
+        this.attributeBuilders = EMPTY_ATTR_BUILDER_ARR;
     }
 
     public ValueBuilder getValueBuilder() {
@@ -69,9 +66,26 @@ public class ValueSetElementBuilder {
     public void setAbbrevDisplayName(String abbrevDisplayName) {
         this.abbrevDisplayName = abbrevDisplayName;
     }
-    
+
+    public AttributeBuilder[] getAttributeBuilders() {
+        return attributeBuilders.clone();
+    }
+
+    public void setAttributeBuilders(AttributeBuilder[] attributeBuilders) {
+        if (attributeBuilders != null) {
+            ProtempaUtil.checkArrayForNullElement(attributeBuilders, "attributeBuilders");
+            this.attributeBuilders = attributeBuilders.clone();
+        } else {
+            this.attributeBuilders = EMPTY_ATTR_BUILDER_ARR;
+        }
+    }
+
     public ValueSetElement build() {
-        return new ValueSetElement(this.valueBuilder != null ? this.valueBuilder.build() : null, this.displayName, this.abbrevDisplayName);
+        Attribute[] attributes = new Attribute[this.attributeBuilders.length];
+        for (int i = 0; i < attributes.length; i++) {
+            attributes[i] = this.attributeBuilders[i].build();
+        }
+        return new ValueSetElement(this.valueBuilder != null ? this.valueBuilder.build() : null, this.displayName, this.abbrevDisplayName, attributes);
     }
 
     @Override
@@ -80,6 +94,7 @@ public class ValueSetElementBuilder {
         hash = 61 * hash + Objects.hashCode(this.valueBuilder);
         hash = 61 * hash + Objects.hashCode(this.displayName);
         hash = 61 * hash + Objects.hashCode(this.abbrevDisplayName);
+        hash = 61 * hash + Arrays.deepHashCode(this.attributeBuilders);
         return hash;
     }
 
@@ -101,6 +116,9 @@ public class ValueSetElementBuilder {
         if (!Objects.equals(this.abbrevDisplayName, other.abbrevDisplayName)) {
             return false;
         }
+        if (!Arrays.deepEquals(this.attributeBuilders, other.attributeBuilders)) {
+            return false;
+        }
         return true;
     }
 
@@ -108,7 +126,5 @@ public class ValueSetElementBuilder {
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
-    
-    
-    
+
 }

@@ -26,15 +26,32 @@ package org.protempa.valueset;
  */
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.protempa.Attribute;
+import org.protempa.AttributeBuilder;
+import org.protempa.ProtempaUtil;
 import org.protempa.proposition.value.Value;
 
 /**
  * For specifying the values of a value set.
  */
-public class ValueSetElement {
+public final class ValueSetElement {
+    private static final Attribute[] EMPTY_ATTRIBUTE_ARR = new Attribute[0];
     private final Value value;
     private final String displayName;
     private final String abbrevDisplayName;
+    private final Attribute[] attributes;
+    
+    public ValueSetElement(Value value) {
+        this(value, null, null);
+    }
+    
+    public ValueSetElement(Value value, String displayName) {
+        this(value, displayName, null);
+    }
+    
+    public ValueSetElement(Value value, String displayName, String abbrevDisplayName) {
+        this(value, displayName, abbrevDisplayName, null);
+    }
 
     /**
      * Instantiates a value of a value set.
@@ -47,7 +64,7 @@ public class ValueSetElement {
      * {@link String}. If <code>null</code> is specified,
      * {@link #getAbbrevDisplayName()} will return the empty string.
      */
-    public ValueSetElement(Value value, String displayName, String abbrevDisplayName) {
+    public ValueSetElement(Value value, String displayName, String abbrevDisplayName, Attribute[] attributes) {
         if (value == null) {
             throw new IllegalArgumentException("value cannot be null");
         }
@@ -64,6 +81,13 @@ public class ValueSetElement {
         this.value = value;
         this.displayName = displayName;
         this.abbrevDisplayName = abbrevDisplayName;
+        if (attributes != null) {
+            ProtempaUtil.checkArrayForNullElement(attributes, "attributes");
+            this.attributes = attributes.clone();
+        } else {
+            this.attributes = EMPTY_ATTRIBUTE_ARR;
+        }
+        
     }
 
     /**
@@ -94,9 +118,26 @@ public class ValueSetElement {
         return value;
     }
 
+    public Attribute[] getAttributes() {
+        return attributes.clone();
+    }
+    
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+    
+    public ValueSetElementBuilder asBuilder() {
+        ValueSetElementBuilder builder = new ValueSetElementBuilder();
+        builder.setAbbrevDisplayName(this.abbrevDisplayName);
+        builder.setDisplayName(this.displayName);
+        builder.setValueBuilder(this.value.asBuilder());
+        AttributeBuilder[] builders = new AttributeBuilder[this.attributes.length];
+        for (int i = 0; i < builders.length; i++) {
+            builders[i] = this.attributes[i].asBuilder();
+        }
+        builder.setAttributeBuilders(builders);
+        return builder;
     }
     
 }

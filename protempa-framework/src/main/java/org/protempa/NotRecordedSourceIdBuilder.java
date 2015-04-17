@@ -1,8 +1,10 @@
+package org.protempa;
+
 /*
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +19,30 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa;
+
+import java.io.Serializable;
 
 /**
- * Interface for classes that specify the source of proposition definitions and 
- * value sets.
- * 
+ *
  * @author Andrew Post
  */
-public interface SourceId {
+public class NotRecordedSourceIdBuilder implements SourceIdBuilder, Serializable {
+    private static final long serialVersionUID = 1;
+
+    @Override
+    public SourceId build() {
+        return NotRecordedSourceId.getInstance();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && getClass() == obj.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return 1;
+    }
+
     
-    String getStringRepresentation();
-    
-    SourceIdBuilder asBuilder();
 }

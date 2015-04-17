@@ -30,6 +30,8 @@ import org.protempa.proposition.value.ValueType;
  */
 public final class PropertyDefinition implements Serializable {
     private static final long serialVersionUID = 5258018980150529695L;
+    
+    private static final Attribute[] EMPTY_ATTRIBUTES = new Attribute[0];
 
     private final String id;
     private final String displayName;
@@ -37,6 +39,13 @@ public final class PropertyDefinition implements Serializable {
     private final String valueSetId;
     private final String declaringPropId;
     private final String propId;
+    private Attribute[] attributes;
+    
+    public PropertyDefinition(String propId, String id, String displayName, 
+            ValueType valueType, String valueSetId, String declaringPropId) {
+        this(propId, id, displayName, valueType, valueSetId, declaringPropId,
+                null);
+    }
 
     /**
      * Initializes the property definition with a displayName, a value type and a
@@ -52,7 +61,8 @@ public final class PropertyDefinition implements Serializable {
      * @see ValueType#isCompatible(ValueSet) 
      */
     public PropertyDefinition(String propId, String id, String displayName, 
-            ValueType valueType, String valueSetId, String declaringPropId) {
+            ValueType valueType, String valueSetId, String declaringPropId,
+            Attribute[] attributes) {
         if (propId == null) {
             throw new IllegalArgumentException("propId cannot be null");
         }
@@ -71,6 +81,11 @@ public final class PropertyDefinition implements Serializable {
         this.valueType = valueType;
         this.valueSetId = valueSetId;
         this.declaringPropId = declaringPropId;
+        if (attributes == null) {
+            this.attributes = EMPTY_ATTRIBUTES;
+        } else {
+            this.attributes = attributes.clone();
+        }
     }
 
     public String getPropId() {
@@ -121,6 +136,19 @@ public final class PropertyDefinition implements Serializable {
     
     public boolean isInherited() {
         return !this.propId.equals(this.declaringPropId);
+    }
+    
+    public Attribute[] getAttributes() {
+        return attributes.clone();
+    }
+
+    public Attribute attribute(String name) {
+        for (Attribute attribute : this.attributes) {
+            if (attribute.getName().equals(name)) {
+                return attribute;
+            }
+        }
+        return null;
     }
     
     @Override

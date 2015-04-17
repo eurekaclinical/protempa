@@ -1,4 +1,4 @@
-package org.protempa.proposition.value;
+package org.protempa;
 
 /*
  * #%L
@@ -20,41 +20,48 @@ package org.protempa.proposition.value;
  * #L%
  */
 
-import java.math.BigDecimal;
 import java.util.Objects;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.protempa.proposition.value.ValueBuilder;
 
 /**
  *
  * @author Andrew Post
  */
-public class NumberValueBuilder implements NumericalValueBuilder {
-    private BigDecimal val;
+public class AttributeBuilder {
+    private String name;
+    private ValueBuilder valueBuilder;
 
-    public NumberValueBuilder() {
-    }
-
-    public NumberValueBuilder(NumberValue numberValue) {
-        this.val = numberValue.getBigDecimal();
-    }
-
-    public BigDecimal getVal() {
-        return val;
-    }
-
-    public void setVal(BigDecimal val) {
-        this.val = val;
+    public AttributeBuilder() {
     }
     
-    @Override
-    public NumberValue build() {
-        return new NumberValue(val);
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public ValueBuilder getValueBuilder() {
+        return valueBuilder;
+    }
+
+    public void setValueBuilder(ValueBuilder valueBuilder) {
+        this.valueBuilder = valueBuilder;
+    }
+
+    public Attribute build() {
+        if (this.valueBuilder == null) {
+            throw new IllegalStateException("valueBuilder cannot be null");
+        }
+        return new Attribute(this.name, this.valueBuilder.build());
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.val);
+        hash = 59 * hash + Objects.hashCode(this.name);
+        hash = 59 * hash + Objects.hashCode(this.valueBuilder);
         return hash;
     }
 
@@ -66,16 +73,14 @@ public class NumberValueBuilder implements NumericalValueBuilder {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final NumberValueBuilder other = (NumberValueBuilder) obj;
-        if (!Objects.equals(this.val, other.val)) {
+        final AttributeBuilder other = (AttributeBuilder) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.valueBuilder, other.valueBuilder)) {
             return false;
         }
         return true;
-    }
-    
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
     }
     
 }

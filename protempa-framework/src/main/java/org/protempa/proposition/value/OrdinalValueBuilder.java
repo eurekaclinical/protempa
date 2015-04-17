@@ -27,7 +27,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  *
  * @author Andrew Post
  */
-public class OrdinalValueBuilder implements ValueBuilder<OrdinalValue> {
+public class OrdinalValueBuilder implements OrderedValueBuilder {
     private String value;
     private int index;
 

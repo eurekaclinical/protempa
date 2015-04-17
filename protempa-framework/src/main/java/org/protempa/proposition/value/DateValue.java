@@ -234,7 +234,7 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
 	}
 
     @Override
-    public ValueBuilder asBuilder() {
+    public DateValueBuilder asBuilder() {
         return new DateValueBuilder(this);
     }
     

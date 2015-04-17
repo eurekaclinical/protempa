@@ -42,5 +42,10 @@ public class NotRecordedSourceId implements SourceId, Serializable {
     public String getStringRepresentation() {
         return "Source not recorded";
     }
+
+    @Override
+    public SourceIdBuilder asBuilder() {
+        return new NotRecordedSourceIdBuilder();
+    }
     
 }

@@ -27,4 +27,7 @@ package org.protempa.proposition.value;
  */
 public interface OrderedValue extends Value {
 
+    @Override
+    OrderedValueBuilder asBuilder();
+
 }

@@ -150,7 +150,7 @@ class Util {
             vses[i] = new ValueSetElement(val, displayName, abbrevDisplayName);
             i++;
         }
-        return new ValueSet(valueSetCls.getName(), vses,
+        return new ValueSet(valueSetCls.getName(), valueSetCls.getName(), vses,
                 DefaultSourceId.getInstance(backend.getDisplayName()));
     }
 

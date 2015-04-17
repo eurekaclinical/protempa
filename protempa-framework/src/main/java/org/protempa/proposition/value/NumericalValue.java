@@ -55,4 +55,8 @@ public interface NumericalValue extends OrderedValue {
      * @return a {@link NumberValue}.
      */
     NumberValue getNumberValue();
+
+    @Override
+    NumericalValueBuilder asBuilder();
+    
 }

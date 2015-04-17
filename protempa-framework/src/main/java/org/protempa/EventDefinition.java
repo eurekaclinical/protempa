@@ -19,8 +19,6 @@
  */
 package org.protempa;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-
 
 /**
  * Defines external acts upon an entity such as a patient.

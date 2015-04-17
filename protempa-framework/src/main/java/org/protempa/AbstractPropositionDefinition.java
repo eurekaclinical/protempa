@@ -22,8 +22,6 @@ package org.protempa;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
@@ -31,13 +29,11 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
  * Abstract base class for all knowledge definition classes.
  *
  * FIXME We support event, abstraction, and primitive parameter definitions with
- * the same name, yet
- * <code>Protempa</code>'s public API assumes that they all share the same
- * namespace. This needs to be fixed. I'm leaning toward having all knowledge
- * definitions share the same namespace, in which case, no changes to Protempa's
- * API would be required, and the duplicate id checking could all occur in this
- * class in a concrete implementation of
- * <code>setId0()</code>.
+ * the same name, yet <code>Protempa</code>'s public API assumes that they all
+ * share the same namespace. This needs to be fixed. I'm leaning toward having
+ * all knowledge definitions share the same namespace, in which case, no changes
+ * to Protempa's API would be required, and the duplicate id checking could all
+ * occur in this class in a concrete implementation of <code>setId0()</code>.
  *
  * @author Andrew Post
  */
@@ -45,10 +41,11 @@ public abstract class AbstractPropositionDefinition implements
         PropositionDefinition {
 
     private static final long serialVersionUID = -2754387751719003721L;
-    private static final PropertyDefinition[] EMPTY_PROPERTIES =
-            new PropertyDefinition[0];
-    private static final ReferenceDefinition[] EMPTY_REFERENCES =
-            new ReferenceDefinition[0];
+    private static final PropertyDefinition[] EMPTY_PROPERTIES
+            = new PropertyDefinition[0];
+    private static final ReferenceDefinition[] EMPTY_REFERENCES
+            = new ReferenceDefinition[0];
+    private static final Attribute[] EMPTY_ATTRIBUTES = new Attribute[0];
     protected static final String CHILDREN_PROPERTY = "children";
     /**
      * The id of propositions created by this definition.
@@ -80,6 +77,7 @@ public abstract class AbstractPropositionDefinition implements
     private Date updated;
     private Date downloaded;
     private String version;
+    private Attribute[] attributes;
 
     /**
      * Creates a new knowledge definition.
@@ -104,6 +102,7 @@ public abstract class AbstractPropositionDefinition implements
         this.propertyDefinitions = EMPTY_PROPERTIES;
         this.referenceDefinitions = EMPTY_REFERENCES;
         this.sourceId = NotRecordedSourceId.getInstance();
+        this.attributes = EMPTY_ATTRIBUTES;
     }
 
     @Override
@@ -119,7 +118,7 @@ public abstract class AbstractPropositionDefinition implements
     /**
      * Sets the proposition id of propositions derived by this proposition
      * definition.
-     * 
+     *
      * @param propId a proposition id. Pass in <code>null</code> to set the
      * value of this field to the value of this proposition definition's
      * <code>id</code> field.
@@ -246,8 +245,8 @@ public abstract class AbstractPropositionDefinition implements
 
     @Override
     public final PropertyDefinition propertyDefinition(String id) {
-        for (PropertyDefinition propertyDefinition :
-                this.propertyDefinitions) {
+        for (PropertyDefinition propertyDefinition
+                : this.propertyDefinitions) {
             if (propertyDefinition.getId().equals(id)) {
                 return propertyDefinition;
             }
@@ -276,8 +275,8 @@ public abstract class AbstractPropositionDefinition implements
 
     @Override
     public final ReferenceDefinition referenceDefinition(String name) {
-        for (ReferenceDefinition referenceDefinition :
-                this.referenceDefinitions) {
+        for (ReferenceDefinition referenceDefinition
+                : this.referenceDefinitions) {
             if (referenceDefinition.getId().equals(name)) {
                 return referenceDefinition;
             }
@@ -362,7 +361,7 @@ public abstract class AbstractPropositionDefinition implements
     public void setVersion(String version) {
         this.version = version;
     }
-    
+
     @Override
     public Date getDownloaded() {
         return this.downloaded;
@@ -371,7 +370,30 @@ public abstract class AbstractPropositionDefinition implements
     public void setDownloaded(Date downloaded) {
         this.downloaded = downloaded;
     }
-    
+
+    @Override
+    public Attribute[] getAttributes() {
+        return attributes.clone();
+    }
+
+    public void setAttributes(Attribute[] attributes) {
+        if (attributes == null) {
+            this.attributes = EMPTY_ATTRIBUTES;
+        } else {
+            this.attributes = attributes.clone();
+        }
+    }
+
+    @Override
+    public Attribute attribute(String name) {
+        for (Attribute attribute : this.attributes) {
+            if (attribute.getName().equals(name)) {
+                return attribute;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         if (this.changes == null) {

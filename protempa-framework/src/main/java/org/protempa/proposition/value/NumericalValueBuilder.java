@@ -1,8 +1,10 @@
+package org.protempa.proposition.value;
+
 /*
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +19,14 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa;
 
 /**
- * Interface for classes that specify the source of proposition definitions and 
- * value sets.
- * 
+ *
  * @author Andrew Post
  */
-public interface SourceId {
+public interface NumericalValueBuilder extends OrderedValueBuilder {
+
+    @Override
+    NumericalValue build();
     
-    String getStringRepresentation();
-    
-    SourceIdBuilder asBuilder();
 }

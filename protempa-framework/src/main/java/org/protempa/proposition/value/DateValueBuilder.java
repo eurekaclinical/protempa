@@ -28,7 +28,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  *
  * @author Andrew Post
  */
-public class DateValueBuilder implements ValueBuilder<DateValue> {
+public class DateValueBuilder implements OrderedValueBuilder {
     private Date date;
 
     public DateValueBuilder() {

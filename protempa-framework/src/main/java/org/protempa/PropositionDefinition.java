@@ -193,4 +193,8 @@ public interface PropositionDefinition extends Serializable,
      */
     Date getUpdated();
     
+    Attribute[] getAttributes();
+    
+    Attribute attribute(String name);
+    
 }

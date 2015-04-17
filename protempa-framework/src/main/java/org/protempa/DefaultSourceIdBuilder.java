@@ -1,4 +1,6 @@
-package org.protempa.proposition.value;
+package org.protempa;
+
+import java.util.Objects;
 
 /*
  * #%L
@@ -20,41 +22,30 @@ package org.protempa.proposition.value;
  * #L%
  */
 
-import java.math.BigDecimal;
-import java.util.Objects;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 /**
  *
- * @author Andrew Post
+ * @author arpost
  */
-public class NumberValueBuilder implements NumericalValueBuilder {
-    private BigDecimal val;
+public class DefaultSourceIdBuilder implements SourceIdBuilder {
+    private String sourceIdStr;
 
-    public NumberValueBuilder() {
+    public String getSourceIdStr() {
+        return sourceIdStr;
     }
 
-    public NumberValueBuilder(NumberValue numberValue) {
-        this.val = numberValue.getBigDecimal();
-    }
-
-    public BigDecimal getVal() {
-        return val;
-    }
-
-    public void setVal(BigDecimal val) {
-        this.val = val;
+    public void setSourceIdStr(String sourceIdStr) {
+        this.sourceIdStr = sourceIdStr;
     }
     
     @Override
-    public NumberValue build() {
-        return new NumberValue(val);
+    public SourceId build() {
+        return DefaultSourceId.getInstance(this.sourceIdStr);
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.val);
+        int hash = 3;
+        hash = 71 * hash + Objects.hashCode(this.sourceIdStr);
         return hash;
     }
 
@@ -66,16 +57,11 @@ public class NumberValueBuilder implements NumericalValueBuilder {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final NumberValueBuilder other = (NumberValueBuilder) obj;
-        if (!Objects.equals(this.val, other.val)) {
+        final DefaultSourceIdBuilder other = (DefaultSourceIdBuilder) obj;
+        if (!Objects.equals(this.sourceIdStr, other.sourceIdStr)) {
             return false;
         }
         return true;
-    }
-    
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
     }
     
 }

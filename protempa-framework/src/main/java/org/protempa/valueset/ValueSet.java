@@ -46,6 +46,7 @@ public final class ValueSet {
             new ValueSetElement[0];
 
     private final String id;
+    private final String displayName;
     private final ValueSetElement[] valueSetElements;
     private final Map<Value, ValueSetElement> values;
     private final Set<Value> valuesKeySet;
@@ -53,12 +54,13 @@ public final class ValueSet {
     private final OrderedValue upperBound;
     private final SourceId sourceId;
 
-    public ValueSet(String id, OrderedValue lowerBound,
+    public ValueSet(String id, String displayName, OrderedValue lowerBound,
             OrderedValue upperBound, SourceId sourceId) {
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
         this.id = id.intern();
+        this.displayName = displayName;
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
         this.valueSetElements = EMPTY_VALUE_SET_ELT_ARRAY;
@@ -78,7 +80,7 @@ public final class ValueSet {
      * @param valueSetElements a {@link ValueSetElement[]}. No duplicate
      * {@link ValueSetElement}s are allowed.
      */
-    public ValueSet(String id,
+    public ValueSet(String id, String displayName,
             ValueSetElement[] valueSetElements, SourceId sourceId) {
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
@@ -86,6 +88,7 @@ public final class ValueSet {
         ProtempaUtil.checkArray(valueSetElements, "valueSetElements");
 
         this.id = id.intern();
+        this.displayName = displayName;
         this.valueSetElements = valueSetElements.clone();
 
         this.values = new HashMap<>();
@@ -117,6 +120,10 @@ public final class ValueSet {
      */
     public String getId() {
         return this.id;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
     
     /**
@@ -226,5 +233,20 @@ public final class ValueSet {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+    
+    public ValueSetBuilder asBuilder() {
+        ValueSetBuilder builder = new ValueSetBuilder();
+        builder.setId(this.id);
+        builder.setDisplayName(this.displayName);
+        builder.setLowerBoundBuilder(this.lowerBound != null ? this.lowerBound.asBuilder() : null);
+        builder.setSourceIdBuilder(this.sourceId.asBuilder());
+        builder.setUpperBoundBuilder(this.upperBound != null ? this.upperBound.asBuilder() : null);
+        ValueSetElementBuilder[] vseBuilders = new ValueSetElementBuilder[this.valueSetElements.length];
+        for (int i = 0; i < this.valueSetElements.length; i++) {
+            vseBuilders[i] = this.valueSetElements[i].asBuilder();
+        }
+        builder.setValueSetElementBuilders(vseBuilders);
+        return builder;
     }
 }

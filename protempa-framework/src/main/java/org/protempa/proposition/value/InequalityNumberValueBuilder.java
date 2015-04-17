@@ -28,7 +28,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  *
  * @author Andrew Post
  */
-public class InequalityNumberValueBuilder implements ValueBuilder<InequalityNumberValue> {
+public class InequalityNumberValueBuilder implements NumericalValueBuilder {
     private ValueComparator comparator;
     private BigDecimal val;
 

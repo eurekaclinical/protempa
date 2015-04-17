@@ -269,7 +269,7 @@ public final class InequalityNumberValue implements
     }
 
     @Override
-    public ValueBuilder asBuilder() {
+    public InequalityNumberValueBuilder asBuilder() {
         return new InequalityNumberValueBuilder(this);
     }
 }

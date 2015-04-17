@@ -54,5 +54,12 @@ public class DefaultSourceId implements SourceId, Serializable {
     public String getStringRepresentation() {
         return this.sourceIdStr;
     }
+
+    @Override
+    public DefaultSourceIdBuilder asBuilder() {
+        DefaultSourceIdBuilder builder = new DefaultSourceIdBuilder();
+        builder.setSourceIdStr(this.sourceIdStr);
+        return builder;
+    }
     
 }

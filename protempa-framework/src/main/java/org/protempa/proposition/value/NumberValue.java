@@ -265,7 +265,7 @@ public final class NumberValue implements NumericalValue,
     }
 
     @Override
-    public ValueBuilder asBuilder() {
+    public NumberValueBuilder asBuilder() {
         return new NumberValueBuilder(this);
     }
 }
