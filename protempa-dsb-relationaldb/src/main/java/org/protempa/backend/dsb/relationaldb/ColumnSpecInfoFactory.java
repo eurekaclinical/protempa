@@ -214,11 +214,17 @@ public final class ColumnSpecInfoFactory {
                     if (filter instanceof PositionFilter) {
                         PositionFilter pf = (PositionFilter) filter;
                         ColumnSpec startTimeSpec = mes.getStartTimeSpec();
-                        if (startTimeSpec != null && ((pf.getStartSide() == Side.START && pf.getStart() != null) || (pf.getFinishSide() == Side.START && pf.getFinish() != null))) {
+                        if (startTimeSpec != null 
+                                && ((pf.getStartSide() == Side.START && pf.getStart() != null) 
+                                || (pf.getFinish() != null 
+                                        && (pf.getFinishSide() == Side.START 
+                                            || (mes.getFinishTimeSpec() == null && pf.getFinishSide() == Side.FINISH))))) {
                             i += wrapColumnSpec(startTimeSpec, columnSpecs);
                         }
                         ColumnSpec finishTimeSpec = mes.getFinishTimeSpec();
-                        if (finishTimeSpec != null && ((pf.getStartSide() == Side.FINISH && pf.getStart() != null) || (pf.getFinishSide() == Side.FINISH && pf.getFinish() != null))) {
+                        if (finishTimeSpec != null 
+                                && ((pf.getStartSide() == Side.FINISH && pf.getStart() != null) 
+                                || (pf.getFinishSide() == Side.FINISH && pf.getFinish() != null))) {
                             i += wrapColumnSpec(finishTimeSpec, columnSpecs);
                         }
                     } else if (filter instanceof PropertyValueFilter) {

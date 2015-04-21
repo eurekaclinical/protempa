@@ -214,6 +214,13 @@ abstract class Executor implements AutoCloseable {
     void init() throws FinderException {
         try {
             allNarrowerDescendants = ks.collectPropDefDescendantsUsingAllNarrower(false, propIds.toArray(new String[propIds.size()]));
+            if (isLoggable(Level.FINE)) {
+                Set<String> allNarrowerDescendantsPropIds = new HashSet<>();
+                for (PropositionDefinition pd : this.allNarrowerDescendants) {
+                    allNarrowerDescendantsPropIds.add(pd.getId());
+                }
+                log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));
+            }
         } catch (KnowledgeSourceReadException ex) {
             throw new FinderException(query.getId(), ex);
         }
