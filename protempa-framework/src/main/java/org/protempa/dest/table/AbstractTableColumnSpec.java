@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
@@ -78,10 +80,9 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource) throws 
-                KnowledgeSourceReadException {
+            KnowledgeSourceCache ksCache) {
         return this.linkTraverser.traverseLinks(links, proposition, 
                 forwardDerivations, backwardDerivations, references, 
-                knowledgeSource);
+                ksCache);
     }
 }

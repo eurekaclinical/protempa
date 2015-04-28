@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
@@ -61,7 +62,7 @@ public class LinkTraverser {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource) throws KnowledgeSourceReadException {
+            KnowledgeSourceCache ksCache) {
         LinkedList<Proposition> result = new LinkedList<>();
         Logger logger = Util.logger();
         result.add(proposition);
@@ -73,7 +74,7 @@ public class LinkTraverser {
                     Proposition prop = result.remove();
                     Collection<Proposition> c = link.traverse(prop,
                             forwardDerivations, backwardDerivations,
-                            references, knowledgeSource, this.cache);
+                            references, ksCache, this.cache);
                     result.addAll(c);
                     j++;
                 }

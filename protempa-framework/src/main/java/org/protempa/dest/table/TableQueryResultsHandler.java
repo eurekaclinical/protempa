@@ -34,7 +34,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceCache;
+import org.protempa.KnowledgeSourceCacheFactory;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.dest.AbstractQueryResultsHandler;
@@ -42,6 +45,7 @@ import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.valueset.ValueSet;
 
 /**
  *
@@ -58,6 +62,7 @@ public final class TableQueryResultsHandler
     private final Map<String, String> replace;
     private final boolean inferPropositionIdsNeeded;
     private final KnowledgeSource knowledgeSource;
+    private KnowledgeSourceCache ksCache;
 
     TableQueryResultsHandler(BufferedWriter out, char columnDelimiter,
             String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
@@ -135,6 +140,12 @@ public final class TableQueryResultsHandler
                 throw new QueryResultsHandlerProcessingException("Could not write header", ex);
             }
         }
+        
+        try {
+            this.ksCache = new KnowledgeSourceCacheFactory().getInstance(this.knowledgeSource, cache, true);
+        } catch (KnowledgeSourceReadException ex) {
+            throw new QueryResultsHandlerProcessingException(ex);
+        }
     }
 
     @Override
@@ -152,15 +163,13 @@ public final class TableQueryResultsHandler
                 }
                 for (int i = 0; i < n; i++) {
                     TableColumnSpec columnSpec = this.columnSpecs[i];
-                    columnSpec.columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.knowledgeSource, this.replace, this.columnDelimiter, this.out);
+                    columnSpec.columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.ksCache, this.replace, this.columnDelimiter, this.out);
                     if (i < n - 1) {
                         this.out.write(this.columnDelimiter);
                     } else {
                         this.out.newLine();
                     }
                 }
-            } catch (KnowledgeSourceReadException ex1) {
-                throw new QueryResultsHandlerProcessingException("Could not read knowledge source", ex1);
             } catch (IOException ex) {
                 throw new QueryResultsHandlerProcessingException("Could not write row" + ex);
             }

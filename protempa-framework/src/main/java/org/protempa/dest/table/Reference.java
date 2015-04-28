@@ -31,6 +31,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
@@ -328,7 +329,7 @@ public final class Reference extends Link {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource, Set<Proposition> cache) {
+            KnowledgeSourceCache ksCache, Set<Proposition> cache) {
         List<Proposition> props = new ArrayList<>();
         String[] refNames =
                 this.referenceNames.length > 0

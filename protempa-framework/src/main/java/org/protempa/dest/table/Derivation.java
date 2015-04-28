@@ -31,6 +31,7 @@ import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
 import org.protempa.proposition.Parameter;
@@ -46,6 +47,7 @@ import org.protempa.proposition.value.Value;
  * @author Andrew Post
  */
 public final class Derivation extends Link {
+
     private static final Value[] EMPTY_VALUE_ARRAY = new Value[0];
 
     /**
@@ -153,8 +155,8 @@ public final class Derivation extends Link {
         } else {
             Set<String> result = new HashSet<>();
             for (String propId : inPropIds) {
-                PropositionDefinition propDef =
-                        knowledgeSource.readPropositionDefinition(propId);
+                PropositionDefinition propDef
+                        = knowledgeSource.readPropositionDefinition(propId);
                 if (propDef == null) {
                     throw new IllegalArgumentException("Invalid propId: "
                             + propId);
@@ -164,36 +166,36 @@ public final class Derivation extends Link {
                         Arrays.addAll(result, propDef.getChildren());
                         break;
                     case MULT_BACKWARD:
-                        Queue<String> backwardProps =
-                                new LinkedList<>();
+                        Queue<String> backwardProps
+                                = new LinkedList<>();
                         Arrays.addAll(backwardProps, propDef.getChildren());
                         String pId;
                         while ((pId = backwardProps.poll()) != null) {
-                            PropositionDefinition pDef =
-                                    knowledgeSource.readPropositionDefinition(pId);
+                            PropositionDefinition pDef
+                                    = knowledgeSource.readPropositionDefinition(pId);
                             Arrays.addAll(backwardProps, pDef.getChildren());
                         }
                         result.addAll(backwardProps);
                         break;
                     case SINGLE_FORWARD:
-                        for (PropositionDefinition def :
-                                knowledgeSource.readParents(propDef)) {
+                        for (PropositionDefinition def
+                                : knowledgeSource.readParents(propDef)) {
                             result.add(def.getId());
                         }
                         break;
                     case MULT_FORWARD:
-                        Queue<String> forwardProps =
-                                new LinkedList<>();
-                        for (PropositionDefinition def :
-                                knowledgeSource.readParents(propDef)) {
+                        Queue<String> forwardProps
+                                = new LinkedList<>();
+                        for (PropositionDefinition def
+                                : knowledgeSource.readParents(propDef)) {
                             forwardProps.add(def.getId());
                         }
                         // pId is declared in MULT_BACKWARD case.
                         while ((pId = forwardProps.poll()) != null) {
-                            PropositionDefinition pDef =
-                                    knowledgeSource.readPropositionDefinition(pId);
-                            for (PropositionDefinition def :
-                                    knowledgeSource.readParents(pDef)) {
+                            PropositionDefinition pDef
+                                    = knowledgeSource.readPropositionDefinition(pId);
+                            for (PropositionDefinition def
+                                    : knowledgeSource.readParents(pDef)) {
                                 forwardProps.add(def.getId());
                             }
                         }
@@ -235,8 +237,7 @@ public final class Derivation extends Link {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource, final Set<Proposition> cache)
-            throws KnowledgeSourceReadException {
+            KnowledgeSourceCache ksCache, final Set<Proposition> cache) {
         //First, aggregate derived values according to the specified behavior.
         List<Proposition> derived = null;
         switch (this.behavior) {
@@ -251,7 +252,7 @@ public final class Derivation extends Link {
                         cache);
                 break;
             case MULT_FORWARD:
-                populateKnowledgeTree(knowledgeSource);
+                populateKnowledgeTree(ksCache);
                 if (this.knowledgeTree.contains(proposition.getId())) {
                     /*
                      * For performance, pull the specified proposition ids,
@@ -268,8 +269,8 @@ public final class Derivation extends Link {
                          * If (in hierarchy or ???) and not in cache, then add
                          * to derived.
                          */
-                        Collection<Proposition> c =
-                                forwardDerivations.get(prop);
+                        Collection<Proposition> c
+                                = forwardDerivations.get(prop);
                         if (c != null) {
                             for (Proposition p : c) {
                                 if (cache.add(p)) {
@@ -288,8 +289,8 @@ public final class Derivation extends Link {
                 internalDerived.add(proposition);
                 while (!internalDerived.isEmpty()) {
                     Proposition prop = internalDerived.remove();
-                    Collection<Proposition> c =
-                            backwardDerivations.get(prop);
+                    Collection<Proposition> c
+                            = backwardDerivations.get(prop);
                     if (c != null) {
                         for (Proposition p : c) {
                             if (cache.add(p)) {
@@ -316,12 +317,23 @@ public final class Derivation extends Link {
         return ToStringBuilder.reflectionToString(this);
     }
 
-    private void populateKnowledgeTree(KnowledgeSource knowledgeSource)
-            throws KnowledgeSourceReadException {
+    private void populateKnowledgeTree(KnowledgeSourceCache ksCache) {
         if (this.knowledgeTree == null) {
             this.knowledgeTree = new HashSet<>();
-            this.knowledgeTree.addAll(
-                knowledgeSource.collectPropIdDescendantsUsingAllNarrower(true, getPropositionIds()));
+            Queue<String> queue = new LinkedList<>();
+            Arrays.addAll(queue, getPropositionIds());
+            String propId;
+            while ((propId = queue.poll()) != null) {
+                PropositionDefinition propDef = ksCache.get(propId);
+                if (propDef != null) {
+                    if (propDef.getInDataSource()) {
+                        this.knowledgeTree.add(propDef.getId());
+                    }
+                    Arrays.addAll(queue, propDef.getChildren());
+                } else {
+                    throw new AssertionError("Invalid proposition definition " + propId);
+                }
+            }
         }
     }
 
@@ -331,7 +343,7 @@ public final class Derivation extends Link {
         } else {
             if (proposition instanceof Parameter
                     && Arrays.contains(this.allowedValues,
-                    ((Parameter) proposition).getValue())) {
+                            ((Parameter) proposition).getValue())) {
                 return true;
             } else {
                 return false;
@@ -340,9 +352,8 @@ public final class Derivation extends Link {
     }
 
     /**
-     * Filters
-     * <code>propositions</code>. Removes duplicates, propositions not in the
-     * proposition id list, and parameters that do not meet any value
+     * Filters <code>propositions</code>. Removes duplicates, propositions not
+     * in the proposition id list, and parameters that do not meet any value
      * constraints set.
      *
      * @param propositions the {@link Collection<Proposition>} to filter.

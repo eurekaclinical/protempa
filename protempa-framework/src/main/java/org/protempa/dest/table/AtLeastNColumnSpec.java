@@ -30,7 +30,9 @@ import java.util.Set;
 import org.arp.javautil.string.StringUtil;
 
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
@@ -82,12 +84,11 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource, Map<String, String> replace,
-            char delimiter, Writer writer) throws KnowledgeSourceReadException, 
-            IOException {
+            KnowledgeSourceCache ksCache, Map<String, String> replace,
+            char delimiter, Writer writer) throws IOException {
         Collection<Proposition> props = traverseLinks(this.links, proposition,
                 forwardDerivations, backwardDerivations, references,
-                knowledgeSource);
+                ksCache);
         String str = props.size() >= this.n ? this.trueOutput : this.falseOutput;
         StringUtil.escapeAndWriteDelimitedColumn(str, delimiter, replace, writer);
     }

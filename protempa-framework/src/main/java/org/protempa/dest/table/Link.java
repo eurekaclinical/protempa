@@ -34,7 +34,9 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
@@ -395,8 +397,7 @@ public abstract class Link {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource, Set<Proposition> cache)
-            throws KnowledgeSourceReadException;
+            KnowledgeSourceCache ksCache, Set<Proposition> cache);
 
     @Override
     public String toString() {

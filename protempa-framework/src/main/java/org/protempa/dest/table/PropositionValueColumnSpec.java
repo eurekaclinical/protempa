@@ -34,11 +34,12 @@ import java.util.Set;
 import org.arp.javautil.string.StringUtil;
 
 import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalParameter;
-import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
 import org.protempa.proposition.value.InequalityNumberValue;
@@ -105,12 +106,11 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSource knowledgeSource, Map<String, String> replace,
-            char delimiter, Writer writer) throws KnowledgeSourceReadException,
-            IOException {
+            KnowledgeSourceCache ksCache, Map<String, String> replace,
+            char delimiter, Writer writer) throws IOException {
         List<Proposition> propositions = traverseLinks(this.links, proposition,
                 forwardDerivations, backwardDerivations, references,
-                knowledgeSource);
+                ksCache);
         Value value = null;
         BigDecimal sumTotal = null;
         BigInteger count = BigInteger.ZERO;
