@@ -19,11 +19,15 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +44,7 @@ import org.protempa.query.Query;
  * @author Andrew Post
  */
 abstract class Executor implements AutoCloseable {
+
     private static final Logger LOGGER = ProtempaUtil.logger();
     private final Set<String> keyIds;
     private final Set<String> propIds;
@@ -124,26 +129,98 @@ abstract class Executor implements AutoCloseable {
 
         private final DataStreamingEventIterator<Proposition> itr;
         private final ExecutorCounter counter;
+        private final List<FinderException> finderExceptions;
+        private final List<DataSourceReadException> dataSourceReadExceptions;
 
         public DataStreamingEventProcessor(DataStreamingEventIterator<Proposition> itr) {
             assert itr != null : "itr cannot be null";
             this.itr = itr;
             this.counter = new ExecutorCounter();
+            this.finderExceptions = new ArrayList<>();
+            this.dataSourceReadExceptions = new ArrayList<>();
         }
 
         final void process() throws DataSourceReadException, FinderException {
-            String queryId = query.getId();
+            final String queryId = query.getId();
             log(Level.INFO, "Processing data for query {0}", queryId);
-            try {
-                for (; this.itr.hasNext();) {
-                    doProcess(this.itr.next(), propIds);
-                    this.counter.incr();
-                    derivationsBuilder.reset();
+            final DataStreamingEvent poisonPill = new DataStreamingEvent("poison", Collections.emptyList());
+            final BlockingQueue<DataStreamingEvent> queue = new ArrayBlockingQueue<>(1000);
+            final Thread producer = new Thread() {
+
+                @Override
+                public void run() {
+                    boolean itrClosed = false;
+                    try {
+                        while (!isInterrupted() && itr.hasNext()) {
+                            queue.put(itr.next());
+                        }
+                        itr.close();
+                        queue.put(poisonPill);
+                        itrClosed = true;
+                    } catch (DataSourceReadException ex) {
+                        dataSourceReadExceptions.add(ex);
+                        try {
+                            queue.put(poisonPill);
+                        } catch (InterruptedException ignore) {}
+                    } catch (InterruptedException ex) {
+                        ProtempaUtil.logger().log(Level.FINER, "Protempa producer thread interrupted", ex);
+                        try {
+                            queue.put(poisonPill);
+                        } catch (InterruptedException ignore) {}
+                    } finally {
+                        if (!itrClosed) {
+                            try {
+                                itr.close();
+                            } catch (DataSourceReadException ignore) {
+                            }
+                        }
+                    }
                 }
-                log(Level.INFO, "Done processing data for query {0}", queryId);
-            } finally {
-                this.itr.close();
-                log(Level.INFO, "Done retrieving data for query {0}", queryId);
+            };
+
+            final Thread consumer = new Thread() {
+
+                @Override
+                public void run() {
+                    try {
+                        DataStreamingEvent dse;
+                        while (!isInterrupted() && ((dse = queue.take()) != poisonPill)) {
+                            doProcess(dse, propIds);
+                            counter.incr();
+                            derivationsBuilder.reset();
+                        }
+                        log(Level.INFO, "Done processing data for query {0}", queryId);
+                    } catch (FinderException ex) {
+                        finderExceptions.add(ex);
+                    } catch (InterruptedException ex) {
+                        producer.interrupt();
+                    } catch (DataSourceReadException ex) {
+                        dataSourceReadExceptions.add(ex);
+                    } finally {
+                        log(Level.INFO, "Done retrieving data for query {0}", queryId);
+                    }
+                }
+
+            };
+            
+            producer.start();
+            consumer.start();
+            try {
+                producer.join();
+            } catch (InterruptedException ex) {
+                ProtempaUtil.logger().log(Level.FINER, "Protempa producer thread interrupted", ex);
+            }
+            try {
+                consumer.join();
+            } catch (InterruptedException ex) {
+                ProtempaUtil.logger().log(Level.FINER, "Protempa consumer thread interrupted", ex);
+            }
+            
+            if (!this.dataSourceReadExceptions.isEmpty()) {
+                throw this.dataSourceReadExceptions.get(0);
+            }
+            if (!this.finderExceptions.isEmpty()) {
+                throw this.finderExceptions.get(0);
             }
         }
 
@@ -314,5 +391,5 @@ abstract class Executor implements AutoCloseable {
         abstractionFinder.clear();
         log(Level.FINEST, "Rule base initialized for query {0}", query.getId());
     }
-    
+
 }

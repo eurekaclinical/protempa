@@ -19,7 +19,6 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
@@ -47,16 +48,22 @@ import org.protempa.query.Query;
  * @author Andrew Post
  */
 abstract class ExecutorWithResultsHandler extends Executor {
+
     private final Destination destination;
     private QueryResultsHandler resultsHandler;
     private final AbstractionFinder abstractionFinder;
     private boolean failed;
+    
+    private final BlockingQueue<QueueObject> queue = new ArrayBlockingQueue<>(1000);
+    private final QueueObject poisonPill = new QueueObject();
+    private final HandleQueryResultsThread handleQueryResultsThread;
 
     public ExecutorWithResultsHandler(Query query, Destination resultsHandlerFactory, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws FinderException {
         super(query, querySession, strategy, abstractionFinder);
         assert resultsHandlerFactory != null : "resultsHandlerFactory cannot be null";
         this.destination = resultsHandlerFactory;
         this.abstractionFinder = abstractionFinder;
+        this.handleQueryResultsThread = new HandleQueryResultsThread();
     }
 
     @Override
@@ -74,7 +81,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
         DataStreamingEventIterator<Proposition> itr = this.abstractionFinder.getDataSource().readPropositions(getKeyIds(), inDataSourcePropIds, getFilters(), getQuerySession(), this.resultsHandler);
         return itr;
     }
-
+    
     @Override
     void init() throws FinderException {
         String queryId = getQuery().getId();
@@ -97,6 +104,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
                 throw fe;
             }
             this.resultsHandler.start(getAllNarrowerDescendants());
+            this.handleQueryResultsThread.start();
         } catch (QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | Error | RuntimeException ex) {
             this.failed = true;
             throw new FinderException(getQuery().getId(), ex);
@@ -115,12 +123,20 @@ abstract class ExecutorWithResultsHandler extends Executor {
             throw new FinderException(getQuery().getId(), ex);
         }
     }
-    
-    
 
     @Override
     public void close() throws FinderException {
         try {
+            try {
+                this.queue.put(this.poisonPill);
+            } catch (InterruptedException ex) {
+                log(Level.FINER, "Handle query results handler thread interrupted", ex);
+            }
+            try {
+                this.handleQueryResultsThread.join();
+            } catch (InterruptedException ex) {
+                log(Level.FINER, "Handle query results handler thread interrupted", ex);
+            }
             if (!this.failed) {
                 this.resultsHandler.finish();
             }
@@ -133,7 +149,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
                 try {
                     this.resultsHandler.close();
                 } catch (QueryResultsHandlerCloseException ignore) {
-                    
+
                 }
             }
         }
@@ -165,10 +181,9 @@ abstract class ExecutorWithResultsHandler extends Executor {
                 log(Level.FINER, "Forward derivations for query {0}: {1}", new Object[]{queryId, forwardDerivations});
                 log(Level.FINER, "Backward derivations for query {0}: {1}", new Object[]{queryId, backwardDerivations});
             }
-            this.resultsHandler.handleQueryResult(keyId, filteredPropositions, forwardDerivations, backwardDerivations, refs);
-        } catch (QueryResultsHandlerProcessingException ex) {
-            this.failed = true;
-            throw new FinderException(getQuery().getId(), ex);
+            queue.put(new QueueObject(keyId, filteredPropositions, forwardDerivations, backwardDerivations, refs));
+        } catch (InterruptedException ex) {
+            log(Level.FINER, "Handle query results handler thread interrupted", ex);
         }
     }
 
@@ -176,6 +191,47 @@ abstract class ExecutorWithResultsHandler extends Executor {
         processResults(propositions, null, keyId);
     }
     
+    private class HandleQueryResultsThread extends Thread {
+
+        @Override
+        public void run() {
+            QueueObject qo;
+            try {
+                while (!isInterrupted() && ((qo = queue.take()) != poisonPill)) {
+                    try {
+                        resultsHandler.handleQueryResult(qo.keyId, qo.propositions, qo.forwardDerivations, qo.backwardDerivations, qo.refs);
+                    } catch (QueryResultsHandlerProcessingException ex) {
+                        Logger.getLogger(ExecutorWithResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ExecutorWithResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    };
+    
+    private static final class QueueObject {
+
+        List<Proposition> propositions;
+        Map<Proposition, List<Proposition>> forwardDerivations;
+        Map<Proposition, List<Proposition>> backwardDerivations;
+        String keyId;
+        Map<UniqueId, Proposition> refs;
+
+        QueueObject(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> refs) {
+            this.propositions = propositions;
+            this.forwardDerivations = forwardDerivations;
+            this.backwardDerivations = backwardDerivations;
+            this.keyId = keyId;
+            this.refs = refs;
+        }
+
+        QueueObject() {
+
+        }
+    }
+
     private static List<Proposition> extractRequestedPropositions(
             Iterator<Proposition> propositions, Set<String> propositionIds,
             Map<UniqueId, Proposition> refs) {
@@ -189,7 +245,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
         }
         return result;
     }
-    
+
     private static void addToCache(QuerySession qs,
             List<Proposition> propositions,
             Map<Proposition, List<Proposition>> forwardDerivations,
@@ -204,5 +260,5 @@ abstract class ExecutorWithResultsHandler extends Executor {
             qs.addDerivationsToCache(me.getKey(), me.getValue());
         }
     }
-    
+
 }

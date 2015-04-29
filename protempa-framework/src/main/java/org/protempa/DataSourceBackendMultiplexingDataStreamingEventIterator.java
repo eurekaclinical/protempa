@@ -52,31 +52,28 @@ public class DataSourceBackendMultiplexingDataStreamingEventIterator
      */
     @Override
     public void close() throws DataSourceReadException {
-        List<DataSourceReadException> exceptions =
-                new ArrayList<>();
-        for (DataStreamingEventIterator<UniqueIdPair> it : this.refs) {
-            try {
-                it.close();
-            } catch (DataSourceReadException ex) {
-                exceptions.add(ex);
+        try {
+            super.close();
+        } finally {
+            List<DataSourceReadException> exceptions =
+                    new ArrayList<>();
+            for (DataStreamingEventIterator<UniqueIdPair> it : this.refs) {
+                try {
+                    it.close();
+                } catch (DataSourceReadException ex) {
+                    exceptions.add(ex);
+                }
             }
-        }
-        for (DataStreamingEventIterator<Proposition> it : this.itrs) {
-            try {
-                it.close();
-            } catch (DataSourceReadException ex) {
-                exceptions.add(ex);
+            if (!exceptions.isEmpty()) {
+                DataSourceReadException ex = new DataSourceReadException(
+                        "Error occurred reading from data source");
+                List<StackTraceElement> elts = new ArrayList<>();
+                for (DataSourceReadException subex : exceptions) {
+                    Arrays.addAll(elts, subex.getStackTrace());
+                }
+                ex.setStackTrace(elts.toArray(new StackTraceElement[elts.size()]));
+                throw ex;
             }
-        }
-        if (!exceptions.isEmpty()) {
-            DataSourceReadException ex = new DataSourceReadException(
-                    "Error occurred reading from data source");
-            List<StackTraceElement> elts = new ArrayList<>();
-            for (DataSourceReadException subex : exceptions) {
-                Arrays.addAll(elts, subex.getStackTrace());
-            }
-            ex.setStackTrace(elts.toArray(new StackTraceElement[elts.size()]));
-            throw ex;
         }
     }
 }

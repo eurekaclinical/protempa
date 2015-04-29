@@ -30,7 +30,7 @@ import org.protempa.proposition.Proposition;
  * @author Andrew Post
  */
 final class ReferenceLinkerPropositionDataStreamerProcessor
-        extends PropositionDataStreamerProcessor {
+        extends PropositionDataStreamerProcessor implements AutoCloseable {
     
     private final DataStreamer refsStreamer;
     private final RefDataStreamerProcessor refsProcessor;
@@ -53,4 +53,11 @@ final class ReferenceLinkerPropositionDataStreamerProcessor
         this.refsProcessor.clear();
         super.fireKeyCompleted(keyId, data);
     }
+
+    @Override
+    public void close() {
+        super.close();
+        this.refsStreamer.close();
+    }
+    
 }

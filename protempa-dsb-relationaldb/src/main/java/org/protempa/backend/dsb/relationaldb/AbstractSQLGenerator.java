@@ -34,7 +34,6 @@ import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.Unit;
 import org.protempa.proposition.value.UnitFactory;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -135,7 +134,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             return false;
         }
     }
-
+    
     @Override
     public DataStreamingEventIterator<Proposition> readPropositionsStreaming(
             final Set<String> keyIds, final Set<String> propIds, final Filter filters)
@@ -149,9 +148,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         if (stagingApplies()) {
             stager = doStage(allEntitySpecs, filters, propIds, keyIds, null);
         }
-
+        
         boolean transaction = true;
-        Connection connection = null;
+            Connection connection = null;
         if (this.connectionSpec != null) {
             try {
                 connection = this.connectionSpec.getOrCreate();
@@ -172,107 +171,17 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
         final List<StreamingIteratorPair> itrs =
                 new ArrayList<>();
-        //if (transaction) {
-        final StreamingSQLExecutor streamingExecutor = new StreamingSQLExecutor(
+            final StreamingSQLExecutor streamingExecutor = new StreamingSQLExecutor(
                 connection, backendNameForMessages(),
                 this.backend.getQueryTimeout());
-//        NonRetryingSQLExecutor nonStreamingExecutor =
-//                new NonRetryingSQLExecutor(connection, backendNameForMessages(),
-//                this.backend.getQueryTimeout());
-//        ResultCache<Proposition> cachedResults = null;
-
-        
-/*
- * The multithreaded implementation
- */
-//        final Queue<EntitySpec> queue = new LinkedList(entitySpecToPropIds.keySet());
-//        final List<DataSourceReadException> exes = new ArrayList<DataSourceReadException>(4);
-//        Thread[] threads = new Thread[4];
-//
-//        for (int i = 0; i < threads.length; i++) {
-//            threads[i] = new Thread(new Runnable() {
-//
-//                @Override
-//                public void run() {
-//                    Connection connection = null;
-//                    try {
-//                        connection = connectionSpec.getOrCreate();
-//                        StreamingSQLExecutor streamingExecutor = new StreamingSQLExecutor(
-//                                connection, backendNameForMessages(),
-//                                backend.getQueryTimeout());
-//
-//                        EntitySpec entitySpec;
-//                        do {
-//                            synchronized (queue) {
-//                                entitySpec = queue.poll();
-//                            }
-//                            if (entitySpec != null) {
-//                                List<StreamingIteratorPair> pair =
-//                                        processEntitySpecStreaming(entitySpec,
-//                                        allEntitySpecToResultProcessor,
-//                                        allEntitySpecs, filters,
-//                                        propIds,
-//                                        keyIds, streamingExecutor);
-//                                synchronized (itrs) {
-//                                    itrs.addAll(pair);
-//                                }
-//                            }
-//                        } while (entitySpec != null);
-//                    } catch (SQLException ex) {
-//                        exes.add(new DataSourceReadException("Error getting connection", ex));
-//                    } catch (DataSourceReadException ex) {
-//                        try {
-//                            connection.close();
-//                        } catch (Exception ignore) {}
-//                        exes.add(ex);
-//                    }
-//                }
-//            });
-//            threads[i].start();
-//        }
-//        for (int i = 0; i < threads.length; i++) {
-//            try {
-//                threads[i].join();
-//            } catch (InterruptedException ex) {
-//                Logger.getLogger(AbstractSQLGenerator.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-//        for (DataSourceReadException ex : exes) {
-//            throw ex;
-//        }
-/*
- * End multithreaded implementation.
- */
         for (EntitySpec entitySpec : entitySpecToPropIds.keySet()) {
-//            boolean partitionUsed = false;
-//            boolean partitionUsed = entitySpec.getPartitionBy() != null;
-//            if (!partitionUsed) {
-//                for (ReferenceSpec rs : entitySpec.getInboundRefSpecs()) {
-//                    EntitySpec res = entitySpecForName(allEntitySpecs, 
-//                            rs.getEntityName());
-//                    partitionUsed = res.getPartitionBy() != null;
-//                    if (partitionUsed) {
-//                        break;
-//                    }
-//                }
-//            }
-//            if (!partitionUsed) {
             itrs.addAll(processEntitySpecStreaming(entitySpec,
                     allEntitySpecToResultProcessor,
                     allEntitySpecs, filters,
                     propIds,
                     keyIds, streamingExecutor));
-//            } else {
-//                if (cachedResults == null) {
-//                    cachedResults = newResultCache();
-//                }
-//                processEntitySpec(entitySpec,
-//                        allEntitySpecToResultProcessor,
-//                        allEntitySpecs, filters,
-//                        cachedResults, propIds,
-//                        keyIds, null, nonStreamingExecutor);
-//            }
         }
+        
         List<DataStreamingEventIterator<Proposition>> events =
                 new ArrayList<>(
                 itrs.size());
@@ -286,186 +195,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 new RelationalDbDataReadIterator(refs, events, connection,
                 transaction, stagingApplies() ? stager : null);
 
-//        if (cachedResults != null) {
-//            return new CombinedRelationalDbDataReadIterator(streamingResults,
-//                    cachedResults);
-//        } else {
         return streamingResults;
-//        }
-    }
-
-//    /*
-//     * allEntitySpecs() returns a map of non-parameterized
-//     * SQLGenResultProcessorFactory objects, therefore the resulting map here
-//     * cannot be parameterized either.
-//     */
-//    @SuppressWarnings("rawtypes")
-//    @Override
-//    public ResultCache<Proposition> readPropositions(final Set<String> keyIds,
-//            final Set<String> propIds, final Filter filters,
-//            final SQLOrderBy order) throws DataSourceReadException {
-//        final Map<EntitySpec, List<String>> entitySpecToPropIds =
-//                entitySpecToPropIds(propIds);
-//        final Map<EntitySpec, SQLGenResultProcessorFactory> entitySpecToResultProcessor = allEntitySpecToResultProcessor();
-//        final Collection<EntitySpec> entitySpecs =
-//                entitySpecToResultProcessor.keySet();
-//
-//        DataStager stager = null;
-//        try {
-//            if (stagingApplies()) {
-//                stager = doStage(entitySpecs, filters, propIds, keyIds, order);
-//            }
-//
-//            return readEntitySpecs(filters, propIds, keyIds, order,
-//                    entitySpecToPropIds,
-//                    entitySpecToResultProcessor);
-//        } finally {
-//            if (stagingApplies()) {
-//                cleanupStagingArea(stager);
-//            }
-//        }
-//    }
-//
-//    private ResultCache<Proposition> readEntitySpecs(final Filter filters,
-//            final Set<String> propIds, final Set<String> keyIds,
-//            final SQLOrderBy order,
-//            final Map<EntitySpec, List<String>> entitySpecToPropIds,
-//            final Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecToResultProcessor)
-//            throws DataSourceReadException {
-//        final ResultCache<Proposition> results = newResultCache();
-//        final Collection<EntitySpec> allEntitySpecs =
-//                allEntitySpecToResultProcessor.keySet();
-//
-//        boolean transaction = true;
-//        if (transaction) {
-//            NonRetryingSQLExecutor exec = null;
-//            final NonRetryingSQLExecutor executor;
-//            try {
-//                executor = new NonRetryingSQLExecutor(
-//                        this.connectionSpec, backendNameForMessages(),
-//                        this.backend.getQueryTimeout());
-//                exec = executor;
-//                Retryable<DataSourceReadException> operation =
-//                        new Retryable<DataSourceReadException>() {
-//
-//                            @Override
-//                            public DataSourceReadException attempt() {
-//                                for (EntitySpec entitySpec :
-//                                        entitySpecToPropIds.keySet()) {
-//                                    try {
-//                                        processEntitySpec(entitySpec,
-//                                                allEntitySpecToResultProcessor,
-//                                                allEntitySpecs, filters,
-//                                                results, propIds,
-//                                                keyIds, order, executor);
-//                                    } catch (DataSourceReadException ex) {
-//                                        return ex;
-//                                    }
-//                                }
-//                                return null;
-//                            }
-//
-//                            @Override
-//                            public void recover() {
-//                                try {
-//                                    Thread.sleep(3 * 1000L);
-//                                } catch (InterruptedException ex) {
-//                                    throw new RuntimeException(ex);
-//                                }
-//                            }
-//                        };
-//                Retryer<DataSourceReadException> retryer =
-//                        new Retryer<DataSourceReadException>(3);
-//                if (!retryer.execute(operation)) {
-//                    DataSourceReadException ex =
-//                            new DataSourceReadException(retryer.getErrors());
-//                    throw new DataSourceReadException(
-//                            "Error retrieving data from data source backend "
-//                            + executor.getBackendNameForMessages(), ex);
-//                }
-//                executor.close();
-//                exec = null;
-//            } catch (SQLException ex) {
-//                throw new DataSourceReadException(
-//                        "Error getting a database connection", ex);
-//            } finally {
-//                if (exec != null) {
-//                    try {
-//                        exec.close();
-//                    } catch (SQLException ignore) {
-//                    }
-//                }
-//            }
-//        } else {
-//            RetryingSQLExecutor executor = new RetryingSQLExecutor(
-//                    this.connectionSpec, backendNameForMessages(),
-//                    this.backend.getQueryTimeout(), 3);
-//            for (EntitySpec entitySpec : entitySpecToPropIds.keySet()) {
-//                processEntitySpec(entitySpec,
-//                        allEntitySpecToResultProcessor,
-//                        allEntitySpecs, filters, results, propIds, keyIds,
-//                        order, executor);
-//            }
-//        }
-//
-//        return results;
-//    }
-    private void cleanupStagingArea(DataStager stager)
-            throws DataSourceReadException {
-        Logger logger = SQLGenUtil.logger();
-        logger.log(Level.INFO, "Cleaning up staged data");
-        try {
-            stager.cleanup();
-        } catch (SQLException ex) {
-            throw new DataSourceReadException(
-                    "Failed to clean up the staging area", ex);
-        }
-    }
-
-    private void processEntitySpec(EntitySpec entitySpec,
-            Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecToResultProcessor,
-            Collection<EntitySpec> allEntitySpecs, Filter filters,
-            ResultCache<Proposition> results, Set<String> propIds,
-            Set<String> keyIds, SQLOrderBy order,
-            org.protempa.backend.dsb.relationaldb.SQLExecutor executor)
-            throws DataSourceReadException {
-        Logger logger = SQLGenUtil.logger();
-        logProcessingEntitySpec(logger, entitySpec);
-
-        SQLGenResultProcessorFactory<Proposition> factory =
-                getResultProcessorFactory(allEntitySpecToResultProcessor,
-                entitySpec);
-
-        List<EntitySpec> applicableEntitySpecs =
-                computeApplicableEntitySpecs(allEntitySpecs, entitySpec);
-
-        Set<Filter> applicableFilters = computeApplicableFilters(filters,
-                allEntitySpecs, entitySpec);
-
-        List<Set<Filter>> partitions = constructPartitions(entitySpec,
-                applicableFilters);
-
-        String dataSourceBackendId = this.backend.getDataSourceBackendId();
-        MainResultProcessor<Proposition> resultProcessor =
-                factory.getInstance(dataSourceBackendId, entitySpec, results);
-
-        for (Set<Filter> partition : partitions) {
-            generateAndExecuteSelect(entitySpec, null, propIds, partition,
-                    applicableEntitySpecs, new LinkedHashMap<String, ReferenceSpec>(), keyIds, order, resultProcessor,
-                    executor, false);
-        }
-
-        if (results.anyAdded()) {
-            processReferences(entitySpec, factory, dataSourceBackendId,
-                    results, allEntitySpecs, propIds, filters, keyIds, order,
-                    executor);
-        } else {
-            logSkippingRefs(logger, entitySpec);
-        }
-
-        results.clearTmp();
-
-        logDoneProcessing(logger, entitySpec);
+    
     }
 
     private class StreamingIteratorPair {
@@ -535,157 +266,12 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             List<DataStreamingEventIterator<UniqueIdPair>> refResults =
                     java.util.Collections.singletonList(resultProcessor
                             .getInboundReferenceResults());
-//            List<ReferenceResultSetIterator> refResults =
-//                    processReferencesStreaming(entitySpec, factory,
-//                    dataSourceBackendId,
-//                    allEntitySpecs, propIds, filters, keyIds, executor);
             result.add(new StreamingIteratorPair(results, refResults));
         }
 
         logDoneProcessing(logger, entitySpec);
 
         return result;
-    }
-
-    private void processReferences(EntitySpec entitySpec,
-            SQLGenResultProcessorFactory<Proposition> factory,
-            String dataSourceBackendId, ResultCache<Proposition> results,
-            Collection<EntitySpec> allEntitySpecs, Set<String> propIds,
-            Filter filters, Set<String> keyIds, SQLOrderBy order,
-            org.protempa.backend.dsb.relationaldb.SQLExecutor executor)
-            throws DataSourceReadException {
-        ReferenceSpec[] refSpecs = entitySpec.getReferenceSpecs();
-        if (refSpecs != null) {
-            Logger logger = SQLGenUtil.logger();
-
-            /*
-             * Create a copy of allEntitySpecs with the current entitySpec the
-             * first item of the list. This is to make sure that its joins make
-             * it into the list of column specs.
-             */
-            for (ReferenceSpec referenceSpec : refSpecs) {
-                RefResultProcessor<Proposition> refResultProcessor =
-                        factory.getRefInstance(dataSourceBackendId,
-                        entitySpec, referenceSpec, results);
-                List<EntitySpec> allEntitySpecsCopyForRefs =
-                        copyEntitySpecsForRefs(entitySpec, allEntitySpecs);
-
-                EntitySpec referredToEntitySpec = entitySpecForName(
-                        allEntitySpecsCopyForRefs,
-                        referenceSpec.getEntityName());
-                assert referredToEntitySpec != null :
-                        "refferedToEntitySpec should not be null";
-                if (Collections.containsAny(propIds,
-                        referredToEntitySpec.getPropositionIds())) {
-                    logProcessingRef(logger, referenceSpec, entitySpec);
-
-                    retainEntitySpecsWithInboundRefs(
-                            allEntitySpecsCopyForRefs, entitySpec,
-                            referenceSpec);
-
-                    Set<Filter> refsApplicableFilters =
-                            refsComputeApplicableFilters(filters,
-                            allEntitySpecsCopyForRefs, referredToEntitySpec);
-
-                    retainEntitySpecsWithFiltersOrConstraints(
-                            entitySpec, referredToEntitySpec,
-                            allEntitySpecsCopyForRefs, refsApplicableFilters,
-                            propIds);
-
-                    List<Set<Filter>> refsFilterSets = constructPartitions(
-                            referredToEntitySpec, refsApplicableFilters);
-
-                    for (Set<Filter> filterSet : refsFilterSets) {
-                        generateAndExecuteSelect(entitySpec, referenceSpec,
-                                propIds, filterSet, allEntitySpecsCopyForRefs,
-                                new LinkedHashMap<String, ReferenceSpec>(),
-                                keyIds, order, refResultProcessor, executor,
-                                false);
-                    }
-                    logDoneProcessingRef(logger, referenceSpec,
-                            entitySpec);
-                } else {
-                    logSkippingReference(logger, referenceSpec);
-                }
-
-            }
-            logDoneProcessingEntitySpec(logger, entitySpec);
-        }
-    }
-
-    private List<ReferenceResultSetIterator> processReferencesStreaming(
-            EntitySpec entitySpec,
-            SQLGenResultProcessorFactory<Proposition> factory,
-            String dataSourceBackendId,
-            Collection<EntitySpec> allEntitySpecs, Set<String> propIds,
-            Filter filters, Set<String> keyIds,
-            StreamingSQLExecutor executor)
-            throws DataSourceReadException {
-        List<ReferenceResultSetIterator> itrs =
-                new ArrayList<>();
-        ReferenceSpec[] refSpecs = entitySpec.getReferenceSpecs();
-        if (refSpecs != null) {
-            Logger logger = SQLGenUtil.logger();
-
-            /*
-             * Create a copy of allEntitySpecs with the current entitySpec the
-             * first item of the list. This is to make sure that its joins make
-             * it into the list of column specs.
-             */
-            for (ReferenceSpec referenceSpec : refSpecs) {
-                StreamingRefResultProcessor<Proposition> refResultProcessor =
-                        null;
-                List<EntitySpec> allEntitySpecsCopyForRefs =
-                        copyEntitySpecsForRefs(entitySpec, allEntitySpecs);
-                EntitySpec referredToEntitySpec = entitySpecForName(
-                        allEntitySpecsCopyForRefs,
-                        referenceSpec.getEntityName());
-                assert referredToEntitySpec != null :
-                        "referredToEntitySpec should not be null";
-                refResultProcessor =
-                        factory.getStreamingRefInstance(referenceSpec,
-                        entitySpec, dataSourceBackendId);
-
-                if (Collections.containsAny(propIds,
-                        referredToEntitySpec.getPropositionIds())) {
-                    logProcessingRef(logger, referenceSpec, entitySpec);
-
-                    retainEntitySpecsWithInboundRefs(
-                            allEntitySpecsCopyForRefs, entitySpec,
-                            referenceSpec);
-
-                    Set<Filter> refsApplicableFilters =
-                            refsComputeApplicableFilters(filters,
-                            allEntitySpecsCopyForRefs, referredToEntitySpec);
-
-                    retainEntitySpecsWithFiltersOrConstraints(
-                            entitySpec, referredToEntitySpec,
-                            allEntitySpecsCopyForRefs, refsApplicableFilters,
-                            propIds);
-
-                    List<Set<Filter>> refsFilterSets = constructPartitions(
-                            referredToEntitySpec, refsApplicableFilters);
-
-                    for (Set<Filter> filterSet : refsFilterSets) {
-                        generateAndExecuteSelectStreaming(entitySpec,
-                                referenceSpec,
-                                propIds, filterSet,
-                                allEntitySpecsCopyForRefs,
-                                new LinkedHashMap<String, ReferenceSpec>(),
-                                keyIds, SQLOrderBy.ASCENDING,
-                                refResultProcessor, executor, true);
-                        itrs.add(refResultProcessor.getResult());
-                    }
-                    logDoneProcessingRef(logger, referenceSpec,
-                            entitySpec);
-                } else {
-                    logSkippingReference(logger, referenceSpec);
-                }
-
-            }
-            logDoneProcessingEntitySpec(logger, entitySpec);
-        }
-        return itrs;
     }
 
     private static List<EntitySpec> computeApplicableEntitySpecs(
@@ -696,17 +282,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         assert !result.isEmpty() :
                 "allEntitySpecsCopy should have at least one element";
         return result;
-    }
-
-    private Set<Filter> refsComputeApplicableFilters(Filter filters,
-            List<EntitySpec> allEntitySpecsCopyForRefs,
-            EntitySpec referredToEntitySpec) {
-        Set<Filter> refFiltersCopy = copyFilters(filters);
-        removeNonApplicableFilters(
-                allEntitySpecsCopyForRefs, refFiltersCopy,
-                referredToEntitySpec);
-        removeStagedFilters(referredToEntitySpec, refFiltersCopy);
-        return refFiltersCopy;
     }
 
     private Set<Filter> computeApplicableFilters(Filter filters,
@@ -772,18 +347,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         return filterList;
     }
 
-    private List<EntitySpec> copyEntitySpecsForRefs(EntitySpec entitySpec,
-            Collection<EntitySpec> allEntitySpecs) {
-        List<EntitySpec> allEntitySpecsCopyForRefs = new LinkedList<>();
-        allEntitySpecsCopyForRefs.add(entitySpec);
-        for (EntitySpec es : allEntitySpecs) {
-            if (es != entitySpec) {
-                allEntitySpecsCopyForRefs.add(es);
-            }
-        }
-        return allEntitySpecsCopyForRefs;
-    }
-
     private DataStager doStage(Collection<EntitySpec> allEntitySpecs,
             Filter filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order) throws DataSourceReadException {
@@ -803,18 +366,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         return stager;
     }
 
-    private EntitySpec entitySpecForName(Collection<EntitySpec> entitySpecs,
-            String entitySpecName) {
-        EntitySpec referredToEntitySpec = null;
-        for (EntitySpec reffedToSpec : entitySpecs) {
-            if (entitySpecName.equals(reffedToSpec.getName())) {
-                referredToEntitySpec = reffedToSpec;
-                break;
-            }
-        }
-        return referredToEntitySpec;
-    }
-
     private static SQLGenResultProcessorFactory<Proposition> getResultProcessorFactory(
             Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecToResultProcessor,
             EntitySpec entitySpec) {
@@ -825,33 +376,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 allEntitySpecToResultProcessor.get(entitySpec);
         assert factory != null : "factory should never be null";
         return factory;
-    }
-
-    private void logSkippingReference(Logger logger, ReferenceSpec referenceSpec) {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE, "Skipping reference {0}",
-                    referenceSpec.getReferenceName());
-        }
-    }
-
-    private void logSkippingRefs(Logger logger, EntitySpec entitySpec) {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(
-                    Level.FINE,
-                    "Skipping reference queries for entity spec {0} because the query for {0} returned no data",
-                    entitySpec.getName());
-        }
-    }
-
-    private ResultCache<Proposition> newResultCache() throws DataSourceReadException {
-        ResultCache<Proposition> results;
-        try {
-            results = new ResultCache<>();
-        } catch (IOException ex) {
-            throw new DataSourceReadException(
-                    "Could not create the cache", ex);
-        }
-        return results;
     }
 
     /**
@@ -920,36 +444,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 && this.stagedTableSpecs.length > 0;
     }
 
-    private static void retainEntitySpecsWithFiltersOrConstraints(
-            EntitySpec entitySpec, EntitySpec referredToEntitySpec,
-            Collection<EntitySpec> allEntitySpecsCopyForRefs,
-            Collection<Filter> refFiltersCopy, Set<String> propIds) {
-        for (Iterator<EntitySpec> itr = allEntitySpecsCopyForRefs.iterator(); itr.hasNext();) {
-            EntitySpec es = itr.next();
-            if (es != entitySpec && es != referredToEntitySpec) {
-                Set<String> esPropIds = Arrays.asSet(es.getPropositionIds());
-                ColumnSpec codeSpec = es.getCodeSpec();
-                if (codeSpec != null) {
-                    List<ColumnSpec> codeSpecL = codeSpec.asList();
-                    ColumnSpec last = codeSpecL.get(codeSpecL.size() - 1);
-                    if (last.getConstraint() != null
-                            && (last.getConstraint() != Operator.EQUAL_TO
-                            || !last.isPropositionIdsComplete() || needsPropIdInClause(
-                            propIds, es.getPropositionIds()))) {
-                        return;
-                    }
-                }
-                for (Filter filter : refFiltersCopy) {
-                    if (Collections.containsAny(esPropIds,
-                            filter.getPropositionIds())) {
-                        return;
-                    }
-                }
-                itr.remove();
-            }
-        }
-    }
-
     private void logDoneProcessing(Logger logger, EntitySpec entitySpec) {
         if (logger.isLoggable(Level.FINE)) {
             logger.log(Level.FINE,
@@ -957,41 +451,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     + "have been processed",
                     new Object[]{entitySpec.getName(),
                         backendNameForMessages()});
-        }
-    }
-
-    private void logDoneProcessingEntitySpec(Logger logger,
-            EntitySpec entitySpec) {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(
-                    Level.FINE,
-                    "Data source backend {0} is done processing entity spec {1}",
-                    new Object[]{backendNameForMessages(),
-                        entitySpec.getName()});
-        }
-    }
-
-    private void logDoneProcessingRef(Logger logger,
-            ReferenceSpec referenceSpec, EntitySpec entitySpec) {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(
-                    Level.FINE,
-                    "Data source backend {0} is done processing reference {1} for entity spec {2}",
-                    new Object[]{backendNameForMessages(),
-                        referenceSpec.getReferenceName(),
-                        entitySpec.getName()});
-        }
-    }
-
-    private void logProcessingRef(Logger logger, ReferenceSpec referenceSpec,
-            EntitySpec entitySpec) {
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(
-                    Level.FINE,
-                    "Data source backend {0} is processing reference {1} for entity spec {2}",
-                    new Object[]{backendNameForMessages(),
-                        referenceSpec.getReferenceName(),
-                        entitySpec.getName()});
         }
     }
 
@@ -1015,19 +474,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             }
             logger.log(Level.FINER, "Applicable entity specs are {0}",
                     StringUtils.join(allEntitySpecsCopyNames, ", "));
-        }
-    }
-
-    private static void retainEntitySpecsWithInboundRefs(
-            Collection<EntitySpec> entitySpecs, EntitySpec entitySpec,
-            ReferenceSpec referenceSpec) {
-        for (Iterator<EntitySpec> itr = entitySpecs.iterator(); itr.hasNext();) {
-            EntitySpec es = itr.next();
-            if (es != entitySpec
-                    && !referenceSpec.getEntityName().equals(es.getName())
-                    && !es.hasReferenceTo(entitySpec)) {
-                itr.remove();
-            }
         }
     }
 
@@ -1137,40 +583,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             ReferenceSpec> inboundRefSpecs, Set<String> keyIds,
             SQLOrderBy order, StreamingResultProcessor<P> resultProcessor,
             StreamingSQLExecutor executor,
-            boolean wrapKeyId) throws DataSourceReadException {
-        Logger logger = SQLGenUtil.logger();
-        String backendNameForMessages = backendNameForMessages();
-        String entitySpecName = entitySpec.getName();
-
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(Level.FINE,
-                    "Data source backend {0} is generating query for {1}",
-                    new Object[]{backendNameForMessages, entitySpecName});
-        }
-
-        String query = getSelectStatement(entitySpec, referenceSpec,
-                entitySpecsCopy, inboundRefSpecs, filtersCopy, propIds,
-                keyIds, order,
-                resultProcessor, this.stagedTableSpecs, wrapKeyId).generateStatement();
-
-        if (logger.isLoggable(Level.FINE)) {
-            logger.log(
-                    Level.FINE,
-                    "Data source backend {0} generated the following query for {1}: {2}",
-                    new Object[]{backendNameForMessages, entitySpecName,
-                        query});
-        }
-        executor.executeSelect(entitySpecName, query, resultProcessor);
-    }
-
-    private <P extends Proposition> void generateAndExecuteSelect(
-            EntitySpec entitySpec, ReferenceSpec referenceSpec,
-            Set<String> propIds, Set<Filter> filtersCopy,
-            List<EntitySpec> entitySpecsCopy, LinkedHashMap<String,
-            ReferenceSpec> inboundRefSpecs,
-            Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            org.protempa.backend.dsb.relationaldb.SQLExecutor executor,
             boolean wrapKeyId) throws DataSourceReadException {
         Logger logger = SQLGenUtil.logger();
         String backendNameForMessages = backendNameForMessages();

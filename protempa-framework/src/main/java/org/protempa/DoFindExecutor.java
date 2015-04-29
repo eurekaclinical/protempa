@@ -41,12 +41,6 @@ class DoFindExecutor extends ExecutorWithResultsHandler {
             final DerivationsBuilder derivationsBuilder,
             final ExecutionStrategy strategy)
             throws ProtempaException {
-                // List<String> termPropIds =
-        // getPropIdsFromTerms(explodeTerms(termIds));
-        // List<String> allPropIds = new ArrayList<String>();
-        // allPropIds.addAll(propIds);
-        // allPropIds.addAll(termPropIds);
-
         new DataStreamingEventProcessor(newDataIterator()) {
             @Override
             void doProcess(DataStreamingEvent next,
@@ -59,5 +53,7 @@ class DoFindExecutor extends ExecutorWithResultsHandler {
                 processResults(resultsItr, keyId);
             }
         }.process();
+
     }
+    
 }

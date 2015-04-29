@@ -73,4 +73,9 @@ class PropositionDataStreamerProcessor
         assert this.handler != null : "handler cannot be null";
         this.handler.handle(keyId, data);
     }
+    
+    public void close() {
+        
+    }
+    
 }

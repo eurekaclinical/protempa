@@ -21,18 +21,23 @@ package org.protempa;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.protempa.proposition.Proposition;
 
 /**
  * Provides the same functionality as {@link DataStreamer} except as an
  * iterator. While {@link DataStreamer} implements pushing data from a data
- * source to the caller, this iterator supports pulling data from the data 
+ * source to the caller, this iterator supports pulling data from the data
  * source.
+ *
  * @author Andrew Post
  */
-final class DataStreamerIterator<E extends Proposition> {
+final class DataStreamerIterator<E extends Proposition> implements AutoCloseable {
 
     private final List<DataStreamingEventIterator<E>> itrs;
     private final List<DataStreamingEvent<E>> currentElt;
@@ -42,6 +47,8 @@ final class DataStreamerIterator<E extends Proposition> {
     private int i = 0;
     private DataStreamingEvent<E> currentMin;
     private String nextKeyId;
+    private final BlockingQueue<Integer> queue = new SynchronousQueue<>();
+    private final ConsumerThread[] getterThreads;
 
     /**
      * Constructs an iterator with a list of iterators containing data from the
@@ -51,7 +58,7 @@ final class DataStreamerIterator<E extends Proposition> {
      * @throws SQLException if an error occurred querying the underlying
      * database during iteration.
      */
-    DataStreamerIterator(List<DataStreamingEventIterator<E>> itrs) 
+    DataStreamerIterator(List<DataStreamingEventIterator<E>> itrs)
             throws DataSourceReadException {
         assert itrs != null : "itrs cannot be null";
         this.itrs = itrs;
@@ -83,10 +90,75 @@ final class DataStreamerIterator<E extends Proposition> {
                 break;
             }
         }
+        this.getterThreads = new DataStreamerIterator.ConsumerThread[4];
+        for (int k = 0; k < this.getterThreads.length; k++) {
+            this.getterThreads[k] = new ConsumerThread(k);
+            this.getterThreads[k].start();
+        }
     }
 
     String getNextKeyId() {
         return this.nextKeyId;
+    }
+
+    @Override
+    public void close() {
+        for (int k = 0; k < this.getterThreads.length; k++) {
+            this.getterThreads[k].requestDone();
+            try {
+                this.getterThreads[k].join();
+            } catch (InterruptedException ex) {
+                ProtempaUtil.logger().log(Level.FINER, "Interrupted thread {0}", this.getterThreads[k].getName());
+            }
+        }
+    }
+
+    private final class ConsumerThread extends Thread {
+
+        private volatile boolean done;
+        private final List<DataSourceReadException> exceptions;
+
+        ConsumerThread(int k) {
+            super("DataStreamerIterator GetterThread " + k);
+            this.done = false;
+            this.exceptions = new ArrayList<>();
+        }
+
+        @Override
+        public void run() {
+            try {
+                synchronized (this) {
+                    while (!this.done) {
+                        Integer index;
+                        do {
+                            while ((index = queue.poll(500, TimeUnit.MILLISECONDS)) != null && index > -1) {
+                                advance(index);
+                            }
+                        } while (!done && index == null);
+                        wait();
+                    }
+                }
+            } catch (InterruptedException ex) {
+                ProtempaUtil.logger().log(Level.FINER, "Interrupted thread {0}", getName());
+            } catch (DataSourceReadException ex) {
+                this.exceptions.add(ex);
+            }
+        }
+
+        void requestDone() {
+            this.done = true;
+        }
+
+        void joinPatient() {
+            synchronized (this) {
+                notify();
+            }
+        }
+
+        List<DataSourceReadException> getExceptions() {
+            return exceptions;
+        }
+        
     }
 
     /**
@@ -94,9 +166,7 @@ final class DataStreamerIterator<E extends Proposition> {
      * whether the the next item in at least one iterator is for the right
      * keyId.
      *
-     * @return
-     * <code>true</code> or
-     * <code>false</code>.
+     * @return <code>true</code> or <code>false</code>.
      */
     boolean hasNext() throws DataSourceReadException {
         if (!hasNextComputed) {
@@ -126,19 +196,46 @@ final class DataStreamerIterator<E extends Proposition> {
                  */
                 if (currentMin == null) {
                     this.hasNext = false;
+                    try {
+                        for (int k = 0; k < this.getterThreads.length; k++) {
+                            getterThreads[k].requestDone();
+                        }
+                        for (int k = 0; k < this.getterThreads.length; k++) {
+                            this.getterThreads[k].joinPatient();
+                        }
+                        for (int k = 0; k < this.getterThreads.length; k++) {
+                            getterThreads[k].join();
+                        }
+                    } catch (InterruptedException ex) {
+                        ProtempaUtil.logger().log(Level.FINER, "Interrupted thread");
+                    }
                 } else {
                     int n = this.currentElt.size();
                     for (; i < n; i++) {
                         DataStreamingEvent<E> elt = this.currentElt.get(i);
                         if (elt != null && elt.getKeyId().equals(
-                                this.currentMin != null 
-                                ? this.currentMin.getKeyId() : null)) {
+                                this.currentMin != null
+                                        ? this.currentMin.getKeyId() : null)) {
                             this.result = elt;
                             this.nextKeyId = elt.getKeyId();
-                            advance(i);
+                            try {
+                                queue.put(i);
+                            } catch (InterruptedException ex) {
+                                ProtempaUtil.logger().log(Level.FINER, "Interrupted putting on queue");
+                            }
                             i++;
                             break;
                         }
+                    }
+                    try {
+                        for (int k = 0; k < this.getterThreads.length; k++) {
+                            queue.put(-1);
+                        }
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(DataStreamerIterator.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    for (int k = 0; k < getterThreads.length; k++) {
+                        getterThreads[k].joinPatient();
                     }
                     if (this.i == n && this.result == null) {
                         this.i = 0;
@@ -148,6 +245,14 @@ final class DataStreamerIterator<E extends Proposition> {
             } while (this.hasNext && stayInLoop);
             this.hasNextComputed = true;
         }
+        
+        for (int k = 0; k < this.getterThreads.length; k++) {
+            List<DataSourceReadException> exceptions = this.getterThreads[k].getExceptions();
+            if (!exceptions.isEmpty()) {
+                throw exceptions.get(0);
+            }
+        }
+        
         return hasNext;
     }
 
@@ -160,7 +265,7 @@ final class DataStreamerIterator<E extends Proposition> {
         return r;
     }
 
-    private void advance(int j) 
+    private void advance(int j)
             throws DataSourceReadException {
         DataStreamingEventIterator<E> itr = this.itrs.get(j);
         if (itr.hasNext()) {

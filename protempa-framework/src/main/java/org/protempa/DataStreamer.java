@@ -31,7 +31,7 @@ import java.util.*;
  *
  * @author Andrew Post
  */
-final class DataStreamer<E> {
+final class DataStreamer<E> implements AutoCloseable {
 
     private DataStreamerIterator itr;
 
@@ -71,6 +71,13 @@ final class DataStreamer<E> {
 
         if (!stopOnNext) {
             processor.finish();
+        }
+    }
+
+    @Override
+    public void close() {
+        if (this.itr != null) {
+            this.itr.close();
         }
     }
 }

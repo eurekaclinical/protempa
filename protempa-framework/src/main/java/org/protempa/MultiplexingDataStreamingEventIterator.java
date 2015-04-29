@@ -143,6 +143,10 @@ public class MultiplexingDataStreamingEventIterator
     public void close() throws DataSourceReadException {
         List<DataSourceReadException> exceptions =
                 new ArrayList<>();
+        if (this.itr != null) {
+            this.itr.close();
+        }
+        this.processor.close();
         for (DataStreamingEventIterator<Proposition> it : this.itrs) {
             try {
                 it.close();
