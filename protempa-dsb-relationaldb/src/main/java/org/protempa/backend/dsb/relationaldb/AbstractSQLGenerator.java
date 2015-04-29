@@ -80,7 +80,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     @Override
     public void initialize(
             ConnectionSpec connectionSpec, RelationalDatabaseSpec relationalDatabaseSpec, RelationalDbDataSourceBackend backend) {
-        
+
         if (relationalDatabaseSpec != null) {
             this.primitiveParameterEntitySpecs = relationalDatabaseSpec.getPrimitiveParameterSpecs();
             populatePropositionMap(this.primitiveParameterSpecs,
@@ -100,7 +100,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         this.backend = backend;
     }
-    
+
     public boolean getStreamingMode() {
         return true;
     }
@@ -134,80 +134,65 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             return false;
         }
     }
-    
+
     @Override
     public DataStreamingEventIterator<Proposition> readPropositionsStreaming(
             final Set<String> keyIds, final Set<String> propIds, final Filter filters)
             throws DataSourceReadException {
-        final Map<EntitySpec, List<String>> entitySpecToPropIds =
-                entitySpecToPropIds(propIds);
+        final Map<EntitySpec, List<String>> entitySpecToPropIds
+                = entitySpecToPropIds(propIds);
         final Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecToResultProcessor = allEntitySpecToResultProcessor();
-        final Collection<EntitySpec> allEntitySpecs =
-                allEntitySpecToResultProcessor.keySet();
+        final Collection<EntitySpec> allEntitySpecs
+                = allEntitySpecToResultProcessor.keySet();
         DataStager stager = null;
         if (stagingApplies()) {
             stager = doStage(allEntitySpecs, filters, propIds, keyIds, null);
         }
-        
-        boolean transaction = true;
-            Connection connection = null;
-        if (this.connectionSpec != null) {
-            try {
-                connection = this.connectionSpec.getOrCreate();
-                try {
-                    connection.setAutoCommit(!transaction);
-                } catch (SQLException ex) {
-                    try {
-                        connection.close();
-                    } catch (SQLException ignore) {
-                    }
-                    throw new DataSourceReadException(
-                            "Error setting auto commit", ex);
-                }
-            } catch (SQLException ex) {
-                throw new DataSourceReadException(
-                        "Error getting a database connection", ex);
-            }
-        }
-        final List<StreamingIteratorPair> itrs =
-                new ArrayList<>();
-            final StreamingSQLExecutor streamingExecutor = new StreamingSQLExecutor(
-                connection, backendNameForMessages(),
-                this.backend.getQueryTimeout());
+
+        final List<StreamingIteratorPair> itrs
+                = new ArrayList<>();
+        List<Connection> connections = new ArrayList<>();
         for (EntitySpec entitySpec : entitySpecToPropIds.keySet()) {
+            Connection conn;
+            try {
+                conn = this.connectionSpec.getOrCreate();
+            } catch (SQLException ex) {
+                throw new DataSourceReadException(ex);
+            }
+            connections.add(conn);
             itrs.addAll(processEntitySpecStreaming(entitySpec,
                     allEntitySpecToResultProcessor,
                     allEntitySpecs, filters,
                     propIds,
-                    keyIds, streamingExecutor));
+                    keyIds, new StreamingSQLExecutor(
+                conn, backendNameForMessages(),
+                this.backend.getQueryTimeout())));
         }
-        
-        List<DataStreamingEventIterator<Proposition>> events =
-                new ArrayList<>(
-                itrs.size());
-        List<DataStreamingEventIterator<UniqueIdPair>> refs =
-                new ArrayList<>();
+
+        List<DataStreamingEventIterator<Proposition>> events
+                = new ArrayList<>(
+                        itrs.size());
+        List<DataStreamingEventIterator<UniqueIdPair>> refs
+                = new ArrayList<>();
         for (StreamingIteratorPair pair : itrs) {
             events.add(pair.getProps());
             refs.addAll(pair.getRefs());
         }
-        RelationalDbDataReadIterator streamingResults =
-                new RelationalDbDataReadIterator(refs, events, connection,
-                transaction, stagingApplies() ? stager : null);
+        RelationalDbDataReadIterator streamingResults
+                = new RelationalDbDataReadIterator(refs, events, connections,
+                        stagingApplies() ? stager : null);
 
         return streamingResults;
-    
+
     }
 
     private class StreamingIteratorPair {
 
         private final DataStreamingEventIterator<Proposition> props;
-        private final List<? extends DataStreamingEventIterator<UniqueIdPair>>
-        refs;
+        private final List<? extends DataStreamingEventIterator<UniqueIdPair>> refs;
 
         StreamingIteratorPair(DataStreamingEventIterator<Proposition> props,
-                List<? extends DataStreamingEventIterator<UniqueIdPair>>
-                        refs) {
+                List<? extends DataStreamingEventIterator<UniqueIdPair>> refs) {
             this.props = props;
             this.refs = refs;
         }
@@ -216,8 +201,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             return props;
         }
 
-        public List<? extends DataStreamingEventIterator<UniqueIdPair>> getRefs
-                () {
+        public List<? extends DataStreamingEventIterator<UniqueIdPair>> getRefs() {
             return refs;
         }
     }
@@ -232,12 +216,12 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         Logger logger = SQLGenUtil.logger();
         logProcessingEntitySpec(logger, entitySpec);
 
-        SQLGenResultProcessorFactory<Proposition> factory =
-                getResultProcessorFactory(allEntitySpecToResultProcessor,
-                entitySpec);
+        SQLGenResultProcessorFactory<Proposition> factory
+                = getResultProcessorFactory(allEntitySpecToResultProcessor,
+                        entitySpec);
 
-        List<EntitySpec> applicableEntitySpecs =
-                computeApplicableEntitySpecs(allEntitySpecs, entitySpec);
+        List<EntitySpec> applicableEntitySpecs
+                = computeApplicableEntitySpecs(allEntitySpecs, entitySpec);
 
         Set<Filter> applicableFilters = computeApplicableFilters(filters,
                 allEntitySpecs, entitySpec);
@@ -245,15 +229,13 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         List<Set<Filter>> partitions = constructPartitions(entitySpec,
                 applicableFilters);
 
-        LinkedHashMap<String, ReferenceSpec> inboundRefSpecs =
-                collectInboundRefSpecs
-                (applicableEntitySpecs, entitySpec, propIds);
-        Map<String, ReferenceSpec> bidirRefSpecs = collectBidirectionalReferences
-                (applicableEntitySpecs, entitySpec, propIds);
+        LinkedHashMap<String, ReferenceSpec> inboundRefSpecs
+                = collectInboundRefSpecs(applicableEntitySpecs, entitySpec, propIds);
+        Map<String, ReferenceSpec> bidirRefSpecs = collectBidirectionalReferences(applicableEntitySpecs, entitySpec, propIds);
 
         String dataSourceBackendId = this.backend.getDataSourceBackendId();
-        StreamingMainResultProcessor<Proposition> resultProcessor =
-                factory.getStreamingInstance(dataSourceBackendId, entitySpec,
+        StreamingMainResultProcessor<Proposition> resultProcessor
+                = factory.getStreamingInstance(dataSourceBackendId, entitySpec,
                         inboundRefSpecs, bidirRefSpecs);
 
         for (Set<Filter> filterSet : partitions) {
@@ -261,10 +243,10 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     applicableEntitySpecs, inboundRefSpecs, keyIds,
                     SQLOrderBy.ASCENDING,
                     resultProcessor, executor, true);
-            DataStreamingEventIterator<Proposition> results =
-                    resultProcessor.getResults();
-            List<DataStreamingEventIterator<UniqueIdPair>> refResults =
-                    java.util.Collections.singletonList(resultProcessor
+            DataStreamingEventIterator<Proposition> results
+                    = resultProcessor.getResults();
+            List<DataStreamingEventIterator<UniqueIdPair>> refResults
+                    = java.util.Collections.singletonList(resultProcessor
                             .getInboundReferenceResults());
             result.add(new StreamingIteratorPair(results, refResults));
         }
@@ -316,7 +298,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 || positionFilter.getStart() == null
                 || positionFilter.getFinish() == null
                 || !positionFilter.getStartSide().equals(
-                positionFilter.getFinishSide())) {
+                        positionFilter.getFinishSide())) {
             filterList.add(filtersCopy);
         } else {
             Long start = positionFilter.getStart();
@@ -372,8 +354,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         // we know that the map contains only factory instances that are
         // parameterized by implementations of Proposition
         @SuppressWarnings("unchecked")
-        SQLGenResultProcessorFactory<Proposition> factory =
-                allEntitySpecToResultProcessor.get(entitySpec);
+        SQLGenResultProcessorFactory<Proposition> factory
+                = allEntitySpecToResultProcessor.get(entitySpec);
         assert factory != null : "factory should never be null";
         return factory;
     }
@@ -419,8 +401,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                                     PositionFilter pf = (PositionFilter) f;
                                     Long start = pf.getStart();
                                     if (start != null) {
-                                        long addToPosition =
-                                                partitionBy.addToPosition(start, 1);
+                                        long addToPosition
+                                                = partitionBy.addToPosition(start, 1);
                                         Long finish = pf.getFinish();
                                         if (finish != null) {
                                             if (addToPosition < finish) {
@@ -477,19 +459,18 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
     }
 
-    private static LinkedHashMap<String, ReferenceSpec> collectInboundRefSpecs
-            (Collection<EntitySpec> entitySpecs, EntitySpec rhsEntitySpec,
+    private static LinkedHashMap<String, ReferenceSpec> collectInboundRefSpecs(Collection<EntitySpec> entitySpecs, EntitySpec rhsEntitySpec,
             Set<String> propIds) {
         LinkedHashMap<String, ReferenceSpec> result = new LinkedHashMap<>();
 
         for (EntitySpec lhsReferenceSpec : entitySpecs) {
-            if (lhsReferenceSpec.hasReferenceTo(rhsEntitySpec) && 
-                    Collections.containsAny(propIds, lhsReferenceSpec.getPropositionIds())) {
+            if (lhsReferenceSpec.hasReferenceTo(rhsEntitySpec)
+                    && Collections.containsAny(propIds, lhsReferenceSpec.getPropositionIds())) {
                 boolean isMany = false;
                 if (rhsEntitySpec.hasReferenceTo(lhsReferenceSpec)) {
                     for (ReferenceSpec rhsToLhsReferenceSpec : rhsEntitySpec.getReferenceSpecs()) {
-                        if (rhsToLhsReferenceSpec.getEntityName().equals(lhsReferenceSpec.getName()) &&
-                        rhsToLhsReferenceSpec.getType() == ReferenceSpec.Type.MANY) {
+                        if (rhsToLhsReferenceSpec.getEntityName().equals(lhsReferenceSpec.getName())
+                                && rhsToLhsReferenceSpec.getType() == ReferenceSpec.Type.MANY) {
                             isMany = true;
                             break;
                         }
@@ -508,20 +489,19 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         return result;
     }
 
-    private static Map<String, ReferenceSpec> collectBidirectionalReferences
-            (Collection<EntitySpec> entitySpecs, EntitySpec lhsEntitySpec,
+    private static Map<String, ReferenceSpec> collectBidirectionalReferences(Collection<EntitySpec> entitySpecs, EntitySpec lhsEntitySpec,
             Set<String> propIds) {
         Map<String, ReferenceSpec> result = new HashMap<>();
 
         for (ReferenceSpec lhsToRhsReferenceSpec : lhsEntitySpec.getReferenceSpecs()) {
             for (EntitySpec rhsEntitySpec : entitySpecs) {
-                if (rhsEntitySpec.getName().equals(lhsToRhsReferenceSpec.getEntityName()) 
+                if (rhsEntitySpec.getName().equals(lhsToRhsReferenceSpec.getEntityName())
                         && Collections.containsAny(propIds, rhsEntitySpec.getPropositionIds())) {
                     if (rhsEntitySpec.hasReferenceTo(lhsEntitySpec)) {
                         for (ReferenceSpec rhsToLhsReferenceSpec : rhsEntitySpec.getReferenceSpecs()) {
                             if (rhsToLhsReferenceSpec.getEntityName().equals(lhsEntitySpec
-                                    .getName()) && rhsToLhsReferenceSpec.getType() ==
-                                    ReferenceSpec.Type.MANY) {
+                                    .getName()) && rhsToLhsReferenceSpec.getType()
+                                    == ReferenceSpec.Type.MANY) {
                                 result.put(rhsEntitySpec.getName(), lhsToRhsReferenceSpec);
                             }
                         }
@@ -579,8 +559,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private <P extends Proposition> void generateAndExecuteSelectStreaming(
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
             Set<String> propIds, Set<Filter> filtersCopy,
-            List<EntitySpec> entitySpecsCopy, LinkedHashMap<String,
-            ReferenceSpec> inboundRefSpecs, Set<String> keyIds,
+            List<EntitySpec> entitySpecsCopy, LinkedHashMap<String, ReferenceSpec> inboundRefSpecs, Set<String> keyIds,
             SQLOrderBy order, StreamingResultProcessor<P> resultProcessor,
             StreamingSQLExecutor executor,
             boolean wrapKeyId) throws DataSourceReadException {
@@ -666,8 +645,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     protected abstract SelectStatement getSelectStatement(
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
-            List<EntitySpec> entitySpecs, Map<String,
-            ReferenceSpec> inboundRefSpecs, Set<Filter> filters,
+            List<EntitySpec> entitySpecs, Map<String, ReferenceSpec> inboundRefSpecs, Set<Filter> filters,
             Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables,
             boolean wrapKeyId);
@@ -693,10 +671,9 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
      * @param queryPropIds the proposition ids to query.
      * @param entitySpecPropIds the proposition ids corresponding to the current
      * entity spec.
-     * @return
-     * <code>true</code> if the query contains < 85% of the proposition ids that
-     * are known to the data source and if the where clause would contain less
-     * than or equal to 2000 codes.
+     * @return <code>true</code> if the query contains < 85% of the proposition
+     * ids that are known to the data source and if the where clause would
+     * contain less than or equal to 2000 codes.
      */
     static boolean needsPropIdInClause(Set<String> queryPropIds,
             String[] entitySpecPropIds) {
@@ -718,11 +695,11 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     /**
      * Gets a the class name of the driver to load for this SQL generator, or
      * <code>null</code> if the driver is a JDBC 4 driver and does not need to
-     * be loaded explicitly. Returning not-
-     * <code>null</code> will do no harm if a JDBC 4 driver.
+     * be loaded explicitly. Returning not- <code>null</code> will do no harm if
+     * a JDBC 4 driver.
      *
-     * This implementation returns
-     * <code>null</code>. Override it to return a driver's class name.
+     * This implementation returns <code>null</code>. Override it to return a
+     * driver's class name.
      *
      * @return a class name {@link String}.
      */

@@ -37,17 +37,15 @@ import org.protempa.proposition.Proposition;
 public class RelationalDbDataReadIterator
         extends DataSourceBackendMultiplexingDataStreamingEventIterator {
 
-    private Connection connection;
-    private final boolean transaction;
+    private final List<Connection> connections;
     private final DataStager stager;
 
     RelationalDbDataReadIterator(
             List<? extends DataStreamingEventIterator<UniqueIdPair>> refs,
             List<? extends DataStreamingEventIterator<Proposition>> itrs,
-            Connection connection, boolean transaction, DataStager stager) {
+            List<Connection> connections, DataStager stager) {
         super(itrs, refs);
-        this.connection = connection;
-        this.transaction = transaction;
+        this.connections = connections;
         this.stager = stager;
     }
 
@@ -55,25 +53,25 @@ public class RelationalDbDataReadIterator
     public void close() throws DataSourceReadException {
         try {
             super.close();
-            if (this.connection != null) {
-                if (transaction) {
-                    this.connection.commit();
-                }
-
-                if (this.stager != null) {
-                    cleanupStagingArea(this.stager);
-                }
-
-                this.connection.close();
-                this.connection = null;
-            }
-        } catch (SQLException sqle) {
-            throw new DataSourceReadException("Error retrieving data", sqle);
         } finally {
-            if (this.connection != null) {
+            for (Connection connection : this.connections) {
                 try {
-                    this.connection.close();
-                } catch (SQLException ignore) {
+
+                    if (this.stager != null) {
+                        cleanupStagingArea(this.stager);
+                    }
+
+                    connection.close();
+                    connection = null;
+                } catch (SQLException sqle) {
+                    throw new DataSourceReadException("Error retrieving data", sqle);
+                } finally {
+                    if (connection != null) {
+                        try {
+                            connection.close();
+                        } catch (SQLException ignore) {
+                        }
+                    }
                 }
             }
         }
