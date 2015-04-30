@@ -47,6 +47,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -135,6 +141,48 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
     }
 
+    private class SQLExecutorCallable implements Callable<List<StreamingIteratorPair>> {
+
+        private final Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecToResultProcessor;
+        private final Collection<EntitySpec> allEntitySpecs;
+        private final Filter filters;
+        private final Set<String> propIds;
+        private final Set<String> keyIds;
+        private final EntitySpec entitySpec;
+
+        public SQLExecutorCallable(EntitySpec entitySpec,
+                Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecToResultProcessor,
+                Collection<EntitySpec> allEntitySpecs,
+                Filter filters,
+                Set<String> propIds,
+                Set<String> keyIds) {
+            this.entitySpec = entitySpec;
+            this.allEntitySpecToResultProcessor = allEntitySpecToResultProcessor;
+            this.allEntitySpecs = allEntitySpecs;
+            this.filters = filters;
+            this.propIds = propIds;
+            this.keyIds = keyIds;
+        }
+
+        @Override
+        public List<StreamingIteratorPair> call() throws Exception {
+            Connection conn;
+            try {
+                conn = connectionSpec.getOrCreate();
+            } catch (SQLException ex) {
+                throw new DataSourceReadException(ex);
+            }
+            return processEntitySpecStreaming(this.entitySpec,
+                    allEntitySpecToResultProcessor,
+                    allEntitySpecs, filters,
+                    propIds,
+                    keyIds, new StreamingSQLExecutor(
+                            conn, backendNameForMessages(),
+                            backend.getQueryTimeout()));
+        }
+
+    }
+
     @Override
     public DataStreamingEventIterator<Proposition> readPropositionsStreaming(
             final Set<String> keyIds, final Set<String> propIds, final Filter filters)
@@ -149,25 +197,24 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             stager = doStage(allEntitySpecs, filters, propIds, keyIds, null);
         }
 
-        final List<StreamingIteratorPair> itrs
-                = new ArrayList<>();
+        final List<StreamingIteratorPair> itrs = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(4);
+        List<Future<List<StreamingIteratorPair>>> list = new ArrayList<>();
         List<Connection> connections = new ArrayList<>();
         for (EntitySpec entitySpec : entitySpecToPropIds.keySet()) {
-            Connection conn;
+            list.add(executor.submit(new SQLExecutorCallable(entitySpec, allEntitySpecToResultProcessor, allEntitySpecs, filters, propIds, keyIds)));
+        }
+
+        for (Future<List<StreamingIteratorPair>> future : list) {
             try {
-                conn = this.connectionSpec.getOrCreate();
-            } catch (SQLException ex) {
+                itrs.addAll(future.get());
+            } catch (InterruptedException ex) {
+                Logger.getLogger(AbstractSQLGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ExecutionException ex) {
                 throw new DataSourceReadException(ex);
             }
-            connections.add(conn);
-            itrs.addAll(processEntitySpecStreaming(entitySpec,
-                    allEntitySpecToResultProcessor,
-                    allEntitySpecs, filters,
-                    propIds,
-                    keyIds, new StreamingSQLExecutor(
-                conn, backendNameForMessages(),
-                this.backend.getQueryTimeout())));
         }
+        executor.shutdown();
 
         List<DataStreamingEventIterator<Proposition>> events
                 = new ArrayList<>(
@@ -190,11 +237,14 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         private final DataStreamingEventIterator<Proposition> props;
         private final List<? extends DataStreamingEventIterator<UniqueIdPair>> refs;
+        private final Connection connection;
 
         StreamingIteratorPair(DataStreamingEventIterator<Proposition> props,
-                List<? extends DataStreamingEventIterator<UniqueIdPair>> refs) {
+                List<? extends DataStreamingEventIterator<UniqueIdPair>> refs,
+                Connection connection) {
             this.props = props;
             this.refs = refs;
+            this.connection = connection;
         }
 
         public DataStreamingEventIterator<Proposition> getProps() {
@@ -204,6 +254,11 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         public List<? extends DataStreamingEventIterator<UniqueIdPair>> getRefs() {
             return refs;
         }
+
+        public Connection getConnection() {
+            return connection;
+        }
+
     }
 
     private List<StreamingIteratorPair> processEntitySpecStreaming(EntitySpec entitySpec,
@@ -248,7 +303,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             List<DataStreamingEventIterator<UniqueIdPair>> refResults
                     = java.util.Collections.singletonList(resultProcessor
                             .getInboundReferenceResults());
-            result.add(new StreamingIteratorPair(results, refResults));
+            result.add(new StreamingIteratorPair(results, refResults, executor.getConnection()));
         }
 
         logDoneProcessing(logger, entitySpec);

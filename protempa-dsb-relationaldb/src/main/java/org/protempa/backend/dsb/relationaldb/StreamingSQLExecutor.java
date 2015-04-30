@@ -42,6 +42,10 @@ public class StreamingSQLExecutor {
         this.backendNameForMessages = backendNameForMessages;
     }
     
+    Connection getConnection() {
+        return this.connection;
+    }
+    
     void executeSelect(String entitySpecName, String query,
             StreamingResultProcessor<?> resultProcessor)
             throws DataSourceReadException {
