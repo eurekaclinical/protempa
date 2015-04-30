@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.drools.StatefulSession;
 import org.protempa.dest.Destination;
 import org.protempa.query.Query;
@@ -162,7 +163,7 @@ final class AbstractionFinder {
             executor.execute();
         }
     }
-    
+
     Query buildQuery(QueryBuilder queryBuilder) throws QueryBuildException {
         return queryBuilder.build(this.knowledgeSource, this.algorithmSource);
     }
@@ -204,17 +205,20 @@ final class AbstractionFinder {
             if (!algorithmSourceClosed) {
                 try {
                     this.algorithmSource.close();
-                } catch (CloseException ignored) {}
+                } catch (CloseException ignored) {
+                }
             }
             if (!knowledgeSourceClosed) {
                 try {
                     this.knowledgeSource.close();
-                } catch (CloseException ignored) {}
+                } catch (CloseException ignored) {
+                }
             }
             if (!termSourceClosed) {
                 try {
                     this.termSource.close();
-                } catch (CloseException ignored) {}
+                } catch (CloseException ignored) {
+                }
             }
         }
         try {
@@ -259,7 +263,6 @@ final class AbstractionFinder {
 //
 //        return result;
 //    }
-
     void retrieveAndStoreData(Query query, QuerySession qs,
             String persistentStoreEnvironment) throws FinderException {
         assert query != null : "query cannot be null";
@@ -300,7 +303,7 @@ final class AbstractionFinder {
             executor.execute();
         }
     }
-    
+
     boolean isClosed() {
         return this.closed;
     }

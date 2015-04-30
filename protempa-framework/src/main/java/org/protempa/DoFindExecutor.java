@@ -47,9 +47,14 @@ class DoFindExecutor extends ExecutorWithResultsHandler {
                     Set<String> propositionIds)
                     throws FinderException {
                 String keyId = next.getKeyId();
-                Iterator<Proposition> resultsItr = strategy.execute(
+                Iterator<Proposition> resultsItr;
+                if (strategy != null) {
+                    resultsItr = strategy.execute(
                         keyId, propositionIds, next.getData(),
                         null);
+                } else {
+                    resultsItr = next.getData().iterator();
+                }
                 processResults(resultsItr, keyId);
             }
         }.process();

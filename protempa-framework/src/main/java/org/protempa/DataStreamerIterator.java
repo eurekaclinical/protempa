@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -47,7 +48,7 @@ final class DataStreamerIterator<E extends Proposition> implements AutoCloseable
     private int i = 0;
     private DataStreamingEvent<E> currentMin;
     private String nextKeyId;
-    private final BlockingQueue<Integer> queue = new SynchronousQueue<>();
+    private final BlockingQueue<Integer> queue = new LinkedBlockingQueue<>();
     private final ConsumerThread[] getterThreads;
 
     /**
@@ -117,6 +118,10 @@ final class DataStreamerIterator<E extends Proposition> implements AutoCloseable
 
         private volatile boolean done;
         private final List<DataSourceReadException> exceptions;
+        private final Object starterMonitor = new Object();
+        private final Object finisherMonitor = new Object();
+        private volatile boolean patientStarted;
+        private volatile boolean patientFinished;
 
         ConsumerThread(int k) {
             super("DataStreamerIterator GetterThread " + k);
@@ -127,15 +132,23 @@ final class DataStreamerIterator<E extends Proposition> implements AutoCloseable
         @Override
         public void run() {
             try {
-                synchronized (this) {
-                    while (!this.done) {
-                        Integer index;
-                        do {
-                            while ((index = queue.poll(500, TimeUnit.MILLISECONDS)) != null && index > -1) {
-                                advance(index);
-                            }
-                        } while (!done && index == null);
-                        wait();
+                while (!this.done) {
+                    synchronized (this.starterMonitor) {
+                        while (!this.patientStarted) {
+                            this.starterMonitor.wait();
+                        }
+                        this.patientStarted = false;
+                        if (this.done) {
+                            return;
+                        }
+                    }
+                    Integer index;
+                    while ((index = queue.take()) > -1) {
+                        advance(index);
+                    }
+                    synchronized (this.finisherMonitor) {
+                        this.patientFinished = true;
+                        this.finisherMonitor.notify();
                     }
                 }
             } catch (InterruptedException ex) {
@@ -149,16 +162,30 @@ final class DataStreamerIterator<E extends Proposition> implements AutoCloseable
             this.done = true;
         }
 
-        void joinPatient() {
-            synchronized (this) {
-                notify();
+        void startPatient() {
+            synchronized (this.starterMonitor) {
+                this.patientStarted = true;
+                this.starterMonitor.notify();
+            }
+        }
+
+        void finishPatient() {
+            synchronized (this.finisherMonitor) {
+                while (!this.patientFinished) {
+                    try {
+                        this.finisherMonitor.wait();
+                    } catch (InterruptedException ex) {
+                        ProtempaUtil.logger().log(Level.FINER, "Interrupted thread {0}", getName());
+                    }
+                }
+                this.patientFinished = false;
             }
         }
 
         List<DataSourceReadException> getExceptions() {
             return exceptions;
         }
-        
+
     }
 
     /**
@@ -201,7 +228,7 @@ final class DataStreamerIterator<E extends Proposition> implements AutoCloseable
                             getterThreads[k].requestDone();
                         }
                         for (int k = 0; k < this.getterThreads.length; k++) {
-                            this.getterThreads[k].joinPatient();
+                            this.getterThreads[k].startPatient();
                         }
                         for (int k = 0; k < this.getterThreads.length; k++) {
                             getterThreads[k].join();
@@ -210,6 +237,9 @@ final class DataStreamerIterator<E extends Proposition> implements AutoCloseable
                         ProtempaUtil.logger().log(Level.FINER, "Interrupted thread");
                     }
                 } else {
+                    for (int k = 0; k < this.getterThreads.length; k++) {
+                        this.getterThreads[k].startPatient();
+                    }
                     int n = this.currentElt.size();
                     for (; i < n; i++) {
                         DataStreamingEvent<E> elt = this.currentElt.get(i);
@@ -232,10 +262,10 @@ final class DataStreamerIterator<E extends Proposition> implements AutoCloseable
                             queue.put(-1);
                         }
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(DataStreamerIterator.class.getName()).log(Level.SEVERE, null, ex);
+                        ProtempaUtil.logger().log(Level.FINER, "Interrupted putting end object on queue");
                     }
                     for (int k = 0; k < getterThreads.length; k++) {
-                        getterThreads[k].joinPatient();
+                        getterThreads[k].finishPatient();
                     }
                     if (this.i == n && this.result == null) {
                         this.i = 0;
@@ -245,14 +275,14 @@ final class DataStreamerIterator<E extends Proposition> implements AutoCloseable
             } while (this.hasNext && stayInLoop);
             this.hasNextComputed = true;
         }
-        
+
         for (int k = 0; k < this.getterThreads.length; k++) {
             List<DataSourceReadException> exceptions = this.getterThreads[k].getExceptions();
             if (!exceptions.isEmpty()) {
                 throw exceptions.get(0);
             }
         }
-        
+
         return hasNext;
     }
 

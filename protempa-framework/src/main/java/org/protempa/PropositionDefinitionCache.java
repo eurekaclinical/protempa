@@ -38,7 +38,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * 
  * @author Andrew Post
  */
-public final class PropositionDefinitionCache implements Serializable {
+final class PropositionDefinitionCache implements Serializable {
 
     private static final long serialVersionUID = 5988857805118255882L;
 
@@ -195,47 +195,47 @@ public final class PropositionDefinitionCache implements Serializable {
                 && !this.idToPropositionDefinitionMap.containsKey(id);
     }
     
-    public boolean hasPropositionDefinition(String eventId) {
+    boolean hasPropositionDefinition(String eventId) {
         return getPropositionDefinition(eventId) != null;
     }
     
-    public boolean hasTemporalPropositionDefinition(String propId) {
+    boolean hasTemporalPropositionDefinition(String propId) {
         return getTemporalPropositionDefinition(propId) != null;
     }
 
-    public PropositionDefinition getPropositionDefinition(String propId) {
+    PropositionDefinition getPropositionDefinition(String propId) {
         return idToPropositionDefinitionMap.get(propId);
     }
     
-    public TemporalPropositionDefinition getTemporalPropositionDefinition(String propId) {
+    TemporalPropositionDefinition getTemporalPropositionDefinition(String propId) {
         return this.idToTemporalPropositionDefinitionMap.get(propId);
     }
 
-    public boolean hasValueSet(String valueSetId) {
+    boolean hasValueSet(String valueSetId) {
         return getValueSet(valueSetId) != null;
     }
 
-    public ValueSet getValueSet(String valueSetId) {
+    ValueSet getValueSet(String valueSetId) {
         return idtoValueSetMap.get(valueSetId);
     }
 
-    public boolean hasAbstractionDefinition(String paramId) {
+    boolean hasAbstractionDefinition(String paramId) {
         return getAbstractionDefinition(paramId) != null;
     }
     
-    public boolean hasContextDefinition(String contextId) {
+    boolean hasContextDefinition(String contextId) {
         return getContextDefinition(contextId) != null;
     }
 
-    public AbstractionDefinition getAbstractionDefinition(String paramId) {
+    AbstractionDefinition getAbstractionDefinition(String paramId) {
         return idToAbstractionDefinitionMap.get(paramId);
     }
     
-    public ContextDefinition getContextDefinition(String contextId) {
+    ContextDefinition getContextDefinition(String contextId) {
         return idToContextDefinitionMap.get(contextId);
     }
 
-    public void addPropositionDefinition(PropositionDefinition def) throws InvalidPropositionIdException {
+    void addPropositionDefinition(PropositionDefinition def) throws InvalidPropositionIdException {
         assert def != null : "def cannot be null";
         String id = def.getId();
         if (this.idToPropositionDefinitionMap.containsKey(id)) {
@@ -245,7 +245,7 @@ public final class PropositionDefinitionCache implements Serializable {
         }
     }
 
-    public void addAbstractionDefinition(AbstractionDefinition def) throws InvalidPropositionIdException {
+    void addAbstractionDefinition(AbstractionDefinition def) throws InvalidPropositionIdException {
         assert def != null : "def cannot be null";
         String id = def.getId();
         if (this.idToAbstractionDefinitionMap.containsKey(id)) {
@@ -255,7 +255,7 @@ public final class PropositionDefinitionCache implements Serializable {
         }
     }
 
-    public void addValueSet(ValueSet valueSet) throws InvalidValueSetDefinitionException {
+    void addValueSet(ValueSet valueSet) throws InvalidValueSetDefinitionException {
         assert valueSet != null : "valueSet cannot be null";
         String id = valueSet.getId();
         if (this.idtoValueSetMap.containsKey(id)) {
@@ -265,7 +265,7 @@ public final class PropositionDefinitionCache implements Serializable {
         }
     }
     
-    public void addContextDefinition(ContextDefinition def) throws InvalidPropositionIdException {
+    void addContextDefinition(ContextDefinition def) throws InvalidPropositionIdException {
         assert def != null : "def cannot be null";
         String id = def.getId();
         if (this.idToContextDefinitionMap.containsKey(id)) {
@@ -275,7 +275,7 @@ public final class PropositionDefinitionCache implements Serializable {
         }
     }
     
-    public void addTemporalPropositionDefinition(TemporalPropositionDefinition def) throws InvalidPropositionIdException {
+    void addTemporalPropositionDefinition(TemporalPropositionDefinition def) throws InvalidPropositionIdException {
         assert def != null : "def cannot be null";
         String id = def.getId();
         if (this.idToTemporalPropositionDefinitionMap.containsKey(id)) {
