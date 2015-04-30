@@ -209,7 +209,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             try {
                 itrs.addAll(future.get());
             } catch (InterruptedException ex) {
-                Logger.getLogger(AbstractSQLGenerator.class.getName()).log(Level.SEVERE, null, ex);
+                SQLGenUtil.logger().log(Level.FINER, "SQL generation thread interrupted", ex);
             } catch (ExecutionException ex) {
                 throw new DataSourceReadException(ex);
             }
