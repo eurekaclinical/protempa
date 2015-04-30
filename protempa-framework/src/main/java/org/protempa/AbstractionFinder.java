@@ -153,15 +153,35 @@ final class AbstractionFinder {
             throws FinderException {
         assert destination != null : "destination cannot be null";
         ExecutorStrategy strategy;
-        if (workingMemoryCache != null) {
-            strategy = ExecutorStrategy.STATEFUL;
-        } else {
-            strategy = ExecutorStrategy.STATELESS;
+        try {
+            if (!hasSomethingToAbstract(query)) {
+                strategy = null;
+            } else if (workingMemoryCache != null) {
+                strategy = ExecutorStrategy.STATEFUL;
+            } else {
+                strategy = ExecutorStrategy.STATELESS;
+            }
+        } catch (KnowledgeSourceReadException ex) {
+            throw new FinderException("Error interpreting query", ex);
         }
+
         try (Executor executor = new DoFindExecutor(query, destination, qs, strategy, this)) {
             executor.init();
             executor.execute();
         }
+    }
+
+    private boolean hasSomethingToAbstract(Query query) throws KnowledgeSourceReadException {
+        if (!this.knowledgeSource.readAbstractionDefinitions(query.getPropositionIds()).isEmpty()
+                || !this.knowledgeSource.readContextDefinitions(query.getPropositionIds()).isEmpty()) {
+            return true;
+        }
+        for (PropositionDefinition propDef : query.getPropositionDefinitions()) {
+            if (propDef instanceof AbstractionDefinition || propDef instanceof ContextDefinition) {
+                return true;
+            }
+        }
+        return false;
     }
 
     Query buildQuery(QueryBuilder queryBuilder) throws QueryBuildException {
