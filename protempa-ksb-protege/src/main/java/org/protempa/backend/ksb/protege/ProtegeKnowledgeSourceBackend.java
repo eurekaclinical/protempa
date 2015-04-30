@@ -81,9 +81,7 @@ public abstract class ProtegeKnowledgeSourceBackend
         Class<? extends Unit> getUnitClass() {
             return this.unitClass;
         }
-    }
-
-    ;
+    };
 
     protected ProtegeKnowledgeSourceBackend() {
     }
@@ -143,8 +141,8 @@ public abstract class ProtegeKnowledgeSourceBackend
             throws KnowledgeSourceReadException {
         Instance instance = this.cm.getInstance(name);
         if (instance != null) {
-            PropositionConverter converter =
-                    this.instanceConverterFactory.getInstance(instance);
+            PropositionConverter converter
+                    = this.instanceConverterFactory.getInstance(instance);
             assert converter != null :
                     "no converter for proposition definintion " + name;
             return converter.convert(instance, this);
@@ -157,7 +155,10 @@ public abstract class ProtegeKnowledgeSourceBackend
     public List<PropositionDefinition> readPropositionDefinitions(String[] ids) throws KnowledgeSourceReadException {
         List<PropositionDefinition> result = new ArrayList<>();
         for (String id : ids) {
-            result.add(readPropositionDefinition(id));
+            PropositionDefinition pd = readPropositionDefinition(id);
+            if (pd != null) {
+                result.add(pd);
+            }
         }
         return result;
     }
@@ -166,7 +167,10 @@ public abstract class ProtegeKnowledgeSourceBackend
     public List<AbstractionDefinition> readAbstractionDefinitions(String[] ids) throws KnowledgeSourceReadException {
         List<AbstractionDefinition> result = new ArrayList<>();
         for (String id : ids) {
-            result.add(readAbstractionDefinition(id));
+            AbstractionDefinition ad = readAbstractionDefinition(id);
+            if (ad != null) {
+                result.add(ad);
+            }
         }
         return result;
     }
@@ -175,7 +179,10 @@ public abstract class ProtegeKnowledgeSourceBackend
     public List<ContextDefinition> readContextDefinitions(String[] ids) throws KnowledgeSourceReadException {
         List<ContextDefinition> result = new ArrayList<>();
         for (String id : ids) {
-            result.add(readContextDefinition(id));
+            ContextDefinition cd = readContextDefinition(id);
+            if (cd != null) {
+                result.add(cd);
+            }
         }
         return result;
     }
@@ -184,7 +191,10 @@ public abstract class ProtegeKnowledgeSourceBackend
     public List<TemporalPropositionDefinition> readTemporalPropositionDefinitions(String[] ids) throws KnowledgeSourceReadException {
         List<TemporalPropositionDefinition> result = new ArrayList<>();
         for (String id : ids) {
-            result.add(readTemporalPropositionDefinition(id));
+            TemporalPropositionDefinition tpd = readTemporalPropositionDefinition(id);
+            if (tpd != null) {
+                result.add(tpd);
+            }
         }
         return result;
     }
@@ -193,8 +203,8 @@ public abstract class ProtegeKnowledgeSourceBackend
     public AbstractionDefinition readAbstractionDefinition(String name)
             throws KnowledgeSourceReadException {
         Instance instance = this.cm.getInstance(name);
-        AbstractionConverter ac =
-                this.instanceConverterFactory.getAbstractionInstance(instance);
+        AbstractionConverter ac
+                = this.instanceConverterFactory.getAbstractionInstance(instance);
         if (ac == null) {
             return null;
         } else {
@@ -234,8 +244,8 @@ public abstract class ProtegeKnowledgeSourceBackend
             propIdSets.add(subsumpPropIds);
         }
 
-        Set<String> matchingPropIds =
-                org.arp.javautil.collections.Collections.intersection(
+        Set<String> matchingPropIds
+                = org.arp.javautil.collections.Collections.intersection(
                         propIdSets);
         result.addAll(matchingPropIds);
 
@@ -246,7 +256,7 @@ public abstract class ProtegeKnowledgeSourceBackend
      * Returns the Cls from Protege if a matching Cls is found with the given
      * ancestor
      *
-     * @param name       Name of the class to fetch
+     * @param name Name of the class to fetch
      * @param superClass name of the anscestor
      * @return A Cls containing the given class name
      * @throws KnowledgeSourceReadException
@@ -270,8 +280,8 @@ public abstract class ProtegeKnowledgeSourceBackend
     private String[] collectAssociatedInstanceNames(Instance instance, String slotName) throws KnowledgeSourceReadException {
         String[] result;
         if (instance != null) {
-            Collection<Instance> children =
-                    (Collection<Instance>) cm.getOwnSlotValues(instance, slotName);
+            Collection<Instance> children
+                    = (Collection<Instance>) cm.getOwnSlotValues(instance, slotName);
             result = collectInstanceNames(children);
         } else {
             result = StringUtils.EMPTY_STRING_ARRAY;
@@ -282,7 +292,7 @@ public abstract class ProtegeKnowledgeSourceBackend
     private String[] collectInstanceNames(Collection<Instance> instances) {
         String[] result = new String[instances.size()];
         int i = 0;
-        for (Iterator<?> itr = instances.iterator(); itr.hasNext(); ) {
+        for (Iterator<?> itr = instances.iterator(); itr.hasNext();) {
             Instance child = (Instance) itr.next();
             result[i++] = child.getName();
         }
@@ -376,8 +386,8 @@ public abstract class ProtegeKnowledgeSourceBackend
     @Override
     public TemporalPropositionDefinition readTemporalPropositionDefinition(String name) throws KnowledgeSourceReadException {
         Instance instance = this.cm.getInstance(name);
-        TemporalPropositionConverter ac =
-                this.instanceConverterFactory.getTemporalPropositionInstance(instance);
+        TemporalPropositionConverter ac
+                = this.instanceConverterFactory.getTemporalPropositionInstance(instance);
         if (ac == null) {
             return null;
         } else {
@@ -394,7 +404,6 @@ public abstract class ProtegeKnowledgeSourceBackend
     public String[] readSubContextOfs(String propId) throws KnowledgeSourceReadException {
         return ArrayUtils.EMPTY_STRING_ARRAY;
     }
-
 
     @Override
     public Set<String> getKnowledgeSourceSearchResults(String searchKey) throws KnowledgeSourceReadException {
@@ -417,7 +426,7 @@ public abstract class ProtegeKnowledgeSourceBackend
         }
         return result;
     }
-    
+
     @Override
     public Collection<String> collectPropIdDescendantsUsingInverseIsA(String[] propIds) throws KnowledgeSourceReadException {
         ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
@@ -434,7 +443,7 @@ public abstract class ProtegeKnowledgeSourceBackend
         }
         return result;
     }
-    
+
     private Collection<String> collectPropDescendantsInt(boolean inDataSourceOnly, boolean narrower, String[] propIds) throws KnowledgeSourceReadException {
         Slot inverseIsASlot = this.cm.getSlot("inverseIsA");
         Slot abstractedFromSlot = this.cm.getSlot("abstractedFrom");
@@ -468,9 +477,9 @@ public abstract class ProtegeKnowledgeSourceBackend
             for (Object obj : abstractedFroms) {
                 queue.add((Instance) obj);
             }
-            
+
         }
         return result;
     }
-    
+
 }
