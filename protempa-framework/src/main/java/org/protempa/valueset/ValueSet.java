@@ -53,6 +53,7 @@ public final class ValueSet {
     private final OrderedValue lowerBound;
     private final OrderedValue upperBound;
     private final SourceId sourceId;
+    private final boolean ordered;
 
     public ValueSet(String id, String displayName, OrderedValue lowerBound,
             OrderedValue upperBound, SourceId sourceId) {
@@ -71,6 +72,12 @@ public final class ValueSet {
         } else {
             this.sourceId = sourceId;
         }
+        this.ordered = true;
+    }
+    
+    public ValueSet(String id, String displayName,
+            ValueSetElement[] valueSetElements, SourceId sourceId) {
+        this(id, displayName, valueSetElements, false, sourceId);
     }
 
     /**
@@ -81,7 +88,8 @@ public final class ValueSet {
      * {@link ValueSetElement}s are allowed.
      */
     public ValueSet(String id, String displayName,
-            ValueSetElement[] valueSetElements, SourceId sourceId) {
+            ValueSetElement[] valueSetElements, boolean ordered, 
+            SourceId sourceId) {
         if (id == null) {
             throw new IllegalArgumentException("id cannot be null");
         }
@@ -90,6 +98,7 @@ public final class ValueSet {
         this.id = id.intern();
         this.displayName = displayName;
         this.valueSetElements = valueSetElements.clone();
+        this.ordered = ordered;
 
         this.values = new HashMap<>();
         for (ValueSetElement vse : this.valueSetElements) {
@@ -136,7 +145,10 @@ public final class ValueSet {
     }
 
     /**
-     * Gets the elements of this value set, if specified.
+     * Gets the elements of this value set, if specified. If the 
+     * <code>ordered</code> property has value <code>true</code>, then the 
+     * order in which the value set elements are returned is significant. If
+     * <code>false</code>, it is not.
      *
      * @return a {@link ValueSetElement[]}. Guaranteed not null.
      */
@@ -144,6 +156,10 @@ public final class ValueSet {
         return this.valueSetElements;
     }
 
+    public boolean isOrdered() {
+        return ordered;
+    }
+    
     /**
      * Gets the lower bound of this value set, if specified.
      * 

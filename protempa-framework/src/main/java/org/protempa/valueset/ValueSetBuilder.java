@@ -19,7 +19,6 @@ package org.protempa.valueset;
  * limitations under the License.
  * #L%
  */
-
 import java.util.Arrays;
 import java.util.Objects;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -31,16 +30,18 @@ import org.protempa.proposition.value.OrderedValueBuilder;
  * @author Andrew Post
  */
 public class ValueSetBuilder {
+
     private String id;
     private String displayName;
     private ValueSetElementBuilder[] valueSetElementBuilders;
     private OrderedValueBuilder lowerBoundBuilder;
     private OrderedValueBuilder upperBoundBuilder;
     private SourceIdBuilder sourceIdBuilder;
-    
+    private boolean ordered;
+
     public ValueSetBuilder() {
     }
-    
+
     public String getId() {
         return id;
     }
@@ -63,6 +64,14 @@ public class ValueSetBuilder {
 
     public void setValueSetElementBuilders(ValueSetElementBuilder[] valueSetElementBuilders) {
         this.valueSetElementBuilders = valueSetElementBuilders;
+    }
+
+    public boolean isOrdered() {
+        return ordered;
+    }
+
+    public void setOrdered(boolean ordered) {
+        this.ordered = ordered;
     }
 
     public OrderedValueBuilder getLowerBoundBuilder() {
@@ -88,25 +97,25 @@ public class ValueSetBuilder {
     public void setSourceIdBuilder(SourceIdBuilder sourceIdBuilder) {
         this.sourceIdBuilder = sourceIdBuilder;
     }
-    
+
     public ValueSet build() {
         if (this.lowerBoundBuilder != null || this.upperBoundBuilder != null) {
             return new ValueSet(
                     this.id,
                     this.displayName,
-                    this.lowerBoundBuilder != null ? this.lowerBoundBuilder.build() : null, 
-                    this.upperBoundBuilder != null ? this.upperBoundBuilder.build() : null, 
+                    this.lowerBoundBuilder != null ? this.lowerBoundBuilder.build() : null,
+                    this.upperBoundBuilder != null ? this.upperBoundBuilder.build() : null,
                     this.sourceIdBuilder != null ? this.sourceIdBuilder.build() : null);
         } else {
-            ValueSetElement[] vses = 
-                    new ValueSetElement[this.valueSetElementBuilders.length];
+            ValueSetElement[] vses
+                    = new ValueSetElement[this.valueSetElementBuilders.length];
             for (int i = 0; i < vses.length; i++) {
                 vses[i] = this.valueSetElementBuilders[i].build();
             }
             return new ValueSet(
-                    this.id, 
+                    this.id,
                     this.displayName,
-                    vses, 
+                    vses,
                     this.sourceIdBuilder != null ? this.sourceIdBuilder.build() : null);
         }
     }
@@ -120,6 +129,7 @@ public class ValueSetBuilder {
         hash = 79 * hash + Objects.hashCode(this.lowerBoundBuilder);
         hash = 79 * hash + Objects.hashCode(this.upperBoundBuilder);
         hash = 79 * hash + Objects.hashCode(this.sourceIdBuilder);
+        hash = 79 * hash + Objects.hashCode(this.ordered);
         return hash;
     }
 
@@ -138,8 +148,18 @@ public class ValueSetBuilder {
         if (!Objects.equals(this.displayName, other.displayName)) {
             return false;
         }
-        if (!Arrays.deepEquals(this.valueSetElementBuilders, other.valueSetElementBuilders)) {
+        if (this.ordered != other.ordered) {
             return false;
+        }
+        if (this.ordered) {
+            if (!Arrays.deepEquals(this.valueSetElementBuilders, other.valueSetElementBuilders)) {
+                return false;
+            }
+        } else {
+            if (!Objects.equals(org.arp.javautil.arrays.Arrays.asSet(valueSetElementBuilders),
+                    org.arp.javautil.arrays.Arrays.asSet(other.valueSetElementBuilders))) {
+                return false;
+            }
         }
         if (!Objects.equals(this.lowerBoundBuilder, other.lowerBoundBuilder)) {
             return false;
@@ -152,13 +172,10 @@ public class ValueSetBuilder {
         }
         return true;
     }
-    
-    
 
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
-    
-    
+
 }
