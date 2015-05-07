@@ -30,10 +30,10 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 /**
- * Represents a number, either integral or floating point, with unbounded
- * upper and lower limit (subject to available memory). Significant digits are
+ * Represents a number, either integral or floating point, with unbounded upper
+ * and lower limit (subject to available memory). Significant digits are
  * preserved.
- * 
+ *
  * @author Andrew Post
  */
 public final class NumberValue implements NumericalValue,
@@ -41,17 +41,16 @@ public final class NumberValue implements NumericalValue,
 
     private static final long serialVersionUID = 266750924747111671L;
 
-    private static final Map<BigDecimal, NumberValue> cache =
-            new ReferenceMap<>();
+    private static final Map<BigDecimal, NumberValue> cache = new ReferenceMap<>();
     private BigDecimal num;
     private transient volatile int hashCode;
-    
+
     /**
      * Parses a number from a string. The parser expects a string of the format
      * described in the javadoc for {@link BigDecimal}'s string constructor.
-     * 
+     *
      * @param str a string representing a number.
-     * @return a {@link NumberValue}, or <code>null</code> if no number was 
+     * @return a {@link NumberValue}, or <code>null</code> if no number was
      * found in the string.
      */
     public static NumberValue parse(String str) {
@@ -59,9 +58,9 @@ public final class NumberValue implements NumericalValue,
     }
 
     /**
-     * Gets an instance of {@link NumberValue} representing a 
+     * Gets an instance of {@link NumberValue} representing a
      * <code>double</code>.
-     * 
+     *
      * @param num a double.
      * @return a {@link NumberValue}. Guaranteed not <code>null</code>.
      */
@@ -76,10 +75,12 @@ public final class NumberValue implements NumericalValue,
     public static NumberValue getInstance(BigDecimal num) {
         NumberValue result;
         if (num != null) {
-            result = cache.get(num);
-            if (result == null) {
-                result = new NumberValue(num);
-                cache.put(num, result);
+            synchronized (cache) {
+                result = cache.get(num);
+                if (result == null) {
+                    result = new NumberValue(num);
+                    cache.put(num, result);
+                }
             }
         } else {
             result = getInstance(BigDecimal.ZERO);
@@ -109,7 +110,10 @@ public final class NumberValue implements NumericalValue,
 
     @Override
     public NumberValue replace() {
-        NumberValue result = cache.get(this.num);
+        NumberValue result;
+        synchronized (cache) {
+            result = cache.get(this.num);
+        }
         if (result != null) {
             return result;
         } else {
@@ -180,17 +184,15 @@ public final class NumberValue implements NumericalValue,
     /**
      * Compares this value and another numerically, or checks this number value
      * for membership in a value list.
-     * 
+     *
      * @param o a {@link Value}.
-     * @return If the provided value is a {@link NumericalValue}, returns
-     * {@link ValueComparator#GREATER_THAN},
+     * @return If the provided value is a {@link NumericalValue}, returns null     {@link ValueComparator#GREATER_THAN},
      * {@link ValueComparator#LESS_THAN} or {@link ValueComparator#EQUAL_TO}
-     * depending on whether this value is numerically greater than,
-     * less than or equal to the value provided as argument. If the provided
-     * value is a {@link ValueList}, returns 
-     * {@link ValueComparator#IN} if this object is a member of the list, or
-     * {@link ValueComparator#NOT_IN} if not. Otherwise, returns
-     * {@link ValueComparator#UNKNOWN}.
+     * depending on whether this value is numerically greater than, less than or
+     * equal to the value provided as argument. If the provided value is a
+     * {@link ValueList}, returns {@link ValueComparator#IN} if this object is a
+     * member of the list, or {@link ValueComparator#NOT_IN} if not. Otherwise,
+     * returns {@link ValueComparator#UNKNOWN}.
      */
     @Override
     public ValueComparator compare(Value o) {
@@ -203,29 +205,29 @@ public final class NumberValue implements NumericalValue,
                 int comp = compareTo(other);
                 return comp > 0 ? ValueComparator.GREATER_THAN
                         : (comp < 0 ? ValueComparator.LESS_THAN
-                        : ValueComparator.EQUAL_TO);
+                                : ValueComparator.EQUAL_TO);
             case INEQUALITYNUMBERVALUE:
                 InequalityNumberValue other2 = (InequalityNumberValue) o;
                 int comp2 = num.compareTo((BigDecimal) other2.getNumber());
                 switch (other2.getComparator()) {
                     case EQUAL_TO:
                         return comp2 > 0 ? ValueComparator.GREATER_THAN
-                            : (comp2 < 0 ? ValueComparator.LESS_THAN
-                            : ValueComparator.EQUAL_TO);
+                                : (comp2 < 0 ? ValueComparator.LESS_THAN
+                                        : ValueComparator.EQUAL_TO);
                     case GREATER_THAN:
                         return comp2 <= 0 ? ValueComparator.LESS_THAN
-                            : ValueComparator.UNKNOWN;
+                                : ValueComparator.UNKNOWN;
                     default:
                         return comp2 >= 0 ? ValueComparator.GREATER_THAN
-                            : ValueComparator.UNKNOWN;
+                                : ValueComparator.UNKNOWN;
                 }
             case VALUELIST:
                 ValueList<?> vl = (ValueList<?>) o;
-                return equals(vl) ? ValueComparator.EQUAL_TO 
+                return equals(vl) ? ValueComparator.EQUAL_TO
                         : ValueComparator.NOT_EQUAL_TO;
             default:
                 return ValueComparator.NOT_EQUAL_TO;
-}
+        }
     }
 
     @Override

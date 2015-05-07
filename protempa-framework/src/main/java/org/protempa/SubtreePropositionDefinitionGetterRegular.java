@@ -34,16 +34,12 @@ import org.protempa.backend.ksb.KnowledgeSourceBackend;
 class SubtreePropositionDefinitionGetterRegular {
 
     private final KnowledgeSource knowledgeSource;
-    private final Map<Set<String>, Set<String>> propIdInDataSourceCache;
-    private final Map<Set<String>, Set<PropositionDefinition>> propIdPropInDataSourceCache;
     private final boolean narrower;
 
     SubtreePropositionDefinitionGetterRegular(
             KnowledgeSource knowledgeSource, boolean narrower) {
         assert knowledgeSource != null : "knowledgeSource cannot be null";
         this.knowledgeSource = knowledgeSource;
-        this.propIdInDataSourceCache = new ReferenceMap<>();
-        this.propIdPropInDataSourceCache = new ReferenceMap<>();
         this.narrower = narrower;
 
     }
@@ -79,8 +75,6 @@ class SubtreePropositionDefinitionGetterRegular {
     }
 
     void clear() {
-        this.propIdInDataSourceCache.clear();
-        this.propIdPropInDataSourceCache.clear();
     }
     
 }

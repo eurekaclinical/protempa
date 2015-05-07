@@ -31,24 +31,27 @@ import java.util.Map;
 public class AbsoluteTimeGranularityUtil {
 
     private static final Map<Long, Date> cache = new ReferenceMap<>();
-    
+
     private AbsoluteTimeGranularityUtil() {
-        
+
     }
-    
+
     public static Date asDate(Long position) {
         if (position != null) {
-            Date cached = cache.get(position);
-            if (cached == null) {
-                cached = new Date(position);
-                cache.put(position, cached);
+            Date cached;
+            synchronized (cache) {
+                cached = cache.get(position);
+                if (cached == null) {
+                    cached = new Date(position);
+                    cache.put(position, cached);
+                }
             }
             return cached;
         } else {
             return null;
         }
     }
-    
+
     public static Long asPosition(Date date) {
         if (date != null) {
             return date.getTime();

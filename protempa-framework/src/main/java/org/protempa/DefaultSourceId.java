@@ -29,23 +29,27 @@ import java.util.Map;
  * @author Andrew Post
  */
 public class DefaultSourceId implements SourceId, Serializable {
+
     private static final long serialVersionUID = -8057854346978674580L;
-    
+
     private static final Map<String, DefaultSourceId> CACHE = new ReferenceMap<>();
-    
+
     public static DefaultSourceId getInstance(String sourceIdStr) {
         if (sourceIdStr == null) {
             throw new IllegalArgumentException("sourceIdStr cannot be null");
         }
-        DefaultSourceId result = CACHE.get(sourceIdStr);
-        if (result == null) {
-            result = new DefaultSourceId(sourceIdStr);
-            CACHE.put(sourceIdStr, result);
+        DefaultSourceId result;
+        synchronized (CACHE) {
+            result = CACHE.get(sourceIdStr);
+            if (result == null) {
+                result = new DefaultSourceId(sourceIdStr);
+                CACHE.put(sourceIdStr, result);
+            }
         }
         return result;
     }
     private final String sourceIdStr;
-    
+
     private DefaultSourceId(String sourceIdStr) {
         this.sourceIdStr = sourceIdStr;
     }
@@ -61,5 +65,5 @@ public class DefaultSourceId implements SourceId, Serializable {
         builder.setSourceIdStr(this.sourceIdStr);
         return builder;
     }
-    
+
 }

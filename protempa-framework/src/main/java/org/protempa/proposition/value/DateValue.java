@@ -31,22 +31,22 @@ import java.util.Map;
 
 /**
  * Represents dates and datetimes.
- * 
+ *
  * @author Andrew Post
  */
 public class DateValue implements OrderedValue, Comparable<DateValue>,
         Serializable {
 
-    private static final AbsoluteTimeGranularity gran =
-            AbsoluteTimeGranularity.DAY;
+    private static final AbsoluteTimeGranularity gran
+            = AbsoluteTimeGranularity.DAY;
 
     private static final Map<Date, DateValue> cache = new ReferenceMap<>();
     private static final long serialVersionUID = 7939358587048726659L;
-    
+
     /**
-     * Parses a date from a string. Expects the format used by 
-     * {@link AbsoluteTimeGranularity#DAY}'s <code>getShortFormat()</code>. 
-     * 
+     * Parses a date from a string. Expects the format used by
+     * {@link AbsoluteTimeGranularity#DAY}'s <code>getShortFormat()</code>.
+     *
      * @param str a string representing a date.
      * @return a date value, or <code>null</code> if no date could be parsed.
      */
@@ -57,19 +57,21 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
     /**
      * Constructs a new date value from a Java date object. Uses a cache to
      * reuse date value objects.
-     * 
+     *
      * @param date a {@link Date}. If <code>null</code> a new date value is
      * created using the current time.
-     * 
+     *
      * @return a {@link DateValue}.
      */
     public static DateValue getInstance(Date date) {
         DateValue result;
         if (date != null) {
-            result = cache.get(date);
-            if (result == null) {
-                result = new DateValue(date);
-                cache.put(date, result);
+            synchronized (cache) {
+                result = cache.get(date);
+                if (result == null) {
+                    result = new DateValue(date);
+                    cache.put(date, result);
+                }
             }
         } else {
             result = getInstance(new Date());
@@ -79,20 +81,20 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
 
     /**
      * Constructs a new date value representing the current time.
-     * 
+     *
      * @return a {@link DateValue}.
      */
     public static DateValue getInstance() {
         return getInstance(null);
     }
-    
+
     private Date date;
 
     /**
      * Constructs a new date value object representing the current time. Use
      * {@link #getInstance() } instead to leverage a cache of frequently used
      * date values.
-     * 
+     *
      * @return a {@link DateValue}.
      */
     public DateValue() {
@@ -101,9 +103,9 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
 
     /**
      * Constructs a new date value from a Java date object. Use
-     * {@link #getInstance(Date) } instead to leverage a cache of frequently 
+     * {@link #getInstance(Date) } instead to leverage a cache of frequently
      * used date values.
-     * 
+     *
      * @return a {@link DateValue}.
      */
     public DateValue(Date date) {
@@ -119,7 +121,7 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
 
     /**
      * Gets the date represented by this object as a Java {@link Date}.
-     * 
+     *
      * @return a {@link Date}.
      */
     public Date getDate() {
@@ -137,18 +139,17 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
     }
 
     /**
-     * Compares this date value and another date value according to their 
+     * Compares this date value and another date value according to their
      * natural order, or checks this date value for membership in a value list.
-     * 
+     *
      * @param o a {@link Value}.
      * @return {@link ValueComparator#GREATER_THAN},
      * {@link ValueComparator#LESS_THAN} or {@link ValueComparator#EQUAL_TO}
-     * depending on whether this value is greater than,
-     * less than or equal to the value provided as argument. If the provided
-     * value is a value list, returns {@link ValueComparator#IN} if this date
-     * value is in the list, or {@link ValueComparator#NOT_IN} if this date
-     * value is not in the list. Otherwise, returns 
-     * {@link ValueComparator#UNKNOWN}.
+     * depending on whether this value is greater than, less than or equal to
+     * the value provided as argument. If the provided value is a value list,
+     * returns {@link ValueComparator#IN} if this date value is in the list, or
+     * {@link ValueComparator#NOT_IN} if this date value is not in the list.
+     * Otherwise, returns {@link ValueComparator#UNKNOWN}.
      */
     @Override
     public ValueComparator compare(Value o) {
@@ -161,7 +162,7 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
                 int comp = compareTo(other);
                 return comp > 0 ? ValueComparator.GREATER_THAN
                         : (comp < 0 ? ValueComparator.LESS_THAN
-                        : ValueComparator.EQUAL_TO);
+                                : ValueComparator.EQUAL_TO);
             case VALUELIST:
                 ValueList<?> vl = (ValueList<?>) o;
                 return vl.contains(this) ? ValueComparator.IN : ValueComparator.NOT_IN;
@@ -172,7 +173,10 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
 
     @Override
     public Value replace() {
-        DateValue result = cache.get(this.date);
+        DateValue result;
+        synchronized (cache) {
+            result = cache.get(this.date);
+        }
         if (result != null) {
             return result;
         } else {
@@ -211,31 +215,36 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
         }
     }
 
-	@Override
-	public int hashCode() {
-		return (date == null) ? 0 : date.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return (date == null) ? 0 : date.hashCode();
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DateValue other = (DateValue) obj;
-		if (date == null) {
-			if (other.date != null)
-				return false;
-		} else if (!date.equals(other.date))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        DateValue other = (DateValue) obj;
+        if (date == null) {
+            if (other.date != null) {
+                return false;
+            }
+        } else if (!date.equals(other.date)) {
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public DateValueBuilder asBuilder() {
         return new DateValueBuilder(this);
     }
-    
+
 }

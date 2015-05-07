@@ -19,7 +19,6 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -52,12 +51,16 @@ class CollectSubtreeGetterSlowStrategy {
     }
 
     void clear() {
-        this.propIdInDataSourceCache.clear();
-        this.propIdPropInDataSourceCache.clear();
-
+        synchronized (this.propIdInDataSourceCache) {
+            this.propIdInDataSourceCache.clear();
+        }
+        synchronized (this.propIdPropInDataSourceCache) {
+            this.propIdPropInDataSourceCache.clear();
+        }
     }
-    
+
     class InDataSourceResult<E> {
+
         private final Set<E> result;
         private final Set<String> missing;
 
@@ -73,23 +76,24 @@ class CollectSubtreeGetterSlowStrategy {
         public Set<String> getMissing() {
             return missing;
         }
-        
+
     }
-    
+
     InDataSourceResult<String> collectPropIds(boolean inDataSourceOnly, Set<String> propIds)
             throws KnowledgeSourceReadException {
         if (propIds.contains(null)) {
             throw new IllegalArgumentException(
                     "propIds cannot contain a null element");
         }
-
-        InDataSourceResult<String> cachedResult = propIdInDataSourceCache.get(propIds);
-        if (cachedResult != null) {
-            return cachedResult;
-        } else {
-            InDataSourceResult<String> inDataSourceResult = this.propIdWalker.walkNarrowerPropDefs(inDataSourceOnly, propIds);
-            propIdInDataSourceCache.put(propIds, inDataSourceResult);
-            return inDataSourceResult;
+        synchronized (propIdInDataSourceCache) {
+            InDataSourceResult<String> cachedResult = propIdInDataSourceCache.get(propIds);
+            if (cachedResult != null) {
+                return cachedResult;
+            } else {
+                InDataSourceResult<String> inDataSourceResult = this.propIdWalker.walkNarrowerPropDefs(inDataSourceOnly, propIds);
+                propIdInDataSourceCache.put(propIds, inDataSourceResult);
+                return inDataSourceResult;
+            }
         }
     }
 
@@ -99,18 +103,20 @@ class CollectSubtreeGetterSlowStrategy {
             throw new IllegalArgumentException(
                     "propIds cannot contain a null element");
         }
-
-        InDataSourceResult<PropositionDefinition> cachedResult = propIdPropInDataSourceCache.get(propIds);
-        if (cachedResult != null) {
-            return cachedResult;
-        } else {
-            InDataSourceResult<PropositionDefinition> inDataSourceResult = this.propDefWalker.walkNarrowerPropDefs(inDataSourceOnly, propIds);
-            propIdPropInDataSourceCache.put(propIds, inDataSourceResult);
-            return inDataSourceResult;
+        synchronized (propIdPropInDataSourceCache) {
+            InDataSourceResult<PropositionDefinition> cachedResult = propIdPropInDataSourceCache.get(propIds);
+            if (cachedResult != null) {
+                return cachedResult;
+            } else {
+                InDataSourceResult<PropositionDefinition> inDataSourceResult = this.propDefWalker.walkNarrowerPropDefs(inDataSourceOnly, propIds);
+                propIdPropInDataSourceCache.put(propIds, inDataSourceResult);
+                return inDataSourceResult;
+            }
         }
     }
-    
+
     private abstract class Walker<E> {
+
         InDataSourceResult<E> walkNarrowerPropDefs(boolean inDataSource, Set<String> propIds) {
             Set<E> found = new HashSet<>();
             Set<String> missing = new HashSet<>();
@@ -134,24 +140,25 @@ class CollectSubtreeGetterSlowStrategy {
             InDataSourceResult<E> inDataSourceResult = new InDataSourceResult<>(found, missing);
             return inDataSourceResult;
         }
-        
+
         protected abstract void addToFound(String propId, PropositionDefinition propDef, Set<E> found);
     }
-    
+
     private final class PropositionDefinitionWalker extends Walker<PropositionDefinition> {
 
         @Override
         protected void addToFound(String propId, PropositionDefinition propDef, Set<PropositionDefinition> found) {
             found.add(propDef);
         }
-        
+
     }
 
     private final class PropIdWalker extends Walker<String> {
+
         @Override
         protected void addToFound(String propId, PropositionDefinition propDef, Set<String> found) {
             found.add(propId);
         }
     }
-    
+
 }
