@@ -70,7 +70,7 @@ final class ConstraintNetwork {
         intervals = new ArrayList<>(initialCapacity);
     }
 
-    void clear() {
+    synchronized void clear() {
         directedGraph.clear();
 
         intervals.clear();
@@ -96,7 +96,7 @@ final class ConstraintNetwork {
      * @return true if the graph changed as a result of this operation, false
      *         otherwise.
      */
-    boolean removeRelation(Interval i1, Interval i2) {
+    synchronized boolean removeRelation(Interval i1, Interval i2) {
         if (i1 == i2 || !containsInterval(i1) || !containsInterval(i2)) {
             return false;
         }
@@ -135,7 +135,7 @@ final class ConstraintNetwork {
      * @return true if the graph changed as a result of this operation, false
      *         otherwise.
      */
-    boolean removeInterval(Interval i) {
+    synchronized boolean removeInterval(Interval i) {
         calcMinDuration = null;
         calcMaxDuration = null;
         calcMinFinish = null;
@@ -183,7 +183,7 @@ final class ConstraintNetwork {
      *         interval, then the constraint network may be in an inconsistent
      *         state (e.g., part of the interval got added).
      */
-    boolean addInterval(Interval i) {
+    synchronized boolean addInterval(Interval i) {
         if (i == null || containsInterval(i) || !intervals.add(i)) {
             return false;
         }
@@ -227,7 +227,7 @@ final class ConstraintNetwork {
      *
      * @return a <code>Weight</code> object.
      */
-    Weight getMinimumStart() {
+    synchronized Weight getMinimumStart() {
         if (calcMinStart == null) {
             // Find the shortest distance from a start to time zero.
             Weight result = WeightFactory.NEG_INFINITY;
@@ -256,7 +256,7 @@ final class ConstraintNetwork {
      *
      * @return a <code>Weight</code> object.
      */
-    Weight getMaximumStart() {
+    synchronized Weight getMaximumStart() {
         if (calcMaxStart == null) {
             // Find the longest distance from time zero to a start.
             Weight result = WeightFactory.POS_INFINITY;
@@ -285,7 +285,7 @@ final class ConstraintNetwork {
      *
      * @return a <code>Weight</code> object.
      */
-    Weight getMinimumFinish() {
+    synchronized Weight getMinimumFinish() {
         if (calcMinFinish == null) {
             // Find the shortest distance from a finish to time zero.
             Weight result = WeightFactory.POS_INFINITY;
@@ -314,7 +314,7 @@ final class ConstraintNetwork {
      *
      * @return a <code>Weight</code> object.
      */
-    Weight getMaximumFinish() {
+    synchronized Weight getMaximumFinish() {
         if (calcMaxFinish == null) {
             // Find the longest distance from time zero to a finish.
             Weight result = WeightFactory.NEG_INFINITY;
@@ -342,7 +342,7 @@ final class ConstraintNetwork {
      *
      * @return a <code>Weight</code> object.
      */
-    Weight getMaximumDuration() {
+    synchronized Weight getMaximumDuration() {
         if (calcMaxDuration == null) {
             Weight max = WeightFactory.ZERO;
             for (int i = 0, n = intervals.size(); i < n; i++) {
@@ -369,7 +369,7 @@ final class ConstraintNetwork {
      *
      * @return a <code>Weight</code> object.
      */
-    Weight getMinimumDuration() {
+    synchronized Weight getMinimumDuration() {
         if (calcMinDuration == null) {
             Weight min = WeightFactory.POS_INFINITY;
             for (int i = 0, n = intervals.size(); i < n; i++) {
@@ -398,7 +398,7 @@ final class ConstraintNetwork {
      * @return <code>true</code> if this network is consistent,
      *         <code>false</code> otherwise.
      */
-    boolean getConsistent() {
+    synchronized boolean getConsistent() {
         return DirectionalPathConsistency.getConsistent(directedGraph);
     }
 }

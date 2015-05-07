@@ -30,9 +30,9 @@ import org.arp.javautil.graph.Weight;
 /**
  * A constraint representing a temporal abstraction interval. When added to a
  * distance graph, two vertices are created, one marking the start of the
- * interval, and the other marking the end of the interval. Edges in between
- * the two represent the length of the interval.
- * 
+ * interval, and the other marking the end of the interval. Edges in between the
+ * two represent the length of the interval.
+ *
  * @author Andrew Post
  */
 public final class DefaultInterval extends Interval {
@@ -77,29 +77,30 @@ public final class DefaultInterval extends Interval {
     }
 
     private void calculator() {
-        if (constraintNetworkStale) {
-            computeLength();
-            if (cn == null) {
-                cn = new ConstraintNetwork(1);
-                if (v[0] == null || v[1] == null || v[2] == null
-                        || v[3] == null || v[4] != null || v[5] != null
-                        || v[2].compareTo(v[1]) <= 0) {
-                    cn.addInterval(this);
+        synchronized (this) {
+            if (constraintNetworkStale) {
+                computeLength();
+                if (cn == null) {
+                    cn = new ConstraintNetwork(1);
+                    if (v[0] == null || v[1] == null || v[2] == null
+                            || v[3] == null || v[4] != null || v[5] != null
+                            || v[2].compareTo(v[1]) <= 0) {
+                        cn.addInterval(this);
+                    } else {
+                        simple = true;
+                    }
                 } else {
-                    simple = true;
+                    cn.clear();
+                    if (v[0] == null || v[1] == null || v[2] == null
+                            || v[3] == null || v[2].compareTo(v[1]) <= 0) {
+                        cn.addInterval(this);
+                    } else {
+                        simple = true;
+                    }
                 }
-            } else {
-                cn.clear();
-                if (v[0] == null || v[1] == null || v[2] == null
-                        || v[3] == null || v[2].compareTo(v[1]) <= 0) {
-                    cn.addInterval(this);
-                } else {
-                    simple = true;
-                }
+                constraintNetworkStale = false;
             }
-            constraintNetworkStale = false;
         }
-
     }
 
     public boolean isValid() {
@@ -107,9 +108,11 @@ public final class DefaultInterval extends Interval {
         return cn.getConsistent();
     }
 
-    /***************************************************************************
+    /**
+     * *************************************************************************
      * MINIMUM START
-     **************************************************************************/
+     *************************************************************************
+     */
 
     /*
      * (non-Javadoc)
@@ -127,9 +130,11 @@ public final class DefaultInterval extends Interval {
         }
     }
 
-    /***************************************************************************
+    /**
+     * *************************************************************************
      * MAXIMUM START
-     **************************************************************************/
+     *************************************************************************
+     */
 
     /*
      * (non-Javadoc)
@@ -147,9 +152,11 @@ public final class DefaultInterval extends Interval {
         }
     }
 
-    /***************************************************************************
+    /**
+     * *************************************************************************
      * MINIMUM FINISH
-     **************************************************************************/
+     *************************************************************************
+     */
 
     /*
      * (non-Javadoc)
@@ -167,9 +174,11 @@ public final class DefaultInterval extends Interval {
         }
     }
 
-    /***************************************************************************
+    /**
+     * *************************************************************************
      * MAXIMUM START
-     **************************************************************************/
+     *************************************************************************
+     */
 
     /*
      * (non-Javadoc)
@@ -187,9 +196,11 @@ public final class DefaultInterval extends Interval {
         }
     }
 
-    /***************************************************************************
+    /**
+     * *************************************************************************
      * MINIMUM DURATION
-     **************************************************************************/
+     *************************************************************************
+     */
 
     /*
      * (non-Javadoc)
@@ -207,9 +218,11 @@ public final class DefaultInterval extends Interval {
         }
     }
 
-    /***************************************************************************
+    /**
+     * *************************************************************************
      * MAXIMUM DURATION
-     **************************************************************************/
+     *************************************************************************
+     */
 
     /*
      * (non-Javadoc)
