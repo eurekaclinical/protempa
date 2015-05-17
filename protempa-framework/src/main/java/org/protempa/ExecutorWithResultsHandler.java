@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.collections.Iterators;
 import org.protempa.dest.Destination;
@@ -53,7 +52,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
     private QueryResultsHandler resultsHandler;
     private final AbstractionFinder abstractionFinder;
     private boolean failed;
-    
+
     private final BlockingQueue<QueueObject> queue = new ArrayBlockingQueue<>(1000);
     private final QueueObject poisonPill = new QueueObject();
     private final HandleQueryResultsThread handleQueryResultsThread;
@@ -81,7 +80,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
         DataStreamingEventIterator<Proposition> itr = this.abstractionFinder.getDataSource().readPropositions(getKeyIds(), inDataSourcePropIds, getFilters(), getQuerySession(), this.resultsHandler);
         return itr;
     }
-    
+
     @Override
     void init() throws FinderException {
         String queryId = getQuery().getId();
@@ -118,9 +117,6 @@ abstract class ExecutorWithResultsHandler extends Executor {
         } catch (FinderException ex) {
             this.failed = true;
             throw ex;
-        } catch (Error | RuntimeException ex) {
-            this.failed = true;
-            throw new FinderException(getQuery().getId(), ex);
         }
     }
 
@@ -137,12 +133,21 @@ abstract class ExecutorWithResultsHandler extends Executor {
             } catch (InterruptedException ex) {
                 log(Level.FINER, "Handle query results handler thread interrupted", ex);
             }
-            if (!this.failed) {
-                this.resultsHandler.finish();
+            
+            Throwable throwable = this.handleQueryResultsThread.getThrowable();
+            if (throwable != null) {
+                throw throwable;
             }
-            this.resultsHandler.close();
-            this.resultsHandler = null;
-        } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerCloseException | Error | RuntimeException ex) {
+            
+            // Might be null if init() fails.
+            if (this.resultsHandler != null) {
+                if (!this.failed) {
+                    this.resultsHandler.finish();
+                }
+                this.resultsHandler.close();
+                this.resultsHandler = null;
+            }
+        } catch (Throwable ex) {
             throw new FinderException(getQuery().getId(), ex);
         } finally {
             if (this.resultsHandler != null) {
@@ -156,6 +161,10 @@ abstract class ExecutorWithResultsHandler extends Executor {
     }
 
     final void processResults(Iterator<Proposition> propositions, DerivationsBuilder derivationsBuilder, String keyId) throws FinderException {
+        Throwable throwable = this.handleQueryResultsThread.getThrowable();
+        if (throwable != null) {
+            throw new FinderException(getQuery().getId(), throwable);
+        }
         if (derivationsBuilder == null) {
             derivationsBuilder = getDerivationsBuilder();
         }
@@ -183,15 +192,17 @@ abstract class ExecutorWithResultsHandler extends Executor {
             }
             queue.put(new QueueObject(keyId, filteredPropositions, forwardDerivations, backwardDerivations, refs));
         } catch (InterruptedException ex) {
-            log(Level.FINER, "Handle query results handler thread interrupted", ex);
+            log(Level.FINER, "Process results put on queue thread", ex);
         }
     }
 
     final void processResults(Iterator<Proposition> propositions, String keyId) throws FinderException {
         processResults(propositions, null, keyId);
     }
-    
+
     private class HandleQueryResultsThread extends Thread {
+
+        private volatile Throwable throwable;
 
         @Override
         public void run() {
@@ -200,17 +211,24 @@ abstract class ExecutorWithResultsHandler extends Executor {
                 while (!isInterrupted() && ((qo = queue.take()) != poisonPill)) {
                     try {
                         resultsHandler.handleQueryResult(qo.keyId, qo.propositions, qo.forwardDerivations, qo.backwardDerivations, qo.refs);
-                    } catch (QueryResultsHandlerProcessingException ex) {
-                        Logger.getLogger(ExecutorWithResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (QueryResultsHandlerProcessingException | Error | RuntimeException t) {
+                        this.throwable = t;
+                        break;
                     }
                 }
             } catch (InterruptedException ex) {
-                Logger.getLogger(ExecutorWithResultsHandler.class.getName()).log(Level.SEVERE, null, ex);
+                log(Level.FINER, "Handle query results thread interrupted", ex);
             }
         }
 
+        public Throwable getThrowable() {
+            Throwable result = this.throwable;
+            this.throwable = null;
+            return result;
+        }
+
     };
-    
+
     private static final class QueueObject {
 
         List<Proposition> propositions;

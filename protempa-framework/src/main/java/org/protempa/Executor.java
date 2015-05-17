@@ -324,6 +324,8 @@ abstract class Executor implements AutoCloseable {
             doExecute(this.keyIds, this.derivationsBuilder, executionStrategy);
         } catch (ProtempaException e) {
             throw new FinderException(query.getId(), e);
+        } catch (Error | RuntimeException ex) {
+            throw new FinderException(query.getId(), ex);
         } finally {
             if (executionStrategy != null) {
                 executionStrategy.cleanup();

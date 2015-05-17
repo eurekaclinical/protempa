@@ -92,6 +92,8 @@ public interface DataSource extends Source<DataSourceUpdatedEvent,
      * <code>null</code> key type plural display name.
      */
     String getKeyTypePluralDisplayName() throws DataSourceReadException;
+    
+    KeySetSpec[] getSelectedKeySetSpecs() throws DataSourceReadException;
 
     /**
      * Returns the length units of returned data from this data source.

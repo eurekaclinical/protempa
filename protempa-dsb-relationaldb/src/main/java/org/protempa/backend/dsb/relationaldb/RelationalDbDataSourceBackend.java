@@ -375,6 +375,19 @@ public abstract class RelationalDbDataSourceBackend
         this.sqlGenerator = null;
         this.password = password;
     }
+    
+    public boolean isInKeySetMode() {
+        return this.keyLoaderKeyIdSchema != null || this.keyLoaderKeyIdTable != null;
+    }
+
+    @Override
+    public KeySetSpec[] getSelectedKeySetSpecs() throws DataSourceReadException {
+        if (isInKeySetMode()) {
+            return new KeySetSpec[]{new KeySetSpec(getSourceSystem(), "Cohort", "Cohort", null)};
+        } else {
+            return KeySetSpec.EMPTY_KEY_SET_SPEC_ARRAY;
+        }
+    }
 
     @Override
     public DataStreamingEventIterator<Proposition> readPropositions(
@@ -401,7 +414,7 @@ public abstract class RelationalDbDataSourceBackend
 
     @Override
     public void deleteAllKeys() throws DataSourceWriteException {
-        if (this.keyLoaderKeyIdSchema != null || this.keyLoaderKeyIdTable != null) {
+        if (isInKeySetMode()) {
             try {
                 ConnectionSpec connectionSpecInstance
                         = getConnectionSpecInstance();
@@ -429,7 +442,7 @@ public abstract class RelationalDbDataSourceBackend
 
     @Override
     public void writeKeys(Set<String> keyIds) throws DataSourceWriteException {
-        if (this.keyLoaderKeyIdSchema != null || this.keyLoaderKeyIdTable != null) {
+        if (isInKeySetMode()) {
             int batchSize = 1000;
             try {
                 ConnectionSpec connectionSpecInstance

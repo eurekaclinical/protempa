@@ -19,6 +19,7 @@
  */
 package org.protempa.backend.dsb;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
 import org.protempa.*;
@@ -72,5 +73,7 @@ public interface DataSourceBackend extends
     Comparator<Object> getKeyIdComparator();
     
     DataSourceBackendSourceSystem getSourceSystem();
+
+    KeySetSpec[] getSelectedKeySetSpecs() throws DataSourceReadException;
 
 }

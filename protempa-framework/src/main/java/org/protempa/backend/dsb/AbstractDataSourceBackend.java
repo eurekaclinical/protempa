@@ -24,7 +24,9 @@ import java.util.Comparator;
 import java.util.Set;
 import org.protempa.BackendCloseException;
 import org.protempa.DataSourceBackendSourceSystem;
+import org.protempa.DataSourceReadException;
 import org.protempa.DataSourceWriteException;
+import org.protempa.KeySetSpec;
 import org.protempa.backend.AbstractBackend;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
 import org.protempa.proposition.value.AbsoluteTimeGranularityFactory;
@@ -41,9 +43,9 @@ import org.protempa.proposition.value.UnitFactory;
 public abstract class AbstractDataSourceBackend extends
 		AbstractBackend<DataSourceBackendUpdatedEvent> 
                 implements DataSourceBackend {
-    private static AbsoluteTimeUnitFactory absTimeUnitFactory
+    private static final AbsoluteTimeUnitFactory absTimeUnitFactory
             = new AbsoluteTimeUnitFactory();
-    private static AbsoluteTimeGranularityFactory absTimeGranularityFactory
+    private static final AbsoluteTimeGranularityFactory absTimeGranularityFactory
             = new AbsoluteTimeGranularityFactory();
     
     private String keyType;
@@ -112,6 +114,11 @@ public abstract class AbstractDataSourceBackend extends
     @Override
     public String getKeyTypePluralDisplayName() {
         return getKeyTypeDisplayName() + "s";
+    }
+
+    @Override
+    public KeySetSpec[] getSelectedKeySetSpecs() throws DataSourceReadException {
+        return KeySetSpec.EMPTY_KEY_SET_SPEC_ARRAY;
     }
     
     @Override

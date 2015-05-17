@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.arp.javautil.arrays.Arrays;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.dsb.filter.Filter;
@@ -125,6 +126,16 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
         return result;
     }
 
+    @Override
+    public KeySetSpec[] getSelectedKeySetSpecs() throws DataSourceReadException {
+        initializeIfNeeded();
+        List<KeySetSpec> result = new ArrayList<>();
+        for (DataSourceBackend backend : getBackends()) {
+            Arrays.addAll(result, backend.getSelectedKeySetSpecs());
+        }
+        return result.toArray(new KeySetSpec[result.size()]);
+    }
+    
     /**
      * Returns an object for accessing the granularity of returned data from the
      * schema adaptor for this data source.
