@@ -100,15 +100,11 @@ public final class BackendInstanceSpec<B extends Backend> {
         if (spec.getType().getCls().isArray()) {
             addArrayProperty(spec, value);
         } else {
-            if (value != null && !spec.getType().isInstance(value)) {
-                throw new IllegalArgumentException("value should be "
-                        + spec.getType() + " but was " + value.getClass());
-            }
             spec.validate(value);
             this.properties.put(spec.getName(), value);
         }
     }
-
+    
     public Object getProperty(String name)
             throws InvalidPropertyNameException {
         BackendPropertySpec get = this.propertyMap.get(name);
@@ -220,17 +216,6 @@ public final class BackendInstanceSpec<B extends Backend> {
     private void addArrayProperty(BackendPropertySpec spec, Object value) throws InvalidPropertyValueException {
         if (spec == null) {
             throw new IllegalArgumentException("spec cannot be null");
-        }
-        Class<?> cls = spec.getType().getCls();
-        if (value != null) {
-            if (!cls.isArray()) {
-                throw new AssertionError("property must have an array type");
-            }
-            Class<?> componentType = cls.getComponentType();
-            if (!componentType.isInstance(value)) {
-                throw new IllegalArgumentException("value should be "
-                        + componentType + " but was " + value.getClass());
-            }
         }
         spec.validate(value);
         List<Object> lValue = (List<Object>) this.properties.get(spec.getName());
