@@ -1,5 +1,9 @@
 package org.protempa.dest;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /*
  * #%L
  * Protempa Framework
@@ -19,14 +23,21 @@ package org.protempa.dest;
  * limitations under the License.
  * #L%
  */
-
 /**
  *
  * @author Andrew Post
  */
 public class DefaultStatisticsBuilder {
-    private int numberOfKeys;
 
+    private int numberOfKeys;
+    private Map<String, Integer> counts;
+    private Map<String, String> childrenToParents;
+
+    public DefaultStatisticsBuilder() {
+        this.counts = Collections.emptyMap();
+        this.childrenToParents = Collections.emptyMap();
+    }
+    
     public int getNumberOfKeys() {
         return numberOfKeys;
     }
@@ -35,8 +46,32 @@ public class DefaultStatisticsBuilder {
         this.numberOfKeys = numberOfKeys;
     }
 
-    public DefaultStatistics toDefaultStatistics() {
-        return new DefaultStatistics(this.numberOfKeys);
+    public Map<String, String> getChildrenToParents() {
+        return new HashMap<>(childrenToParents);
     }
-    
+
+    public void setChildrenToParents(Map<String, String> childrenToParents) {
+        if (childrenToParents != null) {
+            this.childrenToParents = new HashMap<>(childrenToParents);
+        } else {
+            this.childrenToParents = Collections.emptyMap();
+        }
+    }
+
+    public Map<String, Integer> getCounts() {
+        return new HashMap<>(counts);
+    }
+
+    public void setCounts(Map<String, Integer> counts) {
+        if (counts != null) {
+            this.counts = new HashMap<>(counts);
+        } else {
+            this.counts = Collections.emptyMap();
+        }
+    }
+
+    public DefaultStatistics toDefaultStatistics() {
+        return new DefaultStatistics(this.numberOfKeys, this.counts, this.childrenToParents);
+    }
+
 }

@@ -1,5 +1,7 @@
 package org.protempa.dest;
 
+import org.protempa.DataSource;
+
 /*
  * #%L
  * Protempa Framework
@@ -25,7 +27,12 @@ package org.protempa.dest;
  * @author Andrew Post
  */
 public abstract class AbstractDestination implements Destination {
-
+    
+    @Override
+    public boolean isGetStatisticsSupported() {
+        return false;
+    }
+    
     @Override
     public Statistics getStatistics() throws StatisticsException {
         return null;

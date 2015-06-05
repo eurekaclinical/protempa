@@ -47,6 +47,11 @@ public final class DeidentifiedDestination extends AbstractDestination {
     }
 
     @Override
+    public boolean isGetStatisticsSupported() {
+        return this.destination.isGetStatisticsSupported();
+    }
+
+    @Override
     public Statistics getStatistics() throws StatisticsException {
         return this.destination.getStatistics();
     }

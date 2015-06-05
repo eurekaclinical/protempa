@@ -1,5 +1,7 @@
 package org.protempa.dest;
 
+import java.util.Map;
+
 /*
  * #%L
  * Protempa Framework
@@ -25,12 +27,14 @@ package org.protempa.dest;
  * written out.
  */
 public interface Statistics {
-
-    /**
-     * Returns the number of keys in the dataset.
-     *
-     * @return the number of keys.
-     */
-    int getNumberOfKeys();
     
+    int getNumberOfKeys() throws StatisticsException;
+    
+    Map<String, String> getChildrenToParents() throws StatisticsException;
+    
+    Map<String, String> getChildrenToParents(String[] propIds) throws StatisticsException;
+
+    Map<String, Integer> getCounts() throws StatisticsException;
+    
+    Map<String, Integer> getCounts(String[] propIds) throws StatisticsException;
 }

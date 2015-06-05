@@ -43,6 +43,8 @@ public interface Destination {
      */
     QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException;
     
+    boolean isGetStatisticsSupported();
+    
     /**
      * Returns an instance that can be used to discover information about 
      * previous runs of data.
