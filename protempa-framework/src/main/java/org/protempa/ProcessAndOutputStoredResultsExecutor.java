@@ -26,6 +26,7 @@ import java.util.Set;
 import org.arp.javautil.datastore.DataStore;
 import org.protempa.datastore.PropositionStoreCreator;
 import org.protempa.dest.Destination;
+import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
 
@@ -36,21 +37,25 @@ import org.protempa.query.Query;
 class ProcessAndOutputStoredResultsExecutor extends ExecutorWithResultsHandler {
     private final String propositionStoreEnvironment;
 
-    ProcessAndOutputStoredResultsExecutor(Query query, Destination resultsHandlerFactory, QuerySession querySession, AbstractionFinder abstractionFinder, String propositionStoreEnvironment) throws FinderException {
+    ProcessAndOutputStoredResultsExecutor(Query query, Destination resultsHandlerFactory, QuerySession querySession, AbstractionFinder abstractionFinder, String propositionStoreEnvironment) throws ExecutorInitException {
         super(query, resultsHandlerFactory, querySession, ExecutorStrategy.STATELESS, abstractionFinder);
         this.propositionStoreEnvironment = propositionStoreEnvironment;
     }
 
     @Override
-    protected void doExecute(Set<String> keyIds, final DerivationsBuilder derivationsBuilder, final ExecutionStrategy strategy) throws ProtempaException {
+    protected void doExecute(Set<String> keyIds, final DerivationsBuilder derivationsBuilder, final ExecutionStrategy strategy) throws ExecutorExecuteException {
         final DataStore<String, List<Proposition>> propStore = new PropositionStoreCreator(propositionStoreEnvironment).getPersistentStore();
         try {
             new KeyIdProcessor(keysToProcess(keyIds, propStore)) {
                 @Override
-                void doProcess(String keyId, Set<String> propIds) throws FinderException {
+                void doProcess(String keyId, Set<String> propIds) throws ExecutorExecuteException {
                     if (propStore.containsKey(keyId)) {
                         Iterator<Proposition> propositions = strategy.execute(keyId, propIds, propStore.get(keyId), null);
-                        processResults(propositions, keyId);
+                        try {
+                            processResults(propositions, keyId);
+                        } catch (QueryResultsHandlerProcessingException ex) {
+                            throw new ExecutorExecuteException(ex);
+                        }
                         derivationsBuilder.reset();
                     }
                 }

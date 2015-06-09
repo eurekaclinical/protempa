@@ -26,13 +26,13 @@ package org.protempa;
  * @author Andrew Post
  *
  */
-public final class FinderException extends ProtempaException {
+public final class QueryException extends ProtempaException {
 
     private static final long serialVersionUID = 7903820808353618290L;
     
     private final String queryId;
 
-    public FinderException(String queryId, Throwable cause) {
+    public QueryException(String queryId, Throwable cause) {
         super("Query " + queryId + " failed", cause);
         if (cause == null) {
             throw new IllegalArgumentException("cause cannot be null");

@@ -63,7 +63,7 @@ import org.protempa.CompoundLowLevelAbstractionDefinition.ValueDefinitionMatchOp
 import org.protempa.ContextDefinition;
 import org.protempa.EventDefinition;
 import org.protempa.ExtendedPropositionDefinition;
-import org.protempa.FinderException;
+import org.protempa.QueryException;
 import org.protempa.HighLevelAbstractionDefinition;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.LowLevelAbstractionDefinition;
@@ -679,7 +679,7 @@ public class ProtempaTest {
             assertEncountersRetrieved(results);
             assertVitalsRetrieved(results);
             assertReferencesRetrieved(results);
-        } catch (FinderException ex) {
+        } catch (QueryException ex) {
             ex.printStackTrace();
             fail(AF_ERROR_MSG);
         } catch (ParseException | QueryBuildException | KnowledgeSourceReadException ex) {
@@ -797,7 +797,7 @@ public class ProtempaTest {
             }
             boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);
             assertTrue("output doesn't match", outputMatches);
-        } catch (FinderException | IOException e) {
+        } catch (QueryException | IOException e) {
             e.printStackTrace();
             fail(AF_ERROR_MSG);
         } catch (KnowledgeSourceReadException | ParseException | QueryBuildException e) {

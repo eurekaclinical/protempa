@@ -113,6 +113,11 @@ public final class DeidentifiedQueryResultsHandler
         this.handler.close();
     }
 
+    @Override
+    public void cancel() {
+        this.handler.cancel();
+    }
+
     private String disguise(String keyId) {
         if (this.keyIdDisguised) {
             if (this.keyMapper.containsKey(keyId)) {

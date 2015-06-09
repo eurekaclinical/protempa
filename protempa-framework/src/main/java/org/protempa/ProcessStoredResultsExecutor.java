@@ -38,14 +38,14 @@ class ProcessStoredResultsExecutor extends Executor {
     private final String propositionStoreEnvironment;
     private final String workingMemoryStoreEnvironment;
 
-    ProcessStoredResultsExecutor(Query query, QuerySession querySession, AbstractionFinder abstractionFinder, String propositionStoreEnvironment, String workingMemoryStoreEnvironment) throws FinderException {
+    ProcessStoredResultsExecutor(Query query, QuerySession querySession, AbstractionFinder abstractionFinder, String propositionStoreEnvironment, String workingMemoryStoreEnvironment) throws ExecutorInitException {
         super(query, querySession, ExecutorStrategy.STATEFUL, abstractionFinder);
         this.propositionStoreEnvironment = propositionStoreEnvironment;
         this.workingMemoryStoreEnvironment = workingMemoryStoreEnvironment;
     }
 
     @Override
-    protected void doExecute(Set<String> keyIds, final DerivationsBuilder derivationsBuilder, final ExecutionStrategy strategy) throws ProtempaException {
+    protected void doExecute(Set<String> keyIds, final DerivationsBuilder derivationsBuilder, final ExecutionStrategy strategy) throws ExecutorExecuteException {
         final DataStore<String, List<Proposition>> propStore = new PropositionStoreCreator(propositionStoreEnvironment).getPersistentStore();
         if (isLoggable(Level.INFO)) {
             log(Level.INFO, "Found {0} records in store {1} for query {2}", new Object[]{propStore.size(), propositionStoreEnvironment, getQuery().getId()});
@@ -55,7 +55,7 @@ class ProcessStoredResultsExecutor extends Executor {
         try {
             new KeyIdProcessor(keysToProcess(keyIds, propStore)) {
                 @Override
-                void doProcess(String keyId, Set<String> propIds) throws FinderException {
+                void doProcess(String keyId, Set<String> propIds) throws ExecutorExecuteException {
                     // the important part here is that the working memory produced
                     // by the rules engine is being persisted by
                     // StatefulExecutionStrategy.execute()

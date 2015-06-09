@@ -32,23 +32,24 @@ import org.arp.javautil.datastore.DataStore;
 import org.drools.WorkingMemory;
 import org.protempa.datastore.WorkingMemoryStoreCreator;
 import org.protempa.dest.Destination;
+import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
 
 /**
  *
- * @author arpost
+ * @author Andrew Post
  */
 class OutputStoredResultsExecutor extends ExecutorWithResultsHandler {
     private final String workingMemoryStoreEnvironment;
 
-    OutputStoredResultsExecutor(Query query, Destination resultsHandlerFactory, QuerySession querySession, AbstractionFinder abstractionFinder, String workingMemoryStoreEnvironment) throws FinderException {
+    OutputStoredResultsExecutor(Query query, Destination resultsHandlerFactory, QuerySession querySession, AbstractionFinder abstractionFinder, String workingMemoryStoreEnvironment) throws ExecutorInitException {
         super(query, resultsHandlerFactory, querySession, ExecutorStrategy.STATEFUL, abstractionFinder);
         this.workingMemoryStoreEnvironment = workingMemoryStoreEnvironment;
     }
 
     @Override
-    protected void doExecute(Set<String> keyIds, final DerivationsBuilder ignored, final ExecutionStrategy strategy) throws ProtempaException {
+    protected void doExecute(Set<String> keyIds, final DerivationsBuilder ignored, final ExecutionStrategy strategy) throws ExecutorExecuteException {
         final DataStore<String, DerivationsBuilder> dbStore = new DerivationsBuilderStoreCreator(workingMemoryStoreEnvironment).getPersistentStore();
         DataStore<String, WorkingMemory> wmStore = null;
         try {
@@ -56,7 +57,7 @@ class OutputStoredResultsExecutor extends ExecutorWithResultsHandler {
             final DataStore<String, WorkingMemory> fwmStore = wmStore;
             new KeyIdProcessor(keysToProcess(keyIds, wmStore)) {
                 @Override
-                void doProcess(String keyId, Set<String> propIds) throws FinderException {
+                void doProcess(String keyId, Set<String> propIds) throws ExecutorExecuteException {
                     if (isLoggable(Level.FINEST)) {
                         log(Level.FINEST, "Determining output for key {0} for query {1}", new Object[]{keyId, getQuery().getId()});
                     }
@@ -65,7 +66,11 @@ class OutputStoredResultsExecutor extends ExecutorWithResultsHandler {
                         DerivationsBuilder derivationsBuilder = dbStore.get(keyId);
                         @SuppressWarnings(value = "unchecked")
                         Iterator<Proposition> propositions = wm.iterateObjects();
-                        processResults(propositions, derivationsBuilder, keyId);
+                        try {
+                            processResults(propositions, derivationsBuilder, keyId);
+                        } catch (QueryResultsHandlerProcessingException ex) {
+                            throw new ExecutorExecuteException(ex);
+                        }
                     }
                 }
             }.process();

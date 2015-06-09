@@ -265,7 +265,12 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
                         propertyName = nextToken;
                         break;
                     case "$":
-                        ValueType vt = ValueType.valueOf(nextToken);
+                        ValueType vt;
+                        try {
+                            vt = ValueType.valueOf(nextToken);
+                        } catch (IllegalArgumentException ex) {
+                            throw new DataSourceReadException("Invalid value type " + nextToken, ex);
+                        }
                         if ("value".equals(propertyName) && lastProposition instanceof PrimitiveParameter) {
                             ((PrimitiveParameter) lastProposition).setValue(vt.parse(column));
                         } else {

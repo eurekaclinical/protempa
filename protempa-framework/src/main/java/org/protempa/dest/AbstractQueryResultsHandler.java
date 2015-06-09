@@ -50,4 +50,9 @@ public abstract class AbstractQueryResultsHandler
     @Override
     public void close() throws QueryResultsHandlerCloseException {
     }
+
+    @Override
+    public void cancel() {
+    }
+    
 }

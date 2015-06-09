@@ -41,7 +41,7 @@ interface ExecutionStrategy {
 
     void createRuleBase(Collection<PropositionDefinition> allNarrowerDescendants, 
             DerivationsBuilder listener,
-            QuerySession qs) throws FinderException;
+            QuerySession qs) throws CreateRuleBaseException;
     
     RuleBase getRuleBase();
 }

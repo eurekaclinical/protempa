@@ -58,16 +58,17 @@ abstract class Executor implements AutoCloseable {
     private final ExecutorStrategy strategy;
     private Collection<PropositionDefinition> allNarrowerDescendants;
     private final AbstractionFinder abstractionFinder;
+    private ExecutionStrategy executionStrategy = null;
 
-    Executor(Query query, QuerySession querySession, AbstractionFinder abstractionFinder) throws FinderException {
+    Executor(Query query, QuerySession querySession, AbstractionFinder abstractionFinder) throws ExecutorInitException {
         this(query, querySession, null, abstractionFinder);
     }
 
-    Executor(Query query, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws FinderException {
+    Executor(Query query, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws ExecutorInitException {
         this.abstractionFinder = abstractionFinder;
         assert query != null : "query cannot be null";
         if (abstractionFinder.isClosed()) {
-            throw new FinderException(query.getId(), new ProtempaAlreadyClosedException());
+            throw new ExecutorInitException(new ProtempaAlreadyClosedException());
         }
         this.keyIds = Arrays.asSet(query.getKeyIds());
         this.propIds = Arrays.asSet(query.getPropositionIds());
@@ -92,7 +93,7 @@ abstract class Executor implements AutoCloseable {
         ExecutorCounter() {
         }
 
-        void incr() throws DataSourceReadException {
+        void incr() throws ExecutorExecuteException {
             if (++this.count % 1000 == 0) {
                 logNumProcessed(this.count);
             }
@@ -114,7 +115,7 @@ abstract class Executor implements AutoCloseable {
             this.counter = new ExecutorCounter();
         }
 
-        void process() throws DataSourceReadException, FinderException {
+        void process() throws ExecutorExecuteException {
             for (; this.itr.hasNext();) {
                 doProcess(this.itr.next(), propIds);
                 this.counter.incr();
@@ -122,25 +123,23 @@ abstract class Executor implements AutoCloseable {
             }
         }
 
-        abstract void doProcess(String keyId, Set<String> propIds) throws FinderException;
+        abstract void doProcess(String keyId, Set<String> propIds) throws ExecutorExecuteException;
     }
 
     abstract class DataStreamingEventProcessor {
 
         private final DataStreamingEventIterator<Proposition> itr;
         private final ExecutorCounter counter;
-        private final List<FinderException> finderExceptions;
-        private final List<DataSourceReadException> dataSourceReadExceptions;
+        private final List<ExecutorExecuteException> exceptions;
 
         public DataStreamingEventProcessor(DataStreamingEventIterator<Proposition> itr) {
             assert itr != null : "itr cannot be null";
             this.itr = itr;
             this.counter = new ExecutorCounter();
-            this.finderExceptions = new ArrayList<>();
-            this.dataSourceReadExceptions = new ArrayList<>();
+            this.exceptions = new ArrayList<>();
         }
 
-        final void process() throws DataSourceReadException, FinderException {
+        final void process() throws ExecutorExecuteException {
             final String queryId = query.getId();
             log(Level.INFO, "Processing data for query {0}", queryId);
             final DataStreamingEvent poisonPill = new DataStreamingEvent("poison", Collections.emptyList());
@@ -158,15 +157,23 @@ abstract class Executor implements AutoCloseable {
                         queue.put(poisonPill);
                         itrClosed = true;
                     } catch (DataSourceReadException ex) {
-                        dataSourceReadExceptions.add(ex);
+                        exceptions.add(new ExecutorExecuteException(ex));
                         try {
                             queue.put(poisonPill);
-                        } catch (InterruptedException ignore) {}
+                        } catch (InterruptedException ignore) {
+                        }
+                    } catch (Error | RuntimeException ex) {
+                        exceptions.add(new ExecutorExecuteException(ex));
+                        try {
+                            queue.put(poisonPill);
+                        } catch (InterruptedException ignore) {
+                        }
                     } catch (InterruptedException ex) {
                         ProtempaUtil.logger().log(Level.FINER, "Protempa producer thread interrupted", ex);
                         try {
                             queue.put(poisonPill);
-                        } catch (InterruptedException ignore) {}
+                        } catch (InterruptedException ignore) {
+                        }
                     } finally {
                         if (!itrClosed) {
                             try {
@@ -189,38 +196,32 @@ abstract class Executor implements AutoCloseable {
                             counter.incr();
                             derivationsBuilder.reset();
                         }
-                        log(Level.INFO, "Done processing data for query {0}", queryId);
-                    } catch (FinderException ex) {
-                        finderExceptions.add(ex);
+                    } catch (ExecutorExecuteException ex) {
+                        exceptions.add(ex);
                     } catch (InterruptedException ex) {
                         producer.interrupt();
-                    } catch (DataSourceReadException ex) {
-                        dataSourceReadExceptions.add(ex);
-                    } finally {
-                        log(Level.INFO, "Done retrieving data for query {0}", queryId);
                     }
                 }
 
             };
-            
+
             producer.start();
             consumer.start();
             try {
                 producer.join();
+                log(Level.INFO, "Done retrieving data for query {0}", queryId);
             } catch (InterruptedException ex) {
                 ProtempaUtil.logger().log(Level.FINER, "Protempa producer thread interrupted", ex);
             }
             try {
                 consumer.join();
+                log(Level.INFO, "Done processing data for query {0}", queryId);
             } catch (InterruptedException ex) {
                 ProtempaUtil.logger().log(Level.FINER, "Protempa consumer thread interrupted", ex);
             }
-            
-            if (!this.dataSourceReadExceptions.isEmpty()) {
-                throw this.dataSourceReadExceptions.get(0);
-            }
-            if (!this.finderExceptions.isEmpty()) {
-                throw this.finderExceptions.get(0);
+
+            if (!this.exceptions.isEmpty()) {
+                throw this.exceptions.get(0);
             }
         }
 
@@ -228,7 +229,7 @@ abstract class Executor implements AutoCloseable {
             return this.counter.getCount();
         }
 
-        abstract void doProcess(DataStreamingEvent next, Set<String> propIds) throws FinderException;
+        abstract void doProcess(DataStreamingEvent next, Set<String> propIds) throws ExecutorExecuteException;
     }
 
     protected final Query getQuery() {
@@ -288,7 +289,10 @@ abstract class Executor implements AutoCloseable {
         Logging.logCount(LOGGER, level, count, singularMsg, pluralMsg, singularParams, pluralParams);
     }
 
-    void init() throws FinderException {
+    void init() throws ExecutorInitException {
+        if (isLoggable(Level.FINE)) {
+            log(Level.FINE, "Propositions to be queried for query {0} are {1}", new Object[]{query.getId(), StringUtils.join(this.propIds, ", ")});
+        }
         try {
             allNarrowerDescendants = ks.collectPropDefDescendantsUsingAllNarrower(false, propIds.toArray(new String[propIds.size()]));
             if (isLoggable(Level.FINE)) {
@@ -299,45 +303,39 @@ abstract class Executor implements AutoCloseable {
                 log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));
             }
         } catch (KnowledgeSourceReadException ex) {
-            throw new FinderException(query.getId(), ex);
+            throw new ExecutorInitException(ex);
+        }
+
+        if (strategy != null) {
+            switch (strategy) {
+                case STATELESS:
+                    executionStrategy = newStatelessStrategy();
+                    break;
+                case STATEFUL:
+                    executionStrategy = newStatefulStrategy();
+                    break;
+                default:
+                    throw new AssertionError("Invalid execution strategy: " + strategy);
+            }
         }
     }
 
-    void execute() throws FinderException {
-        if (isLoggable(Level.FINE)) {
-            log(Level.FINE, "Propositions to be queried for query {0} are {1}", new Object[]{query.getId(), StringUtils.join(this.propIds, ", ")});
-        }
-        ExecutionStrategy executionStrategy = null;
+    void execute() throws ExecutorExecuteException {
         try {
-            if (strategy != null) {
-                switch (strategy) {
-                    case STATELESS:
-                        executionStrategy = newStatelessStrategy();
-                        break;
-                    case STATEFUL:
-                        executionStrategy = newStatefulStrategy();
-                        break;
-                    default:
-                        throw new AssertionError("Invalid execution strategy: " + strategy);
-                }
-            }
             doExecute(this.keyIds, this.derivationsBuilder, executionStrategy);
-        } catch (ProtempaException e) {
-            throw new FinderException(query.getId(), e);
         } catch (Error | RuntimeException ex) {
-            throw new FinderException(query.getId(), ex);
-        } finally {
-            if (executionStrategy != null) {
-                executionStrategy.cleanup();
-            }
+            throw new ExecutorExecuteException(ex);
         }
     }
 
     @Override
-    public void close() throws FinderException {
+    public void close() throws ExecutorCloseException {
+        if (executionStrategy != null) {
+            executionStrategy.cleanup();
+        }
     }
 
-    DataStreamingEventIterator<Proposition> newDataIterator() throws KnowledgeSourceReadException, DataSourceReadException {
+    DataStreamingEventIterator<Proposition> newDataIterator() throws ExecutorExecuteException {
         log(Level.INFO, "Retrieving data for query {0}", query.getId());
         Set<String> inDataSourcePropIds = new HashSet<>();
         for (PropositionDefinition pd : allNarrowerDescendants) {
@@ -348,7 +346,12 @@ abstract class Executor implements AutoCloseable {
         if (isLoggable(Level.FINER)) {
             log(Level.FINER, "Asking data source for {0} for query {1}", new Object[]{StringUtils.join(inDataSourcePropIds, ", "), query.getId()});
         }
-        DataStreamingEventIterator<Proposition> itr = abstractionFinder.getDataSource().readPropositions(this.keyIds, inDataSourcePropIds, this.filters, getQuerySession(), null);
+        DataStreamingEventIterator<Proposition> itr;
+        try {
+            itr = abstractionFinder.getDataSource().readPropositions(this.keyIds, inDataSourcePropIds, this.filters, getQuerySession(), null);
+        } catch (DataSourceReadException ex) {
+            throw new ExecutorExecuteException(ex);
+        }
         return itr;
     }
 
@@ -362,32 +365,44 @@ abstract class Executor implements AutoCloseable {
         return result.iterator();
     }
 
-    final void logNumProcessed(int numProcessed) throws DataSourceReadException {
+    final void logNumProcessed(int numProcessed) throws ExecutorExecuteException {
         if (isLoggable(Level.FINE)) {
-            String keyTypeSingDisplayName = abstractionFinder.getDataSource().getKeyTypeDisplayName();
-            String keyTypePluralDisplayName = abstractionFinder.getDataSource().getKeyTypePluralDisplayName();
-            String queryId = query.getId();
-            logCount(Level.FINE, numProcessed, "Processed {0} {1} for query {2}", "Processed {0} {1} for query {2}", new Object[]{keyTypeSingDisplayName, queryId}, new Object[]{keyTypePluralDisplayName, queryId});
+            try {
+                String keyTypeSingDisplayName = abstractionFinder.getDataSource().getKeyTypeDisplayName();
+                String keyTypePluralDisplayName = abstractionFinder.getDataSource().getKeyTypePluralDisplayName();
+                String queryId = query.getId();
+                logCount(Level.FINE, numProcessed, "Processed {0} {1} for query {2}", "Processed {0} {1} for query {2}", new Object[]{keyTypeSingDisplayName, queryId}, new Object[]{keyTypePluralDisplayName, queryId});
+            } catch (DataSourceReadException ex) {
+                throw new ExecutorExecuteException(ex);
+            }
         }
     }
 
-    protected abstract void doExecute(Set<String> keyIds, final DerivationsBuilder derivationsBuilder, final ExecutionStrategy strategy) throws ProtempaException;
+    protected abstract void doExecute(Set<String> keyIds, final DerivationsBuilder derivationsBuilder, final ExecutionStrategy strategy) throws ExecutorExecuteException;
 
-    private StatelessExecutionStrategy newStatelessStrategy() throws FinderException {
+    private StatelessExecutionStrategy newStatelessStrategy() throws ExecutorInitException {
         StatelessExecutionStrategy result = new StatelessExecutionStrategy(abstractionFinder, abstractionFinder.getAlgorithmSource());
-        createRuleBase(result);
+        try {
+            createRuleBase(result);
+        } catch (CreateRuleBaseException ex) {
+            throw new ExecutorInitException(ex);
+        }
         result.initialize();
         return result;
     }
 
-    private StatefulExecutionStrategy newStatefulStrategy() throws FinderException {
+    private StatefulExecutionStrategy newStatefulStrategy() throws ExecutorInitException {
         StatefulExecutionStrategy result = new StatefulExecutionStrategy(abstractionFinder.getAlgorithmSource());
-        createRuleBase(result);
+        try {
+            createRuleBase(result);
+        } catch (CreateRuleBaseException ex) {
+            throw new ExecutorInitException(ex);
+        }
         result.initialize();
         return result;
     }
 
-    private void createRuleBase(ExecutionStrategy result) throws FinderException {
+    private void createRuleBase(ExecutionStrategy result) throws CreateRuleBaseException {
         log(Level.FINEST, "Initializing rule base for query {0}", query.getId());
         result.createRuleBase(allNarrowerDescendants, derivationsBuilder, qs);
         abstractionFinder.clear();

@@ -72,7 +72,7 @@ public final class AbstractionFinderTestHelper {
      *            the name of persistent store where the retrieved data is
      * @return a {@link DataStore} mapping key IDs to working memories as a
      *         result of the rules engine processing
-     * @throws FinderException
+     * @throws QueryException
      *             if something goes wrong in AbstractionFinder
      * @throws KnowledgeSourceReadException
      *             if the {@link KnowledgeSource} cannot be read
@@ -81,7 +81,7 @@ public final class AbstractionFinderTestHelper {
      */
     public DataStore<String, WorkingMemory> processStoredResults(Protempa p,
             Query query,
-            String propositionStorePathname) throws FinderException,
+            String propositionStorePathname) throws QueryException,
             KnowledgeSourceReadException, ProtempaException {
         PropositionDefinition[] propDefs = query.getPropositionDefinitions();
         KnowledgeSource ks;

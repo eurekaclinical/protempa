@@ -35,18 +35,18 @@ import org.protempa.query.Query;
 class RetrieveAndStoreDataExecutor extends Executor {
     private final String persistentStoreEnvironment;
 
-    RetrieveAndStoreDataExecutor(Query query, QuerySession querySession, AbstractionFinder abstractionFinder, String persistentStoreEnvironment) throws FinderException {
+    RetrieveAndStoreDataExecutor(Query query, QuerySession querySession, AbstractionFinder abstractionFinder, String persistentStoreEnvironment) throws ExecutorInitException {
         super(query, querySession, abstractionFinder);
         this.persistentStoreEnvironment = persistentStoreEnvironment;
     }
 
     @Override
-    protected void doExecute(Set<String> keyIds, final DerivationsBuilder derivationsBuilder, final ExecutionStrategy executionStrategy) throws ProtempaException {
+    protected void doExecute(Set<String> keyIds, final DerivationsBuilder derivationsBuilder, final ExecutionStrategy executionStrategy) throws ExecutorExecuteException {
         final DataStore<String, List<Proposition>> store = new PropositionStoreCreator(persistentStoreEnvironment).getPersistentStore();
         try {
             DataStreamingEventProcessor processor = new DataStreamingEventProcessor(newDataIterator()) {
                 @Override
-                void doProcess(DataStreamingEvent next, Set<String> propIds) throws FinderException {
+                void doProcess(DataStreamingEvent next, Set<String> propIds) throws ExecutorExecuteException {
                     store.put(next.getKeyId(), next.getData());
                 }
             };

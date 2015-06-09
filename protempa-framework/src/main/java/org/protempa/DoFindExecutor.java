@@ -19,46 +19,48 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-
 import java.util.Iterator;
 import java.util.Set;
 import org.protempa.dest.Destination;
+import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
 
 /**
  *
- * @author arpost
+ * @author Andrew Post
  */
 class DoFindExecutor extends ExecutorWithResultsHandler {
 
-    DoFindExecutor(Query query, Destination resultsHandlerFactory, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws FinderException {
+    DoFindExecutor(Query query, Destination resultsHandlerFactory, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws ExecutorInitException {
         super(query, resultsHandlerFactory, querySession, strategy, abstractionFinder);
     }
-    
+
     @Override
     protected void doExecute(Set<String> keyIds,
             final DerivationsBuilder derivationsBuilder,
             final ExecutionStrategy strategy)
-            throws ProtempaException {
+            throws ExecutorExecuteException {
         new DataStreamingEventProcessor(newDataIterator()) {
             @Override
             void doProcess(DataStreamingEvent next,
                     Set<String> propositionIds)
-                    throws FinderException {
+                    throws ExecutorExecuteException {
                 String keyId = next.getKeyId();
                 Iterator<Proposition> resultsItr;
                 if (strategy != null) {
                     resultsItr = strategy.execute(
-                        keyId, propositionIds, next.getData(),
-                        null);
+                            keyId, propositionIds, next.getData(),
+                            null);
                 } else {
                     resultsItr = next.getData().iterator();
                 }
-                processResults(resultsItr, keyId);
+                try {
+                    processResults(resultsItr, keyId);
+                } catch (QueryResultsHandlerProcessingException ex) {
+                    throw new ExecutorExecuteException(ex);
+                }
             }
         }.process();
-
     }
-    
 }

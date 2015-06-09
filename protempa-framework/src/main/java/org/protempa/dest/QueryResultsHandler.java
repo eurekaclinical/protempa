@@ -23,7 +23,6 @@ package org.protempa.dest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
@@ -35,17 +34,23 @@ import org.protempa.query.Query;
  * Protempa calls the methods of a provided implementation of this interface in
  * the following order:
  * <ol>
- * <li>{@link #configurationInit() }
- * <li>{@link #knowledgeSourceInit(org.protempa.KnowledgeSource) }
- * <li>{@link #handleInit(org.protempa.KnowledgeSource, org.protempa.query.Query)
- * }
- * <
- * li>{@link #handleStart() }
+ * <li>{@link #start() }
  * <li>{@link #handleQueryResult(java.lang.String, java.util.List, java.util.Map, java.util.Map, java.util.Map)
  * } called once per key
- * <li>{@link #handleFinish() }
+ * <li>{@link #finish() }
  * <li>{@link #close() }
  * </ol>
+ * 
+ * If an exception is thrown by {@link #start() } or {@link #handleQueryResult(java.lang.String, java.util.List, java.util.Map, java.util.Map, java.util.Map) },
+ * {@link #finish() } will be skipped.
+ * 
+ * If {@link #cancel() } is called before {@link #finish() } is called, the
+ * latter will be skipped.
+ * 
+ * The {@link #cancel() } method may be called in parallel
+ * with execution of any of the other methods in the interface. The 
+ * different methods of this interface may be called by different (albeit 
+ * synchronized) threads.
  *
  * @author Michel Mansour
  *
@@ -53,15 +58,10 @@ import org.protempa.query.Query;
 public interface QueryResultsHandler extends AutoCloseable {
 
     /**
-     * Validates this query results handler's specification against the provided
-     * knowledge source. This method cannot be called until after 
-     * {@link #knowledgeSourceInit(org.protempa.KnowledgeSource) }
-     * is, and it may not be called after {@link #close() }.
+     * Validates this query results handler's specification.
      *
      * @throws QueryResultsHandlerValidationFailedException if validation
      * failed.
-     * @throws KnowledgeSourceReadException if the knowledge source could not be
-     * read.
      */
     void validate()
             throws QueryResultsHandlerValidationFailedException;
@@ -80,23 +80,23 @@ public interface QueryResultsHandler extends AutoCloseable {
      * Implementations of {@link QueryResultsHandler} for which such inference
      * does not make sense may return an empty array.
      *
-     * This method may not be called until after {@link #handleInit(org.protempa.KnowledgeSource, org.protempa.query.Query)
-     * }
-     * is, and it may not be called after {@link #close() }.
-     *
      * @return an array of proposition id {@link String}. Guaranteed not
      * <code>null</code>.
+     * @throws org.protempa.dest.QueryResultsHandlerProcessingException if
+     * an error occurs.
      *
      */
     String[] getPropositionIdsNeeded() throws QueryResultsHandlerProcessingException;
 
     /**
      * Called by Protempa prior to the first invocation of
-     * {@link #handleQueryResult}. Implementers of this method may perform
-     * arbitrary processing related to the output of the handler, such as
-     * printing out headers of a file or extracting metadata from the knowledge
-     * source for the handler's output.
+     * {@link #handleQueryResult(java.lang.String, java.util.List, java.util.Map, java.util.Map, java.util.Map) }. 
+     * Implementers of this method may perform arbitrary processing related to 
+     * the output of the handler, such as printing out headers of a file or 
+     * extracting metadata for the handler's output.
      *
+     * @param cache a cache of all of the proposition definitions that were
+     * queried.
      * @throws QueryResultsHandlerProcessingException if any exceptions occur at
      * a lower level.
      */
@@ -138,4 +138,13 @@ public interface QueryResultsHandler extends AutoCloseable {
      */
     @Override
     void close() throws QueryResultsHandlerCloseException;
+    
+    /**
+     * Requests cancellation of whatever this object is currently doing. If
+     * {@link #finish() } has not been called yet, it will be skipped. If
+     * {@link #close() } has not been called yet, it will be called, and it 
+     * must finish cleaning up all resources associated with this query
+     * results handler.
+     */
+    void cancel();
 }

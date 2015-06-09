@@ -57,7 +57,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
     private final QueueObject poisonPill = new QueueObject();
     private final HandleQueryResultsThread handleQueryResultsThread;
 
-    public ExecutorWithResultsHandler(Query query, Destination resultsHandlerFactory, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws FinderException {
+    public ExecutorWithResultsHandler(Query query, Destination resultsHandlerFactory, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws ExecutorInitException {
         super(query, querySession, strategy, abstractionFinder);
         assert resultsHandlerFactory != null : "resultsHandlerFactory cannot be null";
         this.destination = resultsHandlerFactory;
@@ -66,7 +66,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
     }
 
     @Override
-    DataStreamingEventIterator<Proposition> newDataIterator() throws KnowledgeSourceReadException, DataSourceReadException {
+    DataStreamingEventIterator<Proposition> newDataIterator() throws ExecutorExecuteException {
         log(Level.INFO, "Retrieving data for query {0}", getQuery().getId());
         Set<String> inDataSourcePropIds = new HashSet<>();
         for (PropositionDefinition pd : getAllNarrowerDescendants()) {
@@ -77,51 +77,53 @@ abstract class ExecutorWithResultsHandler extends Executor {
         if (isLoggable(Level.FINER)) {
             log(Level.FINER, "Asking data source for {0} for query {1}", new Object[]{StringUtils.join(inDataSourcePropIds, ", "), getQuery().getId()});
         }
-        DataStreamingEventIterator<Proposition> itr = this.abstractionFinder.getDataSource().readPropositions(getKeyIds(), inDataSourcePropIds, getFilters(), getQuerySession(), this.resultsHandler);
+        DataStreamingEventIterator<Proposition> itr;
+        try {
+            itr = this.abstractionFinder.getDataSource().readPropositions(getKeyIds(), inDataSourcePropIds, getFilters(), getQuerySession(), this.resultsHandler);
+        } catch (DataSourceReadException ex) {
+            throw new ExecutorExecuteException(ex);
+        }
         return itr;
     }
 
     @Override
-    void init() throws FinderException {
+    void init() throws ExecutorInitException {
         String queryId = getQuery().getId();
         log(Level.FINE, "Initializing query results handler for query {0}", queryId);
         try {
             this.resultsHandler = this.destination.getQueryResultsHandler(getQuery(), this.abstractionFinder.getDataSource(), getKnowledgeSource());
             log(Level.FINE, "Done initalizing query results handler for query {0}", queryId);
             log(Level.FINE, "Validating query results handler for query {0}", queryId);
-            try {
-                this.resultsHandler.validate();
-            } catch (QueryResultsHandlerValidationFailedException ex) {
-                throw new QueryResultsHandlerInitException(ex);
-            }
+            this.resultsHandler.validate();
             log(Level.FINE, "Query results handler validated successfully for query {0}", queryId);
             addAllPropIds(resultsHandler.getPropositionIdsNeeded());
             try {
                 super.init();
-            } catch (FinderException fe) {
+            } catch (ExecutorInitException fe) {
                 this.failed = true;
                 throw fe;
             }
             this.resultsHandler.start(getAllNarrowerDescendants());
             this.handleQueryResultsThread.start();
-        } catch (QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | Error | RuntimeException ex) {
+        } catch (QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | Error | RuntimeException ex) {
             this.failed = true;
-            throw new FinderException(getQuery().getId(), ex);
+            throw new ExecutorInitException(ex);
         }
     }
 
     @Override
-    void execute() throws FinderException {
+    void execute() throws ExecutorExecuteException {
         try {
             super.execute();
-        } catch (FinderException ex) {
+        } catch (ExecutorExecuteException ex) {
             this.failed = true;
             throw ex;
         }
     }
 
     @Override
-    public void close() throws FinderException {
+    public void close() throws ExecutorCloseException {
+        super.close();
         try {
             try {
                 this.queue.put(this.poisonPill);
@@ -134,7 +136,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
                 log(Level.FINER, "Handle query results handler thread interrupted", ex);
             }
             
-            Throwable throwable = this.handleQueryResultsThread.getThrowable();
+            QueryResultsHandlerProcessingException throwable = this.handleQueryResultsThread.getThrowable();
             if (throwable != null) {
                 throw throwable;
             }
@@ -147,8 +149,8 @@ abstract class ExecutorWithResultsHandler extends Executor {
                 this.resultsHandler.close();
                 this.resultsHandler = null;
             }
-        } catch (Throwable ex) {
-            throw new FinderException(getQuery().getId(), ex);
+        } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerCloseException ex) {
+            throw new ExecutorCloseException(ex);
         } finally {
             if (this.resultsHandler != null) {
                 try {
@@ -160,10 +162,10 @@ abstract class ExecutorWithResultsHandler extends Executor {
         }
     }
 
-    final void processResults(Iterator<Proposition> propositions, DerivationsBuilder derivationsBuilder, String keyId) throws FinderException {
-        Throwable throwable = this.handleQueryResultsThread.getThrowable();
+    final void processResults(Iterator<Proposition> propositions, DerivationsBuilder derivationsBuilder, String keyId) throws QueryResultsHandlerProcessingException {
+        QueryResultsHandlerProcessingException throwable = this.handleQueryResultsThread.getThrowable();
         if (throwable != null) {
-            throw new FinderException(getQuery().getId(), throwable);
+            throw throwable;
         }
         if (derivationsBuilder == null) {
             derivationsBuilder = getDerivationsBuilder();
@@ -196,13 +198,13 @@ abstract class ExecutorWithResultsHandler extends Executor {
         }
     }
 
-    final void processResults(Iterator<Proposition> propositions, String keyId) throws FinderException {
+    final void processResults(Iterator<Proposition> propositions, String keyId) throws QueryResultsHandlerProcessingException {
         processResults(propositions, null, keyId);
     }
 
     private class HandleQueryResultsThread extends Thread {
 
-        private volatile Throwable throwable;
+        private volatile QueryResultsHandlerProcessingException throwable;
 
         @Override
         public void run() {
@@ -211,8 +213,11 @@ abstract class ExecutorWithResultsHandler extends Executor {
                 while (!isInterrupted() && ((qo = queue.take()) != poisonPill)) {
                     try {
                         resultsHandler.handleQueryResult(qo.keyId, qo.propositions, qo.forwardDerivations, qo.backwardDerivations, qo.refs);
-                    } catch (QueryResultsHandlerProcessingException | Error | RuntimeException t) {
-                        this.throwable = t;
+                    } catch (QueryResultsHandlerProcessingException ex) {
+                        this.throwable = ex;
+                        break;
+                    } catch (Error | RuntimeException t) {
+                        this.throwable = new QueryResultsHandlerProcessingException(t);
                         break;
                     }
                 }
@@ -221,8 +226,8 @@ abstract class ExecutorWithResultsHandler extends Executor {
             }
         }
 
-        public Throwable getThrowable() {
-            Throwable result = this.throwable;
+        public QueryResultsHandlerProcessingException getThrowable() {
+            QueryResultsHandlerProcessingException result = this.throwable;
             this.throwable = null;
             return result;
         }

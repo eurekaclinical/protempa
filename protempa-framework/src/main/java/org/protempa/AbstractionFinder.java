@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.StringUtils;
 import org.drools.StatefulSession;
 import org.protempa.dest.Destination;
 import org.protempa.query.Query;
@@ -148,9 +149,8 @@ final class AbstractionFinder {
         }
     }
 
-    void doFind(Query query, Destination destination,
-            QuerySession qs)
-            throws FinderException {
+    void doFind(Query query, Destination destination, QuerySession qs)
+            throws QueryException {
         assert destination != null : "destination cannot be null";
         ExecutorStrategy strategy;
         try {
@@ -161,27 +161,33 @@ final class AbstractionFinder {
             } else {
                 strategy = ExecutorStrategy.STATELESS;
             }
-        } catch (KnowledgeSourceReadException ex) {
-            throw new FinderException("Error interpreting query", ex);
+        } catch (QueryValidationException ex) {
+            throw new QueryException(query.getId(), ex);
         }
 
         try (Executor executor = new DoFindExecutor(query, destination, qs, strategy, this)) {
             executor.init();
             executor.execute();
+        } catch (ExecutorException ex) {
+            throw new QueryException(query.getId(), ex);
         }
     }
 
-    private boolean hasSomethingToAbstract(Query query) throws KnowledgeSourceReadException {
-        if (!this.knowledgeSource.readAbstractionDefinitions(query.getPropositionIds()).isEmpty()
-                || !this.knowledgeSource.readContextDefinitions(query.getPropositionIds()).isEmpty()) {
-            return true;
-        }
-        for (PropositionDefinition propDef : query.getPropositionDefinitions()) {
-            if (propDef instanceof AbstractionDefinition || propDef instanceof ContextDefinition) {
+    private boolean hasSomethingToAbstract(Query query) throws QueryValidationException {
+        try {
+            if (!this.knowledgeSource.readAbstractionDefinitions(query.getPropositionIds()).isEmpty()
+                    || !this.knowledgeSource.readContextDefinitions(query.getPropositionIds()).isEmpty()) {
                 return true;
             }
+            for (PropositionDefinition propDef : query.getPropositionDefinitions()) {
+                if (propDef instanceof AbstractionDefinition || propDef instanceof ContextDefinition) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (KnowledgeSourceReadException ex) {
+            throw new QueryValidationException("Invalid proposition id(s) " + StringUtils.join(query.getPropositionIds(), ", "), ex);
         }
-        return false;
     }
 
     Query buildQuery(QueryBuilder queryBuilder) throws QueryBuildException {
@@ -284,43 +290,51 @@ final class AbstractionFinder {
 //        return result;
 //    }
     void retrieveAndStoreData(Query query, QuerySession qs,
-            String persistentStoreEnvironment) throws FinderException {
+            String persistentStoreEnvironment) throws QueryException {
         assert query != null : "query cannot be null";
         try (Executor executor = new RetrieveAndStoreDataExecutor(query, qs, this, persistentStoreEnvironment)) {
             executor.init();
             executor.execute();
+        } catch (ExecutorException ex) {
+            throw new QueryException(query.getId(), ex);
         }
     }
 
     void processStoredResults(Query query, QuerySession qs,
             String propositionStoreEnvironment,
-            String workingMemoryStoreEnvironment) throws FinderException {
+            String workingMemoryStoreEnvironment) throws QueryException {
         assert query != null : "query cannot be null";
         try (Executor executor = new ProcessStoredResultsExecutor(query, qs, this, propositionStoreEnvironment, workingMemoryStoreEnvironment)) {
             executor.init();
             executor.execute();
+        } catch (ExecutorException ex) {
+            throw new QueryException(query.getId(), ex);
         }
     }
 
     void outputStoredResults(Query query,
             Destination destination, QuerySession qs,
-            String workingMemoryStoreEnvironment) throws FinderException {
+            String workingMemoryStoreEnvironment) throws QueryException {
         assert query != null : "query cannot be null";
         try (Executor executor = new OutputStoredResultsExecutor(query, destination, qs, this, workingMemoryStoreEnvironment)) {
             executor.init();
             executor.execute();
+        } catch (ExecutorException ex) {
+            throw new QueryException(query.getId(), ex);
         }
     }
 
     void processAndOutputStoredResults(Query query,
             Destination destination,
             QuerySession qs, final String propositionStoreEnvironment)
-            throws FinderException {
+            throws QueryException {
         assert query != null : "query cannot be null";
         try (Executor executor = new ProcessAndOutputStoredResultsExecutor(query, destination, qs,
                 this, propositionStoreEnvironment)) {
             executor.init();
             executor.execute();
+        } catch (ExecutorException ex) {
+            throw new QueryException(query.getId(), ex);
         }
     }
 

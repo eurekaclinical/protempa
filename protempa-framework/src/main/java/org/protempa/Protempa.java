@@ -281,10 +281,10 @@ public final class Protempa implements AutoCloseable {
      *
      * @param query a {@link Query}. Cannot be <code>null</code>.
      * @param destination a destination. Cannot be <code>null</code>.
-     * @throws FinderException if an error occurred during query.
+     * @throws QueryException if an error occurred during query.
      */
     public void execute(Query query, Destination destination)
-            throws FinderException {
+            throws QueryException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
         }
@@ -320,12 +320,12 @@ public final class Protempa implements AutoCloseable {
      * will hold the propositions retrieved from the data source
      * @param processStoreName the name of the persistent store that will hold
      * the results of PROTEMPA processing the retrieved propositions
-     * @throws FinderException if PROTEMPA fails to complete for any reason
+     * @throws QueryException if PROTEMPA fails to complete for any reason
      */
     public void executeWithPersistence(Query query,
             Destination destination,
             String retrievalStoreEnvironment,
-            String processStoreName) throws FinderException {
+            String processStoreName) throws QueryException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
         }
@@ -365,10 +365,10 @@ public final class Protempa implements AutoCloseable {
      * holding the propositions. This name should be provided to subsequent
      * calls to {@link #processResultsAndPersist(Query, String, String)} as the
      * name of the proposition data store.
-     * @throws FinderException if the retrieval could not complete
+     * @throws QueryException if the retrieval could not complete
      */
     public void retrieveDataAndPersist(Query query,
-            String retrievalStoreEnvironment) throws FinderException {
+            String retrievalStoreEnvironment) throws QueryException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
         }
@@ -403,11 +403,11 @@ public final class Protempa implements AutoCloseable {
      * one provided to {@link #retrieveDataAndPersist(Query, String)}.
      * @param workingMemoryStoreEnvironment the name of the persistent store to
      * use the processed data
-     * @throws FinderException if processing fails to complete
+     * @throws QueryException if processing fails to complete
      */
     public void processResultsAndPersist(Query query,
             String retrievalStoreEnvironment,
-            String workingMemoryStoreEnvironment) throws FinderException {
+            String workingMemoryStoreEnvironment) throws QueryException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
         }
@@ -444,10 +444,10 @@ public final class Protempa implements AutoCloseable {
      * @param workingMemoryEnvironment the name of the persistent store
      * containing the processed propositions; should be the same as the one
      * provided to {@link #processResultsAndPersist}.
-     * @throws FinderException if the output fails to complete
+     * @throws QueryException if the output fails to complete
      */
     public void outputResults(Query query, Destination destination,
-            String workingMemoryEnvironment) throws FinderException {
+            String workingMemoryEnvironment) throws QueryException {
         outputResults(query, Arrays.asSet(query.getKeyIds()),
                 Arrays.asSet(query.getPropositionIds()), destination,
                 workingMemoryEnvironment);
@@ -475,11 +475,11 @@ public final class Protempa implements AutoCloseable {
      * containing the processed propositions; should be the same as the one
      * provided to
      * {@link #processResultsAndPersist(Query, Set, Set, String, String)}
-     * @throws FinderException if the output fails to complete
+     * @throws QueryException if the output fails to complete
      */
     public void outputResults(Query query, Set<String> keyIds,
             Set<String> propositionIds, Destination resultHandler,
-            String workingMemoryStoreEnvironment) throws FinderException {
+            String workingMemoryStoreEnvironment) throws QueryException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
         }
@@ -508,10 +508,10 @@ public final class Protempa implements AutoCloseable {
      * @param propositionStoreEnvironment the name of the persistent store
      * containing the retrieved propositions; should be the same as the one
      * provided to {@link #retrieveDataAndPersist(Query, String)}
-     * @throws FinderException if the processing and output fail to complete
+     * @throws QueryException if the processing and output fail to complete
      */
     public void processResultsAndOutput(Query query, Destination destination,
-            String propositionStoreEnvironment) throws FinderException {
+            String propositionStoreEnvironment) throws QueryException {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
         }

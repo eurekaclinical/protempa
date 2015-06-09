@@ -47,7 +47,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
     @Override
     public void createRuleBase(Collection<PropositionDefinition> allNarrowerDescendants,
             DerivationsBuilder listener, QuerySession qs)
-            throws FinderException {
+            throws CreateRuleBaseException {
         ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
                 this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
@@ -59,14 +59,14 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
                 }
                 ruleCreator.visit(allNarrowerDescendants);
             } catch (ProtempaException ex) {
-                throw new FinderException(qs.getQuery().getId(), ex);
+                throw new CreateRuleBaseException(ex);
             }
         }
         try {
             this.ruleBase = new JBossRuleBaseFactory(ruleCreator,
                     createRuleBaseConfiguration(ruleCreator, allNarrowerDescendants)).newInstance();
         } catch (RuleBaseInstantiationException ex) {
-            throw new FinderException(qs.getQuery().getId(), ex);
+            throw new CreateRuleBaseException(ex);
         }
     }
 
