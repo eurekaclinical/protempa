@@ -66,7 +66,7 @@ class FixedWidthFileLineIterator extends AbstractFileLineIterator {
         }
         if (this.keyIdColumnSpecs.length > 0) {
             for (PlainColumnSpec colSpec : this.keyIdColumnSpecs) {
-                parseLinks(colSpec.getLinks(), this.keyId, -1);
+                parseLinks(kId, colSpec.getLinks(), this.keyId, -1);
             }
         }
         int colNum = 0;
@@ -79,7 +79,7 @@ class FixedWidthFileLineIterator extends AbstractFileLineIterator {
                  */
                 String column = String.copyValueOf(charArray, colSpec.getOffset(), Math.min(charArray.length - colSpec.getOffset(), colSpec.getLength())).trim();
                 String links = colSpec.getLinks();
-                parseLinks(links, column, colNum++);
+                parseLinks(kId, links, column, colNum++);
             }
         }
         return new DataStreamingEvent(kId, getData());

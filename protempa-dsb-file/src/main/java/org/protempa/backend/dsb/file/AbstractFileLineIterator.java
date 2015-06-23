@@ -41,7 +41,6 @@ import org.arp.javautil.collections.Collections;
 import org.protempa.DataSourceReadException;
 import org.protempa.DataStreamingEvent;
 import org.protempa.DataStreamingEventIterator;
-import org.protempa.proposition.DefaultLocalUniqueId;
 import org.protempa.SourceSystem;
 import org.protempa.proposition.AbstractProposition;
 import org.protempa.proposition.Constant;
@@ -161,7 +160,7 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
         this.requiredRowLength = requiredRowLength;
     }
 
-    protected void parseLinks(String links, String column, int colNum) throws DataSourceReadException {
+    protected void parseLinks(String keyId, String links, String column, int colNum) throws DataSourceReadException {
         if (links != null) {
             String tokens = "[ ]>.$";
             char[] tokensArr = tokens.toCharArray();
@@ -189,7 +188,7 @@ abstract class AbstractFileLineIterator implements DataStreamingEventIterator<Pr
                             } else {
                                 UniqueId uniqueId = new UniqueId(
                                         DataSourceBackendId.getInstance(this.id),
-                                        new DefaultLocalUniqueId());
+                                        new KeyIdPropIdColNumLocalUniqueId(keyId, propId, colNum));
                                 assert propType != null : "propType cannot be null";
                                 switch (propType) {
                                     case "Constant":

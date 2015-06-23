@@ -62,7 +62,7 @@ class DelimitedFileLineIterator extends AbstractFileLineIterator {
             }
             if (this.keyIdColumnSpecs != null) {
                 for (PlainColumnSpec colSpec : this.keyIdColumnSpecs) {
-                    parseLinks(colSpec.getLinks(), this.keyId, -1);
+                    parseLinks(kId, colSpec.getLinks(), this.keyId, -1);
                 }
             }
             int colNum = 0;
@@ -71,7 +71,7 @@ class DelimitedFileLineIterator extends AbstractFileLineIterator {
                     DelimitedColumnSpec colSpec = this.columnSpecs[i];
                     String column = line[colSpec.getIndex() - 1].trim();
                     String links = colSpec.getLinks();
-                    parseLinks(links, column, colNum++);
+                    parseLinks(kId, links, column, colNum++);
                 }
             }
             return new DataStreamingEvent(kId, getData());
