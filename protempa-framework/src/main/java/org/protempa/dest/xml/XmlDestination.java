@@ -21,7 +21,9 @@ package org.protempa.dest.xml;
  */
 
 import java.io.Writer;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
 import org.protempa.dest.AbstractDestination;
@@ -35,7 +37,6 @@ import org.protempa.query.Query;
  * @author Andrew Post
  */
 public final class XmlDestination extends AbstractDestination {
-    private final boolean inferPropositionIdsNeeded;
     private final String[] propIds;
     private final String initialPropId;
     private final Map<String, String> propOrder;
@@ -61,12 +62,6 @@ public final class XmlDestination extends AbstractDestination {
      */
     public XmlDestination(Writer writer, Map<String, String> propOrder,
             String initialPropId, String[] propIds) {
-        this(writer, propOrder, initialPropId, propIds, true);
-    }
-    
-    public XmlDestination(Writer writer, Map<String, String> propOrder,
-            String initialPropId, String[] propIds,
-            boolean inferPropositionIdsNeeded) {
         this.writer = writer;
         this.propOrder = propOrder;
         this.initialPropId = initialPropId;
@@ -75,7 +70,6 @@ public final class XmlDestination extends AbstractDestination {
         } else {
             this.propIds = propIds.clone();
         }
-        this.inferPropositionIdsNeeded = inferPropositionIdsNeeded;
     }
 
     @Override
@@ -83,7 +77,21 @@ public final class XmlDestination extends AbstractDestination {
         if (query.getQueryMode() == QueryMode.UPDATE) {
             throw new QueryResultsHandlerInitException("Update mode not supported");
         }
-        return new XmlQueryResultsHandler(this.writer, this.propOrder, this.initialPropId, this.propIds, this.inferPropositionIdsNeeded, knowledgeSource);
+        return new XmlQueryResultsHandler(this.writer, this.propOrder, this.initialPropId, this.propIds, knowledgeSource);
+    }
+    
+    /**
+     * Returns the proposition ids specified in the constructor.
+     *
+     * @return an array of proposition id {@link String}s. Guaranteed not
+     * <code>null</code>.
+     */
+    @Override
+    public String[] getSupportedPropositionIds(DataSource dataSource, KnowledgeSource knowledgeSource) {
+        Set<String> result = new HashSet<>();
+        result.add(this.initialPropId);
+        org.arp.javautil.arrays.Arrays.addAll(result, this.propIds);
+        return result.toArray(new String[result.size()]);
     }
 
 }

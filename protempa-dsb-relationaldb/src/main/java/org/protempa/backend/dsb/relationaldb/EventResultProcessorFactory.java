@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import org.protempa.proposition.Event;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 
@@ -54,11 +55,12 @@ class EventResultProcessorFactory extends SQLGenResultProcessorFactory<Event> {
     StreamingMainResultProcessor<Event> getStreamingInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
-            Map<String, ReferenceSpec> bidirectionalRefSpecs) {
+            Map<String, ReferenceSpec> bidirectionalRefSpecs,
+            Set<String> propIds) {
         EventStreamingResultProcessor resultProcessor =
                 new EventStreamingResultProcessor(entitySpec,
                         inboundRefSpecs, bidirectionalRefSpecs,
-                        dataSourceBackendId);
+                        dataSourceBackendId, propIds);
         return resultProcessor;
     }
     

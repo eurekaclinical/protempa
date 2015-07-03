@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.collections.Iterators;
 import org.protempa.dest.Destination;
+import org.protempa.dest.GetSupportedPropositionIdsException;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerInitException;
@@ -96,7 +97,9 @@ abstract class ExecutorWithResultsHandler extends Executor {
             log(Level.FINE, "Validating query results handler for query {0}", queryId);
             this.resultsHandler.validate();
             log(Level.FINE, "Query results handler validated successfully for query {0}", queryId);
-            addAllPropIds(resultsHandler.getPropositionIdsNeeded());
+            String[] supportedPropositionIds = destination.getSupportedPropositionIds(this.abstractionFinder.getDataSource(), this.abstractionFinder.getKnowledgeSource());
+            setPropIdsToRetain(supportedPropositionIds);
+
             try {
                 super.init();
             } catch (ExecutorInitException fe) {
@@ -105,7 +108,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
             }
             this.resultsHandler.start(getAllNarrowerDescendants());
             this.handleQueryResultsThread.start();
-        } catch (QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | Error | RuntimeException ex) {
+        } catch (QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | GetSupportedPropositionIdsException | Error | RuntimeException ex) {
             this.failed = true;
             throw new ExecutorInitException(ex);
         }
@@ -135,12 +138,12 @@ abstract class ExecutorWithResultsHandler extends Executor {
             } catch (InterruptedException ex) {
                 log(Level.FINER, "Handle query results handler thread interrupted", ex);
             }
-            
+
             QueryResultsHandlerProcessingException throwable = this.handleQueryResultsThread.getThrowable();
             if (throwable != null) {
                 throw throwable;
             }
-            
+
             // Might be null if init() fails.
             if (this.resultsHandler != null) {
                 if (!this.failed) {

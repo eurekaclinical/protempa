@@ -291,7 +291,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         String dataSourceBackendId = this.backend.getDataSourceBackendId();
         StreamingMainResultProcessor<Proposition> resultProcessor
                 = factory.getStreamingInstance(dataSourceBackendId, entitySpec,
-                        inboundRefSpecs, bidirRefSpecs);
+                        inboundRefSpecs, bidirRefSpecs, propIds);
 
         for (Set<Filter> filterSet : partitions) {
             generateAndExecuteSelectStreaming(entitySpec, null, propIds, filterSet,

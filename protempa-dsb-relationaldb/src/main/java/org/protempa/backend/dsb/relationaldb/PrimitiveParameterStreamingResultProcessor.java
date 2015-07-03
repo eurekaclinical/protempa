@@ -35,6 +35,7 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,12 +47,16 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
             EMPTY_PRIMPARAM_ITR = new EmptyDataStreamingEventIterator<>();
 
     private PrimParamIterator itr;
+    private final Set<String> queryPropIds;
 
     PrimitiveParameterStreamingResultProcessor(
             EntitySpec entitySpec, LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
-            Map<String, ReferenceSpec> bidirectionalRefSpecs, String dataSourceBackendId) {
+            Map<String, ReferenceSpec> bidirectionalRefSpecs, String dataSourceBackendId,
+            Set<String> propIds) {
         super(entitySpec, inboundRefSpecs, bidirectionalRefSpecs,
                 dataSourceBackendId);
+        assert propIds != null : "propIds cannot be null";
+        this.queryPropIds = propIds;
     }
 
     class PrimParamIterator extends PropositionResultSetIterator<PrimitiveParameter> {
@@ -141,6 +146,10 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
+            }
+            
+            if (!queryPropIds.contains(propId)) {
+                return;
             }
 
             PrimitiveParameter p = new PrimitiveParameter(propId, uniqueId);

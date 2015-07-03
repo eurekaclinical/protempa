@@ -34,6 +34,7 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,13 +45,16 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
             EMPTY_CONSTANT_ITR = new EmptyDataStreamingEventIterator<>();
     
     private ConstantIterator itr;
+    private final Set<String> queryPropIds;
 
     ConstantStreamingResultProcessor(
             EntitySpec entitySpec, LinkedHashMap<String,ReferenceSpec> inboundRefSpecs,
-            Map<String, ReferenceSpec> bidirectionalRefSpecs, String
-            dataSourceBackendId) {
+            Map<String, ReferenceSpec> bidirectionalRefSpecs, 
+            String dataSourceBackendId, Set<String> propIds) {
         super(entitySpec, inboundRefSpecs, bidirectionalRefSpecs,
                 dataSourceBackendId);
+        assert propIds != null : "propIds cannot be null";
+        this.queryPropIds = propIds;
     }
 
     class ConstantIterator extends PropositionResultSetIterator<Constant> {
@@ -124,6 +128,10 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
+            }
+            
+            if (!queryPropIds.contains(propId)) {
+                return;
             }
 
             Constant cp = new Constant(propId, uniqueId);

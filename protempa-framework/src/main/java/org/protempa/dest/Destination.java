@@ -54,4 +54,24 @@ public interface Destination {
      * @throws CollectStatisticsException if an error occurred.
      */
     Statistics getStatistics() throws StatisticsException;
+    
+    /**
+     * Infers from the query results handler's specification what propositions
+     * this query results handler supports in its output.
+     *
+     * When executing a processing job, Protempa uses the proposition ids thus
+     * returned to filter those that are queried. 
+     *
+     * Implementations of {@link QueryResultsHandler} for which such inference
+     * does not make sense may return an empty array, in which case, no
+     * filtering occurs.
+     *
+     * @return an array of proposition id {@link String}. Guaranteed not
+     * <code>null</code>.
+     * @throws org.protempa.dest.QueryResultsHandlerProcessingException if
+     * an error occurs.
+     *
+     */
+    String[] getSupportedPropositionIds(DataSource dataSource, KnowledgeSource knowledgeSource) throws GetSupportedPropositionIdsException;
+    
 }

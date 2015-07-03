@@ -20,6 +20,7 @@ package org.protempa.dest.keyloader;
  * #L%
  */
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
 import org.protempa.dest.AbstractDestination;
@@ -46,5 +47,14 @@ public class KeyLoaderDestination extends AbstractDestination {
         }
         return new KeyLoaderQueryResultsHandler(dataSource, knowledgeSource, this.criteria);
     }
-    
+
+    @Override
+    public String[] getSupportedPropositionIds(DataSource dataSource, KnowledgeSource knowledgeSource) {
+        if (this.criteria != null) {
+            return this.criteria.getPropositionIdsSpecified();
+        } else {
+            return ArrayUtils.EMPTY_STRING_ARRAY;
+        }
+    }
+
 }

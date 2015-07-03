@@ -4,6 +4,7 @@ import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.Destination;
+import org.protempa.dest.GetSupportedPropositionIdsException;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerInitException;
 import org.protempa.dest.Statistics;
@@ -54,6 +55,11 @@ public final class DeidentifiedDestination extends AbstractDestination {
     @Override
     public Statistics getStatistics() throws StatisticsException {
         return this.destination.getStatistics();
+    }
+
+    @Override
+    public String[] getSupportedPropositionIds(DataSource dataSource, KnowledgeSource knowledgeSource) throws GetSupportedPropositionIdsException {
+        return destination.getSupportedPropositionIds(dataSource, knowledgeSource);
     }
     
 }

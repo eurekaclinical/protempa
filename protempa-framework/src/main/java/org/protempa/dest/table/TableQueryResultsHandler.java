@@ -37,7 +37,6 @@ import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceCacheFactory;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.dest.AbstractQueryResultsHandler;
@@ -45,7 +44,6 @@ import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
-import org.protempa.valueset.ValueSet;
 
 /**
  *
@@ -60,13 +58,12 @@ public final class TableQueryResultsHandler
     private final boolean headerWritten;
     private final BufferedWriter out;
     private final Map<String, String> replace;
-    private final boolean inferPropositionIdsNeeded;
     private final KnowledgeSource knowledgeSource;
     private KnowledgeSourceCache ksCache;
 
     TableQueryResultsHandler(BufferedWriter out, char columnDelimiter,
             String[] rowPropositionIds, TableColumnSpec[] columnSpecs,
-            boolean headerWritten, boolean inferPropositionIdsNeeded,
+            boolean headerWritten, 
             KnowledgeSource knowledgeSource) {
         checkConstructorArgs(rowPropositionIds, columnSpecs);
         this.columnDelimiter = columnDelimiter;
@@ -78,7 +75,6 @@ public final class TableQueryResultsHandler
         this.replace = new HashMap<>();
         this.replace.put(null, "(null)");
         this.replace.put("", "(empty)");
-        this.inferPropositionIdsNeeded = inferPropositionIdsNeeded;
         this.knowledgeSource = knowledgeSource;
     }
 
@@ -173,32 +169,6 @@ public final class TableQueryResultsHandler
             } catch (IOException ex) {
                 throw new QueryResultsHandlerProcessingException("Could not write row" + ex);
             }
-        }
-    }
-
-    /**
-     * Infers a list of propositions to populate all of the specified
-     * columns.
-     *
-     * @return an array of proposition id {@link String}s.
-     */
-    @Override
-    public String[] getPropositionIdsNeeded() throws QueryResultsHandlerProcessingException {
-        if (this.inferPropositionIdsNeeded) {
-            Set<String> result = new HashSet<>();
-            org.arp.javautil.arrays.Arrays.addAll(result, this.rowPropositionIds);
-            for (TableColumnSpec columnSpec : this.columnSpecs) {
-                String[] inferredPropIds;
-                try {
-                    inferredPropIds = columnSpec.getInferredPropositionIds(this.knowledgeSource, this.rowPropositionIds);
-                } catch (KnowledgeSourceReadException ex) {
-                    throw new QueryResultsHandlerProcessingException("Error getting proposition ids needed", ex);
-                }
-                org.arp.javautil.arrays.Arrays.addAll(result, inferredPropIds);
-            }
-            return result.toArray(new String[result.size()]);
-        } else {
-            return ArrayUtils.EMPTY_STRING_ARRAY;
         }
     }
 

@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import org.protempa.proposition.PrimitiveParameter;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 
@@ -56,11 +57,12 @@ class PrimitiveParameterResultProcessorFactory extends
     StreamingMainResultProcessor<PrimitiveParameter> getStreamingInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
-            Map<String, ReferenceSpec> bidirectionalRefSpecs) {
+            Map<String, ReferenceSpec> bidirectionalRefSpecs,
+            Set<String> propIds) {
         PrimitiveParameterStreamingResultProcessor resultProcessor =
                 new PrimitiveParameterStreamingResultProcessor(entitySpec,
                         inboundRefSpecs, bidirectionalRefSpecs,
-                        dataSourceBackendId);
+                        dataSourceBackendId, propIds);
         return resultProcessor;
     }
 

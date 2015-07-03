@@ -39,7 +39,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
@@ -60,17 +59,15 @@ public final class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
     private final String initialPropId;
     private final Writer out;
     private final String[] propIds;
-    private final boolean inferPropositionIdsNeeded;
     private final KnowledgeSource knowledgeSource;
 
     XmlQueryResultsHandler(Writer writer, Map<String, String> propOrder,
             String initialPropId, String[] propIds,
-            boolean inferPropositionIdsNeeded, KnowledgeSource knowledgeSource) {
+            KnowledgeSource knowledgeSource) {
         this.out = writer;
         this.order = propOrder;
         this.initialPropId = initialPropId;
         this.propIds = propIds;
-        this.inferPropositionIdsNeeded = inferPropositionIdsNeeded;
         this.knowledgeSource = knowledgeSource;
     }
 
@@ -91,24 +88,6 @@ public final class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
             }
         } catch (KnowledgeSourceReadException ex) {
             throw new QueryResultsHandlerValidationFailedException("Error reading from knowledge source", ex);
-        }
-    }
-    
-    /**
-     * Returns the proposition ids specified in the constructor.
-     *
-     * @return an array of proposition id {@link String}s. Guaranteed
-     * not <code>null</code>.
-     */
-    @Override
-    public String[] getPropositionIdsNeeded() {
-        if (this.inferPropositionIdsNeeded) {
-            Set<String> result = new HashSet<>();
-            result.add(this.initialPropId);
-            org.arp.javautil.arrays.Arrays.addAll(result, this.propIds);
-            return result.toArray(new String[result.size()]);
-        } else {
-            return ArrayUtils.EMPTY_STRING_ARRAY;
         }
     }
 
@@ -322,7 +301,7 @@ public final class XmlQueryResultsHandler extends AbstractQueryResultsHandler {
             return null;
         }
     }
-    
+
     private void printDocument(Document doc) throws IOException, TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer = tf.newTransformer();

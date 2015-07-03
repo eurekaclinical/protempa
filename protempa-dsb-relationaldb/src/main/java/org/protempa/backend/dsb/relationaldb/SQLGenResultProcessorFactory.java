@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import org.protempa.proposition.Proposition;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -37,7 +38,8 @@ abstract class SQLGenResultProcessorFactory<P extends Proposition> {
     abstract StreamingMainResultProcessor<P> getStreamingInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
-            Map<String, ReferenceSpec> bidirectionalRefSpecs);
+            Map<String, ReferenceSpec> bidirectionalRefSpecs,
+            Set<String> propIds);
 
     abstract RefResultProcessor<P> getRefInstance(String dataSourceBackendId,
             EntitySpec entitySpec, ReferenceSpec referenceSpec,

@@ -87,11 +87,6 @@ public final class DeidentifiedQueryResultsHandler
     }
 
     @Override
-    public String[] getPropositionIdsNeeded() throws QueryResultsHandlerProcessingException {
-        return this.handler.getPropositionIdsNeeded();
-    }
-
-    @Override
     public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
         this.handler.start(cache);
     }

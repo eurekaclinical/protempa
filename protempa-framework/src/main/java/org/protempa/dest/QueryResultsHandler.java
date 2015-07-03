@@ -65,29 +65,7 @@ public interface QueryResultsHandler extends AutoCloseable {
      */
     void validate()
             throws QueryResultsHandlerValidationFailedException;
-
-    /**
-     * Infers from the query results handler's specification what propositions
-     * need to be queried in order to populate the query result handler's
-     * output.
-     *
-     * When executing a processing job, Protempa takes the union of the
-     * proposition ids returned from this API and the proposition ids specified
-     * in the Protempa {@link Query} when determining what propositions to
-     * retrieve from the underlying data sources and what propositions to
-     * compute.
-     *
-     * Implementations of {@link QueryResultsHandler} for which such inference
-     * does not make sense may return an empty array.
-     *
-     * @return an array of proposition id {@link String}. Guaranteed not
-     * <code>null</code>.
-     * @throws org.protempa.dest.QueryResultsHandlerProcessingException if
-     * an error occurs.
-     *
-     */
-    String[] getPropositionIdsNeeded() throws QueryResultsHandlerProcessingException;
-
+    
     /**
      * Called by Protempa prior to the first invocation of
      * {@link #handleQueryResult(java.lang.String, java.util.List, java.util.Map, java.util.Map, java.util.Map) }. 

@@ -19,13 +19,11 @@
  */
 package org.protempa.dest;
 
-import org.protempa.ProtempaException;
-
 /**
  *
  * @author Andrew Post
  */
-public class QueryResultsHandlerInitException extends ProtempaException {
+public class QueryResultsHandlerInitException extends DestinationException {
 
     public QueryResultsHandlerInitException() {
     }

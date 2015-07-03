@@ -37,6 +37,7 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,15 +48,18 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
             EMPTY_EVENT_ITR = new EmptyDataStreamingEventIterator<>();
 
     private EventIterator itr;
+    private final Set<String> queryPropIds;
     
 
     EventStreamingResultProcessor(
             EntitySpec entitySpec, LinkedHashMap<String,
             ReferenceSpec> inboundRefSpecs, Map<String, ReferenceSpec>
             bidirectionalRefSpecs,
-            String dataSourceBackendId) {
+            String dataSourceBackendId, Set<String> propIds) {
         super(entitySpec, inboundRefSpecs, bidirectionalRefSpecs,
                 dataSourceBackendId);
+        assert propIds != null : "propIds cannot be null";
+        this.queryPropIds = propIds;
     }
 
     class EventIterator extends PropositionResultSetIterator<Event> {
@@ -186,6 +190,10 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
+            }
+            
+            if (!queryPropIds.contains(propId)) {
+                return;
             }
 
             Event event = new Event(propId, uniqueId);

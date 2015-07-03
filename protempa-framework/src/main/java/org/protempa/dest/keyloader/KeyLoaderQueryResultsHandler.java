@@ -103,13 +103,4 @@ public class KeyLoaderQueryResultsHandler extends AbstractQueryResultsHandler {
         }
     }
     
-    @Override
-    public String[] getPropositionIdsNeeded() throws QueryResultsHandlerProcessingException {
-        if (this.criteria != null) {
-            return this.criteria.getPropositionIdsSpecified();
-        } else {
-            return ArrayUtils.EMPTY_STRING_ARRAY;
-        }
-    }
-
 }

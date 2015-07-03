@@ -20,9 +20,7 @@ package org.protempa.dest;
  * #L%
  */
 
-import org.protempa.ProtempaException;
-
-public class QueryResultsHandlerCloseException extends ProtempaException {
+public class QueryResultsHandlerCloseException extends DestinationException {
 
     public QueryResultsHandlerCloseException() {
     }

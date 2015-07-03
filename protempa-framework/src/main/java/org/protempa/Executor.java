@@ -22,9 +22,13 @@ package org.protempa;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -48,6 +52,7 @@ abstract class Executor implements AutoCloseable {
     private static final Logger LOGGER = ProtempaUtil.logger();
     private final Set<String> keyIds;
     private final Set<String> propIds;
+    private Set<String> propIdsToRetain;
     private final Set<And<String>> termIds;
     private final Filter filters;
     private final PropositionDefinition[] propDefs;
@@ -237,7 +242,7 @@ abstract class Executor implements AutoCloseable {
     }
 
     protected final Set<String> getPropIds() {
-        return propIds;
+        return this.propIds;
     }
 
     protected final Collection<PropositionDefinition> getAllNarrowerDescendants() {
@@ -252,8 +257,12 @@ abstract class Executor implements AutoCloseable {
         return this.keyIds;
     }
 
-    protected final void addAllPropIds(String[] propIds) {
-        org.arp.javautil.arrays.Arrays.addAll(this.propIds, propIds);
+    protected final void setPropIdsToRetain(String[] propIds) {
+        if (propIds == null || propIds.length == 0) {
+            this.propIdsToRetain = null;
+        } else {
+            this.propIdsToRetain = Arrays.asSet(propIds);
+        }
         this.allNarrowerDescendants = null;
     }
 
@@ -294,7 +303,8 @@ abstract class Executor implements AutoCloseable {
             log(Level.FINE, "Propositions to be queried for query {0} are {1}", new Object[]{query.getId(), StringUtils.join(this.propIds, ", ")});
         }
         try {
-            allNarrowerDescendants = ks.collectPropDefDescendantsUsingAllNarrower(false, propIds.toArray(new String[propIds.size()]));
+            retain(this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()])));
+
             if (isLoggable(Level.FINE)) {
                 Set<String> allNarrowerDescendantsPropIds = new HashSet<>();
                 for (PropositionDefinition pd : this.allNarrowerDescendants) {
@@ -317,6 +327,35 @@ abstract class Executor implements AutoCloseable {
                 default:
                     throw new AssertionError("Invalid execution strategy: " + strategy);
             }
+        }
+    }
+
+    private void retain(Set<PropositionDefinition> propDefs) {
+        if (this.propIdsToRetain != null) {
+            Map<String, PropositionDefinition> propDefMap = new HashMap<>();
+            for (PropositionDefinition and : propDefs) {
+                propDefMap.put(and.getId(), and);
+            }
+            Queue<String> propIds = new LinkedList<>(this.propIds);
+            String pid;
+            Set<PropositionDefinition> propDefsToKeep = new HashSet<>();
+            while ((pid = propIds.poll()) != null) {
+                if (this.propIdsToRetain.contains(pid)) {
+                    Queue<String> propIdsToKeep = new LinkedList<>();
+                    propIdsToKeep.add(pid);
+                    String pid2;
+                    while ((pid2 = propIdsToKeep.poll()) != null) {
+                        PropositionDefinition get = propDefMap.get(pid2);
+                        propDefsToKeep.add(get);
+                        Arrays.addAll(propIdsToKeep, get.getInverseIsA());
+                    }
+                } else {
+                    Arrays.addAll(propIds, propDefMap.get(pid).getInverseIsA());
+                }
+            }
+            allNarrowerDescendants = propDefsToKeep;
+        } else {
+            allNarrowerDescendants = propDefs;
         }
     }
 

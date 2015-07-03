@@ -1,6 +1,8 @@
 package org.protempa.dest;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.protempa.DataSource;
+import org.protempa.KnowledgeSource;
 
 /*
  * #%L
@@ -36,6 +38,11 @@ public abstract class AbstractDestination implements Destination {
     @Override
     public Statistics getStatistics() throws StatisticsException {
         return null;
+    }
+
+    @Override
+    public String[] getSupportedPropositionIds(DataSource dataSource, KnowledgeSource knowledgeSource) throws GetSupportedPropositionIdsException {
+        return ArrayUtils.EMPTY_STRING_ARRAY;
     }
     
 }

@@ -45,6 +45,7 @@ import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.Destination;
+import org.protempa.dest.GetSupportedPropositionIdsException;
 
 /**
  * Main PROTEMPA API.
@@ -241,7 +242,11 @@ public final class Protempa implements AutoCloseable {
             throws QueryBuildException {
         return this.abstractionFinder.buildQuery(queryBuilder);
     }
-
+    
+    public String[] getSupportedPropositionIds(Destination destination) throws GetSupportedPropositionIdsException {
+        return destination.getSupportedPropositionIds(this.abstractionFinder.getDataSource(), this.abstractionFinder.getKnowledgeSource());
+    }
+    
     public void detachSession(QuerySession querySession) {
         // TODO: implement me.
     }

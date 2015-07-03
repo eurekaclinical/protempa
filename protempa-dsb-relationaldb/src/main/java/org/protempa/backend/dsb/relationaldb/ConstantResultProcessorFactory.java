@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import org.protempa.proposition.Constant;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -57,11 +58,12 @@ class ConstantResultProcessorFactory
     StreamingMainResultProcessor<Constant> getStreamingInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
-            Map<String, ReferenceSpec> bidirectionalRefSpecs) {
+            Map<String, ReferenceSpec> bidirectionalRefSpecs, 
+            Set<String> propIds) {
         ConstantStreamingResultProcessor resultProcessor =
                 new ConstantStreamingResultProcessor(entitySpec,
                         inboundRefSpecs, bidirectionalRefSpecs,
-                        dataSourceBackendId);
+                        dataSourceBackendId, propIds);
         return resultProcessor;
     }
     

@@ -1,8 +1,10 @@
+package org.protempa.dest;
+
 /*
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2015 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,36 +19,28 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa.dest;
 
-import java.util.Collection;
-import org.protempa.PropositionDefinition;
+import org.protempa.ProtempaException;
 
 /**
  *
  * @author Andrew Post
  */
-public abstract class AbstractQueryResultsHandler
-        implements QueryResultsHandler {
-    
-    @Override
-    public void validate() throws QueryResultsHandlerValidationFailedException {
+public abstract class DestinationException extends ProtempaException {
+
+    DestinationException() {
     }
 
-    @Override
-    public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
+    DestinationException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    @Override
-    public void finish() throws QueryResultsHandlerProcessingException {
+    DestinationException(String message) {
+        super(message);
     }
 
-    @Override
-    public void close() throws QueryResultsHandlerCloseException {
-    }
-
-    @Override
-    public void cancel() {
+    DestinationException(Throwable cause) {
+        super(cause);
     }
     
 }
