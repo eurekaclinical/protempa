@@ -37,14 +37,22 @@ import org.protempa.query.Query;
  */
 public final class DeidentifiedDestination extends AbstractDestination {
     private final Destination destination;
+    private final DeidConfig deidConfig;
     
-    public DeidentifiedDestination(Destination destination) {
+    public DeidentifiedDestination(Destination destination, DeidConfig deidConfig) {
+        if (destination == null) {
+            throw new IllegalArgumentException("destination cannot be null");
+        }
+        if (deidConfig == null) {
+            throw new IllegalArgumentException("deidConfig cannot be null");
+        }
         this.destination = destination;
+        this.deidConfig = deidConfig;
     }
 
     @Override
     public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
-       return new DeidentifiedQueryResultsHandler(this.destination.getQueryResultsHandler(query, dataSource, knowledgeSource));
+       return new DeidentifiedQueryResultsHandler(this.destination.getQueryResultsHandler(query, dataSource, knowledgeSource), this.deidConfig);
     }
 
     @Override

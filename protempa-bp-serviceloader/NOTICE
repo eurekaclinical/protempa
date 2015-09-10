@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 This project includes:
+  Apache Commons Codec under Apache License, Version 2.0
   Apache Commons Collections under The Apache Software License, Version 2.0
   Apache Commons DBCP under The Apache Software License, Version 2.0
   Apache Commons Pool under The Apache Software License, Version 2.0

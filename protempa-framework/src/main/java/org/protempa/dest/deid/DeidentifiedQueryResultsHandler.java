@@ -19,7 +19,8 @@
  */
 package org.protempa.dest.deid;
 
-import java.text.NumberFormat;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -34,53 +35,28 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 
 /**
- * Implements de-identification. Only replaces key ids so far.
+ * Implements de-identification. Encrypts keyIds and offsets dates and times.
  *
  * @author Andrew Post
  */
 public final class DeidentifiedQueryResultsHandler
         implements QueryResultsHandler {
-
-    private static final ThreadLocal<NumberFormat> disguisedKeyFormat = new ThreadLocal<NumberFormat>() {
-        @Override
-        protected NumberFormat initialValue() {
-            return NumberFormat.getInstance();
-        }
-    };
-
+    
+    private final Encryption encryption;
     private final QueryResultsHandler handler;
-    private final Map<String, String> keyMapper;
-    private boolean keyIdDisguised;
-    private int nextDisguisedKey;
+    private final DeidConfig deidConfig;
+    private boolean handlerClosed;
+    private Map<String, PropositionDefinition> propDefCache;
 
-    DeidentifiedQueryResultsHandler(QueryResultsHandler handler) {
+    DeidentifiedQueryResultsHandler(QueryResultsHandler handler, DeidConfig deidConfig) {
         if (handler == null) {
             throw new IllegalArgumentException("handler cannot be null");
         }
         this.handler = handler;
-        this.nextDisguisedKey = 1;
-        this.keyIdDisguised = true;
-        this.keyMapper = new HashMap<>();
+        this.deidConfig = deidConfig;
+        this.encryption = deidConfig.getEncryptionInstance();
     }
 
-    /**
-     * Returns whether key ids will be disguised. Default is <code>true</code>.
-     *
-     * @return <code>true</code> or <code>false</code>.
-     */
-    public boolean isKeyIdDisguised() {
-        return keyIdDisguised;
-    }
-
-    /**
-     * Sets whether to disguise key ids.
-     *
-     * @param keyDisguised <code>true</code> or <code>false</code>.
-     */
-    public void setKeyIdDisguised(boolean keyDisguised) {
-        this.keyIdDisguised = keyDisguised;
-    }
-    
     @Override
     public void validate() throws QueryResultsHandlerValidationFailedException {
         this.handler.validate();
@@ -88,40 +64,57 @@ public final class DeidentifiedQueryResultsHandler
 
     @Override
     public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
+        this.propDefCache = new HashMap<>();
+        for (PropositionDefinition propDef : cache) {
+            this.propDefCache.put(propDef.getId(), propDef);
+        }
         this.handler.start(cache);
     }
 
     @Override
     public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
-        keyId = disguise(keyId);
-        this.handler.handleQueryResult(keyId, propositions, forwardDerivations, backwardDerivations, references);
+        String encryptedKeyId;
+        try {
+            encryptedKeyId = this.encryption.encrypt(keyId, keyId);
+        } catch (EncryptException ex) {
+            throw new QueryResultsHandlerProcessingException("Could not encrypt keyId", ex);
+        }
+        
+        List<Proposition> deidentifiedProps = new ArrayList<>(propositions.size());
+        PropositionDeidentifierVisitor visitor = new PropositionDeidentifierVisitor(this.encryption, this.propDefCache, this.deidConfig.getOffset(keyId));
+        visitor.setKeyId(keyId);
+        for (Proposition prop : propositions) {
+            prop.accept(visitor);
+            deidentifiedProps.add(visitor.getProposition());
+        }
+        
+        this.handler.handleQueryResult(encryptedKeyId, deidentifiedProps, forwardDerivations, backwardDerivations, references);
     }
 
     @Override
     public void finish() throws QueryResultsHandlerProcessingException {
         this.handler.finish();
-        this.keyMapper.clear();
     }
 
     @Override
     public void close() throws QueryResultsHandlerCloseException {
-        this.handler.close();
+        try {
+            this.handler.close();
+            this.handlerClosed = true;
+        } finally {
+            try {
+                this.deidConfig.close();
+            } catch (Exception ex) {
+                if (this.handlerClosed) {
+                    throw new QueryResultsHandlerCloseException("Error cleaning up deidentification state");
+                }
+            }
+        }
     }
 
     @Override
     public void cancel() {
         this.handler.cancel();
-    }
-
-    private String disguise(String keyId) {
-        if (this.keyIdDisguised) {
-            if (this.keyMapper.containsKey(keyId)) {
-                keyId = this.keyMapper.get(keyId);
-            } else {
-                keyId = disguisedKeyFormat.get().format(nextDisguisedKey++);
-            }
-        }
-        return keyId;
     }
 
 }

@@ -20,7 +20,10 @@
 package org.protempa;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -40,6 +43,7 @@ public final class PropertyDefinition implements Serializable {
     private final String declaringPropId;
     private final String propId;
     private Attribute[] attributes;
+    private Map<String, Attribute> attributeMap;
     
     public PropertyDefinition(String propId, String id, String displayName, 
             ValueType valueType, String valueSetId, String declaringPropId) {
@@ -85,6 +89,10 @@ public final class PropertyDefinition implements Serializable {
             this.attributes = EMPTY_ATTRIBUTES;
         } else {
             this.attributes = attributes.clone();
+        }
+        this.attributeMap = new HashMap<>();
+        for (Attribute attribute : this.attributes) {
+            this.attributeMap.put(attribute.getName(), attribute);
         }
     }
 
@@ -142,13 +150,12 @@ public final class PropertyDefinition implements Serializable {
         return attributes.clone();
     }
 
-    public Attribute attribute(String name) {
-        for (Attribute attribute : this.attributes) {
-            if (attribute.getName().equals(name)) {
-                return attribute;
-            }
-        }
-        return null;
+    public Attribute getAttribute(String name) {
+        return this.attributeMap.get(name);
+    }
+    
+    public boolean hasAttribute(String name) {
+        return getAttribute(name) != null;
     }
     
     @Override
