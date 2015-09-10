@@ -52,13 +52,13 @@ public class CSVSupport {
                     case 0:
                         break;
                     case 1:
-                        String col0 = cols[0].trim();
+                        String col0 = cols[0];
                         if (col0.length() > 1) {
                             cvs.put(col0, "");
                         }
                         break;
                     case 2:
-                        cvs.put(cols[1].trim(), cols[0].trim());
+                        cvs.put(cols[1], cols[0]);
                         break;
                     default:
                         throw new AssertionError("Invalid mapping in line " + i + ": mapping has length " + cols.length);
