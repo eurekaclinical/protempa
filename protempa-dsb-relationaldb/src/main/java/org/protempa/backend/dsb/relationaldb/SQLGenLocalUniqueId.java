@@ -32,6 +32,10 @@ import org.protempa.proposition.LocalUniqueId;
 final class SQLGenLocalUniqueId implements LocalUniqueId {
 
     private static final long serialVersionUID = 3956023315666447630L;
+
+    private static final Object NEXT_NUMERICAL_ID_LOCK = new Object();
+    private static int NEXT_NUMERICAL_ID = 0;
+
     private String entitySpecName;
     private String[] dbIds;
     private String id;
@@ -52,11 +56,15 @@ final class SQLGenLocalUniqueId implements LocalUniqueId {
             try {
                 this.numericalId = Integer.parseInt(this.dbIds[0]);
             } catch (NumberFormatException ex) {
-                this.numericalId = 1;
+                synchronized (NEXT_NUMERICAL_ID_LOCK) {
+                    this.numericalId = NEXT_NUMERICAL_ID++;
+                }
             }
         } else {
             if (maxWidths == null) {
-                this.numericalId = 1;
+                synchronized (NEXT_NUMERICAL_ID_LOCK) {
+                    this.numericalId = NEXT_NUMERICAL_ID++;
+                }
             } else {
                 assert dbIds.length == maxWidths.length : "maxWidths, if not null, must have the same number of values as dbIds";
                 StringBuilder db = new StringBuilder();
@@ -70,8 +78,9 @@ final class SQLGenLocalUniqueId implements LocalUniqueId {
                     }
                     this.numericalId = Integer.parseInt(db.toString());
                 } catch (NumberFormatException ex) {
-                    this.numericalId = 1;
-                    return;
+                    synchronized (NEXT_NUMERICAL_ID_LOCK) {
+                        this.numericalId = NEXT_NUMERICAL_ID++;
+                    }
                 }
             }
         }
