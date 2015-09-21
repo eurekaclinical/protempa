@@ -347,10 +347,11 @@ abstract class Executor implements AutoCloseable {
                     while ((pid2 = propIdsToKeep.poll()) != null) {
                         PropositionDefinition get = propDefMap.get(pid2);
                         propDefsToKeep.add(get);
-                        Arrays.addAll(propIdsToKeep, get.getInverseIsA());
+                        Arrays.addAll(propIdsToKeep, get.getChildren());
                     }
                 } else {
-                    Arrays.addAll(propIds, propDefMap.get(pid).getInverseIsA());
+                    PropositionDefinition get = propDefMap.get(pid);
+                    Arrays.addAll(propIds, get.getChildren());
                 }
             }
             allNarrowerDescendants = propDefsToKeep;

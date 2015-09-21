@@ -128,8 +128,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     }
 
     @Override
-    public void visit(ContextDefinition def)
-            throws KnowledgeSourceReadException {
+    public void visit(ContextDefinition def) {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
@@ -171,8 +170,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * knowledge source during rule creation.
      */
     @Override
-    public void visit(LowLevelAbstractionDefinition def)
-            throws KnowledgeSourceReadException {
+    public void visit(LowLevelAbstractionDefinition def) {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
@@ -224,7 +222,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     }
     
     @Override
-    public void visit(CompoundLowLevelAbstractionDefinition def) throws KnowledgeSourceReadException {
+    public void visit(CompoundLowLevelAbstractionDefinition def) {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
@@ -271,7 +269,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         private final ExtendedPropositionDefinition epd;
         private final Set<String> subtrees;
 
-        private GetMatchesPredicateExpression(ExtendedPropositionDefinition epd, JBossRuleCreator creator) throws KnowledgeSourceReadException {
+        private GetMatchesPredicateExpression(ExtendedPropositionDefinition epd, JBossRuleCreator creator) {
             assert epd != null : "epd cannot be null";
             this.epd = epd;
             this.subtrees = creator.collectPropIdDescendantsUsingInverseIsA(epd.getPropositionId());
@@ -299,7 +297,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * knowledge source during rule creation.
      */
     @Override
-    public void visit(HighLevelAbstractionDefinition def) throws KnowledgeSourceReadException {
+    public void visit(HighLevelAbstractionDefinition def) {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
         this.getRulesCalled = false;
         try {
@@ -490,15 +488,20 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         return this.rules.toArray(new Rule[this.rules.size()]);
     }
     
-    private Set<String> collectPropIdDescendantsUsingInverseIsA(String... propIds) throws KnowledgeSourceReadException {
+    private Set<String> collectPropIdDescendantsUsingInverseIsA(String... propIds) {
         Set<String> result = new HashSet<>();
         Queue<String> queue = new LinkedList<>();
         Arrays.addAll(queue, propIds);
         String propId;
         while ((propId = queue.poll()) != null) {
             if (result.add(propId)) {
-                String[] children = this.cache.get(propId).getInverseIsA();
-                Arrays.addAll(queue, children);
+                PropositionDefinition pd = this.cache.get(propId);
+                if (pd != null) {
+                    String[] children = pd.getInverseIsA();
+                    Arrays.addAll(queue, children);
+                } else {
+                    throw new AssertionError("PropositionDefinition " + propId + " not in cache");
+                }
             }
         }
         return result;
