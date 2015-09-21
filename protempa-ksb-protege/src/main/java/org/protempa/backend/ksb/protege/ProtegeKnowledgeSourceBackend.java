@@ -52,7 +52,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import org.arp.javautil.arrays.Arrays;
+import java.util.logging.Level;
 import org.protempa.ProtempaUtil;
 
 /**
@@ -445,13 +445,13 @@ public abstract class ProtegeKnowledgeSourceBackend
     }
 
     private Collection<String> collectPropDescendantsInt(boolean inDataSourceOnly, boolean narrower, String[] propIds) throws KnowledgeSourceReadException {
+        assert propIds != null : "propIds cannot be null";
         Slot inverseIsASlot = this.cm.getSlot("inverseIsA");
         Slot abstractedFromSlot = this.cm.getSlot("abstractedFrom");
         Slot inDataSourceSlot = this.cm.getSlot("inDataSource");
         Set<String> result = new HashSet<>();
-        Arrays.addAll(result, propIds);
         Queue<Instance> queue = new LinkedList<>();
-        for (String propId : result) {
+        for (String propId : propIds) {
             Instance instance = this.cm.getInstance(propId);
             if (instance == null) {
                 throw new KnowledgeSourceReadException("unknown proposition id " + propId);
@@ -477,7 +477,6 @@ public abstract class ProtegeKnowledgeSourceBackend
             for (Object obj : abstractedFroms) {
                 queue.add((Instance) obj);
             }
-
         }
         return result;
     }
