@@ -47,7 +47,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -64,6 +63,7 @@ import java.util.logging.Logger;
 public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     static final int FETCH_SIZE = 10000;
+    private static final int DEFAULT_QUERY_THREAD_COUNT = 4;
     private static final String readPropositionsSQL = "select {0} from {1} {2}";
     private ConnectionSpec connectionSpec;
     private final Map<String, List<EntitySpec>> primitiveParameterSpecs;
@@ -76,11 +76,13 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private GranularityFactory granularities;
     private UnitFactory units;
     private RelationalDbDataSourceBackend backend;
+    private int queryThreadCount;
 
     protected AbstractSQLGenerator() {
         this.primitiveParameterSpecs = new HashMap<>();
         this.eventSpecs = new HashMap<>();
         this.constantSpecs = new HashMap<>();
+        this.queryThreadCount = DEFAULT_QUERY_THREAD_COUNT;
     }
 
     @Override
@@ -99,6 +101,10 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             this.granularities = relationalDatabaseSpec.getGranularities();
             this.units = relationalDatabaseSpec.getUnits();
             this.connectionSpec = connectionSpec;
+            Integer queryThreadCountSetting = backend.getQueryThreadCount();
+            if (queryThreadCountSetting != null) {
+                this.queryThreadCount = queryThreadCountSetting;
+            }
         } else {
             throw new IllegalArgumentException(
                     "relationalDatabaseSpec cannot be null");
@@ -198,7 +204,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
 
         final List<StreamingIteratorPair> itrs = new ArrayList<>();
-        ExecutorService executor = Executors.newFixedThreadPool(4);
+        ExecutorService executor = Executors.newFixedThreadPool(this.queryThreadCount);
         List<Future<List<StreamingIteratorPair>>> list = new ArrayList<>();
         List<Connection> connections = new ArrayList<>();
         for (EntitySpec entitySpec : entitySpecToPropIds.keySet()) {

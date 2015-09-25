@@ -101,6 +101,7 @@ public abstract class RelationalDbDataSourceBackend
     private String keyLoaderKeyIdJoinKey;
     private FromBackendRelationalDatabaseSpecBuilder relationalDatabaseSpecBuilder;
     private MappingsFactory mappingsFactory;
+    private Integer queryThreadCount;
 
     public RelationalDbDataSourceBackend() {
         this.databaseAPI = DatabaseAPI.DRIVERMANAGER;
@@ -175,6 +176,15 @@ public abstract class RelationalDbDataSourceBackend
         return defaultKeyIdJoinKey;
     }
 
+    public Integer getQueryThreadCount() {
+        return queryThreadCount;
+    }
+
+    @BackendProperty
+    public void setQueryThreadCount(Integer queryThreadCount) {
+        this.queryThreadCount = queryThreadCount;
+    }
+    
     public String getKeyLoaderKeyIdTable() {
         if (this.keyLoaderKeyIdTable != null) {
             return this.keyLoaderKeyIdTable;
