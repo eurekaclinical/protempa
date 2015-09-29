@@ -69,13 +69,13 @@ class DelimitedFileLineIterator extends AbstractFileLineIterator {
             for (int i = 0; i < this.columnSpecs.length; i++) {
                 if (this.rowSpecs.length == 0 || this.rowSpecs[i] == getLineNumber()) {
                     DelimitedColumnSpec colSpec = this.columnSpecs[i];
-                    String column = line[colSpec.getIndex() - 1].trim();
+                    String column = line[colSpec.getIndex()].trim();
                     String links = colSpec.getLinks();
                     parseLinks(kId, links, column, colNum++);
                 }
             }
             return new DataStreamingEvent(kId, getData());
-        } catch (IOException ex) {
+        } catch (ArrayIndexOutOfBoundsException | IOException ex) {
             throw new DataSourceReadException(ex);
         }
     }

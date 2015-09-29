@@ -56,14 +56,13 @@ abstract class ExecutorWithResultsHandler extends Executor {
 
     private final BlockingQueue<QueueObject> queue = new ArrayBlockingQueue<>(1000);
     private final QueueObject poisonPill = new QueueObject();
-    private final HandleQueryResultsThread handleQueryResultsThread;
+    private HandleQueryResultsThread handleQueryResultsThread;
 
     public ExecutorWithResultsHandler(Query query, Destination resultsHandlerFactory, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws ExecutorInitException {
         super(query, querySession, strategy, abstractionFinder);
         assert resultsHandlerFactory != null : "resultsHandlerFactory cannot be null";
         this.destination = resultsHandlerFactory;
         this.abstractionFinder = abstractionFinder;
-        this.handleQueryResultsThread = new HandleQueryResultsThread();
     }
 
     @Override
@@ -90,10 +89,10 @@ abstract class ExecutorWithResultsHandler extends Executor {
     @Override
     void init() throws ExecutorInitException {
         String queryId = getQuery().getId();
-        log(Level.FINE, "Initializing query results handler for query {0}", queryId);
+        log(Level.FINE, "Initializing query results handler for query {0}...", queryId);
         try {
             this.resultsHandler = this.destination.getQueryResultsHandler(getQuery(), this.abstractionFinder.getDataSource(), getKnowledgeSource());
-            log(Level.FINE, "Done initalizing query results handler for query {0}", queryId);
+            log(Level.FINE, "Got query results handler for query {0}", queryId);
             log(Level.FINE, "Validating query results handler for query {0}", queryId);
             this.resultsHandler.validate();
             log(Level.FINE, "Query results handler validated successfully for query {0}", queryId);
@@ -106,11 +105,15 @@ abstract class ExecutorWithResultsHandler extends Executor {
                 this.failed = true;
                 throw fe;
             }
+            log(Level.FINE, "Calling query results handler start for query {0}...", queryId);
             this.resultsHandler.start(getAllNarrowerDescendants());
+            log(Level.FINE, "Query results handler started for query {0}", queryId);
+            this.handleQueryResultsThread = new HandleQueryResultsThread();
             this.handleQueryResultsThread.start();
+            log(Level.FINE, "Query results handler for query {0} waiting for results...", queryId);
         } catch (QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | GetSupportedPropositionIdsException | Error | RuntimeException ex) {
             this.failed = true;
-            throw new ExecutorInitException(ex);
+            throw new ExecutorInitException("Processing query " + queryId + " failed", ex);
         }
     }
 
@@ -128,20 +131,22 @@ abstract class ExecutorWithResultsHandler extends Executor {
     public void close() throws ExecutorCloseException {
         super.close();
         try {
-            try {
-                this.queue.put(this.poisonPill);
-            } catch (InterruptedException ex) {
-                log(Level.FINER, "Handle query results handler thread interrupted", ex);
-            }
-            try {
-                this.handleQueryResultsThread.join();
-            } catch (InterruptedException ex) {
-                log(Level.FINER, "Handle query results handler thread interrupted", ex);
-            }
+            if (this.handleQueryResultsThread != null) {
+                try {
+                    this.queue.put(this.poisonPill);
+                } catch (InterruptedException ex) {
+                    log(Level.FINER, "Handle query results handler thread interrupted", ex);
+                }
+                try {
+                    this.handleQueryResultsThread.join();
+                } catch (InterruptedException ex) {
+                    log(Level.FINER, "Handle query results handler thread interrupted", ex);
+                }
 
-            QueryResultsHandlerProcessingException throwable = this.handleQueryResultsThread.getThrowable();
-            if (throwable != null) {
-                throw throwable;
+                QueryResultsHandlerProcessingException throwable = this.handleQueryResultsThread.getThrowable();
+                if (throwable != null) {
+                    throw throwable;
+                }
             }
 
             // Might be null if init() fails.

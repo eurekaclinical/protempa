@@ -169,6 +169,7 @@ final class AbstractionFinder {
             executor.init();
             executor.execute();
         } catch (ExecutorException ex) {
+            ProtempaUtil.logger().log(Level.FINE, "Error during execution of query {0}", query.getId());
             throw new QueryException(query.getId(), ex);
         }
     }

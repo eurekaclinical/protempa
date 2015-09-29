@@ -25,9 +25,13 @@ package org.protempa;
  * @author Andrew Post
  */
 public class ExecutorInitException extends ExecutorException {
-
+    
     ExecutorInitException(Throwable cause) {
         super(cause);
+    }
+
+    ExecutorInitException(String message, Throwable cause) {
+        super(message, cause);
     }
     
 }

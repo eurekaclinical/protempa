@@ -141,7 +141,7 @@ abstract class Executor implements AutoCloseable {
             assert itr != null : "itr cannot be null";
             this.itr = itr;
             this.counter = new ExecutorCounter();
-            this.exceptions = new ArrayList<>();
+            this.exceptions = Collections.synchronizedList(new ArrayList<ExecutorExecuteException>());
         }
 
         final void process() throws ExecutorExecuteException {
@@ -289,6 +289,10 @@ abstract class Executor implements AutoCloseable {
     final void log(Level level, String msg, Object param) {
         LOGGER.log(level, msg, param);
     }
+    
+    final void log(Level level, String msg, Throwable throwable) {
+        LOGGER.log(level, msg, throwable);
+    }
 
     final void log(Level level, String msg) {
         LOGGER.log(level, msg);
@@ -317,6 +321,7 @@ abstract class Executor implements AutoCloseable {
         }
 
         if (strategy != null) {
+            log(Level.FINE, "Setting execution strategy...");
             switch (strategy) {
                 case STATELESS:
                     executionStrategy = newStatelessStrategy();
@@ -327,6 +332,7 @@ abstract class Executor implements AutoCloseable {
                 default:
                     throw new AssertionError("Invalid execution strategy: " + strategy);
             }
+            log(Level.FINE, "Execution strategy is set to {0}", strategy);
         }
     }
 
