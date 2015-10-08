@@ -66,6 +66,7 @@ public final class DataInserter {
      */
     public DataInserter(String connectionString) throws SQLException {
         this.connection = DriverManager.getConnection(connectionString);
+        this.connection.setAutoCommit(false);
     }
 
     /**

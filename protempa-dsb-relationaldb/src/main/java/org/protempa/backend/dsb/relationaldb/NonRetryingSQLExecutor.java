@@ -33,16 +33,17 @@ import org.protempa.DataSourceReadException;
 public class NonRetryingSQLExecutor extends SQLExecutor {
 
     private Connection connection;
+    private boolean autoCommit;
 
     NonRetryingSQLExecutor(ConnectionSpec connectionSpec,
             String backendNameForMessages, Integer timeout)
             throws SQLException {
         super(connectionSpec, backendNameForMessages, timeout);
         this.connection = connectionSpec.getOrCreate();
-        this.connection.setAutoCommit(false);
+        this.autoCommit = this.connection.getAutoCommit();
     }
-    
-    NonRetryingSQLExecutor(Connection connection, 
+
+    NonRetryingSQLExecutor(Connection connection,
             String backendNameForMessages, Integer timeout) {
         super(null, backendNameForMessages, timeout);
         this.connection = connection;
@@ -89,8 +90,10 @@ public class NonRetryingSQLExecutor extends SQLExecutor {
     void close() throws SQLException {
         boolean closedSuccessfully = false;
         try {
-            this.connection.commit();
-            
+            if (!this.autoCommit) {
+                this.connection.commit();
+            }
+
             this.connection.close();
             closedSuccessfully = true;
         } finally {

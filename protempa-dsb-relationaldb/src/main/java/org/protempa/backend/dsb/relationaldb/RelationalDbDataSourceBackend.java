@@ -109,7 +109,7 @@ public abstract class RelationalDbDataSourceBackend
         this.dryRun
                 = Boolean.getBoolean(SQLGenUtil.SYSTEM_PROPERTY_SKIP_EXECUTION);
     }
-    
+
     public MappingsFactory getMappingsFactory() {
         return mappingsFactory;
     }
@@ -121,7 +121,7 @@ public abstract class RelationalDbDataSourceBackend
             this.mappingsFactory = mappingsFactory;
         }
     }
-    
+
     @BackendProperty(propertyName = "mappings")
     public void parseMappingsFactory(String pathname) {
         this.mappingsFactory = new DelimFileMappingsFactory(pathname);
@@ -184,7 +184,7 @@ public abstract class RelationalDbDataSourceBackend
     public void setQueryThreadCount(Integer queryThreadCount) {
         this.queryThreadCount = queryThreadCount;
     }
-    
+
     public String getKeyLoaderKeyIdTable() {
         if (this.keyLoaderKeyIdTable != null) {
             return this.keyLoaderKeyIdTable;
@@ -385,7 +385,7 @@ public abstract class RelationalDbDataSourceBackend
         this.sqlGenerator = null;
         this.password = password;
     }
-    
+
     public boolean isInKeySetMode() {
         return this.keyLoaderKeyIdSchema != null || this.keyLoaderKeyIdTable != null;
     }
@@ -438,6 +438,13 @@ public abstract class RelationalDbDataSourceBackend
                         }
                         stmtBuilder.append(getKeyLoaderKeyIdTable());
                         stmt.execute(stmtBuilder.toString());
+                        con.commit();
+                    } catch (SQLException sqlex) {
+                        try {
+                            con.rollback();
+                        } catch (SQLException ignore) {
+                            sqlex.addSuppressed(ignore);
+                        }
                     }
                 }
             } catch (InvalidConnectionSpecArguments | SQLException ex) {
@@ -454,35 +461,54 @@ public abstract class RelationalDbDataSourceBackend
     public void writeKeys(Set<String> keyIds) throws DataSourceWriteException {
         if (isInKeySetMode()) {
             int batchSize = 1000;
+            int commitSize = 10000;
             try {
                 ConnectionSpec connectionSpecInstance
                         = getConnectionSpecInstance();
 
                 try (Connection con = connectionSpecInstance.getOrCreate()) {
-                    int i = 0;
-                    List<String> subKeyIds = new ArrayList<>(batchSize);
-                    String stmt = buildWriteKeysInsertStmt(batchSize);
-                    SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
-                    try (PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
-                        for (String keyId : keyIds) {
-                            subKeyIds.add(keyId);
-                            if (++i % batchSize == 0) {
-                                for (int j = 0, n = subKeyIds.size(); j < n; j++) {
-                                    prepareStatement.setObject(j + 1, subKeyIds.get(j));
+                    try {
+                        int i = 0;
+                        List<String> subKeyIds = new ArrayList<>(batchSize);
+                        String stmt = buildWriteKeysInsertStmt(batchSize);
+                        SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
+                        try (PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
+                            for (String keyId : keyIds) {
+                                subKeyIds.add(keyId);
+                                if (++i % batchSize == 0) {
+                                    for (int j = 0, n = subKeyIds.size(); j < n; j++) {
+                                        prepareStatement.setObject(j + 1, subKeyIds.get(j));
+                                    }
+                                    prepareStatement.execute();
+                                }
+                                if (i >= commitSize) {
+                                    con.commit();
+                                    commitSize = 0;
+                                }
+                            }
+                        }
+                        if (!subKeyIds.isEmpty()) {
+                            stmt = buildWriteKeysInsertStmt(subKeyIds.size());
+                            SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
+                            i = 0;
+                            try (PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
+                                for (String subKeyId : subKeyIds) {
+                                    prepareStatement.setObject(++i, subKeyId);
                                 }
                                 prepareStatement.execute();
                             }
                         }
-                    }
-                    if (!subKeyIds.isEmpty()) {
-                        stmt = buildWriteKeysInsertStmt(subKeyIds.size());
-                        SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
-                        i = 0;
-                        try (PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
-                            for (String subKeyId : subKeyIds) {
-                                prepareStatement.setObject(++i, subKeyId);
+                        if (i >= commitSize) {
+                            con.commit();
+                            commitSize = 0;
+                        }
+                    } catch (SQLException ex) {
+                        if (commitSize > 0) {
+                            try {
+                                con.rollback();
+                            } catch (SQLException ignore) {
+                                ex.addSuppressed(ignore);
                             }
-                            prepareStatement.execute();
                         }
                     }
                 }
@@ -614,9 +640,9 @@ public abstract class RelationalDbDataSourceBackend
     protected ConnectionSpec getConnectionSpecInstance()
             throws InvalidConnectionSpecArguments {
         return this.databaseAPI.newConnectionSpecInstance(
-                this.databaseId, this.username, this.password);
+                this.databaseId, this.username, this.password, false);
     }
-
+    
     protected abstract EntitySpec[] constantSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException;
 
     protected abstract EntitySpec[] eventSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException;
