@@ -52,7 +52,11 @@ public final class DeidentifiedDestination extends AbstractDestination {
 
     @Override
     public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
-       return new DeidentifiedQueryResultsHandler(this.destination.getQueryResultsHandler(query, dataSource, knowledgeSource), this.deidConfig);
+        try {
+            return new DeidentifiedQueryResultsHandler(this.destination.getQueryResultsHandler(query, dataSource, knowledgeSource), this.deidConfig);
+        } catch (EncryptionInitException ex) {
+            throw new QueryResultsHandlerInitException("Error initializing deidentifier", ex);
+        }
     }
 
     @Override

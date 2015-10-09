@@ -58,7 +58,7 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
     private final Encryption encryption;
     private final Integer offsetInSeconds;
     private final Map<String, PropositionDefinition> propDefCache;
-    private final Calendar cal;
+    private static final Calendar CAL = Calendar.getInstance();
     private String keyId;
 
     PropositionDeidentifierVisitor(Encryption encryption, Map<String, PropositionDefinition> propDefCache, Integer offsetInSeconds) {
@@ -68,7 +68,6 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
         this.encryption = encryption;
         this.propDefCache = propDefCache;
         this.offsetInSeconds = offsetInSeconds;
-        this.cal = Calendar.getInstance();
     }
 
     public String getKeyId() {
@@ -98,10 +97,12 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
         deidentifiedPrimitiveParameter.setGranularity(primitiveParameter.getGranularity());
         deidentifiedPrimitiveParameter.setValue(primitiveParameter.getValue());
         if (this.offsetInSeconds != null) {
-            this.cal.setTime(AbsoluteTimeGranularityUtil.asDate(primitiveParameter.getPosition()));
-            this.cal.add(Calendar.SECOND, this.offsetInSeconds);
-            Date time = this.cal.getTime();
-            deidentifiedPrimitiveParameter.setPosition(AbsoluteTimeGranularityUtil.asPosition(time));
+            synchronized (CAL) {
+                CAL.setTime(AbsoluteTimeGranularityUtil.asDate(primitiveParameter.getPosition()));
+                CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                Date time = CAL.getTime();
+                deidentifiedPrimitiveParameter.setPosition(AbsoluteTimeGranularityUtil.asPosition(time));
+            }
         } else {
             deidentifiedPrimitiveParameter.setPosition(primitiveParameter.getPosition());
         }
@@ -126,27 +127,29 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
 
     private Interval doOffsetInterval(Interval interval) {
         if (this.offsetInSeconds != null) {
-            Date minStartDate = AbsoluteTimeGranularityUtil.asDate(interval.getMinStart());
-            this.cal.setTime(minStartDate);
-            this.cal.add(Calendar.SECOND, this.offsetInSeconds);
-            minStartDate = this.cal.getTime();
+            synchronized (CAL) {
+                Date minStartDate = AbsoluteTimeGranularityUtil.asDate(interval.getMinStart());
+                CAL.setTime(minStartDate);
+                CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                minStartDate = CAL.getTime();
 
-            Date maxStartDate = AbsoluteTimeGranularityUtil.asDate(interval.getMaxStart());
-            this.cal.setTime(maxStartDate);
-            this.cal.add(Calendar.SECOND, this.offsetInSeconds);
-            maxStartDate = this.cal.getTime();
+                Date maxStartDate = AbsoluteTimeGranularityUtil.asDate(interval.getMaxStart());
+                CAL.setTime(maxStartDate);
+                CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                maxStartDate = CAL.getTime();
 
-            Date minFinishDate = AbsoluteTimeGranularityUtil.asDate(interval.getMinFinish());
-            this.cal.setTime(minFinishDate);
-            this.cal.add(Calendar.SECOND, this.offsetInSeconds);
-            minFinishDate = this.cal.getTime();
+                Date minFinishDate = AbsoluteTimeGranularityUtil.asDate(interval.getMinFinish());
+                CAL.setTime(minFinishDate);
+                CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                minFinishDate = CAL.getTime();
 
-            Date maxFinishDate = AbsoluteTimeGranularityUtil.asDate(interval.getMaxFinish());
-            this.cal.setTime(maxFinishDate);
-            this.cal.add(Calendar.SECOND, this.offsetInSeconds);
-            maxFinishDate = this.cal.getTime();
+                Date maxFinishDate = AbsoluteTimeGranularityUtil.asDate(interval.getMaxFinish());
+                CAL.setTime(maxFinishDate);
+                CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                maxFinishDate = CAL.getTime();
 
-            return INTERVAL_FACTORY.getInstance(minStartDate, maxStartDate, interval.getStartGranularity(), minFinishDate, maxFinishDate, interval.getFinishGranularity());
+                return INTERVAL_FACTORY.getInstance(minStartDate, maxStartDate, interval.getStartGranularity(), minFinishDate, maxFinishDate, interval.getFinishGranularity());
+            }
         } else {
             return interval;
         }
@@ -169,10 +172,10 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
                 Attribute hipaaIdTypeAttr = propertyDefinition.getAttribute(DeidAttributes.HIPAA_IDENTIFIER_TYPE);
                 Value propertyValue = prop.getProperty(name);
                 if (this.offsetInSeconds != null && propertyDefinition.getValueType() == ValueType.DATEVALUE) {
-                    this.cal.setTime(((DateValue) propertyValue).getDate());
-                    this.cal.add(Calendar.SECOND, this.offsetInSeconds);
-                    deidentifiedProp.setProperty(name, DateValue.getInstance(this.cal.getTime()));
-                } else if (hipaaIdTypeAttr != null && DeidAttributes.AGE_IN_YEARS.equals(hipaaIdTypeAttr.getValue())) {
+                    this.CAL.setTime(((DateValue) propertyValue).getDate());
+                    this.CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                    deidentifiedProp.setProperty(name, DateValue.getInstance(this.CAL.getTime()));
+                } else if (hipaaIdTypeAttr != null && DeidAttributes.AGE.equals(hipaaIdTypeAttr.getValue())) {
                     NumericalValue numericalValue = (NumericalValue) propertyValue;
                     if (numericalValue.compare(NumberValue.getInstance(90)) == ValueComparator.GREATER_THAN_OR_EQUAL_TO) {
                         deidentifiedProp.setProperty(name, new InequalityNumberValue(ValueComparator.GREATER_THAN_OR_EQUAL_TO, 90));
@@ -185,6 +188,8 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
                     } catch (EncryptException ex) {
                         throw new AssertionError(ex);
                     }
+                } else {
+                    deidentifiedProp.setProperty(name, propertyValue);
                 }
             }
         }

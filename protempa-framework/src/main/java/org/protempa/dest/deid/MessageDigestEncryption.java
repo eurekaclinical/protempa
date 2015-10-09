@@ -1,7 +1,9 @@
 package org.protempa.dest.deid;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.apache.commons.codec.binary.Base64;
 
 /*
  * #%L
@@ -27,44 +29,44 @@ import java.security.NoSuchAlgorithmException;
  * @author Andrew Post
  */
 public class MessageDigestEncryption implements Encryption {
-    private final MessageDigestDeidConfig deidConfig;
 
-    public MessageDigestEncryption(MessageDigestDeidConfig deidConfig) {
+    private final MessageDigestDeidConfig deidConfig;
+    private final MessageDigest messageDigest;
+
+    public MessageDigestEncryption(MessageDigestDeidConfig deidConfig) throws EncryptionInitException {
         if (deidConfig == null) {
             throw new IllegalArgumentException("deidConfig cannot be null");
         }
         this.deidConfig = deidConfig;
+        String algorithm = this.deidConfig.getAlgorithm();
+        try {
+            messageDigest = MessageDigest.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException ex) {
+            throw new EncryptionInitException(ex);
+        }
     }
 
     @Override
-    public String encrypt(String keyId, String inData) throws EncryptException {
+    public String encrypt(String keyId, String inData) {
         if (keyId == null) {
             throw new IllegalArgumentException("keyId cannot be null");
         }
-        String algorithm = this.deidConfig.getAlgorithm();
-        try {
-            return encrypt(keyId, MessageDigest.getInstance(algorithm), inData);
-        } catch (NoSuchAlgorithmException ex) {
-            throw new EncryptException(ex);
-        }
-    }
-    
-    private String encrypt(String keyId, MessageDigest digest, String inData) {
-        assert keyId != null : "keyId cannot be null";
-        assert digest != null : "digest cannot be null";
+
         if (inData == null) {
             return null;
         }
-        byte[] salt = this.deidConfig.getSalt(keyId);
-        if (salt != null) {
-            digest.update(salt);
+        synchronized (this.messageDigest) {
+            byte[] salt = this.deidConfig.getSalt(keyId);
+            if (salt != null) {
+                this.messageDigest.update(salt);
+            }
+            try {
+                byte[] digested = this.messageDigest.digest(inData.getBytes("UTF-8"));
+                return Base64.encodeBase64String(digested);
+            } catch (UnsupportedEncodingException ex) {
+                throw new AssertionError("UTF-8 should be supported but is not");
+            }
         }
-        digest.update(inData.getBytes());
-        StringBuilder hexBuilder = new StringBuilder();
-        for (byte b : digest.digest()) {
-            hexBuilder.append(Integer.toHexString(b & 0x00FF));
-        }
-        return hexBuilder.toString();
     }
 
 }

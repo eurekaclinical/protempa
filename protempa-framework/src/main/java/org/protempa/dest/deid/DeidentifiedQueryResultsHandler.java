@@ -19,7 +19,6 @@
  */
 package org.protempa.dest.deid;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,7 +47,7 @@ public final class DeidentifiedQueryResultsHandler
     private boolean handlerClosed;
     private Map<String, PropositionDefinition> propDefCache;
 
-    DeidentifiedQueryResultsHandler(QueryResultsHandler handler, DeidConfig deidConfig) {
+    DeidentifiedQueryResultsHandler(QueryResultsHandler handler, DeidConfig deidConfig) throws EncryptionInitException {
         if (handler == null) {
             throw new IllegalArgumentException("handler cannot be null");
         }

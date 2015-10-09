@@ -19,6 +19,7 @@ package org.protempa.dest.deid;
  * limitations under the License.
  * #L%
  */
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +28,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * Utility class for encrypting and decrypting strings. Uses the
@@ -37,31 +39,28 @@ import javax.crypto.NoSuchPaddingException;
  */
 public class CipherEncryption implements Encryption {
 
-    private static final String stringvector = "0123456789ABCDEF";
-    private static final byte[] bytevector = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
-    private static final String pseudo[] = {"0", "1", "2",
-        "3", "4", "5", "6", "7", "8",
-        "9", "A", "B", "C", "D", "E",
-        "F"};
-
-    private final Object cipherLock;
     private Cipher encryptCipher;
     private Cipher decryptCipher;
     private final CipherDeidConfig deidConfig;
+    private final KeyGenerator keygen;
 
-    public CipherEncryption(CipherDeidConfig deidConfig) {
+    public CipherEncryption(CipherDeidConfig deidConfig) throws EncryptionInitException {
         if (deidConfig == null) {
             throw new IllegalArgumentException("deidConfig cannot be null");
         }
         this.deidConfig = deidConfig;
-        this.cipherLock = new Object();
+        try {
+            this.keygen = KeyGenerator.getInstance(this.deidConfig.getKeyAlgorithm());
+        } catch (NoSuchAlgorithmException ex) {
+            throw new EncryptionInitException(ex);
+        }
+;
     }
 
     private void initCiphers() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
-        synchronized (this.cipherLock) {
+        synchronized (this.keygen) {
             if (this.encryptCipher == null) {
-                KeyGenerator keygen = KeyGenerator.getInstance(this.deidConfig.getKeyAlgorithm());
-                Key key = keygen.generateKey();
+                Key key = this.keygen.generateKey();
                 this.encryptCipher = Cipher.getInstance(this.deidConfig.getCipherAlgorithm());
                 this.encryptCipher.init(Cipher.ENCRYPT_MODE, key);
                 this.decryptCipher = Cipher.getInstance(this.deidConfig.getCipherAlgorithm());
@@ -89,13 +88,15 @@ public class CipherEncryption implements Encryption {
         }
         try {
             initCiphers();
-            byte[] cleartext = str.getBytes();
+            byte[] cleartext = str.getBytes("UTF-8");
             byte[] ciphertext = this.encryptCipher.doFinal(cleartext);
-            return byteArrayToHexString(ciphertext);
+            return Base64.encodeBase64String(ciphertext);
         } catch (InvalidKeyException ex) {
             throw new AssertionError(ex);
         } catch (BadPaddingException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException ex) {
             throw new EncryptException("Could not encrypt string", ex);
+        } catch (UnsupportedEncodingException ex) {
+            throw new AssertionError("UTF-8 should be supported but is not");
         }
     }
 
@@ -118,7 +119,7 @@ public class CipherEncryption implements Encryption {
         }
         try {
             initCiphers();
-            byte[] ciphertext = hexStringToByteArray(str);
+            byte[] ciphertext = Base64.decodeBase64(str);
             byte[] cleartext = this.decryptCipher.doFinal(ciphertext);
             return new String(cleartext);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException ex) {
@@ -129,64 +130,4 @@ public class CipherEncryption implements Encryption {
 
     }
 
-    /**
-     * Converts a byte[] array to readable string format.
-     *
-     * @param a byte array.
-     * @return a hexadecimal string.
-     */
-    private static String byteArrayToHexString(byte in[]) {
-        byte ch = 0x00;
-        int i = 0;
-        if (in == null || in.length <= 0) {
-            return null;
-        }
-
-        StringBuffer out = new StringBuffer(in.length * 2);
-
-        while (i < in.length) {
-            ch = (byte) (in[i] & 0xF0); // Strip off high nibble
-            ch = (byte) (ch >>> 4);
-            // shift the bits down
-            ch = (byte) (ch & 0x0F);
-            //must do this is high order bit is on!
-            out.append(pseudo[(int) ch]); // convert the nibble to a String Character
-
-            ch = (byte) (in[i] & 0x0F); // Strip off low nibble 
-            out.append(pseudo[(int) ch]); // convert the nibble to a String Character
-            i++;
-        }
-        String rslt = new String(out);
-        return rslt;
-    }
-
-    /**
-     * Converts a hex string to a byte[] array.
-     *
-     * @param a string containing only hexadecimal characters.
-     * @return a byte array.
-     *
-     */
-    private static byte[] hexStringToByteArray(String hexstring) {
-
-        int i = 0;
-        if (hexstring == null || hexstring.length() <= 0) {
-            return null;
-        }
-
-        byte[] out = new byte[hexstring.length() / 2];
-        while (i < hexstring.length() - 1) {
-            byte ch = 0x00;
-            //Convert high nibble charater to a hex byte
-            ch = (byte) (ch | bytevector[stringvector.indexOf(hexstring.charAt(i))]);
-            ch = (byte) (ch << 4); //move this to the high bit
-
-            //Convert the low nibble to a hexbyte
-            ch = (byte) (ch | bytevector[stringvector.indexOf(hexstring.charAt(i + 1))]); //next hex value
-            out[i / 2] = ch;
-            i++;
-            i++;
-        }
-        return out;
-    }
 }

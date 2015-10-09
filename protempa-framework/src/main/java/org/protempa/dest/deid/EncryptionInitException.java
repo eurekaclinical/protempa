@@ -20,20 +20,27 @@ package org.protempa.dest.deid;
  * #L%
  */
 
-import org.protempa.proposition.value.NominalValue;
+import org.protempa.ProtempaException;
 
 /**
  *
  * @author Andrew Post
  */
-public class DeidAttributes {
-    public static final String IS_HIPAA_IDENTIFIER = "is-HIPAA-identifier";
-    public static final String HIPAA_IDENTIFIER_TYPE = "HIPAA-identifier-type";
+public class EncryptionInitException extends ProtempaException {
+
+    EncryptionInitException() {
+    }
+
+    EncryptionInitException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    EncryptionInitException(String message) {
+        super(message);
+    }
+
+    EncryptionInitException(Throwable cause) {
+        super(cause);
+    }
     
-    public static NominalValue AGE = NominalValue.getInstance("AGE");
-    public static NominalValue BIRTHDATE = NominalValue.getInstance("BIRTHDATE");
-    public static NominalValue MRN = NominalValue.getInstance("MRN");
-    public static NominalValue OTHER = NominalValue.getInstance("OTHER");
-    
-    private DeidAttributes() {}
 }

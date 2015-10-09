@@ -27,6 +27,6 @@ package org.protempa.dest.deid;
 public interface DeidConfig extends AutoCloseable {
     Integer getOffset(String keyId);
     
-    Encryption getEncryptionInstance();
+    Encryption getEncryptionInstance() throws EncryptionInitException;
     
 }
