@@ -40,7 +40,7 @@ import org.protempa.proposition.UniqueId;
  */
 public final class DeidentifiedQueryResultsHandler
         implements QueryResultsHandler {
-    
+
     private final Encryption encryption;
     private final QueryResultsHandler handler;
     private final DeidConfig deidConfig;
@@ -78,16 +78,73 @@ public final class DeidentifiedQueryResultsHandler
         } catch (EncryptException ex) {
             throw new QueryResultsHandlerProcessingException("Could not encrypt keyId", ex);
         }
-        
+
+        Map<UniqueId, Proposition> deidentifiedPropsByUniqueId = new HashMap<>();
         List<Proposition> deidentifiedProps = new ArrayList<>(propositions.size());
         PropositionDeidentifierVisitor visitor = new PropositionDeidentifierVisitor(this.encryption, this.propDefCache, this.deidConfig.getOffset(keyId));
         visitor.setKeyId(keyId);
+
         for (Proposition prop : propositions) {
             prop.accept(visitor);
-            deidentifiedProps.add(visitor.getProposition());
+            Proposition deidentifiedProposition = visitor.getProposition();
+            deidentifiedProps.add(deidentifiedProposition);
+            deidentifiedPropsByUniqueId.put(deidentifiedProposition.getUniqueId(), deidentifiedProposition);
         }
-        
-        this.handler.handleQueryResult(encryptedKeyId, deidentifiedProps, forwardDerivations, backwardDerivations, references);
+
+        Map<UniqueId, Proposition> deidentifiedReferences = new HashMap<>();
+        for (Map.Entry<UniqueId, Proposition> me : references.entrySet()) {
+            Proposition prop = deidentifiedPropsByUniqueId.get(me.getKey());
+            if (prop == null) {
+                me.getValue().accept(visitor);
+                prop = visitor.getProposition();
+                deidentifiedPropsByUniqueId.put(prop.getUniqueId(), prop);
+            }
+            deidentifiedReferences.put(prop.getUniqueId(), prop);
+        }
+
+        Map<Proposition, List<Proposition>> deidentifiedForwardDerivations = new HashMap<>();
+        for (Map.Entry<Proposition, List<Proposition>> me : forwardDerivations.entrySet()) {
+            Proposition key = deidentifiedPropsByUniqueId.get(me.getKey().getUniqueId());
+            if (key == null) {
+                me.getKey().accept(visitor);
+                key = visitor.getProposition();
+                deidentifiedPropsByUniqueId.put(key.getUniqueId(), key);
+            }
+            List<Proposition> values = new ArrayList<>();
+            for (Proposition val : me.getValue()) {
+                Proposition prop = deidentifiedPropsByUniqueId.get(val.getUniqueId());
+                if (prop == null) {
+                    me.getKey().accept(visitor);
+                    prop = visitor.getProposition();
+                    deidentifiedPropsByUniqueId.put(prop.getUniqueId(), prop);
+                }
+                values.add(prop);
+            }
+            deidentifiedForwardDerivations.put(key, values);
+        }
+
+        Map<Proposition, List<Proposition>> deidentifiedBackwardDerivations = new HashMap<>();
+        for (Map.Entry<Proposition, List<Proposition>> me : backwardDerivations.entrySet()) {
+            Proposition key = deidentifiedPropsByUniqueId.get(me.getKey().getUniqueId());
+            if (key == null) {
+                me.getKey().accept(visitor);
+                key = visitor.getProposition();
+                deidentifiedPropsByUniqueId.put(key.getUniqueId(), key);
+            }
+            List<Proposition> values = new ArrayList<>();
+            for (Proposition val : me.getValue()) {
+                Proposition prop = deidentifiedPropsByUniqueId.get(val.getUniqueId());
+                if (prop == null) {
+                    me.getKey().accept(visitor);
+                    prop = visitor.getProposition();
+                    deidentifiedPropsByUniqueId.put(prop.getUniqueId(), prop);
+                }
+                values.add(prop);
+            }
+            deidentifiedBackwardDerivations.put(key, values);
+        }
+
+        this.handler.handleQueryResult(encryptedKeyId, deidentifiedProps, deidentifiedForwardDerivations, deidentifiedBackwardDerivations, deidentifiedReferences);
     }
 
     @Override

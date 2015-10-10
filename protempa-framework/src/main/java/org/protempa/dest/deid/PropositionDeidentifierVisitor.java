@@ -164,17 +164,19 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
         deidentifiedProp.setDownloadDate(prop.getDownloadDate());
         deidentifiedProp.setUpdateDate(prop.getUpdateDate());
         deidentifiedProp.setSourceSystem(prop.getSourceSystem());
+        PropositionDefinition propDef = this.propDefCache.get(prop.getId());
         for (String name : prop.getPropertyNames()) {
-            PropositionDefinition propDef = this.propDefCache.get(prop.getId());
             PropertyDefinition propertyDefinition = propDef.propertyDefinition(name);
             if (propertyDefinition != null) {
                 Attribute hipaaIdAttr = propertyDefinition.getAttribute(DeidAttributes.IS_HIPAA_IDENTIFIER);
                 Attribute hipaaIdTypeAttr = propertyDefinition.getAttribute(DeidAttributes.HIPAA_IDENTIFIER_TYPE);
                 Value propertyValue = prop.getProperty(name);
                 if (this.offsetInSeconds != null && propertyDefinition.getValueType() == ValueType.DATEVALUE) {
-                    this.CAL.setTime(((DateValue) propertyValue).getDate());
-                    this.CAL.add(Calendar.SECOND, this.offsetInSeconds);
-                    deidentifiedProp.setProperty(name, DateValue.getInstance(this.CAL.getTime()));
+                    synchronized (CAL) {
+                        this.CAL.setTime(((DateValue) propertyValue).getDate());
+                        this.CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                        deidentifiedProp.setProperty(name, DateValue.getInstance(this.CAL.getTime()));
+                    }
                 } else if (hipaaIdTypeAttr != null && DeidAttributes.AGE.equals(hipaaIdTypeAttr.getValue())) {
                     NumericalValue numericalValue = (NumericalValue) propertyValue;
                     if (numericalValue.compare(NumberValue.getInstance(90)) == ValueComparator.GREATER_THAN_OR_EQUAL_TO) {
