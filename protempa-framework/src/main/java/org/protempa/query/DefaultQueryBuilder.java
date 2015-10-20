@@ -50,6 +50,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     private And<String>[] termIds;
     private PropositionDefinition[] propDefs;
     private String id;
+    private String username;
     private final PropertyChangeSupport changes;
     
     private QueryMode queryMode;
@@ -69,6 +70,14 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public QueryMode getQueryMode() {
@@ -299,8 +308,8 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
                 }
             }
         }
-        return new Query(this.id, this.keyIds, this.filters, this.propIds, 
-                this.termIds, this.propDefs, this.queryMode);
+        return new Query(this.id, this.username, this.keyIds, this.filters, 
+                this.propIds, this.termIds, this.propDefs, this.queryMode);
     }
 
     @Override

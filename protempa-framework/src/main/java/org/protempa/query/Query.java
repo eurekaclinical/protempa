@@ -49,6 +49,7 @@ public class Query implements Serializable {
     private final And<String>[] termIds;
     private final PropositionDefinition[] propDefs;
     private String id;
+    private String username;
     private QueryMode queryMode;
     
     /**
@@ -80,6 +81,12 @@ public class Query implements Serializable {
      * @param termIds
      */
     public Query(String id, String[] keyIds, Filter filters, String[] propIds,
+            And<String>[] termIds, PropositionDefinition[] propDefs,
+            QueryMode queryMode) {
+        this(id, null, keyIds, filters, propIds, termIds, propDefs, queryMode);
+    }
+    
+    public Query(String id, String username, String[] keyIds, Filter filters, String[] propIds,
             And<String>[] termIds, PropositionDefinition[] propDefs,
             QueryMode queryMode) {
         if (keyIds == null) {
@@ -115,6 +122,7 @@ public class Query implements Serializable {
         } else {
             this.queryMode = queryMode;
         }
+        this.username = username;
     }
 
     /**
@@ -181,6 +189,10 @@ public class Query implements Serializable {
         return id;
     }
 
+    public String getUsername() {
+        return username;
+    }
+    
     /**
      * @return an array that references all of the filters in the chain of
      * filters.
@@ -199,12 +211,13 @@ public class Query implements Serializable {
     @Override
     public int hashCode() {
         final int prime = 31;
-        int result = prime + ((filters == null) ? 0 : filters.hashCode());
-        result = prime * result + Arrays.hashCode(keyIds);
-        result = prime * result + Arrays.hashCode(propIds);
-        result = prime * result + Arrays.hashCode(termIds);
-        result = prime * result + Arrays.hashCode(propDefs);
+        int result = prime + (this.filters != null ? this.filters.hashCode() : 0);
+        result = prime * result + Arrays.hashCode(this.keyIds);
+        result = prime * result + Arrays.hashCode(this.propIds);
+        result = prime * result + Arrays.hashCode(this.termIds);
+        result = prime * result + Arrays.hashCode(this.propDefs);
         result = prime * result + this.queryMode.hashCode();
+        result = prime * result + (this.username != null ? this.username.hashCode() : 0);
         return result;
     }
 
@@ -220,26 +233,29 @@ public class Query implements Serializable {
             return false;
         }
         Query other = (Query) obj;
-        if (filters == null) {
+        if (this.filters == null) {
             if (other.filters != null) {
                 return false;
             }
-        } else if (!filters.equals(other.filters)) {
+        } else if (!this.filters.equals(other.filters)) {
             return false;
         }
-        if (!Arrays.equals(keyIds, other.keyIds)) {
+        if (!Arrays.equals(this.keyIds, other.keyIds)) {
             return false;
         }
-        if (!Arrays.equals(propIds, other.propIds)) {
+        if (!Arrays.equals(this.propIds, other.propIds)) {
             return false;
         }
-        if (!Arrays.equals(termIds, other.termIds)) {
+        if (!Arrays.equals(this.termIds, other.termIds)) {
             return false;
         }
-        if (!Arrays.equals(propDefs, other.propDefs)) {
+        if (!Arrays.equals(this.propDefs, other.propDefs)) {
             return false;
         }
         if (!this.queryMode.equals(other.queryMode)) {
+            return false;
+        }
+        if (this.username != null ? !this.username.equals(other.username) : other.username != null) {
             return false;
         }
         return true;
