@@ -23,7 +23,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueType;
 
 /**
@@ -62,7 +61,7 @@ public final class PropertyDefinition implements Serializable {
      * @param valueType a {@link ValueType}. Cannot be <code>null</code>.
      * @param valueSetId the unique id of this property's {@link ValueSet}.
      *
-     * @see ValueType#isCompatible(ValueSet) 
+     * @see ValueType#isCompatible(org.protempa.valueset.ValueSet) 
      */
     public PropertyDefinition(String propId, String id, String displayName, 
             ValueType valueType, String valueSetId, String declaringPropId,
