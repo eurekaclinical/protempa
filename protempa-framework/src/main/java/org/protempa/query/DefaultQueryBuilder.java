@@ -49,7 +49,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     @SuppressWarnings("unchecked")
     private And<String>[] termIds;
     private PropositionDefinition[] propDefs;
-    private String id;
+    private String name;
     private String username;
     private final PropertyChangeSupport changes;
     
@@ -64,12 +64,12 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         this.queryMode = Query.DEFAULT_QUERY_MODE;
     }
 
-    public String getId() {
-        return id;
+    public String getName() {
+        return name;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getUsername() {
@@ -308,7 +308,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
                 }
             }
         }
-        return new Query(this.id, this.username, this.keyIds, this.filters, 
+        return new Query(this.name, this.username, this.keyIds, this.filters, 
                 this.propIds, this.termIds, this.propDefs, this.queryMode);
     }
 

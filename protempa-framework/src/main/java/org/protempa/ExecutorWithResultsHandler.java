@@ -67,7 +67,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
 
     @Override
     DataStreamingEventIterator<Proposition> newDataIterator() throws ExecutorExecuteException {
-        log(Level.INFO, "Retrieving data for query {0}", getQuery().getId());
+        log(Level.INFO, "Retrieving data for query {0}", getQuery().getName());
         Set<String> inDataSourcePropIds = new HashSet<>();
         for (PropositionDefinition pd : getAllNarrowerDescendants()) {
             if (pd.getInDataSource()) {
@@ -75,7 +75,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
             }
         }
         if (isLoggable(Level.FINER)) {
-            log(Level.FINER, "Asking data source for {0} for query {1}", new Object[]{StringUtils.join(inDataSourcePropIds, ", "), getQuery().getId()});
+            log(Level.FINER, "Asking data source for {0} for query {1}", new Object[]{StringUtils.join(inDataSourcePropIds, ", "), getQuery().getName()});
         }
         DataStreamingEventIterator<Proposition> itr;
         try {
@@ -88,7 +88,7 @@ abstract class ExecutorWithResultsHandler extends Executor {
 
     @Override
     void init() throws ExecutorInitException {
-        String queryId = getQuery().getId();
+        String queryId = getQuery().getName();
         log(Level.FINE, "Initializing query results handler for query {0}...", queryId);
         try {
             this.resultsHandler = this.destination.getQueryResultsHandler(getQuery(), this.abstractionFinder.getDataSource(), getKnowledgeSource());
@@ -189,12 +189,12 @@ abstract class ExecutorWithResultsHandler extends Executor {
         }
         Map<UniqueId, Proposition> refs = new HashMap<>();
         if (isLoggable(Level.FINER)) {
-            log(Level.FINER, "References for query {0}: {1}", new Object[]{getQuery().getId(), refs});
+            log(Level.FINER, "References for query {0}: {1}", new Object[]{getQuery().getName(), refs});
         }
         try {
             List<Proposition> filteredPropositions = extractRequestedPropositions(propositions, propositionIds, refs);
             if (isLoggable(Level.FINER)) {
-                String queryId = getQuery().getId();
+                String queryId = getQuery().getName();
                 log(Level.FINER, "Proposition ids for query {0}: {1}", new Object[]{queryId, propositionIds});
                 log(Level.FINER, "Filtered propositions for query {0}: {1}", new Object[]{queryId, filteredPropositions});
                 log(Level.FINER, "Forward derivations for query {0}: {1}", new Object[]{queryId, forwardDerivations});

@@ -52,7 +52,7 @@ class RetrieveAndStoreDataExecutor extends Executor {
             };
             processor.process();
             if (isLoggable(Level.INFO)) {
-                log(Level.INFO, "Wrote {0} records into store {1} for query {2}", new Object[]{processor.getCount(), persistentStoreEnvironment, getQuery().getId()});
+                log(Level.INFO, "Wrote {0} records into store {1} for query {2}", new Object[]{processor.getCount(), persistentStoreEnvironment, getQuery().getName()});
             }
         } finally {
             store.shutdown();

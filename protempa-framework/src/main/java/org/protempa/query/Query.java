@@ -48,7 +48,7 @@ public class Query implements Serializable {
     private final String[] propIds;
     private final And<String>[] termIds;
     private final PropositionDefinition[] propDefs;
-    private String id;
+    private String name;
     private String username;
     private QueryMode queryMode;
     
@@ -116,7 +116,7 @@ public class Query implements Serializable {
         if (id == null) {
             id = UUID.randomUUID().toString();
         }
-        this.id = id;
+        this.name = id;
         if (queryMode == null) {
             this.queryMode = DEFAULT_QUERY_MODE;
         } else {
@@ -185,8 +185,8 @@ public class Query implements Serializable {
      * 
      * @return an identifier {@link String}. 
      */
-    public final String getId() {
-        return id;
+    public final String getName() {
+        return name;
     }
 
     public String getUsername() {

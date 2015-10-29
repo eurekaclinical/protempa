@@ -301,10 +301,10 @@ public final class Protempa implements AutoCloseable {
             throw new IllegalArgumentException("resultsHandler cannot be null");
         }
         Logger logger = ProtempaUtil.logger();
-        logger.log(Level.INFO, "Executing query {0}", query.getId());
+        logger.log(Level.INFO, "Executing query {0}", query.getName());
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
         this.abstractionFinder.doFind(query, destination, qs);
-        logger.log(Level.INFO, "Query {0} execution complete", query.getId());
+        logger.log(Level.INFO, "Query {0} execution complete", query.getName());
     }
 
     /**

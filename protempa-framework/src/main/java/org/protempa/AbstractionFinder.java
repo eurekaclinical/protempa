@@ -162,15 +162,15 @@ final class AbstractionFinder {
                 strategy = ExecutorStrategy.STATELESS;
             }
         } catch (QueryValidationException ex) {
-            throw new QueryException(query.getId(), ex);
+            throw new QueryException(query.getName(), ex);
         }
 
         try (Executor executor = new DoFindExecutor(query, destination, qs, strategy, this)) {
             executor.init();
             executor.execute();
         } catch (ExecutorException ex) {
-            ProtempaUtil.logger().log(Level.FINE, "Error during execution of query {0}", query.getId());
-            throw new QueryException(query.getId(), ex);
+            ProtempaUtil.logger().log(Level.FINE, "Error during execution of query {0}", query.getName());
+            throw new QueryException(query.getName(), ex);
         }
     }
 
@@ -297,7 +297,7 @@ final class AbstractionFinder {
             executor.init();
             executor.execute();
         } catch (ExecutorException ex) {
-            throw new QueryException(query.getId(), ex);
+            throw new QueryException(query.getName(), ex);
         }
     }
 
@@ -309,7 +309,7 @@ final class AbstractionFinder {
             executor.init();
             executor.execute();
         } catch (ExecutorException ex) {
-            throw new QueryException(query.getId(), ex);
+            throw new QueryException(query.getName(), ex);
         }
     }
 
@@ -321,7 +321,7 @@ final class AbstractionFinder {
             executor.init();
             executor.execute();
         } catch (ExecutorException ex) {
-            throw new QueryException(query.getId(), ex);
+            throw new QueryException(query.getName(), ex);
         }
     }
 
@@ -335,7 +335,7 @@ final class AbstractionFinder {
             executor.init();
             executor.execute();
         } catch (ExecutorException ex) {
-            throw new QueryException(query.getId(), ex);
+            throw new QueryException(query.getName(), ex);
         }
     }
 

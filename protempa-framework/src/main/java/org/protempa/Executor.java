@@ -145,7 +145,7 @@ abstract class Executor implements AutoCloseable {
         }
 
         final void process() throws ExecutorExecuteException {
-            final String queryId = query.getId();
+            final String queryId = query.getName();
             log(Level.INFO, "Processing data for query {0}", queryId);
             final DataStreamingEvent poisonPill = new DataStreamingEvent("poison", Collections.emptyList());
             final BlockingQueue<DataStreamingEvent> queue = new ArrayBlockingQueue<>(1000);
@@ -304,7 +304,7 @@ abstract class Executor implements AutoCloseable {
 
     void init() throws ExecutorInitException {
         if (isLoggable(Level.FINE)) {
-            log(Level.FINE, "Propositions to be queried for query {0} are {1}", new Object[]{query.getId(), StringUtils.join(this.propIds, ", ")});
+            log(Level.FINE, "Propositions to be queried for query {0} are {1}", new Object[]{query.getName(), StringUtils.join(this.propIds, ", ")});
         }
         try {
             retain(this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()])));
@@ -382,7 +382,7 @@ abstract class Executor implements AutoCloseable {
     }
 
     DataStreamingEventIterator<Proposition> newDataIterator() throws ExecutorExecuteException {
-        log(Level.INFO, "Retrieving data for query {0}", query.getId());
+        log(Level.INFO, "Retrieving data for query {0}", query.getName());
         Set<String> inDataSourcePropIds = new HashSet<>();
         for (PropositionDefinition pd : allNarrowerDescendants) {
             if (pd.getInDataSource()) {
@@ -390,7 +390,7 @@ abstract class Executor implements AutoCloseable {
             }
         }
         if (isLoggable(Level.FINER)) {
-            log(Level.FINER, "Asking data source for {0} for query {1}", new Object[]{StringUtils.join(inDataSourcePropIds, ", "), query.getId()});
+            log(Level.FINER, "Asking data source for {0} for query {1}", new Object[]{StringUtils.join(inDataSourcePropIds, ", "), query.getName()});
         }
         DataStreamingEventIterator<Proposition> itr;
         try {
@@ -416,7 +416,7 @@ abstract class Executor implements AutoCloseable {
             try {
                 String keyTypeSingDisplayName = abstractionFinder.getDataSource().getKeyTypeDisplayName();
                 String keyTypePluralDisplayName = abstractionFinder.getDataSource().getKeyTypePluralDisplayName();
-                String queryId = query.getId();
+                String queryId = query.getName();
                 logCount(Level.FINE, numProcessed, "Processed {0} {1} for query {2}", "Processed {0} {1} for query {2}", new Object[]{keyTypeSingDisplayName, queryId}, new Object[]{keyTypePluralDisplayName, queryId});
             } catch (DataSourceReadException ex) {
                 throw new ExecutorExecuteException(ex);
@@ -449,10 +449,10 @@ abstract class Executor implements AutoCloseable {
     }
 
     private void createRuleBase(ExecutionStrategy result) throws CreateRuleBaseException {
-        log(Level.FINEST, "Initializing rule base for query {0}", query.getId());
+        log(Level.FINEST, "Initializing rule base for query {0}", query.getName());
         result.createRuleBase(allNarrowerDescendants, derivationsBuilder, qs);
         abstractionFinder.clear();
-        log(Level.FINEST, "Rule base initialized for query {0}", query.getId());
+        log(Level.FINEST, "Rule base initialized for query {0}", query.getName());
     }
 
 }

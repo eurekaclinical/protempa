@@ -59,7 +59,7 @@ class OutputStoredResultsExecutor extends ExecutorWithResultsHandler {
                 @Override
                 void doProcess(String keyId, Set<String> propIds) throws ExecutorExecuteException {
                     if (isLoggable(Level.FINEST)) {
-                        log(Level.FINEST, "Determining output for key {0} for query {1}", new Object[]{keyId, getQuery().getId()});
+                        log(Level.FINEST, "Determining output for key {0} for query {1}", new Object[]{keyId, getQuery().getName()});
                     }
                     if (fwmStore.containsKey(keyId)) {
                         WorkingMemory wm = fwmStore.get(keyId);

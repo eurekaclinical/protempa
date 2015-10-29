@@ -48,7 +48,7 @@ class ProcessStoredResultsExecutor extends Executor {
     protected void doExecute(Set<String> keyIds, final DerivationsBuilder derivationsBuilder, final ExecutionStrategy strategy) throws ExecutorExecuteException {
         final DataStore<String, List<Proposition>> propStore = new PropositionStoreCreator(propositionStoreEnvironment).getPersistentStore();
         if (isLoggable(Level.INFO)) {
-            log(Level.INFO, "Found {0} records in store {1} for query {2}", new Object[]{propStore.size(), propositionStoreEnvironment, getQuery().getId()});
+            log(Level.INFO, "Found {0} records in store {1} for query {2}", new Object[]{propStore.size(), propositionStoreEnvironment, getQuery().getName()});
         }
         final DataStore<String, WorkingMemory> wmStore = new WorkingMemoryStoreCreator(null, workingMemoryStoreEnvironment).getPersistentStore();
         final DataStore<String, DerivationsBuilder> dbStore = new DerivationsBuilderStoreCreator(workingMemoryStoreEnvironment).getPersistentStore();
