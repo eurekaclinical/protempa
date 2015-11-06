@@ -208,11 +208,6 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
         <dependencies>
             <dependency>
                 <groupId>org.protempa</groupId>
-                <artifactId>protempa-bconfigs-commons-ini</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.protempa</groupId>
                 <artifactId>protempa-bconfigs-ini4j-ini</artifactId>
                 <version>${project.version}</version>
             </dependency>

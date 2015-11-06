@@ -43,11 +43,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
-            <artifactId>protempa-bconfigs-commons-ini</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>edu.stanford</groupId>
             <artifactId>protege</artifactId>
             <version>3.4.7</version>

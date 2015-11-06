@@ -28,11 +28,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
-            <artifactId>protempa-bconfigs-commons-ini</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>umlsquery</groupId>
             <artifactId>umls-query</artifactId>
             <version>1.0.2</version>
