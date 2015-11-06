@@ -1,20 +1,9 @@
-Protempa ${project.version} -- A Temporal Query Framework for Clinical Databases
-Department of Biomedical Informatics, Emory University
+${project.name} ${project.version} -- A Temporal Query Framework for Clinical Databases
+Department of Biomedical Informatics, ${project.organization.name}
 
 OVERVIEW
 
-Welcome to Protempa! It supports the construction of software systems for 
-querying clinical databases, summarizing patient data, detecting clinically 
-significant data patterns in groups of patients or individual patients, and 
-extract, transform and load (ETL). Its special feature, temporal abstraction,
-supports queries and summarization of data in terms of temporal patterns. 
-Temporal patterns enable robust querying and extraction of clinical history. 
-These patterns include frequencies (at least two, three, etc. of some event or
-observation); sequences (chemotherapy followed by surgery within 180 days,
-a hospital encounter followed by another hospital encounter within 30 days); 
-and overlaps (falling platelet counts in the setting of HELLP syndrome).
-Protempa is the foundation for the Eureka! Clinical Analytics tool, available
-from http://aiw.sourceforge.net.
+${project.description}
 
 WHAT'S NEW
 
@@ -49,18 +38,18 @@ code. We use Maven 3.
 
 INSTALLATION
 
-The easiest way to get Protempa is using Maven. It is available from
-the http://maven.cci.emory.edu/nexus/content/repositories/aiw/ repository. 
+The easiest way to get ${project.name} is using Maven. It is available from
+the ${project.distributionManagement.repository.url} repository. 
 Use the following dependency declaration:
 
 <dependency>
-  <groupId>org.protempa</groupId>
-  <artifactId>protempa</artifactId>
-  <version>${project.version}</version>
+    <groupId>${project.groupId}</groupId>
+    <artifactId>${project.artifactId}</artifactId> 
+    <version>${project.version}</version>
 </dependency>
 
-The source code is also available in tarball and zip file formats from 
-http://aiw.sourceforge.net/dev/protempa-${project.version}.
+It is also available in tarball and zip file formats from
+${project.url}.
 
 Please see the technical documentation linked below for detailed instructions 
 on what the framework does and how to use it.
@@ -71,13 +60,13 @@ Please send an email to help@eurekaclinical.org for support or questions.
 
 LICENSING
 
-Protempa is freely available as open source under the Apache License, 
-Version 2.0. A copy of the license is in the LICENSE file provided in this 
-distribution.
+${project.name} is freely available as open source under the Apache License,
+Version 2.0. A copy of the license is in the LICENSE file provided in
+this distribution.
 
-Protempa is Copyright (C) 2012-2013 Emory University.
+${project.name} is Copyright (C) ${project.inceptionYear}-2015 Emory University.
 
 MORE INFORMATION
 
-Please see http://aiw.sourceforge.net/dev/protempa-${project.version} for technical
+Please see ${project.url} for technical
 documentation and more information.
