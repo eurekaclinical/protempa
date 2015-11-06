@@ -49,11 +49,6 @@
             <artifactId>protempa-dsb-relationaldb</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
-            <artifactId>protempa-ksb-bioportal</artifactId>
-            <version>2.4-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
