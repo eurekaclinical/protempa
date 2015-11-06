@@ -64,7 +64,7 @@ ${project.name} is freely available as open source under the Apache License,
 Version 2.0. A copy of the license is in the LICENSE file provided in
 this distribution.
 
-${project.name} is Copyright (C) ${project.inceptionYear}-2015 Emory University.
+${project.name} is Copyright (C) ${project.inceptionYear}-2015 ${project.organization.name}.
 
 MORE INFORMATION
 
