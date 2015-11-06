@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.protempa</groupId>
     <artifactId>protempa</artifactId>
-    <version>3.0-Alpha-3-SNAPSHOT</version>
+    <version>3.0-Alpha-2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Protempa</name>
     <url>http://aiw.sourceforge.net/dev/protempa-${project.version}</url>

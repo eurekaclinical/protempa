@@ -4,7 +4,7 @@
     <parent>
         <artifactId>protempa</artifactId>
         <groupId>org.protempa</groupId>
-        <version>3.0-Alpha-3-SNAPSHOT</version>
+        <version>3.0-Alpha-2-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>protempa-test-suite</artifactId>
