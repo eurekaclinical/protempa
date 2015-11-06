@@ -30,7 +30,7 @@
         <dependency>
             <groupId>org.arp</groupId>
             <artifactId>javautil</artifactId>
-            <version>3.0-Alpha-1</version>
+            <version>3.0-Alpha-2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
