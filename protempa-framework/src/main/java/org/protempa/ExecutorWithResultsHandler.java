@@ -201,8 +201,11 @@ abstract class ExecutorWithResultsHandler extends Executor {
                 log(Level.FINER, "Backward derivations for query {0}: {1}", new Object[]{queryId, backwardDerivations});
             }
             queue.put(new QueueObject(keyId, filteredPropositions, forwardDerivations, backwardDerivations, refs));
+            if (isLoggable(Level.FINER)) {
+                log(Level.FINER, "Results put on query result handler queue for query {0}", getQuery().getName());
+            }
         } catch (InterruptedException ex) {
-            log(Level.FINER, "Process results put on queue thread", ex);
+            log(Level.FINER, "Interrupted putting results on queue thread for query " + getQuery().getName(), ex);
         }
     }
 
@@ -219,6 +222,10 @@ abstract class ExecutorWithResultsHandler extends Executor {
             QueueObject qo;
             try {
                 while (!isInterrupted() && ((qo = queue.take()) != poisonPill)) {
+                    if (isLoggable(Level.FINER)) {
+                        String queryId = getQuery().getName();
+                        log(Level.FINER, "Handling some results for query {0}", queryId);
+                    }
                     try {
                         resultsHandler.handleQueryResult(qo.keyId, qo.propositions, qo.forwardDerivations, qo.backwardDerivations, qo.refs);
                     } catch (QueryResultsHandlerProcessingException ex) {
@@ -228,9 +235,12 @@ abstract class ExecutorWithResultsHandler extends Executor {
                         this.throwable = new QueryResultsHandlerProcessingException(t);
                         break;
                     }
+                    if (isLoggable(Level.FINER)) {
+                        log(Level.FINER, "Results passed to query result handler for query {0}", getQuery().getName());
+                    }
                 }
             } catch (InterruptedException ex) {
-                log(Level.FINER, "Handle query results thread interrupted", ex);
+                log(Level.FINER, "Handle query results thread interrupted for query " + getQuery().getName(), ex);
             }
         }
 
