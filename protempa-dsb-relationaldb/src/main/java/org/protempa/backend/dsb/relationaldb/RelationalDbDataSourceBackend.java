@@ -632,7 +632,7 @@ public abstract class RelationalDbDataSourceBackend
             try {
                 this.mappingsFactory.closeAll();
             } catch (IOException ex) {
-                throw new DataSourceBackendCloseException(ex);
+                throw new BackendCloseException(ex);
             }
         }
     }

@@ -39,9 +39,7 @@ import org.protempa.proposition.value.UnitFactory;
  * @author Andrew Post
  * @see DataSourceBackend
  */
-public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent, DataSourceBackend, 
-        DataSourceUpdatedEvent, DataSourceBackendUpdatedEvent> implements DataSource {
-    
+public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent, DataSourceBackend, DataSourceUpdatedEvent, DataSourceBackendUpdatedEvent> implements DataSource {
 
     public DataSourceImpl(DataSourceBackend[] backends) {
         super(backends != null ? backends : new DataSourceBackend[0]);
@@ -135,7 +133,7 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
         }
         return result.toArray(new KeySetSpec[result.size()]);
     }
-    
+
     /**
      * Returns an object for accessing the granularity of returned data from the
      * schema adaptor for this data source.
@@ -192,7 +190,7 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
     @Override
     public DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds,
-            Filter filters, QuerySession qs, 
+            Filter filters, QuerySession qs,
             QueryResultsHandler queryResultsHandler)
             throws DataSourceReadException {
         Set<String> notNullKeyIds = handleKeyIdSetArgument(keyIds);
@@ -200,11 +198,15 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
 
         initializeIfNeeded();
         DataSourceBackend[] backends = getBackends();
-        List<DataStreamingEventIterator<Proposition>> itrs =
-                new ArrayList<>(backends.length);
+        List<DataStreamingEventIterator<Proposition>> itrs
+                = new ArrayList<>(backends.length);
         for (DataSourceBackend backend : backends) {
-            itrs.add(backend.readPropositions(notNullKeyIds,
-                    notNullPropIds, filters, qs, queryResultsHandler));
+            try {
+                itrs.add(backend.readPropositions(notNullKeyIds,
+                        notNullPropIds, filters, qs, queryResultsHandler));
+            } catch (Error | RuntimeException ex) {
+                throw new DataSourceReadException("Unexpected error accessing " + backend.getDisplayName(), ex);
+            }
         }
         return new MultiplexingDataStreamingEventIterator(itrs,
                 new PropositionDataStreamerProcessor());
@@ -213,14 +215,22 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
     @Override
     public void deleteAllKeys() throws DataSourceWriteException {
         for (DataSourceBackend backend : getBackends()) {
-            backend.deleteAllKeys();
+            try {
+                backend.deleteAllKeys();
+            } catch (Error | RuntimeException ex) {
+                throw new DataSourceWriteException("Unexpected error accessing " + backend.getDisplayName(), ex);
+            }
         }
     }
-    
+
     @Override
     public void writeKeys(Set<String> keyIds) throws DataSourceWriteException {
         for (DataSourceBackend backend : getBackends()) {
-            backend.writeKeys(keyIds);
+            try {
+                backend.writeKeys(keyIds);
+            } catch (Error | RuntimeException ex) {
+                throw new DataSourceWriteException("Unexpected error accessing " + backend.getDisplayName(), ex);
+            }
         }
     }
 
@@ -235,13 +245,6 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
         clear();
         super.close();
     }
-
-    @Override
-    protected void throwCloseException(List<BackendCloseException> exceptions) throws SourceCloseException {
-        throw new DataSourceCloseException(exceptions);
-    }
-    
-    
 
     @Override
     public void clear() {

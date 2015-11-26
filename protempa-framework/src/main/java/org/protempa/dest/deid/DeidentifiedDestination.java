@@ -38,6 +38,7 @@ import org.protempa.query.Query;
 public final class DeidentifiedDestination extends AbstractDestination {
     private final Destination destination;
     private final DeidConfig deidConfig;
+    private final String id;
     
     public DeidentifiedDestination(Destination destination, DeidConfig deidConfig) {
         if (destination == null) {
@@ -48,6 +49,12 @@ public final class DeidentifiedDestination extends AbstractDestination {
         }
         this.destination = destination;
         this.deidConfig = deidConfig;
+        this.id = this.destination.getId() + " with deidentification";
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
     }
 
     @Override

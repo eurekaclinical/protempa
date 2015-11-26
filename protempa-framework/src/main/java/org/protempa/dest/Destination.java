@@ -30,6 +30,21 @@ import org.protempa.query.Query;
  */
 public interface Destination {
     /**
+     * Gets the destination's identifier string for logging and internal
+     * purposes.
+     * 
+     * @return a string.
+     */
+    String getId();
+    
+    /**
+     * Gets the destination's display name for user interfaces.
+     * 
+     * @return a string.
+     */
+    String getDisplayName();
+    
+    /**
      * Performs any initialization required for the query results handler's
      * configuration. After calling this method, calls to 
      * {@link #collectStatistics() } will work. This method is called by

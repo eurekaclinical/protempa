@@ -22,7 +22,6 @@ package org.protempa;
 import org.protempa.backend.AlgorithmSourceBackendUpdatedEvent;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import java.util.Collections;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -121,13 +120,6 @@ public final class AlgorithmSourceImpl
         clear();
         super.close();
     }
-
-    @Override
-    protected void throwCloseException(List<BackendCloseException> exceptions) throws SourceCloseException {
-        throw new AlgorithmSourceCloseException(exceptions);
-    }
-    
-    
 
     @Override
     public void clear() {

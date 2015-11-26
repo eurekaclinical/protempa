@@ -956,11 +956,6 @@ public final class KnowledgeSourceImpl
     }
 
     @Override
-    protected void throwCloseException(List<BackendCloseException> exceptions) throws SourceCloseException {
-        throw new KnowledgeSourceCloseException(exceptions);
-    }
-
-    @Override
     public void clear() {
         if (this.propositionDefinitionCache != null) {
             synchronized (this.propositionDefinitionCache) {

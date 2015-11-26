@@ -29,6 +29,28 @@ import org.protempa.PropositionDefinition;
 public abstract class AbstractQueryResultsHandler
         implements QueryResultsHandler {
     
+    private String id;
+    
+    protected AbstractQueryResultsHandler() {
+        this.id = getClass().getName();
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    /**
+     * Returns this query result handler's display name for user interfaces. 
+     * This implementation returns the same string as {@link #getId() }.
+     * 
+     * @return a string.
+     */
+    @Override
+    public String getDisplayName() {
+        return getId();
+    }
+
     @Override
     public void validate() throws QueryResultsHandlerValidationFailedException {
     }

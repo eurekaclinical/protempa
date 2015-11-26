@@ -113,23 +113,22 @@ public abstract class AbstractSource<S extends SourceUpdatedEvent,
         for (Backend backend : this.backends) {
             backend.removeBackendListener(this);
         }
-        List<BackendCloseException> exceptions =
-                new ArrayList<>();
+        List<BackendCloseException> exceptions = new ArrayList<>();
         for (Backend backend : this.backends) {
             try {
                 backend.close();
             } catch (BackendCloseException ex) {
                 exceptions.add(ex);
+            } catch (Error | RuntimeException ex) {
+                exceptions.add(new BackendCloseException(ex));
             }
         }
         if (!exceptions.isEmpty()) {
-            throwCloseException(exceptions);
+            throw new SourceCloseException(exceptions.toArray(new BackendCloseException[exceptions.size()]));
         }
         this.closed = true;
     }
     
-    protected abstract void throwCloseException(List<BackendCloseException> exceptions) throws SourceCloseException;
-
     protected boolean isClosed() {
         return this.closed;
     }

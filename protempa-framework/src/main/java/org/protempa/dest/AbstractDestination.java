@@ -23,18 +23,39 @@ import org.protempa.KnowledgeSource;
  * limitations under the License.
  * #L%
  */
-
 /**
- * 
+ *
  * @author Andrew Post
  */
 public abstract class AbstractDestination implements Destination {
-    
+
+    private String id;
+
+    protected AbstractDestination() {
+        this.id = getClass().getName();
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    /**
+     * Returns this destination's display name for user interfaces. This
+     * implementation returns the same string as {@link #getId() }.
+     * 
+     * @return a string.
+     */
+    @Override
+    public String getDisplayName() {
+        return getId();
+    }
+
     @Override
     public boolean isGetStatisticsSupported() {
         return false;
     }
-    
+
     @Override
     public Statistics getStatistics() throws StatisticsException {
         return null;
@@ -44,5 +65,5 @@ public abstract class AbstractDestination implements Destination {
     public String[] getSupportedPropositionIds(DataSource dataSource, KnowledgeSource knowledgeSource) throws GetSupportedPropositionIdsException {
         return ArrayUtils.EMPTY_STRING_ARRAY;
     }
-    
+
 }

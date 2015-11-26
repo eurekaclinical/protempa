@@ -26,20 +26,20 @@ package org.protempa;
  * @author Andrew Post
  *
  */
-public abstract class BackendCloseException extends ProtempaException {
+public final class BackendCloseException extends ProtempaException {
 
-    BackendCloseException() {
+    public BackendCloseException() {
     }
 
-    BackendCloseException(String message, Throwable cause) {
+    public BackendCloseException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    BackendCloseException(String message) {
+    public BackendCloseException(String message) {
         super(message);
     }
 
-    BackendCloseException(Throwable cause) {
+    public BackendCloseException(Throwable cause) {
         super(cause);
     }
 }

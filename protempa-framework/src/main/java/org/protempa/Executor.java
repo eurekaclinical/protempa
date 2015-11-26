@@ -19,6 +19,7 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,10 +37,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
-import org.arp.javautil.datastore.DataStore;
+import org.arp.javautil.collections.Iterators;
 import org.arp.javautil.log.Logging;
 import org.protempa.backend.dsb.filter.Filter;
+import org.protempa.dest.Destination;
+import org.protempa.dest.GetSupportedPropositionIdsException;
+import org.protempa.dest.QueryResultsHandler;
+import org.protempa.dest.QueryResultsHandlerCloseException;
+import org.protempa.dest.QueryResultsHandlerInitException;
+import org.protempa.dest.QueryResultsHandlerProcessingException;
+import org.protempa.dest.QueryResultsHandlerValidationFailedException;
 import org.protempa.proposition.Proposition;
+import org.protempa.proposition.UniqueId;
 import org.protempa.query.And;
 import org.protempa.query.Query;
 
@@ -47,7 +56,7 @@ import org.protempa.query.Query;
  *
  * @author Andrew Post
  */
-abstract class Executor implements AutoCloseable {
+final class Executor implements AutoCloseable {
 
     private static final Logger LOGGER = ProtempaUtil.logger();
     private final Set<String> keyIds;
@@ -64,14 +73,22 @@ abstract class Executor implements AutoCloseable {
     private Collection<PropositionDefinition> allNarrowerDescendants;
     private final AbstractionFinder abstractionFinder;
     private ExecutionStrategy executionStrategy = null;
+    private final ExecutorCounter counter = new ExecutorCounter();
+    private final List<ExecutorExecuteException> exceptions;
+    private final Destination destination;
+    private QueryResultsHandler resultsHandler;
+    private boolean failed;
+    private final MessageFormat logMessageFormat;
 
-    Executor(Query query, QuerySession querySession, AbstractionFinder abstractionFinder) throws ExecutorInitException {
-        this(query, querySession, null, abstractionFinder);
+    Executor(Query query, Destination resultsHandlerFactory, QuerySession querySession, AbstractionFinder abstractionFinder) throws ExecutorInitException {
+        this(query, resultsHandlerFactory, querySession, null, abstractionFinder);
     }
 
-    Executor(Query query, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws ExecutorInitException {
+    Executor(Query query, Destination resultsHandlerFactory, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws ExecutorInitException {
         this.abstractionFinder = abstractionFinder;
         assert query != null : "query cannot be null";
+        assert resultsHandlerFactory != null : "resultsHandlerFactory cannot be null";
+        assert abstractionFinder != null : "abstractionFinder cannot be null";
         if (abstractionFinder.isClosed()) {
             throw new ExecutorInitException(new ProtempaAlreadyClosedException());
         }
@@ -89,6 +106,215 @@ abstract class Executor implements AutoCloseable {
         this.qs = querySession;
         this.derivationsBuilder = new DerivationsBuilder();
         this.strategy = strategy;
+        this.destination = resultsHandlerFactory;
+        this.exceptions = Collections.synchronizedList(new ArrayList<ExecutorExecuteException>());
+        this.logMessageFormat = new MessageFormat("Query " + this.query.getName() + ": {0}");
+    }
+
+    void init() throws ExecutorInitException {
+        log(Level.FINE, "Initializing query results handler...");
+        try {
+            this.resultsHandler = this.destination.getQueryResultsHandler(getQuery(), this.abstractionFinder.getDataSource(), getKnowledgeSource());
+            log(Level.FINE, "Got query results handler {0}", this.resultsHandler.getId());
+            log(Level.FINE, "Validating query results handler");
+            this.resultsHandler.validate();
+            log(Level.FINE, "Query results handler validated successfully");
+            String[] supportedPropositionIds = destination.getSupportedPropositionIds(this.abstractionFinder.getDataSource(), this.abstractionFinder.getKnowledgeSource());
+            setPropIdsToRetain(supportedPropositionIds);
+
+            if (isLoggable(Level.FINE)) {
+                log(Level.FINE, "Propositions to be queried are {0}", StringUtils.join(this.propIds, ", "));
+            }
+            try {
+                retain(this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()])));
+
+                if (isLoggable(Level.FINE)) {
+                    Set<String> allNarrowerDescendantsPropIds = new HashSet<>();
+                    for (PropositionDefinition pd : this.allNarrowerDescendants) {
+                        allNarrowerDescendantsPropIds.add(pd.getId());
+                    }
+                    log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));
+                }
+            } catch (KnowledgeSourceReadException ex) {
+                throw new ExecutorInitException(ex);
+            }
+
+            if (strategy != null) {
+                log(Level.FINE, "Setting execution strategy...");
+                switch (strategy) {
+                    case STATELESS:
+                        executionStrategy = newStatelessStrategy();
+                        break;
+                    case STATEFUL:
+                        executionStrategy = newStatefulStrategy();
+                        break;
+                    default:
+                        throw new AssertionError("Invalid execution strategy: " + strategy);
+                }
+                log(Level.FINE, "Execution strategy is set to {0}", strategy);
+            }
+
+            log(Level.FINE, "Calling query results handler start...");
+            this.resultsHandler.start(getAllNarrowerDescendants());
+            log(Level.FINE, "Query results handler started");
+            log(Level.FINE, "Query results handler waiting for results...");
+        } catch (QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | GetSupportedPropositionIdsException | Error | RuntimeException ex) {
+            this.failed = true;
+            throw new ExecutorInitException("Processing query failed", ex);
+        }
+    }
+
+    void execute() throws ExecutorExecuteException {
+        try {
+            log(Level.INFO, "Processing data");
+            DataStreamingEvent doProcessPoisonPill = new DataStreamingEvent("poison", Collections.emptyList());
+            QueueObject hqrPoisonPill = new QueueObject();
+            BlockingQueue<DataStreamingEvent> doProcessQueue = new ArrayBlockingQueue<>(1000);
+            BlockingQueue<QueueObject> hqrQueue = new ArrayBlockingQueue<>(1000);
+
+            Thread retrieveDataThread = new RetrieveDataThread(doProcessQueue, doProcessPoisonPill);
+            Thread doProcessThread = new DoProcessThread(doProcessQueue, hqrQueue, doProcessPoisonPill, hqrPoisonPill, retrieveDataThread);
+            Thread handleQueryResultThread = new HandleQueryResultThread(hqrQueue, hqrPoisonPill, doProcessThread);
+
+            retrieveDataThread.start();
+            doProcessThread.start();
+            handleQueryResultThread.start();
+            try {
+                retrieveDataThread.join();
+                log(Level.INFO, "Done retrieving data");
+            } catch (InterruptedException ex) {
+                log(Level.FINER, "Protempa producer thread join interrupted", ex);
+            }
+            try {
+                doProcessThread.join();
+                log(Level.INFO, "Done processing data");
+            } catch (InterruptedException ex) {
+                log(Level.FINER, "Protempa consumer thread join interrupted", ex);
+            }
+            try {
+                handleQueryResultThread.join();
+                log(Level.INFO, "Done outputting results");
+            } catch (InterruptedException ex) {
+                log(Level.FINER, "Protempa consumer thread join interrupted", ex);
+            }
+
+            if (!exceptions.isEmpty()) {
+                throw exceptions.get(0);
+            }
+        } catch (ExecutorExecuteException ex) {
+            this.failed = true;
+            throw ex;
+        }
+    }
+
+    @Override
+    public void close() throws ExecutorCloseException {
+        if (executionStrategy != null) {
+            executionStrategy.cleanup();
+        }
+        try {
+            // Might be null if init() fails.
+            if (this.resultsHandler != null) {
+                if (!this.failed) {
+                    this.resultsHandler.finish();
+                }
+                this.resultsHandler.close();
+                this.resultsHandler = null;
+            }
+        } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerCloseException ex) {
+            throw new ExecutorCloseException(ex);
+        } finally {
+            if (this.resultsHandler != null) {
+                try {
+                    this.resultsHandler.close();
+                } catch (QueryResultsHandlerCloseException ignore) {
+
+                }
+            }
+        }
+    }
+
+    ExecutionStrategy getExecutionStrategy() {
+        return this.executionStrategy;
+    }
+
+    int getCount() {
+        return counter.getCount();
+    }
+
+    Query getQuery() {
+        return query;
+    }
+
+    Set<String> getPropIds() {
+        return this.propIds;
+    }
+
+    Collection<PropositionDefinition> getAllNarrowerDescendants() {
+        return allNarrowerDescendants;
+    }
+
+    Filter getFilters() {
+        return this.filters;
+    }
+
+    Set<String> getKeyIds() {
+        return this.keyIds;
+    }
+
+    void setPropIdsToRetain(String[] propIds) {
+        if (propIds == null || propIds.length == 0) {
+            this.propIdsToRetain = null;
+        } else {
+            this.propIdsToRetain = Arrays.asSet(propIds);
+        }
+        this.allNarrowerDescendants = null;
+    }
+
+    DerivationsBuilder getDerivationsBuilder() {
+        return this.derivationsBuilder;
+    }
+
+    KnowledgeSource getKnowledgeSource() {
+        return ks;
+    }
+
+    QuerySession getQuerySession() {
+        return qs;
+    }
+
+    boolean isLoggable(Level level) {
+        return LOGGER.isLoggable(level);
+    }
+
+    void log(Level level, String msg, Object[] params) {
+        if (isLoggable(level)) {
+            LOGGER.log(level, this.logMessageFormat.format(new Object[]{msg}), params);
+        }
+    }
+
+    void log(Level level, String msg, Object param) {
+        if (isLoggable(level)) {
+            LOGGER.log(level, this.logMessageFormat.format(new Object[]{msg}), param);
+        }
+    }
+
+    void log(Level level, String msg, Throwable throwable) {
+        if (isLoggable(level)) {
+            LOGGER.log(level, this.logMessageFormat.format(new Object[]{msg}), throwable);
+        }
+    }
+
+    void log(Level level, String msg) {
+        if (isLoggable(level)) {
+            LOGGER.log(level, this.logMessageFormat.format(new Object[]{msg}));
+        }
+    }
+
+    void logCount(Level level, int count, String singularMsg, String pluralMsg, Object[] singularParams, Object[] pluralParams) {
+        if (isLoggable(level)) {
+            Logging.logCount(LOGGER, level, count, this.logMessageFormat.format(new Object[]{singularMsg}), this.logMessageFormat.format(new Object[]{pluralMsg}), singularParams, pluralParams);
+        }
     }
 
     private class ExecutorCounter {
@@ -107,233 +333,249 @@ abstract class Executor implements AutoCloseable {
         int getCount() {
             return this.count;
         }
-    }
 
-    abstract class KeyIdProcessor {
-
-        private final Iterator<String> itr;
-        private final ExecutorCounter counter;
-
-        public KeyIdProcessor(Iterator<String> itr) {
-            assert itr != null : "itr cannot be null";
-            this.itr = itr;
-            this.counter = new ExecutorCounter();
-        }
-
-        void process() throws ExecutorExecuteException {
-            for (; this.itr.hasNext();) {
-                doProcess(this.itr.next(), propIds);
-                this.counter.incr();
-                derivationsBuilder.reset();
-            }
-        }
-
-        abstract void doProcess(String keyId, Set<String> propIds) throws ExecutorExecuteException;
-    }
-
-    abstract class DataStreamingEventProcessor {
-
-        private final DataStreamingEventIterator<Proposition> itr;
-        private final ExecutorCounter counter;
-        private final List<ExecutorExecuteException> exceptions;
-
-        public DataStreamingEventProcessor(DataStreamingEventIterator<Proposition> itr) {
-            assert itr != null : "itr cannot be null";
-            this.itr = itr;
-            this.counter = new ExecutorCounter();
-            this.exceptions = Collections.synchronizedList(new ArrayList<ExecutorExecuteException>());
-        }
-
-        final void process() throws ExecutorExecuteException {
-            final String queryId = query.getName();
-            log(Level.INFO, "Processing data for query {0}", queryId);
-            final DataStreamingEvent poisonPill = new DataStreamingEvent("poison", Collections.emptyList());
-            final BlockingQueue<DataStreamingEvent> queue = new ArrayBlockingQueue<>(1000);
-            final Thread producer = new Thread() {
-
-                @Override
-                public void run() {
-                    boolean itrClosed = false;
-                    try {
-                        while (!isInterrupted() && itr.hasNext()) {
-                            queue.put(itr.next());
-                        }
-                        itr.close();
-                        queue.put(poisonPill);
-                        itrClosed = true;
-                    } catch (DataSourceReadException ex) {
-                        exceptions.add(new ExecutorExecuteException(ex));
-                        try {
-                            queue.put(poisonPill);
-                        } catch (InterruptedException ignore) {
-                        }
-                    } catch (Error | RuntimeException ex) {
-                        exceptions.add(new ExecutorExecuteException(ex));
-                        try {
-                            queue.put(poisonPill);
-                        } catch (InterruptedException ignore) {
-                        }
-                    } catch (InterruptedException ex) {
-                        ProtempaUtil.logger().log(Level.FINER, "Protempa producer thread interrupted", ex);
-                        try {
-                            queue.put(poisonPill);
-                        } catch (InterruptedException ignore) {
-                        }
-                    } finally {
-                        if (!itrClosed) {
-                            try {
-                                itr.close();
-                            } catch (DataSourceReadException ignore) {
-                            }
-                        }
-                    }
-                }
-            };
-
-            final Thread consumer = new Thread() {
-
-                @Override
-                public void run() {
-                    try {
-                        DataStreamingEvent dse;
-                        while (!isInterrupted() && ((dse = queue.take()) != poisonPill)) {
-                            doProcess(dse, propIds);
-                            counter.incr();
-                            derivationsBuilder.reset();
-                        }
-                    } catch (ExecutorExecuteException ex) {
-                        exceptions.add(ex);
-                    } catch (InterruptedException ex) {
-                        producer.interrupt();
-                    }
-                }
-
-            };
-
-            producer.start();
-            consumer.start();
-            try {
-                producer.join();
-                log(Level.INFO, "Done retrieving data for query {0}", queryId);
-            } catch (InterruptedException ex) {
-                ProtempaUtil.logger().log(Level.FINER, "Protempa producer thread interrupted", ex);
-            }
-            try {
-                consumer.join();
-                log(Level.INFO, "Done processing data for query {0}", queryId);
-            } catch (InterruptedException ex) {
-                ProtempaUtil.logger().log(Level.FINER, "Protempa consumer thread interrupted", ex);
-            }
-
-            if (!this.exceptions.isEmpty()) {
-                throw this.exceptions.get(0);
-            }
-        }
-
-        final int getCount() {
-            return this.counter.getCount();
-        }
-
-        abstract void doProcess(DataStreamingEvent next, Set<String> propIds) throws ExecutorExecuteException;
-    }
-
-    protected final Query getQuery() {
-        return query;
-    }
-
-    protected final Set<String> getPropIds() {
-        return this.propIds;
-    }
-
-    protected final Collection<PropositionDefinition> getAllNarrowerDescendants() {
-        return allNarrowerDescendants;
-    }
-
-    protected final Filter getFilters() {
-        return this.filters;
-    }
-
-    protected final Set<String> getKeyIds() {
-        return this.keyIds;
-    }
-
-    protected final void setPropIdsToRetain(String[] propIds) {
-        if (propIds == null || propIds.length == 0) {
-            this.propIdsToRetain = null;
-        } else {
-            this.propIdsToRetain = Arrays.asSet(propIds);
-        }
-        this.allNarrowerDescendants = null;
-    }
-
-    protected final DerivationsBuilder getDerivationsBuilder() {
-        return this.derivationsBuilder;
-    }
-
-    final KnowledgeSource getKnowledgeSource() {
-        return ks;
-    }
-
-    final QuerySession getQuerySession() {
-        return qs;
-    }
-
-    final boolean isLoggable(Level level) {
-        return LOGGER.isLoggable(level);
-    }
-
-    final void log(Level level, String msg, Object[] params) {
-        LOGGER.log(level, msg, params);
-    }
-
-    final void log(Level level, String msg, Object param) {
-        LOGGER.log(level, msg, param);
-    }
-    
-    final void log(Level level, String msg, Throwable throwable) {
-        LOGGER.log(level, msg, throwable);
-    }
-
-    final void log(Level level, String msg) {
-        LOGGER.log(level, msg);
-    }
-
-    final void logCount(Level level, int count, String singularMsg, String pluralMsg, Object[] singularParams, Object[] pluralParams) {
-        Logging.logCount(LOGGER, level, count, singularMsg, pluralMsg, singularParams, pluralParams);
-    }
-
-    void init() throws ExecutorInitException {
-        if (isLoggable(Level.FINE)) {
-            log(Level.FINE, "Propositions to be queried for query {0} are {1}", new Object[]{query.getName(), StringUtils.join(this.propIds, ", ")});
-        }
-        try {
-            retain(this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()])));
-
+        private void logNumProcessed(int numProcessed) throws ExecutorExecuteException {
             if (isLoggable(Level.FINE)) {
-                Set<String> allNarrowerDescendantsPropIds = new HashSet<>();
-                for (PropositionDefinition pd : this.allNarrowerDescendants) {
-                    allNarrowerDescendantsPropIds.add(pd.getId());
+                try {
+                    String keyTypeSingDisplayName = abstractionFinder.getDataSource().getKeyTypeDisplayName();
+                    String keyTypePluralDisplayName = abstractionFinder.getDataSource().getKeyTypePluralDisplayName();
+                    logCount(Level.FINE, numProcessed, "Processed {0} {1}", "Processed {0} {1}", new Object[]{keyTypeSingDisplayName}, new Object[]{keyTypePluralDisplayName});
+                } catch (DataSourceReadException ex) {
+                    throw new ExecutorExecuteException(ex);
                 }
-                log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));
             }
-        } catch (KnowledgeSourceReadException ex) {
-            throw new ExecutorInitException(ex);
+        }
+    }
+
+    private class RetrieveDataThread extends Thread {
+
+        private final BlockingQueue<DataStreamingEvent> queue;
+        private final DataStreamingEvent poisonPill;
+        private final DataStreamingEventIterator<Proposition> itr;
+
+        RetrieveDataThread(BlockingQueue<DataStreamingEvent> queue, DataStreamingEvent poisonPill) throws ExecutorExecuteException {
+            super("protempa.executor.RetrieveDataThread");
+            this.queue = queue;
+            this.poisonPill = poisonPill;
+            this.itr = newDataIterator();
         }
 
-        if (strategy != null) {
-            log(Level.FINE, "Setting execution strategy...");
-            switch (strategy) {
-                case STATELESS:
-                    executionStrategy = newStatelessStrategy();
-                    break;
-                case STATEFUL:
-                    executionStrategy = newStatefulStrategy();
-                    break;
-                default:
-                    throw new AssertionError("Invalid execution strategy: " + strategy);
+        @Override
+        public void run() {
+            log(Level.FINER, "Start retrieve data thread");
+            boolean itrClosed = false;
+            try {
+                while (!isInterrupted() && itr.hasNext()) {
+                    queue.put(itr.next());
+                }
+                itr.close();
+                queue.put(poisonPill);
+                itrClosed = true;
+            } catch (DataSourceReadException ex) {
+                exceptions.add(new ExecutorExecuteException(ex));
+                try {
+                    queue.put(poisonPill);
+                } catch (InterruptedException ignore) {
+                    log(Level.SEVERE, "Failed to send stop message to the do process thread; the query may be hung", ignore);
+                }
+            } catch (Error | RuntimeException ex) {
+                exceptions.add(new ExecutorExecuteException(ex));
+                try {
+                    queue.put(poisonPill);
+                } catch (InterruptedException ignore) {
+                    log(Level.SEVERE, "Failed to send stop message to the do process thread; the query may be hung", ignore);
+                }
+            } catch (InterruptedException ex) {
+                log(Level.FINER, "Retrieve data thread interrupted", ex);
+                try {
+                    queue.put(poisonPill);
+                } catch (InterruptedException ignore) {
+                    log(Level.SEVERE, "Failed to send stop message to the do process thread; the query may be hung", ignore);
+                }
+            } finally {
+                if (!itrClosed) {
+                    try {
+                        itr.close();
+                    } catch (DataSourceReadException ignore) {
+                    }
+                }
             }
-            log(Level.FINE, "Execution strategy is set to {0}", strategy);
+            log(Level.FINER, "End retrieve data thread");
         }
+    }
+
+    private class DoProcessThread extends Thread {
+
+        private final BlockingQueue<DataStreamingEvent> doProcessQueue;
+        private final BlockingQueue<QueueObject> hqrQueue;
+        private final QueueObject hqrPoisonPill;
+        private final DataStreamingEvent doProcessPoisonPill;
+        private final Thread producer;
+
+        DoProcessThread(BlockingQueue<DataStreamingEvent> doProcessQueue, BlockingQueue<QueueObject> hqrQueue, DataStreamingEvent doProcessPoisonPill, QueueObject hqrPoisonPill, Thread producer) {
+            super("protempa.executor.DoProcessThread");
+            this.doProcessQueue = doProcessQueue;
+            this.hqrQueue = hqrQueue;
+            this.doProcessPoisonPill = doProcessPoisonPill;
+            this.producer = producer;
+            this.hqrPoisonPill = hqrPoisonPill;
+        }
+
+        @Override
+        public void run() {
+            log(Level.FINER, "Start do process thread");
+            try {
+                DataStreamingEvent dse;
+                while (!isInterrupted() && ((dse = doProcessQueue.take()) != doProcessPoisonPill)) {
+                    String keyId = dse.getKeyId();
+                    Iterator<Proposition> resultsItr;
+                    ExecutionStrategy strategy = getExecutionStrategy();
+                    if (strategy != null) {
+                        resultsItr = strategy.execute(
+                                keyId, propIds, dse.getData(),
+                                null);
+                    } else {
+                        resultsItr = dse.getData().iterator();
+                    }
+                    Map<Proposition, List<Proposition>> forwardDerivations = derivationsBuilder.toForwardDerivations();
+                    Map<Proposition, List<Proposition>> backwardDerivations = derivationsBuilder.toBackwardDerivations();
+                    QuerySession qs = getQuerySession();
+                    if (qs.isCachingEnabled()) {
+                        List<Proposition> props = Iterators.asList(resultsItr);
+                        addToCache(qs, Collections.unmodifiableList(props), Collections.unmodifiableMap(forwardDerivations), Collections.unmodifiableMap(backwardDerivations));
+                        resultsItr = props.iterator();
+                    }
+                    Map<UniqueId, Proposition> refs = new HashMap<>();
+                    List<Proposition> filteredPropositions = extractRequestedPropositions(resultsItr, refs);
+                    if (isLoggable(Level.FINEST)) {
+                        log(Level.FINEST, "Proposition ids: {0}", propIds);
+                        log(Level.FINEST, "Filtered propositions: {0}", filteredPropositions);
+                        log(Level.FINEST, "Forward derivations: {0}", forwardDerivations);
+                        log(Level.FINEST, "Backward derivations: {0}", backwardDerivations);
+                        log(Level.FINEST, "References: {0}", refs);
+                    }
+                    this.hqrQueue.put(new QueueObject(keyId, filteredPropositions, forwardDerivations, backwardDerivations, refs));
+                    log(Level.FINER, "Results put on query result handler queue");
+                    counter.incr();
+                    derivationsBuilder.reset();
+                }
+                this.hqrQueue.put(this.hqrPoisonPill);
+            } catch (ExecutorExecuteException ex) {
+                log(Level.FINER, "Do process thread threw ExecutorExecuteException", ex);
+                exceptions.add(ex);
+                producer.interrupt();
+                try {
+                    hqrQueue.put(hqrPoisonPill);
+                } catch (InterruptedException ignore) {
+                    log(Level.SEVERE, "Failed to stop the query results handler queue; the query may be hung", ignore);
+                }
+            } catch (InterruptedException ex) {
+                log(Level.FINER, "Do process thread interrupted", ex);
+                producer.interrupt();
+                try {
+                    hqrQueue.put(hqrPoisonPill);
+                } catch (InterruptedException ignore) {
+                    log(Level.SEVERE, "Failed to stop the query results handler queue; the query may be hung", ignore);
+                }
+            } catch (Error | RuntimeException t) {
+                log(Level.SEVERE, "Do process thread threw exception; the query may be hung", t);
+                throw t;
+            }
+            log(Level.FINER, "End do process thread");
+        }
+
+        private List<Proposition> extractRequestedPropositions(
+                Iterator<Proposition> propositions,
+                Map<UniqueId, Proposition> refs) {
+            List<Proposition> result = new ArrayList<>();
+            while (propositions.hasNext()) {
+                Proposition prop = propositions.next();
+                refs.put(prop.getUniqueId(), prop);
+                if (propIds.contains(prop.getId())) {
+                    result.add(prop);
+                }
+            }
+            return result;
+        }
+
+        private void addToCache(QuerySession qs,
+                List<Proposition> propositions,
+                Map<Proposition, List<Proposition>> forwardDerivations,
+                Map<Proposition, List<Proposition>> backwardDerivations) {
+            qs.addPropositionsToCache(propositions);
+            for (Map.Entry<Proposition, List<Proposition>> me
+                    : forwardDerivations.entrySet()) {
+                qs.addDerivationsToCache(me.getKey(), me.getValue());
+            }
+            for (Map.Entry<Proposition, List<Proposition>> me
+                    : backwardDerivations.entrySet()) {
+                qs.addDerivationsToCache(me.getKey(), me.getValue());
+            }
+        }
+    }
+
+    private class HandleQueryResultThread extends Thread {
+
+        private final BlockingQueue<QueueObject> queue;
+        private final Thread producerThread;
+        private final QueueObject poisonPill;
+
+        HandleQueryResultThread(BlockingQueue<QueueObject> queue, QueueObject poisonPill, Thread producerThread) {
+            super("protempa.executor.HandleQueryResultThread");
+            this.queue = queue;
+            this.producerThread = producerThread;
+            this.poisonPill = poisonPill;
+        }
+
+        @Override
+        public void run() {
+            log(Level.FINER, "Start handle query results thread");
+            QueueObject qo;
+            try {
+                while (!isInterrupted() && ((qo = queue.take()) != poisonPill)) {
+                    log(Level.FINER, "Handling some results");
+                    try {
+                        resultsHandler.handleQueryResult(qo.keyId, qo.propositions, qo.forwardDerivations, qo.backwardDerivations, qo.refs);
+                    } catch (QueryResultsHandlerProcessingException ex) {
+                        log(Level.FINER, "Handle query results threw QueryResultsHandlerProcessingException", ex);
+                        exceptions.add(new ExecutorExecuteException(ex));
+                        producerThread.interrupt();
+                        break;
+                    } catch (Error | RuntimeException t) {
+                        log(Level.FINER, "Handle query results threw exception", t);
+                        exceptions.add(new ExecutorExecuteException(new QueryResultsHandlerProcessingException(t)));
+                        producerThread.interrupt();
+                        break;
+                    }
+                    log(Level.FINER, "Results passed to query result handler");
+                }
+            } catch (InterruptedException ex) {
+                log(Level.FINER, "Handle query results thread interrupted", ex);
+                producerThread.interrupt();
+            }
+            log(Level.FINER, "End handle query results thread");
+        }
+
+    };
+
+    private DataStreamingEventIterator<Proposition> newDataIterator() throws ExecutorExecuteException {
+        log(Level.INFO, "Retrieving data");
+        Set<String> inDataSourcePropIds = new HashSet<>();
+        for (PropositionDefinition pd : allNarrowerDescendants) {
+            if (pd.getInDataSource()) {
+                inDataSourcePropIds.add(pd.getId());
+            }
+        }
+        if (isLoggable(Level.FINER)) {
+            log(Level.FINER, "Asking data source for {0}", StringUtils.join(inDataSourcePropIds, ", "));
+        }
+        DataStreamingEventIterator<Proposition> itr;
+        try {
+            itr = abstractionFinder.getDataSource().readPropositions(this.keyIds, inDataSourcePropIds, this.filters, getQuerySession(), this.resultsHandler);
+        } catch (DataSourceReadException ex) {
+            throw new ExecutorExecuteException(ex);
+        }
+        return itr;
     }
 
     private void retain(Set<PropositionDefinition> propDefs) {
@@ -342,10 +584,10 @@ abstract class Executor implements AutoCloseable {
             for (PropositionDefinition and : propDefs) {
                 propDefMap.put(and.getId(), and);
             }
-            Queue<String> propIds = new LinkedList<>(this.propIds);
+            Queue<String> propIdsQueue = new LinkedList<>(this.propIds);
             String pid;
             Set<PropositionDefinition> propDefsToKeep = new HashSet<>();
-            while ((pid = propIds.poll()) != null) {
+            while ((pid = propIdsQueue.poll()) != null) {
                 if (this.propIdsToRetain.contains(pid)) {
                     Queue<String> propIdsToKeep = new LinkedList<>();
                     propIdsToKeep.add(pid);
@@ -357,7 +599,7 @@ abstract class Executor implements AutoCloseable {
                     }
                 } else {
                     PropositionDefinition get = propDefMap.get(pid);
-                    Arrays.addAll(propIds, get.getChildren());
+                    Arrays.addAll(propIdsQueue, get.getChildren());
                 }
             }
             allNarrowerDescendants = propDefsToKeep;
@@ -365,66 +607,6 @@ abstract class Executor implements AutoCloseable {
             allNarrowerDescendants = propDefs;
         }
     }
-
-    void execute() throws ExecutorExecuteException {
-        try {
-            doExecute(this.keyIds, this.derivationsBuilder, executionStrategy);
-        } catch (Error | RuntimeException ex) {
-            throw new ExecutorExecuteException(ex);
-        }
-    }
-
-    @Override
-    public void close() throws ExecutorCloseException {
-        if (executionStrategy != null) {
-            executionStrategy.cleanup();
-        }
-    }
-
-    DataStreamingEventIterator<Proposition> newDataIterator() throws ExecutorExecuteException {
-        log(Level.INFO, "Retrieving data for query {0}", query.getName());
-        Set<String> inDataSourcePropIds = new HashSet<>();
-        for (PropositionDefinition pd : allNarrowerDescendants) {
-            if (pd.getInDataSource()) {
-                inDataSourcePropIds.add(pd.getId());
-            }
-        }
-        if (isLoggable(Level.FINER)) {
-            log(Level.FINER, "Asking data source for {0} for query {1}", new Object[]{StringUtils.join(inDataSourcePropIds, ", "), query.getName()});
-        }
-        DataStreamingEventIterator<Proposition> itr;
-        try {
-            itr = abstractionFinder.getDataSource().readPropositions(this.keyIds, inDataSourcePropIds, this.filters, getQuerySession(), null);
-        } catch (DataSourceReadException ex) {
-            throw new ExecutorExecuteException(ex);
-        }
-        return itr;
-    }
-
-    final Iterator<String> keysToProcess(Set<String> keyIds, DataStore<String, ?> propStore) {
-        Set<String> result;
-        if (keyIds != null && !keyIds.isEmpty()) {
-            result = keyIds;
-        } else {
-            result = propStore.keySet();
-        }
-        return result.iterator();
-    }
-
-    final void logNumProcessed(int numProcessed) throws ExecutorExecuteException {
-        if (isLoggable(Level.FINE)) {
-            try {
-                String keyTypeSingDisplayName = abstractionFinder.getDataSource().getKeyTypeDisplayName();
-                String keyTypePluralDisplayName = abstractionFinder.getDataSource().getKeyTypePluralDisplayName();
-                String queryId = query.getName();
-                logCount(Level.FINE, numProcessed, "Processed {0} {1} for query {2}", "Processed {0} {1} for query {2}", new Object[]{keyTypeSingDisplayName, queryId}, new Object[]{keyTypePluralDisplayName, queryId});
-            } catch (DataSourceReadException ex) {
-                throw new ExecutorExecuteException(ex);
-            }
-        }
-    }
-
-    protected abstract void doExecute(Set<String> keyIds, final DerivationsBuilder derivationsBuilder, final ExecutionStrategy strategy) throws ExecutorExecuteException;
 
     private StatelessExecutionStrategy newStatelessStrategy() throws ExecutorInitException {
         StatelessExecutionStrategy result = new StatelessExecutionStrategy(abstractionFinder, abstractionFinder.getAlgorithmSource());
@@ -449,10 +631,10 @@ abstract class Executor implements AutoCloseable {
     }
 
     private void createRuleBase(ExecutionStrategy result) throws CreateRuleBaseException {
-        log(Level.FINEST, "Initializing rule base for query {0}", query.getName());
+        log(Level.FINEST, "Initializing rule base");
         result.createRuleBase(allNarrowerDescendants, derivationsBuilder, qs);
         abstractionFinder.clear();
-        log(Level.FINEST, "Rule base initialized for query {0}", query.getName());
+        log(Level.FINEST, "Rule base initialized");
     }
 
 }

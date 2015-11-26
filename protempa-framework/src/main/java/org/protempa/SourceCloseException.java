@@ -19,34 +19,22 @@
  */
 package org.protempa;
 
-import java.util.List;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
- * Abstract class for exceptions that are thrown when an error occurs calling
- * the data source.
+ * Class for exceptions that are thrown when an error occurs while closing
+ * a data, knowledge, algorithm or term source.
  *
  * @author Andrew Post
  *
  */
-public abstract class SourceCloseException extends CloseException {
+public final class SourceCloseException extends CloseException {
 
-    SourceCloseException() {
+    SourceCloseException(BackendCloseException... exceptions) {
+        super(exceptionsToString(exceptions));
     }
 
-    SourceCloseException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    SourceCloseException(String message) {
-        super(message);
-    }
-
-    SourceCloseException(Throwable cause) {
-        super(cause);
-    }
-    
-    protected static String exceptionsToString(List<BackendCloseException> causes) {
+    private static String exceptionsToString(BackendCloseException[] causes) {
         StringBuilder stackTrace = new StringBuilder();
         for (BackendCloseException ex : causes) {
             stackTrace.append(ExceptionUtils.getStackTrace(ex));

@@ -85,13 +85,6 @@ public final class TermSourceImpl extends AbstractSource<TermSourceUpdatedEvent,
         super.close();
     }
 
-    @Override
-    protected void throwCloseException(List<BackendCloseException> exceptions) throws SourceCloseException {
-        throw new TermSourceCloseException(exceptions);
-    }
-    
-    
-
     /**
      * Notifies registered listeners that the term source has been updated.
      *

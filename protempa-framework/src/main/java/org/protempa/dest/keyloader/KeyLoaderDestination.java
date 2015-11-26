@@ -35,9 +35,31 @@ import org.protempa.query.Query;
  */
 public class KeyLoaderDestination extends AbstractDestination {
     private final Criteria criteria;
-
+    private final String id;
+    private final String displayName;
+    
     public KeyLoaderDestination(Criteria criteria) {
+        this(null, criteria);
+    }
+
+    public KeyLoaderDestination(String id, Criteria criteria) {
+        this(id, null, criteria);
+    }
+    
+    public KeyLoaderDestination(String id, String displayName, Criteria criteria) {
         this.criteria = criteria;
+        this.id = id;
+        this.displayName = displayName;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return this.displayName != null ? this.displayName : super.getDisplayName();
+    }
+
+    @Override
+    public String getId() {
+        return this.id != null ? this.id : super.getId();
     }
     
     @Override
@@ -45,7 +67,7 @@ public class KeyLoaderDestination extends AbstractDestination {
         if (query.getQueryMode() == QueryMode.UPDATE) {
             throw new QueryResultsHandlerInitException("Update mode not supported");
         }
-        return new KeyLoaderQueryResultsHandler(dataSource, knowledgeSource, this.criteria);
+        return new KeyLoaderQueryResultsHandler(dataSource, knowledgeSource, this.criteria, this.id, this.displayName);
     }
 
     @Override

@@ -56,6 +56,21 @@ import org.protempa.query.Query;
  *
  */
 public interface QueryResultsHandler extends AutoCloseable {
+    
+    /**
+     * Gets the query result handler's identifier string for logging and
+     * internal purposes.
+     * 
+     * @return a string.
+     */
+    String getId();
+    
+    /**
+     * Gets the query result handler's display name for user interfaces.
+     * 
+     * @return a string.
+     */
+    String getDisplayName();
 
     /**
      * Validates this query results handler's specification.

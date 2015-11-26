@@ -165,7 +165,7 @@ final class AbstractionFinder {
             throw new QueryException(query.getName(), ex);
         }
 
-        try (Executor executor = new DoFindExecutor(query, destination, qs, strategy, this)) {
+        try (Executor executor = new Executor(query, destination, qs, strategy, this)) {
             executor.init();
             executor.execute();
         } catch (ExecutorException ex) {
@@ -259,84 +259,6 @@ final class AbstractionFinder {
             throw exception;
         }
         this.closed = true;
-    }
-
-//    private List<String> getPropIdsFromTerms(
-//            Set<And<TermSubsumption>> termSubsumptionClauses)
-//            throws KnowledgeSourceReadException {
-//        List<String> result = new ArrayList<String>();
-//
-//        for (And<TermSubsumption> subsumpClause : termSubsumptionClauses) {
-//            result.addAll(this.knowledgeSource
-//                    .getPropositionDefinitionsByTerm(subsumpClause));
-//        }
-//
-//        return result;
-//    }
-//    private Set<And<TermSubsumption>> explodeTerms(Set<And<String>> termClauses)
-//            throws TermSourceReadException {
-//        Set<And<TermSubsumption>> result = new HashSet<And<TermSubsumption>>();
-//
-//        for (And<String> termClause : termClauses) {
-//            And<TermSubsumption> subsumpClause = new And<TermSubsumption>();
-//            List<TermSubsumption> tss = new ArrayList<TermSubsumption>();
-//            for (String termId : termClause.getAnded()) {
-//                tss.add(TermSubsumption.fromTerms(this.termSource
-//                        .getTermSubsumption(termId)));
-//            }
-//            subsumpClause.setAnded(tss);
-//            result.add(subsumpClause);
-//        }
-//
-//        return result;
-//    }
-    void retrieveAndStoreData(Query query, QuerySession qs,
-            String persistentStoreEnvironment) throws QueryException {
-        assert query != null : "query cannot be null";
-        try (Executor executor = new RetrieveAndStoreDataExecutor(query, qs, this, persistentStoreEnvironment)) {
-            executor.init();
-            executor.execute();
-        } catch (ExecutorException ex) {
-            throw new QueryException(query.getName(), ex);
-        }
-    }
-
-    void processStoredResults(Query query, QuerySession qs,
-            String propositionStoreEnvironment,
-            String workingMemoryStoreEnvironment) throws QueryException {
-        assert query != null : "query cannot be null";
-        try (Executor executor = new ProcessStoredResultsExecutor(query, qs, this, propositionStoreEnvironment, workingMemoryStoreEnvironment)) {
-            executor.init();
-            executor.execute();
-        } catch (ExecutorException ex) {
-            throw new QueryException(query.getName(), ex);
-        }
-    }
-
-    void outputStoredResults(Query query,
-            Destination destination, QuerySession qs,
-            String workingMemoryStoreEnvironment) throws QueryException {
-        assert query != null : "query cannot be null";
-        try (Executor executor = new OutputStoredResultsExecutor(query, destination, qs, this, workingMemoryStoreEnvironment)) {
-            executor.init();
-            executor.execute();
-        } catch (ExecutorException ex) {
-            throw new QueryException(query.getName(), ex);
-        }
-    }
-
-    void processAndOutputStoredResults(Query query,
-            Destination destination,
-            QuerySession qs, final String propositionStoreEnvironment)
-            throws QueryException {
-        assert query != null : "query cannot be null";
-        try (Executor executor = new ProcessAndOutputStoredResultsExecutor(query, destination, qs,
-                this, propositionStoreEnvironment)) {
-            executor.init();
-            executor.execute();
-        } catch (ExecutorException ex) {
-            throw new QueryException(query.getName(), ex);
-        }
     }
 
     boolean isClosed() {

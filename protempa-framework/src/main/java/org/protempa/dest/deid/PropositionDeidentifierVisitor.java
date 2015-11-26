@@ -127,29 +127,43 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
 
     private Interval doOffsetInterval(Interval interval) {
         if (this.offsetInSeconds != null) {
-            synchronized (CAL) {
-                Date minStartDate = AbsoluteTimeGranularityUtil.asDate(interval.getMinStart());
-                CAL.setTime(minStartDate);
-                CAL.add(Calendar.SECOND, this.offsetInSeconds);
-                minStartDate = CAL.getTime();
-
-                Date maxStartDate = AbsoluteTimeGranularityUtil.asDate(interval.getMaxStart());
-                CAL.setTime(maxStartDate);
-                CAL.add(Calendar.SECOND, this.offsetInSeconds);
-                maxStartDate = CAL.getTime();
-
-                Date minFinishDate = AbsoluteTimeGranularityUtil.asDate(interval.getMinFinish());
-                CAL.setTime(minFinishDate);
-                CAL.add(Calendar.SECOND, this.offsetInSeconds);
-                minFinishDate = CAL.getTime();
-
-                Date maxFinishDate = AbsoluteTimeGranularityUtil.asDate(interval.getMaxFinish());
-                CAL.setTime(maxFinishDate);
-                CAL.add(Calendar.SECOND, this.offsetInSeconds);
-                maxFinishDate = CAL.getTime();
-
-                return INTERVAL_FACTORY.getInstance(minStartDate, maxStartDate, interval.getStartGranularity(), minFinishDate, maxFinishDate, interval.getFinishGranularity());
+            Date minStartDate = AbsoluteTimeGranularityUtil.asDate(interval.getMinStart());
+            if (minStartDate != null) {
+                synchronized (CAL) {
+                    CAL.setTime(minStartDate);
+                    CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                    minStartDate = CAL.getTime();
+                }
             }
+
+            Date maxStartDate = AbsoluteTimeGranularityUtil.asDate(interval.getMaxStart());
+            if (maxStartDate != null) {
+                synchronized (CAL) {
+                    CAL.setTime(maxStartDate);
+                    CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                    maxStartDate = CAL.getTime();
+                }
+            }
+
+            Date minFinishDate = AbsoluteTimeGranularityUtil.asDate(interval.getMinFinish());
+            if (minFinishDate != null) {
+                synchronized (CAL) {
+                    CAL.setTime(minFinishDate);
+                    CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                    minFinishDate = CAL.getTime();
+                }
+            }
+
+            Date maxFinishDate = AbsoluteTimeGranularityUtil.asDate(interval.getMaxFinish());
+            if (maxFinishDate != null) {
+                synchronized (CAL) {
+                    CAL.setTime(maxFinishDate);
+                    CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                    maxFinishDate = CAL.getTime();
+                }
+            }
+
+            return INTERVAL_FACTORY.getInstance(minStartDate, maxStartDate, interval.getStartGranularity(), minFinishDate, maxFinishDate, interval.getFinishGranularity());
         } else {
             return interval;
         }
@@ -171,11 +185,13 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
                 Attribute hipaaIdAttr = propertyDefinition.getAttribute(DeidAttributes.IS_HIPAA_IDENTIFIER);
                 Attribute hipaaIdTypeAttr = propertyDefinition.getAttribute(DeidAttributes.HIPAA_IDENTIFIER_TYPE);
                 Value propertyValue = prop.getProperty(name);
-                if (this.offsetInSeconds != null && propertyDefinition.getValueType() == ValueType.DATEVALUE) {
+                if (propertyValue == null) {
+                    deidentifiedProp.setProperty(name, propertyValue);
+                } else if (this.offsetInSeconds != null && propertyDefinition.getValueType() == ValueType.DATEVALUE) {
                     synchronized (CAL) {
-                        this.CAL.setTime(((DateValue) propertyValue).getDate());
-                        this.CAL.add(Calendar.SECOND, this.offsetInSeconds);
-                        deidentifiedProp.setProperty(name, DateValue.getInstance(this.CAL.getTime()));
+                        CAL.setTime(((DateValue) propertyValue).getDate());
+                        CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                        deidentifiedProp.setProperty(name, DateValue.getInstance(CAL.getTime()));
                     }
                 } else if (hipaaIdTypeAttr != null && DeidAttributes.AGE.equals(hipaaIdTypeAttr.getValue())) {
                     NumericalValue numericalValue = (NumericalValue) propertyValue;

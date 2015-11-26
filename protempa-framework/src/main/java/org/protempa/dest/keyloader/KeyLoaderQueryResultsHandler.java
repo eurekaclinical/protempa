@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.ArrayUtils;
 import org.protempa.DataSource;
 import org.protempa.DataSourceWriteException;
 import org.protempa.KnowledgeSource;
@@ -44,10 +43,12 @@ public class KeyLoaderQueryResultsHandler extends AbstractQueryResultsHandler {
     private final Criteria criteria;
     private final KnowledgeSource knowledgeSource;
     private final int batchSize = 1000;
+    private final String id;
+    private final String displayName;
     private int i;
     private Set<String> keyIds;
 
-    KeyLoaderQueryResultsHandler(DataSource dataSource, KnowledgeSource knowledgeSource, Criteria criteria) {
+    KeyLoaderQueryResultsHandler(DataSource dataSource, KnowledgeSource knowledgeSource, Criteria criteria, String id, String displayName) {
         if (dataSource == null) {
             throw new IllegalArgumentException("dataSource cannot be null");
         }
@@ -57,6 +58,18 @@ public class KeyLoaderQueryResultsHandler extends AbstractQueryResultsHandler {
         this.dataSource = dataSource;
         this.knowledgeSource = knowledgeSource;
         this.criteria = criteria;
+        this.id = id;
+        this.displayName = displayName;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return this.displayName != null ? this.displayName : super.getDisplayName();
+    }
+
+    @Override
+    public String getId() {
+        return this.id != null ? this.id : super.getId();
     }
 
     @Override
