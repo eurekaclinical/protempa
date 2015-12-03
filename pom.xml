@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.eurekaclinical</groupId>
     <artifactId>protempa</artifactId>
-    <version>3.0-Alpha-4-SNAPSHOT</version>
+    <version>3.0-Alpha-4</version>
     <packaging>pom</packaging>
     <name>Protempa</name>
     <url>http://aiw.sourceforge.net/dev/protempa-${project.version}</url>
@@ -32,7 +32,7 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
         <connection>scm:git:https://github.com/eurekaclinical/protempa.git</connection>
         <developerConnection>scm:git:https://github.com/eurekaclinical/protempa.git</developerConnection>
         <url>https://github.com/eurekaclinical/protempa.git</url>
-        <tag>HEAD</tag>
+        <tag>protempa-3.0-Alpha-4</tag>
     </scm>
     
     <issueManagement>
