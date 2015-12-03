@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.protempa</groupId>
+        <groupId>org.eurekaclinical</groupId>
         <artifactId>protempa</artifactId>
         <version>3.0-Alpha-4-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.protempa</groupId>
+    <groupId>org.eurekaclinical</groupId>
     <artifactId>protempa-tsb-umls</artifactId>
     <packaging>jar</packaging>
     <name>Protempa UMLS Term Source Backend</name>
@@ -18,12 +18,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.protempa</groupId>
+            <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-framework</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
+            <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-bp-serviceloader</artifactId>
             <scope>compile</scope>
         </dependency>

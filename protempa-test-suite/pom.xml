@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>protempa</artifactId>
-        <groupId>org.protempa</groupId>
+        <groupId>org.eurekaclinical</groupId>
         <version>3.0-Alpha-4-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
@@ -19,33 +19,33 @@
     
     <dependencies>
         <dependency>
-            <groupId>org.protempa</groupId>
+            <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-framework</artifactId>
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
+            <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-ksb-protege</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
+            <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-tsb-umls</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
+            <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-bcp-serviceloader</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
+            <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-bconfigs-ini4j-ini</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.protempa</groupId>
+            <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-dsb-relationaldb</artifactId>
         </dependency>
         <dependency>

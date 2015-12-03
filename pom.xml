@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.protempa</groupId>
+    <groupId>org.eurekaclinical</groupId>
     <artifactId>protempa</artifactId>
     <version>3.0-Alpha-4-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -29,28 +29,26 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
     </properties>
 
     <scm>
-        <developerConnection>scm:git:ssh://git.cci.emory.edu/opt/git/aiw/protempa.git</developerConnection>
+        <connection>scm:git:https://github.com/eurekaclinical/protempa.git</connection>
+        <developerConnection>scm:git:https://github.com/eurekaclinical/protempa.git</developerConnection>
+        <url>https://github.com/eurekaclinical/protempa.git</url>
         <tag>HEAD</tag>
     </scm>
     
     <issueManagement>
-        <system>JIRA</system>
-        <url>http://jira.cci.emory.edu:8080/jira/secure/Dashboard.jspa</url>
+        <system>GitHub</system>
+        <url>https://github.com/eurekaclinical/protempa/issues</url>
     </issueManagement>
     
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-            <distribution>manual</distribution>
+            <distribution>repo</distribution>
         </license>
     </licenses>
     
     <distributionManagement>
-        <site>
-            <id>aiw.sourceforge.net</id>
-            <url>scp://shell.sourceforge.net/home/project-web/aiw/htdocs/dev/protempa-${project.version}</url>
-        </site>
         <repository>
             <id>aiw</id>
             <name>AIW Repo</name>
@@ -207,48 +205,48 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.protempa</groupId>
+                <groupId>org.eurekaclinical</groupId>
                 <artifactId>protempa-bconfigs-ini4j-ini</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.protempa</groupId>
+                <groupId>org.eurekaclinical</groupId>
                 <artifactId>protempa-bcp-serviceloader</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.protempa</groupId>
+                <groupId>org.eurekaclinical</groupId>
                 <artifactId>protempa-bp-serviceloader</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.protempa</groupId>
+                <groupId>org.eurekaclinical</groupId>
                 <artifactId>protempa-dsb-relationaldb</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.protempa</groupId>
+                <groupId>org.eurekaclinical</groupId>
                 <artifactId>protempa-framework</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.protempa</groupId>
+                <groupId>org.eurekaclinical</groupId>
                 <artifactId>protempa-framework</artifactId>
                 <version>${project.version}</version>
                 <type>test-jar</type>
             </dependency>
             <dependency>
-                <groupId>org.protempa</groupId>
+                <groupId>org.eurekaclinical</groupId>
                 <artifactId>protempa-ksb-protege</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.protempa</groupId>
+                <groupId>org.eurekaclinical</groupId>
                 <artifactId>protempa-test-suite</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.protempa</groupId>
+                <groupId>org.eurekaclinical</groupId>
                 <artifactId>protempa-tsb-umls</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -265,44 +263,6 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin
-                </artifactId>
-                <version>2.7</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jxr-plugin</artifactId>
-                <version>2.3</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-report-plugin
-                </artifactId>
-                <version>2.16</version>
-                <configuration>
-                    <aggregate>true</aggregate>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.11</version>
-                <configuration>
-                    <configLocation>http://aiw.sourceforge.net/dev/aiw-checkstyle-1.0/protempa-checkstyle.xml</configLocation>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>
 
     <build>
         <plugins>
@@ -412,18 +372,6 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.16</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.3</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.wagon</groupId>
-                        <artifactId>wagon-ssh</artifactId>
-                        <version>2.5</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.protempa</groupId>
+        <groupId>org.eurekaclinical</groupId>
         <artifactId>protempa</artifactId>
         <version>3.0-Alpha-4-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.protempa</groupId>
+    <groupId>org.eurekaclinical</groupId>
     <artifactId>protempa-bp-serviceloader</artifactId>
     <packaging>jar</packaging>
     <name>Protempa ServiceLoader Backend Provider</name>
@@ -18,7 +18,7 @@
     
     <dependencies>
         <dependency>
-            <groupId>org.protempa</groupId>
+            <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-framework</artifactId>
             <scope>compile</scope>
         </dependency>
