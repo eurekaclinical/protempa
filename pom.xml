@@ -19,14 +19,11 @@ a hospital encounter followed by another hospital encounter within 30 days);
 and overlaps (falling platelet counts in the setting of HELLP syndrome).
     </description>
     
-    <organization>
-        <name>Emory University</name>
-        <url>http://www.emory.edu</url>
-    </organization>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <parent>
+        <groupId>org.eurekaclinical</groupId>
+        <artifactId>eurekaclinical-parent</artifactId>
+        <version>1-SNAPSHOT</version>
+    </parent>
 
     <scm>
         <connection>scm:git:https://github.com/eurekaclinical/protempa.git</connection>
@@ -48,27 +45,7 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
         </license>
     </licenses>
     
-    <distributionManagement>
-        <repository>
-            <id>aiw</id>
-            <name>AIW Repo</name>
-            <url>http://maven.cci.emory.edu/nexus/content/repositories/aiw/</url>
-        </repository>
-        <snapshotRepository>
-            <id>aiw-snapshots</id>
-            <name>AIW Snapshots Repo</name>
-            <url>http://maven.cci.emory.edu/nexus/content/repositories/aiw-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
     <repositories>
-        <repository>
-            <id>maven.cci</id>
-            <url>http://maven.cci.emory.edu/nexus/content/repositories/public</url>
-        </repository>
-        <repository>
-            <id>aiw</id>
-            <url>http://maven.cci.emory.edu/nexus/content/repositories/aiw/</url>
-        </repository>
         <repository>
             <id>oracleReleases</id>
             <name>Oracle Released Java Packages</name>
@@ -76,119 +53,6 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
             <layout>default</layout>
         </repository>
     </repositories>
-    
-    <developers>
-        <developer>
-            <id>arpost</id>
-            <name>Andrew Post</name>
-            <email>arpost@emory.edu</email>
-            <roles>
-                <role>Faculty Project Lead</role>
-            </roles>
-            <organization>Department of Biomedical Informatics, Emory
-                University
-            </organization>
-        </developer>
-        <developer>
-            <id>hrathod</id>
-            <name>Himanshu Rathod</name>
-            <email>himanshu.rathod@emory.edu</email>
-            <roles>
-                <role>Software Developer</role>
-            </roles>
-            <organization>Department of Biomedical Informatics, Emory
-                University
-            </organization>
-        </developer>
-        <developer>
-            <id>mmansour</id>
-            <name>Michel Mansour</name>
-            <email>michel.mansour@emory.edu</email>
-            <roles>
-                <role>Software Developer</role>
-            </roles>
-            <organization>Department of Biomedical Informatics, Emory
-                University
-            </organization>
-        </developer>
-        <developer>
-            <id>wtorian</id>
-            <name>Mike Torian</name>
-            <email>william.m.torian@emory.edu</email>
-            <roles>
-                <role>Data Warehouse Engineer</role>
-            </roles>
-            <organization>Department of Biomedical Informatics, Emory
-                University
-            </organization>
-        </developer>
-        <developer>
-            <id>mbrow2</id>
-            <name>Michael Brown</name>
-            <email>mbrow2@emory.edu</email>
-            <roles>
-                <role>Software Engineer</role>
-            </roles>
-            <organization>Department of Biomedical Informatics, Emory
-                University
-            </organization>
-        </developer>
-        <developer>
-            <id>sagravat</id>
-            <name>Sanjay Agravat</name>
-            <email>sagrava@emory.edu</email>
-            <roles>
-                <role>Software Developer</role>
-            </roles>
-            <organization>Department of Biomedical Informatics, Emory
-                University
-            </organization>
-        </developer>
-        <developer>
-            <id>gsmilto</id>
-            <name>Geoff Milton</name>
-            <email>gsmilto@emory.edu</email>
-            <roles>
-                <role>Software Developer</role>
-            </roles>
-            <organization>Department of Biomedical Informatics, Emory
-                University
-            </organization>
-        </developer>
-        <developer>
-            <id>ssturm2</id>
-            <name>Zanna Sturm</name>
-            <email>ssturm2@emory.edu</email>
-            <roles>
-                <role>User Interface Designer</role>
-            </roles>
-            <organization>Department of Biomedical Informatics, Emory
-                University
-            </organization>
-        </developer>
-        <developer>
-            <id>akalsan</id>
-            <name>Akshatha Kalsanka Pai</name>
-            <email>akalsan@emory.edu</email>
-            <roles>
-                <role>Software Developer</role>
-            </roles>
-            <organization>Department of Biomedical Informatics, Emory
-                University
-            </organization>
-        </developer>
-        <developer>
-            <id>richard.willard</id>
-            <name>Richie Willard</name>
-            <email>richard.willard@emoryhealthcare.org</email>
-            <roles>
-                <role>Project Manager</role>
-            </roles>
-            <organization>Department of Biomedical Informatics, Emory
-                University
-            </organization>
-        </developer>
-    </developers>
 
     <modules>
         <module>protempa-framework</module>
@@ -250,17 +114,6 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
                 <artifactId>protempa-tsb-umls</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.11</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>1.10</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -268,37 +121,14 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>1.5</version>
                 <configuration>
                     <licenseName>apache_v2</licenseName>
                     <roots>
@@ -311,101 +141,31 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
                         <xsd>xml</xsd>
                     </extraExtensions>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>first</id>
-                        <goals>
-                            <goal>update-file-header</goal>
-                        </goals>
-                        <phase>process-sources</phase>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.jasig.maven</groupId>
                 <artifactId>maven-notice-plugin</artifactId>
-                <version>1.0.5</version>
                 <configuration>
                     <noticeTemplate>etc/NOTICE.template</noticeTemplate>
                     <licenseMapping>
                         <param>etc/license-mappings.xml</param>
                     </licenseMapping>
                 </configuration>
-                <executions>
-                    <execution>	
-                        <id>checkontest</id>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <phase>test</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.16</version>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
-                <version>1.6</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
                 <inherited>false</inherited>
                 <configuration>
                     <descriptors>
                         <descriptor>assembly/src.xml</descriptor>
                     </descriptors>
-                    <tarLongFileMode>gnu</tarLongFileMode>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <!-- For additional tests that are very slow or require resources
-            (e.g., a database) that are external to the build. -->
-            <id>test-tier2</id>
-        </profile>
-    </profiles>
 </project>
