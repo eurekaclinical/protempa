@@ -13,10 +13,6 @@
         against Protempa
     </description>
     
-    <properties>
-        <h2-version>1.4.185</h2-version>
-    </properties>
-    
     <dependencies>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
@@ -60,17 +56,14 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>${h2-version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
-            <version>2.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-catalina</artifactId>
-            <version>8.0.5</version>
         </dependency>
     </dependencies>
     <build>

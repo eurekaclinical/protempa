@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 This project includes:
+  Apache Commons CLI under Apache License, Version 2.0
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons Collections under Apache License, Version 2.0
   Apache Commons DBCP under The Apache Software License, Version 2.0
@@ -20,7 +21,6 @@ This project includes:
   Apache Commons Logging under The Apache Software License, Version 2.0
   Apache Commons Pool under The Apache Software License, Version 2.0
   Apache ServiceMix :: Bundles :: xstream under The Apache Software License, Version 2.0
-  Commons CLI under The Apache Software License, Version 2.0
   Commons IO under The Apache Software License, Version 2.0
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
   JavaUtil under Apache License, Version 2.0
