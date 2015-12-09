@@ -15,7 +15,7 @@
     <description>Implements support for using the UMLS for access to clinical
         terms.
     </description>
-
+    
     <dependencies>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>umlsquery</groupId>
             <artifactId>umls-query</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -41,7 +41,6 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.18</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
