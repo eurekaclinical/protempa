@@ -5,7 +5,7 @@
     <version>3.0-Alpha-5-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Protempa</name>
-    <url>http://aiw.sourceforge.net/dev/protempa-${project.version}</url>
+    <url>https://github.com/eurekaclinical/protempa.git</url>
     <inceptionYear>2012</inceptionYear>
     <description>Protempa supports the construction of software systems for 
 querying clinical databases, summarizing patient data, detecting clinically 
