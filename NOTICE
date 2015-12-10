@@ -22,9 +22,8 @@ This project includes:
   Apache Commons Pool under The Apache Software License, Version 2.0
   Apache POI under The Apache Software License, Version 2.0
   Apache ServiceMix :: Bundles :: xstream under The Apache Software License, Version 2.0
-  Commons Collections under The Apache Software License, Version 2.0
   Commons IO under The Apache Software License, Version 2.0
-  Commons Lang under The Apache Software License, Version 2.0
+  Core Protege under Mozilla Public License
   dom4j under BSD License
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
   H2 Database Engine under MPL 2.0, and EPL 1.0
@@ -32,12 +31,13 @@ This project includes:
   ini4j under Apache 2
   JavaUtil under Apache License, Version 2.0
   je under Sleepycat License
+  JGoodies Common under The BSD License
+  JGoodies Looks under The BSD License
   JUnit under Eclipse Public License 1.0
   kXML 2 is a small XML pull parser based on the common XML pull API under BSD style or Public Domain
   mvel under The Apache Software License, Version 2.0
-  MySQL java connector under The GNU General Public License, Version 2
+  MySQL Connector/J under The GNU General Public License, Version 2
   opencsv under Apache 2
-  protege under Mozilla Public License
   Protempa under Apache License, Version 2.0
   Protempa File Data Source Backend under Apache License, Version 2.0
   Protempa Framework under Apache License, Version 2.0

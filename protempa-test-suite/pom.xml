@@ -18,7 +18,6 @@
             <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-framework</artifactId>
             <scope>test</scope>
-            <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>org.eurekaclinical</groupId>

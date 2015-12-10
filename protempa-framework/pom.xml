@@ -25,19 +25,16 @@
         <protempa.xsd.tableQueryResultsHandler.name>protempa_tableQueryResultsHandler.xsd</protempa.xsd.tableQueryResultsHandler.name>
         <protempa.xsd.tableQueryResultsHandler.url>${protempa.xsd.parentUrl}/${protempa.xsd.tableQueryResultsHandler.name}</protempa.xsd.tableQueryResultsHandler.url>
     </properties>
-    
+      
     <dependencies>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>javautil</artifactId>
-            <version>3.0-Alpha-3</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.drools</groupId>
             <artifactId>drools-core</artifactId>
             <version>4.0.7</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

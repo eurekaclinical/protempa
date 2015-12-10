@@ -8,21 +8,21 @@
     <url>https://github.com/eurekaclinical/protempa.git</url>
     <inceptionYear>2012</inceptionYear>
     <description>Protempa supports the construction of software systems for 
-querying clinical databases, summarizing patient data, detecting clinically 
-significant data patterns in groups of patients or individual patients, and 
-extract, transform and load (ETL). Its special feature, temporal abstraction,
-supports queries and summarization of data in terms of temporal patterns. 
-Temporal patterns enable robust querying and extraction of clinical history. 
-These patterns include frequencies (at least two, three, etc. of some event or
-observation); sequences (chemotherapy followed by surgery within 180 days,
-a hospital encounter followed by another hospital encounter within 30 days); 
-and overlaps (falling platelet counts in the setting of HELLP syndrome).
+        querying clinical databases, summarizing patient data, detecting clinically 
+        significant data patterns in groups of patients or individual patients, and 
+        extract, transform and load (ETL). Its special feature, temporal abstraction,
+        supports queries and summarization of data in terms of temporal patterns. 
+        Temporal patterns enable robust querying and extraction of clinical history. 
+        These patterns include frequencies (at least two, three, etc. of some event or
+        observation); sequences (chemotherapy followed by surgery within 180 days,
+        a hospital encounter followed by another hospital encounter within 30 days); 
+        and overlaps (falling platelet counts in the setting of HELLP syndrome).
     </description>
     
     <parent>
         <groupId>org.eurekaclinical</groupId>
         <artifactId>eurekaclinical-parent</artifactId>
-        <version>1-SNAPSHOT</version>
+        <version>1-Alpha-4</version>
     </parent>
 
     <scm>
@@ -44,15 +44,6 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
             <distribution>repo</distribution>
         </license>
     </licenses>
-    
-    <repositories>
-        <repository>
-            <id>oracleReleases</id>
-            <name>Oracle Released Java Packages</name>
-            <url>http://download.oracle.com/maven</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
 
     <modules>
         <module>protempa-framework</module>
@@ -113,6 +104,11 @@ and overlaps (falling platelet counts in the setting of HELLP syndrome).
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>protempa-tsb-umls</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eurekaclinical</groupId>
+                <artifactId>javautil</artifactId>
+                <version>3.0-Alpha-4</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

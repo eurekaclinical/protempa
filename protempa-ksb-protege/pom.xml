@@ -43,10 +43,16 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>edu.stanford</groupId>
+            <groupId>edu.stanford.protege</groupId>
             <artifactId>protege</artifactId>
-            <version>3.4.7</version>
+            <version>3.5.1</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.catalysoft</groupId>
+                    <artifactId>unicode_panel</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>
