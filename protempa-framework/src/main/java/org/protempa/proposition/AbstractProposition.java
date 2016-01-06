@@ -61,6 +61,7 @@ public abstract class AbstractProposition implements Proposition {
     private Date downloadDate;
     private Date createDate;
     private Date updateDate;
+    private Date deleteDate;
 
     /**
      * Creates a proposition with an id and unique identifier. The unique
@@ -435,9 +436,28 @@ public abstract class AbstractProposition implements Proposition {
      * Sets the date this proposition was downloaded from the source system. If
      * this proposition was derived, sets the date it was derived.
      * 
-     * @param downloadDate a date.
+     * @param downloadDate a date, or <code>null</code> if the proposition was
+     * not downloaded from a source system.
      */
     public final void setDownloadDate(Date downloadDate) {
         this.downloadDate = downloadDate;
     }
+
+    @Override
+    public Date getDeleteDate() {
+        return deleteDate;
+    }
+
+    /**
+     * Sets the date this proposition was deleted from the source system. If
+     * this proposition was derived, sets the date it was invalidated by data
+     * changes.
+     * 
+     * @param deleteDate a date, or <code>null</code> if the proposition has
+     * not been deleted.
+     */
+    public void setDeleteDate(Date deleteDate) {
+        this.deleteDate = deleteDate;
+    }
+    
 }

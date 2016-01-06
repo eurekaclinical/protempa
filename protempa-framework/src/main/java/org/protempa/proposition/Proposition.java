@@ -144,21 +144,31 @@ public interface Proposition extends PropositionVisitable,
     Date getDownloadDate();
     
     /**
-     * Gets the date this proposition was created according to the source
-     * system from which it was obtained, or for derived propositions, the
-     * date it was created through the temporal abstraction process.
+     * Gets the date this proposition was created in the source system, or for 
+     * derived propositions, the date it was created through the temporal 
+     * abstraction process.
      * 
      * @return a date, <code>null</code> means the create date is not recorded.
      */
     Date getCreateDate();
     
     /**
-     * Gets the date this proposition was last updated according to the source
-     * system from which it was obtained, or for derived propositions, the
-     * date it was last updated through the temporal abstraction process.
+     * Gets the date this proposition was last updated in the source
+     * system, or for derived propositions, the date it was last updated 
+     * through the temporal abstraction process.
      * 
      * @return a date, <code>null</code> means the proposition has never been
      * updated.
      */
     Date getUpdateDate();
+    
+    /**
+     * Gets the date this proposition was deleted from the source system, or
+     * for derived propositions, the date it was invalidated due to data
+     * changes.
+     * 
+     * @return a date, or <code>null</code> if the proposition has not been
+     * deleted.
+     */
+    Date getDeleteDate();
 }
