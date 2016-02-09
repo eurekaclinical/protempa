@@ -79,6 +79,8 @@ final class Executor implements AutoCloseable {
     private QueryResultsHandler resultsHandler;
     private boolean failed;
     private final MessageFormat logMessageFormat;
+    private Thread handleQueryResultThread;
+    private boolean canceled;
 
     Executor(Query query, Destination resultsHandlerFactory, QuerySession querySession, AbstractionFinder abstractionFinder) throws ExecutorInitException {
         this(query, resultsHandlerFactory, querySession, null, abstractionFinder);
@@ -164,36 +166,52 @@ final class Executor implements AutoCloseable {
         }
     }
 
+    void cancel() {
+        synchronized (this) {
+            if (this.handleQueryResultThread != null) {
+                this.handleQueryResultThread.interrupt();
+            }
+            this.canceled = true;
+        }
+        log(Level.INFO, "Query {0} was canceled", this.query.getName());
+    }
+
     void execute() throws ExecutorExecuteException {
         try {
-            log(Level.INFO, "Processing data");
-            DataStreamingEvent doProcessPoisonPill = new DataStreamingEvent("poison", Collections.emptyList());
-            QueueObject hqrPoisonPill = new QueueObject();
-            BlockingQueue<DataStreamingEvent> doProcessQueue = new ArrayBlockingQueue<>(1000);
-            BlockingQueue<QueueObject> hqrQueue = new ArrayBlockingQueue<>(1000);
+            Thread retrieveDataThread;
+            Thread doProcessThread;
+            synchronized (this) {
+                if (this.canceled) {
+                    return;
+                }
+                log(Level.INFO, "Processing data for query {0}", this.query.getName());
+                DataStreamingEvent doProcessPoisonPill = new DataStreamingEvent("poison", Collections.emptyList());
+                QueueObject hqrPoisonPill = new QueueObject();
+                BlockingQueue<DataStreamingEvent> doProcessQueue = new ArrayBlockingQueue<>(1000);
+                BlockingQueue<QueueObject> hqrQueue = new ArrayBlockingQueue<>(1000);
+                retrieveDataThread = new RetrieveDataThread(doProcessQueue, doProcessPoisonPill);
+                doProcessThread = new DoProcessThread(doProcessQueue, hqrQueue, doProcessPoisonPill, hqrPoisonPill, retrieveDataThread);
+                this.handleQueryResultThread = new HandleQueryResultThread(hqrQueue, hqrPoisonPill, doProcessThread);
+                retrieveDataThread.start();
+                doProcessThread.start();
+                this.handleQueryResultThread.start();
+            }
 
-            Thread retrieveDataThread = new RetrieveDataThread(doProcessQueue, doProcessPoisonPill);
-            Thread doProcessThread = new DoProcessThread(doProcessQueue, hqrQueue, doProcessPoisonPill, hqrPoisonPill, retrieveDataThread);
-            Thread handleQueryResultThread = new HandleQueryResultThread(hqrQueue, hqrPoisonPill, doProcessThread);
-
-            retrieveDataThread.start();
-            doProcessThread.start();
-            handleQueryResultThread.start();
             try {
                 retrieveDataThread.join();
-                log(Level.INFO, "Done retrieving data");
+                log(Level.INFO, "Done retrieving data for query {0}", this.query.getName());
             } catch (InterruptedException ex) {
                 log(Level.FINER, "Protempa producer thread join interrupted", ex);
             }
             try {
                 doProcessThread.join();
-                log(Level.INFO, "Done processing data");
+                log(Level.INFO, "Done processing data for query {0}", this.query.getName());
             } catch (InterruptedException ex) {
                 log(Level.FINER, "Protempa consumer thread join interrupted", ex);
             }
             try {
-                handleQueryResultThread.join();
-                log(Level.INFO, "Done outputting results");
+                this.handleQueryResultThread.join();
+                log(Level.INFO, "Done outputting results for query {0}", this.query.getName());
             } catch (InterruptedException ex) {
                 log(Level.FINER, "Protempa consumer thread join interrupted", ex);
             }
@@ -385,13 +403,8 @@ final class Executor implements AutoCloseable {
                 } catch (InterruptedException ignore) {
                     log(Level.SEVERE, "Failed to send stop message to the do process thread; the query may be hung", ignore);
                 }
-            } catch (InterruptedException ex) {
+            } catch (InterruptedException ex) { // by DoProcessThread
                 log(Level.FINER, "Retrieve data thread interrupted", ex);
-                try {
-                    queue.put(poisonPill);
-                } catch (InterruptedException ignore) {
-                    log(Level.SEVERE, "Failed to send stop message to the do process thread; the query may be hung", ignore);
-                }
             } finally {
                 if (!itrClosed) {
                     try {
@@ -469,14 +482,9 @@ final class Executor implements AutoCloseable {
                 } catch (InterruptedException ignore) {
                     log(Level.SEVERE, "Failed to stop the query results handler queue; the query may be hung", ignore);
                 }
-            } catch (InterruptedException ex) {
+            } catch (InterruptedException ex) { // by the HQR thread
                 log(Level.FINER, "Do process thread interrupted", ex);
                 producer.interrupt();
-                try {
-                    hqrQueue.put(hqrPoisonPill);
-                } catch (InterruptedException ignore) {
-                    log(Level.SEVERE, "Failed to stop the query results handler queue; the query may be hung", ignore);
-                }
             } catch (Error | RuntimeException t) {
                 log(Level.SEVERE, "Do process thread threw exception; the query may be hung", t);
                 throw t;
@@ -532,7 +540,7 @@ final class Executor implements AutoCloseable {
             log(Level.FINER, "Start handle query results thread");
             QueueObject qo;
             try {
-                while (!isInterrupted() && ((qo = queue.take()) != poisonPill)) {
+                while ((qo = queue.take()) != poisonPill) {
                     log(Level.FINER, "Handling some results");
                     try {
                         resultsHandler.handleQueryResult(qo.keyId, qo.propositions, qo.forwardDerivations, qo.backwardDerivations, qo.refs);
