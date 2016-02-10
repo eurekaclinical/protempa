@@ -127,18 +127,14 @@ final class Executor implements AutoCloseable {
             if (isLoggable(Level.FINE)) {
                 log(Level.FINE, "Propositions to be queried are {0}", StringUtils.join(this.propIds, ", "));
             }
-            try {
-                retain(this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()])));
+            retain(this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()])));
 
-                if (isLoggable(Level.FINE)) {
-                    Set<String> allNarrowerDescendantsPropIds = new HashSet<>();
-                    for (PropositionDefinition pd : this.allNarrowerDescendants) {
-                        allNarrowerDescendantsPropIds.add(pd.getId());
-                    }
-                    log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));
+            if (isLoggable(Level.FINE)) {
+                Set<String> allNarrowerDescendantsPropIds = new HashSet<>();
+                for (PropositionDefinition pd : this.allNarrowerDescendants) {
+                    allNarrowerDescendantsPropIds.add(pd.getId());
                 }
-            } catch (KnowledgeSourceReadException ex) {
-                throw new ExecutorInitException(ex);
+                log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));
             }
 
             if (strategy != null) {
@@ -160,7 +156,7 @@ final class Executor implements AutoCloseable {
             this.resultsHandler.start(getAllNarrowerDescendants());
             log(Level.FINE, "Query results handler started");
             log(Level.FINE, "Query results handler waiting for results...");
-        } catch (QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | GetSupportedPropositionIdsException | Error | RuntimeException ex) {
+        } catch (KnowledgeSourceReadException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | GetSupportedPropositionIdsException | Error | RuntimeException ex) {
             this.failed = true;
             throw new ExecutorInitException("Processing query failed", ex);
         }
