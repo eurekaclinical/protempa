@@ -222,7 +222,7 @@ final class Executor implements AutoCloseable {
     }
 
     @Override
-    public void close() throws ExecutorCloseException {
+    public void close() throws CloseException {
         if (executionStrategy != null) {
             executionStrategy.cleanup();
         }
@@ -236,7 +236,7 @@ final class Executor implements AutoCloseable {
                 this.resultsHandler = null;
             }
         } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerCloseException ex) {
-            throw new ExecutorCloseException(ex);
+            throw new CloseException(ex);
         } finally {
             if (this.resultsHandler != null) {
                 try {
@@ -492,7 +492,7 @@ final class Executor implements AutoCloseable {
                 Iterator<Proposition> propositions,
                 Map<UniqueId, Proposition> refs) {
             List<Proposition> result = new ArrayList<>();
-            while (propositions.hasNext()) {
+            while (!isInterrupted() && propositions.hasNext()) {
                 Proposition prop = propositions.next();
                 refs.put(prop.getUniqueId(), prop);
                 if (propIds.contains(prop.getId())) {

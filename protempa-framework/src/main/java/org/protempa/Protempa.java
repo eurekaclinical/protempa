@@ -22,12 +22,10 @@ package org.protempa;
 import java.util.ArrayList;
 import java.util.List;
 import org.protempa.backend.BackendInitializationException;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.CollectionUtils;
 
-import org.arp.javautil.arrays.Arrays;
 import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
@@ -116,8 +114,8 @@ public final class Protempa implements AutoCloseable {
      * {@link #close()} is called. May be <code>null</code> if you're not using
      * terms.
      *
-     * @throws ProtempaException if an error occur in starting Protempa. There
-     * frequently will be a nested exception that provides more detail.
+     * @throws ProtempaStartupException if an error occur in starting Protempa.
+     * There frequently will be a nested exception that provides more detail.
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource, TermSource termSource)
@@ -145,8 +143,8 @@ public final class Protempa implements AutoCloseable {
      * abstract parameters, <code>false</code> not to cache found abstract
      * parameters.
      *
-     * @throws ProtempaException if an error occur in starting Protempa. There
-     * frequently will be a nested exception that provides more detail.
+     * @throws ProtempaStartupException if an error occur in starting Protempa.
+     * There frequently will be a nested exception that provides more detail.
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource, TermSource termSource,
@@ -242,11 +240,11 @@ public final class Protempa implements AutoCloseable {
             throws QueryBuildException {
         return this.abstractionFinder.buildQuery(queryBuilder);
     }
-    
+
     public String[] getSupportedPropositionIds(Destination destination) throws GetSupportedPropositionIdsException {
         return destination.getSupportedPropositionIds(this.abstractionFinder.getDataSource(), this.abstractionFinder.getKnowledgeSource());
     }
-    
+
     public void detachSession(QuerySession querySession) {
         // TODO: implement me.
     }
@@ -305,6 +303,16 @@ public final class Protempa implements AutoCloseable {
         QuerySession qs = new QuerySession(query, this.abstractionFinder);
         this.abstractionFinder.doFind(query, destination, qs);
         logger.log(Level.INFO, "Query {0} execution complete", query.getName());
+    }
+
+    /**
+     * Cancels an executing query. If a query is not running, this method has no
+     * effect. Is intended to be called from a different thread from the one
+     * that called {@link #execute(org.protempa.query.Query, org.protempa.dest.Destination)
+     * }.
+     */
+    public void cancel() {
+        this.abstractionFinder.cancel();
     }
 
     public void validateDataSourceBackendConfigurations()

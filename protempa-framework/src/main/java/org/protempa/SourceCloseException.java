@@ -28,7 +28,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
  * @author Andrew Post
  *
  */
-public final class SourceCloseException extends CloseException {
+public final class SourceCloseException extends ProtempaException {
 
     SourceCloseException(BackendCloseException... exceptions) {
         super(exceptionsToString(exceptions));
