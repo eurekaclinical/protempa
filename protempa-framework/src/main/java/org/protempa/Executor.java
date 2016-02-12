@@ -169,7 +169,7 @@ final class Executor implements AutoCloseable {
             }
             this.canceled = true;
         }
-        log(Level.INFO, "Query {0} was canceled", this.query.getName());
+        log(Level.INFO, "Canceled");
     }
 
     void execute() throws ExecutorExecuteException {
@@ -180,7 +180,7 @@ final class Executor implements AutoCloseable {
                 if (this.canceled) {
                     return;
                 }
-                log(Level.INFO, "Processing data for query {0}", this.query.getName());
+                log(Level.INFO, "Processing data");
                 DataStreamingEvent doProcessPoisonPill = new DataStreamingEvent("poison", Collections.emptyList());
                 QueueObject hqrPoisonPill = new QueueObject();
                 BlockingQueue<DataStreamingEvent> doProcessQueue = new ArrayBlockingQueue<>(1000);
@@ -195,19 +195,19 @@ final class Executor implements AutoCloseable {
 
             try {
                 retrieveDataThread.join();
-                log(Level.INFO, "Done retrieving data for query {0}", this.query.getName());
+                log(Level.INFO, "Done retrieving data");
             } catch (InterruptedException ex) {
                 log(Level.FINER, "Protempa producer thread join interrupted", ex);
             }
             try {
                 doProcessThread.join();
-                log(Level.INFO, "Done processing data for query {0}", this.query.getName());
+                log(Level.INFO, "Done processing data");
             } catch (InterruptedException ex) {
                 log(Level.FINER, "Protempa consumer thread join interrupted", ex);
             }
             try {
                 this.handleQueryResultThread.join();
-                log(Level.INFO, "Done outputting results for query {0}", this.query.getName());
+                log(Level.INFO, "Done outputting results");
             } catch (InterruptedException ex) {
                 log(Level.FINER, "Protempa consumer thread join interrupted", ex);
             }
