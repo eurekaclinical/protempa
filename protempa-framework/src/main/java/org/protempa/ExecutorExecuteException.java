@@ -24,7 +24,7 @@ package org.protempa;
  *
  * @author Andrew Post
  */
-public class ExecutorExecuteException extends ExecutorException {
+class ExecutorExecuteException extends ExecutorException {
 
     ExecutorExecuteException(Throwable cause) {
         super("Query failed during execution", cause);
