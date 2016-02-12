@@ -28,8 +28,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.lang3.StringUtils;
-import org.protempa.CloseException;
 import org.protempa.Protempa;
+import org.protempa.CloseException;
 import org.protempa.ProtempaStartupException;
 
 /**
@@ -366,7 +366,6 @@ public abstract class CLI {
      * and {@link #close()} in succession. Must be called only after 
      * {@link #processArgs(java.lang.String[], int, int) }.
      *
-     * @param configurationId a PROTEMPA configuration id {@link String}.
      */
     public final void initializeExecuteAndClose() {
         try {
@@ -379,10 +378,7 @@ public abstract class CLI {
         try {
             execute();
             close();
-        } catch (CloseException ex) {
-            printException(ex);
-            error = true;
-        } catch (CLIException ex) {
+        } catch (CloseException | CLIException ex) {
             printException(ex);
             error = true;
         } finally {
