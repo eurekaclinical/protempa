@@ -24,9 +24,9 @@ package org.protempa;
  *
  * @author Andrew Post
  */
-public class ExecutorException extends ProtempaException {
+class ExecutorException extends ProtempaException {
 
-    public ExecutorException(String message, Throwable cause) {
+    ExecutorException(String message, Throwable cause) {
         super(message, cause);
     }
     
