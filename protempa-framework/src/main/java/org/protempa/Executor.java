@@ -74,7 +74,7 @@ final class Executor implements AutoCloseable {
     private final AbstractionFinder abstractionFinder;
     private ExecutionStrategy executionStrategy = null;
     private final ExecutorCounter counter = new ExecutorCounter();
-    private final List<ExecutorExecuteException> exceptions;
+    private final List<QueryException> exceptions;
     private final Destination destination;
     private QueryResultsHandler resultsHandler;
     private boolean failed;
@@ -82,17 +82,17 @@ final class Executor implements AutoCloseable {
     private Thread handleQueryResultThread;
     private boolean canceled;
 
-    Executor(Query query, Destination resultsHandlerFactory, QuerySession querySession, AbstractionFinder abstractionFinder) throws ExecutorInitException {
+    Executor(Query query, Destination resultsHandlerFactory, QuerySession querySession, AbstractionFinder abstractionFinder) throws QueryException {
         this(query, resultsHandlerFactory, querySession, null, abstractionFinder);
     }
 
-    Executor(Query query, Destination resultsHandlerFactory, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws ExecutorInitException {
+    Executor(Query query, Destination resultsHandlerFactory, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws QueryException {
         this.abstractionFinder = abstractionFinder;
         assert query != null : "query cannot be null";
         assert resultsHandlerFactory != null : "resultsHandlerFactory cannot be null";
         assert abstractionFinder != null : "abstractionFinder cannot be null";
         if (abstractionFinder.isClosed()) {
-            throw new ExecutorInitException(new ProtempaAlreadyClosedException());
+            throw new QueryException(query.getName(), new ProtempaAlreadyClosedException());
         }
         this.keyIds = Arrays.asSet(query.getKeyIds());
         this.propIds = Arrays.asSet(query.getPropositionIds());
@@ -109,11 +109,11 @@ final class Executor implements AutoCloseable {
         this.derivationsBuilder = new DerivationsBuilder();
         this.strategy = strategy;
         this.destination = resultsHandlerFactory;
-        this.exceptions = Collections.synchronizedList(new ArrayList<ExecutorExecuteException>());
+        this.exceptions = Collections.synchronizedList(new ArrayList<QueryException>());
         this.logMessageFormat = new MessageFormat("Query " + this.query.getName() + ": {0}");
     }
 
-    void init() throws ExecutorInitException {
+    void init() throws QueryException {
         log(Level.FINE, "Initializing query results handler...");
         try {
             this.resultsHandler = this.destination.getQueryResultsHandler(getQuery(), this.abstractionFinder.getDataSource(), getKnowledgeSource());
@@ -158,7 +158,7 @@ final class Executor implements AutoCloseable {
             log(Level.FINE, "Query results handler waiting for results...");
         } catch (KnowledgeSourceReadException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | GetSupportedPropositionIdsException | Error | RuntimeException ex) {
             this.failed = true;
-            throw new ExecutorInitException("Processing query failed", ex);
+            throw new QueryException(this.query.getName(), ex);
         }
     }
 
@@ -172,7 +172,7 @@ final class Executor implements AutoCloseable {
         log(Level.INFO, "Canceled");
     }
 
-    void execute() throws ExecutorExecuteException {
+    void execute() throws QueryException {
         try {
             Thread retrieveDataThread;
             Thread doProcessThread;
@@ -215,7 +215,7 @@ final class Executor implements AutoCloseable {
             if (!exceptions.isEmpty()) {
                 throw exceptions.get(0);
             }
-        } catch (ExecutorExecuteException ex) {
+        } catch (QueryException ex) {
             this.failed = true;
             throw ex;
         }
@@ -338,7 +338,7 @@ final class Executor implements AutoCloseable {
         ExecutorCounter() {
         }
 
-        void incr() throws ExecutorExecuteException {
+        void incr() throws QueryException {
             if (++this.count % 1000 == 0) {
                 logNumProcessed(this.count);
             }
@@ -348,14 +348,14 @@ final class Executor implements AutoCloseable {
             return this.count;
         }
 
-        private void logNumProcessed(int numProcessed) throws ExecutorExecuteException {
+        private void logNumProcessed(int numProcessed) throws QueryException {
             if (isLoggable(Level.FINE)) {
                 try {
                     String keyTypeSingDisplayName = abstractionFinder.getDataSource().getKeyTypeDisplayName();
                     String keyTypePluralDisplayName = abstractionFinder.getDataSource().getKeyTypePluralDisplayName();
                     logCount(Level.FINE, numProcessed, "Processed {0} {1}", "Processed {0} {1}", new Object[]{keyTypeSingDisplayName}, new Object[]{keyTypePluralDisplayName});
                 } catch (DataSourceReadException ex) {
-                    throw new ExecutorExecuteException(ex);
+                    throw new QueryException(Executor.this.query.getName(), ex);
                 }
             }
         }
@@ -367,7 +367,7 @@ final class Executor implements AutoCloseable {
         private final DataStreamingEvent poisonPill;
         private final DataStreamingEventIterator<Proposition> itr;
 
-        RetrieveDataThread(BlockingQueue<DataStreamingEvent> queue, DataStreamingEvent poisonPill) throws ExecutorExecuteException {
+        RetrieveDataThread(BlockingQueue<DataStreamingEvent> queue, DataStreamingEvent poisonPill) throws QueryException {
             super("protempa.executor.RetrieveDataThread");
             this.queue = queue;
             this.poisonPill = poisonPill;
@@ -386,14 +386,14 @@ final class Executor implements AutoCloseable {
                 queue.put(poisonPill);
                 itrClosed = true;
             } catch (DataSourceReadException ex) {
-                exceptions.add(new ExecutorExecuteException(ex));
+                exceptions.add(new QueryException(Executor.this.query.getName(), ex));
                 try {
                     queue.put(poisonPill);
                 } catch (InterruptedException ignore) {
                     log(Level.SEVERE, "Failed to send stop message to the do process thread; the query may be hung", ignore);
                 }
             } catch (Error | RuntimeException ex) {
-                exceptions.add(new ExecutorExecuteException(ex));
+                exceptions.add(new QueryException(Executor.this.query.getName(), ex));
                 try {
                     queue.put(poisonPill);
                 } catch (InterruptedException ignore) {
@@ -469,7 +469,7 @@ final class Executor implements AutoCloseable {
                     derivationsBuilder.reset();
                 }
                 this.hqrQueue.put(this.hqrPoisonPill);
-            } catch (ExecutorExecuteException ex) {
+            } catch (QueryException ex) {
                 log(Level.FINER, "Do process thread threw ExecutorExecuteException", ex);
                 exceptions.add(ex);
                 producer.interrupt();
@@ -542,12 +542,12 @@ final class Executor implements AutoCloseable {
                         resultsHandler.handleQueryResult(qo.keyId, qo.propositions, qo.forwardDerivations, qo.backwardDerivations, qo.refs);
                     } catch (QueryResultsHandlerProcessingException ex) {
                         log(Level.FINER, "Handle query results threw QueryResultsHandlerProcessingException", ex);
-                        exceptions.add(new ExecutorExecuteException(ex));
+                        exceptions.add(new QueryException(Executor.this.query.getName(), ex));
                         producerThread.interrupt();
                         break;
                     } catch (Error | RuntimeException t) {
                         log(Level.FINER, "Handle query results threw exception", t);
-                        exceptions.add(new ExecutorExecuteException(new QueryResultsHandlerProcessingException(t)));
+                        exceptions.add(new QueryException(Executor.this.query.getName(), new QueryResultsHandlerProcessingException(t)));
                         producerThread.interrupt();
                         break;
                     }
@@ -562,7 +562,7 @@ final class Executor implements AutoCloseable {
 
     };
 
-    private DataStreamingEventIterator<Proposition> newDataIterator() throws ExecutorExecuteException {
+    private DataStreamingEventIterator<Proposition> newDataIterator() throws QueryException {
         log(Level.INFO, "Retrieving data");
         Set<String> inDataSourcePropIds = new HashSet<>();
         for (PropositionDefinition pd : allNarrowerDescendants) {
@@ -577,7 +577,7 @@ final class Executor implements AutoCloseable {
         try {
             itr = abstractionFinder.getDataSource().readPropositions(this.keyIds, inDataSourcePropIds, this.filters, getQuerySession(), this.resultsHandler);
         } catch (DataSourceReadException ex) {
-            throw new ExecutorExecuteException(ex);
+            throw new QueryException(this.query.getName(), ex);
         }
         return itr;
     }
@@ -612,23 +612,23 @@ final class Executor implements AutoCloseable {
         }
     }
 
-    private StatelessExecutionStrategy newStatelessStrategy() throws ExecutorInitException {
+    private StatelessExecutionStrategy newStatelessStrategy() throws QueryException {
         StatelessExecutionStrategy result = new StatelessExecutionStrategy(abstractionFinder, abstractionFinder.getAlgorithmSource());
         try {
             createRuleBase(result);
         } catch (CreateRuleBaseException ex) {
-            throw new ExecutorInitException(ex);
+            throw new QueryException(this.query.getName(), ex);
         }
         result.initialize();
         return result;
     }
 
-    private StatefulExecutionStrategy newStatefulStrategy() throws ExecutorInitException {
+    private StatefulExecutionStrategy newStatefulStrategy() throws QueryException {
         StatefulExecutionStrategy result = new StatefulExecutionStrategy(abstractionFinder.getAlgorithmSource());
         try {
             createRuleBase(result);
         } catch (CreateRuleBaseException ex) {
-            throw new ExecutorInitException(ex);
+            throw new QueryException(this.query.getName(), ex);
         }
         result.initialize();
         return result;
