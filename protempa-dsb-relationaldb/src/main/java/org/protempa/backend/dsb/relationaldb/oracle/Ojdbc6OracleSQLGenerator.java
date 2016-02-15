@@ -25,7 +25,8 @@ import org.protempa.backend.dsb.filter.Filter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.arp.javautil.version.MajorMinorVersion;
+import org.arp.javautil.sql.DatabaseVersion;
+import org.arp.javautil.sql.DriverVersion;
 import org.protempa.backend.dsb.relationaldb.AbstractSQLGeneratorWithCompatChecks;
 import org.protempa.backend.dsb.relationaldb.DataStager;
 import org.protempa.backend.dsb.relationaldb.EntitySpec;
@@ -44,11 +45,11 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGeneratorWithCompatChec
     
     private static final String DRIVER_CLASS_NAME = "oracle.jdbc.OracleDriver";
     private static final String DRIVER_NAME = "Oracle JDBC driver";
-    private static final MajorMinorVersion MIN_DRIVER_VERSION = new MajorMinorVersion(11, 0);
-    private static final MajorMinorVersion MAX_DRIVER_VERSION = new MajorMinorVersion(11, Integer.MAX_VALUE);
+    private static final DriverVersion MIN_DRIVER_VERSION = new DriverVersion(11, 0);
+    private static final DriverVersion MAX_DRIVER_VERSION = new DriverVersion(11, Integer.MAX_VALUE);
     private static final String DATABASE_PRODUCT_NAME = "Oracle";
-    private static final MajorMinorVersion MIN_DATABASE_VERSION = new MajorMinorVersion(10, 0);
-    private static final MajorMinorVersion MAX_DATABASE_VERSION = new MajorMinorVersion(11, Integer.MAX_VALUE);
+    private static final DatabaseVersion MIN_DATABASE_VERSION = new DatabaseVersion(10, 0);
+    private static final DatabaseVersion MAX_DATABASE_VERSION = new DatabaseVersion(11, Integer.MAX_VALUE);
     
     public Ojdbc6OracleSQLGenerator() {
         super(DRIVER_CLASS_NAME,

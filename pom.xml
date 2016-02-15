@@ -108,7 +108,7 @@
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>javautil</artifactId>
-                <version>3.0-Alpha-4</version>
+                <version>3.0-Alpha-6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

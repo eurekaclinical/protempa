@@ -24,7 +24,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import org.arp.javautil.sql.DatabaseMetaDataWrapper;
-import org.arp.javautil.version.MajorMinorVersion;
+import org.arp.javautil.sql.DatabaseVersion;
+import org.arp.javautil.sql.DriverVersion;
 
 /**
  * Abstract class for constructing a SQL generator with useful compatibility
@@ -35,11 +36,11 @@ import org.arp.javautil.version.MajorMinorVersion;
 public abstract class AbstractSQLGeneratorWithCompatChecks extends AbstractSQLGenerator {
     private final String driverClassName;
     private final String driverName;
-    private final MajorMinorVersion minDriverVersion;
-    private final MajorMinorVersion maxDriverVersion;
+    private final DriverVersion minDriverVersion;
+    private final DriverVersion maxDriverVersion;
     private final String databaseProductName;
-    private final MajorMinorVersion minDatabaseVersion;
-    private final MajorMinorVersion maxDatabaseVersion;
+    private final DatabaseVersion minDatabaseVersion;
+    private final DatabaseVersion maxDatabaseVersion;
 
     /**
      * Creates a SQL generator with the specified driver class name and 
@@ -62,10 +63,10 @@ public abstract class AbstractSQLGeneratorWithCompatChecks extends AbstractSQLGe
      * <code>null</code>.
      */
     public AbstractSQLGeneratorWithCompatChecks(String driverClassName, 
-            String driverName, MajorMinorVersion minDriverVersion,
-            MajorMinorVersion maxDriverVersion,
-            String databaseProductName, MajorMinorVersion minDatabaseVersion,
-            MajorMinorVersion maxDatabaseVersion) {
+            String driverName, DriverVersion minDriverVersion,
+            DriverVersion maxDriverVersion,
+            String databaseProductName, DatabaseVersion minDatabaseVersion,
+            DatabaseVersion maxDatabaseVersion) {
         if (driverName == null) {
             throw new IllegalArgumentException("driverName cannot be null");
         }

@@ -23,7 +23,8 @@ package org.protempa.backend.dsb.relationaldb.psql;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.arp.javautil.version.MajorMinorVersion;
+import org.arp.javautil.sql.DatabaseVersion;
+import org.arp.javautil.sql.DriverVersion;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.backend.dsb.relationaldb.AbstractSQLGeneratorWithCompatChecks;
 import org.protempa.backend.dsb.relationaldb.EntitySpec;
@@ -45,11 +46,11 @@ public class PostgresqlPre91SQLGenerator
         extends AbstractSQLGeneratorWithCompatChecks {
     private static final String DRIVER_CLASS_NAME = "org.postgresql.Driver";
     private static final String DRIVER_NAME = "PostgreSQL Native Driver";
-    private static final MajorMinorVersion MIN_DRIVER_VERSION = new MajorMinorVersion(9, 0);
-    private static final MajorMinorVersion MAX_DRIVER_VERSION = new MajorMinorVersion(9, Integer.MAX_VALUE);
+    private static final DriverVersion MIN_DRIVER_VERSION = new DriverVersion(9, 0);
+    private static final DriverVersion MAX_DRIVER_VERSION = new DriverVersion(9, Integer.MAX_VALUE);
     private static final String DATABASE_PRODUCT_NAME = "PostgreSQL";
-    private static final MajorMinorVersion MIN_DATABASE_VERSION = new MajorMinorVersion(8, 0);
-    private static final MajorMinorVersion MAX_DATABASE_VERSION = new MajorMinorVersion(9, 0);
+    private static final DatabaseVersion MIN_DATABASE_VERSION = new DatabaseVersion(8, 0);
+    private static final DatabaseVersion MAX_DATABASE_VERSION = new DatabaseVersion(9, 0);
     
     public PostgresqlPre91SQLGenerator() {
         super(DRIVER_CLASS_NAME, 

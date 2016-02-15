@@ -24,7 +24,8 @@ import org.protempa.backend.dsb.filter.Filter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.arp.javautil.version.MajorMinorVersion;
+import org.arp.javautil.sql.DatabaseVersion;
+import org.arp.javautil.sql.DriverVersion;
 import org.protempa.backend.dsb.relationaldb.AbstractSQLGeneratorWithCompatChecks;
 import org.protempa.backend.dsb.relationaldb.EntitySpec;
 import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
@@ -43,11 +44,11 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGeneratorWithCompat
     
     private static final String DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
     private static final String DRIVER_NAME = "MySQL-AB JDBC Driver";
-    private static final MajorMinorVersion MIN_DRIVER_VERSION = new MajorMinorVersion(5, 0);
-    private static final MajorMinorVersion MAX_DRIVER_VERSION = new MajorMinorVersion(5, Integer.MAX_VALUE);
+    private static final DriverVersion MIN_DRIVER_VERSION = new DriverVersion(5, 0);
+    private static final DriverVersion MAX_DRIVER_VERSION = new DriverVersion(5, Integer.MAX_VALUE);
     private static final String DATABASE_PRODUCT_NAME = "MySQL";
-    private static final MajorMinorVersion MIN_DATABASE_VERSION = new MajorMinorVersion(4, 1);
-    private static final MajorMinorVersion MAX_DATABASE_VERSION = new MajorMinorVersion(5, Integer.MAX_VALUE);
+    private static final DatabaseVersion MIN_DATABASE_VERSION = new DatabaseVersion(4, 1);
+    private static final DatabaseVersion MAX_DATABASE_VERSION = new DatabaseVersion(5, Integer.MAX_VALUE);
 
     public ConnectorJ5MySQL415Generator() {
         super(DRIVER_CLASS_NAME,
