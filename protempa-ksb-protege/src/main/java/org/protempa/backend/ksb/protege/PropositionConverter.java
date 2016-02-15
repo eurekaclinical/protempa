@@ -38,6 +38,8 @@ interface PropositionConverter {
      *            the Protege proposition {@link Instance}.
      * @param backend
      *            the Protege {@link KnowledgeSourceBackend}.
+     * @throws KnowledgeSourceReadException if an error occurred reading the
+     * Protege knowledge base.
      */
     PropositionDefinition convert(Instance protegeProposition,
             ProtegeKnowledgeSourceBackend backend)

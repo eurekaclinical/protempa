@@ -57,7 +57,7 @@ import org.protempa.backend.InvalidPropertyValueException;
 public class INIConfigurations extends AbstractConfigurations {
 
     /**
-     * The default directory for configurations ( <code>.protempa-configs</code>
+     * The default directory for configurations (<code>.protempa-configs</code>
      * in the user's home directory).
      */
     public static final File DEFAULT_DIRECTORY
@@ -80,8 +80,14 @@ public class INIConfigurations extends AbstractConfigurations {
         this(null);
     }
     
-    public INIConfigurations(File directory) {
-        this(null, directory);
+    /**
+     * Creates an INI file configurations instance that looks for backend
+     * configurations in the specified directory. If <code>null</code>, the
+     * default directory will be used ({@link #DEFAULT_DIRECTORY}).
+     * @param pathname the directory containing backend configurations.
+     */
+    public INIConfigurations(File pathname) {
+        this(null, pathname);
     }
     
     /**
@@ -90,9 +96,11 @@ public class INIConfigurations extends AbstractConfigurations {
      * for a system property,
      * <code>protempa.inicommonsconfigurations.pathname</code> for a pathname.
      * If unspecified, it looks for configuration files in the default location
-     * (see {@link #DEFAULT_FILE}).
+     * (see {@link #DEFAULT_DIRECTORY}).
      *
-     * @param directory a directory.
+     * @param backendProvider the provider for loading data source, knowledge
+     * source, algorithm source etc. backends.
+     * @param directory the directory containing backend configuration files.
      */
     public INIConfigurations(BackendProvider backendProvider, File directory) {
         super(backendProvider);

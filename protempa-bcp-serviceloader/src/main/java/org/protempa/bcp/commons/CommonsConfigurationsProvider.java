@@ -25,10 +25,11 @@ import org.protempa.backend.Configurations;
 import org.protempa.backend.ConfigurationsProvider;
 
 /**
- * Uses Java's {@link ServiceLoader} to load {@link Configurations}. 
- * By default, it configures {@link ServiceLoader} to use the current thread's 
- * context class loader. Use {@link #setConfigurationsClassLoader} to 
- * specify a different class loader.
+ * Uses JavaUtil's {@link SingletonServiceLoader} to load 
+ * {@link Configurations}. By default, it configures 
+ * {@link SingletonServiceLoader} to use the current thread's context class 
+ * loader. Use {@link #setConfigurationsClassLoader} to specify a different 
+ * class loader.
  * 
  * @author Andrew Post
  */

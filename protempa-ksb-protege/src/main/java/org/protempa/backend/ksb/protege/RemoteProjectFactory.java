@@ -24,10 +24,7 @@ import edu.stanford.smi.protege.server.RemoteProjectManager;
 import java.util.List;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 import org.protempa.backend.BackendInstanceSpec;
-import org.protempa.backend.BackendProviderManager;
 import org.protempa.backend.BackendProviderSpecLoaderException;
-import org.protempa.backend.BackendSpec;
-import org.protempa.backend.BackendSpecLoader;
 import org.protempa.backend.Configuration;
 import org.protempa.backend.Configurations;
 import org.protempa.backend.ConfigurationsLoadException;
@@ -39,15 +36,24 @@ import org.protempa.backend.InvalidPropertyNameException;
  * Opens a remote Protege project that is specified in a PROTEMPA configuration.
  * A remote Protege project is uniquely specified by its hostname (and port).
  *
- * @param configurationId the id {@link String} of the configuration.
- * @param host the hostname {@link String}.
- * @param knowledgeBaseName the name {@link String} of the knowledge base.
- * @return a Protege {@link Project}.
- *
  * @author Andrew Post
  */
 public class RemoteProjectFactory {
 
+    /**
+     * Opens a remote Protege project that is specified in a PROTEMPA
+     * configuration. A remote Protege project is uniquely specified by its
+     * hostname (and port).
+     *
+     * @param configurationId the id {@link String} of the configuration.
+     * @param host the hostname {@link String}.
+     * @param knowledgeBaseName the name {@link String} of the knowledge base.
+     * @return a Protege {@link Project}.
+     * @throws org.protempa.backend.ConfigurationsLoadException
+     * @throws org.protempa.backend.BackendProviderSpecLoaderException
+     * @throws org.protempa.backend.InvalidPropertyNameException
+     * @throws org.protempa.backend.ConfigurationsNotFoundException
+     */
     public Project getInstance(String configurationId,
             String host, String knowledgeBaseName)
             throws ConfigurationsLoadException,
@@ -63,8 +69,8 @@ public class RemoteProjectFactory {
         KNOWLEDGE_SOURCE_BACKEND_SPEC_LOOP:
         for (BackendInstanceSpec<KnowledgeSourceBackend> bis : knowledgeSourceBackendSections) {
             if (bis.getBackendSpec().getId().equals(
-                    RemoteKnowledgeSourceBackend.class.getName()) && 
-                    knowledgeBaseName.equals(bis.getProperty("knowledgeBaseName"))) {
+                    RemoteKnowledgeSourceBackend.class.getName())
+                    && knowledgeBaseName.equals(bis.getProperty("knowledgeBaseName"))) {
                 String hname = (String) bis.getProperty("hostname");
                 if (host.equals(hname)) {
                     hostname = hname;
