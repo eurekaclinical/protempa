@@ -59,6 +59,12 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
     private final Integer offsetInSeconds;
     private final Map<String, PropositionDefinition> propDefCache;
     private static final Calendar CAL = Calendar.getInstance();
+    private static final Calendar AGE_OVER_89_CAL = Calendar.getInstance();
+    private static final Date AGE_OVER_89;
+    static {
+        AGE_OVER_89_CAL.add(Calendar.YEAR, -90);
+        AGE_OVER_89 = AGE_OVER_89_CAL.getTime();
+    }
     private String keyId;
 
     PropositionDeidentifierVisitor(Encryption encryption, Map<String, PropositionDefinition> propDefCache, Integer offsetInSeconds) {
@@ -190,8 +196,12 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
                 } else if (this.offsetInSeconds != null && propertyDefinition.getValueType() == ValueType.DATEVALUE) {
                     synchronized (CAL) {
                         CAL.setTime(((DateValue) propertyValue).getDate());
-                        CAL.add(Calendar.SECOND, this.offsetInSeconds);
-                        deidentifiedProp.setProperty(name, DateValue.getInstance(CAL.getTime()));
+                        if (CAL.before(AGE_OVER_89_CAL)) {
+                            deidentifiedProp.setProperty(name, DateValue.getInstance(AGE_OVER_89));
+                        } else {
+                            CAL.add(Calendar.SECOND, this.offsetInSeconds);
+                            deidentifiedProp.setProperty(name, DateValue.getInstance(CAL.getTime()));
+                        }
                     }
                 } else if (hipaaIdTypeAttr != null && DeidAttributes.AGE.equals(hipaaIdTypeAttr.getValue())) {
                     NumericalValue numericalValue = (NumericalValue) propertyValue;
