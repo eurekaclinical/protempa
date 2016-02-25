@@ -140,6 +140,15 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
                 cp.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             cp.setSourceSystem(dsType);
+            if (entitySpec.getCreateDateSpec() != null) {
+                cp.setCreateDate(resultSet.getTimestamp(i++));
+            }
+            if (entitySpec.getUpdateDateSpec() != null) {
+                cp.setUpdateDate(resultSet.getTimestamp(i++));
+            }
+            if (entitySpec.getDeleteDateSpec() != null) {
+                cp.setDeleteDate(resultSet.getTimestamp(i++));
+            }
             cp.setDownloadDate(this.now);
             handleProposition(cp);
 

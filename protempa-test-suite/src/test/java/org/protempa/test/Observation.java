@@ -28,7 +28,7 @@ import java.util.Date;
  * @author hrathod
  * 
  */
-abstract class Observation {
+abstract class Observation extends Record {
 	/**
 	 * The unique identifier for the observation.
 	 */

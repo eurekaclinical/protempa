@@ -78,6 +78,7 @@ public final class TemporalAbstractParameterFactory {
         e.setSourceSystem(SourceSystem.DERIVED);
         e.setInterval(intervalFactory.getInstance(start,
                 this.granularity, finish, this.granularity));
+        e.setCreateDate(new Date());
         return e;
     }
 }

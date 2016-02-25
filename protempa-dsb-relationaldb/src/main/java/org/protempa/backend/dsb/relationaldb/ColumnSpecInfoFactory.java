@@ -75,6 +75,9 @@ public final class ColumnSpecInfoFactory {
                 i, columnSpecInfo, referenceSpec);
         i = processConstraintSpecs(entitySpec, entitySpecs, columnSpecs, i);
         i = processFilters(entitySpec, entitySpecs, filters, columnSpecs, i);
+        i = processCreateDate(entitySpec, columnSpecs, i, columnSpecInfo, referenceSpec);
+        i = processUpdateDate(entitySpec, columnSpecs, i, columnSpecInfo, referenceSpec);
+        i = processDeleteDate(entitySpec, columnSpecs, i, columnSpecInfo, referenceSpec);
         
         int refNum = 0;
         for (EntitySpec entitySpec2 : entitySpecs) {
@@ -306,6 +309,45 @@ public final class ColumnSpecInfoFactory {
             i += wrapColumnSpec(spec, columnSpecs);
             if (referenceSpec == null) {
                 columnSpecInfo.setStartTimeIndex(i - 1);
+            }
+        }
+        return i;
+    }
+    
+    private static int processCreateDate(EntitySpec entitySpec,
+            List<IntColumnSpecWrapper> columnSpecs, int i,
+            ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
+        ColumnSpec spec = entitySpec.getCreateDateSpec();
+        if (spec != null) {
+            i += wrapColumnSpec(spec, columnSpecs);
+            if (referenceSpec == null) {
+                columnSpecInfo.setCreateDateIndex(i - 1);
+            }
+        }
+        return i;
+    }
+    
+    private static int processUpdateDate(EntitySpec entitySpec,
+            List<IntColumnSpecWrapper> columnSpecs, int i,
+            ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
+        ColumnSpec spec = entitySpec.getUpdateDateSpec();
+        if (spec != null) {
+            i += wrapColumnSpec(spec, columnSpecs);
+            if (referenceSpec == null) {
+                columnSpecInfo.setUpdateDateIndex(i - 1);
+            }
+        }
+        return i;
+    }
+    
+    private static int processDeleteDate(EntitySpec entitySpec,
+            List<IntColumnSpecWrapper> columnSpecs, int i,
+            ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
+        ColumnSpec spec = entitySpec.getDeleteDateSpec();
+        if (spec != null) {
+            i += wrapColumnSpec(spec, columnSpecs);
+            if (referenceSpec == null) {
+                columnSpecInfo.setDeleteDateIndex(i - 1);
             }
         }
         return i;

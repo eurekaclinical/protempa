@@ -37,9 +37,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 /**
  * An implementation of the {@link DataProvider} interface, using an Excel
  * workbook as the data source.
- * 
+ *
  * @author hrathod
- * 
+ *
  */
 public class XlsxDataProvider implements DataProvider {
 
@@ -95,12 +95,10 @@ public class XlsxDataProvider implements DataProvider {
 
     /**
      * Create the data provider from the given data file.
-     * 
-     * @param inDataFile
-     *            The Excel workbook file to use as the data store.
-     * @throws DataProviderException
-     *             Thrown when the workbook can not be accessed, or parsed
-     *             correctly.
+     *
+     * @param inDataFile The Excel workbook file to use as the data store.
+     * @throws DataProviderException Thrown when the workbook can not be
+     * accessed, or parsed correctly.
      */
     public XlsxDataProvider(File inDataFile) throws DataProviderException {
         this.dataFile = inDataFile;
@@ -185,7 +183,7 @@ public class XlsxDataProvider implements DataProvider {
 
     /**
      * Parse the list of patients from the workbook.
-     * 
+     *
      * @return A list of {@link Patient} objects.
      */
     private List<Patient> readPatients() {
@@ -207,6 +205,9 @@ public class XlsxDataProvider implements DataProvider {
                     .getCell(5)));
             patient.setRace(XlsxDataProvider.readStringValue(row.getCell(6)));
             patient.setGender(XlsxDataProvider.readStringValue(row.getCell(7)));
+            patient.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(8)));
+            patient.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(9)));
+            patient.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(10)));
             result.add(patient);
         }
         return result;
@@ -214,7 +215,7 @@ public class XlsxDataProvider implements DataProvider {
 
     /**
      * Parse the list of providers in the workbook.
-     * 
+     *
      * @return A list of {@link Provider} objects.
      */
     private List<Provider> readProviders() {
@@ -230,6 +231,9 @@ public class XlsxDataProvider implements DataProvider {
                     .getCell(1)));
             provider.setLastName(XlsxDataProvider.readStringValue(row
                     .getCell(2)));
+            provider.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(3)));
+            provider.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(4)));
+            provider.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(5)));
             result.add(provider);
         }
         return result;
@@ -237,7 +241,7 @@ public class XlsxDataProvider implements DataProvider {
 
     /**
      * Parse the list of encounters in the workbook.
-     * 
+     *
      * @return A list of {@link Encounter} objects.
      */
     private List<Encounter> readEncounters() {
@@ -258,6 +262,9 @@ public class XlsxDataProvider implements DataProvider {
             encounter.setType(XlsxDataProvider.readStringValue(row.getCell(5)));
             encounter.setDischargeDisposition(XlsxDataProvider
                     .readStringValue(row.getCell(6)));
+            encounter.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(7)));
+            encounter.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(8)));
+            encounter.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(9)));
             result.add(encounter);
         }
         return result;
@@ -265,7 +272,7 @@ public class XlsxDataProvider implements DataProvider {
 
     /**
      * Parse the list of CPT codes in the workbook.
-     * 
+     *
      * @return A list of {@link CPT} objects.
      */
     private List<CPT> readCpts() {
@@ -280,6 +287,9 @@ public class XlsxDataProvider implements DataProvider {
             cpt.setEncounterId(XlsxDataProvider.readLongValue(row.getCell(1)));
             cpt.setTimestamp(XlsxDataProvider.readDateValue(row.getCell(2)));
             cpt.setEntityId(XlsxDataProvider.readStringValue(row.getCell(3)));
+            cpt.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(4)));
+            cpt.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(5)));
+            cpt.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(6)));
             result.add(cpt);
         }
         return result;
@@ -287,7 +297,7 @@ public class XlsxDataProvider implements DataProvider {
 
     /**
      * Parse the list of ICD9 Diagnostic codes present in the workbook.
-     * 
+     *
      * @return A list of {@link Icd9Diagnosis} objects.
      */
     private List<Icd9Diagnosis> readIcd9Diagnoses() {
@@ -305,6 +315,9 @@ public class XlsxDataProvider implements DataProvider {
                     .getCell(2)));
             diagnosis.setEntityId(XlsxDataProvider.readStringValue(row
                     .getCell(3)));
+            diagnosis.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(4)));
+            diagnosis.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(5)));
+            diagnosis.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(6)));
             result.add(diagnosis);
         }
         return result;
@@ -312,7 +325,7 @@ public class XlsxDataProvider implements DataProvider {
 
     /**
      * Parse the list of ICD9 Procedure codes present in the workbook.
-     * 
+     *
      * @return A list of {@link Icd9Procedure} objects.
      */
     private List<Icd9Procedure> readIcd9Procedures() {
@@ -330,6 +343,9 @@ public class XlsxDataProvider implements DataProvider {
                     .getCell(2)));
             procedure.setEntityId(XlsxDataProvider.readStringValue(row
                     .getCell(3)));
+            procedure.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(4)));
+            procedure.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(5)));
+            procedure.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(6)));
             result.add(procedure);
         }
         return result;
@@ -337,7 +353,7 @@ public class XlsxDataProvider implements DataProvider {
 
     /**
      * Parse the list of medications present in the workbook.
-     * 
+     *
      * @return A list of {@link Medication} objects.
      */
     private List<Medication> readMedications() {
@@ -355,6 +371,9 @@ public class XlsxDataProvider implements DataProvider {
                     .getCell(2)));
             medication.setEntityId(XlsxDataProvider.readStringValue(row
                     .getCell(3)));
+            medication.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(4)));
+            medication.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(5)));
+            medication.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(6)));
             result.add(medication);
         }
         return result;
@@ -362,7 +381,7 @@ public class XlsxDataProvider implements DataProvider {
 
     /**
      * Parse the list of labs present in the workbook's "eLABS" worksheet.
-     * 
+     *
      * @return A list of {@link Lab} objects.
      */
     private List<Lab> readLabs() {
@@ -381,6 +400,9 @@ public class XlsxDataProvider implements DataProvider {
             lab.setResultAsNum(XlsxDataProvider.readDoubleValue(row.getCell(5)));
             lab.setUnits(XlsxDataProvider.readStringValue(row.getCell(6)));
             lab.setFlag(XlsxDataProvider.readStringValue(row.getCell(7)));
+            lab.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(8)));
+            lab.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(9)));
+            lab.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(10)));
             result.add(lab);
         }
         return result;
@@ -388,7 +410,7 @@ public class XlsxDataProvider implements DataProvider {
 
     /**
      * Parse the list of vitals present in the workbook's "eVITALS" worksheet.
-     * 
+     *
      * @return A list of {@link Vital} objects.
      */
     private List<Vital> readVitals() {
@@ -399,16 +421,17 @@ public class XlsxDataProvider implements DataProvider {
         while (rows.hasNext()) {
             Row row = rows.next();
             Vital vital = new Vital();
-            vital.setId(XlsxDataProvider.readStringValue(row.getCell(0)));
-            vital.setEncounterId(XlsxDataProvider.readLongValue(row.getCell(1)));
-            vital.setTimestamp(XlsxDataProvider.readDateValue(row.getCell(2)));
-            vital.setEntityId(XlsxDataProvider.readStringValue(row.getCell(3)));
-            vital.setResultAsStr(XlsxDataProvider.readStringValue(row
-                    .getCell(4)));
-            vital.setResultAsNum(XlsxDataProvider.readDoubleValue(row
-                    .getCell(5)));
-            vital.setUnits(XlsxDataProvider.readStringValue(row.getCell(6)));
-            vital.setFlag(XlsxDataProvider.readStringValue(row.getCell(7)));
+            vital.setId(readStringValue(row.getCell(0)));
+            vital.setEncounterId(readLongValue(row.getCell(1)));
+            vital.setTimestamp(readDateValue(row.getCell(2)));
+            vital.setEntityId(readStringValue(row.getCell(3)));
+            vital.setResultAsStr(readStringValue(row.getCell(4)));
+            vital.setResultAsNum(readDoubleValue(row.getCell(5)));
+            vital.setUnits(readStringValue(row.getCell(6)));
+            vital.setFlag(readStringValue(row.getCell(7)));
+            vital.setCreateDate(readDateValue(row.getCell(8)));
+            vital.setUpdateDate(readDateValue(row.getCell(9)));
+            vital.setDeleteDate(readDateValue(row.getCell(10)));
             result.add(vital);
         }
         return result;
@@ -416,91 +439,89 @@ public class XlsxDataProvider implements DataProvider {
 
     /**
      * Read a date value from the given spreadsheet cell.
-     * 
-     * @param cell
-     *            The cell to read the value from.
+     *
+     * @param cell The cell to read the value from.
      * @return The date in the cell, if valid, null otherwise.
      */
     private static Date readDateValue(Cell cell) {
-        Date result;
-        String value = XlsxDataProvider.readStringValue(cell);
-        if (value == null) {
-            result = null;
-        } else {
+        if (cell != null) {
+            Date result;
             try {
-                result = SDF.parse(value);
-            } catch (ParseException e) {
-                result = null;
+                result = cell.getDateCellValue();
+            } catch (IllegalStateException ex) {
+                String value = XlsxDataProvider.readStringValue(cell);
+                if (value == null) {
+                    result = null;
+                } else {
+                    try {
+                        result = SDF.parse(value);
+                    } catch (ParseException e) {
+                        result = null;
+                    }
+                }
             }
+            return result;
+        } else {
+            return null;
         }
-        return result;
     }
 
     /**
      * Read a string value from the given cell.
-     * 
-     * @param cell
-     *            The cell to read value from.
+     *
+     * @param cell The cell to read value from.
      * @return A String containing the cell value, if valid, null otherwise.
      */
     private static String readStringValue(Cell cell) {
         String result;
         if (cell == null) {
             result = null;
-        } else {
-            if (cell.getCellType() != Cell.CELL_TYPE_STRING) {
-                if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                    result = String.valueOf(cell.getNumericCellValue());
-                } else {
-                    result = null;
-                }
+        } else if (cell.getCellType() != Cell.CELL_TYPE_STRING) {
+            if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                result = String.valueOf(cell.getNumericCellValue());
             } else {
-                result = cell.getStringCellValue();
+                result = null;
             }
+        } else {
+            result = cell.getStringCellValue();
         }
         return result;
     }
 
     /**
      * Read a numerical value as a Long type from the given cell.
-     * 
-     * @param cell
-     *            The cell to read the value from.
+     *
+     * @param cell The cell to read the value from.
      * @return A Long containing the cell's value, if valid, null otherwise.
      */
     private static Long readLongValue(Cell cell) {
         Long result;
         if (cell == null) {
             result = null;
+        } else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+            Double value = new Double(cell.getNumericCellValue());
+            result = new Long(value.longValue());
         } else {
-            if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                Double value = new Double(cell.getNumericCellValue());
-                result = new Long(value.longValue());
-            } else {
-                result = null;
-            }
+            result = null;
         }
         return result;
     }
 
     /**
      * Read the give cell's value as a Double type.
-     * 
-     * @param cell
-     *            The cell to read the value from.
+     *
+     * @param cell The cell to read the value from.
      * @return A Double containing the cell value, if valid, null otherwise.
      */
     private static Double readDoubleValue(Cell cell) {
         Double result;
         if (cell == null) {
             result = null;
+        } else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+            double value = cell.getNumericCellValue();
+            result = new Double(value);
         } else {
-            if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                double value = cell.getNumericCellValue();
-                result = new Double(value);
-            } else {
-                result = null;
-            }
+            result = null;
         }
         return result;
     }

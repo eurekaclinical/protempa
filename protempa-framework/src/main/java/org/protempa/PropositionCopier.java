@@ -20,6 +20,7 @@
 package org.protempa;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.logging.Level;
 
 import org.drools.WorkingMemory;
@@ -116,6 +117,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         param.setSourceSystem(SourceSystem.DERIVED);
         param.setInterval(abstractParameter.getInterval());
         param.setValue(abstractParameter.getValue());
+        param.setCreateDate(new Date());
         this.workingMemory.insert(param);
         this.derivationsBuilder.propositionAsserted(abstractParameter, param);
         ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", param);
@@ -134,6 +136,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         Event e = new Event(propId, this.uniqueIdProvider.getInstance());
         e.setInterval(event.getInterval());
         e.setSourceSystem(SourceSystem.DERIVED);
+        e.setCreateDate(new Date());
         this.workingMemory.insert(e);
         this.derivationsBuilder.propositionAsserted(event, e);
         ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", e);
@@ -155,6 +158,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         param.setGranularity(primitiveParameter.getGranularity());
         param.setValue(primitiveParameter.getValue());
         param.setSourceSystem(SourceSystem.DERIVED);
+        param.setCreateDate(new Date());
         this.workingMemory.insert(param);
         this.derivationsBuilder.propositionAsserted(primitiveParameter, param);
         ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", param);
@@ -172,6 +176,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         assert this.workingMemory != null : "workingMemory wasn't set";
         Constant newConstant = new Constant(propId, this.uniqueIdProvider.getInstance());
         newConstant.setSourceSystem(SourceSystem.DERIVED);
+        newConstant.setCreateDate(new Date());
         this.workingMemory.insert(newConstant);
         this.derivationsBuilder.propositionAsserted(constant, newConstant);
         ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", newConstant);

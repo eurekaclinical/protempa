@@ -27,7 +27,6 @@ This project includes:
   bcel under Apache License, Version 2.0
   Commons IO under The Apache Software License, Version 2.0
   Core Protege under Mozilla Public License
-  dom4j under BSD License
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
   H2 Database Engine under MPL 2.0, and EPL 1.0
   Hamcrest Core under New BSD License
@@ -65,6 +64,5 @@ This project includes:
   StAX API under The Apache Software License, Version 2.0
   UMLSQuery under Apache License, Version 2.0
   xercesImpl under Apache License, Version 2.0
-  XML Commons External Components XML APIs under The Apache Software License, Version 2.0
   XmlBeans under The Apache Software License, Version 2.0
 

@@ -23,6 +23,7 @@
  */
 package org.protempa;
 
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,6 +67,7 @@ class AbstractionCombinerConsequence implements Consequence {
         result.setSourceSystem(SourceSystem.DERIVED);
         result.setInterval(segment.getInterval());
         result.setValue(a1.getValue());
+        result.setCreateDate(new Date());
         Logger logger = ProtempaUtil.logger();
         if (logger.isLoggable(Level.FINEST)) {
             logger.log(Level.FINEST, "Created {0} from {1} and {2}", new Object[]{result, a1, a2});

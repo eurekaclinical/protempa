@@ -161,6 +161,15 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                 p.setProperty(propertySpec.getName(), propertyValues[j]);
             }
             p.setSourceSystem(this.dsType);
+            if (entitySpec.getCreateDateSpec() != null) {
+                p.setCreateDate(resultSet.getTimestamp(i++));
+            }
+            if (entitySpec.getUpdateDateSpec() != null) {
+                p.setUpdateDate(resultSet.getTimestamp(i++));
+            }
+            if (entitySpec.getDeleteDateSpec() != null) {
+                p.setDeleteDate(resultSet.getTimestamp(i++));
+            }
             p.setDownloadDate(this.now);
             handleProposition(p);
 

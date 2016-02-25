@@ -20,6 +20,7 @@
 package org.protempa;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -222,6 +223,7 @@ final class CompoundLowLevelAbstractionConsequence implements
         result.setValue(value);
         result.setSourceSystem(SourceSystem.DERIVED);
         result.setContextId(contextId);
+        result.setCreateDate(new Date());
 
         return result;
     }

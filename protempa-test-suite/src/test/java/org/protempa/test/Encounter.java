@@ -27,7 +27,7 @@ import java.util.Date;
  * @author hrathod
  * 
  */
-class Encounter {
+class Encounter extends Record {
 	/**
 	 * The encounter's unique identifier.
 	 */

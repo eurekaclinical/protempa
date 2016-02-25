@@ -25,7 +25,7 @@ package org.protempa.test;
  * @author hrathod
  * 
  */
-abstract class Person {
+abstract class Person extends Record {
 	/**
 	 * The unique identifier for the person.
 	 */

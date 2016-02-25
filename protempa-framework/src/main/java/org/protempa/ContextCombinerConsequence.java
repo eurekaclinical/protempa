@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,6 +59,7 @@ class ContextCombinerConsequence implements Consequence {
         Segment<Context> segment = new Segment<>(s);
         UniqueIdFactory uidFactory = new ProviderBasedUniqueIdFactory(new JBossRulesDerivedLocalUniqueIdValuesProvider(arg1, a1Id));
         Context result = new Context(a1Id, uidFactory.getInstance());
+        result.setCreateDate(new Date());
         result.setSourceSystem(SourceSystem.DERIVED);
         result.setInterval(segment.getInterval());
         Logger logger = ProtempaUtil.logger();

@@ -21,6 +21,7 @@ package org.protempa;
 
 import org.protempa.proposition.interval.Interval.Side;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.protempa.proposition.AbstractParameter;
@@ -68,6 +69,7 @@ public final class AbstractParameterFactory {
         AbstractParameter result = new AbstractParameter(propId, uniqueId);
         result.setSourceSystem(SourceSystem.DERIVED);
         result.setContextId(contextId);
+        result.setCreateDate(new Date());
 
         Long minStart = null;
         Long maxStart = null;

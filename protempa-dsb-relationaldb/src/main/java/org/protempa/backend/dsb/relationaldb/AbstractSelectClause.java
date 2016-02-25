@@ -72,6 +72,15 @@ public abstract class AbstractSelectClause implements SelectClause {
         if (info.getReferenceIndices() != null) {
             i += info.getReferenceIndices().size();
         }
+        if (info.getCreateDateIndex() > 0) {
+            i++;
+        }
+        if (info.getUpdateDateIndex() > 0) {
+            i++;
+        }
+        if (info.getDeleteDateIndex() > 0) {
+            i++;
+        }
         int[] indices = new int[i];
         String[] names = new String[i];
         int k = 0;
@@ -117,6 +126,19 @@ public abstract class AbstractSelectClause implements SelectClause {
                 indices[k] = entry.getValue();
                 names[k++] = entry.getKey() + "_ref";
             }
+        }
+        
+        if (info.getCreateDateIndex() > 0) {
+            indices[k] = info.getCreateDateIndex();
+            names[k++] = "createdate";
+        }
+        if (info.getUpdateDateIndex() > 0) {
+            indices[k] = info.getUpdateDateIndex();
+            names[k++] = "updatedate";
+        }
+        if (info.getDeleteDateIndex() > 0) {
+            indices[k] = info.getDeleteDateIndex();
+            names[k++] = "deletedate";
         }
 
         boolean unique = info.isUnique();

@@ -23,6 +23,7 @@ import org.protempa.proposition.interval.Interval.Side;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
@@ -146,6 +147,7 @@ class ContextDefinitionInducedByConsequence implements Consequence {
 
         context.setInterval(this.intervalFactory.getInstance(minStart,
                 maxStart, startGran, minFinish, maxFinish, finishGran));
+        context.setCreateDate(new Date());
         kh.getWorkingMemory().insert(context);
 
         this.derivationsBuilder.propositionAsserted(prop, context);

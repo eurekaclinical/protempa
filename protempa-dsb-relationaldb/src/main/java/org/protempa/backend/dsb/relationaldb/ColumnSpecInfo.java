@@ -33,6 +33,9 @@ public final class ColumnSpecInfo {
     private int[] uniqueIdIndices;
     private Map<String, Integer> referenceIndices;
     private boolean usingKeyIdIndex;
+    private int createDateIndex = -1;
+    private int updateDateIndex = -1;
+    private int deleteDateIndex = -1;
 
     ColumnSpecInfo() {
 
@@ -117,4 +120,30 @@ public final class ColumnSpecInfo {
     void setUsingKeyIdIndex(boolean usingKeyIdIndex) {
         this.usingKeyIdIndex = usingKeyIdIndex;
     }
+
+    int getCreateDateIndex() {
+        return createDateIndex;
+    }
+
+    void setCreateDateIndex(int createDateIndex) {
+        this.createDateIndex = createDateIndex;
+    }
+
+    int getUpdateDateIndex() {
+        return updateDateIndex;
+    }
+
+    void setUpdateDateIndex(int updateDateIndex) {
+        this.updateDateIndex = updateDateIndex;
+    }
+
+    int getDeleteDateIndex() {
+        return deleteDateIndex;
+    }
+
+    void setDeleteDateIndex(int deleteDateIndex) {
+        this.deleteDateIndex = deleteDateIndex;
+    }
+    
+    
 }

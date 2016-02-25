@@ -69,6 +69,9 @@ public final class EntitySpec implements Serializable {
     private final JDBCPositionFormat positionParser;
     private final Unit partitionBy;
     private final int[] maxWidths;
+    private final ColumnSpec createDateSpec;
+    private final ColumnSpec updateDateSpec;
+    private final ColumnSpec deleteDateSpec;
     
     public EntitySpec(String name,
             String description,
@@ -93,6 +96,61 @@ public final class EntitySpec implements Serializable {
                 propertySpecs, referenceSpecs, codeToPropIdMap, codeSpec, 
                 constraintSpecs, valueSpec, valueType, granularity, 
                 positionParser, partitionBy, null);
+    }
+    
+    public EntitySpec(String name,
+            String description,
+            String[] propositionIds,
+            boolean unique,
+            ColumnSpec baseSpec,
+            ColumnSpec[] uniqueIdSpecs,
+            ColumnSpec startTimeOrTimestampSpec,
+            ColumnSpec finishTimeSpec,
+            PropertySpec[] propertySpecs,
+            ReferenceSpec[] referenceSpecs,
+            Map<String, String> codeToPropIdMap,
+            ColumnSpec codeSpec,
+            ColumnSpec[] constraintSpecs,
+            ColumnSpec valueSpec,
+            ValueType valueType,
+            Granularity granularity,
+            JDBCPositionFormat positionParser,
+            Unit partitionBy,
+            ColumnSpec createDateSpec,
+            ColumnSpec updateDateSpec,
+            ColumnSpec deleteDateSpec) {
+        this(name, description, propositionIds, unique, baseSpec, 
+                uniqueIdSpecs, startTimeOrTimestampSpec, finishTimeSpec, 
+                propertySpecs, referenceSpecs, codeToPropIdMap, codeSpec, 
+                constraintSpecs, valueSpec, valueType, granularity, 
+                positionParser, partitionBy, null,
+                createDateSpec, updateDateSpec, deleteDateSpec);
+    }
+    
+    public EntitySpec(String name,
+            String description,
+            String[] propositionIds,
+            boolean unique,
+            ColumnSpec baseSpec,
+            ColumnSpec[] uniqueIdSpecs,
+            ColumnSpec startTimeOrTimestampSpec,
+            ColumnSpec finishTimeSpec,
+            PropertySpec[] propertySpecs,
+            ReferenceSpec[] referenceSpecs,
+            Map<String, String> codeToPropIdMap,
+            ColumnSpec codeSpec,
+            ColumnSpec[] constraintSpecs,
+            ColumnSpec valueSpec,
+            ValueType valueType,
+            Granularity granularity,
+            JDBCPositionFormat positionParser,
+            Unit partitionBy,
+            int[] maxWidths) {
+        this(name, description, propositionIds, unique, baseSpec, 
+                uniqueIdSpecs, startTimeOrTimestampSpec, finishTimeSpec, 
+                propertySpecs, referenceSpecs, codeToPropIdMap, codeSpec, 
+                constraintSpecs, valueSpec, valueType, granularity, 
+                positionParser, partitionBy, null, null, null, null);
     }
 
     /**
@@ -173,7 +231,10 @@ public final class EntitySpec implements Serializable {
             Granularity granularity,
             JDBCPositionFormat positionParser,
             Unit partitionBy,
-            int[] maxWidths) {
+            int[] maxWidths,
+            ColumnSpec createDateSpec,
+            ColumnSpec updateDateSpec,
+            ColumnSpec deleteDateSpec) {
         if (name == null) {
             throw new IllegalArgumentException("name cannot be null");
         }
@@ -278,6 +339,9 @@ public final class EntitySpec implements Serializable {
             }
             this.maxWidths = maxWidths.clone();
         }
+        this.createDateSpec = createDateSpec;
+        this.updateDateSpec = updateDateSpec;
+        this.deleteDateSpec = deleteDateSpec;
     }
 
     /**
@@ -524,6 +588,18 @@ public final class EntitySpec implements Serializable {
             return maxWidths.clone();
         }
     }
+
+    public ColumnSpec getCreateDateSpec() {
+        return createDateSpec;
+    }
+
+    public ColumnSpec getUpdateDateSpec() {
+        return updateDateSpec;
+    }
+
+    public ColumnSpec getDeleteDateSpec() {
+        return deleteDateSpec;
+    }
     
     /**
      * Returns the distinct tables specified in this entity spec, not including
@@ -541,6 +617,9 @@ public final class EntitySpec implements Serializable {
         addTo(results, this.startTimeOrTimestampSpec);
         addTo(results, this.uniqueIdSpecs);
         addTo(results, this.valueSpec);
+        addTo(results, this.createDateSpec);
+        addTo(results, this.updateDateSpec);
+        addTo(results, this.deleteDateSpec);
         for (PropertySpec propertySpec : this.propertySpecs) {
             addTo(results, propertySpec.getCodeSpec());
         }

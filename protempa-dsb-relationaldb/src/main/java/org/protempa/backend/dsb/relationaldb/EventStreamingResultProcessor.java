@@ -203,6 +203,15 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
                 PropertySpec propertySpec = propertySpecs[j];
                 event.setProperty(propertySpec.getName(), propertyValues[j]);
             }
+            if (entitySpec.getCreateDateSpec() != null) {
+                event.setCreateDate(resultSet.getTimestamp(i++));
+            }
+            if (entitySpec.getUpdateDateSpec() != null) {
+                event.setUpdateDate(resultSet.getTimestamp(i++));
+            }
+            if (entitySpec.getDeleteDateSpec() != null) {
+                event.setDeleteDate(resultSet.getTimestamp(i++));
+            }
             event.setDownloadDate(this.now);
             handleProposition(event);
 

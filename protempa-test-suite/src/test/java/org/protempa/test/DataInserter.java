@@ -120,7 +120,7 @@ public final class DataInserter {
         }
 
     }
-
+    
     /**
      * Insert a list of patients to the data base using the given connection.
      * 
@@ -133,7 +133,7 @@ public final class DataInserter {
         int counter = 0;
         final Connection connection = this.getConnection();
         PreparedStatement preparedStatement = connection
-                .prepareStatement("insert into patient values (?,?,?,?,?,?,?,?)");
+                .prepareStatement("insert into patient values (?,?,?,?,?,?,?,?,?,?,?)");
         for (Patient patient : patients) {
             Date dateOfBirth;
             if (patient.getDateOfBirth() == null) {
@@ -149,6 +149,9 @@ public final class DataInserter {
             preparedStatement.setString(6, patient.getMaritalStatus());
             preparedStatement.setString(7, patient.getRace());
             preparedStatement.setString(8, patient.getGender());
+            preparedStatement.setTimestamp(9, toTimestamp(patient.getCreateDate()));
+            preparedStatement.setTimestamp(10, toTimestamp(patient.getUpdateDate()));
+            preparedStatement.setTimestamp(11, toTimestamp(patient.getDeleteDate()));
             preparedStatement.addBatch();
 
             counter++;
@@ -179,7 +182,7 @@ public final class DataInserter {
         int counter = 0;
         final Connection connection = this.getConnection();
         PreparedStatement preparedStatement = connection
-                .prepareStatement("insert into encounter values (?,?,?,?,?,?,?)");
+                .prepareStatement("insert into encounter values (?,?,?,?,?,?,?,?,?,?)");
         for (Encounter encounter : encounters) {
             preparedStatement.setLong(1, encounter.getId().longValue());
             preparedStatement.setLong(2, encounter.getPatientId().longValue());
@@ -190,6 +193,9 @@ public final class DataInserter {
                     .getTime()));
             preparedStatement.setString(6, encounter.getType());
             preparedStatement.setString(7, encounter.getDischargeDisposition());
+            preparedStatement.setTimestamp(8, toTimestamp(encounter.getCreateDate()));
+            preparedStatement.setTimestamp(9, toTimestamp(encounter.getUpdateDate()));
+            preparedStatement.setTimestamp(10, toTimestamp(encounter.getDeleteDate()));
             preparedStatement.addBatch();
 
             counter++;
@@ -219,11 +225,14 @@ public final class DataInserter {
         int counter = 0;
         final Connection connection = this.getConnection();
         PreparedStatement preparedStatement = connection
-                .prepareStatement("insert into provider values (?,?,?)");
+                .prepareStatement("insert into provider values (?,?,?,?,?,?)");
         for (Provider provider : providers) {
             preparedStatement.setLong(1, provider.getId().longValue());
             preparedStatement.setString(2, provider.getFirstName());
             preparedStatement.setString(3, provider.getLastName());
+            preparedStatement.setTimestamp(4, toTimestamp(provider.getCreateDate()));
+            preparedStatement.setTimestamp(5, toTimestamp(provider.getUpdateDate()));
+            preparedStatement.setTimestamp(6, toTimestamp(provider.getDeleteDate()));
             preparedStatement.addBatch();
 
             counter++;
@@ -337,7 +346,7 @@ public final class DataInserter {
         int counter = 0;
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("insert into ").append(table)
-                .append(" values (?,?,?,?)");
+                .append(" values (?,?,?,?,?,?,?)");
         final Connection connection = this.getConnection();
         PreparedStatement preparedStatement = connection
                 .prepareStatement(sqlBuilder.toString());
@@ -348,6 +357,9 @@ public final class DataInserter {
             preparedStatement.setTimestamp(3, new Timestamp(observation
                     .getTimestamp().getTime()));
             preparedStatement.setString(4, observation.getEntityId());
+            preparedStatement.setTimestamp(5, toTimestamp(observation.getCreateDate()));
+            preparedStatement.setTimestamp(6, toTimestamp(observation.getUpdateDate()));
+            preparedStatement.setTimestamp(7, toTimestamp(observation.getDeleteDate()));
             preparedStatement.addBatch();
 
             counter++;
@@ -381,7 +393,7 @@ public final class DataInserter {
         int counter = 0;
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("insert into ").append(table)
-                .append(" values (?,?,?,?,?,?,?,?)");
+                .append(" values (?,?,?,?,?,?,?,?,?,?,?)");
         final Connection connection = this.getConnection();
         PreparedStatement preparedStatement = connection
                 .prepareStatement(sqlBuilder.toString());
@@ -397,6 +409,9 @@ public final class DataInserter {
                     .doubleValue());
             preparedStatement.setString(7, observation.getUnits());
             preparedStatement.setString(8, observation.getFlag());
+            preparedStatement.setTimestamp(9, toTimestamp(observation.getCreateDate()));
+            preparedStatement.setTimestamp(10, toTimestamp(observation.getUpdateDate()));
+            preparedStatement.setTimestamp(11, toTimestamp(observation.getDeleteDate()));
             preparedStatement.addBatch();
 
             counter++;
@@ -411,6 +426,14 @@ public final class DataInserter {
         connection.commit();
         preparedStatement.clearBatch();
         preparedStatement.close();
+    }
+    
+    private static Timestamp toTimestamp(java.util.Date date) {
+        if (date != null) {
+            return new Timestamp(date.getTime());
+        } else {
+            return null;
+        }
     }
 
 }

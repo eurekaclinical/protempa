@@ -57,6 +57,9 @@ final class SingleColumnQueryResultsHandler
         try {
             this.data.put(keyId, new HashMap<Proposition, List<Proposition>>());
             for (Proposition p : propositions) {
+                if (p.getCreateDate() == null) {
+                    throw new QueryResultsHandlerProcessingException("invalid proposition with no create date: " + p);
+                }
                 this.data.get(keyId).put(p, new ArrayList<Proposition>());
                 storeDerivations(forwardDerivations.get(p), this.data.get(keyId).get(p));
                 storeDerivations(backwardDerivations.get(p), this.data.get(keyId).get(p));
