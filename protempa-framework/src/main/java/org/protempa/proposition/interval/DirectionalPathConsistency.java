@@ -21,9 +21,9 @@ package org.protempa.proposition.interval;
 
 import java.util.Iterator;
 
-import org.arp.javautil.graph.DirectedGraph;
-import org.arp.javautil.graph.Edge;
-import org.arp.javautil.graph.Weight;
+import org.protempa.graph.DirectedGraph;
+import org.protempa.graph.Edge;
+import org.protempa.graph.Weight;
 
 /**
  * An implementation of the directional path consistency (DPC) algorithm for

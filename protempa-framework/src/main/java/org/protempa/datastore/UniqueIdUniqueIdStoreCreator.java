@@ -21,10 +21,8 @@ package org.protempa.datastore;
 
 import java.io.Serializable;
 import java.util.List;
-import org.arp.javautil.datastore.BdbCacheFactory;
-import org.arp.javautil.datastore.BdbPersistentStoreFactory;
-
-import org.arp.javautil.datastore.DataStore;
+import org.eurekaclinical.datastore.BdbPersistentStoreFactory;
+import org.eurekaclinical.datastore.DataStore;
 import org.protempa.proposition.UniqueId;
 
 public final class UniqueIdUniqueIdStoreCreator extends AbstractDataStoreCreator<UniqueId, List<UniqueIdUniqueIdStoreCreator.Reference>> {

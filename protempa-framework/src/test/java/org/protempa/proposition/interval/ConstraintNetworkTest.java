@@ -22,7 +22,7 @@ package org.protempa.proposition.interval;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
 
 import junit.framework.TestCase;
-import org.arp.javautil.graph.WeightFactory;
+import org.protempa.graph.WeightFactory;
 
 /**
  * @author Andrew Post

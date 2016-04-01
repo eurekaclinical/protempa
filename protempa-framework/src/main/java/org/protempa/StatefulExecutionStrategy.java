@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 
-import org.arp.javautil.datastore.DataStore;
+import org.eurekaclinical.datastore.DataStore;
 import org.drools.StatefulSession;
 import org.drools.WorkingMemory;
 import org.protempa.proposition.Proposition;

@@ -20,7 +20,7 @@
 package org.protempa.datastore;
 
 import java.io.IOException;
-import org.arp.javautil.datastore.DataStore;
+import org.eurekaclinical.datastore.DataStore;
 
 /**
  * An interface for defining classes that return external data stores.

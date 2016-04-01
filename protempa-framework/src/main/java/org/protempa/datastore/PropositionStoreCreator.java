@@ -22,9 +22,9 @@ package org.protempa.datastore;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.arp.javautil.datastore.BdbPersistentStoreFactory;
+import org.eurekaclinical.datastore.BdbPersistentStoreFactory;
 
-import org.arp.javautil.datastore.DataStore;
+import org.eurekaclinical.datastore.DataStore;
 import org.protempa.proposition.Proposition;
 
 /**

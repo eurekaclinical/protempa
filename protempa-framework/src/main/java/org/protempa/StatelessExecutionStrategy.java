@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.arp.javautil.datastore.DataStore;
+import org.eurekaclinical.datastore.DataStore;
 import org.drools.StatelessSession;
 import org.drools.StatelessSessionResult;
 import org.drools.WorkingMemory;

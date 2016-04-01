@@ -25,7 +25,7 @@ import java.io.ObjectInputStream;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Unit;
 
-import org.arp.javautil.graph.Weight;
+import org.protempa.graph.Weight;
 
 /**
  * A constraint representing a temporal abstraction interval. When added to a

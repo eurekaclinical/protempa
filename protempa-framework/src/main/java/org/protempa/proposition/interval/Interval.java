@@ -24,8 +24,8 @@ import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.util.Arrays;
 
-import org.arp.javautil.graph.Weight;
-import org.arp.javautil.graph.WeightFactory;
+import org.protempa.graph.Weight;
+import org.protempa.graph.WeightFactory;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Unit;

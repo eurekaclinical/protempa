@@ -21,8 +21,8 @@
     
     <parent>
         <groupId>org.eurekaclinical</groupId>
-        <artifactId>eurekaclinical-parent</artifactId>
-        <version>1-Alpha-13</version>
+        <artifactId>eurekaclinical-parent-standard-deps</artifactId>
+        <version>1-Alpha-1</version>
     </parent>
 
     <scm>
@@ -108,7 +108,12 @@
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>javautil</artifactId>
-                <version>3.0-Alpha-6</version>
+                <version>3.0-Alpha-7</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eurekaclinical</groupId>
+                <artifactId>datastore</artifactId>
+                <version>1.0-Alpha-1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

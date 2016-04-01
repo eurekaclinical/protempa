@@ -23,10 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.arp.javautil.graph.BellmanFord;
-import org.arp.javautil.graph.DirectedGraph;
-import org.arp.javautil.graph.Weight;
-import org.arp.javautil.graph.WeightFactory;
+import org.protempa.graph.BellmanFord;
+import org.protempa.graph.DirectedGraph;
+import org.protempa.graph.Weight;
+import org.protempa.graph.WeightFactory;
 
 /**
  * Temporal constraint network for solving the simple temporal problem (STP) as

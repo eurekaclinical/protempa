@@ -19,9 +19,9 @@
  */
 package org.protempa;
 
-import org.arp.javautil.datastore.BdbPersistentStoreFactory;
+import org.eurekaclinical.datastore.BdbPersistentStoreFactory;
 
-import org.arp.javautil.datastore.DataStore;
+import org.eurekaclinical.datastore.DataStore;
 import org.protempa.datastore.AbstractDataStoreCreator;
 
 final class DerivationsBuilderStoreCreator extends

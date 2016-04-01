@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.arp.javautil.datastore.DataStore;
+import org.eurekaclinical.datastore.DataStore;
 import org.drools.RuleBase;
 import org.drools.WorkingMemory;
 import org.protempa.proposition.Proposition;

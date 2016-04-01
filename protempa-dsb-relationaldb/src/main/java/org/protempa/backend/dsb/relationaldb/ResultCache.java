@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.arp.javautil.collections.Collections;
-import org.arp.javautil.datastore.DataStore;
+import org.eurekaclinical.datastore.DataStore;
 import org.protempa.datastore.PropositionStoreCreator;
 import org.protempa.datastore.UniqueIdUniqueIdStoreCreator;
 import org.protempa.proposition.Proposition;

@@ -20,10 +20,10 @@
 package org.protempa.datastore;
 
 import java.io.IOException;
-import org.apache.commons.io.FileUtils;
-import org.arp.javautil.datastore.BdbCacheFactory;
-import org.arp.javautil.datastore.BdbUtil;
-import org.arp.javautil.datastore.DataStore;
+import org.arp.javautil.io.FileUtil;
+import org.eurekaclinical.datastore.BdbCacheFactory;
+import org.eurekaclinical.datastore.BdbUtil;
+import org.eurekaclinical.datastore.DataStore;
 
 /**
  *
@@ -54,7 +54,7 @@ public abstract class AbstractDataStoreCreator<K, V>
         if (this.environmentName == null) {
             tempEnvironment =
                     BdbUtil.uniqueEnvironment("cache-store", null,
-                    FileUtils.getTempDirectory());
+                    FileUtil.getTempDirectory());
         } else {
             tempEnvironment = this.environmentName;
         }

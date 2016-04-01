@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.arp.javautil.datastore.DataStore;
+import org.eurekaclinical.datastore.DataStore;
 import org.protempa.DataSourceResultMap;
 import org.protempa.datastore.UniqueIdUniqueIdStoreCreator;
 import org.protempa.proposition.AbstractParameter;

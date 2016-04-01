@@ -36,7 +36,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import junit.framework.TestCase;
-import org.apache.commons.io.FileUtils;
 import static org.junit.Assert.assertArrayEquals;
 import org.protempa.AlgorithmSource;
 import org.protempa.AlgorithmSourceImpl;
@@ -192,13 +191,23 @@ public class XMLConfigurationTest extends TestCase {
         File file = File.createTempFile("testTableResultsQueryHandler", ".xml");
         KnowledgeSource ks = new KnowledgeSourceImpl(new KnowledgeSourceBackend[0]);
         XMLConfiguration.writeTableDestinationAsXML(destination, file, true, ks);
-        System.err.println(FileUtils.readFileToString(file));
+        
+        fileToStderr(file);
         checkXMLValid(file, "protempa_tableQueryResultsHandler.xsd");
         TableDestination reconstitutedResultsHandler = XMLConfiguration.readTableQueryResultsHandlerFactoryAsXML(file, dataWriter, ks);
         assertEquals("Delimiter is the same", reconstitutedResultsHandler.getColumnDelimiter(), destination.getColumnDelimiter());
         assertArrayEquals("Column specs are the same", reconstitutedResultsHandler.getColumnSpecs(), destination.getColumnSpecs());
         assertArrayEquals("Row proposition ids are the same", reconstitutedResultsHandler.getRowPropositionIds(), destination.getRowPropositionIds());
         assertEquals("headerWritten is the same", reconstitutedResultsHandler.isHeaderWritten(), destination.isHeaderWritten());
+    }
+    
+    private static void fileToStderr(File file) throws IOException {
+        try (BufferedReader r = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = r.readLine()) != null) {
+                System.err.println(line);
+            }
+        }
     }
 
     private TableDestination createTestTableDestination(BufferedWriter dataWriter) throws QueryResultsHandlerInitException {

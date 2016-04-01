@@ -13,7 +13,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 This project includes:
-  ant under The Apache Software License, Version 2.0
   Apache Commons CLI under Apache License, Version 2.0
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons Collections under Apache License, Version 2.0
@@ -24,17 +23,14 @@ This project includes:
   Apache POI under The Apache Software License, Version 2.0
   Apache ServiceMix :: Bundles :: xstream under The Apache Software License, Version 2.0
   avalon-framework under Apache License, Version 2.0
-  bcel under Apache License, Version 2.0
   Commons IO under The Apache Software License, Version 2.0
   Core Protege under Mozilla Public License
+  Datastore under Apache License, Version 2.0
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
   H2 Database Engine under MPL 2.0, and EPL 1.0
   Hamcrest Core under New BSD License
   ini4j under Apache 2
-  jakarta-regexp under Apache License, Version 2.0
-  JarAnalyzer under Kirkk.com BSD License
   JavaUtil under Apache License, Version 2.0
-  jdom under Apache style license
   je under Sleepycat License
   JGoodies Common under The BSD License
   JGoodies Looks under The BSD License
@@ -42,12 +38,8 @@ This project includes:
   kXML 2 is a small XML pull parser based on the common XML pull API under BSD style or Public Domain
   Logging under The Apache Software License, Version 2.0
   logkit under Apache License, Version 2.0
-  MockRunner-Core under Mockrunner License, based on Apache Software License, version 1.1
-  MockRunner-JDBC under Mockrunner License, based on Apache Software License, version 1.1
   mvel under The Apache Software License, Version 2.0
-  Neko HTML under Apache License, Version 2.0
   opencsv under Apache 2
-  oro under Apache License, Version 2.0
   Protempa Framework under Apache License, Version 2.0
   Protempa Ini4j INI Backend Configurations under Apache License, Version 2.0
   Protempa Protege Knowledge Source Backend under Apache License, Version 2.0
@@ -56,10 +48,8 @@ This project includes:
   Protempa ServiceLoader Backend Provider under Apache License, Version 2.0
   Protempa Test Suite under Apache License, Version 2.0
   Protempa UMLS Term Source Backend under Apache License, Version 2.0
-  regexp under Apache License, Version 2.0
   servlet-api under Commons Development and Distribution License, Version 1.0
   StAX API under The Apache Software License, Version 2.0
   UMLSQuery under Apache License, Version 2.0
-  xercesImpl under Apache License, Version 2.0
   XmlBeans under The Apache Software License, Version 2.0
 
