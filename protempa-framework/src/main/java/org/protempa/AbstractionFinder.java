@@ -171,6 +171,7 @@ final class AbstractionFinder {
             this.executor.close();
             this.executor = null;
         } catch (CloseException ex) {
+            this.executor = null; //Don't try closing it again below
             throw new QueryException(query.getName(), ex);
         } finally {
             if (this.executor != null) {
