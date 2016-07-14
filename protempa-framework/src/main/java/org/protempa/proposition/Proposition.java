@@ -135,40 +135,56 @@ public interface Proposition extends PropositionVisitable,
     UniqueId getUniqueId();
     
     /**
-     * Gets the date this proposition was downloaded from the source system. If
-     * this proposition was derived, gets the date it was derived.
+     * Gets the timestamp this proposition was downloaded from the source system.
+     * If this proposition was derived, gets the date it was derived. A 
+     * <code>null</code> value means the proposition was not downloaded from a
+     * source system, or the source system did not provide an accurate
+     * downloaded timestamp. Protempa does not use this timestamp in any fashion 
+     * to control how propositions are used in computing temporal abstractions.
      * 
-     * @return a date, <code>null</code> if the proposition was not downloaded
-     * from a source system.
+     * @return a timestamp, <code>null</code>.
      */
     Date getDownloadDate();
     
     /**
-     * Gets the date this proposition was created in the source system, or for 
-     * derived propositions, the date it was created through the temporal 
-     * abstraction process.
+     * Gets the timestamp this proposition was created in the source system, or 
+     * for derived propositions, the timestamp it was created through the 
+     * temporal abstraction process. A <code>null</code> value means the create
+     * timestamp was not recorded, or the source system did not have an
+     * accurate created timestamp. Returned values may be in the future, if
+     * that is what the source system provided. Protempa does not use this 
+     * timestamp in any fashion to control how propositions are used in 
+     * computing temporal abstractions.
      * 
-     * @return a date, <code>null</code> means the create date is not recorded.
+     * @return a timestamp, or <code>null</code>.
      */
     Date getCreateDate();
     
     /**
-     * Gets the date this proposition was last updated in the source
-     * system, or for derived propositions, the date it was last updated 
-     * through the temporal abstraction process.
+     * Gets the timestamp when this proposition was last updated in the source
+     * system, or for derived propositions, the timestamp it was last updated 
+     * through the temporal abstraction process. Used to determine when a
+     * proposition has been updated. A <code>null</code> value means that the
+     * proposition's value has not been updated. When a source system does
+     * not provide accurate update timestamps, a data source backend may set 
+     * this value to the downloaded timestamp to ensure that Protempa does not 
+     * miss an update.
      * 
-     * @return a date, <code>null</code> means the proposition has never been
-     * updated.
+     * @return a timestamp, or <code>null</code>.
      */
     Date getUpdateDate();
     
     /**
-     * Gets the date this proposition was deleted from the source system, or
-     * for derived propositions, the date it was invalidated due to data
-     * changes.
-     * 
-     * @return a date, or <code>null</code> if the proposition has not been
-     * deleted.
+     * Gets the timestamp this proposition was deleted from the source system, 
+     * or for derived propositions, the timestamp it was invalidated due to 
+     * data changes. Used to determine when to delete or invalidate a proposition. 
+     * A <code>null</code> value means the proposition should not be deleted. Any
+     * non-null timestamp will cause the proposition to be deleted, even a
+     * timestamp in the future. A data source backend may set this timestamp
+     * to the downloaded timestamp if it knows a proposition should be deleted
+     * but the source system does not provide an accurate delete timestamp.
+     *
+     * @return a timestamp, or <code>null</code>.
      */
     Date getDeleteDate();
 }

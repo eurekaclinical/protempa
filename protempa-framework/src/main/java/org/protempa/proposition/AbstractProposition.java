@@ -403,9 +403,15 @@ public abstract class AbstractProposition implements Proposition {
     /**
      * Sets the date this proposition was created according to the source
      * system from which it was obtained, or for derived propositions, the
-     * date it was created through the temporal abstraction process.
+     * date it was created through the temporal abstraction process. If the 
+     * source system does not maintain accurate create timestamps or does
+     * not provide a create timestamp, you may set it to <code>null</code>. 
+     * Protempa implements no validation checking for future timestamps.
+     * Protempa does not use the create timestamp in any fashion to control
+     * how propositions are used in computing temporal abstractions. The
+     * default value is <code>null</code>.
      * 
-     * @param createDate a date.
+     * @param createDate a timestamp, or <code>null</code>.
      */
     public final void setCreateDate(Date createDate) {
         this.createDate = createDate;
@@ -417,11 +423,19 @@ public abstract class AbstractProposition implements Proposition {
     }
     
     /**
-     * Sets the date this proposition was last updated according to the source
-     * system from which it was obtained, or for derived propositions, the
-     * date it was last updated through the temporal abstraction process.
+     * Sets the timestamp this proposition was last updated according to the 
+     * source system from which it was obtained, or for derived propositions, 
+     * the date it was last updated through the temporal abstraction process.
+     * If the source system does not maintain accurate update timestamps, 
+     * set it to the downloaded timestamp. It's permissible to set the update 
+     * timestamp equal to the create timestamp when creating a proposition. 
+     * It's also permissible to set the update timestamp when creating a 
+     * proposition and leave the create timestamp <code>null</code>, for 
+     * example, if the source system cannot distinguish between created and 
+     * updated records. Protempa may ignore propositions with an update 
+     * timestamp set in the future. The default value is <code>null</code>.
      * 
-     * @param updateDate a date.
+     * @param updateDate a timestamp, or <code>null</code>.
      */
     public final void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
@@ -434,10 +448,12 @@ public abstract class AbstractProposition implements Proposition {
     
     /**
      * Sets the date this proposition was downloaded from the source system. If
-     * this proposition was derived, sets the date it was derived.
+     * this proposition was derived, sets the date it was derived. Set the
+     * download date to <code>null</code> if the source system did not provide
+     * a download date or it is inaccurate. The default value is 
+     * <code>null</code>.
      * 
-     * @param downloadDate a date, or <code>null</code> if the proposition was
-     * not downloaded from a source system.
+     * @param downloadDate a date, or <code>null</code>.
      */
     public final void setDownloadDate(Date downloadDate) {
         this.downloadDate = downloadDate;
@@ -449,12 +465,16 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     /**
-     * Sets the date this proposition was deleted from the source system. If
-     * this proposition was derived, sets the date it was invalidated by data
-     * changes.
+     * Sets the timestamp this proposition was deleted from the source system.
+     * If this proposition was derived, sets the date it was invalidated by
+     * data changes. Set to <code>null</code> to indicate that this 
+     * proposition has not been deleted. If you know that a proposition should
+     * be deleted but the source system does not maintain accurate delete
+     * timestamps, set it to the query/read timestamp. The default value is 
+     * <code>null</code>. Any non-null timestamp will cause Protempa to delete
+     * the proposition, even if the timestamp is in the future. 
      * 
-     * @param deleteDate a date, or <code>null</code> if the proposition has
-     * not been deleted.
+     * @param deleteDate a timestamp, or <code>null</code>.
      */
     public void setDeleteDate(Date deleteDate) {
         this.deleteDate = deleteDate;
