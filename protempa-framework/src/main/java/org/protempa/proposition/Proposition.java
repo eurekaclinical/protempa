@@ -29,14 +29,26 @@ import org.protempa.proposition.visitor.PropositionCheckedVisitable;
 import org.protempa.proposition.visitor.PropositionVisitable;
 
 /**
- * A data element. All implementations of this have property change support
- * methods, but no change events are fired at present.
+ * A data record. All implementations of this interface have property change 
+ * support methods, but no change events are fired at present.
  * 
  * In Proposition, the equals() method is used to compare two instances of 
  * Proposition.  Two propositions are equal if they have the same 
  * datasource backend id, and unique identifier.  If either instance has a 
  * null datasource backend id, or null unique identifier, a object refernce 
  * check is made for equality.
+ * 
+ * The create, update, delete and download timestamp fields are database audit-
+ * style fields to indicate when the record was created in the source system,
+ * updated in the source system, deleted from the source system, and downloaded
+ * from the source system. A data source backend may provide its own timestamps 
+ * if the source system does not provide accurate values. The create and 
+ * download timestamps are not used in any data computations. The update 
+ * timestamp is intended for use by query results handlers to determine when a 
+ * record has been updated. The presence of a non-null delete timestamp is 
+ * intended for use by query results handlers to determine whether a record has 
+ * been deleted. In the future, the temporal abstraction process may use these 
+ * fields.
  * 
  * @author Andrew Post
  */
@@ -135,12 +147,13 @@ public interface Proposition extends PropositionVisitable,
     UniqueId getUniqueId();
     
     /**
-     * Gets the timestamp this proposition was downloaded from the source system.
-     * If this proposition was derived, gets the date it was derived. A 
+     * Gets the timestamp this proposition was downloaded from the source 
+     * system. If this proposition was derived, gets the date it was derived. A 
      * <code>null</code> value means the proposition was not downloaded from a
      * source system, or the source system did not provide an accurate
-     * downloaded timestamp. Protempa does not use this timestamp in any fashion 
-     * to control how propositions are used in computing temporal abstractions.
+     * downloaded timestamp. Protempa does not use this timestamp in any 
+     * fashion to control how propositions are used in computing temporal 
+     * abstractions.
      * 
      * @return a timestamp, <code>null</code>.
      */
@@ -177,12 +190,13 @@ public interface Proposition extends PropositionVisitable,
     /**
      * Gets the timestamp this proposition was deleted from the source system, 
      * or for derived propositions, the timestamp it was invalidated due to 
-     * data changes. Used to determine when to delete or invalidate a proposition. 
-     * A <code>null</code> value means the proposition should not be deleted. Any
-     * non-null timestamp will cause the proposition to be deleted, even a
-     * timestamp in the future. A data source backend may set this timestamp
-     * to the downloaded timestamp if it knows a proposition should be deleted
-     * but the source system does not provide an accurate delete timestamp.
+     * data changes. Used to determine when to delete or invalidate a 
+     * proposition. A <code>null</code> value means the proposition should not 
+     * be deleted. Any non-null timestamp will cause the proposition to be 
+     * deleted, even a timestamp in the future. A data source backend may set 
+     * this timestamp to the downloaded timestamp if it knows a proposition 
+     * should be deleted but the source system does not provide an accurate 
+     * delete timestamp.
      *
      * @return a timestamp, or <code>null</code>.
      */
