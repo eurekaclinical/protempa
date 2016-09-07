@@ -39,12 +39,12 @@ public final class SqlGeneratorUtil {
     public static String prepareValue(Object val) {
         StringBuilder result = new StringBuilder();
         
-        boolean numberOrBoolean;
-        if (!(val instanceof Number) && !(val instanceof Boolean)) {
-            numberOrBoolean = false;
+        boolean numberOrBooleanOrNull;
+        if (val != null && !(val instanceof Number) && !(val instanceof Boolean)) {
+            numberOrBooleanOrNull = false;
             result.append("'");
         } else {
-            numberOrBoolean = true;
+            numberOrBooleanOrNull = true;
         }
         if (val instanceof Boolean) {
             Boolean boolVal = (Boolean) val;
@@ -56,7 +56,7 @@ public final class SqlGeneratorUtil {
         } else {
             result.append(val);
         }
-        if (!numberOrBoolean) {
+        if (!numberOrBooleanOrNull) {
             result.append("'");
         }
         return result.toString();
