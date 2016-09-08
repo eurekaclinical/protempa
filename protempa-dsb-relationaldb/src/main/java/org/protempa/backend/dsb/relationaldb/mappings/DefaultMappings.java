@@ -41,13 +41,23 @@ public class DefaultMappings implements Mappings {
 
     private final Map<Object, String> cache;
     private final Set<Object> descriptionsMissing;
-
+    private String name;
+    
     public DefaultMappings(Map<Object, String> mappings) {
+        this("Unknown", mappings);
+    }
+
+    public DefaultMappings(String name, Map<Object, String> mappings) {
         if (mappings == null) {
             throw new IllegalArgumentException("mappings cannot be null");
         }
         this.cache = new HashMap<>(mappings);
         this.descriptionsMissing = new HashSet<>();
+        this.name = name;
+    }
+    
+    public String getName() {
+        return this.name;
     }
 
     @Override
@@ -74,7 +84,7 @@ public class DefaultMappings implements Mappings {
             if (result == null) {
                 result = DEFAULT_DESCRIPTION_MISSING_TARGET;
                 if (descriptionsMissing.add(source) && LOGGER.isLoggable(Level.WARNING)) {
-                    LOGGER.log(Level.WARNING, "No mapping for source {0}; this value will be loaded as {1}", new Object[]{source, result});
+                    LOGGER.log(Level.WARNING, "Mapping {0}: No mapping for source {1}; this value will be loaded as {2}", new Object[]{getName(), source, result});
                 }
             }
         }
@@ -111,12 +121,12 @@ public class DefaultMappings implements Mappings {
         }
         return new DefaultMappings(newMappings);
     }
-
+    
     @Override
     public void close() {
         this.cache.clear();
     }
-
+    
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);

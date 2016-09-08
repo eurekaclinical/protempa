@@ -19,7 +19,6 @@ package org.protempa.backend.dsb.relationaldb.mappings;
  * limitations under the License.
  * #L%
  */
-
 import java.io.File;
 import java.io.IOException;
 
@@ -28,23 +27,28 @@ import java.io.IOException;
  * @author Andrew Post
  */
 public class DelimFileMappingsFactory extends AbstractMappingsFactory {
+
     private final String pathnamePrefix;
-    
+
     public DelimFileMappingsFactory(String pathnamePrefix) {
         if (pathnamePrefix == null) {
             throw new IllegalArgumentException("pathNamePrefix cannot be null");
         }
         this.pathnamePrefix = pathnamePrefix;
     }
-    
+
     @Override
     public DelimFileMappings getInstance(String filename) throws IOException {
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
-        DelimFileMappings m = new DelimFileMappings(new File(this.pathnamePrefix, filename));
-        addMappings(m);
-        return m;
+        try {
+            DelimFileMappings m = new DelimFileMappings(new File(this.pathnamePrefix, filename));
+            addMappings(m);
+            return m;
+        } catch (IOException ex) {
+            throw new IOException("Error reading delim file " + filename, ex);
+        }
     }
 
 }

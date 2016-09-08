@@ -61,7 +61,7 @@ public class CSVSupport {
                         cvs.put(cols[1], cols[0]);
                         break;
                     default:
-                        throw new AssertionError("Invalid mapping in line " + i + ": mapping has length " + cols.length);
+                        throw new IOException("Invalid mapping in line " + i + ": mapping has length " + cols.length);
                 }
                 i++;
             }

@@ -19,7 +19,6 @@ package org.protempa.backend.dsb.relationaldb.mappings;
  * limitations under the License.
  * #L%
  */
-
 import java.io.IOException;
 
 /**
@@ -27,9 +26,10 @@ import java.io.IOException;
  * @author Andrew Post
  */
 public class ResourceMappingsFactory extends AbstractMappingsFactory {
+
     private final String resourcePrefix;
     private final Class<?> cls;
-    
+
     public ResourceMappingsFactory(String resourcePrefix, Class<?> cls) {
         if (resourcePrefix == null) {
             throw new IllegalArgumentException("resourcePrefix cannot be null");
@@ -44,15 +44,19 @@ public class ResourceMappingsFactory extends AbstractMappingsFactory {
         }
         this.cls = cls;
     }
-    
+
     @Override
     public ResourceMappings getInstance(String resource) throws IOException {
         if (resource == null) {
             throw new IllegalArgumentException("resource cannot be null");
         }
-        ResourceMappings m = new ResourceMappings(this.resourcePrefix + resource, cls);
-        addMappings(m);
-        return m;
+        try {
+            ResourceMappings m = new ResourceMappings(this.resourcePrefix + resource, cls);
+            addMappings(m);
+            return m;
+        } catch (IOException ex) {
+            throw new IOException("Error reading resource " + resource, ex);
+        }
     }
 
 }

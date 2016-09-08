@@ -19,8 +19,6 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.Operator;
-
 abstract class WhereConstraintProcessor {
 
     private final ColumnSpec columnSpec;
@@ -44,9 +42,11 @@ abstract class WhereConstraintProcessor {
             TableAliaser referenceIndices) {
         switch (constraint) {
             case EQUAL_TO:
+            case IS:
                 return new EqualToWhereConstraintProcessor(columnSpec,
                         constraint, whereClause, sqlCodes, referenceIndices);
             case NOT_EQUAL_TO:
+            case IS_NOT:
                 return new NotEqualToWhereConstraintProcessor(columnSpec,
                         constraint, whereClause, sqlCodes, referenceIndices);
             case LESS_THAN:

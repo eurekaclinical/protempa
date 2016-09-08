@@ -41,6 +41,7 @@ import org.protempa.proposition.value.ValueList;
 import org.protempa.proposition.value.ValueVisitor;
 
 public abstract class AbstractWhereClause implements WhereClause {
+
     private final Set<String> propIds;
     private final ColumnSpecInfo info;
     private final List<EntitySpec> entitySpecs;
@@ -144,27 +145,24 @@ public abstract class AbstractWhereClause implements WhereClause {
                     if (wherePart.length() > wherePartLength) {
                         first = false;
                     }
-                } else {
-                    if (inGroup) {
-                        first = true;
-                        int wherePartLength = wherePart.length();
-                        wherePart.append(") OR (");
-                        wherePart.append(processForWhereClause(prevEntitySpec,
-                                first));
-                        wherePart.append(")) ");
-                        if (wherePart.length() > wherePartLength) {
-                            first = false;
-                        }
-                        inGroup = false;
-                    } else {
-                        int wherePartLength = wherePart.length();
-                        wherePart.append(processForWhereClause(prevEntitySpec,
-                                first));
-                        if (wherePart.length() > wherePartLength) {
-                            first = false;
-                        }
+                } else if (inGroup) {
+                    first = true;
+                    int wherePartLength = wherePart.length();
+                    wherePart.append(") OR (");
+                    wherePart.append(processForWhereClause(prevEntitySpec,
+                            first));
+                    wherePart.append(")) ");
+                    if (wherePart.length() > wherePartLength) {
+                        first = false;
                     }
-
+                    inGroup = false;
+                } else {
+                    int wherePartLength = wherePart.length();
+                    wherePart.append(processForWhereClause(prevEntitySpec,
+                            first));
+                    if (wherePart.length() > wherePartLength) {
+                        first = false;
+                    }
                 }
 
             }
@@ -233,7 +231,8 @@ public abstract class AbstractWhereClause implements WhereClause {
             boolean first) {
         StringBuilder wherePart = new StringBuilder();
 
-        CONSTRAINT_LOOP: for (ColumnSpec constraintSpec : entitySpec
+        CONSTRAINT_LOOP:
+        for (ColumnSpec constraintSpec : entitySpec
                 .getConstraintSpecs()) {
             // Skip any constraints that were included in any staged data
             // Joining against that data implicitly applies the constraint
@@ -257,7 +256,7 @@ public abstract class AbstractWhereClause implements WhereClause {
     private StringBuilder processPropertySpecs(PropertySpec[] propertySpecs,
             boolean first) {
         StringBuilder wherePart = new StringBuilder();
-        
+
         for (PropertySpec ps : propertySpecs) {
             ColumnSpec constraintSpec = ps.getConstraintSpec();
             if (constraintSpec != null) {
@@ -268,7 +267,7 @@ public abstract class AbstractWhereClause implements WhereClause {
                 }
             }
         }
-        
+
         for (Filter filter : filters) {
             for (PropertySpec ps : propertySpecs) {
                 if (filter instanceof PropertyValueFilter) {
@@ -345,7 +344,7 @@ public abstract class AbstractWhereClause implements WhereClause {
                 Mappings filteredMappings = filterMappingsByTarget(
                         this.propIds, columnSpec.getMappings());
                 selectClause.setCaseClause(
-                        filteredSqlCodes(propIds, filteredMappings), 
+                        filteredSqlCodes(propIds, filteredMappings),
                         columnSpec, filteredMappings);
             }
         }
@@ -355,7 +354,10 @@ public abstract class AbstractWhereClause implements WhereClause {
             Set<?> propIds, boolean first) {
 
         StringBuilder wherePart = new StringBuilder();
-        if (hasConstraint(columnSpec)) {
+        String expr = columnSpec.getExpr();
+        if (expr != null) {
+            wherePart.append(expr);
+        } else if (hasConstraint(columnSpec)) {
             setCaseClauseIfNeeded(columnSpec, null);
             wherePart
                     .append(processConstraint(columnSpec, propIds, null, first));
@@ -367,7 +369,7 @@ public abstract class AbstractWhereClause implements WhereClause {
             ValueComparator comparator, Value[] values, boolean first) {
 
         StringBuilder wherePart = new StringBuilder();
-        
+
         Operator constraint = valueComparatorToSqlOp(comparator);
         if (columnSpec != null && constraint != null) {
             ValueExtractor ve = new ValueExtractor();
@@ -391,8 +393,8 @@ public abstract class AbstractWhereClause implements WhereClause {
         }
         Mappings propIdToSqlCodes = cs.getMappings();
         if (constraint != null && referenceIndices.getIndex(cs) > -1) {
-            Mappings filteredConstraintValues = 
-                    filterMappingsByTarget(propIds, propIdToSqlCodes);
+            Mappings filteredConstraintValues
+                    = filterMappingsByTarget(propIds, propIdToSqlCodes);
             if (!first) {
                 wherePart.append(" AND ");
             }
@@ -402,7 +404,7 @@ public abstract class AbstractWhereClause implements WhereClause {
             wherePart.append(
                     WhereConstraintProcessor.getInstance(cs,
                             constraint, this, sqlCodes, referenceIndices)
-                            .processConstraint()).append(')');
+                    .processConstraint()).append(')');
         }
 
         return wherePart.toString();
@@ -411,12 +413,12 @@ public abstract class AbstractWhereClause implements WhereClause {
     /**
      * Returns whether an IN clause containing the proposition ids of interest
      * should be added to the WHERE clause.
-     * 
-     * @param entitySpecPropIds
-     *            the proposition ids corresponding to the current entity spec.
+     *
+     * @param entitySpecPropIds the proposition ids corresponding to the current
+     * entity spec.
      * @return <code>true</code> if the query contains < 85% of the proposition
-     *         ids that are known to the data source and if the where clause
-     *         would contain less than or equal to 2000 codes.
+     * ids that are known to the data source and if the where clause would
+     * contain less than or equal to 2000 codes.
      */
     private boolean needsPropIdInClause(String[] entitySpecPropIds) {
 
@@ -486,7 +488,7 @@ public abstract class AbstractWhereClause implements WhereClause {
             values.add(dateValue.getDate());
         }
     }
-    
+
     private static Operator valueComparatorToSqlOp(
             ValueComparator valueComparator) throws IllegalStateException {
         Operator constraint = null;
@@ -528,7 +530,7 @@ public abstract class AbstractWhereClause implements WhereClause {
         }
         return filteredMappings;
     }
-    
+
     private static Object[] filteredSqlCodes(Set<?> codes, Mappings mappings) {
         Object[] sqlCodes = null;
         if (mappings != null && !mappings.isEmpty()) {
@@ -538,7 +540,7 @@ public abstract class AbstractWhereClause implements WhereClause {
         }
         return sqlCodes;
     }
-    
+
     private static boolean hasConstraint(ColumnSpec columnSpec) {
         if (columnSpec != null) {
             List<ColumnSpec> columnSpecL = columnSpec.asList();
@@ -548,5 +550,5 @@ public abstract class AbstractWhereClause implements WhereClause {
 
         return false;
     }
-    
+
 }

@@ -19,8 +19,6 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import org.protempa.backend.dsb.relationaldb.Operator;
-
 final class EqualToWhereConstraintProcessor extends WhereConstraintProcessor {
 
     EqualToWhereConstraintProcessor(ColumnSpec columnSpec,
@@ -40,7 +38,9 @@ final class EqualToWhereConstraintProcessor extends WhereConstraintProcessor {
             assert getSqlCodes().length == 1 : "invalid sqlCodes length";
             result.append(getReferenceIndices()
                     .generateColumnReferenceWithOp(getColumnSpec()));
+            result.append(' ');
             result.append(getConstraint().getSqlOperator());
+            result.append(' ');
             result.append(SqlGeneratorUtil.prepareValue(getSqlCodes()[0]));
         }
 
