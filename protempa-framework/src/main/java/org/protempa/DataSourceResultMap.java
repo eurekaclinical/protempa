@@ -41,7 +41,7 @@ import org.arp.javautil.collections.CompositeList;
  * @see #getPrimitiveParameters(java.util.Set, java.util.Set, org.protempa.dsb.filter.Filter, org.protempa.QuerySession)
  */
 public class DataSourceResultMap<P> implements Map<String, List<P>> {
-    private final List<Map<String, List<P>>> maps;
+    private final List<? extends Map<String, List<P>>> maps;
 
     public DataSourceResultMap(List<? extends Map<String, List<P>>> maps) {
         if (maps != null) {

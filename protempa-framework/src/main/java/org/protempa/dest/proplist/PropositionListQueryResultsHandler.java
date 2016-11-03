@@ -52,7 +52,7 @@ import org.protempa.proposition.visitor.AbstractPropositionCheckedVisitor;
  */
 public final class PropositionListQueryResultsHandler extends AbstractQueryResultsHandler {
     private static final char COLUMN_DELIMITER = '\t';
-    private final List<Comparator<Proposition>> comparator;
+    private final List<? extends Comparator<Proposition>> comparator;
     private final boolean includeDerived;
     private final TabDelimHandlerPropositionVisitor visitor;
 
