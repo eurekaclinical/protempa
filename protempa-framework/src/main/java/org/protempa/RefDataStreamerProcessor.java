@@ -91,20 +91,21 @@ final class RefDataStreamerProcessor
     }
 
     @Override
-    protected void fireKeyCompleted(String keyId, List<UniqueIdPair> data) {
+    protected void fireKeyCompleted(String keyId, List<UniqueIdPair> data) throws DataSourceReadException {
         assert keyId != null : "keyId cannot be null";
         assert data != null : "data cannot be null";
-        assert getKeyId() == null || keyId.equals(getKeyId()) 
-                : "incompatible keyId: expected " 
+        assert getKeyId() == null || keyId.equals(getKeyId()) : "incompatible keyId: expected "
                 + getKeyId() + " but got " + keyId;
         for (UniqueIdPair pair : data) {
             Proposition prop = getProposition(pair.getProposition());
-            assert prop != null : "prop cannot be null: " + keyId + "; " 
-                    + getKeyId() + "; " + pair.getProposition() + "; " 
-                    + this.uniqueIdToPropositions;
-            this.adder.setParameters(pair.getReferenceName(),
-                    pair.getReference());
-            prop.accept(this.adder);
+            if (prop != null) {
+                this.adder.setParameters(pair.getReferenceName(),
+                        pair.getReference());
+                prop.accept(this.adder);
+            } else {
+                throw new DataSourceReadException("Can't find left-hand-side of reference: keyId=" + keyId
+                    + "; references: " + pair);
+            }
         }
     }
 
