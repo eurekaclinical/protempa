@@ -149,7 +149,7 @@ final class AbstractionFinder {
         }
     }
 
-    void doFind(Query query, Destination destination, QuerySession qs)
+    void doFind(Query query, Destination destination)
             throws QueryException {
         assert destination != null : "destination cannot be null";
         ExecutorStrategy strategy;
@@ -165,7 +165,7 @@ final class AbstractionFinder {
             throw new QueryException(query.getName(), ex);
         }
         try {
-            this.executor = new Executor(query, destination, qs, strategy, this);
+            this.executor = new Executor(query, destination, strategy, this);
             this.executor.init();
             this.executor.execute();
             this.executor.close();

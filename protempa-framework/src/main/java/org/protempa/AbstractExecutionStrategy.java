@@ -46,7 +46,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
 
     @Override
     public void createRuleBase(Collection<PropositionDefinition> allNarrowerDescendants,
-            DerivationsBuilder listener, QuerySession qs)
+            DerivationsBuilder listener)
             throws CreateRuleBaseException {
         ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
                 this.algorithmSource);

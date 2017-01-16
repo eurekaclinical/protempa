@@ -245,34 +245,6 @@ public final class Protempa implements AutoCloseable {
         return destination.getSupportedPropositionIds(this.abstractionFinder.getDataSource(), this.abstractionFinder.getKnowledgeSource());
     }
 
-    public void detachSession(QuerySession querySession) {
-        // TODO: implement me.
-    }
-
-    public void reattachSession(QuerySession querySession) {
-        // TODO: implement me
-    }
-
-    public void deleteSession(QuerySession querySession) {
-        // TODO: implement me
-    }
-
-    /**
-     * Create a QuerySession object, which can be used by the caller to further
-     * filter or drill the results of the initial query that is passed in.
-     *
-     * @param query The query object to set up in the database for subsequent
-     * queries
-     * @return A QuerySession object, containing initial query state
-     */
-    public QuerySession prepare(Query query) {
-        // TODO: implement me
-        if (query == null) {
-            throw new IllegalArgumentException("query cannot be null");
-        }
-        return new QuerySession(query, this.abstractionFinder);
-    }
-
     /**
      * Executes a query.
      *
@@ -300,8 +272,7 @@ public final class Protempa implements AutoCloseable {
         }
         Logger logger = ProtempaUtil.logger();
         logger.log(Level.INFO, "Executing query {0}", query.getName());
-        QuerySession qs = new QuerySession(query, this.abstractionFinder);
-        this.abstractionFinder.doFind(query, destination, qs);
+        this.abstractionFinder.doFind(query, destination);
         logger.log(Level.INFO, "Query {0} execution complete", query.getName());
     }
 

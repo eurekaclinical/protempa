@@ -108,7 +108,7 @@ public interface DataSource extends Source<DataSourceUpdatedEvent,
     
     DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds, Filter filters, 
-            QuerySession qs, QueryResultsHandler queryResultsHandler) 
+            QueryResultsHandler queryResultsHandler) 
             throws DataSourceReadException;
     
     void deleteAllKeys() throws DataSourceWriteException;

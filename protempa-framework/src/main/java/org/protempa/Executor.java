@@ -67,7 +67,6 @@ final class Executor implements AutoCloseable {
     private final PropositionDefinition[] propDefs;
     private final KnowledgeSource ks;
     private final Query query;
-    private final QuerySession qs;
     private DerivationsBuilder derivationsBuilder;
     private final ExecutorStrategy strategy;
     private Collection<PropositionDefinition> allNarrowerDescendants;
@@ -82,11 +81,11 @@ final class Executor implements AutoCloseable {
     private Thread handleQueryResultThread;
     private boolean canceled;
 
-    Executor(Query query, Destination resultsHandlerFactory, QuerySession querySession, AbstractionFinder abstractionFinder) throws QueryException {
-        this(query, resultsHandlerFactory, querySession, null, abstractionFinder);
+    Executor(Query query, Destination resultsHandlerFactory, AbstractionFinder abstractionFinder) throws QueryException {
+        this(query, resultsHandlerFactory, null, abstractionFinder);
     }
 
-    Executor(Query query, Destination resultsHandlerFactory, QuerySession querySession, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws QueryException {
+    Executor(Query query, Destination resultsHandlerFactory, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws QueryException {
         this.abstractionFinder = abstractionFinder;
         assert query != null : "query cannot be null";
         assert resultsHandlerFactory != null : "resultsHandlerFactory cannot be null";
@@ -105,7 +104,6 @@ final class Executor implements AutoCloseable {
             ks = abstractionFinder.getKnowledgeSource();
         }
         this.query = query;
-        this.qs = querySession;
         this.derivationsBuilder = new DerivationsBuilder();
         this.strategy = strategy;
         this.destination = resultsHandlerFactory;
@@ -293,10 +291,6 @@ final class Executor implements AutoCloseable {
         return ks;
     }
 
-    QuerySession getQuerySession() {
-        return qs;
-    }
-
     boolean isLoggable(Level level) {
         return LOGGER.isLoggable(level);
     }
@@ -448,12 +442,6 @@ final class Executor implements AutoCloseable {
                     }
                     Map<Proposition, List<Proposition>> forwardDerivations = derivationsBuilder.toForwardDerivations();
                     Map<Proposition, List<Proposition>> backwardDerivations = derivationsBuilder.toBackwardDerivations();
-                    QuerySession qs = getQuerySession();
-                    if (qs.isCachingEnabled()) {
-                        List<Proposition> props = Iterators.asList(resultsItr);
-                        addToCache(qs, Collections.unmodifiableList(props), Collections.unmodifiableMap(forwardDerivations), Collections.unmodifiableMap(backwardDerivations));
-                        resultsItr = props.iterator();
-                    }
                     Map<UniqueId, Proposition> refs = new HashMap<>();
                     List<Proposition> filteredPropositions = extractRequestedPropositions(resultsItr, refs);
                     if (isLoggable(Level.FINEST)) {
@@ -501,21 +489,7 @@ final class Executor implements AutoCloseable {
             }
             return result;
         }
-
-        private void addToCache(QuerySession qs,
-                List<Proposition> propositions,
-                Map<Proposition, List<Proposition>> forwardDerivations,
-                Map<Proposition, List<Proposition>> backwardDerivations) {
-            qs.addPropositionsToCache(propositions);
-            for (Map.Entry<Proposition, List<Proposition>> me
-                    : forwardDerivations.entrySet()) {
-                qs.addDerivationsToCache(me.getKey(), me.getValue());
-            }
-            for (Map.Entry<Proposition, List<Proposition>> me
-                    : backwardDerivations.entrySet()) {
-                qs.addDerivationsToCache(me.getKey(), me.getValue());
-            }
-        }
+        
     }
 
     private class HandleQueryResultThread extends Thread {
@@ -575,7 +549,7 @@ final class Executor implements AutoCloseable {
         }
         DataStreamingEventIterator<Proposition> itr;
         try {
-            itr = abstractionFinder.getDataSource().readPropositions(this.keyIds, inDataSourcePropIds, this.filters, getQuerySession(), this.resultsHandler);
+            itr = abstractionFinder.getDataSource().readPropositions(this.keyIds, inDataSourcePropIds, this.filters, this.resultsHandler);
         } catch (DataSourceReadException ex) {
             throw new QueryException(this.query.getName(), ex);
         }
@@ -636,7 +610,7 @@ final class Executor implements AutoCloseable {
 
     private void createRuleBase(ExecutionStrategy result) throws CreateRuleBaseException {
         log(Level.FINEST, "Initializing rule base");
-        result.createRuleBase(allNarrowerDescendants, derivationsBuilder, qs);
+        result.createRuleBase(allNarrowerDescendants, derivationsBuilder);
         abstractionFinder.clear();
         log(Level.FINEST, "Rule base initialized");
     }

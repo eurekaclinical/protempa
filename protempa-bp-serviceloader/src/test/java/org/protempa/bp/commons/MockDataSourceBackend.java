@@ -65,7 +65,7 @@ public class MockDataSourceBackend extends AbstractCommonsDataSourceBackend {
     }
 
     @Override
-    public MultiplexingDataStreamingEventIterator readPropositions(Set<String> keyIds, Set<String> propIds, Filter filters, QuerySession qs, QueryResultsHandler queryResultsHandler) throws DataSourceReadException {
+    public MultiplexingDataStreamingEventIterator readPropositions(Set<String> keyIds, Set<String> propIds, Filter filters, QueryResultsHandler queryResultsHandler) throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

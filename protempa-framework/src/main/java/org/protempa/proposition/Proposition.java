@@ -22,7 +22,6 @@ package org.protempa.proposition;
 import java.beans.PropertyChangeListener;
 import java.util.Date;
 import java.util.List;
-import org.protempa.QuerySession;
 import org.protempa.SourceSystem;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.visitor.PropositionCheckedVisitable;

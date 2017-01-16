@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.Set;
 import org.protempa.DataSourceReadException;
 import org.protempa.DataStreamingEventIterator;
-import org.protempa.QuerySession;
 import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.annotations.BackendProperty;
 import org.protempa.backend.dsb.filter.Filter;
@@ -58,7 +57,7 @@ public class DelimitedFileDataSourceBackend
     @Override
     public DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds, Filter filters,
-            QuerySession qs, QueryResultsHandler queryResultsHandler)
+            QueryResultsHandler queryResultsHandler)
             throws DataSourceReadException {
         File[] files = getFiles();
         DelimitedFileLineIterator[] result

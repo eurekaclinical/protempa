@@ -402,7 +402,7 @@ public abstract class RelationalDbDataSourceBackend
     @Override
     public DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds, Filter filters,
-            QuerySession qs, QueryResultsHandler queryResultsHandler)
+            QueryResultsHandler queryResultsHandler)
             throws DataSourceReadException {
         if (this.sqlGenerator == null) {
             try {

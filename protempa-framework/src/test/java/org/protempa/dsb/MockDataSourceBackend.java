@@ -23,7 +23,6 @@ import org.protempa.DataSourceReadException;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.MultiplexingDataStreamingEventIterator;
-import org.protempa.QuerySession;
 import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
 import org.protempa.backend.DataSourceBackendFailedConfigurationValidationException;
@@ -84,7 +83,7 @@ public class MockDataSourceBackend extends AbstractDataSourceBackend {
     }
 
     @Override
-    public MultiplexingDataStreamingEventIterator readPropositions(Set<String> keyIds, Set<String> propIds, Filter filters, QuerySession qs, QueryResultsHandler queryResultsHandler) throws DataSourceReadException {
+    public MultiplexingDataStreamingEventIterator readPropositions(Set<String> keyIds, Set<String> propIds, Filter filters, QueryResultsHandler queryResultsHandler) throws DataSourceReadException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

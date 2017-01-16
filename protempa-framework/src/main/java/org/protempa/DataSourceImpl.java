@@ -190,7 +190,7 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
     @Override
     public DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds, Set<String> propIds,
-            Filter filters, QuerySession qs,
+            Filter filters,
             QueryResultsHandler queryResultsHandler)
             throws DataSourceReadException {
         Set<String> notNullKeyIds = handleKeyIdSetArgument(keyIds);
@@ -203,7 +203,7 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
         for (DataSourceBackend backend : backends) {
             try {
                 itrs.add(backend.readPropositions(notNullKeyIds,
-                        notNullPropIds, filters, qs, queryResultsHandler));
+                        notNullPropIds, filters, queryResultsHandler));
             } catch (Error | RuntimeException ex) {
                 throw new DataSourceReadException("Unexpected error accessing " + backend.getDisplayName(), ex);
             }

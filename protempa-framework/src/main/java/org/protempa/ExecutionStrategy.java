@@ -40,8 +40,7 @@ interface ExecutionStrategy {
     void cleanup();
 
     void createRuleBase(Collection<PropositionDefinition> allNarrowerDescendants, 
-            DerivationsBuilder listener,
-            QuerySession qs) throws CreateRuleBaseException;
+            DerivationsBuilder listener) throws CreateRuleBaseException;
     
     RuleBase getRuleBase();
 }

@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.Set;
 import org.protempa.DataSourceReadException;
 import org.protempa.DataStreamingEventIterator;
-import org.protempa.QuerySession;
 import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.annotations.BackendProperty;
 import org.protempa.backend.dsb.filter.Filter;
@@ -53,7 +52,7 @@ public class FixedWidthFileDataSourceBackend extends AbstractFileDataSourceBacke
     }
 
     @Override
-    public DataStreamingEventIterator<Proposition> readPropositions(Set<String> keyIds, Set<String> propIds, Filter filters, QuerySession qs, QueryResultsHandler queryResultsHandler) throws DataSourceReadException {
+    public DataStreamingEventIterator<Proposition> readPropositions(Set<String> keyIds, Set<String> propIds, Filter filters, QueryResultsHandler queryResultsHandler) throws DataSourceReadException {
         File[] files = getFiles();
         FixedWidthFileLineIterator[] result = new FixedWidthFileLineIterator[files.length];
         for (int i = 0; i < files.length; i++) {

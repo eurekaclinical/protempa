@@ -19,7 +19,6 @@
  */
 package org.protempa.backend.dsb;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
 import org.protempa.*;
@@ -44,7 +43,7 @@ public interface DataSourceBackend extends
     
     DataStreamingEventIterator<Proposition> readPropositions(
             Set<String> keyIds,
-            Set<String> propIds, Filter filters, QuerySession qs,
+            Set<String> propIds, Filter filters,
             QueryResultsHandler queryResultsHandler) 
             throws DataSourceReadException;
 
