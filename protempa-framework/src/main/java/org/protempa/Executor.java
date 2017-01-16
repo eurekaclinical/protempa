@@ -61,7 +61,6 @@ final class Executor implements AutoCloseable {
     private static final Logger LOGGER = ProtempaUtil.logger();
     private final Set<String> keyIds;
     private final Set<String> propIds;
-    private Set<String> propIdsToRetain;
     private final Set<And<String>> termIds;
     private final Filter filters;
     private final PropositionDefinition[] propDefs;
@@ -107,7 +106,7 @@ final class Executor implements AutoCloseable {
         this.derivationsBuilder = new DerivationsBuilder();
         this.strategy = strategy;
         this.destination = resultsHandlerFactory;
-        this.exceptions = Collections.synchronizedList(new ArrayList<QueryException>());
+        this.exceptions = Collections.synchronizedList(new ArrayList<>());
         this.logMessageFormat = new MessageFormat("Query " + this.query.getName() + ": {0}");
     }
 
@@ -119,13 +118,11 @@ final class Executor implements AutoCloseable {
             log(Level.FINE, "Validating query results handler");
             this.resultsHandler.validate();
             log(Level.FINE, "Query results handler validated successfully");
-            String[] supportedPropositionIds = destination.getSupportedPropositionIds(this.abstractionFinder.getDataSource(), this.abstractionFinder.getKnowledgeSource());
-            setPropIdsToRetain(supportedPropositionIds);
 
             if (isLoggable(Level.FINE)) {
                 log(Level.FINE, "Propositions to be queried are {0}", StringUtils.join(this.propIds, ", "));
             }
-            retain(this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()])));
+            this.allNarrowerDescendants = this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()]));
 
             if (isLoggable(Level.FINE)) {
                 Set<String> allNarrowerDescendantsPropIds = new HashSet<>();
@@ -154,7 +151,7 @@ final class Executor implements AutoCloseable {
             this.resultsHandler.start(getAllNarrowerDescendants());
             log(Level.FINE, "Query results handler started");
             log(Level.FINE, "Query results handler waiting for results...");
-        } catch (KnowledgeSourceReadException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | GetSupportedPropositionIdsException | Error | RuntimeException ex) {
+        } catch (KnowledgeSourceReadException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | Error | RuntimeException ex) {
             this.failed = true;
             throw new QueryException(this.query.getName(), ex);
         }
@@ -272,15 +269,6 @@ final class Executor implements AutoCloseable {
 
     Set<String> getKeyIds() {
         return this.keyIds;
-    }
-
-    void setPropIdsToRetain(String[] propIds) {
-        if (propIds == null || propIds.length == 0) {
-            this.propIdsToRetain = null;
-        } else {
-            this.propIdsToRetain = Arrays.asSet(propIds);
-        }
-        this.allNarrowerDescendants = null;
     }
 
     DerivationsBuilder getDerivationsBuilder() {
@@ -483,9 +471,7 @@ final class Executor implements AutoCloseable {
             while (!isInterrupted() && propositions.hasNext()) {
                 Proposition prop = propositions.next();
                 refs.put(prop.getUniqueId(), prop);
-                if (propIds.contains(prop.getId())) {
-                    result.add(prop);
-                }
+                result.add(prop);
             }
             return result;
         }
@@ -554,36 +540,6 @@ final class Executor implements AutoCloseable {
             throw new QueryException(this.query.getName(), ex);
         }
         return itr;
-    }
-
-    private void retain(Set<PropositionDefinition> propDefs) {
-        if (this.propIdsToRetain != null) {
-            Map<String, PropositionDefinition> propDefMap = new HashMap<>();
-            for (PropositionDefinition and : propDefs) {
-                propDefMap.put(and.getId(), and);
-            }
-            Queue<String> propIdsQueue = new LinkedList<>(this.propIds);
-            String pid;
-            Set<PropositionDefinition> propDefsToKeep = new HashSet<>();
-            while ((pid = propIdsQueue.poll()) != null) {
-                if (this.propIdsToRetain.contains(pid)) {
-                    Queue<String> propIdsToKeep = new LinkedList<>();
-                    propIdsToKeep.add(pid);
-                    String pid2;
-                    while ((pid2 = propIdsToKeep.poll()) != null) {
-                        PropositionDefinition get = propDefMap.get(pid2);
-                        propDefsToKeep.add(get);
-                        Arrays.addAll(propIdsToKeep, get.getChildren());
-                    }
-                } else {
-                    PropositionDefinition get = propDefMap.get(pid);
-                    Arrays.addAll(propIdsQueue, get.getChildren());
-                }
-            }
-            allNarrowerDescendants = propDefsToKeep;
-        } else {
-            allNarrowerDescendants = propDefs;
-        }
     }
 
     private StatelessExecutionStrategy newStatelessStrategy() throws QueryException {
