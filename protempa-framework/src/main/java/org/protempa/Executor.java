@@ -181,7 +181,7 @@ final class Executor implements AutoCloseable {
                 log(Level.INFO, "Processing data");
                 DataStreamingEvent doProcessPoisonPill = new DataStreamingEvent("poison", Collections.emptyList());
                 QueueObject hqrPoisonPill = new QueueObject();
-                BlockingQueue<DataStreamingEvent> doProcessQueue = new ArrayBlockingQueue<>(1000);
+                BlockingQueue<DataStreamingEvent<Proposition>> doProcessQueue = new ArrayBlockingQueue<>(1000);
                 BlockingQueue<QueueObject> hqrQueue = new ArrayBlockingQueue<>(1000);
                 retrieveDataThread = new RetrieveDataThread(doProcessQueue, doProcessPoisonPill);
                 doProcessThread = new DoProcessThread(doProcessQueue, hqrQueue, doProcessPoisonPill, hqrPoisonPill, retrieveDataThread);
@@ -357,11 +357,11 @@ final class Executor implements AutoCloseable {
 
     private class RetrieveDataThread extends Thread {
 
-        private final BlockingQueue<DataStreamingEvent> queue;
-        private final DataStreamingEvent poisonPill;
+        private final BlockingQueue<DataStreamingEvent<Proposition>> queue;
+        private final DataStreamingEvent<Proposition> poisonPill;
         private final DataStreamingEventIterator<Proposition> itr;
 
-        RetrieveDataThread(BlockingQueue<DataStreamingEvent> queue, DataStreamingEvent poisonPill) throws QueryException {
+        RetrieveDataThread(BlockingQueue<DataStreamingEvent<Proposition>> queue, DataStreamingEvent<Proposition> poisonPill) throws QueryException {
             super("protempa.executor.RetrieveDataThread");
             this.queue = queue;
             this.poisonPill = poisonPill;
@@ -409,13 +409,13 @@ final class Executor implements AutoCloseable {
 
     private class DoProcessThread extends Thread {
 
-        private final BlockingQueue<DataStreamingEvent> doProcessQueue;
+        private final BlockingQueue<DataStreamingEvent<Proposition>> doProcessQueue;
         private final BlockingQueue<QueueObject> hqrQueue;
         private final QueueObject hqrPoisonPill;
-        private final DataStreamingEvent doProcessPoisonPill;
+        private final DataStreamingEvent<Proposition> doProcessPoisonPill;
         private final Thread producer;
 
-        DoProcessThread(BlockingQueue<DataStreamingEvent> doProcessQueue, BlockingQueue<QueueObject> hqrQueue, DataStreamingEvent doProcessPoisonPill, QueueObject hqrPoisonPill, Thread producer) {
+        DoProcessThread(BlockingQueue<DataStreamingEvent<Proposition>> doProcessQueue, BlockingQueue<QueueObject> hqrQueue, DataStreamingEvent<Proposition> doProcessPoisonPill, QueueObject hqrPoisonPill, Thread producer) {
             super("protempa.executor.DoProcessThread");
             this.doProcessQueue = doProcessQueue;
             this.hqrQueue = hqrQueue;
@@ -428,7 +428,7 @@ final class Executor implements AutoCloseable {
         public void run() {
             log(Level.FINER, "Start do process thread");
             try {
-                DataStreamingEvent dse;
+                DataStreamingEvent<Proposition> dse;
                 while (!isInterrupted() && ((dse = doProcessQueue.take()) != doProcessPoisonPill)) {
                     String keyId = dse.getKeyId();
                     Iterator<Proposition> resultsItr;
