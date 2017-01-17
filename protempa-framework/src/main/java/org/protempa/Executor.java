@@ -421,17 +421,19 @@ final class Executor implements AutoCloseable {
                     String keyId = dse.getKeyId();
                     Iterator<Proposition> resultsItr;
                     ExecutionStrategy strategy = getExecutionStrategy();
+                    List<Proposition> data = dse.getData();
                     if (strategy != null) {
                         resultsItr = strategy.execute(
-                                keyId, propIds, dse.getData(),
+                                keyId, propIds, data,
                                 null);
                     } else {
-                        resultsItr = dse.getData().iterator();
+                        resultsItr = data.iterator();
                     }
                     Map<Proposition, List<Proposition>> forwardDerivations = derivationsBuilder.toForwardDerivations();
                     Map<Proposition, List<Proposition>> backwardDerivations = derivationsBuilder.toBackwardDerivations();
-                    Map<UniqueId, Proposition> refs = new HashMap<>();
-                    List<Proposition> filteredPropositions = extractRequestedPropositions(resultsItr, refs);
+                    int inputSize = data.size();
+                    Map<UniqueId, Proposition> refs = org.arp.javautil.collections.Collections.newHashMap(inputSize);
+                    List<Proposition> filteredPropositions = extractRequestedPropositions(resultsItr, refs, inputSize);
                     if (isLoggable(Level.FINEST)) {
                         log(Level.FINEST, "Proposition ids: {0}", propIds);
                         log(Level.FINEST, "Filtered propositions: {0}", filteredPropositions);
@@ -466,8 +468,9 @@ final class Executor implements AutoCloseable {
 
         private List<Proposition> extractRequestedPropositions(
                 Iterator<Proposition> propositions,
-                Map<UniqueId, Proposition> refs) {
-            List<Proposition> result = new ArrayList<>();
+                Map<UniqueId, Proposition> refs, int inputSize) {
+            int outputSize = inputSize + Math.round(inputSize * 0.20f);
+            List<Proposition> result = new ArrayList<>(outputSize);
             while (!isInterrupted() && propositions.hasNext()) {
                 Proposition prop = propositions.next();
                 refs.put(prop.getUniqueId(), prop);
