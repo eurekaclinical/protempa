@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.arp.javautil.collections.Collections;
 import org.protempa.PropositionDefinition;
 import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.QueryResultsHandler;
@@ -75,7 +76,7 @@ public final class DeidentifiedQueryResultsHandler
 
     @Override
     public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
-        this.propDefCache = new HashMap<>();
+        this.propDefCache = Collections.newHashMap(cache.size());
         for (PropositionDefinition propDef : cache) {
             this.propDefCache.put(propDef.getId(), propDef);
         }
