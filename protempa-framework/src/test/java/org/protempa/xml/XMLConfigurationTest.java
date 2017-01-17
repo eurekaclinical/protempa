@@ -255,7 +255,7 @@ public class XMLConfigurationTest extends TestCase {
         DistanceBetweenColumnSpec monthsBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.MONTH);
         DistanceBetweenColumnSpec yearsBetweenColumnSpec = new DistanceBetweenColumnSpec("pref", links, AbsoluteTimeUnit.YEAR);
         OutputConfig outputConfig = new OutputConfig(true, true, true, true, true, true, true,
-                "idHeading", "valueHeading", "displayNameHeading", "abbrevDisplayNameHeading", "startOrTimestampHeading", "finishHeading", "lengthHeading");
+                "idHeading", "valueHeading", "displayNameHeading", "abbrevDisplayNameHeading", "startOrTimestampHeading", "finishHeading", "lengthHeading", null);
         ValueOutputConfig valueOutputConfig = new ValueOutputConfig(true, true, "Display Name", "Disp. Nm.");
         PropositionColumnSpec propositionColumnSpec = new PropositionColumnSpec("xPref", propIds1, outputConfig, valueOutputConfig, links, 5);
         PropositionValueColumnSpec maxPropositionValueColumnSpec = new PropositionValueColumnSpec("yPref", links, PropositionValueColumnSpec.Type.MAX);

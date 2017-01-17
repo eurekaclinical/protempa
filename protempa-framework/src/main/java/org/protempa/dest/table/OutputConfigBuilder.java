@@ -19,6 +19,9 @@
  */
 package org.protempa.dest.table;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A bean-like class for creating {@link OutputConfig} configuration
  * objects.
@@ -41,6 +44,7 @@ public final class OutputConfigBuilder {
     private String finishHeading;
     private String lengthHeading;
     private String idHeading;
+    private Map<String, String> propertyHeadings;
 
     public OutputConfigBuilder() {
         reset();
@@ -61,6 +65,7 @@ public final class OutputConfigBuilder {
         this.showFinish = false;
         this.showLength = false;
         this.showId = false;
+        this.propertyHeadings = new HashMap<>();
     }
 
     public String getIdHeading() {
@@ -189,6 +194,26 @@ public final class OutputConfigBuilder {
     public void setShowLength(boolean showLength) {
         this.showLength = showLength;
     }
+    
+    public HashMap<String, String> getPropertyHeadings() {
+        return new HashMap<>(this.propertyHeadings);
+    }
+
+    public String getPropertyHeading(String propertyName) {
+        return this.propertyHeadings.get(propertyName);
+    }
+
+    public void setPropertyHeadings(HashMap<String, String> propertyHeadings) {
+        if (propertyHeadings == null) {
+            this.propertyHeadings = new HashMap<>();
+        } else {
+            this.propertyHeadings = propertyHeadings;
+        }
+    }
+
+    public void putPropertyHeading(String propertyName, String propertyHeading) {
+        this.propertyHeadings.put(propertyName, propertyHeading);
+    }
 
     /**
      * Creates a new {@link OutputConfig} instance.
@@ -200,6 +225,6 @@ public final class OutputConfigBuilder {
                 this.showFinish, this.showLength, this.idHeading, this.valueHeading,
                 this.displayNameHeading, this.abbrevDisplayNameHeading,
                 this.startOrTimestampHeading, this.finishHeading,
-                this.lengthHeading);
+                this.lengthHeading, this.propertyHeadings);
     }
 }

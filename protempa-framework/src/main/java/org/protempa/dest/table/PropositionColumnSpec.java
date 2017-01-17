@@ -133,7 +133,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         propositionVisitor = new ValuesPropositionVisitor();
     }
 
-    protected String[] columnNames(String prefix) {
+    private String[] columnNames() {
         List<String> results = new ArrayList<>();
         if (this.outputConfig.showId()) {
             results.add(StringUtils.defaultIfEmpty(
@@ -171,7 +171,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                     this.columnNamePrefixOverride + "_length"));
         }
         for (String heading : this.propertyNames) {
-            results.add(this.columnNamePrefixOverride + "." + heading);
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getPropertyHeading(heading), 
+                    this.columnNamePrefixOverride + "." + heading));
         }
         return results.toArray(new String[results.size()]);
     }
@@ -424,9 +426,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     @Override
     public String[] columnNames(KnowledgeSource knowledgeSource)
             throws KnowledgeSourceReadException {
-        String headerString = this.columnNamePrefixOverride != null ? this.columnNamePrefixOverride
-                : generateLinksHeaderString(this.links);
-        String[] one = columnNames(headerString);
+        String[] one = columnNames();
         String[] result = new String[one.length * this.numInstances];
         for (int i = 0; i < result.length; i++) {
             result[i] = one[i % one.length];

@@ -19,12 +19,16 @@
  */
 package org.protempa.dest.table;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * An immutable class for configurating {@link TableColumnSpec}s.
  *
  * @author Himanshu Rathod
  */
 public class OutputConfig {
+
     private final boolean showValue;
     private final boolean showDisplayName;
     private final boolean showAbbrevDisplayName;
@@ -39,6 +43,7 @@ public class OutputConfig {
     private final String finishHeading;
     private final String lengthHeading;
     private final String idHeading;
+    private HashMap<String, String> propertyHeadings;
 
     public OutputConfig() {
         this.showValue = false;
@@ -55,6 +60,7 @@ public class OutputConfig {
         this.finishHeading = "";
         this.lengthHeading = "";
         this.idHeading = "";
+        this.propertyHeadings = new HashMap<>();
     }
 
     public OutputConfig(boolean showId, boolean showValue, boolean showDisplayName,
@@ -63,7 +69,8 @@ public class OutputConfig {
             boolean showLength, String idHeading,
             String valueHeading, String displayNameHeading,
             String abbrevDisplayNameHeading, String startOrTimestampHeading,
-            String finishHeading, String lengthHeading) {
+            String finishHeading, String lengthHeading,
+            Map<String, String> propertyHeadings) {
         this.showId = showId;
         this.showValue = showValue;
         this.showDisplayName = showDisplayName;
@@ -75,24 +82,35 @@ public class OutputConfig {
             idHeading = "";
         }
         this.idHeading = idHeading;
-        if (valueHeading == null)
+        if (valueHeading == null) {
             valueHeading = "";
+        }
         this.valueHeading = valueHeading;
-        if (displayNameHeading == null)
+        if (displayNameHeading == null) {
             displayNameHeading = "";
+        }
         this.displayNameHeading = displayNameHeading;
-        if (abbrevDisplayNameHeading == null)
+        if (abbrevDisplayNameHeading == null) {
             abbrevDisplayNameHeading = "";
+        }
         this.abbrevDisplayNameHeading = abbrevDisplayNameHeading;
-        if (startOrTimestampHeading == null)
+        if (startOrTimestampHeading == null) {
             startOrTimestampHeading = "";
+        }
         this.startOrTimestampHeading = startOrTimestampHeading;
-        if (finishHeading == null)
+        if (finishHeading == null) {
             finishHeading = "";
+        }
         this.finishHeading = finishHeading;
-        if (lengthHeading == null)
+        if (lengthHeading == null) {
             lengthHeading = "";
+        }
         this.lengthHeading = lengthHeading;
+        if (propertyHeadings != null) {
+            this.propertyHeadings = new HashMap<>(propertyHeadings);
+        } else {
+            this.propertyHeadings = new HashMap<>();
+        }
     }
 
     public String getIdHeading() {
@@ -151,6 +169,14 @@ public class OutputConfig {
         return showLength;
     }
 
+    public HashMap<String, String> getPropertyHeadings() {
+        return new HashMap<>(this.propertyHeadings);
+    }
+
+    public String getPropertyHeading(String propertyName) {
+        return this.propertyHeadings.get(propertyName);
+    }
+
     public int numActiveColumns() {
         int i = 0;
         if (this.showId) {
@@ -174,89 +200,124 @@ public class OutputConfig {
         if (this.showValue) {
             i++;
         }
+        if (this.propertyHeadings != null) {
+            i += this.propertyHeadings.size();
+        }
         return i;
     }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((abbrevDisplayNameHeading == null) ? 0 : abbrevDisplayNameHeading.hashCode());
-		result = prime * result + ((displayNameHeading == null) ? 0 : displayNameHeading.hashCode());
-		result = prime * result + ((finishHeading == null) ? 0 : finishHeading.hashCode());
-		result = prime * result + ((idHeading == null) ? 0 : idHeading.hashCode());
-		result = prime * result + ((lengthHeading == null) ? 0 : lengthHeading.hashCode());
-		result = prime * result + (showAbbrevDisplayName ? 1231 : 1237);
-		result = prime * result + (showDisplayName ? 1231 : 1237);
-		result = prime * result + (showFinish ? 1231 : 1237);
-		result = prime * result + (showId ? 1231 : 1237);
-		result = prime * result + (showLength ? 1231 : 1237);
-		result = prime * result + (showStartOrTimestamp ? 1231 : 1237);
-		result = prime * result + (showValue ? 1231 : 1237);
-		result = prime * result + ((startOrTimestampHeading == null) ? 0 : startOrTimestampHeading.hashCode());
-		result = prime * result + ((valueHeading == null) ? 0 : valueHeading.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((abbrevDisplayNameHeading == null) ? 0 : abbrevDisplayNameHeading.hashCode());
+        result = prime * result + ((displayNameHeading == null) ? 0 : displayNameHeading.hashCode());
+        result = prime * result + ((finishHeading == null) ? 0 : finishHeading.hashCode());
+        result = prime * result + ((idHeading == null) ? 0 : idHeading.hashCode());
+        result = prime * result + ((lengthHeading == null) ? 0 : lengthHeading.hashCode());
+        result = prime * result + (showAbbrevDisplayName ? 1231 : 1237);
+        result = prime * result + (showDisplayName ? 1231 : 1237);
+        result = prime * result + (showFinish ? 1231 : 1237);
+        result = prime * result + (showId ? 1231 : 1237);
+        result = prime * result + (showLength ? 1231 : 1237);
+        result = prime * result + (showStartOrTimestamp ? 1231 : 1237);
+        result = prime * result + (showValue ? 1231 : 1237);
+        result = prime * result + ((startOrTimestampHeading == null) ? 0 : startOrTimestampHeading.hashCode());
+        result = prime * result + ((valueHeading == null) ? 0 : valueHeading.hashCode());
+        result = prime * result + ((propertyHeadings == null) ? 0 : propertyHeadings.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		OutputConfig other = (OutputConfig) obj;
-		if (abbrevDisplayNameHeading == null) {
-			if (other.abbrevDisplayNameHeading != null)
-				return false;
-		} else if (!abbrevDisplayNameHeading.equals(other.abbrevDisplayNameHeading))
-			return false;
-		if (displayNameHeading == null) {
-			if (other.displayNameHeading != null)
-				return false;
-		} else if (!displayNameHeading.equals(other.displayNameHeading))
-			return false;
-		if (finishHeading == null) {
-			if (other.finishHeading != null)
-				return false;
-		} else if (!finishHeading.equals(other.finishHeading))
-			return false;
-		if (idHeading == null) {
-			if (other.idHeading != null)
-				return false;
-		} else if (!idHeading.equals(other.idHeading))
-			return false;
-		if (lengthHeading == null) {
-			if (other.lengthHeading != null)
-				return false;
-		} else if (!lengthHeading.equals(other.lengthHeading))
-			return false;
-		if (showAbbrevDisplayName != other.showAbbrevDisplayName)
-			return false;
-		if (showDisplayName != other.showDisplayName)
-			return false;
-		if (showFinish != other.showFinish)
-			return false;
-		if (showId != other.showId)
-			return false;
-		if (showLength != other.showLength)
-			return false;
-		if (showStartOrTimestamp != other.showStartOrTimestamp)
-			return false;
-		if (showValue != other.showValue)
-			return false;
-		if (startOrTimestampHeading == null) {
-			if (other.startOrTimestampHeading != null)
-				return false;
-		} else if (!startOrTimestampHeading.equals(other.startOrTimestampHeading))
-			return false;
-		if (valueHeading == null) {
-			if (other.valueHeading != null)
-				return false;
-		} else if (!valueHeading.equals(other.valueHeading))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        OutputConfig other = (OutputConfig) obj;
+        if (abbrevDisplayNameHeading == null) {
+            if (other.abbrevDisplayNameHeading != null) {
+                return false;
+            }
+        } else if (!abbrevDisplayNameHeading.equals(other.abbrevDisplayNameHeading)) {
+            return false;
+        }
+        if (displayNameHeading == null) {
+            if (other.displayNameHeading != null) {
+                return false;
+            }
+        } else if (!displayNameHeading.equals(other.displayNameHeading)) {
+            return false;
+        }
+        if (finishHeading == null) {
+            if (other.finishHeading != null) {
+                return false;
+            }
+        } else if (!finishHeading.equals(other.finishHeading)) {
+            return false;
+        }
+        if (idHeading == null) {
+            if (other.idHeading != null) {
+                return false;
+            }
+        } else if (!idHeading.equals(other.idHeading)) {
+            return false;
+        }
+        if (lengthHeading == null) {
+            if (other.lengthHeading != null) {
+                return false;
+            }
+        } else if (!lengthHeading.equals(other.lengthHeading)) {
+            return false;
+        }
+        if (showAbbrevDisplayName != other.showAbbrevDisplayName) {
+            return false;
+        }
+        if (showDisplayName != other.showDisplayName) {
+            return false;
+        }
+        if (showFinish != other.showFinish) {
+            return false;
+        }
+        if (showId != other.showId) {
+            return false;
+        }
+        if (showLength != other.showLength) {
+            return false;
+        }
+        if (showStartOrTimestamp != other.showStartOrTimestamp) {
+            return false;
+        }
+        if (showValue != other.showValue) {
+            return false;
+        }
+        if (startOrTimestampHeading == null) {
+            if (other.startOrTimestampHeading != null) {
+                return false;
+            }
+        } else if (!startOrTimestampHeading.equals(other.startOrTimestampHeading)) {
+            return false;
+        }
+        if (valueHeading == null) {
+            if (other.valueHeading != null) {
+                return false;
+            }
+        } else if (!valueHeading.equals(other.valueHeading)) {
+            return false;
+        }
+        if (propertyHeadings == null) {
+            if (other.propertyHeadings != null) {
+                return false;
+            }
+        } else if (!propertyHeadings.equals(other.propertyHeadings)) {
+            return false;
+        }
+        return true;
+    }
 
 }
