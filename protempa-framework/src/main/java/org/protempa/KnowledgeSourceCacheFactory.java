@@ -23,6 +23,7 @@ package org.protempa;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import org.arp.javautil.collections.Collections;
 import org.protempa.valueset.ValueSet;
 
 /**
@@ -32,7 +33,7 @@ import org.protempa.valueset.ValueSet;
 public final class KnowledgeSourceCacheFactory {
 
     public KnowledgeSourceCache getInstance(KnowledgeSource ks, Collection<PropositionDefinition> cache, boolean collectValueSets) throws KnowledgeSourceReadException {
-        Map<String, PropositionDefinition> propDefCache = new HashMap<>();
+        Map<String, PropositionDefinition> propDefCache = Collections.newHashMap(cache.size());
         for (PropositionDefinition pd : cache) {
             propDefCache.put(pd.getId(), pd);
         }
