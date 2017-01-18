@@ -19,12 +19,12 @@
  */
 package org.protempa.dest.table;
 
+import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A bean-like class for creating {@link OutputConfig} configuration
- * objects.
+ * A bean-like class for creating {@link OutputConfig} configuration objects.
  *
  * @author Andrew Post
  */
@@ -45,6 +45,7 @@ public final class OutputConfigBuilder {
     private String lengthHeading;
     private String idHeading;
     private Map<String, String> propertyHeadings;
+    private DateFormat dateFormat;
 
     public OutputConfigBuilder() {
         reset();
@@ -66,6 +67,7 @@ public final class OutputConfigBuilder {
         this.showLength = false;
         this.showId = false;
         this.propertyHeadings = new HashMap<>();
+        this.dateFormat = null;
     }
 
     public String getIdHeading() {
@@ -84,8 +86,9 @@ public final class OutputConfigBuilder {
     }
 
     public void setValueHeading(String valueHeading) {
-        if (valueHeading == null)
+        if (valueHeading == null) {
             valueHeading = "";
+        }
         this.valueHeading = valueHeading;
     }
 
@@ -94,8 +97,9 @@ public final class OutputConfigBuilder {
     }
 
     public void setDisplayNameHeading(String displayNameHeading) {
-        if (displayNameHeading == null)
+        if (displayNameHeading == null) {
             displayNameHeading = "";
+        }
         this.displayNameHeading = displayNameHeading;
     }
 
@@ -104,8 +108,9 @@ public final class OutputConfigBuilder {
     }
 
     public void setAbbrevDisplayNameHeading(String abbrevDisplayNameHeading) {
-        if (abbrevDisplayNameHeading == null)
+        if (abbrevDisplayNameHeading == null) {
             abbrevDisplayNameHeading = "";
+        }
         this.abbrevDisplayNameHeading = abbrevDisplayNameHeading;
     }
 
@@ -114,8 +119,9 @@ public final class OutputConfigBuilder {
     }
 
     public void setStartOrTimestampHeading(String startOrTimestampHeading) {
-        if (startOrTimestampHeading == null)
+        if (startOrTimestampHeading == null) {
             startOrTimestampHeading = "";
+        }
         this.startOrTimestampHeading = startOrTimestampHeading;
     }
 
@@ -124,8 +130,9 @@ public final class OutputConfigBuilder {
     }
 
     public void setFinishHeading(String finishHeading) {
-        if (finishHeading == null)
+        if (finishHeading == null) {
             finishHeading = "";
+        }
         this.finishHeading = finishHeading;
     }
 
@@ -134,8 +141,9 @@ public final class OutputConfigBuilder {
     }
 
     public void setLengthHeading(String lengthHeading) {
-        if (lengthHeading == null)
+        if (lengthHeading == null) {
             lengthHeading = "";
+        }
         this.lengthHeading = lengthHeading;
     }
 
@@ -194,7 +202,7 @@ public final class OutputConfigBuilder {
     public void setShowLength(boolean showLength) {
         this.showLength = showLength;
     }
-    
+
     public HashMap<String, String> getPropertyHeadings() {
         return new HashMap<>(this.propertyHeadings);
     }
@@ -215,8 +223,17 @@ public final class OutputConfigBuilder {
         this.propertyHeadings.put(propertyName, propertyHeading);
     }
 
+    public DateFormat getDateFormat() {
+        return dateFormat;
+    }
+
+    public void setDateFormat(DateFormat dateFormat) {
+        this.dateFormat = dateFormat;
+    }
+
     /**
      * Creates a new {@link OutputConfig} instance.
+     *
      * @return a {@link OutputConfig}.
      */
     public OutputConfig build() {
@@ -225,6 +242,6 @@ public final class OutputConfigBuilder {
                 this.showFinish, this.showLength, this.idHeading, this.valueHeading,
                 this.displayNameHeading, this.abbrevDisplayNameHeading,
                 this.startOrTimestampHeading, this.finishHeading,
-                this.lengthHeading, this.propertyHeadings);
+                this.lengthHeading, this.propertyHeadings, this.dateFormat);
     }
 }

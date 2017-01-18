@@ -19,6 +19,7 @@
  */
 package org.protempa.dest.table;
 
+import java.text.Format;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +44,8 @@ public class OutputConfig {
     private final String finishHeading;
     private final String lengthHeading;
     private final String idHeading;
-    private HashMap<String, String> propertyHeadings;
+    private final HashMap<String, String> propertyHeadings;
+    private final Format positionFormat;
 
     public OutputConfig() {
         this.showValue = false;
@@ -61,6 +63,7 @@ public class OutputConfig {
         this.lengthHeading = "";
         this.idHeading = "";
         this.propertyHeadings = new HashMap<>();
+        this.positionFormat = null;
     }
 
     public OutputConfig(boolean showId, boolean showValue, boolean showDisplayName,
@@ -70,7 +73,8 @@ public class OutputConfig {
             String valueHeading, String displayNameHeading,
             String abbrevDisplayNameHeading, String startOrTimestampHeading,
             String finishHeading, String lengthHeading,
-            Map<String, String> propertyHeadings) {
+            Map<String, String> propertyHeadings,
+            Format positionFormat) {
         this.showId = showId;
         this.showValue = showValue;
         this.showDisplayName = showDisplayName;
@@ -111,6 +115,7 @@ public class OutputConfig {
         } else {
             this.propertyHeadings = new HashMap<>();
         }
+        this.positionFormat = positionFormat;
     }
 
     public String getIdHeading() {
@@ -139,6 +144,10 @@ public class OutputConfig {
 
     public String getLengthHeading() {
         return lengthHeading;
+    }
+
+    public Format getPositionFormat() {
+        return positionFormat;
     }
 
     public boolean showId() {
@@ -200,9 +209,7 @@ public class OutputConfig {
         if (this.showValue) {
             i++;
         }
-        if (this.propertyHeadings != null) {
-            i += this.propertyHeadings.size();
-        }
+        i += this.propertyHeadings.size();
         return i;
     }
 
@@ -224,7 +231,9 @@ public class OutputConfig {
         result = prime * result + (showValue ? 1231 : 1237);
         result = prime * result + ((startOrTimestampHeading == null) ? 0 : startOrTimestampHeading.hashCode());
         result = prime * result + ((valueHeading == null) ? 0 : valueHeading.hashCode());
-        result = prime * result + ((propertyHeadings == null) ? 0 : propertyHeadings.hashCode());
+        result = prime * result + propertyHeadings.hashCode();
+        result = prime * result + ((positionFormat == null) ? 0 : positionFormat.hashCode());
+
         return result;
     }
 
@@ -310,11 +319,14 @@ public class OutputConfig {
         } else if (!valueHeading.equals(other.valueHeading)) {
             return false;
         }
-        if (propertyHeadings == null) {
-            if (other.propertyHeadings != null) {
+        if (!propertyHeadings.equals(other.propertyHeadings)) {
+            return false;
+        }
+        if (positionFormat == null) {
+            if (other.positionFormat != null) {
                 return false;
             }
-        } else if (!propertyHeadings.equals(other.propertyHeadings)) {
+        } else if (!positionFormat.equals(other.positionFormat)) {
             return false;
         }
         return true;

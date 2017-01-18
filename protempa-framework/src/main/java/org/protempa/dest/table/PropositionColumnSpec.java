@@ -21,6 +21,7 @@ package org.protempa.dest.table;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.text.Format;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,10 +94,11 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         this(null, propertyNames, outputConfig, valueOutputConfig, links,
                 numInstances);
     }
-
+    
     public PropositionColumnSpec(String columnNamePrefixOverride,
             String[] propertyNames, OutputConfig outputConfig,
-            ValueOutputConfig valueOutputConfig, Link[] links, int numInstances) {
+            ValueOutputConfig valueOutputConfig, Link[] links, 
+            int numInstances) {
         if (propertyNames == null) {
             this.propertyNames = ArrayUtils.EMPTY_STRING_ARRAY;
         } else {
@@ -200,6 +202,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
         @Override
         public void visit(AbstractParameter abstractParameter) {
+            Format positionFormat = outputConfig.getPositionFormat();
             if (outputConfig.showId()) {
                 result[i++] = abstractParameter.getId();
             }
@@ -208,10 +211,10 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             }
             displayNames(abstractParameter);
             if (outputConfig.showStartOrTimestamp()) {
-                result[i++] = abstractParameter.getStartFormattedShort();
+                result[i++] = positionFormat != null ? abstractParameter.formatStart(positionFormat) : abstractParameter.getStartFormattedShort();
             }
             if (outputConfig.showFinish()) {
-                result[i++] = abstractParameter.getFinishFormattedShort();
+                result[i++] = positionFormat != null ? abstractParameter.formatFinish(positionFormat) : abstractParameter.getFinishFormattedShort();
             }
             if (outputConfig.showLength()) {
                 //result[i++] = abstractParameter.getLengthFormattedShort();
@@ -227,6 +230,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
         @Override
         public void visit(Event event) {
+            Format positionFormat = outputConfig.getPositionFormat();
             if (outputConfig.showId()) {
                 result[i++] = event.getId();
             }
@@ -235,10 +239,10 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             }
             displayNames(event);
             if (outputConfig.showStartOrTimestamp()) {
-                result[i++] = event.getStartFormattedShort();
+                result[i++] = positionFormat != null ? event.formatStart(positionFormat) : event.getStartFormattedShort();
             }
             if (outputConfig.showFinish()) {
-                result[i++] = event.getFinishFormattedShort();
+                result[i++] = positionFormat != null ? event.formatFinish(positionFormat) : event.getFinishFormattedShort();
             }
             if (outputConfig.showLength()) {
                 //result[i++] = event.getLengthFormattedShort();
@@ -258,6 +262,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
         @Override
         public void visit(PrimitiveParameter primitiveParameter) {
+            Format positionFormat = outputConfig.getPositionFormat();
             if (outputConfig.showId()) {
                 result[i++] = primitiveParameter.getId();
             }
@@ -266,10 +271,10 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             }
             displayNames(primitiveParameter);
             if (outputConfig.showStartOrTimestamp()) {
-                result[i++] = primitiveParameter.getStartFormattedShort();
+                result[i++] = positionFormat != null ? primitiveParameter.formatStart(positionFormat) : primitiveParameter.getStartFormattedShort();
             }
             if (outputConfig.showFinish()) {
-                result[i++] = primitiveParameter.getFinishFormattedShort();
+                result[i++] = positionFormat != null ? primitiveParameter.formatFinish(positionFormat) : primitiveParameter.getFinishFormattedShort();
             }
             if (outputConfig.showLength()) {
                 //result[i++] = primitiveParameter.getLengthFormattedShort();

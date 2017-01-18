@@ -194,7 +194,7 @@ public abstract class TemporalProposition extends AbstractProposition {
      * @return the start of this parameter's interval as a formatted
      *         <code>String</code>.
      */
-    private String formatStart(Format format) {
+    public final String formatStart(Format format) {
         if (format != null) {
             Long minStart = interval.getMinStart();
             if (minStart != null) {
@@ -221,7 +221,7 @@ public abstract class TemporalProposition extends AbstractProposition {
      * @return the finish of this parameter's interval as a formatted
      *         <code>String</code>.
      */
-    private String formatFinish(Format format) {
+    public final String formatFinish(Format format) {
         if (format != null) {
             Long minFinish = interval.getMinFinish();
             if (minFinish != null) {
@@ -239,7 +239,7 @@ public abstract class TemporalProposition extends AbstractProposition {
         }
     }
 
-    private String formatLength(Format format) {
+    public final String formatLength(Format format) {
         if (format != null) {
             Long minLength = interval.getMinLength();
             if (minLength != null) {
