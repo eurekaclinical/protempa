@@ -19,6 +19,7 @@
  */
 package org.protempa.proposition.value;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import junit.framework.TestCase;
@@ -75,5 +76,18 @@ public class DateValueTest extends TestCase {
     
     public void testNullArg() {
         DateValue.getInstance(null);
+    }
+    
+    public void testCustomFormat() {
+        Calendar cal = Calendar.getInstance();
+        cal.clear();
+        cal.set(Calendar.YEAR, 2017);
+        cal.set(Calendar.MONTH, Calendar.JANUARY);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+        DateValue dateValue = DateValue.getInstance(cal.getTime());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String actual = dateValue.format(sdf);
+        String expected = "2017-01-01";
+        assertEquals(expected, actual);
     }
 }

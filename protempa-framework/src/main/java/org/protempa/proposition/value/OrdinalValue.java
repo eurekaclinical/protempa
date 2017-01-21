@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.text.Format;
 import java.util.List;
 import java.util.Objects;
 
@@ -66,6 +67,15 @@ public final class OrdinalValue implements OrderedValue, Serializable {
     @Override
     public String getFormatted() {
         return val;
+    }
+    
+    @Override
+    public String format(Format format) {
+        if (format == null) {
+            return getFormatted();
+        } else {
+            return format.format(this.val);
+        }
     }
     
     @Override

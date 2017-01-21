@@ -19,6 +19,8 @@
  */
 package org.protempa.proposition.value;
 
+import java.text.Format;
+
 /**
  * A value (number, string, category, etc.). PROTEMPA implements its own value
  * system rather than use the built-in primitive or object types in
@@ -49,6 +51,16 @@ public interface Value extends ValueVisitable {
      * @return a {@link String}. Guaranteed not <code>null</code>.
      */
     String getFormatted();
+    
+    /**
+     * Returns a string representing this value, formatted by the 
+     * provided {@link Format}.
+     * 
+     * @param format a {@link Format}. Passing in a <code>null</code> will
+     * result in the same behavior as {@link #getFormatted() }.
+     * @return a {@link String}.
+     */
+    String format(Format format);
 
     /**
      * Returns whether the given value is greater, less than, equal to or not

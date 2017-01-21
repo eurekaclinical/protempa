@@ -178,7 +178,7 @@ public class OutputConfig {
         return showLength;
     }
 
-    public HashMap<String, String> getPropertyHeadings() {
+    public Map<String, String> getPropertyHeadings() {
         return new HashMap<>(this.propertyHeadings);
     }
 
@@ -186,7 +186,7 @@ public class OutputConfig {
         return this.propertyHeadings.get(propertyName);
     }
 
-    public int numActiveColumns() {
+    public int getNumberOfColumns() {
         int i = 0;
         if (this.showId) {
             i++;

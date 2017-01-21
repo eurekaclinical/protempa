@@ -48,6 +48,7 @@ import org.protempa.proposition.Event;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.visitor.AbstractPropositionVisitor;
 import org.protempa.valueset.ValueSet;
@@ -373,16 +374,16 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                         } else {
                             Util.logger().log(Level.WARNING,
                                     "Cannot write value set display name because value set {0} is not in the knowledge source", propertyDef.getValueSetId());
-                            outputValue = propertyValue.getFormatted();
+                            outputValue = propertyValue instanceof DateValue ? propertyValue.format(outputConfig.getPositionFormat()) : propertyValue.getFormatted();
                         }
                     } else {
                         Util.logger().log(Level.WARNING,
                                 "Cannot write value set display name because proposition {0} is not in the knowledgeSource", proposition.getId());
-                        outputValue = propertyValue.getFormatted();
+                        outputValue = propertyValue instanceof DateValue ? propertyValue.format(outputConfig.getPositionFormat()) : propertyValue.getFormatted();
                     }
 
             } else {
-                outputValue = propertyValue.getFormatted();
+                outputValue = propertyValue instanceof DateValue ? propertyValue.format(outputConfig.getPositionFormat()) : propertyValue.getFormatted();
             }
             return outputValue;
         }
@@ -411,8 +412,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 proposition, forwardDerivations, backwardDerivations,
                 references, propDefCache);
         propositionVisitor.setKnowledgeSource(propDefCache);
-        String[] result = new String[(this.outputConfig.numActiveColumns()
-                + this.propertyNames.length) * this.numInstances];
+        String[] result = new String[this.outputConfig.getNumberOfColumns() * this.numInstances];
         propositionVisitor.setResult(result);
         int i = 0;
         for (Proposition prop : propositions) {

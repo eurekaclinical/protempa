@@ -22,6 +22,7 @@ package org.protempa.proposition.value;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -107,6 +108,15 @@ public class ValueList<V extends Value> extends ArrayList<V> implements Value {
             }
         }
         return '[' + StringUtils.join(l, ", ") + ']';
+    }
+    
+    @Override
+    public String format(Format format) {
+        if (format == null) {
+            return getFormatted();
+        } else {
+            return format.format(this);
+        }
     }
 
     @Override

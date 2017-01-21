@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.text.Format;
 import java.util.Collections;
 import java.util.Map;
 import org.apache.commons.collections4.map.ReferenceMap;
@@ -141,6 +142,15 @@ public final class NominalValue implements Value, Comparable<NominalValue>,
     @Override
     public String getFormatted() {
         return val;
+    }
+    
+    @Override
+    public String format(Format format) {
+        if (format == null) {
+            return getFormatted();
+        } else {
+            return format.format(this.val);
+        }
     }
 
     @Override

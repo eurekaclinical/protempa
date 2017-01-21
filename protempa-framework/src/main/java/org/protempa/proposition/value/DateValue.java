@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.text.Format;
 import java.util.Date;
 import java.util.Map;
 
@@ -131,6 +132,22 @@ public class DateValue implements OrderedValue, Comparable<DateValue>,
     @Override
     public String getFormatted() {
         return gran.getShortFormat().format(this.date);
+    }
+
+    /**
+     * Formats this date value with a custom {@link Format}. This method
+     * passes the format a {@link Date} object.
+     * 
+     * @param format the custom format.
+     * @return a formatted date string.
+     */
+    @Override
+    public String format(Format format) {
+        if (format == null) {
+            return getFormatted();
+        } else {
+            return format.format(this.date);
+        }
     }
 
     @Override

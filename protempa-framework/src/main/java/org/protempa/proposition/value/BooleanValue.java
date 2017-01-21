@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.text.Format;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
@@ -103,6 +104,15 @@ public final class BooleanValue implements Value, Serializable {
     @Override
     public String getFormatted() {
         return Boolean.toString(this.val);
+    }
+    
+    @Override
+    public String format(Format format) {
+        if (format == null) {
+            return getFormatted();
+        } else {
+            return format.format(this.val);
+        }
     }
     
     @Override

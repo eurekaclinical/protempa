@@ -24,6 +24,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.text.Format;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
@@ -129,6 +130,18 @@ public final class InequalityNumberValue implements
     @Override
     public String getFormatted() {
         return comp.getComparatorString() + " " + val.getFormatted();
+    }
+    
+    @Override
+    public String format(Format format) {
+        if (format == null) {
+            return getFormatted();
+        } else {
+            Object[] objToFormat = new Object[2];
+            objToFormat[0] = this.comp;
+            objToFormat[1] = this.val;
+            return format.format(objToFormat);
+        }
     }
 
     @Override

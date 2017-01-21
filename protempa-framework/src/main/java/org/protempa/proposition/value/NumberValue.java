@@ -27,6 +27,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.text.Format;
 import java.util.Map;
 
 /**
@@ -160,6 +161,15 @@ public final class NumberValue implements NumericalValue,
     @Override
     public String getFormatted() {
         return num.toString();
+    }
+    
+    @Override
+    public String format(Format format) {
+        if (format == null) {
+            return getFormatted();
+        } else {
+            return format.format(this.num);
+        }
     }
 
     @Override
