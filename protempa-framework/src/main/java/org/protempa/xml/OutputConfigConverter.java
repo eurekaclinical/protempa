@@ -114,8 +114,8 @@ class OutputConfigConverter extends AbstractConverter {
         String finishHeading = nullAsEmptyString(reader.getAttribute(FINISH_HEADING));
         String lengthHeading = nullAsEmptyString(reader.getAttribute(LENGTH_HEADING));
 
-        return new OutputConfig(showId, showValue, showDisplayName, showAbbrevDisplayName, showStartOrTimestamp, showFinish, showLength, idHeading,
-                valueHeading, displayNameHeading, abbrevDisplayNameHeading, startOrTimestampHeading, finishHeading, lengthHeading, null, null);
+        return new OutputConfig(showId, showValue, showDisplayName, showAbbrevDisplayName, showStartOrTimestamp, showFinish, showLength, false, idHeading,
+                valueHeading, displayNameHeading, abbrevDisplayNameHeading, startOrTimestampHeading, finishHeading, lengthHeading, null, null, null);
     }
 
 }

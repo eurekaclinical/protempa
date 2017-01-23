@@ -138,6 +138,11 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
     private String[] columnNames() {
         List<String> results = new ArrayList<>();
+        if (this.outputConfig.showUniqueId()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getUniqueIdHeading(),
+                    this.columnNamePrefixOverride + "_uniqueId"));
+        }
         if (this.outputConfig.showId()) {
             results.add(StringUtils.defaultIfEmpty(
                     outputConfig.getIdHeading(),
@@ -204,6 +209,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         @Override
         public void visit(AbstractParameter abstractParameter) {
             Format positionFormat = outputConfig.getPositionFormat();
+            if (outputConfig.showUniqueId()) {
+                result[i++] = abstractParameter.getUniqueId().getStringRepresentation();
+            }
             if (outputConfig.showId()) {
                 result[i++] = abstractParameter.getId();
             }
@@ -232,6 +240,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         @Override
         public void visit(Event event) {
             Format positionFormat = outputConfig.getPositionFormat();
+            if (outputConfig.showUniqueId()) {
+                result[i++] = event.getUniqueId().getStringRepresentation();
+            }
             if (outputConfig.showId()) {
                 result[i++] = event.getId();
             }
@@ -264,6 +275,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         @Override
         public void visit(PrimitiveParameter primitiveParameter) {
             Format positionFormat = outputConfig.getPositionFormat();
+            if (outputConfig.showUniqueId()) {
+                result[i++] = primitiveParameter.getUniqueId().getStringRepresentation();
+            }
             if (outputConfig.showId()) {
                 result[i++] = primitiveParameter.getId();
             }
@@ -296,6 +310,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
         @Override
         public void visit(Constant constant) {
+            if (outputConfig.showUniqueId()) {
+                result[i++] = constant.getUniqueId().getStringRepresentation();
+            }
             if (outputConfig.showId()) {
                 result[i++] = constant.getId();
             }

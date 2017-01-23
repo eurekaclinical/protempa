@@ -37,6 +37,7 @@ public final class OutputConfigBuilder {
     private boolean showFinish;
     private boolean showLength;
     private boolean showId;
+    private boolean showUniqueId;
     private String valueHeading;
     private String displayNameHeading;
     private String abbrevDisplayNameHeading;
@@ -44,6 +45,7 @@ public final class OutputConfigBuilder {
     private String finishHeading;
     private String lengthHeading;
     private String idHeading;
+    private String uniqueIdHeading;
     private Map<String, String> propertyHeadings;
     private DateFormat dateFormat;
 
@@ -59,6 +61,7 @@ public final class OutputConfigBuilder {
         this.finishHeading = "";
         this.lengthHeading = "";
         this.idHeading = "";
+        this.uniqueIdHeading = "";
         this.showValue = false;
         this.showDisplayName = false;
         this.showAbbrevDisplayName = false;
@@ -66,6 +69,7 @@ public final class OutputConfigBuilder {
         this.showFinish = false;
         this.showLength = false;
         this.showId = false;
+        this.showUniqueId = false;
         this.propertyHeadings = new HashMap<>();
         this.dateFormat = null;
     }
@@ -73,12 +77,20 @@ public final class OutputConfigBuilder {
     public String getIdHeading() {
         return this.idHeading;
     }
-
+    
     public void setIdHeading(String idHeading) {
         if (idHeading == null) {
             idHeading = "";
         }
         this.idHeading = idHeading;
+    }
+
+    public String getUniqueIdHeading() {
+        return uniqueIdHeading;
+    }
+
+    public void setUniqueIdHeading(String uniqueIdHeading) {
+        this.uniqueIdHeading = uniqueIdHeading;
     }
 
     public String getValueHeading() {
@@ -153,6 +165,14 @@ public final class OutputConfigBuilder {
 
     public void setShowId(boolean showId) {
         this.showId = showId;
+    }
+    
+    public boolean showUniqueId() {
+        return this.showUniqueId;
+    }
+    
+    public void setShowUniqueId(boolean showUniqueId) {
+        this.showUniqueId = showUniqueId;
     }
 
     public boolean showValue() {
@@ -239,9 +259,11 @@ public final class OutputConfigBuilder {
     public OutputConfig build() {
         return new OutputConfig(this.showId, this.showValue, this.showDisplayName,
                 this.showAbbrevDisplayName, this.showStartOrTimestamp,
-                this.showFinish, this.showLength, this.idHeading, this.valueHeading,
+                this.showFinish, this.showLength, this.showUniqueId,
+                this.idHeading, this.valueHeading,
                 this.displayNameHeading, this.abbrevDisplayNameHeading,
                 this.startOrTimestampHeading, this.finishHeading,
-                this.lengthHeading, this.propertyHeadings, this.dateFormat);
+                this.lengthHeading, this.uniqueIdHeading, 
+                this.propertyHeadings, this.dateFormat);
     }
 }

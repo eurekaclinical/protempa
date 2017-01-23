@@ -37,6 +37,7 @@ public class OutputConfig {
     private final boolean showFinish;
     private final boolean showLength;
     private final boolean showId;
+    private final boolean showUniqueId;
     private final String valueHeading;
     private final String displayNameHeading;
     private final String abbrevDisplayNameHeading;
@@ -44,6 +45,7 @@ public class OutputConfig {
     private final String finishHeading;
     private final String lengthHeading;
     private final String idHeading;
+    private final String uniqueIdHeading;
     private final HashMap<String, String> propertyHeadings;
     private final Format positionFormat;
 
@@ -55,6 +57,7 @@ public class OutputConfig {
         this.showFinish = false;
         this.showLength = false;
         this.showId = false;
+        this.showUniqueId = false;
         this.valueHeading = "";
         this.displayNameHeading = "";
         this.abbrevDisplayNameHeading = "";
@@ -62,6 +65,7 @@ public class OutputConfig {
         this.finishHeading = "";
         this.lengthHeading = "";
         this.idHeading = "";
+        this.uniqueIdHeading = "";
         this.propertyHeadings = new HashMap<>();
         this.positionFormat = null;
     }
@@ -69,13 +73,14 @@ public class OutputConfig {
     public OutputConfig(boolean showId, boolean showValue, boolean showDisplayName,
             boolean showAbbrevDisplayName,
             boolean showStartOrTimestamp, boolean showFinish,
-            boolean showLength, String idHeading,
+            boolean showLength, boolean showUniqueId, String idHeading, 
             String valueHeading, String displayNameHeading,
             String abbrevDisplayNameHeading, String startOrTimestampHeading,
-            String finishHeading, String lengthHeading,
+            String finishHeading, String lengthHeading, String uniqueIdHeading,
             Map<String, String> propertyHeadings,
             Format positionFormat) {
         this.showId = showId;
+        this.showUniqueId = showUniqueId;
         this.showValue = showValue;
         this.showDisplayName = showDisplayName;
         this.showAbbrevDisplayName = showAbbrevDisplayName;
@@ -110,6 +115,10 @@ public class OutputConfig {
             lengthHeading = "";
         }
         this.lengthHeading = lengthHeading;
+        if (uniqueIdHeading == null) {
+            uniqueIdHeading = "";
+        }
+        this.uniqueIdHeading = uniqueIdHeading;
         if (propertyHeadings != null) {
             this.propertyHeadings = new HashMap<>(propertyHeadings);
         } else {
@@ -120,6 +129,10 @@ public class OutputConfig {
 
     public String getIdHeading() {
         return idHeading;
+    }
+    
+    public String getUniqueIdHeading() {
+        return uniqueIdHeading;
     }
 
     public String getValueHeading() {
@@ -152,6 +165,10 @@ public class OutputConfig {
 
     public boolean showId() {
         return showId;
+    }
+    
+    public boolean showUniqueId() {
+        return showUniqueId;
     }
 
     public boolean showValue() {
@@ -191,6 +208,9 @@ public class OutputConfig {
         if (this.showId) {
             i++;
         }
+        if (this.showUniqueId) {
+            i++;
+        }
         if (this.showAbbrevDisplayName) {
             i++;
         }
@@ -221,11 +241,13 @@ public class OutputConfig {
         result = prime * result + ((displayNameHeading == null) ? 0 : displayNameHeading.hashCode());
         result = prime * result + ((finishHeading == null) ? 0 : finishHeading.hashCode());
         result = prime * result + ((idHeading == null) ? 0 : idHeading.hashCode());
+        result = prime * result + ((uniqueIdHeading == null) ? 0 : uniqueIdHeading.hashCode());
         result = prime * result + ((lengthHeading == null) ? 0 : lengthHeading.hashCode());
         result = prime * result + (showAbbrevDisplayName ? 1231 : 1237);
         result = prime * result + (showDisplayName ? 1231 : 1237);
         result = prime * result + (showFinish ? 1231 : 1237);
         result = prime * result + (showId ? 1231 : 1237);
+        result = prime * result + (showUniqueId ? 1231 : 1237);
         result = prime * result + (showLength ? 1231 : 1237);
         result = prime * result + (showStartOrTimestamp ? 1231 : 1237);
         result = prime * result + (showValue ? 1231 : 1237);
@@ -277,6 +299,13 @@ public class OutputConfig {
         } else if (!idHeading.equals(other.idHeading)) {
             return false;
         }
+        if (uniqueIdHeading == null) {
+            if (other.uniqueIdHeading != null) {
+                return false;
+            }
+        } else if (!uniqueIdHeading.equals(other.uniqueIdHeading)) {
+            return false;
+        }
         if (lengthHeading == null) {
             if (other.lengthHeading != null) {
                 return false;
@@ -294,6 +323,9 @@ public class OutputConfig {
             return false;
         }
         if (showId != other.showId) {
+            return false;
+        }
+        if (showUniqueId != other.showUniqueId) {
             return false;
         }
         if (showLength != other.showLength) {
