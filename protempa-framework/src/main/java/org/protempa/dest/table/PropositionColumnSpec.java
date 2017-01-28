@@ -68,6 +68,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     private final OutputConfig outputConfig;
     private final ValueOutputConfig valueOutputConfig;
     private final ValuesPropositionVisitor propositionVisitor;
+    private final String[] result;
 
     public PropositionColumnSpec(String[] propertyNames) {
         this(propertyNames, null, null);
@@ -134,6 +135,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         this.numInstances = numInstances;
         this.columnNamePrefixOverride = columnNamePrefixOverride;
         propositionVisitor = new ValuesPropositionVisitor();
+        result = new String[this.outputConfig.getNumberOfColumns() * this.numInstances];
     }
 
     private String[] columnNames() {
@@ -429,7 +431,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 proposition, forwardDerivations, backwardDerivations,
                 references, propDefCache);
         propositionVisitor.setKnowledgeSource(propDefCache);
-        String[] result = new String[this.outputConfig.getNumberOfColumns() * this.numInstances];
+        Arrays.fill(result, null);
         propositionVisitor.setResult(result);
         int i = 0;
         for (Proposition prop : propositions) {
