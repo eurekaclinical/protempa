@@ -24,7 +24,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.ProtempaUtil;
 
 /**
- * A 1:N relationship with instances of another entity.
+ * A relationship with instances of another entity.
  * 
  * @author Andrew Post
  */
@@ -41,6 +41,25 @@ public class ReferenceSpec implements Serializable {
     private EntitySpec referringEntitySpec;
     private final ColumnSpec[] uniqueIdSpecs;
     private final Type type;
+    private final boolean applyConstraints;
+    
+    public ReferenceSpec(String referenceName, String entityName,
+            ColumnSpec[] uniqueIdSpecs, Type type, boolean applyConstraints) {
+        if (referenceName == null)
+            throw new IllegalArgumentException("referenceName cannot be null");
+        if (entityName == null)
+            throw new IllegalArgumentException("entityName cannot be null");
+        if (uniqueIdSpecs == null)
+            throw new IllegalArgumentException("uniqueIdSpecs cannot be null");
+        if (type == null)
+            throw new IllegalArgumentException("type cannot be null");
+        this.uniqueIdSpecs = uniqueIdSpecs.clone();
+        ProtempaUtil.checkArray(this.uniqueIdSpecs, "uniqueIdSpecs");
+        this.referenceName = referenceName.intern();
+        this.entityName = entityName;
+        this.type = type;
+        this.applyConstraints = applyConstraints;
+    }
 
     /**
      * Instantiates a reference instance with the reference's name, the 
@@ -56,19 +75,7 @@ public class ReferenceSpec implements Serializable {
      */
     public ReferenceSpec(String referenceName, String entityName,
             ColumnSpec[] uniqueIdSpecs, Type type) {
-        if (referenceName == null)
-            throw new IllegalArgumentException("referenceName cannot be null");
-        if (entityName == null)
-            throw new IllegalArgumentException("entityName cannot be null");
-        if (uniqueIdSpecs == null)
-            throw new IllegalArgumentException("uniqueIdSpecs cannot be null");
-        if (type == null)
-            throw new IllegalArgumentException("type cannot be null");
-        this.uniqueIdSpecs = uniqueIdSpecs.clone();
-        ProtempaUtil.checkArray(this.uniqueIdSpecs, "uniqueIdSpecs");
-        this.referenceName = referenceName.intern();
-        this.entityName = entityName;
-        this.type = type;
+        this(referenceName, entityName, uniqueIdSpecs, type, true);
     }
 
     EntitySpec getReferringEntitySpec() {
@@ -112,6 +119,10 @@ public class ReferenceSpec implements Serializable {
         return this.type;
     }
 
+    public boolean isApplyConstraints() {
+        return applyConstraints;
+    }
+    
     @Override
     public String toString() {
         return new ToStringBuilder(this)

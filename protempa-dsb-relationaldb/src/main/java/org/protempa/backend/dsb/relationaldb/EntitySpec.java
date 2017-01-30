@@ -460,7 +460,7 @@ public final class EntitySpec implements Serializable {
         boolean found = false;
         String entitySpecName = entitySpec.name;
         for (ReferenceSpec refSpec : this.referenceSpecs) {
-            if (refSpec.getEntityName().equals(entitySpecName)) {
+            if (refSpec.getEntityName().equals(entitySpecName) && refSpec.isApplyConstraints()) {
                 found = true;
                 continue;
             }
