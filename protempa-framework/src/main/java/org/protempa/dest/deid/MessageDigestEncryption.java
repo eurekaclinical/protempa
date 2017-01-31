@@ -3,7 +3,7 @@ package org.protempa.dest.deid;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import org.apache.commons.codec.binary.Base64;
+import java.util.Base64;
 
 /*
  * #%L
@@ -29,6 +29,8 @@ import org.apache.commons.codec.binary.Base64;
  * @author Andrew Post
  */
 public class MessageDigestEncryption implements Encryption {
+    
+    private static final Base64.Encoder BASE64_ENCODER = Base64.getEncoder();
 
     private final MessageDigestDeidConfig deidConfig;
     private final MessageDigest messageDigest;
@@ -62,7 +64,7 @@ public class MessageDigestEncryption implements Encryption {
             }
             try {
                 byte[] digested = this.messageDigest.digest(inData.getBytes("UTF-8"));
-                return Base64.encodeBase64String(digested);
+                return BASE64_ENCODER.encodeToString(digested);
             } catch (UnsupportedEncodingException ex) {
                 throw new AssertionError("UTF-8 should be supported but is not");
             }
