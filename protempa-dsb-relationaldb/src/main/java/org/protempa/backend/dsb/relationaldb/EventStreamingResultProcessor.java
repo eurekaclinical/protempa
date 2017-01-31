@@ -186,15 +186,17 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
                     columnTypes);
             i = extractReferenceUniqueIdPairs(resultSet, uniqueId,
                     refUniqueIds, i);
-            this.getReferenceIterator().addUniqueIds(kId, refUniqueIds);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
             }
             
             if (!queryPropIds.contains(propId)) {
+                this.getReferenceIterator().addUniqueIds(kId, null);
                 return;
             }
+            
+            this.getReferenceIterator().addUniqueIds(kId, refUniqueIds);
 
             Event event = new Event(propId, uniqueId);
             event.setSourceSystem(dsType);

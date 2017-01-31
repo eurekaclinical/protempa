@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -128,19 +129,28 @@ public abstract class AbstractSelectStatement implements SelectStatement {
                 this.entitySpec, wrapKeyId);
         FromClause from = getFromClause(toColumnSpecs(info.getColumnSpecs()),
                 referenceIndices, this.stagedTables);
-        WhereClause where = getWhereClause(propIds, info, this.entitySpecs,
+        List<EntitySpec> esCopy = new ArrayList<>(entitySpecs);
+        for (Iterator<EntitySpec> itr = esCopy.iterator(); itr.hasNext();) {
+            EntitySpec es = itr.next();
+            ReferenceSpec[] referencesTo = es.referencesTo(entitySpec);
+            for (ReferenceSpec rs : referencesTo) {
+                if (!rs.isApplyConstraints()) {
+                    itr.remove();
+                    break;
+                }
+            }
+        }
+        WhereClause where = getWhereClause(propIds, info, esCopy,
                 this.filters, referenceIndices, this.keyIds, this.order,
                 this.resultProcessor, select, this.stagedTables);
 
-        StringBuilder result = new StringBuilder(select.generateClause())
-                .append(" ").append(from.generateClause()).append(" ")
-                .append(where.generateClause());
-
-        return result.toString();
+        return select.generateClause() + 
+                " " + from.generateClause() + 
+                " " + where.generateClause();
     }
     
     protected final List<ColumnSpec> toColumnSpecs(List<IntColumnSpecWrapper> columnSpecWrappers) {
-        List<ColumnSpec> result = new ArrayList<ColumnSpec>();
+        List<ColumnSpec> result = new ArrayList<>();
         for (IntColumnSpecWrapper icsw : columnSpecWrappers) {
             result.add(icsw.getColumnSpec());
         }

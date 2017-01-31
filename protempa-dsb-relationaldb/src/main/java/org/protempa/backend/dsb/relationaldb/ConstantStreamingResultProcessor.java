@@ -124,15 +124,17 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
                     propertyValues, columnTypes);
             i = extractReferenceUniqueIdPairs(resultSet, uniqueId,
                     refUniqueIds, i);
-            this.getReferenceIterator().addUniqueIds(kId, refUniqueIds);
 
             if (isCasePresent()) {
                 propId = resultSet.getString(i++);
             }
             
             if (!queryPropIds.contains(propId)) {
+                this.getReferenceIterator().addUniqueIds(kId, null);
                 return;
             }
+            
+            this.getReferenceIterator().addUniqueIds(kId, refUniqueIds);
 
             Constant cp = new Constant(propId, uniqueId);
             for (int j = 0; j < propertySpecs.length; j++) {

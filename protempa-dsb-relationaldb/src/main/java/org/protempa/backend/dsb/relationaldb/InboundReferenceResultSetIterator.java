@@ -113,8 +113,7 @@ final class InboundReferenceResultSetIterator implements
              * send back a DataStreamingEvent with no UniqueIdPairs.
              */
 
-            result = new DataStreamingEvent<>(this.keyId,
-                    new ArrayList<UniqueIdPair>(0));
+            result = new DataStreamingEvent<>(this.keyId, new ArrayList<>(0));
         } else {
             result = this.dataStreamingEventQueue.remove();
         }

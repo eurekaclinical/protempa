@@ -42,8 +42,7 @@ import org.protempa.proposition.interval.Interval.Side;
 public final class ColumnSpecInfoFactory {
 
     public ColumnSpecInfo newInstance(Set<String> propIds, EntitySpec entitySpec,
-            Collection<EntitySpec> entitySpecs, Map<String, ReferenceSpec>
-            inboundRefSpecs, Collection<Filter> filters, ReferenceSpec referenceSpec,
+            Collection<EntitySpec> entitySpecs, Map<String, ReferenceSpec> inboundRefSpecs, Collection<Filter> filters, ReferenceSpec referenceSpec,
             boolean streamingMode) {
         ColumnSpecInfo columnSpecInfo = new ColumnSpecInfo();
         if (referenceSpec == null || streamingMode) {
@@ -78,13 +77,13 @@ public final class ColumnSpecInfoFactory {
         i = processCreateDate(entitySpec, columnSpecs, i, columnSpecInfo, referenceSpec);
         i = processUpdateDate(entitySpec, columnSpecs, i, columnSpecInfo, referenceSpec);
         i = processDeleteDate(entitySpec, columnSpecs, i, columnSpecInfo, referenceSpec);
-        
+
         int refNum = 0;
         for (EntitySpec entitySpec2 : entitySpecs) {
             for (Map.Entry<String, ReferenceSpec> inboundRef : inboundRefSpecs.entrySet()) {
                 if (inboundRef.getKey().equals(entitySpec2.getName())) {
-                    if (entitySpec2 != entitySpec && referenceSpec == null &&
-                            entitySpec2.hasReferenceTo(entitySpec)) {
+                    if (entitySpec2 != entitySpec && referenceSpec == null
+                            && entitySpec2.hasReferenceTo(entitySpec)) {
                         i = processReferenceSpecs(entitySpec2, entitySpec, columnSpecs,
                                 refNum, i, columnSpecInfo);
                         refNum++;
@@ -135,7 +134,7 @@ public final class ColumnSpecInfoFactory {
         if (refSpecs != null) {
             numUniqueIndices += refSpecs.length;
         }
-        int[] uniqueIndices =  new int[numUniqueIndices];
+        int[] uniqueIndices = new int[numUniqueIndices];
         int j = 0;
         if (codeSpecs != null && uniqueIndices != null) {
             for (ColumnSpec uniqueIdSpec : codeSpecs) {
@@ -167,7 +166,7 @@ public final class ColumnSpecInfoFactory {
                     || !(lastColumnSpec.getConstraint() == Operator.EQUAL_TO
                     && lastColumnSpec.isPropositionIdsComplete()
                     && !AbstractSQLGenerator.needsPropIdInClause(propIds,
-                    entitySpec.getPropositionIds()))) {
+                            entitySpec.getPropositionIds()))) {
                 i += wrapColumnSpec(codeSpec, columnSpecs);
             } else {
                 codeSpec = null;
@@ -185,8 +184,12 @@ public final class ColumnSpecInfoFactory {
         List<EntitySpec> l = new LinkedList<>();
         l.add(entitySpec);
         for (EntitySpec es : entitySpecs) {
-            if (es.hasReferenceTo(l.get(0))) {
-                l.add(0, es);
+            ReferenceSpec[] referencesTo = es.referencesTo(l.get(0));
+            for (ReferenceSpec rs : referencesTo) {
+                if (rs.isApplyConstraints()) {
+                    l.add(0, es);
+                    break;
+                }
             }
         }
         for (EntitySpec es : l) {
@@ -195,7 +198,7 @@ public final class ColumnSpecInfoFactory {
                 i += wrapColumnSpec(spec, columnSpecs);
             }
         }
-        
+
         return i;
     }
 
@@ -217,16 +220,16 @@ public final class ColumnSpecInfoFactory {
                     if (filter instanceof PositionFilter) {
                         PositionFilter pf = (PositionFilter) filter;
                         ColumnSpec startTimeSpec = mes.getStartTimeSpec();
-                        if (startTimeSpec != null 
-                                && ((pf.getStartSide() == Side.START && pf.getStart() != null) 
-                                || (pf.getFinish() != null 
-                                        && (pf.getFinishSide() == Side.START 
-                                            || (mes.getFinishTimeSpec() == null && pf.getFinishSide() == Side.FINISH))))) {
+                        if (startTimeSpec != null
+                                && ((pf.getStartSide() == Side.START && pf.getStart() != null)
+                                || (pf.getFinish() != null
+                                && (pf.getFinishSide() == Side.START
+                                || (mes.getFinishTimeSpec() == null && pf.getFinishSide() == Side.FINISH))))) {
                             i += wrapColumnSpec(startTimeSpec, columnSpecs);
                         }
                         ColumnSpec finishTimeSpec = mes.getFinishTimeSpec();
-                        if (finishTimeSpec != null 
-                                && ((pf.getStartSide() == Side.FINISH && pf.getStart() != null) 
+                        if (finishTimeSpec != null
+                                && ((pf.getStartSide() == Side.FINISH && pf.getStart() != null)
                                 || (pf.getFinishSide() == Side.FINISH && pf.getFinish() != null))) {
                             i += wrapColumnSpec(finishTimeSpec, columnSpecs);
                         }
@@ -248,8 +251,8 @@ public final class ColumnSpecInfoFactory {
             List<IntColumnSpecWrapper> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo) {
         PropertySpec[] propertySpecs = entitySpec.getPropertySpecs();
-        Map<String, Integer> propertyIndices =
-                new HashMap<>();
+        Map<String, Integer> propertyIndices
+                = new HashMap<>();
         for (PropertySpec propertySpec : propertySpecs) {
             ColumnSpec codeSpec = propertySpec.getCodeSpec();
             i += wrapColumnSpec(codeSpec, columnSpecs);
@@ -259,7 +262,7 @@ public final class ColumnSpecInfoFactory {
         if (propertySpecs.length > 0) {
             columnSpecInfo.setPropertyIndices(propertyIndices);
         }
-        
+
         ColumnSpec valueSpec = entitySpec.getValueSpec();
         if (valueSpec != null) {
             i += wrapColumnSpec(valueSpec, columnSpecs);
@@ -270,9 +273,9 @@ public final class ColumnSpecInfoFactory {
     }
 
     private static int processReferenceSpecs(EntitySpec lhsEntitySpec,
-                                             EntitySpec rhsEntitySpec,
-                                             List<IntColumnSpecWrapper> columnSpecs, int refNum,
-                                             int i, ColumnSpecInfo columnSpecInfo) {
+            EntitySpec rhsEntitySpec,
+            List<IntColumnSpecWrapper> columnSpecs, int refNum,
+            int i, ColumnSpecInfo columnSpecInfo) {
 
         if (lhsEntitySpec.hasReferenceTo(rhsEntitySpec)) {
             for (ColumnSpec referringUniqueIdSpec : lhsEntitySpec.getUniqueIdSpecs()) {
@@ -280,7 +283,7 @@ public final class ColumnSpecInfoFactory {
             }
 
             if (columnSpecInfo.getReferenceIndices() == null) {
-                columnSpecInfo.setReferenceIndices(new HashMap<String, Integer>());
+                columnSpecInfo.setReferenceIndices(new HashMap<>());
             }
             columnSpecInfo.getReferenceIndices().put("ref" + refNum, i - 1);
         }
@@ -313,7 +316,7 @@ public final class ColumnSpecInfoFactory {
         }
         return i;
     }
-    
+
     private static int processCreateDate(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
@@ -326,7 +329,7 @@ public final class ColumnSpecInfoFactory {
         }
         return i;
     }
-    
+
     private static int processUpdateDate(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
@@ -339,7 +342,7 @@ public final class ColumnSpecInfoFactory {
         }
         return i;
     }
-    
+
     private static int processDeleteDate(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i,
             ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
@@ -352,12 +355,12 @@ public final class ColumnSpecInfoFactory {
         }
         return i;
     }
-    
+
     private static int wrapPropertySpecConstraintSpec(PropertySpec propertySpec, List<IntColumnSpecWrapper> columnSpecs) {
         ColumnSpec lastSpec = propertySpec.getCodeSpec().getLastSpec();
         return wrapColumnSpecsHelper(propertySpec.getConstraintSpec(), lastSpec, columnSpecs);
     }
-    
+
     private static int wrapColumnSpec(ColumnSpec spec, List<IntColumnSpecWrapper> columnSpecs) {
         return wrapColumnSpecsHelper(spec, null, columnSpecs);
     }
@@ -380,7 +383,7 @@ public final class ColumnSpecInfoFactory {
         }
         return asList.size();
     }
-    
+
     private static int processBaseSpec(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i) {
         ColumnSpec spec = entitySpec.getBaseSpec();
