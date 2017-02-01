@@ -186,11 +186,11 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
         deidentifiedProp.setSourceSystem(prop.getSourceSystem());
         PropositionDefinition propDef = this.propDefCache.get(prop.getId());
         for (String name : prop.getPropertyNames()) {
+            Value propertyValue = prop.getProperty(name);
             PropertyDefinition propertyDefinition = propDef.propertyDefinition(name);
             if (propertyDefinition != null) {
                 Attribute hipaaIdAttr = propertyDefinition.getAttribute(DeidAttributes.IS_HIPAA_IDENTIFIER);
                 Attribute hipaaIdTypeAttr = propertyDefinition.getAttribute(DeidAttributes.HIPAA_IDENTIFIER_TYPE);
-                Value propertyValue = prop.getProperty(name);
                 if (propertyValue == null) {
                     deidentifiedProp.setProperty(name, propertyValue);
                 } else if (this.offsetInSeconds != null && propertyDefinition.getValueType() == ValueType.DATEVALUE) {
@@ -219,6 +219,8 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
                 } else {
                     deidentifiedProp.setProperty(name, propertyValue);
                 }
+            } else {
+                deidentifiedProp.setProperty(name, propertyValue);
             }
         }
         for (String name : prop.getReferenceNames()) {
