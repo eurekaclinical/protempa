@@ -48,6 +48,7 @@ final class AbstractionFinder {
     // private final Map<String, List<String>> termToPropDefMap;
     private boolean closed;
     private Executor executor;
+    private final List<ProtempaEventListener> eventListeners;
 
     AbstractionFinder(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource, TermSource termSource,
@@ -58,11 +59,14 @@ final class AbstractionFinder {
         assert knowledgeSource != null : "knowledgeSource cannot be null";
         assert algorithmSource != null : "algorithmSource cannot be null";
         assert termSource != null : "termSource cannot be null";
+        assert eventListeners != null : "eventListeners cannot be null";
 
         this.dataSource = dataSource;
         this.knowledgeSource = knowledgeSource;
         this.termSource = termSource;
         this.algorithmSource = algorithmSource;
+        
+        this.eventListeners = eventListeners;
         
         this.dataSource.setEventListeners(eventListeners);
         this.knowledgeSource.setEventListeners(eventListeners);
@@ -132,6 +136,10 @@ final class AbstractionFinder {
         }
     }
 
+    List<ProtempaEventListener> getEventListeners() {
+        return eventListeners;
+    }
+    
     DataSource getDataSource() {
         return this.dataSource;
     }

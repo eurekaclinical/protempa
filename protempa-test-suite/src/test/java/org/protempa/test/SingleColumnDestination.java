@@ -21,8 +21,10 @@ package org.protempa.test;
  */
 
 import java.io.Writer;
+import java.util.List;
 import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
+import org.protempa.ProtempaEventListener;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerInitException;
@@ -40,7 +42,7 @@ public final class SingleColumnDestination extends AbstractDestination {
     }
 
     @Override
-    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
         return new SingleColumnQueryResultsHandler(writer);
     }
 

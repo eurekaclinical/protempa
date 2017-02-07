@@ -22,10 +22,12 @@ package org.protempa.dest.xml;
 
 import java.io.Writer;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
+import org.protempa.ProtempaEventListener;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerInitException;
@@ -73,7 +75,7 @@ public final class XmlDestination extends AbstractDestination {
     }
 
     @Override
-    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
         if (query.getQueryMode() == QueryMode.UPDATE) {
             throw new QueryResultsHandlerInitException("Update mode not supported");
         }

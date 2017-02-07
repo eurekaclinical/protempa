@@ -2,11 +2,13 @@ package org.protempa.dest.table;
 
 import java.io.BufferedWriter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.ArrayUtils;
 import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.ProtempaEventListener;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.GetSupportedPropositionIdsException;
 import org.protempa.dest.QueryResultsHandlerInitException;
@@ -72,7 +74,7 @@ public final class TableDestination extends AbstractDestination {
     }
 
     @Override
-    public TableQueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+    public TableQueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
         if (query.getQueryMode() == QueryMode.UPDATE) {
             throw new QueryResultsHandlerInitException("Update mode not supported");
         }
