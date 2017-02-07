@@ -29,8 +29,8 @@ import org.protempa.proposition.PrimitiveParameter;
  */
 public class PrimitiveParameterStreamingRefResultProcessor extends StreamingRefResultProcessor<PrimitiveParameter> {
 
-    public PrimitiveParameterStreamingRefResultProcessor(ReferenceSpec referenceSpec, EntitySpec entitySpec, String dataSourceBackendId) {
-        super(referenceSpec, entitySpec, dataSourceBackendId);
+    public PrimitiveParameterStreamingRefResultProcessor(RelationalDbDataSourceBackend backend, ReferenceSpec referenceSpec, EntitySpec entitySpec, String dataSourceBackendId) {
+        super(backend, referenceSpec, entitySpec, dataSourceBackendId);
     }
     
     @Override

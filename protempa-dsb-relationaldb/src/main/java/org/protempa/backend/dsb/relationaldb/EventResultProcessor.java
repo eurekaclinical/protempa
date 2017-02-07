@@ -45,9 +45,9 @@ class EventResultProcessor extends MainResultProcessor<Event> {
             new IntervalFactory();
     private static final int FLUSH_SIZE = 1000000;
 
-    EventResultProcessor(ResultCache<Event> results,
+    EventResultProcessor(RelationalDbDataSourceBackend backend, ResultCache<Event> results,
             EntitySpec entitySpec, String dataSourceBackendId) {
-        super(results, entitySpec, dataSourceBackendId);
+        super(backend, results, entitySpec, dataSourceBackendId);
     }
 
     @Override

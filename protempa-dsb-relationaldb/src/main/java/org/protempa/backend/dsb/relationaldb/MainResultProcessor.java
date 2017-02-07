@@ -34,9 +34,10 @@ abstract class MainResultProcessor<P extends Proposition>
     private ColumnSpec[] lastColumnSpecs;
     private PropertySpec[] propertySpecs;
     
-    protected MainResultProcessor(ResultCache<P> results,
+    protected MainResultProcessor(RelationalDbDataSourceBackend backend,
+            ResultCache<P> results,
             EntitySpec entitySpec, String dataSourceBackendId) {
-        super(entitySpec, dataSourceBackendId);
+        super(backend, entitySpec, dataSourceBackendId);
         assert results != null : "resultCache cannot be null";
         this.results = results;
         this.propertySpecs = getEntitySpec().getPropertySpecs();

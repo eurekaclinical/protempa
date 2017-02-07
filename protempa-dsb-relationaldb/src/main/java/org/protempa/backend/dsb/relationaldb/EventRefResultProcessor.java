@@ -29,10 +29,10 @@ import org.protempa.proposition.UniqueId;
  */
 final class EventRefResultProcessor extends RefResultProcessor<Event> {
 
-    EventRefResultProcessor(ResultCache<Event> results, 
+    EventRefResultProcessor(RelationalDbDataSourceBackend backend, ResultCache<Event> results, 
             ReferenceSpec referenceSpec, EntitySpec entitySpec, 
             String dataSourceBackendId) {
-        super(results, referenceSpec, entitySpec, dataSourceBackendId);
+        super(backend, results, referenceSpec, entitySpec, dataSourceBackendId);
     }
 
     @Override

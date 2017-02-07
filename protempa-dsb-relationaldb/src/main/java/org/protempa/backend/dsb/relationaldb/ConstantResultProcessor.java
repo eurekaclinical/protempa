@@ -40,9 +40,9 @@ class ConstantResultProcessor extends MainResultProcessor<Constant> {
 
     private static final int FLUSH_SIZE = 1000000;
 
-    ConstantResultProcessor(ResultCache<Constant> results,
+    ConstantResultProcessor(RelationalDbDataSourceBackend backend, ResultCache<Constant> results,
             EntitySpec entitySpec, String dataSourceBackendId) {
-        super(results, entitySpec, dataSourceBackendId);
+        super(backend, results, entitySpec, dataSourceBackendId);
     }
 
     @Override

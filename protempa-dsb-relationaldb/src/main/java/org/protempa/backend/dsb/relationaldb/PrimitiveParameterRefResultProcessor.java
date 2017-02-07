@@ -31,10 +31,11 @@ final class PrimitiveParameterRefResultProcessor extends
         RefResultProcessor<PrimitiveParameter> {
 
     PrimitiveParameterRefResultProcessor(
+            RelationalDbDataSourceBackend backend,
             ResultCache<PrimitiveParameter> results, 
             ReferenceSpec referenceSpec, EntitySpec entitySpec, 
             String dataSourceBackendId) {
-        super(results, referenceSpec, entitySpec, dataSourceBackendId);
+        super(backend, results, referenceSpec, entitySpec, dataSourceBackendId);
     }
 
     @Override

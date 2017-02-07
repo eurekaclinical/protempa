@@ -716,4 +716,8 @@ public abstract class RelationalDbDataSourceBackend
         }
 
     }
+    
+    void fireProtempaEvent(ProtempaEvent evt) {
+        this.fireEvent(evt);
+    }
 }

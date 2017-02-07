@@ -42,11 +42,12 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
     private Statement statement;
     
     protected StreamingMainResultProcessor(
+            RelationalDbDataSourceBackend backend,
             EntitySpec entitySpec, LinkedHashMap<String,
             ReferenceSpec> inboundRefSpecs,
             Map<String, ReferenceSpec> bidirectionalRefSpecs,
             String dataSourceBackendId) {
-        super(entitySpec, dataSourceBackendId);
+        super(backend, entitySpec, dataSourceBackendId);
         this.propertySpecs = getEntitySpec().getPropertySpecs();
         this.inboundRefSpecs = inboundRefSpecs;
         this.bidirectionalRefSpecs = bidirectionalRefSpecs;

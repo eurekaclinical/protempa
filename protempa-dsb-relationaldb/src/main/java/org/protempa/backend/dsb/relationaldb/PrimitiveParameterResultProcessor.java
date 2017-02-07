@@ -41,9 +41,10 @@ class PrimitiveParameterResultProcessor extends
 
     private static final int FLUSH_SIZE = 1000000;
     
-    PrimitiveParameterResultProcessor(ResultCache<PrimitiveParameter> results,
+    PrimitiveParameterResultProcessor(RelationalDbDataSourceBackend backend,
+            ResultCache<PrimitiveParameter> results,
             EntitySpec entitySpec, String dataSourceBackendId) {
-        super(results, entitySpec, dataSourceBackendId);
+        super(backend, results, entitySpec, dataSourceBackendId);
     }
 
     @Override

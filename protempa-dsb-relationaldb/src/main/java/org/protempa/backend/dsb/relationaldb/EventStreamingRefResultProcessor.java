@@ -29,8 +29,8 @@ import org.protempa.proposition.Event;
  */
 public class EventStreamingRefResultProcessor extends StreamingRefResultProcessor<Event> {
 
-    public EventStreamingRefResultProcessor(ReferenceSpec referenceSpec, EntitySpec entitySpec, String dataSourceBackendId) {
-        super(referenceSpec, entitySpec, dataSourceBackendId);
+    public EventStreamingRefResultProcessor(RelationalDbDataSourceBackend backend, ReferenceSpec referenceSpec, EntitySpec entitySpec, String dataSourceBackendId) {
+        super(backend, referenceSpec, entitySpec, dataSourceBackendId);
     }
     
     @Override

@@ -50,10 +50,11 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
     private final Set<String> queryPropIds;
 
     PrimitiveParameterStreamingResultProcessor(
+            RelationalDbDataSourceBackend backend,
             EntitySpec entitySpec, LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Map<String, ReferenceSpec> bidirectionalRefSpecs, String dataSourceBackendId,
             Set<String> propIds) {
-        super(entitySpec, inboundRefSpecs, bidirectionalRefSpecs,
+        super(backend, entitySpec, inboundRefSpecs, bidirectionalRefSpecs,
                 dataSourceBackendId);
         assert propIds != null : "propIds cannot be null";
         this.queryPropIds = propIds;
@@ -70,7 +71,7 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                 EntitySpec entitySpec, Map<String, ReferenceSpec> inboundRefSpecs, Map<String,
                 ReferenceSpec> bidirectionalRefSpecs, InboundReferenceResultSetIterator referenceIterator)
                 throws SQLException {
-            super(statement, resultSet, entitySpec, inboundRefSpecs,
+            super(getBackend(), statement, resultSet, entitySpec, inboundRefSpecs,
                     bidirectionalRefSpecs,
                     getDataSourceBackendId(), referenceIterator);
             this.logger = SQLGenUtil.logger();
