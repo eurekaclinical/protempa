@@ -24,7 +24,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.text.Format;
-import java.util.Collections;
 import java.util.Map;
 import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.builder.ToStringBuilder;
