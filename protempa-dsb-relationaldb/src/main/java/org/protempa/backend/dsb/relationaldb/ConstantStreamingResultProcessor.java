@@ -47,11 +47,11 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
     private ConstantIterator itr;
     private final Set<String> queryPropIds;
 
-    ConstantStreamingResultProcessor(
+    ConstantStreamingResultProcessor(RelationalDbDataSourceBackend backend, 
             EntitySpec entitySpec, LinkedHashMap<String,ReferenceSpec> inboundRefSpecs,
             Map<String, ReferenceSpec> bidirectionalRefSpecs, 
             String dataSourceBackendId, Set<String> propIds) {
-        super(entitySpec, inboundRefSpecs, bidirectionalRefSpecs,
+        super(backend, entitySpec, inboundRefSpecs, bidirectionalRefSpecs,
                 dataSourceBackendId);
         assert propIds != null : "propIds cannot be null";
         this.queryPropIds = propIds;
@@ -68,7 +68,7 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
                 ReferenceSpec> inboundRefSpecs,
                 Map<String, ReferenceSpec> bidirectionalRefSpecs, InboundReferenceResultSetIterator referenceIterator)
                 throws SQLException {
-            super(statement, resultSet, entitySpec, inboundRefSpecs,
+            super(getBackend(), statement, resultSet, entitySpec, inboundRefSpecs,
                     bidirectionalRefSpecs, getDataSourceBackendId(), referenceIterator);
             this.logger = SQLGenUtil.logger();
             this.dsType = DataSourceBackendSourceSystem.getInstance(getDataSourceBackendId());

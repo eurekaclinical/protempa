@@ -31,12 +31,18 @@ import java.util.Set;
  */
 class EventResultProcessorFactory extends SQLGenResultProcessorFactory<Event> {
 
+    private final RelationalDbDataSourceBackend backend;
+
+    EventResultProcessorFactory(RelationalDbDataSourceBackend backend) {
+        this.backend = backend;
+    }
+    
     @Override
     MainResultProcessor<Event> getInstance(String dataSourceBackendId,
             EntitySpec entitySpec, ResultCache<Event> cache) {
 
         EventResultProcessor resultProcessor = 
-                new EventResultProcessor(cache, entitySpec, 
+                new EventResultProcessor(this.backend, cache, entitySpec, 
                         dataSourceBackendId);
         return resultProcessor;
     }
@@ -46,7 +52,7 @@ class EventResultProcessorFactory extends SQLGenResultProcessorFactory<Event> {
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
             ResultCache<Event> cache) {
         EventRefResultProcessor resultProcessor = 
-                new EventRefResultProcessor(cache, referenceSpec,
+                new EventRefResultProcessor(this.backend, cache, referenceSpec,
                         entitySpec, dataSourceBackendId);
         return resultProcessor;
     }
@@ -58,7 +64,7 @@ class EventResultProcessorFactory extends SQLGenResultProcessorFactory<Event> {
             Map<String, ReferenceSpec> bidirectionalRefSpecs,
             Set<String> propIds) {
         EventStreamingResultProcessor resultProcessor =
-                new EventStreamingResultProcessor(entitySpec,
+                new EventStreamingResultProcessor(this.backend, entitySpec,
                         inboundRefSpecs, bidirectionalRefSpecs,
                         dataSourceBackendId, propIds);
         return resultProcessor;
@@ -66,7 +72,7 @@ class EventResultProcessorFactory extends SQLGenResultProcessorFactory<Event> {
     
     @Override
     StreamingRefResultProcessor<Event> getStreamingRefInstance(ReferenceSpec referenceSpec, EntitySpec entitySpec, String dataSourceBackendId) {
-        return new EventStreamingRefResultProcessor(referenceSpec, entitySpec, dataSourceBackendId);
+        return new EventStreamingRefResultProcessor(this.backend, referenceSpec, entitySpec, dataSourceBackendId);
     }
 
 }

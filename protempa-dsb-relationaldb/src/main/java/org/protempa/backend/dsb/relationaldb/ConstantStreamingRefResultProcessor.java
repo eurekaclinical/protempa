@@ -29,8 +29,8 @@ import org.protempa.proposition.Constant;
  */
 public class ConstantStreamingRefResultProcessor extends StreamingRefResultProcessor<Constant> {
 
-    public ConstantStreamingRefResultProcessor(ReferenceSpec referenceSpec, EntitySpec entitySpec, String dataSourceBackendId) {
-        super(referenceSpec, entitySpec, dataSourceBackendId);
+    public ConstantStreamingRefResultProcessor(RelationalDbDataSourceBackend backend, ReferenceSpec referenceSpec, EntitySpec entitySpec, String dataSourceBackendId) {
+        super(backend, referenceSpec, entitySpec, dataSourceBackendId);
     }
     
     @Override

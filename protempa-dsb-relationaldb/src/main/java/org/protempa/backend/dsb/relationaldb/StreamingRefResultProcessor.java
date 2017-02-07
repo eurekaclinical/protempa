@@ -27,14 +27,15 @@ import org.protempa.proposition.Proposition;
 abstract class StreamingRefResultProcessor<P extends Proposition> 
         extends AbstractResultProcessor implements StreamingResultProcessor<P> {
     
-    private ReferenceSpec referenceSpec;
+    private final ReferenceSpec referenceSpec;
     private ReferenceResultSetIterator itr;
     private Statement statement;
 
     protected StreamingRefResultProcessor(
+            RelationalDbDataSourceBackend backend,
             ReferenceSpec referenceSpec, EntitySpec entitySpec,
             String dataSourceBackendId) {
-        super(entitySpec, dataSourceBackendId);
+        super(backend, entitySpec, dataSourceBackendId);
         assert referenceSpec != null : "referenceSpec cannot be null";
         this.referenceSpec = referenceSpec;
     }

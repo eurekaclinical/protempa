@@ -33,12 +33,14 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.protempa.ProtempaEvent;
 
 /**
  * Base implementation for iterators that read a result set that is ordered by
@@ -70,22 +72,24 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     private InboundReferenceResultSetIterator referenceIterator;
 
     private boolean advanceInvoked = false;
+    private final RelationalDbDataSourceBackend backend;
 
-    PropositionResultSetIterator(Statement statement, ResultSet resultSet,
-            EntitySpec entitySpec, Map<String,
-            ReferenceSpec> inboundRefSpecs,
+    PropositionResultSetIterator(RelationalDbDataSourceBackend backend,
+            Statement statement, ResultSet resultSet,
+            EntitySpec entitySpec, Map<String, ReferenceSpec> inboundRefSpecs,
             Map<String, ReferenceSpec> bidirectionalRefSpecs,
             String dataSourceBackendId, InboundReferenceResultSetIterator referenceIterator)
             throws SQLException {
+        assert backend != null : "backend cannot be null";
         assert resultSet != null : "resultSet cannot be null";
         assert entitySpec != null : "entitySpec cannot be null";
         assert dataSourceBackendId != null : "dataSourceBackendId cannot be null";
-
+        this.backend = backend;
         this.resultSet = resultSet;
         this.logger = SQLGenUtil.logger();
         logger.log(Level.INFO, "Creating proposition iterator for {0}", new Object[]{entitySpec.getName()});
-        this.uniqueIds =
-                new String[entitySpec.getUniqueIdSpecs().length];
+        this.uniqueIds
+                = new String[entitySpec.getUniqueIdSpecs().length];
         this.entitySpec = entitySpec;
         this.propIds = entitySpec.getPropositionIds();
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
@@ -140,9 +144,9 @@ abstract class PropositionResultSetIterator<P extends Proposition>
 
     /**
      * Reads the next record from the result set and creates a
-     * {@link Proposition}. Implementations must call {@link #handleKeyId}
-     * with the current key id, and they must call {@link #handleProposition}
-     * with the proposition.
+     * {@link Proposition}. Implementations must call {@link #handleKeyId} with
+     * the current key id, and they must call {@link #handleProposition} with
+     * the proposition.
      *
      * @param resultSet
      * @param uniqueIds
@@ -166,7 +170,7 @@ abstract class PropositionResultSetIterator<P extends Proposition>
         this.dataStreamingEvent = new DataStreamingEvent<>(key, uniqueProps);
         this.props = new HashMap<>();
     }
-    
+
     @Override
     public boolean hasNext() {
         return this.dataStreamingEvent != null || advance() != null;
@@ -207,11 +211,11 @@ abstract class PropositionResultSetIterator<P extends Proposition>
                     while (this.dataStreamingEvent == null) {
                         if (this.resultSet.next()) {
                             doProcess(this.resultSet, this.uniqueIds,
-                                this.codeSpec, this.entitySpec,
+                                    this.codeSpec, this.entitySpec,
                                     this.bidirectionalRefSpecs,
-                                this.columnTypes, this.propIds,
-                                this.propertySpecs, this.propertyValues,
-                                this.refUniqueIds);
+                                    this.columnTypes, this.propIds,
+                                    this.propertySpecs, this.propertyValues,
+                                    this.refUniqueIds);
                             this.count++;
                         } else {
                             logger.log(Level.INFO, "Result set complete for {0} proposition iterator", this.entitySpec.getName());
@@ -232,8 +236,22 @@ abstract class PropositionResultSetIterator<P extends Proposition>
                     }
                 } catch (SQLException ex) {
                     normalExit = false;
+                    backend.fireProtempaEvent(
+                        new ProtempaEvent(
+                            ProtempaEvent.Level.INFO,
+                            ProtempaEvent.Type.DSB_QUERY_STOP,
+                            backend.getClass(),
+                            new Date(),
+                            this.entitySpec.getName()));
+                    backend.fireProtempaEvent(
+                        new ProtempaEvent(
+                            ProtempaEvent.Level.INFO,
+                            ProtempaEvent.Type.DSB_QUERY_RESULT,
+                            backend.getClass(),
+                            new Date(),
+                            this.entitySpec.getName() + ": ERROR (" + ex.getMessage() + ")"));
                     throw new StreamingSQLException(
-                            "Error during streaming entity " 
+                            "Error during streaming entity "
                             + this.entitySpec.getName(),
                             ex);
                 } finally {
@@ -256,6 +274,20 @@ abstract class PropositionResultSetIterator<P extends Proposition>
             }
         }
         if (this.resultSet == null) {
+            backend.fireProtempaEvent(
+                    new ProtempaEvent(
+                            ProtempaEvent.Level.INFO,
+                            ProtempaEvent.Type.DSB_QUERY_STOP,
+                            backend.getClass(),
+                            new Date(),
+                            this.entitySpec.getName()));
+            backend.fireProtempaEvent(
+                    new ProtempaEvent(
+                            ProtempaEvent.Level.INFO,
+                            ProtempaEvent.Type.DSB_QUERY_RESULT,
+                            backend.getClass(),
+                            new Date(),
+                            this.entitySpec.getName() + ": " + count + " record(s) total"));
             if (logger.isLoggable(Level.FINE)) {
                 Logging.logCount(logger, Level.FINE, count,
                         "Retrieved {0} record total",

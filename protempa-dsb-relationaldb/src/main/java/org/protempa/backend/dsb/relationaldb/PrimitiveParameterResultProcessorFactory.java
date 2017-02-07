@@ -32,14 +32,21 @@ import java.util.Set;
 class PrimitiveParameterResultProcessorFactory extends
         SQLGenResultProcessorFactory<PrimitiveParameter> {
 
+    private final RelationalDbDataSourceBackend backend;
+
+    PrimitiveParameterResultProcessorFactory(RelationalDbDataSourceBackend backend) {
+        assert backend != null : "backend cannot be null";
+        this.backend = backend;
+    }
+    
     @Override
     MainResultProcessor<PrimitiveParameter> getInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             ResultCache<PrimitiveParameter> cache) {
 
         PrimitiveParameterResultProcessor resultProcessor = 
-                new PrimitiveParameterResultProcessor(cache, entitySpec,
-                        dataSourceBackendId);
+                new PrimitiveParameterResultProcessor(this.backend, 
+                        cache, entitySpec, dataSourceBackendId);
         return resultProcessor;
     }
 
@@ -48,7 +55,7 @@ class PrimitiveParameterResultProcessorFactory extends
             String dataSourceBackendId, EntitySpec entitySpec,
             ReferenceSpec referenceSpec, ResultCache<PrimitiveParameter> cache) {
         PrimitiveParameterRefResultProcessor resultProcessor = 
-                new PrimitiveParameterRefResultProcessor(cache, 
+                new PrimitiveParameterRefResultProcessor(this.backend, cache, 
                         referenceSpec, entitySpec, dataSourceBackendId);
         return resultProcessor;
     }
@@ -60,7 +67,7 @@ class PrimitiveParameterResultProcessorFactory extends
             Map<String, ReferenceSpec> bidirectionalRefSpecs,
             Set<String> propIds) {
         PrimitiveParameterStreamingResultProcessor resultProcessor =
-                new PrimitiveParameterStreamingResultProcessor(entitySpec,
+                new PrimitiveParameterStreamingResultProcessor(this.backend, entitySpec,
                         inboundRefSpecs, bidirectionalRefSpecs,
                         dataSourceBackendId, propIds);
         return resultProcessor;
@@ -68,7 +75,7 @@ class PrimitiveParameterResultProcessorFactory extends
 
     @Override
     StreamingRefResultProcessor<PrimitiveParameter> getStreamingRefInstance(ReferenceSpec referenceSpec, EntitySpec entitySpec, String dataSourceBackendId) {
-        return new PrimitiveParameterStreamingRefResultProcessor(referenceSpec, entitySpec, dataSourceBackendId);
+        return new PrimitiveParameterStreamingRefResultProcessor(this.backend, referenceSpec, entitySpec, dataSourceBackendId);
     }
     
     

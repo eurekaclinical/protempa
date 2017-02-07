@@ -39,6 +39,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,6 +55,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.protempa.ProtempaEvent;
 
 /**
  * Abstract class for implement database and driver-specific SQL generators.
@@ -172,6 +174,13 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         @Override
         public List<StreamingIteratorPair> call() throws Exception {
+            backend.fireProtempaEvent(
+                    new ProtempaEvent(
+                            ProtempaEvent.Level.INFO, 
+                            ProtempaEvent.Type.DSB_QUERY_START, 
+                            backend.getClass(), 
+                            new Date(), 
+                            this.entitySpec.getName()));
             Connection conn;
             try {
                 conn = connectionSpec.getOrCreate();
@@ -585,15 +594,15 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
          * name. Thus, we use a LinkedHashMap.
          */
         Map<EntitySpec, SQLGenResultProcessorFactory> result = new LinkedHashMap<>();
-        PrimitiveParameterResultProcessorFactory ppFactory = new PrimitiveParameterResultProcessorFactory();
+        PrimitiveParameterResultProcessorFactory ppFactory = new PrimitiveParameterResultProcessorFactory(this.backend);
         for (EntitySpec es : this.primitiveParameterEntitySpecs) {
             result.put(es, ppFactory);
         }
-        EventResultProcessorFactory eFactory = new EventResultProcessorFactory();
+        EventResultProcessorFactory eFactory = new EventResultProcessorFactory(this.backend);
         for (EntitySpec es : this.eventEntitySpecs) {
             result.put(es, eFactory);
         }
-        ConstantResultProcessorFactory cFactory = new ConstantResultProcessorFactory();
+        ConstantResultProcessorFactory cFactory = new ConstantResultProcessorFactory(this.backend);
         for (EntitySpec es : this.constantEntitySpecs) {
             result.put(es, cFactory);
         }

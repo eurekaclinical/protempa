@@ -37,10 +37,11 @@ abstract class RefResultProcessor<P extends Proposition> extends AbstractResultP
     private ReferenceSpec referenceSpec;
     private ResultCache<P> cache;
 
-    protected RefResultProcessor(ResultCache<P> results, 
+    protected RefResultProcessor(RelationalDbDataSourceBackend backend,
+            ResultCache<P> results, 
             ReferenceSpec referenceSpec, EntitySpec entitySpec, 
             String dataSourceBackendId) {
-        super(entitySpec, dataSourceBackendId);
+        super(backend, entitySpec, dataSourceBackendId);
         assert results != null : "results cannot be null";
         assert referenceSpec != null : "referenceSpec cannot be null";
         this.cache = results;

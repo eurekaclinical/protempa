@@ -30,10 +30,10 @@ import org.protempa.proposition.UniqueId;
 final class ConstantRefResultProcessor extends
         RefResultProcessor<Constant> {
 
-    ConstantRefResultProcessor(ResultCache<Constant> results, 
+    ConstantRefResultProcessor(RelationalDbDataSourceBackend backend, ResultCache<Constant> results, 
             ReferenceSpec referenceSpec, EntitySpec entitySpec, 
             String dataSourceBackendId) {
-        super(results, referenceSpec, entitySpec, dataSourceBackendId);
+        super(backend, results, referenceSpec, entitySpec, dataSourceBackendId);
     }
 
     @Override

@@ -32,13 +32,19 @@ import java.util.Set;
 class ConstantResultProcessorFactory
         extends SQLGenResultProcessorFactory<Constant> {
 
+    private final RelationalDbDataSourceBackend backend;
+
+    ConstantResultProcessorFactory(RelationalDbDataSourceBackend backend) {
+        this.backend = backend;
+    }
+    
     @Override
     MainResultProcessor<Constant> getInstance(
             String dataSourceBackendId, EntitySpec entitySpec, 
             ResultCache<Constant> cache) {
 
         ConstantResultProcessor resultProcessor =
-                new ConstantResultProcessor(cache, entitySpec, 
+                new ConstantResultProcessor(this.backend, cache, entitySpec, 
                         dataSourceBackendId);
         return resultProcessor;
     }
@@ -49,7 +55,7 @@ class ConstantResultProcessorFactory
             ReferenceSpec referenceSpec,
             ResultCache<Constant> cache) {
         ConstantRefResultProcessor resultProcessor =
-                new ConstantRefResultProcessor(cache, referenceSpec,
+                new ConstantRefResultProcessor(this.backend, cache, referenceSpec,
                         entitySpec, dataSourceBackendId);
         return resultProcessor;
     }
@@ -61,7 +67,7 @@ class ConstantResultProcessorFactory
             Map<String, ReferenceSpec> bidirectionalRefSpecs, 
             Set<String> propIds) {
         ConstantStreamingResultProcessor resultProcessor =
-                new ConstantStreamingResultProcessor(entitySpec,
+                new ConstantStreamingResultProcessor(this.backend, entitySpec,
                         inboundRefSpecs, bidirectionalRefSpecs,
                         dataSourceBackendId, propIds);
         return resultProcessor;
@@ -69,7 +75,7 @@ class ConstantResultProcessorFactory
     
     @Override
     StreamingRefResultProcessor<Constant> getStreamingRefInstance(ReferenceSpec referenceSpec, EntitySpec entitySpec, String dataSourceBackendId) {
-        return new ConstantStreamingRefResultProcessor(referenceSpec, entitySpec, dataSourceBackendId);
+        return new ConstantStreamingRefResultProcessor(this.backend, referenceSpec, entitySpec, dataSourceBackendId);
     }
 
 }

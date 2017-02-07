@@ -31,21 +31,29 @@ import org.protempa.proposition.UniqueId;
  */
 abstract class AbstractResultProcessor implements SQLGenResultProcessor {
 
-    private String dataSourceBackendId;
-    private EntitySpec entitySpec;
+    private final String dataSourceBackendId;
+    private final EntitySpec entitySpec;
     private boolean casePresent;
+    final RelationalDbDataSourceBackend backend;
     
-    protected AbstractResultProcessor(EntitySpec entitySpec, 
+    protected AbstractResultProcessor(RelationalDbDataSourceBackend backend,
+            EntitySpec entitySpec, 
             String dataSourceBackendId) {
+        assert backend != null : "backend cannot be null";
         assert entitySpec != null : "entitySpec cannot be null";
         assert dataSourceBackendId != null : 
                 "dataSourceBackendId cannot be null";
+        this.backend = backend;
         this.entitySpec = entitySpec;
         this.dataSourceBackendId = dataSourceBackendId;
     }
 
     final String getDataSourceBackendId() {
         return dataSourceBackendId;
+    }
+
+    public RelationalDbDataSourceBackend getBackend() {
+        return backend;
     }
 
     @Override
