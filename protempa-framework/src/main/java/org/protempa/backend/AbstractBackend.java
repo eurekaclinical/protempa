@@ -22,6 +22,8 @@ package org.protempa.backend;
 import java.util.ArrayList;
 import java.util.List;
 import org.protempa.BackendListener;
+import org.protempa.ProtempaEvent;
+import org.protempa.ProtempaEventListener;
 
 /**
  * Common interface for PROTEMPA backends.
@@ -38,6 +40,7 @@ public abstract class AbstractBackend<E extends BackendUpdatedEvent>
     private String configurationsId;
     
     private String id;
+    private List<ProtempaEventListener> eventListeners;
 
     public AbstractBackend() {
         this.listenerList = new ArrayList<>();
@@ -76,6 +79,17 @@ public abstract class AbstractBackend<E extends BackendUpdatedEvent>
     @Override
     public void removeBackendListener(BackendListener<E> listener) {
         this.listenerList.remove(listener);
+    }
+
+    @Override
+    public void setEventListeners(List<ProtempaEventListener> eventListeners) {
+        this.eventListeners = eventListeners;
+    }
+    
+    protected void fireEvent(ProtempaEvent evt) {
+        for (ProtempaEventListener l : this.eventListeners) {
+            l.eventFired(evt);
+        }
     }
 
     /**

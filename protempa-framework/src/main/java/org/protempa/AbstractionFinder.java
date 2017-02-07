@@ -22,6 +22,7 @@ package org.protempa;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -50,7 +51,8 @@ final class AbstractionFinder {
 
     AbstractionFinder(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource, TermSource termSource,
-            boolean cacheFoundAbstractParameters)
+            boolean cacheFoundAbstractParameters, 
+            List<ProtempaEventListener> eventListeners)
             throws KnowledgeSourceReadException {
         assert dataSource != null : "dataSource cannot be null";
         assert knowledgeSource != null : "knowledgeSource cannot be null";
@@ -61,6 +63,11 @@ final class AbstractionFinder {
         this.knowledgeSource = knowledgeSource;
         this.termSource = termSource;
         this.algorithmSource = algorithmSource;
+        
+        this.dataSource.setEventListeners(eventListeners);
+        this.knowledgeSource.setEventListeners(eventListeners);
+        this.termSource.setEventListeners(eventListeners);
+        this.algorithmSource.setEventListeners(eventListeners);
 
         this.dataSource.addSourceListener(
                 new SourceListener<DataSourceUpdatedEvent>() {

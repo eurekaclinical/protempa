@@ -19,8 +19,10 @@
  */
 package org.protempa.backend;
 
+import java.util.List;
 import org.protempa.BackendCloseException;
 import org.protempa.BackendListener;
+import org.protempa.ProtempaEventListener;
 import org.protempa.Source;
 
 /**
@@ -81,4 +83,6 @@ public interface Backend<E extends BackendUpdatedEvent> {
      *            a {@link BackendListener}.
      */
     void removeBackendListener(BackendListener<E> listener);
+    
+    void setEventListeners(List<ProtempaEventListener> eventListeners);
 }

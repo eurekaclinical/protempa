@@ -28,7 +28,7 @@ import org.protempa.backend.BackendUpdatedEvent;
  *
  * @author Andrew Post
  */
-public final class SourceClosedUnexpectedlyEvent<S extends SourceUpdatedEvent, B extends Backend, T extends BackendUpdatedEvent> extends EventObject {
+public final class SourceClosedUnexpectedlyEvent<S extends SourceUpdatedEvent, B extends Backend<T>, T extends BackendUpdatedEvent> extends EventObject {
     private static final long serialVersionUID = 7088929112407759901L;
     private Source<S, B, T> protempaSource;
 

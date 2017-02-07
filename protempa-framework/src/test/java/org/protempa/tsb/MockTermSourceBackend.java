@@ -32,6 +32,7 @@ import org.protempa.backend.tsb.TermSourceBackend;
 
 import java.util.List;
 import java.util.Map;
+import org.protempa.ProtempaEventListener;
 
 /**
  *
@@ -87,5 +88,10 @@ public class MockTermSourceBackend implements TermSourceBackend {
     @Override
     public String getId() {
         return "mocktsb";
+    }
+
+    @Override
+    public void setEventListeners(List<ProtempaEventListener> eventListeners) {
+        
     }
 }

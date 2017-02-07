@@ -131,4 +131,6 @@ public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, Kno
     
     List<ContextDefinition> readContextDefinitions(String... propIds) throws KnowledgeSourceReadException;
 
+    public void setEventListeners(List<ProtempaEventListener> eventListeners);
+
 }

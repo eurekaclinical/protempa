@@ -26,11 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractSource<S extends SourceUpdatedEvent, 
-        B extends Backend, E extends SourceUpdatedEvent, 
+        B extends Backend<T>, E extends SourceUpdatedEvent, 
         T extends BackendUpdatedEvent> implements Source<S, B, T> {
 
     private final List<SourceListener<S>> listenerList;
-    private B[] backends;
+    private List<ProtempaEventListener> eventListeners;
+    private final B[] backends;
     private boolean closed;
 
     /**
@@ -46,8 +47,16 @@ public abstract class AbstractSource<S extends SourceUpdatedEvent,
         ProtempaUtil.checkArrayForDuplicates(backends, "backends");
         this.listenerList = new ArrayList<>();
         this.backends = backends.clone();
-        for (Backend backend : this.backends) {
+        for (B backend : this.backends) {
             backend.addBackendListener(this);
+        }
+    }
+
+    @Override
+    public void setEventListeners(List<ProtempaEventListener> eventListeners) {
+        this.eventListeners = eventListeners;
+        for (B backend : this.backends) {
+            backend.setEventListeners(eventListeners);
         }
     }
     
@@ -60,7 +69,7 @@ public abstract class AbstractSource<S extends SourceUpdatedEvent,
     public final B[] getBackends() {
         return this.backends.clone();
     }
-
+    
     /**
      * Adds a listener that gets called whenever something changes.
      *

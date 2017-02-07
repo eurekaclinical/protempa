@@ -43,5 +43,7 @@ public interface TermSource extends Source<TermSourceUpdatedEvent, TermSourceBac
     List<String> getTermSubsumption(String termId) throws TermSourceReadException;
 
     Term readTerm(String id) throws TermSourceReadException;
+
+    public void setEventListeners(List<ProtempaEventListener> eventListeners);
     
 }
