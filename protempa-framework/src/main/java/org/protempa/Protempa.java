@@ -53,7 +53,6 @@ import org.protempa.dest.GetSupportedPropositionIdsException;
 public final class Protempa implements AutoCloseable {
 
     private static final String STARTUP_FAILURE_MSG = "PROTEMPA could not start up";
-    private final AbstractionFinder abstractionFinder;
 
     public static Protempa newInstance(String configurationId)
             throws ProtempaStartupException {
@@ -96,6 +95,9 @@ public final class Protempa implements AutoCloseable {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
     }
+    
+    private final AbstractionFinder abstractionFinder;
+    private final List<ProtempaEventListener> eventListeners;
 
     /**
      * Constructor that configures PROTEMPA not to cache found abstract
@@ -150,6 +152,7 @@ public final class Protempa implements AutoCloseable {
             AlgorithmSource algorithmSource, TermSource termSource,
             boolean cacheFoundAbstractParameters)
             throws ProtempaStartupException {
+        this.eventListeners = new ArrayList<>();
         DataSource ds;
         if (dataSource == null) {
             ds = new DataSourceImpl(new DataSourceBackend[0]);
@@ -177,10 +180,10 @@ public final class Protempa implements AutoCloseable {
         } else {
             ts = termSource;
         }
-
+        
         try {
             this.abstractionFinder = new AbstractionFinder(ds, ks, as, ts,
-                    cacheFoundAbstractParameters);
+                    cacheFoundAbstractParameters, this.eventListeners);
         } catch (KnowledgeSourceReadException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
@@ -224,6 +227,14 @@ public final class Protempa implements AutoCloseable {
      */
     public TermSource getTermSource() {
         return this.abstractionFinder.getTermSource();
+    }
+    
+    public void addEventListener(ProtempaEventListener eventListener) {
+        this.eventListeners.add(eventListener);
+    }
+    
+    public void removeEventListener(ProtempaEventListener eventListener) {
+        this.eventListeners.remove(eventListener);
     }
 
     /**

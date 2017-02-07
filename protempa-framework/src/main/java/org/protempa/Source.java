@@ -19,10 +19,11 @@
  */
 package org.protempa;
 
+import java.util.List;
 import org.protempa.backend.Backend;
 import org.protempa.backend.BackendUpdatedEvent;
 
-public interface Source<S extends SourceUpdatedEvent, B extends Backend, T extends BackendUpdatedEvent> 
+public interface Source<S extends SourceUpdatedEvent, B extends Backend<?>, T extends BackendUpdatedEvent> 
         extends BackendListener<T>, AutoCloseable {
 
     B[] getBackends();
@@ -30,6 +31,8 @@ public interface Source<S extends SourceUpdatedEvent, B extends Backend, T exten
     void addSourceListener(SourceListener<S> sourceListener);
 
     void removeSourceListener(SourceListener<S> sourceListener);
+    
+    void setEventListeners(List<ProtempaEventListener> eventListeners);
 
     @Override
     void close() throws SourceCloseException;

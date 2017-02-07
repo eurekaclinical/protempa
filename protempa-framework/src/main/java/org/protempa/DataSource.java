@@ -114,5 +114,5 @@ public interface DataSource extends Source<DataSourceUpdatedEvent,
     void deleteAllKeys() throws DataSourceWriteException;
     
     void writeKeys(Set<String> keyIds) throws DataSourceWriteException;
-    
+
 }

@@ -23,6 +23,7 @@
  */
 package org.protempa;
 
+import java.util.List;
 import java.util.Set;
 import org.protempa.backend.AlgorithmSourceBackendUpdatedEvent;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
@@ -55,5 +56,7 @@ public interface AlgorithmSource extends Source<AlgorithmSourceUpdatedEvent, Alg
      * reading an algorithm.
      */
     Set<Algorithm> readAlgorithms() throws AlgorithmSourceReadException;
+
+    public void setEventListeners(List<ProtempaEventListener> eventListeners);
     
 }
