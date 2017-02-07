@@ -32,7 +32,7 @@ public interface Source<S extends SourceUpdatedEvent, B extends Backend<?>, T ex
 
     void removeSourceListener(SourceListener<S> sourceListener);
     
-    void setEventListeners(List<ProtempaEventListener> eventListeners);
+    void setEventListeners(List<? extends ProtempaEventListener> eventListeners);
 
     @Override
     void close() throws SourceCloseException;

@@ -57,6 +57,4 @@ public interface AlgorithmSource extends Source<AlgorithmSourceUpdatedEvent, Alg
      */
     Set<Algorithm> readAlgorithms() throws AlgorithmSourceReadException;
 
-    public void setEventListeners(List<ProtempaEventListener> eventListeners);
-    
 }
