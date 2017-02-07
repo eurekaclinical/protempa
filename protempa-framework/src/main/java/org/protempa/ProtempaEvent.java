@@ -21,6 +21,7 @@ package org.protempa;
  */
 
 import java.util.Date;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
  *
@@ -76,6 +77,11 @@ public class ProtempaEvent {
 
     public String getDescription() {
         return description;
+    }
+    
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
     
 }
