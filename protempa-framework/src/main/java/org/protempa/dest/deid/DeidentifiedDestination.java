@@ -1,7 +1,10 @@
 package org.protempa.dest.deid;
 
+import java.util.EventListener;
+import java.util.List;
 import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
+import org.protempa.ProtempaEventListener;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.Destination;
 import org.protempa.dest.GetSupportedPropositionIdsException;
@@ -58,9 +61,9 @@ public final class DeidentifiedDestination extends AbstractDestination {
     }
 
     @Override
-    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
         try {
-            return new DeidentifiedQueryResultsHandler(this.destination.getQueryResultsHandler(query, dataSource, knowledgeSource), this.deidConfig);
+            return new DeidentifiedQueryResultsHandler(this.destination.getQueryResultsHandler(query, dataSource, knowledgeSource, eventListeners), this.deidConfig);
         } catch (EncryptionInitException ex) {
             throw new QueryResultsHandlerInitException("Error initializing deidentifier", ex);
         }

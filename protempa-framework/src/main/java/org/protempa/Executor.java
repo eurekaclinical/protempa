@@ -113,7 +113,7 @@ final class Executor implements AutoCloseable {
     void init() throws QueryException {
         log(Level.FINE, "Initializing query results handler...");
         try {
-            this.resultsHandler = this.destination.getQueryResultsHandler(getQuery(), this.abstractionFinder.getDataSource(), getKnowledgeSource());
+            this.resultsHandler = this.destination.getQueryResultsHandler(getQuery(), this.abstractionFinder.getDataSource(), getKnowledgeSource(), this.abstractionFinder.getEventListeners());
             log(Level.FINE, "Got query results handler {0}", this.resultsHandler.getId());
             log(Level.FINE, "Validating query results handler");
             this.resultsHandler.validate();

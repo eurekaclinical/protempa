@@ -1,7 +1,9 @@
 package org.protempa.dest;
 
+import java.util.List;
 import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
+import org.protempa.ProtempaEventListener;
 import org.protempa.query.Query;
 
 /*
@@ -56,7 +58,7 @@ public interface Destination {
      * any exceptions occur. There may be a nested exception with more
      * information.
      */
-    QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException;
+    QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException;
     
     boolean isGetStatisticsSupported();
     

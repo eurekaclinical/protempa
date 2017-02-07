@@ -1,7 +1,9 @@
 package org.protempa.dest.map;
 
+import java.util.List;
 import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
+import org.protempa.ProtempaEventListener;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerInitException;
@@ -37,7 +39,7 @@ public final class MapDestination extends AbstractDestination {
     MapDestination() {}
 
     @Override
-    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
         if (query.getQueryMode() == QueryMode.UPDATE) {
             throw new QueryResultsHandlerInitException("Update mode not supported");
         }
