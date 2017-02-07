@@ -48,12 +48,12 @@ final class AbstractionFinder {
     // private final Map<String, List<String>> termToPropDefMap;
     private boolean closed;
     private Executor executor;
-    private final List<ProtempaEventListener> eventListeners;
+    private final List<? extends ProtempaEventListener> eventListeners;
 
     AbstractionFinder(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource, TermSource termSource,
             boolean cacheFoundAbstractParameters, 
-            List<ProtempaEventListener> eventListeners)
+            List<? extends ProtempaEventListener> eventListeners)
             throws KnowledgeSourceReadException {
         assert dataSource != null : "dataSource cannot be null";
         assert knowledgeSource != null : "knowledgeSource cannot be null";
@@ -136,7 +136,7 @@ final class AbstractionFinder {
         }
     }
 
-    List<ProtempaEventListener> getEventListeners() {
+    List<? extends ProtempaEventListener> getEventListeners() {
         return eventListeners;
     }
     

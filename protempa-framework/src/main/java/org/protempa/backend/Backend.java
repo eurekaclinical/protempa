@@ -84,5 +84,5 @@ public interface Backend<E extends BackendUpdatedEvent> {
      */
     void removeBackendListener(BackendListener<E> listener);
     
-    void setEventListeners(List<ProtempaEventListener> eventListeners);
+    void setEventListeners(List<? extends ProtempaEventListener> eventListeners);
 }

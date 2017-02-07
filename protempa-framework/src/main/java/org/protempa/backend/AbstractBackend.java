@@ -40,7 +40,7 @@ public abstract class AbstractBackend<E extends BackendUpdatedEvent>
     private String configurationsId;
     
     private String id;
-    private List<ProtempaEventListener> eventListeners;
+    private List<? extends ProtempaEventListener> eventListeners;
 
     public AbstractBackend() {
         this.listenerList = new ArrayList<>();
@@ -82,7 +82,7 @@ public abstract class AbstractBackend<E extends BackendUpdatedEvent>
     }
 
     @Override
-    public void setEventListeners(List<ProtempaEventListener> eventListeners) {
+    public void setEventListeners(List<? extends ProtempaEventListener> eventListeners) {
         this.eventListeners = eventListeners;
     }
     

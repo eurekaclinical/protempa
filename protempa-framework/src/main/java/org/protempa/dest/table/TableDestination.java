@@ -74,7 +74,7 @@ public final class TableDestination extends AbstractDestination {
     }
 
     @Override
-    public TableQueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
+    public TableQueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
         if (query.getQueryMode() == QueryMode.UPDATE) {
             throw new QueryResultsHandlerInitException("Update mode not supported");
         }

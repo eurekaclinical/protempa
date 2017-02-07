@@ -91,7 +91,7 @@ public class MockTermSourceBackend implements TermSourceBackend {
     }
 
     @Override
-    public void setEventListeners(List<ProtempaEventListener> eventListeners) {
+    public void setEventListeners(List<? extends ProtempaEventListener> eventListeners) {
         
     }
 }

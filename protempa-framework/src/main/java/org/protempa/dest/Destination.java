@@ -58,7 +58,7 @@ public interface Destination {
      * any exceptions occur. There may be a nested exception with more
      * information.
      */
-    QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException;
+    QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException;
     
     boolean isGetStatisticsSupported();
     

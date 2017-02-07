@@ -30,7 +30,7 @@ public abstract class AbstractSource<S extends SourceUpdatedEvent,
         T extends BackendUpdatedEvent> implements Source<S, B, T> {
 
     private final List<SourceListener<S>> listenerList;
-    private List<ProtempaEventListener> eventListeners;
+    private List<? extends ProtempaEventListener> eventListeners;
     private final B[] backends;
     private boolean closed;
 
@@ -53,7 +53,7 @@ public abstract class AbstractSource<S extends SourceUpdatedEvent,
     }
 
     @Override
-    public void setEventListeners(List<ProtempaEventListener> eventListeners) {
+    public void setEventListeners(List<? extends ProtempaEventListener> eventListeners) {
         this.eventListeners = eventListeners;
         for (B backend : this.backends) {
             backend.setEventListeners(eventListeners);
