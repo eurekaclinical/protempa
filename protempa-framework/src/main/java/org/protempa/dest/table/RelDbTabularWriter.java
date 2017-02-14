@@ -20,13 +20,10 @@ package org.protempa.dest.table;
  * #L%
  */
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.text.Format;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.Proposition;
@@ -42,13 +39,13 @@ import org.protempa.proposition.value.Value;
  *
  * @author Andrew Post
  */
-class RelDbTabularWriter extends AbstractTabularWriter {
+public class RelDbTabularWriter extends AbstractTabularWriter {
     private final RecordHandler<ArrayList<?>> recordHandler;
     private final ArrayList<Object> row;
     private int colIndex;
     private final Map<?, ?> replace;
     
-    RelDbTabularWriter(ConnectionSpec inConnectionSpec, String inStatement, Map<?, ?> inReplace) throws SQLException {
+    public RelDbTabularWriter(ConnectionSpec inConnectionSpec, String inStatement, Map<?, ?> inReplace) throws SQLException {
         this.recordHandler = new ListRecordHandler(inConnectionSpec, inStatement);
         this.row = new ArrayList<>();
         this.replace = inReplace;

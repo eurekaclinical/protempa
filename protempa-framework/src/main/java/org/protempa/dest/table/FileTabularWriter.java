@@ -37,14 +37,14 @@ import org.protempa.proposition.value.Value;
  *
  * @author Andrew Post
  */
-class FileTabularWriter extends AbstractTabularWriter {
+public class FileTabularWriter extends AbstractTabularWriter {
 
     private final BufferedWriter writer;
     private int colIndex;
     private final char delimiter;
     private final StringMapReplacer replacer;
 
-    FileTabularWriter(BufferedWriter inWriter, char inDelimiter, StringMapReplacer inReplacer) {
+    public FileTabularWriter(BufferedWriter inWriter, char inDelimiter, StringMapReplacer inReplacer) {
         this.writer = inWriter;
         this.delimiter = inDelimiter;
         this.replacer = inReplacer;
