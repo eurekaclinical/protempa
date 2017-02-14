@@ -13,18 +13,6 @@
     <packaging>jar</packaging>
     <name>Protempa Framework</name>
     <description>Protempa Framework is the core of Protempa.</description>
-    <properties>
-        <protempa.xsd.version>1.1</protempa.xsd.version>
-        <protempa.xsd.parentUrl>http://aiwdev02.eushc.org/protempa/schema/${protempa.xsd.version}</protempa.xsd.parentUrl>
-        <protempa.xsd.query.name>protempa_query.xsd</protempa.xsd.query.name>
-        <protempa.xsd.query.url>${protempa.xsd.parentUrl}/${protempa.xsd.query.name}</protempa.xsd.query.url>
-        <protempa.xsd.configuration.name>protempa_configuration.xsd</protempa.xsd.configuration.name>
-        <protempa.xsd.configuration.url>${protempa.xsd.parentUrl}/${protempa.xsd.configuration.name}</protempa.xsd.configuration.url>
-        <protempa.xsd.relationalDBBackend.name>protempa_relationalDBBackend.xsd</protempa.xsd.relationalDBBackend.name>
-        <protempa.xsd.relationalDBBackend.url>${protempa.xsd.parentUrl}/${protempa.xsd.relationalDBBackend.name}</protempa.xsd.relationalDBBackend.url>
-        <protempa.xsd.tableQueryResultsHandler.name>protempa_tableQueryResultsHandler.xsd</protempa.xsd.tableQueryResultsHandler.name>
-        <protempa.xsd.tableQueryResultsHandler.url>${protempa.xsd.parentUrl}/${protempa.xsd.tableQueryResultsHandler.name}</protempa.xsd.tableQueryResultsHandler.url>
-    </properties>
       
     <dependencies>
         <dependency>
@@ -47,10 +35,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.xstream</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -100,7 +84,6 @@
                 <filtering>false</filtering>
                 <directory>${basedir}/src/main/resources</directory>
                 <includes>
-                    <include>org/protempa/xml/*.xsd</include>
                     <include>org/protempa/backend/**/*</include>
                     <include>org/protempa/proposition/**/*</include>
                     <include>org/protempa/asb/**/*</include>
