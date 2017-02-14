@@ -19,20 +19,16 @@
  */
 package org.protempa.dest.table;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.arp.javautil.string.StringUtil;
 
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
@@ -84,13 +80,13 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSourceCache ksCache, Map<String, String> replace,
-            char delimiter, Writer writer) throws IOException {
+            KnowledgeSourceCache ksCache,
+            TabularWriter writer) throws TabularWriterException {
         Collection<Proposition> props = traverseLinks(this.links, proposition,
                 forwardDerivations, backwardDerivations, references,
                 ksCache);
         String str = props.size() >= this.n ? this.trueOutput : this.falseOutput;
-        StringUtil.escapeAndWriteDelimitedColumn(str, delimiter, replace, writer);
+        writer.writeString(str);
     }
 
     @Override

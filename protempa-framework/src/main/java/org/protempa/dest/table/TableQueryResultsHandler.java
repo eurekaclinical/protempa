@@ -20,19 +20,14 @@
 package org.protempa.dest.table;
 
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.arp.javautil.string.StringUtil;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceCacheFactory;
@@ -56,7 +51,7 @@ public final class TableQueryResultsHandler
     private final String[] rowPropositionIds;
     private final TableColumnSpec[] columnSpecs;
     private final boolean headerWritten;
-    private final BufferedWriter out;
+    private final FileTabularWriter out;
     private final Map<String, String> replace;
     private final KnowledgeSource knowledgeSource;
     private KnowledgeSourceCache ksCache;
@@ -71,10 +66,10 @@ public final class TableQueryResultsHandler
         ProtempaUtil.internAll(this.rowPropositionIds);
         this.columnSpecs = columnSpecs.clone();
         this.headerWritten = headerWritten;
-        this.out = out;
         this.replace = new HashMap<>();
         this.replace.put(null, "(null)");
         this.replace.put("", "(empty)");
+        this.out = new FileTabularWriter(out, this.columnDelimiter, new StringMapReplacer(this.replace));
         this.knowledgeSource = knowledgeSource;
     }
 
@@ -128,11 +123,13 @@ public final class TableQueryResultsHandler
                         columnNames.add(colName);
                     }
                 }
-                StringUtil.escapeAndWriteDelimitedColumns(columnNames, this.columnDelimiter, this.out);
-                this.out.newLine();
+                for (String columnName : columnNames) {
+                    this.out.writeString(columnName);
+                }
+                this.out.newRow();
             } catch (KnowledgeSourceReadException ex1) {
                 throw new QueryResultsHandlerProcessingException("Error reading knowledge source", ex1);
-            } catch (IOException ex) {
+            } catch (TabularWriterException ex) {
                 throw new QueryResultsHandlerProcessingException("Could not write header", ex);
             }
         }
@@ -153,20 +150,13 @@ public final class TableQueryResultsHandler
                 continue;
             }
             try {
-                StringUtil.escapeAndWriteDelimitedColumn(keyId, this.columnDelimiter, this.out);
-                if (n > 0) {
-                    this.out.write(this.columnDelimiter);
-                }
+                this.out.writeString(keyId);
                 for (int i = 0; i < n; i++) {
                     TableColumnSpec columnSpec = this.columnSpecs[i];
-                    columnSpec.columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.ksCache, this.replace, this.columnDelimiter, this.out);
-                    if (i < n - 1) {
-                        this.out.write(this.columnDelimiter);
-                    } else {
-                        this.out.newLine();
-                    }
+                    columnSpec.columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.ksCache, this.out);
                 }
-            } catch (IOException ex) {
+                this.out.newRow();
+            } catch (TabularWriterException ex) {
                 throw new QueryResultsHandlerProcessingException("Could not write row" + ex);
             }
         }

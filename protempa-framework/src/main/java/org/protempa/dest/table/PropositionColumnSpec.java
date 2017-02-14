@@ -19,8 +19,6 @@
  */
 package org.protempa.dest.table;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -34,12 +32,12 @@ import java.util.logging.Level;
 import org.apache.commons.lang3.ArrayUtils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.arp.javautil.string.StringUtil;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
+import org.protempa.ProtempaException;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Constant;
@@ -50,7 +48,7 @@ import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.Value;
-import org.protempa.proposition.visitor.AbstractPropositionVisitor;
+import org.protempa.proposition.visitor.AbstractPropositionCheckedVisitor;
 import org.protempa.valueset.ValueSet;
 
 public class PropositionColumnSpec extends AbstractTableColumnSpec {
@@ -68,7 +66,6 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     private final OutputConfig outputConfig;
     private final ValueOutputConfig valueOutputConfig;
     private final ValuesPropositionVisitor propositionVisitor;
-    private final String[] result;
 
     public PropositionColumnSpec(String[] propertyNames) {
         this(propertyNames, null, null);
@@ -96,10 +93,10 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         this(null, propertyNames, outputConfig, valueOutputConfig, links,
                 numInstances);
     }
-    
+
     public PropositionColumnSpec(String columnNamePrefixOverride,
             String[] propertyNames, OutputConfig outputConfig,
-            ValueOutputConfig valueOutputConfig, Link[] links, 
+            ValueOutputConfig valueOutputConfig, Link[] links,
             int numInstances) {
         if (propertyNames == null) {
             this.propertyNames = ArrayUtils.EMPTY_STRING_ARRAY;
@@ -135,7 +132,6 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         this.numInstances = numInstances;
         this.columnNamePrefixOverride = columnNamePrefixOverride;
         propositionVisitor = new ValuesPropositionVisitor();
-        result = new String[this.outputConfig.getNumberOfColumns() * this.numInstances];
     }
 
     private String[] columnNames() {
@@ -182,17 +178,16 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         }
         for (String heading : this.propertyNames) {
             results.add(StringUtils.defaultIfEmpty(
-                    outputConfig.getPropertyHeading(heading), 
+                    outputConfig.getPropertyHeading(heading),
                     this.columnNamePrefixOverride + "." + heading));
         }
         return results.toArray(new String[results.size()]);
     }
 
-    private class ValuesPropositionVisitor extends AbstractPropositionVisitor {
+    private class ValuesPropositionVisitor extends AbstractPropositionCheckedVisitor {
 
         private KnowledgeSourceCache ksCache;
-        private String[] result;
-        private int i = 0;
+        private TabularWriter tabularWriter;
 
         ValuesPropositionVisitor() {
         }
@@ -201,135 +196,109 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             this.ksCache = ksCache;
         }
 
-//        KnowledgeSource getKnowledgeSource() {
-//            return this.knowledgeSource;
-//        }
-        void setResult(String[] result) {
-            this.result = result;
+        void setTabularWriter(TabularWriter tabularWriter) {
+            this.tabularWriter = tabularWriter;
+        }
+
+        TabularWriter getTabularWriter() {
+            return tabularWriter;
         }
 
         @Override
-        public void visit(AbstractParameter abstractParameter) {
+        public void visit(AbstractParameter abstractParameter) throws TabularWriterException {
             Format positionFormat = outputConfig.getPositionFormat();
             if (outputConfig.showUniqueId()) {
-                result[i++] = abstractParameter.getUniqueId().getStringRepresentation();
+                this.tabularWriter.writeUniqueId(abstractParameter);
             }
             if (outputConfig.showId()) {
-                result[i++] = abstractParameter.getId();
+                this.tabularWriter.writeId(abstractParameter);
             }
             if (outputConfig.showValue()) {
-                result[i++] = abstractParameter.getValueFormatted();
+                this.tabularWriter.writeValue(abstractParameter);
             }
             displayNames(abstractParameter);
             if (outputConfig.showStartOrTimestamp()) {
-                result[i++] = positionFormat != null ? abstractParameter.formatStart(positionFormat) : abstractParameter.getStartFormattedShort();
+                this.tabularWriter.writeStart(abstractParameter, positionFormat);
             }
             if (outputConfig.showFinish()) {
-                result[i++] = positionFormat != null ? abstractParameter.formatFinish(positionFormat) : abstractParameter.getFinishFormattedShort();
+                this.tabularWriter.writeFinish(abstractParameter, positionFormat);
             }
             if (outputConfig.showLength()) {
-                //result[i++] = abstractParameter.getLengthFormattedShort();
-                /*
-                 * This is a hack until we have an API in PROTEMPA to get a 
-                 * length string without units.
-                 */
-                result[i++] = numberFormat.get().format(
-                        abstractParameter.getInterval().getMinLength());
+                this.tabularWriter.writeLength(abstractParameter, numberFormat.get());
             }
             processProperties(abstractParameter);
         }
 
         @Override
-        public void visit(Event event) {
+        public void visit(Event event) throws TabularWriterException {
             Format positionFormat = outputConfig.getPositionFormat();
             if (outputConfig.showUniqueId()) {
-                result[i++] = event.getUniqueId().getStringRepresentation();
+                this.tabularWriter.writeUniqueId(event);
             }
             if (outputConfig.showId()) {
-                result[i++] = event.getId();
+                this.tabularWriter.writeId(event);
             }
             if (outputConfig.showValue()) {
-                result[i++] = null;
+                this.tabularWriter.writeNull();
             }
             displayNames(event);
             if (outputConfig.showStartOrTimestamp()) {
-                result[i++] = positionFormat != null ? event.formatStart(positionFormat) : event.getStartFormattedShort();
+                this.tabularWriter.writeStart(event, positionFormat);
             }
             if (outputConfig.showFinish()) {
-                result[i++] = positionFormat != null ? event.formatFinish(positionFormat) : event.getFinishFormattedShort();
+                this.tabularWriter.writeFinish(event, positionFormat);
             }
             if (outputConfig.showLength()) {
-                //result[i++] = event.getLengthFormattedShort();
-                /*
-                 * This is a hack until we have an API in PROTEMPA to get a 
-                 * length string without units.
-                 */
-                Long minLength = event.getInterval().getMinLength();
-                if (minLength != null) {
-                    result[i++] = numberFormat.get().format(minLength);
-                } else {
-                    result[i++] = "";
-                }
+                this.tabularWriter.writeLength(event, numberFormat.get());
             }
             processProperties(event);
         }
 
         @Override
-        public void visit(PrimitiveParameter primitiveParameter) {
+        public void visit(PrimitiveParameter primitiveParameter) throws TabularWriterException {
             Format positionFormat = outputConfig.getPositionFormat();
             if (outputConfig.showUniqueId()) {
-                result[i++] = primitiveParameter.getUniqueId().getStringRepresentation();
+                this.tabularWriter.writeUniqueId(primitiveParameter);
             }
             if (outputConfig.showId()) {
-                result[i++] = primitiveParameter.getId();
+                this.tabularWriter.writeId(primitiveParameter);
             }
             if (outputConfig.showValue()) {
-                result[i++] = primitiveParameter.getValueFormatted();
+                this.tabularWriter.writeValue(primitiveParameter);
             }
             displayNames(primitiveParameter);
             if (outputConfig.showStartOrTimestamp()) {
-                result[i++] = positionFormat != null ? primitiveParameter.formatStart(positionFormat) : primitiveParameter.getStartFormattedShort();
+                this.tabularWriter.writeStart(primitiveParameter, positionFormat);
             }
             if (outputConfig.showFinish()) {
-                result[i++] = positionFormat != null ? primitiveParameter.formatFinish(positionFormat) : primitiveParameter.getFinishFormattedShort();
+                this.tabularWriter.writeFinish(primitiveParameter, positionFormat);
             }
             if (outputConfig.showLength()) {
-                //result[i++] = primitiveParameter.getLengthFormattedShort();
-                /*
-                 * This is a hack until we have an API in PROTEMPA to get a 
-                 * length string without units.
-                 */
-                Long minLength =
-                        primitiveParameter.getInterval().getMinLength();
-                if (minLength != null) {
-                    result[i++] = numberFormat.get().format(minLength);
-                } else {
-                    result[i++] = "";
-                }
+                this.tabularWriter.writeLength(primitiveParameter, numberFormat.get());
             }
             processProperties(primitiveParameter);
         }
 
         @Override
-        public void visit(Constant constant) {
+        public void visit(Constant constant) throws TabularWriterException {
             if (outputConfig.showUniqueId()) {
-                result[i++] = constant.getUniqueId().getStringRepresentation();
+                this.tabularWriter.writeUniqueId(constant);
             }
             if (outputConfig.showId()) {
-                result[i++] = constant.getId();
+                this.tabularWriter.writeId(constant);
             }
             if (outputConfig.showValue()) {
-                result[i++] = null;
+                this.tabularWriter.writeNull();
             }
             displayNames(constant);
             if (outputConfig.showStartOrTimestamp()) {
-                result[i++] = null;
+                this.tabularWriter.writeNull();
             }
             if (outputConfig.showFinish()) {
-                result[i++] = null;
+                this.tabularWriter.writeNull();
             }
             if (outputConfig.showLength()) {
-                result[i++] = null;
+                this.tabularWriter.writeNull();
             }
             processProperties(constant);
         }
@@ -341,27 +310,25 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         }
 
         void clear() {
-            this.result = null;
+            this.tabularWriter = null;
             this.ksCache = null;
-            this.i = 0;
         }
 
-        private void displayNames(Proposition proposition) {
+        private void displayNames(Proposition proposition) throws TabularWriterException {
             boolean showDisplayName = outputConfig.showDisplayName();
             boolean showAbbrevDisplayName = outputConfig.showAbbrevDisplayName();
             if (showDisplayName || showAbbrevDisplayName) {
-                PropositionDefinition propositionDefinition =
-                        ksCache.get(proposition.getId());
+                PropositionDefinition propositionDefinition
+                        = ksCache.get(proposition.getId());
                 if (propositionDefinition != null) {
                     if (showDisplayName) {
-                        result[i++] = propositionDefinition.getDisplayName();
+                        this.tabularWriter.writeString(propositionDefinition.getDisplayName());
                     }
                     if (showAbbrevDisplayName) {
-                        result[i++] =
-                                propositionDefinition.getAbbreviatedDisplayName();
+                        this.tabularWriter.writeString(propositionDefinition.getAbbreviatedDisplayName());
                     }
                 } else {
-                    result[i++] = null;
+                    this.tabularWriter.writeNull();
                     Util.logger().log(Level.WARNING,
                             "Cannot write display name for {0} because it is not in the knowledge source", proposition.getId());
                 }
@@ -371,35 +338,35 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         private String getOutputPropertyValue(Proposition proposition,
                 String propertyName, Value propertyValue) {
             String outputValue = null;
-            boolean showDisplayName =
-                    valueOutputConfig.isShowPropertyValueDisplayName();
-            boolean showAbbrevDisplayName =
-                    valueOutputConfig.isShowPropertyValueAbbrevDisplayName();
+            boolean showDisplayName
+                    = valueOutputConfig.isShowPropertyValueDisplayName();
+            boolean showAbbrevDisplayName
+                    = valueOutputConfig.isShowPropertyValueAbbrevDisplayName();
             if (showDisplayName || showAbbrevDisplayName) {
-                    PropositionDefinition propositionDef =
-                            ksCache.get(proposition.getId());
-                    if (propositionDef != null) {
-                        PropertyDefinition propertyDef =
-                                propositionDef.propertyDefinition(propertyName);
-                        ValueSet valueSet =
-                                ksCache.getValueSet(propertyDef.getValueSetId());
-                        if (valueSet != null) {
-                            if (showAbbrevDisplayName) {
+                PropositionDefinition propositionDef
+                        = ksCache.get(proposition.getId());
+                if (propositionDef != null) {
+                    PropertyDefinition propertyDef
+                            = propositionDef.propertyDefinition(propertyName);
+                    ValueSet valueSet
+                            = ksCache.getValueSet(propertyDef.getValueSetId());
+                    if (valueSet != null) {
+                        if (showAbbrevDisplayName) {
 
-                                outputValue = valueSet.abbrevDisplayName(propertyValue);
-                            } else if (showDisplayName) {
-                                outputValue = valueSet.displayName(propertyValue);
-                            }
-                        } else {
-                            Util.logger().log(Level.WARNING,
-                                    "Cannot write value set display name because value set {0} is not in the knowledge source", propertyDef.getValueSetId());
-                            outputValue = propertyValue instanceof DateValue ? propertyValue.format(outputConfig.getPositionFormat()) : propertyValue.getFormatted();
+                            outputValue = valueSet.abbrevDisplayName(propertyValue);
+                        } else if (showDisplayName) {
+                            outputValue = valueSet.displayName(propertyValue);
                         }
                     } else {
                         Util.logger().log(Level.WARNING,
-                                "Cannot write value set display name because proposition {0} is not in the knowledgeSource", proposition.getId());
+                                "Cannot write value set display name because value set {0} is not in the knowledge source", propertyDef.getValueSetId());
                         outputValue = propertyValue instanceof DateValue ? propertyValue.format(outputConfig.getPositionFormat()) : propertyValue.getFormatted();
                     }
+                } else {
+                    Util.logger().log(Level.WARNING,
+                            "Cannot write value set display name because proposition {0} is not in the knowledgeSource", proposition.getId());
+                    outputValue = propertyValue instanceof DateValue ? propertyValue.format(outputConfig.getPositionFormat()) : propertyValue.getFormatted();
+                }
 
             } else {
                 outputValue = propertyValue instanceof DateValue ? propertyValue.format(outputConfig.getPositionFormat()) : propertyValue.getFormatted();
@@ -407,14 +374,15 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             return outputValue;
         }
 
-        private void processProperties(Proposition proposition) {
+        private void processProperties(Proposition proposition) throws TabularWriterException {
             for (String propertyName : propertyNames) {
                 Value value = proposition.getProperty(propertyName);
                 if (value != null) {
-                    result[i++] = getOutputPropertyValue(proposition,
-                            propertyName, value);
+                    this.tabularWriter.writeString(
+                            getOutputPropertyValue(proposition,
+                            propertyName, value));
                 } else {
-                    result[i++] = null;
+                    this.tabularWriter.writeNull();
                 }
             }
         }
@@ -425,26 +393,27 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSourceCache propDefCache, Map<String, String> replace,
-            char delimiter, Writer writer) throws IOException {
+            KnowledgeSourceCache propDefCache,
+            TabularWriter writer) throws TabularWriterException {
         Collection<Proposition> propositions = this.traverseLinks(this.links,
                 proposition, forwardDerivations, backwardDerivations,
                 references, propDefCache);
         propositionVisitor.setKnowledgeSource(propDefCache);
-        Arrays.fill(result, null);
-        propositionVisitor.setResult(result);
+        propositionVisitor.setTabularWriter(writer);
         int i = 0;
         for (Proposition prop : propositions) {
             if (i < this.numInstances) {
-                prop.accept(propositionVisitor);
+                try {
+                    prop.acceptChecked(propositionVisitor);
+                } catch (ProtempaException ex) {
+                    throw (TabularWriterException) ex;
+                }
                 i++;
             } else {
                 break;
             }
         }
         propositionVisitor.clear();
-        
-        StringUtil.escapeAndWriteDelimitedColumns(result, replace, delimiter, writer);
     }
 
     @Override
@@ -498,7 +467,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         return valueOutputConfig;
     }
 
-    public ValuesPropositionVisitor getPropositionVisitor() {
+    ValuesPropositionVisitor getPropositionVisitor() {
         return propositionVisitor;
     }
 
@@ -559,13 +528,13 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         }
         return true;
     }
-    
+
     @Override
     public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource,
             String[] inPropIds) throws KnowledgeSourceReadException {
         Set<String> result = new HashSet<>();
         for (Link link : this.links) {
-            inPropIds = link.getInferredPropositionIds(knowledgeSource, 
+            inPropIds = link.getInferredPropositionIds(knowledgeSource,
                     inPropIds);
             org.arp.javautil.arrays.Arrays.addAll(result, inPropIds);
         }

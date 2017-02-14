@@ -19,7 +19,6 @@ package org.protempa.dest.table;
  * limitations under the License.
  * #L%
  */
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.text.Format;
@@ -43,122 +42,166 @@ class FileTabularWriter extends AbstractTabularWriter {
     private final BufferedWriter writer;
     private int colIndex;
     private final char delimiter;
-    
-    FileTabularWriter(BufferedWriter inWriter, char inDelimiter) {
+    private final StringMapReplacer replacer;
+
+    FileTabularWriter(BufferedWriter inWriter, char inDelimiter, StringMapReplacer inReplacer) {
         this.writer = inWriter;
         this.delimiter = inDelimiter;
+        this.replacer = inReplacer;
     }
-    
-    void writeString(String inValue) throws IOException {
-        writeDelimiter();
-        StringUtil.escapeAndWriteDelimitedColumn(inValue, this.delimiter, this.writer);
-        incr();
-    }
-    
+
     @Override
-    public void writeNominal(NominalValue inValue, Format inFormat) throws IOException {
-        writeDelimiter();
-        StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
-        incr();
+    public void writeString(String inValue) throws TabularWriterException {
+        try {
+            writeDelimiter();
+            StringUtil.escapeAndWriteDelimitedColumn(inValue, this.delimiter, this.replacer != null ? this.replacer.getReplace() : null, this.writer);
+            incr();
+        } catch (IOException ex) {
+            throw new TabularWriterException(ex);
+        }
     }
-    
+
     @Override
-    public void writeNumber(NumberValue inValue, Format inFormat) throws IOException {
-        writeDelimiter();
-        StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
-        incr();
+    public void writeNominal(NominalValue inValue, Format inFormat) throws TabularWriterException {
+        try {
+            writeDelimiter();
+            StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.replacer != null ? this.replacer.getReplace() : null, this.writer);
+            incr();
+        } catch (IOException ex) {
+            throw new TabularWriterException(ex);
+        }
     }
-    
+
     @Override
-    public void writeInequality(InequalityNumberValue inValue, Format inFormat) throws IOException {
-        writeDelimiter();
-        String comparatorString = inValue.getInequality().getComparatorString();
-        StringUtil.escapeAndWriteDelimitedColumn(inFormat != null ? inFormat.format(comparatorString) : comparatorString, this.delimiter, this.writer);
-        incr();
+    public void writeNumber(NumberValue inValue, Format inFormat) throws TabularWriterException {
+        try {
+            writeDelimiter();
+            StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.replacer != null ? this.replacer.getReplace() : null, this.writer);
+            incr();
+        } catch (IOException ex) {
+            throw new TabularWriterException(ex);
+        }
     }
-    
+
     @Override
-    public void writeNumber(InequalityNumberValue inValue, Format inFormat) throws IOException {
-        writeDelimiter();
-        StringUtil.escapeAndWriteDelimitedColumn(inValue.getNumberValue().format(inFormat), this.delimiter, this.writer);
-        incr();
+    public void writeInequality(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException {
+        try {
+            writeDelimiter();
+            String comparatorString = inValue.getInequality().getComparatorString();
+            StringUtil.escapeAndWriteDelimitedColumn(inFormat != null ? inFormat.format(comparatorString) : comparatorString, this.delimiter, this.replacer != null ? this.replacer.getReplace() : null, this.writer);
+            incr();
+        } catch (IOException ex) {
+            throw new TabularWriterException(ex);
+        }
     }
-    
+
     @Override
-    public void writeDate(DateValue inValue, Format inFormat) throws IOException {
-        writeDelimiter();
-        StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
-        incr();
+    public void writeNumber(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException {
+        try {
+            writeDelimiter();
+            StringUtil.escapeAndWriteDelimitedColumn(inValue.getNumberValue().format(inFormat), this.delimiter, this.replacer != null ? this.replacer.getReplace() : null, this.writer);
+            incr();
+        } catch (IOException ex) {
+            throw new TabularWriterException(ex);
+        }
     }
-    
+
     @Override
-    public void writeBoolean(BooleanValue inValue, Format inFormat) throws IOException {
-        writeDelimiter();
-        StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
-        incr();
+    public void writeDate(DateValue inValue, Format inFormat) throws TabularWriterException {
+        try {
+            writeDelimiter();
+            StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.replacer != null ? this.replacer.getReplace() : null, this.writer);
+            incr();
+        } catch (IOException ex) {
+            throw new TabularWriterException(ex);
+        }
     }
-    
+
     @Override
-    public void writeId(Proposition inProposition) throws IOException {
+    public void writeBoolean(BooleanValue inValue, Format inFormat) throws TabularWriterException {
+        try {
+            writeDelimiter();
+            StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.replacer != null ? this.replacer.getReplace() : null, this.writer);
+            incr();
+        } catch (IOException ex) {
+            throw new TabularWriterException(ex);
+        }
+    }
+
+    @Override
+    public void writeId(Proposition inProposition) throws TabularWriterException {
         String value = inProposition.getId();
         writeString(value);
     }
-    
+
     @Override
-    public void writeUniqueId(Proposition inProposition) throws IOException {
+    public void writeUniqueId(Proposition inProposition) throws TabularWriterException {
         String value = inProposition.getUniqueId().getStringRepresentation();
         writeString(value);
     }
-    
+
     @Override
-    public void writeStart(TemporalProposition inProposition, Format inFormat) throws IOException {
+    public void writeStart(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         String value = inProposition.getStartFormattedShort();
         writeString(value);
     }
-    
+
     @Override
-    public void writeFinish(TemporalProposition inProposition, Format inFormat) throws IOException {
+    public void writeFinish(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         String value = inProposition.getFinishFormattedShort();
         writeString(value);
     }
-    
+
     @Override
-    public void writeLength(TemporalProposition inProposition, Format inFormat) throws IOException {
+    public void writeLength(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         String value = inFormat != null ? inFormat.format(inProposition.getInterval().getMinLength()) : inProposition.getLengthFormattedShort();
         writeString(value);
     }
-    
+
     @Override
-    public void writeValue(Parameter inProposition, Format inFormat) throws IOException {
+    public void writeValue(Parameter inProposition, Format inFormat) throws TabularWriterException {
         Value value = inProposition.getValue();
         write(value, inFormat);
     }
-    
+
     @Override
-    public void writePropertyValue(Proposition inProposition, String inPropertyName, Format inFormat) throws IOException {
+    public void writePropertyValue(Proposition inProposition, String inPropertyName, Format inFormat) throws TabularWriterException {
         Value value = inProposition.getProperty(inPropertyName);
         write(value, inFormat);
     }
-    
+
     @Override
-    public void newRow() throws IOException {
-        this.writer.newLine();
-        this.colIndex = 0;
+    public void writeNull() throws TabularWriterException {
+        write(null, null);
     }
-    
+
     @Override
-    public void close() throws Exception {
-        this.writer.close();
+    public void newRow() throws TabularWriterException {
+        try {
+            this.writer.newLine();
+            this.colIndex = 0;
+        } catch (IOException ex) {
+            throw new TabularWriterException(ex);
+        }
     }
-    
+
+    @Override
+    public void close() throws TabularWriterException {
+        try {
+            this.writer.close();
+        } catch (IOException ex) {
+            throw new TabularWriterException(ex);
+        }
+    }
+
     private void writeDelimiter() throws IOException {
         if (this.colIndex > 0) {
             this.writer.write(this.delimiter);
         }
     }
-    
+
     private void incr() {
         this.colIndex++;
     }
-    
+
 }

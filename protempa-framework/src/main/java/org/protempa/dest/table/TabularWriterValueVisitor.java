@@ -20,7 +20,6 @@ package org.protempa.dest.table;
  * #L%
  */
 
-import java.io.IOException;
 import java.text.Format;
 import org.protempa.proposition.value.BooleanValue;
 import org.protempa.proposition.value.DateValue;
@@ -39,7 +38,7 @@ import org.protempa.proposition.value.ValueVisitor;
 class TabularWriterValueVisitor implements ValueVisitor {
     
     private final TabularWriter tabularWriter;
-    private IOException exception;
+    private TabularWriterException exception;
     private Format format;
 
     TabularWriterValueVisitor(TabularWriter tabularWriter) {
@@ -58,7 +57,7 @@ class TabularWriterValueVisitor implements ValueVisitor {
     public void visit(NominalValue nominalValue) {
         try {
             this.tabularWriter.writeNominal(nominalValue, this.format);
-        } catch (IOException ex) {
+        } catch (TabularWriterException ex) {
             this.exception = ex;
         }
     }
@@ -72,7 +71,7 @@ class TabularWriterValueVisitor implements ValueVisitor {
     public void visit(BooleanValue booleanValue) {
         try {
             this.tabularWriter.writeBoolean(booleanValue, this.format);
-        } catch (IOException ex) {
+        } catch (TabularWriterException ex) {
             this.exception = ex;
         }
     }
@@ -86,7 +85,7 @@ class TabularWriterValueVisitor implements ValueVisitor {
     public void visit(NumberValue numberValue) {
         try {
             this.tabularWriter.writeNumber(numberValue, this.format);
-        } catch (IOException ex) {
+        } catch (TabularWriterException ex) {
             this.exception = ex;
         }
     }
@@ -95,7 +94,7 @@ class TabularWriterValueVisitor implements ValueVisitor {
     public void visit(InequalityNumberValue inequalityNumberValue) {
         try {
             this.tabularWriter.writeInequality(inequalityNumberValue, this.format);
-        } catch (IOException ex) {
+        } catch (TabularWriterException ex) {
             this.exception = ex;
         }
     }
@@ -104,12 +103,12 @@ class TabularWriterValueVisitor implements ValueVisitor {
     public void visit(DateValue dateValue) {
         try {
             this.tabularWriter.writeDate(dateValue, this.format);
-        } catch (IOException ex) {
+        } catch (TabularWriterException ex) {
             this.exception = ex;
         }
     }
 
-    IOException getException() {
+    TabularWriterException getException() {
         return this.exception;
     }
     

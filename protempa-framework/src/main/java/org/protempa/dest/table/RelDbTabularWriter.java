@@ -20,13 +20,14 @@ package org.protempa.dest.table;
  * #L%
  */
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Format;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.arp.javautil.sql.ConnectionSpec;
-import org.arp.javautil.string.StringUtil;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
@@ -42,115 +43,163 @@ import org.protempa.proposition.value.Value;
  * @author Andrew Post
  */
 class RelDbTabularWriter extends AbstractTabularWriter {
-    private final RecordHandler recordHandler;
+    private final RecordHandler<ArrayList<?>> recordHandler;
+    private final ArrayList<Object> row;
     private int colIndex;
+    private final Map<?, ?> replace;
     
-    RelDbTabularWriter(ConnectionSpec inConnectionSpec) throws SQLException {
-        this.recordHandler = new RecordHandler(inConnectionSpec, "");
+    RelDbTabularWriter(ConnectionSpec inConnectionSpec, String inStatement, Map<?, ?> inReplace) throws SQLException {
+        this.recordHandler = new ListRecordHandler(inConnectionSpec, inStatement);
+        this.row = new ArrayList<>();
+        this.replace = inReplace;
     }
     
-    void writeString(String inValue) throws IOException {
-        StringUtil.escapeAndWriteDelimitedColumn(inValue, this.delimiter, this.writer);
+    @Override
+    public void writeString(String inValue) throws TabularWriterException {
+        this.row.add(doReplace(inValue));
         incr();
     }
     
     @Override
-    public void writeNominal(NominalValue inValue, Format inFormat) throws IOException {
-        StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
+    public void writeNominal(NominalValue inValue, Format inFormat) {
+        if (inFormat != null) {
+            this.row.add(inValue.format(inFormat));
+        } else {
+            this.row.add(inValue.getString());
+        }
         incr();
     }
     
     @Override
-    public void writeNumber(NumberValue inValue, Format inFormat) throws IOException {
-        StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
+    public void writeNumber(NumberValue inValue, Format inFormat) {
+        if (inFormat != null) {
+            this.row.add(inValue.format(inFormat));
+        } else {
+            this.row.add(inValue.getNumber());
+        }
         incr();
     }
     
     @Override
-    public void writeInequality(InequalityNumberValue inValue, Format inFormat) throws IOException {
-        String comparatorString = inValue.getInequality().getComparatorString();
-        StringUtil.escapeAndWriteDelimitedColumn(inFormat != null ? inFormat.format(comparatorString) : comparatorString, this.delimiter, this.writer);
+    public void writeInequality(InequalityNumberValue inValue, Format inFormat) {
+        if (inFormat != null) {
+            this.row.add(inFormat.format(inValue.getComparator()));
+        } else {
+            this.row.add(inValue.getComparator().getComparatorString());
+        }
         incr();
     }
     
     @Override
-    public void writeNumber(InequalityNumberValue inValue, Format inFormat) throws IOException {
-        StringUtil.escapeAndWriteDelimitedColumn(inValue.getNumberValue().format(inFormat), this.delimiter, this.writer);
+    public void writeNumber(InequalityNumberValue inValue, Format inFormat) {
+        if (inFormat != null) {
+            this.row.add(inValue.format(inFormat));
+        } else {
+            this.row.add(inValue.getNumber());
+        }
         incr();
     }
     
     @Override
-    public void writeDate(DateValue inValue, Format inFormat) throws IOException {
-        StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
+    public void writeDate(DateValue inValue, Format inFormat) {
+        if (inFormat != null) {
+            this.row.add(inValue.format(inFormat));
+        } else {
+            this.row.add(inValue.getDate());
+        }
         incr();
     }
     
     @Override
-    public void writeBoolean(BooleanValue inValue, Format inFormat) throws IOException {
-        StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
+    public void writeBoolean(BooleanValue inValue, Format inFormat) {
+        if (inFormat != null) {
+            this.row.add(inValue.format(inFormat));
+        } else {
+            this.row.add(inValue.getBoolean());
+        }
         incr();
     }
     
     @Override
-    public void writeId(Proposition inProposition) throws IOException {
+    public void writeId(Proposition inProposition) throws TabularWriterException {
         String value = inProposition.getId();
         writeString(value);
     }
     
     @Override
-    public void writeUniqueId(Proposition inProposition) throws IOException {
+    public void writeUniqueId(Proposition inProposition) throws TabularWriterException {
         String value = inProposition.getUniqueId().getStringRepresentation();
         writeString(value);
     }
     
     @Override
-    public void writeStart(TemporalProposition inProposition, Format inFormat) throws IOException {
+    public void writeStart(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         String value = inProposition.getStartFormattedShort();
         writeString(value);
     }
     
     @Override
-    public void writeFinish(TemporalProposition inProposition, Format inFormat) throws IOException {
+    public void writeFinish(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         String value = inProposition.getFinishFormattedShort();
         writeString(value);
     }
     
     @Override
-    public void writeLength(TemporalProposition inProposition, Format inFormat) throws IOException {
+    public void writeLength(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         String value = inFormat != null ? inFormat.format(inProposition.getInterval().getMinLength()) : inProposition.getLengthFormattedShort();
         writeString(value);
     }
     
     @Override
-    public void writeValue(Parameter inProposition, Format inFormat) throws IOException {
+    public void writeValue(Parameter inProposition, Format inFormat) throws TabularWriterException {
         Value value = inProposition.getValue();
         write(value, inFormat);
     }
     
     @Override
-    public void writePropertyValue(Proposition inProposition, String inPropertyName, Format inFormat) throws IOException {
+    public void writePropertyValue(Proposition inProposition, String inPropertyName, Format inFormat) throws TabularWriterException {
         Value value = inProposition.getProperty(inPropertyName);
         write(value, inFormat);
     }
+
+    @Override
+    public void writeNull() throws TabularWriterException {
+        write(null, null);
+    }
     
     @Override
-    public void newRow() throws IOException {
-        this.writer.newLine();
+    public void newRow() throws TabularWriterException {
+        try {
+            this.recordHandler.insert(this.row);
+        } catch (SQLException ex) {
+            throw new TabularWriterException(ex);
+        }
         this.colIndex = 0;
     }
     
     @Override
-    public void close() throws SQLException {
-    }
-    
-    private void writeDelimiter() throws IOException {
-        if (this.colIndex > 0) {
-            this.writer.write(this.delimiter);
+    public void close() throws TabularWriterException {
+        try {
+            this.recordHandler.close();
+        } catch (SQLException ex) {
+            throw new TabularWriterException(ex);
         }
     }
     
-    private void incr() {
-        this.colIndex++;
+    private int incr() {
+        return this.colIndex++;
+    }
+    
+    private Object doReplace(Object val) {
+        if (this.replace != null) {
+            if (this.replace.containsKey(val)) {
+                return this.replace.get(val);
+            } else {
+                return val;
+            }
+        } else {
+            return val;
+        }
     }
     
 }

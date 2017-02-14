@@ -36,7 +36,6 @@ import org.arp.javautil.string.StringUtil;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalParameter;
@@ -106,8 +105,8 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSourceCache ksCache, Map<String, String> replace,
-            char delimiter, Writer writer) throws IOException {
+            KnowledgeSourceCache ksCache,
+            TabularWriter writer) throws TabularWriterException {
         List<Proposition> propositions = traverseLinks(this.links, proposition,
                 forwardDerivations, backwardDerivations, references,
                 ksCache);
@@ -271,24 +270,22 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
 
         if (sumTotal != null) {
             if (this.type == Type.AVG) {
-                StringUtil.escapeAndWriteDelimitedColumn(NumberValue.getInstance(
-                    sumTotal.divide(BigDecimal.valueOf(count.longValue())))
-                    .getFormatted(), delimiter, replace, writer);
+                writer.writeNumber(NumberValue.getInstance(
+                    sumTotal.divide(BigDecimal.valueOf(count.longValue()))));
             } else {
-                StringUtil.escapeAndWriteDelimitedColumn(NumberValue.getInstance(sumTotal)
-                    .getFormatted(), delimiter, replace, writer);
+                writer.writeNumber(NumberValue.getInstance(sumTotal));
             }
         } else if (this.type == Type.MEDIAN) {
             NumberValue median = medianValue(orderStats);
             if (median != null) {
-                StringUtil.escapeAndWriteDelimitedColumn(median.getFormatted(), delimiter, replace, writer);
+                writer.writeString(median.getFormatted());
             } else {
-                StringUtil.escapeAndWriteDelimitedColumn(null, delimiter, replace, writer);
+                writer.writeNull();
             }
         } else if (value != null) {
-            StringUtil.escapeAndWriteDelimitedColumn(value.getFormatted(), delimiter, replace, writer);
+            writer.writeString(value.getFormatted());
         } else {
-            StringUtil.escapeAndWriteDelimitedColumn(null, delimiter, replace, writer);
+            writer.writeNull();
         }
     }
 

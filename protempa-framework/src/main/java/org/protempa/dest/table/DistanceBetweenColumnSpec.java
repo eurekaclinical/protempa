@@ -20,7 +20,6 @@
 package org.protempa.dest.table;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,7 +34,6 @@ import org.arp.javautil.string.StringUtil;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.PropositionUtil;
@@ -92,8 +90,8 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSourceCache ksCache, Map<String, String> replace,
-            char delimiter, Writer writer) throws IOException {
+            KnowledgeSourceCache ksCache,
+            TabularWriter writer) throws TabularWriterException {
         Logger logger = Util.logger();
         List<Proposition> propositions = traverseLinks(this.links,
                 proposition, forwardDerivations, backwardDerivations, 
@@ -106,7 +104,7 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
                 size);
         }
         if (size < 2) {
-            StringUtil.escapeAndWriteDelimitedColumn(null, delimiter, replace, writer);
+            writer.writeNull();
             return;
         }
         
@@ -134,8 +132,7 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
         String distance = PropositionUtil
                             .distanceBetweenFormattedShort(first, second, 
                                 this.units);
-        StringUtil.escapeAndWriteDelimitedColumn(distance, delimiter, replace, 
-                writer);
+        writer.writeString(distance);
     }
     
     @Override

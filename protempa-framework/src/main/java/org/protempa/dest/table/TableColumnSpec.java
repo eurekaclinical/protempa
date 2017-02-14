@@ -19,14 +19,11 @@
  */
 package org.protempa.dest.table;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PropositionDefinition;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
@@ -67,9 +64,9 @@ public interface TableColumnSpec {
             Map<Proposition, List<Proposition>> forwardDerivations,
             Map<Proposition, List<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
-            KnowledgeSourceCache knowledgeSourceCache, Map<String, String> replace,
-            char delimiter, Writer writer)
-            throws IOException;
+            KnowledgeSourceCache knowledgeSourceCache,
+            TabularWriter writer)
+            throws TabularWriterException;
     
     /**
      * Validates the fields of this column specification against the
