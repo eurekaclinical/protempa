@@ -4,7 +4,7 @@
     <parent>
         <artifactId>protempa</artifactId>
         <groupId>org.eurekaclinical</groupId>
-        <version>4.0-Alpha-14</version>
+        <version>4.0-Alpha-15-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>protempa-test-suite</artifactId>
