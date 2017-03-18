@@ -43,7 +43,7 @@ public class ConstantColumnSpecTest {
     public void testValue() throws IOException, TabularWriterException {
         ConstantColumnSpec ccs = new ConstantColumnSpec("heading", "value");
         StringWriter sw = new StringWriter();
-        try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t', null)) {
+        try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", null, null, null, null, null, ftw);
         }
         Assert.assertEquals("value", sw.toString());

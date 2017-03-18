@@ -43,20 +43,18 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
     private final RecordHandler<ArrayList<?>> recordHandler;
     private final ArrayList<Object> row;
     private int colIndex;
-    private final Map<?, ?> replace;
     
-    public RelDbTabularWriter(ConnectionSpec inConnectionSpec, String inStatement, Map<?, ?> inReplace) throws SQLException {
+    public RelDbTabularWriter(ConnectionSpec inConnectionSpec, String inStatement) throws SQLException {
         this.recordHandler = new ListRecordHandler(inConnectionSpec, inStatement);
         this.row = new ArrayList<>();
-        this.replace = inReplace;
     }
     
     @Override
     public void writeString(String inValue) throws TabularWriterException {
-        this.row.add(doReplace(inValue));
+        this.row.add(inValue);
         incr();
     }
-    
+
     @Override
     public void writeNominal(NominalValue inValue, Format inFormat) {
         if (inFormat != null) {
@@ -187,10 +185,10 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         return this.colIndex++;
     }
     
-    private Object doReplace(Object val) {
-        if (this.replace != null) {
-            if (this.replace.containsKey(val)) {
-                return this.replace.get(val);
+    private <E extends Object> E doReplace(E val, Map<E, E> replace) {
+        if (replace != null) {
+            if (replace.containsKey(val)) {
+                return replace.get(val);
             } else {
                 return val;
             }
