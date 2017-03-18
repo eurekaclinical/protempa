@@ -66,6 +66,10 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     private final OutputConfig outputConfig;
     private final ValueOutputConfig valueOutputConfig;
     private final ValuesPropositionVisitor propositionVisitor;
+    
+    public PropositionColumnSpec() {
+        this(null);
+    }
 
     public PropositionColumnSpec(String[] propertyNames) {
         this(propertyNames, null, null);

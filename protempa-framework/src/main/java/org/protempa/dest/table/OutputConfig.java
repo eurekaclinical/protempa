@@ -19,6 +19,7 @@
  */
 package org.protempa.dest.table;
 
+import java.text.DateFormat;
 import java.text.Format;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,266 @@ import java.util.Map;
  *
  * @author Himanshu Rathod
  */
-public class OutputConfig {
+public final class OutputConfig {
+
+    public static final class Builder {
+
+        private boolean showValue;
+        private boolean showDisplayName;
+        private boolean showAbbrevDisplayName;
+        private boolean showStartOrTimestamp;
+        private boolean showFinish;
+        private boolean showLength;
+        private boolean showId;
+        private boolean showUniqueId;
+        private String valueHeading;
+        private String displayNameHeading;
+        private String abbrevDisplayNameHeading;
+        private String startOrTimestampHeading;
+        private String finishHeading;
+        private String lengthHeading;
+        private String idHeading;
+        private String uniqueIdHeading;
+        private Map<String, String> propertyHeadings;
+        private DateFormat dateFormat;
+
+        public Builder() {
+            reset();
+        }
+
+        public void reset() {
+            this.valueHeading = "";
+            this.displayNameHeading = "";
+            this.abbrevDisplayNameHeading = "";
+            this.startOrTimestampHeading = "";
+            this.finishHeading = "";
+            this.lengthHeading = "";
+            this.idHeading = "";
+            this.uniqueIdHeading = "";
+            this.showValue = false;
+            this.showDisplayName = false;
+            this.showAbbrevDisplayName = false;
+            this.showStartOrTimestamp = false;
+            this.showFinish = false;
+            this.showLength = false;
+            this.showId = false;
+            this.showUniqueId = false;
+            this.propertyHeadings = new HashMap<>();
+            this.dateFormat = null;
+        }
+
+        public String getIdHeading() {
+            return this.idHeading;
+        }
+
+        public Builder idHeading(String idHeading) {
+            if (idHeading == null) {
+                idHeading = "";
+            }
+            this.idHeading = idHeading;
+            return this;
+        }
+
+        public String getUniqueIdHeading() {
+            return uniqueIdHeading;
+        }
+
+        public Builder uniqueIdHeading(String uniqueIdHeading) {
+            this.uniqueIdHeading = uniqueIdHeading;
+            return this;
+        }
+
+        public String getValueHeading() {
+            return valueHeading;
+        }
+
+        public Builder valueHeading(String valueHeading) {
+            if (valueHeading == null) {
+                valueHeading = "";
+            }
+            this.valueHeading = valueHeading;
+            return this;
+        }
+
+        public String getDisplayNameHeading() {
+            return displayNameHeading;
+        }
+
+        public Builder displayNameHeading(String displayNameHeading) {
+            if (displayNameHeading == null) {
+                displayNameHeading = "";
+            }
+            this.displayNameHeading = displayNameHeading;
+            return this;
+        }
+
+        public String getAbbrevDisplayNameHeading() {
+            return abbrevDisplayNameHeading;
+        }
+
+        public Builder abbrevDisplayNameHeading(String abbrevDisplayNameHeading) {
+            if (abbrevDisplayNameHeading == null) {
+                abbrevDisplayNameHeading = "";
+            }
+            this.abbrevDisplayNameHeading = abbrevDisplayNameHeading;
+            return this;
+        }
+
+        public String getStartOrTimestampHeading() {
+            return startOrTimestampHeading;
+        }
+
+        public Builder startOrTimestampHeading(String startOrTimestampHeading) {
+            if (startOrTimestampHeading == null) {
+                startOrTimestampHeading = "";
+            }
+            this.startOrTimestampHeading = startOrTimestampHeading;
+            return this;
+        }
+
+        public String getFinishHeading() {
+            return finishHeading;
+        }
+
+        public Builder finishHeading(String finishHeading) {
+            if (finishHeading == null) {
+                finishHeading = "";
+            }
+            this.finishHeading = finishHeading;
+            return this;
+        }
+
+        public String getLengthHeading() {
+            return lengthHeading;
+        }
+
+        public Builder lengthHeading(String lengthHeading) {
+            if (lengthHeading == null) {
+                lengthHeading = "";
+            }
+            this.lengthHeading = lengthHeading;
+            return this;
+        }
+
+        public boolean getShowId() {
+            return this.showId;
+        }
+
+        public Builder showId() {
+            this.showId = true;
+            return this;
+        }
+
+        public boolean getShowUniqueId() {
+            return this.showUniqueId;
+        }
+
+        public Builder showUniqueId() {
+            this.showUniqueId = true;
+            return this;
+        }
+
+        public boolean getShowValue() {
+            return showValue;
+        }
+
+        public Builder showValue() {
+            this.showValue = true;
+            return this;
+        }
+
+        public boolean getShowDisplayName() {
+            return showDisplayName;
+        }
+
+        public Builder showDisplayName() {
+            this.showDisplayName = true;
+            return this;
+        }
+
+        public boolean getShowAbbrevDisplayName() {
+            return showAbbrevDisplayName;
+        }
+
+        public Builder showAbbrevDisplayName() {
+            this.showAbbrevDisplayName = true;
+            return this;
+        }
+
+        public boolean getShowStartOrTimestamp() {
+            return showStartOrTimestamp;
+        }
+
+        public Builder showStartOrTimestamp() {
+            this.showStartOrTimestamp = true;
+            return this;
+        }
+
+        public boolean getShowFinish() {
+            return showFinish;
+        }
+
+        public Builder showFinish() {
+            this.showFinish = true;
+            return this;
+        }
+
+        public boolean getShowLength() {
+            return showLength;
+        }
+
+        public Builder showLength() {
+            this.showLength = true;
+            return this;
+        }
+
+        public HashMap<String, String> getPropertyHeadings() {
+            return new HashMap<>(this.propertyHeadings);
+        }
+
+        public String getPropertyHeading(String propertyName) {
+            return this.propertyHeadings.get(propertyName);
+        }
+
+        public Builder propertyHeadings(HashMap<String, String> propertyHeadings) {
+            if (propertyHeadings == null) {
+                this.propertyHeadings = new HashMap<>();
+            } else {
+                this.propertyHeadings = propertyHeadings;
+            }
+            return this;
+        }
+
+        public Builder putPropertyHeading(String propertyName, String propertyHeading) {
+            this.propertyHeadings.put(propertyName, propertyHeading);
+            return this;
+        }
+
+        public DateFormat getDateFormat() {
+            return dateFormat;
+        }
+
+        public Builder dateFormat(DateFormat dateFormat) {
+            this.dateFormat = dateFormat;
+            return this;
+        }
+
+        /**
+         * Creates a new {@link OutputConfig} instance.
+         *
+         * @return a {@link OutputConfig}.
+         */
+        public OutputConfig build() {
+            return new OutputConfig(this.showId, this.showValue, this.showDisplayName,
+                    this.showAbbrevDisplayName, this.showStartOrTimestamp,
+                    this.showFinish, this.showLength, this.showUniqueId,
+                    this.idHeading, this.valueHeading,
+                    this.displayNameHeading, this.abbrevDisplayNameHeading,
+                    this.startOrTimestampHeading, this.finishHeading,
+                    this.lengthHeading, this.uniqueIdHeading,
+                    this.propertyHeadings, this.dateFormat);
+        }
+    }
 
     private final boolean showValue;
     private final boolean showDisplayName;
@@ -73,7 +333,7 @@ public class OutputConfig {
     public OutputConfig(boolean showId, boolean showValue, boolean showDisplayName,
             boolean showAbbrevDisplayName,
             boolean showStartOrTimestamp, boolean showFinish,
-            boolean showLength, boolean showUniqueId, String idHeading, 
+            boolean showLength, boolean showUniqueId, String idHeading,
             String valueHeading, String displayNameHeading,
             String abbrevDisplayNameHeading, String startOrTimestampHeading,
             String finishHeading, String lengthHeading, String uniqueIdHeading,
@@ -130,7 +390,7 @@ public class OutputConfig {
     public String getIdHeading() {
         return idHeading;
     }
-    
+
     public String getUniqueIdHeading() {
         return uniqueIdHeading;
     }
@@ -166,7 +426,7 @@ public class OutputConfig {
     public boolean showId() {
         return showId;
     }
-    
+
     public boolean showUniqueId() {
         return showUniqueId;
     }
