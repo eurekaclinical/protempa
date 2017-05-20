@@ -49,16 +49,28 @@ The project uses the maven build tool. Typically, you build it by invoking `mvn 
 To run Protempa, write code like the following:
 
 ```
-SourceFactory sourceFactory = new SourceFactory(new INIConfigurations(new File("src/test/resources")).load("protempa-config.ini"));
-Protempa protempa = Protempa.newInstance(sourceFactory);
+import org.protempa.SourceFactory;
+import org.protempa.backend.Configurations;
+import org.protempa.bconfigs.ini4j.INIConfigurations;
+import org.protempa.Protempa;
+import org.protempa.dest.map.MapDestination;
 
-DefaultQueryBuilder q = new DefaultQueryBuilder();
-q.setName("My test query");
-q.setPropositionIds(new String[]{"ICD9:Diagnoses", "ICD9:Procedures", "LAB:LabTest", "Encounter", "MED:medications", "VitalSign", "PatientDetails"}); // an array of concept names from the knowledge source
-Query query = protempa.buildQuery(q);
+// An implementation of org.protempa.backend.Configurations provides the backends to use.
+Configurations backends = new INIConfigurations(new File("src/test/resources")).load("protempa-config.ini");
+SourceFactory sourceFactory = new SourceFactory(backends);
 
-Destination dest = // an implementation of org.protempa.dest.Destination
-protempa.execute(query, dest);
+// Use try-with-resources to ensure resources are cleaned up.
+try (Protempa protempa = Protempa.newInstance(sourceFactory)) {
+    DefaultQueryBuilder q = new DefaultQueryBuilder();
+    q.setName("My test query");
+    q.setPropositionIds(new String[]{"ICD9:Diagnoses", "ICD9:Procedures", "LAB:LabTest", "Encounter", "MED:medications", "VitalSign",     
+        "PatientDetails"}); // an array of concept names from the knowledge source
+    Query query = protempa.buildQuery(q);
+
+    // An implementation of org.protempa.dest.Destination processes output from Protempa.
+    Destination dest = new MapDestination(); 
+    protempa.execute(query, dest);
+}
 ```
 
 The `protempa-config.ini` file is an INI configuration file that specifies a data source backend, a knowledge source backend, and an algorithm source backend, for example:
