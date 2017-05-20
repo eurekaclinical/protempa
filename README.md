@@ -16,6 +16,9 @@ Protempa implements an extension of the [knowledge based temporal abstraction me
 
 In the clinical domain, temporal abstraction can be used for automated chart abstraction for large volumes of patient records (tens of millions), assuming that the the temporal patterns of interest can be described ahead of time in an ontology or as rules.
 
+### For more information
+See our [publication about Protempa](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1975802/) for more information.
+
 ## Version 4.0 development series
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa)
 
