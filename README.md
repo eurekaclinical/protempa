@@ -5,7 +5,7 @@
 Protempa identifies temporal sequences in clinical data. It supports retrieving patient populations containing sequences of interest from clinical datasets and databases in support of clinical research, outcomes studies and quality improvement. It provides for portability across data sources, and the creation of libraries of temporal sequence definitions and time series data processing algorithms.
 
 ### Protempa architecture
-Protempa is a software framework with a modular architecture. It has four modules, shown in the diagram below, that provide for 1)  defining time series data processing algorithms such as for finding states and trends (the Algorithm Source), 2) specifying algorithm parameters and interval relationships that define sequences of interest (the Knowledge Source), 3) a connection to an existing data store (the Data Source), and 4) a data processing environment for managing the sequence-finding routines (the Abstraction Finder). The first three modules have back ends that implement environment- or application-specific features.
+Protempa is a software framework with a modular architecture. It has four modules, shown in the diagram below, that provide for 1)  defining time series data processing algorithms such as for finding states and trends (the Algorithm Source), 2) specifying frequency, sequence and overlap temporal patterns of interest (the Knowledge Source), 3) a connection to an existing data store (the Data Source), and 4) a data processing environment for managing the sequence-finding routines (the Abstraction Finder). The first three modules have back ends that implement environment- or application-specific features.
 
 ![Protempa architecture](https://github.com/eurekaclinical/dev-wiki/blob/master/images/Protempa%20architecture.png)
 
@@ -67,7 +67,7 @@ try (Protempa protempa = Protempa.newInstance(sourceFactory)) {
     DefaultQueryBuilder q = new DefaultQueryBuilder();
     q.setName("My test query");
     q.setPropositionIds(new String[]{"ICD9:Diagnoses", "ICD9:Procedures", "LAB:LabTest", "Encounter", "MED:medications", "VitalSign",     
-        "PatientDetails"}); // an array of concept names from the knowledge source
+        "PatientDetails"}); // an array of the concept ids of the data to retrieve and/or temporal patterns to compute
     Query query = protempa.buildQuery(q);
 
     // An implementation of org.protempa.dest.Destination processes output from the temporal abstraction process.
