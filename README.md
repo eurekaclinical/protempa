@@ -24,7 +24,7 @@ The project uses the maven build tool. Typically, you build it by invoking `mvn 
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
-    <artifactId>protempa-framework</artifactId>
+    <artifactId>protempa</artifactId>
     <version>version</version>
 </dependency>
 ```
