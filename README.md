@@ -70,7 +70,7 @@ try (Protempa protempa = Protempa.newInstance(sourceFactory)) {
         "PatientDetails"}); // an array of concept names from the knowledge source
     Query query = protempa.buildQuery(q);
 
-    // An implementation of org.protempa.dest.Destination processes output from Protempa.
+    // An implementation of org.protempa.dest.Destination processes output from the temporal abstraction process.
     Destination dest = new MapDestination(); 
     protempa.execute(query, dest);
 }
