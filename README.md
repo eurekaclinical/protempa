@@ -53,7 +53,10 @@ import org.protempa.SourceFactory;
 import org.protempa.backend.Configurations;
 import org.protempa.bconfigs.ini4j.INIConfigurations;
 import org.protempa.Protempa;
+import org.protempa.dest.Destination;
 import org.protempa.dest.map.MapDestination;
+import org.protempa.query.DefaultQueryBuilder;
+import org.protempa.query.Query;
 
 // An implementation of org.protempa.backend.Configurations provides the backends to use.
 Configurations backends = new INIConfigurations(new File("src/test/resources")).load("protempa-config.ini");
