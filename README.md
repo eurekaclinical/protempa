@@ -81,14 +81,14 @@ The `protempa-config.ini` file is an INI configuration file that specifies a dat
 # An implementation of org.protempa.backend.dsb.DataSourceBackend provides the data.
 # Implementations of this interface can be plugged into Protempa using the java.util.ServiceLoader mechanism.
 [edu.emory.cci.aiw.cvrg.eureka.etl.dsb.EurekaDataSourceBackend]
-dataSourceBackendId=Spreadsheet # any fields in the implementation that have the @BackendProperty annotation.
+dataSourceBackendId=Spreadsheet # any setters in the implementation that have the @BackendProperty annotation.
 databaseName = spreadsheet
 sampleUrl = ../docs/sample.xlsx
 
 # An implementation of org.protempa.backend.dsb.KnowledgeSourceBackend provides the temporal sequence definitions.
 # Implementations of this interface can be plugged into Protempa using the java.util.ServiceLoader mechanism.
 [edu.emory.cci.aiw.i2b2etl.ksb.I2b2KnowledgeSourceBackend]
-databaseAPI = DATASOURCE # any fields in the implementation that have the @BackendProperty annotation.
+databaseAPI = DATASOURCE # any setters in the implementation that have the @BackendProperty annotation.
 databaseId = java:/comp/env/jdbc/I2b2KS
 targetTable = EUREKAPHENOTYPEONTOLOGY
 
