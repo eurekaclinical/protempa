@@ -59,8 +59,8 @@ import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
 
 // An implementation of org.protempa.backend.Configurations provides the backends to use.
-Configurations backends = new INIConfigurations(new File("src/test/resources")).load("protempa-config.ini");
-SourceFactory sourceFactory = new SourceFactory(backends);
+Configurations backends = new INIConfigurations(new File("src/test/resources"));
+SourceFactory sourceFactory = new SourceFactory(backends.load("protempa-config.ini"));
 
 // Use try-with-resources to ensure resources are cleaned up.
 try (Protempa protempa = Protempa.newInstance(sourceFactory)) {
