@@ -2,6 +2,8 @@
 [Atlanta Clinical and Translational Science Institute (ACTSI)](http://www.actsi.org), [Emory University](http://www.emory.edu), Atlanta, GA
 
 ## What does it do?
+Protempa identifies temporal sequences in clinical data. 
+
 Protempa is a software framework with a modular architecture. It has four modules, shown in the diagram below, that provide for 1)  defining temporal abstraction primitives and processing time-stamped data with those primitives (the Algorithm Source), 2) specifying algorithm parameters and interval relationships that define abstractions of interest (the Knowledge Source), 3) a connection to an existing data store (the Data Source), and 4) a data processing environment for managing the abstraction-finding routines (the Abstraction Finder). The first three modules have back ends that implement environment- or application-specific features.
 
 ## Version 4.0 development series
