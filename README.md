@@ -53,14 +53,28 @@ SourceFactory sourceFactory = new SourceFactory(new INIConfigurations(new File("
 Protempa protempa = Protempa.newInstance(sourceFactory);
 
 DefaultQueryBuilder q = new DefaultQueryBuilder();
-q.setName("i2b2 ETL Test Query No Derived Variables With Lower Date Bound");
-q.setPropositionIds(new String[]{"ICD9:Diagnoses", "ICD9:Procedures", "LAB:LabTest", "Encounter", "MED:medications", "VitalSign", "PatientDetails"});
+q.setName("My test query");
+q.setPropositionIds(new String[]{"ICD9:Diagnoses", "ICD9:Procedures", "LAB:LabTest", "Encounter", "MED:medications", "VitalSign", "PatientDetails"}); // an array of concept names from the knowledge source
 Query query = protempa.buildQuery(q);
 
 Destination dest = // an implementation of org.protempa.dest.Destination
 protempa.execute(query, dest);
 ```
 
+The `protempa-config.ini` file is an INI configuration file that specifies a data source backend, a knowledge source backend, and an algorithm source backend, for example:
+```
+[edu.emory.cci.aiw.cvrg.eureka.etl.dsb.EurekaDataSourceBackend] # an implementation of org.protempa.backend.dsb.DataSourceBackend
+dataSourceBackendId=Spreadsheet # any fields in the implementation that have the @BackendProperty annotation.
+databaseName = spreadsheet
+sampleUrl = ../docs/sample.xlsx
+
+[edu.emory.cci.aiw.i2b2etl.ksb.I2b2KnowledgeSourceBackend] # an implementation of org.protempa.backend.dsb.KnowledgeSourceBackend
+databaseAPI = DATASOURCE # any fields in the implementation that have the @BackendProperty annotation.
+databaseId = java:/comp/env/jdbc/I2b2KS
+targetTable = EUREKAPHENOTYPEONTOLOGY
+
+[org.protempa.backend.asb.java.JavaAlgorithmBackend] # an implementation of org.protempa.backend.asb.AlgorithmSourceBackend
+```
 ## Developer documentation
 * [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa)
 
