@@ -44,6 +44,23 @@ The project uses the maven build tool. Typically, you build it by invoking `mvn 
 </dependency>
 ```
 
+## Example
+
+To run Protempa, write code like the following:
+
+```
+SourceFactory sourceFactory = new SourceFactory(new INIConfigurations(new File("src/test/resources")).load("protempa-config.ini"));
+Protempa protempa = Protempa.newInstance(sourceFactory);
+
+DefaultQueryBuilder q = new DefaultQueryBuilder();
+q.setName("i2b2 ETL Test Query No Derived Variables With Lower Date Bound");
+q.setPropositionIds(new String[]{"ICD9:Diagnoses", "ICD9:Procedures", "LAB:LabTest", "Encounter", "MED:medications", "VitalSign", "PatientDetails"});
+Query query = protempa.buildQuery(q);
+
+Destination dest = // an implementation of org.protempa.dest.Destination
+protempa.execute(query, dest);
+```
+
 ## Developer documentation
 * [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa)
 
