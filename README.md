@@ -10,7 +10,9 @@ Protempa is a software framework with a modular architecture. It has four module
 ![Protempa architecture](https://github.com/eurekaclinical/dev-wiki/blob/master/images/Protempa%20architecture.png)
 
 ### Methods
-Protempa implements an extension of the temporal abstraction method, which is a data summarization method in which an ontology is used to describe interpretations of the data of interest, with an emphasis on interpretations of time intervals containing frequency, sequence and overlap temporal patterns in the data. For portability, the descriptions use standard terminologies to describe the source data. The temporal abstraction process translates the ontology's descriptions into business rules that translate source data into a standard data model, compute the temporal patterns described in the ontology, and output the standardized data plus intervals representing the temporal patterns that were found.
+Protempa implements an extension of the knowledge based temporal abstraction method, which is a data summarization method in which an ontology is used to describe interpretations of the data of interest, with an emphasis on interpretations of time intervals containing frequency, sequence and overlap temporal patterns in the data. For portability across data sets, the descriptions use standard terminologies to describe the source data. The temporal abstraction process translates the ontology's descriptions into business rules that translate source data into a standard data model, compute the temporal patterns described in the ontology, and output the standardized data plus intervals representing the temporal patterns that were found. The diagram below depicts a collection of clinical observations and events, and time intervals representing a summary of its contents.
+
+![Temporal abstraction example](https://github.com/eurekaclinical/dev-wiki/blob/master/images/BP%20figure.png)
 
 In the clinical domain, temporal abstraction can be used for automated chart abstraction for large volumes of patient records (tens of millions), assuming that the the temporal patterns of interest can be described ahead of time in an ontology or as rules.
 
