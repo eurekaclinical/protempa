@@ -78,17 +78,21 @@ try (Protempa protempa = Protempa.newInstance(sourceFactory)) {
 
 The `protempa-config.ini` file is an INI configuration file that specifies a data source backend, a knowledge source backend, and an algorithm source backend, for example:
 ```
-[edu.emory.cci.aiw.cvrg.eureka.etl.dsb.EurekaDataSourceBackend] # an implementation of org.protempa.backend.dsb.DataSourceBackend
+# An implementation of org.protempa.backend.dsb.DataSourceBackend provides the data.
+[edu.emory.cci.aiw.cvrg.eureka.etl.dsb.EurekaDataSourceBackend]
 dataSourceBackendId=Spreadsheet # any fields in the implementation that have the @BackendProperty annotation.
 databaseName = spreadsheet
 sampleUrl = ../docs/sample.xlsx
 
-[edu.emory.cci.aiw.i2b2etl.ksb.I2b2KnowledgeSourceBackend] # an implementation of org.protempa.backend.dsb.KnowledgeSourceBackend
+# An implementation of org.protempa.backend.dsb.KnowledgeSourceBackend provides the temporal sequence definitions.
+[edu.emory.cci.aiw.i2b2etl.ksb.I2b2KnowledgeSourceBackend]
 databaseAPI = DATASOURCE # any fields in the implementation that have the @BackendProperty annotation.
 databaseId = java:/comp/env/jdbc/I2b2KS
 targetTable = EUREKAPHENOTYPEONTOLOGY
 
-[org.protempa.backend.asb.java.JavaAlgorithmBackend] # an implementation of org.protempa.backend.asb.AlgorithmSourceBackend
+# An implementation of org.protempa.backend.asb.AlgorithmSourceBackend provides time series processing algorithms.
+# In general, use the built-in JavaAlgorithmBackend.
+[org.protempa.backend.asb.java.JavaAlgorithmBackend]
 ```
 ## Developer documentation
 * [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa)
