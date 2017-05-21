@@ -157,7 +157,8 @@ targetTable = EUREKAPHENOTYPEONTOLOGY
 * `protempa-framework`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-framework) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-framework.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-framework)
 * `protempa-bcp-serviceloader`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-bcp-serviceloader) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-bcp-serviceloader.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-bcp-serviceloader)
 * `protempa-bp-serviceloader`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-bp-serviceloader) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-bp-serviceloader.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-bp-serviceloader)
-
+* `protempa-dsb-relationaldb`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-dsb-relationaldb) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-dsb-relationaldb.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-dsb-relationaldb)
+* `protempa-dsb-file`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-dsb-file) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-dsb-file.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-dsb-file)
 
 ## Getting help
 Feel free to contact us at help@eurekaclinical.org.
