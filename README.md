@@ -159,6 +159,7 @@ targetTable = EUREKAPHENOTYPEONTOLOGY
 * `protempa-bp-serviceloader`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-bp-serviceloader) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-bp-serviceloader.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-bp-serviceloader)
 * `protempa-dsb-relationaldb`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-dsb-relationaldb) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-dsb-relationaldb.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-dsb-relationaldb)
 * `protempa-dsb-file`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-dsb-file) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-dsb-file.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-dsb-file)
+* `protempa-bconfigs-ini4j-ini`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-bconfigs-ini4j-ini) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-bconfigs-ini4j-ini.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-bconfigs-ini4j-ini)
 
 ## Getting help
 Feel free to contact us at help@eurekaclinical.org.
