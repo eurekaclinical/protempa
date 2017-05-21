@@ -38,8 +38,8 @@ The project uses the maven build tool. Typically, you build it by invoking `mvn 
 ## Maven dependency
 Protempa consists of a number of modules:
 
-### protempa-framework
-Provides 
+### Protempa Framework
+Core framework, is always required.
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
@@ -47,6 +47,58 @@ Provides
     <version>version</version>
 </dependency>
 ```
+
+### Protempa ServiceLoader Backend Configurations Provider
+Supports creating plugins that manage data source, knowledge source, and algorithm source backend configuration data using the `java.util.ServiceLoader` mechanism.
+```
+<dependency>
+    <groupId>org.eurekaclinical</groupId>
+    <artifactId>protempa-bcp-serviceloader</artifactId>
+    <version>version</version>
+</dependency>
+```
+
+### Protempa ServiceLoader Backend Provider
+Supports creating plugins that implement data source, knowledge source, and algorithm source backends using the `java.util.ServiceLoader` mechanism.
+```
+<dependency>
+    <groupId>org.eurekaclinical</groupId>
+    <artifactId>protempa-bcp-serviceloader</artifactId>
+    <version>version</version>
+</dependency>
+```
+
+### Protempa Relational Database Data Source Backend
+Provides base classes and interfaces for loading data into Protempa from a relational database. Depends on the Protempa ServiceLoader Backend Provider.
+```
+<dependency>
+    <groupId>org.eurekaclinical</groupId>
+    <artifactId>protempa-bp-serviceloader</artifactId>
+    <version>version</version>
+</dependency>
+```
+
+### Protempa File Data Source Backend
+Provides base classes and interfaces for loading data into Protempa from files. Depends on the Protempa ServiceLoader Backend Provider.
+```
+<dependency>
+    <groupId>org.eurekaclinical</groupId>
+    <artifactId>protempa-dsb-relationaldb</artifactId>
+    <version>version</version>
+</dependency>
+```
+
+### Protempa Ini4j INI Backend Configurations
+A backend configuration management plugin that stores configuration data in INI files. Depends on the Protempa ServiceLoader Backend Configurations Provider. 
+```
+<dependency>
+    <groupId>org.eurekaclinical</groupId>
+    <artifactId>protempa-dsb-file</artifactId>
+    <version>version</version>
+</dependency>
+```
+
+Protempa includes a test suite module, Protempa Test Suite, that is invoked automatically when Protempa builds. Several other deprecated modules are provided in the source code and are not described here.
 
 ## Example
 
