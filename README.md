@@ -49,7 +49,7 @@ Core framework, is always required.
 ```
 
 ### Protempa ServiceLoader Backend Configurations Provider
-Supports creating plugins that manage data source, knowledge source, and algorithm source backend configuration data using the `java.util.ServiceLoader` mechanism.
+Supports creating *backend configuration management plugins* that manage data source, knowledge source, and algorithm source backend configuration data using the `java.util.ServiceLoader` mechanism.
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
@@ -59,7 +59,7 @@ Supports creating plugins that manage data source, knowledge source, and algorit
 ```
 
 ### Protempa ServiceLoader Backend Provider
-Supports creating plugins that implement data source, knowledge source, and algorithm source backends using the `java.util.ServiceLoader` mechanism.
+Supports creating *backend plugins* that implement data source, knowledge source, and algorithm source backends using the `java.util.ServiceLoader` mechanism.
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
