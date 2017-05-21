@@ -5,7 +5,7 @@
 Protempa identifies temporal sequences in clinical data. It supports retrieving patient populations containing sequences of interest from clinical datasets and databases in support of clinical research, outcomes studies and quality improvement. It provides for portability across data sources, and the creation of libraries of temporal sequence definitions and time series data processing algorithms.
 
 ### Protempa architecture
-Protempa is a software framework with a modular architecture. It has four modules, shown in the diagram below, that provide for 1)  defining time series data processing algorithms such as for finding states and trends (the Algorithm Source), 2) specifying frequency, sequence and overlap temporal patterns of interest (the Knowledge Source), 3) a connection to an existing data store (the Data Source), and 4) a data processing environment for managing the sequence-finding routines (the Abstraction Finder). The first three modules have back ends that implement environment- or application-specific features.
+Protempa is a software framework with a modular architecture. It has four modules, shown in the diagram below, that provide for 1)  defining time series data processing algorithms such as for finding states and trends (the *Algorithm Source*), 2) specifying frequency, sequence and overlap temporal patterns of interest (the *Knowledge Source*), 3) a connection to an existing data store (the *Data Source*), and 4) a data processing environment for managing the sequence-finding routines (the *Abstraction Finder*). The first three modules have back ends that implement environment- or application-specific features. Additinally, the framework provides a fifth module, not shown, the *Destination*, which processes the data and temporal sequences that are retrieved and identified.  Destinations can be plugged into Protempa that process its output in various ways.
 
 ![Protempa architecture](https://github.com/eurekaclinical/dev-wiki/blob/master/images/Protempa%20architecture.png)
 
@@ -36,10 +36,14 @@ Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-cent
 The project uses the maven build tool. Typically, you build it by invoking `mvn clean install` at the command line. For simple file changes, not additions or deletions, you can usually use `mvn install`. See https://github.com/eurekaclinical/dev-wiki/wiki/Building-Eureka!-Clinical-projects for more details.
 
 ## Maven dependency
+Protempa consists of a number of modules:
+
+### protempa-framework
+Provides 
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
-    <artifactId>protempa</artifactId>
+    <artifactId>protempa-framework</artifactId>
     <version>version</version>
 </dependency>
 ```
