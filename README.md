@@ -63,7 +63,7 @@ Supports creating *backend plugins* that implement data source, knowledge source
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
-    <artifactId>protempa-bcp-serviceloader</artifactId>
+    <artifactId>protempa-bp-serviceloader</artifactId>
     <version>version</version>
 </dependency>
 ```
@@ -73,7 +73,7 @@ Provides base classes and interfaces for creating data source backend plugins th
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
-    <artifactId>protempa-bp-serviceloader</artifactId>
+    <artifactId>protempa-dsb-relationaldb</artifactId>
     <version>version</version>
 </dependency>
 ```
@@ -83,7 +83,7 @@ Provides base classes and interfaces for creating data source backend plugins th
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
-    <artifactId>protempa-dsb-relationaldb</artifactId>
+    <artifactId>protempa-dsb-file</artifactId>
     <version>version</version>
 </dependency>
 ```
@@ -93,7 +93,7 @@ A backend configuration management plugin that stores configuration data in INI 
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
-    <artifactId>protempa-dsb-file</artifactId>
+    <artifactId>protempa-bconfigs-ini4j-ini</artifactId>
     <version>version</version>
 </dependency>
 ```
@@ -154,7 +154,10 @@ targetTable = EUREKAPHENOTYPEONTOLOGY
 [org.protempa.backend.asb.java.JavaAlgorithmBackend]
 ```
 ## Developer documentation
-* [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-framework) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-framework.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-framework)
+* `protempa-framework`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-framework) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-framework.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-framework)
+* `protempa-bcp-serviceloader`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-bcp-serviceloader) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-bcp-serviceloader.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-bcp-serviceloader)
+* `protempa-bp-serviceloader`: [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-bp-serviceloader) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-bp-serviceloader.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-bp-serviceloader)
+
 
 ## Getting help
 Feel free to contact us at help@eurekaclinical.org.
