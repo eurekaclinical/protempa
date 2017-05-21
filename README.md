@@ -98,7 +98,7 @@ targetTable = EUREKAPHENOTYPEONTOLOGY
 [org.protempa.backend.asb.java.JavaAlgorithmBackend]
 ```
 ## Developer documentation
-* [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa)
+* [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-framework) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-framework.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-framework)
 
 ## Getting help
 Feel free to contact us at help@eurekaclinical.org.
