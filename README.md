@@ -69,7 +69,7 @@ Supports creating *backend plugins* that implement data source, knowledge source
 ```
 
 ### Protempa Relational Database Data Source Backend
-Provides base classes and interfaces for loading data into Protempa from a relational database. Depends on the Protempa ServiceLoader Backend Provider.
+Provides base classes and interfaces for creating data source backend plugins that load data into Protempa from a relational database. Depends on the Protempa ServiceLoader Backend Provider.
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
@@ -79,7 +79,7 @@ Provides base classes and interfaces for loading data into Protempa from a relat
 ```
 
 ### Protempa File Data Source Backend
-Provides base classes and interfaces for loading data into Protempa from files. Depends on the Protempa ServiceLoader Backend Provider.
+Provides base classes and interfaces for creating data source backend plugins that load data into Protempa from files. Depends on the Protempa ServiceLoader Backend Provider.
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
