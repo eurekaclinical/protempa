@@ -20,6 +20,15 @@ Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-cent
 ## Building it
 Follow the build instructions for the parent project. You can build this project separately by going to the parent project's root directory, and running `mvn clean install -pl protempa-bcp-serviceloader` or `mvn install -pl protempa-bcp-serviceloader`.
 
+## Maven dependency
+```
+<dependency>
+    <groupId>org.eurekaclinical</groupId>
+    <artifactId>protempa-bcp-serviceloader</artifactId>
+    <version>version</version>
+</dependency>
+```
+
 ## Developer documentation
 [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-bcp-serviceloader) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-bcp-serviceloader.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-bcp-serviceloader)
 
