@@ -10,12 +10,9 @@ Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-cent
 ## Version history
 ### Version 3.5
 
-## Build requirements
+## Requirements
 * [Oracle Java JDK 8](http://www.oracle.com/technetwork/java/javase/overview/index.html)
 * [Maven 3.2.5 or greater](https://maven.apache.org)
-
-## Runtime requirements
-* [Oracle Java JRE 8](http://www.oracle.com/technetwork/java/javase/overview/index.html)
 
 ## Building it
 Follow the build instructions for the parent project. You can build this project separately by going to the parent project's root directory, and running `mvn clean install -pl protempa-test-suite` or `mvn install -pl protempa-test-suite`.
