@@ -49,7 +49,7 @@ Core framework, is always required.
 ```
 
 ### Protempa ServiceLoader Backend Configurations Provider
-Supports creating *backend configuration management plugins* that manage data source, knowledge source, and algorithm source backend configuration data using the `java.util.ServiceLoader` mechanism.
+Provides registering a configuration mechanism for data source, knowledge source, and algorithm source backends using the `java.util.ServiceLoader` mechanism.
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
@@ -59,7 +59,7 @@ Supports creating *backend configuration management plugins* that manage data so
 ```
 
 ### Protempa ServiceLoader Backend Provider
-Supports creating *backend plugins* that implement data source, knowledge source, and algorithm source backends using the `java.util.ServiceLoader` mechanism.
+Provides registering data source, knowledge source, and algorithm source backends within Protempa using the `java.util.ServiceLoader` mechanism.
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
@@ -69,7 +69,7 @@ Supports creating *backend plugins* that implement data source, knowledge source
 ```
 
 ### Protempa Relational Database Data Source Backend
-Provides base classes and interfaces for creating data source backend plugins that load data into Protempa from a relational database. Depends on the Protempa ServiceLoader Backend Provider.
+Provides base classes and interfaces for creating data source backends that load data into Protempa from a relational database. Depends on the Protempa ServiceLoader Backend Provider.
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
@@ -79,7 +79,7 @@ Provides base classes and interfaces for creating data source backend plugins th
 ```
 
 ### Protempa File Data Source Backend
-Provides base classes and interfaces for creating data source backend plugins that load data into Protempa from files. Depends on the Protempa ServiceLoader Backend Provider.
+Provides base classes and interfaces for creating data source backends that load data into Protempa from files. Depends on the Protempa ServiceLoader Backend Provider.
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
@@ -89,7 +89,7 @@ Provides base classes and interfaces for creating data source backend plugins th
 ```
 
 ### Protempa Ini4j INI Backend Configurations
-A backend configuration management plugin that stores configuration data in INI files. Depends on the Protempa ServiceLoader Backend Configurations Provider. 
+Provides configuring data source, algorithm source and knowledge source backends in an INI file. Depends on the Protempa ServiceLoader Backend Configurations Provider. 
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
