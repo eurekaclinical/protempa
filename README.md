@@ -89,7 +89,7 @@ Provides base classes and interfaces for creating data source backends that load
 ```
 
 ### Protempa Ini4j INI Backend Configurations
-Provides configuring data source, algorithm source and knowledge source backends in an INI file. Depends on the Protempa ServiceLoader Backend Configurations Provider. 
+Provides configuring data source, algorithm source and knowledge source backends in INI files. Depends on the Protempa ServiceLoader Backend Configurations Provider. 
 ```
 <dependency>
     <groupId>org.eurekaclinical</groupId>
