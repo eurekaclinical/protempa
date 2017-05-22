@@ -20,6 +20,15 @@ Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-cent
 ## Building it
 Follow the build instructions for the parent project. You can build this project separately by going to the parent project's root directory, and running `mvn clean install -pl protempa-framework` or `mvn install -pl protempa-framework`.
 
+## Maven dependency
+```
+<dependency>
+    <groupId>org.eurekaclinical</groupId>
+    <artifactId>protempa-framework</artifactId>
+    <version>version</version>
+</dependency>
+```
+
 ## Developer documentation
 [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-framework) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-framework.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-framework)
 
