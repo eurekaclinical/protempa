@@ -1,5 +1,5 @@
 # Protempa Framework
-[Atlanta Clinical and Translational Science Institute (ACTSI)](http://www.actsi.org), [Emory University](http://www.emory.edu), Atlanta, GA
+[Department of Biomedical Informatics](http://bmi.emory.edu), [Emory University](http://www.emory.edu), Atlanta, GA
 
 ## What does it do?
 It is the core module of [Protempa](https://github.com/eurekaclinical/protempa).
