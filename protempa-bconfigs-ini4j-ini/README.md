@@ -20,6 +20,15 @@ Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-cent
 ## Building it
 Follow the build instructions for the parent project. You can build this project separately by going to the parent project's root directory, and running `mvn clean install -pl protempa-bconfigs-ini4j-ini` or `mvn install -pl protempa-bconfigs-ini4j-ini`.
 
+## Maven dependency
+```
+<dependency>
+    <groupId>org.eurekaclinical</groupId>
+    <artifactId>protempa-bconfigs-ini4j-ini</artifactId>
+    <version>version</version>
+</dependency>
+```
+
 ## Developer documentation
 [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-bconfigs-ini4j-ini) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-bconfigs-ini4j-ini.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-bconfigs-ini4j-ini)
 
