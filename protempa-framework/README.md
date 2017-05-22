@@ -18,7 +18,7 @@ Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-cent
 * [Oracle Java JRE 8](http://www.oracle.com/technetwork/java/javase/overview/index.html)
 
 ## Building it
-Follow the build instructions for the parent project. You can build this project separately by going to the parent project's root directory, and running `mvn clean install -pl i2b2-export-service` or `mvn install -pl i2b2-export-service`.
+Follow the build instructions for the parent project. You can build this project separately by going to the parent project's root directory, and running `mvn clean install -pl protempa-framework` or `mvn install -pl protempa-framework`.
 
 ## Developer documentation
 [Javadoc for latest development release](http://javadoc.io/doc/org.eurekaclinical/protempa-framework) [![Javadocs](http://javadoc.io/badge/org.eurekaclinical/protempa-framework.svg)](http://javadoc.io/doc/org.eurekaclinical/protempa-framework)
