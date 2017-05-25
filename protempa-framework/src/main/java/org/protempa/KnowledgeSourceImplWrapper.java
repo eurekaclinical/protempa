@@ -58,14 +58,10 @@ class KnowledgeSourceImplWrapper
         super(new KnowledgeSourceBackend[0]);
         assert knowledgeSource != null : "knowledgeSource cannot be null";
         this.knowledgeSource = knowledgeSource;
-        this.propositionDefinitionsMap
-                = new HashMap<>();
-        this.abstractionDefinitionsMap
-                = new HashMap<>();
-        this.contextDefinitionsMap
-                = new HashMap<>();
-        this.temporalPropDefsMap
-                = new HashMap<>();
+        this.propositionDefinitionsMap = new HashMap<>();
+        this.abstractionDefinitionsMap = new HashMap<>();
+        this.contextDefinitionsMap = new HashMap<>();
+        this.temporalPropDefsMap = new HashMap<>();
         this.isAMap = new HashMap<>();
         this.abstractedIntoMap = new HashMap<>();
         this.inducesMap = new HashMap<>();
@@ -314,16 +310,7 @@ class KnowledgeSourceImplWrapper
             throw new IllegalArgumentException("propDef cannot be null");
         }
         initializeIfNeeded();
-        List<ContextDefinition> result = new ArrayList<>();
-        for (String subContextId : propDef.getSubContexts()) {
-            ContextDefinition contextDefinition = readContextDefinition(subContextId);
-            if (contextDefinition != null) {
-                result.add(contextDefinition);
-            } else {
-                throw new AssertionError("Context definition " + propDef.getId() + " is invalid because sub-context " + subContextId + " does not exist.");
-            }
-        }
-        return result;
+        return readContextDefinitions(propDef.getSubContexts());
     }
 
     @Override
@@ -334,12 +321,8 @@ class KnowledgeSourceImplWrapper
             throw new IllegalArgumentException("propDef cannot be null");
         }
         initializeIfNeeded();
-        List<PropositionDefinition> result
-                = new ArrayList<>();
-        for (String propId : propDef.getAbstractedFrom()) {
-            result.add(readPropositionDefinition(propId));
-        }
-        return result;
+        Set<String> abstractedFrom = propDef.getAbstractedFrom();
+        return readPropositionDefinitions(abstractedFrom.toArray(new String[abstractedFrom.size()]));
     }
 
     @Override
@@ -363,28 +346,7 @@ class KnowledgeSourceImplWrapper
         if (propDef == null) {
             throw new IllegalArgumentException("propDef cannot be null");
         }
-        initializeIfNeeded();
-        String propId = propDef.getId();
-        List<AbstractionDefinition> result
-                = new ArrayList<>();
-        if (this.abstractedIntoMap.containsKey(propId)) {
-            List<String> propIds = this.abstractedIntoMap.get(propDef.getId());
-
-            if (propIds != null) {
-                for (String abstractedIntoPropId : propIds) {
-                    result.add(
-                            readAbstractionDefinition(abstractedIntoPropId));
-                }
-            }
-        }
-        List<AbstractionDefinition> r
-                = this.knowledgeSource.readAbstractedInto(propDef);
-        for (AbstractionDefinition def : r) {
-            if (!propositionDefinitionsMap.containsKey(def.getId())) {
-                result.add(def);
-            }
-        }
-        return result;
+        return readAbstractedInto(propDef.getId());
     }
 
     @Override
@@ -394,12 +356,26 @@ class KnowledgeSourceImplWrapper
             throw new IllegalArgumentException("propId cannot be null");
         }
         initializeIfNeeded();
-        PropositionDefinition propDef = readPropositionDefinition(propId);
-        if (propDef != null) {
-            return readAbstractedInto(propDef);
-        } else {
-            return Collections.emptyList();
+        List<AbstractionDefinition> result
+                = new ArrayList<>();
+        if (this.abstractedIntoMap.containsKey(propId)) {
+            List<String> propIds = this.abstractedIntoMap.get(propId);
+
+            if (propIds != null) {
+                for (String abstractedIntoPropId : propIds) {
+                    result.add(
+                            readAbstractionDefinition(abstractedIntoPropId));
+                }
+            }
         }
+        List<AbstractionDefinition> r
+                = this.knowledgeSource.readAbstractedInto(propId);
+        for (AbstractionDefinition def : r) {
+            if (!propositionDefinitionsMap.containsKey(def.getId())) {
+                result.add(def);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -409,28 +385,7 @@ class KnowledgeSourceImplWrapper
         if (propDef == null) {
             throw new IllegalArgumentException("propDef cannot be null");
         }
-        initializeIfNeeded();
-        String propId = propDef.getId();
-        List<ContextDefinition> result
-                = new ArrayList<>();
-        if (this.inducesMap.containsKey(propId)) {
-            List<String> propIds = this.inducesMap.get(propDef.getId());
-
-            if (propIds != null) {
-                for (String inducesPropId : propIds) {
-                    result.add(
-                            readContextDefinition(inducesPropId));
-                }
-            }
-        }
-        List<ContextDefinition> r
-                = this.knowledgeSource.readInduces(propDef);
-        for (ContextDefinition def : r) {
-            if (!propositionDefinitionsMap.containsKey(def.getId())) {
-                result.add(def);
-            }
-        }
-        return result;
+        return readInduces(propDef.getId());
     }
 
     @Override
@@ -440,13 +395,26 @@ class KnowledgeSourceImplWrapper
             throw new IllegalArgumentException("propId cannot be null");
         }
         initializeIfNeeded();
-        TemporalPropositionDefinition propDef
-                = readTemporalPropositionDefinition(propId);
-        if (propDef != null) {
-            return readInduces(propDef);
-        } else {
-            return Collections.emptyList();
+        List<ContextDefinition> result
+                = new ArrayList<>();
+        if (this.inducesMap.containsKey(propId)) {
+            List<String> propIds = this.inducesMap.get(propId);
+
+            if (propIds != null) {
+                for (String inducesPropId : propIds) {
+                    result.add(
+                            readContextDefinition(inducesPropId));
+                }
+            }
         }
+        List<ContextDefinition> r
+                = this.knowledgeSource.readInduces(propId);
+        for (ContextDefinition def : r) {
+            if (!propositionDefinitionsMap.containsKey(def.getId())) {
+                result.add(def);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -472,12 +440,7 @@ class KnowledgeSourceImplWrapper
             throw new IllegalArgumentException("propDef cannot be null");
         }
         initializeIfNeeded();
-        List<PropositionDefinition> result
-                = new ArrayList<>();
-        for (String propId : propDef.getInverseIsA()) {
-            result.add(readPropositionDefinition(propId));
-        }
-        return result;
+        return readPropositionDefinitions(propDef.getInverseIsA());
     }
 
     @Override
@@ -490,7 +453,7 @@ class KnowledgeSourceImplWrapper
         if (def != null) {
             return readInverseIsA(def);
         } else {
-            return Collections.emptyList();
+            return new ArrayList<>(0);
         }
     }
 
@@ -500,12 +463,20 @@ class KnowledgeSourceImplWrapper
         if (propDef == null) {
             throw new IllegalArgumentException("propDef cannot be null");
         }
+        return readIsA(propDef.getId());
+    }
+
+    @Override
+    public List<PropositionDefinition> readIsA(String propId)
+            throws KnowledgeSourceReadException {
+        if (propId == null) {
+            throw new IllegalArgumentException("propId cannot be null");
+        }
         initializeIfNeeded();
-        String propId = propDef.getId();
         List<PropositionDefinition> result
                 = new ArrayList<>();
         if (this.isAMap.containsKey(propId)) {
-            List<String> propIds = this.isAMap.get(propDef.getId());
+            List<String> propIds = this.isAMap.get(propId);
 
             if (propIds != null) {
                 for (String isAPropId : propIds) {
@@ -516,7 +487,7 @@ class KnowledgeSourceImplWrapper
         }
 
         List<PropositionDefinition> r
-                = this.knowledgeSource.readIsA(propDef);
+                = this.knowledgeSource.readIsA(propId);
         for (PropositionDefinition def : r) {
             if (!propositionDefinitionsMap.containsKey(def.getId())) {
                 result.add(def);
@@ -524,21 +495,6 @@ class KnowledgeSourceImplWrapper
         }
 
         return result;
-    }
-
-    @Override
-    public List<PropositionDefinition> readIsA(String propId)
-            throws KnowledgeSourceReadException {
-        if (propId == null) {
-            throw new IllegalArgumentException("propId cannot be null");
-        }
-        initializeIfNeeded();
-        PropositionDefinition propDef = readPropositionDefinition(propId);
-        if (propDef != null) {
-            return readIsA(propDef);
-        } else {
-            return Collections.emptyList();
-        }
     }
 
     @Override
@@ -694,17 +650,7 @@ class KnowledgeSourceImplWrapper
         if (propDef == null) {
             throw new IllegalArgumentException("propDef cannot be null");
         }
-        initializeIfNeeded();
-        String propId = propDef.getId();
-        if (this.propositionDefinitionsMap.containsKey(propId)) {
-            List<PropositionDefinition> result
-                    = new ArrayList<>();
-            result.addAll(readIsA(propDef));
-            result.addAll(readAbstractedInto(propDef));
-            return result;
-        } else {
-            return this.knowledgeSource.readParents(propDef);
-        }
+        return readParents(propDef.getId());
     }
 
     @Override
@@ -714,11 +660,14 @@ class KnowledgeSourceImplWrapper
             throw new IllegalArgumentException("propId cannot be null");
         }
         initializeIfNeeded();
-        PropositionDefinition propDef = readPropositionDefinition(propId);
-        if (propDef != null) {
-            return readParents(propDef);
+        if (this.propositionDefinitionsMap.containsKey(propId)) {
+            List<PropositionDefinition> result
+                    = new ArrayList<>();
+            result.addAll(readIsA(propId));
+            result.addAll(readAbstractedInto(propId));
+            return result;
         } else {
-            return Collections.emptyList();
+            return this.knowledgeSource.readParents(propId);
         }
     }
 
@@ -748,30 +697,16 @@ class KnowledgeSourceImplWrapper
     }
 
     @Override
-    public List<ContextDefinition> readSubContextOfs(String id) throws KnowledgeSourceReadException {
-        if (id == null) {
-            throw new IllegalArgumentException("id cannot be null");
-        }
-        ContextDefinition def = readContextDefinition(id);
-        if (def != null) {
-            return readSubContextOfs(readContextDefinition(id));
-        } else {
-            return Collections.emptyList();
-        }
-    }
-
-    @Override
-    public List<ContextDefinition> readSubContextOfs(ContextDefinition contextDef) throws KnowledgeSourceReadException {
-        if (contextDef == null) {
-            throw new IllegalArgumentException("propDef cannot be null");
+    public List<ContextDefinition> readSubContextOfs(String propId) throws KnowledgeSourceReadException {
+        if (propId == null) {
+            throw new IllegalArgumentException("propId cannot be null");
         }
         initializeIfNeeded();
-        String propId = contextDef.getId();
         List<ContextDefinition> result
                 = new ArrayList<>();
         if (this.subContextOfMap.containsKey(propId)) {
             List<String> propIds
-                    = this.subContextOfMap.get(contextDef.getId());
+                    = this.subContextOfMap.get(propId);
 
             if (propIds != null) {
                 for (String subContextOfId : propIds) {
@@ -781,7 +716,7 @@ class KnowledgeSourceImplWrapper
             }
         }
         List<ContextDefinition> r
-                = this.knowledgeSource.readSubContextOfs(contextDef);
+                = this.knowledgeSource.readSubContextOfs(propId);
         for (ContextDefinition def : r) {
             if (!propositionDefinitionsMap.containsKey(def.getId())) {
                 result.add(def);
@@ -791,8 +726,179 @@ class KnowledgeSourceImplWrapper
     }
 
     @Override
-    public List<PropositionDefinition> getMatchingPropositionDefinitions(String searchKey)
-            throws KnowledgeSourceReadException {
-        return null;
+    public List<ContextDefinition> readSubContextOfs(ContextDefinition contextDef) throws KnowledgeSourceReadException {
+        if (contextDef == null) {
+            throw new IllegalArgumentException("propDef cannot be null");
+        }
+        return readSubContextOfs(contextDef.getId());
     }
+
+    @Override
+    public List<String> readAbstractedIntoPropIds(PropositionDefinition propDef) throws KnowledgeSourceReadException {
+        if (propDef == null) {
+            throw new IllegalArgumentException("propDef cannot be null");
+        }
+        return readAbstractedIntoPropIds(propDef.getId());
+    }
+
+    @Override
+    public List<String> readAbstractedIntoPropIds(String propId) throws KnowledgeSourceReadException {
+        if (propId == null) {
+            throw new IllegalArgumentException("propId cannot be null");
+        }
+        initializeIfNeeded();
+        List<String> result = new ArrayList<>();
+        if (this.abstractedIntoMap.containsKey(propId)) {
+            List<String> propIds = this.abstractedIntoMap.get(propId);
+
+            if (propIds != null) {
+                for (String abstractedIntoPropId : propIds) {
+                    result.add(abstractedIntoPropId);
+                }
+            }
+        }
+        List<String> r
+                = this.knowledgeSource.readAbstractedIntoPropIds(propId);
+        for (String def : r) {
+            if (!propositionDefinitionsMap.containsKey(def)) {
+                result.add(def);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<String> readIsAPropIds(PropositionDefinition propDef) throws KnowledgeSourceReadException {
+        if (propDef == null) {
+            throw new IllegalArgumentException("propDef cannot be null");
+        }
+        return readIsAPropIds(propDef.getId());
+    }
+
+    @Override
+    public List<String> readIsAPropIds(String propId) throws KnowledgeSourceReadException {
+        if (propId == null) {
+            throw new IllegalArgumentException("propId cannot be null");
+        }
+        initializeIfNeeded();
+        List<String> result = new ArrayList<>();
+        if (this.isAMap.containsKey(propId)) {
+            List<String> propIds = this.isAMap.get(propId);
+
+            if (propIds != null) {
+                for (String isAPropId : propIds) {
+                    result.add(isAPropId);
+                }
+            }
+        }
+
+        List<String> r
+                = this.knowledgeSource.readIsAPropIds(propId);
+        for (String def : r) {
+            if (!propositionDefinitionsMap.containsKey(def)) {
+                result.add(def);
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<String> readSubContextOfPropIds(String propId) throws KnowledgeSourceReadException {
+        if (propId == null) {
+            throw new IllegalArgumentException("propId cannot be null");
+        }
+        initializeIfNeeded();
+        List<String> result = new ArrayList<>();
+        if (this.subContextOfMap.containsKey(propId)) {
+            List<String> propIds
+                    = this.subContextOfMap.get(propId);
+
+            if (propIds != null) {
+                for (String subContextOfId : propIds) {
+                    result.add(subContextOfId);
+                }
+            }
+        }
+        List<String> r
+                = this.knowledgeSource.readSubContextOfPropIds(propId);
+        for (String def : r) {
+            if (!propositionDefinitionsMap.containsKey(def)) {
+                result.add(def);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<String> readSubContextOfPropIds(ContextDefinition contextDef) throws KnowledgeSourceReadException {
+        if (contextDef == null) {
+            throw new IllegalArgumentException("contextDef cannot be null");
+        }
+        return readSubContextOfPropIds(contextDef.getId());
+    }
+
+    @Override
+    public List<String> readInducesPropIds(String propId) throws KnowledgeSourceReadException {
+        if (propId == null) {
+            throw new IllegalArgumentException("propId cannot be null");
+        }
+        initializeIfNeeded();
+        List<String> result = new ArrayList<>();
+        if (this.inducesMap.containsKey(propId)) {
+            List<String> propIds = this.inducesMap.get(propId);
+
+            if (propIds != null) {
+                for (String inducesPropId : propIds) {
+                    result.add(inducesPropId);
+                }
+            }
+        }
+        List<String> r = this.knowledgeSource.readInducesPropIds(propId);
+        for (String def : r) {
+            if (!propositionDefinitionsMap.containsKey(def)) {
+                result.add(def);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public List<String> readInducesPropIds(TemporalPropositionDefinition propDef) throws KnowledgeSourceReadException {
+        if (propDef == null) {
+            throw new IllegalArgumentException("propDef cannot be null");
+        }
+        return readInducesPropIds(propDef.getId());
+    }
+
+    @Override
+    public List<String> readParentPropIds(PropositionDefinition propDef) throws KnowledgeSourceReadException {
+        if (propDef == null) {
+            throw new IllegalArgumentException("propDef cannot be null");
+        }
+        return readParentPropIds(propDef.getId());
+    }
+
+    @Override
+    public List<String> readParentPropIds(String propId) throws KnowledgeSourceReadException {
+        if (propId == null) {
+            throw new IllegalArgumentException("propId cannot be null");
+        }
+        initializeIfNeeded();
+        if (this.propositionDefinitionsMap.containsKey(propId)) {
+            List<String> result
+                    = new ArrayList<>();
+            result.addAll(readIsAPropIds(propId));
+            result.addAll(readAbstractedIntoPropIds(propId));
+            return result;
+        } else {
+            return this.knowledgeSource.readParentPropIds(propId);
+        }
+    }
+
+    @Override
+    public List<String> getMatchingPropIds(String searchKey) throws KnowledgeSourceReadException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }
