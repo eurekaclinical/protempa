@@ -357,13 +357,7 @@ public final class Reference extends Link {
             return explicitPropIds.clone();
         } else {
             Set<String> result = new HashSet<>();
-            for (String propId : inPropIds) {
-                PropositionDefinition propDef =
-                        knowledgeSource.readPropositionDefinition(propId);
-                if (propDef == null) {
-                    throw new IllegalArgumentException("Invalid propId: " + 
-                            propId);
-                }
+            for (PropositionDefinition propDef : knowledgeSource.readPropositionDefinitions(inPropIds)) {
                 for (String refName : this.referenceNames) {
                     ReferenceDefinition refDef =
                             propDef.referenceDefinition(refName);

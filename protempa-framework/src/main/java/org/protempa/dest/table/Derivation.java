@@ -154,13 +154,7 @@ public final class Derivation extends Link {
             return explicitPropIds;
         } else {
             Set<String> result = new HashSet<>();
-            for (String propId : inPropIds) {
-                PropositionDefinition propDef
-                        = knowledgeSource.readPropositionDefinition(propId);
-                if (propDef == null) {
-                    throw new IllegalArgumentException("Invalid propId: "
-                            + propId);
-                }
+            for (PropositionDefinition propDef : knowledgeSource.readPropositionDefinitions(inPropIds)) {
                 switch (this.behavior) {
                     case SINGLE_BACKWARD:
                         Arrays.addAll(result, propDef.getChildren());

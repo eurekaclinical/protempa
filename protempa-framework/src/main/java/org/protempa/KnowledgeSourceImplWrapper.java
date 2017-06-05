@@ -281,12 +281,11 @@ class KnowledgeSourceImplWrapper
             throw new IllegalArgumentException("propDef cannot be null");
         }
         initializeIfNeeded();
-        List<TemporalPropositionDefinition> result
-                = new ArrayList<>();
+        Set<String> propIds = new HashSet<>();
         for (TemporalExtendedPropositionDefinition tepd : propDef.getInducedBy()) {
-            result.add(readTemporalPropositionDefinition(tepd.getPropositionId()));
+            propIds.add(tepd.getPropositionId());
         }
-        return result;
+        return readTemporalPropositionDefinitions(propIds.toArray(new String[propIds.size()]));
     }
 
     @Override
@@ -360,12 +359,8 @@ class KnowledgeSourceImplWrapper
                 = new ArrayList<>();
         if (this.abstractedIntoMap.containsKey(propId)) {
             List<String> propIds = this.abstractedIntoMap.get(propId);
-
             if (propIds != null) {
-                for (String abstractedIntoPropId : propIds) {
-                    result.add(
-                            readAbstractionDefinition(abstractedIntoPropId));
-                }
+                result.addAll(readAbstractionDefinitions(propIds.toArray(new String[propIds.size()])));
             }
         }
         List<AbstractionDefinition> r
@@ -399,12 +394,8 @@ class KnowledgeSourceImplWrapper
                 = new ArrayList<>();
         if (this.inducesMap.containsKey(propId)) {
             List<String> propIds = this.inducesMap.get(propId);
-
             if (propIds != null) {
-                for (String inducesPropId : propIds) {
-                    result.add(
-                            readContextDefinition(inducesPropId));
-                }
+                result.addAll(readContextDefinitions(propIds.toArray(new String[propIds.size()])));
             }
         }
         List<ContextDefinition> r
@@ -479,10 +470,7 @@ class KnowledgeSourceImplWrapper
             List<String> propIds = this.isAMap.get(propId);
 
             if (propIds != null) {
-                for (String isAPropId : propIds) {
-                    result.add(
-                            readPropositionDefinition(isAPropId));
-                }
+                result.addAll(readPropositionDefinitions(propIds.toArray(new String[propIds.size()])));
             }
         }
 
@@ -709,10 +697,7 @@ class KnowledgeSourceImplWrapper
                     = this.subContextOfMap.get(propId);
 
             if (propIds != null) {
-                for (String subContextOfId : propIds) {
-                    result.add(
-                            readContextDefinition(subContextOfId));
-                }
+                result.addAll(readContextDefinitions(propIds.toArray(new String[propIds.size()])));
             }
         }
         List<ContextDefinition> r
@@ -847,11 +832,8 @@ class KnowledgeSourceImplWrapper
         List<String> result = new ArrayList<>();
         if (this.inducesMap.containsKey(propId)) {
             List<String> propIds = this.inducesMap.get(propId);
-
             if (propIds != null) {
-                for (String inducesPropId : propIds) {
-                    result.add(inducesPropId);
-                }
+                result.addAll(propIds);
             }
         }
         List<String> r = this.knowledgeSource.readInducesPropIds(propId);

@@ -208,8 +208,13 @@ public abstract class Link {
     void validate(KnowledgeSource knowledgeSource) throws 
             LinkValidationFailedException, KnowledgeSourceReadException {
         List<String> invalidPropIds = new ArrayList<>();
+        List<PropositionDefinition> propDefs = knowledgeSource.readPropositionDefinitions(this.propIdsAsSet.toArray(new String[this.propIdsAsSet.size()]));
+        Set<String> foundPropIds = new HashSet<>();
+        for (PropositionDefinition propDef : propDefs) {
+            foundPropIds.add(propDef.getId());
+        }
         for (String propId : this.propIdsAsSet) {
-            if (!knowledgeSource.hasPropositionDefinition(propId)) {
+            if (!foundPropIds.contains(propId)) {
                 invalidPropIds.add(propId);
             }
         }

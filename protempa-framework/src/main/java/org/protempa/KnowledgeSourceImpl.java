@@ -108,16 +108,7 @@ public final class KnowledgeSourceImpl
         List<PropositionDefinition> result = new ArrayList<>();
         initializeIfNeeded("reading inverseIsA of {0}", propDef.getId());
         String[] propIds = propDef.getInverseIsA();
-        for (String propId : propIds) {
-            PropositionDefinition pd = readPropositionDefinition(propId);
-            assert pd != null :
-                    "Proposition definition " + propId
-                    + ", which is specified as a child of "
-                    + propDef.getId() + ", does not exist";
-            if (pd != null) {
-                result.add(pd);
-            }
-        }
+        result.addAll(readPropositionDefinitions(propIds));
         return result;
     }
 
@@ -165,13 +156,7 @@ public final class KnowledgeSourceImpl
         for (KnowledgeSourceBackend backend : getBackends()) {
             Arrays.addAll(isAs, backend.readIsA(id));
         }
-        List<PropositionDefinition> result
-                = new ArrayList<>();
-        for (String isAPropId : isAs) {
-            result.add(readPropositionDefinition(isAPropId));
-        }
-
-        return result;
+        return readPropositionDefinitions(isAs.toArray(new String[isAs.size()]));
     }
 
     @Override
@@ -194,23 +179,11 @@ public final class KnowledgeSourceImpl
         if (propDef == null) {
             throw new IllegalArgumentException("propDef cannot be null");
         }
-        List<PropositionDefinition> result = new ArrayList<>();
         initializeIfNeeded("reading abstractedFrom of {0}",
                 propDef.getId());
 
         Set<String> propIds = propDef.getAbstractedFrom();
-        for (String propId : propIds) {
-            PropositionDefinition pd = readPropositionDefinition(propId);
-            assert pd != null :
-                    "Proposition definition " + propId
-                    + ", which " + propDef.getId()
-                    + "is specified as abstracted from, does not exist";
-            if (pd != null) {
-                result.add(pd);
-            }
-        }
-        return result;
-
+        return readPropositionDefinitions(propIds.toArray(new String[propIds.size()]));
     }
 
     @Override
@@ -260,19 +233,7 @@ public final class KnowledgeSourceImpl
             Arrays.addAll(abstractedIntos,
                     backend.readAbstractedInto(id));
         }
-        List<AbstractionDefinition> result
-                = new ArrayList<>();
-        for (String abstractedIntoPropId : abstractedIntos) {
-            AbstractionDefinition def
-                    = readAbstractionDefinition(abstractedIntoPropId);
-            if (def == null) {
-                throw new KnowledgeSourceReadException(
-                        "Invalid proposition id: " + abstractedIntoPropId);
-            }
-            result.add(def);
-        }
-
-        return result;
+        return readAbstractionDefinitions(abstractedIntos.toArray(new String[abstractedIntos.size()]));
     }
 
     @Override
@@ -322,19 +283,7 @@ public final class KnowledgeSourceImpl
             Arrays.addAll(induces,
                     backend.readInduces(id));
         }
-        List<ContextDefinition> result
-                = new ArrayList<>();
-        for (String inducesPropId : induces) {
-            ContextDefinition def
-                    = readContextDefinition(inducesPropId);
-            if (def == null) {
-                throw new KnowledgeSourceReadException(
-                        "Invalid proposition id: " + inducesPropId);
-            }
-            result.add(def);
-        }
-
-        return result;
+        return readContextDefinitions(induces.toArray(new String[induces.size()]));
     }
 
     @Override
@@ -362,19 +311,7 @@ public final class KnowledgeSourceImpl
             Arrays.addAll(subContextOfs,
                     backend.readSubContextOfs(id));
         }
-        List<ContextDefinition> result
-                = new ArrayList<>();
-        for (String subContextOfPropId : subContextOfs) {
-            ContextDefinition def
-                    = readContextDefinition(subContextOfPropId);
-            if (def == null) {
-                throw new KnowledgeSourceReadException(
-                        "Invalid context id: " + subContextOfPropId);
-            }
-            result.add(def);
-        }
-
-        return result;
+        return readContextDefinitions(subContextOfs.toArray(new String[subContextOfs.size()]));
     }
 
     @Override
@@ -428,22 +365,11 @@ public final class KnowledgeSourceImpl
         if (contextDef == null) {
             throw new IllegalArgumentException("contextDef cannot be null");
         }
-        List<ContextDefinition> result = new ArrayList<>();
         initializeIfNeeded("reading subContexts of {0}",
                 contextDef.getId());
 
         String[] propIds = contextDef.getSubContexts();
-        for (String propId : propIds) {
-            ContextDefinition pd = readContextDefinition(propId);
-            assert pd != null :
-                    "Context definition " + propId
-                    + ", which " + contextDef.getId()
-                    + "is specified as abstracted from, does not exist";
-            if (pd != null) {
-                result.add(pd);
-            }
-        }
-        return result;
+        return readContextDefinitions(propIds);
     }
 
     @Override
@@ -535,18 +461,12 @@ public final class KnowledgeSourceImpl
         initializeIfNeeded("reading inducedBy of {0}",
                 contextDef.getId());
 
-        TemporalExtendedPropositionDefinition[] propIds = contextDef.getInducedBy();
-        for (TemporalExtendedPropositionDefinition tepd : propIds) {
-            TemporalPropositionDefinition pd = readTemporalPropositionDefinition(tepd.getPropositionId());
-            assert pd != null :
-                    "Proposition definition " + tepd.getPropositionId()
-                    + ", which " + contextDef.getId()
-                    + "is specified as induced by, does not exist";
-            if (pd != null) {
-                result.add(pd);
-            }
+        TemporalExtendedPropositionDefinition[] tepds = contextDef.getInducedBy();
+        Set<String> propIds = new HashSet<>();
+        for (TemporalExtendedPropositionDefinition tepd : tepds) {
+            propIds.add(tepd.getPropositionId());
         }
-        return result;
+        return readTemporalPropositionDefinitions(propIds.toArray(new String[propIds.size()]));
     }
 
     @Override

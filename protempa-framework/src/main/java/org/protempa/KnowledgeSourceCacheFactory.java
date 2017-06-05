@@ -43,7 +43,7 @@ public final class KnowledgeSourceCacheFactory {
             for (PropositionDefinition propDef : cache) {
                 for (PropertyDefinition pd : propDef.getPropertyDefinitions()) {
                     String valueSetId = pd.getValueSetId();
-                    if (valueSetId != null) {
+                    if (valueSetId != null && !vsCache.containsKey(valueSetId)) {
                         vsCache.put(valueSetId, ks.readValueSet(valueSetId));
                     }
                 }
