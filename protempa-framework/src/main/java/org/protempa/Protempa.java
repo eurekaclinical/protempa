@@ -21,6 +21,9 @@ package org.protempa;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import org.protempa.backend.BackendInitializationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,12 +69,42 @@ public final class Protempa implements AutoCloseable {
     public static Protempa newInstance(SourceFactory sourceFactory)
             throws ProtempaStartupException {
         try {
-            return new Protempa(sourceFactory.newDataSourceInstance(),
-                    sourceFactory.newKnowledgeSourceInstance(),
-                    sourceFactory.newAlgorithmSourceInstance(),
-                    sourceFactory.newTermSourceInstance(), false);
-        } catch (BackendInitializationException | BackendNewInstanceException ex) {
+            FutureTask<DataSource> newDataSourceInstance = new FutureTask<>(new Callable<DataSource>() {
+                @Override
+                public DataSource call() throws BackendInitializationException, BackendNewInstanceException {
+                    return sourceFactory.newDataSourceInstance();
+                }
+            });
+            newDataSourceInstance.run();
+            FutureTask<KnowledgeSource> newKnowledgeSourceInstance = new FutureTask<>(new Callable<KnowledgeSource>() {
+                @Override
+                public KnowledgeSource call() throws BackendInitializationException, BackendNewInstanceException {
+                    return sourceFactory.newKnowledgeSourceInstance();
+                }
+            });
+            newKnowledgeSourceInstance.run();
+            FutureTask<AlgorithmSource> newAlgorithmSourceInstance = new FutureTask<>(new Callable<AlgorithmSource>() {
+                @Override
+                public AlgorithmSource call() throws BackendInitializationException, BackendNewInstanceException {
+                    return sourceFactory.newAlgorithmSourceInstance();
+                }
+            });
+            newAlgorithmSourceInstance.run();
+            FutureTask<TermSource> newTermSourceInstance = new FutureTask<>(new Callable<TermSource>() {
+                @Override
+                public TermSource call() throws BackendInitializationException, BackendNewInstanceException {
+                    return sourceFactory.newTermSourceInstance();
+                }
+            });
+            newTermSourceInstance.run();
+            return new Protempa(newDataSourceInstance.get(),
+                    newKnowledgeSourceInstance.get(),
+                    newAlgorithmSourceInstance.get(),
+                    newTermSourceInstance.get(), false);
+        } catch (InterruptedException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
+        } catch (ExecutionException ex) {
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex.getCause());
         }
     }
 
@@ -87,15 +120,45 @@ public final class Protempa implements AutoCloseable {
     public static Protempa newInstance(SourceFactory sourceFactory,
             boolean useCache) throws ProtempaStartupException {
         try {
-            return new Protempa(sourceFactory.newDataSourceInstance(),
-                    sourceFactory.newKnowledgeSourceInstance(),
-                    sourceFactory.newAlgorithmSourceInstance(),
-                    sourceFactory.newTermSourceInstance(), useCache);
-        } catch (BackendInitializationException | BackendNewInstanceException ex) {
+            FutureTask<DataSource> newDataSourceInstance = new FutureTask<>(new Callable<DataSource>() {
+                @Override
+                public DataSource call() throws BackendInitializationException, BackendNewInstanceException {
+                    return sourceFactory.newDataSourceInstance();
+                }
+            });
+            newDataSourceInstance.run();
+            FutureTask<KnowledgeSource> newKnowledgeSourceInstance = new FutureTask<>(new Callable<KnowledgeSource>() {
+                @Override
+                public KnowledgeSource call() throws BackendInitializationException, BackendNewInstanceException {
+                    return sourceFactory.newKnowledgeSourceInstance();
+                }
+            });
+            newKnowledgeSourceInstance.run();
+            FutureTask<AlgorithmSource> newAlgorithmSourceInstance = new FutureTask<>(new Callable<AlgorithmSource>() {
+                @Override
+                public AlgorithmSource call() throws BackendInitializationException, BackendNewInstanceException {
+                    return sourceFactory.newAlgorithmSourceInstance();
+                }
+            });
+            newAlgorithmSourceInstance.run();
+            FutureTask<TermSource> newTermSourceInstance = new FutureTask<>(new Callable<TermSource>() {
+                @Override
+                public TermSource call() throws BackendInitializationException, BackendNewInstanceException {
+                    return sourceFactory.newTermSourceInstance();
+                }
+            });
+            newTermSourceInstance.run();
+            return new Protempa(newDataSourceInstance.get(),
+                    newKnowledgeSourceInstance.get(),
+                    newAlgorithmSourceInstance.get(),
+                    newTermSourceInstance.get(), useCache);
+        } catch (InterruptedException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
+        } catch (ExecutionException ex) {
+            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex.getCause());
         }
     }
-    
+
     private final AbstractionFinder abstractionFinder;
     private final List<ProtempaEventListener> eventListeners;
 
@@ -180,7 +243,7 @@ public final class Protempa implements AutoCloseable {
         } else {
             ts = termSource;
         }
-        
+
         try {
             this.abstractionFinder = new AbstractionFinder(ds, ks, as, ts,
                     cacheFoundAbstractParameters, this.eventListeners);
@@ -228,11 +291,11 @@ public final class Protempa implements AutoCloseable {
     public TermSource getTermSource() {
         return this.abstractionFinder.getTermSource();
     }
-    
+
     public void addEventListener(ProtempaEventListener eventListener) {
         this.eventListeners.add(eventListener);
     }
-    
+
     public void removeEventListener(ProtempaEventListener eventListener) {
         this.eventListeners.remove(eventListener);
     }

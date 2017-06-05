@@ -81,12 +81,7 @@ public class ProtempaTest {
 
     private static final String ICD9_013_82 = "ICD9:013.82";
     private static final String ICD9_804 = "ICD9:804";
-    private static Logger logger = Logger.getLogger(ProtempaTest.class
-            .getName());
-    /**
-     * Sample data file
-     */
-    private static final String SAMPLE_DATA_FILE = "src/test/resources/dsb/sample-data.xlsx";
+    
     /**
      * The ground truth results directory for the test data
      */
@@ -131,69 +126,6 @@ public class ProtempaTest {
      * Instance of Protempa to run
      */
     private Protempa protempa;
-
-    /*
-     * Spreadsheet reader and data provider
-     */
-    private static DataProvider dataProvider;
-
-    /*
-     * Number of patients in the dataset
-     */
-    private static int patientCount;
-    private static DataInserter inserter;
-
-    /**
-     * Performs set up operations required for all testing (eg, setting up the
-     * in-memory database).
-     *
-     * @throws Exception if something goes wrong
-     */
-    @BeforeClass
-    public static void setUpAll() throws Exception {
-        logger.log(Level.INFO, "Populating database");
-        dataProvider = new XlsxDataProvider(new File(SAMPLE_DATA_FILE));
-        inserter = new DataInserter("jdbc:h2:mem:test;INIT=RUNSCRIPT FROM 'src/test/resources/dsb/test-schema.sql';DB_CLOSE_DELAY=-1");
-        patientCount = dataProvider.getPatients().size();
-        inserter.insertPatients(dataProvider.getPatients());
-        inserter.insertEncounters(dataProvider.getEncounters());
-        inserter.insertProviders(dataProvider.getProviders());
-        inserter.insertIcd9Diagnoses(dataProvider.getIcd9Diagnoses());
-        inserter.insertIcd9Procedures(dataProvider.getIcd9Procedures());
-        inserter.insertLabs(dataProvider.getLabs());
-        inserter.insertVitals(dataProvider.getVitals());
-        logger.log(Level.INFO, "Database populated");
-    }
-
-    /**
-     * Performs tear down operations once all testing is complete (eg, closing
-     * Protempa)
-     *
-     * @throws Exception if something goes wrong
-     */
-    @AfterClass
-    public static void tearDownAll() throws Exception {
-        Exception exceptionToThrow = null;
-        try {
-            inserter.truncateTables();
-        } catch (SQLException ex) {
-            if (exceptionToThrow == null) {
-                exceptionToThrow = ex;
-            }
-        }
-
-        try {
-            inserter.close();
-        } catch (SQLException ex) {
-            if (exceptionToThrow == null) {
-                exceptionToThrow = ex;
-            }
-        }
-
-        if (exceptionToThrow != null) {
-            throw exceptionToThrow;
-        }
-    }
 
     /**
      * @throws Exception

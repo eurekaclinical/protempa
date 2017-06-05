@@ -19,6 +19,7 @@
  */
 package org.protempa.test;
 
+import java.io.File;
 import org.protempa.backend.annotations.BackendInfo;
 import org.protempa.backend.dsb.relationaldb.ColumnSpec;
 import org.protempa.backend.dsb.relationaldb.EntitySpec;
@@ -33,6 +34,13 @@ import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.proposition.value.*;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.protempa.BackendCloseException;
+import org.protempa.backend.BackendInitializationException;
+import org.protempa.backend.BackendInstanceSpec;
+import org.protempa.backend.DataSourceBackendInitializationException;
 import org.protempa.backend.dsb.relationaldb.Operator;
 import org.protempa.backend.dsb.relationaldb.mappings.Mappings;
 import org.protempa.backend.dsb.relationaldb.mappings.ResourceMappingsFactory;
@@ -44,10 +52,13 @@ import org.protempa.backend.dsb.relationaldb.mappings.ResourceMappingsFactory;
  */
 @BackendInfo(displayName = "Protempa Test Database")
 public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
-
+    
     private static final AbsoluteTimeUnitFactory absTimeUnitFactory = new AbsoluteTimeUnitFactory();
     private static final AbsoluteTimeGranularityFactory absTimeGranularityFactory = new AbsoluteTimeGranularityFactory();
     private static final JDBCPositionFormat dtPositionParser = new JDBCDateTimeTimestampPositionParser();
+    private static Logger logger = Logger.getLogger(TestDataSourceBackend.class.getName());
+    private DataProvider dataProvider;
+    private DataInserter inserter;
 
     /**
      * Initializes a new backend.
@@ -60,6 +71,53 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
         setMappingsFactory(new ResourceMappingsFactory("/etc/mappings/", getClass()));
     }
 
+    @Override
+    public void initialize(BackendInstanceSpec config) throws BackendInitializationException {
+        try {
+            super.initialize(config);
+            logger.log(Level.INFO, "Populating database");
+            dataProvider = new XlsxDataProvider(new File("src/test/resources/dsb/sample-data.xlsx"));
+            inserter = new DataInserter("jdbc:h2:mem:test;INIT=RUNSCRIPT FROM 'src/test/resources/dsb/test-schema.sql';DB_CLOSE_DELAY=-1");
+            inserter.insertPatients(dataProvider.getPatients());
+            inserter.insertEncounters(dataProvider.getEncounters());
+            inserter.insertProviders(dataProvider.getProviders());
+            inserter.insertIcd9Diagnoses(dataProvider.getIcd9Diagnoses());
+            inserter.insertIcd9Procedures(dataProvider.getIcd9Procedures());
+            inserter.insertLabs(dataProvider.getLabs());
+            inserter.insertVitals(dataProvider.getVitals());
+            logger.log(Level.INFO, "Database populated");
+        } catch (SQLException | DataProviderException ex) {
+            throw new DataSourceBackendInitializationException(ex);
+        }
+    }
+
+    @Override
+    public void close() throws BackendCloseException {
+        super.close();
+        Exception exceptionToThrow = null;
+        try {
+            inserter.truncateTables();
+        } catch (SQLException ex) {
+            if (exceptionToThrow == null) {
+                exceptionToThrow = ex;
+            }
+        }
+
+        try {
+            inserter.close();
+        } catch (SQLException ex) {
+            if (exceptionToThrow == null) {
+                exceptionToThrow = ex;
+            }
+        }
+
+        if (exceptionToThrow != null) {
+            throw new BackendCloseException(exceptionToThrow);
+        }
+    }
+    
+    
+    
     @Override
     protected StagingSpec[] stagedSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException {
         return null;
