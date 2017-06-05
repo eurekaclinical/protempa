@@ -88,7 +88,6 @@ class SubtreePropositionDefinitionGetterForWrapper {
     }
 
     void clear() {
-        this.inDataSourceSlowStrategy.clear();
     }
 
     

@@ -19,11 +19,9 @@
  */
 package org.protempa;
 
-import org.apache.commons.collections4.map.ReferenceMap;
 import org.arp.javautil.arrays.Arrays;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
 
@@ -74,7 +72,4 @@ class SubtreePropositionDefinitionGetterRegular {
         return result;
     }
 
-    void clear() {
-    }
-    
 }

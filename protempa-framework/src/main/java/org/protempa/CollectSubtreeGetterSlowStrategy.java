@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import org.apache.commons.collections4.map.ReferenceMap;
 import org.arp.javautil.arrays.Arrays;
 
 /**
@@ -33,8 +32,6 @@ import org.arp.javautil.arrays.Arrays;
  */
 class CollectSubtreeGetterSlowStrategy {
 
-    private final Map<Set<String>, InDataSourceResult<String>> propIdInDataSourceCache;
-    private final Map<Set<String>, InDataSourceResult<PropositionDefinition>> propIdPropInDataSourceCache;
     private final Map<String, PropositionDefinition> propositionDefinitionMap;
     private final PropositionDefinitionWalker propDefWalker;
     private final PropIdWalker propIdWalker;
@@ -42,21 +39,10 @@ class CollectSubtreeGetterSlowStrategy {
 
     CollectSubtreeGetterSlowStrategy(Map<String, PropositionDefinition> propositionDefinitionMap, boolean narrower) {
         assert propositionDefinitionMap != null : "propositionDefinitionMap cannot be null";
-        this.propIdInDataSourceCache = new ReferenceMap<>();
-        this.propIdPropInDataSourceCache = new ReferenceMap<>();
         this.propositionDefinitionMap = propositionDefinitionMap;
         this.narrower = narrower;
         this.propDefWalker = new PropositionDefinitionWalker();
         this.propIdWalker = new PropIdWalker();
-    }
-
-    void clear() {
-        synchronized (this.propIdInDataSourceCache) {
-            this.propIdInDataSourceCache.clear();
-        }
-        synchronized (this.propIdPropInDataSourceCache) {
-            this.propIdPropInDataSourceCache.clear();
-        }
     }
 
     class InDataSourceResult<E> {
@@ -85,16 +71,7 @@ class CollectSubtreeGetterSlowStrategy {
             throw new IllegalArgumentException(
                     "propIds cannot contain a null element");
         }
-        synchronized (propIdInDataSourceCache) {
-            InDataSourceResult<String> cachedResult = propIdInDataSourceCache.get(propIds);
-            if (cachedResult != null) {
-                return cachedResult;
-            } else {
-                InDataSourceResult<String> inDataSourceResult = this.propIdWalker.walkNarrowerPropDefs(inDataSourceOnly, propIds);
-                propIdInDataSourceCache.put(propIds, inDataSourceResult);
-                return inDataSourceResult;
-            }
-        }
+        return this.propIdWalker.walkNarrowerPropDefs(inDataSourceOnly, propIds);
     }
 
     InDataSourceResult<PropositionDefinition> collectPropDefs(boolean inDataSourceOnly, Set<String> propIds)
@@ -103,16 +80,7 @@ class CollectSubtreeGetterSlowStrategy {
             throw new IllegalArgumentException(
                     "propIds cannot contain a null element");
         }
-        synchronized (propIdPropInDataSourceCache) {
-            InDataSourceResult<PropositionDefinition> cachedResult = propIdPropInDataSourceCache.get(propIds);
-            if (cachedResult != null) {
-                return cachedResult;
-            } else {
-                InDataSourceResult<PropositionDefinition> inDataSourceResult = this.propDefWalker.walkNarrowerPropDefs(inDataSourceOnly, propIds);
-                propIdPropInDataSourceCache.put(propIds, inDataSourceResult);
-                return inDataSourceResult;
-            }
-        }
+        return this.propDefWalker.walkNarrowerPropDefs(inDataSourceOnly, propIds);
     }
 
     private abstract class Walker<E> {
