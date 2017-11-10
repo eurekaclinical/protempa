@@ -47,5 +47,9 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eurekaclinical</groupId>
+            <artifactId>javautil</artifactId>
+        </dependency>
     </dependencies>
 </project>
