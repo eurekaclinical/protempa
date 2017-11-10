@@ -39,7 +39,7 @@ class DelimitedFileLineIterator extends AbstractFileLineIterator {
     private final int keyIdIndex;
     private final CSVParser csvParser;
 
-    DelimitedFileLineIterator(DelimitedFileDataSourceBackend backend, 
+    DelimitedFileLineIterator(DelimitedFileDataSourceBackend backend,
             File file, Long defaultPosition)
             throws DataSourceReadException {
         super(backend, file, defaultPosition, backend.getKeyId() != null);
@@ -74,7 +74,7 @@ class DelimitedFileLineIterator extends AbstractFileLineIterator {
                     parseLinks(kId, links, column, colNum++);
                 }
             }
-            return new DataStreamingEvent(kId, getData());
+            return new DataStreamingEvent<>(kId, getData());
         } catch (ArrayIndexOutOfBoundsException | IOException ex) {
             throw new DataSourceReadException(ex);
         }
