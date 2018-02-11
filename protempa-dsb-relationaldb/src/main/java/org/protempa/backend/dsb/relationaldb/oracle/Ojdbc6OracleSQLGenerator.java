@@ -46,7 +46,7 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGeneratorWithCompatChec
     private static final String DRIVER_CLASS_NAME = "oracle.jdbc.OracleDriver";
     private static final String DRIVER_NAME = "Oracle JDBC driver";
     private static final DriverVersion MIN_DRIVER_VERSION = new DriverVersion(11, 0);
-    private static final DriverVersion MAX_DRIVER_VERSION = new DriverVersion(11, Integer.MAX_VALUE);
+    private static final DriverVersion MAX_DRIVER_VERSION = new DriverVersion(12, Integer.MAX_VALUE);
     private static final String DATABASE_PRODUCT_NAME = "Oracle";
     private static final DatabaseVersion MIN_DATABASE_VERSION = new DatabaseVersion(10, 0);
     private static final DatabaseVersion MAX_DATABASE_VERSION = new DatabaseVersion(11, Integer.MAX_VALUE);
