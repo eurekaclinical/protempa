@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.eurekaclinical</groupId>
         <artifactId>eurekaclinical-parent-standard-deps</artifactId>
-        <version>2-Beta-4</version>
+        <version>2</version>
     </parent>
 
     <scm>
@@ -100,12 +100,12 @@
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>javautil</artifactId>
-                <version>4.0-Alpha-4</version>
+                <version>4.0</version>
             </dependency>
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>datastore</artifactId>
-                <version>2.0-Beta-3</version>
+                <version>2.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
