@@ -19,10 +19,9 @@ In the clinical domain, temporal abstraction can be used for automated chart abs
 ### For more information
 See our [publication about Protempa](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1975802/) for more information.
 
-## Version history
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa)
 
-### Version 4.0
+## Version 4.0
 * Support OJDBC driver version 12.
 * Update datastore dependency to version 2.
 * Update javautil dependency to version 4.
