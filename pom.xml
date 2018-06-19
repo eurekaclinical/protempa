@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.eurekaclinical</groupId>
         <artifactId>eurekaclinical-parent-standard-deps</artifactId>
-        <version>2</version>
+        <version>3</version>
     </parent>
 
     <scm>
