@@ -39,7 +39,7 @@ import org.protempa.proposition.value.Value;
  * @author Andrew Post
  */
 public class FileTabularWriter extends AbstractTabularWriter {
-
+    
     private final BufferedWriter writer;
     private int colIndex;
     private final char delimiter;
@@ -48,7 +48,7 @@ public class FileTabularWriter extends AbstractTabularWriter {
         this.writer = inWriter;
         this.delimiter = inDelimiter;
     }
-
+    
     @Override
     public void writeString(String inValue) throws TabularWriterException {
         try {
@@ -171,7 +171,7 @@ public class FileTabularWriter extends AbstractTabularWriter {
 
     @Override
     public void writeNull() throws TabularWriterException {
-        write(null, null);
+        writeString(null);
     }
 
     @Override
