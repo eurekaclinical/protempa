@@ -21,6 +21,9 @@ See our [publication about Protempa](https://www.ncbi.nlm.nih.gov/pmc/articles/P
 
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa)
 
+## Version 4.0.1
+* Avoid NullPointerExceptions when writing nulls to a delimited file.
+
 ## Version 4.0
 * Support OJDBC driver version 12.
 * Update datastore dependency to version 2.
