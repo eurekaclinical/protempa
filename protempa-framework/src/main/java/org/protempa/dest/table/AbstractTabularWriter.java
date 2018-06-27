@@ -19,8 +19,6 @@ package org.protempa.dest.table;
  * limitations under the License.
  * #L%
  */
-
-import java.io.IOException;
 import java.text.Format;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.Proposition;
@@ -98,7 +96,16 @@ public abstract class AbstractTabularWriter implements TabularWriter {
     public void writePropertyValue(Proposition inProposition, String inPropertyName) throws TabularWriterException {
         writePropertyValue(inProposition, inPropertyName, null);
     }
-    
+
+    /**
+     * Writes the provided value, taking into account the type of value that it
+     * is and the provided formatter.
+     *
+     * @param inValue the value to write. Cannot be <code>null</code>.
+     * @param inFormat the formatter to use.
+     * @throws TabularWriterException if an error occurs trying to write the
+     * value.
+     */
     void write(Value inValue, Format inFormat) throws TabularWriterException {
         this.valueVisitor.setFormat(inFormat);
         inValue.accept(this.valueVisitor);
