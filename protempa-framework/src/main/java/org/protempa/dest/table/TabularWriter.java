@@ -69,16 +69,58 @@ public interface TabularWriter extends AutoCloseable {
     
     void writeNumericalId(Proposition inProposition) throws TabularWriterException;
     
+    /**
+     * Writes the start of a temporal proposition's interval using the value of 
+     * {@link TemporalProposition#getStartFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeStart(TemporalProposition inProposition) throws TabularWriterException;
     
+    /**
+     * Writes the start of a temporal proposition's interval. If no format is 
+     * specified, it uses the value of 
+     * {@link TemporalProposition#getStartFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @param inFormat the formatter.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeStart(TemporalProposition inProposition, Format inFormat) throws TabularWriterException;
     
+    /**
+     * Writes the finish of a temporal proposition's interval using the value 
+     * of {@link TemporalProposition#getFinishFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeFinish(TemporalProposition inProposition) throws TabularWriterException;
     
+    /**
+     * Writes the finish of a temporal proposition's interval. If no format is 
+     * specified, it uses the value of 
+     * {@link TemporalProposition#getFinishFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @param inFormat the formatter.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeFinish(TemporalProposition inProposition, Format inFormat) throws TabularWriterException;
     
+    /**
+     * Writes the length of a temporal proposition's interval using the value 
+     * of {@link TemporalProposition#getLengthFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeLength(TemporalProposition inProposition) throws TabularWriterException;
     
+    /**
+     * Writes the length of a temporal proposition's interval. If no format is 
+     * specified, it uses the value of 
+     * {@link TemporalProposition#getLengthFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @param inFormat the formatter.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeLength(TemporalProposition inProposition, Format inFormat) throws TabularWriterException;
     
     void writeValue(Parameter inProposition) throws TabularWriterException;

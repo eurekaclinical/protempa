@@ -141,19 +141,34 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
     
     @Override
     public void writeStart(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
-        String value = inProposition.getStartFormattedShort();
+        String value;
+        if (inFormat == null) {
+            value = inProposition.getStartFormattedShort();
+        } else {
+            value = inProposition.formatStart(inFormat);
+        }
         writeString(value);
     }
     
     @Override
     public void writeFinish(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
-        String value = inProposition.getFinishFormattedShort();
+        String value;
+        if (inFormat == null) {
+            value = inProposition.getFinishFormattedShort();
+        } else {
+            value = inProposition.formatFinish(inFormat);
+        }
         writeString(value);
     }
     
     @Override
     public void writeLength(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
-        String value = inFormat != null ? inFormat.format(inProposition.getInterval().getMinLength()) : inProposition.getLengthFormattedShort();
+        String value;
+        if (inFormat == null) {
+            value = inProposition.getLengthFormattedShort();
+        } else {
+            value = inProposition.formatLength(inFormat);
+        }
         writeString(value);
     }
     

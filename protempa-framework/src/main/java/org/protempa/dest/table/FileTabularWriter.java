@@ -43,7 +43,7 @@ public class FileTabularWriter extends AbstractTabularWriter {
     private int colIndex;
     private final char delimiter;
     private final QuoteModel quoteModel;
-    
+
     public FileTabularWriter(BufferedWriter inWriter, char inDelimiter) {
         this(inWriter, inDelimiter, null);
     }
@@ -58,7 +58,7 @@ public class FileTabularWriter extends AbstractTabularWriter {
             this.quoteModel = inQuoteModel;
         }
     }
-    
+
     @Override
     public void writeString(String inValue) throws TabularWriterException {
         try {
@@ -154,7 +154,7 @@ public class FileTabularWriter extends AbstractTabularWriter {
         String value = inProposition.getUniqueId().getLocalUniqueId().getId();
         writeString(value);
     }
-    
+
     @Override
     public void writeNumericalId(Proposition inProposition) throws TabularWriterException {
         String value = String.valueOf(inProposition.getUniqueId().getLocalUniqueId().getNumericalId());
@@ -163,19 +163,34 @@ public class FileTabularWriter extends AbstractTabularWriter {
 
     @Override
     public void writeStart(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
-        String value = inProposition.getStartFormattedShort();
+        String value;
+        if (inFormat == null) {
+            value = inProposition.getStartFormattedShort();
+        } else {
+            value = inProposition.formatStart(inFormat);
+        }
         writeString(value);
     }
 
     @Override
     public void writeFinish(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
-        String value = inProposition.getFinishFormattedShort();
+        String value;
+        if (inFormat == null) {
+            value = inProposition.getFinishFormattedShort();
+        } else {
+            value = inProposition.formatFinish(inFormat);
+        }
         writeString(value);
     }
 
     @Override
     public void writeLength(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
-        String value = inFormat != null ? inFormat.format(inProposition.getInterval().getMinLength()) : inProposition.getLengthFormattedShort();
+        String value;
+        if (inFormat == null) {
+            value = inProposition.getLengthFormattedShort();
+        } else {
+            value = inProposition.formatLength(inFormat);
+        }
         writeString(value);
     }
 
@@ -220,7 +235,7 @@ public class FileTabularWriter extends AbstractTabularWriter {
             this.writer.write(this.delimiter);
         }
     }
-    
+
     private void escapeAndWriteDelimitedColumn(String inValue) throws IOException {
         if (this.quoteModel == QuoteModel.ALWAYS) {
             StringUtil.escapeAndWriteDelimitedColumn(inValue, this.delimiter, true, this.writer);
