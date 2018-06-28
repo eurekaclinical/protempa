@@ -47,7 +47,11 @@ import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.DateValue;
+import org.protempa.proposition.value.InequalityNumberValue;
+import org.protempa.proposition.value.NominalValue;
+import org.protempa.proposition.value.NumberValue;
 import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.visitor.AbstractPropositionCheckedVisitor;
 import org.protempa.valueset.ValueSet;
 
@@ -297,6 +301,32 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             }
             if (outputConfig.showValue()) {
                 this.tabularWriter.writeValue(primitiveParameter);
+            }
+            if (outputConfig.showInequality()) {
+                Value value = primitiveParameter.getValue();
+                if (value instanceof InequalityNumberValue) {
+                    this.tabularWriter.writeInequality((InequalityNumberValue) value);
+                } else {
+                    this.tabularWriter.writeString(ValueComparator.EQUAL_TO.toString());
+                }
+            }
+            if (outputConfig.showNumber()) {
+                Value value = primitiveParameter.getValue();
+                if (value instanceof InequalityNumberValue) {
+                    this.tabularWriter.writeNumber((InequalityNumberValue) value);
+                } else if (value instanceof NumberValue) {
+                    this.tabularWriter.writeNumber((NumberValue) value);
+                } else {
+                    this.tabularWriter.writeNull();
+                }
+            }
+            if (outputConfig.showNominal()) {
+                Value value = primitiveParameter.getValue();
+                if (value instanceof NominalValue) {
+                    this.tabularWriter.writeNominal((NominalValue) value);
+                } else {
+                    this.tabularWriter.writeNull();
+                }
             }
             displayNames(primitiveParameter);
             if (outputConfig.showStartOrTimestamp()) {

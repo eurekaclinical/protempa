@@ -116,6 +116,17 @@ public class FileTabularWriter extends AbstractTabularWriter {
     }
 
     @Override
+    public void writeInequalityNumber(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException {
+        try {
+            writeDelimiter();
+            escapeAndWriteDelimitedColumn(inValue.format(inFormat));
+            incr();
+        } catch (IOException ex) {
+            throw new TabularWriterException(ex);
+        }
+    }
+    
+    @Override
     public void writeDate(DateValue inValue, Format inFormat) throws TabularWriterException {
         try {
             writeDelimiter();

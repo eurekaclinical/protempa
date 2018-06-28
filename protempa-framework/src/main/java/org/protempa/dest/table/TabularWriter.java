@@ -53,6 +53,10 @@ public interface TabularWriter extends AutoCloseable {
     
     void writeNumber(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException;
     
+    void writeInequalityNumber(InequalityNumberValue inValue) throws TabularWriterException;
+    
+    void writeInequalityNumber(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException;
+    
     void writeDate(DateValue inValue) throws TabularWriterException;
     
     void writeDate(DateValue inValue, Format inFormat) throws TabularWriterException;

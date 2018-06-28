@@ -19,7 +19,7 @@ package org.protempa.dest.table;
  * limitations under the License.
  * #L%
  */
-
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.Format;
 import java.util.ArrayList;
@@ -40,15 +40,16 @@ import org.protempa.proposition.value.Value;
  * @author Andrew Post
  */
 public class RelDbTabularWriter extends AbstractTabularWriter {
+
     private final RecordHandler<ArrayList<?>> recordHandler;
     private final ArrayList<Object> row;
     private int colIndex;
-    
+
     public RelDbTabularWriter(ConnectionSpec inConnectionSpec, String inStatement) throws SQLException {
         this.recordHandler = new ListRecordHandler(inConnectionSpec, inStatement);
         this.row = new ArrayList<>();
     }
-    
+
     @Override
     public void writeString(String inValue) throws TabularWriterException {
         this.row.add(inValue);
@@ -64,7 +65,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         }
         incr();
     }
-    
+
     @Override
     public void writeNumber(NumberValue inValue, Format inFormat) {
         if (inFormat != null) {
@@ -74,7 +75,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         }
         incr();
     }
-    
+
     @Override
     public void writeInequality(InequalityNumberValue inValue, Format inFormat) {
         if (inFormat != null) {
@@ -84,7 +85,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         }
         incr();
     }
-    
+
     @Override
     public void writeNumber(InequalityNumberValue inValue, Format inFormat) {
         if (inFormat != null) {
@@ -94,7 +95,18 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         }
         incr();
     }
-    
+
+    @Override
+    public void writeInequalityNumber(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException {
+        if (inFormat != null) {
+            this.row.add(inValue.format(inFormat));
+        } else {
+            this.row.add(inValue.getNumber());
+        }
+        
+        incr();
+    }
+
     @Override
     public void writeDate(DateValue inValue, Format inFormat) {
         if (inFormat != null) {
@@ -104,7 +116,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         }
         incr();
     }
-    
+
     @Override
     public void writeBoolean(BooleanValue inValue, Format inFormat) {
         if (inFormat != null) {
@@ -114,31 +126,31 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         }
         incr();
     }
-    
+
     @Override
     public void writeId(Proposition inProposition) throws TabularWriterException {
         String value = inProposition.getId();
         writeString(value);
     }
-    
+
     @Override
     public void writeUniqueId(Proposition inProposition) throws TabularWriterException {
         String value = inProposition.getUniqueId().getStringRepresentation();
         writeString(value);
     }
-    
+
     @Override
     public void writeLocalUniqueId(Proposition inProposition) throws TabularWriterException {
         String value = inProposition.getUniqueId().getLocalUniqueId().getId();
         writeString(value);
     }
-    
+
     @Override
     public void writeNumericalId(Proposition inProposition) throws TabularWriterException {
         String value = String.valueOf(inProposition.getUniqueId().getLocalUniqueId().getNumericalId());
         writeString(value);
     }
-    
+
     @Override
     public void writeStart(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         String value;
@@ -149,7 +161,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         }
         writeString(value);
     }
-    
+
     @Override
     public void writeFinish(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         String value;
@@ -160,7 +172,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         }
         writeString(value);
     }
-    
+
     @Override
     public void writeLength(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         String value;
@@ -171,13 +183,13 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         }
         writeString(value);
     }
-    
+
     @Override
     public void writeValue(Parameter inProposition, Format inFormat) throws TabularWriterException {
         Value value = inProposition.getValue();
         write(value, inFormat);
     }
-    
+
     @Override
     public void writePropertyValue(Proposition inProposition, String inPropertyName, Format inFormat) throws TabularWriterException {
         Value value = inProposition.getProperty(inPropertyName);
@@ -188,7 +200,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
     public void writeNull() throws TabularWriterException {
         write(null, null);
     }
-    
+
     @Override
     public void newRow() throws TabularWriterException {
         try {
@@ -198,7 +210,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         }
         this.colIndex = 0;
     }
-    
+
     @Override
     public void close() throws TabularWriterException {
         try {
@@ -207,11 +219,11 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
             throw new TabularWriterException(ex);
         }
     }
-    
+
     private int incr() {
         return this.colIndex++;
     }
-    
+
     private <E extends Object> E doReplace(E val, Map<E, E> replace) {
         if (replace != null) {
             if (replace.containsKey(val)) {
@@ -223,5 +235,5 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
             return val;
         }
     }
-    
+
 }

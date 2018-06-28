@@ -21,6 +21,11 @@ See our [publication about Protempa](https://www.ncbi.nlm.nih.gov/pmc/articles/P
 
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa)
 
+## Version 4.3
+* Fix output of inequality number values in tabular writers.
+* Support output of just numbers, just nominals, and just the inequality part of
+inequality number values.
+
 ## Version 4.2.1
 * Honor start and finish formatters that are specified for tabular writers.
 

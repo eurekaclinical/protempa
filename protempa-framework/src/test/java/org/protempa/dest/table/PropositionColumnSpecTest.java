@@ -31,9 +31,13 @@ import org.junit.Test;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.DefaultUniqueIdFactory;
 import org.protempa.proposition.Event;
+import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.interval.IntervalFactory;
 import org.protempa.proposition.value.AbsoluteTimeGranularity;
+import org.protempa.proposition.value.InequalityNumberValue;
+import org.protempa.proposition.value.NominalValue;
+import org.protempa.proposition.value.NumberValue;
 
 /**
  *
@@ -97,7 +101,7 @@ public class PropositionColumnSpecTest {
     }
     
     @Test
-    public void testValueFileTabularWriterPrintStart() throws IOException, TabularWriterException {
+    public void testFileTabularWriterPrintStart() throws IOException, TabularWriterException {
         UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
         Event prop = new Event("TESTEVENT", uniqueId);
         Calendar cal = Calendar.getInstance();
@@ -114,7 +118,7 @@ public class PropositionColumnSpecTest {
     }
     
     @Test
-    public void testValueFileTabularWriterPrintFinish() throws IOException, TabularWriterException {
+    public void testFileTabularWriterPrintFinish() throws IOException, TabularWriterException {
         UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
         Event prop = new Event("TESTEVENT", uniqueId);
         Calendar cal = Calendar.getInstance();
@@ -128,5 +132,89 @@ public class PropositionColumnSpecTest {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
         }
         Assert.assertEquals("2018-06-01T14:47:00", sw.toString());
+    }
+    
+    @Test
+    public void testNumberFileTabularWriterPrintNumber() throws IOException, TabularWriterException {
+        UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
+        PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
+        prop.setValue(NumberValue.getInstance(10));
+        OutputConfig outputConfig = new OutputConfig.Builder().showNumber().build();
+        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        StringWriter sw = new StringWriter();
+        try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
+            ccs.columnValues("00001", prop, null, null, null, null, ftw);
+        }
+        Assert.assertEquals("10", sw.toString());
+    }
+    
+    @Test
+    public void testNominalFileTabularWriterPrintNumber() throws IOException, TabularWriterException {
+        UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
+        PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
+        prop.setValue(NominalValue.getInstance("foo"));
+        OutputConfig outputConfig = new OutputConfig.Builder().showNumber().build();
+        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        StringWriter sw = new StringWriter();
+        try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
+            ccs.columnValues("00001", prop, null, null, null, null, ftw);
+        }
+        Assert.assertEquals("NULL", sw.toString());
+    }
+    
+    @Test
+    public void testNominalFileTabularWriterPrintNominal() throws IOException, TabularWriterException {
+        UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
+        PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
+        prop.setValue(NominalValue.getInstance("foo"));
+        OutputConfig outputConfig = new OutputConfig.Builder().showNominal().build();
+        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        StringWriter sw = new StringWriter();
+        try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
+            ccs.columnValues("00001", prop, null, null, null, null, ftw);
+        }
+        Assert.assertEquals("foo", sw.toString());
+    }
+    
+    @Test
+    public void testNumberFileTabularWriterPrintNominal() throws IOException, TabularWriterException {
+        UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
+        PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
+        prop.setValue(NumberValue.getInstance(10));
+        OutputConfig outputConfig = new OutputConfig.Builder().showNominal().build();
+        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        StringWriter sw = new StringWriter();
+        try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
+            ccs.columnValues("00001", prop, null, null, null, null, ftw);
+        }
+        Assert.assertEquals("NULL", sw.toString());
+    }
+    
+    @Test
+    public void testInequalityNumberFileTabularWriterPrintNumber() throws IOException, TabularWriterException {
+        UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
+        PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
+        prop.setValue(InequalityNumberValue.parse("<10"));
+        OutputConfig outputConfig = new OutputConfig.Builder().showNumber().build();
+        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        StringWriter sw = new StringWriter();
+        try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
+            ccs.columnValues("00001", prop, null, null, null, null, ftw);
+        }
+        Assert.assertEquals("10", sw.toString());
+    }
+    
+    @Test
+    public void testInequalityNumberFileTabularWriterPrintInequality() throws IOException, TabularWriterException {
+        UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
+        PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
+        prop.setValue(InequalityNumberValue.parse("<10"));
+        OutputConfig outputConfig = new OutputConfig.Builder().showInequality().build();
+        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        StringWriter sw = new StringWriter();
+        try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
+            ccs.columnValues("00001", prop, null, null, null, null, ftw);
+        }
+        Assert.assertEquals("<", sw.toString());
     }
 }

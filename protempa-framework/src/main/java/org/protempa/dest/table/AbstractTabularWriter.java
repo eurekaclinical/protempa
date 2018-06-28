@@ -63,6 +63,11 @@ public abstract class AbstractTabularWriter implements TabularWriter {
     }
 
     @Override
+    public void writeInequalityNumber(InequalityNumberValue inValue) throws TabularWriterException {
+        writeInequalityNumber(inValue, null);
+    }
+    
+    @Override
     public void writeDate(DateValue inValue) throws TabularWriterException {
         writeDate(inValue, null);
     }

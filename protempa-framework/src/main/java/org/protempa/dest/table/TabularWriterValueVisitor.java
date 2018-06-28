@@ -93,7 +93,7 @@ class TabularWriterValueVisitor implements ValueVisitor {
     @Override
     public void visit(InequalityNumberValue inequalityNumberValue) {
         try {
-            this.tabularWriter.writeInequality(inequalityNumberValue, this.format);
+            this.tabularWriter.writeInequalityNumber(inequalityNumberValue, this.format);
         } catch (TabularWriterException ex) {
             this.exception = ex;
         }
