@@ -65,6 +65,8 @@ public interface TabularWriter extends AutoCloseable {
     
     void writeUniqueId(Proposition inProposition) throws TabularWriterException;
     
+    void writeLocalUniqueId(Proposition inProposition) throws TabularWriterException;
+    
     void writeStart(TemporalProposition inProposition) throws TabularWriterException;
     
     void writeStart(TemporalProposition inProposition, Format inFormat) throws TabularWriterException;

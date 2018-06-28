@@ -304,10 +304,12 @@ public final class OutputConfig {
             return new OutputConfig(this.showId, this.showValue, this.showDisplayName,
                     this.showAbbrevDisplayName, this.showStartOrTimestamp,
                     this.showFinish, this.showLength, this.showUniqueId,
+                    this.showLocalUniqueId,
                     this.idHeading, this.valueHeading,
                     this.displayNameHeading, this.abbrevDisplayNameHeading,
                     this.startOrTimestampHeading, this.finishHeading,
                     this.lengthHeading, this.uniqueIdHeading,
+                    this.localUniqueIdHeading,
                     this.propertyHeadings, this.dateFormat);
         }
     }
@@ -443,6 +445,10 @@ public final class OutputConfig {
     public String getUniqueIdHeading() {
         return uniqueIdHeading;
     }
+    
+    public String getLocalUniqueIdHeading() {
+        return localUniqueIdHeading;
+    }
 
     public String getValueHeading() {
         return valueHeading;
@@ -478,6 +484,10 @@ public final class OutputConfig {
 
     public boolean showUniqueId() {
         return showUniqueId;
+    }
+    
+    public boolean showLocalUniqueId() {
+        return showLocalUniqueId;
     }
 
     public boolean showValue() {

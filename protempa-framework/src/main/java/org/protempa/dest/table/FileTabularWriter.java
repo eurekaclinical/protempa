@@ -22,7 +22,6 @@ package org.protempa.dest.table;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.text.Format;
-import java.util.Map;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.Proposition;
@@ -39,21 +38,32 @@ import org.protempa.proposition.value.Value;
  * @author Andrew Post
  */
 public class FileTabularWriter extends AbstractTabularWriter {
-    
+
     private final BufferedWriter writer;
     private int colIndex;
     private final char delimiter;
-
+    private final QuoteModel quoteModel;
+    
     public FileTabularWriter(BufferedWriter inWriter, char inDelimiter) {
+        this(inWriter, inDelimiter, null);
+    }
+
+    public FileTabularWriter(BufferedWriter inWriter, char inDelimiter,
+            QuoteModel inQuoteModel) {
         this.writer = inWriter;
         this.delimiter = inDelimiter;
+        if (inQuoteModel == null) {
+            this.quoteModel = QuoteModel.WHEN_QUOTE_EMBEDDED;
+        } else {
+            this.quoteModel = inQuoteModel;
+        }
     }
     
     @Override
     public void writeString(String inValue) throws TabularWriterException {
         try {
             writeDelimiter();
-            StringUtil.escapeAndWriteDelimitedColumn(inValue, this.delimiter, this.writer);
+            escapeAndWriteDelimitedColumn(inValue);
             incr();
         } catch (IOException ex) {
             throw new TabularWriterException(ex);
@@ -64,18 +74,18 @@ public class FileTabularWriter extends AbstractTabularWriter {
     public void writeNominal(NominalValue inValue, Format inFormat) throws TabularWriterException {
         try {
             writeDelimiter();
-            StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
+            escapeAndWriteDelimitedColumn(inValue.format(inFormat));
             incr();
         } catch (IOException ex) {
             throw new TabularWriterException(ex);
         }
     }
-    
+
     @Override
     public void writeNumber(NumberValue inValue, Format inFormat) throws TabularWriterException {
         try {
             writeDelimiter();
-            StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
+            escapeAndWriteDelimitedColumn(inValue.format(inFormat));
             incr();
         } catch (IOException ex) {
             throw new TabularWriterException(ex);
@@ -87,7 +97,7 @@ public class FileTabularWriter extends AbstractTabularWriter {
         try {
             writeDelimiter();
             String comparatorString = inValue.getInequality().getComparatorString();
-            StringUtil.escapeAndWriteDelimitedColumn(inFormat != null ? inFormat.format(comparatorString) : comparatorString, this.delimiter, this.writer);
+            escapeAndWriteDelimitedColumn(inFormat != null ? inFormat.format(comparatorString) : comparatorString);
             incr();
         } catch (IOException ex) {
             throw new TabularWriterException(ex);
@@ -98,7 +108,7 @@ public class FileTabularWriter extends AbstractTabularWriter {
     public void writeNumber(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException {
         try {
             writeDelimiter();
-            StringUtil.escapeAndWriteDelimitedColumn(inValue.getNumberValue().format(inFormat), this.delimiter, this.writer);
+            escapeAndWriteDelimitedColumn(inValue.getNumberValue().format(inFormat));
             incr();
         } catch (IOException ex) {
             throw new TabularWriterException(ex);
@@ -109,7 +119,7 @@ public class FileTabularWriter extends AbstractTabularWriter {
     public void writeDate(DateValue inValue, Format inFormat) throws TabularWriterException {
         try {
             writeDelimiter();
-            StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
+            escapeAndWriteDelimitedColumn(inValue.format(inFormat));
             incr();
         } catch (IOException ex) {
             throw new TabularWriterException(ex);
@@ -120,7 +130,7 @@ public class FileTabularWriter extends AbstractTabularWriter {
     public void writeBoolean(BooleanValue inValue, Format inFormat) throws TabularWriterException {
         try {
             writeDelimiter();
-            StringUtil.escapeAndWriteDelimitedColumn(inValue.format(inFormat), this.delimiter, this.writer);
+            escapeAndWriteDelimitedColumn(inValue.format(inFormat));
             incr();
         } catch (IOException ex) {
             throw new TabularWriterException(ex);
@@ -136,6 +146,12 @@ public class FileTabularWriter extends AbstractTabularWriter {
     @Override
     public void writeUniqueId(Proposition inProposition) throws TabularWriterException {
         String value = inProposition.getUniqueId().getStringRepresentation();
+        writeString(value);
+    }
+
+    @Override
+    public void writeLocalUniqueId(Proposition inProposition) throws TabularWriterException {
+        String value = inProposition.getUniqueId().getLocalUniqueId().getId();
         writeString(value);
     }
 
@@ -196,6 +212,14 @@ public class FileTabularWriter extends AbstractTabularWriter {
     private void writeDelimiter() throws IOException {
         if (this.colIndex > 0) {
             this.writer.write(this.delimiter);
+        }
+    }
+    
+    private void escapeAndWriteDelimitedColumn(String inValue) throws IOException {
+        if (this.quoteModel == QuoteModel.ALWAYS) {
+            StringUtil.escapeAndWriteDelimitedColumn(inValue, this.delimiter, true, this.writer);
+        } else {
+            StringUtil.escapeAndWriteDelimitedColumn(inValue, this.delimiter, this.writer);
         }
     }
 

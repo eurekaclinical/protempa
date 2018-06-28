@@ -128,6 +128,12 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
     }
     
     @Override
+    public void writeLocalUniqueId(Proposition inProposition) throws TabularWriterException {
+        String value = inProposition.getUniqueId().getLocalUniqueId().getId();
+        writeString(value);
+    }
+    
+    @Override
     public void writeStart(TemporalProposition inProposition, Format inFormat) throws TabularWriterException {
         String value = inProposition.getStartFormattedShort();
         writeString(value);

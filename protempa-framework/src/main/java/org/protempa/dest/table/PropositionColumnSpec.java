@@ -145,6 +145,11 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                     outputConfig.getUniqueIdHeading(),
                     this.columnNamePrefixOverride + "_uniqueId"));
         }
+        if (this.outputConfig.showLocalUniqueId()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getLocalUniqueIdHeading(),
+                    this.columnNamePrefixOverride + "_localUniqueId"));
+        }
         if (this.outputConfig.showId()) {
             results.add(StringUtils.defaultIfEmpty(
                     outputConfig.getIdHeading(),
@@ -214,6 +219,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             if (outputConfig.showUniqueId()) {
                 this.tabularWriter.writeUniqueId(abstractParameter);
             }
+            if (outputConfig.showLocalUniqueId()) {
+                this.tabularWriter.writeLocalUniqueId(abstractParameter);
+            }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(abstractParameter);
             }
@@ -238,6 +246,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             Format positionFormat = outputConfig.getPositionFormat();
             if (outputConfig.showUniqueId()) {
                 this.tabularWriter.writeUniqueId(event);
+            }
+            if (outputConfig.showLocalUniqueId()) {
+                this.tabularWriter.writeLocalUniqueId(event);
             }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(event);
@@ -264,6 +275,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             if (outputConfig.showUniqueId()) {
                 this.tabularWriter.writeUniqueId(primitiveParameter);
             }
+            if (outputConfig.showLocalUniqueId()) {
+                this.tabularWriter.writeLocalUniqueId(primitiveParameter);
+            }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(primitiveParameter);
             }
@@ -287,6 +301,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         public void visit(Constant constant) throws TabularWriterException {
             if (outputConfig.showUniqueId()) {
                 this.tabularWriter.writeUniqueId(constant);
+            }
+            if (outputConfig.showLocalUniqueId()) {
+                this.tabularWriter.writeLocalUniqueId(constant);
             }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(constant);
