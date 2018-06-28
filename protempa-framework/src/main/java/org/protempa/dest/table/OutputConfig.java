@@ -41,6 +41,7 @@ public final class OutputConfig {
         private boolean showLength;
         private boolean showId;
         private boolean showUniqueId;
+        private boolean showLocalUniqueId;
         private String valueHeading;
         private String displayNameHeading;
         private String abbrevDisplayNameHeading;
@@ -49,6 +50,7 @@ public final class OutputConfig {
         private String lengthHeading;
         private String idHeading;
         private String uniqueIdHeading;
+        private String localUniqueIdHeading;
         private Map<String, String> propertyHeadings;
         private DateFormat dateFormat;
 
@@ -65,6 +67,7 @@ public final class OutputConfig {
             this.lengthHeading = "";
             this.idHeading = "";
             this.uniqueIdHeading = "";
+            this.localUniqueIdHeading = "";
             this.showValue = false;
             this.showDisplayName = false;
             this.showAbbrevDisplayName = false;
@@ -73,6 +76,7 @@ public final class OutputConfig {
             this.showLength = false;
             this.showId = false;
             this.showUniqueId = false;
+            this.showLocalUniqueId = false;
             this.propertyHeadings = new HashMap<>();
             this.dateFormat = null;
         }
@@ -98,6 +102,15 @@ public final class OutputConfig {
             return this;
         }
 
+        public String getLocalUniqueIdHeading() {
+            return localUniqueIdHeading;
+        }
+
+        public Builder localUniqueIdHeading(String localUniqueIdHeading) {
+            this.localUniqueIdHeading = localUniqueIdHeading;
+            return this;
+        }
+        
         public String getValueHeading() {
             return valueHeading;
         }
@@ -185,6 +198,15 @@ public final class OutputConfig {
 
         public Builder showUniqueId() {
             this.showUniqueId = true;
+            return this;
+        }
+        
+        public boolean getShowLocalUniqueId() {
+            return this.showLocalUniqueId;
+        }
+
+        public Builder showLocalUniqueId() {
+            this.showLocalUniqueId = true;
             return this;
         }
 
@@ -298,6 +320,7 @@ public final class OutputConfig {
     private final boolean showLength;
     private final boolean showId;
     private final boolean showUniqueId;
+    private final boolean showLocalUniqueId;
     private final String valueHeading;
     private final String displayNameHeading;
     private final String abbrevDisplayNameHeading;
@@ -306,6 +329,7 @@ public final class OutputConfig {
     private final String lengthHeading;
     private final String idHeading;
     private final String uniqueIdHeading;
+    private final String localUniqueIdHeading;
     private final HashMap<String, String> propertyHeadings;
     private final Format positionFormat;
 
@@ -318,6 +342,7 @@ public final class OutputConfig {
         this.showLength = false;
         this.showId = false;
         this.showUniqueId = false;
+        this.showLocalUniqueId = false;
         this.valueHeading = "";
         this.displayNameHeading = "";
         this.abbrevDisplayNameHeading = "";
@@ -326,10 +351,12 @@ public final class OutputConfig {
         this.lengthHeading = "";
         this.idHeading = "";
         this.uniqueIdHeading = "";
+        this.localUniqueIdHeading = "";
         this.propertyHeadings = new HashMap<>();
         this.positionFormat = null;
     }
 
+    @Deprecated
     public OutputConfig(boolean showId, boolean showValue, boolean showDisplayName,
             boolean showAbbrevDisplayName,
             boolean showStartOrTimestamp, boolean showFinish,
@@ -339,8 +366,26 @@ public final class OutputConfig {
             String finishHeading, String lengthHeading, String uniqueIdHeading,
             Map<String, String> propertyHeadings,
             Format positionFormat) {
+        this(showId, showValue, showDisplayName, showAbbrevDisplayName, 
+                showStartOrTimestamp, showFinish, showLength, showUniqueId, false,
+                idHeading, valueHeading, displayNameHeading, 
+                abbrevDisplayNameHeading, startOrTimestampHeading,
+                finishHeading, lengthHeading, uniqueIdHeading,
+                null, propertyHeadings, positionFormat);
+    }
+    
+    public OutputConfig(boolean showId, boolean showValue, boolean showDisplayName,
+            boolean showAbbrevDisplayName,
+            boolean showStartOrTimestamp, boolean showFinish,
+            boolean showLength, boolean showUniqueId, boolean showLocalUniqueId, String idHeading,
+            String valueHeading, String displayNameHeading,
+            String abbrevDisplayNameHeading, String startOrTimestampHeading,
+            String finishHeading, String lengthHeading, String uniqueIdHeading,
+            String localUniqueIdHeading, Map<String, String> propertyHeadings,
+            Format positionFormat) {
         this.showId = showId;
         this.showUniqueId = showUniqueId;
+        this.showLocalUniqueId = showLocalUniqueId;
         this.showValue = showValue;
         this.showDisplayName = showDisplayName;
         this.showAbbrevDisplayName = showAbbrevDisplayName;
@@ -379,6 +424,10 @@ public final class OutputConfig {
             uniqueIdHeading = "";
         }
         this.uniqueIdHeading = uniqueIdHeading;
+        if (localUniqueIdHeading == null) {
+            localUniqueIdHeading = "";
+        }
+        this.localUniqueIdHeading = localUniqueIdHeading;
         if (propertyHeadings != null) {
             this.propertyHeadings = new HashMap<>(propertyHeadings);
         } else {
@@ -471,6 +520,9 @@ public final class OutputConfig {
         if (this.showUniqueId) {
             i++;
         }
+        if (this.showLocalUniqueId) {
+            i++;
+        }
         if (this.showAbbrevDisplayName) {
             i++;
         }
@@ -502,12 +554,14 @@ public final class OutputConfig {
         result = prime * result + ((finishHeading == null) ? 0 : finishHeading.hashCode());
         result = prime * result + ((idHeading == null) ? 0 : idHeading.hashCode());
         result = prime * result + ((uniqueIdHeading == null) ? 0 : uniqueIdHeading.hashCode());
+        result = prime * result + ((localUniqueIdHeading == null) ? 0 : localUniqueIdHeading.hashCode());
         result = prime * result + ((lengthHeading == null) ? 0 : lengthHeading.hashCode());
         result = prime * result + (showAbbrevDisplayName ? 1231 : 1237);
         result = prime * result + (showDisplayName ? 1231 : 1237);
         result = prime * result + (showFinish ? 1231 : 1237);
         result = prime * result + (showId ? 1231 : 1237);
         result = prime * result + (showUniqueId ? 1231 : 1237);
+        result = prime * result + (showLocalUniqueId ? 1231 : 1237);
         result = prime * result + (showLength ? 1231 : 1237);
         result = prime * result + (showStartOrTimestamp ? 1231 : 1237);
         result = prime * result + (showValue ? 1231 : 1237);
@@ -566,6 +620,13 @@ public final class OutputConfig {
         } else if (!uniqueIdHeading.equals(other.uniqueIdHeading)) {
             return false;
         }
+        if (localUniqueIdHeading == null) {
+            if (other.localUniqueIdHeading != null) {
+                return false;
+            }
+        } else if (!localUniqueIdHeading.equals(other.localUniqueIdHeading)) {
+            return false;
+        }
         if (lengthHeading == null) {
             if (other.lengthHeading != null) {
                 return false;
@@ -586,6 +647,9 @@ public final class OutputConfig {
             return false;
         }
         if (showUniqueId != other.showUniqueId) {
+            return false;
+        }
+        if (showLocalUniqueId != other.showLocalUniqueId) {
             return false;
         }
         if (showLength != other.showLength) {
