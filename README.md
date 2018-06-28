@@ -21,6 +21,9 @@ See our [publication about Protempa](https://www.ncbi.nlm.nih.gov/pmc/articles/P
 
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa)
 
+## Version 4.2.1
+* Honor start and finish formatters that are specified for tabular writers.
+
 ## Version 4.2
 * Allow writing the LocalUniqueId numericalId field to tabular files.
 
