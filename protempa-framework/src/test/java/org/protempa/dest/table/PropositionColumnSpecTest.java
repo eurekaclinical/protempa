@@ -78,4 +78,17 @@ public class PropositionColumnSpecTest {
         }
         Assert.assertEquals(uniqueId.getLocalUniqueId().getId() + '\t' + prop.getId(), sw.toString());
     }
+    
+    @Test
+    public void testValueFileTabularWriterPrintNumericalId() throws IOException, TabularWriterException {
+        UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
+        Event prop = new Event("TESTEVENT", uniqueId);
+        OutputConfig outputConfig = new OutputConfig.Builder().showNumericalId().build();
+        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        StringWriter sw = new StringWriter();
+        try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
+            ccs.columnValues("00001", prop, null, null, null, null, ftw);
+        }
+        Assert.assertEquals(String.valueOf(uniqueId.getLocalUniqueId().getNumericalId()), sw.toString());
+    }
 }

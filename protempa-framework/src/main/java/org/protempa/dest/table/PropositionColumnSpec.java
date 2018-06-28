@@ -150,6 +150,11 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                     outputConfig.getLocalUniqueIdHeading(),
                     this.columnNamePrefixOverride + "_localUniqueId"));
         }
+        if (this.outputConfig.showNumericalId()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getNumericalIdHeading(),
+                    this.columnNamePrefixOverride + "_numericalId"));
+        }
         if (this.outputConfig.showId()) {
             results.add(StringUtils.defaultIfEmpty(
                     outputConfig.getIdHeading(),
@@ -222,6 +227,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             if (outputConfig.showLocalUniqueId()) {
                 this.tabularWriter.writeLocalUniqueId(abstractParameter);
             }
+            if (outputConfig.showNumericalId()) {
+                this.tabularWriter.writeNumericalId(abstractParameter);
+            }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(abstractParameter);
             }
@@ -249,6 +257,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             }
             if (outputConfig.showLocalUniqueId()) {
                 this.tabularWriter.writeLocalUniqueId(event);
+            }
+            if (outputConfig.showNumericalId()) {
+                this.tabularWriter.writeNumericalId(event);
             }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(event);
@@ -278,6 +289,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             if (outputConfig.showLocalUniqueId()) {
                 this.tabularWriter.writeLocalUniqueId(primitiveParameter);
             }
+            if (outputConfig.showNumericalId()) {
+                this.tabularWriter.writeNumericalId(primitiveParameter);
+            }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(primitiveParameter);
             }
@@ -304,6 +318,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             }
             if (outputConfig.showLocalUniqueId()) {
                 this.tabularWriter.writeLocalUniqueId(constant);
+            }
+            if (outputConfig.showNumericalId()) {
+                this.tabularWriter.writeNumericalId(constant);
             }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(constant);
