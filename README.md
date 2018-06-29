@@ -21,6 +21,9 @@ See our [publication about Protempa](https://www.ncbi.nlm.nih.gov/pmc/articles/P
 
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa)
 
+## Version 4.3.2
+* Actually write nominal column headers for tabular writers.
+
 ## Version 4.3.1
 * Write = not EQUAL_TO for the operator for lab values that do not start with
 an inequality.

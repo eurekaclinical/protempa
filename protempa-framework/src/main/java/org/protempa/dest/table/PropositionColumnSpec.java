@@ -179,6 +179,11 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                     outputConfig.getNumberHeading(),
                     this.columnNamePrefixOverride + "_numberValue"));
         }
+        if (this.outputConfig.showNominal()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getNominalHeading(),
+                    this.columnNamePrefixOverride + "_nominalValue"));
+        }
         if (this.outputConfig.showDisplayName()) {
             results.add(StringUtils.defaultIfEmpty(
                     outputConfig.getDisplayNameHeading(),
