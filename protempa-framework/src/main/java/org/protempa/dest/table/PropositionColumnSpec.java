@@ -169,6 +169,16 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                     outputConfig.getValueHeading(),
                     this.columnNamePrefixOverride + "_value"));
         }
+        if (this.outputConfig.showInequality()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getInequalityHeading(),
+                    this.columnNamePrefixOverride + "_inequalityValue"));
+        }
+        if (this.outputConfig.showNumber()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getNumberHeading(),
+                    this.columnNamePrefixOverride + "_numberValue"));
+        }
         if (this.outputConfig.showDisplayName()) {
             results.add(StringUtils.defaultIfEmpty(
                     outputConfig.getDisplayNameHeading(),
@@ -307,7 +317,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 if (value instanceof InequalityNumberValue) {
                     this.tabularWriter.writeInequality((InequalityNumberValue) value);
                 } else {
-                    this.tabularWriter.writeString(ValueComparator.EQUAL_TO.toString());
+                    this.tabularWriter.writeString(ValueComparator.EQUAL_TO.getComparatorString());
                 }
             }
             if (outputConfig.showNumber()) {
