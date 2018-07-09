@@ -69,29 +69,6 @@ public interface Proposition extends PropositionVisitable,
     SourceSystem getSourceSystem();
 
     /**
-     * Adds a {@link PropertyChangeListener} to the listener list. The listener
-     * is registered for all bound properties of this class (none at present).
-     * 
-     * If listener is null, no exception is thrown and no action is performed.
-     * 
-     * @param l
-     *            the {@link PropertyChangeListener} to be added.
-     */
-    void addPropertyChangeListener(PropertyChangeListener l);
-
-    /**
-     * Removes a {@link PropertyChangeListener} from the listener list. This
-     * method should be used to remove {@link PropertyChangeListener}s that were
-     * registered for all bound properties of this class.
-     * 
-     * If listener is null, no exception is thrown and no action is performed.
-     * 
-     * @param l
-     *            the {@link PropertyChangeListener} to be removed
-     */
-    void removePropertyChangeListener(PropertyChangeListener l);
-
-    /**
      * Determines if the specified object is a {@link Proposition} and has
      * the same field values as this proposition.
      * 

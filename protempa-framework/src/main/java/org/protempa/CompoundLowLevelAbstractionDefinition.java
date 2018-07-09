@@ -326,13 +326,8 @@ public final class CompoundLowLevelAbstractionDefinition
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.children;
         this.children = this.lowLevelIds.toArray(new String[this.lowLevelIds
                 .size()]);
-        if (this.changes != null) {
-            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.children);
-        }
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {

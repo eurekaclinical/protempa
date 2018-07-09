@@ -19,7 +19,6 @@
  */
 package org.protempa;
 
-import java.beans.PropertyChangeListener;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -134,16 +133,6 @@ public interface PropositionDefinition extends Serializable,
     ReferenceDefinition referenceDefinition(String name);
 
     boolean getInDataSource();
-
-    void addPropertyChangeListener(PropertyChangeListener listener);
-
-    void removePropertyChangeListener(PropertyChangeListener listener);
-
-    void addPropertyChangeListener(String propertyName,
-            PropertyChangeListener listener);
-
-    void removePropertyChangeListener(String proeprtyName,
-            PropertyChangeListener listener);
 
     SourceId getSourceId();
     

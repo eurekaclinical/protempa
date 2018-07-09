@@ -19,8 +19,6 @@
  */
 package org.protempa;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.Date;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -70,7 +68,6 @@ public abstract class AbstractPropositionDefinition implements
     private PropertyDefinition[] propertyDefinitions;
     private ReferenceDefinition[] referenceDefinitions;
     private boolean inDataSource;
-    protected PropertyChangeSupport changes;
     private SourceId sourceId;
     private Date accessed;
     private Date created;
@@ -145,11 +142,7 @@ public abstract class AbstractPropositionDefinition implements
         if (abbrev == null) {
             abbrev = "";
         }
-        String old = this.abbrevDisplayName;
         this.abbrevDisplayName = abbrev;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("abbreviatedDisplayName", old, abbrev);
-        }
     }
 
     @Override
@@ -166,11 +159,7 @@ public abstract class AbstractPropositionDefinition implements
         if (displayName == null) {
             displayName = "";
         }
-        String old = this.displayName;
         this.displayName = displayName;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("displayName", old, displayName);
-        }
     }
 
     @Override
@@ -182,11 +171,7 @@ public abstract class AbstractPropositionDefinition implements
         if (description == null) {
             description = "";
         }
-        String old = this.description;
         this.description = description;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("description", old, this.description);
-        }
     }
 
     @Override
@@ -201,13 +186,9 @@ public abstract class AbstractPropositionDefinition implements
      * <code>null</code> or duplicate elements allowed.
      */
     public void setInverseIsA(String... inverseIsA) {
-        String[] old = this.inverseIsA;
         ProtempaUtil.checkArrayForNullElement(inverseIsA, "inverseIsA");
         ProtempaUtil.checkArrayForDuplicates(inverseIsA, "inverseIsA");
         this.inverseIsA = inverseIsA.clone();
-        if (this.changes != null) {
-            this.changes.firePropertyChange("inverseIsA", old, getInverseIsA());
-        }
         recalculateChildren();
     }
 
@@ -228,14 +209,10 @@ public abstract class AbstractPropositionDefinition implements
      * or duplicate elements allowed.
      */
     public final void setTermIds(String... termIds) {
-        String[] old = this.termIds;
         ProtempaUtil.checkArrayForNullElement(termIds, "termIds");
         ProtempaUtil.checkArrayForDuplicates(termIds, "termIds");
         this.termIds = termIds.clone();
 
-        if (this.changes != null) {
-            this.changes.firePropertyChange("termIds", old, getTermIds());
-        }
     }
 
     @Override
@@ -256,16 +233,11 @@ public abstract class AbstractPropositionDefinition implements
 
     public final void setPropertyDefinitions(
             PropertyDefinition... propertyDefinitions) {
-        PropertyDefinition[] old = this.propertyDefinitions;
         ProtempaUtil.checkArrayForNullElement(propertyDefinitions,
                 "propertyDefinitions");
         ProtempaUtil.checkArrayForDuplicates(propertyDefinitions,
                 "propertyDefinitions");
         this.propertyDefinitions = propertyDefinitions.clone();
-        if (this.changes != null) {
-            this.changes.firePropertyChange("propertyDefinitions", old,
-                    this.propertyDefinitions);
-        }
     }
 
     @Override
@@ -286,17 +258,11 @@ public abstract class AbstractPropositionDefinition implements
 
     public final void setReferenceDefinitions(
             ReferenceDefinition... referenceDefinitions) {
-        ReferenceDefinition[] old = this.referenceDefinitions;
         ProtempaUtil.checkArrayForNullElement(referenceDefinitions,
                 "referenceDefinitions");
         ProtempaUtil.checkArrayForDuplicates(referenceDefinitions,
                 "referenceDefinitions");
         this.referenceDefinitions = referenceDefinitions.clone();
-
-        if (this.changes != null) {
-            this.changes.firePropertyChange("referenceDefinitions", old,
-                    this.referenceDefinitions);
-        }
     }
 
     @Override
@@ -305,12 +271,7 @@ public abstract class AbstractPropositionDefinition implements
     }
 
     public void setInDataSource(boolean inDataSource) {
-        boolean old = this.inDataSource;
         this.inDataSource = inDataSource;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("inDataSource", old,
-                    this.inDataSource);
-        }
     }
 
     @Override
@@ -392,40 +353,6 @@ public abstract class AbstractPropositionDefinition implements
             }
         }
         return null;
-    }
-
-    @Override
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        if (this.changes == null) {
-            this.changes = new PropertyChangeSupport(this);
-        }
-        if (this.changes != null) {
-            this.changes.addPropertyChangeListener(listener);
-        }
-    }
-
-    @Override
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        if (this.changes != null) {
-            this.changes.removePropertyChangeListener(listener);
-        }
-    }
-
-    @Override
-    public void addPropertyChangeListener(String propertyName,
-            PropertyChangeListener listener) {
-        if (this.changes == null) {
-            this.changes = new PropertyChangeSupport(this);
-        }
-        this.changes.addPropertyChangeListener(propertyName, listener);
-    }
-
-    @Override
-    public void removePropertyChangeListener(String propertyName,
-            PropertyChangeListener listener) {
-        if (this.changes != null) {
-            this.changes.removePropertyChangeListener(propertyName, listener);
-        }
     }
 
     /**

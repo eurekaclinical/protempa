@@ -19,7 +19,6 @@
  */
 package org.protempa;
 
-import java.beans.PropertyChangeSupport;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.Relation;
@@ -40,7 +39,6 @@ public final class SimpleGapFunction extends GapFunction {
     private Integer maximumGap;
     private Unit maximumGapUnits;
     private Relation relation;
-    protected final PropertyChangeSupport changes;
 
     /**
      * Instantiates an instance with the default maximum gap and units. The
@@ -69,8 +67,6 @@ public final class SimpleGapFunction extends GapFunction {
         this.maximumGapUnits = maximumGapUnit;
         this.maximumGap = maximumGap;
         initRelation();
-        this.changes = new PropertyChangeSupport(this);
-
     }
 
     /**
@@ -125,10 +121,8 @@ public final class SimpleGapFunction extends GapFunction {
             throw new IllegalArgumentException(
                     "maximumGap must be null or >= 0");
         }
-        Integer old = this.maximumGap;
         this.maximumGap = maximumGap;
         initRelation();
-        this.changes.firePropertyChange("maximumGap", old, this.maximumGap);
     }
 
     /**
@@ -138,11 +132,8 @@ public final class SimpleGapFunction extends GapFunction {
      * @param unit a {@link Unit} value.
      */
     public void setMaximumGapUnit(Unit unit) {
-        Unit old = this.maximumGapUnits;
         this.maximumGapUnits = unit;
         initRelation();
-        this.changes.firePropertyChange("maximumGapUnit", old,
-                this.maximumGapUnits);
     }
 
     private void initRelation() {

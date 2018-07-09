@@ -46,11 +46,7 @@ public abstract class AbstractAbstractionDefinition
         if (gapFunction == null) {
             gapFunction = GapFunction.DEFAULT;
         }
-        GapFunction old = this.gapFunction;
         this.gapFunction = gapFunction;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("gapFunction", old, this.gapFunction);
-        }
     }
 
     @Override

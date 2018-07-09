@@ -19,8 +19,6 @@
  */
 package org.protempa.query;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -51,12 +49,10 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     private PropositionDefinition[] propDefs;
     private String name;
     private String username;
-    private final PropertyChangeSupport changes;
 
     private QueryMode queryMode;
 
     public DefaultQueryBuilder() {
-        this.changes = new PropertyChangeSupport(this);
         this.propDefs = EMPTY_PROP_DEF_ARRAY;
         this.keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
@@ -84,13 +80,11 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     }
 
     public void setQueryMode(QueryMode queryMode) {
-        QueryMode old = this.queryMode;
         if (queryMode == null) {
             this.queryMode = Query.DEFAULT_QUERY_MODE;
         } else {
             this.queryMode = queryMode;
         }
-        this.changes.firePropertyChange("queryMode", old, this.queryMode);
     }
 
     /**
@@ -111,9 +105,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * @param filters a {@link Filter}.
      */
     public final void setFilters(Filter filters) {
-        Filter old = this.filters;
         this.filters = filters;
-        this.changes.firePropertyChange("filters", old, this.filters);
     }
 
     /**
@@ -137,9 +129,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         if (keyIds == null) {
             keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         }
-        String[] old = this.keyIds;
         this.keyIds = keyIds.clone();
-        this.changes.firePropertyChange("keyIds", old, this.keyIds);
     }
 
     /**
@@ -160,14 +150,12 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * <code>null</code>, an empty {@link String[]} will be stored.
      */
     public final void setPropositionIds(String[] propIds) {
-        String[] old = this.propIds;
         if (propIds == null) {
             this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
         } else {
             this.propIds = propIds.clone();
             ProtempaUtil.internAll(this.propIds);
         }
-        this.changes.firePropertyChange("propIds", old, this.propIds);
     }
 
     /**
@@ -188,49 +176,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         if (propDefs == null) {
             propDefs = EMPTY_PROP_DEF_ARRAY;
         }
-        PropositionDefinition[] old = this.propDefs;
         this.propDefs = propDefs.clone();
-        this.changes.firePropertyChange("propositionDefinitions", old,
-                this.propDefs);
-    }
-
-    /**
-     * Adds listeners for changes to this Query's properties.
-     *
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void addPropertyChangeListener(PropertyChangeListener listener) {
-        this.changes.addPropertyChangeListener(listener);
-    }
-
-    /**
-     * Removes listeners for changes to this Query's properties.
-     *
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void removePropertyChangeListener(PropertyChangeListener listener) {
-        this.changes.removePropertyChangeListener(listener);
-    }
-
-    /**
-     * Adds listeners for changes to the specified property.
-     *
-     * @param propertyName the name {@link String} of the property of interest.
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        this.changes.addPropertyChangeListener(propertyName, listener);
-    }
-
-    /**
-     * Removes listeners for changes to the specified property.
-     *
-     * @param propertyName the name {@link String} of the property that is no
-     * longer of interest.
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        this.changes.removePropertyChangeListener(propertyName, listener);
     }
 
     @Override

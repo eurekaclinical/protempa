@@ -184,12 +184,7 @@ public class SequentialTemporalPatternDefinition extends AbstractAbstractionDefi
     }
 
     public void setTemporalOffset(TemporalPatternOffset temporalOffset) {
-        TemporalPatternOffset old = temporalOffset;
         this.temporalOffset = temporalOffset;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("temporalOffset", old,
-                    this.temporalOffset);
-        }
     }
 
     @Override
@@ -204,7 +199,6 @@ public class SequentialTemporalPatternDefinition extends AbstractAbstractionDefi
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.children;
         Set<String> abstractedFrom = getAbstractedFrom();
         String[] inverseIsA = getInverseIsA();
         if (inverseIsA != null) {
@@ -214,10 +208,6 @@ public class SequentialTemporalPatternDefinition extends AbstractAbstractionDefi
         }
         this.children = 
                 abstractedFrom.toArray(new String[abstractedFrom.size()]);
-        if (this.changes != null) {
-            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.children);
-        }
     }
 
     @Override

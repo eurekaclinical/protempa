@@ -188,14 +188,9 @@ public final class SliceDefinition extends AbstractAbstractionDefinition {
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.children;
         Set<String> abstractedFrom = getAbstractedFrom();
         this.children = 
                 abstractedFrom.toArray(new String[abstractedFrom.size()]);
-        if (this.changes != null) {
-            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.children);
-        }
     }
 
     @Override

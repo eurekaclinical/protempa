@@ -55,7 +55,6 @@ public final class ContextDefinition extends AbstractPropositionDefinition
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.children;
         Set<String> newChildren = new HashSet<>();
         Arrays.addAll(newChildren, getInverseIsA());
         Arrays.addAll(newChildren, this.subContexts);
@@ -63,10 +62,6 @@ public final class ContextDefinition extends AbstractPropositionDefinition
             newChildren.add(tepd.getPropositionId());
         }
         this.children = newChildren.toArray(new String[newChildren.size()]);
-        if (this.changes != null) {
-            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.children);
-        }
     }
 
     @Override

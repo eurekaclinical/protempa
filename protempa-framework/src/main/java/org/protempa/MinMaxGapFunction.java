@@ -19,7 +19,6 @@
  */
 package org.protempa;
 
-import java.beans.PropertyChangeSupport;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.Relation;
@@ -36,7 +35,6 @@ public final class MinMaxGapFunction extends GapFunction {
     private Integer maximumGap;
     private Unit maximumGapUnits;
     private Relation relation;
-    protected final PropertyChangeSupport changes;
 
     /**
      * Instantiates an instance with the default minimum and maximum gap and
@@ -48,7 +46,6 @@ public final class MinMaxGapFunction extends GapFunction {
 
     public MinMaxGapFunction(Integer minimumGap, Unit minimumGapUnit,
             Integer maximumGap, Unit maximumGapUnit) {
-        this.changes = new PropertyChangeSupport(this);
         this.minimumGapUnits = minimumGapUnit;
         setMinimumGap(minimumGap);
         this.maximumGapUnits = maximumGapUnit;
@@ -80,36 +77,26 @@ public final class MinMaxGapFunction extends GapFunction {
         if (maximumGap != null && maximumGap < 0) {
             maximumGap = 0;
         }
-        Integer old = this.maximumGap;
         this.maximumGap = maximumGap;
         setRelation();
-        this.changes.firePropertyChange("maximumGap", old, this.maximumGap);
     }
 
     public void setMinimumGap(Integer minimumGap) {
         if (minimumGap == null || minimumGap < 0) {
             minimumGap = 0;
         }
-        Integer old = minimumGap;
         this.minimumGap = minimumGap;
         setRelation();
-        this.changes.firePropertyChange("minimumGap", old, this.minimumGap);
     }
 
     public void setMaximumGapUnit(Unit unit) {
-        Unit old = this.maximumGapUnits;
         this.maximumGapUnits = unit;
         setRelation();
-        this.changes.firePropertyChange("maximumGapUnit", old,
-                this.maximumGapUnits);
     }
 
     public void setMinimumGapUnit(Unit unit) {
-        Unit old = this.minimumGapUnits;
         this.minimumGapUnits = unit;
         setRelation();
-        this.changes.firePropertyChange("minimumGapUnit", old,
-                this.minimumGapUnits);
     }
 
     private void setRelation() {
