@@ -131,9 +131,6 @@ public final class Protempa implements AutoCloseable {
      * @param algorithmSource an {@link AlgorithmSource}. Will be closed when
      * {@link #close()} is called. May be <code>null</code> if you're not
      * computing any low-level abstractions.
-     * @param termSource a {@link TermSource}. Will be closed when
-     * {@link #close()} is called. May be <code>null</code> if you're not using
-     * terms.
      *
      * @throws ProtempaStartupException if an error occur in starting Protempa.
      * There frequently will be a nested exception that provides more detail.
