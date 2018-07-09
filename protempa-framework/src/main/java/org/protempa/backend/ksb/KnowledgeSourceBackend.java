@@ -30,7 +30,6 @@ import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
 import org.protempa.TemporalPropositionDefinition;
-import org.protempa.TermSubsumption;
 import org.protempa.valueset.ValueSet;
 import org.protempa.query.And;
 
@@ -66,35 +65,6 @@ public interface KnowledgeSourceBackend extends
             throws KnowledgeSourceReadException;
     
     TemporalPropositionDefinition readTemporalPropositionDefinition(String id)
-            throws KnowledgeSourceReadException;
-
-    /**
-     * Gets the proposition definitions that are associated with the given AND
-     * clause of term subsumptions. A proposition matches if and only if at
-     * least one term in every subsumption is related to that proposition.
-     * 
-     * @param termSubsumptions
-     *            the term subsumptions to match in the knowledge source
-     * 
-     * @return a {@link List} of proposition definitions associated with the
-     *         given term IDs
-     * @throws KnowledgeSourceReadException
-     *             if there is a problem reading from the knowledge source
-     */
-    List<String> getPropositionsByTermSubsumption(
-            And<TermSubsumption> termSubsumptions)
-            throws KnowledgeSourceReadException;
-
-    /**
-     * Gets the proposition definitions for a given term.
-     * 
-     * @param termId
-     *            the term ID to look up
-     * @return a {@link List} of proposoition IDs related to the given term
-     * @throws KnowledgeSourceReadException
-     *             if there is a problem reading from the Knowledge source
-     */
-    String[] getPropositionsByTerm(String termId)
             throws KnowledgeSourceReadException;
 
     /**

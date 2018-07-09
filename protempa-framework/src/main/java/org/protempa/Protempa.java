@@ -37,7 +37,6 @@ import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.dsb.DataValidationEvent;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.backend.tsb.TermSourceBackend;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.query.QueryBuilder;
@@ -75,13 +74,9 @@ public final class Protempa implements AutoCloseable {
             FutureTask<AlgorithmSource> newAlgorithmSourceInstance = 
                     new FutureTask<>(() -> sourceFactory.newAlgorithmSourceInstance());
             newAlgorithmSourceInstance.run();
-            FutureTask<TermSource> newTermSourceInstance = 
-                    new FutureTask<>(() -> sourceFactory.newTermSourceInstance());
-            newTermSourceInstance.run();
             return new Protempa(newDataSourceInstance.get(),
                     newKnowledgeSourceInstance.get(),
-                    newAlgorithmSourceInstance.get(),
-                    newTermSourceInstance.get(), false);
+                    newAlgorithmSourceInstance.get(), false);
         } catch (InterruptedException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (ExecutionException ex) {
@@ -110,13 +105,9 @@ public final class Protempa implements AutoCloseable {
             FutureTask<AlgorithmSource> newAlgorithmSourceInstance = 
                     new FutureTask<>(() -> sourceFactory.newAlgorithmSourceInstance());
             newAlgorithmSourceInstance.run();
-            FutureTask<TermSource> newTermSourceInstance = 
-                    new FutureTask<>(() -> sourceFactory.newTermSourceInstance());
-            newTermSourceInstance.run();
             return new Protempa(newDataSourceInstance.get(),
                     newKnowledgeSourceInstance.get(),
-                    newAlgorithmSourceInstance.get(),
-                    newTermSourceInstance.get(), useCache);
+                    newAlgorithmSourceInstance.get(), useCache);
         } catch (InterruptedException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (ExecutionException ex) {
@@ -148,9 +139,9 @@ public final class Protempa implements AutoCloseable {
      * There frequently will be a nested exception that provides more detail.
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
-            AlgorithmSource algorithmSource, TermSource termSource)
+            AlgorithmSource algorithmSource)
             throws ProtempaStartupException {
-        this(dataSource, knowledgeSource, algorithmSource, termSource, false);
+        this(dataSource, knowledgeSource, algorithmSource, false);
     }
 
     /**
@@ -166,9 +157,6 @@ public final class Protempa implements AutoCloseable {
      * @param algorithmSource an {@link AlgorithmSource}. Will be closed when
      * {@link #close()} is called. May be <code>null</code> if you're not
      * computing any low-level abstractions.
-     * @param termSource a {@link TermSource}. Will be closed when
-     * {@link #close()} is called. May be <code>null</code> if you're not using
-     * terms.
      * @param cacheFoundAbstractParameters <code>true</code> to cache found
      * abstract parameters, <code>false</code> not to cache found abstract
      * parameters.
@@ -177,7 +165,7 @@ public final class Protempa implements AutoCloseable {
      * There frequently will be a nested exception that provides more detail.
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
-            AlgorithmSource algorithmSource, TermSource termSource,
+            AlgorithmSource algorithmSource,
             boolean cacheFoundAbstractParameters)
             throws ProtempaStartupException {
         this.eventListeners = new ArrayList<>();
@@ -202,15 +190,8 @@ public final class Protempa implements AutoCloseable {
             as = algorithmSource;
         }
 
-        TermSource ts;
-        if (termSource == null) {
-            ts = new TermSourceImpl(new TermSourceBackend[0]);
-        } else {
-            ts = termSource;
-        }
-
         try {
-            this.abstractionFinder = new AbstractionFinder(ds, ks, as, ts,
+            this.abstractionFinder = new AbstractionFinder(ds, ks, as,
                     cacheFoundAbstractParameters, this.eventListeners);
         } catch (KnowledgeSourceReadException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
@@ -245,16 +226,6 @@ public final class Protempa implements AutoCloseable {
      */
     public AlgorithmSource getAlgorithmSource() {
         return this.abstractionFinder.getAlgorithmSource();
-    }
-
-    /**
-     * Gets the term source.
-     *
-     * @return a {@link TermSource}. Will be closed when {@link #close()} is
-     * called
-     */
-    public TermSource getTermSource() {
-        return this.abstractionFinder.getTermSource();
     }
 
     public void addEventListener(ProtempaEventListener eventListener) {
@@ -391,7 +362,6 @@ public final class Protempa implements AutoCloseable {
         this.abstractionFinder.getAlgorithmSource().clear();
         this.abstractionFinder.getDataSource().clear();
         this.abstractionFinder.getKnowledgeSource().clear();
-        this.abstractionFinder.getTermSource().clear();
         ProtempaUtil.logger().fine("Protempa cleared");
     }
 }

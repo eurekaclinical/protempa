@@ -26,7 +26,6 @@ import org.drools.util.StringUtils;
 import org.protempa.backend.AbstractBackend;
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.TermSubsumption;
 import org.protempa.valueset.ValueSet;
 import org.protempa.query.And;
 
@@ -52,28 +51,6 @@ public abstract class AbstractKnowledgeSourceBackend extends
     public ValueSet readValueSet(String id)
             throws KnowledgeSourceReadException {
         return null;
-    }
-
-    /**
-     * A default implementation that returns an empty List.
-     * 
-     * @return a {@link List<String>}.
-     */
-    @Override
-    public List<String> getPropositionsByTermSubsumption(
-            And<TermSubsumption> termId) throws KnowledgeSourceReadException {
-        return new ArrayList<>();
-    }
-
-    /**
-     * A default implementation that returns an empty list.
-     * 
-     * @see org.protempa.KnowledgeSourceBackend#getPropositionsByTerm(java.lang.String)
-     */
-    @Override
-    public String[] getPropositionsByTerm(String termId)
-            throws KnowledgeSourceReadException {
-        return StringUtils.EMPTY_STRING_ARRAY;
     }
 
     /**

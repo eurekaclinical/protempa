@@ -22,7 +22,6 @@ package org.protempa.backend;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.backend.tsb.TermSourceBackend;
 
 /**
  *
@@ -48,8 +47,6 @@ public interface Configurations {
     
     BackendInstanceSpec<KnowledgeSourceBackend> newKnowledgeSourceBackendSection(String backendSpecId) throws BackendSpecNotFoundException, BackendProviderSpecLoaderException;
     
-    BackendInstanceSpec<TermSourceBackend> newTermSourceBackendSection(String backendSpecId) throws BackendSpecNotFoundException, BackendProviderSpecLoaderException;
-        
     /**
      * Writes the provided backend specifications to the configurations with
      * the specified id. The passed-in objects will have their 

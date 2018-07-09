@@ -42,7 +42,6 @@
         <module>protempa-bcp-serviceloader</module>
         <module>protempa-bp-serviceloader</module>
         <module>protempa-ksb-protege</module>
-        <module>protempa-tsb-umls</module>
         <module>protempa-dsb-relationaldb</module>
         <module>protempa-dsb-file</module>
         <module>protempa-test-suite</module>

@@ -43,34 +43,29 @@ final class AbstractionFinder {
     private final Map<String, StatefulSession> workingMemoryCache;
     private final DataSource dataSource;
     private final KnowledgeSource knowledgeSource;
-    private final TermSource termSource;
     private final AlgorithmSource algorithmSource;
-    // private final Map<String, List<String>> termToPropDefMap;
     private boolean closed;
     private Executor executor;
     private final List<? extends ProtempaEventListener> eventListeners;
 
     AbstractionFinder(DataSource dataSource, KnowledgeSource knowledgeSource,
-            AlgorithmSource algorithmSource, TermSource termSource,
+            AlgorithmSource algorithmSource,
             boolean cacheFoundAbstractParameters, 
             List<? extends ProtempaEventListener> eventListeners)
             throws KnowledgeSourceReadException {
         assert dataSource != null : "dataSource cannot be null";
         assert knowledgeSource != null : "knowledgeSource cannot be null";
         assert algorithmSource != null : "algorithmSource cannot be null";
-        assert termSource != null : "termSource cannot be null";
         assert eventListeners != null : "eventListeners cannot be null";
 
         this.dataSource = dataSource;
         this.knowledgeSource = knowledgeSource;
-        this.termSource = termSource;
         this.algorithmSource = algorithmSource;
         
         this.eventListeners = eventListeners;
         
         this.dataSource.setEventListeners(eventListeners);
         this.knowledgeSource.setEventListeners(eventListeners);
-        this.termSource.setEventListeners(eventListeners);
         this.algorithmSource.setEventListeners(eventListeners);
 
         this.dataSource.addSourceListener(
@@ -96,19 +91,6 @@ final class AbstractionFinder {
             public void closedUnexpectedly(SourceClosedUnexpectedlyEvent e) {
                 throw new UnsupportedOperationException(
                         "Not supported yet.");
-            }
-        });
-
-        this.termSource.addSourceListener(
-                new SourceListener<TermSourceUpdatedEvent>() {
-            @Override
-            public void sourceUpdated(TermSourceUpdatedEvent event) {
-            }
-
-            @Override
-            public void closedUnexpectedly(SourceClosedUnexpectedlyEvent e) {
-                throw new UnsupportedOperationException(
-                        "Not supported yet");
             }
         });
 
@@ -146,10 +128,6 @@ final class AbstractionFinder {
 
     AlgorithmSource getAlgorithmSource() {
         return this.algorithmSource;
-    }
-
-    TermSource getTermSource() {
-        return this.termSource;
     }
 
     Set<String> getKnownKeys() {
@@ -244,15 +222,12 @@ final class AbstractionFinder {
         clear();
         boolean algorithmSourceClosed = false;
         boolean knowledgeSourceClosed = false;
-        boolean termSourceClosed = false;
 
         try {
             this.algorithmSource.close();
             algorithmSourceClosed = true;
             this.knowledgeSource.close();
             knowledgeSourceClosed = true;
-            this.termSource.close();
-            termSourceClosed = true;
         } catch (SourceCloseException e) {
             exception = new CloseException(e);
         } finally {
@@ -265,12 +240,6 @@ final class AbstractionFinder {
             if (!knowledgeSourceClosed) {
                 try {
                     this.knowledgeSource.close();
-                } catch (SourceCloseException ignored) {
-                }
-            }
-            if (!termSourceClosed) {
-                try {
-                    this.termSource.close();
                 } catch (SourceCloseException ignored) {
                 }
             }

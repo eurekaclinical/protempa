@@ -22,7 +22,6 @@ package org.protempa.backend;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.backend.tsb.TermSourceBackend;
 
 /**
  *
@@ -70,15 +69,6 @@ public abstract class AbstractConfigurations implements Configurations {
         BackendSpecLoader<KnowledgeSourceBackend> loader
                 = this.backendProvider.getKnowledgeSourceBackendSpecLoader();
         BackendSpec<KnowledgeSourceBackend> backendSpec
-                = loader.loadSpec(id);
-        return backendSpec.newBackendInstanceSpec();
-    }
-
-    @Override
-    public BackendInstanceSpec<TermSourceBackend> newTermSourceBackendSection(String id) throws BackendSpecNotFoundException, BackendProviderSpecLoaderException {
-        BackendSpecLoader<TermSourceBackend> loader
-                = this.backendProvider.getTermSourceBackendSpecLoader();
-        BackendSpec<TermSourceBackend> backendSpec
                 = loader.loadSpec(id);
         return backendSpec.newBackendInstanceSpec();
     }

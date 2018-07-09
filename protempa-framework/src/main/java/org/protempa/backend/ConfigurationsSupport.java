@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.backend.tsb.TermSourceBackend;
 
 /**
  *
@@ -38,11 +37,9 @@ public class ConfigurationsSupport {
     private final List<BackendInstanceSpec<AlgorithmSourceBackend>> asbInstanceSpecs;
     private final List<BackendInstanceSpec<DataSourceBackend>> dsbInstanceSpecs;
     private final List<BackendInstanceSpec<KnowledgeSourceBackend>> ksbInstanceSpecs;
-    private final List<BackendInstanceSpec<TermSourceBackend>> tsbInstanceSpecs;
     private BackendSpecLoader<AlgorithmSourceBackend> asl;
     private BackendSpecLoader<DataSourceBackend> dsl;
     private BackendSpecLoader<KnowledgeSourceBackend> ksl;
-    private BackendSpecLoader<TermSourceBackend> tsl;
     private String configurationId;
 
     public ConfigurationsSupport(BackendProvider backendProvider) {
@@ -58,7 +55,6 @@ public class ConfigurationsSupport {
         this.asbInstanceSpecs = new ArrayList<>();
         this.dsbInstanceSpecs = new ArrayList<>();
         this.ksbInstanceSpecs = new ArrayList<>();
-        this.tsbInstanceSpecs = new ArrayList<>();
     }
 
     public void init(String configurationId) throws ConfigurationsLoadException {
@@ -67,7 +63,6 @@ public class ConfigurationsSupport {
             asl = backendProvider.getAlgorithmSourceBackendSpecLoader();
             dsl = backendProvider.getDataSourceBackendSpecLoader();
             ksl = backendProvider.getKnowledgeSourceBackendSpecLoader();
-            tsl = backendProvider.getTermSourceBackendSpecLoader();
         } catch (BackendProviderSpecLoaderException ex) {
             throw new ConfigurationsLoadException(ex);
         }
@@ -91,11 +86,6 @@ public class ConfigurationsSupport {
                 BackendInstanceSpec<KnowledgeSourceBackend> newBackendInstanceSpec = loadSpec.newBackendInstanceSpec();
                 result = newBackendInstanceSpec;
                 ksbInstanceSpecs.add(newBackendInstanceSpec);
-            } else if (tsl.hasSpec(sectionId)) {
-                BackendSpec<TermSourceBackend> loadSpec = tsl.loadSpec(sectionId);
-                BackendInstanceSpec<TermSourceBackend> newBackendInstanceSpec = loadSpec.newBackendInstanceSpec();
-                result = newBackendInstanceSpec;
-                tsbInstanceSpecs.add(newBackendInstanceSpec);
             } else {
                 throw new InvalidConfigurationException(
                         "The backend " + sectionId + " was not found");
@@ -119,17 +109,12 @@ public class ConfigurationsSupport {
         return ksbInstanceSpecs;
     }
 
-    public List<BackendInstanceSpec<TermSourceBackend>> getTermSourceBackendInstanceSpecs() {
-        return tsbInstanceSpecs;
-    }
-
     public Configuration buildConfiguration() {
         Configuration configuration = new Configuration();
         configuration.setConfigurationId(this.configurationId);
         configuration.setAlgorithmSourceBackendSections(asbInstanceSpecs);
         configuration.setDataSourceBackendSections(dsbInstanceSpecs);
         configuration.setKnowledgeSourceBackendSections(ksbInstanceSpecs);
-        configuration.setTermSourceBackendSections(tsbInstanceSpecs);
         return configuration;
     }
 

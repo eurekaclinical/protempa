@@ -33,7 +33,6 @@ import org.protempa.backend.InvalidConfigurationException;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.backend.tsb.TermSourceBackend;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -48,7 +47,6 @@ public class SourceFactory {
     private final List<BackendInstanceSpec<AlgorithmSourceBackend>> algorithmSourceBackendInstanceSpecs;
     private final List<BackendInstanceSpec<DataSourceBackend>> dataSourceBackendInstanceSpecs;
     private final List<BackendInstanceSpec<KnowledgeSourceBackend>> knowledgeSourceBackendInstanceSpecs;
-    private final List<BackendInstanceSpec<TermSourceBackend>> termSourceBackendInstanceSpecs;
     
     public SourceFactory(Configuration configuration) {
         if (configuration == null) {
@@ -57,7 +55,6 @@ public class SourceFactory {
         this.algorithmSourceBackendInstanceSpecs = configuration.getAlgorithmSourceBackendSections();
         this.dataSourceBackendInstanceSpecs = configuration.getDataSourceBackendSections();
         this.knowledgeSourceBackendInstanceSpecs = configuration.getKnowledgeSourceBackendSections();
-        this.termSourceBackendInstanceSpecs = configuration.getTermSourceBackendSections();
     }
 
     public SourceFactory(Configurations configurations, String configurationId)
@@ -83,7 +80,6 @@ public class SourceFactory {
         this.algorithmSourceBackendInstanceSpecs = configuration.getAlgorithmSourceBackendSections();
         this.dataSourceBackendInstanceSpecs = configuration.getDataSourceBackendSections();
         this.knowledgeSourceBackendInstanceSpecs = configuration.getKnowledgeSourceBackendSections();
-        this.termSourceBackendInstanceSpecs = configuration.getTermSourceBackendSections();
         logger.log(Level.FINE, "Configuration {0} loaded", configurationId);
     }
 
@@ -121,13 +117,4 @@ public class SourceFactory {
         return new AlgorithmSourceImpl(backends);
     }
 
-    public final TermSource newTermSourceInstance()
-            throws BackendInitializationException, BackendNewInstanceException {
-        TermSourceBackend[] backends = new TermSourceBackend[this.termSourceBackendInstanceSpecs.size()];
-        for (int i = 0; i < backends.length; i++) {
-            backends[i] = this.termSourceBackendInstanceSpecs.get(i).getInstance();
-        }
-        return new TermSourceImpl(backends);
-
-    }
 }

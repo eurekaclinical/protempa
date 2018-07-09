@@ -730,26 +730,6 @@ public final class KnowledgeSourceImpl
         return this.collectSubtreeGetter.subtreePropDefs(false, propIds);
     }
 
-    /**
-     * Gets the mappings from term IDs to proposition IDs for each backend.
-     *
-     * @return a {@link Map} of {@link String}s to a {@link List} of
-     * <code>String</code>s, with the keys being {@link Term} IDs and the values
-     * being lists of {@link PropositionDefinition} IDs.
-     */
-    @Override
-    public List<String> getPropositionDefinitionsByTerm(
-            And<TermSubsumption> termSubsumptionClause)
-            throws KnowledgeSourceReadException {
-        List<String> result = new ArrayList<>();
-        initializeIfNeeded("getting proposition definitions by term");
-        for (KnowledgeSourceBackend backend : getBackends()) {
-            result.addAll(backend.getPropositionsByTermSubsumption(termSubsumptionClause));
-        }
-
-        return result;
-    }
-
     @Override
     public void backendUpdated(KnowledgeSourceBackendUpdatedEvent event) {
         clear();
