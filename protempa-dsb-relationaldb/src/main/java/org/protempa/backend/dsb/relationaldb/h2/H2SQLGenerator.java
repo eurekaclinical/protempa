@@ -32,7 +32,6 @@ import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
 import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
 import org.protempa.backend.dsb.relationaldb.SelectStatement;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 
 /**
  * Generates SQL compatible with the H2 database engine 1.x
@@ -64,7 +63,7 @@ public final class H2SQLGenerator extends AbstractSQLGeneratorWithCompatChecks {
             Map<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            StagingSpec[] stagedTables, boolean wrapKeyId) {
+            boolean wrapKeyId) {
         return new H2SelectStatement(entitySpec, referenceSpec, entitySpecs,
                 inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
                 getStreamingMode(), wrapKeyId);

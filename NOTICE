@@ -29,13 +29,13 @@ This project includes:
   Hamcrest Core under New BSD License
   ini4j under Apache 2
   JavaUtil under Apache License, Version 2.0
-  je under Sleepycat License
   JGoodies Common under The BSD License
   JGoodies Looks under The BSD License
   JUnit under Eclipse Public License 1.0
   mvel under The Apache Software License, Version 2.0
   MySQL Connector/J under The GNU General Public License, Version 2
   opencsv under Apache 2
+  Oracle NoSQL Database Server under Apache 2
   Protempa under Apache License, Version 2.0
   Protempa File Data Source Backend under Apache License, Version 2.0
   Protempa Framework under Apache License, Version 2.0

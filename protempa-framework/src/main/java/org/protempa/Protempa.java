@@ -21,15 +21,12 @@ package org.protempa;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-import org.protempa.backend.BackendInitializationException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.CollectionUtils;
 
-import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.BackendProviderSpecLoaderException;
 import org.protempa.backend.ConfigurationsLoadException;
 import org.protempa.backend.ConfigurationsNotFoundException;
@@ -69,33 +66,17 @@ public final class Protempa implements AutoCloseable {
     public static Protempa newInstance(SourceFactory sourceFactory)
             throws ProtempaStartupException {
         try {
-            FutureTask<DataSource> newDataSourceInstance = new FutureTask<>(new Callable<DataSource>() {
-                @Override
-                public DataSource call() throws BackendInitializationException, BackendNewInstanceException {
-                    return sourceFactory.newDataSourceInstance();
-                }
-            });
+            FutureTask<DataSource> newDataSourceInstance = 
+                    new FutureTask<>(() -> sourceFactory.newDataSourceInstance());
             newDataSourceInstance.run();
-            FutureTask<KnowledgeSource> newKnowledgeSourceInstance = new FutureTask<>(new Callable<KnowledgeSource>() {
-                @Override
-                public KnowledgeSource call() throws BackendInitializationException, BackendNewInstanceException {
-                    return sourceFactory.newKnowledgeSourceInstance();
-                }
-            });
+            FutureTask<KnowledgeSource> newKnowledgeSourceInstance = 
+                    new FutureTask<>(() -> sourceFactory.newKnowledgeSourceInstance());
             newKnowledgeSourceInstance.run();
-            FutureTask<AlgorithmSource> newAlgorithmSourceInstance = new FutureTask<>(new Callable<AlgorithmSource>() {
-                @Override
-                public AlgorithmSource call() throws BackendInitializationException, BackendNewInstanceException {
-                    return sourceFactory.newAlgorithmSourceInstance();
-                }
-            });
+            FutureTask<AlgorithmSource> newAlgorithmSourceInstance = 
+                    new FutureTask<>(() -> sourceFactory.newAlgorithmSourceInstance());
             newAlgorithmSourceInstance.run();
-            FutureTask<TermSource> newTermSourceInstance = new FutureTask<>(new Callable<TermSource>() {
-                @Override
-                public TermSource call() throws BackendInitializationException, BackendNewInstanceException {
-                    return sourceFactory.newTermSourceInstance();
-                }
-            });
+            FutureTask<TermSource> newTermSourceInstance = 
+                    new FutureTask<>(() -> sourceFactory.newTermSourceInstance());
             newTermSourceInstance.run();
             return new Protempa(newDataSourceInstance.get(),
                     newKnowledgeSourceInstance.get(),
@@ -120,33 +101,17 @@ public final class Protempa implements AutoCloseable {
     public static Protempa newInstance(SourceFactory sourceFactory,
             boolean useCache) throws ProtempaStartupException {
         try {
-            FutureTask<DataSource> newDataSourceInstance = new FutureTask<>(new Callable<DataSource>() {
-                @Override
-                public DataSource call() throws BackendInitializationException, BackendNewInstanceException {
-                    return sourceFactory.newDataSourceInstance();
-                }
-            });
+            FutureTask<DataSource> newDataSourceInstance = 
+                    new FutureTask<>(() -> sourceFactory.newDataSourceInstance());
             newDataSourceInstance.run();
-            FutureTask<KnowledgeSource> newKnowledgeSourceInstance = new FutureTask<>(new Callable<KnowledgeSource>() {
-                @Override
-                public KnowledgeSource call() throws BackendInitializationException, BackendNewInstanceException {
-                    return sourceFactory.newKnowledgeSourceInstance();
-                }
-            });
+            FutureTask<KnowledgeSource> newKnowledgeSourceInstance = 
+                    new FutureTask<>(() -> sourceFactory.newKnowledgeSourceInstance());
             newKnowledgeSourceInstance.run();
-            FutureTask<AlgorithmSource> newAlgorithmSourceInstance = new FutureTask<>(new Callable<AlgorithmSource>() {
-                @Override
-                public AlgorithmSource call() throws BackendInitializationException, BackendNewInstanceException {
-                    return sourceFactory.newAlgorithmSourceInstance();
-                }
-            });
+            FutureTask<AlgorithmSource> newAlgorithmSourceInstance = 
+                    new FutureTask<>(() -> sourceFactory.newAlgorithmSourceInstance());
             newAlgorithmSourceInstance.run();
-            FutureTask<TermSource> newTermSourceInstance = new FutureTask<>(new Callable<TermSource>() {
-                @Override
-                public TermSource call() throws BackendInitializationException, BackendNewInstanceException {
-                    return sourceFactory.newTermSourceInstance();
-                }
-            });
+            FutureTask<TermSource> newTermSourceInstance = 
+                    new FutureTask<>(() -> sourceFactory.newTermSourceInstance());
             newTermSourceInstance.run();
             return new Protempa(newDataSourceInstance.get(),
                     newKnowledgeSourceInstance.get(),
@@ -388,8 +353,7 @@ public final class Protempa implements AutoCloseable {
             throws DataSourceFailedDataValidationException,
             DataSourceValidationIncompleteException {
         KnowledgeSource knowledgeSource = getKnowledgeSource();
-        List<DataValidationEvent> validationEvents
-                = new ArrayList<>();
+        List<DataValidationEvent> validationEvents = new ArrayList<>();
         try {
             for (DataSourceBackend backend : getDataSource().getBackends()) {
                 CollectionUtils.addAll(validationEvents,

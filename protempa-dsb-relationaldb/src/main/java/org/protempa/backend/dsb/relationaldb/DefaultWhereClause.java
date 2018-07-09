@@ -32,7 +32,7 @@ public final class DefaultWhereClause extends AbstractWhereClause {
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             SelectClause selectClause) {
         super(propIds, info, entitySpecs, filters, referenceIndices, keyIds,
-                order, resultProcessor, selectClause, new StagingSpec[0]);
+                order, resultProcessor, selectClause);
     }
 
     @Override

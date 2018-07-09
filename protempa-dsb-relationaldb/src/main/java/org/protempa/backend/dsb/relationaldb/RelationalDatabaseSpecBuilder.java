@@ -33,11 +33,9 @@ class RelationalDatabaseSpecBuilder implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final EntitySpec[] EMPTY_ES_ARR = new EntitySpec[0];
-    private static final StagingSpec[] EMPTY_SS_ARR = new StagingSpec[0];
     private EntitySpec[] primitiveParameterSpecs = EMPTY_ES_ARR;
     private EntitySpec[] eventSpecs = EMPTY_ES_ARR;
     private EntitySpec[] constantSpecs = EMPTY_ES_ARR;
-    private StagingSpec[] stagedSpecs = EMPTY_SS_ARR;
     private UnitFactory units;
     private GranularityFactory granularities;
 
@@ -132,24 +130,11 @@ class RelationalDatabaseSpecBuilder implements Serializable {
         }
     }
 
-    StagingSpec[] getStagedSpecs() {
-        return stagedSpecs.clone();
-    }
-
-    void setStagedSpecs(StagingSpec[] stagedSpecs) {
-        if (stagedSpecs == null) {
-            this.stagedSpecs = EMPTY_SS_ARR;
-        } else {
-            this.stagedSpecs = stagedSpecs.clone();
-        }
-    }
-
     RelationalDatabaseSpec build() {
         return new RelationalDatabaseSpec(
                 getPrimitiveParameterSpecs(),
                 getEventSpecs(),
                 getConstantSpecs(),
-                getStagedSpecs(),
                 getUnits(),
                 getGranularities()
         );

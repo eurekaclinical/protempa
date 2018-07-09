@@ -43,15 +43,6 @@ public interface DataStoreCreator<K, V> {
      *            the name of the store
      * @return a {@link DataStore} backed by a permanent store implementation
      */
-    public DataStore<K, V> getPersistentStore();
+    DataStore<K, V> getPersistentStore();
 
-    /**
-     * Returns a new cache store. A cache store is temporary and unnamed, so it
-     * is the responsibility of the caller to keep a reference to the returned
-     * store.
-     * 
-     * @return a {@link DataStore} backed by a temporary store implementation
-     * @throws IOException if an occur occurs in creating the store on-disk.
-     */
-    public DataStore<K, V> newCacheStore() throws IOException;
 }

@@ -20,18 +20,17 @@
 package org.protempa.datastore;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOError;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import org.eurekaclinical.datastore.BdbPersistentStoreFactory;
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.SerializationUtils;
+import org.eurekaclinical.datastore.bdb.BdbPersistentStoreFactory;
 
 import org.eurekaclinical.datastore.DataStore;
 import org.drools.RuleBase;
@@ -45,9 +44,9 @@ import org.drools.WorkingMemory;
  * memory to a byte array and have BDB serialize that instead. The byte array
  * can then be deserialized into a Drools rule base, which can generate the
  * original working memory.
- * 
+ *
  * @author Michel Mansour
- * 
+ *
  */
 final class DroolsWorkingMemoryStore implements
         DataStore<String, WorkingMemory> {
@@ -72,7 +71,7 @@ final class DroolsWorkingMemoryStore implements
         this.store.shutdown();
         this.isClosed = true;
     }
-    
+
     @Override
     public boolean isClosed() {
         return isClosed;
@@ -82,39 +81,18 @@ final class DroolsWorkingMemoryStore implements
      * Converts a byte array to the original Drools working memory it
      * represents. This is done using a Drools rule base, which can generate a
      * stateful session from a byte array.
-     * 
-     * @param barr
-     * @return
+     *
+     * @param barr a byte array containing the working memory.
+     * @return the working memory.
+     *
+     * @throws IOError if an error occurs reading the working memory.
      */
     private WorkingMemory readWorkingMemory(byte[] barr) {
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(barr);
-            WorkingMemory wm = ruleBase.newStatefulSession(bais, false);
-            bais.close();
-            return wm;
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(barr)) {
+                return ruleBase.newStatefulSession(bais, false);
+            }
         } catch (IOException | ClassNotFoundException ex) {
-            throw new IOError(ex);
-        }
-    }
-
-    /**
-     * Converts a Drools working memory into a byte array for storage by
-     * BerkeleyDB. This is necessary because the BDB serializes objects
-     * interferes with the custom way in which Drools expects to deserialize
-     * them.
-     */
-    private byte[] writeWorkingMemory(WorkingMemory wm) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(wm);
-            byte[] result = baos.toByteArray();
-            oos.close();
-            baos.close();
-            DataStoreUtil.logger().log(Level.FINEST,
-                    "Working memory size: {0}", result.length);
-            return result;
-        } catch (IOException ex) {
             throw new IOError(ex);
         }
     }
@@ -130,10 +108,30 @@ final class DroolsWorkingMemoryStore implements
         return retval;
     }
 
+    /**
+     * Puts the working memory into the data store.
+     *
+     * @param key the keyId.
+     * @param value the working memory.
+     * @return the working memory.
+     *
+     * @throws IOError if an error occurs writing the key and working memory to
+     * the data store.
+     */
     @Override
     public WorkingMemory put(String key, WorkingMemory value) {
-        this.store.put(key, writeWorkingMemory(value));
-        return value;
+        /*
+         * Converts a Drools working memory into a byte array for storage by
+         * BerkeleyDB. This is necessary because the BDB serializes objects
+         * interferes with the custom way in which Drools expects to deserialize
+         * them.
+         */
+        try {
+            this.store.put(key, SerializationUtils.serialize(value));
+            return value;
+        } catch (SerializationException ex) {
+            throw new IOError(ex);
+        }
     }
 
     @Override
@@ -161,10 +159,19 @@ final class DroolsWorkingMemoryStore implements
         return readWorkingMemory(this.store.remove(key));
     }
 
+    /**
+     * Writes all of the keyId-working memory pairs in the given map to the data
+     * store.
+     *
+     * @param m a map of keyId-working memory pairs.
+     *
+     * @throws IOError if an error occurs writing a working memory to the data
+     * store.
+     */
     @Override
     public void putAll(Map<? extends String, ? extends WorkingMemory> m) {
         for (Entry<? extends String, ? extends WorkingMemory> e : m.entrySet()) {
-            this.store.put(e.getKey(), writeWorkingMemory(e.getValue()));
+            put(e.getKey(), e.getValue());
         }
     }
 
@@ -178,6 +185,14 @@ final class DroolsWorkingMemoryStore implements
         return this.store.keySet();
     }
 
+    /**
+     * Gets the working memories from this data store. Depending on how many
+     * working memories that have been saved, this operation could exhaust
+     * memory!
+     *
+     * @return a collection of working memories.
+     * @throws IOError if an error occurred while reading the working memories.
+     */
     @Override
     public Collection<WorkingMemory> values() {
         Collection<WorkingMemory> values = new ArrayList<>();
@@ -188,6 +203,14 @@ final class DroolsWorkingMemoryStore implements
         return Collections.unmodifiableCollection(values);
     }
 
+    /**
+     * Returns a collection view of the map. It reads the working memories
+     * lazily. Each call to {@link Map.Entry#getValue() } could throw an IOError
+     * if an error occurs while reading the entry's working memory from the data
+     * store.
+     *
+     * @return a collection view of the map.
+     */
     @Override
     public Set<java.util.Map.Entry<String, WorkingMemory>> entrySet() {
         Set<java.util.Map.Entry<String, WorkingMemory>> entrySet = new HashSet<>();
@@ -198,30 +221,37 @@ final class DroolsWorkingMemoryStore implements
 
         return entrySet;
     }
-    
+
     private class LazyEntry implements Map.Entry<String, WorkingMemory> {
 
-        private final String key; 
-        
+        private final String key;
+
         public LazyEntry(String key) {
             this.key = key;
         }
-        
+
         @Override
         public String getKey() {
             return this.key;
         }
 
+        /**
+         * Gets this map entry's working memory.
+         *
+         * @return the working memory.
+         *
+         * @throws IOError if there was an error reading the working memory.
+         */
         @Override
         public WorkingMemory getValue() {
-            return readWorkingMemory(store.get(this.key)); 
+            return readWorkingMemory(store.get(this.key));
         }
 
         @Override
         public WorkingMemory setValue(WorkingMemory value) {
             throw new UnsupportedOperationException("setValue not supported");
         }
-        
+
     }
 
 }

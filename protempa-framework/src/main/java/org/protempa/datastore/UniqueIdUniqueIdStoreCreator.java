@@ -21,7 +21,7 @@ package org.protempa.datastore;
 
 import java.io.Serializable;
 import java.util.List;
-import org.eurekaclinical.datastore.BdbPersistentStoreFactory;
+import org.eurekaclinical.datastore.bdb.BdbPersistentStoreFactory;
 import org.eurekaclinical.datastore.DataStore;
 import org.protempa.proposition.UniqueId;
 

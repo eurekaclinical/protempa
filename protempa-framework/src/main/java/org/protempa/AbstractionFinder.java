@@ -80,8 +80,7 @@ final class AbstractionFinder {
             }
 
             @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
+            public void closedUnexpectedly(SourceClosedUnexpectedlyEvent e) {
                 throw new UnsupportedOperationException(
                         "Not supported yet.");
             }
@@ -94,8 +93,7 @@ final class AbstractionFinder {
             }
 
             @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
+            public void closedUnexpectedly(SourceClosedUnexpectedlyEvent e) {
                 throw new UnsupportedOperationException(
                         "Not supported yet.");
             }
@@ -108,8 +106,7 @@ final class AbstractionFinder {
             }
 
             @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
+            public void closedUnexpectedly(SourceClosedUnexpectedlyEvent e) {
                 throw new UnsupportedOperationException(
                         "Not supported yet");
             }
@@ -122,8 +119,7 @@ final class AbstractionFinder {
             }
 
             @Override
-            public void closedUnexpectedly(
-                    SourceClosedUnexpectedlyEvent e) {
+            public void closedUnexpectedly(SourceClosedUnexpectedlyEvent e) {
                 throw new UnsupportedOperationException(
                         "Not supported yet.");
             }

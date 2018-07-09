@@ -30,7 +30,6 @@ import org.protempa.backend.dsb.relationaldb.JoinSpec;
 import org.protempa.backend.dsb.relationaldb.PropertySpec;
 import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.RelationalDbDataSourceBackend;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.proposition.value.*;
 
 import java.io.IOException;
@@ -118,11 +117,6 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
     
     
     
-    @Override
-    protected StagingSpec[] stagedSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException {
-        return null;
-    }
-
     @Override
     public String getKeyType() {
         return "Patient";

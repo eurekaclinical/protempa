@@ -19,8 +19,6 @@
  */
 package org.protempa.backend.dsb.relationaldb.oracle;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.protempa.backend.dsb.relationaldb.AbstractFromClause;
@@ -33,64 +31,26 @@ import org.protempa.backend.dsb.relationaldb.EntitySpec;
 import org.protempa.backend.dsb.relationaldb.JoinSpec;
 import org.protempa.backend.dsb.relationaldb.JoinSpec.JoinType;
 import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.backend.dsb.relationaldb.TableAliaser;
 
 class Ojdbc6OracleFromClause extends AbstractFromClause {
 
-    private final StagingSpec[] stagedTables;
-    private final Map<String, ReferenceSpec> inboundReferenceSpecs;
 
     Ojdbc6OracleFromClause(EntitySpec currentSpec,
-            Map<String, ReferenceSpec> inboundReferenceSpecs,
-            List<ColumnSpec> columnSpecs, TableAliaser referenceIndices,
-            StagingSpec[] stagedTables) {
+            List<ColumnSpec> columnSpecs, TableAliaser referenceIndices) {
         super(currentSpec, columnSpecs, referenceIndices);
-        this.stagedTables = stagedTables;
-        this.inboundReferenceSpecs = inboundReferenceSpecs;
-    }
-
-    protected StagingSpec[] getStagedTables() {
-        return stagedTables;
-    }
-    
-    private static List<String> toEntitySpecNames(EntitySpec[] entitySpecs) {
-        List<String> result = new ArrayList<>(entitySpecs.length);
-        for (EntitySpec entitySpec : entitySpecs) {
-            result.add(entitySpec.getName());
-        }
-        return result;
     }
 
     @Override
     protected String generateFromTable(ColumnSpec columnSpec) {
         StringBuilder fromPart = new StringBuilder();
-        boolean foundStagedTable = false;
         String schemaToAppend = null;
         String tableToAppend = "";
-        
-        if (this.stagedTables != null) {
-            List<String> entitySpecNames = new ArrayList<>(this.inboundReferenceSpecs.keySet());
-            entitySpecNames.add(getCurrentSpec().getName());
-            for (StagingSpec sspec : this.stagedTables) {
-                if (!foundStagedTable
-                        && !Collections.disjoint(toEntitySpecNames(sspec.getEntitySpecs()), entitySpecNames)
-                        && columnSpec.isSameSchemaAndTable(sspec
-                                .getReplacedTable())) {
-                    foundStagedTable = true;
-                    if (sspec.getStagingArea().getSchema() != null) {
-                        schemaToAppend = sspec.getStagingArea().getSchema();
-                    }
-                    tableToAppend = sspec.getStagingArea().getTable();
-                }
-            }
+
+        if (columnSpec.getSchema() != null) {
+            schemaToAppend = columnSpec.getSchema();
         }
-        if (!foundStagedTable) {
-            if (columnSpec.getSchema() != null) {
-                schemaToAppend = columnSpec.getSchema();
-            }
-            tableToAppend = columnSpec.getTable();
-        }
+        tableToAppend = columnSpec.getTable();
 
         if (schemaToAppend != null) {
             fromPart.append(schemaToAppend);

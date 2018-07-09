@@ -34,11 +34,9 @@ public final class RelationalDatabaseSpec implements Serializable {
 
     private static final long serialVersionUID = -7404642542962229266L;
     private static final EntitySpec[] EMPTY_ES_ARR = new EntitySpec[0];
-    private static final StagingSpec[] EMPTY_SS_ARR = new StagingSpec[0];
     private EntitySpec[] primitiveParameterSpecs = EMPTY_ES_ARR;
     private EntitySpec[] eventSpecs = EMPTY_ES_ARR;
     private EntitySpec[] constantSpecs = EMPTY_ES_ARR;
-    private StagingSpec[] stagedSpecs = EMPTY_SS_ARR;
     private final UnitFactory units;
     private final GranularityFactory granularities;
 
@@ -73,12 +71,10 @@ public final class RelationalDatabaseSpec implements Serializable {
      */
     RelationalDatabaseSpec(EntitySpec[] primitiveParameterSpecs,
             EntitySpec[] eventSpecs, EntitySpec[] constantSpecs,
-            StagingSpec[] stagedSpecs, UnitFactory units,
-            GranularityFactory granularities) {
+            UnitFactory units, GranularityFactory granularities) {
         setPrimitiveParameterSpecs(primitiveParameterSpecs);
         setConstantSpecs(constantSpecs);
         setEventSpecs(eventSpecs);
-        setStagedSpecs(stagedSpecs);
         this.units = units;
         this.granularities = granularities;
     }
@@ -160,15 +156,4 @@ public final class RelationalDatabaseSpec implements Serializable {
         }
     }
     
-    StagingSpec[] getStagedSpecs() {
-        return stagedSpecs.clone();
-    }
-    
-    private void setStagedSpecs(StagingSpec[] stagedSpecs) {
-        if (stagedSpecs == null) {
-            this.stagedSpecs = EMPTY_SS_ARR;
-        } else {
-            this.stagedSpecs = stagedSpecs.clone();
-        }
-    }
 }

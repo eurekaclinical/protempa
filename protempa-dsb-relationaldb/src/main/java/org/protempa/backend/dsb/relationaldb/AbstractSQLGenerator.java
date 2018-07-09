@@ -74,7 +74,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private EntitySpec[] eventEntitySpecs;
     private final Map<String, List<EntitySpec>> constantSpecs;
     private EntitySpec[] constantEntitySpecs;
-    private StagingSpec[] stagedTableSpecs;
     private GranularityFactory granularities;
     private UnitFactory units;
     private RelationalDbDataSourceBackend backend;
@@ -99,7 +98,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             populatePropositionMap(this.eventSpecs, this.eventEntitySpecs);
             this.constantEntitySpecs = relationalDatabaseSpec.getConstantSpecs();
             populatePropositionMap(this.constantSpecs, this.constantEntitySpecs);
-            this.stagedTableSpecs = relationalDatabaseSpec.getStagedSpecs();
             this.granularities = relationalDatabaseSpec.getGranularities();
             this.units = relationalDatabaseSpec.getUnits();
             this.connectionSpec = connectionSpec;
@@ -207,10 +205,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         final Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecToResultProcessor = allEntitySpecToResultProcessor();
         final Collection<EntitySpec> allEntitySpecs
                 = allEntitySpecToResultProcessor.keySet();
-        DataStager stager = null;
-        if (stagingApplies()) {
-            stager = doStage(allEntitySpecs, filters, propIds, keyIds, null);
-        }
 
         final List<StreamingIteratorPair> itrs = new ArrayList<>();
         ExecutorService executor = Executors.newFixedThreadPool(this.queryThreadCount);
@@ -241,8 +235,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             refs.addAll(pair.getRefs());
         }
         RelationalDbDataReadIterator streamingResults
-                = new RelationalDbDataReadIterator(refs, events, connections,
-                        stagingApplies() ? stager : null);
+                = new RelationalDbDataReadIterator(refs, events, connections);
 
         return streamingResults;
 
@@ -340,7 +333,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Collection<EntitySpec> allEntitySpecs, EntitySpec entitySpec) {
         Set<Filter> filtersCopy = copyFilters(filters);
         removeNonApplicableFilters(allEntitySpecs, filtersCopy, entitySpec);
-        removeStagedFilters(entitySpec, filtersCopy);
         return filtersCopy;
     }
 
@@ -405,7 +397,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         DataStager stager = null;
 
         try {
-            stager = getDataStager(this.stagedTableSpecs, null,
+            stager = getDataStager(null,
                     new LinkedList<>(allEntitySpecs),
                     copyFilters(filters), propIds, keyIds, order,
                     this.connectionSpec);
@@ -428,72 +420,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 = allEntitySpecToResultProcessor.get(entitySpec);
         assert factory != null : "factory should never be null";
         return factory;
-    }
-
-    /**
-     * Leave behind a position filter, if one exists and the entity spec has
-     * partition by set and the duration of the partition is less than the
-     * duration of the filter's time range.
-     *
-     * @param filtersCopy
-     */
-    private void removeStagedFilters(EntitySpec entitySpec,
-            Set<Filter> filtersCopy) {
-        boolean first = true;
-        boolean isPositionFilter;
-        Unit partitionBy = entitySpec.getPartitionBy();
-        for (Iterator<Filter> itr = filtersCopy.iterator(); itr.hasNext();) {
-            isPositionFilter = false;
-            Filter f = itr.next();
-            if (f instanceof PositionFilter) {
-                isPositionFilter = true;
-            }
-            String[] propIds = f.getPropositionIds();
-            FILTER_LOOP:
-            for (String propId : propIds) {
-                List<EntitySpec> entitySpecs = new ArrayList<>();
-                if (this.constantSpecs.containsKey(propId)) {
-                    entitySpecs.addAll(this.constantSpecs.get(propId));
-                }
-                if (this.eventSpecs.containsKey(propId)) {
-                    entitySpecs.addAll(this.eventSpecs.get(propId));
-                }
-                if (this.primitiveParameterSpecs.containsKey(propId)) {
-                    entitySpecs.addAll(this.primitiveParameterSpecs.get(propId));
-                }
-
-                for (StagingSpec staged : this.stagedTableSpecs) {
-                    for (EntitySpec es : entitySpecs) {
-                        for (EntitySpec ses : staged.getEntitySpecs()) {
-                            if (SQLGenUtil.somePropIdsMatch(es, ses)) {
-                                if (first && isPositionFilter
-                                        && partitionBy != null) {
-                                    PositionFilter pf = (PositionFilter) f;
-                                    Long start = pf.getStart();
-                                    if (start != null) {
-                                        long addToPosition
-                                                = partitionBy.addToPosition(start, 1);
-                                        Long finish = pf.getFinish();
-                                        if (finish != null) {
-                                            if (addToPosition < finish) {
-                                                break FILTER_LOOP;
-                                            }
-                                        }
-                                    }
-                                }
-                                itr.remove();
-                                break FILTER_LOOP;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean stagingApplies() {
-        return this.stagedTableSpecs != null
-                && this.stagedTableSpecs.length > 0;
     }
 
     private void logDoneProcessing(Logger logger, EntitySpec entitySpec) {
@@ -607,12 +533,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             result.put(es, cFactory);
         }
 
-        // staging queries generate no results
-        for (StagingSpec ss : this.stagedTableSpecs) {
-            for (EntitySpec es : ss.getEntitySpecs()) {
-                result.put(es, null);
-            }
-        }
         return result;
     }
 
@@ -646,7 +566,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         String query = getSelectStatement(entitySpec, referenceSpec,
                 entitySpecsCopy, inboundRefSpecs, filtersCopy, propIds,
                 keyIds, order,
-                resultProcessor, this.stagedTableSpecs, wrapKeyId).generateStatement();
+                resultProcessor, wrapKeyId).generateStatement();
 
         if (logger.isLoggable(Level.FINE)) {
             logger.log(
@@ -717,10 +637,10 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             EntitySpec entitySpec, ReferenceSpec referenceSpec,
             List<EntitySpec> entitySpecs, Map<String, ReferenceSpec> inboundRefSpecs, Set<Filter> filters,
             Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
-            SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables,
+            SQLGenResultProcessor resultProcessor,
             boolean wrapKeyId);
 
-    protected DataStager getDataStager(StagingSpec[] stagingSpecs,
+    protected DataStager getDataStager(
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, ConnectionSpec connectionSpec) {

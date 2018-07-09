@@ -34,7 +34,6 @@ import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
 import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
 import org.protempa.backend.dsb.relationaldb.SelectClause;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.backend.dsb.relationaldb.TableAliaser;
 import org.protempa.backend.dsb.relationaldb.WhereClause;
 
@@ -47,7 +46,7 @@ final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             boolean streamingMode, boolean wrapKeyId) {
         super(entitySpec, referenceSpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
-                order, resultProcessor, null, streamingMode, wrapKeyId);
+                order, resultProcessor, streamingMode, wrapKeyId);
     }
 
     @Override
@@ -65,7 +64,7 @@ final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
      */
     @Override
     protected FromClause getFromClause(List<ColumnSpec> columnSpecs,
-            TableAliaser referenceIndices, StagingSpec[] stagedTables) {
+            TableAliaser referenceIndices) {
         return new ConnectorJ5MySQL415FromClause(getEntitySpec(), columnSpecs, referenceIndices);
     }
 
@@ -84,7 +83,7 @@ final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            SelectClause selectClause, StagingSpec[] stagedTables) {
+            SelectClause selectClause) {
         return new DefaultWhereClause(propIds, info, entitySpecs, filters,
                 referenceIndices, keyIds, order, resultProcessor, selectClause);
     }

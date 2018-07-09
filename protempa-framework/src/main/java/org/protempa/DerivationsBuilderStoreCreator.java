@@ -19,7 +19,7 @@
  */
 package org.protempa;
 
-import org.eurekaclinical.datastore.BdbPersistentStoreFactory;
+import org.eurekaclinical.datastore.bdb.BdbPersistentStoreFactory;
 
 import org.eurekaclinical.datastore.DataStore;
 import org.protempa.datastore.AbstractDataStoreCreator;
@@ -50,12 +50,6 @@ final class DerivationsBuilderStoreCreator extends
         DataStore<String, DerivationsBuilder> store = 
                 this.storeFactory.newInstance(nextDatabaseName());
         return store;
-    }
-
-    @Override
-    public DataStore<String, DerivationsBuilder> newCacheStore() {
-        throw new UnsupportedOperationException(
-            "Temporary caches are not supported for DerivationsBuilder objects");
     }
 
     @Override

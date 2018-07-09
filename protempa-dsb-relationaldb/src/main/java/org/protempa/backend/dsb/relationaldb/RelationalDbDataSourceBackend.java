@@ -649,8 +649,6 @@ public abstract class RelationalDbDataSourceBackend
 
     protected abstract EntitySpec[] primitiveParameterSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException;
 
-    protected abstract StagingSpec[] stagedSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException;
-
     private FromBackendRelationalDatabaseSpecBuilder createRelationalDatabaseSpecBuilder() {
         return new FromBackendRelationalDatabaseSpecBuilder();
     }
@@ -662,15 +660,6 @@ public abstract class RelationalDbDataSourceBackend
         private String keyIdTable;
         private String keyIdColumn;
         private String keyIdJoinKey;
-
-        @Override
-        public StagingSpec[] getStagedSpecs() {
-            try {
-                return stagedSpecs(this.keyIdSchema, this.keyIdTable, this.keyIdColumn, this.keyIdJoinKey);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
 
         @Override
         public EntitySpec[] getPrimitiveParameterSpecs() {

@@ -32,7 +32,6 @@ import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
 import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
 import org.protempa.backend.dsb.relationaldb.SelectStatement;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 
 /**
  * PostgreSQL driver for Protempa. Supports database version 9.1 or greater 
@@ -65,7 +64,7 @@ public class PostgresqlSQLGenerator
             Map<String, ReferenceSpec> inboundRefSpecs, 
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds, 
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, 
-            StagingSpec[] stagedTables, boolean wrapKeyId) {
+            boolean wrapKeyId) {
         return new PostgresqlSelectStatement(entitySpec, referenceSpec, entitySpecs,
                 inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
                 getStreamingMode(), wrapKeyId);

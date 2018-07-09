@@ -23,13 +23,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -37,11 +34,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
-import org.arp.javautil.collections.Iterators;
 import org.arp.javautil.log.Logging;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.dest.Destination;
-import org.protempa.dest.GetSupportedPropositionIdsException;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerInitException;
@@ -243,10 +238,6 @@ final class Executor implements AutoCloseable {
         }
     }
 
-    ExecutionStrategy getExecutionStrategy() {
-        return this.executionStrategy;
-    }
-
     int getCount() {
         return counter.getCount();
     }
@@ -420,10 +411,9 @@ final class Executor implements AutoCloseable {
                 while (!isInterrupted() && ((dse = doProcessQueue.take()) != doProcessPoisonPill)) {
                     String keyId = dse.getKeyId();
                     Iterator<Proposition> resultsItr;
-                    ExecutionStrategy strategy = getExecutionStrategy();
                     List<Proposition> data = dse.getData();
-                    if (strategy != null) {
-                        resultsItr = strategy.execute(
+                    if (executionStrategy != null) {
+                        resultsItr = executionStrategy.execute(
                                 keyId, propIds, data,
                                 null);
                     } else {

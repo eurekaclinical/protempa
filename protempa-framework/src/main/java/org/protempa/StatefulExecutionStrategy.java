@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eurekaclinical.datastore.DataStore;
 import org.drools.StatefulSession;
@@ -31,43 +32,31 @@ import org.protempa.proposition.Proposition;
 
 class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
-    @Override
-    public void initialize() {
-    }
+    private StatefulSession workingMemory;
 
     StatefulExecutionStrategy(AlgorithmSource algorithmSource) {
         super(algorithmSource);
     }
-
-    private StatefulSession applyRules(String keyId, List<?> objects) {
-        StatefulSession workingMemory = ruleBase.newStatefulSession(false);
-        workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
-        ProtempaUtil.logger().log(Level.FINEST,
-                "Adding {0} objects for key ID {1}",
-                new Object[] { objects.size(), keyId });
-        for (Object obj : objects) {
-            workingMemory.insert(obj);
-        }
-        workingMemory.fireAllRules();
-        int wmCount = 0;
-        for (Iterator<?> itr = workingMemory.iterateObjects(); itr.hasNext();itr.next()) {
-            wmCount++;
-        }
-        ProtempaUtil.logger().log(Level.FINEST,
-                "Iterated over {0} objects", new Object[] { wmCount });
-        return workingMemory;
+    
+    @Override
+    public void initialize() {
+        this.workingMemory = ruleBase.newStatefulSession(false);
     }
 
     @Override
     public Iterator<Proposition> execute(String keyId,
             Set<String> propositionIds, List<?> objects,
             DataStore<String, WorkingMemory> wmStore) {
-        StatefulSession workingMemory = applyRules(keyId, objects);
-        ProtempaUtil.logger().log(Level.FINEST,
+        Logger logger = ProtempaUtil.logger();
+        this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
+        for (Object obj : objects) {
+            this.workingMemory.insert(obj);
+        }
+        this.workingMemory.fireAllRules();
+        logger.log(Level.FINEST,
                 "Persisting working memory for key ID {0}", keyId);
-        wmStore.put(keyId, workingMemory);
-        workingMemory.dispose();
-        ProtempaUtil.logger().log(Level.FINEST,
+        wmStore.put(keyId, this.workingMemory);
+        logger.log(Level.FINEST,
                 "Persisted working memory for key ID {0}", keyId);
 
         return null;
@@ -75,5 +64,6 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
     @Override
     public void cleanup() {
+        this.workingMemory.dispose();
     }
 }

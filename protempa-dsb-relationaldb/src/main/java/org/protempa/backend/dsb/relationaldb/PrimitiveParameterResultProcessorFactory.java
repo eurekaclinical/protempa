@@ -40,27 +40,6 @@ class PrimitiveParameterResultProcessorFactory extends
     }
     
     @Override
-    MainResultProcessor<PrimitiveParameter> getInstance(
-            String dataSourceBackendId, EntitySpec entitySpec,
-            ResultCache<PrimitiveParameter> cache) {
-
-        PrimitiveParameterResultProcessor resultProcessor = 
-                new PrimitiveParameterResultProcessor(this.backend, 
-                        cache, entitySpec, dataSourceBackendId);
-        return resultProcessor;
-    }
-
-    @Override
-    RefResultProcessor<PrimitiveParameter> getRefInstance(
-            String dataSourceBackendId, EntitySpec entitySpec,
-            ReferenceSpec referenceSpec, ResultCache<PrimitiveParameter> cache) {
-        PrimitiveParameterRefResultProcessor resultProcessor = 
-                new PrimitiveParameterRefResultProcessor(this.backend, cache, 
-                        referenceSpec, entitySpec, dataSourceBackendId);
-        return resultProcessor;
-    }
-
-    @Override
     StreamingMainResultProcessor<PrimitiveParameter> getStreamingInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,

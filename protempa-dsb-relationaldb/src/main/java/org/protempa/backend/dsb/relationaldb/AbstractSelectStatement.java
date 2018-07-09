@@ -39,7 +39,6 @@ public abstract class AbstractSelectStatement implements SelectStatement {
     private final Set<String> keyIds;
     private final SQLOrderBy order;
     private final SQLGenResultProcessor resultProcessor;
-    private final StagingSpec[] stagedTables;
     private final boolean streamingMode;
     private final boolean wrapKeyId;
 
@@ -48,7 +47,7 @@ public abstract class AbstractSelectStatement implements SelectStatement {
             Map<String, ReferenceSpec> inboundReferenceSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            StagingSpec[] stagedTables, boolean streamingMode,
+            boolean streamingMode,
             boolean wrapKeyId) {
         this.entitySpec = entitySpec;
         this.referenceSpec = referenceSpec;
@@ -59,7 +58,6 @@ public abstract class AbstractSelectStatement implements SelectStatement {
         this.keyIds = Collections.unmodifiableSet(keyIds);
         this.order = order;
         this.resultProcessor = resultProcessor;
-        this.stagedTables = stagedTables;
         this.streamingMode = streamingMode;
         this.wrapKeyId = wrapKeyId;
     }
@@ -100,22 +98,17 @@ public abstract class AbstractSelectStatement implements SelectStatement {
         return resultProcessor;
     }
 
-    protected StagingSpec[] getStagedTables() {
-        return stagedTables;
-    }
-
     protected abstract SelectClause getSelectClause(ColumnSpecInfo info,
             TableAliaser referenceIndices, EntitySpec entitySpec, boolean wrapKeyId);
 
     protected abstract FromClause getFromClause(List<ColumnSpec> columnSpecs,
-            TableAliaser referenceIndices, StagingSpec[] stagedTables);
+            TableAliaser referenceIndices);
 
     protected abstract WhereClause getWhereClause(Set<String> propIds,
             ColumnSpecInfo info, List<EntitySpec> entitySpecs,
             Set<Filter> filters, TableAliaser referenceIndices,
             Set<String> keyIds, SQLOrderBy order,
-            SQLGenResultProcessor resultProcessor, SelectClause selectClause,
-            StagingSpec[] stagedTables);
+            SQLGenResultProcessor resultProcessor, SelectClause selectClause);
 
     @Override
     public String generateStatement() {
@@ -128,7 +121,7 @@ public abstract class AbstractSelectStatement implements SelectStatement {
         SelectClause select = getSelectClause(info, referenceIndices,
                 this.entitySpec, wrapKeyId);
         FromClause from = getFromClause(toColumnSpecs(info.getColumnSpecs()),
-                referenceIndices, this.stagedTables);
+                referenceIndices);
         List<EntitySpec> esCopy = new ArrayList<>(entitySpecs);
         for (Iterator<EntitySpec> itr = esCopy.iterator(); itr.hasNext();) {
             EntitySpec es = itr.next();
@@ -142,7 +135,7 @@ public abstract class AbstractSelectStatement implements SelectStatement {
         }
         WhereClause where = getWhereClause(propIds, info, esCopy,
                 this.filters, referenceIndices, this.keyIds, this.order,
-                this.resultProcessor, select, this.stagedTables);
+                this.resultProcessor, select);
 
         return select.generateClause() + 
                 " " + from.generateClause() + 

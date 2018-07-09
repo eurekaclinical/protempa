@@ -21,8 +21,7 @@ package org.protempa.datastore;
 
 import java.io.IOException;
 import org.arp.javautil.io.FileUtil;
-import org.eurekaclinical.datastore.BdbCacheFactory;
-import org.eurekaclinical.datastore.BdbUtil;
+import org.eurekaclinical.datastore.bdb.BdbUtil;
 import org.eurekaclinical.datastore.DataStore;
 
 /**
@@ -48,18 +47,4 @@ public abstract class AbstractDataStoreCreator<K, V>
 
     protected abstract String nextDatabaseName();
 
-    @Override
-    public DataStore<K, V> newCacheStore() throws IOException {
-        String tempEnvironment;
-        if (this.environmentName == null) {
-            tempEnvironment =
-                    BdbUtil.uniqueEnvironment("cache-store", null,
-                    FileUtil.getTempDirectory());
-        } else {
-            tempEnvironment = this.environmentName;
-        }
-        BdbCacheFactory<K, V> bdbCacheFactory =
-                new BdbCacheFactory<>(tempEnvironment, true);
-        return bdbCacheFactory.newInstance(nextDatabaseName());
-    }
 }
