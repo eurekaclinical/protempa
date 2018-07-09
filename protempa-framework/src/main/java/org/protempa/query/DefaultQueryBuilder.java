@@ -28,9 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.arp.javautil.arrays.Arrays;
 import org.protempa.*;
 import org.protempa.backend.dsb.filter.Filter;
 
@@ -50,8 +48,6 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     private String[] keyIds;
     private Filter filters;
     private String[] propIds;
-    @SuppressWarnings("unchecked")
-    private And<String>[] termIds;
     private PropositionDefinition[] propDefs;
     private String name;
     private String username;
@@ -64,7 +60,6 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         this.propDefs = EMPTY_PROP_DEF_ARRAY;
         this.keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
-        this.termIds = new And[0];
         this.queryMode = Query.DEFAULT_QUERY_MODE;
     }
 
@@ -176,42 +171,6 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     }
 
     /**
-     * Gets the term ids to be queried in disjunctive normal form. PROTEMPA will
-     * navigate these terms' subsumption hierarchy, find proposition definitions
-     * that have been annotated with each term, and add those to the query.
-     * <code>And</code>'d term ids will only match a proposition definition if
-     * it is annotated with all of the specified term ids (or terms in their
-     * subsumption hierarchies).
-     *
-     * @return a {@link String[]} of term ids representing disjunctive normal
-     * form.
-     */
-    public final And<String>[] getTermIds() {
-        return this.termIds.clone();
-    }
-
-    /**
-     * Sets the term ids to be queried in disjunctive normal form. If any terms
-     * are specified, PROTEMPA will navigate the term's subsumption hierarchy,
-     * find proposition definitions that have been annotated with each term, and
-     * add those to the query. If <code>and</code>'d term ids are specified,
-     * proposition definitions will only match if they are annotated with all of
-     * the specified term ids (or terms in their subsumption hierarchies).
-     *
-     * @param termIds a {@link And[]} term ids representing disjunctive normal
-     * form.
-     */
-    @SuppressWarnings("unchecked")
-    public final void setTermIds(And<String>[] termIds) {
-        if (termIds == null) {
-            termIds = new And[0];
-        }
-        And<String>[] old = this.termIds;
-        this.termIds = (And<String>[]) termIds.clone();
-        this.changes.firePropertyChange("termIds", old, this.termIds);
-    }
-
-    /**
      * Returns an optional set of user-specified proposition definitions.
      *
      * @return an array of {@link PropositionDefinition}s.
@@ -309,7 +268,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
             }
         }
         return new Query(this.name, this.username, this.keyIds, this.filters,
-                this.propIds, this.termIds, this.propDefs, this.queryMode);
+                this.propIds, this.propDefs, this.queryMode);
     }
 
     @Override

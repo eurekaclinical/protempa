@@ -44,7 +44,6 @@ import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
-import org.protempa.query.And;
 import org.protempa.query.Query;
 
 /**
@@ -56,7 +55,6 @@ final class Executor implements AutoCloseable {
     private static final Logger LOGGER = ProtempaUtil.logger();
     private final Set<String> keyIds;
     private final Set<String> propIds;
-    private final Set<And<String>> termIds;
     private final Filter filters;
     private final PropositionDefinition[] propDefs;
     private final KnowledgeSource ks;
@@ -89,7 +87,6 @@ final class Executor implements AutoCloseable {
         }
         this.keyIds = Arrays.asSet(query.getKeyIds());
         this.propIds = Arrays.asSet(query.getPropositionIds());
-        this.termIds = Arrays.asSet(query.getTermIds());
         this.filters = query.getFilters();
         this.propDefs = query.getPropositionDefinitions();
         if (propDefs != null && propDefs.length > 0) {

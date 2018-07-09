@@ -273,10 +273,6 @@ public final class Protempa implements AutoCloseable {
         if (query == null) {
             throw new IllegalArgumentException("query cannot be null");
         }
-        if (query.getTermIds().length > 0) {
-            throw new UnsupportedOperationException(
-                    "term id support has not been implemented yet.");
-        }
         if (destination == null) {
             throw new IllegalArgumentException("resultsHandler cannot be null");
         }
