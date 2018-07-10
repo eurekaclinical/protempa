@@ -30,11 +30,11 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
-import org.eurekaclinical.datastore.bdb.BdbPersistentStoreFactory;
 
 import org.eurekaclinical.datastore.DataStore;
 import org.drools.RuleBase;
-import org.drools.WorkingMemory;
+import org.drools.StatefulSession;
+import org.eurekaclinical.datastore.DataStoreFactory;
 
 /**
  * A data store mapping key IDs to Drools working memory objects. This
@@ -48,8 +48,8 @@ import org.drools.WorkingMemory;
  * @author Michel Mansour
  *
  */
-final class DroolsWorkingMemoryStore implements
-        DataStore<String, WorkingMemory> {
+public final class DroolsWorkingMemoryStore implements
+        DataStore<String, StatefulSession> {
 
     private final DataStore<String, byte[]> store;
     private boolean isClosed;
@@ -60,15 +60,15 @@ final class DroolsWorkingMemoryStore implements
      */
     private final RuleBase ruleBase;
 
-    DroolsWorkingMemoryStore(BdbPersistentStoreFactory storeFactory, String dbName, RuleBase ruleBase) {
-        store = storeFactory.newInstance(dbName);
+    public DroolsWorkingMemoryStore(DataStoreFactory storeFactory, String dbName, RuleBase ruleBase) throws IOException {
+        this.store = storeFactory.getInstance(dbName);
         this.isClosed = false;
         this.ruleBase = ruleBase;
     }
 
     @Override
-    public void shutdown() {
-        this.store.shutdown();
+    public void close() {
+        this.store.close();
         this.isClosed = true;
     }
 
@@ -87,25 +87,30 @@ final class DroolsWorkingMemoryStore implements
      *
      * @throws IOError if an error occurs reading the working memory.
      */
-    private WorkingMemory readWorkingMemory(byte[] barr) {
+    private StatefulSession readWorkingMemory(byte[] barr) {
         try {
             try (ByteArrayInputStream bais = new ByteArrayInputStream(barr)) {
-                return ruleBase.newStatefulSession(bais, false);
+                return this.ruleBase.newStatefulSession(bais, false);
             }
         } catch (IOException | ClassNotFoundException ex) {
             throw new IOError(ex);
         }
     }
 
+    /**
+     * Gets a working memory from the data store.
+     * @param key the keyId.
+     * @return the working memory, or <code>null</code> if the data store
+     * contains no working memory for the given keyId.
+     */
     @Override
-    public WorkingMemory get(Object key) {
-        WorkingMemory retval;
-        if (key instanceof String) {
-            retval = readWorkingMemory(this.store.get(key));
+    public StatefulSession get(Object key) {
+        byte[] result = this.store.get(key);
+        if (result != null) {
+            return readWorkingMemory(result);
         } else {
-            retval = null;
+            return null;
         }
-        return retval;
     }
 
     /**
@@ -119,7 +124,7 @@ final class DroolsWorkingMemoryStore implements
      * the data store.
      */
     @Override
-    public WorkingMemory put(String key, WorkingMemory value) {
+    public StatefulSession put(String key, StatefulSession value) {
         /*
          * Converts a Drools working memory into a byte array for storage by
          * BerkeleyDB. This is necessary because the BDB serializes objects
@@ -155,7 +160,7 @@ final class DroolsWorkingMemoryStore implements
     }
 
     @Override
-    public WorkingMemory remove(Object key) {
+    public StatefulSession remove(Object key) {
         return readWorkingMemory(this.store.remove(key));
     }
 
@@ -169,8 +174,8 @@ final class DroolsWorkingMemoryStore implements
      * store.
      */
     @Override
-    public void putAll(Map<? extends String, ? extends WorkingMemory> m) {
-        for (Entry<? extends String, ? extends WorkingMemory> e : m.entrySet()) {
+    public void putAll(Map<? extends String, ? extends StatefulSession> m) {
+        for (Entry<? extends String, ? extends StatefulSession> e : m.entrySet()) {
             put(e.getKey(), e.getValue());
         }
     }
@@ -194,8 +199,8 @@ final class DroolsWorkingMemoryStore implements
      * @throws IOError if an error occurred while reading the working memories.
      */
     @Override
-    public Collection<WorkingMemory> values() {
-        Collection<WorkingMemory> values = new ArrayList<>();
+    public Collection<StatefulSession> values() {
+        Collection<StatefulSession> values = new ArrayList<>();
         for (byte[] barr : this.store.values()) {
             values.add(readWorkingMemory(barr));
         }
@@ -212,8 +217,8 @@ final class DroolsWorkingMemoryStore implements
      * @return a collection view of the map.
      */
     @Override
-    public Set<java.util.Map.Entry<String, WorkingMemory>> entrySet() {
-        Set<java.util.Map.Entry<String, WorkingMemory>> entrySet = new HashSet<>();
+    public Set<java.util.Map.Entry<String, StatefulSession>> entrySet() {
+        Set<java.util.Map.Entry<String, StatefulSession>> entrySet = new HashSet<>();
 
         for (String key : this.store.keySet()) {
             entrySet.add(new LazyEntry(key));
@@ -222,7 +227,7 @@ final class DroolsWorkingMemoryStore implements
         return entrySet;
     }
 
-    private class LazyEntry implements Map.Entry<String, WorkingMemory> {
+    private class LazyEntry implements Map.Entry<String, StatefulSession> {
 
         private final String key;
 
@@ -243,12 +248,12 @@ final class DroolsWorkingMemoryStore implements
          * @throws IOError if there was an error reading the working memory.
          */
         @Override
-        public WorkingMemory getValue() {
+        public StatefulSession getValue() {
             return readWorkingMemory(store.get(this.key));
         }
 
         @Override
-        public WorkingMemory setValue(WorkingMemory value) {
+        public StatefulSession setValue(StatefulSession value) {
             throw new UnsupportedOperationException("setValue not supported");
         }
 

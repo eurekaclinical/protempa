@@ -19,15 +19,7 @@
  */
 package org.protempa;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Level;
-import org.apache.commons.lang3.StringUtils;
-import org.drools.StatefulSession;
 import org.protempa.dest.Destination;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
@@ -40,7 +32,6 @@ import org.protempa.query.QueryBuilder;
  */
 final class AbstractionFinder {
 
-    private final Map<String, StatefulSession> workingMemoryCache;
     private final DataSource dataSource;
     private final KnowledgeSource knowledgeSource;
     private final AlgorithmSource algorithmSource;
@@ -50,7 +41,6 @@ final class AbstractionFinder {
 
     AbstractionFinder(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource,
-            boolean cacheFoundAbstractParameters, 
             List<? extends ProtempaEventListener> eventListeners)
             throws KnowledgeSourceReadException {
         assert dataSource != null : "dataSource cannot be null";
@@ -107,11 +97,6 @@ final class AbstractionFinder {
             }
         });
 
-        if (cacheFoundAbstractParameters) {
-            this.workingMemoryCache = new HashMap<>();
-        } else {
-            this.workingMemoryCache = null;
-        }
     }
 
     List<? extends ProtempaEventListener> getEventListeners() {
@@ -130,31 +115,11 @@ final class AbstractionFinder {
         return this.algorithmSource;
     }
 
-    Set<String> getKnownKeys() {
-        if (workingMemoryCache != null) {
-            return Collections.unmodifiableSet(workingMemoryCache.keySet());
-        } else {
-            return Collections.emptySet();
-        }
-    }
-
     void doFind(Query query, Destination destination)
             throws QueryException {
         assert destination != null : "destination cannot be null";
-        ExecutorStrategy strategy;
         try {
-            if (!hasSomethingToAbstract(query)) {
-                strategy = null;
-            } else if (workingMemoryCache != null) {
-                strategy = ExecutorStrategy.STATEFUL;
-            } else {
-                strategy = ExecutorStrategy.STATELESS;
-            }
-        } catch (QueryValidationException ex) {
-            throw new QueryException(query.getName(), ex);
-        }
-        try {
-            this.executor = new Executor(query, destination, strategy, this);
+            this.executor = new Executor(query, destination, this);
             this.executor.init();
             this.executor.execute();
             this.executor.close();
@@ -178,70 +143,25 @@ final class AbstractionFinder {
         }
     }
 
-    private boolean hasSomethingToAbstract(Query query) throws QueryValidationException {
-        try {
-            if (!this.knowledgeSource.readAbstractionDefinitions(query.getPropositionIds()).isEmpty()
-                    || !this.knowledgeSource.readContextDefinitions(query.getPropositionIds()).isEmpty()) {
-                return true;
-            }
-            for (PropositionDefinition propDef : query.getPropositionDefinitions()) {
-                if (propDef instanceof AbstractionDefinition || propDef instanceof ContextDefinition) {
-                    return true;
-                }
-            }
-            return false;
-        } catch (KnowledgeSourceReadException ex) {
-            throw new QueryValidationException("Invalid proposition id(s) " + StringUtils.join(query.getPropositionIds(), ", "), ex);
-        }
-    }
-
     Query buildQuery(QueryBuilder queryBuilder) throws QueryBuildException {
         return queryBuilder.build(this.knowledgeSource, this.algorithmSource);
     }
 
-    /**
-     * Clears the working memory cache. Only needs to be called in caching mode.
-     */
-    void clear() {
-        if (workingMemoryCache != null) {
-            for (Iterator<StatefulSession> itr
-                    = workingMemoryCache.values().iterator(); itr.hasNext();) {
-                try {
-                    itr.next().dispose();
-                    itr.remove();
-                } catch (Exception e) {
-                    ProtempaUtil.logger().log(Level.SEVERE,
-                            "Could not dispose stateful rule session", e);
-                }
-            }
-        }
-    }
-
     void close() throws CloseException {
         CloseException exception = null;
-        clear();
-        boolean algorithmSourceClosed = false;
-        boolean knowledgeSourceClosed = false;
 
         try {
             this.algorithmSource.close();
-            algorithmSourceClosed = true;
+        } catch (SourceCloseException ex) {
+            exception = new CloseException(ex);
+        }
+        try {
             this.knowledgeSource.close();
-            knowledgeSourceClosed = true;
-        } catch (SourceCloseException e) {
-            exception = new CloseException(e);
-        } finally {
-            if (!algorithmSourceClosed) {
-                try {
-                    this.algorithmSource.close();
-                } catch (SourceCloseException ignored) {
-                }
-            }
-            if (!knowledgeSourceClosed) {
-                try {
-                    this.knowledgeSource.close();
-                } catch (SourceCloseException ignored) {
-                }
+        } catch (SourceCloseException ex) {
+            if (exception == null) {
+                exception = new CloseException(ex);
+            } else {
+                exception.addSuppressed(ex);
             }
         }
         try {

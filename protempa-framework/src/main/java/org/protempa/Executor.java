@@ -60,7 +60,6 @@ final class Executor implements AutoCloseable {
     private final KnowledgeSource ks;
     private final Query query;
     private DerivationsBuilder derivationsBuilder;
-    private final ExecutorStrategy strategy;
     private Collection<PropositionDefinition> allNarrowerDescendants;
     private final AbstractionFinder abstractionFinder;
     private ExecutionStrategy executionStrategy = null;
@@ -74,10 +73,6 @@ final class Executor implements AutoCloseable {
     private boolean canceled;
 
     Executor(Query query, Destination resultsHandlerFactory, AbstractionFinder abstractionFinder) throws QueryException {
-        this(query, resultsHandlerFactory, null, abstractionFinder);
-    }
-
-    Executor(Query query, Destination resultsHandlerFactory, ExecutorStrategy strategy, AbstractionFinder abstractionFinder) throws QueryException {
         this.abstractionFinder = abstractionFinder;
         assert query != null : "query cannot be null";
         assert resultsHandlerFactory != null : "resultsHandlerFactory cannot be null";
@@ -96,7 +91,6 @@ final class Executor implements AutoCloseable {
         }
         this.query = query;
         this.derivationsBuilder = new DerivationsBuilder();
-        this.strategy = strategy;
         this.destination = resultsHandlerFactory;
         this.exceptions = Collections.synchronizedList(new ArrayList<>());
         this.logMessageFormat = new MessageFormat("Query " + this.query.getName() + ": {0}");
@@ -124,19 +118,17 @@ final class Executor implements AutoCloseable {
                 log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));
             }
 
-            if (strategy != null) {
-                log(Level.FINE, "Setting execution strategy...");
-                switch (strategy) {
-                    case STATELESS:
-                        executionStrategy = newStatelessStrategy();
-                        break;
-                    case STATEFUL:
-                        executionStrategy = newStatefulStrategy();
-                        break;
-                    default:
-                        throw new AssertionError("Invalid execution strategy: " + strategy);
+            try {
+                if (hasSomethingToAbstract(query)) {
+                    newExecutionStrategy();
+                    try {
+                        this.executionStrategy.initialize(allNarrowerDescendants, derivationsBuilder);
+                    } catch (ExecutionStrategyInitializationException ex) {
+                        throw new QueryException(query.getName(), ex);
+                    }
                 }
-                log(Level.FINE, "Execution strategy is set to {0}", strategy);
+            } catch (QueryValidationException ex) {
+                throw new QueryException(query.getName(), ex);
             }
 
             log(Level.FINE, "Calling query results handler start...");
@@ -210,10 +202,10 @@ final class Executor implements AutoCloseable {
 
     @Override
     public void close() throws CloseException {
-        if (executionStrategy != null) {
-            executionStrategy.cleanup();
-        }
         try {
+            if (executionStrategy != null) {
+                executionStrategy.shutdown();
+            }
             // Might be null if init() fails.
             if (this.resultsHandler != null) {
                 if (!this.failed) {
@@ -222,7 +214,9 @@ final class Executor implements AutoCloseable {
                 this.resultsHandler.close();
                 this.resultsHandler = null;
             }
-        } catch (QueryResultsHandlerProcessingException | QueryResultsHandlerCloseException ex) {
+        } catch (QueryResultsHandlerProcessingException
+                | QueryResultsHandlerCloseException
+                | ExecutionStrategyShutdownException ex) {
             throw new CloseException(ex);
         } finally {
             if (this.resultsHandler != null) {
@@ -407,31 +401,36 @@ final class Executor implements AutoCloseable {
                 DataStreamingEvent<Proposition> dse;
                 while (!isInterrupted() && ((dse = doProcessQueue.take()) != doProcessPoisonPill)) {
                     String keyId = dse.getKeyId();
-                    Iterator<Proposition> resultsItr;
-                    List<Proposition> data = dse.getData();
-                    if (executionStrategy != null) {
-                        resultsItr = executionStrategy.execute(
-                                keyId, propIds, data,
-                                null);
-                    } else {
-                        resultsItr = data.iterator();
+                    try {
+                        Iterator<Proposition> resultsItr;
+                        List<Proposition> data = dse.getData();
+                        if (executionStrategy != null) {
+                            resultsItr = executionStrategy.execute(
+                                    keyId, propIds, data);
+                        } else {
+                            resultsItr = data.iterator();
+                        }
+                        Map<Proposition, List<Proposition>> forwardDerivations = derivationsBuilder.toForwardDerivations();
+                        Map<Proposition, List<Proposition>> backwardDerivations = derivationsBuilder.toBackwardDerivations();
+                        int inputSize = data.size();
+                        Map<UniqueId, Proposition> refs = org.arp.javautil.collections.Collections.newHashMap(inputSize);
+                        List<Proposition> filteredPropositions = extractRequestedPropositions(resultsItr, refs, inputSize);
+                        if (isLoggable(Level.FINEST)) {
+                            log(Level.FINEST, "Proposition ids: {0}", propIds);
+                            log(Level.FINEST, "Filtered propositions: {0}", filteredPropositions);
+                            log(Level.FINEST, "Forward derivations: {0}", forwardDerivations);
+                            log(Level.FINEST, "Backward derivations: {0}", backwardDerivations);
+                            log(Level.FINEST, "References: {0}", refs);
+                        }
+                        this.hqrQueue.put(new QueueObject(keyId, filteredPropositions, forwardDerivations, backwardDerivations, refs));
+                        log(Level.FINER, "Results put on query result handler queue");
+                        counter.incr();
+                        derivationsBuilder.reset();
+                    } finally {
+                        if (executionStrategy != null) {
+                            executionStrategy.closeCurrentWorkingMemory();
+                        }
                     }
-                    Map<Proposition, List<Proposition>> forwardDerivations = derivationsBuilder.toForwardDerivations();
-                    Map<Proposition, List<Proposition>> backwardDerivations = derivationsBuilder.toBackwardDerivations();
-                    int inputSize = data.size();
-                    Map<UniqueId, Proposition> refs = org.arp.javautil.collections.Collections.newHashMap(inputSize);
-                    List<Proposition> filteredPropositions = extractRequestedPropositions(resultsItr, refs, inputSize);
-                    if (isLoggable(Level.FINEST)) {
-                        log(Level.FINEST, "Proposition ids: {0}", propIds);
-                        log(Level.FINEST, "Filtered propositions: {0}", filteredPropositions);
-                        log(Level.FINEST, "Forward derivations: {0}", forwardDerivations);
-                        log(Level.FINEST, "Backward derivations: {0}", backwardDerivations);
-                        log(Level.FINEST, "References: {0}", refs);
-                    }
-                    this.hqrQueue.put(new QueueObject(keyId, filteredPropositions, forwardDerivations, backwardDerivations, refs));
-                    log(Level.FINER, "Results put on query result handler queue");
-                    counter.incr();
-                    derivationsBuilder.reset();
                 }
                 this.hqrQueue.put(this.hqrPoisonPill);
             } catch (QueryException ex) {
@@ -465,7 +464,7 @@ final class Executor implements AutoCloseable {
             }
             return result;
         }
-        
+
     }
 
     private class HandleQueryResultThread extends Thread {
@@ -525,40 +524,40 @@ final class Executor implements AutoCloseable {
         }
         DataStreamingEventIterator<Proposition> itr;
         try {
-            itr = abstractionFinder.getDataSource().readPropositions(this.keyIds, inDataSourcePropIds, this.filters, this.resultsHandler);
+            itr = this.abstractionFinder.getDataSource().readPropositions(this.keyIds, inDataSourcePropIds, this.filters, this.resultsHandler);
         } catch (DataSourceReadException ex) {
             throw new QueryException(this.query.getName(), ex);
         }
         return itr;
     }
 
-    private StatelessExecutionStrategy newStatelessStrategy() throws QueryException {
-        StatelessExecutionStrategy result = new StatelessExecutionStrategy(abstractionFinder, abstractionFinder.getAlgorithmSource());
+    private boolean hasSomethingToAbstract(Query query) throws QueryValidationException {
         try {
-            createRuleBase(result);
-        } catch (CreateRuleBaseException ex) {
-            throw new QueryException(this.query.getName(), ex);
+            KnowledgeSource ks = this.abstractionFinder.getKnowledgeSource();
+            if (!ks.readAbstractionDefinitions(query.getPropositionIds()).isEmpty()
+                    || !ks.readContextDefinitions(query.getPropositionIds()).isEmpty()) {
+                return true;
+            }
+            for (PropositionDefinition propDef : query.getPropositionDefinitions()) {
+                if (propDef instanceof AbstractionDefinition || propDef instanceof ContextDefinition) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (KnowledgeSourceReadException ex) {
+            throw new QueryValidationException("Invalid proposition id(s) " + StringUtils.join(query.getPropositionIds(), ", "), ex);
         }
-        result.initialize();
-        return result;
     }
 
-    private StatefulExecutionStrategy newStatefulStrategy() throws QueryException {
-        StatefulExecutionStrategy result = new StatefulExecutionStrategy(abstractionFinder.getAlgorithmSource());
-        try {
-            createRuleBase(result);
-        } catch (CreateRuleBaseException ex) {
-            throw new QueryException(this.query.getName(), ex);
+    private void newExecutionStrategy() {
+        if (this.query.getDatabasePath() != null) {
+            this.executionStrategy = new StatefulExecutionStrategy(
+                    this.abstractionFinder.getAlgorithmSource(),
+                    this.query);
+        } else {
+            this.executionStrategy = new StatelessExecutionStrategy(
+                    this.abstractionFinder.getAlgorithmSource());
         }
-        result.initialize();
-        return result;
-    }
-
-    private void createRuleBase(ExecutionStrategy result) throws CreateRuleBaseException {
-        log(Level.FINEST, "Initializing rule base");
-        result.createRuleBase(allNarrowerDescendants, derivationsBuilder);
-        abstractionFinder.clear();
-        log(Level.FINEST, "Rule base initialized");
     }
 
 }

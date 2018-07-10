@@ -1,10 +1,10 @@
-package org.protempa;
+package org.protempa.datastore;
 
-/*
+/*-
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 - 2015 Emory University
+ * Copyright (C) 2012 - 2018 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,26 @@ package org.protempa;
  * #L%
  */
 
+import org.protempa.ProtempaException;
+
 /**
  *
- * @author Andrew Post
+ * @author Andrew
  */
-public class CreateRuleBaseException extends ProtempaException {
+public class DataStoreExistsException extends ProtempaException {
 
-    CreateRuleBaseException(Throwable cause) {
+    public DataStoreExistsException() {
+    }
+
+    public DataStoreExistsException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public DataStoreExistsException(String message) {
+        super(message);
+    }
+
+    public DataStoreExistsException(Throwable cause) {
         super(cause);
     }
     

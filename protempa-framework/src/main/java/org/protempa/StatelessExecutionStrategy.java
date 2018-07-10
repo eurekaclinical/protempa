@@ -19,37 +19,34 @@
  */
 package org.protempa;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eurekaclinical.datastore.DataStore;
 import org.drools.StatelessSession;
 import org.drools.StatelessSessionResult;
-import org.drools.WorkingMemory;
 import org.protempa.proposition.Proposition;
 
 class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
     private StatelessSession statelessSession;
-    private final AbstractionFinder abstractionFinder;
 
-    StatelessExecutionStrategy(AbstractionFinder abstractionFinder, 
-            AlgorithmSource algorithmSource) {
+    StatelessExecutionStrategy(AlgorithmSource algorithmSource) {
         super(algorithmSource);
-        this.abstractionFinder = abstractionFinder;
     }
     
     @Override
-    public void initialize() {
-        this.statelessSession = ruleBase.newStatelessSession();
+    public void initialize(Collection<PropositionDefinition> allNarrowerDescendants,
+            DerivationsBuilder listener) throws ExecutionStrategyInitializationException {
+        super.initialize(allNarrowerDescendants, listener);
+        this.statelessSession = getRuleBase().newStatelessSession();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Iterator<Proposition> execute(String keyId,
-            Set<String> propositionIds, List<?> objects,
-            DataStore<String, WorkingMemory> wm) {
+            Set<String> propositionIds, List<?> objects) {
         this.statelessSession.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
         StatelessSessionResult result = this.statelessSession
                 .executeWithResults(objects);
@@ -57,8 +54,11 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     @Override
-    public void cleanup() {
-        this.abstractionFinder.clear();
+    public void closeCurrentWorkingMemory() {
+    }
+    
+    @Override
+    public void shutdown() {
     }
 
 }

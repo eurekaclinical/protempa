@@ -20,31 +20,30 @@
 package org.protempa.datastore;
 
 import java.io.IOException;
-import org.arp.javautil.io.FileUtil;
-import org.eurekaclinical.datastore.bdb.BdbUtil;
 import org.eurekaclinical.datastore.DataStore;
 
 /**
+ * An interface for defining classes that create and return data stores.
  *
- * @author Andrew Post
+ * @author Michel Mansour
+ *
+ * @param <K> the key type to store
+ * @param <V> the value type to store
  */
-public abstract class AbstractDataStoreCreator<K, V>
-        implements DataStoreCreator<K, V> {
+public interface DataStores<K, V> extends AutoCloseable {
 
-    private final String environmentName;
-    
-    protected AbstractDataStoreCreator() {
-        this(null);
-    }
+    /**
+     * Returns a permanent store with the given name.
+     *
+     * @param name the name of the store, or <code>null</code> if no store
+     * exists with the given name.
+     * @return a {@link DataStore} backed by a permanent store implementation
+     * @throws java.io.IOException if an error occurred getting/creating the
+     * data store.
+     */
+    DataStore<K, V> getDataStore(String name) throws IOException;
 
-    protected AbstractDataStoreCreator(String environmentName) {
-        this.environmentName = environmentName;
-    }
-
-    protected String getEnvironmentName() {
-        return this.environmentName;
-    }
-
-    protected abstract String nextDatabaseName();
+    @Override
+    void close() throws IOException;
 
 }

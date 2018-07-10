@@ -49,8 +49,8 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     private PropositionDefinition[] propDefs;
     private String name;
     private String username;
-
     private QueryMode queryMode;
+    private String databasePath;
 
     public DefaultQueryBuilder() {
         this.propDefs = EMPTY_PROP_DEF_ARRAY;
@@ -58,7 +58,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
         this.queryMode = Query.DEFAULT_QUERY_MODE;
     }
-
+    
     public String getName() {
         return name;
     }
@@ -66,7 +66,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
+    
     public String getUsername() {
         return username;
     }
@@ -87,6 +87,14 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         }
     }
 
+    public String getDatabasePath() {
+        return databasePath;
+    }
+
+    public void setDatabasePath(String databasePath) {
+        this.databasePath = databasePath;
+    }
+    
     /**
      * Gets the filters to be applied to this query.
      *
@@ -214,7 +222,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
             }
         }
         return new Query(this.name, this.username, this.keyIds, this.filters,
-                this.propIds, this.propDefs, this.queryMode);
+                this.propIds, this.propDefs, this.queryMode, this.databasePath);
     }
 
     @Override

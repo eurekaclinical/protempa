@@ -104,7 +104,7 @@
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>datastore</artifactId>
-                <version>[3.0-Alpha-1,4.0)</version>
+                <version>[3.0-Alpha-5,4.0)</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

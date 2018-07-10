@@ -50,6 +50,7 @@ public class Query implements Serializable {
     private String name;
     private String username;
     private QueryMode queryMode;
+    private String databasePath;
     
     /**
      * Creates new Query instance with a default identifier.
@@ -88,6 +89,11 @@ public class Query implements Serializable {
     public Query(String id, String username, String[] keyIds, Filter filters, String[] propIds,
             PropositionDefinition[] propDefs,
             QueryMode queryMode) {
+        this(id, username, keyIds, filters, propIds, propDefs, queryMode, null);
+    }
+    
+    public Query(String id, String username, String[] keyIds, Filter filters, String[] propIds,
+            PropositionDefinition[] propDefs, QueryMode queryMode, String databasePath) {
         if (keyIds == null) {
             keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         }
@@ -115,6 +121,7 @@ public class Query implements Serializable {
             this.queryMode = queryMode;
         }
         this.username = username;
+        this.databasePath = databasePath;
     }
 
     /**
@@ -169,7 +176,7 @@ public class Query implements Serializable {
     public String getUsername() {
         return username;
     }
-    
+
     /**
      * @return an array that references all of the filters in the chain of
      * filters.
@@ -184,6 +191,10 @@ public class Query implements Serializable {
     public QueryMode getQueryMode() {
         return queryMode;
     }
+
+    public String getDatabasePath() {
+        return databasePath;
+    }
     
     @Override
     public int hashCode() {
@@ -194,6 +205,7 @@ public class Query implements Serializable {
         result = prime * result + Arrays.hashCode(this.propDefs);
         result = prime * result + this.queryMode.hashCode();
         result = prime * result + (this.username != null ? this.username.hashCode() : 0);
+        result = prime * result + (this.databasePath != null ? this.databasePath.hashCode() : 0);
         return result;
     }
 
@@ -229,6 +241,9 @@ public class Query implements Serializable {
             return false;
         }
         if (this.username != null ? !this.username.equals(other.username) : other.username != null) {
+            return false;
+        }
+        if (this.databasePath != null ? this.databasePath.equals(other.databasePath) : other.databasePath != null) {
             return false;
         }
         return true;

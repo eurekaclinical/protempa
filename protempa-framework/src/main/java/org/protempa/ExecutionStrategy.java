@@ -24,23 +24,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eurekaclinical.datastore.DataStore;
 import org.drools.RuleBase;
-import org.drools.WorkingMemory;
 import org.protempa.proposition.Proposition;
 
 interface ExecutionStrategy {
     
-    void initialize();
-
-    Iterator<Proposition> execute(String keyIds,
-            Set<String> propositionIds, List<?> objects,
-            DataStore<String, WorkingMemory> wm);
-
-    void cleanup();
-
-    void createRuleBase(Collection<PropositionDefinition> allNarrowerDescendants, 
-            DerivationsBuilder listener) throws CreateRuleBaseException;
+    void initialize(Collection<PropositionDefinition> allNarrowerDescendants, 
+            DerivationsBuilder listener) throws ExecutionStrategyInitializationException;
     
+    Iterator<Proposition> execute(String keyIds,
+            Set<String> propositionIds, List<?> objects);
+    
+    void closeCurrentWorkingMemory();
+
+    void shutdown() throws ExecutionStrategyShutdownException;
+
     RuleBase getRuleBase();
 }

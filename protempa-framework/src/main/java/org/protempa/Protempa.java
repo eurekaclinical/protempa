@@ -62,8 +62,7 @@ public final class Protempa implements AutoCloseable {
         }
     }
 
-    public static Protempa newInstance(SourceFactory sourceFactory)
-            throws ProtempaStartupException {
+    public static Protempa newInstance(SourceFactory sourceFactory) throws ProtempaStartupException {
         try {
             FutureTask<DataSource> newDataSourceInstance = 
                     new FutureTask<>(() -> sourceFactory.newDataSourceInstance());
@@ -76,38 +75,7 @@ public final class Protempa implements AutoCloseable {
             newAlgorithmSourceInstance.run();
             return new Protempa(newDataSourceInstance.get(),
                     newKnowledgeSourceInstance.get(),
-                    newAlgorithmSourceInstance.get(), false);
-        } catch (InterruptedException ex) {
-            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
-        } catch (ExecutionException ex) {
-            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex.getCause());
-        }
-    }
-
-    public static Protempa newInstance(String configurationsId, boolean useCache)
-            throws ProtempaStartupException {
-        try {
-            return newInstance(new SourceFactory(configurationsId), useCache);
-        } catch (ConfigurationsNotFoundException | InvalidConfigurationException | BackendProviderSpecLoaderException | ConfigurationsLoadException ex) {
-            throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
-        }
-    }
-
-    public static Protempa newInstance(SourceFactory sourceFactory,
-            boolean useCache) throws ProtempaStartupException {
-        try {
-            FutureTask<DataSource> newDataSourceInstance = 
-                    new FutureTask<>(() -> sourceFactory.newDataSourceInstance());
-            newDataSourceInstance.run();
-            FutureTask<KnowledgeSource> newKnowledgeSourceInstance = 
-                    new FutureTask<>(() -> sourceFactory.newKnowledgeSourceInstance());
-            newKnowledgeSourceInstance.run();
-            FutureTask<AlgorithmSource> newAlgorithmSourceInstance = 
-                    new FutureTask<>(() -> sourceFactory.newAlgorithmSourceInstance());
-            newAlgorithmSourceInstance.run();
-            return new Protempa(newDataSourceInstance.get(),
-                    newKnowledgeSourceInstance.get(),
-                    newAlgorithmSourceInstance.get(), useCache);
+                    newAlgorithmSourceInstance.get());
         } catch (InterruptedException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         } catch (ExecutionException ex) {
@@ -119,8 +87,8 @@ public final class Protempa implements AutoCloseable {
     private final List<ProtempaEventListener> eventListeners;
 
     /**
-     * Constructor that configures PROTEMPA not to cache found abstract
-     * parameters.
+     * Constructor that lets the user specify whether or not to cache found
+     * abstract parameters.
      *
      * @param dataSource a {@link DataSource}. Will be closed when
      * {@link #close()} is called. May be <code>null</code> if you're not
@@ -137,33 +105,6 @@ public final class Protempa implements AutoCloseable {
      */
     public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
             AlgorithmSource algorithmSource)
-            throws ProtempaStartupException {
-        this(dataSource, knowledgeSource, algorithmSource, false);
-    }
-
-    /**
-     * Constructor that lets the user specify whether or not to cache found
-     * abstract parameters.
-     *
-     * @param dataSource a {@link DataSource}. Will be closed when
-     * {@link #close()} is called. May be <code>null</code> if you're not
-     * retrieving data from a data source (for example, you're only working with
-     * a persistent store).
-     * @param knowledgeSource a {@link KnowledgeSource}. Will be closed when
-     * {@link #close()} is called.
-     * @param algorithmSource an {@link AlgorithmSource}. Will be closed when
-     * {@link #close()} is called. May be <code>null</code> if you're not
-     * computing any low-level abstractions.
-     * @param cacheFoundAbstractParameters <code>true</code> to cache found
-     * abstract parameters, <code>false</code> not to cache found abstract
-     * parameters.
-     *
-     * @throws ProtempaStartupException if an error occur in starting Protempa.
-     * There frequently will be a nested exception that provides more detail.
-     */
-    public Protempa(DataSource dataSource, KnowledgeSource knowledgeSource,
-            AlgorithmSource algorithmSource,
-            boolean cacheFoundAbstractParameters)
             throws ProtempaStartupException {
         this.eventListeners = new ArrayList<>();
         DataSource ds;
@@ -189,7 +130,7 @@ public final class Protempa implements AutoCloseable {
 
         try {
             this.abstractionFinder = new AbstractionFinder(ds, ks, as,
-                    cacheFoundAbstractParameters, this.eventListeners);
+                    this.eventListeners);
         } catch (KnowledgeSourceReadException ex) {
             throw new ProtempaStartupException(STARTUP_FAILURE_MSG, ex);
         }
@@ -351,7 +292,6 @@ public final class Protempa implements AutoCloseable {
      * source and algorithm source.
      */
     public void clear() {
-        this.abstractionFinder.clear();
         this.abstractionFinder.getAlgorithmSource().clear();
         this.abstractionFinder.getDataSource().clear();
         this.abstractionFinder.getKnowledgeSource().clear();

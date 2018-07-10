@@ -30,7 +30,7 @@ import org.drools.RuleBaseConfiguration.AssertBehaviour;
 abstract class AbstractExecutionStrategy implements ExecutionStrategy {
 
     private final AlgorithmSource algorithmSource;
-    protected RuleBase ruleBase;
+    private RuleBase ruleBase;
 
     /**
      * @param abstractionFinder
@@ -45,9 +45,9 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
     }
 
     @Override
-    public void createRuleBase(Collection<PropositionDefinition> allNarrowerDescendants,
+    public void initialize(Collection<PropositionDefinition> allNarrowerDescendants,
             DerivationsBuilder listener)
-            throws CreateRuleBaseException {
+            throws ExecutionStrategyInitializationException {
         ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
                 this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
@@ -59,14 +59,14 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
                 }
                 ruleCreator.visit(allNarrowerDescendants);
             } catch (ProtempaException ex) {
-                throw new CreateRuleBaseException(ex);
+                throw new ExecutionStrategyInitializationException(ex);
             }
         }
         try {
             this.ruleBase = new JBossRuleBaseFactory(ruleCreator,
                     createRuleBaseConfiguration(ruleCreator, allNarrowerDescendants)).newInstance();
         } catch (RuleBaseInstantiationException ex) {
-            throw new CreateRuleBaseException(ex);
+            throw new ExecutionStrategyInitializationException(ex);
         }
     }
 
