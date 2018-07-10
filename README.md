@@ -21,6 +21,15 @@ See our [publication about Protempa](https://www.ncbi.nlm.nih.gov/pmc/articles/P
 
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa)
 
+## Version 5.0
+* Removed all TermSource and related code.
+* Update datastore version.
+* Remove cache store code.
+* Remove non-streaming relational data source backend support.
+* Remove staging relational data source backend support.
+* Remove CLI code.
+* Remove Java Bean property support.
+
 ## Version 4.3.2
 * Actually write nominal column headers for tabular writers.
 
