@@ -26,11 +26,6 @@
         </dependency>
         <dependency>
             <groupId>org.eurekaclinical</groupId>
-            <artifactId>protempa-tsb-umls</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-bcp-serviceloader</artifactId>
             <scope>test</scope>
         </dependency>

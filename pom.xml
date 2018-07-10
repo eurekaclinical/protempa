@@ -93,11 +93,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
-                <artifactId>protempa-tsb-umls</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eurekaclinical</groupId>
                 <artifactId>javautil</artifactId>
                 <version>[4.0,5.0)</version>
             </dependency>
