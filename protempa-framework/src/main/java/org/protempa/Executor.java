@@ -119,7 +119,7 @@ final class Executor implements AutoCloseable {
             }
 
             try {
-                if (hasSomethingToAbstract(query)) {
+                if (hasSomethingToAbstract(query) || this.query.getDatabasePath() != null) {
                     newExecutionStrategy();
                     try {
                         this.executionStrategy.initialize(allNarrowerDescendants, derivationsBuilder);
@@ -551,10 +551,12 @@ final class Executor implements AutoCloseable {
 
     private void newExecutionStrategy() {
         if (this.query.getDatabasePath() != null) {
+            log(Level.FINER, "Chosen stateful execution strategy");
             this.executionStrategy = new StatefulExecutionStrategy(
                     this.abstractionFinder.getAlgorithmSource(),
                     this.query);
         } else {
+            log(Level.FINER, "Chosen stateless execution strategy");
             this.executionStrategy = new StatelessExecutionStrategy(
                     this.abstractionFinder.getAlgorithmSource());
         }

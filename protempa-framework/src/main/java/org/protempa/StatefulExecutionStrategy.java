@@ -57,11 +57,14 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     public void initialize(Collection<PropositionDefinition> allNarrowerDescendants,
             DerivationsBuilder listener) throws ExecutionStrategyInitializationException {
         super.initialize(allNarrowerDescendants, listener);
+        Logger logger = ProtempaUtil.logger();
         this.workingMemoryStoreCreator = new WorkingMemoryDataStores(getRuleBase(), this.databasePath.getParent());
         try {
             this.dataStore = this.workingMemoryStoreCreator.getDataStore(this.databasePath.getName());
+            logger.log(Level.FINE, "Opened data store {}", this.databasePath.getPath());
             if (this.queryMode == QueryMode.REPLACE) {
                 this.dataStore.clear();
+                logger.log(Level.FINE, "Cleared data store {}", this.databasePath.getPath());
             }
         } catch (IOException ex) {
             throw new ExecutionStrategyInitializationException(ex);
