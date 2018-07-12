@@ -536,7 +536,7 @@ final class Executor implements AutoCloseable {
                     this.abstractionFinder.getAlgorithmSource());
         }
     }
-    
+
     private void initializeExecutionStrategy() throws QueryException {
         try {
             this.executionStrategy.initialize(this.propositionDefinitionCache, this.derivationsBuilder);
@@ -544,10 +544,10 @@ final class Executor implements AutoCloseable {
             throw new QueryException(query.getName(), ex);
         }
     }
-    
+
     private void extractPropositionDefinitionCache() throws KnowledgeSourceReadException {
         this.propositionDefinitionCache = this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()]));
-        
+
         if (isLoggable(Level.FINE)) {
             Set<String> allNarrowerDescendantsPropIds = new HashSet<>();
             for (PropositionDefinition pd : this.propositionDefinitionCache) {
@@ -556,15 +556,15 @@ final class Executor implements AutoCloseable {
             log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));
         }
     }
-    
+
     private void startQueryResultsHandler() throws QueryResultsHandlerProcessingException {
         log(Level.FINE, "Calling query results handler start...");
         this.resultsHandler.start(this.propositionDefinitionCache);
         log(Level.FINE, "Query results handler started");
         log(Level.FINE, "Query results handler waiting for results...");
     }
-    
-        private void createQueryResultsHandler() throws QueryResultsHandlerValidationFailedException, QueryResultsHandlerInitException {
+
+    private void createQueryResultsHandler() throws QueryResultsHandlerValidationFailedException, QueryResultsHandlerInitException {
         log(Level.FINE, "Initializing query results handler...");
         this.resultsHandler = this.destination.getQueryResultsHandler(getQuery(), this.abstractionFinder.getDataSource(), getKnowledgeSource(), this.abstractionFinder.getEventListeners());
         log(Level.FINE, "Got query results handler {0}", this.resultsHandler.getId());
