@@ -70,8 +70,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         }
     }
 
-    @Override
-    public RuleBase getRuleBase() {
+    protected RuleBase getRuleBase() {
         return this.ruleBase;
     }
 

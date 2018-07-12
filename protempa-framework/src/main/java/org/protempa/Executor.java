@@ -60,7 +60,7 @@ final class Executor implements AutoCloseable {
     private final KnowledgeSource ks;
     private final Query query;
     private DerivationsBuilder derivationsBuilder;
-    private Collection<PropositionDefinition> allNarrowerDescendants;
+    private Collection<PropositionDefinition> propositionDefinitionCache;
     private final AbstractionFinder abstractionFinder;
     private ExecutionStrategy executionStrategy = null;
     private final ExecutorCounter counter = new ExecutorCounter();
@@ -97,44 +97,24 @@ final class Executor implements AutoCloseable {
     }
 
     void init() throws QueryException {
-        log(Level.FINE, "Initializing query results handler...");
         try {
-            this.resultsHandler = this.destination.getQueryResultsHandler(getQuery(), this.abstractionFinder.getDataSource(), getKnowledgeSource(), this.abstractionFinder.getEventListeners());
-            log(Level.FINE, "Got query results handler {0}", this.resultsHandler.getId());
-            log(Level.FINE, "Validating query results handler");
-            this.resultsHandler.validate();
-            log(Level.FINE, "Query results handler validated successfully");
+            createQueryResultsHandler();
 
             if (isLoggable(Level.FINE)) {
                 log(Level.FINE, "Propositions to be queried are {0}", StringUtils.join(this.propIds, ", "));
             }
-            this.allNarrowerDescendants = this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()]));
-
-            if (isLoggable(Level.FINE)) {
-                Set<String> allNarrowerDescendantsPropIds = new HashSet<>();
-                for (PropositionDefinition pd : this.allNarrowerDescendants) {
-                    allNarrowerDescendantsPropIds.add(pd.getId());
-                }
-                log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));
-            }
+            extractPropositionDefinitionCache();
 
             try {
                 if (hasSomethingToAbstract(query) || this.query.getDatabasePath() != null) {
-                    newExecutionStrategy();
-                    try {
-                        this.executionStrategy.initialize(allNarrowerDescendants, derivationsBuilder);
-                    } catch (ExecutionStrategyInitializationException ex) {
-                        throw new QueryException(query.getName(), ex);
-                    }
+                    selectExecutionStrategy();
+                    initializeExecutionStrategy();
                 }
             } catch (QueryValidationException ex) {
                 throw new QueryException(query.getName(), ex);
             }
 
-            log(Level.FINE, "Calling query results handler start...");
-            this.resultsHandler.start(getAllNarrowerDescendants());
-            log(Level.FINE, "Query results handler started");
-            log(Level.FINE, "Query results handler waiting for results...");
+            startQueryResultsHandler();
         } catch (KnowledgeSourceReadException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | Error | RuntimeException ex) {
             this.failed = true;
             throw new QueryException(this.query.getName(), ex);
@@ -239,10 +219,6 @@ final class Executor implements AutoCloseable {
 
     Set<String> getPropIds() {
         return this.propIds;
-    }
-
-    Collection<PropositionDefinition> getAllNarrowerDescendants() {
-        return allNarrowerDescendants;
     }
 
     Filter getFilters() {
@@ -405,8 +381,7 @@ final class Executor implements AutoCloseable {
                         Iterator<Proposition> resultsItr;
                         List<Proposition> data = dse.getData();
                         if (executionStrategy != null) {
-                            resultsItr = executionStrategy.execute(
-                                    keyId, propIds, data);
+                            resultsItr = executionStrategy.execute(keyId, data);
                         } else {
                             resultsItr = data.iterator();
                         }
@@ -514,7 +489,7 @@ final class Executor implements AutoCloseable {
     private DataStreamingEventIterator<Proposition> newDataIterator() throws QueryException {
         log(Level.INFO, "Retrieving data");
         Set<String> inDataSourcePropIds = new HashSet<>();
-        for (PropositionDefinition pd : allNarrowerDescendants) {
+        for (PropositionDefinition pd : this.propositionDefinitionCache) {
             if (pd.getInDataSource()) {
                 inDataSourcePropIds.add(pd.getId());
             }
@@ -549,7 +524,7 @@ final class Executor implements AutoCloseable {
         }
     }
 
-    private void newExecutionStrategy() {
+    private void selectExecutionStrategy() {
         if (this.query.getDatabasePath() != null) {
             log(Level.FINER, "Chosen stateful execution strategy");
             this.executionStrategy = new StatefulExecutionStrategy(
@@ -560,6 +535,42 @@ final class Executor implements AutoCloseable {
             this.executionStrategy = new StatelessExecutionStrategy(
                     this.abstractionFinder.getAlgorithmSource());
         }
+    }
+    
+    private void initializeExecutionStrategy() throws QueryException {
+        try {
+            this.executionStrategy.initialize(this.propositionDefinitionCache, this.derivationsBuilder);
+        } catch (ExecutionStrategyInitializationException ex) {
+            throw new QueryException(query.getName(), ex);
+        }
+    }
+    
+    private void extractPropositionDefinitionCache() throws KnowledgeSourceReadException {
+        this.propositionDefinitionCache = this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()]));
+        
+        if (isLoggable(Level.FINE)) {
+            Set<String> allNarrowerDescendantsPropIds = new HashSet<>();
+            for (PropositionDefinition pd : this.propositionDefinitionCache) {
+                allNarrowerDescendantsPropIds.add(pd.getId());
+            }
+            log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));
+        }
+    }
+    
+    private void startQueryResultsHandler() throws QueryResultsHandlerProcessingException {
+        log(Level.FINE, "Calling query results handler start...");
+        this.resultsHandler.start(this.propositionDefinitionCache);
+        log(Level.FINE, "Query results handler started");
+        log(Level.FINE, "Query results handler waiting for results...");
+    }
+    
+        private void createQueryResultsHandler() throws QueryResultsHandlerValidationFailedException, QueryResultsHandlerInitException {
+        log(Level.FINE, "Initializing query results handler...");
+        this.resultsHandler = this.destination.getQueryResultsHandler(getQuery(), this.abstractionFinder.getDataSource(), getKnowledgeSource(), this.abstractionFinder.getEventListeners());
+        log(Level.FINE, "Got query results handler {0}", this.resultsHandler.getId());
+        log(Level.FINE, "Validating query results handler");
+        this.resultsHandler.validate();
+        log(Level.FINE, "Query results handler validated successfully");
     }
 
 }

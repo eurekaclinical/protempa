@@ -45,8 +45,7 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Iterator<Proposition> execute(String keyId,
-            Set<String> propositionIds, List<?> objects) {
+    public Iterator<Proposition> execute(String keyId, List<?> objects) {
         this.statelessSession.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
         StatelessSessionResult result = this.statelessSession
                 .executeWithResults(objects);

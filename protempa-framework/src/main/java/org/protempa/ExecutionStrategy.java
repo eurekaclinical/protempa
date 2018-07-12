@@ -22,22 +22,18 @@ package org.protempa;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
-import org.drools.RuleBase;
 import org.protempa.proposition.Proposition;
 
 interface ExecutionStrategy {
     
-    void initialize(Collection<PropositionDefinition> allNarrowerDescendants, 
-            DerivationsBuilder listener) throws ExecutionStrategyInitializationException;
+    void initialize(Collection<PropositionDefinition> cache,
+            DerivationsBuilder listener) 
+            throws ExecutionStrategyInitializationException;
     
-    Iterator<Proposition> execute(String keyIds,
-            Set<String> propositionIds, List<?> objects);
+    Iterator<Proposition> execute(String keyIds, List<?> objects);
     
     void closeCurrentWorkingMemory();
 
     void shutdown() throws ExecutionStrategyShutdownException;
-
-    RuleBase getRuleBase();
 }

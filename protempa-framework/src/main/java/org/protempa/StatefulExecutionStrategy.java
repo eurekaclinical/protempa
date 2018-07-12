@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.drools.FactException;
+import org.drools.FactHandle;
 import org.drools.StatefulSession;
 
 import org.eurekaclinical.datastore.DataStore;
@@ -37,10 +39,10 @@ import org.protempa.query.Query;
 import org.protempa.query.QueryMode;
 
 class StatefulExecutionStrategy extends AbstractExecutionStrategy {
-    
+
     private final File databasePath;
     private DataStore<String, StatefulSession> dataStore;
-    private WorkingMemoryDataStores workingMemoryStoreCreator;
+    private WorkingMemoryDataStores workingMemoryDataStores;
     private StatefulSession workingMemory;
     private final QueryMode queryMode;
 
@@ -52,46 +54,29 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         this.databasePath = new File(dbPath);
         this.queryMode = query.getQueryMode();
     }
-    
+
     @Override
     public void initialize(Collection<PropositionDefinition> allNarrowerDescendants,
             DerivationsBuilder listener) throws ExecutionStrategyInitializationException {
         super.initialize(allNarrowerDescendants, listener);
-        Logger logger = ProtempaUtil.logger();
-        this.workingMemoryStoreCreator = new WorkingMemoryDataStores(getRuleBase(), this.databasePath.getParent());
+        createDataStoreManager();
         try {
-            this.dataStore = this.workingMemoryStoreCreator.getDataStore(this.databasePath.getName());
-            logger.log(Level.FINE, "Opened data store {}", this.databasePath.getPath());
-            if (this.queryMode == QueryMode.REPLACE) {
-                this.dataStore.clear();
-                logger.log(Level.FINE, "Cleared data store {}", this.databasePath.getPath());
-            }
+            getDataStore();
+            prepareDataStore();
         } catch (IOException ex) {
             throw new ExecutionStrategyInitializationException(ex);
         }
     }
 
     @Override
-    public Iterator<Proposition> execute(String keyId,
-            Set<String> propositionIds, List<?> objects) {
-        Logger logger = ProtempaUtil.logger();
-        this.workingMemory = this.dataStore.get(keyId);
-        if (this.workingMemory == null) {
-            this.workingMemory = getRuleBase().newStatefulSession(false);
-        }
-        this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
-        for (Object obj : objects) {
-            this.workingMemory.insert(obj);
-        }
-        this.workingMemory.fireAllRules();
-        logger.log(Level.FINEST,
-                "Persisting working memory for key ID {0}", keyId);
-        this.dataStore.put(keyId, this.workingMemory);
-        logger.log(Level.FINEST,
-                "Persisted working memory for key ID {0}", keyId);
-        return (Iterator<Proposition>) this.workingMemory.iterateObjects();
+    public Iterator<Proposition> execute(String keyId, List<?> objects) {
+        getOrCreateWorkingMemoryInstance(keyId);
+        insertRetrievedDataIntoWorkingMemory(objects);
+        fireAllRules();
+        persistWorkingMemory(keyId);
+        return getWorkingMemoryIterator();
     }
-    
+
     @Override
     public void closeCurrentWorkingMemory() {
         this.workingMemory.dispose();
@@ -99,23 +84,87 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
     @Override
     public void shutdown() throws ExecutionStrategyShutdownException {
-        ExecutionStrategyShutdownException exception = null;
+        ExecutionStrategyShutdownException exception1 = closeDataStore();
+        ExecutionStrategyShutdownException exception2 = closeDataStoreManager();
+        if (exception1 != null && exception2 != null) {
+            exception1.addSuppressed(exception2);
+            throw exception1;
+        } else if (exception1 != null) {
+            throw exception1;
+        } else if (exception2 != null) {
+            throw exception2;
+        }
+    }
+
+    private void createDataStoreManager() {
+        this.workingMemoryDataStores = new WorkingMemoryDataStores(getRuleBase(), this.databasePath.getParent());
+    }
+
+    private void getDataStore() throws IOException {
+        Logger logger = ProtempaUtil.logger();
+        this.dataStore = this.workingMemoryDataStores.getDataStore(this.databasePath.getName());
+        logger.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
+    }
+
+    private void prepareDataStore() {
+        Logger logger = ProtempaUtil.logger();
+        if (this.queryMode == QueryMode.REPLACE) {
+            this.dataStore.clear();
+            logger.log(Level.FINE, "Cleared data store {0}", this.databasePath.getPath());
+        }
+    }
+
+    private void getOrCreateWorkingMemoryInstance(String keyId) {
+        this.workingMemory = this.dataStore.get(keyId);
+        if (this.workingMemory == null) {
+            this.workingMemory = getRuleBase().newStatefulSession(false);
+        }
+        this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
+    }
+
+    private void insertRetrievedDataIntoWorkingMemory(List<?> objects) throws FactException {
+        for (Object obj : objects) {
+            FactHandle factHandle = this.workingMemory.getFactHandle(obj);
+            if (factHandle != null) {
+                this.workingMemory.update(factHandle, obj);
+            } else {
+                this.workingMemory.insert(obj);
+            }
+        }
+    }
+
+    private void fireAllRules() throws FactException {
+        this.workingMemory.fireAllRules();
+    }
+
+    private void persistWorkingMemory(String keyId) {
+        Logger logger = ProtempaUtil.logger();
+        logger.log(Level.FINEST,
+                "Persisting working memory for key ID {0}", keyId);
+        this.dataStore.put(keyId, this.workingMemory);
+        logger.log(Level.FINEST,
+                "Persisted working memory for key ID {0}", keyId);
+    }
+
+    private Iterator<Proposition> getWorkingMemoryIterator() {
+        return (Iterator<Proposition>) this.workingMemory.iterateObjects();
+    }
+
+    private ExecutionStrategyShutdownException closeDataStore() {
         try {
             dataStore.close();
         } catch (IOError err) {
-            exception = new ExecutionStrategyShutdownException(err);
+            return new ExecutionStrategyShutdownException(err);
         }
+        return null;
+    }
+
+    private ExecutionStrategyShutdownException closeDataStoreManager() {
         try {
-            this.workingMemoryStoreCreator.close();
+            this.workingMemoryDataStores.close();
         } catch (IOException ex) {
-            if (exception != null) {
-                exception.addSuppressed(new ExecutionStrategyShutdownException(ex));
-            } else {
-                exception = new ExecutionStrategyShutdownException(ex);
-            }
+            return new ExecutionStrategyShutdownException(ex);
         }
-        if (exception != null) {
-            throw exception;
-        }
+        return null;
     }
 }
