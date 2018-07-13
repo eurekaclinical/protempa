@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.drools.WorkingMemory;
 import org.drools.spi.Consequence;
@@ -51,6 +52,7 @@ final class CompoundLowLevelAbstractionConsequence implements
     private static final long serialVersionUID = 6456351279290509422L;
     private final CompoundLowLevelAbstractionDefinition cllad;
     private final DerivationsBuilder derivationsBuilder;
+    private final Logger logger;
 
     /**
      * Constructor.
@@ -66,29 +68,7 @@ final class CompoundLowLevelAbstractionConsequence implements
         assert def != null : "def cannot be null";
         this.cllad = def;
         this.derivationsBuilder = derivationsBuilder;
-    }
-
-    private void assertDerivedProposition(WorkingMemory workingMemory,
-            AbstractParameter derived, Set<AbstractParameter> sources) {
-        workingMemory.insert(derived);
-        for (AbstractParameter parameter : sources) {
-            derivationsBuilder.propositionAsserted(parameter, derived);
-        }
-        ProtempaUtil.logger().log(Level.FINER,
-                "Asserted derived proposition {0}", derived);
-    }
-
-    private final static class AbstractParameterWithSourceParameters {
-
-        final AbstractParameter parameter;
-        final Set<AbstractParameter> sourceParameters;
-
-        public AbstractParameterWithSourceParameters(
-                AbstractParameter parameter,
-                Set<AbstractParameter> sourcePropositions) {
-            this.parameter = parameter;
-            this.sourceParameters = sourcePropositions;
-        }
+        this.logger = ProtempaUtil.logger();
     }
 
     @Override
@@ -152,7 +132,7 @@ final class CompoundLowLevelAbstractionConsequence implements
         if (cllad.getMinimumNumberOfValues() <= 1) {
             // We're matching all intervals, even if not consecutive.
             for (AbstractParameterWithSourceParameters param : derivedProps) {
-                assertDerivedProposition(workingMemory, param.parameter,
+                assertDerivedProposition(knowledgeHelper, param.parameter,
                         param.sourceParameters);
             }
         } else {
@@ -177,7 +157,7 @@ final class CompoundLowLevelAbstractionConsequence implements
                                 cllad.getPropositionId(), factory.getInstance(), seg, null,
                                 derivedProps.get(i).parameter.getValue(),
                                 null, null, cllad.getContextId());
-                        assertDerivedProposition(workingMemory, result,
+                        assertDerivedProposition(knowledgeHelper, result,
                                 derivedProps.get(i).sourceParameters);
                     }
                 }
@@ -188,6 +168,16 @@ final class CompoundLowLevelAbstractionConsequence implements
                 }
             }
         }
+    }
+    
+    private void assertDerivedProposition(KnowledgeHelper knowledgeHelper,
+            AbstractParameter derived, Set<AbstractParameter> sources) {
+        knowledgeHelper.insertLogical(derived);
+        for (AbstractParameter parameter : sources) {
+            derivationsBuilder.propositionAsserted(parameter, derived);
+        }
+        this.logger.log(Level.FINER,
+                "Asserted derived proposition {0}", derived);
     }
 
     private boolean allMatch(CompoundValuedInterval multiInterval,
@@ -240,5 +230,18 @@ final class CompoundLowLevelAbstractionConsequence implements
             }
         }
         return true;
+    }
+    
+    private static class AbstractParameterWithSourceParameters {
+
+        final AbstractParameter parameter;
+        final Set<AbstractParameter> sourceParameters;
+
+        public AbstractParameterWithSourceParameters(
+                AbstractParameter parameter,
+                Set<AbstractParameter> sourcePropositions) {
+            this.parameter = parameter;
+            this.sourceParameters = sourcePropositions;
+        }
     }
 }

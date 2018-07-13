@@ -22,7 +22,6 @@ package org.protempa;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.drools.StatelessSession;
 import org.drools.StatelessSessionResult;
@@ -35,7 +34,7 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
     StatelessExecutionStrategy(AlgorithmSource algorithmSource) {
         super(algorithmSource);
     }
-    
+
     @Override
     public void initialize(Collection<PropositionDefinition> allNarrowerDescendants,
             DerivationsBuilder listener) throws ExecutionStrategyInitializationException {
@@ -55,7 +54,7 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
     @Override
     public void closeCurrentWorkingMemory() {
     }
-    
+
     @Override
     public void shutdown() {
     }

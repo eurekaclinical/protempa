@@ -36,13 +36,13 @@ import org.protempa.proposition.Context;
  * @author Andrew Post
  */
 final class ContextCombiner implements TemporalPropositionCombiner<ContextDefinition> {
-    
-    private static final ClassObjectType CONTEXT_OBJECT_TYPE = 
-            new ClassObjectType(Context.class);
+
+    private static final ClassObjectType CONTEXT_OBJECT_TYPE
+            = new ClassObjectType(Context.class);
 
     @Override
-    public void toRules(ContextDefinition d, List<Rule> rules, 
-    DerivationsBuilder derivationsBuilder) {
+    public void toRules(ContextDefinition d, List<Rule> rules,
+            DerivationsBuilder derivationsBuilder) {
         try {
             Rule rule = new Rule("CONTEXT_COMBINER_" + d.getId());
             rule.setSalience(new SalienceInteger(3));
@@ -66,5 +66,5 @@ final class ContextCombiner implements TemporalPropositionCombiner<ContextDefini
                     "Could not create rules from " + d.toString() + ".", e);
         }
     }
-    
+
 }

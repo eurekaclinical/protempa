@@ -19,7 +19,7 @@
  */
 package org.protempa.test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,6 +28,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.List;
+import org.apache.commons.io.IOUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -76,7 +78,7 @@ public class ProtempaTest {
 
     private static final String ICD9_013_82 = "ICD9:013.82";
     private static final String ICD9_804 = "ICD9:804";
-    
+
     /**
      * The ground truth results directory for the test data
      */
@@ -159,9 +161,7 @@ public class ProtempaTest {
                     = new SingleColumnDestination(fw);
             protempa.execute(query(), destination);
         }
-        boolean outputMatches = outputMatches(outputFile, TRUTH_OUTPUT);
-        assertTrue("output doesn't match", outputMatches);
-
+        outputMatches(outputFile, TRUTH_OUTPUT);
     }
 
     private ContextDefinition context1() {
@@ -497,35 +497,21 @@ public class ProtempaTest {
         return query;
     }
 
-    private boolean outputMatches(File file1, String file2) throws IOException {
-        BufferedReader br1 = new BufferedReader(new FileReader(file1));
-        BufferedReader br2 = new BufferedReader(new FileReader(file2));
-        String line1 = null, line2 = null;
-
-        while ((line1 = br1.readLine()) != null
-                && ((line2 = br2.readLine()) != null)) {
-            if (!line1.equals(line2)) {
-                br1.close();
-                br2.close();
-                return false;
-            }
+    private void outputMatches(File actual, String expected) throws IOException {
+        BufferedReader actualReader = new BufferedReader(new FileReader(actual));
+        BufferedReader expectedReader = new BufferedReader(new FileReader(expected));
+        
+        List<String> actualLines = IOUtils.readLines(actualReader);
+        java.util.Map<String, Integer> countsActual = new java.util.HashMap<>();
+        for (String line : actualLines) {
+            countsActual.put(line, countsActual.getOrDefault(line, 0) + 1);
         }
-
-        // this accounts for the short-circuiting in the while loop above
-        // when line1 == null, we won't execute br2.readLine()
-        boolean retval = false;
-        if (line1 == null && line2 != null) {
-            line2 = br2.readLine();
-            if (line2 == null) {
-                retval = true;
-            } else {
-                retval = false;
-            }
+        List<String> expectedLines = IOUtils.readLines(expectedReader);
+        java.util.Map<String, Integer> countsExpected = new java.util.HashMap<>();
+        for (String line : expectedLines) {
+            countsExpected.put(line, countsExpected.getOrDefault(line, 0) + 1);
         }
-
-        br1.close();
-        br2.close();
-
-        return retval;
+        assertEquals(countsExpected, countsActual);
+        assertEquals(expectedLines, actualLines);
     }
 }

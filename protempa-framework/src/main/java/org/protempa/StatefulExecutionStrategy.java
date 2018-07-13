@@ -22,18 +22,24 @@ package org.protempa;
 import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.collections4.iterators.IteratorChain;
 import org.drools.FactException;
 import org.drools.FactHandle;
 import org.drools.StatefulSession;
+import org.drools.event.DefaultWorkingMemoryEventListener;
+import org.drools.event.ObjectRetractedEvent;
+import org.drools.event.WorkingMemoryEventListener;
 
 import org.eurekaclinical.datastore.DataStore;
 import org.protempa.datastore.WorkingMemoryDataStores;
+import org.protempa.proposition.AbstractProposition;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
 import org.protempa.query.QueryMode;
@@ -45,6 +51,20 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private WorkingMemoryDataStores workingMemoryDataStores;
     private StatefulSession workingMemory;
     private final QueryMode queryMode;
+    private final List<Proposition> propsToDelete = new ArrayList<>();
+    private final Logger logger = ProtempaUtil.logger();
+
+    private final WorkingMemoryEventListener workingMemoryEventListener
+            = new DefaultWorkingMemoryEventListener() {
+
+        @Override
+        public void objectRetracted(ObjectRetractedEvent ore) {
+            AbstractProposition propToDelete = (AbstractProposition) ore.getOldObject();
+            logger.log(Level.FINEST, "Retracted proposition {0}", propToDelete);
+            propToDelete.setDeleteDate(new Date());
+            propsToDelete.add(propToDelete);
+        }
+    };
 
     StatefulExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
         super(algorithmSource);
@@ -56,9 +76,9 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     @Override
-    public void initialize(Collection<PropositionDefinition> allNarrowerDescendants,
+    public void initialize(Collection<PropositionDefinition> cache,
             DerivationsBuilder listener) throws ExecutionStrategyInitializationException {
-        super.initialize(allNarrowerDescendants, listener);
+        super.initialize(cache, listener);
         createDataStoreManager();
         try {
             getDataStore();
@@ -79,6 +99,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
     @Override
     public void closeCurrentWorkingMemory() {
+        this.workingMemory.removeEventListener(this.workingMemoryEventListener);
         this.workingMemory.dispose();
     }
 
@@ -101,16 +122,14 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private void getDataStore() throws IOException {
-        Logger logger = ProtempaUtil.logger();
         this.dataStore = this.workingMemoryDataStores.getDataStore(this.databasePath.getName());
-        logger.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
+        this.logger.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
     }
 
     private void prepareDataStore() {
-        Logger logger = ProtempaUtil.logger();
         if (this.queryMode == QueryMode.REPLACE) {
             this.dataStore.clear();
-            logger.log(Level.FINE, "Cleared data store {0}", this.databasePath.getPath());
+            this.logger.log(Level.FINE, "Cleared data store {0}", this.databasePath.getPath());
         }
     }
 
@@ -120,15 +139,18 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             this.workingMemory = getRuleBase().newStatefulSession(false);
         }
         this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
+        this.workingMemory.addEventListener(this.workingMemoryEventListener);
     }
 
     private void insertRetrievedDataIntoWorkingMemory(List<?> objects) throws FactException {
         for (Object obj : objects) {
-            FactHandle factHandle = this.workingMemory.getFactHandle(obj);
+            Proposition prop = (Proposition) obj;
+            FactHandle factHandle = this.workingMemory.getFactHandle(prop);
             if (factHandle != null) {
-                this.workingMemory.update(factHandle, obj);
+                this.workingMemory.modifyRetract(factHandle);
+                this.workingMemory.modifyInsert(factHandle, prop);
             } else {
-                this.workingMemory.insert(obj);
+                this.workingMemory.insert(prop);
             }
         }
     }
@@ -138,16 +160,17 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private void persistWorkingMemory(String keyId) {
-        Logger logger = ProtempaUtil.logger();
-        logger.log(Level.FINEST,
+        this.logger.log(Level.FINEST,
                 "Persisting working memory for key ID {0}", keyId);
         this.dataStore.put(keyId, this.workingMemory);
-        logger.log(Level.FINEST,
+        this.logger.log(Level.FINEST,
                 "Persisted working memory for key ID {0}", keyId);
     }
 
     private Iterator<Proposition> getWorkingMemoryIterator() {
-        return (Iterator<Proposition>) this.workingMemory.iterateObjects();
+        return (Iterator<Proposition>) new IteratorChain(
+                this.workingMemory.iterateObjects(),
+                this.propsToDelete.iterator());
     }
 
     private ExecutionStrategyShutdownException closeDataStore() {
@@ -167,4 +190,5 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         }
         return null;
     }
+
 }

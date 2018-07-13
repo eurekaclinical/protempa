@@ -148,7 +148,7 @@ class ContextDefinitionInducedByConsequence implements Consequence {
         context.setInterval(this.intervalFactory.getInstance(minStart,
                 maxStart, startGran, minFinish, maxFinish, finishGran));
         context.setCreateDate(new Date());
-        kh.getWorkingMemory().insert(context);
+        kh.insertLogical(context);
 
         this.derivationsBuilder.propositionAsserted(prop, context);
     }

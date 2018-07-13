@@ -55,12 +55,12 @@ final class SingleColumnQueryResultsHandler
     @Override
     public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
         try {
-            this.data.put(keyId, new HashMap<Proposition, List<Proposition>>());
+            this.data.put(keyId, new HashMap<>());
             for (Proposition p : propositions) {
                 if (p.getCreateDate() == null) {
                     throw new QueryResultsHandlerProcessingException("invalid proposition with no create date: " + p);
                 }
-                this.data.get(keyId).put(p, new ArrayList<Proposition>());
+                this.data.get(keyId).put(p, new ArrayList<>());
                 storeDerivations(forwardDerivations.get(p), this.data.get(keyId).get(p));
                 storeDerivations(backwardDerivations.get(p), this.data.get(keyId).get(p));
             }

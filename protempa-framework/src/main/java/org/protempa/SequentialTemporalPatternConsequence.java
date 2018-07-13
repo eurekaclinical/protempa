@@ -184,7 +184,7 @@ class SequentialTemporalPatternConsequence implements Consequence {
                 AbstractParameterFactory.getFromAbstraction(
                 def.getPropositionId(), uniqueId,
                 segment, subList, null, temporalOffset, epds, null);
-        knowledgeHelper.getWorkingMemory().insert(result);
+        knowledgeHelper.insertLogical(result);
         for (Proposition proposition : segment) {
             this.derivationsBuilder.propositionAsserted(proposition, result);
         }
