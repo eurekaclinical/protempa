@@ -35,7 +35,6 @@ import org.drools.FactHandle;
 import org.drools.StatefulSession;
 import org.drools.event.DefaultWorkingMemoryEventListener;
 import org.drools.event.ObjectRetractedEvent;
-import org.drools.event.WorkingMemoryEventListener;
 
 import org.eurekaclinical.datastore.DataStore;
 import org.protempa.datastore.WorkingMemoryDataStores;
@@ -50,21 +49,30 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private DataStore<String, StatefulSession> dataStore;
     private WorkingMemoryDataStores workingMemoryDataStores;
     private StatefulSession workingMemory;
+    private final MyWorkingMemoryEventListener workingMemoryEventListener;
     private final QueryMode queryMode;
-    private final List<Proposition> propsToDelete = new ArrayList<>();
     private final Logger logger = ProtempaUtil.logger();
-
-    private final WorkingMemoryEventListener workingMemoryEventListener
-            = new DefaultWorkingMemoryEventListener() {
+    
+    private static final class MyWorkingMemoryEventListener extends DefaultWorkingMemoryEventListener {
+        private List<Proposition> propsToDelete = new ArrayList<>();
+        private Logger logger = ProtempaUtil.logger();
 
         @Override
         public void objectRetracted(ObjectRetractedEvent ore) {
             AbstractProposition propToDelete = (AbstractProposition) ore.getOldObject();
-            logger.log(Level.FINEST, "Retracted proposition {0}", propToDelete);
+            this.logger.log(Level.FINEST, "Retracted proposition {0}", propToDelete);
             propToDelete.setDeleteDate(new Date());
-            propsToDelete.add(propToDelete);
+            this.propsToDelete.add(propToDelete);
         }
-    };
+        
+        List<Proposition> getPropsToDelete() {
+            return this.propsToDelete;
+        }
+        
+        void clear() {
+            this.propsToDelete.clear();
+        }
+    }
 
     StatefulExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
         super(algorithmSource);
@@ -73,6 +81,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         assert dbPath != null : "query.getDatabasePath() cannot return a null value";
         this.databasePath = new File(dbPath);
         this.queryMode = query.getQueryMode();
+        this.workingMemoryEventListener = new MyWorkingMemoryEventListener();
     }
 
     @Override
@@ -100,6 +109,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     @Override
     public void closeCurrentWorkingMemory() {
         this.workingMemory.removeEventListener(this.workingMemoryEventListener);
+        this.workingMemoryEventListener.clear();
         this.workingMemory.dispose();
     }
 
@@ -170,7 +180,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private Iterator<Proposition> getWorkingMemoryIterator() {
         return (Iterator<Proposition>) new IteratorChain(
                 this.workingMemory.iterateObjects(),
-                this.propsToDelete.iterator());
+                this.workingMemoryEventListener.getPropsToDelete().iterator());
     }
 
     private ExecutionStrategyShutdownException closeDataStore() {
