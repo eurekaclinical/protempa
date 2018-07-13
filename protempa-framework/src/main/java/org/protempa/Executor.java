@@ -421,8 +421,13 @@ final class Executor implements AutoCloseable {
                 log(Level.FINER, "Do process thread interrupted", ex);
                 producer.interrupt();
             } catch (Error | RuntimeException t) {
-                log(Level.SEVERE, "Do process thread threw exception; the query may be hung", t);
-                throw t;
+                log(Level.SEVERE, "Do process thread threw runtime error", t);
+                producer.interrupt();
+                try {
+                    hqrQueue.put(hqrPoisonPill);
+                } catch (InterruptedException ignore) {
+                    log(Level.SEVERE, "Failed to stop the query results handler queue; the query may be hung", ignore);
+                }
             }
             log(Level.FINER, "End do process thread");
         }
