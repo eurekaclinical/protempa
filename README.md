@@ -29,9 +29,9 @@ Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-cent
 * Remove staging relational data source backend support.
 * Remove CLI code.
 * Remove Java Bean property support.
-* Propositions are now inserted into the Drools' working memory using the
-insertLogical method so that the rules engine will dynamically retract
-propositions correctly.
+* Propositions are now inserted into the Drools working memory using the
+insertLogical method rather than plain insert so that the rules engine will
+dynamically retract propositions correctly.
 
 ## Version 4.3.2
 * Actually write nominal column headers for tabular writers.
