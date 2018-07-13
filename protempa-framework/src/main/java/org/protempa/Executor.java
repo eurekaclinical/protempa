@@ -428,6 +428,7 @@ final class Executor implements AutoCloseable {
                 } catch (InterruptedException ignore) {
                     log(Level.SEVERE, "Failed to stop the query results handler queue; the query may be hung", ignore);
                 }
+                throw t;
             }
             log(Level.FINER, "End do process thread");
         }
