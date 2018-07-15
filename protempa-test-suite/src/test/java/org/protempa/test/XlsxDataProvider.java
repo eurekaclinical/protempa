@@ -28,6 +28,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -56,42 +60,6 @@ public class XlsxDataProvider implements DataProvider {
      * Holds the workbook associated with the data file.
      */
     private final XSSFWorkbook workbook;
-    /**
-     * The list of patients parsed from the data file.
-     */
-    private List<Patient> patients;
-    /**
-     * The list of providers parsed from the data file.
-     */
-    private List<Provider> providers;
-    /**
-     * The list of encounters parsed from the data file.
-     */
-    private List<Encounter> encounters;
-    /**
-     * The list of CPT codes parsed from the data file.
-     */
-    private List<CPT> cpts;
-    /**
-     * The list of ICD9 Diagnostic codes parsed from the data file.
-     */
-    private List<Icd9Diagnosis> icd9Diagnoses;
-    /**
-     * The list of ICD9 Procedure codes parsed from the data file.
-     */
-    private List<Icd9Procedure> icd9Procedures;
-    /**
-     * The list of medications parsed from the data file.
-     */
-    private List<Medication> medications;
-    /**
-     * The list of labs parsed from the data file.
-     */
-    private List<Lab> labs;
-    /**
-     * The list of vitals parsed from the data file.
-     */
-    private List<Vital> vitals;
 
     /**
      * Create the data provider from the given data file.
@@ -110,89 +78,56 @@ public class XlsxDataProvider implements DataProvider {
     }
 
     @Override
-    public List<Patient> getPatients() {
-        if (this.patients == null) {
-            this.patients = this.readPatients();
-        }
-        return this.patients;
+    public Stream<Patient> getPatients() {
+        return readPatients();
     }
 
     @Override
-    public List<Provider> getProviders() {
-        if (this.providers == null) {
-            this.providers = this.readProviders();
-        }
-        return this.providers;
+    public Stream<Provider> getProviders() {
+        return readProviders();
     }
 
     @Override
-    public List<Encounter> getEncounters() {
-        if (this.encounters == null) {
-            this.encounters = this.readEncounters();
-        }
-        return this.encounters;
+    public Stream<Encounter> getEncounters() {
+        return readEncounters();
     }
 
     @Override
-    public List<CPT> getCptCodes() {
-        if (this.cpts == null) {
-            this.cpts = this.readCpts();
-        }
-        return this.cpts;
+    public Stream<Icd9Diagnosis> getIcd9Diagnoses() {
+        return readIcd9Diagnoses();
     }
 
     @Override
-    public List<Icd9Diagnosis> getIcd9Diagnoses() {
-        if (this.icd9Diagnoses == null) {
-            this.icd9Diagnoses = this.readIcd9Diagnoses();
-        }
-        return this.icd9Diagnoses;
+    public Stream<Icd9Procedure> getIcd9Procedures() {
+        return readIcd9Procedures();
     }
 
     @Override
-    public List<Icd9Procedure> getIcd9Procedures() {
-        if (this.icd9Procedures == null) {
-            this.icd9Procedures = this.readIcd9Procedures();
-        }
-        return this.icd9Procedures;
+    public Stream<Medication> getMedications() {
+        return readMedications();
     }
 
     @Override
-    public List<Medication> getMedications() {
-        if (this.medications == null) {
-            this.medications = this.readMedications();
-        }
-        return this.medications;
+    public Stream<Lab> getLabs() {
+        return readLabs();
     }
 
     @Override
-    public List<Lab> getLabs() {
-        if (this.labs == null) {
-            this.labs = this.readLabs();
-        }
-        return this.labs;
-    }
-
-    @Override
-    public List<Vital> getVitals() {
-        if (this.vitals == null) {
-            this.vitals = this.readVitals();
-        }
-        return this.vitals;
+    public Stream<Vital> getVitals() {
+        return this.readVitals();
     }
 
     /**
-     * Parse the list of patients from the workbook.
+     * Parse the stream of patients from the workbook.
      *
-     * @return A list of {@link Patient} objects.
+     * @return A stream of {@link Patient} objects.
      */
-    private List<Patient> readPatients() {
+    private Stream<Patient> readPatients() {
         XSSFSheet sheet = this.workbook.getSheet("patient");
-        List<Patient> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
-        while (rows.hasNext()) {
-            Row row = rows.next();
+        Stream<Row> stream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(rows, Spliterator.ORDERED), false);
+        return stream.map(row -> {
             Patient patient = new Patient();
             patient.setId(XlsxDataProvider.readLongValue(row.getCell(0)));
             patient.setFirstName(XlsxDataProvider.readStringValue(row
@@ -208,23 +143,21 @@ public class XlsxDataProvider implements DataProvider {
             patient.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(8)));
             patient.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(9)));
             patient.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(10)));
-            result.add(patient);
-        }
-        return result;
+            return patient;
+        });
     }
 
     /**
-     * Parse the list of providers in the workbook.
+     * Parse the stream of providers in the workbook.
      *
-     * @return A list of {@link Provider} objects.
+     * @return A stream of {@link Provider} objects.
      */
-    private List<Provider> readProviders() {
+    private Stream<Provider> readProviders() {
         XSSFSheet sheet = this.workbook.getSheet("provider");
-        List<Provider> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
-        while (rows.hasNext()) {
-            Row row = rows.next();
+        Stream<Row> stream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(rows, Spliterator.ORDERED), false);
+        return stream.map(row -> {
             Provider provider = new Provider();
             provider.setId(XlsxDataProvider.readLongValue(row.getCell(0)));
             provider.setFirstName(XlsxDataProvider.readStringValue(row
@@ -234,23 +167,21 @@ public class XlsxDataProvider implements DataProvider {
             provider.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(3)));
             provider.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(4)));
             provider.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(5)));
-            result.add(provider);
-        }
-        return result;
+            return provider;
+        });
     }
 
     /**
-     * Parse the list of encounters in the workbook.
+     * Parse the stream of encounters in the workbook.
      *
-     * @return A list of {@link Encounter} objects.
+     * @return A stream of {@link Encounter} objects.
      */
-    private List<Encounter> readEncounters() {
+    private Stream<Encounter> readEncounters() {
         XSSFSheet sheet = this.workbook.getSheet("encounter");
-        List<Encounter> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
-        while (rows.hasNext()) {
-            Row row = rows.next();
+        Stream<Row> stream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(rows, Spliterator.ORDERED), false);
+        return stream.map(row -> {
             Encounter encounter = new Encounter();
             encounter.setId(XlsxDataProvider.readLongValue(row.getCell(0)));
             encounter.setPatientId(XlsxDataProvider.readLongValue(row
@@ -265,48 +196,21 @@ public class XlsxDataProvider implements DataProvider {
             encounter.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(7)));
             encounter.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(8)));
             encounter.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(9)));
-            result.add(encounter);
-        }
-        return result;
+            return encounter;
+        });
     }
 
     /**
-     * Parse the list of CPT codes in the workbook.
+     * Parse the stream of ICD9 Diagnostic codes present in the workbook.
      *
-     * @return A list of {@link CPT} objects.
+     * @return A stream of {@link Icd9Diagnosis} objects.
      */
-    private List<CPT> readCpts() {
-        XSSFSheet sheet = this.workbook.getSheet("eCPT");
-        List<CPT> result = new ArrayList<>();
-        Iterator<Row> rows = sheet.rowIterator();
-        rows.next(); // skip header row
-        while (rows.hasNext()) {
-            Row row = rows.next();
-            CPT cpt = new CPT();
-            cpt.setId(XlsxDataProvider.readStringValue(row.getCell(0)));
-            cpt.setEncounterId(XlsxDataProvider.readLongValue(row.getCell(1)));
-            cpt.setTimestamp(XlsxDataProvider.readDateValue(row.getCell(2)));
-            cpt.setEntityId(XlsxDataProvider.readStringValue(row.getCell(3)));
-            cpt.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(4)));
-            cpt.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(5)));
-            cpt.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(6)));
-            result.add(cpt);
-        }
-        return result;
-    }
-
-    /**
-     * Parse the list of ICD9 Diagnostic codes present in the workbook.
-     *
-     * @return A list of {@link Icd9Diagnosis} objects.
-     */
-    private List<Icd9Diagnosis> readIcd9Diagnoses() {
+    private Stream<Icd9Diagnosis> readIcd9Diagnoses() {
         XSSFSheet sheet = this.workbook.getSheet("eICD9D");
-        List<Icd9Diagnosis> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
-        while (rows.hasNext()) {
-            Row row = rows.next();
+        Stream<Row> stream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(rows, Spliterator.ORDERED), false);
+        return stream.map(row -> {
             Icd9Diagnosis diagnosis = new Icd9Diagnosis();
             diagnosis.setId(XlsxDataProvider.readStringValue(row.getCell(0)));
             diagnosis.setEncounterId(XlsxDataProvider.readLongValue(row
@@ -318,23 +222,21 @@ public class XlsxDataProvider implements DataProvider {
             diagnosis.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(4)));
             diagnosis.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(5)));
             diagnosis.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(6)));
-            result.add(diagnosis);
-        }
-        return result;
+            return diagnosis;
+        });
     }
 
     /**
-     * Parse the list of ICD9 Procedure codes present in the workbook.
+     * Parse the stream of ICD9 Procedure codes present in the workbook.
      *
-     * @return A list of {@link Icd9Procedure} objects.
+     * @return A stream of {@link Icd9Procedure} objects.
      */
-    private List<Icd9Procedure> readIcd9Procedures() {
+    private Stream<Icd9Procedure> readIcd9Procedures() {
         XSSFSheet sheet = this.workbook.getSheet("eICD9P");
-        List<Icd9Procedure> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
-        while (rows.hasNext()) {
-            Row row = rows.next();
+        Stream<Row> stream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(rows, Spliterator.ORDERED), false);
+        return stream.map(row -> {
             Icd9Procedure procedure = new Icd9Procedure();
             procedure.setId(XlsxDataProvider.readStringValue(row.getCell(0)));
             procedure.setEncounterId(XlsxDataProvider.readLongValue(row
@@ -346,23 +248,21 @@ public class XlsxDataProvider implements DataProvider {
             procedure.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(4)));
             procedure.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(5)));
             procedure.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(6)));
-            result.add(procedure);
-        }
-        return result;
+            return procedure;
+        });
     }
 
     /**
-     * Parse the list of medications present in the workbook.
+     * Parse the stream of medications present in the workbook.
      *
-     * @return A list of {@link Medication} objects.
+     * @return A stream of {@link Medication} objects.
      */
-    private List<Medication> readMedications() {
+    private Stream<Medication> readMedications() {
         XSSFSheet sheet = this.workbook.getSheet("eMEDS");
-        List<Medication> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
-        while (rows.hasNext()) {
-            Row row = rows.next();
+        Stream<Row> stream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(rows, Spliterator.ORDERED), false);
+        return stream.map(row -> {
             Medication medication = new Medication();
             medication.setId(XlsxDataProvider.readStringValue(row.getCell(0)));
             medication.setEncounterId(XlsxDataProvider.readLongValue(row
@@ -374,23 +274,21 @@ public class XlsxDataProvider implements DataProvider {
             medication.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(4)));
             medication.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(5)));
             medication.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(6)));
-            result.add(medication);
-        }
-        return result;
+            return medication;
+        });
     }
 
     /**
-     * Parse the list of labs present in the workbook's "eLABS" worksheet.
+     * Parse the stream of labs present in the workbook's "eLABS" worksheet.
      *
-     * @return A list of {@link Lab} objects.
+     * @return A stream of {@link Lab} objects.
      */
-    private List<Lab> readLabs() {
+    private Stream<Lab> readLabs() {
         XSSFSheet sheet = this.workbook.getSheet("eLABS");
-        List<Lab> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
-        while (rows.hasNext()) {
-            Row row = rows.next();
+        Stream<Row> stream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(rows, Spliterator.ORDERED), false);
+        return stream.map(row -> {
             Lab lab = new Lab();
             lab.setId(XlsxDataProvider.readStringValue(row.getCell(0)));
             lab.setEncounterId(XlsxDataProvider.readLongValue(row.getCell(1)));
@@ -403,23 +301,21 @@ public class XlsxDataProvider implements DataProvider {
             lab.setCreateDate(XlsxDataProvider.readDateValue(row.getCell(8)));
             lab.setUpdateDate(XlsxDataProvider.readDateValue(row.getCell(9)));
             lab.setDeleteDate(XlsxDataProvider.readDateValue(row.getCell(10)));
-            result.add(lab);
-        }
-        return result;
+            return lab;
+        });
     }
 
     /**
-     * Parse the list of vitals present in the workbook's "eVITALS" worksheet.
+     * Parse the stream of vitals present in the workbook's "eVITALS" worksheet.
      *
-     * @return A list of {@link Vital} objects.
+     * @return A stream of {@link Vital} objects.
      */
-    private List<Vital> readVitals() {
+    private Stream<Vital> readVitals() {
         XSSFSheet sheet = this.workbook.getSheet("eVITALS");
-        List<Vital> result = new ArrayList<>();
         Iterator<Row> rows = sheet.rowIterator();
         rows.next(); // skip header row
-        while (rows.hasNext()) {
-            Row row = rows.next();
+        Stream<Row> stream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(rows, Spliterator.ORDERED), false);
+        return stream.map(row -> {
             Vital vital = new Vital();
             vital.setId(readStringValue(row.getCell(0)));
             vital.setEncounterId(readLongValue(row.getCell(1)));
@@ -432,9 +328,8 @@ public class XlsxDataProvider implements DataProvider {
             vital.setCreateDate(readDateValue(row.getCell(8)));
             vital.setUpdateDate(readDateValue(row.getCell(9)));
             vital.setDeleteDate(readDateValue(row.getCell(10)));
-            result.add(vital);
-        }
-        return result;
+            return vital;
+        });
     }
 
     /**
@@ -499,8 +394,8 @@ public class XlsxDataProvider implements DataProvider {
         if (cell == null) {
             result = null;
         } else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-            Double value = new Double(cell.getNumericCellValue());
-            result = new Long(value.longValue());
+            Double value = Double.valueOf(cell.getNumericCellValue());
+            result = Long.valueOf(value.longValue());
         } else {
             result = null;
         }
@@ -519,7 +414,7 @@ public class XlsxDataProvider implements DataProvider {
             result = null;
         } else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
             double value = cell.getNumericCellValue();
-            result = new Double(value);
+            result = Double.valueOf(value);
         } else {
             result = null;
         }

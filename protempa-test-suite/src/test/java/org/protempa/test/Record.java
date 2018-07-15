@@ -19,14 +19,14 @@ package org.protempa.test;
  * limitations under the License.
  * #L%
  */
-
 import java.util.Date;
 
 /**
  *
- * @author arpost
+ * @author Andrew Post
  */
-abstract class Record {
+public abstract class Record {
+
     private Date createDate;
     private Date updateDate;
     private Date deleteDate;
@@ -54,6 +54,5 @@ abstract class Record {
     void setDeleteDate(Date deleteDate) {
         this.deleteDate = deleteDate;
     }
-    
-    
+
 }

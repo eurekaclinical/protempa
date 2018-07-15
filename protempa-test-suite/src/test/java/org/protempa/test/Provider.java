@@ -25,6 +25,6 @@ package org.protempa.test;
  * @author hrathod
  * 
  */
-class Provider extends Person {
+public class Provider extends Person {
 	// no additional fields, yet.
 }

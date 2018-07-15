@@ -25,6 +25,6 @@ package org.protempa.test;
  * @author hrathod
  * 
  */
-class Lab extends ObservationWithResult {
+public class Lab extends ObservationWithResult {
 	// no additional fields needed, yet.
 }

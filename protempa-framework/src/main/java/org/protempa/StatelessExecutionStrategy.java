@@ -22,6 +22,7 @@ package org.protempa;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.commons.collections4.iterators.IteratorChain;
 
 import org.drools.StatelessSession;
 import org.drools.StatelessSessionResult;
@@ -30,9 +31,11 @@ import org.protempa.proposition.Proposition;
 class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
     private StatelessSession statelessSession;
+    private final DeletedWorkingMemoryEventListener workingMemoryEventListener;
 
     StatelessExecutionStrategy(AlgorithmSource algorithmSource) {
         super(algorithmSource);
+        this.workingMemoryEventListener = new DeletedWorkingMemoryEventListener();
     }
 
     @Override
@@ -46,9 +49,11 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
     @SuppressWarnings("unchecked")
     public Iterator<Proposition> execute(String keyId, List<?> objects) {
         this.statelessSession.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
+        this.statelessSession.addEventListener(this.workingMemoryEventListener);
         StatelessSessionResult result = this.statelessSession
                 .executeWithResults(objects);
-        return result.iterateObjects();
+        this.statelessSession.removeEventListener(this.workingMemoryEventListener);
+        return getWorkingMemoryIterator(result);
     }
 
     @Override
@@ -57,6 +62,12 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
     @Override
     public void shutdown() {
+    }
+    
+    private Iterator<Proposition> getWorkingMemoryIterator(StatelessSessionResult result) {
+        return (Iterator<Proposition>) new IteratorChain(
+                result.iterateObjects(),
+                this.workingMemoryEventListener.getPropsToDelete().iterator());
     }
 
 }

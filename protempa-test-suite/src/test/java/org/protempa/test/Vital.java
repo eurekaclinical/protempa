@@ -25,6 +25,6 @@ package org.protempa.test;
  * @author hrathod
  * 
  */
-class Vital extends ObservationWithResult {
+public class Vital extends ObservationWithResult {
 	// no additional fields needed, yet.
 }

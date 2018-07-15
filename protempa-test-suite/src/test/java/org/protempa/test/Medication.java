@@ -25,6 +25,6 @@ package org.protempa.test;
  * @author hrathod
  * 
  */
-class Medication extends Observation {
+public class Medication extends Observation {
 	// No new fields to add, yet.
 }

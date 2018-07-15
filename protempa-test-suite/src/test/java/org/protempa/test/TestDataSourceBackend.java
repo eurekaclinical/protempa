@@ -107,9 +107,11 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
         } catch (SQLException ex) {
             if (exceptionToThrow == null) {
                 exceptionToThrow = ex;
+            } else {
+                exceptionToThrow.addSuppressed(ex);
             }
         }
-
+        
         if (exceptionToThrow != null) {
             throw new BackendCloseException(exceptionToThrow);
         }
