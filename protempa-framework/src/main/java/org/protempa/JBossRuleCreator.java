@@ -84,19 +84,14 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             Context.class);
     private static final SalienceInteger TWO_SALIENCE = new SalienceInteger(2);
     private static final SalienceInteger ONE_SALIENCE = new SalienceInteger(1);
-    private static final SalienceInteger ZERO_SALIENCE = new SalienceInteger(0);
-    private static final SalienceInteger MINUS_TWO_SALIENCE = new SalienceInteger(
-            -2);
-    private static final SalienceInteger MINUS_THREE_SALIENCE = new SalienceInteger(
-            -3);
-    private static final SalienceInteger MINUS_FOUR_SALIENCE = new SalienceInteger(
-            -4);
+    private static final SalienceInteger MINUS_TWO_SALIENCE = new SalienceInteger(-2);
+    private static final SalienceInteger MINUS_THREE_SALIENCE = new SalienceInteger(-3);
+    private static final AbstractionCombiner ABSTRACTION_COMBINER = new AbstractionCombiner();
+    private static final ContextCombiner CONTEXT_COMBINER = new ContextCombiner();
     private final Map<LowLevelAbstractionDefinition, Algorithm> algorithms;
     private final List<Rule> rules;
     private final Map<Rule, TemporalPropositionDefinition> ruleToAbstractionDefinition;
     private final DerivationsBuilder derivationsBuilder;
-    private int inverseIsAIndex = -1;
-    private boolean getRulesCalled;
     private final Map<String, PropositionDefinition> cache;
 
     JBossRuleCreator(Map<LowLevelAbstractionDefinition, Algorithm> algorithms,
@@ -104,13 +99,13 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         assert allNarrowerDescendants != null : "allNarrowerDescendants cannot be null";
         this.algorithms = algorithms;
         this.rules = new ArrayList<>();
-        this.ruleToAbstractionDefinition
-                = new HashMap<>();
+        this.ruleToAbstractionDefinition = new HashMap<>();
         this.derivationsBuilder = derivationsBuilder;
         this.cache = new HashMap<>();
         for (PropositionDefinition pd : allNarrowerDescendants) {
             this.cache.put(pd.getId(), pd);
         }
+        new DeletedProposition().toRules(this.rules, this.derivationsBuilder);
     }
 
     /**
@@ -130,7 +125,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(ContextDefinition def) {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
-        this.getRulesCalled = false;
         try {
             boolean ruleCreated = false;
             TemporalExtendedPropositionDefinition[] tepds = def.getInducedBy();
@@ -152,8 +146,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             }
 
             if (ruleCreated) {
-                new ContextCombiner()
-                        .toRules(def, rules, this.derivationsBuilder);
+                CONTEXT_COMBINER.toRules(def, rules, this.derivationsBuilder);
             }
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
@@ -172,7 +165,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(LowLevelAbstractionDefinition def) {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
-        this.getRulesCalled = false;
         try {
             /*
              * If there are no value definitions defined, we might still have an
@@ -224,7 +216,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(CompoundLowLevelAbstractionDefinition def) {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
-        this.getRulesCalled = false;
         try {
             if (!def.getLowLevelAbstractionIds().isEmpty()) {
                 Rule rule = new Rule(def.getId());
@@ -248,43 +239,11 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 rule.setSalience(ONE_SALIENCE);
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
-                new AbstractionCombiner()
-                        .toRules(def, rules, this.derivationsBuilder);
+                ABSTRACTION_COMBINER.toRules(def, rules, this.derivationsBuilder);
             }
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
                     + e.getMessage());
-        }
-    }
-
-    /**
-     * This needs to be static. Predicate expressions may be serialized, and
-     * if an instance of this predicate expression is serialized, it would
-     * also force serialization of the enclosing class.
-     */
-    private static final class GetMatchesPredicateExpression implements
-            PredicateExpression {
-
-        private static final long serialVersionUID = -6225160728904051528L;
-        private final ExtendedPropositionDefinition epd;
-        private final Set<String> subtrees;
-
-        private GetMatchesPredicateExpression(ExtendedPropositionDefinition epd, JBossRuleCreator creator) {
-            assert epd != null : "epd cannot be null";
-            this.epd = epd;
-            this.subtrees = creator.collectPropIdDescendantsUsingInverseIsA(epd.getPropositionId());
-        }
-
-        @Override
-        public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
-                Declaration[] arg3, WorkingMemory arg4, Object context)
-                throws Exception {
-            return epd.getMatches((Proposition) arg0, subtrees);
-        }
-
-        @Override
-        public Object createContext() {
-            return null;
         }
     }
 
@@ -299,7 +258,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(HighLevelAbstractionDefinition def) {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
-        this.getRulesCalled = false;
         try {
             Set<ExtendedPropositionDefinition> epdsC = def
                     .getExtendedPropositionDefinitions();
@@ -328,8 +286,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                         epds, this.derivationsBuilder));
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
-                new AbstractionCombiner()
-                        .toRules(def, rules, this.derivationsBuilder);
+                ABSTRACTION_COMBINER.toRules(def, rules, this.derivationsBuilder);
             }
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
@@ -347,7 +304,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(SliceDefinition def) throws KnowledgeSourceReadException {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
-        this.getRulesCalled = false;
         try {
             Set<TemporalExtendedPropositionDefinition> epdsC = def
                     .getTemporalExtendedPropositionDefinitions();
@@ -400,7 +356,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     @Override
     public void visit(SequentialTemporalPatternDefinition def) throws ProtempaException {
         ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
-        this.getRulesCalled = false;
         try {
             TemporalExtendedPropositionDefinition lhs = def.getFirstTemporalExtendedPropositionDefinition();
             if (lhs != null) {
@@ -431,8 +386,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 rule.setSalience(MINUS_TWO_SALIENCE);
                 this.ruleToAbstractionDefinition.put(rule, def);
                 rules.add(rule);
-                new AbstractionCombiner()
-                        .toRules(def, rules, this.derivationsBuilder);
+                ABSTRACTION_COMBINER.toRules(def, rules, this.derivationsBuilder);
             }
         } catch (InvalidRuleException e) {
             throw new AssertionError(e.getClass().getName() + ": "
@@ -449,8 +403,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      */
     @Override
     public void visit(EventDefinition def) {
-        this.getRulesCalled = false;
-
     }
 
     /**
@@ -462,7 +414,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      */
     @Override
     public void visit(ConstantDefinition def) {
-        this.getRulesCalled = false;
     }
 
     /**
@@ -475,7 +426,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      */
     @Override
     public void visit(PrimitiveParameterDefinition def) {
-        this.getRulesCalled = false;
     }
 
     /**
@@ -484,7 +434,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * @return a {@link Rule[]}. Guaranteed not <code>null</code>.
      */
     Rule[] getRules() {
-        this.getRulesCalled = true;
         return this.rules.toArray(new Rule[this.rules.size()]);
     }
     
@@ -505,6 +454,37 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             }
         }
         return result;
+    }
+    
+    /**
+     * This needs to be static. Predicate expressions may be serialized, and
+     * if an instance of this predicate expression is serialized, it would
+     * also force serialization of the enclosing class.
+     */
+    private static final class GetMatchesPredicateExpression implements
+            PredicateExpression {
+
+        private static final long serialVersionUID = -6225160728904051528L;
+        private final ExtendedPropositionDefinition epd;
+        private final Set<String> subtrees;
+
+        private GetMatchesPredicateExpression(ExtendedPropositionDefinition epd, JBossRuleCreator creator) {
+            assert epd != null : "epd cannot be null";
+            this.epd = epd;
+            this.subtrees = creator.collectPropIdDescendantsUsingInverseIsA(epd.getPropositionId());
+        }
+
+        @Override
+        public boolean evaluate(Object arg0, Tuple arg1, Declaration[] arg2,
+                Declaration[] arg3, WorkingMemory arg4, Object context)
+                throws Exception {
+            return epd.getMatches((Proposition) arg0, subtrees);
+        }
+
+        @Override
+        public Object createContext() {
+            return null;
+        }
     }
 
 }

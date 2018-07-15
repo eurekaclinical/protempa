@@ -38,7 +38,7 @@ import org.protempa.proposition.AbstractParameter;
  *
  * @author Andrew Post
  */
-final class AbstractionCombiner implements TemporalPropositionCombiner<AbstractionDefinition> {
+final class AbstractionCombiner implements RuleCreator<AbstractionDefinition> {
 
     private static final ClassObjectType ABSTRACT_PARAMETER_OBJECT_TYPE = new ClassObjectType(
             AbstractParameter.class);
@@ -46,6 +46,7 @@ final class AbstractionCombiner implements TemporalPropositionCombiner<Abstracti
     AbstractionCombiner() {
     }
 
+    @Override
     public void toRules(AbstractionDefinition d, List<Rule> rules,
             DerivationsBuilder derivationsBuilder) {
         try {

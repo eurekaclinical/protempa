@@ -19,7 +19,6 @@
  */
 package org.protempa.proposition;
 
-import java.beans.PropertyChangeListener;
 import java.util.Date;
 import java.util.List;
 import org.protempa.SourceSystem;

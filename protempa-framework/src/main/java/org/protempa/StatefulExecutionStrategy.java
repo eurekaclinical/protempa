@@ -38,7 +38,6 @@ import org.drools.event.ObjectRetractedEvent;
 
 import org.eurekaclinical.datastore.DataStore;
 import org.protempa.datastore.WorkingMemoryDataStores;
-import org.protempa.proposition.AbstractProposition;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
 import org.protempa.query.QueryMode;
@@ -49,30 +48,10 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private DataStore<String, StatefulSession> dataStore;
     private WorkingMemoryDataStores workingMemoryDataStores;
     private StatefulSession workingMemory;
-    private final MyWorkingMemoryEventListener workingMemoryEventListener;
+    private final DeletedWorkingMemoryEventListener workingMemoryEventListener;
     private final QueryMode queryMode;
     private final Logger logger = ProtempaUtil.logger();
-    
-    private static final class MyWorkingMemoryEventListener extends DefaultWorkingMemoryEventListener {
-        private List<Proposition> propsToDelete = new ArrayList<>();
-        private Logger logger = ProtempaUtil.logger();
 
-        @Override
-        public void objectRetracted(ObjectRetractedEvent ore) {
-            AbstractProposition propToDelete = (AbstractProposition) ore.getOldObject();
-            this.logger.log(Level.FINEST, "Retracted proposition {0}", propToDelete);
-            propToDelete.setDeleteDate(new Date());
-            this.propsToDelete.add(propToDelete);
-        }
-        
-        List<Proposition> getPropsToDelete() {
-            return this.propsToDelete;
-        }
-        
-        void clear() {
-            this.propsToDelete.clear();
-        }
-    }
 
     StatefulExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
         super(algorithmSource);
@@ -81,7 +60,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         assert dbPath != null : "query.getDatabasePath() cannot return a null value";
         this.databasePath = new File(dbPath);
         this.queryMode = query.getQueryMode();
-        this.workingMemoryEventListener = new MyWorkingMemoryEventListener();
+        this.workingMemoryEventListener = new DeletedWorkingMemoryEventListener();
     }
 
     @Override
@@ -108,8 +87,6 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
     @Override
     public void closeCurrentWorkingMemory() {
-        this.workingMemory.removeEventListener(this.workingMemoryEventListener);
-        this.workingMemoryEventListener.clear();
         this.workingMemory.dispose();
     }
 
@@ -146,10 +123,14 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private void getOrCreateWorkingMemoryInstance(String keyId) {
         this.workingMemory = this.dataStore.get(keyId);
         if (this.workingMemory == null) {
-            this.workingMemory = getRuleBase().newStatefulSession(false);
+            createWorkingMemory(keyId);
         }
-        this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
         this.workingMemory.addEventListener(this.workingMemoryEventListener);
+    }
+
+    private void createWorkingMemory(String keyId) {
+        this.workingMemory = getRuleBase().newStatefulSession(false);
+        this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
     }
 
     private void insertRetrievedDataIntoWorkingMemory(List<?> objects) throws FactException {
@@ -170,6 +151,8 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private void persistWorkingMemory(String keyId) {
+        this.workingMemory.removeEventListener(this.workingMemoryEventListener);
+        this.workingMemoryEventListener.clear();
         this.logger.log(Level.FINEST,
                 "Persisting working memory for key ID {0}", keyId);
         this.dataStore.put(keyId, this.workingMemory);

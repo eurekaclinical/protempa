@@ -35,7 +35,7 @@ import org.protempa.proposition.Context;
  *
  * @author Andrew Post
  */
-final class ContextCombiner implements TemporalPropositionCombiner<ContextDefinition> {
+final class ContextCombiner implements RuleCreator<ContextDefinition> {
 
     private static final ClassObjectType CONTEXT_OBJECT_TYPE
             = new ClassObjectType(Context.class);

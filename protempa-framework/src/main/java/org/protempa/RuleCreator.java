@@ -26,6 +26,6 @@ import org.drools.rule.Rule;
  *
  * @author Andrew Post
  */
-interface TemporalPropositionCombiner<T extends TemporalPropositionDefinition> {
-    void toRules(T d, List<Rule> rules, DerivationsBuilder derivationsBuilder);
+interface RuleCreator<P extends PropositionDefinition> {
+    void toRules(P d, List<Rule> rules, DerivationsBuilder derivationsBuilder);
 }
