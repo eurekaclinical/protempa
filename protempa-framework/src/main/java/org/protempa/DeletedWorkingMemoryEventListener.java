@@ -19,7 +19,6 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -41,21 +40,23 @@ final class DeletedWorkingMemoryEventListener extends DefaultWorkingMemoryEventL
 
     private final List<Proposition> propsToDelete;
     private final Logger logger;
-    private final SetDeletedPropositionVisitor visitor;
+    private final SetDeleteDatePropositionVisitor setDeleteDatePropVisitor;
 
     public DeletedWorkingMemoryEventListener() {
         this.propsToDelete = new ArrayList<>();
         this.logger = ProtempaUtil.logger();
-        this.visitor = new SetDeletedPropositionVisitor();
+        this.setDeleteDatePropVisitor = new SetDeleteDatePropositionVisitor();
     }
 
     /**
      * Listens for retracted propositions that were retracted as a result of
      * another proposition coming from a data source backend with a non-null
-     * delete date, creates a copy of those propositions with their delete date
-     * set to the date when the listener instance was created.
+     * delete date. Adds them to a list that will be passed to the
+     * query results handler along with propositions that remain in working
+     * memory.
      *
-     * @param ore
+     * @param ore an object retracted event containing the retracted object
+     * and other metadata.
      */
     @Override
     public void objectRetracted(ObjectRetractedEvent ore) {
@@ -63,12 +64,8 @@ final class DeletedWorkingMemoryEventListener extends DefaultWorkingMemoryEventL
         if (name.equals("DELETE_PROPOSITION")) {
             Proposition prop = (Proposition) ore.getOldObject();
             this.logger.log(Level.FINEST, "Deleted proposition {0}", prop);
-            if (prop.getDeleteDate() == null) {
-                prop.accept(this.visitor);
-                this.propsToDelete.add(this.visitor.getDeletedCopy());
-            } else {
-                this.propsToDelete.add(prop);
-            }
+            prop.accept(this.setDeleteDatePropVisitor);
+            this.propsToDelete.add(this.setDeleteDatePropVisitor.getDeleted());
         }
     }
 

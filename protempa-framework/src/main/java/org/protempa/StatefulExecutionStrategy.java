@@ -22,9 +22,7 @@ package org.protempa;
 import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -33,8 +31,6 @@ import org.apache.commons.collections4.iterators.IteratorChain;
 import org.drools.FactException;
 import org.drools.FactHandle;
 import org.drools.StatefulSession;
-import org.drools.event.DefaultWorkingMemoryEventListener;
-import org.drools.event.ObjectRetractedEvent;
 
 import org.eurekaclinical.datastore.DataStore;
 import org.protempa.datastore.WorkingMemoryDataStores;
