@@ -391,25 +391,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         return filterList;
     }
 
-    private DataStager doStage(Collection<EntitySpec> allEntitySpecs,
-            Filter filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order) throws DataSourceReadException {
-        DataStager stager = null;
-
-        try {
-            stager = getDataStager(null,
-                    new LinkedList<>(allEntitySpecs),
-                    copyFilters(filters), propIds, keyIds, order,
-                    this.connectionSpec);
-            stager.stageTables();
-        } catch (SQLException ex) {
-            Logger logger = SQLGenUtil.logger();
-            logger.log(Level.SEVERE, "Failed to create staging area", ex);
-            throw new DataSourceReadException(ex);
-        }
-        return stager;
-    }
-
     private static SQLGenResultProcessorFactory<Proposition> getResultProcessorFactory(
             Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecToResultProcessor,
             EntitySpec entitySpec) {
