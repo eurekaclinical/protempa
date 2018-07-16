@@ -21,7 +21,6 @@ package org.protempa.backend.dsb.relationaldb;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.Set;
 import org.arp.javautil.sql.ConnectionSpec;
 
