@@ -50,7 +50,7 @@ import org.protempa.dest.GetSupportedPropositionIdsException;
  * @author Andrew Post
  */
 public final class Protempa implements AutoCloseable {
-
+    private static final Logger LOGGER = Logger.getLogger(Protempa.class.getName());
     private static final String STARTUP_FAILURE_MSG = "PROTEMPA could not start up";
 
     public static Protempa newInstance(String configurationId)
@@ -214,10 +214,9 @@ public final class Protempa implements AutoCloseable {
         if (destination == null) {
             throw new IllegalArgumentException("resultsHandler cannot be null");
         }
-        Logger logger = ProtempaUtil.logger();
-        logger.log(Level.INFO, "Executing query {0}", query.getName());
+        LOGGER.log(Level.INFO, "Executing query {0}", query.getName());
         this.abstractionFinder.doFind(query, destination);
-        logger.log(Level.INFO, "Query {0} execution complete", query.getName());
+        LOGGER.log(Level.INFO, "Query {0} execution complete", query.getName());
     }
 
     /**
@@ -284,7 +283,7 @@ public final class Protempa implements AutoCloseable {
     @Override
     public void close() throws CloseException {
         this.abstractionFinder.close();
-        ProtempaUtil.logger().info("Protempa closed");
+        LOGGER.info("Protempa closed");
     }
 
     /**
@@ -295,6 +294,6 @@ public final class Protempa implements AutoCloseable {
         this.abstractionFinder.getAlgorithmSource().clear();
         this.abstractionFinder.getDataSource().clear();
         this.abstractionFinder.getKnowledgeSource().clear();
-        ProtempaUtil.logger().fine("Protempa cleared");
+        LOGGER.fine("Protempa cleared");
     }
 }

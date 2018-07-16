@@ -42,6 +42,7 @@ import org.protempa.proposition.interval.Relation;
 final class LowLevelAbstractionConsequence implements Consequence {
 
     private static final long serialVersionUID = 2455607587534331595L;
+    private static final Logger LOGGER = Logger.getLogger(LowLevelAbstractionConsequence.class.getName());
     private static final Relation REL = new Relation(null, null, 0, null, null,
             null, null, null, null, null, null, null, 0, null, null, null);
     private final LowLevelAbstractionDefinition def;
@@ -57,13 +58,12 @@ final class LowLevelAbstractionConsequence implements Consequence {
     }
 
     private static class MyObjectAsserter implements ObjectAsserter {
-        private final Logger logger = ProtempaUtil.logger();
         private KnowledgeHelper knowledgeHelper;
 
         @Override
         public void assertObject(Object obj) {
             knowledgeHelper.insertLogical(obj);
-            logger.log(Level.FINER, "Asserted derived proposition {0}", obj);
+            LOGGER.log(Level.FINER, "Asserted derived proposition {0}", obj);
         }
     }
 

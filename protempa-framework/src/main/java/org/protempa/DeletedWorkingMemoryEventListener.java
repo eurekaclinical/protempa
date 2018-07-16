@@ -37,14 +37,13 @@ import org.protempa.proposition.Proposition;
  * @author Andrew Post
  */
 final class DeletedWorkingMemoryEventListener extends DefaultWorkingMemoryEventListener {
+    private static final Logger LOGGER = Logger.getLogger(DeletedWorkingMemoryEventListener.class.getName());
 
     private final List<Proposition> propsToDelete;
-    private final Logger logger;
     private final SetDeleteDatePropositionVisitor setDeleteDatePropVisitor;
 
     public DeletedWorkingMemoryEventListener() {
         this.propsToDelete = new ArrayList<>();
-        this.logger = ProtempaUtil.logger();
         this.setDeleteDatePropVisitor = new SetDeleteDatePropositionVisitor();
     }
 
@@ -63,7 +62,7 @@ final class DeletedWorkingMemoryEventListener extends DefaultWorkingMemoryEventL
         String name = ore.getPropagationContext().getRuleOrigin().getName();
         if (name.equals("DELETE_PROPOSITION")) {
             Proposition prop = (Proposition) ore.getOldObject();
-            this.logger.log(Level.FINEST, "Deleted proposition {0}", prop);
+            LOGGER.log(Level.FINEST, "Deleted proposition {0}", prop);
             prop.accept(this.setDeleteDatePropVisitor);
             this.propsToDelete.add(this.setDeleteDatePropVisitor.getDeleted());
         }

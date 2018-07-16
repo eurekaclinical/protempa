@@ -43,7 +43,8 @@ import org.protempa.backend.Configuration;
  * @author Andrew Post
  */
 public class SourceFactory {
-
+    private static final Logger LOGGER = Logger.getLogger(SourceFactory.class.getName());
+    
     private final List<BackendInstanceSpec<AlgorithmSourceBackend>> algorithmSourceBackendInstanceSpecs;
     private final List<BackendInstanceSpec<DataSourceBackend>> dataSourceBackendInstanceSpecs;
     private final List<BackendInstanceSpec<KnowledgeSourceBackend>> knowledgeSourceBackendInstanceSpecs;
@@ -62,25 +63,24 @@ public class SourceFactory {
             ConfigurationsLoadException,
             InvalidConfigurationException,
             ConfigurationsNotFoundException {
-        Logger logger = ProtempaUtil.logger();
-        logger.fine("Loading backend provider");
+        LOGGER.fine("Loading backend provider");
         BackendProvider backendProvider =
                 BackendProviderManager.getBackendProvider();
-        logger.log(Level.FINE, "Got backend provider {0}",
+        LOGGER.log(Level.FINE, "Got backend provider {0}",
                 backendProvider.getClass().getName());
         if (configurations == null) {
-            logger.fine("Loading configurations");
+            LOGGER.fine("Loading configurations");
             configurations =
                     ConfigurationsProviderManager.getConfigurations();
-            logger.fine("Got available configurations");
+            LOGGER.fine("Got available configurations");
         }
         
-        logger.log(Level.FINE, "Loading configuration {0}", configurationId);
+        LOGGER.log(Level.FINE, "Loading configuration {0}", configurationId);
         Configuration configuration = configurations.load(configurationId);
         this.algorithmSourceBackendInstanceSpecs = configuration.getAlgorithmSourceBackendSections();
         this.dataSourceBackendInstanceSpecs = configuration.getDataSourceBackendSections();
         this.knowledgeSourceBackendInstanceSpecs = configuration.getKnowledgeSourceBackendSections();
-        logger.log(Level.FINE, "Configuration {0} loaded", configurationId);
+        LOGGER.log(Level.FINE, "Configuration {0} loaded", configurationId);
     }
 
     public SourceFactory(String configurationId)

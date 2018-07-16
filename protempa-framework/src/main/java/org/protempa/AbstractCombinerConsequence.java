@@ -22,6 +22,7 @@ package org.protempa;
 
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.drools.WorkingMemory;
 import org.drools.common.InternalFactHandle;
 import org.drools.spi.Consequence;
@@ -34,13 +35,13 @@ import org.protempa.proposition.Proposition;
  * @param <P> an implementation of the Proposition interface.
  */
 public abstract class AbstractCombinerConsequence<P extends Proposition> implements Consequence {
+    
+    private static final Logger LOGGER = Logger.getLogger(AbstractCombinerConsequence.class.getName());
 
-    private final java.util.logging.Logger logger;
     private final DerivationsBuilder derivationsBuilder;
 
     AbstractCombinerConsequence(DerivationsBuilder derivationsBuilder) {
         this.derivationsBuilder = derivationsBuilder;
-        this.logger = ProtempaUtil.logger();
     }
     
     @Override
@@ -50,8 +51,8 @@ public abstract class AbstractCombinerConsequence<P extends Proposition> impleme
         InternalFactHandle a2f = kh.getTuple().get(1);
         P a2 = (P) wm.getObject(a2f);
         P result = newCombinedFact(a1, a2, wm);
-        if (this.logger.isLoggable(Level.FINEST)) {
-            this.logger.log(Level.FINEST, "Created {0} from {1} and {2}", new Object[]{result, a1, a2});
+        if (LOGGER.isLoggable(Level.FINEST)) {
+            LOGGER.log(Level.FINEST, "Created {0} from {1} and {2}", new Object[]{result, a1, a2});
         }
         kh.retract(a1f);
         kh.retract(a2f);
@@ -66,7 +67,7 @@ public abstract class AbstractCombinerConsequence<P extends Proposition> impleme
             this.derivationsBuilder.propositionReplaceForward(prop, a2, result);
             this.derivationsBuilder.propositionAssertedBackward(prop, result);
         }
-        this.logger.log(Level.FINER, "Asserted derived proposition {0}", result);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", result);
     }
 
     protected abstract P newCombinedFact(P a1, P a2, WorkingMemory wm);

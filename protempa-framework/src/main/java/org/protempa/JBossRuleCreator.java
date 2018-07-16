@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.arp.javautil.arrays.Arrays;
 
 import org.drools.WorkingMemory;
@@ -88,6 +89,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     private static final SalienceInteger MINUS_THREE_SALIENCE = new SalienceInteger(-3);
     private static final AbstractionCombiner ABSTRACTION_COMBINER = new AbstractionCombiner();
     private static final ContextCombiner CONTEXT_COMBINER = new ContextCombiner();
+    private static final Logger LOGGER = Logger.getLogger(JBossRuleCreator.class.getName());
     private final Map<LowLevelAbstractionDefinition, Algorithm> algorithms;
     private final List<Rule> rules;
     private final Map<Rule, TemporalPropositionDefinition> ruleToAbstractionDefinition;
@@ -124,7 +126,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
 
     @Override
     public void visit(ContextDefinition def) {
-        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
+        LOGGER.log(Level.FINER, "Creating rule for {0}", def);
         try {
             boolean ruleCreated = false;
             TemporalExtendedPropositionDefinition[] tepds = def.getInducedBy();
@@ -164,7 +166,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      */
     @Override
     public void visit(LowLevelAbstractionDefinition def) {
-        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
+        LOGGER.log(Level.FINER, "Creating rule for {0}", def);
         try {
             /*
              * If there are no value definitions defined, we might still have an
@@ -215,7 +217,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     
     @Override
     public void visit(CompoundLowLevelAbstractionDefinition def) {
-        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
+        LOGGER.log(Level.FINER, "Creating rule for {0}", def);
         try {
             if (!def.getLowLevelAbstractionIds().isEmpty()) {
                 Rule rule = new Rule(def.getId());
@@ -257,7 +259,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      */
     @Override
     public void visit(HighLevelAbstractionDefinition def) {
-        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
+        LOGGER.log(Level.FINER, "Creating rule for {0}", def);
         try {
             Set<ExtendedPropositionDefinition> epdsC = def
                     .getExtendedPropositionDefinitions();
@@ -303,7 +305,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      */
     @Override
     public void visit(SliceDefinition def) throws KnowledgeSourceReadException {
-        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
+        LOGGER.log(Level.FINER, "Creating rule for {0}", def);
         try {
             Set<TemporalExtendedPropositionDefinition> epdsC = def
                     .getTemporalExtendedPropositionDefinitions();
@@ -355,7 +357,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      */
     @Override
     public void visit(SequentialTemporalPatternDefinition def) throws ProtempaException {
-        ProtempaUtil.logger().log(Level.FINER, "Creating rule for {0}", def);
+        LOGGER.log(Level.FINER, "Creating rule for {0}", def);
         try {
             TemporalExtendedPropositionDefinition lhs = def.getFirstTemporalExtendedPropositionDefinition();
             if (lhs != null) {

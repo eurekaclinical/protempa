@@ -20,7 +20,6 @@
 package org.protempa;
 
 import java.util.Date;
-import java.util.logging.Logger;
 import org.drools.WorkingMemory;
 import org.protempa.proposition.Context;
 import org.protempa.proposition.ProviderBasedUniqueIdFactory;
@@ -34,11 +33,9 @@ import org.protempa.proposition.UniqueIdFactory;
  */
 class ContextCombinerConsequence extends AbstractCombinerConsequence<Context> {
     private static final long serialVersionUID = -7984448674528718012L;
-    private final Logger logger;
 
     public ContextCombinerConsequence(DerivationsBuilder derivationsBuilder) {
         super(derivationsBuilder);
-        this.logger = ProtempaUtil.logger();
     }
 
     @Override

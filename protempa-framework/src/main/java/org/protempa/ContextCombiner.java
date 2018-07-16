@@ -21,6 +21,7 @@ package org.protempa;
 
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.drools.base.ClassObjectType;
 import org.drools.base.SalienceInteger;
 import org.drools.rule.EvalCondition;
@@ -37,6 +38,7 @@ import org.protempa.proposition.Context;
  */
 final class ContextCombiner implements RuleCreator<ContextDefinition> {
 
+    private final static Logger LOGGER = Logger.getLogger(ContextCombiner.class.getName());
     private static final ClassObjectType CONTEXT_OBJECT_TYPE
             = new ClassObjectType(Context.class);
 
@@ -62,7 +64,7 @@ final class ContextCombiner implements RuleCreator<ContextDefinition> {
                     derivationsBuilder));
             rules.add(rule);
         } catch (InvalidRuleException e) {
-            ProtempaUtil.logger().log(Level.SEVERE,
+            LOGGER.log(Level.SEVERE,
                     "Could not create rules from " + d.toString() + ".", e);
         }
     }

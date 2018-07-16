@@ -38,11 +38,8 @@ import org.protempa.proposition.UniqueIdFactory;
 class AbstractionCombinerConsequence extends AbstractCombinerConsequence<AbstractParameter> {
     private static final long serialVersionUID = -7984448674528718012L;
     
-    private final java.util.logging.Logger logger;
-
     public AbstractionCombinerConsequence(DerivationsBuilder derivationsBuilder) {
         super(derivationsBuilder);
-        this.logger = ProtempaUtil.logger();
     }
 
     @Override

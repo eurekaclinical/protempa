@@ -36,7 +36,7 @@ import org.protempa.proposition.Context;
 class ContextCombinerCondition implements EvalExpression {
     private static final long serialVersionUID = -3292416251502209461L;
     private final ContextDefinition contextDef;
-    private final HorizontalTemporalInference hti = new HorizontalTemporalInference();
+    private static final HorizontalTemporalInference HTI = new HorizontalTemporalInference();
 
     public ContextCombinerCondition(ContextDefinition contextDef) {
         this.contextDef = contextDef;
@@ -46,7 +46,7 @@ class ContextCombinerCondition implements EvalExpression {
     public boolean evaluate(Tuple arg0, Declaration[] arg1, WorkingMemory arg2, Object context) throws Exception {
         Context a1 = (Context) arg2.getObject(arg0.get(0));
         Context a2 = (Context) arg2.getObject(arg0.get(1));
-        return a1 != a2 && (a1.getInterval().compareTo(a2.getInterval()) <= 0) && (hti.execute(this.contextDef, a1, a2) || contextDef.getGapFunction().execute(a1, a2));
+        return a1 != a2 && (a1.getInterval().compareTo(a2.getInterval()) <= 0) && (HTI.execute(this.contextDef, a1, a2) || contextDef.getGapFunction().execute(a1, a2));
     }
 
     @Override

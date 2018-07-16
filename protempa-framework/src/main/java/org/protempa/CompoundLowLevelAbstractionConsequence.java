@@ -46,13 +46,12 @@ import org.protempa.proposition.value.Value;
 /**
  * Drools consequence for {@link CompoundLowLevelAbstractionDefinition}s.
  */
-final class CompoundLowLevelAbstractionConsequence implements
-        Consequence {
+final class CompoundLowLevelAbstractionConsequence implements Consequence {
 
     private static final long serialVersionUID = 6456351279290509422L;
     private final CompoundLowLevelAbstractionDefinition cllad;
     private final DerivationsBuilder derivationsBuilder;
-    private final Logger logger;
+    private final static Logger LOGGER = Logger.getLogger(CompoundLowLevelAbstractionConsequence.class.getName());
 
     /**
      * Constructor.
@@ -68,7 +67,6 @@ final class CompoundLowLevelAbstractionConsequence implements
         assert def != null : "def cannot be null";
         this.cllad = def;
         this.derivationsBuilder = derivationsBuilder;
-        this.logger = ProtempaUtil.logger();
     }
 
     @Override
@@ -176,8 +174,7 @@ final class CompoundLowLevelAbstractionConsequence implements
         for (AbstractParameter parameter : sources) {
             derivationsBuilder.propositionAsserted(parameter, derived);
         }
-        this.logger.log(Level.FINER,
-                "Asserted derived proposition {0}", derived);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", derived);
     }
 
     private boolean allMatch(CompoundValuedInterval multiInterval,

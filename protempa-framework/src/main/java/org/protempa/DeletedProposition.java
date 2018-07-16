@@ -22,6 +22,7 @@ package org.protempa;
 
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.drools.base.ClassObjectType;
 import org.drools.base.SalienceInteger;
 import org.drools.rule.InvalidRuleException;
@@ -36,7 +37,7 @@ import org.protempa.proposition.Proposition;
  * @author Andrew Post
  */
 final class DeletedProposition {
-    
+    private static final Logger LOGGER = Logger.getLogger(DeletedProposition.class.getName());
     private static final ClassObjectType PROPOSITION_OBJECT_TYPE = 
             new ClassObjectType(Proposition.class);
 
@@ -51,7 +52,7 @@ final class DeletedProposition {
             rule.setConsequence(new DeletedPropositionConsequence(derivationsBuilder));
             rules.add(rule);
         } catch (InvalidRuleException e) {
-            ProtempaUtil.logger().log(Level.SEVERE, "Could not create rules.", e);
+            LOGGER.log(Level.SEVERE, "Could not create rules.", e);
         }
     }
     

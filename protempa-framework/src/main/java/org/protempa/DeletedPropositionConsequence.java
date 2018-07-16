@@ -19,7 +19,6 @@
  */
 package org.protempa;
 
-import java.util.logging.Logger;
 import org.drools.WorkingMemory;
 import org.drools.common.InternalFactHandle;
 import org.drools.spi.Consequence;
@@ -32,12 +31,10 @@ import org.protempa.proposition.Proposition;
  */
 class DeletedPropositionConsequence implements Consequence {
     private static final long serialVersionUID = 1L;
-    private final Logger logger;
     private final DerivationsBuilder derivationsBuilder;
 
     public DeletedPropositionConsequence(DerivationsBuilder derivationsBuilder) {
         this.derivationsBuilder = derivationsBuilder;
-        this.logger = ProtempaUtil.logger();
     }
 
     @Override

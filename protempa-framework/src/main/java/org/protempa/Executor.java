@@ -52,7 +52,7 @@ import org.protempa.query.Query;
  */
 final class Executor implements AutoCloseable {
 
-    private static final Logger LOGGER = ProtempaUtil.logger();
+    private static final Logger LOGGER = Logger.getLogger(Executor.class.getName());
     private final Set<String> keyIds;
     private final Set<String> propIds;
     private final Filter filters;

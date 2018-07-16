@@ -39,6 +39,7 @@ import org.protempa.query.Query;
 import org.protempa.query.QueryMode;
 
 class StatefulExecutionStrategy extends AbstractExecutionStrategy {
+    private static final Logger LOGGER = Logger.getLogger(StatefulExecutionStrategy.class.getName());
 
     private final File databasePath;
     private DataStore<String, StatefulSession> dataStore;
@@ -46,7 +47,6 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private StatefulSession workingMemory;
     private final DeletedWorkingMemoryEventListener workingMemoryEventListener;
     private final QueryMode queryMode;
-    private final Logger logger = ProtempaUtil.logger();
     private List<Proposition> propsToDelete;
 
 
@@ -107,13 +107,13 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
     private void getDataStore() throws IOException {
         this.dataStore = this.workingMemoryDataStores.getDataStore(this.databasePath.getName());
-        this.logger.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
+        LOGGER.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
     }
 
     private void prepareDataStore() {
         if (this.queryMode == QueryMode.REPLACE) {
             this.dataStore.clear();
-            this.logger.log(Level.FINE, "Cleared data store {0}", this.databasePath.getPath());
+            LOGGER.log(Level.FINE, "Cleared data store {0}", this.databasePath.getPath());
         }
     }
 
@@ -151,10 +151,10 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private void cleanupAndPersistWorkingMemory(String keyId) {
         this.workingMemory.removeEventListener(this.workingMemoryEventListener);
         this.workingMemoryEventListener.clear();
-        this.logger.log(Level.FINEST,
+        LOGGER.log(Level.FINEST,
                 "Persisting working memory for key ID {0}", keyId);
         this.dataStore.put(keyId, this.workingMemory);
-        this.logger.log(Level.FINEST,
+        LOGGER.log(Level.FINEST,
                 "Persisted working memory for key ID {0}", keyId);
     }
 

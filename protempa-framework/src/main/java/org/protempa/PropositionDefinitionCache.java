@@ -19,12 +19,17 @@
  */
 package org.protempa;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import org.protempa.valueset.ValueSet;
-import java.io.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
@@ -41,6 +46,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 final class PropositionDefinitionCache implements Serializable {
 
     private static final long serialVersionUID = 5988857805118255882L;
+    private static final Logger LOGGER = Logger.getLogger(PropositionDefinitionCache.class.getName());
 
     /**
      * Map of abstract parameter id <code>String</code> objects to
@@ -111,7 +117,7 @@ final class PropositionDefinitionCache implements Serializable {
                 } catch (InvalidPropositionIdException ex) {
                     String msg = "Could not add de-serialized proposition definition " + def;
                     //InvalidObjectException doesn't support nested exceptions.
-                    ProtempaUtil.logger().log(Level.SEVERE, msg, ex);
+                    LOGGER.log(Level.SEVERE, msg, ex);
                     throw new InvalidObjectException(msg);
                 }
             }
@@ -129,7 +135,7 @@ final class PropositionDefinitionCache implements Serializable {
                 } catch (InvalidPropositionIdException ex) {
                     String msg = "Could not add de-serialized abstract parameter definition " + def;
                     //InvalidObjectException doesn't support nested exceptions.
-                    ProtempaUtil.logger().log(Level.SEVERE, msg, ex);
+                    LOGGER.log(Level.SEVERE, msg, ex);
                     throw new InvalidObjectException(msg);
                 }
             }
@@ -147,7 +153,7 @@ final class PropositionDefinitionCache implements Serializable {
                 } catch (InvalidValueSetDefinitionException ex) {
                     String msg = "Could not add de-serialized value set " + valueSet;
                     //InvalidObjectException doesn't support nested exceptions.
-                    ProtempaUtil.logger().log(Level.SEVERE, msg, ex);
+                    LOGGER.log(Level.SEVERE, msg, ex);
                     throw new InvalidObjectException(msg);
                 }
             }
@@ -163,7 +169,7 @@ final class PropositionDefinitionCache implements Serializable {
                 } catch (InvalidPropositionIdException ex) {
                     String msg = "Could not add de-serialized context definition " + def;
                     //InvalidObjectException doesn't support nested exceptions.
-                    ProtempaUtil.logger().log(Level.SEVERE, msg, ex);
+                    LOGGER.log(Level.SEVERE, msg, ex);
                     throw new InvalidObjectException(msg);
                 }
             }
@@ -181,7 +187,7 @@ final class PropositionDefinitionCache implements Serializable {
                 } catch (InvalidPropositionIdException ex) {
                     String msg = "Could not add de-serialized temporalPropositionDefinition " + def;
                     //InvalidObjectException doesn't support nested exceptions.
-                    ProtempaUtil.logger().log(Level.SEVERE, msg, ex);
+                    LOGGER.log(Level.SEVERE, msg, ex);
                     throw new InvalidObjectException(msg);
                 }
             }

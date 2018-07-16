@@ -23,9 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.logging.Logger;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.comparator.TemporalPropositionIntervalComparator;
 
@@ -38,21 +36,6 @@ import org.protempa.proposition.comparator.TemporalPropositionIntervalComparator
 public final class ProtempaUtil {
 
     private ProtempaUtil() {
-    }
-
-    private static class LazyLoggerHolder {
-
-        private static Logger instance =
-                Logger.getLogger(ProtempaUtil.class.getPackage().getName());
-    }
-
-    /**
-     * Gets the logger for this package.
-     *
-     * @return a {@link Logger} object.
-     */
-    static Logger logger() {
-        return LazyLoggerHolder.instance;
     }
 
     /**

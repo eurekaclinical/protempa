@@ -22,6 +22,7 @@ package org.protempa;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.drools.WorkingMemory;
 import org.drools.spi.KnowledgeHelper;
@@ -53,6 +54,7 @@ import org.protempa.proposition.UniqueIdFactory;
 class PropositionCopier extends AbstractPropositionVisitor implements Serializable {
 
     private static final long serialVersionUID = 1236050515546951710L;
+    private static final Logger LOGGER = Logger.getLogger(PropositionCopier.class.getName());
     
     private final String propId;
     private final DerivationsBuilder derivationsBuilder;
@@ -87,7 +89,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         assert kh != null : "kh cannot be null";
         assert this.kh == null : "The previous user of this copier forgot to call release!";
         if (this.kh != null) {
-            ProtempaUtil.logger().log(Level.WARNING, 
+            LOGGER.log(Level.WARNING, 
                     "The previous user of this copier forgot to call release. This causes a memory leak!");
         }
         this.kh = kh;
@@ -121,7 +123,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         param.setCreateDate(new Date());
         this.kh.insertLogical(param);
         this.derivationsBuilder.propositionAsserted(abstractParameter, param);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", param);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", param);
     }
 
     /**
@@ -140,7 +142,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         e.setCreateDate(new Date());
         this.kh.insertLogical(e);
         this.derivationsBuilder.propositionAsserted(event, e);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", e);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", e);
     }
 
     /**
@@ -162,7 +164,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         param.setCreateDate(new Date());
         this.kh.insertLogical(param);
         this.derivationsBuilder.propositionAsserted(primitiveParameter, param);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", param);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", param);
     }
 
     /**
@@ -180,7 +182,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
         newConstant.setCreateDate(new Date());
         this.kh.insertLogical(newConstant);
         this.derivationsBuilder.propositionAsserted(constant, newConstant);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", newConstant);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", newConstant);
     }
 
 

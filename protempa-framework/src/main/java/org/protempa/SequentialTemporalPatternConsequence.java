@@ -49,6 +49,7 @@ import org.protempa.proposition.interval.Relation;
 class SequentialTemporalPatternConsequence implements Consequence {
 
     private static final long serialVersionUID = -833609244124008166L;
+    private static final Logger LOGGER = Logger.getLogger(SequentialTemporalPatternConsequence.class.getName());
     private final SequentialTemporalPatternDefinition def;
     private final TemporalExtendedPropositionDefinition[] epds;
     private final DerivationsBuilder derivationsBuilder;
@@ -174,7 +175,6 @@ class SequentialTemporalPatternConsequence implements Consequence {
 
     private void assertProposition(List<TemporalProposition> subList, 
             KnowledgeHelper knowledgeHelper, UniqueId uniqueId) throws FactException {
-        Logger logger = ProtempaUtil.logger();
         Segment<TemporalProposition> segment =
                         new Segment<>(
                         new Sequence<>(
@@ -188,6 +188,6 @@ class SequentialTemporalPatternConsequence implements Consequence {
         for (Proposition proposition : segment) {
             this.derivationsBuilder.propositionAsserted(proposition, result);
         }
-        logger.log(Level.FINER, "Asserted derived proposition {0}", result);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", result);
     }
 }
