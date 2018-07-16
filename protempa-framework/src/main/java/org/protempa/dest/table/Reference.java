@@ -311,6 +311,7 @@ public final class Reference extends Link {
      * Traverses a reference.
      *
      * @param proposition a {@link Proposition} at which to start the traversal.
+     * Cannot be <code>null</code>.
      * @param forwardDerivations a {@link Map<Proposition,List<Proposition>>} of
      * derived propositions.
      * @param backwardDerivations a {@link Map<Proposition,List<Proposition>>}

@@ -46,14 +46,14 @@ import org.protempa.proposition.value.NumberValue;
 public class PropositionColumnSpecTest {
     @Test
     public void testHeading() throws KnowledgeSourceReadException {
-        PropositionColumnSpec ccs = new PropositionColumnSpec();
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().build();
         Assert.assertArrayEquals(StringUtils.EMPTY_STRING_ARRAY, ccs.columnNames(null));
     }
     
     @Test
     public void testValueFileTabularWriter() throws IOException, TabularWriterException {
         Event prop = new Event("TESTEVENT", new DefaultUniqueIdFactory().getInstance());
-        PropositionColumnSpec ccs = new PropositionColumnSpec();
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
@@ -62,11 +62,21 @@ public class PropositionColumnSpecTest {
     }
     
     @Test
+    public void testNullValueFileTabularWriter() throws IOException, TabularWriterException {
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().build();
+        StringWriter sw = new StringWriter();
+        try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
+            ccs.columnValues("00001", null, null, null, null, null, ftw);
+        }
+        Assert.assertEquals("NULL", sw.toString());
+    }
+    
+    @Test
     public void testValueFileTabularWriterPrintUniqueId() throws IOException, TabularWriterException {
         UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
         Event prop = new Event("TESTEVENT", uniqueId);
         OutputConfig outputConfig = new OutputConfig.Builder().showUniqueId().showId().build();
-        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().outputConfig(outputConfig).build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
@@ -79,7 +89,7 @@ public class PropositionColumnSpecTest {
         UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
         Event prop = new Event("TESTEVENT", uniqueId);
         OutputConfig outputConfig = new OutputConfig.Builder().showLocalUniqueId().showId().build();
-        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().outputConfig(outputConfig).build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
@@ -92,7 +102,7 @@ public class PropositionColumnSpecTest {
         UniqueId uniqueId = new DefaultUniqueIdFactory().getInstance();
         Event prop = new Event("TESTEVENT", uniqueId);
         OutputConfig outputConfig = new OutputConfig.Builder().showNumericalId().build();
-        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().outputConfig(outputConfig).build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
@@ -109,7 +119,7 @@ public class PropositionColumnSpecTest {
         cal.set(2018, Calendar.JUNE, 1, 14, 47, 0);
         prop.setInterval(new IntervalFactory().getInstance(cal.getTimeInMillis(), AbsoluteTimeGranularity.SECOND));
         OutputConfig outputConfig = new OutputConfig.Builder().showStartOrTimestamp().dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")).build();
-        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().outputConfig(outputConfig).build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
@@ -126,7 +136,7 @@ public class PropositionColumnSpecTest {
         cal.set(2018, Calendar.JUNE, 1, 14, 47, 0);
         prop.setInterval(new IntervalFactory().getInstance(cal.getTimeInMillis(), AbsoluteTimeGranularity.SECOND));
         OutputConfig outputConfig = new OutputConfig.Builder().showFinish().dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")).build();
-        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().outputConfig(outputConfig).build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
@@ -140,7 +150,7 @@ public class PropositionColumnSpecTest {
         PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
         prop.setValue(NumberValue.getInstance(10));
         OutputConfig outputConfig = new OutputConfig.Builder().showNumber().build();
-        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().outputConfig(outputConfig).build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
@@ -154,7 +164,7 @@ public class PropositionColumnSpecTest {
         PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
         prop.setValue(NominalValue.getInstance("foo"));
         OutputConfig outputConfig = new OutputConfig.Builder().showNumber().build();
-        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().outputConfig(outputConfig).build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
@@ -168,7 +178,7 @@ public class PropositionColumnSpecTest {
         PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
         prop.setValue(NominalValue.getInstance("foo"));
         OutputConfig outputConfig = new OutputConfig.Builder().showNominal().build();
-        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().outputConfig(outputConfig).build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
@@ -182,7 +192,7 @@ public class PropositionColumnSpecTest {
         PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
         prop.setValue(NumberValue.getInstance(10));
         OutputConfig outputConfig = new OutputConfig.Builder().showNominal().build();
-        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().outputConfig(outputConfig).build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
@@ -196,7 +206,7 @@ public class PropositionColumnSpecTest {
         PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
         prop.setValue(InequalityNumberValue.parse("<10"));
         OutputConfig outputConfig = new OutputConfig.Builder().showNumber().build();
-        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().outputConfig(outputConfig).build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);
@@ -210,7 +220,7 @@ public class PropositionColumnSpecTest {
         PrimitiveParameter prop = new PrimitiveParameter("TESTEVENT", uniqueId);
         prop.setValue(InequalityNumberValue.parse("<10"));
         OutputConfig outputConfig = new OutputConfig.Builder().showInequality().build();
-        PropositionColumnSpec ccs = new PropositionColumnSpec(null, outputConfig, null);
+        PropositionColumnSpec ccs = new PropositionColumnSpec.Builder().outputConfig(outputConfig).build();
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", prop, null, null, null, null, ftw);

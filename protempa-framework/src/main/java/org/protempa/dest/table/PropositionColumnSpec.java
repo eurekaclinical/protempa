@@ -24,6 +24,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -70,25 +71,30 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     private final OutputConfig outputConfig;
     private final ValueOutputConfig valueOutputConfig;
     private final ValuesPropositionVisitor propositionVisitor;
-    
+
+    @Deprecated
     public PropositionColumnSpec() {
         this(null);
     }
 
+    @Deprecated
     public PropositionColumnSpec(String[] propertyNames) {
         this(propertyNames, null, null);
     }
 
+    @Deprecated
     public PropositionColumnSpec(String columnNamePrefixOverride,
             String[] propertyNames) {
         this(columnNamePrefixOverride, propertyNames, null, null, null, 1);
     }
 
+    @Deprecated
     public PropositionColumnSpec(String[] propertyNames,
             OutputConfig outputConfig, ValueOutputConfig valueOutputConfig) {
         this(propertyNames, outputConfig, valueOutputConfig, null);
     }
 
+    @Deprecated
     public PropositionColumnSpec(String[] propertyNames,
             OutputConfig outputConfig, ValueOutputConfig valueOutputConfig,
             Link[] links) {
@@ -100,6 +106,76 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             Link[] links, int numInstances) {
         this(null, propertyNames, outputConfig, valueOutputConfig, links,
                 numInstances);
+    }
+
+    public static final class Builder {
+
+        private String columnNamePrefixOverride;
+        private String[] propertyNames;
+        private OutputConfig outputConfig;
+        private ValueOutputConfig valueOutputConfig;
+        private Link[] links;
+        private int numInstances = 1;
+
+        public Builder columnNamePrefixOverride(String columnNamePrefixOverride) {
+            this.columnNamePrefixOverride = columnNamePrefixOverride;
+            return this;
+        }
+
+        public String getColumnNamePrefixOverride() {
+            return columnNamePrefixOverride;
+        }
+
+        public Builder propertyNames(String[] propertyNames) {
+            this.propertyNames = propertyNames;
+            return this;
+        }
+
+        public String[] getPropertyNames() {
+            return propertyNames;
+        }
+
+        public Builder outputConfig(OutputConfig outputConfig) {
+            this.outputConfig = outputConfig;
+            return this;
+        }
+
+        public OutputConfig getOutputConfig() {
+            return outputConfig;
+        }
+
+        public Builder valueOutputConfig(ValueOutputConfig valueOutputConfig) {
+            this.valueOutputConfig = valueOutputConfig;
+            return this;
+        }
+
+        public ValueOutputConfig getValueOutputConfig() {
+            return valueOutputConfig;
+        }
+
+        public Builder links(Link[] links) {
+            this.links = links;
+            return this;
+        }
+
+        public Link[] getLinks() {
+            return links;
+        }
+
+        public Builder numInstances(int numInstances) {
+            this.numInstances = numInstances;
+            return this;
+        }
+
+        public int getNumInstances() {
+            return numInstances;
+        }
+
+        public PropositionColumnSpec build() {
+            return new PropositionColumnSpec(this.columnNamePrefixOverride,
+                    this.propertyNames, this.outputConfig, this.valueOutputConfig,
+                    this.links, this.numInstances);
+        }
     }
 
     public PropositionColumnSpec(String columnNamePrefixOverride,
@@ -462,8 +538,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 Value value = proposition.getProperty(propertyName);
                 if (value != null) {
                     this.tabularWriter.writeString(
-                            getOutputPropertyValue(proposition,
-                            propertyName, value));
+                            getOutputPropertyValue(proposition, propertyName, value));
                 } else {
                     this.tabularWriter.writeNull();
                 }
@@ -478,9 +553,14 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache propDefCache,
             TabularWriter writer) throws TabularWriterException {
-        Collection<Proposition> propositions = this.traverseLinks(this.links,
-                proposition, forwardDerivations, backwardDerivations,
-                references, propDefCache);
+        Collection<Proposition> propositions;
+        if (proposition != null) {
+            propositions = this.traverseLinks(this.links,
+                    proposition, forwardDerivations, backwardDerivations,
+                    references, propDefCache);
+        } else {
+            propositions = Collections.emptyList();
+        }
         propositionVisitor.setKnowledgeSource(propDefCache);
         propositionVisitor.setTabularWriter(writer);
         int i = 0;
@@ -495,6 +575,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             } else {
                 break;
             }
+        }
+        for (; i < this.numInstances; i++) {
+            writer.writeNull();
         }
         propositionVisitor.clear();
     }

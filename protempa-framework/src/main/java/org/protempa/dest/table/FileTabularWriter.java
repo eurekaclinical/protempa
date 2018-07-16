@@ -22,6 +22,8 @@ package org.protempa.dest.table;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.text.Format;
+import java.util.HashMap;
+import java.util.Map;
 import org.arp.javautil.string.StringUtil;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.Proposition;
@@ -43,6 +45,7 @@ public class FileTabularWriter extends AbstractTabularWriter {
     private int colIndex;
     private final char delimiter;
     private final QuoteModel quoteModel;
+    private final Map<String, String> replacement;
 
     public FileTabularWriter(BufferedWriter inWriter, char inDelimiter) {
         this(inWriter, inDelimiter, null);
@@ -50,12 +53,23 @@ public class FileTabularWriter extends AbstractTabularWriter {
 
     public FileTabularWriter(BufferedWriter inWriter, char inDelimiter,
             QuoteModel inQuoteModel) {
+        this(inWriter, inDelimiter, inQuoteModel, null);
+    }
+    
+    public FileTabularWriter(BufferedWriter inWriter, char inDelimiter,
+            QuoteModel inQuoteModel, String nullValue) {
         this.writer = inWriter;
         this.delimiter = inDelimiter;
         if (inQuoteModel == null) {
             this.quoteModel = QuoteModel.WHEN_QUOTE_EMBEDDED;
         } else {
             this.quoteModel = inQuoteModel;
+        }
+        this.replacement = new HashMap<>();
+        if (nullValue == null) {
+            this.replacement.put(null, "NULL");
+        } else {
+            this.replacement.put(null, nullValue);
         }
     }
 
@@ -249,9 +263,9 @@ public class FileTabularWriter extends AbstractTabularWriter {
 
     private void escapeAndWriteDelimitedColumn(String inValue) throws IOException {
         if (this.quoteModel == QuoteModel.ALWAYS) {
-            StringUtil.escapeAndWriteDelimitedColumn(inValue, this.delimiter, true, this.writer);
+            StringUtil.escapeAndWriteDelimitedColumn(inValue, this.delimiter, true, this.replacement, this.writer);
         } else {
-            StringUtil.escapeAndWriteDelimitedColumn(inValue, this.delimiter, this.writer);
+            StringUtil.escapeAndWriteDelimitedColumn(inValue, this.delimiter, this.replacement, this.writer);
         }
     }
 

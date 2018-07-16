@@ -33,7 +33,7 @@ import org.protempa.proposition.UniqueId;
  * @author Andrew Post
  */
 public class LinkTraverser {
-    
+
     private final Set<Proposition> cache;
 
     public LinkTraverser() {
@@ -45,7 +45,8 @@ public class LinkTraverser {
      *
      * @param links the {@link Link}s to traverse. If <code>null</code> or an
      * empty array, then the supplied proposition is returned.
-     * @param proposition the {@link Proposition} from which to start.
+     * @param proposition the {@link Proposition} from which to start. Cannot be
+     * <code>null</code>.
      * @param forwardDerivations map of propositions from raw data toward
      * derived propositions.
      * @param backwardDerivations map of propositions from derived propositions
