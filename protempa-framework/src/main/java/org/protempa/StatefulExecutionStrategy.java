@@ -47,6 +47,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private final DeletedWorkingMemoryEventListener workingMemoryEventListener;
     private final QueryMode queryMode;
     private final Logger logger = ProtempaUtil.logger();
+    private List<Proposition> propsToDelete;
 
 
     StatefulExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
@@ -77,7 +78,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         getOrCreateWorkingMemoryInstance(keyId);
         insertRetrievedDataIntoWorkingMemory(objects);
         fireAllRules();
-        persistWorkingMemory(keyId);
+        cleanupAndPersistWorkingMemory(keyId);
         return getWorkingMemoryIterator();
     }
 
@@ -144,9 +145,10 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
     private void fireAllRules() throws FactException {
         this.workingMemory.fireAllRules();
+        this.propsToDelete = this.workingMemoryEventListener.getPropsToDelete();
     }
 
-    private void persistWorkingMemory(String keyId) {
+    private void cleanupAndPersistWorkingMemory(String keyId) {
         this.workingMemory.removeEventListener(this.workingMemoryEventListener);
         this.workingMemoryEventListener.clear();
         this.logger.log(Level.FINEST,
@@ -159,7 +161,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private Iterator<Proposition> getWorkingMemoryIterator() {
         return (Iterator<Proposition>) new IteratorChain(
                 this.workingMemory.iterateObjects(),
-                this.workingMemoryEventListener.getPropsToDelete().iterator());
+                this.propsToDelete.iterator());
     }
 
     private ExecutionStrategyShutdownException closeDataStore() {

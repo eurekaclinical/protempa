@@ -27,8 +27,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 
@@ -48,6 +51,7 @@ import org.protempa.LowLevelAbstractionValueDefinition;
 import org.protempa.PrimitiveParameterDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.Protempa;
+import org.protempa.ProtempaException;
 import org.protempa.SimpleGapFunction;
 import org.protempa.SlidingWindowWidthMode;
 import org.protempa.SourceFactory;
@@ -155,7 +159,7 @@ public class ProtempaTest {
      * verifies that the final output is correct.
      */
     @Test
-    public void testProtempa() throws Exception {
+    public void testProtempa() throws IOException, ProtempaException {
         File outputFile = File.createTempFile("protempa-test", null);
         try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
             Destination destination = new SingleColumnDestination(fw);
@@ -429,8 +433,7 @@ public class ProtempaTest {
         return bp;
     }
 
-    private Query query() throws ParseException, KnowledgeSourceReadException,
-            QueryBuildException {
+    private Query query() throws KnowledgeSourceReadException, QueryBuildException {
         DefaultQueryBuilder q = new DefaultQueryBuilder();
 
         q.setKeyIds(KEY_IDS);
@@ -485,10 +488,16 @@ public class ProtempaTest {
             diastolicClassification3(), bloodPressureClassification3Any(),
             context1(), systolicClassificationMyContext1()});
 
-        DateFormat shortFormat = AbsoluteTimeGranularity.DAY.getShortFormat();
+        Calendar cal = Calendar.getInstance();
+        cal.clear();
+        cal.set(2006, Calendar.AUGUST, 1);
+        Date fromDate = cal.getTime();
+        cal.clear();
+        cal.set(2011, Calendar.AUGUST, 31);
+        Date toDate = cal.getTime();
         DateTimeFilter timeRange = new DateTimeFilter(
-                new String[]{"Encounter"}, shortFormat.parse("08/01/2006"),
-                AbsoluteTimeGranularity.DAY, shortFormat.parse("08/31/2011"),
+                new String[]{"Encounter"}, fromDate,
+                AbsoluteTimeGranularity.DAY, toDate,
                 AbsoluteTimeGranularity.DAY, Side.START, Side.START);
 
         q.setFilters(timeRange);

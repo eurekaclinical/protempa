@@ -593,6 +593,7 @@ DERIVATION MySystolicClassification
 DERIVATION MySystolicClassification3
 13
 PROPOSITION DiastolicBloodPressure
+PROPOSITION DiastolicBloodPressure
 DERIVATION MyDiastolicClassification
 DERIVATION MyDiastolicClassification3
 PROPOSITION Encounter
@@ -634,6 +635,7 @@ DERIVATION Encounter
 DERIVATION Encounter
 PROPOSITION Patient
 PROPOSITION PatientAll
+PROPOSITION SystolicBloodPressure
 PROPOSITION SystolicBloodPressure
 DERIVATION MySystolicClassification
 DERIVATION MySystolicClassification

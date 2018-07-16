@@ -53,8 +53,9 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
         StatelessSessionResult result = this.statelessSession
                 .executeWithResults(props);
         this.statelessSession.removeEventListener(this.workingMemoryEventListener);
+        List<Proposition> propsToDelete = this.workingMemoryEventListener.getPropsToDelete();
         this.workingMemoryEventListener.clear();
-        return getWorkingMemoryIterator(result);
+        return (Iterator<Proposition>) new IteratorChain(result.iterateObjects(), propsToDelete.iterator());
     }
 
     @Override
@@ -65,10 +66,4 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
     public void shutdown() {
     }
     
-    private Iterator<Proposition> getWorkingMemoryIterator(StatelessSessionResult result) {
-        return (Iterator<Proposition>) new IteratorChain(
-                result.iterateObjects(),
-                this.workingMemoryEventListener.getPropsToDelete().iterator());
-    }
-
 }
