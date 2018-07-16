@@ -43,6 +43,7 @@ import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
 import org.protempa.query.QueryBuildException;
 import org.protempa.dest.Destination;
+import org.protempa.query.QueryMode;
 
 /**
  * Unit tests for Protempa.
@@ -52,7 +53,7 @@ import org.protempa.dest.Destination;
  *
  * @author Michel Mansour
  */
-public class ProtempaTest {
+public class ProtempaWithPersistenceTest {
 
     /**
      * The ground truth results directory for the test data
@@ -63,11 +64,6 @@ public class ProtempaTest {
      */
     private static final String TRUTH_OUTPUT = TRUTH_DIR + "/output.txt";
 
-    /*
-     * Instance of Protempa to run
-     */
-    private Protempa protempa;
-
     /**
      * @throws Exception
      */
@@ -77,10 +73,6 @@ public class ProtempaTest {
         // others
         System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
                 "org.protempa.backend.dsb.relationaldb.h2.H2SQLGenerator");
-        SourceFactory sf = new SourceFactory(
-                new INIConfigurations(new File("src/test/resources")),
-                "protege-h2-test-config");
-        protempa = Protempa.newInstance(sf);
     }
 
     /**
@@ -88,9 +80,6 @@ public class ProtempaTest {
      */
     @After
     public void tearDown() throws Exception {
-        if (this.protempa != null) {
-            this.protempa.close();
-        }
     }
 
     /**
@@ -98,13 +87,24 @@ public class ProtempaTest {
      * verifies that the final output is correct.
      */
     @Test
-    public void testProtempa() throws IOException, ProtempaException {
-        File outputFile = File.createTempFile("protempa-test", null);
-        try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
-            Destination destination = new SingleColumnDestination(fw);
-            protempa.execute(query(), destination);
+    public void testProtempaWithPersistence() throws IOException, ProtempaException {
+
+        SourceFactory sf = new SourceFactory(
+                new INIConfigurations(new File("src/test/resources")),
+                "protege-h2-test-config");
+        try (Protempa protempa = Protempa.newInstance(sf)) {
+            DefaultQueryBuilder q = new QueryBuilderFactory().getInstance();
+            File tempDir = Files.createTempDirectory(null).toFile();
+            q.setDatabasePath(tempDir.getPath());
+            Query query = protempa.buildQuery(q);
+
+            File outputFile = File.createTempFile("protempa-test-with-persistence", null);
+            try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
+                Destination destination = new SingleColumnDestination(fw);
+                protempa.execute(query, destination);
+            }
+            outputMatches(outputFile, TRUTH_OUTPUT);
         }
-        outputMatches(outputFile, TRUTH_OUTPUT);
     }
 
     private void outputMatches(File actual, String expected) throws IOException {
@@ -116,11 +116,5 @@ public class ProtempaTest {
             assertEquals(expectedLines, actualLines);
         }
     }
-    
-    private Query query() throws KnowledgeSourceReadException, QueryBuildException {
-        DefaultQueryBuilder q = new QueryBuilderFactory().getInstance();
-        Query query = protempa.buildQuery(q);
 
-        return query;
-    }
 }
