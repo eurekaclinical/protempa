@@ -19,8 +19,9 @@
  */
 package org.protempa.test;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.Writer;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,8 +39,9 @@ import org.protempa.dest.QueryResultsHandlerProcessingException;
 
 final class SingleColumnQueryResultsHandler
         extends AbstractQueryResultsHandler {
+
     private final Map<String, Map<Proposition, List<Proposition>>> data;
-    private final Writer writer;
+    private final BufferedWriter writer;
 
     /**
      * Creates a new instance that will write to the given writer. The finish()
@@ -47,26 +49,24 @@ final class SingleColumnQueryResultsHandler
      *
      * @param writer the {@link Writer} to output to
      */
-    SingleColumnQueryResultsHandler(Writer writer) {
+    SingleColumnQueryResultsHandler(BufferedWriter writer) {
         this.data = new HashMap<>();
         this.writer = writer;
     }
-    
+
     @Override
     public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
-        try {
-            this.data.put(keyId, new HashMap<>());
-            for (Proposition p : propositions) {
-                if (p.getCreateDate() == null) {
-                    throw new QueryResultsHandlerProcessingException("invalid proposition with no create date: " + p);
-                }
-                this.data.get(keyId).put(p, new ArrayList<>());
-                storeDerivations(forwardDerivations.get(p), this.data.get(keyId).get(p));
-                storeDerivations(backwardDerivations.get(p), this.data.get(keyId).get(p));
+        Map<Proposition, List<Proposition>> result = new HashMap<>();
+        for (Proposition p : propositions) {
+            if (p.getCreateDate() == null) {
+                throw new QueryResultsHandlerProcessingException("invalid proposition with no create date: " + p);
             }
-        } catch (IOException ex) {
-            throw new QueryResultsHandlerProcessingException(ex);
+            List<Proposition> allDerivations = new ArrayList<>();
+            allDerivations.addAll(forwardDerivations.getOrDefault(p, Collections.EMPTY_LIST));
+            allDerivations.addAll(backwardDerivations.getOrDefault(p, Collections.EMPTY_LIST));
+            result.put(p, allDerivations);
         }
+        this.data.put(keyId, result);
     }
 
     @Override
@@ -101,16 +101,7 @@ final class SingleColumnQueryResultsHandler
     
     private void writeLine(String str) throws IOException {
         this.writer.write(str);
-        this.writer.write("\n");
-    }
-
-    private void storeDerivations(List<Proposition> derivations,
-            List<Proposition> outputDerivations) throws IOException {
-        if (derivations != null && derivations.size() > 0) {
-            for (Proposition d : derivations) {
-                outputDerivations.add(d);
-            }
-        }
+        this.writer.newLine();
     }
 
     private static class PropositionComparator implements

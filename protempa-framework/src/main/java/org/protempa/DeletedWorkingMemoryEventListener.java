@@ -66,7 +66,6 @@ final class DeletedWorkingMemoryEventListener extends DefaultWorkingMemoryEventL
             this.logger.log(Level.FINEST, "Deleted proposition {0}", prop);
             prop.accept(this.setDeleteDatePropVisitor);
             this.propsToDelete.add(this.setDeleteDatePropVisitor.getDeleted());
-            System.err.println("RETRACTED " + prop);
         }
     }
 

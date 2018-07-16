@@ -22,6 +22,7 @@ package org.protempa.test;
 import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -156,7 +157,7 @@ public class ProtempaTest {
     @Test
     public void testProtempa() throws Exception {
         File outputFile = File.createTempFile("protempa-test", null);
-        try (FileWriter fw = new FileWriter(outputFile)) {
+        try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
             Destination destination
                     = new SingleColumnDestination(fw);
             protempa.execute(query(), destination);
@@ -498,20 +499,12 @@ public class ProtempaTest {
     }
 
     private void outputMatches(File actual, String expected) throws IOException {
-        BufferedReader actualReader = new BufferedReader(new FileReader(actual));
-        BufferedReader expectedReader = new BufferedReader(new FileReader(expected));
-        
-        List<String> actualLines = IOUtils.readLines(actualReader);
-        java.util.Map<String, Integer> countsActual = new java.util.HashMap<>();
-        for (String line : actualLines) {
-            countsActual.put(line, countsActual.getOrDefault(line, 0) + 1);
+        try (BufferedReader actualReader = new BufferedReader(new FileReader(actual));
+                BufferedReader expectedReader = new BufferedReader(new FileReader(expected))) {
+
+            List<String> actualLines = IOUtils.readLines(actualReader);
+            List<String> expectedLines = IOUtils.readLines(expectedReader);
+            assertEquals(expectedLines, actualLines);
         }
-        List<String> expectedLines = IOUtils.readLines(expectedReader);
-        java.util.Map<String, Integer> countsExpected = new java.util.HashMap<>();
-        for (String line : expectedLines) {
-            countsExpected.put(line, countsExpected.getOrDefault(line, 0) + 1);
-        }
-        assertEquals(countsExpected, countsActual);
-        assertEquals(expectedLines, actualLines);
     }
 }

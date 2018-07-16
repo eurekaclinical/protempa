@@ -53,6 +53,7 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
         StatelessSessionResult result = this.statelessSession
                 .executeWithResults(props);
         this.statelessSession.removeEventListener(this.workingMemoryEventListener);
+        this.workingMemoryEventListener.clear();
         return getWorkingMemoryIterator(result);
     }
 
