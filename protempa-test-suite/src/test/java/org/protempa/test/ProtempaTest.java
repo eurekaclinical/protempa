@@ -158,8 +158,7 @@ public class ProtempaTest {
     public void testProtempa() throws Exception {
         File outputFile = File.createTempFile("protempa-test", null);
         try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
-            Destination destination
-                    = new SingleColumnDestination(fw);
+            Destination destination = new SingleColumnDestination(fw);
             protempa.execute(query(), destination);
         }
         outputMatches(outputFile, TRUTH_OUTPUT);
