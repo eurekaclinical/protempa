@@ -304,7 +304,6 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
         String schemaName = getSchemaName();
         Mappings icd9DiagnosesMappings = getMappingsFactory().getInstance("icd9_diagnosis_02232012.txt");
         Mappings icd9ProcedureMappings = getMappingsFactory().getInstance("icd9_procedure_02232012.txt");
-        Mappings cptMappings = getMappingsFactory().getInstance("cpt_procedure_02232012.txt");
         Mappings medsMappings = getMappingsFactory().getInstance("meds_02232012.txt");
         EntitySpec[] eventSpecs = new EntitySpec[] {
                 new EntitySpec(

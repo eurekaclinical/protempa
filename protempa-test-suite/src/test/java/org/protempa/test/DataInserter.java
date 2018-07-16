@@ -23,12 +23,10 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -44,7 +42,6 @@ final class DataInserter {
     private static final String PATIENT = "patient";
     private static final String ENCOUNTER = "encounter";
     private static final String PROVIDER = "provider";
-    private static final String CPT = "cpt_event";
     private static final String ICD9D = "icd9d_event";
     private static final String ICD9P = "icd9p_event";
     private static final String LABS = "labs_event";
@@ -53,7 +50,7 @@ final class DataInserter {
     private static final String SCHEMA = "TEST";
 
     private static final String TABLES[] = new String[]{PATIENT, ENCOUNTER,
-        PROVIDER, CPT, ICD9D, ICD9P, LABS, MEDS, VITALS};
+        PROVIDER, ICD9D, ICD9P, LABS, MEDS, VITALS};
 
     private final Connection connection;
 
