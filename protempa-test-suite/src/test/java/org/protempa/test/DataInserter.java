@@ -216,47 +216,47 @@ final class DataInserter {
      * Insert a stream of observations and their related results to a target
      * database using the given connection.
      *
-     * @param observations The observations to insert.
+     * @param obsx The observations to insert.
      * @param table The table in which the observations should be inserted.
      * @throws SQLException Thrown if there are any JDBC errors.
      */
     private <T extends ObservationWithResult> void insertObservationsWithResult(
-            Stream<T> observations, String table)
+            Stream<T> obsx, String table)
             throws SQLException {
         int counter = 0;
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("insert into ").append(table)
                 .append(" values (?,?,?,?,?,?,?,?,?,?,?)");
-        try (PreparedStatement preparedStatement = connection
+        try (PreparedStatement preparedStmt = connection
                 .prepareStatement(sqlBuilder.toString())) {
-            for (T observation : (Iterable<T>) observations::iterator) {
-                preparedStatement.setString(1, observation.getId());
-                preparedStatement.setLong(2, observation.getEncounterId()
+            for (T obx : (Iterable<T>) obsx::iterator) {
+                preparedStmt.setString(1, obx.getId());
+                preparedStmt.setLong(2, obx.getEncounterId()
                         .longValue());
-                preparedStatement.setTimestamp(3, new Timestamp(observation
+                preparedStmt.setTimestamp(3, new Timestamp(obx
                         .getTimestamp().getTime()));
-                preparedStatement.setString(4, observation.getEntityId());
-                preparedStatement.setString(5, observation.getResultAsStr());
-                preparedStatement.setDouble(6, observation.getResultAsNum()
+                preparedStmt.setString(4, obx.getEntityId());
+                preparedStmt.setString(5, obx.getResultAsStr());
+                preparedStmt.setDouble(6, obx.getResultAsNum()
                         .doubleValue());
-                preparedStatement.setString(7, observation.getUnits());
-                preparedStatement.setString(8, observation.getFlag());
-                preparedStatement.setTimestamp(9, toTimestamp(observation.getCreateDate()));
-                preparedStatement.setTimestamp(10, toTimestamp(observation.getUpdateDate()));
-                preparedStatement.setTimestamp(11, toTimestamp(observation.getDeleteDate()));
-                preparedStatement.addBatch();
+                preparedStmt.setString(7, obx.getUnits());
+                preparedStmt.setString(8, obx.getFlag());
+                preparedStmt.setTimestamp(9, toTimestamp(obx.getCreateDate()));
+                preparedStmt.setTimestamp(10, toTimestamp(obx.getUpdateDate()));
+                preparedStmt.setTimestamp(11, toTimestamp(obx.getDeleteDate()));
+                preparedStmt.addBatch();
 
                 counter++;
                 if (counter >= 128) {
-                    preparedStatement.executeBatch();
+                    preparedStmt.executeBatch();
                     connection.commit();
-                    preparedStatement.clearBatch();
+                    preparedStmt.clearBatch();
                     counter = 0;
                 }
             }
-            preparedStatement.executeBatch();
+            preparedStmt.executeBatch();
             connection.commit();
-            preparedStatement.clearBatch();
+            preparedStmt.clearBatch();
         } catch (SQLException ex) {
             try {
                 connection.rollback();
