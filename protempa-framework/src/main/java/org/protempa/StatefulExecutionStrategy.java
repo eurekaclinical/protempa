@@ -73,7 +73,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     @Override
-    public Iterator<Proposition> execute(String keyId, List<?> objects) {
+    public Iterator<Proposition> execute(String keyId, List<? extends Proposition> objects) {
         getOrCreateWorkingMemoryInstance(keyId);
         insertRetrievedDataIntoWorkingMemory(objects);
         fireAllRules();

@@ -31,7 +31,7 @@ interface ExecutionStrategy {
             DerivationsBuilder listener) 
             throws ExecutionStrategyInitializationException;
     
-    Iterator<Proposition> execute(String keyIds, List<?> objects);
+    Iterator<Proposition> execute(String keyIds, List<? extends Proposition> objects);
     
     void closeCurrentWorkingMemory();
 

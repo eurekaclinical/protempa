@@ -47,11 +47,11 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Iterator<Proposition> execute(String keyId, List<?> objects) {
+    public Iterator<Proposition> execute(String keyId, List<? extends Proposition> props) {
         this.statelessSession.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
         this.statelessSession.addEventListener(this.workingMemoryEventListener);
         StatelessSessionResult result = this.statelessSession
-                .executeWithResults(objects);
+                .executeWithResults(props);
         this.statelessSession.removeEventListener(this.workingMemoryEventListener);
         return getWorkingMemoryIterator(result);
     }
