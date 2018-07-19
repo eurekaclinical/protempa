@@ -35,11 +35,11 @@ import org.protempa.query.Query;
  *
  * @author Andrew Post
  */
-public class ReprocessDoProcessThread extends AbstractDoProcessThread {
+public class DoReprocessThread extends AbstractDoProcessThread {
 
-    private static final Logger LOGGER = Logger.getLogger(ReprocessDoProcessThread.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DoReprocessThread.class.getName());
 
-    ReprocessDoProcessThread(
+    DoReprocessThread(
             BlockingQueue<QueueObject> hqrQueue,
             QueueObject hqrPoisonPill, Query query,
             AlgorithmSource algorithmSource, KnowledgeSource knowledgeSource,

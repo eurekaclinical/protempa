@@ -140,7 +140,7 @@ final class Executor implements AutoCloseable {
                             this.propositionDefinitionCache);
                 } else {
                     retrieveDataThread = null;
-                    doProcessThread = new ReprocessDoProcessThread(hqrQueue,
+                    doProcessThread = new DoReprocessThread(hqrQueue,
                             hqrPoisonPill, this.query,
                             this.abstractionFinder.getAlgorithmSource(),
                             this.abstractionFinder.getKnowledgeSource(),
