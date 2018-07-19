@@ -57,7 +57,6 @@ final class Executor implements AutoCloseable {
     private final Query query;
     private Collection<PropositionDefinition> propositionDefinitionCache;
     private final AbstractionFinder abstractionFinder;
-    private ExecutionStrategy executionStrategy;
     private final Destination destination;
     private QueryResultsHandler resultsHandler;
     private boolean failed;
@@ -96,16 +95,6 @@ final class Executor implements AutoCloseable {
                 log(Level.FINE, "Propositions to be queried are {0}", StringUtils.join(this.propIds, ", "));
             }
             extractPropositionDefinitionCache();
-
-            try {
-                if (hasSomethingToAbstract(query) || this.query.getDatabasePath() != null) {
-                    selectExecutionStrategy();
-                    initializeExecutionStrategy();
-                }
-            } catch (QueryValidationException ex) {
-                throw new QueryException(query.getName(), ex);
-            }
-
             startQueryResultsHandler();
         } catch (KnowledgeSourceReadException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | Error | RuntimeException ex) {
             this.failed = true;
@@ -145,7 +134,9 @@ final class Executor implements AutoCloseable {
                         this.filters, this.resultsHandler);
                 doProcessThread = new DoProcessThread(doProcessQueue, hqrQueue,
                         doProcessPoisonPill, hqrPoisonPill, this.query,
-                        this.executionStrategy, retrieveDataThread);
+                        retrieveDataThread, this.abstractionFinder.getAlgorithmSource(),
+                        this.abstractionFinder.getKnowledgeSource(),
+                        this.propositionDefinitionCache);
                 this.handleQueryResultThread
                         = new HandleQueryResultThread(hqrQueue, hqrPoisonPill, doProcessThread, this.query, this.resultsHandler);
                 retrieveDataThread.start();
@@ -189,9 +180,6 @@ final class Executor implements AutoCloseable {
     @Override
     public void close() throws CloseException {
         try {
-            if (executionStrategy != null) {
-                executionStrategy.shutdown();
-            }
             // Might be null if init() fails.
             if (this.resultsHandler != null) {
                 if (!this.failed) {
@@ -201,8 +189,7 @@ final class Executor implements AutoCloseable {
                 this.resultsHandler = null;
             }
         } catch (QueryResultsHandlerProcessingException
-                | QueryResultsHandlerCloseException
-                | ExecutionStrategyShutdownException ex) {
+                | QueryResultsHandlerCloseException ex) {
             throw new CloseException(ex);
         } finally {
             if (this.resultsHandler != null) {
@@ -240,45 +227,6 @@ final class Executor implements AutoCloseable {
     void log(Level level, String msg) {
         if (isLoggable(level)) {
             LOGGER.log(level, this.logMessageFormat.format(new Object[]{msg}));
-        }
-    }
-
-    private boolean hasSomethingToAbstract(Query query) throws QueryValidationException {
-        try {
-            KnowledgeSource ks = this.abstractionFinder.getKnowledgeSource();
-            if (!ks.readAbstractionDefinitions(query.getPropositionIds()).isEmpty()
-                    || !ks.readContextDefinitions(query.getPropositionIds()).isEmpty()) {
-                return true;
-            }
-            for (PropositionDefinition propDef : query.getPropositionDefinitions()) {
-                if (propDef instanceof AbstractionDefinition || propDef instanceof ContextDefinition) {
-                    return true;
-                }
-            }
-            return false;
-        } catch (KnowledgeSourceReadException ex) {
-            throw new QueryValidationException("Invalid proposition id(s) " + StringUtils.join(query.getPropositionIds(), ", "), ex);
-        }
-    }
-
-    private void selectExecutionStrategy() {
-        if (this.query.getDatabasePath() != null) {
-            log(Level.FINER, "Chosen stateful execution strategy");
-            this.executionStrategy = new StatefulExecutionStrategy(
-                    this.abstractionFinder.getAlgorithmSource(),
-                    this.query);
-        } else {
-            log(Level.FINER, "Chosen stateless execution strategy");
-            this.executionStrategy = new StatelessExecutionStrategy(
-                    this.abstractionFinder.getAlgorithmSource());
-        }
-    }
-
-    private void initializeExecutionStrategy() throws QueryException {
-        try {
-            this.executionStrategy.initialize(this.propositionDefinitionCache);
-        } catch (ExecutionStrategyInitializationException ex) {
-            throw new QueryException(query.getName(), ex);
         }
     }
 

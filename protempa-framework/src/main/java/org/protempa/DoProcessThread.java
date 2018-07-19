@@ -22,15 +22,18 @@ package org.protempa;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.StringUtils;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;
+import org.protempa.query.QueryValidationException;
 
 /**
  *
@@ -45,25 +48,32 @@ class DoProcessThread extends AbstractThread {
     private final QueueObject hqrPoisonPill;
     private final DataStreamingEvent<Proposition> doProcessPoisonPill;
     private final Thread producer;
-    private final ExecutionStrategy executionStrategy;
+    private ExecutionStrategy executionStrategy;
     private int count;
     private final List<QueryException> exceptions;
     private final Query query;
+    private final AlgorithmSource algorithmSource;
+    private final Collection<PropositionDefinition> propositionDefinitionCache;
+    private final KnowledgeSource knowledgeSource;
 
     DoProcessThread(BlockingQueue<DataStreamingEvent<Proposition>> doProcessQueue,
             BlockingQueue<QueueObject> hqrQueue,
             DataStreamingEvent<Proposition> doProcessPoisonPill,
-            QueueObject hqrPoisonPill, Query query, ExecutionStrategy executionStrategy,
-            Thread producer) {
+            QueueObject hqrPoisonPill, Query query,
+            Thread producer, AlgorithmSource algorithmSource,
+            KnowledgeSource knowledgeSource,
+            Collection<PropositionDefinition> propositionDefinitionCache) {
         super(query, LOGGER, "protempa.executor.DoProcessThread");
         this.doProcessQueue = doProcessQueue;
         this.hqrQueue = hqrQueue;
         this.doProcessPoisonPill = doProcessPoisonPill;
         this.producer = producer;
         this.hqrPoisonPill = hqrPoisonPill;
-        this.executionStrategy = executionStrategy;
         this.exceptions = new ArrayList<>();
         this.query = query;
+        this.algorithmSource = algorithmSource;
+        this.knowledgeSource = knowledgeSource;
+        this.propositionDefinitionCache = propositionDefinitionCache;
     }
 
     List<QueryException> getExceptions() {
@@ -73,11 +83,15 @@ class DoProcessThread extends AbstractThread {
     int getCount() {
         return this.count;
     }
-    
+
     @Override
     public void run() {
         log(Level.FINER, "Start do process thread");
         try {
+            if (hasSomethingToAbstract(query) || this.query.getDatabasePath() != null) {
+                selectExecutionStrategy();
+                this.executionStrategy.initialize(this.propositionDefinitionCache);
+            }
             DataStreamingEvent<Proposition> dse;
             while (!isInterrupted() && ((dse = doProcessQueue.take()) != doProcessPoisonPill)) {
                 String keyId = dse.getKeyId();
@@ -117,6 +131,14 @@ class DoProcessThread extends AbstractThread {
             // by the HQR thread
             log(Level.FINER, "Do process thread interrupted", ex);
             producer.interrupt();
+        } catch (ExecutionStrategyInitializationException | KnowledgeSourceReadException ex) {
+            producer.interrupt();
+            try {
+                hqrQueue.put(hqrPoisonPill);
+            } catch (InterruptedException ignore) {
+                log(Level.SEVERE, "Failed to stop the query results handler queue; the query may be hung", ignore);
+            }
+            this.exceptions.add(new QueryException(this.query.getName(), ex));
         } catch (Error | RuntimeException t) {
             log(Level.SEVERE, "Do process thread threw runtime error", t);
             producer.interrupt();
@@ -126,6 +148,13 @@ class DoProcessThread extends AbstractThread {
                 log(Level.SEVERE, "Failed to stop the query results handler queue; the query may be hung", ignore);
             }
             throw t;
+        }
+        if (executionStrategy != null) {
+            try {
+                executionStrategy.shutdown();
+            } catch (ExecutionStrategyShutdownException ex) {
+                this.exceptions.add(new QueryException(this.query.getName(), ex));
+            }
         }
         log(Level.FINER, "End do process thread");
     }
@@ -139,6 +168,32 @@ class DoProcessThread extends AbstractThread {
             result.add(prop);
         }
         return result;
+    }
+
+    private void selectExecutionStrategy() {
+        if (this.query.getDatabasePath() != null) {
+            log(Level.FINER, "Chosen stateful execution strategy");
+            this.executionStrategy = new StatefulExecutionStrategy(
+                    this.algorithmSource,
+                    this.query);
+        } else {
+            log(Level.FINER, "Chosen stateless execution strategy");
+            this.executionStrategy = new StatelessExecutionStrategy(
+                    this.algorithmSource);
+        }
+    }
+
+    private boolean hasSomethingToAbstract(Query query) throws KnowledgeSourceReadException {
+        if (!this.knowledgeSource.readAbstractionDefinitions(query.getPropositionIds()).isEmpty()
+                || !this.knowledgeSource.readContextDefinitions(query.getPropositionIds()).isEmpty()) {
+            return true;
+        }
+        for (PropositionDefinition propDef : query.getPropositionDefinitions()) {
+            if (propDef instanceof AbstractionDefinition || propDef instanceof ContextDefinition) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
