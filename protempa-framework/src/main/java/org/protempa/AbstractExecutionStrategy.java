@@ -31,6 +31,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
 
     private final AlgorithmSource algorithmSource;
     private RuleBase ruleBase;
+    private final DerivationsBuilder derivationsBuilder;
 
     /**
      * @param abstractionFinder
@@ -38,20 +39,25 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
      */
     AbstractExecutionStrategy(AlgorithmSource algorithmSource) {
         this.algorithmSource = algorithmSource;
+        this.derivationsBuilder = new DerivationsBuilder();
     }
 
+    @Override
+    public DerivationsBuilder getDerivationsBuilder() {
+        return derivationsBuilder;
+    }
+    
     protected final AlgorithmSource getAlgorithmSource() {
         return this.algorithmSource;
     }
 
     @Override
-    public void initialize(Collection<PropositionDefinition> allNarrowerDescendants,
-            DerivationsBuilder listener)
+    public void initialize(Collection<PropositionDefinition> allNarrowerDescendants)
             throws ExecutionStrategyInitializationException {
         ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
                 this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
-                visitor.getAlgorithms(), listener, allNarrowerDescendants);
+                visitor.getAlgorithms(), this.derivationsBuilder, allNarrowerDescendants);
         if (allNarrowerDescendants != null) {
             try {
                 for (PropositionDefinition pd : allNarrowerDescendants) {

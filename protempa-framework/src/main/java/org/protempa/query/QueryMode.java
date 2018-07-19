@@ -25,5 +25,5 @@ package org.protempa.query;
  * @author Andrew Post
  */
 public enum QueryMode {
-    UPDATE, REPLACE
+    UPDATE, REPLACE, REPROCESS
 }

@@ -122,6 +122,9 @@ public class Query implements Serializable {
         }
         this.username = username;
         this.databasePath = databasePath;
+        if (this.databasePath == null && this.queryMode == QueryMode.REPROCESS) {
+            throw new IllegalArgumentException("Must specify a database path when in reprocess mode!");
+        }
     }
 
     /**

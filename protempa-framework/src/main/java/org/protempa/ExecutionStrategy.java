@@ -27,11 +27,12 @@ import org.protempa.proposition.Proposition;
 
 interface ExecutionStrategy {
     
-    void initialize(Collection<PropositionDefinition> cache,
-            DerivationsBuilder listener) 
+    void initialize(Collection<PropositionDefinition> cache) 
             throws ExecutionStrategyInitializationException;
     
     Iterator<Proposition> execute(String keyIds, List<? extends Proposition> objects);
+    
+    DerivationsBuilder getDerivationsBuilder();
     
     void closeCurrentWorkingMemory();
 

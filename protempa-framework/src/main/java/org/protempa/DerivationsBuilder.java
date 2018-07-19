@@ -43,10 +43,8 @@ final class DerivationsBuilder implements Serializable {
     }
 
     void reset() {
-        this.forwardDerivations = 
-                new HashMap<>();
-        this.backwardDerivations = 
-                new HashMap<>();
+        this.forwardDerivations = new HashMap<>();
+        this.backwardDerivations = new HashMap<>();
     }
     
     Map<Proposition, List<Proposition>> toForwardDerivations() {

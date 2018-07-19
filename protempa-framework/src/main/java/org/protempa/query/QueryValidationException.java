@@ -1,4 +1,6 @@
-package org.protempa;
+package org.protempa.query;
+
+import org.protempa.ProtempaException;
 
 /*
  * #%L
@@ -26,11 +28,11 @@ package org.protempa;
  */
 public class QueryValidationException extends ProtempaException {
 
-    QueryValidationException(String message, Throwable cause) {
+    public QueryValidationException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    QueryValidationException(String message) {
+    public QueryValidationException(String message) {
         super(message);
     }
     

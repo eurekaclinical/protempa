@@ -39,9 +39,8 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     @Override
-    public void initialize(Collection<PropositionDefinition> allNarrowerDescendants,
-            DerivationsBuilder listener) throws ExecutionStrategyInitializationException {
-        super.initialize(allNarrowerDescendants, listener);
+    public void initialize(Collection<PropositionDefinition> allNarrowerDescendants) throws ExecutionStrategyInitializationException {
+        super.initialize(allNarrowerDescendants);
         this.statelessSession = getRuleBase().newStatelessSession();
     }
 

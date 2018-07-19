@@ -215,10 +215,14 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
                 }
                 propIdsToTest.removeAll(actualPropIds);
                 if (!propIdsToTest.isEmpty()) {
-                    throw new QueryBuildException("Invalid proposition ids: " + propIdsToTest);
+                    throw new QueryValidationException("Invalid proposition ids: " + propIdsToTest);
                 }
-            } catch (KnowledgeSourceReadException ex) {
+            } catch (QueryValidationException | KnowledgeSourceReadException ex) {
                 throw new QueryBuildException("Could not build query", ex);
+            }
+            if (this.queryMode == QueryMode.REPROCESS && this.databasePath == null) {
+                throw new QueryBuildException("Could not build query", 
+                        new QueryValidationException("Database path must be specified in reprocess mode"));
             }
         }
         return new Query(this.name, this.username, this.keyIds, this.filters,

@@ -59,11 +59,10 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         this.queryMode = query.getQueryMode();
         this.workingMemoryEventListener = new DeletedWorkingMemoryEventListener();
     }
-
+    
     @Override
-    public void initialize(Collection<PropositionDefinition> cache,
-            DerivationsBuilder listener) throws ExecutionStrategyInitializationException {
-        super.initialize(cache, listener);
+    public void initialize(Collection<PropositionDefinition> cache) throws ExecutionStrategyInitializationException {
+        super.initialize(cache);
         createDataStoreManager();
         try {
             getDataStore();
