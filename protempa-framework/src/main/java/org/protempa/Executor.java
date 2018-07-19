@@ -138,7 +138,8 @@ final class Executor implements AutoCloseable {
                         this.abstractionFinder.getKnowledgeSource(),
                         this.propositionDefinitionCache);
                 this.handleQueryResultThread
-                        = new HandleQueryResultThread(hqrQueue, hqrPoisonPill, doProcessThread, this.query, this.resultsHandler);
+                        = new HandleQueryResultThread(hqrQueue, hqrPoisonPill, 
+                                doProcessThread, this.query, this.resultsHandler);
                 retrieveDataThread.start();
                 doProcessThread.start();
                 this.handleQueryResultThread.start();

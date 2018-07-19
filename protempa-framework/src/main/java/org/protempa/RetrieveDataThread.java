@@ -115,7 +115,9 @@ class RetrieveDataThread extends AbstractThread {
         if (isLoggable(Level.FINER)) {
             log(Level.FINER, "Asking data source for {0}", StringUtils.join(inDataSourcePropIds, ", "));
         }
-        return this.dataSource.readPropositions(Arrays.asSet(this.query.getKeyIds()), inDataSourcePropIds, this.filters, this.queryResultsHandler);
+        return this.dataSource.readPropositions(
+                Arrays.asSet(this.query.getKeyIds()), inDataSourcePropIds, 
+                this.filters, this.queryResultsHandler);
     }
 
 }

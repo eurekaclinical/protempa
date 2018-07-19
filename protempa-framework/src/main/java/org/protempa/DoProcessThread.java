@@ -148,12 +148,13 @@ class DoProcessThread extends AbstractThread {
                 log(Level.SEVERE, "Failed to stop the query results handler queue; the query may be hung", ignore);
             }
             throw t;
-        }
-        if (executionStrategy != null) {
-            try {
-                executionStrategy.shutdown();
-            } catch (ExecutionStrategyShutdownException ex) {
-                this.exceptions.add(new QueryException(this.query.getName(), ex));
+        } finally {
+            if (executionStrategy != null) {
+                try {
+                    executionStrategy.shutdown();
+                } catch (ExecutionStrategyShutdownException ex) {
+                    this.exceptions.add(new QueryException(this.query.getName(), ex));
+                }
             }
         }
         log(Level.FINER, "End do process thread");
