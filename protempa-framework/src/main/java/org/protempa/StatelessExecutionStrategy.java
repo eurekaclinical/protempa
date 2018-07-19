@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.collections4.iterators.IteratorChain;
+import org.arp.javautil.collections.Iterators;
 
 import org.drools.StatelessSession;
 import org.drools.StatelessSessionResult;
@@ -46,11 +47,11 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Iterator<Proposition> execute(String keyId, List<? extends Proposition> props) {
+    public Iterator<Proposition> execute(String keyId, Iterator<? extends Proposition> props) {
         this.statelessSession.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
         this.statelessSession.addEventListener(this.workingMemoryEventListener);
         StatelessSessionResult result = this.statelessSession
-                .executeWithResults(props);
+                .executeWithResults(Iterators.asCollection(props));
         this.statelessSession.removeEventListener(this.workingMemoryEventListener);
         List<Proposition> propsToDelete = this.workingMemoryEventListener.getPropsToDelete();
         this.workingMemoryEventListener.clear();

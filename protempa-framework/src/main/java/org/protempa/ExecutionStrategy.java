@@ -21,7 +21,6 @@ package org.protempa;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import org.protempa.proposition.Proposition;
 
@@ -30,7 +29,7 @@ interface ExecutionStrategy {
     void initialize(Collection<PropositionDefinition> cache) 
             throws ExecutionStrategyInitializationException;
     
-    Iterator<Proposition> execute(String keyIds, List<? extends Proposition> objects);
+    Iterator<Proposition> execute(String keyIds, Iterator<? extends Proposition> objects);
     
     DerivationsBuilder getDerivationsBuilder();
     

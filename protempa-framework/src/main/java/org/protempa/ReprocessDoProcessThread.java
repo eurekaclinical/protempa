@@ -21,10 +21,13 @@ package org.protempa;
  */
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.drools.StatefulSession;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
 
@@ -32,39 +35,37 @@ import org.protempa.query.Query;
  *
  * @author Andrew Post
  */
-public class DoProcessThread extends AbstractDoProcessThread {
-    
-    private static final Logger LOGGER = Logger.getLogger(DoProcessThread.class.getName());
-    
-    private final BlockingQueue<DataStreamingEvent<Proposition>> doProcessQueue;
-    private final DataStreamingEvent<Proposition> doProcessPoisonPill;
+public class ReprocessDoProcessThread extends AbstractDoProcessThread {
 
-    DoProcessThread(BlockingQueue<DataStreamingEvent<Proposition>> doProcessQueue, 
-            BlockingQueue<QueueObject> hqrQueue, 
-            DataStreamingEvent<Proposition> doProcessPoisonPill, 
-            QueueObject hqrPoisonPill, Query query, Thread producer, 
-            AlgorithmSource algorithmSource, KnowledgeSource knowledgeSource, 
+    private static final Logger LOGGER = Logger.getLogger(ReprocessDoProcessThread.class.getName());
+
+    ReprocessDoProcessThread(
+            BlockingQueue<QueueObject> hqrQueue,
+            QueueObject hqrPoisonPill, Query query,
+            AlgorithmSource algorithmSource, KnowledgeSource knowledgeSource,
             Collection<PropositionDefinition> propositionDefinitionCache) {
-        super(hqrQueue, hqrPoisonPill, query, producer, algorithmSource, 
+        super(hqrQueue, hqrPoisonPill, query, null, algorithmSource,
                 knowledgeSource, propositionDefinitionCache, LOGGER);
-        this.doProcessQueue = doProcessQueue;
-        this.doProcessPoisonPill = doProcessPoisonPill;
     }
-    
+
     @Override
     protected void doProcessDataLoop() throws InterruptedException {
         int count = 0;
-        DataStreamingEvent<Proposition> dse;
-        while (!isInterrupted() && ((dse = doProcessQueue.take()) != doProcessPoisonPill)) {
-            try {
-                List<Proposition> data = dse.getData();
-                doProcessData(dse.getKeyId(), data.iterator(), data.size(), getQuery());
-                count++;
-            } finally {
-                closeWorkingMemory();
+        ExecutionStrategy executionStrategy = getExecutionStrategy();
+        if (executionStrategy instanceof StatefulExecutionStrategy) {
+            Iterator<Map.Entry<String, StatefulSession>> iterator = 
+                    ((StatefulExecutionStrategy) executionStrategy).getDataStore().entrySet().iterator();
+            while (!isInterrupted() && iterator.hasNext()) {
+                Map.Entry<String, StatefulSession> next = iterator.next();
+                try {
+                    doProcessData(next.getKey(), next.getValue().iterateObjects(), -1, getQuery());
+                    count++;
+                } finally {
+                    closeWorkingMemory();
+                }
             }
         }
         log(Level.INFO, "Processed {0}", count);
     }
-    
+
 }

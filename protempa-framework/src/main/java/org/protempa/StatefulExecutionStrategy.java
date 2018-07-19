@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.iterators.IteratorChain;
@@ -65,7 +66,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         super.initialize(cache);
         createDataStoreManager();
         try {
-            getDataStore();
+            grabDataStore();
             prepareDataStore();
         } catch (IOException ex) {
             throw new ExecutionStrategyInitializationException(ex);
@@ -73,7 +74,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     @Override
-    public Iterator<Proposition> execute(String keyId, List<? extends Proposition> objects) {
+    public Iterator<Proposition> execute(String keyId, Iterator<? extends Proposition> objects) {
         getOrCreateWorkingMemoryInstance(keyId);
         insertRetrievedDataIntoWorkingMemory(objects);
         fireAllRules();
@@ -99,12 +100,16 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             throw exception2;
         }
     }
-
+    
+    public DataStore<String, StatefulSession> getDataStore() {
+        return this.dataStore;
+    }
+    
     private void createDataStoreManager() {
         this.workingMemoryDataStores = new WorkingMemoryDataStores(getRuleBase(), this.databasePath.getParent());
     }
-
-    private void getDataStore() throws IOException {
+    
+    private void grabDataStore() throws IOException {
         this.dataStore = this.workingMemoryDataStores.getDataStore(this.databasePath.getName());
         LOGGER.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
     }
@@ -129,9 +134,9 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
     }
 
-    private void insertRetrievedDataIntoWorkingMemory(List<?> objects) throws FactException {
-        for (Object obj : objects) {
-            Proposition prop = (Proposition) obj;
+    private void insertRetrievedDataIntoWorkingMemory(Iterator<?> objects) throws FactException {
+        while (objects.hasNext()) {
+            Proposition prop = (Proposition) objects.next();
             FactHandle factHandle = this.workingMemory.getFactHandle(prop);
             if (factHandle != null) {
                 this.workingMemory.modifyRetract(factHandle);

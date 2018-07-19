@@ -41,6 +41,7 @@ import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
+import org.protempa.query.QueryMode;
 
 /**
  *
@@ -114,42 +115,56 @@ final class Executor implements AutoCloseable {
     void execute() throws QueryException {
         try {
             RetrieveDataThread retrieveDataThread;
-            DoProcessThread doProcessThread;
+            AbstractDoProcessThread doProcessThread;
             synchronized (this) {
                 if (this.canceled) {
                     return;
                 }
                 log(Level.INFO, "Processing data");
-                DataStreamingEvent doProcessPoisonPill = new DataStreamingEvent("poison", Collections.emptyList());
-                QueueObject hqrPoisonPill = new QueueObject();
                 BlockingQueue<DataStreamingEvent<Proposition>> doProcessQueue
                         = new ArrayBlockingQueue<>(1000);
-                BlockingQueue<QueueObject> hqrQueue
-                        = new ArrayBlockingQueue<>(1000);
-                retrieveDataThread = new RetrieveDataThread(doProcessQueue,
-                        doProcessPoisonPill, this.query, 
-                        this.abstractionFinder.getDataSource(), 
-                        this.propositionDefinitionCache,
-                        this.filters, this.resultsHandler);
-                doProcessThread = new DoProcessThread(doProcessQueue, hqrQueue,
-                        doProcessPoisonPill, hqrPoisonPill, this.query,
-                        retrieveDataThread, this.abstractionFinder.getAlgorithmSource(),
-                        this.abstractionFinder.getKnowledgeSource(),
-                        this.propositionDefinitionCache);
+                QueueObject hqrPoisonPill = new QueueObject();
+                BlockingQueue<QueueObject> hqrQueue = new ArrayBlockingQueue<>(1000);
+                if (this.query.getQueryMode() != QueryMode.REPROCESS) {
+                    DataStreamingEvent doProcessPoisonPill = 
+                            new DataStreamingEvent("poison", Collections.emptyList());
+                    retrieveDataThread = new RetrieveDataThread(doProcessQueue,
+                            doProcessPoisonPill, this.query,
+                            this.abstractionFinder.getDataSource(),
+                            this.propositionDefinitionCache,
+                            this.filters, this.resultsHandler);
+                    doProcessThread = new DoProcessThread(doProcessQueue, hqrQueue,
+                            doProcessPoisonPill, hqrPoisonPill, this.query,
+                            retrieveDataThread, this.abstractionFinder.getAlgorithmSource(),
+                            this.abstractionFinder.getKnowledgeSource(),
+                            this.propositionDefinitionCache);
+                } else {
+                    retrieveDataThread = null;
+                    doProcessThread = new ReprocessDoProcessThread(hqrQueue,
+                            hqrPoisonPill, this.query,
+                            this.abstractionFinder.getAlgorithmSource(),
+                            this.abstractionFinder.getKnowledgeSource(),
+                            this.propositionDefinitionCache);
+                    
+                }
                 this.handleQueryResultThread
-                        = new HandleQueryResultThread(hqrQueue, hqrPoisonPill, 
-                                doProcessThread, this.query, this.resultsHandler);
-                retrieveDataThread.start();
+                            = new HandleQueryResultThread(hqrQueue, hqrPoisonPill,
+                                    doProcessThread, this.query, this.resultsHandler);
+                if (retrieveDataThread != null) {
+                    retrieveDataThread.start();
+                }
                 doProcessThread.start();
                 this.handleQueryResultThread.start();
             }
 
-            try {
-                retrieveDataThread.join();
-                this.exceptions.addAll(retrieveDataThread.getExceptions());
-                log(Level.INFO, "Done retrieving data");
-            } catch (InterruptedException ex) {
-                log(Level.FINER, "Protempa producer thread join interrupted", ex);
+            if (retrieveDataThread != null) {
+                try {
+                    retrieveDataThread.join();
+                    this.exceptions.addAll(retrieveDataThread.getExceptions());
+                    log(Level.INFO, "Done retrieving data");
+                } catch (InterruptedException ex) {
+                    log(Level.FINER, "Protempa producer thread join interrupted", ex);
+                }
             }
             try {
                 doProcessThread.join();
