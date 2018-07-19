@@ -31,14 +31,16 @@ import org.protempa.query.Query;
  */
 public class AbstractThread extends Thread {
 
-    final Query query;
+    private final Query query;
     private final MessageFormat logMessageFormat;
     private final Logger logger;
     
     AbstractThread(Query query, Logger logger, String name) {
         super(name);
+        assert query != null : "query cannot be null";
+        assert logger != null : "logger cannot be null";
         this.query = query;
-        this.logMessageFormat = new MessageFormat("Query " + this.query.getName() + ": {0}");
+        this.logMessageFormat = ProtempaUtil.getLogMessageFormat(this.query);
         this.logger = logger;
     }
     
@@ -57,4 +59,9 @@ public class AbstractThread extends Thread {
     protected boolean isLoggable(Level level) {
         return this.logger.isLoggable(level);
     }
+
+    protected Query getQuery() {
+        return query;
+    }
+    
 }

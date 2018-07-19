@@ -19,7 +19,6 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -73,6 +72,7 @@ class RetrieveDataThread extends AbstractThread {
     @Override
     public void run() {
         log(Level.FINER, "Start retrieve data thread");
+        Query query = getQuery();
         boolean itrClosed = false;
         DataStreamingEventIterator<Proposition> itr = null;
         try {
@@ -84,7 +84,7 @@ class RetrieveDataThread extends AbstractThread {
             queue.put(poisonPill);
             itrClosed = true;
         } catch (DataSourceReadException | Error | RuntimeException ex) {
-            exceptions.add(new QueryException(this.query.getName(), ex));
+            exceptions.add(new QueryException(query.getName(), ex));
             try {
                 queue.put(poisonPill);
             } catch (InterruptedException ignore) {
@@ -106,6 +106,7 @@ class RetrieveDataThread extends AbstractThread {
 
     private DataStreamingEventIterator<Proposition> newDataIterator() throws DataSourceReadException {
         log(Level.INFO, "Retrieving data");
+        Query query = getQuery();
         Set<String> inDataSourcePropIds = new HashSet<>();
         for (PropositionDefinition pd : this.propositionDefinitionCache) {
             if (pd.getInDataSource()) {
@@ -116,7 +117,7 @@ class RetrieveDataThread extends AbstractThread {
             log(Level.FINER, "Asking data source for {0}", StringUtils.join(inDataSourcePropIds, ", "));
         }
         return this.dataSource.readPropositions(
-                Arrays.asSet(this.query.getKeyIds()), inDataSourcePropIds, 
+                Arrays.asSet(query.getKeyIds()), inDataSourcePropIds, 
                 this.filters, this.queryResultsHandler);
     }
 

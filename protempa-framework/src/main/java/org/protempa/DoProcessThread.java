@@ -33,7 +33,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;
-import org.protempa.query.QueryValidationException;
 
 /**
  *
@@ -49,9 +48,7 @@ class DoProcessThread extends AbstractThread {
     private final DataStreamingEvent<Proposition> doProcessPoisonPill;
     private final Thread producer;
     private ExecutionStrategy executionStrategy;
-    private int count;
     private final List<QueryException> exceptions;
-    private final Query query;
     private final AlgorithmSource algorithmSource;
     private final Collection<PropositionDefinition> propositionDefinitionCache;
     private final KnowledgeSource knowledgeSource;
@@ -70,7 +67,6 @@ class DoProcessThread extends AbstractThread {
         this.producer = producer;
         this.hqrPoisonPill = hqrPoisonPill;
         this.exceptions = new ArrayList<>();
-        this.query = query;
         this.algorithmSource = algorithmSource;
         this.knowledgeSource = knowledgeSource;
         this.propositionDefinitionCache = propositionDefinitionCache;
@@ -80,19 +76,17 @@ class DoProcessThread extends AbstractThread {
         return this.exceptions;
     }
 
-    int getCount() {
-        return this.count;
-    }
-
     @Override
     public void run() {
         log(Level.FINER, "Start do process thread");
+        Query query = getQuery();
         try {
-            if (hasSomethingToAbstract(query) || this.query.getDatabasePath() != null) {
+            if (hasSomethingToAbstract(query) || query.getDatabasePath() != null) {
                 selectExecutionStrategy();
                 this.executionStrategy.initialize(this.propositionDefinitionCache);
             }
             DataStreamingEvent<Proposition> dse;
+            int count = 0;
             while (!isInterrupted() && ((dse = doProcessQueue.take()) != doProcessPoisonPill)) {
                 String keyId = dse.getKeyId();
                 try {
@@ -110,7 +104,7 @@ class DoProcessThread extends AbstractThread {
                     Map<UniqueId, Proposition> refs = org.arp.javautil.collections.Collections.newHashMap(inputSize);
                     List<Proposition> filteredPropositions = extractRequestedPropositions(resultsItr, refs, inputSize);
                     if (LOGGER.isLoggable(Level.FINEST)) {
-                        log(Level.FINEST, "Proposition ids: {0}", String.join(", ", this.query.getPropositionIds()));
+                        log(Level.FINEST, "Proposition ids: {0}", String.join(", ", query.getPropositionIds()));
                         log(Level.FINEST, "Filtered propositions: {0}", filteredPropositions);
                         log(Level.FINEST, "Forward derivations: {0}", forwardDerivations);
                         log(Level.FINEST, "Backward derivations: {0}", backwardDerivations);
@@ -118,7 +112,7 @@ class DoProcessThread extends AbstractThread {
                     }
                     this.hqrQueue.put(new QueueObject(keyId, filteredPropositions, forwardDerivations, backwardDerivations, refs));
                     log(Level.FINER, "Results put on query result handler queue");
-                    this.count++;
+                    count++;
                     derivationsBuilder.reset();
                 } finally {
                     if (this.executionStrategy != null) {
@@ -126,6 +120,7 @@ class DoProcessThread extends AbstractThread {
                     }
                 }
             }
+            log(Level.INFO, "Processed {0}", count);
             this.hqrQueue.put(this.hqrPoisonPill);
         } catch (InterruptedException ex) {
             // by the HQR thread
@@ -138,7 +133,7 @@ class DoProcessThread extends AbstractThread {
             } catch (InterruptedException ignore) {
                 log(Level.SEVERE, "Failed to stop the query results handler queue; the query may be hung", ignore);
             }
-            this.exceptions.add(new QueryException(this.query.getName(), ex));
+            this.exceptions.add(new QueryException(query.getName(), ex));
         } catch (Error | RuntimeException t) {
             log(Level.SEVERE, "Do process thread threw runtime error", t);
             producer.interrupt();
@@ -153,7 +148,7 @@ class DoProcessThread extends AbstractThread {
                 try {
                     executionStrategy.shutdown();
                 } catch (ExecutionStrategyShutdownException ex) {
-                    this.exceptions.add(new QueryException(this.query.getName(), ex));
+                    this.exceptions.add(new QueryException(query.getName(), ex));
                 }
             }
         }
@@ -172,11 +167,11 @@ class DoProcessThread extends AbstractThread {
     }
 
     private void selectExecutionStrategy() {
-        if (this.query.getDatabasePath() != null) {
+        Query query = getQuery();
+        if (query.getDatabasePath() != null) {
             log(Level.FINER, "Chosen stateful execution strategy");
             this.executionStrategy = new StatefulExecutionStrategy(
-                    this.algorithmSource,
-                    this.query);
+                    this.algorithmSource, query);
         } else {
             log(Level.FINER, "Chosen stateless execution strategy");
             this.executionStrategy = new StatelessExecutionStrategy(

@@ -19,7 +19,6 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-import org.protempa.query.QueryValidationException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,7 +82,7 @@ final class Executor implements AutoCloseable {
         }
         this.query = query;
         this.destination = resultsHandlerFactory;
-        this.logMessageFormat = new MessageFormat("Query " + this.query.getName() + ": {0}");
+        this.logMessageFormat = ProtempaUtil.getLogMessageFormat(this.query);
         this.exceptions = new ArrayList<>();
     }
 
@@ -154,8 +153,6 @@ final class Executor implements AutoCloseable {
             }
             try {
                 doProcessThread.join();
-                int count = doProcessThread.getCount();
-                log(Level.INFO, "Processed {0}", count);
                 this.exceptions.addAll(doProcessThread.getExceptions());
                 log(Level.INFO, "Done processing data");
             } catch (InterruptedException ex) {

@@ -19,6 +19,7 @@
  */
 package org.protempa;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.comparator.TemporalPropositionIntervalComparator;
+import org.protempa.query.Query;
 
 /**
  * Utility methods for the PROTEMPA project. They are not intended to be
@@ -185,4 +187,9 @@ public final class ProtempaUtil {
             new TemporalPropositionIntervalComparator();
     static final Comparator<TemporalProposition> REVERSE_TEMP_PROP_COMP =
             Collections.reverseOrder(TEMP_PROP_COMP);
+    
+    public static MessageFormat getLogMessageFormat(Query query) {
+        return new MessageFormat("Query " + query.getName() + ": {0}");
+    }
+    
 }

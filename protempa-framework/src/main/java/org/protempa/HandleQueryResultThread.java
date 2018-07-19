@@ -60,6 +60,7 @@ class HandleQueryResultThread extends AbstractThread {
     @Override
     public void run() {
         log(Level.FINER, "Start handle query results thread");
+        Query query = getQuery();
         QueueObject qo;
         try {
             while ((qo = queue.take()) != poisonPill) {
@@ -68,12 +69,12 @@ class HandleQueryResultThread extends AbstractThread {
                     this.queryResultsHandler.handleQueryResult(qo.keyId, qo.propositions, qo.forwardDerivations, qo.backwardDerivations, qo.refs);
                 } catch (QueryResultsHandlerProcessingException ex) {
                     log(Level.FINER, "Handle query results threw QueryResultsHandlerProcessingException", ex);
-                    exceptions.add(new QueryException(this.query.getName(), ex));
+                    exceptions.add(new QueryException(query.getName(), ex));
                     producerThread.interrupt();
                     break;
                 } catch (Error | RuntimeException t) {
                     log(Level.FINER, "Handle query results threw exception", t);
-                    exceptions.add(new QueryException(this.query.getName(), new QueryResultsHandlerProcessingException(t)));
+                    exceptions.add(new QueryException(query.getName(), new QueryResultsHandlerProcessingException(t)));
                     producerThread.interrupt();
                     break;
                 }
