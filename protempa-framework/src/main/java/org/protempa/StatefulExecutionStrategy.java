@@ -40,6 +40,7 @@ import org.protempa.query.Query;
 import org.protempa.query.QueryMode;
 
 class StatefulExecutionStrategy extends AbstractExecutionStrategy {
+
     private static final Logger LOGGER = Logger.getLogger(StatefulExecutionStrategy.class.getName());
 
     private final File databasePath;
@@ -50,7 +51,6 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private final QueryMode queryMode;
     private List<Proposition> propsToDelete;
 
-
     StatefulExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
         super(algorithmSource);
         assert query != null : "query cannot be null";
@@ -60,7 +60,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         this.queryMode = query.getQueryMode();
         this.workingMemoryEventListener = new DeletedWorkingMemoryEventListener();
     }
-    
+
     @Override
     public void initialize(Collection<PropositionDefinition> cache) throws ExecutionStrategyInitializationException {
         super.initialize(cache);
@@ -100,15 +100,15 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             throw exception2;
         }
     }
-    
+
     public DataStore<String, StatefulSession> getDataStore() {
         return this.dataStore;
     }
-    
+
     private void createDataStoreManager() {
         this.workingMemoryDataStores = new WorkingMemoryDataStores(getRuleBase(), this.databasePath.getParent());
     }
-    
+
     private void grabDataStore() throws IOException {
         this.dataStore = this.workingMemoryDataStores.getDataStore(this.databasePath.getName());
         LOGGER.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
@@ -135,14 +135,16 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private void insertRetrievedDataIntoWorkingMemory(Iterator<?> objects) throws FactException {
-        while (objects.hasNext()) {
-            Proposition prop = (Proposition) objects.next();
-            FactHandle factHandle = this.workingMemory.getFactHandle(prop);
-            if (factHandle != null) {
-                this.workingMemory.modifyRetract(factHandle);
-                this.workingMemory.modifyInsert(factHandle, prop);
-            } else {
-                this.workingMemory.insert(prop);
+        if (objects != null) {
+            while (objects.hasNext()) {
+                Proposition prop = (Proposition) objects.next();
+                FactHandle factHandle = this.workingMemory.getFactHandle(prop);
+                if (factHandle != null) {
+                    this.workingMemory.modifyRetract(factHandle);
+                    this.workingMemory.modifyInsert(factHandle, prop);
+                } else {
+                    this.workingMemory.insert(prop);
+                }
             }
         }
     }

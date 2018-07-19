@@ -19,9 +19,7 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -169,10 +167,12 @@ abstract class AbstractDoProcessThread extends AbstractThread {
             Iterator<Proposition> propositions, Map<UniqueId, Proposition> refs,
             int sizeHint) {
         List<Proposition> result = new ArrayList<>(sizeHint > -1 ? sizeHint : 200);
-        while (!isInterrupted() && propositions.hasNext()) {
-            Proposition prop = propositions.next();
-            refs.put(prop.getUniqueId(), prop);
-            result.add(prop);
+        if (propositions != null) {
+            while (!isInterrupted() && propositions.hasNext()) {
+                Proposition prop = propositions.next();
+                refs.put(prop.getUniqueId(), prop);
+                result.add(prop);
+            }
         }
         return result;
     }

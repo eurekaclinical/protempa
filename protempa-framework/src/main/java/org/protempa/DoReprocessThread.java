@@ -53,12 +53,12 @@ public class DoReprocessThread extends AbstractDoProcessThread {
         int count = 0;
         ExecutionStrategy executionStrategy = getExecutionStrategy();
         if (executionStrategy instanceof StatefulExecutionStrategy) {
-            Iterator<Map.Entry<String, StatefulSession>> iterator = 
-                    ((StatefulExecutionStrategy) executionStrategy).getDataStore().entrySet().iterator();
+            Iterator<String> iterator = 
+                    ((StatefulExecutionStrategy) executionStrategy).getDataStore().keySet().iterator();
             while (!isInterrupted() && iterator.hasNext()) {
-                Map.Entry<String, StatefulSession> next = iterator.next();
+                String keyId = iterator.next();
                 try {
-                    doProcessData(next.getKey(), next.getValue().iterateObjects(), -1, getQuery());
+                    doProcessData(keyId, null, -1, getQuery());
                     count++;
                 } finally {
                     closeWorkingMemory();
