@@ -32,12 +32,13 @@ import org.protempa.query.Query;
  *
  * @author Andrew Post
  */
-public class DoProcessThread extends AbstractDoProcessThread {
+public class DoProcessThread extends AbstractDoProcessThread<ExecutionStrategy> {
     
     private static final Logger LOGGER = Logger.getLogger(DoProcessThread.class.getName());
     
     private final BlockingQueue<DataStreamingEvent<Proposition>> doProcessQueue;
     private final DataStreamingEvent<Proposition> doProcessPoisonPill;
+    private final AlgorithmSource algorithmSource;
 
     DoProcessThread(BlockingQueue<DataStreamingEvent<Proposition>> doProcessQueue, 
             BlockingQueue<QueueObject> hqrQueue, 
@@ -45,10 +46,11 @@ public class DoProcessThread extends AbstractDoProcessThread {
             QueueObject hqrPoisonPill, Query query, Thread producer, 
             AlgorithmSource algorithmSource, KnowledgeSource knowledgeSource, 
             Collection<PropositionDefinition> propositionDefinitionCache) {
-        super(hqrQueue, hqrPoisonPill, query, producer, algorithmSource, 
+        super(hqrQueue, hqrPoisonPill, query, producer, 
                 knowledgeSource, propositionDefinitionCache, LOGGER);
         this.doProcessQueue = doProcessQueue;
         this.doProcessPoisonPill = doProcessPoisonPill;
+        this.algorithmSource = algorithmSource;
     }
     
     @Override
@@ -64,7 +66,21 @@ public class DoProcessThread extends AbstractDoProcessThread {
                 closeWorkingMemory();
             }
         }
-        log(Level.INFO, "Processed {0}", count);
+        log(Level.INFO, "Processed {0} keys", count);
+    }
+    
+    @Override
+    ExecutionStrategy selectExecutionStrategy() {
+        Query query = getQuery();
+        if (query.getDatabasePath() != null) {
+            log(Level.FINER, "Chosen stateful execution strategy");
+            return new StatefulExecutionStrategy(
+                    this.algorithmSource, query);
+        } else {
+            log(Level.FINER, "Chosen stateless execution strategy");
+            return new StatelessExecutionStrategy(
+                    this.algorithmSource);
+        }
     }
     
 }

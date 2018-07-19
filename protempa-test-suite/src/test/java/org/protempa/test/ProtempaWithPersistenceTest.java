@@ -32,16 +32,16 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.protempa.KnowledgeSourceReadException;
 import org.protempa.Protempa;
 import org.protempa.ProtempaException;
 import org.protempa.SourceFactory;
 import org.protempa.bconfigs.ini4j.INIConfigurations;
 import org.protempa.query.DefaultQueryBuilder;
 import org.protempa.query.Query;
-import org.protempa.query.QueryBuildException;
 import org.protempa.dest.Destination;
 import org.protempa.query.QueryMode;
 
@@ -63,28 +63,36 @@ public class ProtempaWithPersistenceTest {
      * The ground truth output.
      */
     private static final String TRUTH_OUTPUT = TRUTH_DIR + "/output.txt";
+    
+    private static File TEMP_DIR;
+    
+    
 
     /**
      * @throws Exception
      */
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         // force the use of the H2 driver so we don't bother trying to load
         // others
         System.setProperty("protempa.dsb.relationaldatabase.sqlgenerator",
                 "org.protempa.backend.dsb.relationaldb.h2.H2SQLGenerator");
+        TEMP_DIR = Files.createTempDirectory(null).toFile();
     }
 
     /**
      * @throws Exception
      */
-    @After
-    public void tearDown() throws Exception {
+    @AfterClass
+    public static void tearDown() throws Exception {
+        TEMP_DIR = null;
     }
 
     /**
-     * Tests the end-to-end execution of Protempa without persistence. Only
+     * Tests the end-to-end execution of Protempa with persistence. Only
      * verifies that the final output is correct.
+     * @throws java.io.IOException if file writing fails.
+     * @throws org.protempa.ProtempaException if the Protempa run fails.
      */
     @Test
     public void testProtempaWithPersistence() throws IOException, ProtempaException {
@@ -94,11 +102,12 @@ public class ProtempaWithPersistenceTest {
                 "protege-h2-test-config");
         try (Protempa protempa = Protempa.newInstance(sf)) {
             DefaultQueryBuilder q = new QueryBuilderFactory().getInstance();
-            File tempDir = Files.createTempDirectory(null).toFile();
-            q.setDatabasePath(tempDir.getPath());
+            
+            q.setDatabasePath(TEMP_DIR.getPath());
             Query query = protempa.buildQuery(q);
 
-            File outputFile = File.createTempFile("protempa-test-with-persistence", null);
+            File outputFile = 
+                    File.createTempFile("protempa-test-with-persistence", null);
             try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
                 Destination destination = new SingleColumnDestination(fw);
                 protempa.execute(query, destination);
@@ -107,6 +116,35 @@ public class ProtempaWithPersistenceTest {
         }
     }
 
+    /**
+     * Tests the end-to-end execution of Protempa with persistence, 
+     * reprocessing the output of {@link #testProtempaWithPersistence() }. Only
+     * verifies that the final output is correct.
+     * @throws java.io.IOException if file writing fails.
+     * @throws org.protempa.ProtempaException if the Protempa run fails.
+     */
+    @Test
+    public void testProtempaWithPersistenceReprocess() throws IOException, ProtempaException {
+
+        SourceFactory sf = new SourceFactory(
+                new INIConfigurations(new File("src/test/resources")),
+                "protege-h2-test-config");
+        try (Protempa protempa = Protempa.newInstance(sf)) {
+            DefaultQueryBuilder q = new QueryBuilderFactory().getInstance();
+            q.setDatabasePath(TEMP_DIR.getPath());
+            q.setQueryMode(QueryMode.REPROCESS);
+            Query query = protempa.buildQuery(q);
+
+            File outputFile = 
+                    File.createTempFile("protempa-test-with-persistence-reprocess", null);
+            try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
+                Destination destination = new SingleColumnDestination(fw);
+                protempa.execute(query, destination);
+            }
+            outputMatches(outputFile, TRUTH_OUTPUT);
+        }
+    }
+    
     private void outputMatches(File actual, String expected) throws IOException {
         try (BufferedReader actualReader = new BufferedReader(new FileReader(actual));
                 BufferedReader expectedReader = new BufferedReader(new FileReader(expected))) {

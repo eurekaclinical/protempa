@@ -19,53 +19,53 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.drools.StatefulSession;
-import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
 
 /**
  *
  * @author Andrew Post
  */
-public class DoReprocessThread extends AbstractDoProcessThread {
+public class DoReprocessThread extends AbstractDoProcessThread<StatefulExecutionStrategy> {
 
     private static final Logger LOGGER = Logger.getLogger(DoReprocessThread.class.getName());
+    private final AlgorithmSource algorithmSource;
 
     DoReprocessThread(
             BlockingQueue<QueueObject> hqrQueue,
             QueueObject hqrPoisonPill, Query query,
             AlgorithmSource algorithmSource, KnowledgeSource knowledgeSource,
             Collection<PropositionDefinition> propositionDefinitionCache) {
-        super(hqrQueue, hqrPoisonPill, query, null, algorithmSource,
+        super(hqrQueue, hqrPoisonPill, query, null,
                 knowledgeSource, propositionDefinitionCache, LOGGER);
+        this.algorithmSource = algorithmSource;
     }
 
     @Override
     protected void doProcessDataLoop() throws InterruptedException {
         int count = 0;
-        ExecutionStrategy executionStrategy = getExecutionStrategy();
-        if (executionStrategy instanceof StatefulExecutionStrategy) {
-            Iterator<String> iterator = 
-                    ((StatefulExecutionStrategy) executionStrategy).getDataStore().keySet().iterator();
-            while (!isInterrupted() && iterator.hasNext()) {
-                String keyId = iterator.next();
-                try {
-                    doProcessData(keyId, null, -1, getQuery());
-                    count++;
-                } finally {
-                    closeWorkingMemory();
-                }
+        StatefulExecutionStrategy executionStrategy = getExecutionStrategy();
+        Iterator<String> iterator
+                = executionStrategy.getDataStore().keySet().iterator();
+        while (!isInterrupted() && iterator.hasNext()) {
+            String keyId = iterator.next();
+            try {
+                doProcessData(keyId, null, -1, getQuery());
+                count++;
+            } finally {
+                closeWorkingMemory();
             }
         }
-        log(Level.INFO, "Processed {0}", count);
+        log(Level.INFO, "Processed {0} keys", count);
+    }
+
+    @Override
+    StatefulExecutionStrategy selectExecutionStrategy() {
+        return new StatefulExecutionStrategy(this.algorithmSource, getQuery());
     }
 
 }

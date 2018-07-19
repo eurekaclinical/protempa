@@ -36,14 +36,13 @@ import org.protempa.query.Query;
  *
  * @author Andrew Post
  */
-abstract class AbstractDoProcessThread extends AbstractThread {
+abstract class AbstractDoProcessThread<E extends ExecutionStrategy> extends AbstractThread {
 
     private final BlockingQueue<QueueObject> hqrQueue;
     private final QueueObject hqrPoisonPill;
     private final Thread producer;
-    private ExecutionStrategy executionStrategy;
+    private E executionStrategy;
     private final List<QueryException> exceptions;
-    private final AlgorithmSource algorithmSource;
     private final Collection<PropositionDefinition> propositionDefinitionCache;
     private final KnowledgeSource knowledgeSource;
     private DerivationsBuilder derivationsBuilder;
@@ -51,7 +50,7 @@ abstract class AbstractDoProcessThread extends AbstractThread {
     AbstractDoProcessThread(
             BlockingQueue<QueueObject> hqrQueue,
             QueueObject hqrPoisonPill, Query query,
-            Thread producer, AlgorithmSource algorithmSource,
+            Thread producer,
             KnowledgeSource knowledgeSource,
             Collection<PropositionDefinition> propositionDefinitionCache,
             Logger logger) {
@@ -60,7 +59,6 @@ abstract class AbstractDoProcessThread extends AbstractThread {
         this.producer = producer;
         this.hqrPoisonPill = hqrPoisonPill;
         this.exceptions = new ArrayList<>();
-        this.algorithmSource = algorithmSource;
         this.knowledgeSource = knowledgeSource;
         this.propositionDefinitionCache = propositionDefinitionCache;
     }
@@ -113,7 +111,7 @@ abstract class AbstractDoProcessThread extends AbstractThread {
         this.derivationsBuilder.reset();
     }
 
-    protected ExecutionStrategy getExecutionStrategy() {
+    protected E getExecutionStrategy() {
         return this.executionStrategy;
     }
 
@@ -155,7 +153,7 @@ abstract class AbstractDoProcessThread extends AbstractThread {
     private void initialize() throws KnowledgeSourceReadException, ExecutionStrategyInitializationException {
         Query query = getQuery();
         if (hasSomethingToAbstract(query) || query.getDatabasePath() != null) {
-            selectExecutionStrategy();
+            this.executionStrategy = selectExecutionStrategy();
             this.executionStrategy.initialize(this.propositionDefinitionCache);
             this.derivationsBuilder = this.executionStrategy.getDerivationsBuilder();
         } else {
@@ -186,19 +184,8 @@ abstract class AbstractDoProcessThread extends AbstractThread {
     List<QueryException> getExceptions() {
         return this.exceptions;
     }
-
-    private void selectExecutionStrategy() {
-        Query query = getQuery();
-        if (query.getDatabasePath() != null) {
-            log(Level.FINER, "Chosen stateful execution strategy");
-            this.executionStrategy = new StatefulExecutionStrategy(
-                    this.algorithmSource, query);
-        } else {
-            log(Level.FINER, "Chosen stateless execution strategy");
-            this.executionStrategy = new StatelessExecutionStrategy(
-                    this.algorithmSource);
-        }
-    }
+    
+    abstract E selectExecutionStrategy();
 
     private boolean hasSomethingToAbstract(Query query) throws KnowledgeSourceReadException {
         if (!this.knowledgeSource.readAbstractionDefinitions(query.getPropositionIds()).isEmpty()
