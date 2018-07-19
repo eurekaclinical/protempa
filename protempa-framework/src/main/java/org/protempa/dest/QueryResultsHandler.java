@@ -24,10 +24,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.protempa.PropositionDefinition;
-import org.protempa.ProtempaEventListener;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
-import org.protempa.query.Query;
 
 /**
  * Interface defining the operations for handling results of a Protempa query.
