@@ -31,9 +31,7 @@ import java.nio.file.Files;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 
-import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.protempa.Protempa;
@@ -63,6 +61,8 @@ public class ProtempaWithPersistenceTest {
      * The ground truth output.
      */
     private static final String TRUTH_OUTPUT = TRUTH_DIR + "/output.txt";
+    
+    private static final String TRUTH_OUTPUT_REPROCESS = TRUTH_DIR + "/output-reprocess.txt";
     
     private static File TEMP_DIR;
     
@@ -141,7 +141,7 @@ public class ProtempaWithPersistenceTest {
                 Destination destination = new SingleColumnDestination(fw);
                 protempa.execute(query, destination);
             }
-            outputMatches(outputFile, TRUTH_OUTPUT);
+            outputMatches(outputFile, TRUTH_OUTPUT_REPROCESS);
         }
     }
     
