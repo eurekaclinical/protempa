@@ -97,11 +97,11 @@ public class ProtempaTest {
      * verifies that the final output is correct.
      */
     @Test
-    public void testProtempa() throws IOException, ProtempaException {
+    public void testProtempaRetrieve() throws IOException, ProtempaException {
         File outputFile = File.createTempFile("protempa-test", null);
         try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
             Destination destination = new SingleColumnDestination(fw);
-            protempa.execute(query(), destination);
+            protempa.execute(queryRetrieve(), destination);
         }
         outputMatches(outputFile, TRUTH_OUTPUT);
     }
@@ -116,7 +116,7 @@ public class ProtempaTest {
         }
     }
     
-    private Query query() throws KnowledgeSourceReadException, QueryBuildException {
+    private Query queryRetrieve() throws KnowledgeSourceReadException, QueryBuildException {
         DefaultQueryBuilder q = new QueryBuilderFactory().getInstance();
         Query query = protempa.buildQuery(q);
 

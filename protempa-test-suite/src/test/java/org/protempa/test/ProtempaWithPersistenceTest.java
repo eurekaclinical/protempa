@@ -124,13 +124,79 @@ public class ProtempaWithPersistenceTest {
      * @throws org.protempa.ProtempaException if the Protempa run fails.
      */
     @Test
-    public void testProtempaWithPersistenceReprocess() throws IOException, ProtempaException {
+    public void testProtempaWithPersistenceReprocessRetrieve() throws IOException, ProtempaException {
 
         SourceFactory sf = new SourceFactory(
                 new INIConfigurations(new File("src/test/resources")),
                 "protege-h2-test-config");
         try (Protempa protempa = Protempa.newInstance(sf)) {
-            DefaultQueryBuilder q = new QueryBuilderFactory().getInstance();
+            DefaultQueryBuilder q = new QueryBuilderReprocessFactory().getInstanceRetrieve();
+            q.setDatabasePath(TEMP_DIR.getPath());
+            q.setQueryMode(QueryMode.REPROCESS);
+            Query query = protempa.buildQuery(q);
+
+            File outputFile = 
+                    File.createTempFile("protempa-test-with-persistence-reprocess", null);
+            try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
+                Destination destination = new SingleColumnDestination(fw);
+                protempa.execute(query, destination);
+            }
+            outputMatches(outputFile, TRUTH_OUTPUT_REPROCESS);
+        }
+    }
+    
+    @Test
+    public void testProtempaWithPersistenceReprocessUpdate() throws IOException, ProtempaException {
+
+        SourceFactory sf = new SourceFactory(
+                new INIConfigurations(new File("src/test/resources")),
+                "protege-h2-test-config");
+        try (Protempa protempa = Protempa.newInstance(sf)) {
+            DefaultQueryBuilder q = new QueryBuilderReprocessFactory().getInstanceRetrieve();
+            q.setDatabasePath(TEMP_DIR.getPath());
+            q.setQueryMode(QueryMode.REPROCESS);
+            Query query = protempa.buildQuery(q);
+
+            File outputFile = 
+                    File.createTempFile("protempa-test-with-persistence-reprocess", null);
+            try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
+                Destination destination = new SingleColumnDestination(fw);
+                protempa.execute(query, destination);
+            }
+            outputMatches(outputFile, TRUTH_OUTPUT_REPROCESS);
+        }
+    }
+    
+    @Test
+    public void testProtempaWithPersistenceReprocessCreate() throws IOException, ProtempaException {
+
+        SourceFactory sf = new SourceFactory(
+                new INIConfigurations(new File("src/test/resources")),
+                "protege-h2-test-config");
+        try (Protempa protempa = Protempa.newInstance(sf)) {
+            DefaultQueryBuilder q = new QueryBuilderReprocessFactory().getInstanceCreate();
+            q.setDatabasePath(TEMP_DIR.getPath());
+            q.setQueryMode(QueryMode.REPROCESS);
+            Query query = protempa.buildQuery(q);
+
+            File outputFile = 
+                    File.createTempFile("protempa-test-with-persistence-reprocess", null);
+            try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
+                Destination destination = new SingleColumnDestination(fw);
+                protempa.execute(query, destination);
+            }
+            outputMatches(outputFile, TRUTH_OUTPUT_REPROCESS);
+        }
+    }
+    
+    @Test
+    public void testProtempaWithPersistenceReprocessDelete() throws IOException, ProtempaException {
+
+        SourceFactory sf = new SourceFactory(
+                new INIConfigurations(new File("src/test/resources")),
+                "protege-h2-test-config");
+        try (Protempa protempa = Protempa.newInstance(sf)) {
+            DefaultQueryBuilder q = new QueryBuilderReprocessFactory().getInstanceRetrieve();
             q.setDatabasePath(TEMP_DIR.getPath());
             q.setQueryMode(QueryMode.REPROCESS);
             Query query = protempa.buildQuery(q);
