@@ -59,7 +59,6 @@ public final class WorkingMemoryDataStores implements
         this.ruleBase = ruleBase;
         this.storeFactory = new BdbPersistentStoreFactory(directory);
     }
-
     
     @Override
     public DataStore<String, StatefulSession> getDataStore(String name) throws IOException {

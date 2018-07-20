@@ -322,6 +322,10 @@ public abstract class AbstractProposition implements Proposition {
         }
 
         s.writeObject(this.sourceSystem);
+        s.writeObject(this.createDate);
+        s.writeObject(this.updateDate);
+        s.writeObject(this.deleteDate);
+        s.writeObject(this.downloadDate);
     }
 
     protected void readAbstractProposition(ObjectInputStream s)
@@ -371,6 +375,10 @@ public abstract class AbstractProposition implements Proposition {
             }
         }
         setSourceSystem((SourceSystem) s.readObject());
+        setCreateDate((Date) s.readObject());
+        setUpdateDate((Date) s.readObject());
+        setDeleteDate((Date) s.readObject());
+        setDownloadDate((Date) s.readObject());
     }
 
     @Override

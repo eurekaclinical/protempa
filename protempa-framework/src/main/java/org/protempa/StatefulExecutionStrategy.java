@@ -33,6 +33,7 @@ import org.drools.FactHandle;
 import org.drools.StatefulSession;
 
 import org.eurekaclinical.datastore.DataStore;
+import org.eurekaclinical.datastore.DataStoreFactory;
 import org.protempa.datastore.WorkingMemoryDataStores;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
@@ -71,7 +72,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             throw new ExecutionStrategyInitializationException(ex);
         }
     }
-
+    
     @Override
     public Iterator<Proposition> execute(String keyId, Iterator<? extends Proposition> objects) {
         getOrCreateWorkingMemoryInstance(keyId);

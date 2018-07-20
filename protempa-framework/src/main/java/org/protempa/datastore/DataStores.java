@@ -21,6 +21,7 @@ package org.protempa.datastore;
 
 import java.io.IOException;
 import org.eurekaclinical.datastore.DataStore;
+import org.eurekaclinical.datastore.DataStoreFactory;
 
 /**
  * An interface for defining classes that create and return data stores.
@@ -31,7 +32,7 @@ import org.eurekaclinical.datastore.DataStore;
  * @param <V> the value type to store
  */
 public interface DataStores<K, V> extends AutoCloseable {
-
+    
     /**
      * Returns a permanent store with the given name.
      *

@@ -50,6 +50,12 @@ public class AbstractThread extends Thread {
         }
     }
     
+    protected void log(Level level, String msg, Throwable throwable) {
+        if (logger.isLoggable(level)) {
+            logger.log(level, this.logMessageFormat.format(new Object[]{msg}), throwable);
+        }
+    }
+    
     protected void log(Level level, String msg, Object param) {
         if (logger.isLoggable(level)) {
             logger.log(level, this.logMessageFormat.format(new Object[]{msg}), param);
