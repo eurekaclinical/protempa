@@ -19,15 +19,11 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.eurekaclinical.datastore.DataStore;
-import org.eurekaclinical.datastore.DataStoreFactory;
 import org.protempa.query.Query;
 
 /**
@@ -51,26 +47,19 @@ public class DoReprocessThread extends AbstractDoProcessThread<StatefulExecution
 
     @Override
     protected void doProcessDataLoop() throws InterruptedException {
-//        try {
-            int count = 0;
-            StatefulExecutionStrategy executionStrategy = getExecutionStrategy();
+        int count = 0;
+        StatefulExecutionStrategy executionStrategy = getExecutionStrategy();
         Iterator<String> iterator = executionStrategy.getDataStore().keySet().iterator();
-            while (!isInterrupted() && iterator.hasNext()) {
-                String keyId = iterator.next();
-                try {
-                    System.err.println("About to process next record");
-                    doProcessData(keyId, null, -1, getQuery());
-                    count++;
-                    System.err.println("Processed " + count + " records");
-                } finally {
-                    closeWorkingMemory();
-                }
-                System.err.println("Closed " + count + " records");
+        while (!isInterrupted() && iterator.hasNext()) {
+            String keyId = iterator.next();
+            try {
+                doProcessData(keyId, null, -1, getQuery());
+                count++;
+            } finally {
+                closeWorkingMemory();
             }
-            log(Level.INFO, "Processed {0} keys", count);
-//        } catch (IOException ex) {
-//            Logger.getLogger(DoReprocessThread.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+        }
+        log(Level.INFO, "Processed {0} keys", count);
     }
 
     @Override

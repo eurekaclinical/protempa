@@ -55,7 +55,11 @@ final class SingleColumnQueryResultsHandler
     }
 
     @Override
-    public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
+    public void handleQueryResult(String keyId, List<Proposition> propositions, 
+            Map<Proposition, List<Proposition>> forwardDerivations, 
+            Map<Proposition, List<Proposition>> backwardDerivations, 
+            Map<UniqueId, Proposition> references) 
+            throws QueryResultsHandlerProcessingException {
         Map<Proposition, List<Proposition>> result = new HashMap<>();
         for (Proposition p : propositions) {
             if (p.getCreateDate() == null) {

@@ -32,10 +32,16 @@ class WorkingMemoryGlobals {
     static void addAll(Package rules) {
         rules.addGlobal(KEY_ID, String.class);
         rules.addGlobal(DERIVED_UNIQUE_ID_COUNTS, Map.class);
+        rules.addGlobal(FORWARD_DERIVATIONS, Map.class);
+        rules.addGlobal(BACKWARD_DERIVATIONS, Map.class);
     }
     private WorkingMemoryGlobals() {}
     
     static final String KEY_ID = "keyId";
     
     static final String DERIVED_UNIQUE_ID_COUNTS = "derivedUniqueIdCounts";
+    
+    static final String FORWARD_DERIVATIONS = "forwardDerivations";
+    
+    static final String BACKWARD_DERIVATIONS = "backwardDerivations";
 }

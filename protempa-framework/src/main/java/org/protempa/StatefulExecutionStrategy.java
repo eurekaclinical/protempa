@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.iterators.IteratorChain;
@@ -124,6 +125,11 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         this.workingMemory = this.dataStore.get(keyId);
         if (this.workingMemory == null) {
             createWorkingMemory(keyId);
+        } else {
+            DerivationsBuilder derivationsBuilder = getDerivationsBuilder();
+            derivationsBuilder.reset(
+                    (Map<Proposition, List<Proposition>>) this.workingMemory.getGlobal(WorkingMemoryGlobals.FORWARD_DERIVATIONS),
+                    (Map<Proposition, List<Proposition>>) this.workingMemory.getGlobal(WorkingMemoryGlobals.BACKWARD_DERIVATIONS));
         }
         this.workingMemory.addEventListener(this.workingMemoryEventListener);
     }
@@ -131,9 +137,15 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private void createWorkingMemory(String keyId) {
         this.workingMemory = getRuleBase().newStatefulSession(false);
         this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
+        DerivationsBuilder derivationsBuilder = getDerivationsBuilder();
+        this.workingMemory.setGlobal(WorkingMemoryGlobals.FORWARD_DERIVATIONS, 
+                derivationsBuilder.getForwardDerivations());
+        this.workingMemory.setGlobal(WorkingMemoryGlobals.BACKWARD_DERIVATIONS, 
+                derivationsBuilder.getBackwardDerivations());
     }
 
-    private void insertRetrievedDataIntoWorkingMemory(Iterator<?> objects) throws FactException {
+    private void insertRetrievedDataIntoWorkingMemory(Iterator<?> objects) 
+            throws FactException {
         if (objects != null) {
             while (objects.hasNext()) {
                 Proposition prop = (Proposition) objects.next();

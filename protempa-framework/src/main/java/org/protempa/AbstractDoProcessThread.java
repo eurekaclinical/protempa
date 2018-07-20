@@ -93,13 +93,15 @@ abstract class AbstractDoProcessThread<E extends ExecutionStrategy> extends Abst
             resultsItr = dataItr;
         }
         Map<Proposition, List<Proposition>> forwardDerivations
-                = this.derivationsBuilder.toForwardDerivations();
+                = this.derivationsBuilder.getForwardDerivations();
         Map<Proposition, List<Proposition>> backwardDerivations
-                = this.derivationsBuilder.toBackwardDerivations();
+                = this.derivationsBuilder.getBackwardDerivations();
         Map<UniqueId, Proposition> refs = new HashMap<>();
-        List<Proposition> filteredPropositions = extractRequestedPropositions(resultsItr, refs, sizeHint);
+        List<Proposition> filteredPropositions = 
+                extractRequestedPropositions(resultsItr, refs, sizeHint);
         if (isLoggable(Level.FINEST)) {
-            log(Level.FINEST, "Proposition ids: {0}", String.join(", ", query.getPropositionIds()));
+            log(Level.FINEST, "Proposition ids: {0}", 
+                    String.join(", ", query.getPropositionIds()));
             log(Level.FINEST, "Filtered propositions: {0}", filteredPropositions);
             log(Level.FINEST, "Forward derivations: {0}", forwardDerivations);
             log(Level.FINEST, "Backward derivations: {0}", backwardDerivations);

@@ -46,33 +46,47 @@ final class DerivationsBuilder implements Serializable {
         this.forwardDerivations = new HashMap<>();
         this.backwardDerivations = new HashMap<>();
     }
-    
-    Map<Proposition, List<Proposition>> toForwardDerivations() {
+
+    void reset(Map<Proposition, List<Proposition>> forwardDerivations,
+            Map<Proposition, List<Proposition>> backwardDerivations) {
+        if (forwardDerivations != null) {
+            this.forwardDerivations = forwardDerivations;
+        } else {
+            this.forwardDerivations = new HashMap<>();
+        }
+        if (backwardDerivations != null) {
+            this.backwardDerivations = backwardDerivations;
+        } else {
+            this.backwardDerivations = new HashMap<>();
+        }
+    }
+
+    Map<Proposition, List<Proposition>> getForwardDerivations() {
         return this.forwardDerivations;
     }
-    
-    Map<Proposition, List<Proposition>> toBackwardDerivations() {
+
+    Map<Proposition, List<Proposition>> getBackwardDerivations() {
         return this.backwardDerivations;
     }
-    
+
     List<Proposition> propositionRetractedForward(Proposition proposition) {
         return this.forwardDerivations.remove(proposition);
     }
-    
-    void propositionReplaceForward(Proposition prop, Proposition oldProp, 
+
+    void propositionReplaceForward(Proposition prop, Proposition oldProp,
             Proposition newProp) {
         List<Proposition> props = this.forwardDerivations.get(prop);
         props.remove(oldProp);
         props.add(newProp);
     }
-    
-    void propositionReplaceBackward(Proposition prop, Proposition oldProp, 
+
+    void propositionReplaceBackward(Proposition prop, Proposition oldProp,
             Proposition newProp) {
         List<Proposition> props = this.backwardDerivations.get(prop);
         props.remove(oldProp);
         props.add(newProp);
     }
-    
+
     List<Proposition> propositionRetractedBackward(Proposition proposition) {
         return this.backwardDerivations.remove(proposition);
     }
@@ -81,17 +95,17 @@ final class DerivationsBuilder implements Serializable {
             Proposition newProposition) {
         assert oldProposition != null : "old proposition cannot be null";
         assert newProposition != null : "new proposition cannot be null";
-        Collections.putList(this.forwardDerivations, oldProposition, 
+        Collections.putList(this.forwardDerivations, oldProposition,
                 newProposition);
-        Collections.putList(this.backwardDerivations, newProposition, 
+        Collections.putList(this.backwardDerivations, newProposition,
                 oldProposition);
     }
-    
+
     void propositionAssertedBackward(Proposition oldProposition,
             Proposition newProposition) {
         assert oldProposition != null : "old proposition cannot be null";
         assert newProposition != null : "new proposition cannot be null";
-        Collections.putList(this.backwardDerivations, newProposition, 
+        Collections.putList(this.backwardDerivations, newProposition,
                 oldProposition);
     }
 }
