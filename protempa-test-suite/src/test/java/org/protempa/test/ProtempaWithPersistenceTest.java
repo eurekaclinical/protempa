@@ -132,7 +132,7 @@ public class ProtempaWithPersistenceTest {
         try (Protempa protempa = Protempa.newInstance(sf)) {
             DefaultQueryBuilder q = new QueryBuilderReprocessFactory().getInstanceRetrieve();
             q.setDatabasePath(TEMP_DIR.getPath());
-            q.setQueryMode(QueryMode.REPROCESS);
+            q.setQueryMode(QueryMode.REPROCESS_RETRIEVE);
             Query query = protempa.buildQuery(q);
 
             File outputFile = 
@@ -154,7 +154,7 @@ public class ProtempaWithPersistenceTest {
         try (Protempa protempa = Protempa.newInstance(sf)) {
             DefaultQueryBuilder q = new QueryBuilderReprocessFactory().getInstanceRetrieve();
             q.setDatabasePath(TEMP_DIR.getPath());
-            q.setQueryMode(QueryMode.REPROCESS);
+            q.setQueryMode(QueryMode.REPROCESS_UPDATE);
             Query query = protempa.buildQuery(q);
 
             File outputFile = 
@@ -176,7 +176,7 @@ public class ProtempaWithPersistenceTest {
         try (Protempa protempa = Protempa.newInstance(sf)) {
             DefaultQueryBuilder q = new QueryBuilderReprocessFactory().getInstanceCreate();
             q.setDatabasePath(TEMP_DIR.getPath());
-            q.setQueryMode(QueryMode.REPROCESS);
+            q.setQueryMode(QueryMode.REPROCESS_CREATE);
             Query query = protempa.buildQuery(q);
 
             File outputFile = 
@@ -198,7 +198,7 @@ public class ProtempaWithPersistenceTest {
         try (Protempa protempa = Protempa.newInstance(sf)) {
             DefaultQueryBuilder q = new QueryBuilderReprocessFactory().getInstanceRetrieve();
             q.setDatabasePath(TEMP_DIR.getPath());
-            q.setQueryMode(QueryMode.REPROCESS);
+            q.setQueryMode(QueryMode.REPROCESS_DELETE);
             Query query = protempa.buildQuery(q);
 
             File outputFile = 

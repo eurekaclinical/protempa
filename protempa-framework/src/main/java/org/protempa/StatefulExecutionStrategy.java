@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import org.apache.commons.collections4.iterators.IteratorChain;
 import org.drools.FactException;
 import org.drools.FactHandle;
+import org.drools.RuleBase;
 import org.drools.StatefulSession;
 
 import org.eurekaclinical.datastore.DataStore;
@@ -50,6 +51,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private final DeletedWorkingMemoryEventListener workingMemoryEventListener;
     private final QueryMode queryMode;
     private List<Proposition> propsToDelete;
+    private RuleBase ruleBase;
 
     StatefulExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
         super(algorithmSource);
@@ -105,8 +107,10 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         return this.dataStore;
     }
 
-    private void createDataStoreManager() {
-        this.workingMemoryDataStores = new WorkingMemoryDataStores(getRuleBase(), this.databasePath.getParent());
+    private void createDataStoreManager() throws ExecutionStrategyInitializationException {
+        this.ruleBase = createRuleBase();
+        this.workingMemoryDataStores = 
+                new WorkingMemoryDataStores(this.ruleBase, this.databasePath.getParent());
     }
 
     private void grabDataStore() throws IOException {
@@ -135,7 +139,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private void createWorkingMemory(String keyId) {
-        this.workingMemory = getRuleBase().newStatefulSession(false);
+        this.workingMemory = this.ruleBase.newStatefulSession(false);
         this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
         DerivationsBuilder derivationsBuilder = getDerivationsBuilder();
         this.workingMemory.setGlobal(WorkingMemoryGlobals.FORWARD_DERIVATIONS, 
@@ -195,6 +199,8 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             this.workingMemoryDataStores.close();
         } catch (IOException ex) {
             return new ExecutionStrategyShutdownException(ex);
+        } finally {
+            this.ruleBase = null;
         }
         return null;
     }

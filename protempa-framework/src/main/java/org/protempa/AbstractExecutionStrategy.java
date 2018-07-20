@@ -30,12 +30,12 @@ import org.drools.RuleBaseConfiguration.AssertBehaviour;
 abstract class AbstractExecutionStrategy implements ExecutionStrategy {
 
     private final AlgorithmSource algorithmSource;
-    private RuleBase ruleBase;
     private final DerivationsBuilder derivationsBuilder;
+    private Collection<PropositionDefinition> propositionCache;
 
     /**
-     * @param abstractionFinder
-     *            the {@link AbstractionFinder} using this execution strategy
+     * @param abstractionFinder the {@link AbstractionFinder} using this
+     * execution strategy
      */
     AbstractExecutionStrategy(AlgorithmSource algorithmSource) {
         this.algorithmSource = algorithmSource;
@@ -46,42 +46,42 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
     public DerivationsBuilder getDerivationsBuilder() {
         return derivationsBuilder;
     }
-    
+
     protected final AlgorithmSource getAlgorithmSource() {
         return this.algorithmSource;
     }
 
     @Override
-    public void initialize(Collection<PropositionDefinition> allNarrowerDescendants)
+    public void initialize(Collection<PropositionDefinition> cache)
             throws ExecutionStrategyInitializationException {
+        this.propositionCache = cache;
+    }
+
+    protected RuleBase createRuleBase() throws ExecutionStrategyInitializationException {
         ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
                 this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
-                visitor.getAlgorithms(), this.derivationsBuilder, allNarrowerDescendants);
-        if (allNarrowerDescendants != null) {
+                visitor.getAlgorithms(), this.derivationsBuilder, this.propositionCache);
+        if (this.propositionCache != null) {
             try {
-                for (PropositionDefinition pd : allNarrowerDescendants) {
+                for (PropositionDefinition pd : this.propositionCache) {
                     pd.acceptChecked(visitor);
                 }
-                ruleCreator.visit(allNarrowerDescendants);
+                ruleCreator.visit(this.propositionCache);
             } catch (ProtempaException ex) {
                 throw new ExecutionStrategyInitializationException(ex);
             }
         }
         try {
-            this.ruleBase = new JBossRuleBaseFactory(ruleCreator,
-                    createRuleBaseConfiguration(ruleCreator, allNarrowerDescendants)).newInstance();
+            return new JBossRuleBaseFactory(ruleCreator,
+                    createRuleBaseConfiguration(ruleCreator, this.propositionCache)).newInstance();
         } catch (RuleBaseInstantiationException ex) {
             throw new ExecutionStrategyInitializationException(ex);
         }
     }
 
-    protected RuleBase getRuleBase() {
-        return this.ruleBase;
-    }
-
-    protected RuleBaseConfiguration createRuleBaseConfiguration(
-            JBossRuleCreator ruleCreator, 
+    private RuleBaseConfiguration createRuleBaseConfiguration(
+            JBossRuleCreator ruleCreator,
             Collection<PropositionDefinition> allNarrowerDescendants)
             throws RuleBaseInstantiationException {
         RuleBaseConfiguration config = new RuleBaseConfiguration();
@@ -121,9 +121,9 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
             if (algorithm == null && algorithmId != null) {
                 throw new NoSuchAlgorithmException(
                         "Low level abstraction definition "
-                                + lowLevelAbstractionDefinition.getId()
-                                + " wants the algorithm " + algorithmId
-                                + ", but no such algorithm is available.");
+                        + lowLevelAbstractionDefinition.getId()
+                        + " wants the algorithm " + algorithmId
+                        + ", but no such algorithm is available.");
             }
             this.algorithms.put(lowLevelAbstractionDefinition, algorithm);
 
@@ -169,7 +169,6 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         @Override
         public void visit(ContextDefinition def) throws ProtempaException {
         }
-        
-        
+
     }
 }

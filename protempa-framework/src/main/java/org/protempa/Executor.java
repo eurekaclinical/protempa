@@ -125,7 +125,8 @@ final class Executor implements AutoCloseable {
                         = new ArrayBlockingQueue<>(1000);
                 QueueObject hqrPoisonPill = new QueueObject();
                 BlockingQueue<QueueObject> hqrQueue = new ArrayBlockingQueue<>(1000);
-                if (this.query.getQueryMode() != QueryMode.REPROCESS) {
+                QueryMode queryMode = this.query.getQueryMode();
+                if (Arrays.contains(QueryMode.etlModes(), queryMode)) {
                     DataStreamingEvent doProcessPoisonPill = 
                             new DataStreamingEvent("poison", Collections.emptyList());
                     retrieveDataThread = new RetrieveDataThread(doProcessQueue,

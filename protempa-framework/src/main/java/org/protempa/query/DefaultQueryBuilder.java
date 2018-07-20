@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.arp.javautil.arrays.Arrays;
 import org.protempa.*;
 import org.protempa.backend.dsb.filter.Filter;
 
@@ -220,7 +221,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
             } catch (QueryValidationException | KnowledgeSourceReadException ex) {
                 throw new QueryBuildException("Could not build query", ex);
             }
-            if (this.queryMode == QueryMode.REPROCESS && this.databasePath == null) {
+            if (Arrays.contains(QueryMode.reprocessModes(), this.queryMode) && this.databasePath == null) {
                 throw new QueryBuildException("Could not build query", 
                         new QueryValidationException("Database path must be specified in reprocess mode"));
             }

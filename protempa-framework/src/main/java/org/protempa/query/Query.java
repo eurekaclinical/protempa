@@ -122,7 +122,7 @@ public class Query implements Serializable {
         }
         this.username = username;
         this.databasePath = databasePath;
-        if (this.databasePath == null && this.queryMode == QueryMode.REPROCESS) {
+        if (this.databasePath == null && org.arp.javautil.arrays.Arrays.contains(QueryMode.reprocessModes(), this.queryMode)) {
             throw new IllegalArgumentException("Must specify a database path when in reprocess mode!");
         }
     }
