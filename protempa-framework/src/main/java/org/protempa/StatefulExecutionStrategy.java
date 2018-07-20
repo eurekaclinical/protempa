@@ -33,7 +33,6 @@ import org.drools.FactHandle;
 import org.drools.StatefulSession;
 
 import org.eurekaclinical.datastore.DataStore;
-import org.eurekaclinical.datastore.DataStoreFactory;
 import org.protempa.datastore.WorkingMemoryDataStores;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
