@@ -20,13 +20,8 @@
 package org.protempa.datastore;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOError;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,7 +52,6 @@ public final class DroolsWorkingMemoryStore implements
 
     private final DataStore<String, byte[]> store;
     private boolean isClosed;
-    private static final String RULE_BASE_DB_NAME = "ec.rulebase.db";
 
     /*
      * Drools rule base. Required to recreate the original working memory from a
@@ -68,18 +62,10 @@ public final class DroolsWorkingMemoryStore implements
     DroolsWorkingMemoryStore(DataStore dataStore, String dbPath, String dbName, RuleBase ruleBase) throws IOException {
         assert dataStore != null : "dataStore cannot be null";
         assert dbName != null : "dbName cannot be null";
+        assert ruleBase != null : "ruleBase cannot be null";
         this.store = dataStore;
         this.isClosed = false;
-        if (ruleBase != null) {
-            this.ruleBase = ruleBase;
-            try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(new File(dbPath, RULE_BASE_DB_NAME)))) {
-                SerializationUtils.serialize(ruleBase, outputStream);
-            }
-        } else {
-            try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(dbPath, RULE_BASE_DB_NAME)))) {
-                this.ruleBase = SerializationUtils.deserialize(inputStream);
-            }
-        }
+        this.ruleBase = ruleBase;
     }
 
     public RuleBase getRuleBase() {
@@ -116,7 +102,7 @@ public final class DroolsWorkingMemoryStore implements
             throw new IOError(ex);
         }
     }
-    
+
     /**
      * Gets a working memory from the data store.
      *

@@ -114,14 +114,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             String dbName = this.databasePath.getName();
             Query query = getQuery();
             QueryMode queryMode = query.getQueryMode();
-            if (this.workingMemoryDataStores.exists(dbName)) {
-                this.dataStore = this.workingMemoryDataStores.getDataStore(dbName);
-            } else {
-                if (!Arrays.contains(QueryMode.etlModes(), queryMode)) {
-                    throw new ExecutionStrategyInitializationException("No data store with name " + dbName);
-                }
-                this.dataStore = this.workingMemoryDataStores.newDataStore(dbName, createRuleBase());
-            }
+            this.dataStore = this.workingMemoryDataStores.getDataStore(dbName, createRuleBase());
             this.ruleBase = this.workingMemoryDataStores.getRuleBase();
             switch (queryMode) {
                 case REPROCESS_RETRIEVE:

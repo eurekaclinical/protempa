@@ -69,26 +69,11 @@ public final class WorkingMemoryDataStores implements DataStores {
      * @throws IOException if an error occurred querying for the data store.
      */
     @Override
-    public DataStore<String, StatefulSession> getDataStore(String name) throws IOException {
-        if (!exists(name)) {
-            return null;
-        }
+    public DataStore<String, StatefulSession> getDataStore(String name, RuleBase ruleBase) throws IOException {
         DataStore dataStore = this.storeFactory.getInstance(name);
         DroolsWorkingMemoryStore result = 
                 new DroolsWorkingMemoryStore(dataStore, this.directory, 
                         name, ruleBase);
-        this.ruleBase = result.getRuleBase();
-        return result;
-    }
-
-    @Override
-    public DataStore<String, StatefulSession> newDataStore(String name, RuleBase ruleBase) throws IOException, DataStoreExistsException {
-        if (exists(name)) {
-            throw new DataStoreExistsException(name);
-        }
-        DataStore dataStore = this.storeFactory.getInstance(name);
-        DroolsWorkingMemoryStore result = 
-                new DroolsWorkingMemoryStore(dataStore, this.directory, name, ruleBase);
         this.ruleBase = result.getRuleBase();
         return result;
     }
