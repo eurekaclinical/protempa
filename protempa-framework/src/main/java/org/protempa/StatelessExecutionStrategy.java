@@ -28,14 +28,15 @@ import org.arp.javautil.collections.Iterators;
 import org.drools.StatelessSession;
 import org.drools.StatelessSessionResult;
 import org.protempa.proposition.Proposition;
+import org.protempa.query.Query;
 
 class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
     private StatelessSession statelessSession;
     private final DeletedWorkingMemoryEventListener workingMemoryEventListener;
 
-    StatelessExecutionStrategy(AlgorithmSource algorithmSource) {
-        super(algorithmSource);
+    StatelessExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
+        super(algorithmSource, query);
         this.workingMemoryEventListener = new DeletedWorkingMemoryEventListener();
     }
 

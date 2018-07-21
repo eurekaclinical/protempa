@@ -43,6 +43,14 @@ public final class QueryException extends ProtempaException {
         this.queryId = queryId;
     }
     
+    public QueryException(String queryId, String message) {
+        super(message != null ? "Query " + queryId + " failed: " + message : "Query " + queryId + " failed");
+        if (queryId == null) {
+            throw new IllegalArgumentException("queryId cannot be null");
+        }
+        this.queryId = queryId;
+    }
+    
     public String getQueryId() {
         return this.queryId;
     }

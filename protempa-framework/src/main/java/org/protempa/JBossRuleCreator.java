@@ -51,6 +51,7 @@ import org.protempa.proposition.Context;
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
+import org.protempa.query.Query;
 
 /**
  * Translates PROTEMPA proposition definitions into Drools (formerly called
@@ -95,19 +96,22 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     private final Map<Rule, TemporalPropositionDefinition> ruleToAbstractionDefinition;
     private final DerivationsBuilder derivationsBuilder;
     private final Map<String, PropositionDefinition> cache;
+    private final Query query;
 
     JBossRuleCreator(Map<LowLevelAbstractionDefinition, Algorithm> algorithms,
-            DerivationsBuilder derivationsBuilder, Collection<PropositionDefinition> allNarrowerDescendants) {
-        assert allNarrowerDescendants != null : "allNarrowerDescendants cannot be null";
+            DerivationsBuilder derivationsBuilder, 
+            Collection<PropositionDefinition> cache, Query query) {
+        assert cache != null : "allNarrowerDescendants cannot be null";
+        assert query != null : "query cannot be null";
+        this.query = query;
         this.algorithms = algorithms;
         this.rules = new ArrayList<>();
         this.ruleToAbstractionDefinition = new HashMap<>();
         this.derivationsBuilder = derivationsBuilder;
         this.cache = new HashMap<>();
-        for (PropositionDefinition pd : allNarrowerDescendants) {
+        for (PropositionDefinition pd : cache) {
             this.cache.put(pd.getId(), pd);
         }
-        new DeletedProposition().toRules(this.rules, this.derivationsBuilder);
     }
 
     /**
@@ -125,7 +129,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     }
 
     @Override
-    public void visit(ContextDefinition def) {
+    public void visit(ContextDefinition def) throws ProtempaException {
         LOGGER.log(Level.FINER, "Creating rule for {0}", def);
         try {
             boolean ruleCreated = false;
@@ -165,7 +169,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * knowledge source during rule creation.
      */
     @Override
-    public void visit(LowLevelAbstractionDefinition def) {
+    public void visit(LowLevelAbstractionDefinition def) throws ProtempaException {
         LOGGER.log(Level.FINER, "Creating rule for {0}", def);
         try {
             /*
@@ -216,7 +220,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     }
     
     @Override
-    public void visit(CompoundLowLevelAbstractionDefinition def) {
+    public void visit(CompoundLowLevelAbstractionDefinition def) throws ProtempaException {
         LOGGER.log(Level.FINER, "Creating rule for {0}", def);
         try {
             if (!def.getLowLevelAbstractionIds().isEmpty()) {
@@ -258,7 +262,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * knowledge source during rule creation.
      */
     @Override
-    public void visit(HighLevelAbstractionDefinition def) {
+    public void visit(HighLevelAbstractionDefinition def) throws ProtempaException {
         LOGGER.log(Level.FINER, "Creating rule for {0}", def);
         try {
             Set<ExtendedPropositionDefinition> epdsC = def
@@ -304,7 +308,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * knowledge source during rule creation.
      */
     @Override
-    public void visit(SliceDefinition def) throws KnowledgeSourceReadException {
+    public void visit(SliceDefinition def) throws ProtempaException {
         LOGGER.log(Level.FINER, "Creating rule for {0}", def);
         try {
             Set<TemporalExtendedPropositionDefinition> epdsC = def
@@ -436,10 +440,12 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      * @return a {@link Rule[]}. Guaranteed not <code>null</code>.
      */
     Rule[] getRules() {
-        return this.rules.toArray(new Rule[this.rules.size()]);
+        List<Rule> rulesToReturn = new ArrayList<>(this.rules);
+        new DeletedProposition().toRules(rulesToReturn, this.derivationsBuilder);
+        return rulesToReturn.toArray(new Rule[rulesToReturn.size()]);
     }
     
-    private Set<String> collectPropIdDescendantsUsingInverseIsA(String... propIds) {
+    private Set<String> collectPropIdDescendantsUsingInverseIsA(String... propIds) throws QueryException {
         Set<String> result = new HashSet<>();
         Queue<String> queue = new LinkedList<>();
         Arrays.addAll(queue, propIds);
@@ -451,7 +457,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                     String[] children = pd.getInverseIsA();
                     Arrays.addAll(queue, children);
                 } else {
-                    throw new AssertionError("PropositionDefinition " + propId + " not in cache");
+                    throw new QueryException(this.query.getName(), "PropositionDefinition " + propId + " is referenced but was not queried");
                 }
             }
         }
@@ -470,7 +476,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
         private final ExtendedPropositionDefinition epd;
         private final Set<String> subtrees;
 
-        private GetMatchesPredicateExpression(ExtendedPropositionDefinition epd, JBossRuleCreator creator) {
+        private GetMatchesPredicateExpression(ExtendedPropositionDefinition epd, JBossRuleCreator creator) throws ProtempaException {
             assert epd != null : "epd cannot be null";
             this.epd = epd;
             this.subtrees = creator.collectPropIdDescendantsUsingInverseIsA(epd.getPropositionId());

@@ -79,7 +79,7 @@ public class DoProcessThread extends AbstractDoProcessThread<ExecutionStrategy> 
         } else {
             log(Level.FINER, "Chosen stateless execution strategy");
             return new StatelessExecutionStrategy(
-                    this.algorithmSource);
+                    this.algorithmSource, query);
         }
     }
     

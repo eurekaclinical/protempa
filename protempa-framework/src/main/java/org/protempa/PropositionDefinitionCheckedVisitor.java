@@ -36,12 +36,12 @@ public interface PropositionDefinitionCheckedVisitor {
      * Process a collection of proposition definitions.
      * 
      * @param propositionDefinitions
-     *            a {@link Collection<PropositionDefinition>}. Cannot be
+     *            a {@link Collection<? extends PropositionDefinition>}. Cannot be
      *            <code>null</code>.
      * @throws ProtempaException
      *             if an error occurs.
      */
-    void visit(Collection<PropositionDefinition> propositionDefinitions)
+    void visit(Collection<? extends PropositionDefinition> propositionDefinitions)
             throws ProtempaException;
 
     /**

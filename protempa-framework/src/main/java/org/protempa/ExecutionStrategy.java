@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.protempa.proposition.Proposition;
+import org.protempa.query.Query;
 
 interface ExecutionStrategy {
     

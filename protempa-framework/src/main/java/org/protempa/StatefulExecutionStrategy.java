@@ -29,10 +29,13 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.iterators.IteratorChain;
+import org.arp.javautil.arrays.Arrays;
+import org.arp.javautil.collections.Iterators;
 import org.drools.FactException;
 import org.drools.FactHandle;
 import org.drools.RuleBase;
 import org.drools.StatefulSession;
+import org.drools.rule.Rule;
 
 import org.eurekaclinical.datastore.DataStore;
 import org.protempa.datastore.WorkingMemoryDataStores;
@@ -49,17 +52,15 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private WorkingMemoryDataStores workingMemoryDataStores;
     private StatefulSession workingMemory;
     private final DeletedWorkingMemoryEventListener workingMemoryEventListener;
-    private final QueryMode queryMode;
     private List<Proposition> propsToDelete;
     private RuleBase ruleBase;
 
     StatefulExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
-        super(algorithmSource);
+        super(algorithmSource, query);
         assert query != null : "query cannot be null";
         String dbPath = query.getDatabasePath();
         assert dbPath != null : "query.getDatabasePath() cannot return a null value";
         this.databasePath = new File(dbPath);
-        this.queryMode = query.getQueryMode();
         this.workingMemoryEventListener = new DeletedWorkingMemoryEventListener();
     }
 
@@ -67,14 +68,10 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     public void initialize(Collection<PropositionDefinition> cache) throws ExecutionStrategyInitializationException {
         super.initialize(cache);
         createDataStoreManager();
-        try {
-            grabDataStore();
-            prepareDataStore();
-        } catch (IOException ex) {
-            throw new ExecutionStrategyInitializationException(ex);
-        }
+        grabDataStore();
+        prepareDataStore();
     }
-    
+
     @Override
     public Iterator<Proposition> execute(String keyId, Iterator<? extends Proposition> objects) {
         getOrCreateWorkingMemoryInstance(keyId);
@@ -108,18 +105,47 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private void createDataStoreManager() throws ExecutionStrategyInitializationException {
-        this.ruleBase = createRuleBase();
-        this.workingMemoryDataStores = 
-                new WorkingMemoryDataStores(this.ruleBase, this.databasePath.getParent());
+        this.workingMemoryDataStores
+                = new WorkingMemoryDataStores(this.databasePath.getParent());
     }
 
-    private void grabDataStore() throws IOException {
-        this.dataStore = this.workingMemoryDataStores.getDataStore(this.databasePath.getName());
-        LOGGER.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
+    private void grabDataStore() throws ExecutionStrategyInitializationException {
+        try {
+            String dbName = this.databasePath.getName();
+            Query query = getQuery();
+            QueryMode queryMode = query.getQueryMode();
+            if (this.workingMemoryDataStores.exists(dbName)) {
+                this.dataStore = this.workingMemoryDataStores.getDataStore(dbName);
+            } else {
+                if (!Arrays.contains(QueryMode.etlModes(), queryMode)) {
+                    throw new ExecutionStrategyInitializationException("No data store with name " + dbName);
+                }
+                this.dataStore = this.workingMemoryDataStores.newDataStore(dbName, createRuleBase());
+            }
+            this.ruleBase = this.workingMemoryDataStores.getRuleBase();
+            switch (queryMode) {
+                case REPROCESS_RETRIEVE:
+                    break;
+                case REPROCESS_CREATE:
+                    addToRuleBase(this.ruleBase, query.getPropositionDefinitions());
+                    break;
+                case REPROCESS_UPDATE:
+                    updateInRuleBase(this.ruleBase, query.getPropositionDefinitions());
+                    break;
+                case REPROCESS_DELETE:
+                    deleteFromRuleBase(this.ruleBase, query.getPropositionDefinitions());
+                    break;
+                default:
+                    break;
+            }
+            LOGGER.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
+        } catch (IOException | ProtempaException ex) {
+            throw new ExecutionStrategyInitializationException(ex);
+        }
     }
 
     private void prepareDataStore() {
-        if (this.queryMode == QueryMode.REPLACE) {
+        if (getQuery().getQueryMode() == QueryMode.REPLACE) {
             this.dataStore.clear();
             LOGGER.log(Level.FINE, "Cleared data store {0}", this.databasePath.getPath());
         }
@@ -139,16 +165,16 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private void createWorkingMemory(String keyId) {
-        this.workingMemory = this.ruleBase.newStatefulSession(false);
+        this.workingMemory = this.ruleBase.newStatefulSession(true);
         this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
         DerivationsBuilder derivationsBuilder = getDerivationsBuilder();
-        this.workingMemory.setGlobal(WorkingMemoryGlobals.FORWARD_DERIVATIONS, 
+        this.workingMemory.setGlobal(WorkingMemoryGlobals.FORWARD_DERIVATIONS,
                 derivationsBuilder.getForwardDerivations());
-        this.workingMemory.setGlobal(WorkingMemoryGlobals.BACKWARD_DERIVATIONS, 
+        this.workingMemory.setGlobal(WorkingMemoryGlobals.BACKWARD_DERIVATIONS,
                 derivationsBuilder.getBackwardDerivations());
     }
 
-    private void insertRetrievedDataIntoWorkingMemory(Iterator<?> objects) 
+    private void insertRetrievedDataIntoWorkingMemory(Iterator<?> objects)
             throws FactException {
         if (objects != null) {
             while (objects.hasNext()) {
@@ -203,6 +229,39 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             this.ruleBase = null;
         }
         return null;
+    }
+
+    private void addToRuleBase(RuleBase ruleBase, PropositionDefinition... propositionDefinitions) throws ProtempaException {
+        org.drools.rule.Package pkg = new org.drools.rule.Package(ProtempaUtil.DROOLS_PACKAGE_NAME);
+        JBossRuleCreator creator = newRuleCreator(Arrays.asList(propositionDefinitions));
+        for (Rule rule : creator.getRules()) {
+            pkg.addRule(rule);
+        }
+        try {
+            ruleBase.addPackage(pkg); // Drools merges it.
+        } catch (Exception ex) {
+            throw new QueryException(getQuery().getName(), ex);
+        }
+    }
+
+    private void updateInRuleBase(RuleBase ruleBase, PropositionDefinition... propositionDefinitions) throws ProtempaException {
+        org.drools.rule.Package pkg = new org.drools.rule.Package(ProtempaUtil.DROOLS_PACKAGE_NAME);
+        JBossRuleCreator creator = newRuleCreator(Arrays.asList(propositionDefinitions));
+        for (Rule rule : creator.getRules()) {
+            pkg.addRule(rule);
+        }
+        try {
+            ruleBase.addPackage(pkg); // Drools merges it.
+        } catch (Exception ex) {
+            throw new QueryException(getQuery().getName(), ex);
+        }
+    }
+
+    private void deleteFromRuleBase(RuleBase ruleBase, PropositionDefinition... propositionDefinitions) throws ProtempaException {
+        JBossRuleCreator creator = newRuleCreator(Arrays.asList(propositionDefinitions));
+        for (Rule rule : creator.getRules()) {
+            ruleBase.removeRule(ProtempaUtil.DROOLS_PACKAGE_NAME, rule.getName());
+        }
     }
 
 }

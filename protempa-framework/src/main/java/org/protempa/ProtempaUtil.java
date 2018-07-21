@@ -37,6 +37,8 @@ import org.protempa.query.Query;
  */
 public final class ProtempaUtil {
 
+    static String DROOLS_PACKAGE_NAME = "PROTEMPA Rules";
+
     private ProtempaUtil() {
     }
 

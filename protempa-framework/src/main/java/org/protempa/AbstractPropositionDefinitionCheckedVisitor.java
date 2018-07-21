@@ -44,7 +44,7 @@ public abstract class AbstractPropositionDefinitionCheckedVisitor implements
      * @see org.protempa.PropositionDefinitionCheckedVisitor#visit(java.util.Collection)
      */
     @Override
-    public void visit(Collection<PropositionDefinition> propositionDefinitions)
+    public void visit(Collection<? extends PropositionDefinition> propositionDefinitions)
             throws ProtempaException {
         for (PropositionDefinition def : propositionDefinitions) {
             def.acceptChecked(this);

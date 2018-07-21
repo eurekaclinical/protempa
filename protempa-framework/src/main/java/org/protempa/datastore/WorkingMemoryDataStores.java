@@ -20,10 +20,10 @@
 package org.protempa.datastore;
 
 import java.io.IOException;
+import org.drools.RuleBase;
 import org.eurekaclinical.datastore.bdb.BdbPersistentStoreFactory;
 
 import org.eurekaclinical.datastore.DataStore;
-import org.drools.RuleBase;
 import org.drools.StatefulSession;
 import org.eurekaclinical.datastore.DataStoreFactory;
 
@@ -33,36 +33,80 @@ import org.eurekaclinical.datastore.DataStoreFactory;
  *
  * @author Michel Mansour
  */
-public final class WorkingMemoryDataStores implements
-        DataStores<String, StatefulSession> {
+public final class WorkingMemoryDataStores implements DataStores {
 
     public static final String DATABASE_NAME = "WorkingMemoryStore";
 
-    private final RuleBase ruleBase;
     private final DataStoreFactory storeFactory;
+    private RuleBase ruleBase;
+    private final String directory;
 
     /**
      * Constructs a working memory creator.
      *
-     * @param ruleBase the Drools rule base from which working memory objects 
-     * are generated. Cannot be <code>null</code>.
      * @param directory the directory in which the working memory data stores
      * will be stored. Cannot be <code>null</code>.
      */
-    public WorkingMemoryDataStores(RuleBase ruleBase, String directory) {
-        if (ruleBase == null) {
-            throw new IllegalArgumentException("ruleBase cannot be null");
-        }
+    public WorkingMemoryDataStores(String directory) {
         if (directory == null) {
             throw new IllegalArgumentException("directory cannot be null");
         }
-        this.ruleBase = ruleBase;
         this.storeFactory = new BdbPersistentStoreFactory(directory);
+        this.directory = directory;
     }
     
     @Override
+    public boolean exists(String dbname) throws IOException {
+        return this.storeFactory.exists(dbname);
+    }
+
+    /**
+     * Gets the persisted data store with the given name, if it exists. Sets 
+     * the <code>ruleBase</code> field to the rule base of that data store.
+     *
+     * @param name the name of the data store.
+     * @return the data store.
+     * @throws IOException if an error occurred querying for the data store.
+     */
+    @Override
     public DataStore<String, StatefulSession> getDataStore(String name) throws IOException {
-        return new DroolsWorkingMemoryStore(this.storeFactory, name, this.ruleBase);
+        if (!exists(name)) {
+            return null;
+        }
+        DataStore dataStore = this.storeFactory.getInstance(name);
+        DroolsWorkingMemoryStore result = 
+                new DroolsWorkingMemoryStore(dataStore, this.directory, 
+                        name, ruleBase);
+        this.ruleBase = result.getRuleBase();
+        return result;
+    }
+
+    @Override
+    public DataStore<String, StatefulSession> newDataStore(String name, RuleBase ruleBase) throws IOException, DataStoreExistsException {
+        if (exists(name)) {
+            throw new DataStoreExistsException(name);
+        }
+        DataStore dataStore = this.storeFactory.getInstance(name);
+        DroolsWorkingMemoryStore result = 
+                new DroolsWorkingMemoryStore(dataStore, this.directory, name, ruleBase);
+        this.ruleBase = result.getRuleBase();
+        return result;
+    }
+
+    /**
+     * Gets the rule base that was retrieved by the {@link #getDataStore(java.lang.String)
+     * }
+     * method or given to the {@link #newDataStore(org.drools.RuleBase, java.lang.String)
+     * }
+     * method, depending on which of those methods was last called.
+     *
+     * @return the rule base, or <code>null</code> if neither the
+     * {@link #getDataStore(java.lang.String) } nor the
+     * {@link #newDataStore(org.drools.RuleBase, java.lang.String) } has ever
+     * been called.
+     */
+    public RuleBase getRuleBase() {
+        return ruleBase;
     }
 
     @Override

@@ -26,22 +26,29 @@ import java.util.Map;
 import org.drools.RuleBase;
 import org.drools.RuleBaseConfiguration;
 import org.drools.RuleBaseConfiguration.AssertBehaviour;
+import org.protempa.query.Query;
 
 abstract class AbstractExecutionStrategy implements ExecutionStrategy {
 
     private final AlgorithmSource algorithmSource;
     private final DerivationsBuilder derivationsBuilder;
     private Collection<PropositionDefinition> propositionCache;
+    private final Query query;
 
     /**
      * @param abstractionFinder the {@link AbstractionFinder} using this
      * execution strategy
      */
-    AbstractExecutionStrategy(AlgorithmSource algorithmSource) {
+    AbstractExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
         this.algorithmSource = algorithmSource;
         this.derivationsBuilder = new DerivationsBuilder();
+        this.query = query;
     }
 
+    public Query getQuery() {
+        return query;
+    }
+    
     @Override
     public DerivationsBuilder getDerivationsBuilder() {
         return derivationsBuilder;
@@ -51,6 +58,10 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         return this.algorithmSource;
     }
 
+    protected Collection<PropositionDefinition> getPropositionCache() {
+        return propositionCache;
+    }
+
     @Override
     public void initialize(Collection<PropositionDefinition> cache)
             throws ExecutionStrategyInitializationException {
@@ -58,13 +69,24 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
     }
 
     protected RuleBase createRuleBase() throws ExecutionStrategyInitializationException {
+        JBossRuleCreator ruleCreator = newRuleCreator(this.propositionCache);
+        try {
+            return new JBossRuleBaseFactory(ruleCreator,
+                    createRuleBaseConfiguration(ruleCreator, this.propositionCache)).newInstance();
+        } catch (RuleBaseInstantiationException ex) {
+            throw new ExecutionStrategyInitializationException(ex);
+        }
+    }
+
+    protected JBossRuleCreator newRuleCreator(Collection<? extends PropositionDefinition> propDefs) throws ExecutionStrategyInitializationException {
         ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
                 this.algorithmSource);
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
-                visitor.getAlgorithms(), this.derivationsBuilder, this.propositionCache);
+                visitor.getAlgorithms(), this.derivationsBuilder, 
+                this.propositionCache, this.query);
         if (this.propositionCache != null) {
             try {
-                for (PropositionDefinition pd : this.propositionCache) {
+                for (PropositionDefinition pd : propDefs) {
                     pd.acceptChecked(visitor);
                 }
                 ruleCreator.visit(this.propositionCache);
@@ -72,12 +94,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
                 throw new ExecutionStrategyInitializationException(ex);
             }
         }
-        try {
-            return new JBossRuleBaseFactory(ruleCreator,
-                    createRuleBaseConfiguration(ruleCreator, this.propositionCache)).newInstance();
-        } catch (RuleBaseInstantiationException ex) {
-            throw new ExecutionStrategyInitializationException(ex);
-        }
+        return ruleCreator;
     }
 
     private RuleBaseConfiguration createRuleBaseConfiguration(

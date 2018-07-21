@@ -20,8 +20,13 @@
 package org.protempa.datastore;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOError;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +39,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.eurekaclinical.datastore.DataStore;
 import org.drools.RuleBase;
 import org.drools.StatefulSession;
-import org.eurekaclinical.datastore.DataStoreFactory;
 
 /**
  * A data store mapping key IDs to Drools working memory objects. This
@@ -53,6 +57,7 @@ public final class DroolsWorkingMemoryStore implements
 
     private final DataStore<String, byte[]> store;
     private boolean isClosed;
+    private static final String RULE_BASE_DB_NAME = "ec.rulebase.db";
 
     /*
      * Drools rule base. Required to recreate the original working memory from a
@@ -60,10 +65,25 @@ public final class DroolsWorkingMemoryStore implements
      */
     private final RuleBase ruleBase;
 
-    public DroolsWorkingMemoryStore(DataStoreFactory storeFactory, String dbName, RuleBase ruleBase) throws IOException {
-        this.store = storeFactory.getInstance(dbName);
+    DroolsWorkingMemoryStore(DataStore dataStore, String dbPath, String dbName, RuleBase ruleBase) throws IOException {
+        assert dataStore != null : "dataStore cannot be null";
+        assert dbName != null : "dbName cannot be null";
+        this.store = dataStore;
         this.isClosed = false;
-        this.ruleBase = ruleBase;
+        if (ruleBase != null) {
+            this.ruleBase = ruleBase;
+            try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(new File(dbPath, RULE_BASE_DB_NAME)))) {
+                SerializationUtils.serialize(ruleBase, outputStream);
+            }
+        } else {
+            try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(dbPath, RULE_BASE_DB_NAME)))) {
+                this.ruleBase = SerializationUtils.deserialize(inputStream);
+            }
+        }
+    }
+
+    public RuleBase getRuleBase() {
+        return ruleBase;
     }
 
     @Override
@@ -89,16 +109,17 @@ public final class DroolsWorkingMemoryStore implements
      */
     private StatefulSession readWorkingMemory(byte[] barr) {
         try {
-            try (ByteArrayInputStream bais = new ByteArrayInputStream(barr)) {
-                return this.ruleBase.newStatefulSession(bais, false);
+            try (ByteArrayInputStream stream = new ByteArrayInputStream(barr)) {
+                return this.ruleBase.newStatefulSession(stream, true);
             }
         } catch (IOException | ClassNotFoundException ex) {
             throw new IOError(ex);
         }
     }
-
+    
     /**
      * Gets a working memory from the data store.
+     *
      * @param key the keyId.
      * @return the working memory, or <code>null</code> if the data store
      * contains no working memory for the given keyId.
@@ -116,7 +137,7 @@ public final class DroolsWorkingMemoryStore implements
     /**
      * Puts the working memory into the data store.
      *
-     * @param key the keyId.
+     * @param key the keyId. Cannot be <code>null</code>.
      * @param value the working memory.
      * @return the working memory.
      *
@@ -131,6 +152,9 @@ public final class DroolsWorkingMemoryStore implements
          * interferes with the custom way in which Drools expects to deserialize
          * them.
          */
+        if (key == null) {
+            throw new IllegalArgumentException("key cannot be null");
+        }
         try {
             this.store.put(key, SerializationUtils.serialize(value));
             return value;

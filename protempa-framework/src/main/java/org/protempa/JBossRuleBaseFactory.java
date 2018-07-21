@@ -56,7 +56,7 @@ class JBossRuleBaseFactory {
 
     private Package newPackage() {
         org.drools.rule.Package rules =
-                new org.drools.rule.Package("PROTEMPA Rules");
+                new org.drools.rule.Package(ProtempaUtil.DROOLS_PACKAGE_NAME);
         for (Rule rule : this.ruleCreator.getRules()) {
             rules.addRule(rule);
         }
