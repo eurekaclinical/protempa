@@ -23,11 +23,10 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.protempa.proposition.Proposition;
-import org.protempa.query.Query;
 
 interface ExecutionStrategy {
     
-    void initialize(Collection<PropositionDefinition> cache) 
+    void initialize(Collection<? extends PropositionDefinition> cache) 
             throws ExecutionStrategyInitializationException;
     
     Iterator<Proposition> execute(String keyIds, Iterator<? extends Proposition> objects);

@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.arp.javautil.arrays.Arrays;
+import org.drools.RuleBaseConfiguration;
 
 import org.drools.WorkingMemory;
 import org.drools.base.ClassObjectType;
@@ -101,7 +102,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
     JBossRuleCreator(Map<LowLevelAbstractionDefinition, Algorithm> algorithms,
             DerivationsBuilder derivationsBuilder, 
             Collection<PropositionDefinition> cache, Query query) {
-        assert cache != null : "allNarrowerDescendants cannot be null";
+        assert cache != null : "cache cannot be null";
         assert query != null : "query cannot be null";
         this.query = query;
         this.algorithms = algorithms;
@@ -439,10 +440,25 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      *
      * @return a {@link Rule[]}. Guaranteed not <code>null</code>.
      */
-    Rule[] getRules() {
+    List<Rule> getRules() {
         List<Rule> rulesToReturn = new ArrayList<>(this.rules);
         new DeletedProposition().toRules(rulesToReturn, this.derivationsBuilder);
-        return rulesToReturn.toArray(new Rule[rulesToReturn.size()]);
+        return rulesToReturn;
+    }
+    
+    RuleBaseConfiguration getRuleBaseConfiguration()
+            throws RuleBaseInstantiationException {
+        RuleBaseConfiguration config = new RuleBaseConfiguration();
+        config.setShadowProxy(false);
+        try {
+            config.setConflictResolver(new PROTEMPAConflictResolver(
+                    this.cache.values(), getRuleToTPDMap()));
+        } catch (CycleDetectedException ex) {
+            throw new RuleBaseInstantiationException(
+                    "Problem creating data processing rules", ex);
+        }
+        config.setAssertBehaviour(RuleBaseConfiguration.AssertBehaviour.EQUALITY);
+        return config;
     }
     
     private Set<String> collectPropIdDescendantsUsingInverseIsA(String... propIds) throws QueryException {
@@ -494,5 +510,5 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
             return null;
         }
     }
-
+    
 }

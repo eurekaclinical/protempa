@@ -33,7 +33,6 @@ import org.drools.rule.Rule;
 class JBossRuleBaseFactory {
 
     private final JBossRuleCreator ruleCreator;
-    private final RuleBaseConfiguration ruleBaseConfiguration;
 
     /**
      * Provides a knowledge source and an algorithm source.
@@ -43,17 +42,15 @@ class JBossRuleBaseFactory {
      * @param algorithmSource
      *            the <code>AlgorithmSource</code> to use.
      */
-    JBossRuleBaseFactory(JBossRuleCreator ruleCreator, RuleBaseConfiguration ruleBaseConfiguration) {
+    JBossRuleBaseFactory(JBossRuleCreator ruleCreator) {
         assert ruleCreator != null : "ruleCreator cannot be null";
-
         this.ruleCreator = ruleCreator;
-        this.ruleBaseConfiguration = ruleBaseConfiguration;
     }
 
     RuleBase newInstance() throws RuleBaseInstantiationException {
-        return newRuleBase(this.ruleBaseConfiguration, newPackage());
+        return newRuleBase(this.ruleCreator.getRuleBaseConfiguration(), newPackage());
     }
-
+    
     private Package newPackage() {
         org.drools.rule.Package rules =
                 new org.drools.rule.Package(ProtempaUtil.DROOLS_PACKAGE_NAME);

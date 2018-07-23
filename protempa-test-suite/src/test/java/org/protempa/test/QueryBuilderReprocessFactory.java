@@ -66,32 +66,21 @@ class QueryBuilderReprocessFactory {
         "MySystolicClassification", "MyDiastolicClassification",
         "MyBloodPressureClassificationAny",
         "MyBloodPressureClassificationConsecutiveAny",
+        "MyBloodPressureClassificationAll",
         "MyTwoConsecutiveHighBloodPressure", "MySystolicClassification3",
         "MyDiastolicClassification3", "MyBloodPressureClassification3Any",
         "MyContext1", "MySystolicClassificationMyContext1"
     };
 
-    private static final String[] UPDATE_PROP_IDS = {"Patient", "PatientAll",
-        "Encounter", ICD9_013_82, ICD9_804, "VitalSign",
-        "HELLP_FIRST_RECOVERING_PLATELETS", "LDH_TREND", "AST_STATE",
-        "30DayReadmission", "No30DayReadmission", "MyDiagnosis",
-        "MyVitalSign", "MyTemporalPattern", "MyAndLikePattern",
-        "DiastolicBloodPressure", "SystolicBloodPressure",
-        "MySystolicClassification", "MyDiastolicClassification",
-        "MyBloodPressureClassificationAny",
-        "MyBloodPressureClassificationAll",
-        "MyBloodPressureClassificationConsecutiveAny",
-        "MyTwoConsecutiveHighBloodPressure", "MySystolicClassification3",
-        "MyDiastolicClassification3", "MyBloodPressureClassification3Any",
-        "MyContext1", "MySystolicClassificationMyContext1"
+    private static final String[] UPDATE_PROP_IDS = {"MyBloodPressureClassificationAll"
     };
-    
+
     private static final String[] CREATE_PROP_IDS = {
         "MyBloodPressureClassificationAll2"
     };
-    
+
     private static final String[] DELETE_PROP_IDS = {
-        "MyBloodPressureClassificationAll2"
+        "MyBloodPressureClassification3Any"
     };
 
     DefaultQueryBuilder getInstanceRetrieve() {
@@ -139,7 +128,8 @@ class QueryBuilderReprocessFactory {
             bloodPressureClassificationConsecutiveAny(), highBp,
             systolicClassification3(),
             diastolicClassification3(), bloodPressureClassification3Any(),
-            context1(), systolicClassificationMyContext1()});
+            context1(), systolicClassificationMyContext1(),
+            bloodPressureClassificationAll()});
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(2006, Calendar.AUGUST, 1);
@@ -200,7 +190,8 @@ class QueryBuilderReprocessFactory {
             bloodPressureClassificationConsecutiveAny(), highBp,
             systolicClassification3(),
             diastolicClassification3(), bloodPressureClassification3Any(),
-            context1(), systolicClassificationMyContext1()});
+            context1(), systolicClassificationMyContext1(),
+            bloodPressureClassificationAllUpdated()});
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(2006, Calendar.AUGUST, 1);
@@ -215,7 +206,7 @@ class QueryBuilderReprocessFactory {
         q.setFilters(timeRange);
         return q;
     }
-    
+
     DefaultQueryBuilder getInstanceCreate() {
         DefaultQueryBuilder q = new DefaultQueryBuilder();
         q.setPropositionIds(CREATE_PROP_IDS);
@@ -260,6 +251,7 @@ class QueryBuilderReprocessFactory {
             bloodPressureClassificationAny(),
             bloodPressureClassificationConsecutiveAny(), highBp,
             systolicClassification3(),
+            bloodPressureClassificationAll(),
             bloodPressureClassificationAll2(),
             diastolicClassification3(), bloodPressureClassification3Any(),
             context1(), systolicClassificationMyContext1()});
@@ -280,7 +272,7 @@ class QueryBuilderReprocessFactory {
 
     DefaultQueryBuilder getInstanceDelete() {
         DefaultQueryBuilder q = new DefaultQueryBuilder();
-        q.setPropositionIds(UPDATE_PROP_IDS);
+        q.setPropositionIds(DELETE_PROP_IDS);
         EventDefinition ed = new EventDefinition("MyDiagnosis");
         ed.setDisplayName("My Diagnosis");
         ed.setInverseIsA("ICD9:907.1");
@@ -323,7 +315,8 @@ class QueryBuilderReprocessFactory {
             bloodPressureClassificationConsecutiveAny(), highBp,
             systolicClassification3(),
             diastolicClassification3(), bloodPressureClassification3Any(),
-            context1(), systolicClassificationMyContext1()});
+            context1(), systolicClassificationMyContext1(),
+            bloodPressureClassificationAll()});
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(2006, Calendar.AUGUST, 1);
@@ -560,10 +553,10 @@ class QueryBuilderReprocessFactory {
         return bp;
     }
 
-    private PropositionDefinition bloodPressureClassificationAll2() {
+    private PropositionDefinition bloodPressureClassificationAll() {
         CompoundLowLevelAbstractionDefinition bp = new CompoundLowLevelAbstractionDefinition(
-                "MyBloodPressureClassificationAll2");
-        bp.setDisplayName("My Blood Pressure Classification (ALL) 2");
+                "MyBloodPressureClassificationAll");
+        bp.setDisplayName("My Blood Pressure Classification (ALL)");
         bp.addValueClassification(new ValueClassification("MYBP_HIGH", "MySystolicClassification",
                 "My Systolic High"));
         bp.addValueClassification(new ValueClassification("MYBP_HIGH", "MyDiastolicClassification",
@@ -583,7 +576,27 @@ class QueryBuilderReprocessFactory {
     private PropositionDefinition bloodPressureClassificationAllUpdated() {
         CompoundLowLevelAbstractionDefinition bp = new CompoundLowLevelAbstractionDefinition(
                 "MyBloodPressureClassificationAll");
-        bp.setDisplayName("My Blood Pressure Classification (ALL)");
+        bp.setDisplayName("My Blood Pressure Classification (ALL) Updated");
+        bp.addValueClassification(new ValueClassification("MYBP2_HIGH", "MySystolicClassification",
+                "My Systolic High"));
+        bp.addValueClassification(new ValueClassification("MYBP2_HIGH", "MyDiastolicClassification",
+                "My Diastolic High"));
+        bp.addValueClassification(new ValueClassification("MYBP2_NORMAL", "MySystolicClassification",
+                "My Systolic Normal"));
+        bp.addValueClassification(new ValueClassification("MYBP2_NORMAL", "MyDiastolicClassification",
+                "My Diastolic Normal"));
+        bp.setValueDefinitionMatchOperator(CompoundLowLevelAbstractionDefinition.ValueDefinitionMatchOperator.ALL);
+        bp.setMinimumNumberOfValues(1);
+        bp.setGapFunctionBetweenValues(new SimpleGapFunction(90, AbsoluteTimeUnit.DAY));
+        bp.setGapFunction(new SimpleGapFunction(0, null));
+
+        return bp;
+    }
+    
+    private PropositionDefinition bloodPressureClassificationAll2() {
+        CompoundLowLevelAbstractionDefinition bp = new CompoundLowLevelAbstractionDefinition(
+                "MyBloodPressureClassificationAll2");
+        bp.setDisplayName("My Blood Pressure Classification (ALL) Updated");
         bp.addValueClassification(new ValueClassification("MYBP2_HIGH", "MySystolicClassification",
                 "My Systolic High"));
         bp.addValueClassification(new ValueClassification("MYBP2_HIGH", "MyDiastolicClassification",

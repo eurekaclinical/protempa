@@ -20,6 +20,7 @@
 package org.protempa;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.collections4.iterators.IteratorChain;
@@ -41,9 +42,9 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     @Override
-    public void initialize(Collection<PropositionDefinition> allNarrowerDescendants) throws ExecutionStrategyInitializationException {
-        super.initialize(allNarrowerDescendants);
-        this.statelessSession = createRuleBase().newStatelessSession();
+    public void initialize(Collection<? extends PropositionDefinition> cache) throws ExecutionStrategyInitializationException {
+        super.initialize(cache);
+        this.statelessSession = getRuleBase().newStatelessSession();
     }
 
     @Override
@@ -65,6 +66,27 @@ class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
     @Override
     public void shutdown() {
+    }
+    
+    @Override
+    protected JBossRuleCreator newRuleCreator() throws ExecutionStrategyInitializationException {
+        ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
+                getAlgorithmSource());
+        Collection<PropositionDefinition> propDefs = getCache();
+        try {
+            visitor.visit(propDefs);
+        } catch (ProtempaException ex) {
+            throw new ExecutionStrategyInitializationException(ex);
+        }
+        JBossRuleCreator ruleCreator = new JBossRuleCreator(
+                visitor.getAlgorithms(), getDerivationsBuilder(),
+                propDefs, getQuery());
+        try {
+            ruleCreator.visit(propDefs);
+        } catch (ProtempaException ex) {
+            throw new ExecutionStrategyInitializationException(ex);
+        }
+        return ruleCreator;
     }
     
 }

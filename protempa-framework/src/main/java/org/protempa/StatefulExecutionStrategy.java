@@ -22,20 +22,17 @@ package org.protempa;
 import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.collections4.iterators.IteratorChain;
-import org.arp.javautil.arrays.Arrays;
-import org.arp.javautil.collections.Iterators;
 import org.drools.FactException;
-import org.drools.FactHandle;
-import org.drools.RuleBase;
 import org.drools.StatefulSession;
-import org.drools.rule.Rule;
 
 import org.eurekaclinical.datastore.DataStore;
 import org.protempa.datastore.WorkingMemoryDataStores;
@@ -48,12 +45,11 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private static final Logger LOGGER = Logger.getLogger(StatefulExecutionStrategy.class.getName());
 
     private final File databasePath;
-    private DataStore<String, StatefulSession> dataStore;
+    private DataStore<String, WorkingMemoryFactStore> dataStore;
     private WorkingMemoryDataStores workingMemoryDataStores;
     private StatefulSession workingMemory;
     private final DeletedWorkingMemoryEventListener workingMemoryEventListener;
     private List<Proposition> propsToDelete;
-    private RuleBase ruleBase;
 
     StatefulExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
         super(algorithmSource, query);
@@ -65,17 +61,16 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     @Override
-    public void initialize(Collection<PropositionDefinition> cache) throws ExecutionStrategyInitializationException {
+    public void initialize(Collection<? extends PropositionDefinition> cache) throws ExecutionStrategyInitializationException {
+        createDataStoreManager(cache);
         super.initialize(cache);
-        createDataStoreManager();
-        grabDataStore();
-        prepareDataStore();
+        getOrCreateDataStore();
     }
 
     @Override
     public Iterator<Proposition> execute(String keyId, Iterator<? extends Proposition> objects) {
         getOrCreateWorkingMemoryInstance(keyId);
-        insertRetrievedDataIntoWorkingMemory(objects);
+        updateWorkingMemory(keyId, objects);
         fireAllRules();
         cleanupAndPersistWorkingMemory(keyId);
         return getWorkingMemoryIterator();
@@ -100,44 +95,67 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         }
     }
 
-    public DataStore<String, StatefulSession> getDataStore() {
+    public DataStore<String, WorkingMemoryFactStore> getDataStore() {
         return this.dataStore;
     }
-
-    private void createDataStoreManager() throws ExecutionStrategyInitializationException {
-        this.workingMemoryDataStores
-                = new WorkingMemoryDataStores(this.databasePath.getParent());
+    
+    @Override
+    protected JBossRuleCreator newRuleCreator() throws ExecutionStrategyInitializationException {
+        ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
+                getAlgorithmSource());
+        Collection<PropositionDefinition> propDefs;
+        Query query = getQuery();
+        switch (query.getQueryMode()) {
+            case REPROCESS_RETRIEVE:
+            case REPROCESS_DELETE:
+                propDefs = Collections.emptyList();
+                break;
+            case REPROCESS_UPDATE:
+            case REPROCESS_CREATE:
+                propDefs = new ArrayList<>(getCache());
+                propDefs.removeAll(this.workingMemoryDataStores.getStoredPropositionDefinitions());
+                break;
+            case REPLACE:
+            case UPDATE:
+                propDefs = getCache();
+                break;
+            default:
+                throw new AssertionError("Unexpected query mode " + query.getQueryMode());
+        }
+        try {
+            visitor.visit(propDefs);
+        } catch (ProtempaException ex) {
+            throw new ExecutionStrategyInitializationException(ex);
+        }
+        JBossRuleCreator ruleCreator = new JBossRuleCreator(
+                visitor.getAlgorithms(), getDerivationsBuilder(),
+                propDefs, query);
+        try {
+            ruleCreator.visit(propDefs);
+        } catch (ProtempaException ex) {
+            throw new ExecutionStrategyInitializationException(ex);
+        }
+        return ruleCreator;
     }
 
-    private void grabDataStore() throws ExecutionStrategyInitializationException {
+    private void createDataStoreManager(Collection<? extends PropositionDefinition> cache) throws ExecutionStrategyInitializationException {
         try {
-            String dbName = this.databasePath.getName();
-            Query query = getQuery();
-            QueryMode queryMode = query.getQueryMode();
-            this.dataStore = this.workingMemoryDataStores.getDataStore(dbName, createRuleBase());
-            this.ruleBase = this.workingMemoryDataStores.getRuleBase();
-            switch (queryMode) {
-                case REPROCESS_RETRIEVE:
-                    break;
-                case REPROCESS_CREATE:
-                    addToRuleBase(this.ruleBase, query.getPropositionDefinitions());
-                    break;
-                case REPROCESS_UPDATE:
-                    updateInRuleBase(this.ruleBase, query.getPropositionDefinitions());
-                    break;
-                case REPROCESS_DELETE:
-                    deleteFromRuleBase(this.ruleBase, query.getPropositionDefinitions());
-                    break;
-                default:
-                    break;
-            }
-            LOGGER.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
-        } catch (IOException | ProtempaException ex) {
+            this.workingMemoryDataStores
+                    = new WorkingMemoryDataStores(this.databasePath.getParent(), cache);
+        } catch (IOException ex) {
             throw new ExecutionStrategyInitializationException(ex);
         }
     }
 
-    private void prepareDataStore() {
+    private void getOrCreateDataStore() throws ExecutionStrategyInitializationException {
+        try {
+            String dbName = this.databasePath.getName();
+            this.dataStore = this.workingMemoryDataStores.getDataStore(dbName);
+            LOGGER.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
+        } catch (IOException ex) {
+            throw new ExecutionStrategyInitializationException(ex);
+        }
+
         if (getQuery().getQueryMode() == QueryMode.REPLACE) {
             this.dataStore.clear();
             LOGGER.log(Level.FINE, "Cleared data store {0}", this.databasePath.getPath());
@@ -145,40 +163,45 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private void getOrCreateWorkingMemoryInstance(String keyId) {
-        this.workingMemory = this.dataStore.get(keyId);
-        if (this.workingMemory == null) {
-            createWorkingMemory(keyId);
-        } else {
-            DerivationsBuilder derivationsBuilder = getDerivationsBuilder();
-            derivationsBuilder.reset(
-                    (Map<Proposition, List<Proposition>>) this.workingMemory.getGlobal(WorkingMemoryGlobals.FORWARD_DERIVATIONS),
-                    (Map<Proposition, List<Proposition>>) this.workingMemory.getGlobal(WorkingMemoryGlobals.BACKWARD_DERIVATIONS));
-        }
-        this.workingMemory.addEventListener(this.workingMemoryEventListener);
+        createWorkingMemory(keyId);
+        this.workingMemory.addEventListener(
+                this.workingMemoryEventListener);
     }
 
     private void createWorkingMemory(String keyId) {
-        this.workingMemory = this.ruleBase.newStatefulSession(true);
+        this.workingMemory = getRuleBase().newStatefulSession(true);
         this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
-        DerivationsBuilder derivationsBuilder = getDerivationsBuilder();
-        this.workingMemory.setGlobal(WorkingMemoryGlobals.FORWARD_DERIVATIONS,
-                derivationsBuilder.getForwardDerivations());
-        this.workingMemory.setGlobal(WorkingMemoryGlobals.BACKWARD_DERIVATIONS,
-                derivationsBuilder.getBackwardDerivations());
     }
 
-    private void insertRetrievedDataIntoWorkingMemory(Iterator<?> objects)
+    private void updateWorkingMemory(String keyId, Iterator<?> objects)
             throws FactException {
         if (objects != null) {
             while (objects.hasNext()) {
-                Proposition prop = (Proposition) objects.next();
-                FactHandle factHandle = this.workingMemory.getFactHandle(prop);
-                if (factHandle != null) {
-                    this.workingMemory.modifyRetract(factHandle);
-                    this.workingMemory.modifyInsert(factHandle, prop);
-                } else {
-                    this.workingMemory.insert(prop);
-                }
+                this.workingMemory.insert((Proposition) objects.next());
+            }
+        }
+        if (this.dataStore != null) {
+            WorkingMemoryFactStore factStore = this.dataStore.get(keyId);
+            QueryMode queryMode = getQuery().getQueryMode();
+            String[] propIds = getQuery().getPropositionIds();
+            switch (queryMode) {
+                case REPROCESS_UPDATE:
+                case REPROCESS_DELETE:
+                    factStore.removeAll(propIds);
+                case REPROCESS_RETRIEVE:
+                case REPROCESS_CREATE:
+                    getDerivationsBuilder().reset(
+                            (Map<Proposition, List<Proposition>>) factStore.getForwardDerivations(),
+                            (Map<Proposition, List<Proposition>>) factStore.getBackwardDerivations());
+                    for (Proposition prop : factStore.getPropositions()) {
+                        this.workingMemory.insert(prop);
+                    }
+                    break;
+                case REPLACE:
+                case UPDATE:
+                    break;
+                default:
+                    throw new AssertionError("Unexpected query mode " + queryMode);
             }
         }
     }
@@ -193,7 +216,16 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         this.workingMemoryEventListener.clear();
         LOGGER.log(Level.FINEST,
                 "Persisting working memory for key ID {0}", keyId);
-        this.dataStore.put(keyId, this.workingMemory);
+        WorkingMemoryFactStore factStore = new WorkingMemoryFactStore();
+        factStore.setForwardDerivations(getDerivationsBuilder().getForwardDerivations());
+        factStore.setBackwardDerivations(getDerivationsBuilder().getBackwardDerivations());
+        List<Proposition> facts = new ArrayList<>();
+        Iterator factItr = this.workingMemory.iterateObjects();
+        while (factItr.hasNext()) {
+            facts.add((Proposition) factItr.next());
+        }
+        factStore.setPropositions(facts);
+        this.dataStore.put(keyId, factStore);
         LOGGER.log(Level.FINEST,
                 "Persisted working memory for key ID {0}", keyId);
     }
@@ -205,10 +237,12 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private ExecutionStrategyShutdownException closeDataStore() {
-        try {
-            dataStore.close();
-        } catch (IOError err) {
-            return new ExecutionStrategyShutdownException(err);
+        if (this.dataStore != null) {
+            try {
+                this.dataStore.close();
+            } catch (IOError err) {
+                return new ExecutionStrategyShutdownException(err);
+            }
         }
         return null;
     }
@@ -218,43 +252,8 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             this.workingMemoryDataStores.close();
         } catch (IOException ex) {
             return new ExecutionStrategyShutdownException(ex);
-        } finally {
-            this.ruleBase = null;
         }
         return null;
-    }
-
-    private void addToRuleBase(RuleBase ruleBase, PropositionDefinition... propositionDefinitions) throws ProtempaException {
-        org.drools.rule.Package pkg = new org.drools.rule.Package(ProtempaUtil.DROOLS_PACKAGE_NAME);
-        JBossRuleCreator creator = newRuleCreator(Arrays.asList(propositionDefinitions));
-        for (Rule rule : creator.getRules()) {
-            pkg.addRule(rule);
-        }
-        try {
-            ruleBase.addPackage(pkg); // Drools merges it.
-        } catch (Exception ex) {
-            throw new QueryException(getQuery().getName(), ex);
-        }
-    }
-
-    private void updateInRuleBase(RuleBase ruleBase, PropositionDefinition... propositionDefinitions) throws ProtempaException {
-        org.drools.rule.Package pkg = new org.drools.rule.Package(ProtempaUtil.DROOLS_PACKAGE_NAME);
-        JBossRuleCreator creator = newRuleCreator(Arrays.asList(propositionDefinitions));
-        for (Rule rule : creator.getRules()) {
-            pkg.addRule(rule);
-        }
-        try {
-            ruleBase.addPackage(pkg); // Drools merges it.
-        } catch (Exception ex) {
-            throw new QueryException(getQuery().getName(), ex);
-        }
-    }
-
-    private void deleteFromRuleBase(RuleBase ruleBase, PropositionDefinition... propositionDefinitions) throws ProtempaException {
-        JBossRuleCreator creator = newRuleCreator(Arrays.asList(propositionDefinitions));
-        for (Rule rule : creator.getRules()) {
-            ruleBase.removeRule(ProtempaUtil.DROOLS_PACKAGE_NAME, rule.getName());
-        }
     }
 
 }

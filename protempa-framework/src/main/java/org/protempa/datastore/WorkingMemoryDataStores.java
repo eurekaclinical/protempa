@@ -19,13 +19,22 @@
  */
 package org.protempa.datastore;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import org.drools.RuleBase;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eurekaclinical.datastore.bdb.BdbPersistentStoreFactory;
 
 import org.eurekaclinical.datastore.DataStore;
-import org.drools.StatefulSession;
 import org.eurekaclinical.datastore.DataStoreFactory;
+import org.protempa.PropositionDefinition;
+import org.protempa.WorkingMemoryFactStore;
 
 /**
  * A class to generate permanent stores mapping key IDs to Drools working memory
@@ -38,8 +47,7 @@ public final class WorkingMemoryDataStores implements DataStores {
     public static final String DATABASE_NAME = "WorkingMemoryStore";
 
     private final DataStoreFactory storeFactory;
-    private RuleBase ruleBase;
-    private final String directory;
+    private Collection<PropositionDefinition> storedPropositionDefinitions;
 
     /**
      * Constructs a working memory creator.
@@ -47,12 +55,30 @@ public final class WorkingMemoryDataStores implements DataStores {
      * @param directory the directory in which the working memory data stores
      * will be stored. Cannot be <code>null</code>.
      */
-    public WorkingMemoryDataStores(String directory) {
+    public WorkingMemoryDataStores(String directory, Collection<? extends PropositionDefinition> cache) throws IOException {
         if (directory == null) {
             throw new IllegalArgumentException("directory cannot be null");
         }
+        if (cache == null) {
+            throw new IllegalArgumentException("cache cannot be null");
+        }
         this.storeFactory = new BdbPersistentStoreFactory(directory);
-        this.directory = directory;
+        this.storedPropositionDefinitions = new ArrayList<>();
+        File file = new File(directory, "stored-propdefs");
+        if (file.exists()) {
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+                this.storedPropositionDefinitions = (Collection<PropositionDefinition>) ois.readObject();
+            } catch (ClassNotFoundException ex) {
+                throw new IOException("Error deserializing proposition definitions", ex);
+            }
+        }
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
+            oos.writeObject(cache);
+        }
+    }
+
+    public Collection<PropositionDefinition> getStoredPropositionDefinitions() {
+        return storedPropositionDefinitions;
     }
     
     @Override
@@ -61,37 +87,16 @@ public final class WorkingMemoryDataStores implements DataStores {
     }
 
     /**
-     * Gets the persisted data store with the given name, if it exists. Sets 
-     * the <code>ruleBase</code> field to the rule base of that data store.
+     * Gets the persisted data store with the given name, if it exists, or
+     * creates a new data store with the given name.
      *
      * @param name the name of the data store.
      * @return the data store.
      * @throws IOException if an error occurred querying for the data store.
      */
     @Override
-    public DataStore<String, StatefulSession> getDataStore(String name, RuleBase ruleBase) throws IOException {
-        DataStore dataStore = this.storeFactory.getInstance(name);
-        DroolsWorkingMemoryStore result = 
-                new DroolsWorkingMemoryStore(dataStore, this.directory, 
-                        name, ruleBase);
-        this.ruleBase = result.getRuleBase();
-        return result;
-    }
-
-    /**
-     * Gets the rule base that was retrieved by the {@link #getDataStore(java.lang.String)
-     * }
-     * method or given to the {@link #newDataStore(org.drools.RuleBase, java.lang.String)
-     * }
-     * method, depending on which of those methods was last called.
-     *
-     * @return the rule base, or <code>null</code> if neither the
-     * {@link #getDataStore(java.lang.String) } nor the
-     * {@link #newDataStore(org.drools.RuleBase, java.lang.String) } has ever
-     * been called.
-     */
-    public RuleBase getRuleBase() {
-        return ruleBase;
+    public DataStore<String, WorkingMemoryFactStore> getDataStore(String name) throws IOException {
+        return this.storeFactory.getInstance(name);
     }
 
     @Override

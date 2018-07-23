@@ -53,7 +53,7 @@ class TopologicalSortComparator implements Comparator<TemporalPropositionDefinit
      * @throws CycleDetectedException if a cycle in the abstraction
      * definitions is detected.
      */
-    TopologicalSortComparator(Collection<PropositionDefinition> allNarrowerDescendants,
+    TopologicalSortComparator(Collection<? extends PropositionDefinition> allNarrowerDescendants,
             Collection<? extends TemporalPropositionDefinition> abstractionDefinitions)
             throws CycleDetectedException {
         // build the graph, a map of node name -> list of neighbors.
