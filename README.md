@@ -32,6 +32,12 @@ Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-cent
 * Propositions are now inserted into the Drools working memory using the
 insertLogical method rather than plain insert so that the rules engine will
 dynamically retract propositions correctly.
+* New query option to save data abstractions as they are computed in a key-
+value store by key. Sending changed data through Protempa will update the
+abstractions based upon the updated data.
+* New query modes: REPROCESS_CREATE, REPROCESS_DELETE, REPROCESS_UPDATE, and
+REPROCESS_RETRIEVE. These are basic CRUD operations for modifying the key-value 
+store and retrieving data and abstractions from it.
 
 ## Version 4.3.2
 * Actually write nominal column headers for tabular writers.
