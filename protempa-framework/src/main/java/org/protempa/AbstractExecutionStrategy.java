@@ -21,7 +21,6 @@ package org.protempa;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import org.drools.RuleBase;
 import org.protempa.query.Query;
