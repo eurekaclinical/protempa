@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.proposition.Proposition;
 

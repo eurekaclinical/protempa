@@ -26,11 +26,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.iterators.IteratorChain;
+import org.arp.javautil.arrays.Arrays;
 import org.drools.FactException;
 import org.drools.StatefulSession;
 
@@ -98,11 +103,11 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     public DataStore<String, WorkingMemoryFactStore> getDataStore() {
         return this.dataStore;
     }
-    
+
     @Override
     protected JBossRuleCreator newRuleCreator() throws ExecutionStrategyInitializationException {
-        ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
-                getAlgorithmSource());
+        ValidateAlgorithmCheckedVisitor visitor
+                = new ValidateAlgorithmCheckedVisitor(getAlgorithmSource());
         Collection<PropositionDefinition> propDefs;
         Query query = getQuery();
         switch (query.getQueryMode()) {
@@ -111,9 +116,48 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
                 propDefs = Collections.emptyList();
                 break;
             case REPROCESS_UPDATE:
+                Collection<PropositionDefinition> cache = getCache();
+                String[] queryPropIds = getQuery().getPropositionIds();
+                Set<String> propIdsUpdate = this.workingMemoryDataStores
+                        .getStoredPropositionDefinitions().stream()
+                        .map(elt -> elt.getPropositionId())
+                        .filter(propId -> !Arrays.contains(queryPropIds, propId))
+                        .collect(Collectors.toSet());
+                Queue<String> propIdsQueue = new LinkedList<>();
+                Arrays.addAll(propIdsQueue, queryPropIds);
+                String pId;
+                while ((pId = propIdsQueue.poll()) != null) {
+                    for (PropositionDefinition propDef : cache) {
+                        String[] children = propDef.getChildren();
+                        if (Arrays.contains(children, pId)) {
+                            propIdsQueue.add(propDef.getId());
+                            propIdsUpdate.remove(pId);
+                        }
+                    }
+                }
+                propDefs = cache.stream()
+                        .filter(propDef -> propDef != null 
+                                && !propIdsUpdate.contains(propDef.getPropositionId()))
+                        .collect(Collectors.toList());
+                break;
             case REPROCESS_CREATE:
                 propDefs = new ArrayList<>(getCache());
-                propDefs.removeAll(this.workingMemoryDataStores.getStoredPropositionDefinitions());
+                Set<String> propIdsCreate = this.workingMemoryDataStores
+                        .getStoredPropositionDefinitions()
+                        .stream()
+                        .map(elt -> elt.getPropositionId())
+                        .collect(Collectors.toSet());
+                for (String propId : getQuery().getPropositionIds()) {
+                    if (propIdsCreate.contains(propId)) {
+                        throw new ExecutionStrategyInitializationException("Proposition id " + propId + "already exists; if you want to update it, use the update query mode");
+                    }
+                }
+                for (Iterator<PropositionDefinition> itr = propDefs.iterator(); itr.hasNext();) {
+                    PropositionDefinition propDef = itr.next();
+                    if (propDef == null || propIdsCreate.contains(propDef.getPropositionId())) {
+                        itr.remove();
+                    }
+                }
                 break;
             case REPLACE:
             case UPDATE:
@@ -183,11 +227,10 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         if (this.dataStore != null) {
             WorkingMemoryFactStore factStore = this.dataStore.get(keyId);
             QueryMode queryMode = getQuery().getQueryMode();
-            String[] propIds = getQuery().getPropositionIds();
             switch (queryMode) {
                 case REPROCESS_UPDATE:
                 case REPROCESS_DELETE:
-                    factStore.removeAll(propIds);
+                    factStore.removeAll(getQuery().getPropositionIds());
                 case REPROCESS_RETRIEVE:
                 case REPROCESS_CREATE:
                     getDerivationsBuilder().reset(

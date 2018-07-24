@@ -472,8 +472,6 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
                 if (pd != null) {
                     String[] children = pd.getInverseIsA();
                     Arrays.addAll(queue, children);
-                } else {
-                    throw new QueryException(this.query.getName(), "PropositionDefinition " + propId + " is referenced but was not queried");
                 }
             }
         }
