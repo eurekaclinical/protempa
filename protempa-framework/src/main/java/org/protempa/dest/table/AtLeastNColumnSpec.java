@@ -22,7 +22,6 @@ package org.protempa.dest.table;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -77,8 +76,8 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
 
     @Override
     public void columnValues(String key, Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache ksCache,
             TabularWriter writer) throws TabularWriterException {

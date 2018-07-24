@@ -60,8 +60,8 @@ public class LinkTraverser {
      */
     public List<Proposition> traverseLinks(Link[] links,
             Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache ksCache) {
         LinkedList<Proposition> result = new LinkedList<>();

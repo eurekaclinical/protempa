@@ -19,8 +19,6 @@
  */
 package org.protempa.dest.table;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -31,7 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.arp.javautil.string.StringUtil;
 
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
@@ -102,8 +99,8 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
 
     @Override
     public void columnValues(String key, Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache ksCache,
             TabularWriter writer) throws TabularWriterException {

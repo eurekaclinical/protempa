@@ -20,8 +20,8 @@ package org.protempa.dest.table;
  * #L%
  */
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
@@ -55,7 +55,11 @@ public class ConstantColumnSpec extends AbstractTableColumnSpec {
     }
 
     @Override
-    public void columnValues(String key, Proposition proposition, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references, KnowledgeSourceCache knowledgeSourceCache, TabularWriter writer) throws TabularWriterException {
+    public void columnValues(String key, Proposition proposition, 
+            Map<Proposition, Set<Proposition>> forwardDerivations, 
+            Map<Proposition, Set<Proposition>> backwardDerivations, 
+            Map<UniqueId, Proposition> references, 
+            KnowledgeSourceCache knowledgeSourceCache, TabularWriter writer) throws TabularWriterException {
         writer.writeString(value);
     }
 

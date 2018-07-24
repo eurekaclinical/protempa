@@ -21,6 +21,7 @@ package org.protempa.dest.table;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
@@ -78,8 +79,8 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
      */
     List<Proposition> traverseLinks(Link[] links,
             Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache ksCache) {
         return this.linkTraverser.traverseLinks(links, proposition,

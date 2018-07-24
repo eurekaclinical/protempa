@@ -372,10 +372,10 @@ public abstract class Link {
      *
      * @param proposition a {@link Proposition} at which to start the traversal.
      * Cannot be <code>null</code>.
-     * @param forwardDerivations a {@link Map<Proposition,List<Proposition>>} of
+     * @param forwardDerivations a {@link Map<Proposition,Set<Proposition>>} of
      * derived
      * propositions.
-     * @param backwardDerivations a {@link Map<Proposition,List<Proposition>>}
+     * @param backwardDerivations a {@link Map<Proposition,Set<Proposition>>}
      * of derived
      * propositions.
      * @param references a {@link Map<Proposition,Proposition>} of unique
@@ -388,8 +388,8 @@ public abstract class Link {
      * step. Not guaranteed to be modifiable.
      */
     abstract Collection<Proposition> traverse(Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache ksCache, Set<Proposition> cache);
 
