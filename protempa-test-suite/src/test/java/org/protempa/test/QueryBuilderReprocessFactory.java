@@ -19,8 +19,6 @@ package org.protempa.test;
  * limitations under the License.
  * #L%
  */
-import java.util.Calendar;
-import java.util.Date;
 import org.protempa.CompoundLowLevelAbstractionDefinition;
 import org.protempa.ContextDefinition;
 import org.protempa.EventDefinition;
@@ -35,10 +33,7 @@ import org.protempa.SlidingWindowWidthMode;
 import org.protempa.TemporalExtendedParameterDefinition;
 import org.protempa.TemporalExtendedPropositionDefinition;
 import org.protempa.ValueClassification;
-import org.protempa.backend.dsb.filter.DateTimeFilter;
-import org.protempa.proposition.interval.Interval;
 import org.protempa.proposition.interval.Relation;
-import org.protempa.proposition.value.AbsoluteTimeGranularity;
 import org.protempa.proposition.value.AbsoluteTimeUnit;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
@@ -136,151 +131,31 @@ class QueryBuilderReprocessFactory {
     DefaultQueryBuilder getInstanceUpdate() {
         DefaultQueryBuilder q = new DefaultQueryBuilder();
         q.setPropositionIds(UPDATE_PROP_IDS);
-        EventDefinition ed = new EventDefinition("MyDiagnosis");
-        ed.setDisplayName("My Diagnosis");
-        ed.setInverseIsA("ICD9:907.1");
-        PrimitiveParameterDefinition pd = new PrimitiveParameterDefinition(
-                "MyVitalSign");
-        pd.setDisplayName("My Vital Sign");
-        pd.setInverseIsA("HeartRate");
-        HighLevelAbstractionDefinition hd = new HighLevelAbstractionDefinition(
-                "MyTemporalPattern");
-        hd.setDisplayName("My Temporal Pattern");
-        TemporalExtendedPropositionDefinition td1 = new TemporalExtendedPropositionDefinition(
-                ed.getId());
-        TemporalExtendedPropositionDefinition td2 = new TemporalExtendedPropositionDefinition(
-                pd.getId());
-        hd.add(td1);
-        hd.add(td2);
-        Relation rel = new Relation();
-        hd.setRelation(td1, td2, rel);
-        HighLevelAbstractionDefinition hd2 = new HighLevelAbstractionDefinition(
-                "MyAndLikePattern");
-        hd.setDisplayName("My Or-like Pattern");
-        ExtendedPropositionDefinition epd1 = new ExtendedPropositionDefinition(
-                "ICD9:V-codes");
-        ExtendedPropositionDefinition epd2 = new ExtendedPropositionDefinition(
-                "ICD9:35.83");
-        hd2.add(epd1);
-        hd2.add(epd2);
-        HighLevelAbstractionDefinition highBp = new HighLevelAbstractionDefinition(
-                "MyTwoConsecutiveHighBloodPressure");
-        highBp.setDisplayName("My Two Consecutive High Blood Pressure");
-        TemporalExtendedParameterDefinition highBpTpd = new TemporalExtendedParameterDefinition(
-                "MyBloodPressureClassificationConsecutiveAny");
-        highBpTpd.setValue(NominalValue.getInstance("MYBP_HIGH"));
-        highBp.add(highBpTpd);
-        Relation highBpRel = new Relation();
-        highBp.setRelation(highBpTpd, highBpTpd, highBpRel);
-        q.setPropositionDefinitions(new PropositionDefinition[]{ed, pd, hd,
-            hd2, systolicClassification(), diastolicClassification(),
-            bloodPressureClassificationAny(),
-            bloodPressureClassificationConsecutiveAny(), highBp,
-            systolicClassification3(),
-            diastolicClassification3(), bloodPressureClassification3Any(),
-            context1(), systolicClassificationMyContext1(),
-            bloodPressureClassificationAllUpdated()});
+        q.setPropositionDefinitions(new PropositionDefinition[]{
+            systolicClassification(), diastolicClassification(),
+            bloodPressureClassificationAllUpdated()
+        });
         return q;
     }
 
     DefaultQueryBuilder getInstanceCreate() {
         DefaultQueryBuilder q = new DefaultQueryBuilder();
         q.setPropositionIds(CREATE_PROP_IDS);
-        EventDefinition ed = new EventDefinition("MyDiagnosis");
-        ed.setDisplayName("My Diagnosis");
-        ed.setInverseIsA("ICD9:907.1");
-        PrimitiveParameterDefinition pd = new PrimitiveParameterDefinition(
-                "MyVitalSign");
-        pd.setDisplayName("My Vital Sign");
-        pd.setInverseIsA("HeartRate");
-        HighLevelAbstractionDefinition hd = new HighLevelAbstractionDefinition(
-                "MyTemporalPattern");
-        hd.setDisplayName("My Temporal Pattern");
-        TemporalExtendedPropositionDefinition td1 = new TemporalExtendedPropositionDefinition(
-                ed.getId());
-        TemporalExtendedPropositionDefinition td2 = new TemporalExtendedPropositionDefinition(
-                pd.getId());
-        hd.add(td1);
-        hd.add(td2);
-        Relation rel = new Relation();
-        hd.setRelation(td1, td2, rel);
-        HighLevelAbstractionDefinition hd2 = new HighLevelAbstractionDefinition(
-                "MyAndLikePattern");
-        hd.setDisplayName("My Or-like Pattern");
-        ExtendedPropositionDefinition epd1 = new ExtendedPropositionDefinition(
-                "ICD9:V-codes");
-        ExtendedPropositionDefinition epd2 = new ExtendedPropositionDefinition(
-                "ICD9:35.83");
-        hd2.add(epd1);
-        hd2.add(epd2);
-        HighLevelAbstractionDefinition highBp = new HighLevelAbstractionDefinition(
-                "MyTwoConsecutiveHighBloodPressure");
-        highBp.setDisplayName("My Two Consecutive High Blood Pressure");
-        TemporalExtendedParameterDefinition highBpTpd = new TemporalExtendedParameterDefinition(
-                "MyBloodPressureClassificationConsecutiveAny");
-        highBpTpd.setValue(NominalValue.getInstance("MYBP_HIGH"));
-        highBp.add(highBpTpd);
-        Relation highBpRel = new Relation();
-        highBp.setRelation(highBpTpd, highBpTpd, highBpRel);
-        q.setPropositionDefinitions(new PropositionDefinition[]{ed, pd, hd,
-            hd2, systolicClassification(), diastolicClassification(),
-            bloodPressureClassificationAny(),
-            bloodPressureClassificationConsecutiveAny(), highBp,
-            systolicClassification3(),
-            bloodPressureClassificationAll(),
-            bloodPressureClassificationAll2(),
-            diastolicClassification3(), bloodPressureClassification3Any(),
-            context1(), systolicClassificationMyContext1()});
+        q.setPropositionDefinitions(new PropositionDefinition[]{
+            systolicClassification(), diastolicClassification(),
+            bloodPressureClassificationAll2()
+        });
         return q;
     }
 
     DefaultQueryBuilder getInstanceDelete() {
         DefaultQueryBuilder q = new DefaultQueryBuilder();
         q.setPropositionIds(DELETE_PROP_IDS);
-        EventDefinition ed = new EventDefinition("MyDiagnosis");
-        ed.setDisplayName("My Diagnosis");
-        ed.setInverseIsA("ICD9:907.1");
-        PrimitiveParameterDefinition pd = new PrimitiveParameterDefinition(
-                "MyVitalSign");
-        pd.setDisplayName("My Vital Sign");
-        pd.setInverseIsA("HeartRate");
-        HighLevelAbstractionDefinition hd = new HighLevelAbstractionDefinition(
-                "MyTemporalPattern");
-        hd.setDisplayName("My Temporal Pattern");
-        TemporalExtendedPropositionDefinition td1 = new TemporalExtendedPropositionDefinition(
-                ed.getId());
-        TemporalExtendedPropositionDefinition td2 = new TemporalExtendedPropositionDefinition(
-                pd.getId());
-        hd.add(td1);
-        hd.add(td2);
-        Relation rel = new Relation();
-        hd.setRelation(td1, td2, rel);
-        HighLevelAbstractionDefinition hd2 = new HighLevelAbstractionDefinition(
-                "MyAndLikePattern");
-        hd.setDisplayName("My Or-like Pattern");
-        ExtendedPropositionDefinition epd1 = new ExtendedPropositionDefinition(
-                "ICD9:V-codes");
-        ExtendedPropositionDefinition epd2 = new ExtendedPropositionDefinition(
-                "ICD9:35.83");
-        hd2.add(epd1);
-        hd2.add(epd2);
-        HighLevelAbstractionDefinition highBp = new HighLevelAbstractionDefinition(
-                "MyTwoConsecutiveHighBloodPressure");
-        highBp.setDisplayName("My Two Consecutive High Blood Pressure");
-        TemporalExtendedParameterDefinition highBpTpd = new TemporalExtendedParameterDefinition(
-                "MyBloodPressureClassificationConsecutiveAny");
-        highBpTpd.setValue(NominalValue.getInstance("MYBP_HIGH"));
-        highBp.add(highBpTpd);
-        Relation highBpRel = new Relation();
-        highBp.setRelation(highBpTpd, highBpTpd, highBpRel);
-        q.setPropositionDefinitions(new PropositionDefinition[]{ed, pd, hd,
-            hd2, systolicClassification(), diastolicClassification(),
-            bloodPressureClassificationAny(),
-            bloodPressureClassificationConsecutiveAny(), highBp,
+        q.setPropositionDefinitions(new PropositionDefinition[]{
             systolicClassification3(),
-            diastolicClassification3(), bloodPressureClassification3Any(),
-            context1(), systolicClassificationMyContext1(),
-            bloodPressureClassificationAll()});
+            diastolicClassification3(), 
+            bloodPressureClassification3Any(),
+        });
         return q;
     }
 
