@@ -17,10 +17,6 @@
  * limitations under the License.
  * #L%
  */
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.protempa;
 
 import org.drools.WorkingMemory;

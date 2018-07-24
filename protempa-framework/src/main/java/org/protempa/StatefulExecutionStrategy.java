@@ -234,8 +234,8 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
                 case REPROCESS_RETRIEVE:
                 case REPROCESS_CREATE:
                     getDerivationsBuilder().reset(
-                            (Map<Proposition, List<Proposition>>) factStore.getForwardDerivations(),
-                            (Map<Proposition, List<Proposition>>) factStore.getBackwardDerivations());
+                            factStore.getForwardDerivations(),
+                            factStore.getBackwardDerivations());
                     for (Proposition prop : factStore.getPropositions()) {
                         this.workingMemory.insert(prop);
                     }

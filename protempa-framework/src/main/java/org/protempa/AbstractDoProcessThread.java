@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -92,9 +93,9 @@ abstract class AbstractDoProcessThread<E extends ExecutionStrategy> extends Abst
         } else {
             resultsItr = dataItr;
         }
-        Map<Proposition, List<Proposition>> forwardDerivations
+        Map<Proposition, Set<Proposition>> forwardDerivations
                 = this.derivationsBuilder.getForwardDerivations();
-        Map<Proposition, List<Proposition>> backwardDerivations
+        Map<Proposition, Set<Proposition>> backwardDerivations
                 = this.derivationsBuilder.getBackwardDerivations();
         Map<UniqueId, Proposition> refs = new HashMap<>();
         List<Proposition> filteredPropositions = 

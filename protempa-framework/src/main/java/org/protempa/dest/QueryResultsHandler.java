@@ -23,6 +23,7 @@ package org.protempa.dest;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.protempa.PropositionDefinition;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
@@ -106,8 +107,8 @@ public interface QueryResultsHandler extends AutoCloseable {
      */
     void handleQueryResult(String keyId,
             List<Proposition> propositions,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references)
             throws QueryResultsHandlerProcessingException;
 

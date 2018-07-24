@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.DefaultStatisticsBuilder;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
@@ -63,7 +64,10 @@ public final class MapQueryResultsHandler extends AbstractQueryResultsHandler {
      * @param propositions a {@link List<Proposition>} of propositions.
      */
     @Override
-    public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
+    public void handleQueryResult(String keyId, List<Proposition> propositions, 
+            Map<Proposition, Set<Proposition>> forwardDerivations, 
+            Map<Proposition, Set<Proposition>> backwardDerivations, 
+            Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
         resultMap.put(keyId, propositions);
     }
 

@@ -20,7 +20,7 @@ package org.protempa;
  * #L%
  */
 
-import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.drools.WorkingMemory;
@@ -57,8 +57,8 @@ public abstract class AbstractCombinerConsequence<P extends Proposition> impleme
         kh.retract(a1f);
         kh.retract(a2f);
         kh.insertLogical(result);
-        List<Proposition> a1PropBackward = this.derivationsBuilder.propositionRetractedBackward(a1);
-        List<Proposition> a2PropBackward = this.derivationsBuilder.propositionRetractedBackward(a2);
+        Set<Proposition> a1PropBackward = this.derivationsBuilder.propositionRetractedBackward(a1);
+        Set<Proposition> a2PropBackward = this.derivationsBuilder.propositionRetractedBackward(a2);
         for (Proposition prop : a1PropBackward) {
             this.derivationsBuilder.propositionReplaceForward(prop, a1, result);
             this.derivationsBuilder.propositionAssertedBackward(prop, result);

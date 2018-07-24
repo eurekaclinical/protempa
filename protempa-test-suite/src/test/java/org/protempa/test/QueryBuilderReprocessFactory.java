@@ -130,18 +130,6 @@ class QueryBuilderReprocessFactory {
             diastolicClassification3(), bloodPressureClassification3Any(),
             context1(), systolicClassificationMyContext1(),
             bloodPressureClassificationAll()});
-        Calendar cal = Calendar.getInstance();
-        cal.clear();
-        cal.set(2006, Calendar.AUGUST, 1);
-        Date fromDate = cal.getTime();
-        cal.clear();
-        cal.set(2011, Calendar.AUGUST, 31);
-        Date toDate = cal.getTime();
-        DateTimeFilter timeRange = new DateTimeFilter(
-                new String[]{"Encounter"}, fromDate,
-                AbsoluteTimeGranularity.DAY, toDate,
-                AbsoluteTimeGranularity.DAY, Interval.Side.START, Interval.Side.START);
-        q.setFilters(timeRange);
         return q;
     }
 
@@ -192,18 +180,6 @@ class QueryBuilderReprocessFactory {
             diastolicClassification3(), bloodPressureClassification3Any(),
             context1(), systolicClassificationMyContext1(),
             bloodPressureClassificationAllUpdated()});
-        Calendar cal = Calendar.getInstance();
-        cal.clear();
-        cal.set(2006, Calendar.AUGUST, 1);
-        Date fromDate = cal.getTime();
-        cal.clear();
-        cal.set(2011, Calendar.AUGUST, 31);
-        Date toDate = cal.getTime();
-        DateTimeFilter timeRange = new DateTimeFilter(
-                new String[]{"Encounter"}, fromDate,
-                AbsoluteTimeGranularity.DAY, toDate,
-                AbsoluteTimeGranularity.DAY, Interval.Side.START, Interval.Side.START);
-        q.setFilters(timeRange);
         return q;
     }
 
@@ -255,18 +231,6 @@ class QueryBuilderReprocessFactory {
             bloodPressureClassificationAll2(),
             diastolicClassification3(), bloodPressureClassification3Any(),
             context1(), systolicClassificationMyContext1()});
-        Calendar cal = Calendar.getInstance();
-        cal.clear();
-        cal.set(2006, Calendar.AUGUST, 1);
-        Date fromDate = cal.getTime();
-        cal.clear();
-        cal.set(2011, Calendar.AUGUST, 31);
-        Date toDate = cal.getTime();
-        DateTimeFilter timeRange = new DateTimeFilter(
-                new String[]{"Encounter"}, fromDate,
-                AbsoluteTimeGranularity.DAY, toDate,
-                AbsoluteTimeGranularity.DAY, Interval.Side.START, Interval.Side.START);
-        q.setFilters(timeRange);
         return q;
     }
 
@@ -317,18 +281,6 @@ class QueryBuilderReprocessFactory {
             diastolicClassification3(), bloodPressureClassification3Any(),
             context1(), systolicClassificationMyContext1(),
             bloodPressureClassificationAll()});
-        Calendar cal = Calendar.getInstance();
-        cal.clear();
-        cal.set(2006, Calendar.AUGUST, 1);
-        Date fromDate = cal.getTime();
-        cal.clear();
-        cal.set(2011, Calendar.AUGUST, 31);
-        Date toDate = cal.getTime();
-        DateTimeFilter timeRange = new DateTimeFilter(
-                new String[]{"Encounter"}, fromDate,
-                AbsoluteTimeGranularity.DAY, toDate,
-                AbsoluteTimeGranularity.DAY, Interval.Side.START, Interval.Side.START);
-        q.setFilters(timeRange);
         return q;
     }
 

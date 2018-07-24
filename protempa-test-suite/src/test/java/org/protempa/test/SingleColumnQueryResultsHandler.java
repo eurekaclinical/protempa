@@ -21,13 +21,14 @@ package org.protempa.test;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.protempa.proposition.Proposition;
@@ -40,7 +41,7 @@ import org.protempa.dest.QueryResultsHandlerProcessingException;
 final class SingleColumnQueryResultsHandler
         extends AbstractQueryResultsHandler {
 
-    private final Map<String, Map<Proposition, List<Proposition>>> data;
+    private final Map<String, Map<Proposition, Set<? extends Proposition>>> data;
     private final BufferedWriter writer;
 
     /**
@@ -56,18 +57,18 @@ final class SingleColumnQueryResultsHandler
 
     @Override
     public void handleQueryResult(String keyId, List<Proposition> propositions, 
-            Map<Proposition, List<Proposition>> forwardDerivations, 
-            Map<Proposition, List<Proposition>> backwardDerivations, 
+            Map<Proposition, Set<Proposition>> forwardDerivations, 
+            Map<Proposition, Set<Proposition>> backwardDerivations, 
             Map<UniqueId, Proposition> references) 
             throws QueryResultsHandlerProcessingException {
-        Map<Proposition, List<Proposition>> result = new HashMap<>();
+        Map<Proposition, Set<? extends Proposition>> result = new HashMap<>();
         for (Proposition p : propositions) {
             if (p.getCreateDate() == null) {
                 throw new QueryResultsHandlerProcessingException("invalid proposition with no create date: " + p);
             }
-            List<Proposition> allDerivations = new ArrayList<>();
-            allDerivations.addAll(forwardDerivations.getOrDefault(p, Collections.EMPTY_LIST));
-            allDerivations.addAll(backwardDerivations.getOrDefault(p, Collections.EMPTY_LIST));
+            Set<Proposition> allDerivations = new HashSet<>();
+            allDerivations.addAll(forwardDerivations.getOrDefault(p, Collections.emptySet()));
+            allDerivations.addAll(backwardDerivations.getOrDefault(p, Collections.emptySet()));
             result.put(p, allDerivations);
         }
         this.data.put(keyId, result);
@@ -80,7 +81,7 @@ final class SingleColumnQueryResultsHandler
             for (String keyId : sortedKeyIds) {
                 writeLine(keyId);
                 List<PropositionWithDerivations> sortedProps = new ArrayList<>();
-                for (Map.Entry<Proposition, List<Proposition>> pp : this.data.get(keyId).entrySet()) {
+                for (Map.Entry<Proposition, Set<? extends Proposition>> pp : this.data.get(keyId).entrySet()) {
                     sortedProps.add(new PropositionWithDerivations(pp.getKey(), pp.getValue()));
                 }
                 Collections.sort(sortedProps, new PropositionWithDerivationsComparator());
@@ -124,9 +125,9 @@ final class SingleColumnQueryResultsHandler
         private final List<Proposition> derivations;
 
         PropositionWithDerivations(Proposition proposition,
-                List<Proposition> derivations) {
+                Set<? extends Proposition> derivations) {
             this.proposition = proposition;
-            this.derivations = derivations;
+            this.derivations = new ArrayList<>(derivations);
         }
 
         public Proposition getProposition() {

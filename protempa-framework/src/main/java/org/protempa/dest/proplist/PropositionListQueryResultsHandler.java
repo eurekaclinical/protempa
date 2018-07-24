@@ -108,7 +108,10 @@ public final class PropositionListQueryResultsHandler extends AbstractQueryResul
      * occurred writing to the specified file, output stream or writer.
      */
     @Override
-    public void handleQueryResult(String key, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
+    public void handleQueryResult(String key, List<Proposition> propositions, 
+            Map<Proposition, Set<Proposition>> forwardDerivations, 
+            Map<Proposition, Set<Proposition>> backwardDerivations,
+            Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
         Set<Proposition> propositionsAsSet = new HashSet<>();
         addDerived(propositions, forwardDerivations, backwardDerivations, propositionsAsSet);
         List<Proposition> propositionsCopy = new ArrayList<>(propositionsAsSet);
@@ -125,7 +128,10 @@ public final class PropositionListQueryResultsHandler extends AbstractQueryResul
         }
     }
 
-    private void addDerived(List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Set<Proposition> propositionsAsSet) {
+    private void addDerived(List<Proposition> propositions, 
+            Map<? extends Proposition, ? extends Set<? extends Proposition>> forwardDerivations, 
+            Map<? extends Proposition, ? extends Set<? extends Proposition>> backwardDerivations, 
+            Set<Proposition> propositionsAsSet) {
         List<Proposition> derivedProps = new ArrayList<>();
         for (Proposition prop : propositions) {
             boolean added = propositionsAsSet.add(prop);
