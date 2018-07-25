@@ -41,9 +41,6 @@ public class ConstantColumnSpec extends AbstractTableColumnSpec {
         if (heading == null) {
             throw new IllegalArgumentException("heading cannot be null");
         }
-        if (value == null) {
-            throw new IllegalArgumentException("value cannot be null");
-        }
         
         this.heading = heading;
         this.value = value;
