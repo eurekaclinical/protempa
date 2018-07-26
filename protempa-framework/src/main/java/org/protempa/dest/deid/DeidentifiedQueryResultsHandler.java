@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.arp.javautil.collections.Collections;
 import org.protempa.PropositionDefinition;
+import org.protempa.PropositionDefinitionCache;
 import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerCloseException;
@@ -54,7 +55,7 @@ public final class DeidentifiedQueryResultsHandler
     private final DeidConfig deidConfig;
     private final String id;
     private boolean handlerClosed;
-    private Map<String, PropositionDefinition> propDefCache;
+    private PropositionDefinitionCache propDefCache;
 
     DeidentifiedQueryResultsHandler(QueryResultsHandler handler, DeidConfig deidConfig) throws EncryptionInitException {
         if (handler == null) {
@@ -77,11 +78,8 @@ public final class DeidentifiedQueryResultsHandler
     }
 
     @Override
-    public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
-        this.propDefCache = Collections.newHashMap(cache.size());
-        for (PropositionDefinition propDef : cache) {
-            this.propDefCache.put(propDef.getId(), propDef);
-        }
+    public void start(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
+        this.propDefCache = cache;
         this.handler.start(cache);
     }
 

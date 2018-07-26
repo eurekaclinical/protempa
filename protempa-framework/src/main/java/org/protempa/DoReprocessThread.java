@@ -39,7 +39,7 @@ public class DoReprocessThread extends AbstractDoProcessThread<StatefulExecution
             BlockingQueue<QueueObject> hqrQueue,
             QueueObject hqrPoisonPill, Query query,
             AlgorithmSource algorithmSource, KnowledgeSource knowledgeSource,
-            Collection<PropositionDefinition> propositionDefinitionCache) {
+            PropositionDefinitionCache propositionDefinitionCache) {
         super(hqrQueue, hqrPoisonPill, query, null,
                 knowledgeSource, propositionDefinitionCache, LOGGER);
         this.algorithmSource = algorithmSource;

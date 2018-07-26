@@ -44,7 +44,7 @@ class RetrieveDataThread extends AbstractThread {
     private final BlockingQueue<DataStreamingEvent<Proposition>> queue;
     private final DataStreamingEvent<Proposition> poisonPill;
     private final List<QueryException> exceptions;
-    private final Iterable<PropositionDefinition> propositionDefinitionCache;
+    private final PropositionDefinitionCache propositionDefinitionCache;
     private final DataSource dataSource;
     private final QueryResultsHandler queryResultsHandler;
     private final Filter filters;
@@ -52,7 +52,7 @@ class RetrieveDataThread extends AbstractThread {
     RetrieveDataThread(BlockingQueue<DataStreamingEvent<Proposition>> queue,
             DataStreamingEvent<Proposition> poisonPill, Query query,
             DataSource dataSource, 
-            Iterable<PropositionDefinition> propositionDefinitionCache,
+            PropositionDefinitionCache propositionDefinitionCache,
             Filter filters,
             QueryResultsHandler queryResultsHandler) throws QueryException {
         super(query, LOGGER, "protempa.executor.RetrieveDataThread");
@@ -108,7 +108,7 @@ class RetrieveDataThread extends AbstractThread {
         log(Level.INFO, "Retrieving data");
         Query query = getQuery();
         Set<String> inDataSourcePropIds = new HashSet<>();
-        for (PropositionDefinition pd : this.propositionDefinitionCache) {
+        for (PropositionDefinition pd : this.propositionDefinitionCache.getAll()) {
             if (pd.getInDataSource()) {
                 inDataSourcePropIds.add(pd.getId());
             }

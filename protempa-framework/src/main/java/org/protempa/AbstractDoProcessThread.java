@@ -44,7 +44,7 @@ abstract class AbstractDoProcessThread<E extends ExecutionStrategy> extends Abst
     private final Thread producer;
     private E executionStrategy;
     private final List<QueryException> exceptions;
-    private final Collection<PropositionDefinition> propositionDefinitionCache;
+    private final PropositionDefinitionCache propositionDefinitionCache;
     private final KnowledgeSource knowledgeSource;
     private DerivationsBuilder derivationsBuilder;
 
@@ -53,7 +53,7 @@ abstract class AbstractDoProcessThread<E extends ExecutionStrategy> extends Abst
             QueueObject hqrPoisonPill, Query query,
             Thread producer,
             KnowledgeSource knowledgeSource,
-            Collection<PropositionDefinition> propositionDefinitionCache,
+            PropositionDefinitionCache propositionDefinitionCache,
             Logger logger) {
         super(query, logger, "protempa.executor.DoProcessThread");
         this.hqrQueue = hqrQueue;

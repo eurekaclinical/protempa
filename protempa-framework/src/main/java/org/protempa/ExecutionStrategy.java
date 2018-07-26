@@ -19,14 +19,13 @@
  */
 package org.protempa;
 
-import java.util.Collection;
 import java.util.Iterator;
 
 import org.protempa.proposition.Proposition;
 
 interface ExecutionStrategy {
     
-    void initialize(Collection<? extends PropositionDefinition> cache) 
+    void initialize(PropositionDefinitionCache cache) 
             throws ExecutionStrategyInitializationException;
     
     Iterator<Proposition> execute(String keyIds, Iterator<? extends Proposition> objects);

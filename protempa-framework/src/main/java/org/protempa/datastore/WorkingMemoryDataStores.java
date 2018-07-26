@@ -27,13 +27,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashMap;
 import org.eurekaclinical.datastore.bdb.BdbPersistentStoreFactory;
 
 import org.eurekaclinical.datastore.DataStore;
 import org.eurekaclinical.datastore.DataStoreFactory;
 import org.protempa.PropositionDefinition;
+import org.protempa.PropositionDefinitionCache;
 import org.protempa.WorkingMemoryFactStore;
 
 /**
@@ -47,15 +47,16 @@ public final class WorkingMemoryDataStores implements DataStores {
     public static final String DATABASE_NAME = "WorkingMemoryStore";
 
     private final DataStoreFactory storeFactory;
-    private Collection<PropositionDefinition> storedPropositionDefinitions;
+    private PropositionDefinitionCache cache;
 
     /**
      * Constructs a working memory creator.
      *
      * @param directory the directory in which the working memory data stores
      * will be stored. Cannot be <code>null</code>.
+     * @param cache the proposition definitions to write to the store.
      */
-    public WorkingMemoryDataStores(String directory, Collection<? extends PropositionDefinition> cache) throws IOException {
+    public WorkingMemoryDataStores(String directory, PropositionDefinitionCache cache) throws IOException {
         if (directory == null) {
             throw new IllegalArgumentException("directory cannot be null");
         }
@@ -63,24 +64,37 @@ public final class WorkingMemoryDataStores implements DataStores {
             throw new IllegalArgumentException("cache cannot be null");
         }
         this.storeFactory = new BdbPersistentStoreFactory(directory);
-        this.storedPropositionDefinitions = new ArrayList<>();
         File file = new File(directory, "stored-propdefs");
         if (file.exists()) {
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-                this.storedPropositionDefinitions = (Collection<PropositionDefinition>) ois.readObject();
+                int size = ois.readInt();
+                Collection<PropositionDefinition> propDefs = new ArrayList<>(size);
+                for (int i = 0; i < size; i++) {
+                    Object obj = ois.readObject();
+                    if (obj == null) {
+                        throw new IOException("null object read");
+                    } else {
+                        propDefs.add((PropositionDefinition) obj);
+                    }
+                }
+                this.cache = new PropositionDefinitionCache(propDefs);
             } catch (ClassNotFoundException ex) {
                 throw new IOException("Error deserializing proposition definitions", ex);
             }
         }
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-            oos.writeObject(cache);
+            Collection<PropositionDefinition> all = cache.getAll();
+            oos.writeInt(all.size());
+            for (PropositionDefinition pd : all) {
+                oos.writeObject(pd);
+            }
         }
     }
 
-    public Collection<PropositionDefinition> getStoredPropositionDefinitions() {
-        return storedPropositionDefinitions;
+    public PropositionDefinitionCache getCache() {
+        return this.cache;
     }
-    
+
     @Override
     public boolean exists(String dbname) throws IOException {
         return this.storeFactory.exists(dbname);

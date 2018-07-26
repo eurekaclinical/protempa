@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.protempa.PropositionDefinition;
+import org.protempa.PropositionDefinitionCache;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 
@@ -93,7 +94,7 @@ public interface QueryResultsHandler extends AutoCloseable {
      * @throws QueryResultsHandlerProcessingException if any exceptions occur at
      * a lower level.
      */
-    void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException;
+    void start(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException;
 
     /**
      * Handles a single query result, which is the list of propositions

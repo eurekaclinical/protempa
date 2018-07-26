@@ -45,7 +45,7 @@ public class DoProcessThread extends AbstractDoProcessThread<ExecutionStrategy> 
             DataStreamingEvent<Proposition> doProcessPoisonPill, 
             QueueObject hqrPoisonPill, Query query, Thread producer, 
             AlgorithmSource algorithmSource, KnowledgeSource knowledgeSource, 
-            Collection<PropositionDefinition> propositionDefinitionCache) {
+            PropositionDefinitionCache propositionDefinitionCache) {
         super(hqrQueue, hqrPoisonPill, query, producer, 
                 knowledgeSource, propositionDefinitionCache, LOGGER);
         this.doProcessQueue = doProcessQueue;

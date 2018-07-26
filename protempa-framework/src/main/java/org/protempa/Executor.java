@@ -55,7 +55,7 @@ final class Executor implements AutoCloseable {
     private final PropositionDefinition[] propDefs;
     private final KnowledgeSource ks;
     private final Query query;
-    private Collection<PropositionDefinition> propositionDefinitionCache;
+    private PropositionDefinitionCache propositionDefinitionCache;
     private final AbstractionFinder abstractionFinder;
     private final Destination destination;
     private QueryResultsHandler resultsHandler;
@@ -245,11 +245,11 @@ final class Executor implements AutoCloseable {
     }
 
     private void extractPropositionDefinitionCache() throws KnowledgeSourceReadException {
-        this.propositionDefinitionCache = this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()]));
+        this.propositionDefinitionCache = new PropositionDefinitionCache(this.ks.collectPropDefDescendantsUsingAllNarrower(false, this.propIds.toArray(new String[this.propIds.size()])));
 
         if (isLoggable(Level.FINE)) {
             Set<String> allNarrowerDescendantsPropIds = new HashSet<>();
-            for (PropositionDefinition pd : this.propositionDefinitionCache) {
+            for (PropositionDefinition pd : this.propositionDefinitionCache.getAll()) {
                 allNarrowerDescendantsPropIds.add(pd.getId());
             }
             log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));

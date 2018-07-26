@@ -19,7 +19,6 @@
  */
 package org.protempa;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.drools.RuleBase;
@@ -29,7 +28,7 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
 
     private final AlgorithmSource algorithmSource;
     private final DerivationsBuilder derivationsBuilder;
-    private Collection<PropositionDefinition> cache;
+    private PropositionDefinitionCache cache;
     private final Query query;
     private RuleBase ruleBase;
 
@@ -56,17 +55,17 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
         return this.algorithmSource;
     }
 
-    protected Collection<PropositionDefinition> getCache() {
+    protected PropositionDefinitionCache getCache() {
         return cache;
     }
 
     @Override
-    public void initialize(Collection<? extends PropositionDefinition> cache)
+    public void initialize(PropositionDefinitionCache cache)
             throws ExecutionStrategyInitializationException {
         if (cache == null) {
             throw new IllegalArgumentException("cache cannot be null");
         }
-        this.cache = new ArrayList<>(cache);
+        this.cache = cache;
         createRuleBase();
     }
 

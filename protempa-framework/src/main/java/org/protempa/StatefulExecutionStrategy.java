@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
@@ -66,7 +65,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     @Override
-    public void initialize(Collection<? extends PropositionDefinition> cache) throws ExecutionStrategyInitializationException {
+    public void initialize(PropositionDefinitionCache cache) throws ExecutionStrategyInitializationException {
         createDataStoreManager(cache);
         super.initialize(cache);
         getOrCreateDataStore();
@@ -110,24 +109,26 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
                 = new ValidateAlgorithmCheckedVisitor(getAlgorithmSource());
         Collection<PropositionDefinition> propDefs;
         Query query = getQuery();
+        PropositionDefinitionCache cache;
         switch (query.getQueryMode()) {
             case REPROCESS_RETRIEVE:
             case REPROCESS_DELETE:
-                propDefs = Collections.emptyList();
+                cache = new PropositionDefinitionCache(Collections.emptyList());
+                propDefs = cache.getAll();
                 break;
             case REPROCESS_UPDATE:
-                Collection<PropositionDefinition> cache = getCache();
+                cache = this.workingMemoryDataStores.getCache();
                 String[] queryPropIds = getQuery().getPropositionIds();
-                Set<String> propIdsUpdate = this.workingMemoryDataStores
-                        .getStoredPropositionDefinitions().stream()
+                Set<String> propIdsUpdate = cache.getAll().stream()
                         .map(elt -> elt.getPropositionId())
                         .filter(propId -> !Arrays.contains(queryPropIds, propId))
                         .collect(Collectors.toSet());
                 Queue<String> propIdsQueue = new LinkedList<>();
                 Arrays.addAll(propIdsQueue, queryPropIds);
                 String pId;
+                Collection<PropositionDefinition> pDefsFromCache = cache.getAll();
                 while ((pId = propIdsQueue.poll()) != null) {
-                    for (PropositionDefinition propDef : cache) {
+                    for (PropositionDefinition propDef : pDefsFromCache) {
                         String[] children = propDef.getChildren();
                         if (Arrays.contains(children, pId)) {
                             propIdsQueue.add(propDef.getId());
@@ -135,33 +136,39 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
                         }
                     }
                 }
-                propDefs = cache.stream()
-                        .filter(propDef -> propDef != null 
-                                && !propIdsUpdate.contains(propDef.getPropositionId()))
+                propDefs = pDefsFromCache.stream()
+                        .filter(propDef -> propDef != null
+                        && !propIdsUpdate.contains(propDef.getPropositionId()))
                         .collect(Collectors.toList());
+                cache = new PropositionDefinitionCache(propDefs);
                 break;
             case REPROCESS_CREATE:
-                propDefs = new ArrayList<>(getCache());
-                Set<String> propIdsCreate = this.workingMemoryDataStores
-                        .getStoredPropositionDefinitions()
-                        .stream()
+                cache = getCache();
+                propDefs = new ArrayList<>(cache.getAll());
+                Set<String> propIdsInStore = this.workingMemoryDataStores
+                        .getCache().getAll().stream()
                         .map(elt -> elt.getPropositionId())
                         .collect(Collectors.toSet());
-                for (String propId : getQuery().getPropositionIds()) {
-                    if (propIdsCreate.contains(propId)) {
-                        throw new ExecutionStrategyInitializationException("Proposition id " + propId + "already exists; if you want to update it, use the update query mode");
+                for (String propId : query.getPropositionIds()) {
+                    if (propIdsInStore.contains(propId)) {
+                        throw new ExecutionStrategyInitializationException(
+                                "Proposition id "
+                                + propId
+                                + "already exists; if you want to update it, use the update query mode");
                     }
                 }
                 for (Iterator<PropositionDefinition> itr = propDefs.iterator(); itr.hasNext();) {
                     PropositionDefinition propDef = itr.next();
-                    if (propDef == null || propIdsCreate.contains(propDef.getPropositionId())) {
+                    if (propDef == null || propIdsInStore.contains(propDef.getPropositionId())) {
                         itr.remove();
                     }
                 }
+                cache = new PropositionDefinitionCache(propDefs);
                 break;
             case REPLACE:
             case UPDATE:
-                propDefs = getCache();
+                cache = getCache();
+                propDefs = cache.getAll();
                 break;
             default:
                 throw new AssertionError("Unexpected query mode " + query.getQueryMode());
@@ -173,7 +180,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         }
         JBossRuleCreator ruleCreator = new JBossRuleCreator(
                 visitor.getAlgorithms(), getDerivationsBuilder(),
-                propDefs, query);
+                cache);
         try {
             ruleCreator.visit(propDefs);
         } catch (ProtempaException ex) {
@@ -182,7 +189,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         return ruleCreator;
     }
 
-    private void createDataStoreManager(Collection<? extends PropositionDefinition> cache) throws ExecutionStrategyInitializationException {
+    private void createDataStoreManager(PropositionDefinitionCache cache) throws ExecutionStrategyInitializationException {
         try {
             this.workingMemoryDataStores
                     = new WorkingMemoryDataStores(this.databasePath.getParent(), cache);
