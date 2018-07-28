@@ -196,14 +196,14 @@ public abstract class TemporalProposition extends AbstractProposition {
             if (minStart != null) {
                 return format.format(minStart);
             } else {
-                return "Unknown";
+                return null;
             }
         } else {
             Long minStart = interval.getMinStart();
             if (minStart != null) {
                 return numberFormat.get().format(minStart);
             } else {
-                return "Unknown";
+                return null;
             }
         }
     }
@@ -222,14 +222,14 @@ public abstract class TemporalProposition extends AbstractProposition {
             if (minFinish != null) {
                 return format.format(minFinish);
             } else {
-                return "Unknown";
+                return null;
             }
         } else {
             Long minFinish = interval.getMinFinish();
             if (minFinish != null) {
                 return numberFormat.get().format(minFinish);
             } else {
-                return "Unknown";
+                return null;
             }
         }
     }
@@ -240,14 +240,14 @@ public abstract class TemporalProposition extends AbstractProposition {
             if (minLength != null) {
                 return format.format(minLength);
             } else {
-                return "Unknown";
+                return null;
             }
         } else {
             Long minLength = interval.getMinLength();
             if (minLength != null) {
                 return numberFormat.get().format(minLength);
             } else {
-                return "Unknown";
+                return null;
             }
         }
     }
