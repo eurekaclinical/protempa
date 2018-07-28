@@ -38,6 +38,8 @@ abstractions based upon the updated data.
 * New query modes: REPROCESS_CREATE, REPROCESS_DELETE, REPROCESS_UPDATE, and
 REPROCESS_RETRIEVE. These are basic CRUD operations for modifying the key-value 
 store and retrieving data and abstractions from it.
+* Don't return Unknown when formatting a null start or finish. Return null
+instead.
 
 ## Version 4.3.2
 * Actually write nominal column headers for tabular writers.
