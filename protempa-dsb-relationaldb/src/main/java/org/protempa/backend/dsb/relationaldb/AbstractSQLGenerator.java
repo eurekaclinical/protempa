@@ -297,7 +297,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 = collectInboundRefSpecs(applicableEntitySpecs, entitySpec, propIds);
         Map<String, ReferenceSpec> bidirRefSpecs = collectBidirectionalReferences(applicableEntitySpecs, entitySpec, propIds);
 
-        String dataSourceBackendId = this.backend.getDataSourceBackendId();
+        String dataSourceBackendId = this.backend.getId();
         StreamingMainResultProcessor<Proposition> resultProcessor
                 = factory.getStreamingInstance(dataSourceBackendId, entitySpec,
                         inboundRefSpecs, bidirRefSpecs, propIds);
