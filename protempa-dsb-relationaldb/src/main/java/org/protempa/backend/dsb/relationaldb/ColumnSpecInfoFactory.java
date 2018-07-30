@@ -42,47 +42,33 @@ import org.protempa.proposition.interval.Interval.Side;
 public final class ColumnSpecInfoFactory {
 
     public ColumnSpecInfo newInstance(Set<String> propIds, EntitySpec entitySpec,
-            Collection<EntitySpec> entitySpecs, Map<String, ReferenceSpec> inboundRefSpecs, Collection<Filter> filters, ReferenceSpec referenceSpec,
+            Collection<EntitySpec> entitySpecs, Map<String, ReferenceSpec> inboundRefSpecs, Collection<Filter> filters,
             boolean streamingMode) {
         ColumnSpecInfo columnSpecInfo = new ColumnSpecInfo();
-        if (referenceSpec == null || streamingMode) {
-            columnSpecInfo.setUsingKeyIdIndex(true);
-        }
-        EntitySpec refEntitySpec = null;
-        if (referenceSpec != null) {
-            refEntitySpec = findRefEntitySpec(entitySpecs, referenceSpec);
-            columnSpecInfo.setUnique(refEntitySpec.isUnique()
-                    && entitySpec.isUnique()
-                    && hasNoXToManyReferences(entitySpecs, entitySpec));
-        } else {
-            columnSpecInfo.setUnique(entitySpec.isUnique());
-        }
+        columnSpecInfo.setUsingKeyIdIndex(true);
+        columnSpecInfo.setUnique(entitySpec.isUnique());
         List<IntColumnSpecWrapper> columnSpecs = new ArrayList<>();
         int i = 0;
         i = processBaseSpec(entitySpec, columnSpecs, i);
-        i = processUniqueIds(entitySpec, columnSpecs, i,
-                columnSpecInfo, referenceSpec);
+        i = processUniqueIds(entitySpec, columnSpecs, i, columnSpecInfo);
         i = processStartTimeOrTimestamp(entitySpec,
-                columnSpecs, i, columnSpecInfo, referenceSpec);
+                columnSpecs, i, columnSpecInfo);
         i = processFinishTimeSpec(entitySpec, columnSpecs,
-                i, columnSpecInfo, referenceSpec);
-        if (referenceSpec == null) {
-            i = processPropertyAndValueSpecs(entitySpec, columnSpecs, i,
-                    columnSpecInfo);
-        }
-        i = processCodeSpec(propIds, entitySpec, columnSpecs,
-                i, columnSpecInfo, referenceSpec);
+                i, columnSpecInfo);
+        i = processPropertyAndValueSpecs(entitySpec, columnSpecs, i,
+                columnSpecInfo);
+        i = processCodeSpec(entitySpec, columnSpecs, i, columnSpecInfo);
         i = processConstraintSpecs(entitySpec, entitySpecs, columnSpecs, i);
         i = processFilters(entitySpec, entitySpecs, filters, columnSpecs, i);
-        i = processCreateDate(entitySpec, columnSpecs, i, columnSpecInfo, referenceSpec);
-        i = processUpdateDate(entitySpec, columnSpecs, i, columnSpecInfo, referenceSpec);
-        i = processDeleteDate(entitySpec, columnSpecs, i, columnSpecInfo, referenceSpec);
+        i = processCreateDate(entitySpec, columnSpecs, i, columnSpecInfo);
+        i = processUpdateDate(entitySpec, columnSpecs, i, columnSpecInfo);
+        i = processDeleteDate(entitySpec, columnSpecs, i, columnSpecInfo);
 
         int refNum = 0;
         for (EntitySpec entitySpec2 : entitySpecs) {
             for (Map.Entry<String, ReferenceSpec> inboundRef : inboundRefSpecs.entrySet()) {
                 if (inboundRef.getKey().equals(entitySpec2.getName())) {
-                    if (entitySpec2 != entitySpec && referenceSpec == null
+                    if (entitySpec2 != entitySpec
                             && entitySpec2.hasReferenceTo(entitySpec)) {
                         i = processReferenceSpecs(entitySpec2, entitySpec, columnSpecs,
                                 refNum, i, columnSpecInfo);
@@ -96,40 +82,11 @@ public final class ColumnSpecInfoFactory {
         return columnSpecInfo;
     }
 
-    private static boolean hasNoXToManyReferences(
-            Collection<EntitySpec> entitySpecs, EntitySpec entitySpec) {
-        for (EntitySpec es : entitySpecs) {
-            if (es.hasReferenceTo(entitySpec)) {
-                for (ReferenceSpec refSpec : entitySpec.referencesTo(es)) {
-                    if (refSpec.getType() == ReferenceSpec.Type.MANY) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    private static EntitySpec findRefEntitySpec(
-            Collection<EntitySpec> entitySpecs, ReferenceSpec referenceSpec) {
-        String referenceSpecEntityName = referenceSpec.getEntityName();
-        for (EntitySpec es : entitySpecs) {
-            if (es.getName().equals(referenceSpecEntityName)) {
-                return es;
-            }
-        }
-        throw new AssertionError("invalid entity spec name in reference spec "
-                + referenceSpec);
-    }
-
     private static int processUniqueIds(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i,
-            ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
+            ColumnSpecInfo columnSpecInfo) {
         ColumnSpec[] codeSpecs = entitySpec.getUniqueIdSpecs();
         ColumnSpec[] refSpecs = null;
-        if (referenceSpec != null) {
-            refSpecs = referenceSpec.getUniqueIdSpecs();
-        }
         int numUniqueIndices = codeSpecs.length;
         if (refSpecs != null) {
             numUniqueIndices += refSpecs.length;
@@ -154,25 +111,14 @@ public final class ColumnSpecInfoFactory {
         return i;
     }
 
-    private static int processCodeSpec(Set<String> propIds, EntitySpec entitySpec,
+    private static int processCodeSpec(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i,
-            ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
+            ColumnSpecInfo columnSpecInfo) {
         ColumnSpec codeSpec = entitySpec.getCodeSpec();
         if (codeSpec != null) {
-            List<ColumnSpec> specAsList = codeSpec.asList();
-            int specAsListSize = specAsList.size();
-            ColumnSpec lastColumnSpec = specAsList.get(specAsListSize - 1);
-            if (referenceSpec == null
-                    || !(lastColumnSpec.getConstraint() == Operator.EQUAL_TO
-                    && lastColumnSpec.isPropositionIdsComplete()
-                    && !AbstractSQLGenerator.needsPropIdInClause(propIds,
-                            entitySpec.getPropositionIds()))) {
-                i += wrapColumnSpec(codeSpec, columnSpecs);
-            } else {
-                codeSpec = null;
-            }
+            i += wrapColumnSpec(codeSpec, columnSpecs);
         }
-        if (codeSpec != null && referenceSpec == null) {
+        if (codeSpec != null) {
             columnSpecInfo.setCodeIndex(i - 1);
         }
         return i;
@@ -293,65 +239,55 @@ public final class ColumnSpecInfoFactory {
 
     private static int processFinishTimeSpec(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i,
-            ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
+            ColumnSpecInfo columnSpecInfo) {
         ColumnSpec spec = entitySpec.getFinishTimeSpec();
         if (spec != null) {
             i += wrapColumnSpec(spec, columnSpecs);
-            if (referenceSpec == null) {
-                columnSpecInfo.setFinishTimeIndex(i - 1);
-            }
+            columnSpecInfo.setFinishTimeIndex(i - 1);
         }
         return i;
     }
 
     private static int processStartTimeOrTimestamp(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i,
-            ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
+            ColumnSpecInfo columnSpecInfo) {
         ColumnSpec spec = entitySpec.getStartTimeSpec();
         if (spec != null) {
             i += wrapColumnSpec(spec, columnSpecs);
-            if (referenceSpec == null) {
-                columnSpecInfo.setStartTimeIndex(i - 1);
-            }
+            columnSpecInfo.setStartTimeIndex(i - 1);
         }
         return i;
     }
 
     private static int processCreateDate(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i,
-            ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
+            ColumnSpecInfo columnSpecInfo) {
         ColumnSpec spec = entitySpec.getCreateDateSpec();
         if (spec != null) {
             i += wrapColumnSpec(spec, columnSpecs);
-            if (referenceSpec == null) {
-                columnSpecInfo.setCreateDateIndex(i - 1);
-            }
+            columnSpecInfo.setCreateDateIndex(i - 1);
         }
         return i;
     }
 
     private static int processUpdateDate(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i,
-            ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
+            ColumnSpecInfo columnSpecInfo) {
         ColumnSpec spec = entitySpec.getUpdateDateSpec();
         if (spec != null) {
             i += wrapColumnSpec(spec, columnSpecs);
-            if (referenceSpec == null) {
-                columnSpecInfo.setUpdateDateIndex(i - 1);
-            }
+            columnSpecInfo.setUpdateDateIndex(i - 1);
         }
         return i;
     }
 
     private static int processDeleteDate(EntitySpec entitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int i,
-            ColumnSpecInfo columnSpecInfo, ReferenceSpec referenceSpec) {
+            ColumnSpecInfo columnSpecInfo) {
         ColumnSpec spec = entitySpec.getDeleteDateSpec();
         if (spec != null) {
             i += wrapColumnSpec(spec, columnSpecs);
-            if (referenceSpec == null) {
-                columnSpecInfo.setDeleteDateIndex(i - 1);
-            }
+            columnSpecInfo.setDeleteDateIndex(i - 1);
         }
         return i;
     }

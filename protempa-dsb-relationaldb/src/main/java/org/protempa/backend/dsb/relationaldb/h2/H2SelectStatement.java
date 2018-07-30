@@ -40,13 +40,12 @@ import org.protempa.backend.dsb.relationaldb.WhereClause;
 
 final class H2SelectStatement extends AbstractSelectStatement {
 
-    H2SelectStatement(EntitySpec entitySpec,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+    H2SelectStatement(EntitySpec entitySpec, List<EntitySpec> entitySpecs,
             Map<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             boolean streamingMode, boolean wrapKeyId) {
-        super(entitySpec, referenceSpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
+        super(entitySpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
                 order, resultProcessor, streamingMode, wrapKeyId);
     }
 

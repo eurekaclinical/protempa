@@ -59,12 +59,12 @@ public final class H2SQLGenerator extends AbstractSQLGeneratorWithCompatChecks {
 
     @Override
     protected SelectStatement getSelectStatement(EntitySpec entitySpec,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            List<EntitySpec> entitySpecs,
             Map<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             boolean wrapKeyId) {
-        return new H2SelectStatement(entitySpec, referenceSpec, entitySpecs,
+        return new H2SelectStatement(entitySpec, entitySpecs,
                 inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
                 getStreamingMode(), wrapKeyId);
     }

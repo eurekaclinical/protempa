@@ -66,7 +66,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     static final int FETCH_SIZE = 10000;
     private static final int DEFAULT_QUERY_THREAD_COUNT = 4;
-    private static final String readPropositionsSQL = "select {0} from {1} {2}";
+    private static final String READ_PROPOSITION_SQL = "select {0} from {1} {2}";
     private ConnectionSpec connectionSpec;
     private final Map<String, List<EntitySpec>> primitiveParameterSpecs;
     private EntitySpec[] primitiveParameterEntitySpecs;
@@ -200,6 +200,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     public DataStreamingEventIterator<Proposition> readPropositionsStreaming(
             final Set<String> keyIds, final Set<String> propIds, final Filter filters)
             throws DataSourceReadException {
+        SQLGenUtil.logger().log(Level.FINE, "Reading {0}", propIds);
         final Map<EntitySpec, List<String>> entitySpecToPropIds
                 = entitySpecToPropIds(propIds);
         final Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecToResultProcessor = allEntitySpecToResultProcessor();
@@ -302,7 +303,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                         inboundRefSpecs, bidirRefSpecs, propIds);
 
         for (Set<Filter> filterSet : partitions) {
-            generateAndExecuteSelectStreaming(entitySpec, null, propIds, filterSet,
+            generateAndExecuteSelectStreaming(entitySpec, propIds, filterSet,
                     applicableEntitySpecs, inboundRefSpecs, keyIds,
                     SQLOrderBy.ASCENDING,
                     resultProcessor, executor, true);
@@ -528,7 +529,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     private <P extends Proposition> void generateAndExecuteSelectStreaming(
-            EntitySpec entitySpec, ReferenceSpec referenceSpec,
+            EntitySpec entitySpec, 
             Set<String> propIds, Set<Filter> filtersCopy,
             List<EntitySpec> entitySpecsCopy, LinkedHashMap<String, ReferenceSpec> inboundRefSpecs, Set<String> keyIds,
             SQLOrderBy order, StreamingResultProcessor<P> resultProcessor,
@@ -544,7 +545,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     new Object[]{backendNameForMessages, entitySpecName});
         }
 
-        String query = getSelectStatement(entitySpec, referenceSpec,
+        String query = getSelectStatement(entitySpec,
                 entitySpecsCopy, inboundRefSpecs, filtersCopy, propIds,
                 keyIds, order,
                 resultProcessor, wrapKeyId).generateStatement();
@@ -615,7 +616,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     protected abstract SelectStatement getSelectStatement(
-            EntitySpec entitySpec, ReferenceSpec referenceSpec,
+            EntitySpec entitySpec,
             List<EntitySpec> entitySpecs, Map<String, ReferenceSpec> inboundRefSpecs, Set<Filter> filters,
             Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
             SQLGenResultProcessor resultProcessor,
@@ -631,7 +632,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     protected String assembleReadPropositionsQuery(StringBuilder selectClause,
             StringBuilder fromClause, StringBuilder whereClause) {
-        return MessageFormat.format(readPropositionsSQL, selectClause,
+        return MessageFormat.format(READ_PROPOSITION_SQL, selectClause,
                 fromClause, whereClause);
     }
 

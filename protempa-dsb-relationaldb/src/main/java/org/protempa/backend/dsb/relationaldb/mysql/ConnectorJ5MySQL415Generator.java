@@ -70,13 +70,13 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGeneratorWithCompat
      * java.util.Map)
      */
     protected SelectStatement getSelectStatement(EntitySpec entitySpec,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            List<EntitySpec> entitySpecs,
             Map<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             boolean wrapKeyId) {
         return new ConnectorJ5MySQL415SelectStatement(entitySpec,
-                referenceSpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds, order,
+                entitySpecs, inboundRefSpecs, filters, propIds, keyIds, order,
                 resultProcessor, getStreamingMode(), wrapKeyId);
     }
 }

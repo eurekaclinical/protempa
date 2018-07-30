@@ -60,12 +60,12 @@ public class PostgresqlSQLGenerator
 
     @Override
     protected SelectStatement getSelectStatement(EntitySpec entitySpec, 
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs, 
+            List<EntitySpec> entitySpecs, 
             Map<String, ReferenceSpec> inboundRefSpecs, 
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds, 
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, 
             boolean wrapKeyId) {
-        return new PostgresqlSelectStatement(entitySpec, referenceSpec, entitySpecs,
+        return new PostgresqlSelectStatement(entitySpec, entitySpecs,
                 inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
                 getStreamingMode(), wrapKeyId);
     }

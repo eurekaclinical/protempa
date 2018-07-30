@@ -31,7 +31,6 @@ import java.util.Set;
 public abstract class AbstractSelectStatement implements SelectStatement {
 
     private final EntitySpec entitySpec;
-    private final ReferenceSpec referenceSpec;
     private final List<EntitySpec> entitySpecs;
     private final Map<String, ReferenceSpec> inboundReferenceSpecs;
     private final Set<Filter> filters;
@@ -43,14 +42,13 @@ public abstract class AbstractSelectStatement implements SelectStatement {
     private final boolean wrapKeyId;
 
     protected AbstractSelectStatement(EntitySpec entitySpec,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            List<EntitySpec> entitySpecs,
             Map<String, ReferenceSpec> inboundReferenceSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             boolean streamingMode,
             boolean wrapKeyId) {
         this.entitySpec = entitySpec;
-        this.referenceSpec = referenceSpec;
         this.entitySpecs = Collections.unmodifiableList(entitySpecs);
         this.inboundReferenceSpecs = Collections.unmodifiableMap(inboundReferenceSpecs);
         this.filters = Collections.unmodifiableSet(filters);
@@ -64,10 +62,6 @@ public abstract class AbstractSelectStatement implements SelectStatement {
 
     protected EntitySpec getEntitySpec() {
         return entitySpec;
-    }
-
-    protected ReferenceSpec getReferenceSpec() {
-        return referenceSpec;
     }
 
     protected List<EntitySpec> getEntitySpecs() {
@@ -113,7 +107,7 @@ public abstract class AbstractSelectStatement implements SelectStatement {
     @Override
     public String generateStatement() {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(propIds,
-                entitySpec, entitySpecs, inboundReferenceSpecs, filters, referenceSpec,
+                entitySpec, entitySpecs, inboundReferenceSpecs, filters,
                 this.streamingMode);
         TableAliaser referenceIndices = new TableAliaser(info.getColumnSpecs(),
                 "a");

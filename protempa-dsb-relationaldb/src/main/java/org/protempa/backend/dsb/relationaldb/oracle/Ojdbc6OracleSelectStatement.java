@@ -39,13 +39,13 @@ import org.protempa.backend.dsb.relationaldb.WhereClause;
 class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
 
     Ojdbc6OracleSelectStatement(EntitySpec entitySpec,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
+            List<EntitySpec> entitySpecs,
             Map<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, 
             boolean streamingMode,
             boolean wrapKeyId) {
-        super(entitySpec, referenceSpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
+        super(entitySpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
                 order, resultProcessor, streamingMode, wrapKeyId);
     }
 
