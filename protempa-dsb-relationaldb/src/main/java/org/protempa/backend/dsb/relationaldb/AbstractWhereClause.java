@@ -342,6 +342,9 @@ public abstract class AbstractWhereClause implements WhereClause {
         StringBuilder wherePart = new StringBuilder();
         String expr = columnSpec.getExpr();
         if (expr != null) {
+            if (!first) {
+                wherePart.append(" AND ");
+            }
             wherePart.append(expr);
         } else if (hasConstraint(columnSpec)) {
             setCaseClauseIfNeeded(columnSpec, null);
