@@ -80,8 +80,18 @@ public final class ColumnSpecInfoFactory {
             if (inboundRefSpecs.containsKey(lhsEntitySpec.getName())) {
                 if (lhsEntitySpec != rhsEntitySpec
                         && lhsEntitySpec.hasReferenceTo(rhsEntitySpec)) {
-                    i = processReferenceSpecs(lhsEntitySpec, columnSpecs,
-                            refNum, i, columnSpecInfo);
+                    ReferenceSpec referenceTo = rhsEntitySpec.getReferenceTo(lhsEntitySpec);
+                    ColumnSpec[] uidSpecs;
+                    if (referenceTo == null || referenceTo.getType() != ReferenceSpec.Type.ONE) {
+                        uidSpecs = lhsEntitySpec.getUniqueIdSpecs();
+                    } else {
+                        uidSpecs = referenceTo.getUniqueIdSpecs();
+                    }
+                    for (ColumnSpec uidSpec : uidSpecs) {
+                        i += wrapColumnSpec(uidSpec, columnSpecs);
+                    }
+
+                    columnSpecInfo.putReferenceIndices("ref" + refNum, i - 1);
                     refNum++;
                 }
             }
@@ -221,19 +231,6 @@ public final class ColumnSpecInfoFactory {
             i += wrapColumnSpec(valueSpec, columnSpecs);
             columnSpecInfo.setValueIndex(i - 1);
         }
-
-        return i;
-    }
-
-    private static int processReferenceSpecs(EntitySpec lhsEntitySpec,
-            List<IntColumnSpecWrapper> columnSpecs, int refNum,
-            int i, ColumnSpecInfo columnSpecInfo) {
-
-        for (ColumnSpec referringUniqueIdSpec : lhsEntitySpec.getUniqueIdSpecs()) {
-            i += wrapColumnSpec(referringUniqueIdSpec, columnSpecs);
-        }
-
-        columnSpecInfo.putReferenceIndices("ref" + refNum, i - 1);
 
         return i;
     }

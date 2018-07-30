@@ -72,7 +72,7 @@ public final class EntitySpec implements Serializable {
     private final ColumnSpec createDateSpec;
     private final ColumnSpec updateDateSpec;
     private final ColumnSpec deleteDateSpec;
-    
+
     public EntitySpec(String name,
             String description,
             String[] propositionIds,
@@ -91,13 +91,13 @@ public final class EntitySpec implements Serializable {
             Granularity granularity,
             JDBCPositionFormat positionParser,
             Unit partitionBy) {
-        this(name, description, propositionIds, unique, baseSpec, 
-                uniqueIdSpecs, startTimeOrTimestampSpec, finishTimeSpec, 
-                propertySpecs, referenceSpecs, codeToPropIdMap, codeSpec, 
-                constraintSpecs, valueSpec, valueType, granularity, 
+        this(name, description, propositionIds, unique, baseSpec,
+                uniqueIdSpecs, startTimeOrTimestampSpec, finishTimeSpec,
+                propertySpecs, referenceSpecs, codeToPropIdMap, codeSpec,
+                constraintSpecs, valueSpec, valueType, granularity,
                 positionParser, partitionBy, null);
     }
-    
+
     public EntitySpec(String name,
             String description,
             String[] propositionIds,
@@ -119,14 +119,14 @@ public final class EntitySpec implements Serializable {
             ColumnSpec createDateSpec,
             ColumnSpec updateDateSpec,
             ColumnSpec deleteDateSpec) {
-        this(name, description, propositionIds, unique, baseSpec, 
-                uniqueIdSpecs, startTimeOrTimestampSpec, finishTimeSpec, 
-                propertySpecs, referenceSpecs, codeToPropIdMap, codeSpec, 
-                constraintSpecs, valueSpec, valueType, granularity, 
+        this(name, description, propositionIds, unique, baseSpec,
+                uniqueIdSpecs, startTimeOrTimestampSpec, finishTimeSpec,
+                propertySpecs, referenceSpecs, codeToPropIdMap, codeSpec,
+                constraintSpecs, valueSpec, valueType, granularity,
                 positionParser, partitionBy, null,
                 createDateSpec, updateDateSpec, deleteDateSpec);
     }
-    
+
     public EntitySpec(String name,
             String description,
             String[] propositionIds,
@@ -146,10 +146,10 @@ public final class EntitySpec implements Serializable {
             JDBCPositionFormat positionParser,
             Unit partitionBy,
             int[] maxWidths) {
-        this(name, description, propositionIds, unique, baseSpec, 
-                uniqueIdSpecs, startTimeOrTimestampSpec, finishTimeSpec, 
-                propertySpecs, referenceSpecs, codeToPropIdMap, codeSpec, 
-                constraintSpecs, valueSpec, valueType, granularity, 
+        this(name, description, propositionIds, unique, baseSpec,
+                uniqueIdSpecs, startTimeOrTimestampSpec, finishTimeSpec,
+                propertySpecs, referenceSpecs, codeToPropIdMap, codeSpec,
+                constraintSpecs, valueSpec, valueType, granularity,
                 positionParser, partitionBy, null, null, null, null);
     }
 
@@ -468,6 +468,18 @@ public final class EntitySpec implements Serializable {
         return found;
     }
 
+    public ReferenceSpec getReferenceTo(EntitySpec entitySpec) {
+        if (entitySpec != null) {
+            String entitySpecName = entitySpec.name;
+            for (ReferenceSpec refSpec : this.referenceSpecs) {
+                if (refSpec.getEntityName().equals(entitySpecName)) {
+                    return refSpec;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Returns the reference specs that point to the given entity spec.
      *
@@ -600,13 +612,12 @@ public final class EntitySpec implements Serializable {
     public ColumnSpec getDeleteDateSpec() {
         return deleteDateSpec;
     }
-    
+
     /**
      * Returns the distinct tables specified in this entity spec, not including
      * references to other entity specs.
      *
-     * @return an array of {@link TableSpec}s. Guaranteed not 
-     * <code>null</code>.
+     * @return an array of {@link TableSpec}s. Guaranteed not <code>null</code>.
      */
     public ColumnSpec[] getColumnSpecs() {
         Set<ColumnSpec> results = new HashSet<>();
@@ -640,8 +651,9 @@ public final class EntitySpec implements Serializable {
     public String toString() {
         return new ToStringBuilder(this).append("name", this.name).append("description", this.description).append("propositionIds", this.propositionIds).append("unique", this.unique).append("baseSpec", this.baseSpec).append("uniqueIdSpecs", this.uniqueIdSpecs).append("startTimeOrTimestampSpec", this.startTimeOrTimestampSpec).append("finishTimeSpec", this.finishTimeSpec).append("propertySpecs", this.propertySpecs).append("referenceSpecs", this.referenceSpecs).append("codeToPropIdMap", this.codeToPropIdMap).append("codeSpec", this.codeSpec).append("constraintSpecs", this.constraintSpecs).append("valueType", this.valueType).append("valueSpec", this.valueSpec).append("granularity", this.granularity).append("positionParser", this.positionParser).append("partitionBy", this.partitionBy).toString();
     }
-    
+
     private static class RefSpecUID {
+
         String refName;
         String entitySpecName;
 
@@ -649,7 +661,7 @@ public final class EntitySpec implements Serializable {
             this.refName = refName;
             this.entitySpecName = entitySpecName;
         }
-        
+
         @Override
         public int hashCode() {
             int result = 17;
@@ -699,8 +711,8 @@ public final class EntitySpec implements Serializable {
             }
         }
         if (!duplicates.isEmpty()) {
-            throw new IllegalArgumentException("Duplicate reference names " + 
-                    StringUtils.join(duplicates, ", "));
+            throw new IllegalArgumentException("Duplicate reference names "
+                    + StringUtils.join(duplicates, ", "));
         }
     }
 }

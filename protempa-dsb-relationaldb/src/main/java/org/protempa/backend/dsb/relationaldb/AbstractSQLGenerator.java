@@ -291,7 +291,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         LinkedHashMap<String, ReferenceSpec> inboundRefSpecs
                 = collectInboundRefSpecs(applicableEntitySpecs, entitySpec, propIds);
-        Map<String, ReferenceSpec> bidirRefSpecs = collectBidirectionalReferences(applicableEntitySpecs, entitySpec, propIds);
+        Map<String, ReferenceSpec> bidirRefSpecs = 
+                collectBidirectionalReferences(applicableEntitySpecs, entitySpec, propIds);
 
         String dataSourceBackendId = this.backend.getId();
         StreamingMainResultProcessor<Proposition> resultProcessor
@@ -463,7 +464,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         return result;
     }
 
-    private static Map<String, ReferenceSpec> collectBidirectionalReferences(Collection<EntitySpec> entitySpecs, EntitySpec lhsEntitySpec,
+    private static Map<String, ReferenceSpec> collectBidirectionalReferences(
+            Collection<EntitySpec> entitySpecs, EntitySpec lhsEntitySpec,
             Set<String> propIds) {
         Map<String, ReferenceSpec> result = new HashMap<>();
 
@@ -527,7 +529,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private <P extends Proposition> void generateAndExecuteSelectStreaming(
             EntitySpec entitySpec, 
             Set<String> propIds, Set<Filter> filtersCopy,
-            List<EntitySpec> entitySpecsCopy, LinkedHashMap<String, ReferenceSpec> inboundRefSpecs, Set<String> keyIds,
+            List<EntitySpec> entitySpecsCopy, 
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs, Set<String> keyIds,
             SQLOrderBy order, StreamingResultProcessor<P> resultProcessor,
             StreamingSQLExecutor executor,
             boolean wrapKeyId) throws DataSourceReadException {
