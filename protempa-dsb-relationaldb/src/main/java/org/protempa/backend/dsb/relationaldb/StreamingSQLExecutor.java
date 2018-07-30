@@ -69,6 +69,7 @@ public class StreamingSQLExecutor {
                 Statement stmt = connection.createStatement();
                 stmt.setFetchSize(AbstractSQLGenerator.FETCH_SIZE);
                 ResultSet resultSet = stmt.executeQuery(query);
+                logger.log(Level.FINE, "Database query execution for {1} has returned", entitySpecName);
                 resultProcessor.setStatement(stmt);
                 resultProcessor.process(resultSet);
             } catch (SQLException ex) {
