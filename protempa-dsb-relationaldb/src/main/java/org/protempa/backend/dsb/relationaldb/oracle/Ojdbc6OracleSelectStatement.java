@@ -43,10 +43,9 @@ class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
             Map<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, 
-            boolean streamingMode,
             boolean wrapKeyId) {
         super(entitySpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
-                order, resultProcessor, streamingMode, wrapKeyId);
+                order, resultProcessor, wrapKeyId);
     }
 
     @Override

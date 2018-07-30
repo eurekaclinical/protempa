@@ -68,7 +68,7 @@ public class PostgresqlPre91SQLGenerator
             boolean wrapKeyId) {
         return new PostgresqlPre91SelectStatement(entitySpec, entitySpecs,
                 inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
-                getStreamingMode(), wrapKeyId);
+                wrapKeyId);
     }
     
 }

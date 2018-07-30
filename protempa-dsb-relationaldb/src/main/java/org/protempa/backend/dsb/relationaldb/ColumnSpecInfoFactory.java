@@ -41,9 +41,10 @@ import org.protempa.proposition.interval.Interval.Side;
  */
 public final class ColumnSpecInfoFactory {
 
-    public ColumnSpecInfo newInstance(Set<String> propIds, EntitySpec entitySpec,
-            Collection<EntitySpec> entitySpecs, Map<String, ReferenceSpec> inboundRefSpecs, Collection<Filter> filters,
-            boolean streamingMode) {
+    public ColumnSpecInfo newInstance(Set<String> propIds,
+            EntitySpec entitySpec, Collection<EntitySpec> entitySpecs,
+            Map<String, ReferenceSpec> inboundRefSpecs,
+            Collection<Filter> filters) {
         ColumnSpecInfo columnSpecInfo = new ColumnSpecInfo();
         columnSpecInfo.setUsingKeyIdIndex(true);
         columnSpecInfo.setUnique(entitySpec.isUnique());
@@ -63,23 +64,29 @@ public final class ColumnSpecInfoFactory {
         i = processCreateDate(entitySpec, columnSpecs, i, columnSpecInfo);
         i = processUpdateDate(entitySpec, columnSpecs, i, columnSpecInfo);
         i = processDeleteDate(entitySpec, columnSpecs, i, columnSpecInfo);
+        processReferenceSpecs(entitySpec, columnSpecs, i, columnSpecInfo,
+                entitySpecs, inboundRefSpecs);
+        columnSpecInfo.setColumnSpecs(columnSpecs);
+        return columnSpecInfo;
+    }
 
+    private static int processReferenceSpecs(EntitySpec rhsEntitySpec,
+            List<IntColumnSpecWrapper> columnSpecs,
+            int i, ColumnSpecInfo columnSpecInfo,
+            Collection<EntitySpec> entitySpecs,
+            Map<String, ReferenceSpec> inboundRefSpecs) {
         int refNum = 0;
-        for (EntitySpec entitySpec2 : entitySpecs) {
-            for (Map.Entry<String, ReferenceSpec> inboundRef : inboundRefSpecs.entrySet()) {
-                if (inboundRef.getKey().equals(entitySpec2.getName())) {
-                    if (entitySpec2 != entitySpec
-                            && entitySpec2.hasReferenceTo(entitySpec)) {
-                        i = processReferenceSpecs(entitySpec2, entitySpec, columnSpecs,
-                                refNum, i, columnSpecInfo);
-                        refNum++;
-                    }
-                    break;
+        for (EntitySpec lhsEntitySpec : entitySpecs) {
+            if (inboundRefSpecs.containsKey(lhsEntitySpec.getName())) {
+                if (lhsEntitySpec != rhsEntitySpec
+                        && lhsEntitySpec.hasReferenceTo(rhsEntitySpec)) {
+                    i = processReferenceSpecs(lhsEntitySpec, columnSpecs,
+                            refNum, i, columnSpecInfo);
+                    refNum++;
                 }
             }
         }
-        columnSpecInfo.setColumnSpecs(columnSpecs);
-        return columnSpecInfo;
+        return i;
     }
 
     private static int processUniqueIds(EntitySpec entitySpec,
@@ -219,20 +226,14 @@ public final class ColumnSpecInfoFactory {
     }
 
     private static int processReferenceSpecs(EntitySpec lhsEntitySpec,
-            EntitySpec rhsEntitySpec,
             List<IntColumnSpecWrapper> columnSpecs, int refNum,
             int i, ColumnSpecInfo columnSpecInfo) {
 
-        if (lhsEntitySpec.hasReferenceTo(rhsEntitySpec)) {
-            for (ColumnSpec referringUniqueIdSpec : lhsEntitySpec.getUniqueIdSpecs()) {
-                i += wrapColumnSpec(referringUniqueIdSpec, columnSpecs);
-            }
-
-            if (columnSpecInfo.getReferenceIndices() == null) {
-                columnSpecInfo.setReferenceIndices(new HashMap<>());
-            }
-            columnSpecInfo.getReferenceIndices().put("ref" + refNum, i - 1);
+        for (ColumnSpec referringUniqueIdSpec : lhsEntitySpec.getUniqueIdSpecs()) {
+            i += wrapColumnSpec(referringUniqueIdSpec, columnSpecs);
         }
+
+        columnSpecInfo.putReferenceIndices("ref" + refNum, i - 1);
 
         return i;
     }

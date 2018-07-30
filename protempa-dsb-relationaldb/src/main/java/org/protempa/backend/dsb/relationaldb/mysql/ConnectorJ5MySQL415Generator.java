@@ -77,6 +77,6 @@ public class ConnectorJ5MySQL415Generator extends AbstractSQLGeneratorWithCompat
             boolean wrapKeyId) {
         return new ConnectorJ5MySQL415SelectStatement(entitySpec,
                 entitySpecs, inboundRefSpecs, filters, propIds, keyIds, order,
-                resultProcessor, getStreamingMode(), wrapKeyId);
+                resultProcessor, wrapKeyId);
     }
 }

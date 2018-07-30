@@ -113,10 +113,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         this.backend = backend;
     }
 
-    public boolean getStreamingMode() {
-        return true;
-    }
-
     @Override
     public GranularityFactory getGranularities() {
         return this.granularities;

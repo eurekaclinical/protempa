@@ -73,7 +73,6 @@ class RetrieveDataThread extends AbstractThread {
     public void run() {
         log(Level.FINER, "Start retrieve data thread");
         Query query = getQuery();
-        boolean itrClosed = false;
         DataStreamingEventIterator<Proposition> itr = null;
         try {
             itr = newDataIterator();
@@ -82,7 +81,7 @@ class RetrieveDataThread extends AbstractThread {
             }
             itr.close();
             queue.put(poisonPill);
-            itrClosed = true;
+            itr = null;
         } catch (DataSourceReadException | Error | RuntimeException ex) {
             exceptions.add(new QueryException(query.getName(), ex));
             try {
@@ -94,7 +93,7 @@ class RetrieveDataThread extends AbstractThread {
             // by DoProcessThread
             log(Level.FINER, "Retrieve data thread interrupted", ex);
         } finally {
-            if (!itrClosed) {
+            if (itr != null) {
                 try {
                     itr.close();
                 } catch (DataSourceReadException ignore) {

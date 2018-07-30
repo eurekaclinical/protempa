@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -63,7 +64,7 @@ final class Executor implements AutoCloseable {
     private final MessageFormat logMessageFormat;
     private HandleQueryResultThread handleQueryResultThread;
     private boolean canceled;
-    private final List<QueryException> exceptions;
+    private QueryException exception;
 
     Executor(Query query, Destination resultsHandlerFactory, AbstractionFinder abstractionFinder) throws QueryException {
         this.abstractionFinder = abstractionFinder;
@@ -84,7 +85,6 @@ final class Executor implements AutoCloseable {
         this.query = query;
         this.destination = resultsHandlerFactory;
         this.logMessageFormat = ProtempaUtil.getLogMessageFormat(this.query);
-        this.exceptions = new ArrayList<>();
     }
 
     void init() throws QueryException {
@@ -115,7 +115,7 @@ final class Executor implements AutoCloseable {
     void execute() throws QueryException {
         try {
             RetrieveDataThread retrieveDataThread;
-            AbstractDoProcessThread doProcessThread;
+            DoProcessThread doProcessThread;
             synchronized (this) {
                 if (this.canceled) {
                     return;
@@ -127,14 +127,14 @@ final class Executor implements AutoCloseable {
                 BlockingQueue<QueueObject> hqrQueue = new ArrayBlockingQueue<>(1000);
                 QueryMode queryMode = this.query.getQueryMode();
                 if (Arrays.contains(QueryMode.etlModes(), queryMode)) {
-                    DataStreamingEvent doProcessPoisonPill = 
-                            new DataStreamingEvent("poison", Collections.emptyList());
+                    DataStreamingEvent doProcessPoisonPill
+                            = new DataStreamingEvent("poison", Collections.emptyList());
                     retrieveDataThread = new RetrieveDataThread(doProcessQueue,
                             doProcessPoisonPill, this.query,
                             this.abstractionFinder.getDataSource(),
                             this.propositionDefinitionCache,
                             this.filters, this.resultsHandler);
-                    doProcessThread = new DoProcessThread(doProcessQueue, hqrQueue,
+                    doProcessThread = new DoRegularProcessThread(doProcessQueue, hqrQueue,
                             doProcessPoisonPill, hqrPoisonPill, this.query,
                             retrieveDataThread, this.abstractionFinder.getAlgorithmSource(),
                             this.abstractionFinder.getKnowledgeSource(),
@@ -146,11 +146,11 @@ final class Executor implements AutoCloseable {
                             this.abstractionFinder.getAlgorithmSource(),
                             this.abstractionFinder.getKnowledgeSource(),
                             this.propositionDefinitionCache);
-                    
+
                 }
                 this.handleQueryResultThread
-                            = new HandleQueryResultThread(hqrQueue, hqrPoisonPill,
-                                    doProcessThread, this.query, this.resultsHandler);
+                        = new HandleQueryResultThread(hqrQueue, hqrPoisonPill,
+                                doProcessThread, this.query, this.resultsHandler);
                 if (retrieveDataThread != null) {
                     retrieveDataThread.start();
                 }
@@ -161,7 +161,14 @@ final class Executor implements AutoCloseable {
             if (retrieveDataThread != null) {
                 try {
                     retrieveDataThread.join();
-                    this.exceptions.addAll(retrieveDataThread.getExceptions());
+
+                    for (QueryException e : retrieveDataThread.getExceptions()) {
+                        if (this.exception == null) {
+                            this.exception = e;
+                        } else {
+                            this.exception.addSuppressed(e);
+                        }
+                    }
                     log(Level.INFO, "Done retrieving data");
                 } catch (InterruptedException ex) {
                     log(Level.FINER, "Protempa producer thread join interrupted", ex);
@@ -169,21 +176,34 @@ final class Executor implements AutoCloseable {
             }
             try {
                 doProcessThread.join();
-                this.exceptions.addAll(doProcessThread.getExceptions());
+                for (Iterator<QueryException> itr = doProcessThread.getExceptions().iterator(); itr.hasNext();) {
+                    QueryException e = itr.next();
+                    if (this.exception == null) {
+                        this.exception = e;
+                    } else {
+                        this.exception.addSuppressed(e);
+                    }
+                }
                 log(Level.INFO, "Done processing data");
             } catch (InterruptedException ex) {
                 log(Level.FINER, "Protempa consumer thread join interrupted", ex);
             }
             try {
                 this.handleQueryResultThread.join();
-                this.exceptions.addAll(this.handleQueryResultThread.getExceptions());
+                for (QueryException e : handleQueryResultThread.getExceptions()) {
+                    if (this.exception == null) {
+                        this.exception = e;
+                    } else {
+                        this.exception.addSuppressed(e);
+                    }
+                }
                 log(Level.INFO, "Done outputting results");
             } catch (InterruptedException ex) {
                 log(Level.FINER, "Protempa consumer thread join interrupted", ex);
             }
 
-            if (!exceptions.isEmpty()) {
-                throw exceptions.get(0);
+            if (exception != null) {
+                throw exception;
             }
         } catch (QueryException ex) {
             this.failed = true;

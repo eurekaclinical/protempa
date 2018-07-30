@@ -69,8 +69,8 @@ public abstract class AbstractSelectClause implements SelectClause {
         if (info.getValueIndex() > 0) {
             i++;
         }
-        if (info.getReferenceIndices() != null) {
-            i += info.getReferenceIndices().size();
+        if (!info.isReferenceIndicesEmpty()) {
+            i += info.getReferenceIndicesSize();
         }
         if (info.getCreateDateIndex() > 0) {
             i++;
@@ -121,7 +121,7 @@ public abstract class AbstractSelectClause implements SelectClause {
         }
 
         // process inbound references to the entity spec
-        if (info.getReferenceIndices() != null) {
+        if (!info.isReferenceIndicesEmpty()) {
             for (Map.Entry<String, Integer> entry : info.getReferenceIndices().entrySet()) {
                 indices[k] = entry.getValue();
                 names[k++] = entry.getKey() + "_ref";

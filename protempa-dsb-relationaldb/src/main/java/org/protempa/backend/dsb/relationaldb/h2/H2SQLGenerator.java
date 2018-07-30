@@ -66,6 +66,6 @@ public final class H2SQLGenerator extends AbstractSQLGeneratorWithCompatChecks {
             boolean wrapKeyId) {
         return new H2SelectStatement(entitySpec, entitySpecs,
                 inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
-                getStreamingMode(), wrapKeyId);
+                wrapKeyId);
     }
 }

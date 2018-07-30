@@ -38,7 +38,6 @@ public abstract class AbstractSelectStatement implements SelectStatement {
     private final Set<String> keyIds;
     private final SQLOrderBy order;
     private final SQLGenResultProcessor resultProcessor;
-    private final boolean streamingMode;
     private final boolean wrapKeyId;
 
     protected AbstractSelectStatement(EntitySpec entitySpec,
@@ -46,7 +45,6 @@ public abstract class AbstractSelectStatement implements SelectStatement {
             Map<String, ReferenceSpec> inboundReferenceSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            boolean streamingMode,
             boolean wrapKeyId) {
         this.entitySpec = entitySpec;
         this.entitySpecs = Collections.unmodifiableList(entitySpecs);
@@ -56,7 +54,6 @@ public abstract class AbstractSelectStatement implements SelectStatement {
         this.keyIds = Collections.unmodifiableSet(keyIds);
         this.order = order;
         this.resultProcessor = resultProcessor;
-        this.streamingMode = streamingMode;
         this.wrapKeyId = wrapKeyId;
     }
 
@@ -107,8 +104,7 @@ public abstract class AbstractSelectStatement implements SelectStatement {
     @Override
     public String generateStatement() {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(propIds,
-                entitySpec, entitySpecs, inboundReferenceSpecs, filters,
-                this.streamingMode);
+                entitySpec, entitySpecs, inboundReferenceSpecs, filters);
         TableAliaser referenceIndices = new TableAliaser(info.getColumnSpecs(),
                 "a");
 

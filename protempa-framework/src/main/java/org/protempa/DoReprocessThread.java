@@ -19,7 +19,6 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
@@ -30,7 +29,7 @@ import org.protempa.query.Query;
  *
  * @author Andrew Post
  */
-public class DoReprocessThread extends AbstractDoProcessThread<StatefulExecutionStrategy> {
+public class DoReprocessThread extends DoProcessThread<StatefulExecutionStrategy> {
 
     private static final Logger LOGGER = Logger.getLogger(DoReprocessThread.class.getName());
     private final AlgorithmSource algorithmSource;

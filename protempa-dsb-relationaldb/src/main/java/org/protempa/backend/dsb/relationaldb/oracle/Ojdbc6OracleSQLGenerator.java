@@ -65,7 +65,7 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGeneratorWithCompatChec
             boolean wrapKeyId) {
         return new Ojdbc6OracleSelectStatement(entitySpec,
                 entitySpecs, inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
-                getStreamingMode(), wrapKeyId);
+                wrapKeyId);
     }
     
 }
