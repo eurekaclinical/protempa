@@ -35,10 +35,10 @@ import java.util.Map;
 
 abstract class StreamingMainResultProcessor<P extends Proposition>
         extends AbstractResultProcessor implements StreamingResultProcessor<P> {
-    private ColumnSpec[] lastColumnSpecs;
-    private PropertySpec[] propertySpecs;
-    private LinkedHashMap<String, ReferenceSpec> inboundRefSpecs;
-    private Map<String, ReferenceSpec> bidirectionalRefSpecs;
+    private final ColumnSpec[] lastColumnSpecs;
+    private final PropertySpec[] propertySpecs;
+    private final LinkedHashMap<String, ReferenceSpec> inboundRefSpecs;
+    private final Map<String, ReferenceSpec> bidirectionalRefSpecs;
     private Statement statement;
     
     protected StreamingMainResultProcessor(
