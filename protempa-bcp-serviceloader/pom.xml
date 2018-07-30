@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.eurekaclinical</groupId>
         <artifactId>protempa</artifactId>
-        <version>5.0-Beta-9</version>
+        <version>5.0-Beta-10-SNAPSHOT</version>
     </parent>
 
     <groupId>org.eurekaclinical</groupId>
