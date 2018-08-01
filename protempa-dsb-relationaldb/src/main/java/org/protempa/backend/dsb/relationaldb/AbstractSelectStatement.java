@@ -22,17 +22,17 @@ package org.protempa.backend.dsb.relationaldb;
 import java.util.ArrayList;
 import org.protempa.backend.dsb.filter.Filter;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public abstract class AbstractSelectStatement implements SelectStatement {
 
     private final EntitySpec entitySpec;
     private final List<EntitySpec> entitySpecs;
-    private final Map<String, ReferenceSpec> inboundReferenceSpecs;
+    private final LinkedHashMap<String, ReferenceSpec> inboundReferenceSpecs;
     private final Set<Filter> filters;
     private final Set<String> propIds;
     private final Set<String> keyIds;
@@ -42,16 +42,16 @@ public abstract class AbstractSelectStatement implements SelectStatement {
 
     protected AbstractSelectStatement(EntitySpec entitySpec,
             List<EntitySpec> entitySpecs,
-            Map<String, ReferenceSpec> inboundReferenceSpecs,
+            LinkedHashMap<String, ReferenceSpec> inboundReferenceSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             boolean wrapKeyId) {
         this.entitySpec = entitySpec;
-        this.entitySpecs = Collections.unmodifiableList(entitySpecs);
-        this.inboundReferenceSpecs = Collections.unmodifiableMap(inboundReferenceSpecs);
-        this.filters = Collections.unmodifiableSet(filters);
-        this.propIds = Collections.unmodifiableSet(propIds);
-        this.keyIds = Collections.unmodifiableSet(keyIds);
+        this.entitySpecs = new ArrayList<>(entitySpecs);
+        this.inboundReferenceSpecs = new LinkedHashMap<>(inboundReferenceSpecs);
+        this.filters = new HashSet<>(filters);
+        this.propIds = new HashSet<>(propIds);
+        this.keyIds = new HashSet<>(keyIds);
         this.order = order;
         this.resultProcessor = resultProcessor;
         this.wrapKeyId = wrapKeyId;
@@ -59,30 +59,6 @@ public abstract class AbstractSelectStatement implements SelectStatement {
 
     protected EntitySpec getEntitySpec() {
         return entitySpec;
-    }
-
-    protected List<EntitySpec> getEntitySpecs() {
-        return entitySpecs;
-    }
-
-    protected Map<String, ReferenceSpec> getInboundReferenceSpecs() {
-        return inboundReferenceSpecs;
-    }
-
-    protected Set<Filter> getFilters() {
-        return filters;
-    }
-
-    protected Set<String> getPropIds() {
-        return propIds;
-    }
-
-    protected Set<String> getKeyIds() {
-        return keyIds;
-    }
-
-    protected SQLOrderBy getOrder() {
-        return order;
     }
 
     protected SQLGenResultProcessor getResultProcessor() {

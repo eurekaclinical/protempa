@@ -25,6 +25,7 @@ import org.protempa.backend.dsb.filter.PropertyValueFilter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -39,11 +40,11 @@ import org.protempa.proposition.interval.Interval.Side;
  *
  * @author Andrew Post
  */
-public final class ColumnSpecInfoFactory {
+final class ColumnSpecInfoFactory {
 
-    public ColumnSpecInfo newInstance(Set<String> propIds,
+    ColumnSpecInfo newInstance(Set<String> propIds,
             EntitySpec entitySpec, Collection<EntitySpec> entitySpecs,
-            Map<String, ReferenceSpec> inboundRefSpecs,
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Collection<Filter> filters) {
         ColumnSpecInfo columnSpecInfo = new ColumnSpecInfo();
         columnSpecInfo.setUsingKeyIdIndex(true);
@@ -74,7 +75,7 @@ public final class ColumnSpecInfoFactory {
             List<IntColumnSpecWrapper> columnSpecs,
             int i, ColumnSpecInfo columnSpecInfo,
             Collection<EntitySpec> entitySpecs,
-            Map<String, ReferenceSpec> inboundRefSpecs) {
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs) {
         int refNum = 0;
         for (EntitySpec lhsEntitySpec : entitySpecs) {
             if (inboundRefSpecs.containsKey(lhsEntitySpec.getName())) {

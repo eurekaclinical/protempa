@@ -20,8 +20,8 @@ package org.protempa.backend.dsb.relationaldb.psql;
  * #L%
  */
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.arp.javautil.sql.DatabaseVersion;
 import org.arp.javautil.sql.DriverVersion;
@@ -62,7 +62,7 @@ public class PostgresqlPre91SQLGenerator
     @Override
     protected SelectStatement getSelectStatement(EntitySpec entitySpec, 
             List<EntitySpec> entitySpecs, 
-            Map<String, ReferenceSpec> inboundRefSpecs, 
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs, 
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds, 
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, 
             boolean wrapKeyId) {

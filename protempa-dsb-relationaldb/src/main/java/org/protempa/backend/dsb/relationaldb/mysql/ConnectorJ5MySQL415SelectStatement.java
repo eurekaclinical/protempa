@@ -19,6 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb.mysql;
 
+import java.util.LinkedHashMap;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.List;
@@ -41,7 +42,7 @@ final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
 
     ConnectorJ5MySQL415SelectStatement(EntitySpec entitySpec,
             List<EntitySpec> entitySpecs,
-            Map<String, ReferenceSpec> inboundRefSpecs,
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             boolean wrapKeyId) {

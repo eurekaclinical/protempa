@@ -19,6 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb.oracle;
 
+import java.util.LinkedHashMap;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.List;
@@ -59,7 +60,7 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGeneratorWithCompatChec
     @Override
     protected SelectStatement getSelectStatement(EntitySpec entitySpec,
             List<EntitySpec> entitySpecs,
-            Map<String, ReferenceSpec> inboundRefSpecs,
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
             boolean wrapKeyId) {

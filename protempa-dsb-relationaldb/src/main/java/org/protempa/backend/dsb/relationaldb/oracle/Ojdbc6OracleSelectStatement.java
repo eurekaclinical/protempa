@@ -19,10 +19,10 @@
  */
 package org.protempa.backend.dsb.relationaldb.oracle;
 
+import java.util.LinkedHashMap;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.protempa.backend.dsb.relationaldb.AbstractSelectStatement;
 import org.protempa.backend.dsb.relationaldb.ColumnSpec;
@@ -40,7 +40,7 @@ class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
 
     Ojdbc6OracleSelectStatement(EntitySpec entitySpec,
             List<EntitySpec> entitySpecs,
-            Map<String, ReferenceSpec> inboundRefSpecs,
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, 
             boolean wrapKeyId) {

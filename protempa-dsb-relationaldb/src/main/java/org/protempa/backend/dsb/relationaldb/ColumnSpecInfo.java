@@ -19,7 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,14 +33,14 @@ public final class ColumnSpecInfo {
     private int valueIndex = -1;
     private int codeIndex = -1;
     private int[] uniqueIdIndices;
-    private final Map<String, Integer> referenceIndices;
+    private final LinkedHashMap<String, Integer> referenceIndices;
     private boolean usingKeyIdIndex;
     private int createDateIndex = -1;
     private int updateDateIndex = -1;
     private int deleteDateIndex = -1;
 
     ColumnSpecInfo() {
-        this.referenceIndices = new HashMap<>();
+        this.referenceIndices = new LinkedHashMap<>();
     }
 
     boolean isUnique() {
@@ -108,14 +108,7 @@ public final class ColumnSpecInfo {
     }
 
     Map<String, Integer> getReferenceIndices() {
-        return new HashMap<>(referenceIndices);
-    }
-
-    void setReferenceIndices(Map<String, Integer> referenceIndices) {
-        this.referenceIndices.clear();
-        if (referenceIndices != null) {
-            this.referenceIndices.putAll(referenceIndices);
-        }
+        return new LinkedHashMap<>(referenceIndices);
     }
 
     int getReferenceIndicesSize() {
