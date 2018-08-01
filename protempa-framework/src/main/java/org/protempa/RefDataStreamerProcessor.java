@@ -22,6 +22,8 @@ package org.protempa;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.protempa.proposition.*;
 import org.protempa.proposition.visitor.AbstractPropositionVisitor;
 
@@ -31,6 +33,8 @@ import org.protempa.proposition.visitor.AbstractPropositionVisitor;
  */
 final class RefDataStreamerProcessor
         extends DataStreamerProcessor<UniqueIdPair> {
+    
+    private static final Logger LOGGER = Logger.getLogger(RefDataStreamerProcessor.class.getName());
 
     private static class ReferenceAdder extends AbstractPropositionVisitor {
 
@@ -103,8 +107,9 @@ final class RefDataStreamerProcessor
                         pair.getReference());
                 prop.accept(this.adder);
             } else {
-                throw new DataSourceReadException("Can't find left-hand-side of reference: keyId=" + keyId
-                    + "; references: " + pair);
+                LOGGER.log(Level.WARNING, 
+                        "Can''t find left-hand-side of reference: keyId={0}; references: {1}", 
+                        new Object[]{keyId, pair});
             }
         }
     }
