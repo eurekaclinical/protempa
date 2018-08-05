@@ -21,14 +21,12 @@ package org.protempa.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
-import org.apache.commons.io.IOUtils;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.After;
 import org.junit.Before;
@@ -98,24 +96,18 @@ public class ProtempaTest {
      */
     @Test
     public void testProtempaRetrieve() throws IOException, ProtempaException {
-        File outputFile = File.createTempFile("protempa-test", null);
-        try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
+        Path outputFile = Files.createTempFile("protempa-test", null);
+        try (BufferedWriter fw = Files.newBufferedWriter(outputFile)) {
             Destination destination = new SingleColumnDestination(fw);
             protempa.execute(queryRetrieve(), destination);
         }
-        outputMatches(outputFile, TRUTH_OUTPUT);
+        outputMatches(outputFile, Paths.get(TRUTH_OUTPUT));
     }
 
-    private void outputMatches(File actual, String expected) throws IOException {
-        try (BufferedReader actualReader = new BufferedReader(new FileReader(actual));
-                BufferedReader expectedReader = new BufferedReader(new FileReader(expected))) {
-
-            List<String> actualLines = IOUtils.readLines(actualReader);
-            List<String> expectedLines = IOUtils.readLines(expectedReader);
-            assertEquals(expectedLines, actualLines);
-        }
+    private void outputMatches(Path actual, Path expected) throws IOException {
+        assertEquals(Files.readAllLines(expected), Files.readAllLines(actual));
     }
-    
+
     private Query queryRetrieve() throws KnowledgeSourceReadException, QueryBuildException {
         DefaultQueryBuilder q = new QueryBuilderFactory().getInstance();
         Query query = protempa.buildQuery(q);
