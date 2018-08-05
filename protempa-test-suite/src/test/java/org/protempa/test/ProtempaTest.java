@@ -110,8 +110,6 @@ public class ProtempaTest {
 
     private Query queryRetrieve() throws KnowledgeSourceReadException, QueryBuildException {
         DefaultQueryBuilder q = new QueryBuilderFactory().getInstance();
-        Query query = protempa.buildQuery(q);
-
-        return query;
+        return protempa.buildQuery(q);
     }
 }

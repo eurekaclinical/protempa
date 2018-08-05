@@ -20,14 +20,13 @@ package org.protempa.test;
  * #L%
  */
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import org.apache.commons.io.IOUtils;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
@@ -46,7 +45,7 @@ import org.protempa.query.QueryMode;
  */
 abstract class AbstractProtempaWithPersistenceTest {
 
-    private File tempDir;
+    private Path tempDir;
 
     /**
      * The ground truth results directory for the test data
@@ -56,7 +55,7 @@ abstract class AbstractProtempaWithPersistenceTest {
     
     @Before
     public void setUp() throws Exception {
-        tempDir = Files.createTempDirectory(null).toFile();
+        tempDir = Files.createTempDirectory(null);
     }
     
     @After
@@ -74,20 +73,20 @@ abstract class AbstractProtempaWithPersistenceTest {
                 new INIConfigurations(new File("src/test/resources")),
                 "protege-h2-test-config");
         try (Protempa protempa = Protempa.newInstance(sf)) {
-            doRun(protempa, buildQuery(qb, queryMode), truthFile != null ? new File(TRUTH_DIR, truthFile) : null);
+            doRun(protempa, buildQuery(qb, queryMode), truthFile != null ? Paths.get(TRUTH_DIR, truthFile) : null);
         }
     }
 
     QueryBuilder buildQuery(DefaultQueryBuilder qb, QueryMode queryMode) {
-        qb.setDatabasePath(new File(tempDir, "test").getPath());
+        qb.setDatabasePath(this.tempDir.resolve("test").toString());
         qb.setQueryMode(queryMode);
         return qb;
     }
 
-    void doRun(final Protempa protempa, QueryBuilder qb, File truthFile) throws IOException, ProtempaException {
-        File outputFile
-                = File.createTempFile("protempa-test-with-persistence", null);
-        try (BufferedWriter fw = new BufferedWriter(new FileWriter(outputFile))) {
+    void doRun(final Protempa protempa, QueryBuilder qb, Path truthFile) throws IOException, ProtempaException {
+        Path outputFile
+                = Files.createTempFile("protempa-test-with-persistence", null);
+        try (BufferedWriter fw = Files.newBufferedWriter(outputFile)) {
             Destination destination = new SingleColumnDestination(fw);
             protempa.execute(protempa.buildQuery(qb), destination);
         }
@@ -96,17 +95,10 @@ abstract class AbstractProtempaWithPersistenceTest {
         }
     }
 
-    private static void assertEqualFiles(File actual, File expected) throws IOException {
-        try (BufferedReader actualReader = new BufferedReader(new FileReader(actual))) {
-            System.out.println("expected file " + expected);
-            String line;
-            while ((line = actualReader.readLine()) != null) {
-                System.out.println(line);
-            }
-        }
-        try (BufferedReader actualReader = new BufferedReader(new FileReader(actual));
-                BufferedReader expectedReader = new BufferedReader(new FileReader(expected))) {
-            assertEquals(IOUtils.readLines(expectedReader), IOUtils.readLines(actualReader));
-        }
+    private static void assertEqualFiles(Path actual, Path expected) throws IOException {
+        List<String> actualLines = Files.readAllLines(actual);
+        System.out.println("actual file " + actual);
+        actualLines.stream().forEach(System.out::println);
+        assertEquals(Files.readAllLines(expected), actualLines);
     }
 }
