@@ -44,6 +44,7 @@ public class WorkingMemoryFactStore implements Serializable {
     private List<Proposition> propositions;
     private Map<Proposition, Set<Proposition>> forwardDerivations;
     private Map<Proposition, Set<Proposition>> backwardDerivations;
+    private Map<String, Integer> instanceNums;
 
     public List<Proposition> getPropositions() {
         return propositions;
@@ -69,6 +70,14 @@ public class WorkingMemoryFactStore implements Serializable {
         this.backwardDerivations = backwardDerivations;
     }
 
+    public Map<String, Integer> getInstanceNums() {
+        return instanceNums;
+    }
+
+    public void setInstanceNums(Map<String, Integer> instanceNums) {
+        this.instanceNums = instanceNums;
+    }
+    
     Collection<Proposition> getAll(String[] propIds) {
         Set<String> pIds = Arrays.asSet(propIds);
         List<Proposition> result = new ArrayList<>();

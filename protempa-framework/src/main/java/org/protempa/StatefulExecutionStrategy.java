@@ -36,6 +36,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.iterators.IteratorChain;
 import org.arp.javautil.arrays.Arrays;
 import org.drools.FactException;
@@ -267,6 +268,15 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private void createWorkingMemory(String keyId) {
         this.workingMemory = getRuleBase().newStatefulSession(true);
         this.workingMemory.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
+        if (this.dataStore != null) {
+            WorkingMemoryFactStore factStore = this.dataStore.get(keyId);
+            if (factStore != null) {
+                Map<String, Integer> instanceNums = factStore.getInstanceNums();
+                if (instanceNums != null) {
+                    this.workingMemory.setGlobal(WorkingMemoryGlobals.DERIVED_UNIQUE_ID_COUNTS, this.dataStore.get(keyId).getInstanceNums());
+                }
+            }
+        }
     }
 
     private void updateWorkingMemory(String keyId, Iterator<?> objects)
@@ -341,6 +351,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         }
         factStore.removeAll(realPropsToDelete);
         factStore.setPropositions(facts);
+        factStore.setInstanceNums((Map<String, Integer>) this.workingMemory.getGlobal(WorkingMemoryGlobals.DERIVED_UNIQUE_ID_COUNTS));
         this.dataStore.put(keyId, factStore);
         try {
             this.workingMemoryDataStores.finish();
