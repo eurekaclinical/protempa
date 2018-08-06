@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import org.eurekaclinical.datastore.bdb.BdbPersistentStoreFactory;
 
@@ -70,6 +71,8 @@ public final class WorkingMemoryDataStores implements DataStores {
             throw new IllegalArgumentException("cache cannot be null");
         }
         
+        this.propositionDefinitionsInStores = new HashMap<>();
+        
         this.storeFactory = new BdbPersistentStoreFactory(directory.toString());
         this.storedPropDefsFile = directory.resolve(name + ".stored-propdefs");
         if (Files.exists(this.storedPropDefsFile)) {
@@ -85,11 +88,12 @@ public final class WorkingMemoryDataStores implements DataStores {
                     }
                 }
                 this.propositionDefinitionsInStores.put(name, new PropositionDefinitionCache(propDefs));
+                cache.merge(this.propositionDefinitionsInStores.get(name));
             } catch (ClassNotFoundException ex) {
                 throw new IOException("Error deserializing proposition definitions", ex);
             }
         }
-        cache.merge(this.propositionDefinitionsInStores.get(name));
+        
         this.databaseName = name;
         this.cache = cache;
     }
