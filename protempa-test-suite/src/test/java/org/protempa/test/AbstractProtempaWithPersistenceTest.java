@@ -97,7 +97,7 @@ abstract class AbstractProtempaWithPersistenceTest {
 
     private static void assertEqualFiles(Path actual, Path expected) throws IOException {
         List<String> actualLines = Files.readAllLines(actual);
-        System.out.println("actual file " + actual);
+        System.out.println("actual file " + actual + "; expected file " + expected);
         actualLines.stream().forEach(System.out::println);
         assertEquals(Files.readAllLines(expected), actualLines);
     }
