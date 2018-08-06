@@ -20,6 +20,7 @@ package org.protempa;
  * #L%
  */
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -68,10 +69,11 @@ public class WorkingMemoryFactStore implements Serializable {
         this.backwardDerivations = backwardDerivations;
     }
 
-    void removeAll(String[] propositionIds) {
+    Collection<Proposition> removeAll(String[] propositionIds) {
         Set<String> propIds = Arrays.asSet(propositionIds);
         Queue<Proposition> queue = new LinkedList<>(this.forwardDerivations != null ? this.forwardDerivations.keySet() : Collections.emptySet());
         Set<String> removed = new HashSet<>(Arrays.asSet(propositionIds));
+        List<Proposition> removedProps = new ArrayList<>();
         while (!queue.isEmpty()) {
             Proposition prop = queue.remove();
             if (prop != null && propIds.contains(prop.getId())) {
@@ -108,10 +110,12 @@ public class WorkingMemoryFactStore implements Serializable {
             for (Iterator<Proposition> itr = this.propositions.iterator(); itr.hasNext();) {
                 Proposition prop = itr.next();
                 if (prop == null || removed.contains(prop.getId())) {
+                    removedProps.add(prop);
                     itr.remove();
                 }
             }
         }
+        return removedProps;
     }
 
 }

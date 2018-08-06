@@ -72,6 +72,10 @@ public class PropositionDefinitionCache {
         return this.cache.get(id);
     }
     
+    public boolean contains(String id) {
+        return this.cache.containsKey(id);
+    }
+    
     public PropositionDefinition remove(String id) {
         return this.cache.remove(id);
     }

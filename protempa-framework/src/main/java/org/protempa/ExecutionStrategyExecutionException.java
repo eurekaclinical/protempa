@@ -1,8 +1,10 @@
-/*
+package org.protempa;
+
+/*-
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 - 2013 Emory University
+ * Copyright (C) 2012 - 2018 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +19,26 @@
  * limitations under the License.
  * #L%
  */
-package org.protempa;
 
-import java.util.Iterator;
+/**
+ *
+ * @author arpost
+ */
+public class ExecutionStrategyExecutionException extends ProtempaException {
 
-import org.protempa.proposition.Proposition;
+    public ExecutionStrategyExecutionException() {
+    }
 
-interface ExecutionStrategy {
-    
-    void initialize(PropositionDefinitionCache cache) 
-            throws ExecutionStrategyInitializationException;
-    
-    Iterator<Proposition> execute(String keyIds, Iterator<? extends Proposition> objects) throws ExecutionStrategyExecutionException;
-    
-    DerivationsBuilder getDerivationsBuilder();
-    
-    void closeCurrentWorkingMemory();
+    public ExecutionStrategyExecutionException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    void shutdown() throws ExecutionStrategyShutdownException;
+    public ExecutionStrategyExecutionException(String message) {
+        super(message);
+    }
+
+    public ExecutionStrategyExecutionException(Throwable cause) {
+        super(cause);
+    }
+    
 }

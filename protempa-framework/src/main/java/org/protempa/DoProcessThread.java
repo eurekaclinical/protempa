@@ -89,44 +89,49 @@ abstract class DoProcessThread<E extends ExecutionStrategy> extends AbstractThre
         }
         log(Level.FINER, "End do process thread");
     }
-    
+
     final AlgorithmSource getAlgorithmSource() {
         return algorithmSource;
     }
 
     final void doProcessData(String keyId, Iterator<Proposition> dataItr, int sizeHint, Query query) throws InterruptedException {
         Iterator<Proposition> resultsItr;
-        if (this.executionStrategy != null) {
-            resultsItr = this.executionStrategy.execute(keyId, dataItr);
-        } else {
-            resultsItr = dataItr;
+        try {
+            if (this.executionStrategy != null) {
+                resultsItr = this.executionStrategy.execute(keyId, dataItr);
+            } else {
+                resultsItr = dataItr;
+            }
+            Map<Proposition, Set<Proposition>> forwardDerivations
+                    = this.derivationsBuilder.getForwardDerivations();
+            Map<Proposition, Set<Proposition>> backwardDerivations
+                    = this.derivationsBuilder.getBackwardDerivations();
+            Map<UniqueId, Proposition> refs = new HashMap<>();
+            List<Proposition> filteredPropositions
+                    = extractRequestedPropositions(resultsItr, refs, sizeHint);
+            if (isLoggable(Level.FINEST)) {
+                log(Level.FINEST, "Proposition ids: {0}",
+                        String.join(", ", query.getPropositionIds()));
+                log(Level.FINEST, "Filtered propositions: {0}", filteredPropositions);
+                log(Level.FINEST, "Forward derivations: {0}", forwardDerivations);
+                log(Level.FINEST, "Backward derivations: {0}", backwardDerivations);
+                log(Level.FINEST, "References: {0}", refs);
+            }
+            this.hqrQueue.put(new QueueObject(keyId, filteredPropositions,
+                    forwardDerivations, backwardDerivations, refs));
+            log(Level.FINER, "Results put on query result handler queue");
+        } catch (ExecutionStrategyExecutionException ex) {
+            this.exceptions.add(new QueryException(query.getName(), ex));
+        } finally {
+            this.derivationsBuilder.reset();
         }
-        Map<Proposition, Set<Proposition>> forwardDerivations
-                = this.derivationsBuilder.getForwardDerivations();
-        Map<Proposition, Set<Proposition>> backwardDerivations
-                = this.derivationsBuilder.getBackwardDerivations();
-        Map<UniqueId, Proposition> refs = new HashMap<>();
-        List<Proposition> filteredPropositions
-                = extractRequestedPropositions(resultsItr, refs, sizeHint);
-        if (isLoggable(Level.FINEST)) {
-            log(Level.FINEST, "Proposition ids: {0}",
-                    String.join(", ", query.getPropositionIds()));
-            log(Level.FINEST, "Filtered propositions: {0}", filteredPropositions);
-            log(Level.FINEST, "Forward derivations: {0}", forwardDerivations);
-            log(Level.FINEST, "Backward derivations: {0}", backwardDerivations);
-            log(Level.FINEST, "References: {0}", refs);
-        }
-        this.hqrQueue.put(new QueueObject(keyId, filteredPropositions,
-                forwardDerivations, backwardDerivations, refs));
-        log(Level.FINER, "Results put on query result handler queue");
-        this.derivationsBuilder.reset();
     }
-    
+
     abstract void doProcessDataLoop() throws InterruptedException;
-    
+
     /**
      * Called by the constructor to setup the execution strategy.
-     * 
+     *
      * @return an execution strategy.
      */
     abstract E selectExecutionStrategy();
@@ -144,7 +149,7 @@ abstract class DoProcessThread<E extends ExecutionStrategy> extends AbstractThre
     final List<QueryException> getExceptions() {
         return this.exceptions;
     }
-    
+
     private List<Proposition> extractRequestedPropositions(
             Iterator<Proposition> propositions, Map<UniqueId, Proposition> refs,
             int sizeHint) {

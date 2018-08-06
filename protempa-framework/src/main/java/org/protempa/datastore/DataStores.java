@@ -43,6 +43,8 @@ public interface DataStores extends AutoCloseable {
      * data store.
      */
     DataStore<String, WorkingMemoryFactStore> getDataStore() throws IOException, DataStoreExistsException;
+    
+    void finish() throws IOException;
 
     @Override
     void close() throws IOException;

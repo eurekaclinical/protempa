@@ -67,6 +67,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         this.databaseDir = this.databasePath.getParent();
         this.databaseName = this.databasePath.getFileName().toString();
         this.workingMemoryEventListener = new DeletedWorkingMemoryEventListener();
+        this.propsToDelete = new ArrayList<>();
     }
 
     @Override
@@ -77,7 +78,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     @Override
-    public Iterator<Proposition> execute(String keyId, Iterator<? extends Proposition> objects) {
+    public Iterator<Proposition> execute(String keyId, Iterator<? extends Proposition> objects) throws ExecutionStrategyExecutionException {
         getOrCreateWorkingMemoryInstance(keyId);
         updateWorkingMemory(keyId, objects);
         fireAllRules();
@@ -88,6 +89,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     @Override
     public void closeCurrentWorkingMemory() {
         this.workingMemory.dispose();
+        this.propsToDelete = new ArrayList<>();
     }
 
     @Override
@@ -117,61 +119,56 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         Query query = getQuery();
         switch (query.getQueryMode()) {
             case REPROCESS_RETRIEVE:
+                cache = new PropositionDefinitionCache(Collections.emptyList());
+                propDefs = cache.getAll();
+                break;
             case REPROCESS_DELETE:
+                failIfQueriedPropIdIsNotAlreadyInDataStore(query);
+                for (String pId : getQuery().getPropositionIds()) {
+                    this.workingMemoryDataStores.getPropositionDefinitionsInStores().remove(pId);
+                }
+
                 cache = new PropositionDefinitionCache(Collections.emptyList());
                 propDefs = cache.getAll();
                 break;
             case REPROCESS_UPDATE:
-                cache = this.workingMemoryDataStores.getPropositionDefinitionsInStores();
-                String[] queryPropIds = getQuery().getPropositionIds();
-                Set<String> propIdsUpdate = cache.getAll().stream()
-                        .map(elt -> elt.getPropositionId())
-                        .filter(propId -> !Arrays.contains(queryPropIds, propId))
-                        .collect(Collectors.toSet());
+                failIfQueriedPropIdIsNotAlreadyInDataStore(query);
+                /**
+                 * The cache contains all proposition definitions needed to
+                 * compute the queried proposition ids.
+                 */
+                cache = getCache();
+                List<PropositionDefinition> propDefsForCache = new ArrayList<>();
                 Queue<String> propIdsQueue = new LinkedList<>();
-                Arrays.addAll(propIdsQueue, queryPropIds);
+                Arrays.addAll(propIdsQueue, getQuery().getPropositionIds());
                 String pId;
-                Collection<PropositionDefinition> pDefsFromCache = cache.getAll();
                 while ((pId = propIdsQueue.poll()) != null) {
-                    for (PropositionDefinition propDef : pDefsFromCache) {
+                    propDefsForCache.add(cache.get(pId));
+                    for (PropositionDefinition propDef : cache.getAll()) {
                         String[] children = propDef.getChildren();
                         if (Arrays.contains(children, pId)) {
-                            propIdsQueue.add(propDef.getId());
-                            propIdsUpdate.remove(pId);
+                            Arrays.addAll(propIdsQueue, children);
                         }
                     }
                 }
-                propDefs = pDefsFromCache.stream()
-                        .filter(propDef -> propDef != null
-                        && !propIdsUpdate.contains(propDef.getPropositionId()))
-                        .collect(Collectors.toList());
-                cache = new PropositionDefinitionCache(propDefs);
+                
+                cache = new PropositionDefinitionCache(propDefsForCache);
+                propDefs = cache.getAll();
                 break;
             case REPROCESS_CREATE:
+                failIfQueriedPropIdIsAlreadyInDataStore(query);
+                /**
+                 * The cache contains all proposition definitions needed to
+                 * compute the queried proposition ids.
+                 */
                 cache = getCache();
                 propDefs = new ArrayList<>(cache.getAll());
-                PropositionDefinitionCache dataStorePropDefs = 
-                        this.workingMemoryDataStores.getPropositionDefinitionsInStores();
-                Set<String> propIdsInStore = dataStorePropDefs.getAll().stream()
-                        .map(elt -> elt.getPropositionId())
-                        .collect(Collectors.toSet());
-                for (String propId : query.getPropositionIds()) {
-                    if (propIdsInStore.contains(propId)) {
-                        propIdsInStore.remove(propId);
-                        dataStorePropDefs.remove(propId);
-                        throw new ExecutionStrategyInitializationException(
-                                "Proposition id "
-                                + propId
-                                + " already exists; if you want to update it, use the update query mode");
-                    }
-                }
-                for (Iterator<PropositionDefinition> itr = propDefs.iterator(); itr.hasNext();) {
-                    PropositionDefinition propDef = itr.next();
-                    if (propDef == null || propIdsInStore.contains(propDef.getPropositionId())) {
-                        itr.remove();
-                    }
-                }
-                cache = new PropositionDefinitionCache(propDefs);
+
+                /**
+                 * Replace the cache with a version that lacks the proposition
+                 * definitions that we computed in a previous run.
+                 */
+                cache = newCacheWithPropDefsThatWeNeedToCompute(propDefs);
                 break;
             case REPLACE:
             case UPDATE:
@@ -195,6 +192,42 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             throw new ExecutionStrategyInitializationException(ex);
         }
         return ruleCreator;
+    }
+
+    private PropositionDefinitionCache newCacheWithPropDefsThatWeNeedToCompute(Collection<PropositionDefinition> propDefs) {
+        PropositionDefinitionCache dataStorePropDefs = this.workingMemoryDataStores.getPropositionDefinitionsInStores();
+        for (Iterator<PropositionDefinition> itr = propDefs.iterator(); itr.hasNext();) {
+            PropositionDefinition propDef = itr.next();
+            if (propDef == null || dataStorePropDefs.contains(propDef.getPropositionId())) {
+                itr.remove();
+            }
+        }
+        return new PropositionDefinitionCache(propDefs);
+    }
+
+    private void failIfQueriedPropIdIsAlreadyInDataStore(Query query) throws ExecutionStrategyInitializationException {
+        PropositionDefinitionCache dataStorePropDefs = this.workingMemoryDataStores.getPropositionDefinitionsInStores();
+        for (String propId : query.getPropositionIds()) {
+            if (dataStorePropDefs.contains(propId)) {
+                throw new ExecutionStrategyInitializationException(
+                        "Proposition id "
+                        + propId
+                        + " already exists; if you want to update it, use the update query mode");
+            }
+        }
+    }
+
+    private void failIfQueriedPropIdIsNotAlreadyInDataStore(Query query) throws ExecutionStrategyInitializationException {
+        PropositionDefinitionCache dataStorePropDefs = this.workingMemoryDataStores.getPropositionDefinitionsInStores();
+        for (String propId : query.getPropositionIds()) {
+            if (!dataStorePropDefs.contains(propId)) {
+                throw new ExecutionStrategyInitializationException(
+                        "Proposition id "
+                        + propId
+                        + " not already in data store; use the add mode to add it");
+            }
+        }
+
     }
 
     private void createDataStoreManager(PropositionDefinitionCache cache) throws ExecutionStrategyInitializationException {
@@ -244,7 +277,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             switch (queryMode) {
                 case REPROCESS_UPDATE:
                 case REPROCESS_DELETE:
-                    factStore.removeAll(getQuery().getPropositionIds());
+                    this.propsToDelete.addAll(factStore.removeAll(getQuery().getPropositionIds()));
                 case REPROCESS_RETRIEVE:
                 case REPROCESS_CREATE:
                     getDerivationsBuilder().reset(
@@ -265,10 +298,10 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
     private void fireAllRules() throws FactException {
         this.workingMemory.fireAllRules();
-        this.propsToDelete = this.workingMemoryEventListener.getPropsToDelete();
+        this.propsToDelete.addAll(this.workingMemoryEventListener.getPropsToDelete());
     }
 
-    private void cleanupAndPersistWorkingMemory(String keyId) {
+    private void cleanupAndPersistWorkingMemory(String keyId) throws ExecutionStrategyExecutionException {
         this.workingMemory.removeEventListener(this.workingMemoryEventListener);
         this.workingMemoryEventListener.clear();
         LOGGER.log(Level.FINEST,
@@ -283,6 +316,11 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         }
         factStore.setPropositions(facts);
         this.dataStore.put(keyId, factStore);
+        try {
+            this.workingMemoryDataStores.finish();
+        } catch (IOException ex) {
+            throw new ExecutionStrategyExecutionException(ex);
+        }
         LOGGER.log(Level.FINEST,
                 "Persisted working memory for key ID {0}", keyId);
     }

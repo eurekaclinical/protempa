@@ -24,7 +24,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,9 +69,9 @@ public final class WorkingMemoryDataStores implements DataStores {
         if (cache == null) {
             throw new IllegalArgumentException("cache cannot be null");
         }
-        
+
         this.propositionDefinitionsInStores = new HashMap<>();
-        
+
         this.storeFactory = new BdbPersistentStoreFactory(directory.toString());
         this.storedPropDefsFile = directory.resolve(name + ".stored-propdefs");
         if (Files.exists(this.storedPropDefsFile)) {
@@ -93,7 +92,7 @@ public final class WorkingMemoryDataStores implements DataStores {
                 throw new IOException("Error deserializing proposition definitions", ex);
             }
         }
-        
+
         this.databaseName = name;
         this.cache = cache;
     }
@@ -121,24 +120,19 @@ public final class WorkingMemoryDataStores implements DataStores {
     }
 
     @Override
-    public void close() throws IOException {
+    public void finish() throws IOException {
         try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(this.storedPropDefsFile))) {
             Collection<PropositionDefinition> all = cache.getAll();
             oos.writeInt(all.size());
             for (PropositionDefinition pd : all) {
                 oos.writeObject(pd);
             }
-            this.storeFactory.close();
-            this.storeFactory = null;
-        } catch (IOException ex) {
-            if (this.storeFactory != null) {
-                try {
-                    this.storeFactory.close();
-                } catch (IOException suppress) {
-                    ex.addSuppressed(suppress);
-                }
-                throw ex;
-            }
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.storeFactory.close();
+        this.storeFactory = null;
     }
 }
