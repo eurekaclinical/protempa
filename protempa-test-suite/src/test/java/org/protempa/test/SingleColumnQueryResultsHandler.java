@@ -54,7 +54,7 @@ final class SingleColumnQueryResultsHandler
         this.data = new HashMap<>();
         this.writer = writer;
     }
-
+    
     @Override
     public void handleQueryResult(String keyId, List<Proposition> propositions, 
             Map<Proposition, Set<Proposition>> forwardDerivations, 

@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.query.Query;
+import org.protempa.query.QueryMode;
 
 /**
  *

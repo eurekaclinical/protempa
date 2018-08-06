@@ -41,7 +41,7 @@ final class DeletedProposition {
     private static final ClassObjectType PROPOSITION_OBJECT_TYPE = 
             new ClassObjectType(Proposition.class);
 
-    public void toRules(List<Rule> rules, DerivationsBuilder derivationsBuilder) {
+    public void toRules(List<Rule> rules) {
         try {
             Rule rule = new Rule("DELETE_PROPOSITION");
             rule.setSalience(new SalienceInteger(10));
@@ -49,7 +49,7 @@ final class DeletedProposition {
             Constraint c0 = new PredicateConstraint(new DeletedPropositionExpression());
             p0.addConstraint(c0);
             rule.addPattern(p0);
-            rule.setConsequence(new DeletedPropositionConsequence(derivationsBuilder));
+            rule.setConsequence(new DeletedPropositionConsequence());
             rules.add(rule);
         } catch (InvalidRuleException e) {
             LOGGER.log(Level.SEVERE, "Could not create rules.", e);

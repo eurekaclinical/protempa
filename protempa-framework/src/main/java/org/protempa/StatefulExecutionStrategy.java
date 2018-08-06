@@ -26,14 +26,16 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.apache.commons.collections4.iterators.IteratorChain;
 import org.arp.javautil.arrays.Arrays;
 import org.drools.FactException;
@@ -151,7 +153,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
                         }
                     }
                 }
-                
+
                 cache = new PropositionDefinitionCache(propDefsForCache);
                 propDefs = cache.getAll();
                 break;
@@ -195,7 +197,8 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private PropositionDefinitionCache newCacheWithPropDefsThatWeNeedToCompute(Collection<PropositionDefinition> propDefs) {
-        PropositionDefinitionCache dataStorePropDefs = this.workingMemoryDataStores.getPropositionDefinitionsInStores();
+        PropositionDefinitionCache dataStorePropDefs
+                = this.workingMemoryDataStores.getPropositionDefinitionsInStores();
         for (Iterator<PropositionDefinition> itr = propDefs.iterator(); itr.hasNext();) {
             PropositionDefinition propDef = itr.next();
             if (propDef == null || dataStorePropDefs.contains(propDef.getPropositionId())) {
@@ -206,7 +209,8 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private void failIfQueriedPropIdIsAlreadyInDataStore(Query query) throws ExecutionStrategyInitializationException {
-        PropositionDefinitionCache dataStorePropDefs = this.workingMemoryDataStores.getPropositionDefinitionsInStores();
+        PropositionDefinitionCache dataStorePropDefs
+                = this.workingMemoryDataStores.getPropositionDefinitionsInStores();
         for (String propId : query.getPropositionIds()) {
             if (dataStorePropDefs.contains(propId)) {
                 throw new ExecutionStrategyInitializationException(
@@ -218,7 +222,8 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     }
 
     private void failIfQueriedPropIdIsNotAlreadyInDataStore(Query query) throws ExecutionStrategyInitializationException {
-        PropositionDefinitionCache dataStorePropDefs = this.workingMemoryDataStores.getPropositionDefinitionsInStores();
+        PropositionDefinitionCache dataStorePropDefs
+                = this.workingMemoryDataStores.getPropositionDefinitionsInStores();
         for (String propId : query.getPropositionIds()) {
             if (!dataStorePropDefs.contains(propId)) {
                 throw new ExecutionStrategyInitializationException(
@@ -277,14 +282,19 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             switch (queryMode) {
                 case REPROCESS_UPDATE:
                 case REPROCESS_DELETE:
-                    this.propsToDelete.addAll(factStore.removeAll(getQuery().getPropositionIds()));
+                    Collection<Proposition> result
+                            = factStore.getAll(getQuery().getPropositionIds());
+                    new MarkDeletedPropositionVisitor().visit(result);
+                    this.propsToDelete.addAll(result);
                 case REPROCESS_RETRIEVE:
                 case REPROCESS_CREATE:
                     getDerivationsBuilder().reset(
                             factStore.getForwardDerivations(),
                             factStore.getBackwardDerivations());
                     for (Proposition prop : factStore.getPropositions()) {
-                        this.workingMemory.insert(prop);
+                        if (prop.getDeleteDate() == null) {
+                            this.workingMemory.insert(prop);
+                        }
                     }
                     break;
                 case REPLACE:
@@ -307,13 +317,29 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
         LOGGER.log(Level.FINEST,
                 "Persisting working memory for key ID {0}", keyId);
         WorkingMemoryFactStore factStore = new WorkingMemoryFactStore();
-        factStore.setForwardDerivations(getDerivationsBuilder().getForwardDerivations());
-        factStore.setBackwardDerivations(getDerivationsBuilder().getBackwardDerivations());
+        Set<Proposition> realPropsToDelete = new HashSet<>(this.propsToDelete);
+        Map<Proposition, Set<Proposition>> forwardDerivationsCopy = new HashMap<>();
+        for (Map.Entry<Proposition, Set<Proposition>> me : getDerivationsBuilder().getForwardDerivations().entrySet()) {
+            Proposition p = me.getKey();
+            Set<Proposition> values = me.getValue();
+            forwardDerivationsCopy.put(p, new HashSet<>(values));
+        }
+        Map<Proposition, Set<Proposition>> backwardsDerivationsCopy = new HashMap<>();
+        for (Map.Entry<Proposition, Set<Proposition>> me : getDerivationsBuilder().getBackwardDerivations().entrySet()) {
+            Proposition p = me.getKey();
+            Set<Proposition> values = me.getValue();
+            backwardsDerivationsCopy.put(p, new HashSet<>(values));
+        }
+        factStore.setForwardDerivations(forwardDerivationsCopy);
+        factStore.setBackwardDerivations(backwardsDerivationsCopy);
         List<Proposition> facts = new ArrayList<>();
         Iterator factItr = this.workingMemory.iterateObjects();
         while (factItr.hasNext()) {
-            facts.add((Proposition) factItr.next());
+            Proposition prop = (Proposition) factItr.next();
+            realPropsToDelete.remove(prop);
+            facts.add(prop);
         }
+        factStore.removeAll(realPropsToDelete);
         factStore.setPropositions(facts);
         this.dataStore.put(keyId, factStore);
         try {

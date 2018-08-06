@@ -20,7 +20,6 @@
 package org.protempa;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -431,7 +430,7 @@ class JBossRuleCreator extends AbstractPropositionDefinitionCheckedVisitor {
      */
     List<Rule> getRules() {
         List<Rule> rulesToReturn = new ArrayList<>(this.rules);
-        new DeletedProposition().toRules(rulesToReturn, this.derivationsBuilder);
+        new DeletedProposition().toRules(rulesToReturn);
         return rulesToReturn;
     }
     

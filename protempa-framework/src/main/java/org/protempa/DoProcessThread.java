@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;
+import org.protempa.query.QueryMode;
 
 /**
  *

@@ -19,8 +19,6 @@
  */
 package org.protempa;
 
-import java.util.Collection;
-
 import org.drools.RuleBase;
 import org.protempa.query.Query;
 

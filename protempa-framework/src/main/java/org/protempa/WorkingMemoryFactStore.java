@@ -69,14 +69,43 @@ public class WorkingMemoryFactStore implements Serializable {
         this.backwardDerivations = backwardDerivations;
     }
 
-    Collection<Proposition> removeAll(String[] propositionIds) {
-        Set<String> propIds = Arrays.asSet(propositionIds);
+    Collection<Proposition> getAll(String[] propIds) {
+        Set<String> pIds = Arrays.asSet(propIds);
+        List<Proposition> result = new ArrayList<>();
+        if (this.propositions != null) {
+            for (Proposition prop : this.propositions) {
+                if (pIds.contains(prop.getId())) {
+                    result.add(prop);
+                }
+            }
+        }
+        return result;
+    }
+
+    void removeAll(Collection<Proposition> propositions) {
+        for (Proposition prop : propositions) {
+            this.forwardDerivations.remove(prop);
+            this.backwardDerivations.remove(prop);
+            for (Collection<Proposition> values : this.forwardDerivations.values()) {
+                values.remove(prop);
+            }
+            for (Collection<Proposition> values : this.backwardDerivations.values()) {
+                values.remove(prop);
+            }
+            if (this.propositions != null) {
+                this.propositions.remove(prop);
+            }
+        }
+    }
+
+    Collection<Proposition> removeAll(String[] propIds) {
+        Set<String> pIds = Arrays.asSet(propIds);
         Queue<Proposition> queue = new LinkedList<>(this.forwardDerivations != null ? this.forwardDerivations.keySet() : Collections.emptySet());
-        Set<String> removed = new HashSet<>(Arrays.asSet(propositionIds));
+        Set<String> removed = new HashSet<>(Arrays.asSet(propIds));
         List<Proposition> removedProps = new ArrayList<>();
         while (!queue.isEmpty()) {
             Proposition prop = queue.remove();
-            if (prop != null && propIds.contains(prop.getId())) {
+            if (prop != null && pIds.contains(prop.getId())) {
                 Collection<Proposition> toRemove = this.forwardDerivations != null ? this.forwardDerivations.remove(prop) : null;
                 removed.add(prop.getId());
                 if (toRemove != null) {

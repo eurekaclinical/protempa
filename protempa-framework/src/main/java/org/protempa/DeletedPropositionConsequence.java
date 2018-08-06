@@ -20,10 +20,8 @@
 package org.protempa;
 
 import org.drools.WorkingMemory;
-import org.drools.common.InternalFactHandle;
 import org.drools.spi.Consequence;
 import org.drools.spi.KnowledgeHelper;
-import org.protempa.proposition.Proposition;
 
 /**
  *
@@ -31,19 +29,13 @@ import org.protempa.proposition.Proposition;
  */
 class DeletedPropositionConsequence implements Consequence {
     private static final long serialVersionUID = 1L;
-    private final DerivationsBuilder derivationsBuilder;
 
-    public DeletedPropositionConsequence(DerivationsBuilder derivationsBuilder) {
-        this.derivationsBuilder = derivationsBuilder;
+    public DeletedPropositionConsequence() {
     }
 
     @Override
     public void evaluate(KnowledgeHelper kh, WorkingMemory wm) throws Exception {
-        InternalFactHandle factHandle = kh.getTuple().get(0);
-        Proposition prop = (Proposition) wm.getObject(factHandle);
-        kh.retract(factHandle);
-        this.derivationsBuilder.propositionRetractedBackward(prop);
-        this.derivationsBuilder.propositionRetractedForward(prop);
+        kh.retract(kh.getTuple().get(0));
     }
 
 }
