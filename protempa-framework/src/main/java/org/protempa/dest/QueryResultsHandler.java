@@ -20,11 +20,9 @@
 package org.protempa.dest;
 
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.protempa.PropositionDefinition;
 import org.protempa.PropositionDefinitionCache;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;

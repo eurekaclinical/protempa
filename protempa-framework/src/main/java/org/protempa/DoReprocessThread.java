@@ -32,16 +32,14 @@ import org.protempa.query.Query;
 public class DoReprocessThread extends DoProcessThread<StatefulExecutionStrategy> {
 
     private static final Logger LOGGER = Logger.getLogger(DoReprocessThread.class.getName());
-    private final AlgorithmSource algorithmSource;
 
     DoReprocessThread(
             BlockingQueue<QueueObject> hqrQueue,
             QueueObject hqrPoisonPill, Query query,
             AlgorithmSource algorithmSource, KnowledgeSource knowledgeSource,
-            PropositionDefinitionCache propositionDefinitionCache) {
+            PropositionDefinitionCache propositionDefinitionCache) throws QueryException {
         super(hqrQueue, hqrPoisonPill, query, null,
-                knowledgeSource, propositionDefinitionCache, LOGGER);
-        this.algorithmSource = algorithmSource;
+                knowledgeSource, propositionDefinitionCache, algorithmSource, LOGGER);
     }
 
     @Override
@@ -63,7 +61,7 @@ public class DoReprocessThread extends DoProcessThread<StatefulExecutionStrategy
 
     @Override
     StatefulExecutionStrategy selectExecutionStrategy() {
-        return new StatefulExecutionStrategy(this.algorithmSource, getQuery());
+        return new StatefulExecutionStrategy(getAlgorithmSource(), getQuery());
     }
 
 }

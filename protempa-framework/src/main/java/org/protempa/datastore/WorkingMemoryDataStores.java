@@ -19,15 +19,15 @@
  */
 package org.protempa.datastore;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Map;
 import org.eurekaclinical.datastore.bdb.BdbPersistentStoreFactory;
 
 import org.eurekaclinical.datastore.DataStore;
@@ -46,27 +46,34 @@ public final class WorkingMemoryDataStores implements DataStores {
 
     public static final String DATABASE_NAME = "WorkingMemoryStore";
 
-    private final DataStoreFactory storeFactory;
+    private DataStoreFactory storeFactory;
+    private Map<String, PropositionDefinitionCache> propositionDefinitionsInStores;
     private PropositionDefinitionCache cache;
+    private Path storedPropDefsFile;
+    private String databaseName;
 
     /**
      * Constructs a working memory creator.
      *
      * @param directory the directory in which the working memory data stores
      * will be stored. Cannot be <code>null</code>.
-     * @param cache the proposition definitions to write to the store.
+     * @param cache the proposition definitions that were queried.
      */
-    public WorkingMemoryDataStores(String directory, PropositionDefinitionCache cache) throws IOException {
+    public WorkingMemoryDataStores(Path directory, String name, PropositionDefinitionCache cache) throws IOException {
         if (directory == null) {
             throw new IllegalArgumentException("directory cannot be null");
+        }
+        if (name == null) {
+            throw new IllegalArgumentException("name cannot be null");
         }
         if (cache == null) {
             throw new IllegalArgumentException("cache cannot be null");
         }
-        this.storeFactory = new BdbPersistentStoreFactory(directory);
-        File file = new File(directory, "stored-propdefs");
-        if (file.exists()) {
-            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+        
+        this.storeFactory = new BdbPersistentStoreFactory(directory.toString());
+        this.storedPropDefsFile = directory.resolve(name + ".stored-propdefs");
+        if (Files.exists(this.storedPropDefsFile)) {
+            try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(this.storedPropDefsFile))) {
                 int size = ois.readInt();
                 Collection<PropositionDefinition> propDefs = new ArrayList<>(size);
                 for (int i = 0; i < size; i++) {
@@ -77,27 +84,23 @@ public final class WorkingMemoryDataStores implements DataStores {
                         propDefs.add((PropositionDefinition) obj);
                     }
                 }
-                this.cache = new PropositionDefinitionCache(propDefs);
+                this.propositionDefinitionsInStores.put(name, new PropositionDefinitionCache(propDefs));
             } catch (ClassNotFoundException ex) {
                 throw new IOException("Error deserializing proposition definitions", ex);
             }
         }
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-            Collection<PropositionDefinition> all = cache.getAll();
-            oos.writeInt(all.size());
-            for (PropositionDefinition pd : all) {
-                oos.writeObject(pd);
-            }
-        }
+        cache.merge(this.propositionDefinitionsInStores.get(name));
+        this.databaseName = name;
+        this.cache = cache;
     }
 
-    public PropositionDefinitionCache getCache() {
-        return this.cache;
+    public PropositionDefinitionCache getPropositionDefinitionsInStores() {
+        return this.propositionDefinitionsInStores.get(this.databaseName);
     }
 
     @Override
-    public boolean exists(String dbname) throws IOException {
-        return this.storeFactory.exists(dbname);
+    public boolean exists() throws IOException {
+        return this.storeFactory.exists(this.databaseName);
     }
 
     /**
@@ -109,13 +112,29 @@ public final class WorkingMemoryDataStores implements DataStores {
      * @throws IOException if an error occurred querying for the data store.
      */
     @Override
-    public DataStore<String, WorkingMemoryFactStore> getDataStore(String name) throws IOException {
-        return this.storeFactory.getInstance(name);
+    public DataStore<String, WorkingMemoryFactStore> getDataStore() throws IOException {
+        return this.storeFactory.getInstance(this.databaseName);
     }
 
     @Override
     public void close() throws IOException {
-        this.storeFactory.close();
+        try (ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(this.storedPropDefsFile))) {
+            Collection<PropositionDefinition> all = cache.getAll();
+            oos.writeInt(all.size());
+            for (PropositionDefinition pd : all) {
+                oos.writeObject(pd);
+            }
+            this.storeFactory.close();
+            this.storeFactory = null;
+        } catch (IOException ex) {
+            if (this.storeFactory != null) {
+                try {
+                    this.storeFactory.close();
+                } catch (IOException suppress) {
+                    ex.addSuppressed(suppress);
+                }
+                throw ex;
+            }
+        }
     }
-
 }

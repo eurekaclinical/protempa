@@ -29,7 +29,7 @@ import org.protempa.query.Query;
  *
  * @author arpost
  */
-public class AbstractThread extends Thread {
+class AbstractThread extends Thread {
 
     private final Query query;
     private final MessageFormat logMessageFormat;
@@ -44,29 +44,29 @@ public class AbstractThread extends Thread {
         this.logger = logger;
     }
     
-    protected void log(Level level, String msg) {
+    final void log(Level level, String msg) {
         if (logger.isLoggable(level)) {
             logger.log(level, this.logMessageFormat.format(new Object[]{msg}));
         }
     }
     
-    protected void log(Level level, String msg, Throwable throwable) {
+    final void log(Level level, String msg, Throwable throwable) {
         if (logger.isLoggable(level)) {
             logger.log(level, this.logMessageFormat.format(new Object[]{msg}), throwable);
         }
     }
     
-    protected void log(Level level, String msg, Object param) {
+    final void log(Level level, String msg, Object param) {
         if (logger.isLoggable(level)) {
             logger.log(level, this.logMessageFormat.format(new Object[]{msg}), param);
         }
     }
     
-    protected boolean isLoggable(Level level) {
+    final boolean isLoggable(Level level) {
         return this.logger.isLoggable(level);
     }
 
-    protected Query getQuery() {
+    final Query getQuery() {
         return query;
     }
     

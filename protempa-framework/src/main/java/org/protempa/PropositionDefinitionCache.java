@@ -19,7 +19,6 @@ package org.protempa;
  * limitations under the License.
  * #L%
  */
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,34 +31,51 @@ import java.util.Set;
 /**
  * A cache containing all of the proposition definitions currently being
  * processed.
- * 
+ *
  * @author Andrew Post
  */
 public class PropositionDefinitionCache {
-    
+
     private final Map<String, PropositionDefinition> cache;
-    
-    
+
     public PropositionDefinitionCache(Collection<? extends PropositionDefinition> propDefs) {
         this.cache = new HashMap<>();
         for (PropositionDefinition pd : propDefs) {
             this.cache.put(pd.getId(), pd);
         }
     }
-    
+
+    /**
+     * Merges the given cache into this one. Any proposition definitions that
+     * are not in this cache will be added.
+     * 
+     * @param otherCache another proposition definition cache.
+     */
+    public void merge(PropositionDefinitionCache otherCache) {
+        if (otherCache != null) {
+            for (Map.Entry<String, PropositionDefinition> me : otherCache.cache.entrySet()) {
+                this.cache.putIfAbsent(me.getKey(), me.getValue());
+            }
+        }
+    }
+
     /**
      * Gets an immutable collection of the proposition definitions.
-     * 
+     *
      * @return a collection of proposition definitions.
      */
     public Collection<PropositionDefinition> getAll() {
         return Collections.unmodifiableCollection(this.cache.values());
     }
-    
+
     public PropositionDefinition get(String id) {
         return this.cache.get(id);
     }
     
+    public PropositionDefinition remove(String id) {
+        return this.cache.remove(id);
+    }
+
     public Set<String> collectPropIdDescendantsUsingInverseIsA(String... propIds) throws QueryException {
         Set<String> result = new HashSet<>();
         Queue<String> queue = new LinkedList<>();

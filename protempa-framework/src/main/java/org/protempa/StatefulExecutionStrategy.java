@@ -19,9 +19,10 @@
  */
 package org.protempa;
 
-import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,19 +49,23 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
     private static final Logger LOGGER = Logger.getLogger(StatefulExecutionStrategy.class.getName());
 
-    private final File databasePath;
+    private final Path databasePath;
     private DataStore<String, WorkingMemoryFactStore> dataStore;
     private WorkingMemoryDataStores workingMemoryDataStores;
     private StatefulSession workingMemory;
     private final DeletedWorkingMemoryEventListener workingMemoryEventListener;
     private List<Proposition> propsToDelete;
+    private final String databaseName;
+    private final Path databaseDir;
 
     StatefulExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
         super(algorithmSource, query);
         assert query != null : "query cannot be null";
         String dbPath = query.getDatabasePath();
         assert dbPath != null : "query.getDatabasePath() cannot return a null value";
-        this.databasePath = new File(dbPath);
+        this.databasePath = Paths.get(dbPath);
+        this.databaseDir = this.databasePath.getParent();
+        this.databaseName = this.databasePath.getFileName().toString();
         this.workingMemoryEventListener = new DeletedWorkingMemoryEventListener();
     }
 
@@ -117,7 +122,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
                 propDefs = cache.getAll();
                 break;
             case REPROCESS_UPDATE:
-                cache = this.workingMemoryDataStores.getCache();
+                cache = this.workingMemoryDataStores.getPropositionDefinitionsInStores();
                 String[] queryPropIds = getQuery().getPropositionIds();
                 Set<String> propIdsUpdate = cache.getAll().stream()
                         .map(elt -> elt.getPropositionId())
@@ -145,16 +150,19 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
             case REPROCESS_CREATE:
                 cache = getCache();
                 propDefs = new ArrayList<>(cache.getAll());
-                Set<String> propIdsInStore = this.workingMemoryDataStores
-                        .getCache().getAll().stream()
+                PropositionDefinitionCache dataStorePropDefs = 
+                        this.workingMemoryDataStores.getPropositionDefinitionsInStores();
+                Set<String> propIdsInStore = dataStorePropDefs.getAll().stream()
                         .map(elt -> elt.getPropositionId())
                         .collect(Collectors.toSet());
                 for (String propId : query.getPropositionIds()) {
                     if (propIdsInStore.contains(propId)) {
+                        propIdsInStore.remove(propId);
+                        dataStorePropDefs.remove(propId);
                         throw new ExecutionStrategyInitializationException(
                                 "Proposition id "
                                 + propId
-                                + "already exists; if you want to update it, use the update query mode");
+                                + " already exists; if you want to update it, use the update query mode");
                     }
                 }
                 for (Iterator<PropositionDefinition> itr = propDefs.iterator(); itr.hasNext();) {
@@ -192,7 +200,7 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     private void createDataStoreManager(PropositionDefinitionCache cache) throws ExecutionStrategyInitializationException {
         try {
             this.workingMemoryDataStores
-                    = new WorkingMemoryDataStores(this.databasePath.getParent(), cache);
+                    = new WorkingMemoryDataStores(this.databaseDir, this.databaseName, cache);
         } catch (IOException ex) {
             throw new ExecutionStrategyInitializationException(ex);
         }
@@ -200,16 +208,15 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
 
     private void getOrCreateDataStore() throws ExecutionStrategyInitializationException {
         try {
-            String dbName = this.databasePath.getName();
-            this.dataStore = this.workingMemoryDataStores.getDataStore(dbName);
-            LOGGER.log(Level.FINE, "Opened data store {0}", this.databasePath.getPath());
+            this.dataStore = this.workingMemoryDataStores.getDataStore();
+            LOGGER.log(Level.FINE, "Opened data store {0}", this.databasePath.toString());
         } catch (IOException ex) {
             throw new ExecutionStrategyInitializationException(ex);
         }
 
         if (getQuery().getQueryMode() == QueryMode.REPLACE) {
             this.dataStore.clear();
-            LOGGER.log(Level.FINE, "Cleared data store {0}", this.databasePath.getPath());
+            LOGGER.log(Level.FINE, "Cleared data store {0}", this.databasePath.toString());
         }
     }
 

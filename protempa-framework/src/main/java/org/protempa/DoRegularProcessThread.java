@@ -37,19 +37,17 @@ public class DoRegularProcessThread extends DoProcessThread<ExecutionStrategy> {
     
     private final BlockingQueue<DataStreamingEvent<Proposition>> doProcessQueue;
     private final DataStreamingEvent<Proposition> doProcessPoisonPill;
-    private final AlgorithmSource algorithmSource;
 
     DoRegularProcessThread(BlockingQueue<DataStreamingEvent<Proposition>> doProcessQueue, 
             BlockingQueue<QueueObject> hqrQueue, 
             DataStreamingEvent<Proposition> doProcessPoisonPill, 
             QueueObject hqrPoisonPill, Query query, Thread producer, 
             AlgorithmSource algorithmSource, KnowledgeSource knowledgeSource, 
-            PropositionDefinitionCache propositionDefinitionCache) {
+            PropositionDefinitionCache propositionDefinitionCache) throws QueryException {
         super(hqrQueue, hqrPoisonPill, query, producer, 
-                knowledgeSource, propositionDefinitionCache, LOGGER);
+                knowledgeSource, propositionDefinitionCache, algorithmSource, LOGGER);
         this.doProcessQueue = doProcessQueue;
         this.doProcessPoisonPill = doProcessPoisonPill;
-        this.algorithmSource = algorithmSource;
     }
     
     @Override
@@ -74,11 +72,11 @@ public class DoRegularProcessThread extends DoProcessThread<ExecutionStrategy> {
         if (query.getDatabasePath() != null) {
             log(Level.FINER, "Chosen stateful execution strategy");
             return new StatefulExecutionStrategy(
-                    this.algorithmSource, query);
+                    getAlgorithmSource(), query);
         } else {
             log(Level.FINER, "Chosen stateless execution strategy");
             return new StatelessExecutionStrategy(
-                    this.algorithmSource, query);
+                    getAlgorithmSource(), query);
         }
     }
     

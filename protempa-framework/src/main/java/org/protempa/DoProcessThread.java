@@ -46,6 +46,7 @@ abstract class DoProcessThread<E extends ExecutionStrategy> extends AbstractThre
     private final PropositionDefinitionCache propositionDefinitionCache;
     private final KnowledgeSource knowledgeSource;
     private DerivationsBuilder derivationsBuilder;
+    private final AlgorithmSource algorithmSource;
 
     DoProcessThread(
             BlockingQueue<QueueObject> hqrQueue,
@@ -53,7 +54,8 @@ abstract class DoProcessThread<E extends ExecutionStrategy> extends AbstractThre
             Thread producer,
             KnowledgeSource knowledgeSource,
             PropositionDefinitionCache propositionDefinitionCache,
-            Logger logger) {
+            AlgorithmSource algorithmSource,
+            Logger logger) throws QueryException {
         super(query, logger, "protempa.executor.DoProcessThread");
         this.hqrQueue = hqrQueue;
         this.producer = producer;
@@ -61,20 +63,23 @@ abstract class DoProcessThread<E extends ExecutionStrategy> extends AbstractThre
         this.exceptions = new ArrayList<>();
         this.knowledgeSource = knowledgeSource;
         this.propositionDefinitionCache = propositionDefinitionCache;
+        assert algorithmSource != null : "algorithmSource cannot be null";
+        this.algorithmSource = algorithmSource;
+        try {
+            initialize();
+        } catch (KnowledgeSourceReadException | ExecutionStrategyInitializationException ex) {
+            throw new QueryException(query.getName(), ex);
+        }
     }
 
     @Override
-    public void run() {
+    public final void run() {
         log(Level.FINER, "Start do process thread");
         try {
-            initialize();
             doProcessDataLoop();
             swallowHQRPoisonPill();
         } catch (InterruptedException ex) {
             handleInterrupted(ex);
-        } catch (ExecutionStrategyInitializationException | KnowledgeSourceReadException ex) {
-            handleException();
-            this.exceptions.add(new QueryException(getQuery().getName(), ex));
         } catch (Error | RuntimeException t) {
             log(Level.SEVERE, "Do process thread threw runtime error", t);
             handleException();
@@ -84,8 +89,12 @@ abstract class DoProcessThread<E extends ExecutionStrategy> extends AbstractThre
         }
         log(Level.FINER, "End do process thread");
     }
+    
+    final AlgorithmSource getAlgorithmSource() {
+        return algorithmSource;
+    }
 
-    protected void doProcessData(String keyId, Iterator<Proposition> dataItr, int sizeHint, Query query) throws InterruptedException {
+    final void doProcessData(String keyId, Iterator<Proposition> dataItr, int sizeHint, Query query) throws InterruptedException {
         Iterator<Proposition> resultsItr;
         if (this.executionStrategy != null) {
             resultsItr = this.executionStrategy.execute(keyId, dataItr);
@@ -97,10 +106,10 @@ abstract class DoProcessThread<E extends ExecutionStrategy> extends AbstractThre
         Map<Proposition, Set<Proposition>> backwardDerivations
                 = this.derivationsBuilder.getBackwardDerivations();
         Map<UniqueId, Proposition> refs = new HashMap<>();
-        List<Proposition> filteredPropositions = 
-                extractRequestedPropositions(resultsItr, refs, sizeHint);
+        List<Proposition> filteredPropositions
+                = extractRequestedPropositions(resultsItr, refs, sizeHint);
         if (isLoggable(Level.FINEST)) {
-            log(Level.FINEST, "Proposition ids: {0}", 
+            log(Level.FINEST, "Proposition ids: {0}",
                     String.join(", ", query.getPropositionIds()));
             log(Level.FINEST, "Filtered propositions: {0}", filteredPropositions);
             log(Level.FINEST, "Forward derivations: {0}", forwardDerivations);
@@ -112,12 +121,43 @@ abstract class DoProcessThread<E extends ExecutionStrategy> extends AbstractThre
         log(Level.FINER, "Results put on query result handler queue");
         this.derivationsBuilder.reset();
     }
+    
+    abstract void doProcessDataLoop() throws InterruptedException;
+    
+    /**
+     * Called by the constructor to setup the execution strategy.
+     * 
+     * @return an execution strategy.
+     */
+    abstract E selectExecutionStrategy();
 
-    protected E getExecutionStrategy() {
+    final E getExecutionStrategy() {
         return this.executionStrategy;
     }
 
-    protected abstract void doProcessDataLoop() throws InterruptedException;
+    final void closeWorkingMemory() {
+        if (this.executionStrategy != null) {
+            this.executionStrategy.closeCurrentWorkingMemory();
+        }
+    }
+
+    final List<QueryException> getExceptions() {
+        return this.exceptions;
+    }
+    
+    private List<Proposition> extractRequestedPropositions(
+            Iterator<Proposition> propositions, Map<UniqueId, Proposition> refs,
+            int sizeHint) {
+        List<Proposition> result = new ArrayList<>(sizeHint > -1 ? sizeHint : 200);
+        if (propositions != null) {
+            while (!isInterrupted() && propositions.hasNext()) {
+                Proposition prop = propositions.next();
+                refs.put(prop.getUniqueId(), prop);
+                result.add(prop);
+            }
+        }
+        return result;
+    }
 
     private void swallowHQRPoisonPill() throws InterruptedException {
         this.hqrQueue.put(this.hqrPoisonPill);
@@ -162,32 +202,6 @@ abstract class DoProcessThread<E extends ExecutionStrategy> extends AbstractThre
             this.derivationsBuilder = new DerivationsBuilder();
         }
     }
-
-    protected List<Proposition> extractRequestedPropositions(
-            Iterator<Proposition> propositions, Map<UniqueId, Proposition> refs,
-            int sizeHint) {
-        List<Proposition> result = new ArrayList<>(sizeHint > -1 ? sizeHint : 200);
-        if (propositions != null) {
-            while (!isInterrupted() && propositions.hasNext()) {
-                Proposition prop = propositions.next();
-                refs.put(prop.getUniqueId(), prop);
-                result.add(prop);
-            }
-        }
-        return result;
-    }
-
-    protected void closeWorkingMemory() {
-        if (this.executionStrategy != null) {
-            this.executionStrategy.closeCurrentWorkingMemory();
-        }
-    }
-
-    protected List<QueryException> getExceptions() {
-        return this.exceptions;
-    }
-    
-    abstract E selectExecutionStrategy();
 
     private boolean hasSomethingToAbstract(Query query) throws KnowledgeSourceReadException {
         if (!this.knowledgeSource.readAbstractionDefinitions(query.getPropositionIds()).isEmpty()

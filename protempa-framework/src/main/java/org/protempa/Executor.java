@@ -95,8 +95,7 @@ final class Executor implements AutoCloseable {
                 log(Level.FINE, "Propositions to be queried are {0}", StringUtils.join(this.propIds, ", "));
             }
             extractPropositionDefinitionCache();
-            startQueryResultsHandler();
-        } catch (KnowledgeSourceReadException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | QueryResultsHandlerProcessingException | Error | RuntimeException ex) {
+        } catch (KnowledgeSourceReadException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | Error | RuntimeException ex) {
             this.failed = true;
             throw new QueryException(this.query.getName(), ex);
         }
@@ -151,6 +150,11 @@ final class Executor implements AutoCloseable {
                 this.handleQueryResultThread
                         = new HandleQueryResultThread(hqrQueue, hqrPoisonPill,
                                 doProcessThread, this.query, this.resultsHandler);
+                try {
+                    startQueryResultsHandler();
+                } catch (QueryResultsHandlerProcessingException ex) {
+                    throw new QueryException(this.query.getName(), ex);
+                }
                 if (retrieveDataThread != null) {
                     retrieveDataThread.start();
                 }

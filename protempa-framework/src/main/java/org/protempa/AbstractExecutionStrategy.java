@@ -37,6 +37,8 @@ abstract class AbstractExecutionStrategy implements ExecutionStrategy {
      * execution strategy
      */
     AbstractExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
+        assert algorithmSource != null : "algorithmSource cannot be null";
+        assert query != null : "query cannot be null";
         this.algorithmSource = algorithmSource;
         this.derivationsBuilder = new DerivationsBuilder();
         this.query = query;

@@ -20,8 +20,6 @@
 package org.protempa.datastore;
 
 import java.io.IOException;
-import org.drools.RuleBase;
-import org.drools.StatefulSession;
 import org.eurekaclinical.datastore.DataStore;
 import org.protempa.WorkingMemoryFactStore;
 
@@ -33,7 +31,7 @@ import org.protempa.WorkingMemoryFactStore;
  */
 public interface DataStores extends AutoCloseable {
     
-    boolean exists(String dbname) throws IOException;
+    boolean exists() throws IOException;
 
     /**
      * Returns a permanent store with the given name.
@@ -44,7 +42,7 @@ public interface DataStores extends AutoCloseable {
      * @throws java.io.IOException if an error occurred getting/creating the
      * data store.
      */
-    DataStore<String, WorkingMemoryFactStore> getDataStore(String name) throws IOException, DataStoreExistsException;
+    DataStore<String, WorkingMemoryFactStore> getDataStore() throws IOException, DataStoreExistsException;
 
     @Override
     void close() throws IOException;
