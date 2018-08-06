@@ -112,9 +112,9 @@ class StatefulExecutionStrategy extends AbstractExecutionStrategy {
     protected JBossRuleCreator newRuleCreator() throws ExecutionStrategyInitializationException {
         ValidateAlgorithmCheckedVisitor visitor
                 = new ValidateAlgorithmCheckedVisitor(getAlgorithmSource());
-        Collection<PropositionDefinition> propDefs;
-        Query query = getQuery();
         PropositionDefinitionCache cache;
+        Collection<PropositionDefinition> propDefs; //same as cache.getAll()
+        Query query = getQuery();
         switch (query.getQueryMode()) {
             case REPROCESS_RETRIEVE:
             case REPROCESS_DELETE:
