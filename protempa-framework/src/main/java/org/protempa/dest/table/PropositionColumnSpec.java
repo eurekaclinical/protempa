@@ -40,6 +40,7 @@ import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaException;
 import org.protempa.ProtempaUtil;
+import org.protempa.pool.Pool;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Context;
@@ -71,6 +72,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     private final OutputConfig outputConfig;
     private final ValueOutputConfig valueOutputConfig;
     private final ValuesPropositionVisitor propositionVisitor;
+    private final Pool pool;
 
     @Deprecated
     public PropositionColumnSpec() {
@@ -116,6 +118,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         private ValueOutputConfig valueOutputConfig;
         private Link[] links;
         private int numInstances = 1;
+        private Pool pool;
 
         public Builder columnNamePrefixOverride(String columnNamePrefixOverride) {
             this.columnNamePrefixOverride = columnNamePrefixOverride;
@@ -170,18 +173,35 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         public int getNumInstances() {
             return numInstances;
         }
+        
+        public Builder pool(Pool pool) {
+            this.pool = pool;
+            return this;
+        }
+        
+        public Pool getPool() {
+            return this.pool;
+        }
 
         public PropositionColumnSpec build() {
             return new PropositionColumnSpec(this.columnNamePrefixOverride,
                     this.propertyNames, this.outputConfig, this.valueOutputConfig,
-                    this.links, this.numInstances);
+                    this.links, this.numInstances, this.pool);
         }
+    }
+    
+    public PropositionColumnSpec(String columnNamePrefixOverride,
+            String[] propertyNames, OutputConfig outputConfig,
+            ValueOutputConfig valueOutputConfig, Link[] links,
+            int numInstances) {
+        this(columnNamePrefixOverride, propertyNames, outputConfig,
+                valueOutputConfig, links, numInstances, null);
     }
 
     public PropositionColumnSpec(String columnNamePrefixOverride,
             String[] propertyNames, OutputConfig outputConfig,
             ValueOutputConfig valueOutputConfig, Link[] links,
-            int numInstances) {
+            int numInstances, Pool pool) {
         if (propertyNames == null) {
             this.propertyNames = ArrayUtils.EMPTY_STRING_ARRAY;
         } else {
@@ -216,6 +236,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         this.numInstances = numInstances;
         this.columnNamePrefixOverride = columnNamePrefixOverride;
         propositionVisitor = new ValuesPropositionVisitor();
+        this.pool = pool;
     }
 
     private String[] columnNames() {
@@ -690,6 +711,13 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 return false;
             }
         } else if (!valueOutputConfig.equals(other.valueOutputConfig)) {
+            return false;
+        }
+        if (pool == null) {
+            if (other.pool != null) {
+                return false;
+            }
+        } else if (!pool.equals(other.pool)) {
             return false;
         }
         return true;

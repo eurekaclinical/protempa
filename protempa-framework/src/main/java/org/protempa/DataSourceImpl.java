@@ -28,6 +28,7 @@ import org.protempa.backend.DataSourceBackendUpdatedEvent;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.dest.QueryResultsHandler;
+import org.protempa.dest.key.KeySetQueryResultsHandler;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
@@ -234,6 +235,17 @@ public final class DataSourceImpl extends AbstractSource<DataSourceUpdatedEvent,
         }
     }
 
+    @Override
+    public void writeKeysFromKeySet(KeySetQueryResultsHandler queryResultsHandler) throws DataSourceWriteException {
+        for (DataSourceBackend backend : getBackends()) {
+            try {
+                backend.writeKeysFromKeySet(queryResultsHandler);
+            } catch (Error | RuntimeException ex) {
+                throw new DataSourceWriteException("Unexpected error accessing " + backend.getDisplayName(), ex);
+            }
+        }
+    }
+    
     @Override
     public void backendUpdated(DataSourceBackendUpdatedEvent evt) {
         clear();

@@ -32,6 +32,7 @@ import org.protempa.backend.AbstractBackend;
 import org.protempa.backend.DataSourceBackendFailedConfigurationValidationException;
 import org.protempa.backend.DataSourceBackendFailedDataValidationException;
 import org.protempa.backend.DataSourceBackendUpdatedEvent;
+import org.protempa.dest.key.KeySetQueryResultsHandler;
 import org.protempa.proposition.value.AbsoluteTimeGranularityFactory;
 import org.protempa.proposition.value.AbsoluteTimeUnitFactory;
 import org.protempa.proposition.value.GranularityFactory;
@@ -135,6 +136,10 @@ public abstract class AbstractDataSourceBackend extends
 
     @Override
     public void writeKeys(Set<String> keyIds) throws DataSourceWriteException {
+    }
+    
+    @Override
+    public void writeKeysFromKeySet(KeySetQueryResultsHandler queryResultsHandler) throws DataSourceWriteException {
     }
 
     @Override

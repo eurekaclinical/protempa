@@ -1,10 +1,10 @@
-package org.protempa.dest.keyloader;
+package org.protempa.pool;
 
-/*
+/*-
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 - 2014 Emory University
+ * Copyright (C) 2012 - 2018 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,27 +20,12 @@ package org.protempa.dest.keyloader;
  * #L%
  */
 
-import org.protempa.ProtempaException;
-
 /**
  *
  * @author Andrew Post
  */
-public class CriteriaEvaluateException extends ProtempaException {
+public interface Pool<E> {
 
-    public CriteriaEvaluateException() {
-    }
-
-    public CriteriaEvaluateException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public CriteriaEvaluateException(String message) {
-        super(message);
-    }
-
-    public CriteriaEvaluateException(Throwable cause) {
-        super(cause);
-    }
+    E valueFor(String inValue) throws PoolException;
     
 }

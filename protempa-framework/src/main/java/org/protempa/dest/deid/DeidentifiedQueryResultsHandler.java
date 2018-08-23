@@ -20,7 +20,6 @@
 package org.protempa.dest.deid;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,8 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.arp.javautil.collections.Collections;
-import org.protempa.PropositionDefinition;
 import org.protempa.PropositionDefinitionCache;
 import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.QueryResultsHandler;

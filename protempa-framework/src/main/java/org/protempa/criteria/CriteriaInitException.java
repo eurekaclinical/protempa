@@ -1,4 +1,4 @@
-package org.protempa.dest.keyloader;
+package org.protempa.criteria;
 
 /*
  * #%L
@@ -20,18 +20,27 @@ package org.protempa.dest.keyloader;
  * #L%
  */
 
-import java.util.List;
-import org.protempa.KnowledgeSource;
-import org.protempa.proposition.Proposition;
+import org.protempa.ProtempaException;
 
 /**
  *
  * @author Andrew Post
  */
-public interface Criteria {
-    boolean evaluate(List<Proposition> propositions) throws CriteriaEvaluateException;
+public class CriteriaInitException extends ProtempaException {
+
+    public CriteriaInitException() {
+    }
+
+    public CriteriaInitException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public CriteriaInitException(String message) {
+        super(message);
+    }
+
+    public CriteriaInitException(Throwable cause) {
+        super(cause);
+    }
     
-    String[] getPropositionIdsSpecified();
-    
-    void init(KnowledgeSource knowledgeSource) throws CriteriaInitException;
 }

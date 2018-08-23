@@ -21,7 +21,6 @@ package org.protempa.dest.deid;
  */
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Map;
 import org.protempa.Attribute;
 import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;

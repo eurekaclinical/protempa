@@ -1,10 +1,10 @@
-package org.protempa.dest.keyloader;
+package org.protempa.pool;
 
-/*
+/*-
  * #%L
  * Protempa Framework
  * %%
- * Copyright (C) 2012 - 2014 Emory University
+ * Copyright (C) 2012 - 2018 Emory University
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,20 +26,20 @@ import org.protempa.ProtempaException;
  *
  * @author Andrew Post
  */
-public class CriteriaInitException extends ProtempaException {
+public class PoolException extends ProtempaException {
 
-    public CriteriaInitException() {
+    public PoolException() {
     }
 
-    public CriteriaInitException(String message, Throwable cause) {
+    public PoolException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public CriteriaInitException(String message) {
+    public PoolException(String message) {
         super(message);
     }
 
-    public CriteriaInitException(Throwable cause) {
+    public PoolException(Throwable cause) {
         super(cause);
     }
     

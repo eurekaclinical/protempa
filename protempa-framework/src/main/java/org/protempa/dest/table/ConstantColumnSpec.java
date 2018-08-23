@@ -25,6 +25,8 @@ import java.util.Set;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
+import org.protempa.pool.Pool;
+import org.protempa.pool.PoolException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 
@@ -36,13 +38,19 @@ public class ConstantColumnSpec extends AbstractTableColumnSpec {
 
     private final String value;
     private final String heading;
+    private final Pool<String> pool;
     
     public ConstantColumnSpec(String heading, String value) {
+        this(heading, value, null);
+    }
+    
+    public ConstantColumnSpec(String heading, String value, Pool<String> pool) {
         if (heading == null) {
             throw new IllegalArgumentException("heading cannot be null");
         }
         
         this.heading = heading;
+        this.pool = pool;
         this.value = value;
     }
 
@@ -57,7 +65,11 @@ public class ConstantColumnSpec extends AbstractTableColumnSpec {
             Map<Proposition, Set<Proposition>> backwardDerivations, 
             Map<UniqueId, Proposition> references, 
             KnowledgeSourceCache knowledgeSourceCache, TabularWriter writer) throws TabularWriterException {
-        writer.writeString(value);
+        try {
+            writer.writeString(this.pool != null ? this.pool.valueFor(this.value) : this.value);
+        } catch (PoolException ex) {
+            throw new TabularWriterException(ex);
+        }
     }
 
     @Override

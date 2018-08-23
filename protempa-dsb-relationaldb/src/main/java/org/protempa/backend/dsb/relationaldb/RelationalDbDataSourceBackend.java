@@ -20,6 +20,8 @@
 package org.protempa.backend.dsb.relationaldb;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -27,16 +29,29 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.arp.javautil.sql.ConnectionSpec;
 import org.arp.javautil.sql.DatabaseAPI;
 import org.arp.javautil.sql.InvalidConnectionSpecArguments;
-import org.protempa.*;
+import org.protempa.BackendCloseException;
+import org.protempa.DataSourceReadException;
+import org.protempa.DataSourceWriteException;
+import org.protempa.DataStreamingEvent;
+import org.protempa.DataStreamingEventIterator;
+import org.protempa.KeySetSpec;
+import org.protempa.KnowledgeSource;
+import org.protempa.KnowledgeSourceReadException;
+import org.protempa.PropertyDefinition;
+import org.protempa.PropositionDefinition;
+import org.protempa.ProtempaEvent;
 import org.protempa.backend.AbstractCommonsDataSourceBackend;
 import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.BackendInstanceSpec;
@@ -50,7 +65,8 @@ import org.protempa.backend.dsb.relationaldb.mappings.DelimFileMappingsFactory;
 import org.protempa.backend.dsb.relationaldb.mappings.MappingsFactory;
 import org.protempa.backend.dsb.relationaldb.mappings.ResourceMappingsFactory;
 import org.protempa.dest.QueryResultsHandler;
-import org.protempa.dest.keyloader.KeyLoaderQueryResultsHandler;
+import org.protempa.dest.key.KeyLoaderQueryResultsHandler;
+import org.protempa.dest.key.KeySetQueryResultsHandler;
 import org.protempa.proposition.Proposition;
 
 /**
@@ -99,6 +115,7 @@ public abstract class RelationalDbDataSourceBackend
     private String keyLoaderKeyIdTable;
     private String keyLoaderKeyIdColumn;
     private String keyLoaderKeyIdJoinKey;
+    private String keyFile;
     private FromBackendRelationalDatabaseSpecBuilder relationalDatabaseSpecBuilder;
     private MappingsFactory mappingsFactory;
     private Integer queryThreadCount;
@@ -224,6 +241,15 @@ public abstract class RelationalDbDataSourceBackend
         this.keyLoaderKeyIdJoinKey = keyLoaderKeyIdJoinKey;
     }
 
+    public String getKeyFile() {
+        return keyFile;
+    }
+
+    @BackendProperty
+    public void setKeyFile(String keyFile) {
+        this.keyFile = keyFile;
+    }
+    
     /**
      * Collects the database connection information specified in this backend's
      * configuration, and uses it to try and get a SQL generator with which to
@@ -450,75 +476,92 @@ public abstract class RelationalDbDataSourceBackend
             } catch (InvalidConnectionSpecArguments | SQLException ex) {
                 throw new DataSourceWriteException("Could not delete all key ids in data source backend " + nameForErrors(), ex);
             }
-        } else {
-            SQLGenUtil.logger().log(Level.FINER,
-                    "Unable to delete all keys in keyIdSchema{0}, keyIdTable={1} and keyIdColumn={2}",
-                    new Object[]{this.keyLoaderKeyIdSchema, this.defaultKeyIdTable, this.defaultKeyIdColumn});
+        }
+    }
+
+    @Override
+    public void writeKeysFromKeySet(KeySetQueryResultsHandler qrh) throws DataSourceWriteException {
+        if (this.keyFile != null) {
+            try {
+                Set<String> localKeyIds = Files.lines(Paths.get(this.keyFile))
+                        .collect(Collectors.toSet());
+                try (DataStreamingEventIterator<Proposition> readPropositions = 
+                        readPropositions(null, Collections.singleton(getKeyType()), null, qrh)) {
+                    while (readPropositions.hasNext()) {
+                        DataStreamingEvent<Proposition> next = readPropositions.next();
+                        if (next.getData() != null) {
+                            //writeKeys(next.getKeyId());
+                        }
+                    }
+                }
+            } catch (IOException | DataSourceReadException ex) {
+                throw new DataSourceWriteException(ex);
+            }
         }
     }
 
     @Override
     public void writeKeys(Set<String> keyIds) throws DataSourceWriteException {
-        if (isInKeySetMode()) {
-            int batchSize = 1000;
-            int commitSize = 10000;
-            try {
-                ConnectionSpec connectionSpecInstance
-                        = getConnectionSpecInstance();
+        if (isInKeySetMode() && keyIds != null) {
+            for (String keyId : keyIds) {
+                writeKeys(keyId);
+            }
+        }
+    }
 
-                try (Connection con = connectionSpecInstance.getOrCreate()) {
-                    try {
-                        int i = 0;
-                        List<String> subKeyIds = new ArrayList<>(batchSize);
-                        String stmt = buildWriteKeysInsertStmt(batchSize);
-                        SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
-                        try (PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
-                            for (String keyId : keyIds) {
-                                subKeyIds.add(keyId);
-                                if (++i % batchSize == 0) {
-                                    for (int j = 0, n = subKeyIds.size(); j < n; j++) {
-                                        prepareStatement.setObject(j + 1, subKeyIds.get(j));
-                                    }
-                                    prepareStatement.execute();
-                                }
-                                if (i >= commitSize) {
-                                    con.commit();
-                                    commitSize = 0;
-                                }
+    private void writeKeys(String keyId) throws DataSourceWriteException {
+        final int batchSize = 1000;
+        int commitSize = 10000;
+        try {
+            ConnectionSpec connectionSpecInstance
+                    = getConnectionSpecInstance();
+
+            try (Connection con = connectionSpecInstance.getOrCreate()) {
+                try {
+                    int i = 0;
+                    List<String> subKeyIds = new ArrayList<>(batchSize);
+                    String stmt = buildWriteKeysInsertStmt(batchSize);
+                    SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
+                    try (PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
+                        subKeyIds.add(keyId);
+                        if (++i % batchSize == 0) {
+                            for (int j = 0, n = subKeyIds.size(); j < n; j++) {
+                                prepareStatement.setObject(j + 1, subKeyIds.get(j));
                             }
-                        }
-                        if (!subKeyIds.isEmpty()) {
-                            stmt = buildWriteKeysInsertStmt(subKeyIds.size());
-                            SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
-                            i = 0;
-                            try (PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
-                                for (String subKeyId : subKeyIds) {
-                                    prepareStatement.setObject(++i, subKeyId);
-                                }
-                                prepareStatement.execute();
-                            }
+                            prepareStatement.execute();
                         }
                         if (i >= commitSize) {
                             con.commit();
                             commitSize = 0;
                         }
-                    } catch (SQLException ex) {
-                        if (commitSize > 0) {
-                            try {
-                                con.rollback();
-                            } catch (SQLException ignore) {
-                                ex.addSuppressed(ignore);
+                    }
+                    if (!subKeyIds.isEmpty()) {
+                        stmt = buildWriteKeysInsertStmt(subKeyIds.size());
+                        SQLGenUtil.logger().log(Level.FINER, "Statement for writing keys: {0}", stmt);
+                        i = 0;
+                        try (PreparedStatement prepareStatement = con.prepareStatement(stmt)) {
+                            for (String subKeyId : subKeyIds) {
+                                prepareStatement.setObject(++i, subKeyId);
                             }
+                            prepareStatement.execute();
+                        }
+                    }
+                    if (i >= commitSize) {
+                        con.commit();
+                        commitSize = 0;
+                    }
+                } catch (SQLException ex) {
+                    if (commitSize > 0) {
+                        try {
+                            con.rollback();
+                        } catch (SQLException ignore) {
+                            ex.addSuppressed(ignore);
                         }
                     }
                 }
-            } catch (InvalidConnectionSpecArguments | SQLException ex) {
-                throw new DataSourceWriteException("Could not write key ids in data source backend " + nameForErrors(), ex);
             }
-        } else {
-            SQLGenUtil.logger().log(Level.FINER,
-                    "Unable to write keys to keyIdSchema{0}, keyIdTable={1} and keyIdColumn={2}",
-                    new Object[]{this.keyLoaderKeyIdSchema, this.defaultKeyIdTable, this.defaultKeyIdColumn});
+        } catch (InvalidConnectionSpecArguments | SQLException ex) {
+            throw new DataSourceWriteException("Could not write key ids in data source backend " + nameForErrors(), ex);
         }
     }
 
@@ -602,12 +645,13 @@ public abstract class RelationalDbDataSourceBackend
                         .readPropositionDefinition(propId);
                 if (propDef == null) {
                     invalidPropIds.add(propId);
-                }
-                PropertyDefinition[] propertyDefs = propDef
-                        .getPropertyDefinitions();
-                for (PropertyDefinition propertyDef : propertyDefs) {
-                    String propName = propertyDef.getId();
-                    propNamesFromPropDefs.add(propName);
+                } else {
+                    PropertyDefinition[] propertyDefs = propDef
+                            .getPropertyDefinitions();
+                    for (PropertyDefinition propertyDef : propertyDefs) {
+                        String propName = propertyDef.getId();
+                        propNamesFromPropDefs.add(propName);
+                    }
                 }
             }
             if (!invalidPropIds.isEmpty()) {
@@ -642,7 +686,7 @@ public abstract class RelationalDbDataSourceBackend
         return this.databaseAPI.newConnectionSpecInstance(
                 this.databaseId, this.username, this.password, false);
     }
-    
+
     protected abstract EntitySpec[] constantSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException;
 
     protected abstract EntitySpec[] eventSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException;
@@ -705,7 +749,7 @@ public abstract class RelationalDbDataSourceBackend
         }
 
     }
-    
+
     void fireProtempaEvent(ProtempaEvent evt) {
         this.fireEvent(evt);
     }

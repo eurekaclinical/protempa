@@ -1,4 +1,4 @@
-package org.protempa.dest.keyloader;
+package org.protempa.dest.key;
 
 /*
  * #%L
@@ -19,6 +19,9 @@ package org.protempa.dest.keyloader;
  * limitations under the License.
  * #L%
  */
+import org.protempa.criteria.CriteriaEvaluateException;
+import org.protempa.criteria.CriteriaInitException;
+import org.protempa.criteria.Criteria;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;

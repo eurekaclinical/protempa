@@ -1,4 +1,4 @@
-package org.protempa.dest.keyloader;
+package org.protempa.dest.key;
 
 /*
  * #%L
@@ -20,6 +20,7 @@ package org.protempa.dest.keyloader;
  * #L%
  */
 
+import org.protempa.criteria.Criteria;
 import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 import org.protempa.DataSource;
