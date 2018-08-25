@@ -31,6 +31,7 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.value.NominalValue;
 
 public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
 
@@ -85,7 +86,7 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
                 forwardDerivations, backwardDerivations, references,
                 ksCache);
         String str = props.size() >= this.n ? this.trueOutput : this.falseOutput;
-        writer.writeString(str);
+        writer.writeNominal(NominalValue.getInstance(str));
     }
 
     @Override

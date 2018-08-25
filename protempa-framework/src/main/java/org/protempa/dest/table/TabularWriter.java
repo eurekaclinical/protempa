@@ -29,14 +29,13 @@ import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.InequalityNumberValue;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
+import org.protempa.proposition.value.Value;
 
 /**
  *
  * @author Andrew Post
  */
 public interface TabularWriter extends AutoCloseable {
-    void writeString(String inValue) throws TabularWriterException;
-    
     void writeNominal(NominalValue inValue) throws TabularWriterException;
     
     void writeNominal(NominalValue inValue, Format inFormat) throws TabularWriterException;
@@ -127,13 +126,17 @@ public interface TabularWriter extends AutoCloseable {
      */
     void writeLength(TemporalProposition inProposition, Format inFormat) throws TabularWriterException;
     
-    void writeValue(Parameter inProposition) throws TabularWriterException;
+    void writeParameterValue(Parameter inProposition) throws TabularWriterException;
     
-    void writeValue(Parameter inProposition, Format inFormat) throws TabularWriterException;
+    void writeParameterValue(Parameter inProposition, Format inFormat) throws TabularWriterException;
     
     void writePropertyValue(Proposition inProposition, String inPropertyName) throws TabularWriterException;
     
     void writePropertyValue(Proposition inProposition, String inPropertyName, Format inFormat) throws TabularWriterException;
+    
+    void writeValue(Value inValue) throws TabularWriterException;
+    
+    void writeValue(Value inValue, Format inFormat) throws TabularWriterException;
     
     void writeNull() throws TabularWriterException;
     

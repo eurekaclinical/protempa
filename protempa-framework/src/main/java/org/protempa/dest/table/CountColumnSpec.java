@@ -33,6 +33,7 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.value.NominalValue;
 
 /**
  * Counts the number of instances of a proposition.
@@ -108,9 +109,9 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
                             "Adding to count: {0}", pId);
                 }
             }
-            writer.writeString("" + result.size());
+            writer.writeNominal(NominalValue.getInstance("" + result.size()));
         } else {
-            writer.writeString("" + props.size());
+            writer.writeNominal(NominalValue.getInstance("" + props.size()));
         }
     }
     

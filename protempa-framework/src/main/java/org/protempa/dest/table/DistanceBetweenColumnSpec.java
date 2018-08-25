@@ -38,6 +38,7 @@ import org.protempa.proposition.PropositionUtil;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
+import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.Unit;
 
 /**
@@ -130,7 +131,7 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
         String distance = PropositionUtil
                             .distanceBetweenFormattedShort(first, second, 
                                 this.units);
-        writer.writeString(distance);
+        writer.writeNominal(NominalValue.getInstance(distance));
     }
     
     @Override

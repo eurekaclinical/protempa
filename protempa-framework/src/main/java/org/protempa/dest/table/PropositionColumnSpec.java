@@ -40,7 +40,6 @@ import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
 import org.protempa.ProtempaException;
 import org.protempa.ProtempaUtil;
-import org.protempa.pool.Pool;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.Constant;
 import org.protempa.proposition.Context;
@@ -58,58 +57,7 @@ import org.protempa.proposition.visitor.AbstractPropositionCheckedVisitor;
 import org.protempa.valueset.ValueSet;
 
 public class PropositionColumnSpec extends AbstractTableColumnSpec {
-
-    private static final ThreadLocal<NumberFormat> numberFormat = new ThreadLocal<NumberFormat>() {
-        @Override
-        protected NumberFormat initialValue() {
-            return NumberFormat.getInstance();
-        }
-    };
-    private final Link[] links;
-    private final String[] propertyNames;
-    private final int numInstances;
-    private final String columnNamePrefixOverride;
-    private final OutputConfig outputConfig;
-    private final ValueOutputConfig valueOutputConfig;
-    private final ValuesPropositionVisitor propositionVisitor;
-    private final Pool pool;
-
-    @Deprecated
-    public PropositionColumnSpec() {
-        this(null);
-    }
-
-    @Deprecated
-    public PropositionColumnSpec(String[] propertyNames) {
-        this(propertyNames, null, null);
-    }
-
-    @Deprecated
-    public PropositionColumnSpec(String columnNamePrefixOverride,
-            String[] propertyNames) {
-        this(columnNamePrefixOverride, propertyNames, null, null, null, 1);
-    }
-
-    @Deprecated
-    public PropositionColumnSpec(String[] propertyNames,
-            OutputConfig outputConfig, ValueOutputConfig valueOutputConfig) {
-        this(propertyNames, outputConfig, valueOutputConfig, null);
-    }
-
-    @Deprecated
-    public PropositionColumnSpec(String[] propertyNames,
-            OutputConfig outputConfig, ValueOutputConfig valueOutputConfig,
-            Link[] links) {
-        this(propertyNames, outputConfig, valueOutputConfig, links, 1);
-    }
-
-    public PropositionColumnSpec(String[] propertyNames,
-            OutputConfig outputConfig, ValueOutputConfig valueOutputConfig,
-            Link[] links, int numInstances) {
-        this(null, propertyNames, outputConfig, valueOutputConfig, links,
-                numInstances);
-    }
-
+    
     public static final class Builder {
 
         private String columnNamePrefixOverride;
@@ -118,7 +66,6 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         private ValueOutputConfig valueOutputConfig;
         private Link[] links;
         private int numInstances = 1;
-        private Pool pool;
 
         public Builder columnNamePrefixOverride(String columnNamePrefixOverride) {
             this.columnNamePrefixOverride = columnNamePrefixOverride;
@@ -174,34 +121,68 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             return numInstances;
         }
         
-        public Builder pool(Pool pool) {
-            this.pool = pool;
-            return this;
-        }
-        
-        public Pool getPool() {
-            return this.pool;
-        }
-
         public PropositionColumnSpec build() {
             return new PropositionColumnSpec(this.columnNamePrefixOverride,
                     this.propertyNames, this.outputConfig, this.valueOutputConfig,
-                    this.links, this.numInstances, this.pool);
+                    this.links, this.numInstances);
         }
     }
+
+    private static final ThreadLocal<NumberFormat> numberFormat = new ThreadLocal<NumberFormat>() {
+        @Override
+        protected NumberFormat initialValue() {
+            return NumberFormat.getInstance();
+        }
+    };
     
+    private final Link[] links;
+    private final String[] propertyNames;
+    private final int numInstances;
+    private final String columnNamePrefixOverride;
+    private final OutputConfig outputConfig;
+    private final ValueOutputConfig valueOutputConfig;
+    private final ValuesPropositionVisitor propositionVisitor;
+
+    @Deprecated
+    public PropositionColumnSpec() {
+        this(null);
+    }
+
+    @Deprecated
+    public PropositionColumnSpec(String[] propertyNames) {
+        this(propertyNames, null, null);
+    }
+
+    @Deprecated
+    public PropositionColumnSpec(String columnNamePrefixOverride,
+            String[] propertyNames) {
+        this(columnNamePrefixOverride, propertyNames, null, null, null, 1);
+    }
+
+    @Deprecated
+    public PropositionColumnSpec(String[] propertyNames,
+            OutputConfig outputConfig, ValueOutputConfig valueOutputConfig) {
+        this(propertyNames, outputConfig, valueOutputConfig, null);
+    }
+
+    @Deprecated
+    public PropositionColumnSpec(String[] propertyNames,
+            OutputConfig outputConfig, ValueOutputConfig valueOutputConfig,
+            Link[] links) {
+        this(propertyNames, outputConfig, valueOutputConfig, links, 1);
+    }
+
+    public PropositionColumnSpec(String[] propertyNames,
+            OutputConfig outputConfig, ValueOutputConfig valueOutputConfig,
+            Link[] links, int numInstances) {
+        this(null, propertyNames, outputConfig, valueOutputConfig, links,
+                numInstances);
+    }
+
     public PropositionColumnSpec(String columnNamePrefixOverride,
             String[] propertyNames, OutputConfig outputConfig,
             ValueOutputConfig valueOutputConfig, Link[] links,
             int numInstances) {
-        this(columnNamePrefixOverride, propertyNames, outputConfig,
-                valueOutputConfig, links, numInstances, null);
-    }
-
-    public PropositionColumnSpec(String columnNamePrefixOverride,
-            String[] propertyNames, OutputConfig outputConfig,
-            ValueOutputConfig valueOutputConfig, Link[] links,
-            int numInstances, Pool pool) {
         if (propertyNames == null) {
             this.propertyNames = ArrayUtils.EMPTY_STRING_ARRAY;
         } else {
@@ -236,7 +217,6 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         this.numInstances = numInstances;
         this.columnNamePrefixOverride = columnNamePrefixOverride;
         propositionVisitor = new ValuesPropositionVisitor();
-        this.pool = pool;
     }
 
     private String[] columnNames() {
@@ -350,7 +330,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 this.tabularWriter.writeId(abstractParameter);
             }
             if (outputConfig.showValue()) {
-                this.tabularWriter.writeValue(abstractParameter);
+                this.tabularWriter.writeParameterValue(abstractParameter);
             }
             displayNames(abstractParameter);
             if (outputConfig.showStartOrTimestamp()) {
@@ -412,14 +392,14 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 this.tabularWriter.writeId(primitiveParameter);
             }
             if (outputConfig.showValue()) {
-                this.tabularWriter.writeValue(primitiveParameter);
+                this.tabularWriter.writeParameterValue(primitiveParameter);
             }
             if (outputConfig.showInequality()) {
                 Value value = primitiveParameter.getValue();
                 if (value instanceof InequalityNumberValue) {
                     this.tabularWriter.writeInequality((InequalityNumberValue) value);
                 } else {
-                    this.tabularWriter.writeString(ValueComparator.EQUAL_TO.getComparatorString());
+                    this.tabularWriter.writeNominal(NominalValue.getInstance(ValueComparator.EQUAL_TO.getComparatorString()));
                 }
             }
             if (outputConfig.showNumber()) {
@@ -502,10 +482,10 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                         = ksCache.get(proposition.getId());
                 if (propositionDefinition != null) {
                     if (showDisplayName) {
-                        this.tabularWriter.writeString(propositionDefinition.getDisplayName());
+                        this.tabularWriter.writeNominal(NominalValue.getInstance(propositionDefinition.getDisplayName()));
                     }
                     if (showAbbrevDisplayName) {
-                        this.tabularWriter.writeString(propositionDefinition.getAbbreviatedDisplayName());
+                        this.tabularWriter.writeNominal(NominalValue.getInstance(propositionDefinition.getAbbreviatedDisplayName()));
                     }
                 } else {
                     this.tabularWriter.writeNull();
@@ -558,8 +538,8 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             for (String propertyName : propertyNames) {
                 Value value = proposition.getProperty(propertyName);
                 if (value != null) {
-                    this.tabularWriter.writeString(
-                            getOutputPropertyValue(proposition, propertyName, value));
+                    this.tabularWriter.writeNominal(
+                            NominalValue.getInstance(getOutputPropertyValue(proposition, propertyName, value)));
                 } else {
                     this.tabularWriter.writeNull();
                 }
@@ -711,13 +691,6 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                 return false;
             }
         } else if (!valueOutputConfig.equals(other.valueOutputConfig)) {
-            return false;
-        }
-        if (pool == null) {
-            if (other.pool != null) {
-                return false;
-            }
-        } else if (!pool.equals(other.pool)) {
             return false;
         }
         return true;

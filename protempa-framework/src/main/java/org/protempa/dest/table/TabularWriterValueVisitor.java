@@ -37,11 +37,11 @@ import org.protempa.proposition.value.ValueVisitor;
  */
 class TabularWriterValueVisitor implements ValueVisitor {
     
-    private final TabularWriter tabularWriter;
+    private final AbstractTabularWriter tabularWriter;
     private TabularWriterException exception;
     private Format format;
 
-    TabularWriterValueVisitor(TabularWriter tabularWriter) {
+    TabularWriterValueVisitor(AbstractTabularWriter tabularWriter) {
         this.tabularWriter = tabularWriter;
     }
 

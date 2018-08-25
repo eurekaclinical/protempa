@@ -19,16 +19,14 @@ package org.protempa.dest.table;
  * limitations under the License.
  * #L%
  */
-
 import java.util.Map;
 import java.util.Set;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.pool.Pool;
-import org.protempa.pool.PoolException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.value.NominalValue;
 
 /**
  *
@@ -36,22 +34,16 @@ import org.protempa.proposition.UniqueId;
  */
 public class ConstantColumnSpec extends AbstractTableColumnSpec {
 
-    private final String value;
+    private final NominalValue value;
     private final String heading;
-    private final Pool<String> pool;
-    
+
     public ConstantColumnSpec(String heading, String value) {
-        this(heading, value, null);
-    }
-    
-    public ConstantColumnSpec(String heading, String value, Pool<String> pool) {
         if (heading == null) {
             throw new IllegalArgumentException("heading cannot be null");
         }
-        
+
         this.heading = heading;
-        this.pool = pool;
-        this.value = value;
+        this.value = value != null ? NominalValue.getInstance(value) : null;
     }
 
     @Override
@@ -60,26 +52,22 @@ public class ConstantColumnSpec extends AbstractTableColumnSpec {
     }
 
     @Override
-    public void columnValues(String key, Proposition proposition, 
-            Map<Proposition, Set<Proposition>> forwardDerivations, 
-            Map<Proposition, Set<Proposition>> backwardDerivations, 
-            Map<UniqueId, Proposition> references, 
+    public void columnValues(String key, Proposition proposition,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
+            Map<UniqueId, Proposition> references,
             KnowledgeSourceCache knowledgeSourceCache, TabularWriter writer) throws TabularWriterException {
-        try {
-            writer.writeString(this.pool != null ? this.pool.valueFor(this.value) : this.value);
-        } catch (PoolException ex) {
-            throw new TabularWriterException(ex);
-        }
+        writer.writeNominal(this.value);
     }
 
     @Override
     public void validate(KnowledgeSource knowledgeSource) throws TableColumnSpecValidationFailedException, KnowledgeSourceReadException {
-        
+
     }
 
     @Override
     public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource, String[] inPropIds) throws KnowledgeSourceReadException {
         return inPropIds;
     }
-    
+
 }

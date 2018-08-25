@@ -43,63 +43,68 @@ public abstract class AbstractTabularWriter implements TabularWriter {
     }
 
     @Override
-    public void writeNominal(NominalValue inValue) throws TabularWriterException {
+    public final void writeNominal(NominalValue inValue) throws TabularWriterException {
         writeNominal(inValue, null);
     }
 
     @Override
-    public void writeNumber(NumberValue inValue) throws TabularWriterException {
+    public final void writeNumber(NumberValue inValue) throws TabularWriterException {
         writeNumber(inValue, null);
     }
 
     @Override
-    public void writeInequality(InequalityNumberValue inValue) throws TabularWriterException {
+    public final void writeInequality(InequalityNumberValue inValue) throws TabularWriterException {
         writeInequality(inValue, null);
     }
 
     @Override
-    public void writeNumber(InequalityNumberValue inValue) throws TabularWriterException {
+    public final void writeNumber(InequalityNumberValue inValue) throws TabularWriterException {
         writeNumber(inValue, null);
     }
 
     @Override
-    public void writeInequalityNumber(InequalityNumberValue inValue) throws TabularWriterException {
+    public final void writeInequalityNumber(InequalityNumberValue inValue) throws TabularWriterException {
         writeInequalityNumber(inValue, null);
     }
     
     @Override
-    public void writeDate(DateValue inValue) throws TabularWriterException {
+    public final void writeDate(DateValue inValue) throws TabularWriterException {
         writeDate(inValue, null);
     }
 
     @Override
-    public void writeBoolean(BooleanValue inValue) throws TabularWriterException {
+    public final void writeBoolean(BooleanValue inValue) throws TabularWriterException {
         writeBoolean(inValue, null);
     }
 
     @Override
-    public void writeStart(TemporalProposition inProposition) throws TabularWriterException {
+    public final void writeStart(TemporalProposition inProposition) throws TabularWriterException {
         writeStart(inProposition, null);
     }
 
     @Override
-    public void writeFinish(TemporalProposition inProposition) throws TabularWriterException {
+    public final void writeFinish(TemporalProposition inProposition) throws TabularWriterException {
         writeFinish(inProposition, null);
     }
 
     @Override
-    public void writeLength(TemporalProposition inProposition) throws TabularWriterException {
+    public final void writeLength(TemporalProposition inProposition) throws TabularWriterException {
         writeLength(inProposition, null);
     }
 
     @Override
-    public void writeValue(Parameter inProposition) throws TabularWriterException {
-        writeValue(inProposition, null);
+    public final void writeParameterValue(Parameter inProposition) throws TabularWriterException {
+        writeParameterValue(inProposition, null);
     }
 
     @Override
-    public void writePropertyValue(Proposition inProposition, String inPropertyName) throws TabularWriterException {
+    public final void writePropertyValue(Proposition inProposition, String inPropertyName) throws TabularWriterException {
         writePropertyValue(inProposition, inPropertyName, null);
+    }
+    
+    @Override
+    public final void writeValue(Value value) throws TabularWriterException {
+        writeValue(value, null);
     }
 
     /**
@@ -111,7 +116,8 @@ public abstract class AbstractTabularWriter implements TabularWriter {
      * @throws TabularWriterException if an error occurs trying to write the
      * value.
      */
-    void write(Value inValue, Format inFormat) throws TabularWriterException {
+    @Override
+    public final void writeValue(Value inValue, Format inFormat) throws TabularWriterException {
         this.valueVisitor.setFormat(inFormat);
         inValue.accept(this.valueVisitor);
         TabularWriterException exception = this.valueVisitor.getException();
@@ -120,4 +126,5 @@ public abstract class AbstractTabularWriter implements TabularWriter {
             throw exception;
         }
     }
+    
 }

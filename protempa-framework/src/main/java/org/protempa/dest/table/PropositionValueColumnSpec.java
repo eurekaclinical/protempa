@@ -275,12 +275,12 @@ public class PropositionValueColumnSpec extends AbstractTableColumnSpec {
         } else if (this.type == Type.MEDIAN) {
             NumberValue median = medianValue(orderStats);
             if (median != null) {
-                writer.writeString(median.getFormatted());
+                writer.writeNumber(median);
             } else {
                 writer.writeNull();
             }
         } else if (value != null) {
-            writer.writeString(value.getFormatted());
+            writer.writeValue(value);
         } else {
             writer.writeNull();
         }
