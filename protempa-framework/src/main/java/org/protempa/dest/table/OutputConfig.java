@@ -503,11 +503,12 @@ public final class OutputConfig {
             String localUniqueIdHeading, Map<String, String> propertyHeadings,
             Format positionFormat) {
         this(showId, showValue, showDisplayName, showAbbrevDisplayName, 
-                showStartOrTimestamp, showFinish, showLength, showUniqueId, false, false,
+                showStartOrTimestamp, showFinish, showLength, showUniqueId, 
+                showLocalUniqueId, false,
                 idHeading, valueHeading, displayNameHeading, 
                 abbrevDisplayNameHeading, startOrTimestampHeading,
                 finishHeading, lengthHeading, uniqueIdHeading,
-                null, null, propertyHeadings, positionFormat);
+                localUniqueIdHeading, null, propertyHeadings, positionFormat);
     }
     
     @Deprecated
