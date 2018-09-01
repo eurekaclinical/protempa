@@ -40,6 +40,9 @@ import org.protempa.proposition.UniqueId;
  * <li>{@link #close() }
  * </ol>
  * 
+ * The {@link #start() }, {@link #handleQueryResult(java.lang.String, java.util.List, java.util.Map, java.util.Map, java.util.Map)
+ * }, {@link #finish() }, and {@link #close() } methods are called on a dedicated thread.
+ * 
  * If an exception is thrown by {@link #start() } or {@link #handleQueryResult(java.lang.String, java.util.List, java.util.Map, java.util.Map, java.util.Map) },
  * {@link #finish() } will be skipped.
  * 
@@ -86,8 +89,7 @@ public interface QueryResultsHandler extends AutoCloseable {
      * {@link #handleQueryResult(java.lang.String, java.util.List, java.util.Map, java.util.Map, java.util.Map) }. 
      * Implementers of this method may perform arbitrary processing related to 
      * the output of the handler, such as printing out headers of a file or 
-     * extracting metadata for the handler's output. This method is called on
-     * the same thread as {@link org.protempa.Protempa#execute(org.protempa.query.Query, org.protempa.dest.Destination) }.
+     * extracting metadata for the handler's output.
      *
      * @param cache a cache of all of the proposition definitions that were
      * queried.
@@ -98,7 +100,7 @@ public interface QueryResultsHandler extends AutoCloseable {
 
     /**
      * Handles a single query result, which is the list of propositions
-     * associated with the given key. This method is called on a dedicated thread.
+     * associated with the given key.
      *
      * @param keyId the identifying key id for the result
      * @param propositions the proposition results for the given key as a newly
@@ -116,9 +118,7 @@ public interface QueryResultsHandler extends AutoCloseable {
     /**
      * Called by Protempa as soon as all query results have been retrieved from
      * the data source. Will not be called if a previous step failed.
-     * This method is called on
-     * the same thread as {@link org.protempa.Protempa#execute(org.protempa.query.Query, org.protempa.dest.Destination) }.
-     *
+     * 
      * @throws QueryResultsHandlerProcessingException if any exceptions occur at
      * a lower level
      */

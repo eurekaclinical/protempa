@@ -35,7 +35,6 @@ import org.protempa.dest.Destination;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerInitException;
-import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
 import org.protempa.proposition.Proposition;
 import org.protempa.query.Query;
@@ -57,7 +56,6 @@ final class Executor implements AutoCloseable {
     private final AbstractionFinder abstractionFinder;
     private final Destination destination;
     private QueryResultsHandler resultsHandler;
-    private boolean failed;
     private final MessageFormat logMessageFormat;
     private HandleQueryResultThread handleQueryResultThread;
     private boolean canceled;
@@ -93,7 +91,6 @@ final class Executor implements AutoCloseable {
             }
             extractPropositionDefinitionCache();
         } catch (KnowledgeSourceReadException | QueryResultsHandlerValidationFailedException | QueryResultsHandlerInitException | Error | RuntimeException ex) {
-            this.failed = true;
             throw new QueryException(this.query.getName(), ex);
         }
     }
@@ -146,12 +143,7 @@ final class Executor implements AutoCloseable {
                 }
                 this.handleQueryResultThread
                         = new HandleQueryResultThread(hqrQueue, hqrPoisonPill,
-                                doProcessThread, this.query, this.resultsHandler);
-                try {
-                    startQueryResultsHandler();
-                } catch (QueryResultsHandlerProcessingException ex) {
-                    throw new QueryException(this.query.getName(), ex);
-                }
+                                doProcessThread, this.query, this.resultsHandler, this.propositionDefinitionCache);
                 if (retrieveDataThread != null) {
                     retrieveDataThread.start();
                 }
@@ -207,34 +199,13 @@ final class Executor implements AutoCloseable {
                 throw exception;
             }
         } catch (QueryException ex) {
-            this.failed = true;
             throw ex;
         }
     }
 
     @Override
     public void close() throws CloseException {
-        try {
-            // Might be null if init() fails.
-            if (this.resultsHandler != null) {
-                if (!this.failed) {
-                    this.resultsHandler.finish();
-                }
-                this.resultsHandler.close();
-                this.resultsHandler = null;
-            }
-        } catch (QueryResultsHandlerProcessingException
-                | QueryResultsHandlerCloseException ex) {
-            throw new CloseException(ex);
-        } finally {
-            if (this.resultsHandler != null) {
-                try {
-                    this.resultsHandler.close();
-                } catch (QueryResultsHandlerCloseException ignore) {
-
-                }
-            }
-        }
+        //Handled in the subthreads
     }
 
     boolean isLoggable(Level level) {
@@ -275,13 +246,6 @@ final class Executor implements AutoCloseable {
             }
             log(Level.FINE, "Proposition details: {0}", StringUtils.join(allNarrowerDescendantsPropIds, ", "));
         }
-    }
-
-    private void startQueryResultsHandler() throws QueryResultsHandlerProcessingException {
-        log(Level.FINE, "Calling query results handler start...");
-        this.resultsHandler.start(this.propositionDefinitionCache);
-        log(Level.FINE, "Query results handler started");
-        log(Level.FINE, "Query results handler waiting for results...");
     }
 
     private void createQueryResultsHandler() throws QueryResultsHandlerValidationFailedException, QueryResultsHandlerInitException {
