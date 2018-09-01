@@ -28,11 +28,9 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;
-import org.protempa.query.QueryMode;
 
 /**
  *
