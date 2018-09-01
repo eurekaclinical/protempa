@@ -72,7 +72,8 @@ public interface QueryResultsHandler extends AutoCloseable {
     String getDisplayName();
     
     /**
-     * Validates this query results handler's specification.
+     * Validates this query results handler's specification. This method is called on
+     * the same thread as {@link org.protempa.Protempa#execute(org.protempa.query.Query, org.protempa.dest.Destination) }.
      *
      * @throws QueryResultsHandlerValidationFailedException if validation
      * failed.
@@ -85,7 +86,8 @@ public interface QueryResultsHandler extends AutoCloseable {
      * {@link #handleQueryResult(java.lang.String, java.util.List, java.util.Map, java.util.Map, java.util.Map) }. 
      * Implementers of this method may perform arbitrary processing related to 
      * the output of the handler, such as printing out headers of a file or 
-     * extracting metadata for the handler's output.
+     * extracting metadata for the handler's output. This method is called on
+     * the same thread as {@link org.protempa.Protempa#execute(org.protempa.query.Query, org.protempa.dest.Destination) }.
      *
      * @param cache a cache of all of the proposition definitions that were
      * queried.
@@ -96,7 +98,7 @@ public interface QueryResultsHandler extends AutoCloseable {
 
     /**
      * Handles a single query result, which is the list of propositions
-     * associated with the given key.
+     * associated with the given key. This method is called on a dedicated thread.
      *
      * @param keyId the identifying key id for the result
      * @param propositions the proposition results for the given key as a newly
@@ -114,6 +116,8 @@ public interface QueryResultsHandler extends AutoCloseable {
     /**
      * Called by Protempa as soon as all query results have been retrieved from
      * the data source. Will not be called if a previous step failed.
+     * This method is called on
+     * the same thread as {@link org.protempa.Protempa#execute(org.protempa.query.Query, org.protempa.dest.Destination) }.
      *
      * @throws QueryResultsHandlerProcessingException if any exceptions occur at
      * a lower level
@@ -123,7 +127,8 @@ public interface QueryResultsHandler extends AutoCloseable {
     /**
      * Called by Protempa after {@link #handleFinish()} to clean up any
      * resources used by the handler. It is called always, even if a previous 
-     * step failed.
+     * step failed. This method is called on
+     * the same thread as {@link org.protempa.Protempa#execute(org.protempa.query.Query, org.protempa.dest.Destination) }.
      *
      * @throws QueryResultsHandlerCloseException if any exceptions occur at a
      * lower level
