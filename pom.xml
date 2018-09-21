@@ -94,12 +94,12 @@
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>javautil</artifactId>
-                <version>[4.2-Beta-1,5.0)</version>
+                <version>[4.2,5.0)</version>
             </dependency>
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>datastore</artifactId>
-                <version>[3.0-Beta-1,4.0)</version>
+                <version>[3.0,4.0)</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
