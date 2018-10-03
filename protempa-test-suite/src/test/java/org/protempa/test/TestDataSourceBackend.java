@@ -30,7 +30,6 @@ import org.protempa.backend.dsb.relationaldb.JoinSpec;
 import org.protempa.backend.dsb.relationaldb.PropertySpec;
 import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.RelationalDbDataSourceBackend;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.proposition.value.*;
 
 import java.io.IOException;
@@ -108,9 +107,11 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
         } catch (SQLException ex) {
             if (exceptionToThrow == null) {
                 exceptionToThrow = ex;
+            } else {
+                exceptionToThrow.addSuppressed(ex);
             }
         }
-
+        
         if (exceptionToThrow != null) {
             throw new BackendCloseException(exceptionToThrow);
         }
@@ -118,11 +119,6 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
     
     
     
-    @Override
-    protected StagingSpec[] stagedSpecs(String keyIdSchema, String keyIdTable, String keyIdColumn, String keyIdJoinKey) throws IOException {
-        return null;
-    }
-
     @Override
     public String getKeyType() {
         return "Patient";
@@ -267,9 +263,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 "PATIENT_KEY") },
                                         ReferenceSpec.Type.ONE) }, null, null,
                         null, null, null, null, null, null,
-                        new ColumnSpec(keyIdSchema, keyIdTable, "CREATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "UPDATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "DELETE_DATE")),
+                        new ColumnSpec(schemaName, "PATIENT", "CREATE_DATE"),
+                        new ColumnSpec(schemaName, "PATIENT", "UPDATE_DATE"),
+                        new ColumnSpec(schemaName, "PATIENT", "DELETE_DATE")),
                 new EntitySpec(
                         "Providers",
                         null,
@@ -296,9 +292,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                                 "LAST_NAME"),
                                         ValueType.NOMINALVALUE) }, null, null,
                         null, null, null, null, null, null, null,
-                        new ColumnSpec(keyIdSchema, keyIdTable, "CREATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "UPDATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "DELETE_DATE")),
+                        new ColumnSpec(schemaName, "PROVIDER", "CREATE_DATE"),
+                        new ColumnSpec(schemaName, "PROVIDER", "UPDATE_DATE"),
+                        new ColumnSpec(schemaName, "PROVIDER", "DELETE_DATE")),
         };
         return constantSpecs;
     }
@@ -308,7 +304,6 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
         String schemaName = getSchemaName();
         Mappings icd9DiagnosesMappings = getMappingsFactory().getInstance("icd9_diagnosis_02232012.txt");
         Mappings icd9ProcedureMappings = getMappingsFactory().getInstance("icd9_procedure_02232012.txt");
-        Mappings cptMappings = getMappingsFactory().getInstance("cpt_procedure_02232012.txt");
         Mappings medsMappings = getMappingsFactory().getInstance("meds_02232012.txt");
         EntitySpec[] eventSpecs = new EntitySpec[] {
                 new EntitySpec(
@@ -439,9 +434,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                         }, null,
                         null, null, null, null, AbsoluteTimeGranularity.DAY,
                         dtPositionParser, null,
-                        new ColumnSpec(keyIdSchema, keyIdTable, "CREATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "UPDATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "DELETE_DATE")),
+                        new ColumnSpec(schemaName, "ENCOUNTER", "CREATE_DATE"),
+                        new ColumnSpec(schemaName, "ENCOUNTER", "UPDATE_DATE"),
+                        new ColumnSpec(schemaName, "ENCOUNTER", "DELETE_DATE")),
                 new EntitySpec(
                         "Diagnosis Codes",
                         null,
@@ -484,9 +479,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 icd9DiagnosesMappings,
                                 true), null, null, null,
                         AbsoluteTimeGranularity.MINUTE, dtPositionParser, null,
-                        new ColumnSpec(keyIdSchema, keyIdTable, "CREATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "UPDATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "DELETE_DATE")),
+                        new ColumnSpec(schemaName, "ICD9D_EVENT", "CREATE_DATE"),
+                        new ColumnSpec(schemaName, "ICD9D_EVENT", "UPDATE_DATE"),
+                        new ColumnSpec(schemaName, "ICD9D_EVENT", "DELETE_DATE")),
                 new EntitySpec(
                         "ICD9 Procedure Codes",
                         null,
@@ -530,52 +525,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 icd9ProcedureMappings,
                                 true), null, null, null,
                         AbsoluteTimeGranularity.MINUTE, dtPositionParser, null,
-                        new ColumnSpec(keyIdSchema, keyIdTable, "CREATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "UPDATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "DELETE_DATE")),
-                new EntitySpec(
-                        "CPT Procedure Codes",
-                        null,
-                        cptMappings.readTargets(),
-                        true,
-                        new ColumnSpec(keyIdSchema, keyIdTable,
-                                keyIdColumn, 
-                                new JoinSpec(keyIdJoinKey, "PATIENT_KEY", new ColumnSpec(schemaName, "PATIENT",
-                                new JoinSpec("PATIENT_KEY",
-                                        "PATIENT_KEY", new ColumnSpec(
-                                                schemaName, "ENCOUNTER",
-                                                new JoinSpec("ENCOUNTER_KEY",
-                                                        "ENCOUNTER_KEY",
-                                                        new ColumnSpec(
-                                                                schemaName,
-                                                                "CPT_EVENT"))))))),
-                        new ColumnSpec[] { new ColumnSpec(schemaName,
-                                "CPT_EVENT", "EVENT_KEY") },
-                        new ColumnSpec(schemaName, "CPT_EVENT", "TS_OBX"),
-                        null,
-                        new PropertySpec[] { new PropertySpec(
-                                "code",
-                                null,
-                                new ColumnSpec(
-                                        schemaName,
-                                        "CPT_EVENT",
-                                        "ENTITY_ID",
-                                        Operator.EQUAL_TO,
-                                        cptMappings),
-                                ValueType.NOMINALVALUE) },
-                        null,
-                        null,
-                        new ColumnSpec(
-                                schemaName,
-                                "CPT_EVENT",
-                                "ENTITY_ID",
-                                Operator.EQUAL_TO,
-                                cptMappings,
-                                true), null, null, null,
-                        AbsoluteTimeGranularity.MINUTE, dtPositionParser, null,
-                        new ColumnSpec(keyIdSchema, keyIdTable, "CREATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "UPDATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "DELETE_DATE")),
+                        new ColumnSpec(schemaName, "ICD9P_EVENT", "CREATE_DATE"),
+                        new ColumnSpec(schemaName, "ICD9P_EVENT", "UPDATE_DATE"),
+                        new ColumnSpec(schemaName, "ICD9P_EVENT", "DELETE_DATE")),
                 new EntitySpec(
                         "Medication Orders",
                         null,
@@ -608,9 +560,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 medsMappings,
                                 true), null, null, null,
                         AbsoluteTimeGranularity.MINUTE, dtPositionParser, null,
-                        new ColumnSpec(keyIdSchema, keyIdTable, "CREATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "UPDATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "DELETE_DATE")),
+                        new ColumnSpec(schemaName, "MEDS_EVENT", "CREATE_DATE"),
+                        new ColumnSpec(schemaName, "MEDS_EVENT", "UPDATE_DATE"),
+                        new ColumnSpec(schemaName, "MEDS_EVENT", "DELETE_DATE")),
 };
         return eventSpecs;
     }
@@ -663,9 +615,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 true), null, new ColumnSpec(schemaName,
                                 "LABS_EVENT", "RESULT_STR"), ValueType.VALUE,
                         AbsoluteTimeGranularity.MINUTE, dtPositionParser, null,
-                        new ColumnSpec(keyIdSchema, keyIdTable, "CREATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "UPDATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "DELETE_DATE")),
+                        new ColumnSpec(schemaName, "LABS_EVENT", "CREATE_DATE"),
+                        new ColumnSpec(schemaName, "LABS_EVENT", "UPDATE_DATE"),
+                        new ColumnSpec(schemaName, "LABS_EVENT", "DELETE_DATE")),
                 new EntitySpec(
                         "Vitals",
                         null,
@@ -712,9 +664,9 @@ public final class TestDataSourceBackend extends RelationalDbDataSourceBackend {
                                 true), null, new ColumnSpec(schemaName,
                                 "VITALS_EVENT", "RESULT_STR"), ValueType.VALUE,
                         AbsoluteTimeGranularity.MINUTE, dtPositionParser, AbsoluteTimeUnit.YEAR,
-                        new ColumnSpec(keyIdSchema, keyIdTable, "CREATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "UPDATE_DATE"),
-                        new ColumnSpec(keyIdSchema, keyIdTable, "DELETE_DATE")),
+                        new ColumnSpec(schemaName, "VITALS_EVENT", "CREATE_DATE"),
+                        new ColumnSpec(schemaName, "VITALS_EVENT", "UPDATE_DATE"),
+                        new ColumnSpec(schemaName, "VITALS_EVENT", "DELETE_DATE")),
 
         };
         return primitiveParameterSpecs;

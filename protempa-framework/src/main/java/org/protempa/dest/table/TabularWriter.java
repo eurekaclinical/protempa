@@ -29,14 +29,13 @@ import org.protempa.proposition.value.DateValue;
 import org.protempa.proposition.value.InequalityNumberValue;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
+import org.protempa.proposition.value.Value;
 
 /**
  *
  * @author Andrew Post
  */
 public interface TabularWriter extends AutoCloseable {
-    void writeString(String inValue) throws TabularWriterException;
-    
     void writeNominal(NominalValue inValue) throws TabularWriterException;
     
     void writeNominal(NominalValue inValue, Format inFormat) throws TabularWriterException;
@@ -53,6 +52,10 @@ public interface TabularWriter extends AutoCloseable {
     
     void writeNumber(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException;
     
+    void writeInequalityNumber(InequalityNumberValue inValue) throws TabularWriterException;
+    
+    void writeInequalityNumber(InequalityNumberValue inValue, Format inFormat) throws TabularWriterException;
+    
     void writeDate(DateValue inValue) throws TabularWriterException;
     
     void writeDate(DateValue inValue, Format inFormat) throws TabularWriterException;
@@ -65,25 +68,75 @@ public interface TabularWriter extends AutoCloseable {
     
     void writeUniqueId(Proposition inProposition) throws TabularWriterException;
     
+    void writeLocalUniqueId(Proposition inProposition) throws TabularWriterException;
+    
+    void writeNumericalId(Proposition inProposition) throws TabularWriterException;
+    
+    /**
+     * Writes the start of a temporal proposition's interval using the value of 
+     * {@link TemporalProposition#getStartFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeStart(TemporalProposition inProposition) throws TabularWriterException;
     
+    /**
+     * Writes the start of a temporal proposition's interval. If no format is 
+     * specified, it uses the value of 
+     * {@link TemporalProposition#getStartFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @param inFormat the formatter.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeStart(TemporalProposition inProposition, Format inFormat) throws TabularWriterException;
     
+    /**
+     * Writes the finish of a temporal proposition's interval using the value 
+     * of {@link TemporalProposition#getFinishFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeFinish(TemporalProposition inProposition) throws TabularWriterException;
     
+    /**
+     * Writes the finish of a temporal proposition's interval. If no format is 
+     * specified, it uses the value of 
+     * {@link TemporalProposition#getFinishFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @param inFormat the formatter.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeFinish(TemporalProposition inProposition, Format inFormat) throws TabularWriterException;
     
+    /**
+     * Writes the length of a temporal proposition's interval using the value 
+     * of {@link TemporalProposition#getLengthFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeLength(TemporalProposition inProposition) throws TabularWriterException;
     
+    /**
+     * Writes the length of a temporal proposition's interval. If no format is 
+     * specified, it uses the value of 
+     * {@link TemporalProposition#getLengthFormattedShort() }.
+     * @param inProposition the temporal proposition.
+     * @param inFormat the formatter.
+     * @throws TabularWriterException if an error occurred.
+     */
     void writeLength(TemporalProposition inProposition, Format inFormat) throws TabularWriterException;
     
-    void writeValue(Parameter inProposition) throws TabularWriterException;
+    void writeParameterValue(Parameter inProposition) throws TabularWriterException;
     
-    void writeValue(Parameter inProposition, Format inFormat) throws TabularWriterException;
+    void writeParameterValue(Parameter inProposition, Format inFormat) throws TabularWriterException;
     
     void writePropertyValue(Proposition inProposition, String inPropertyName) throws TabularWriterException;
     
     void writePropertyValue(Proposition inProposition, String inPropertyName, Format inFormat) throws TabularWriterException;
+    
+    void writeValue(Value inValue) throws TabularWriterException;
+    
+    void writeValue(Value inValue, Format inFormat) throws TabularWriterException;
     
     void writeNull() throws TabularWriterException;
     

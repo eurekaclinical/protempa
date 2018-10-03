@@ -19,8 +19,7 @@
  */
 package org.protempa.dest;
 
-import java.util.Collection;
-import org.protempa.PropositionDefinition;
+import org.protempa.PropositionDefinitionCache;
 
 /**
  *
@@ -56,7 +55,7 @@ public abstract class AbstractQueryResultsHandler
     }
 
     @Override
-    public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
+    public void start(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
     }
 
     @Override

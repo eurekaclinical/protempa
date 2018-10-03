@@ -75,11 +75,7 @@ public final class PrimitiveParameterDefinition
         if (vf == null) {
             vf = DEFAULT_VALUE_TYPE;
         }
-        ValueType old = this.valueType;
         this.valueType = vf;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("valueType", old, this.valueType);
-        }
     }
 
     /**
@@ -98,11 +94,7 @@ public final class PrimitiveParameterDefinition
      *            a units {@link String}.
      */
     public void setUnits(String units) {
-        String old = this.units;
         this.units = units;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("units", old, this.units);
-        }
     }
 
     @Override
@@ -152,7 +144,6 @@ public final class PrimitiveParameterDefinition
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.children;
         Set<String> c = new HashSet<>();
         String[] inverseIsA = getInverseIsA();
         if (inverseIsA != null) {
@@ -161,10 +152,6 @@ public final class PrimitiveParameterDefinition
             }
         }
         this.children = c.toArray(new String[c.size()]);
-        if (this.changes != null) {
-            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.children);
-        }
     }
 
     @Override

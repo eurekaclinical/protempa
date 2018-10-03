@@ -130,47 +130,6 @@ class KnowledgeSourceImplWrapper
     }
 
     @Override
-    public List<String> getPropositionDefinitionsByTerm(
-            And<TermSubsumption> termSubsumptionClause)
-            throws KnowledgeSourceReadException {
-        if (termSubsumptionClause == null) {
-            throw new IllegalArgumentException(
-                    "termSubsumptionClause cannot be null");
-        }
-        initializeIfNeeded();
-
-        List<Set<String>> propIdSets = new ArrayList<>();
-        for (TermSubsumption ts : termSubsumptionClause.getAnded()) {
-            Set<String> subsumpPropIds = new HashSet<>();
-            for (String termId : ts.getTerms()) {
-                List<String> propIds = this.termIdMap.get(termId);
-                if (propIds != null) {
-                    subsumpPropIds.addAll(propIds);
-                }
-            }
-            propIdSets.add(subsumpPropIds);
-        }
-
-        Set<String> matchingPropIds
-                = org.arp.javautil.collections.Collections.intersection(
-                        propIdSets);
-
-        List<String> result = new ArrayList<>();
-        result.addAll(matchingPropIds);
-
-        List<String> resultFromKS
-                = this.knowledgeSource.getPropositionDefinitionsByTerm(
-                        termSubsumptionClause);
-        for (String propId : resultFromKS) {
-            if (!this.propositionDefinitionsMap.containsKey(propId)) {
-                result.add(propId);
-            }
-        }
-
-        return result;
-    }
-
-    @Override
     public boolean hasAbstractionDefinition(String id)
             throws KnowledgeSourceReadException {
         if (id == null) {

@@ -39,28 +39,6 @@ class ConstantResultProcessorFactory
     }
     
     @Override
-    MainResultProcessor<Constant> getInstance(
-            String dataSourceBackendId, EntitySpec entitySpec, 
-            ResultCache<Constant> cache) {
-
-        ConstantResultProcessor resultProcessor =
-                new ConstantResultProcessor(this.backend, cache, entitySpec, 
-                        dataSourceBackendId);
-        return resultProcessor;
-    }
-
-    @Override
-    RefResultProcessor<Constant> getRefInstance(
-            String dataSourceBackendId, EntitySpec entitySpec,
-            ReferenceSpec referenceSpec,
-            ResultCache<Constant> cache) {
-        ConstantRefResultProcessor resultProcessor =
-                new ConstantRefResultProcessor(this.backend, cache, referenceSpec,
-                        entitySpec, dataSourceBackendId);
-        return resultProcessor;
-    }
-    
-    @Override
     StreamingMainResultProcessor<Constant> getStreamingInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,

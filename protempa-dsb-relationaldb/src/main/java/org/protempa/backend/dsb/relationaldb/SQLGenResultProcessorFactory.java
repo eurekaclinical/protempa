@@ -31,19 +31,11 @@ import java.util.Set;
  */
 abstract class SQLGenResultProcessorFactory<P extends Proposition> {
 
-    abstract MainResultProcessor<P> getInstance(
-            String dataSourceBackendId, EntitySpec entitySpec,
-            ResultCache<P> cache);
-
     abstract StreamingMainResultProcessor<P> getStreamingInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Map<String, ReferenceSpec> bidirectionalRefSpecs,
             Set<String> propIds);
-
-    abstract RefResultProcessor<P> getRefInstance(String dataSourceBackendId,
-            EntitySpec entitySpec, ReferenceSpec referenceSpec,
-            ResultCache<P> cache);
 
     abstract StreamingRefResultProcessor<P> getStreamingRefInstance(
             ReferenceSpec referenceSpec, EntitySpec entitySpec, 

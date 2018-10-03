@@ -19,6 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb.mysql;
 
+import java.util.LinkedHashMap;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.List;
@@ -34,20 +35,19 @@ import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
 import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
 import org.protempa.backend.dsb.relationaldb.SelectClause;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.backend.dsb.relationaldb.TableAliaser;
 import org.protempa.backend.dsb.relationaldb.WhereClause;
 
 final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
 
     ConnectorJ5MySQL415SelectStatement(EntitySpec entitySpec,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
-            Map<String, ReferenceSpec> inboundRefSpecs,
+            List<EntitySpec> entitySpecs,
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            boolean streamingMode, boolean wrapKeyId) {
-        super(entitySpec, referenceSpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
-                order, resultProcessor, null, streamingMode, wrapKeyId);
+            boolean wrapKeyId) {
+        super(entitySpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
+                order, resultProcessor, wrapKeyId);
     }
 
     @Override
@@ -65,7 +65,7 @@ final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
      */
     @Override
     protected FromClause getFromClause(List<ColumnSpec> columnSpecs,
-            TableAliaser referenceIndices, StagingSpec[] stagedTables) {
+            TableAliaser referenceIndices) {
         return new ConnectorJ5MySQL415FromClause(getEntitySpec(), columnSpecs, referenceIndices);
     }
 
@@ -84,7 +84,7 @@ final class ConnectorJ5MySQL415SelectStatement extends AbstractSelectStatement {
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            SelectClause selectClause, StagingSpec[] stagedTables) {
+            SelectClause selectClause) {
         return new DefaultWhereClause(propIds, info, entitySpecs, filters,
                 referenceIndices, keyIds, order, resultProcessor, selectClause);
     }

@@ -34,9 +34,9 @@ import org.protempa.proposition.Proposition;
  * {@link #visit(Collection)} and {@link #visit(Map)}, the default
  * implementations are no-ops. Override those methods to implement your
  * visitor's functionality.
- * 
+ *
  * @author Andrew Post
- * 
+ *
  */
 public abstract class AbstractPropositionVisitor
         implements PropositionVisitor {
@@ -59,8 +59,7 @@ public abstract class AbstractPropositionVisitor
     /**
      * Processes abstract parameters. This default implementation is a no-op.
      *
-     * @param abstractParameter
-     *            an {@link AbstractParameter}.
+     * @param abstractParameter an {@link AbstractParameter}.
      */
     @Override
     public void visit(AbstractParameter abstractParameter) {
@@ -69,9 +68,7 @@ public abstract class AbstractPropositionVisitor
     /**
      * Processes events. This default implementation is a no-op.
      *
-     * @param event
-     *            an {@link Event}.
-     * @throws UnsupportedOperationException.
+     * @param event an {@link Event}.
      */
     @Override
     public void visit(Event event) {
@@ -80,9 +77,7 @@ public abstract class AbstractPropositionVisitor
     /**
      * Processes primitive parameters. This default implementation is a no-op.
      *
-     * @param primitiveParameter
-     *            an {@link PrimitiveParameter}.
-     * @throws UnsupportedOperationException.
+     * @param primitiveParameter an {@link PrimitiveParameter}.
      */
     @Override
     public void visit(PrimitiveParameter primitiveParameter) {
@@ -91,8 +86,7 @@ public abstract class AbstractPropositionVisitor
     /**
      * Processes constants. This default implementation is a no-op.
      *
-     * @param primitiveParameter
-     *            an {@link PrimitiveParameter}.
+     * @param constant a {@link Constant}.
      */
     @Override
     public void visit(Constant constant) {
@@ -101,8 +95,7 @@ public abstract class AbstractPropositionVisitor
     /**
      * Processes contexts. This default implementation is a no-op.
      *
-     * @param context
-     *            a {@link Context}.
+     * @param context a {@link Context}.
      */
     @Override
     public void visit(Context context) {

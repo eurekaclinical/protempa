@@ -132,7 +132,7 @@ final class SliceConsequence implements Consequence {
             comp = ProtempaUtil.TEMP_PROP_COMP;
         }
         Collections.sort(pl, comp);
-        this.copier.grab(arg1);
+        this.copier.grab(arg0);
         if (this.merged) {
             mergedInterval(arg0, pl);
         } else {
@@ -159,7 +159,7 @@ final class SliceConsequence implements Consequence {
                 new Sequence<>(def.getPropositionId(), slice));
         AbstractParameter result = AbstractParameterFactory.getFromAbstraction(
                 def.getPropositionId(), factory.getInstance(), segment, slice, null, null, null, null);
-        kh.getWorkingMemory().insert(result);
+        kh.insertLogical(result);
         for (Proposition p : segment) {
             this.derivationsBuilder.propositionAsserted(p, result);
         }

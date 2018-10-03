@@ -19,15 +19,15 @@
  */
 package org.protempa;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.logging.Logger;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.comparator.TemporalPropositionIntervalComparator;
+import org.protempa.query.Query;
 
 /**
  * Utility methods for the PROTEMPA project. They are not intended to be
@@ -37,22 +37,9 @@ import org.protempa.proposition.comparator.TemporalPropositionIntervalComparator
  */
 public final class ProtempaUtil {
 
+    static String DROOLS_PACKAGE_NAME = "PROTEMPA Rules";
+
     private ProtempaUtil() {
-    }
-
-    private static class LazyLoggerHolder {
-
-        private static Logger instance =
-                Logger.getLogger(ProtempaUtil.class.getPackage().getName());
-    }
-
-    /**
-     * Gets the logger for this package.
-     *
-     * @return a {@link Logger} object.
-     */
-    static Logger logger() {
-        return LazyLoggerHolder.instance;
     }
 
     /**
@@ -202,4 +189,9 @@ public final class ProtempaUtil {
             new TemporalPropositionIntervalComparator();
     static final Comparator<TemporalProposition> REVERSE_TEMP_PROP_COMP =
             Collections.reverseOrder(TEMP_PROP_COMP);
+    
+    public static MessageFormat getLogMessageFormat(Query query) {
+        return new MessageFormat("Query " + query.getName() + ": {0}");
+    }
+    
 }

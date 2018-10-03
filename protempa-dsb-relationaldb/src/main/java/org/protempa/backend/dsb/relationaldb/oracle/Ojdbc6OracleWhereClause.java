@@ -33,7 +33,6 @@ import org.protempa.backend.dsb.relationaldb.OrderByClause;
 import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
 import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
 import org.protempa.backend.dsb.relationaldb.SelectClause;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.backend.dsb.relationaldb.TableAliaser;
 
 final class Ojdbc6OracleWhereClause extends AbstractWhereClause {
@@ -42,9 +41,9 @@ final class Ojdbc6OracleWhereClause extends AbstractWhereClause {
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            SelectClause selectClause, StagingSpec[] stagedTables) {
+            SelectClause selectClause) {
         super(propIds, info, entitySpecs, filters, referenceIndices, keyIds,
-                order, resultProcessor, selectClause, stagedTables);
+                order, resultProcessor, selectClause);
     }
 
     @Override

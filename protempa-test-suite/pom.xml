@@ -4,7 +4,7 @@
     <parent>
         <artifactId>protempa</artifactId>
         <groupId>org.eurekaclinical</groupId>
-        <version>4.1-SNAPSHOT</version>
+        <version>5.1-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>protempa-test-suite</artifactId>
@@ -22,11 +22,6 @@
         <dependency>
             <groupId>org.eurekaclinical</groupId>
             <artifactId>protempa-ksb-protege</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eurekaclinical</groupId>
-            <artifactId>protempa-tsb-umls</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

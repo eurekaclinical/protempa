@@ -24,7 +24,6 @@ import org.arp.javautil.serviceloader.ClassServiceLoader;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.backend.tsb.TermSourceBackend;
 import org.protempa.backend.BackendProvider;
 import org.protempa.backend.BackendSpec;
 import org.protempa.backend.BackendSpecLoader;
@@ -62,13 +61,6 @@ public final class CommonsBackendProvider
             getAlgorithmSourceBackendSpecLoader() 
             throws BackendProviderSpecLoaderException {
         return getBackendSpecLoader(AlgorithmSourceBackend.class);
-    }
-
-    @Override
-    public BackendSpecLoader<TermSourceBackend> 
-            getTermSourceBackendSpecLoader()
-            throws BackendProviderSpecLoaderException {
-        return getBackendSpecLoader(TermSourceBackend.class);
     }
 
     private <B extends org.protempa.backend.Backend> BackendSpecLoader<B>

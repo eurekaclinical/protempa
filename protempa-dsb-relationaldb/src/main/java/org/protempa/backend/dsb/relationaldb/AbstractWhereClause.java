@@ -51,13 +51,12 @@ public abstract class AbstractWhereClause implements WhereClause {
     private final SQLOrderBy order;
     private final SQLGenResultProcessor resultProcessor;
     private final SelectClause selectClause;
-    private final StagingSpec[] stagedTables;
 
     protected AbstractWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            SelectClause selectClause, StagingSpec[] stagedTables) {
+            SelectClause selectClause) {
         this.propIds = propIds;
         this.info = info;
         this.entitySpecs = Collections.unmodifiableList(entitySpecs);
@@ -67,7 +66,6 @@ public abstract class AbstractWhereClause implements WhereClause {
         this.order = order;
         this.resultProcessor = resultProcessor;
         this.selectClause = selectClause;
-        this.stagedTables = stagedTables;
     }
 
     protected Set<String> getPropIds() {
@@ -104,10 +102,6 @@ public abstract class AbstractWhereClause implements WhereClause {
 
     protected SelectClause getSelectClause() {
         return selectClause;
-    }
-
-    protected StagingSpec[] getStagedTables() {
-        return stagedTables;
     }
 
     @Override
@@ -234,14 +228,6 @@ public abstract class AbstractWhereClause implements WhereClause {
         CONSTRAINT_LOOP:
         for (ColumnSpec constraintSpec : entitySpec
                 .getConstraintSpecs()) {
-            // Skip any constraints that were included in any staged data
-            // Joining against that data implicitly applies the constraint
-            for (StagingSpec stagingSpec : getStagedTables()) {
-                if (constraintSpec.getLastSpec().isSameSchemaAndTable(
-                        stagingSpec.getReplacedTable())) {
-                    continue CONSTRAINT_LOOP;
-                }
-            }
             int wherePartLength = wherePart.length();
             wherePart.append(processConstraintSpecForWhereClause(
                     constraintSpec, null, first));
@@ -356,6 +342,9 @@ public abstract class AbstractWhereClause implements WhereClause {
         StringBuilder wherePart = new StringBuilder();
         String expr = columnSpec.getExpr();
         if (expr != null) {
+            if (!first) {
+                wherePart.append(" AND ");
+            }
             wherePart.append(expr);
         } else if (hasConstraint(columnSpec)) {
             setCaseClauseIfNeeded(columnSpec, null);

@@ -22,7 +22,6 @@ package org.protempa.dest.table;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +31,7 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.value.NominalValue;
 
 public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
 
@@ -77,8 +77,8 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
 
     @Override
     public void columnValues(String key, Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache ksCache,
             TabularWriter writer) throws TabularWriterException {
@@ -86,7 +86,7 @@ public final class AtLeastNColumnSpec extends AbstractTableColumnSpec {
                 forwardDerivations, backwardDerivations, references,
                 ksCache);
         String str = props.size() >= this.n ? this.trueOutput : this.falseOutput;
-        writer.writeString(str);
+        writer.writeNominal(NominalValue.getInstance(str));
     }
 
     @Override

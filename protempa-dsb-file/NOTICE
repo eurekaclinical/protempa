@@ -21,10 +21,10 @@ This project includes:
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
   Hamcrest Core under New BSD License
   JavaUtil under Apache License, Version 2.0
-  je under Sleepycat License
   JUnit under Eclipse Public License 1.0
   mvel under The Apache Software License, Version 2.0
   opencsv under Apache 2
+  Oracle NoSQL Database Server under Apache 2
   Protempa File Data Source Backend under Apache License, Version 2.0
   Protempa Framework under Apache License, Version 2.0
   Protempa ServiceLoader Backend Provider under Apache License, Version 2.0

@@ -24,6 +24,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,11 +48,85 @@ import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.DateValue;
+import org.protempa.proposition.value.InequalityNumberValue;
+import org.protempa.proposition.value.NominalValue;
+import org.protempa.proposition.value.NumberValue;
 import org.protempa.proposition.value.Value;
+import org.protempa.proposition.value.ValueComparator;
 import org.protempa.proposition.visitor.AbstractPropositionCheckedVisitor;
 import org.protempa.valueset.ValueSet;
 
 public class PropositionColumnSpec extends AbstractTableColumnSpec {
+    
+    public static final class Builder {
+
+        private String columnNamePrefixOverride;
+        private String[] propertyNames;
+        private OutputConfig outputConfig;
+        private ValueOutputConfig valueOutputConfig;
+        private Link[] links;
+        private int numInstances = 1;
+
+        public Builder columnNamePrefixOverride(String columnNamePrefixOverride) {
+            this.columnNamePrefixOverride = columnNamePrefixOverride;
+            return this;
+        }
+
+        public String getColumnNamePrefixOverride() {
+            return columnNamePrefixOverride;
+        }
+
+        public Builder propertyNames(String[] propertyNames) {
+            this.propertyNames = propertyNames;
+            return this;
+        }
+
+        public String[] getPropertyNames() {
+            return propertyNames;
+        }
+
+        public Builder outputConfig(OutputConfig outputConfig) {
+            this.outputConfig = outputConfig;
+            return this;
+        }
+
+        public OutputConfig getOutputConfig() {
+            return outputConfig;
+        }
+
+        public Builder valueOutputConfig(ValueOutputConfig valueOutputConfig) {
+            this.valueOutputConfig = valueOutputConfig;
+            return this;
+        }
+
+        public ValueOutputConfig getValueOutputConfig() {
+            return valueOutputConfig;
+        }
+
+        public Builder links(Link[] links) {
+            this.links = links;
+            return this;
+        }
+
+        public Link[] getLinks() {
+            return links;
+        }
+
+        public Builder numInstances(int numInstances) {
+            this.numInstances = numInstances;
+            return this;
+        }
+
+        public int getNumInstances() {
+            return numInstances;
+        }
+        
+        public PropositionColumnSpec build() {
+            return new PropositionColumnSpec(this.columnNamePrefixOverride,
+                    this.propertyNames, this.outputConfig, this.valueOutputConfig,
+                    this.links, this.numInstances);
+        }
+    }
 
     private static final ThreadLocal<NumberFormat> numberFormat = new ThreadLocal<NumberFormat>() {
         @Override
@@ -59,6 +134,7 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             return NumberFormat.getInstance();
         }
     };
+    
     private final Link[] links;
     private final String[] propertyNames;
     private final int numInstances;
@@ -66,25 +142,30 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
     private final OutputConfig outputConfig;
     private final ValueOutputConfig valueOutputConfig;
     private final ValuesPropositionVisitor propositionVisitor;
-    
+
+    @Deprecated
     public PropositionColumnSpec() {
         this(null);
     }
 
+    @Deprecated
     public PropositionColumnSpec(String[] propertyNames) {
         this(propertyNames, null, null);
     }
 
+    @Deprecated
     public PropositionColumnSpec(String columnNamePrefixOverride,
             String[] propertyNames) {
         this(columnNamePrefixOverride, propertyNames, null, null, null, 1);
     }
 
+    @Deprecated
     public PropositionColumnSpec(String[] propertyNames,
             OutputConfig outputConfig, ValueOutputConfig valueOutputConfig) {
         this(propertyNames, outputConfig, valueOutputConfig, null);
     }
 
+    @Deprecated
     public PropositionColumnSpec(String[] propertyNames,
             OutputConfig outputConfig, ValueOutputConfig valueOutputConfig,
             Link[] links) {
@@ -145,6 +226,16 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                     outputConfig.getUniqueIdHeading(),
                     this.columnNamePrefixOverride + "_uniqueId"));
         }
+        if (this.outputConfig.showLocalUniqueId()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getLocalUniqueIdHeading(),
+                    this.columnNamePrefixOverride + "_localUniqueId"));
+        }
+        if (this.outputConfig.showNumericalId()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getNumericalIdHeading(),
+                    this.columnNamePrefixOverride + "_numericalId"));
+        }
         if (this.outputConfig.showId()) {
             results.add(StringUtils.defaultIfEmpty(
                     outputConfig.getIdHeading(),
@@ -154,6 +245,21 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             results.add(StringUtils.defaultIfEmpty(
                     outputConfig.getValueHeading(),
                     this.columnNamePrefixOverride + "_value"));
+        }
+        if (this.outputConfig.showInequality()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getInequalityHeading(),
+                    this.columnNamePrefixOverride + "_inequalityValue"));
+        }
+        if (this.outputConfig.showNumber()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getNumberHeading(),
+                    this.columnNamePrefixOverride + "_numberValue"));
+        }
+        if (this.outputConfig.showNominal()) {
+            results.add(StringUtils.defaultIfEmpty(
+                    outputConfig.getNominalHeading(),
+                    this.columnNamePrefixOverride + "_nominalValue"));
         }
         if (this.outputConfig.showDisplayName()) {
             results.add(StringUtils.defaultIfEmpty(
@@ -214,11 +320,17 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             if (outputConfig.showUniqueId()) {
                 this.tabularWriter.writeUniqueId(abstractParameter);
             }
+            if (outputConfig.showLocalUniqueId()) {
+                this.tabularWriter.writeLocalUniqueId(abstractParameter);
+            }
+            if (outputConfig.showNumericalId()) {
+                this.tabularWriter.writeNumericalId(abstractParameter);
+            }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(abstractParameter);
             }
             if (outputConfig.showValue()) {
-                this.tabularWriter.writeValue(abstractParameter);
+                this.tabularWriter.writeParameterValue(abstractParameter);
             }
             displayNames(abstractParameter);
             if (outputConfig.showStartOrTimestamp()) {
@@ -238,6 +350,12 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             Format positionFormat = outputConfig.getPositionFormat();
             if (outputConfig.showUniqueId()) {
                 this.tabularWriter.writeUniqueId(event);
+            }
+            if (outputConfig.showLocalUniqueId()) {
+                this.tabularWriter.writeLocalUniqueId(event);
+            }
+            if (outputConfig.showNumericalId()) {
+                this.tabularWriter.writeNumericalId(event);
             }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(event);
@@ -264,11 +382,43 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             if (outputConfig.showUniqueId()) {
                 this.tabularWriter.writeUniqueId(primitiveParameter);
             }
+            if (outputConfig.showLocalUniqueId()) {
+                this.tabularWriter.writeLocalUniqueId(primitiveParameter);
+            }
+            if (outputConfig.showNumericalId()) {
+                this.tabularWriter.writeNumericalId(primitiveParameter);
+            }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(primitiveParameter);
             }
             if (outputConfig.showValue()) {
-                this.tabularWriter.writeValue(primitiveParameter);
+                this.tabularWriter.writeParameterValue(primitiveParameter);
+            }
+            if (outputConfig.showInequality()) {
+                Value value = primitiveParameter.getValue();
+                if (value instanceof InequalityNumberValue) {
+                    this.tabularWriter.writeInequality((InequalityNumberValue) value);
+                } else {
+                    this.tabularWriter.writeNominal(NominalValue.getInstance(ValueComparator.EQUAL_TO.getComparatorString()));
+                }
+            }
+            if (outputConfig.showNumber()) {
+                Value value = primitiveParameter.getValue();
+                if (value instanceof InequalityNumberValue) {
+                    this.tabularWriter.writeNumber((InequalityNumberValue) value);
+                } else if (value instanceof NumberValue) {
+                    this.tabularWriter.writeNumber((NumberValue) value);
+                } else {
+                    this.tabularWriter.writeNull();
+                }
+            }
+            if (outputConfig.showNominal()) {
+                Value value = primitiveParameter.getValue();
+                if (value instanceof NominalValue) {
+                    this.tabularWriter.writeNominal((NominalValue) value);
+                } else {
+                    this.tabularWriter.writeNull();
+                }
             }
             displayNames(primitiveParameter);
             if (outputConfig.showStartOrTimestamp()) {
@@ -287,6 +437,12 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
         public void visit(Constant constant) throws TabularWriterException {
             if (outputConfig.showUniqueId()) {
                 this.tabularWriter.writeUniqueId(constant);
+            }
+            if (outputConfig.showLocalUniqueId()) {
+                this.tabularWriter.writeLocalUniqueId(constant);
+            }
+            if (outputConfig.showNumericalId()) {
+                this.tabularWriter.writeNumericalId(constant);
             }
             if (outputConfig.showId()) {
                 this.tabularWriter.writeId(constant);
@@ -326,10 +482,10 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
                         = ksCache.get(proposition.getId());
                 if (propositionDefinition != null) {
                     if (showDisplayName) {
-                        this.tabularWriter.writeString(propositionDefinition.getDisplayName());
+                        this.tabularWriter.writeNominal(NominalValue.getInstance(propositionDefinition.getDisplayName()));
                     }
                     if (showAbbrevDisplayName) {
-                        this.tabularWriter.writeString(propositionDefinition.getAbbreviatedDisplayName());
+                        this.tabularWriter.writeNominal(NominalValue.getInstance(propositionDefinition.getAbbreviatedDisplayName()));
                     }
                 } else {
                     this.tabularWriter.writeNull();
@@ -382,9 +538,8 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             for (String propertyName : propertyNames) {
                 Value value = proposition.getProperty(propertyName);
                 if (value != null) {
-                    this.tabularWriter.writeString(
-                            getOutputPropertyValue(proposition,
-                            propertyName, value));
+                    this.tabularWriter.writeNominal(
+                            NominalValue.getInstance(getOutputPropertyValue(proposition, propertyName, value)));
                 } else {
                     this.tabularWriter.writeNull();
                 }
@@ -394,14 +549,19 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
 
     @Override
     public void columnValues(String key, Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache propDefCache,
             TabularWriter writer) throws TabularWriterException {
-        Collection<Proposition> propositions = this.traverseLinks(this.links,
-                proposition, forwardDerivations, backwardDerivations,
-                references, propDefCache);
+        Collection<Proposition> propositions;
+        if (proposition != null) {
+            propositions = this.traverseLinks(this.links,
+                    proposition, forwardDerivations, backwardDerivations,
+                    references, propDefCache);
+        } else {
+            propositions = Collections.emptyList();
+        }
         propositionVisitor.setKnowledgeSource(propDefCache);
         propositionVisitor.setTabularWriter(writer);
         int i = 0;
@@ -416,6 +576,9 @@ public class PropositionColumnSpec extends AbstractTableColumnSpec {
             } else {
                 break;
             }
+        }
+        for (; i < this.numInstances; i++) {
+            writer.writeNull();
         }
         propositionVisitor.clear();
     }

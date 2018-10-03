@@ -19,14 +19,14 @@ package org.protempa.dest.table;
  * limitations under the License.
  * #L%
  */
-
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.value.NominalValue;
 
 /**
  *
@@ -34,19 +34,16 @@ import org.protempa.proposition.UniqueId;
  */
 public class ConstantColumnSpec extends AbstractTableColumnSpec {
 
-    private final String value;
+    private final NominalValue value;
     private final String heading;
-    
+
     public ConstantColumnSpec(String heading, String value) {
         if (heading == null) {
             throw new IllegalArgumentException("heading cannot be null");
         }
-        if (value == null) {
-            throw new IllegalArgumentException("value cannot be null");
-        }
-        
+
         this.heading = heading;
-        this.value = value;
+        this.value = value != null ? NominalValue.getInstance(value) : null;
     }
 
     @Override
@@ -55,18 +52,22 @@ public class ConstantColumnSpec extends AbstractTableColumnSpec {
     }
 
     @Override
-    public void columnValues(String key, Proposition proposition, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references, KnowledgeSourceCache knowledgeSourceCache, TabularWriter writer) throws TabularWriterException {
-        writer.writeString(value);
+    public void columnValues(String key, Proposition proposition,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
+            Map<UniqueId, Proposition> references,
+            KnowledgeSourceCache knowledgeSourceCache, TabularWriter writer) throws TabularWriterException {
+        writer.writeNominal(this.value);
     }
 
     @Override
     public void validate(KnowledgeSource knowledgeSource) throws TableColumnSpecValidationFailedException, KnowledgeSourceReadException {
-        
+
     }
 
     @Override
     public String[] getInferredPropositionIds(KnowledgeSource knowledgeSource, String[] inPropIds) throws KnowledgeSourceReadException {
         return inPropIds;
     }
-    
+
 }

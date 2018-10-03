@@ -19,11 +19,63 @@ In the clinical domain, temporal abstraction can be used for automated chart abs
 ### For more information
 See our [publication about Protempa](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1975802/) for more information.
 
-## Version 4.0 development series
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa)
 
-## Version history
-### Version 3.5
+## Version 5.0
+* Removed all TermSource and related code.
+* Update datastore version.
+* Remove cache store code.
+* Remove non-streaming relational data source backend support.
+* Remove staging relational data source backend support.
+* Remove CLI code.
+* Remove Java Bean property support.
+* Propositions are now inserted into the Drools working memory using the
+insertLogical method rather than plain insert so that the rules engine will
+dynamically retract propositions correctly.
+* New query option to save data abstractions as they are computed in a key-
+value store by key. Sending changed data through Protempa will update the
+abstractions based upon the updated data.
+* New query modes: REPROCESS_CREATE, REPROCESS_DELETE, REPROCESS_UPDATE, and
+REPROCESS_RETRIEVE. These are basic CRUD operations for modifying the key-value 
+store and retrieving data and abstractions from it.
+* Don't return Unknown when formatting a null start or finish. Return null
+instead.
+
+## Version 4.3.2
+* Actually write nominal column headers for tabular writers.
+
+## Version 4.3.1
+* Write = not EQUAL_TO for the operator for lab values that do not start with
+an inequality.
+* Actually write number and inequality column headers for tabular writers.
+
+## Version 4.3
+* Fix output of inequality number values in tabular writers.
+* Support output of just numbers, just nominals, and just the inequality part of
+inequality number values.
+
+## Version 4.2.1
+* Honor start and finish formatters that are specified for tabular writers.
+
+## Version 4.2
+* Allow writing the LocalUniqueId numericalId field to tabular files.
+
+## Version 4.1
+* Allow writing the LocalUniqueId id to tabular files.
+* Allow always putting quotes around each value in a tabular file.
+
+## Version 4.0.1
+* Avoid NullPointerExceptions when writing nulls to a delimited file.
+
+## Version 4.0
+* Support OJDBC driver version 12.
+* Update datastore dependency to version 2.
+* Update javautil dependency to version 4.
+* Clean up the NOTICE file generation.
+* Remove the old site directory.
+* Parallelize initialization and data processing.
+* Optimization.
+* More...
 
 ## Build requirements
 * [Oracle Java JDK 8](http://www.oracle.com/technetwork/java/javase/overview/index.html)

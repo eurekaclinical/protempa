@@ -21,10 +21,10 @@ This project includes:
   Datastore under Apache License, Version 2.0
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
   JavaUtil under Apache License, Version 2.0
-  je under Sleepycat License
   JGoodies Common under The BSD License
   JGoodies Looks under The BSD License
   mvel under The Apache Software License, Version 2.0
+  Oracle NoSQL Database Server under Apache 2
   Protempa Framework under Apache License, Version 2.0
   Protempa Protege Knowledge Source Backend under Apache License, Version 2.0
   Protempa ServiceLoader Backend Provider under Apache License, Version 2.0

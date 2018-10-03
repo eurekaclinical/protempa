@@ -31,7 +31,6 @@ import org.protempa.ContextDefinition;
 import org.protempa.KnowledgeSourceReadException;
 import org.protempa.PropositionDefinition;
 import org.protempa.TemporalPropositionDefinition;
-import org.protempa.TermSubsumption;
 import org.protempa.valueset.ValueSet;
 import org.protempa.backend.AbstractCommonsKnowledgeSourceBackend;
 import org.protempa.backend.BackendInitializationException;
@@ -52,7 +51,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.logging.Level;
 import org.protempa.ProtempaUtil;
 
 /**
@@ -210,46 +208,6 @@ public abstract class ProtegeKnowledgeSourceBackend
         } else {
             return ac.convert(instance, this);
         }
-    }
-
-    @Override
-    public String[] getPropositionsByTerm(String termId)
-            throws KnowledgeSourceReadException {
-        return collectAssociatedNames(termId, "termProposition");
-    }
-
-    @Override
-    public List<String> getPropositionsByTermSubsumption(
-            And<TermSubsumption> termIds) throws KnowledgeSourceReadException {
-        List<String> result = new ArrayList<>();
-        List<Set<String>> propIdSets = new ArrayList<>();
-
-        Slot termPropositionSlot = this.cm.getSlot("termProposition");
-
-        // collects the set of proposition IDs for each term subsumption
-        for (TermSubsumption ts : termIds.getAnded()) {
-            Set<String> subsumpPropIds = new HashSet<>();
-            for (String termId : ts.getTerms()) {
-                Instance termInstance = this.cm.getInstance(termId);
-                if (termInstance != null) {
-                    Collection<?> props = cm.getOwnSlotValues(termInstance,
-                            termPropositionSlot);
-                    Iterator<?> it = props.iterator();
-                    while (it.hasNext()) {
-                        Instance prop = (Instance) it.next();
-                        subsumpPropIds.add(prop.getName());
-                    }
-                }
-            }
-            propIdSets.add(subsumpPropIds);
-        }
-
-        Set<String> matchingPropIds
-                = org.arp.javautil.collections.Collections.intersection(
-                        propIdSets);
-        result.addAll(matchingPropIds);
-
-        return result;
     }
 
     /**

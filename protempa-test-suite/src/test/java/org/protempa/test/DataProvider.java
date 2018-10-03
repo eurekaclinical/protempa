@@ -19,76 +19,70 @@
  */
 package org.protempa.test;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * An interface to provide functionality needed to provide data for upload to a
  * PROTEMPA schema.
- * 
+ *
  * @author hrathod
- * 
+ *
  */
 public interface DataProvider {
-	/**
-	 * Get a list of patients from the data.
-	 * 
-	 * @return A list of {@link Patient} objects.
-	 */
-	public List<Patient> getPatients();
 
-	/**
-	 * Get a list of providers from the data.
-	 * 
-	 * @return A list of {@link Provider} objects.
-	 */
-	public List<Provider> getProviders();
+    /**
+     * Get a stream of patients from the data.
+     *
+     * @return A stream of {@link Patient} objects.
+     */
+    Stream<Patient> getPatients();
 
-	/**
-	 * Get a list of encounters from the data.
-	 * 
-	 * @return A list of {@link Encounter} objects.
-	 */
-	public List<Encounter> getEncounters();
+    /**
+     * Get a stream of providers from the data.
+     *
+     * @return A stream of {@link Provider} objects.
+     */
+    Stream<Provider> getProviders();
 
-	/**
-	 * Get a list of CPT codes from the data.
-	 * 
-	 * @return A list of {@link CPT} objects.
-	 */
-	public List<CPT> getCptCodes();
+    /**
+     * Get a stream of encounters from the data.
+     *
+     * @return A stream of {@link Encounter} objects.
+     */
+    Stream<Encounter> getEncounters();
 
-	/**
-	 * Get a list of ICD9 Diagnostic codes from the data.
-	 * 
-	 * @return A list of {@link Icd9Diagnosis} objects.
-	 */
-	public List<Icd9Diagnosis> getIcd9Diagnoses();
+    /**
+     * Get a stream of ICD9 Diagnostic codes from the data.
+     *
+     * @return A stream of {@link Icd9Diagnosis} objects.
+     */
+    Stream<Icd9Diagnosis> getIcd9Diagnoses();
 
-	/**
-	 * Get a list of ICD9 Procedure codes from the data.
-	 * 
-	 * @return A list of {@link Icd9Procedure} objects.
-	 */
-	public List<Icd9Procedure> getIcd9Procedures();
+    /**
+     * Get a stream of ICD9 Procedure codes from the data.
+     *
+     * @return A stream of {@link Icd9Procedure} objects.
+     */
+    Stream<Icd9Procedure> getIcd9Procedures();
 
-	/**
-	 * Get a list of medication from the data.
-	 * 
-	 * @return A list of {@link Medication} objects.
-	 */
-	public List<Medication> getMedications();
+    /**
+     * Get a stream of medication from the data.
+     *
+     * @return A stream of {@link Medication} objects.
+     */
+    Stream<Medication> getMedications();
 
-	/**
-	 * Get a list of lab results from the data.
-	 * 
-	 * @return A list of {@link Lab} objects.
-	 */
-	public List<Lab> getLabs();
+    /**
+     * Get a stream of lab results from the data.
+     *
+     * @return A stream of {@link Lab} objects.
+     */
+    Stream<Lab> getLabs();
 
-	/**
-	 * Get a list of vitals from the data.
-	 * 
-	 * @return A list of {@link Vital} objects.
-	 */
-	public List<Vital> getVitals();
+    /**
+     * Get a stream of vitals from the data.
+     *
+     * @return A stream of {@link Vital} objects.
+     */
+    Stream<Vital> getVitals();
 }

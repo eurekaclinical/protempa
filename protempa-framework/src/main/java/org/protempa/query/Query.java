@@ -46,11 +46,11 @@ public class Query implements Serializable {
     private final String[] keyIds;
     private final Filter filters;
     private final String[] propIds;
-    private final And<String>[] termIds;
     private final PropositionDefinition[] propDefs;
     private String name;
     private String username;
     private QueryMode queryMode;
+    private String databasePath;
     
     /**
      * Creates new Query instance with a default identifier.
@@ -63,9 +63,9 @@ public class Query implements Serializable {
      * @param termIds
      */
     public Query(String[] keyIds, Filter filters, String[] propIds,
-            And<String>[] termIds, PropositionDefinition[] propDefs,
+            PropositionDefinition[] propDefs,
             QueryMode queryMode) {
-        this(null, keyIds, filters, propIds, termIds, propDefs, queryMode);
+        this(null, keyIds, filters, propIds, propDefs, queryMode);
     }
 
     /**
@@ -81,37 +81,35 @@ public class Query implements Serializable {
      * @param termIds
      */
     public Query(String id, String[] keyIds, Filter filters, String[] propIds,
-            And<String>[] termIds, PropositionDefinition[] propDefs,
+            PropositionDefinition[] propDefs,
             QueryMode queryMode) {
-        this(id, null, keyIds, filters, propIds, termIds, propDefs, queryMode);
+        this(id, null, keyIds, filters, propIds, propDefs, queryMode);
     }
     
     public Query(String id, String username, String[] keyIds, Filter filters, String[] propIds,
-            And<String>[] termIds, PropositionDefinition[] propDefs,
+            PropositionDefinition[] propDefs,
             QueryMode queryMode) {
+        this(id, username, keyIds, filters, propIds, propDefs, queryMode, null);
+    }
+    
+    public Query(String id, String username, String[] keyIds, Filter filters, String[] propIds,
+            PropositionDefinition[] propDefs, QueryMode queryMode, String databasePath) {
         if (keyIds == null) {
             keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         }
         if (propIds == null) {
             propIds = ArrayUtils.EMPTY_STRING_ARRAY;
         }
-        if (termIds == null) {
-            // Type safety: The expression of type And[] needs unchecked
-            // conversion to conform to And<String>[]
-            termIds = new And[0];
-        }
         if (propDefs == null) {
             propDefs = EMPTY_PROP_DEF_ARRAY;
         }
         ProtempaUtil.checkArrayForNullElement(keyIds, "keyIds");
         ProtempaUtil.checkArrayForNullElement(propIds, "propIds");
-        ProtempaUtil.checkArrayForNullElement(termIds, "termIds");
         ProtempaUtil.checkArrayForNullElement(propDefs, "propDefs");
         this.keyIds = keyIds.clone();
         this.filters = filters;
         this.propIds = propIds.clone();
         ProtempaUtil.internAll(this.propIds);
-        this.termIds = termIds.clone();
         this.propDefs = propDefs.clone();
         if (id == null) {
             id = UUID.randomUUID().toString();
@@ -123,6 +121,10 @@ public class Query implements Serializable {
             this.queryMode = queryMode;
         }
         this.username = username;
+        this.databasePath = databasePath;
+        if (this.databasePath == null && org.arp.javautil.arrays.Arrays.contains(QueryMode.reprocessModes(), this.queryMode)) {
+            throw new IllegalArgumentException("Must specify a database path when in reprocess mode!");
+        }
     }
 
     /**
@@ -157,21 +159,6 @@ public class Query implements Serializable {
     }
 
     /**
-     * Gets the term ids to be queried in disjunctive normal form. PROTEMPA will
-     * navigate these terms' subsumption hierarchy, find proposition definitions
-     * that have been annotated with each term, and add those to the query.
-     * <code>And</code>'d term ids will only match a proposition definition if
-     * it is annotated with all of the specified term ids (or terms in their
-     * subsumption hierarchies).
-     *
-     * @return a {@link String[]} of term ids representing disjunctive normal
-     * form.
-     */
-    public final And<String>[] getTermIds() {
-        return this.termIds.clone();
-    }
-    
-    /**
      * Returns an optional set of user-specified proposition definitions.
      * 
      * @return an array of {@link PropositionDefinition}s.
@@ -192,7 +179,7 @@ public class Query implements Serializable {
     public String getUsername() {
         return username;
     }
-    
+
     /**
      * @return an array that references all of the filters in the chain of
      * filters.
@@ -207,6 +194,10 @@ public class Query implements Serializable {
     public QueryMode getQueryMode() {
         return queryMode;
     }
+
+    public String getDatabasePath() {
+        return databasePath;
+    }
     
     @Override
     public int hashCode() {
@@ -214,10 +205,10 @@ public class Query implements Serializable {
         int result = prime + (this.filters != null ? this.filters.hashCode() : 0);
         result = prime * result + Arrays.hashCode(this.keyIds);
         result = prime * result + Arrays.hashCode(this.propIds);
-        result = prime * result + Arrays.hashCode(this.termIds);
         result = prime * result + Arrays.hashCode(this.propDefs);
         result = prime * result + this.queryMode.hashCode();
         result = prime * result + (this.username != null ? this.username.hashCode() : 0);
+        result = prime * result + (this.databasePath != null ? this.databasePath.hashCode() : 0);
         return result;
     }
 
@@ -246,9 +237,6 @@ public class Query implements Serializable {
         if (!Arrays.equals(this.propIds, other.propIds)) {
             return false;
         }
-        if (!Arrays.equals(this.termIds, other.termIds)) {
-            return false;
-        }
         if (!Arrays.equals(this.propDefs, other.propDefs)) {
             return false;
         }
@@ -256,6 +244,9 @@ public class Query implements Serializable {
             return false;
         }
         if (this.username != null ? !this.username.equals(other.username) : other.username != null) {
+            return false;
+        }
+        if (this.databasePath != null ? this.databasePath.equals(other.databasePath) : other.databasePath != null) {
             return false;
         }
         return true;

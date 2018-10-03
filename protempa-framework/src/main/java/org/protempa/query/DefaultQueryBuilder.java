@@ -19,8 +19,6 @@
  */
 package org.protempa.query;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.*;
@@ -50,24 +47,19 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     private String[] keyIds;
     private Filter filters;
     private String[] propIds;
-    @SuppressWarnings("unchecked")
-    private And<String>[] termIds;
     private PropositionDefinition[] propDefs;
     private String name;
     private String username;
-    private final PropertyChangeSupport changes;
-
     private QueryMode queryMode;
+    private String databasePath;
 
     public DefaultQueryBuilder() {
-        this.changes = new PropertyChangeSupport(this);
         this.propDefs = EMPTY_PROP_DEF_ARRAY;
         this.keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
-        this.termIds = new And[0];
         this.queryMode = Query.DEFAULT_QUERY_MODE;
     }
-
+    
     public String getName() {
         return name;
     }
@@ -75,7 +67,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
+    
     public String getUsername() {
         return username;
     }
@@ -89,15 +81,21 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
     }
 
     public void setQueryMode(QueryMode queryMode) {
-        QueryMode old = this.queryMode;
         if (queryMode == null) {
             this.queryMode = Query.DEFAULT_QUERY_MODE;
         } else {
             this.queryMode = queryMode;
         }
-        this.changes.firePropertyChange("queryMode", old, this.queryMode);
     }
 
+    public String getDatabasePath() {
+        return databasePath;
+    }
+
+    public void setDatabasePath(String databasePath) {
+        this.databasePath = databasePath;
+    }
+    
     /**
      * Gets the filters to be applied to this query.
      *
@@ -116,9 +114,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * @param filters a {@link Filter}.
      */
     public final void setFilters(Filter filters) {
-        Filter old = this.filters;
         this.filters = filters;
-        this.changes.firePropertyChange("filters", old, this.filters);
     }
 
     /**
@@ -142,9 +138,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         if (keyIds == null) {
             keyIds = ArrayUtils.EMPTY_STRING_ARRAY;
         }
-        String[] old = this.keyIds;
         this.keyIds = keyIds.clone();
-        this.changes.firePropertyChange("keyIds", old, this.keyIds);
     }
 
     /**
@@ -165,50 +159,12 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
      * <code>null</code>, an empty {@link String[]} will be stored.
      */
     public final void setPropositionIds(String[] propIds) {
-        String[] old = this.propIds;
         if (propIds == null) {
             this.propIds = ArrayUtils.EMPTY_STRING_ARRAY;
         } else {
             this.propIds = propIds.clone();
             ProtempaUtil.internAll(this.propIds);
         }
-        this.changes.firePropertyChange("propIds", old, this.propIds);
-    }
-
-    /**
-     * Gets the term ids to be queried in disjunctive normal form. PROTEMPA will
-     * navigate these terms' subsumption hierarchy, find proposition definitions
-     * that have been annotated with each term, and add those to the query.
-     * <code>And</code>'d term ids will only match a proposition definition if
-     * it is annotated with all of the specified term ids (or terms in their
-     * subsumption hierarchies).
-     *
-     * @return a {@link String[]} of term ids representing disjunctive normal
-     * form.
-     */
-    public final And<String>[] getTermIds() {
-        return this.termIds.clone();
-    }
-
-    /**
-     * Sets the term ids to be queried in disjunctive normal form. If any terms
-     * are specified, PROTEMPA will navigate the term's subsumption hierarchy,
-     * find proposition definitions that have been annotated with each term, and
-     * add those to the query. If <code>and</code>'d term ids are specified,
-     * proposition definitions will only match if they are annotated with all of
-     * the specified term ids (or terms in their subsumption hierarchies).
-     *
-     * @param termIds a {@link And[]} term ids representing disjunctive normal
-     * form.
-     */
-    @SuppressWarnings("unchecked")
-    public final void setTermIds(And<String>[] termIds) {
-        if (termIds == null) {
-            termIds = new And[0];
-        }
-        And<String>[] old = this.termIds;
-        this.termIds = (And<String>[]) termIds.clone();
-        this.changes.firePropertyChange("termIds", old, this.termIds);
     }
 
     /**
@@ -229,49 +185,7 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
         if (propDefs == null) {
             propDefs = EMPTY_PROP_DEF_ARRAY;
         }
-        PropositionDefinition[] old = this.propDefs;
         this.propDefs = propDefs.clone();
-        this.changes.firePropertyChange("propositionDefinitions", old,
-                this.propDefs);
-    }
-
-    /**
-     * Adds listeners for changes to this Query's properties.
-     *
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void addPropertyChangeListener(PropertyChangeListener listener) {
-        this.changes.addPropertyChangeListener(listener);
-    }
-
-    /**
-     * Removes listeners for changes to this Query's properties.
-     *
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void removePropertyChangeListener(PropertyChangeListener listener) {
-        this.changes.removePropertyChangeListener(listener);
-    }
-
-    /**
-     * Adds listeners for changes to the specified property.
-     *
-     * @param propertyName the name {@link String} of the property of interest.
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        this.changes.addPropertyChangeListener(propertyName, listener);
-    }
-
-    /**
-     * Removes listeners for changes to the specified property.
-     *
-     * @param propertyName the name {@link String} of the property that is no
-     * longer of interest.
-     * @param listener a {@link PropertyChangeListener}.
-     */
-    public final void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        this.changes.removePropertyChangeListener(propertyName, listener);
     }
 
     @Override
@@ -302,14 +216,18 @@ public class DefaultQueryBuilder implements QueryBuilder, Serializable {
                 }
                 propIdsToTest.removeAll(actualPropIds);
                 if (!propIdsToTest.isEmpty()) {
-                    throw new QueryBuildException("Invalid proposition ids: " + propIdsToTest);
+                    throw new QueryValidationException("Invalid proposition ids: " + propIdsToTest);
                 }
-            } catch (KnowledgeSourceReadException ex) {
+            } catch (QueryValidationException | KnowledgeSourceReadException ex) {
                 throw new QueryBuildException("Could not build query", ex);
+            }
+            if (Arrays.contains(QueryMode.reprocessModes(), this.queryMode) && this.databasePath == null) {
+                throw new QueryBuildException("Could not build query", 
+                        new QueryValidationException("Database path must be specified in reprocess mode"));
             }
         }
         return new Query(this.name, this.username, this.keyIds, this.filters,
-                this.propIds, this.termIds, this.propDefs, this.queryMode);
+                this.propIds, this.propDefs, this.queryMode, this.databasePath);
     }
 
     @Override

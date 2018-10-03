@@ -59,13 +59,6 @@ public class LowLevelAbstractionValueDefinition implements Serializable {
         }
         this.id = id.intern();
         this.lowLevelAbstractionDefinition.addValueDefinition(this);
-        this.lowLevelAbstractionDefinition.addPropertyChangeListener(
-                "algorithmId", new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                LowLevelAbstractionValueDefinition.this.algorithmArguments = null;
-            }
-        });
         this.parameterValues = new HashMap<>();
         this.parameterValueComps = new HashMap<>();
     }

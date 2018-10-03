@@ -65,7 +65,7 @@ final class PROTEMPAConflictResolver extends AbstractConflictResolver {
      * @throws KnowledgeSourceReadException if an error occurs reading from
      * the knowledge source.
      */
-    PROTEMPAConflictResolver(Collection<PropositionDefinition> allNarrowerDescendants,
+    PROTEMPAConflictResolver(Collection<? extends PropositionDefinition> allNarrowerDescendants,
             Map<Rule, ? extends TemporalPropositionDefinition> ruleToTPD)
             throws CycleDetectedException {
         assert allNarrowerDescendants != null : "allNarrowerDescendants cannot be null";

@@ -21,10 +21,10 @@ package org.protempa.dest.deid;
  */
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Map;
 import org.protempa.Attribute;
 import org.protempa.PropertyDefinition;
 import org.protempa.PropositionDefinition;
+import org.protempa.PropositionDefinitionCache;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.AbstractProposition;
 import org.protempa.proposition.Constant;
@@ -57,7 +57,7 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
     private AbstractProposition deidentifiedProp;
     private final Encryption encryption;
     private final Integer offsetInSeconds;
-    private final Map<String, PropositionDefinition> propDefCache;
+    private final PropositionDefinitionCache propDefCache;
     private static final Calendar CAL = Calendar.getInstance();
     private static final Calendar AGE_OVER_89_CAL = Calendar.getInstance();
     private static final Date AGE_OVER_89;
@@ -67,7 +67,7 @@ class PropositionDeidentifierVisitor extends AbstractPropositionVisitor {
     }
     private String keyId;
 
-    PropositionDeidentifierVisitor(Encryption encryption, Map<String, PropositionDefinition> propDefCache, Integer offsetInSeconds) {
+    PropositionDeidentifierVisitor(Encryption encryption, PropositionDefinitionCache propDefCache, Integer offsetInSeconds) {
         assert encryption != null : "encryption cannot be null";
         assert propDefCache != null : "propDefCache cannot be null";
 

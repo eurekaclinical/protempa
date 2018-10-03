@@ -87,7 +87,7 @@ class InverseIsAConsequence implements Consequence {
         List<PropositionCopier> copiers = this.copiersMap.get(prop.getId());
         assert copiers != null : "copiers should never be null";
         for (PropositionCopier copier : copiers) {
-            copier.grab(workingMemory);
+            copier.grab(knowledgeHelper);
             prop.accept(copier);
             copier.release();
         }

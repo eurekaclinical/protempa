@@ -25,5 +25,16 @@ package org.protempa.query;
  * @author Andrew Post
  */
 public enum QueryMode {
-    UPDATE, REPLACE
+    UPDATE, REPLACE, REPROCESS_RETRIEVE, REPROCESS_CREATE, REPROCESS_UPDATE, REPROCESS_DELETE;
+    
+    private static final QueryMode[] ETL_MODES = {UPDATE, REPLACE};
+    private static final QueryMode[] REPROCESS_MODES = {REPROCESS_RETRIEVE, REPROCESS_CREATE, REPROCESS_UPDATE, REPROCESS_DELETE};
+    
+    public static QueryMode[] etlModes() {
+        return ETL_MODES;
+    }
+    
+    public static QueryMode[] reprocessModes() {
+        return REPROCESS_MODES;
+    }
 }

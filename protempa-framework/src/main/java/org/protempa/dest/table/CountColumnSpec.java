@@ -22,7 +22,6 @@ package org.protempa.dest.table;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -34,6 +33,7 @@ import org.protempa.KnowledgeSourceReadException;
 import org.protempa.ProtempaUtil;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
+import org.protempa.proposition.value.NominalValue;
 
 /**
  * Counts the number of instances of a proposition.
@@ -89,8 +89,8 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
 
     @Override
     public void columnValues(String key, Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache ksCache,
             TabularWriter writer) throws TabularWriterException {
@@ -109,9 +109,9 @@ public final class CountColumnSpec extends AbstractTableColumnSpec {
                             "Adding to count: {0}", pId);
                 }
             }
-            writer.writeString("" + result.size());
+            writer.writeNominal(NominalValue.getInstance("" + result.size()));
         } else {
-            writer.writeString("" + props.size());
+            writer.writeNominal(NominalValue.getInstance("" + props.size()));
         }
     }
     

@@ -28,6 +28,7 @@ import org.protempa.backend.DataSourceBackendUpdatedEvent;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.dsb.filter.Filter;
 import org.protempa.dest.QueryResultsHandler;
+import org.protempa.dest.key.KeySetQueryResultsHandler;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.value.GranularityFactory;
 import org.protempa.proposition.value.UnitFactory;
@@ -114,5 +115,7 @@ public interface DataSource extends Source<DataSourceUpdatedEvent,
     void deleteAllKeys() throws DataSourceWriteException;
     
     void writeKeys(Set<String> keyIds) throws DataSourceWriteException;
+    
+    void writeKeysFromKeySet(KeySetQueryResultsHandler queryResultsHandler) throws DataSourceWriteException;
 
 }

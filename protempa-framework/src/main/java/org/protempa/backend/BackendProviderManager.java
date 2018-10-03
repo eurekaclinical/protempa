@@ -23,7 +23,6 @@ import org.arp.javautil.serviceloader.SingletonServiceLoader;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.backend.tsb.TermSourceBackend;
 
 /**
  * Manages PROTEMPA's backend provider.
@@ -102,12 +101,6 @@ public final class BackendProviderManager {
             throws BackendProviderSpecLoaderException {
         loadBackendProviderIfNeeded();
         return backendProvider.getAlgorithmSourceBackendSpecLoader();
-    }
-
-    public static BackendSpecLoader<TermSourceBackend> getTermSourceBackendSpecLoader()
-            throws BackendProviderSpecLoaderException {
-        loadBackendProviderIfNeeded();
-        return backendProvider.getTermSourceBackendSpecLoader();
     }
 
     private static void loadBackendProviderIfNeeded() {

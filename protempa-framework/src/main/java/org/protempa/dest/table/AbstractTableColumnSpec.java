@@ -21,23 +21,24 @@ package org.protempa.dest.table;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
-import org.protempa.PropositionDefinition;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.value.Value;
 import org.protempa.proposition.value.ValueComparator;
 
 public abstract class AbstractTableColumnSpec implements TableColumnSpec {
+
     private final LinkTraverser linkTraverser;
-    
+
     public AbstractTableColumnSpec() {
         this.linkTraverser = new LinkTraverser();
     }
-    
+
     boolean checkCompatible(Proposition proposition,
             PropertyConstraint[] constraints) {
         for (PropertyConstraint ccc : constraints) {
@@ -61,15 +62,16 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
 
     /**
      * Traverses links from a proposition to a list of propositions.
-     * 
+     *
      * @param links the {@link Link}s to traverse.
-     * @param proposition the {@link Proposition} from which to start.
-     * @param forwardDerivations map of propositions from raw data toward 
+     * @param proposition the {@link Proposition} from which to start. Cannot be
+     * <code>null</code>.
+     * @param forwardDerivations map of propositions from raw data toward
      * derived propositions.
-     * @param backwardDerivations map of propositions from derived propositions 
+     * @param backwardDerivations map of propositions from derived propositions
      * toward raw data.
-     * @param references a map of unique id to the corresponding proposition
-     * for propositions that are referred to by other propositions.
+     * @param references a map of unique id to the corresponding proposition for
+     * propositions that are referred to by other propositions.
      * @param knowledgeSource the {@link KnowledgeSource}.
      * @return the list of {@link Propositions} at the end of the traversals.
      * @throws KnowledgeSourceReadException if an error occurred reading from
@@ -77,12 +79,12 @@ public abstract class AbstractTableColumnSpec implements TableColumnSpec {
      */
     List<Proposition> traverseLinks(Link[] links,
             Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache ksCache) {
-        return this.linkTraverser.traverseLinks(links, proposition, 
-                forwardDerivations, backwardDerivations, references, 
+        return this.linkTraverser.traverseLinks(links, proposition,
+                forwardDerivations, backwardDerivations, references,
                 ksCache);
     }
 }

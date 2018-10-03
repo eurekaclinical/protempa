@@ -25,6 +25,6 @@ package org.protempa.test;
  * @author hrathod
  * 
  */
-class Icd9Procedure extends Observation {
+public class Icd9Procedure extends Observation {
 	// no new fields to add, yet.
 }

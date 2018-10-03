@@ -25,16 +25,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.arp.javautil.arrays.Arrays;
 import org.protempa.backend.BackendInitializationException;
 import org.protempa.backend.BackendNewInstanceException;
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.query.And;
 
 /**
  * A read-only "interface" to an externally-maintained knowledge base. The user
@@ -45,6 +44,8 @@ import org.protempa.query.And;
  */
 public final class KnowledgeSourceImpl
         extends AbstractSource<KnowledgeSourceUpdatedEvent, KnowledgeSourceBackend, KnowledgeSourceUpdatedEvent, KnowledgeSourceBackendUpdatedEvent> implements KnowledgeSource {
+    
+    private static final Logger LOGGER = Logger.getLogger(KnowledgeSourceImpl.class.getName());
 
     /**
      * PROTEMPA knowledge base.
@@ -730,26 +731,6 @@ public final class KnowledgeSourceImpl
         return this.collectSubtreeGetter.subtreePropDefs(false, propIds);
     }
 
-    /**
-     * Gets the mappings from term IDs to proposition IDs for each backend.
-     *
-     * @return a {@link Map} of {@link String}s to a {@link List} of
-     * <code>String</code>s, with the keys being {@link Term} IDs and the values
-     * being lists of {@link PropositionDefinition} IDs.
-     */
-    @Override
-    public List<String> getPropositionDefinitionsByTerm(
-            And<TermSubsumption> termSubsumptionClause)
-            throws KnowledgeSourceReadException {
-        List<String> result = new ArrayList<>();
-        initializeIfNeeded("getting proposition definitions by term");
-        for (KnowledgeSourceBackend backend : getBackends()) {
-            result.addAll(backend.getPropositionsByTermSubsumption(termSubsumptionClause));
-        }
-
-        return result;
-    }
-
     @Override
     public void backendUpdated(KnowledgeSourceBackendUpdatedEvent event) {
         clear();
@@ -777,7 +758,7 @@ public final class KnowledgeSourceImpl
     @Override
     public List<String> getMatchingPropIds(String searchKey)
             throws KnowledgeSourceReadException {
-        ProtempaUtil.logger().log(Level.INFO,
+        LOGGER.log(Level.INFO,
                 "Searching knowledge source For search string {0}", searchKey);
         Set<String> searchResults = getSearchResultsFromBackend(searchKey);
         return new ArrayList<>(searchResults);

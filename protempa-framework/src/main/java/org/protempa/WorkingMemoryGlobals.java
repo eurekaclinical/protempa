@@ -38,4 +38,5 @@ class WorkingMemoryGlobals {
     static final String KEY_ID = "keyId";
     
     static final String DERIVED_UNIQUE_ID_COUNTS = "derivedUniqueIdCounts";
+    
 }

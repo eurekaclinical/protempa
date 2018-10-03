@@ -288,12 +288,7 @@ public final class HighLevelAbstractionDefinition
     }
 
     public void setTemporalOffset(TemporalPatternOffset temporalOffset) {
-        TemporalPatternOffset old = temporalOffset;
         this.temporalOffset = temporalOffset;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("temporalOffset", old,
-                    this.temporalOffset);
-        }
     }
 
     @Override
@@ -351,7 +346,6 @@ public final class HighLevelAbstractionDefinition
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.children;
         Set<String> abstractedFrom = getAbstractedFrom();
         Set<String> directChildrenLocal = new HashSet<>(abstractedFrom);
         String[] inverseIsA = getInverseIsA();
@@ -360,10 +354,6 @@ public final class HighLevelAbstractionDefinition
         }
         this.children = directChildrenLocal.toArray(
                 new String[directChildrenLocal.size()]);
-        if (this.changes != null) {
-            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.children);
-        }
     }
 
     @Override

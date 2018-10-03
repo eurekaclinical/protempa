@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.drools.WorkingMemory;
 import org.drools.rule.Declaration;
@@ -41,6 +42,7 @@ import org.protempa.proposition.interval.Relation;
 final class LowLevelAbstractionConsequence implements Consequence {
 
     private static final long serialVersionUID = 2455607587534331595L;
+    private static final Logger LOGGER = Logger.getLogger(LowLevelAbstractionConsequence.class.getName());
     private static final Relation REL = new Relation(null, null, 0, null, null,
             null, null, null, null, null, null, null, 0, null, null, null);
     private final LowLevelAbstractionDefinition def;
@@ -48,23 +50,20 @@ final class LowLevelAbstractionConsequence implements Consequence {
     private final DerivationsBuilder derivationsBuilder;
     private transient MyObjectAsserter objAsserter;
 
-    private void doProcess(WorkingMemory workingMemory, Sequence<PrimitiveParameter> subSeq) throws AlgorithmProcessingException, AlgorithmInitializationException {
-        objAsserter.workingMemory = workingMemory;
-        LowLevelAbstractionFinder.process(subSeq, this.def,
-                this.algorithm,
-                objAsserter, this.derivationsBuilder, workingMemory);
-        objAsserter.workingMemory = null;
+    private void doProcess(KnowledgeHelper knowledgeHelper, Sequence<PrimitiveParameter> subSeq) throws AlgorithmProcessingException, AlgorithmInitializationException {
+        objAsserter.knowledgeHelper = knowledgeHelper;
+        LowLevelAbstractionFinder.process(subSeq, this.def, this.algorithm,
+                objAsserter, this.derivationsBuilder, knowledgeHelper.getWorkingMemory());
+        objAsserter.knowledgeHelper = null;
     }
 
     private static class MyObjectAsserter implements ObjectAsserter {
-
-        private WorkingMemory workingMemory;
+        private KnowledgeHelper knowledgeHelper;
 
         @Override
         public void assertObject(Object obj) {
-            workingMemory.insert(obj);
-            ProtempaUtil.logger().log(Level.FINER,
-                    "Asserted derived proposition {0}", obj);
+            knowledgeHelper.insertLogical(obj);
+            LOGGER.log(Level.FINER, "Asserted derived proposition {0}", obj);
         }
     }
 
@@ -79,23 +78,21 @@ final class LowLevelAbstractionConsequence implements Consequence {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
+    public void evaluate(KnowledgeHelper kh, WorkingMemory wm)
             throws Exception {
         List<PrimitiveParameter> pl =
-                (List<PrimitiveParameter>) arg0.get(
-                arg0.getDeclaration("result"));
-        Declaration declaration = arg0.getDeclaration("result2");
-        Sequence<PrimitiveParameter> seq =
-                new Sequence<>(
-                this.def.getAbstractedFrom(), pl);
+                (List<PrimitiveParameter>) kh.get(
+                kh.getDeclaration("result"));
+        Declaration declaration = kh.getDeclaration("result2");
+        Sequence<PrimitiveParameter> seq = 
+                new Sequence<>(this.def.getAbstractedFrom(), pl);
         if (declaration != null) {
             List<Context> contexts =
-                    (List<Context>) arg0.get(arg0.getDeclaration("result2"));
+                    (List<Context>) kh.get(kh.getDeclaration("result2"));
 
             Sequence<Context> contextSeq =
                     new Sequence<>(this.def.getContextId(), contexts);
-            LinkedList<PrimitiveParameter> ll =
-                    new LinkedList<>(seq);
+            LinkedList<PrimitiveParameter> ll = new LinkedList<>(seq);
 
             for (Context context : contextSeq) {
                 boolean in = false;
@@ -121,12 +118,12 @@ final class LowLevelAbstractionConsequence implements Consequence {
 
                 }
                 if (!subSeq.isEmpty()) {
-                    doProcess(arg1, subSeq);
+                    doProcess(kh, subSeq);
                     subSeq.clear();
                 }
             }
         } else {
-            doProcess(arg1, seq);
+            doProcess(kh, seq);
         }
 
     }

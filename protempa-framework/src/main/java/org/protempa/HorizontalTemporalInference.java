@@ -36,9 +36,8 @@ final class HorizontalTemporalInference {
 
     HorizontalTemporalInference() {
         this.solidRelation = new Relation(null, null, null, null,
-            null, null, null, null,
-            null, null, -1, null,
-            null, null, null, null);
+            null, null, null, null, null, null, -1, null,
+                null, null, null, null);
     }
     
     

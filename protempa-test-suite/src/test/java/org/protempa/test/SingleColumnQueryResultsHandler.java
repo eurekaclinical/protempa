@@ -19,14 +19,16 @@
  */
 package org.protempa.test;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.protempa.proposition.Proposition;
@@ -38,8 +40,9 @@ import org.protempa.dest.QueryResultsHandlerProcessingException;
 
 final class SingleColumnQueryResultsHandler
         extends AbstractQueryResultsHandler {
-    private final Map<String, Map<Proposition, List<Proposition>>> data;
-    private final Writer writer;
+
+    private final Map<String, Map<Proposition, Set<? extends Proposition>>> data;
+    private final BufferedWriter writer;
 
     /**
      * Creates a new instance that will write to the given writer. The finish()
@@ -47,26 +50,28 @@ final class SingleColumnQueryResultsHandler
      *
      * @param writer the {@link Writer} to output to
      */
-    SingleColumnQueryResultsHandler(Writer writer) {
+    SingleColumnQueryResultsHandler(BufferedWriter writer) {
         this.data = new HashMap<>();
         this.writer = writer;
     }
     
     @Override
-    public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
-        try {
-            this.data.put(keyId, new HashMap<Proposition, List<Proposition>>());
-            for (Proposition p : propositions) {
-                if (p.getCreateDate() == null) {
-                    throw new QueryResultsHandlerProcessingException("invalid proposition with no create date: " + p);
-                }
-                this.data.get(keyId).put(p, new ArrayList<Proposition>());
-                storeDerivations(forwardDerivations.get(p), this.data.get(keyId).get(p));
-                storeDerivations(backwardDerivations.get(p), this.data.get(keyId).get(p));
+    public void handleQueryResult(String keyId, List<Proposition> propositions, 
+            Map<Proposition, Set<Proposition>> forwardDerivations, 
+            Map<Proposition, Set<Proposition>> backwardDerivations, 
+            Map<UniqueId, Proposition> references) 
+            throws QueryResultsHandlerProcessingException {
+        Map<Proposition, Set<? extends Proposition>> result = new HashMap<>();
+        for (Proposition p : propositions) {
+            if (p.getCreateDate() == null) {
+                throw new QueryResultsHandlerProcessingException("invalid proposition with no create date: " + p);
             }
-        } catch (IOException ex) {
-            throw new QueryResultsHandlerProcessingException(ex);
+            Set<Proposition> allDerivations = new HashSet<>();
+            allDerivations.addAll(forwardDerivations.getOrDefault(p, Collections.emptySet()));
+            allDerivations.addAll(backwardDerivations.getOrDefault(p, Collections.emptySet()));
+            result.put(p, allDerivations);
         }
+        this.data.put(keyId, result);
     }
 
     @Override
@@ -76,7 +81,7 @@ final class SingleColumnQueryResultsHandler
             for (String keyId : sortedKeyIds) {
                 writeLine(keyId);
                 List<PropositionWithDerivations> sortedProps = new ArrayList<>();
-                for (Map.Entry<Proposition, List<Proposition>> pp : this.data.get(keyId).entrySet()) {
+                for (Map.Entry<Proposition, Set<? extends Proposition>> pp : this.data.get(keyId).entrySet()) {
                     sortedProps.add(new PropositionWithDerivations(pp.getKey(), pp.getValue()));
                 }
                 Collections.sort(sortedProps, new PropositionWithDerivationsComparator());
@@ -101,16 +106,7 @@ final class SingleColumnQueryResultsHandler
     
     private void writeLine(String str) throws IOException {
         this.writer.write(str);
-        this.writer.write("\n");
-    }
-
-    private void storeDerivations(List<Proposition> derivations,
-            List<Proposition> outputDerivations) throws IOException {
-        if (derivations != null && derivations.size() > 0) {
-            for (Proposition d : derivations) {
-                outputDerivations.add(d);
-            }
-        }
+        this.writer.newLine();
     }
 
     private static class PropositionComparator implements
@@ -129,9 +125,9 @@ final class SingleColumnQueryResultsHandler
         private final List<Proposition> derivations;
 
         PropositionWithDerivations(Proposition proposition,
-                List<Proposition> derivations) {
+                Set<? extends Proposition> derivations) {
             this.proposition = proposition;
-            this.derivations = derivations;
+            this.derivations = new ArrayList<>(derivations);
         }
 
         public Proposition getProposition() {

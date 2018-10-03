@@ -19,10 +19,10 @@
  */
 package org.protempa.backend.dsb.relationaldb.h2;
 
+import java.util.LinkedHashMap;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.arp.javautil.sql.DatabaseVersion;
 import org.arp.javautil.sql.DriverVersion;
@@ -32,7 +32,6 @@ import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
 import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
 import org.protempa.backend.dsb.relationaldb.SelectStatement;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 
 /**
  * Generates SQL compatible with the H2 database engine 1.x
@@ -60,13 +59,13 @@ public final class H2SQLGenerator extends AbstractSQLGeneratorWithCompatChecks {
 
     @Override
     protected SelectStatement getSelectStatement(EntitySpec entitySpec,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
-            Map<String, ReferenceSpec> inboundRefSpecs,
+            List<EntitySpec> entitySpecs,
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            StagingSpec[] stagedTables, boolean wrapKeyId) {
-        return new H2SelectStatement(entitySpec, referenceSpec, entitySpecs,
+            boolean wrapKeyId) {
+        return new H2SelectStatement(entitySpec, entitySpecs,
                 inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
-                getStreamingMode(), wrapKeyId);
+                wrapKeyId);
     }
 }

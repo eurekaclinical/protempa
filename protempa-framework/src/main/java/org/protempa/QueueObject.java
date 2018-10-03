@@ -22,6 +22,7 @@ package org.protempa;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 
@@ -31,12 +32,14 @@ import org.protempa.proposition.UniqueId;
  */
 final class QueueObject {
     List<Proposition> propositions;
-    Map<Proposition, List<Proposition>> forwardDerivations;
-    Map<Proposition, List<Proposition>> backwardDerivations;
+    Map<Proposition, Set<Proposition>> forwardDerivations;
+    Map<Proposition, Set<Proposition>> backwardDerivations;
     String keyId;
     Map<UniqueId, Proposition> refs;
 
-    QueueObject(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> refs) {
+    QueueObject(String keyId, List<Proposition> propositions, 
+            Map<Proposition, Set<Proposition>> forwardDerivations, 
+            Map<Proposition, Set<Proposition>> backwardDerivations, Map<UniqueId, Proposition> refs) {
         this.propositions = propositions;
         this.forwardDerivations = forwardDerivations;
         this.backwardDerivations = backwardDerivations;

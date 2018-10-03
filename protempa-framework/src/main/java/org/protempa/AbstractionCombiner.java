@@ -21,6 +21,7 @@ package org.protempa;
 
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.drools.base.ClassObjectType;
 import org.drools.base.SalienceInteger;
 import org.drools.rule.EvalCondition;
@@ -38,14 +39,16 @@ import org.protempa.proposition.AbstractParameter;
  *
  * @author Andrew Post
  */
-final class AbstractionCombiner implements TemporalPropositionCombiner<AbstractionDefinition> {
+final class AbstractionCombiner implements RuleCreator<AbstractionDefinition> {
 
+    private static final Logger LOGGER = Logger.getLogger(AbstractionCombiner.class.getName());
     private static final ClassObjectType ABSTRACT_PARAMETER_OBJECT_TYPE = new ClassObjectType(
             AbstractParameter.class);
 
     AbstractionCombiner() {
     }
 
+    @Override
     public void toRules(AbstractionDefinition d, List<Rule> rules,
             DerivationsBuilder derivationsBuilder) {
         try {
@@ -67,7 +70,7 @@ final class AbstractionCombiner implements TemporalPropositionCombiner<Abstracti
                     derivationsBuilder));
             rules.add(rule);
         } catch (InvalidRuleException e) {
-            ProtempaUtil.logger().log(Level.SEVERE,
+            LOGGER.log(Level.SEVERE,
                     "Could not create rules from " + d.toString() + ".", e);
         }
     }

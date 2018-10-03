@@ -1,27 +1,3 @@
-
---create user  cvrg identified by cvrg
---default tablespace users
---QUOTA 10000M ON users
---temporary tablespace temp;
---
---grant create session to cvrg;
---grant create table to  cvrg;
---grant create view to  cvrg;
---grant create any index to  cvrg;
---GRANT CREATE PUBLIC SYNONYM TO  cvrg;
---GRANT DROP PUBLIC SYNONYM TO  cvrg;
---GRANT CREATE SEQUENCE TO  cvrg;
---GRANT CREATE PROCEDURE TO  cvrg;
---grant CREATE ANY TYPE TO cvrg;
---grant ALTER ANY TYPE TO cvrg;
---grant DROP ANY TYPE TO cvrg;
---grant EXECUTE ANY TYPE TO cvrg;
---grant UNDER ANY TYPE TO cvrg;
---grant CREATE ANY TRIGGER to  cvrg;
---grant ALTER ANY TRIGGER to  cvrg;
---grant DROP ANY TRIGGER to  cvrg;
-
-
 CREATE SCHEMA "TEST";
 
 SET SCHEMA "TEST";
@@ -42,8 +18,6 @@ CREATE TABLE "PATIENT" (
 
 CONSTRAINT patient_pk PRIMARY KEY (patient_key)
 );
---tablespace users
---nologging;
 
 
 
@@ -58,8 +32,6 @@ CREATE TABLE "PROVIDER" (
 
 CONSTRAINT provider_pk PRIMARY KEY (provider_key)
 );
---tablespace users
---nologging;
 
 
 CREATE TABLE "ENCOUNTER" (
@@ -77,29 +49,7 @@ CREATE TABLE "ENCOUNTER" (
  
 CONSTRAINT encounter_pk PRIMARY KEY (encounter_key)
 );
---tablespace users
---nologging;
- 
- 
- 
- 
- 
-CREATE TABLE "CPT_EVENT" (
- 
-"EVENT_KEY"     VARCHAR2(32) NOT NULL ,
-"ENCOUNTER_KEY" NUMBER(22,0) NOT NULL ,
-"TS_OBX"        TIMESTAMP(4) ,
-"ENTITY_ID"     VARCHAR2(128) NOT NULL ,
-"CREATE_DATE"    DATE ,
-"UPDATE_DATE"    DATE ,
-"DELETE_DATE"    DATE ,
- 
-CONSTRAINT cpt_event_pk PRIMARY KEY (event_key)
-);
---tablespace users
---nologging;
- 
- 
+
  
 CREATE TABLE "ICD9D_EVENT" (
  
@@ -113,9 +63,6 @@ CREATE TABLE "ICD9D_EVENT" (
  
 CONSTRAINT icd9d_event_pk PRIMARY KEY (event_key)
 );
---tablespace users
---nologging;
- 
  
  
 CREATE TABLE "ICD9P_EVENT" (
@@ -129,11 +76,7 @@ CREATE TABLE "ICD9P_EVENT" (
 "DELETE_DATE"    DATE ,
  
 CONSTRAINT icd9p_event_pk PRIMARY KEY (event_key)
-);
---tablespace users
---nologging;
- 
- 
+); 
  
  
 CREATE TABLE "MEDS_EVENT" (
@@ -148,10 +91,6 @@ CREATE TABLE "MEDS_EVENT" (
  
 CONSTRAINT meds_event_pk PRIMARY KEY (event_key)
 );
---tablespace users
---nologging;
- 
- 
  
  
 CREATE TABLE "LABS_EVENT" (
@@ -170,10 +109,6 @@ CREATE TABLE "LABS_EVENT" (
  
 CONSTRAINT labs_event_pk PRIMARY KEY (event_key)
 );
---tablespace users
---nologging;
- 
- 
  
  
 CREATE TABLE "VITALS_EVENT" (
@@ -192,5 +127,3 @@ CREATE TABLE "VITALS_EVENT" (
  
 CONSTRAINT vitals_event_pk PRIMARY KEY (event_key)
 );
---tablespace users
---nologging;

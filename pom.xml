@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.eurekaclinical</groupId>
     <artifactId>protempa</artifactId>
-    <version>4.1-SNAPSHOT</version>
+    <version>5.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Protempa</name>
     <url>https://github.com/eurekaclinical/protempa.git</url>
@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.eurekaclinical</groupId>
         <artifactId>eurekaclinical-parent-standard-deps</artifactId>
-        <version>2</version>
+        <version>3</version>
     </parent>
 
     <scm>
@@ -42,7 +42,6 @@
         <module>protempa-bcp-serviceloader</module>
         <module>protempa-bp-serviceloader</module>
         <module>protempa-ksb-protege</module>
-        <module>protempa-tsb-umls</module>
         <module>protempa-dsb-relationaldb</module>
         <module>protempa-dsb-file</module>
         <module>protempa-test-suite</module>
@@ -94,18 +93,13 @@
             </dependency>
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
-                <artifactId>protempa-tsb-umls</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eurekaclinical</groupId>
                 <artifactId>javautil</artifactId>
-                <version>4.0</version>
+                <version>[4.2,5.0)</version>
             </dependency>
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>datastore</artifactId>
-                <version>2.0</version>
+                <version>[3.0,4.0)</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

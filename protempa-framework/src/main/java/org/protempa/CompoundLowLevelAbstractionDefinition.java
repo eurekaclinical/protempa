@@ -246,8 +246,7 @@ public final class CompoundLowLevelAbstractionDefinition
                     "valueClassification cannot be null");
         }
         if (!classificationMatrix.containsKey(valueClassification.value)) {
-            classificationMatrix.put(valueClassification.value,
-                    new ArrayList<ClassificationMatrixValue>());
+            classificationMatrix.put(valueClassification.value, new ArrayList<>());
         }
         lowLevelIds.add(valueClassification.lladId);
         classificationMatrix.get(valueClassification.value).add(
@@ -326,13 +325,8 @@ public final class CompoundLowLevelAbstractionDefinition
 
     @Override
     protected void recalculateChildren() {
-        String[] old = this.children;
         this.children = this.lowLevelIds.toArray(new String[this.lowLevelIds
                 .size()]);
-        if (this.changes != null) {
-            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.children);
-        }
     }
 
     private void writeObject(ObjectOutputStream s) throws IOException {

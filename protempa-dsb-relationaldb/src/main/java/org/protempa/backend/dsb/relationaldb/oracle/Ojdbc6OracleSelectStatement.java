@@ -19,10 +19,10 @@
  */
 package org.protempa.backend.dsb.relationaldb.oracle;
 
+import java.util.LinkedHashMap;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.protempa.backend.dsb.relationaldb.AbstractSelectStatement;
 import org.protempa.backend.dsb.relationaldb.ColumnSpec;
@@ -33,22 +33,19 @@ import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
 import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
 import org.protempa.backend.dsb.relationaldb.SelectClause;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 import org.protempa.backend.dsb.relationaldb.TableAliaser;
 import org.protempa.backend.dsb.relationaldb.WhereClause;
 
 class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
 
     Ojdbc6OracleSelectStatement(EntitySpec entitySpec,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
-            Map<String, ReferenceSpec> inboundRefSpecs,
+            List<EntitySpec> entitySpecs,
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, 
-            StagingSpec[] stagedTables, boolean streamingMode,
             boolean wrapKeyId) {
-        super(entitySpec, referenceSpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
-                order, resultProcessor, stagedTables, streamingMode,
-                wrapKeyId);
+        super(entitySpec, entitySpecs, inboundRefSpecs, filters, propIds, keyIds,
+                order, resultProcessor, wrapKeyId);
     }
 
     @Override
@@ -68,8 +65,8 @@ class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
      */
     @Override
     protected FromClause getFromClause(List<ColumnSpec> columnSpecs,
-            TableAliaser referenceIndices, StagingSpec[] stagedTables) {
-        return new Ojdbc6OracleFromClause(getEntitySpec(), getInboundReferenceSpecs(), columnSpecs, referenceIndices, stagedTables);
+            TableAliaser referenceIndices) {
+        return new Ojdbc6OracleFromClause(getEntitySpec(), columnSpecs, referenceIndices);
     }
 
     /*
@@ -86,9 +83,9 @@ class Ojdbc6OracleSelectStatement extends AbstractSelectStatement {
     protected WhereClause getWhereClause(Set<String> propIds, ColumnSpecInfo info,
             List<EntitySpec> entitySpecs, Set<Filter> filters,
             TableAliaser referenceIndices, Set<String> keyIds,
-            SQLOrderBy order, SQLGenResultProcessor resultProcessor, SelectClause selectClause, StagingSpec[] stagedTables) {
+            SQLOrderBy order, SQLGenResultProcessor resultProcessor, SelectClause selectClause) {
         return new Ojdbc6OracleWhereClause(propIds, info, entitySpecs, filters,
-                referenceIndices, keyIds, order, resultProcessor, selectClause, stagedTables);
+                referenceIndices, keyIds, order, resultProcessor, selectClause);
     }
 
 }

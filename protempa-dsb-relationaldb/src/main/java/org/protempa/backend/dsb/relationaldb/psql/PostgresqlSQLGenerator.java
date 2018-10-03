@@ -20,8 +20,8 @@ package org.protempa.backend.dsb.relationaldb.psql;
  * #L%
  */
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.arp.javautil.sql.DatabaseVersion;
 import org.arp.javautil.sql.DriverVersion;
@@ -32,7 +32,6 @@ import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
 import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
 import org.protempa.backend.dsb.relationaldb.SelectStatement;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 
 /**
  * PostgreSQL driver for Protempa. Supports database version 9.1 or greater 
@@ -61,14 +60,14 @@ public class PostgresqlSQLGenerator
 
     @Override
     protected SelectStatement getSelectStatement(EntitySpec entitySpec, 
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs, 
-            Map<String, ReferenceSpec> inboundRefSpecs, 
+            List<EntitySpec> entitySpecs, 
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs, 
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds, 
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, 
-            StagingSpec[] stagedTables, boolean wrapKeyId) {
-        return new PostgresqlSelectStatement(entitySpec, referenceSpec, entitySpecs,
+            boolean wrapKeyId) {
+        return new PostgresqlSelectStatement(entitySpec, entitySpecs,
                 inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
-                getStreamingMode(), wrapKeyId);
+                wrapKeyId);
     }
     
 }

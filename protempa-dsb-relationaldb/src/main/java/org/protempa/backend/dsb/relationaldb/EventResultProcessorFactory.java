@@ -38,26 +38,6 @@ class EventResultProcessorFactory extends SQLGenResultProcessorFactory<Event> {
     }
     
     @Override
-    MainResultProcessor<Event> getInstance(String dataSourceBackendId,
-            EntitySpec entitySpec, ResultCache<Event> cache) {
-
-        EventResultProcessor resultProcessor = 
-                new EventResultProcessor(this.backend, cache, entitySpec, 
-                        dataSourceBackendId);
-        return resultProcessor;
-    }
-
-    @Override
-    RefResultProcessor<Event> getRefInstance(String dataSourceBackendId,
-            EntitySpec entitySpec, ReferenceSpec referenceSpec,
-            ResultCache<Event> cache) {
-        EventRefResultProcessor resultProcessor = 
-                new EventRefResultProcessor(this.backend, cache, referenceSpec,
-                        entitySpec, dataSourceBackendId);
-        return resultProcessor;
-    }
-    
-    @Override
     StreamingMainResultProcessor<Event> getStreamingInstance(
             String dataSourceBackendId, EntitySpec entitySpec,
             LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,

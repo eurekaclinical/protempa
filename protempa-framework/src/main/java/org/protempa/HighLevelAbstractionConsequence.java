@@ -42,6 +42,7 @@ import org.protempa.proposition.UniqueIdFactory;
 class HighLevelAbstractionConsequence implements Consequence {
 
     private static final long serialVersionUID = -833609244124008166L;
+    private static final Logger LOGGER = Logger.getLogger(HighLevelAbstractionConsequence.class.getName());
     private final HighLevelAbstractionDefinition cad;
     private final int columns;
     private final ExtendedPropositionDefinition[] epds;
@@ -67,10 +68,9 @@ class HighLevelAbstractionConsequence implements Consequence {
     }
 
     @Override
-    public void evaluate(KnowledgeHelper arg0, WorkingMemory arg1)
+    public void evaluate(KnowledgeHelper kh, WorkingMemory wm)
             throws Exception {
-        Logger logger = ProtempaUtil.logger();
-        List<Proposition> ps = parameters(arg0.getTuple(), arg1);
+        List<Proposition> ps = parameters(kh.getTuple(), wm);
         List<TemporalProposition> tps = extractTemporalPropositions(ps);
         List<TemporalExtendedPropositionDefinition> tepdsL
                 = extractTemporalExtendedPropositionDefinitions();
@@ -81,17 +81,17 @@ class HighLevelAbstractionConsequence implements Consequence {
                 = new Segment<>(
                         new Sequence<>(cad.getPropositionId(), tps));
         TemporalPatternOffset temporalOffset = cad.getTemporalOffset();
-        JBossRulesDerivedLocalUniqueIdValuesProvider provider = new JBossRulesDerivedLocalUniqueIdValuesProvider(arg1, cad.getPropositionId());
+        JBossRulesDerivedLocalUniqueIdValuesProvider provider = new JBossRulesDerivedLocalUniqueIdValuesProvider(wm, cad.getPropositionId());
         UniqueIdFactory factory = new ProviderBasedUniqueIdFactory(provider);
         AbstractParameter result
                 = AbstractParameterFactory.getFromAbstraction(cad.getPropositionId(), 
                         factory.getInstance(),
                         segment, tps, null, temporalOffset, tepds, null);
-        arg0.getWorkingMemory().insert(result);
+        kh.insertLogical(result);
         for (Proposition proposition : segment) {
             this.derivationsBuilder.propositionAsserted(proposition, result);
         }
-        logger.log(Level.FINER, "Asserted derived proposition {0}", result);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", result);
     }
 
     private List<Proposition> parameters(Tuple arg0,

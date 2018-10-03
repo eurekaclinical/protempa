@@ -19,8 +19,6 @@
  */
 package org.protempa.proposition;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
@@ -52,7 +50,6 @@ public abstract class AbstractProposition implements Proposition {
      * <code>String</code> for this proposition.
      */
     private String id;
-    private PropertyChangeSupport changes;
     private Map<String, Value> properties;
     private Map<String, List<UniqueId>> references;
     private UniqueId uniqueId; // not final because of custom deserialization
@@ -116,10 +113,6 @@ public abstract class AbstractProposition implements Proposition {
         if (this.references == null) {
             this.references = new LinkedHashMap<>();
         }
-    }
-
-    protected void initializePropertyChangeSupport() {
-        this.changes = new PropertyChangeSupport(this);
     }
 
     @Override
@@ -230,19 +223,6 @@ public abstract class AbstractProposition implements Proposition {
     }
 
     @Override
-    public final void addPropertyChangeListener(PropertyChangeListener l) {
-        initializePropertyChangeSupport();
-        this.changes.addPropertyChangeListener(l);
-    }
-
-    @Override
-    public final void removePropertyChangeListener(PropertyChangeListener l) {
-        if (this.changes != null) {
-            this.changes.removePropertyChangeListener(l);
-        }
-    }
-
-    @Override
     public int hashCode() {
         return this.uniqueId.hashCode();
     }
@@ -342,7 +322,10 @@ public abstract class AbstractProposition implements Proposition {
         }
 
         s.writeObject(this.sourceSystem);
-        s.writeObject(this.changes);
+        s.writeObject(this.createDate);
+        s.writeObject(this.updateDate);
+        s.writeObject(this.deleteDate);
+        s.writeObject(this.downloadDate);
     }
 
     protected void readAbstractProposition(ObjectInputStream s)
@@ -392,7 +375,10 @@ public abstract class AbstractProposition implements Proposition {
             }
         }
         setSourceSystem((SourceSystem) s.readObject());
-        this.changes = (PropertyChangeSupport) s.readObject();
+        setCreateDate((Date) s.readObject());
+        setUpdateDate((Date) s.readObject());
+        setDeleteDate((Date) s.readObject());
+        setDownloadDate((Date) s.readObject());
     }
 
     @Override

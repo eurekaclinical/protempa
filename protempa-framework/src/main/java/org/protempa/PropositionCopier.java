@@ -22,8 +22,10 @@ package org.protempa;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.drools.WorkingMemory;
+import org.drools.spi.KnowledgeHelper;
 import org.protempa.proposition.AbstractParameter;
 import org.protempa.proposition.visitor.AbstractPropositionVisitor;
 import org.protempa.proposition.Constant;
@@ -52,10 +54,11 @@ import org.protempa.proposition.UniqueIdFactory;
 class PropositionCopier extends AbstractPropositionVisitor implements Serializable {
 
     private static final long serialVersionUID = 1236050515546951710L;
+    private static final Logger LOGGER = Logger.getLogger(PropositionCopier.class.getName());
     
     private final String propId;
     private final DerivationsBuilder derivationsBuilder;
-    private WorkingMemory workingMemory;
+    private KnowledgeHelper kh;
     private UniqueIdFactory uniqueIdProvider;
 
     /**
@@ -82,16 +85,16 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
      * @param workingMemory the consequence's {@link WorkingMemory}. Cannot
      * be <code>null</code>.
      */
-    void grab(WorkingMemory workingMemory) {
-        assert workingMemory != null : "workingMemory cannot be null";
-        assert this.workingMemory == null : "The previous user of this copier forgot to call release!";
-        if (this.workingMemory != null) {
-            ProtempaUtil.logger().log(Level.WARNING, 
+    void grab(KnowledgeHelper kh) {
+        assert kh != null : "kh cannot be null";
+        assert this.kh == null : "The previous user of this copier forgot to call release!";
+        if (this.kh != null) {
+            LOGGER.log(Level.WARNING, 
                     "The previous user of this copier forgot to call release. This causes a memory leak!");
         }
-        this.workingMemory = workingMemory;
+        this.kh = kh;
         this.uniqueIdProvider = 
-                new ProviderBasedUniqueIdFactory(new JBossRulesDerivedLocalUniqueIdValuesProvider(this.workingMemory, 
+                new ProviderBasedUniqueIdFactory(new JBossRulesDerivedLocalUniqueIdValuesProvider(this.kh.getWorkingMemory(), 
                         this.propId));
     }
     
@@ -99,7 +102,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
      * Releases this copier for use by another Drools consequence.
      */
     void release() {
-        this.workingMemory = null;
+        this.kh = null;
     }
 
     /**
@@ -112,15 +115,15 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
      */
     @Override
     public void visit(AbstractParameter abstractParameter) {
-        assert this.workingMemory != null : "workingMemory wasn't set";
+        assert this.kh != null : "kh wasn't set";
         AbstractParameter param = new AbstractParameter(propId, this.uniqueIdProvider.getInstance());
         param.setSourceSystem(SourceSystem.DERIVED);
         param.setInterval(abstractParameter.getInterval());
         param.setValue(abstractParameter.getValue());
         param.setCreateDate(new Date());
-        this.workingMemory.insert(param);
+        this.kh.insertLogical(param);
         this.derivationsBuilder.propositionAsserted(abstractParameter, param);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", param);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", param);
     }
 
     /**
@@ -132,14 +135,14 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
      */
     @Override
     public void visit(Event event) {
-        assert this.workingMemory != null : "workingMemory wasn't set";
+        assert this.kh != null : "kh wasn't set";
         Event e = new Event(propId, this.uniqueIdProvider.getInstance());
         e.setInterval(event.getInterval());
         e.setSourceSystem(SourceSystem.DERIVED);
         e.setCreateDate(new Date());
-        this.workingMemory.insert(e);
+        this.kh.insertLogical(e);
         this.derivationsBuilder.propositionAsserted(event, e);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", e);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", e);
     }
 
     /**
@@ -152,16 +155,16 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
      */
     @Override
     public void visit(PrimitiveParameter primitiveParameter) {
-        assert this.workingMemory != null : "workingMemory wasn't set";
+        assert this.kh != null : "kh wasn't set";
         PrimitiveParameter param = new PrimitiveParameter(propId, this.uniqueIdProvider.getInstance());
         param.setPosition(primitiveParameter.getPosition());
         param.setGranularity(primitiveParameter.getGranularity());
         param.setValue(primitiveParameter.getValue());
         param.setSourceSystem(SourceSystem.DERIVED);
         param.setCreateDate(new Date());
-        this.workingMemory.insert(param);
+        this.kh.insertLogical(param);
         this.derivationsBuilder.propositionAsserted(primitiveParameter, param);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", param);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", param);
     }
 
     /**
@@ -173,13 +176,13 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
      */
     @Override
     public void visit(Constant constant) {
-        assert this.workingMemory != null : "workingMemory wasn't set";
+        assert this.kh != null : "kh wasn't set";
         Constant newConstant = new Constant(propId, this.uniqueIdProvider.getInstance());
         newConstant.setSourceSystem(SourceSystem.DERIVED);
         newConstant.setCreateDate(new Date());
-        this.workingMemory.insert(newConstant);
+        this.kh.insertLogical(newConstant);
         this.derivationsBuilder.propositionAsserted(constant, newConstant);
-        ProtempaUtil.logger().log(Level.FINER, "Asserted derived proposition {0}", newConstant);
+        LOGGER.log(Level.FINER, "Asserted derived proposition {0}", newConstant);
     }
 
 
@@ -191,7 +194,7 @@ class PropositionCopier extends AbstractPropositionVisitor implements Serializab
      */
     @Override
     public void visit(Context context) {
-        assert this.workingMemory != null : "workingMemory wasn't set";
+        assert this.kh != null : "kh wasn't set";
         throw new UnsupportedOperationException("Not implemented yet");
     }
 }

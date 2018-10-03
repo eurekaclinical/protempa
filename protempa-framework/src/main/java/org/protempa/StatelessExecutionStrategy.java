@@ -19,46 +19,74 @@
  */
 package org.protempa;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import org.apache.commons.collections4.iterators.IteratorChain;
+import org.arp.javautil.collections.Iterators;
 
-import org.eurekaclinical.datastore.DataStore;
 import org.drools.StatelessSession;
 import org.drools.StatelessSessionResult;
-import org.drools.WorkingMemory;
 import org.protempa.proposition.Proposition;
+import org.protempa.query.Query;
 
 class StatelessExecutionStrategy extends AbstractExecutionStrategy {
 
     private StatelessSession statelessSession;
-    private final AbstractionFinder abstractionFinder;
+    private final DeletedWorkingMemoryEventListener workingMemoryEventListener;
 
-    StatelessExecutionStrategy(AbstractionFinder abstractionFinder, 
-            AlgorithmSource algorithmSource) {
-        super(algorithmSource);
-        this.abstractionFinder = abstractionFinder;
+    StatelessExecutionStrategy(AlgorithmSource algorithmSource, Query query) {
+        super(algorithmSource, query);
+        this.workingMemoryEventListener = new DeletedWorkingMemoryEventListener();
     }
-    
+
     @Override
-    public void initialize() {
-        this.statelessSession = ruleBase.newStatelessSession();
+    public void initialize(PropositionDefinitionCache cache) throws ExecutionStrategyInitializationException {
+        super.initialize(cache);
+        this.statelessSession = getRuleBase().newStatelessSession();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Iterator<Proposition> execute(String keyId,
-            Set<String> propositionIds, List<?> objects,
-            DataStore<String, WorkingMemory> wm) {
+    public Iterator<Proposition> execute(String keyId, Iterator<? extends Proposition> props) {
         this.statelessSession.setGlobal(WorkingMemoryGlobals.KEY_ID, keyId);
+        this.statelessSession.addEventListener(this.workingMemoryEventListener);
         StatelessSessionResult result = this.statelessSession
-                .executeWithResults(objects);
-        return result.iterateObjects();
+                .executeWithResults(Iterators.asCollection(props));
+        this.statelessSession.removeEventListener(this.workingMemoryEventListener);
+        List<Proposition> propsToDelete = this.workingMemoryEventListener.getPropsToDelete();
+        this.workingMemoryEventListener.clear();
+        return (Iterator<Proposition>) new IteratorChain(result.iterateObjects(), propsToDelete.iterator());
     }
 
     @Override
-    public void cleanup() {
-        this.abstractionFinder.clear();
+    public void closeCurrentWorkingMemory() {
     }
 
+    @Override
+    public void shutdown() {
+    }
+    
+    @Override
+    protected JBossRuleCreator newRuleCreator() throws ExecutionStrategyInitializationException {
+        ValidateAlgorithmCheckedVisitor visitor = new ValidateAlgorithmCheckedVisitor(
+                getAlgorithmSource());
+        PropositionDefinitionCache cache = getCache();
+        Collection<PropositionDefinition> propDefs = cache.getAll(); 
+        try {
+            visitor.visit(propDefs);
+        } catch (ProtempaException ex) {
+            throw new ExecutionStrategyInitializationException(ex);
+        }
+        JBossRuleCreator ruleCreator = new JBossRuleCreator(
+                visitor.getAlgorithms(), getDerivationsBuilder(),
+                cache);
+        try {
+            ruleCreator.visit(propDefs);
+        } catch (ProtempaException ex) {
+            throw new ExecutionStrategyInitializationException(ex);
+        }
+        return ruleCreator;
+    }
+    
 }

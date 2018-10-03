@@ -66,7 +66,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     static final int FETCH_SIZE = 10000;
     private static final int DEFAULT_QUERY_THREAD_COUNT = 4;
-    private static final String readPropositionsSQL = "select {0} from {1} {2}";
+    private static final String READ_PROPOSITION_SQL = "select {0} from {1} {2}";
     private ConnectionSpec connectionSpec;
     private final Map<String, List<EntitySpec>> primitiveParameterSpecs;
     private EntitySpec[] primitiveParameterEntitySpecs;
@@ -74,7 +74,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private EntitySpec[] eventEntitySpecs;
     private final Map<String, List<EntitySpec>> constantSpecs;
     private EntitySpec[] constantEntitySpecs;
-    private StagingSpec[] stagedTableSpecs;
     private GranularityFactory granularities;
     private UnitFactory units;
     private RelationalDbDataSourceBackend backend;
@@ -99,7 +98,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             populatePropositionMap(this.eventSpecs, this.eventEntitySpecs);
             this.constantEntitySpecs = relationalDatabaseSpec.getConstantSpecs();
             populatePropositionMap(this.constantSpecs, this.constantEntitySpecs);
-            this.stagedTableSpecs = relationalDatabaseSpec.getStagedSpecs();
             this.granularities = relationalDatabaseSpec.getGranularities();
             this.units = relationalDatabaseSpec.getUnits();
             this.connectionSpec = connectionSpec;
@@ -113,10 +111,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         }
 
         this.backend = backend;
-    }
-
-    public boolean getStreamingMode() {
-        return true;
     }
 
     @Override
@@ -202,15 +196,12 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     public DataStreamingEventIterator<Proposition> readPropositionsStreaming(
             final Set<String> keyIds, final Set<String> propIds, final Filter filters)
             throws DataSourceReadException {
+        SQLGenUtil.logger().log(Level.FINE, "Reading {0}", propIds);
         final Map<EntitySpec, List<String>> entitySpecToPropIds
                 = entitySpecToPropIds(propIds);
         final Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecToResultProcessor = allEntitySpecToResultProcessor();
         final Collection<EntitySpec> allEntitySpecs
                 = allEntitySpecToResultProcessor.keySet();
-        DataStager stager = null;
-        if (stagingApplies()) {
-            stager = doStage(allEntitySpecs, filters, propIds, keyIds, null);
-        }
 
         final List<StreamingIteratorPair> itrs = new ArrayList<>();
         ExecutorService executor = Executors.newFixedThreadPool(this.queryThreadCount);
@@ -241,8 +232,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             refs.addAll(pair.getRefs());
         }
         RelationalDbDataReadIterator streamingResults
-                = new RelationalDbDataReadIterator(refs, events, connections,
-                        stagingApplies() ? stager : null);
+                = new RelationalDbDataReadIterator(refs, events, connections);
 
         return streamingResults;
 
@@ -301,15 +291,16 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
         LinkedHashMap<String, ReferenceSpec> inboundRefSpecs
                 = collectInboundRefSpecs(applicableEntitySpecs, entitySpec, propIds);
-        Map<String, ReferenceSpec> bidirRefSpecs = collectBidirectionalReferences(applicableEntitySpecs, entitySpec, propIds);
+        Map<String, ReferenceSpec> bidirRefSpecs = 
+                collectBidirectionalReferences(applicableEntitySpecs, entitySpec, propIds);
 
-        String dataSourceBackendId = this.backend.getDataSourceBackendId();
+        String dataSourceBackendId = this.backend.getId();
         StreamingMainResultProcessor<Proposition> resultProcessor
                 = factory.getStreamingInstance(dataSourceBackendId, entitySpec,
                         inboundRefSpecs, bidirRefSpecs, propIds);
 
         for (Set<Filter> filterSet : partitions) {
-            generateAndExecuteSelectStreaming(entitySpec, null, propIds, filterSet,
+            generateAndExecuteSelectStreaming(entitySpec, propIds, filterSet,
                     applicableEntitySpecs, inboundRefSpecs, keyIds,
                     SQLOrderBy.ASCENDING,
                     resultProcessor, executor, true);
@@ -340,7 +331,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Collection<EntitySpec> allEntitySpecs, EntitySpec entitySpec) {
         Set<Filter> filtersCopy = copyFilters(filters);
         removeNonApplicableFilters(allEntitySpecs, filtersCopy, entitySpec);
-        removeStagedFilters(entitySpec, filtersCopy);
         return filtersCopy;
     }
 
@@ -399,25 +389,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         return filterList;
     }
 
-    private DataStager doStage(Collection<EntitySpec> allEntitySpecs,
-            Filter filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order) throws DataSourceReadException {
-        DataStager stager = null;
-
-        try {
-            stager = getDataStager(this.stagedTableSpecs, null,
-                    new LinkedList<>(allEntitySpecs),
-                    copyFilters(filters), propIds, keyIds, order,
-                    this.connectionSpec);
-            stager.stageTables();
-        } catch (SQLException ex) {
-            Logger logger = SQLGenUtil.logger();
-            logger.log(Level.SEVERE, "Failed to create staging area", ex);
-            throw new DataSourceReadException(ex);
-        }
-        return stager;
-    }
-
     private static SQLGenResultProcessorFactory<Proposition> getResultProcessorFactory(
             Map<EntitySpec, SQLGenResultProcessorFactory> allEntitySpecToResultProcessor,
             EntitySpec entitySpec) {
@@ -428,72 +399,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 = allEntitySpecToResultProcessor.get(entitySpec);
         assert factory != null : "factory should never be null";
         return factory;
-    }
-
-    /**
-     * Leave behind a position filter, if one exists and the entity spec has
-     * partition by set and the duration of the partition is less than the
-     * duration of the filter's time range.
-     *
-     * @param filtersCopy
-     */
-    private void removeStagedFilters(EntitySpec entitySpec,
-            Set<Filter> filtersCopy) {
-        boolean first = true;
-        boolean isPositionFilter;
-        Unit partitionBy = entitySpec.getPartitionBy();
-        for (Iterator<Filter> itr = filtersCopy.iterator(); itr.hasNext();) {
-            isPositionFilter = false;
-            Filter f = itr.next();
-            if (f instanceof PositionFilter) {
-                isPositionFilter = true;
-            }
-            String[] propIds = f.getPropositionIds();
-            FILTER_LOOP:
-            for (String propId : propIds) {
-                List<EntitySpec> entitySpecs = new ArrayList<>();
-                if (this.constantSpecs.containsKey(propId)) {
-                    entitySpecs.addAll(this.constantSpecs.get(propId));
-                }
-                if (this.eventSpecs.containsKey(propId)) {
-                    entitySpecs.addAll(this.eventSpecs.get(propId));
-                }
-                if (this.primitiveParameterSpecs.containsKey(propId)) {
-                    entitySpecs.addAll(this.primitiveParameterSpecs.get(propId));
-                }
-
-                for (StagingSpec staged : this.stagedTableSpecs) {
-                    for (EntitySpec es : entitySpecs) {
-                        for (EntitySpec ses : staged.getEntitySpecs()) {
-                            if (SQLGenUtil.somePropIdsMatch(es, ses)) {
-                                if (first && isPositionFilter
-                                        && partitionBy != null) {
-                                    PositionFilter pf = (PositionFilter) f;
-                                    Long start = pf.getStart();
-                                    if (start != null) {
-                                        long addToPosition
-                                                = partitionBy.addToPosition(start, 1);
-                                        Long finish = pf.getFinish();
-                                        if (finish != null) {
-                                            if (addToPosition < finish) {
-                                                break FILTER_LOOP;
-                                            }
-                                        }
-                                    }
-                                }
-                                itr.remove();
-                                break FILTER_LOOP;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean stagingApplies() {
-        return this.stagedTableSpecs != null
-                && this.stagedTableSpecs.length > 0;
     }
 
     private void logDoneProcessing(Logger logger, EntitySpec entitySpec) {
@@ -559,7 +464,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         return result;
     }
 
-    private static Map<String, ReferenceSpec> collectBidirectionalReferences(Collection<EntitySpec> entitySpecs, EntitySpec lhsEntitySpec,
+    private static Map<String, ReferenceSpec> collectBidirectionalReferences(
+            Collection<EntitySpec> entitySpecs, EntitySpec lhsEntitySpec,
             Set<String> propIds) {
         Map<String, ReferenceSpec> result = new HashMap<>();
 
@@ -607,12 +513,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             result.put(es, cFactory);
         }
 
-        // staging queries generate no results
-        for (StagingSpec ss : this.stagedTableSpecs) {
-            for (EntitySpec es : ss.getEntitySpecs()) {
-                result.put(es, null);
-            }
-        }
         return result;
     }
 
@@ -627,9 +527,10 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     private <P extends Proposition> void generateAndExecuteSelectStreaming(
-            EntitySpec entitySpec, ReferenceSpec referenceSpec,
+            EntitySpec entitySpec, 
             Set<String> propIds, Set<Filter> filtersCopy,
-            List<EntitySpec> entitySpecsCopy, LinkedHashMap<String, ReferenceSpec> inboundRefSpecs, Set<String> keyIds,
+            List<EntitySpec> entitySpecsCopy, 
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs, Set<String> keyIds,
             SQLOrderBy order, StreamingResultProcessor<P> resultProcessor,
             StreamingSQLExecutor executor,
             boolean wrapKeyId) throws DataSourceReadException {
@@ -643,10 +544,10 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                     new Object[]{backendNameForMessages, entitySpecName});
         }
 
-        String query = getSelectStatement(entitySpec, referenceSpec,
+        String query = getSelectStatement(entitySpec,
                 entitySpecsCopy, inboundRefSpecs, filtersCopy, propIds,
                 keyIds, order,
-                resultProcessor, this.stagedTableSpecs, wrapKeyId).generateStatement();
+                resultProcessor, wrapKeyId).generateStatement();
 
         if (logger.isLoggable(Level.FINE)) {
             logger.log(
@@ -714,13 +615,13 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     protected abstract SelectStatement getSelectStatement(
-            EntitySpec entitySpec, ReferenceSpec referenceSpec,
-            List<EntitySpec> entitySpecs, Map<String, ReferenceSpec> inboundRefSpecs, Set<Filter> filters,
+            EntitySpec entitySpec,
+            List<EntitySpec> entitySpecs, LinkedHashMap<String, ReferenceSpec> inboundRefSpecs, Set<Filter> filters,
             Set<String> propIds, Set<String> keyIds, SQLOrderBy order,
-            SQLGenResultProcessor resultProcessor, StagingSpec[] stagedTables,
+            SQLGenResultProcessor resultProcessor,
             boolean wrapKeyId);
 
-    protected DataStager getDataStager(StagingSpec[] stagingSpecs,
+    protected DataStager getDataStager(
             ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, ConnectionSpec connectionSpec) {
@@ -730,7 +631,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
 
     protected String assembleReadPropositionsQuery(StringBuilder selectClause,
             StringBuilder fromClause, StringBuilder whereClause) {
-        return MessageFormat.format(readPropositionsSQL, selectClause,
+        return MessageFormat.format(READ_PROPOSITION_SQL, selectClause,
                 fromClause, whereClause);
     }
 

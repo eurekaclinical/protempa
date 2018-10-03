@@ -26,7 +26,6 @@ import java.util.List;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.backend.tsb.TermSourceBackend;
 
 /**
  *
@@ -42,13 +41,10 @@ public class Configuration {
 
     private List<BackendInstanceSpec<AlgorithmSourceBackend>> algorithmSourceBackendSections;
 
-    private List<BackendInstanceSpec<TermSourceBackend>> termSourceBackendSections;
-
     public Configuration() {
         this.dataSourceBackendSections = Collections.emptyList();
         this.knowledgeSourceBackendSections = Collections.emptyList();
         this.algorithmSourceBackendSections = Collections.emptyList();
-        this.termSourceBackendSections = Collections.emptyList();
     }
 
     public String getConfigurationId() {
@@ -83,14 +79,6 @@ public class Configuration {
         }
     }
 
-    public void setTermSourceBackendSections(List<BackendInstanceSpec<TermSourceBackend>> termSourceBackendSections) {
-        if (termSourceBackendSections != null) {
-            this.termSourceBackendSections = termSourceBackendSections;
-        } else {
-            this.termSourceBackendSections = Collections.emptyList();
-        }
-    }
-
     public List<BackendInstanceSpec<DataSourceBackend>> getDataSourceBackendSections() {
         return new ArrayList<>(dataSourceBackendSections);
     }
@@ -103,20 +91,14 @@ public class Configuration {
         return new ArrayList<>(algorithmSourceBackendSections);
     }
 
-    public List<BackendInstanceSpec<TermSourceBackend>> getTermSourceBackendSections() {
-        return new ArrayList<>(termSourceBackendSections);
-    }
-    
     public List<BackendInstanceSpec<? extends Backend>> getAllSections() {
         List<BackendInstanceSpec<? extends Backend>> result = new ArrayList<>(
                 this.dataSourceBackendSections.size() + 
                         this.knowledgeSourceBackendSections.size() + 
-                        this.algorithmSourceBackendSections.size() + 
-                        this.termSourceBackendSections.size());
+                        this.algorithmSourceBackendSections.size());
         result.addAll(this.dataSourceBackendSections);
         result.addAll(this.knowledgeSourceBackendSections);
         result.addAll(this.algorithmSourceBackendSections);
-        result.addAll(this.termSourceBackendSections);
         return result;
     }
     
@@ -158,17 +140,6 @@ public class Configuration {
                 }
             }
             
-            for (int i = 0, n = otherConfiguration.termSourceBackendSections.size(); i < n; i++) {
-                BackendInstanceSpec<TermSourceBackend> otherBis = otherConfiguration.termSourceBackendSections.get(i);
-                if (this.termSourceBackendSections.size() >= i + 1) {
-                    BackendInstanceSpec<TermSourceBackend> bis = this.termSourceBackendSections.get(i);
-                    if (bis.getBackendSpec().getId().equals(otherBis.getBackendSpec().getId())) {
-                        for (String name : otherBis.getPropertyNames()) {
-                            bis.setProperty(name, otherBis.getProperty(name));
-                        }
-                    }
-                }
-            }
         }
     }
 

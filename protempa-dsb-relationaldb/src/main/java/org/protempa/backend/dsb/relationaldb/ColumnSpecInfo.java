@@ -19,10 +19,12 @@
  */
 package org.protempa.backend.dsb.relationaldb;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public final class ColumnSpecInfo {
+
     private boolean unique;
     private List<IntColumnSpecWrapper> columnSpecs;
     private int startTimeIndex = -1;
@@ -31,14 +33,14 @@ public final class ColumnSpecInfo {
     private int valueIndex = -1;
     private int codeIndex = -1;
     private int[] uniqueIdIndices;
-    private Map<String, Integer> referenceIndices;
+    private final LinkedHashMap<String, Integer> referenceIndices;
     private boolean usingKeyIdIndex;
     private int createDateIndex = -1;
     private int updateDateIndex = -1;
     private int deleteDateIndex = -1;
 
     ColumnSpecInfo() {
-
+        this.referenceIndices = new LinkedHashMap<>();
     }
 
     boolean isUnique() {
@@ -106,11 +108,19 @@ public final class ColumnSpecInfo {
     }
 
     Map<String, Integer> getReferenceIndices() {
-        return referenceIndices;
+        return new LinkedHashMap<>(referenceIndices);
     }
 
-    void setReferenceIndices(Map<String, Integer> referenceIndices) {
-        this.referenceIndices = referenceIndices;
+    int getReferenceIndicesSize() {
+        return this.referenceIndices.size();
+    }
+
+    boolean isReferenceIndicesEmpty() {
+        return this.referenceIndices.isEmpty();
+    }
+
+    Integer putReferenceIndices(String key, Integer value) {
+        return this.referenceIndices.put(key, value);
     }
 
     boolean isUsingKeyIdIndex() {
@@ -144,6 +154,5 @@ public final class ColumnSpecInfo {
     void setDeleteDateIndex(int deleteDateIndex) {
         this.deleteDateIndex = deleteDateIndex;
     }
-    
-    
+
 }

@@ -25,7 +25,6 @@ import java.util.Collections;
 import org.protempa.backend.asb.AlgorithmSourceBackend;
 import org.protempa.backend.dsb.DataSourceBackend;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.backend.tsb.TermSourceBackend;
 
 public final class MockBackendProvider implements BackendProvider {
 
@@ -39,7 +38,7 @@ public final class MockBackendProvider implements BackendProvider {
             getDataSourceBackendSpecLoader() {
         return new BackendSpecLoader<>(
                 Collections.singletonList(
-                        new BackendSpec<DataSourceBackend>(
+                        new BackendSpec<>(
                                 this, "DSBackendSpec1", "DS Backend Spec 1", null)));
     }
 
@@ -48,7 +47,7 @@ public final class MockBackendProvider implements BackendProvider {
             getKnowledgeSourceBackendSpecLoader() {
         return new BackendSpecLoader<>(
                 Collections.singletonList(
-                        new BackendSpec<KnowledgeSourceBackend>(
+                        new BackendSpec<>(
                                 this, "KSBackendSpec1",
                                 "KS Backend Spec 1", null)));
     }
@@ -58,21 +57,12 @@ public final class MockBackendProvider implements BackendProvider {
             getAlgorithmSourceBackendSpecLoader() {
         return new BackendSpecLoader<>(
                 Collections.singletonList(
-                        new BackendSpec<AlgorithmSourceBackend>(
+                        new BackendSpec<>(
                                 this, "ASBackendSpec1",
                                 "AS Backend Spec 1", new BackendPropertySpec[]{
                                     new BackendPropertySpec("url", "URL",
                                             "The URL to the knowledge base", BackendPropertyType.STRING,
                                             false, new DefaultBackendPropertyValidator())})));
-    }
-
-    @Override
-    public BackendSpecLoader<TermSourceBackend> getTermSourceBackendSpecLoader()
-            throws BackendProviderSpecLoaderException {
-        return new BackendSpecLoader<>(
-                Collections.singletonList(
-                        new BackendSpec<TermSourceBackend>(
-                                this, "TSBackendSpec1", "TS Backend Spec 1", null)));
     }
 
     @Override

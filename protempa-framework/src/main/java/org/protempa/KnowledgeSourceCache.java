@@ -29,10 +29,10 @@ import org.protempa.valueset.ValueSet;
  */
 public final class KnowledgeSourceCache {
 
-    private final Map<String, PropositionDefinition> cache;
+    private final PropositionDefinitionCache cache;
     private final Map<String, ValueSet> valueSetCache;
 
-    public KnowledgeSourceCache(Map<String, PropositionDefinition> propDefCache, Map<String, ValueSet> valueSetCache) {
+    public KnowledgeSourceCache(PropositionDefinitionCache propDefCache, Map<String, ValueSet> valueSetCache) {
         if (propDefCache == null) {
             throw new IllegalArgumentException("propDefCache != null");
         }

@@ -18,21 +18,16 @@
  * #L%
  */
 /**
- * The package <code>org.eurekaclinical.datastore</code> contains classes for
+ * The package <code>org.protempa.datastore</code> contains classes for
  * accessing external temporary and permanent stores. This is the only type-safe
  * way of getting handles to the {@link org.arp.javautil.DataStore} interface, via
  * the {@link org.arp.javautil.datastore.DataStoreFactory} class. If a new type
  * of store is needed, an appropriate class should be created and should
  * implement {@link org.eurekaclinical.datastore.DataStoreCreator}, which
- * defines two methods for building stores.
+ * defines a method for building stores.
  * <p>
  * <code>getPermanentStore</code> returns a named store that will not be removed
  * once execution is finished. If a store with that name already exists, it may
  * be returned. Otherwise, a new store will be created.
- * <p>
- * <code>newCacheStore</code> returns a temporary store that will be destroyed
- * once execution is complete. Caches are not named, and the method is
- * guaranteed to return a new store each time it is called, so it is the
- * caller's responsibility to keep a reference to the store.
  */
-package org.eurekaclinical.datastore;
+package org.protempa.datastore;

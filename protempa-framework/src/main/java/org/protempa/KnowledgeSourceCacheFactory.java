@@ -32,15 +32,11 @@ import org.protempa.valueset.ValueSet;
  */
 public final class KnowledgeSourceCacheFactory {
 
-    public KnowledgeSourceCache getInstance(KnowledgeSource ks, Collection<PropositionDefinition> cache, boolean collectValueSets) throws KnowledgeSourceReadException {
-        Map<String, PropositionDefinition> propDefCache = Collections.newHashMap(cache.size());
-        for (PropositionDefinition pd : cache) {
-            propDefCache.put(pd.getId(), pd);
-        }
+    public KnowledgeSourceCache getInstance(KnowledgeSource ks, PropositionDefinitionCache cache, boolean collectValueSets) throws KnowledgeSourceReadException {
         Map<String, ValueSet> vsCache;
         if (collectValueSets) {
             vsCache = new HashMap<>();
-            for (PropositionDefinition propDef : cache) {
+            for (PropositionDefinition propDef : cache.getAll()) {
                 for (PropertyDefinition pd : propDef.getPropertyDefinitions()) {
                     String valueSetId = pd.getValueSetId();
                     if (valueSetId != null && !vsCache.containsKey(valueSetId)) {
@@ -51,6 +47,6 @@ public final class KnowledgeSourceCacheFactory {
         } else {
             vsCache = null;
         }
-        return new KnowledgeSourceCache(propDefCache, vsCache);
+        return new KnowledgeSourceCache(cache, vsCache);
     }
 }

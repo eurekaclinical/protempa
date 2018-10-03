@@ -21,7 +21,6 @@ package org.protempa.dest.table;
  */
 
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.StringWriter;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,12 +39,22 @@ public class ConstantColumnSpecTest {
     }
     
     @Test
-    public void testValue() throws IOException, TabularWriterException {
+    public void testValue() throws TabularWriterException {
         ConstantColumnSpec ccs = new ConstantColumnSpec("heading", "value");
         StringWriter sw = new StringWriter();
         try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
             ccs.columnValues("00001", null, null, null, null, null, ftw);
         }
         Assert.assertEquals("value", sw.toString());
+    }
+    
+    @Test
+    public void testNullValue() throws TabularWriterException {
+        ConstantColumnSpec ccs = new ConstantColumnSpec("heading", null);
+        StringWriter sw = new StringWriter();
+        try (FileTabularWriter ftw = new FileTabularWriter(new BufferedWriter(sw), '\t')) {
+            ccs.columnValues("00001", null, null, null, null, null, ftw);
+        }
+        Assert.assertEquals("NULL", sw.toString());
     }
 }

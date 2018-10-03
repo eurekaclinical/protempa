@@ -17,10 +17,6 @@
  * limitations under the License.
  * #L%
  */
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.protempa;
 
 import org.drools.WorkingMemory;
@@ -31,12 +27,12 @@ import org.protempa.proposition.AbstractParameter;
 
 /**
  *
- * @author arpost
+ * @author Andrew Post
  */
 class AbstractionCombinerCondition implements EvalExpression {
     private static final long serialVersionUID = -3292416251502209461L;
+    private static final HorizontalTemporalInference HTI = new HorizontalTemporalInference();
     private final AbstractionDefinition abstractionDefinition;
-    private final HorizontalTemporalInference hti = new HorizontalTemporalInference();
 
     public AbstractionCombinerCondition(AbstractionDefinition abstractionDefinition) {
         this.abstractionDefinition = abstractionDefinition;
@@ -50,7 +46,7 @@ class AbstractionCombinerCondition implements EvalExpression {
                 (a1.getValue() == a2.getValue() || (a1.getValue() != null && a1.getValue().equals(a2.getValue()))) && 
                 (a1.getContextId() == a2.getContextId() || (a1.getContextId() != null && a1.getContextId().equals(a2.getContextId()))) &&
                 (a1.getInterval().compareTo(a2.getInterval()) <= 0) && 
-                (hti.execute(this.abstractionDefinition, a1, a2) || abstractionDefinition.getGapFunction().execute(a1, a2));
+                (HTI.execute(this.abstractionDefinition, a1, a2) || abstractionDefinition.getGapFunction().execute(a1, a2));
     }
 
     @Override

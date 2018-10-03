@@ -58,18 +58,18 @@ abstract class PropositionResultSetIterator<P extends Proposition>
     private final int[] columnTypes;
     private Statement statement;
     private int count;
-    private ColumnSpec codeSpec;
-    private String[] propIds;
-    private PropertySpec[] propertySpecs;
-    private Value[] propertyValues;
-    private Map<String, ReferenceSpec> inboundRefSpecs;
-    private UniqueIdPair[] refUniqueIds;
-    private Map<String, ReferenceSpec> bidirectionalRefSpecs;
+    private final ColumnSpec codeSpec;
+    private final String[] propIds;
+    private final PropertySpec[] propertySpecs;
+    private final Value[] propertyValues;
+    private final Map<String, ReferenceSpec> inboundRefSpecs;
+    private final UniqueIdPair[] refUniqueIds;
+    private final Map<String, ReferenceSpec> bidirectionalRefSpecs;
     private Map<UniqueId, P> props;
     private DataStreamingEvent<P> dataStreamingEvent;
     private String keyId;
     private boolean end;
-    private InboundReferenceResultSetIterator referenceIterator;
+    private final InboundReferenceResultSetIterator referenceIterator;
 
     private boolean advanceInvoked = false;
     private final RelationalDbDataSourceBackend backend;
@@ -87,7 +87,6 @@ abstract class PropositionResultSetIterator<P extends Proposition>
         this.backend = backend;
         this.resultSet = resultSet;
         this.logger = SQLGenUtil.logger();
-        logger.log(Level.INFO, "Creating proposition iterator for {0}", new Object[]{entitySpec.getName()});
         this.uniqueIds
                 = new String[entitySpec.getUniqueIdSpecs().length];
         this.entitySpec = entitySpec;

@@ -33,8 +33,8 @@ import org.protempa.proposition.value.Granularity;
 import org.protempa.proposition.value.Unit;
 
 /**
- * A proposition with a valid timestamp or interval.
- * 
+ * A proposition with a timestamp or interval.
+ *
  * @author Andrew Post
  */
 public abstract class TemporalProposition extends AbstractProposition {
@@ -43,7 +43,7 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     private static final ThreadLocal<NumberFormat> numberFormat = new ThreadLocal<NumberFormat>() {
         @Override
-        protected NumberFormat initialValue () {
+        protected NumberFormat initialValue() {
             NumberFormat format = NumberFormat.getInstance();
             format.setGroupingUsed(true);
             return format;
@@ -59,12 +59,10 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     /**
      * Creates a proposition with an id.
-     * 
-     * @param id
-     *            an identification <code>String</code> for this proposition.
-     * @param uniqueId
-     *            a <code>UniqueId</code> that uniquely identifies this
-     *            proposition.
+     *
+     * @param id an identification <code>String</code> for this proposition.
+     * @param uniqueId a <code>UniqueId</code> that uniquely identifies this
+     * proposition.
      */
     TemporalProposition(String id, UniqueId uniqueId) {
         super(id, uniqueId);
@@ -80,7 +78,7 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     /**
      * The range of time over which this parameter's value is true.
-     * 
+     *
      * @return an <code>Interval</code>.
      */
     public final Interval getInterval() {
@@ -89,11 +87,10 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     /**
      * Sets the valid interval.
-     * 
-     * @param interval
-     *            an <code>Interval</code>.
+     *
+     * @param interval an <code>Interval</code>.
      */
-    protected void setInterval(Interval interval) {
+    public void setInterval(Interval interval) {
         if (interval == null) {
             interval = INTERVAL_FACTORY.getInstance();
         }
@@ -102,7 +99,7 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     /**
      * Returns the earliest valid time of this proposition as a long string.
-     * 
+     *
      * @return a <code>String</code>.
      */
     public final String getStartFormattedLong() {
@@ -127,10 +124,10 @@ public abstract class TemporalProposition extends AbstractProposition {
         return formatLength(lengthUnit != null ? lengthUnit.getShortFormat()
                 : null);
     }
-    
+
     /**
      * Returns the latest valid time of this proposition as a long string.
-     * 
+     *
      * @return a <code>String</code>.
      */
     public final String getFinishFormattedLong() {
@@ -142,7 +139,7 @@ public abstract class TemporalProposition extends AbstractProposition {
     /**
      * Returns the earliest valid time of this proposition as a medium-length
      * string.
-     * 
+     *
      * @return a <code>String</code>.
      */
     public final String getStartFormattedMedium() {
@@ -154,7 +151,7 @@ public abstract class TemporalProposition extends AbstractProposition {
     /**
      * Returns the earliest valid time of this proposition as a medium-length
      * string.
-     * 
+     *
      * @return a <code>String</code>.
      */
     public final String getFinishFormattedMedium() {
@@ -165,7 +162,7 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     /**
      * Returns the earliest valid time of this proposition as a short string.
-     * 
+     *
      * @return a <code>String</code>.
      */
     public final String getStartFormattedShort() {
@@ -176,7 +173,7 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     /**
      * Returns the earliest valid time of this proposition as a short string.
-     * 
+     *
      * @return a <code>String</code>.
      */
     public final String getFinishFormattedShort() {
@@ -188,11 +185,10 @@ public abstract class TemporalProposition extends AbstractProposition {
     /**
      * Uses the given <code>Format</code> to format the start of this
      * parameter's interval.
-     * 
-     * @param format
-     *            a <code>Format</code> object.
+     *
+     * @param format a <code>Format</code> object.
      * @return the start of this parameter's interval as a formatted
-     *         <code>String</code>.
+     * <code>String</code>.
      */
     public final String formatStart(Format format) {
         if (format != null) {
@@ -200,14 +196,14 @@ public abstract class TemporalProposition extends AbstractProposition {
             if (minStart != null) {
                 return format.format(minStart);
             } else {
-                return "Unknown";
+                return null;
             }
         } else {
             Long minStart = interval.getMinStart();
             if (minStart != null) {
                 return numberFormat.get().format(minStart);
             } else {
-                return "Unknown";
+                return null;
             }
         }
     }
@@ -215,11 +211,10 @@ public abstract class TemporalProposition extends AbstractProposition {
     /**
      * Uses the given <code>Format</code> to format the finish of this
      * parameter's interval.
-     * 
-     * @param format
-     *            a <code>Format</code> object.
+     *
+     * @param format a <code>Format</code> object.
      * @return the finish of this parameter's interval as a formatted
-     *         <code>String</code>.
+     * <code>String</code>.
      */
     public final String formatFinish(Format format) {
         if (format != null) {
@@ -227,14 +222,14 @@ public abstract class TemporalProposition extends AbstractProposition {
             if (minFinish != null) {
                 return format.format(minFinish);
             } else {
-                return "Unknown";
+                return null;
             }
         } else {
             Long minFinish = interval.getMinFinish();
             if (minFinish != null) {
                 return numberFormat.get().format(minFinish);
             } else {
-                return "Unknown";
+                return null;
             }
         }
     }
@@ -245,14 +240,14 @@ public abstract class TemporalProposition extends AbstractProposition {
             if (minLength != null) {
                 return format.format(minLength);
             } else {
-                return "Unknown";
+                return null;
             }
         } else {
             Long minLength = interval.getMinLength();
             if (minLength != null) {
                 return numberFormat.get().format(minLength);
             } else {
-                return "Unknown";
+                return null;
             }
         }
     }
@@ -283,11 +278,9 @@ public abstract class TemporalProposition extends AbstractProposition {
     /**
      * Called while serializing a temporal proposition. It optimizes for when
      * the temporal proposition's interval is a {@link SimpleInterval}.
-     * 
-     * @param s
-     *            an {@link ObjectOutputStream}.
-     * @throws IOException
-     *             when an error occurs during serialization.
+     *
+     * @param s an {@link ObjectOutputStream}.
+     * @throws IOException when an error occurs during serialization.
      */
     protected void writeTemporalProposition(ObjectOutputStream s)
             throws IOException {
@@ -321,13 +314,11 @@ public abstract class TemporalProposition extends AbstractProposition {
 
     /**
      * Called while deserializing a temporal proposition.
-     * 
-     * @param s
-     *            an {@link ObjectInputStream}.
-     * @throws IOException
-     *             input/output error during deserialization.
-     * @throws ClassNotFoundException
-     *             class of a serialized object cannot be found.
+     *
+     * @param s an {@link ObjectInputStream}.
+     * @throws IOException input/output error during deserialization.
+     * @throws ClassNotFoundException class of a serialized object cannot be
+     * found.
      */
     protected void readTemporalProposition(ObjectInputStream s)
             throws IOException, ClassNotFoundException {

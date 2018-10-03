@@ -311,6 +311,7 @@ public final class Reference extends Link {
      * Traverses a reference.
      *
      * @param proposition a {@link Proposition} at which to start the traversal.
+     * Cannot be <code>null</code>.
      * @param forwardDerivations a {@link Map<Proposition,List<Proposition>>} of
      * derived propositions.
      * @param backwardDerivations a {@link Map<Proposition,List<Proposition>>}
@@ -326,8 +327,8 @@ public final class Reference extends Link {
      */
     @Override
     Collection<Proposition> traverse(Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache ksCache, Set<Proposition> cache) {
         List<Proposition> props = new ArrayList<>();

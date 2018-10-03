@@ -21,6 +21,7 @@ package org.protempa.dest.table;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
@@ -61,8 +62,8 @@ public interface TableColumnSpec {
      * the knowledge source failed.
      */
     void columnValues(String key, Proposition proposition, 
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache knowledgeSourceCache,
             TabularWriter writer)

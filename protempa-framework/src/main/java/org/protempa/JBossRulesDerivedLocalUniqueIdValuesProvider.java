@@ -23,6 +23,7 @@ package org.protempa;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.drools.WorkingMemory;
 import org.protempa.proposition.LocalUniqueIdValuesProvider;
 

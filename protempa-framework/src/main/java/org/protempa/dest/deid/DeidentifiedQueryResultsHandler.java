@@ -20,14 +20,14 @@
 package org.protempa.dest.deid;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.arp.javautil.collections.Collections;
-import org.protempa.PropositionDefinition;
+import org.protempa.PropositionDefinitionCache;
 import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerCloseException;
@@ -52,7 +52,7 @@ public final class DeidentifiedQueryResultsHandler
     private final DeidConfig deidConfig;
     private final String id;
     private boolean handlerClosed;
-    private Map<String, PropositionDefinition> propDefCache;
+    private PropositionDefinitionCache propDefCache;
 
     DeidentifiedQueryResultsHandler(QueryResultsHandler handler, DeidConfig deidConfig) throws EncryptionInitException {
         if (handler == null) {
@@ -75,16 +75,16 @@ public final class DeidentifiedQueryResultsHandler
     }
 
     @Override
-    public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
-        this.propDefCache = Collections.newHashMap(cache.size());
-        for (PropositionDefinition propDef : cache) {
-            this.propDefCache.put(propDef.getId(), propDef);
-        }
+    public void start(PropositionDefinitionCache cache) throws QueryResultsHandlerProcessingException {
+        this.propDefCache = cache;
         this.handler.start(cache);
     }
 
     @Override
-    public void handleQueryResult(String keyId, List<Proposition> propositions, Map<Proposition, List<Proposition>> forwardDerivations, Map<Proposition, List<Proposition>> backwardDerivations, Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
+    public void handleQueryResult(String keyId, List<Proposition> propositions, 
+            Map<Proposition, Set<Proposition>> forwardDerivations, 
+            Map<Proposition, Set<Proposition>> backwardDerivations, 
+            Map<UniqueId, Proposition> references) throws QueryResultsHandlerProcessingException {
         if (LOGGER.isLoggable(Level.FINER)) {
             LOGGER.log(Level.FINER, "Deidentifying data");
         }
@@ -101,8 +101,8 @@ public final class DeidentifiedQueryResultsHandler
         Map<UniqueId, Proposition> deidentifiedPropsByUniqueId = new HashMap<>();
         List<Proposition> deidentifiedProps = new ArrayList<>(propositions.size());
         Map<UniqueId, Proposition> deidentifiedReferences = new HashMap<>();
-        Map<Proposition, List<Proposition>> deidentifiedForwardDerivations = new HashMap<>();
-        Map<Proposition, List<Proposition>> deidentifiedBackwardDerivations = new HashMap<>();
+        Map<Proposition, Set<Proposition>> deidentifiedForwardDerivations = new HashMap<>();
+        Map<Proposition, Set<Proposition>> deidentifiedBackwardDerivations = new HashMap<>();
         try {
             PropositionDeidentifierVisitor visitor = new PropositionDeidentifierVisitor(this.encryption, this.propDefCache, this.deidConfig.getOffset(keyId));
             visitor.setKeyId(keyId);
@@ -124,14 +124,14 @@ public final class DeidentifiedQueryResultsHandler
                 deidentifiedReferences.put(prop.getUniqueId(), prop);
             }
 
-            for (Map.Entry<Proposition, List<Proposition>> me : forwardDerivations.entrySet()) {
+            for (Map.Entry<Proposition, Set<Proposition>> me : forwardDerivations.entrySet()) {
                 Proposition key = deidentifiedPropsByUniqueId.get(me.getKey().getUniqueId());
                 if (key == null) {
                     me.getKey().accept(visitor);
                     key = visitor.getProposition();
                     deidentifiedPropsByUniqueId.put(key.getUniqueId(), key);
                 }
-                List<Proposition> values = new ArrayList<>();
+                Set<Proposition> values = new HashSet<>();
                 for (Proposition val : me.getValue()) {
                     Proposition prop = deidentifiedPropsByUniqueId.get(val.getUniqueId());
                     if (prop == null) {
@@ -144,14 +144,14 @@ public final class DeidentifiedQueryResultsHandler
                 deidentifiedForwardDerivations.put(key, values);
             }
 
-            for (Map.Entry<Proposition, List<Proposition>> me : backwardDerivations.entrySet()) {
+            for (Map.Entry<Proposition, Set<Proposition>> me : backwardDerivations.entrySet()) {
                 Proposition key = deidentifiedPropsByUniqueId.get(me.getKey().getUniqueId());
                 if (key == null) {
                     me.getKey().accept(visitor);
                     key = visitor.getProposition();
                     deidentifiedPropsByUniqueId.put(key.getUniqueId(), key);
                 }
-                List<Proposition> values = new ArrayList<>();
+                Set<Proposition> values = new HashSet<>();
                 for (Proposition val : me.getValue()) {
                     Proposition prop = deidentifiedPropsByUniqueId.get(val.getUniqueId());
                     if (prop == null) {

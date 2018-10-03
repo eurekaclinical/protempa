@@ -29,21 +29,11 @@ import java.util.Set;
 
 import org.protempa.backend.KnowledgeSourceBackendUpdatedEvent;
 import org.protempa.backend.ksb.KnowledgeSourceBackend;
-import org.protempa.query.And;
 
 /**
  * @author Andrew Post
  */
 public interface KnowledgeSource extends Source<KnowledgeSourceUpdatedEvent, KnowledgeSourceBackend, KnowledgeSourceBackendUpdatedEvent> {
-
-    /**
-     * Gets the mappings from term IDs to proposition IDs for each backend.
-     *
-     * @return a {@link Map} of {@link String}s to a {@link List} of
-     * <code>String</code>s, with the keys being {@link Term} IDs and the values
-     * being lists of {@link PropositionDefinition} IDs.
-     */
-    List<String> getPropositionDefinitionsByTerm(And<TermSubsumption> termSubsumptionClause) throws KnowledgeSourceReadException;
 
     boolean hasAbstractionDefinition(String id) throws KnowledgeSourceReadException;
 

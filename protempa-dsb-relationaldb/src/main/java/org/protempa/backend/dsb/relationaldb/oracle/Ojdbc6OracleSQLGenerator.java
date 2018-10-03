@@ -19,7 +19,7 @@
  */
 package org.protempa.backend.dsb.relationaldb.oracle;
 
-import org.arp.javautil.sql.ConnectionSpec;
+import java.util.LinkedHashMap;
 import org.protempa.backend.dsb.filter.Filter;
 
 import java.util.List;
@@ -28,13 +28,11 @@ import java.util.Set;
 import org.arp.javautil.sql.DatabaseVersion;
 import org.arp.javautil.sql.DriverVersion;
 import org.protempa.backend.dsb.relationaldb.AbstractSQLGeneratorWithCompatChecks;
-import org.protempa.backend.dsb.relationaldb.DataStager;
 import org.protempa.backend.dsb.relationaldb.EntitySpec;
 import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
 import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
 import org.protempa.backend.dsb.relationaldb.SelectStatement;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 
 /**
  * Generates SQL compatible with Oracle 10.x and 11.x 
@@ -61,23 +59,14 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGeneratorWithCompatChec
 
     @Override
     protected SelectStatement getSelectStatement(EntitySpec entitySpec,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
-            Map<String, ReferenceSpec> inboundRefSpecs,
+            List<EntitySpec> entitySpecs,
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            StagingSpec[] stagedTables, boolean wrapKeyId) {
-        return new Ojdbc6OracleSelectStatement(entitySpec, referenceSpec,
+            boolean wrapKeyId) {
+        return new Ojdbc6OracleSelectStatement(entitySpec,
                 entitySpecs, inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
-                stagedTables, getStreamingMode(), wrapKeyId);
+                wrapKeyId);
     }
-
-    @Override
-    protected DataStager getDataStager(StagingSpec[] stagingSpecs,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
-            Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
-            SQLOrderBy order, ConnectionSpec connectionSpec) {
-        return new Ojdbc6OracleDataStager(stagingSpecs, referenceSpec,
-                entitySpecs, filters, propIds, keyIds, order, connectionSpec,
-                getStreamingMode());
-    }
+    
 }

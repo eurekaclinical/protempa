@@ -22,45 +22,38 @@ package org.protempa.backend.dsb.relationaldb;
 import java.util.ArrayList;
 import org.protempa.backend.dsb.filter.Filter;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public abstract class AbstractSelectStatement implements SelectStatement {
 
     private final EntitySpec entitySpec;
-    private final ReferenceSpec referenceSpec;
     private final List<EntitySpec> entitySpecs;
-    private final Map<String, ReferenceSpec> inboundReferenceSpecs;
+    private final LinkedHashMap<String, ReferenceSpec> inboundReferenceSpecs;
     private final Set<Filter> filters;
     private final Set<String> propIds;
     private final Set<String> keyIds;
     private final SQLOrderBy order;
     private final SQLGenResultProcessor resultProcessor;
-    private final StagingSpec[] stagedTables;
-    private final boolean streamingMode;
     private final boolean wrapKeyId;
 
     protected AbstractSelectStatement(EntitySpec entitySpec,
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs,
-            Map<String, ReferenceSpec> inboundReferenceSpecs,
+            List<EntitySpec> entitySpecs,
+            LinkedHashMap<String, ReferenceSpec> inboundReferenceSpecs,
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds,
             SQLOrderBy order, SQLGenResultProcessor resultProcessor,
-            StagingSpec[] stagedTables, boolean streamingMode,
             boolean wrapKeyId) {
         this.entitySpec = entitySpec;
-        this.referenceSpec = referenceSpec;
-        this.entitySpecs = Collections.unmodifiableList(entitySpecs);
-        this.inboundReferenceSpecs = Collections.unmodifiableMap(inboundReferenceSpecs);
-        this.filters = Collections.unmodifiableSet(filters);
-        this.propIds = Collections.unmodifiableSet(propIds);
-        this.keyIds = Collections.unmodifiableSet(keyIds);
+        this.entitySpecs = new ArrayList<>(entitySpecs);
+        this.inboundReferenceSpecs = new LinkedHashMap<>(inboundReferenceSpecs);
+        this.filters = new HashSet<>(filters);
+        this.propIds = new HashSet<>(propIds);
+        this.keyIds = new HashSet<>(keyIds);
         this.order = order;
         this.resultProcessor = resultProcessor;
-        this.stagedTables = stagedTables;
-        this.streamingMode = streamingMode;
         this.wrapKeyId = wrapKeyId;
     }
 
@@ -68,67 +61,33 @@ public abstract class AbstractSelectStatement implements SelectStatement {
         return entitySpec;
     }
 
-    protected ReferenceSpec getReferenceSpec() {
-        return referenceSpec;
-    }
-
-    protected List<EntitySpec> getEntitySpecs() {
-        return entitySpecs;
-    }
-
-    protected Map<String, ReferenceSpec> getInboundReferenceSpecs() {
-        return inboundReferenceSpecs;
-    }
-
-    protected Set<Filter> getFilters() {
-        return filters;
-    }
-
-    protected Set<String> getPropIds() {
-        return propIds;
-    }
-
-    protected Set<String> getKeyIds() {
-        return keyIds;
-    }
-
-    protected SQLOrderBy getOrder() {
-        return order;
-    }
-
     protected SQLGenResultProcessor getResultProcessor() {
         return resultProcessor;
-    }
-
-    protected StagingSpec[] getStagedTables() {
-        return stagedTables;
     }
 
     protected abstract SelectClause getSelectClause(ColumnSpecInfo info,
             TableAliaser referenceIndices, EntitySpec entitySpec, boolean wrapKeyId);
 
     protected abstract FromClause getFromClause(List<ColumnSpec> columnSpecs,
-            TableAliaser referenceIndices, StagingSpec[] stagedTables);
+            TableAliaser referenceIndices);
 
     protected abstract WhereClause getWhereClause(Set<String> propIds,
             ColumnSpecInfo info, List<EntitySpec> entitySpecs,
             Set<Filter> filters, TableAliaser referenceIndices,
             Set<String> keyIds, SQLOrderBy order,
-            SQLGenResultProcessor resultProcessor, SelectClause selectClause,
-            StagingSpec[] stagedTables);
+            SQLGenResultProcessor resultProcessor, SelectClause selectClause);
 
     @Override
     public String generateStatement() {
         ColumnSpecInfo info = new ColumnSpecInfoFactory().newInstance(propIds,
-                entitySpec, entitySpecs, inboundReferenceSpecs, filters, referenceSpec,
-                this.streamingMode);
+                entitySpec, entitySpecs, inboundReferenceSpecs, filters);
         TableAliaser referenceIndices = new TableAliaser(info.getColumnSpecs(),
                 "a");
 
         SelectClause select = getSelectClause(info, referenceIndices,
                 this.entitySpec, wrapKeyId);
         FromClause from = getFromClause(toColumnSpecs(info.getColumnSpecs()),
-                referenceIndices, this.stagedTables);
+                referenceIndices);
         List<EntitySpec> esCopy = new ArrayList<>(entitySpecs);
         for (Iterator<EntitySpec> itr = esCopy.iterator(); itr.hasNext();) {
             EntitySpec es = itr.next();
@@ -142,7 +101,7 @@ public abstract class AbstractSelectStatement implements SelectStatement {
         }
         WhereClause where = getWhereClause(propIds, info, esCopy,
                 this.filters, referenceIndices, this.keyIds, this.order,
-                this.resultProcessor, select, this.stagedTables);
+                this.resultProcessor, select);
 
         return select.generateClause() + 
                 " " + from.generateClause() + 

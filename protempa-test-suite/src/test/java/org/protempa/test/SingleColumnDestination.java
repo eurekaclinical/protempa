@@ -20,7 +20,7 @@ package org.protempa.test;
  * #L%
  */
 
-import java.io.Writer;
+import java.io.BufferedWriter;
 import java.util.List;
 import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
@@ -35,14 +35,17 @@ import org.protempa.query.Query;
  * @author Andrew Post
  */
 public final class SingleColumnDestination extends AbstractDestination {
-    private final Writer writer;
+    private final BufferedWriter writer;
     
-    SingleColumnDestination(Writer writer) {
+    SingleColumnDestination(BufferedWriter writer) {
         this.writer = writer;
     }
 
     @Override
-    public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
+    public QueryResultsHandler getQueryResultsHandler(Query query, 
+            DataSource dataSource, KnowledgeSource knowledgeSource, 
+            List<? extends ProtempaEventListener> eventListeners) 
+            throws QueryResultsHandlerInitException {
         return new SingleColumnQueryResultsHandler(writer);
     }
 

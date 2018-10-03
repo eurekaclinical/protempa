@@ -20,8 +20,8 @@ package org.protempa.backend.dsb.relationaldb.psql;
  * #L%
  */
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.arp.javautil.sql.DatabaseVersion;
 import org.arp.javautil.sql.DriverVersion;
@@ -32,7 +32,6 @@ import org.protempa.backend.dsb.relationaldb.ReferenceSpec;
 import org.protempa.backend.dsb.relationaldb.SQLGenResultProcessor;
 import org.protempa.backend.dsb.relationaldb.SQLOrderBy;
 import org.protempa.backend.dsb.relationaldb.SelectStatement;
-import org.protempa.backend.dsb.relationaldb.StagingSpec;
 
 /**
  * PostgreSQL driver for Protempa. Supports versions 8 and 9.0.*, which don't
@@ -62,14 +61,14 @@ public class PostgresqlPre91SQLGenerator
 
     @Override
     protected SelectStatement getSelectStatement(EntitySpec entitySpec, 
-            ReferenceSpec referenceSpec, List<EntitySpec> entitySpecs, 
-            Map<String, ReferenceSpec> inboundRefSpecs, 
+            List<EntitySpec> entitySpecs, 
+            LinkedHashMap<String, ReferenceSpec> inboundRefSpecs, 
             Set<Filter> filters, Set<String> propIds, Set<String> keyIds, 
             SQLOrderBy order, SQLGenResultProcessor resultProcessor, 
-            StagingSpec[] stagedTables, boolean wrapKeyId) {
-        return new PostgresqlPre91SelectStatement(entitySpec, referenceSpec, entitySpecs,
+            boolean wrapKeyId) {
+        return new PostgresqlPre91SelectStatement(entitySpec, entitySpecs,
                 inboundRefSpecs, filters, propIds, keyIds, order, resultProcessor,
-                getStreamingMode(), wrapKeyId);
+                wrapKeyId);
     }
     
 }

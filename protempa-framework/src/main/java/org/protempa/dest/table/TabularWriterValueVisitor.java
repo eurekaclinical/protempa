@@ -37,11 +37,11 @@ import org.protempa.proposition.value.ValueVisitor;
  */
 class TabularWriterValueVisitor implements ValueVisitor {
     
-    private final TabularWriter tabularWriter;
+    private final AbstractTabularWriter tabularWriter;
     private TabularWriterException exception;
     private Format format;
 
-    TabularWriterValueVisitor(TabularWriter tabularWriter) {
+    TabularWriterValueVisitor(AbstractTabularWriter tabularWriter) {
         this.tabularWriter = tabularWriter;
     }
 
@@ -93,7 +93,7 @@ class TabularWriterValueVisitor implements ValueVisitor {
     @Override
     public void visit(InequalityNumberValue inequalityNumberValue) {
         try {
-            this.tabularWriter.writeInequality(inequalityNumberValue, this.format);
+            this.tabularWriter.writeInequalityNumber(inequalityNumberValue, this.format);
         } catch (TabularWriterException ex) {
             this.exception = ex;
         }

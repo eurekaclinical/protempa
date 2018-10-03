@@ -420,9 +420,6 @@ public final class LowLevelAbstractionDefinition
         }
         ValueType old = this.valueType;
         this.valueType = c;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("valueType", old, this.valueType);
-        }
     }
 
     @Override
@@ -498,9 +495,6 @@ public final class LowLevelAbstractionDefinition
     public void setAlgorithmId(String algorithmId) {
         String old = this.algorithmId;
         this.algorithmId = algorithmId;
-        if (this.changes != null) {
-            this.changes.firePropertyChange("algorithmId", old, algorithmId);
-        }
     }
 
     @Override
@@ -606,10 +600,6 @@ public final class LowLevelAbstractionDefinition
     protected void recalculateChildren() {
         String[] old = this.children;
         this.children = this.paramIds.toArray(new String[this.paramIds.size()]);
-        if (this.changes != null) {
-            this.changes.firePropertyChange(CHILDREN_PROPERTY, old,
-                    this.children);
-        }
     }
 
     @Override

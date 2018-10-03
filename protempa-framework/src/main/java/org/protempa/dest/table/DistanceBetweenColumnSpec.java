@@ -19,7 +19,6 @@
  */
 package org.protempa.dest.table;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.arp.javautil.string.StringUtil;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceReadException;
@@ -40,6 +38,7 @@ import org.protempa.proposition.PropositionUtil;
 import org.protempa.proposition.TemporalProposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.proposition.comparator.AllPropositionIntervalComparator;
+import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.Unit;
 
 /**
@@ -87,8 +86,8 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
 
     @Override
     public void columnValues(String key, Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache ksCache,
             TabularWriter writer) throws TabularWriterException {
@@ -132,7 +131,7 @@ public final class DistanceBetweenColumnSpec extends AbstractTableColumnSpec {
         String distance = PropositionUtil
                             .distanceBetweenFormattedShort(first, second, 
                                 this.units);
-        writer.writeString(distance);
+        writer.writeNominal(NominalValue.getInstance(distance));
     }
     
     @Override

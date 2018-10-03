@@ -23,6 +23,7 @@ import org.protempa.backend.dsb.filter.Filter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.protempa.proposition.PrimitiveParameter;
 import org.protempa.proposition.Segment;
@@ -37,6 +38,7 @@ import org.protempa.proposition.value.ValueType;
 public abstract class AbstractAlgorithm implements Algorithm {
 
     private static final long serialVersionUID = 6566132392629105106L;
+    private static final Logger LOGGER = Logger.getLogger(AbstractAlgorithm.class.getName());
 
     private ValueType inValueType;
     private String id;
@@ -148,8 +150,7 @@ public abstract class AbstractAlgorithm implements Algorithm {
         try {
             close();
         } catch (Exception e) {
-            ProtempaUtil.logger().log(Level.SEVERE,
-                    "Could not finalize " + toString(), e);
+            LOGGER.log(Level.SEVERE, "Could not finalize " + toString(), e);
         }
     }
 

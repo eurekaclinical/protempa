@@ -213,9 +213,10 @@ public final class Derivation extends Link {
      * Traverses a derivation.
      *
      * @param proposition a {@link Proposition} at which to start the traversal.
-     * @param forwardDerivations a {@link Map<Proposition,List<Proposition>>} of
+     * Cannot be <code>null</code>.
+     * @param forwardDerivations a {@link Map<Proposition,Set<Proposition>>} of
      * derived propositions.
-     * @param backwardDerivations a {@link Map<Proposition,List<Proposition>>}
+     * @param backwardDerivations a {@link Map<Proposition,Set<Proposition>>}
      * of derived propositions.
      * @param references a {@link Map<Proposition,Proposition>} of unique
      * identifiers to {@link Proposition}s, used to resolve references.
@@ -228,8 +229,8 @@ public final class Derivation extends Link {
      */
     @Override
     Collection<Proposition> traverse(Proposition proposition,
-            Map<Proposition, List<Proposition>> forwardDerivations,
-            Map<Proposition, List<Proposition>> backwardDerivations,
+            Map<Proposition, Set<Proposition>> forwardDerivations,
+            Map<Proposition, Set<Proposition>> backwardDerivations,
             Map<UniqueId, Proposition> references,
             KnowledgeSourceCache ksCache, final Set<Proposition> cache) {
         //First, aggregate derived values according to the specified behavior.
