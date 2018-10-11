@@ -1,4 +1,4 @@
-org.protempa.backend.dsb.relationaldb.oracle.Ojdbc6OracleSQLGenerator
+org.protempa.backend.dsb.relationaldb.oracle.OjdbcOracleSQLGenerator
 org.protempa.backend.dsb.relationaldb.mysql.ConnectorJ5MySQL415Generator
 org.protempa.backend.dsb.relationaldb.h2.H2SQLGenerator
 org.protempa.backend.dsb.relationaldb.psql.PostgresqlSQLGenerator
