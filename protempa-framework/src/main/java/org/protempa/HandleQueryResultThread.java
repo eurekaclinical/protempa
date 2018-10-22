@@ -100,6 +100,7 @@ class HandleQueryResultThread extends AbstractThread {
         } catch (QueryResultsHandlerProcessingException ex) {
             log(Level.FINER, "Query results handler threw exception", ex);
             exceptions.add(new QueryException(query.getName(), ex));
+            producerThread.interrupt();
         } catch (QueryResultsHandlerCloseException ex) {
             log(Level.FINER, "Query results handler close threw exception", ex);
             exceptions.add(new QueryException(query.getName(), ex));
