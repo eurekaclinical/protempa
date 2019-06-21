@@ -21,6 +21,9 @@ See our [publication about Protempa](https://www.ncbi.nlm.nih.gov/pmc/articles/P
 
 Latest release: [![Latest release](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.eurekaclinical/protempa)
 
+## Version 5.1
+* Support reading data from an Oracle 12c database.
+
 ## Version 5.0
 * Removed all TermSource and related code.
 * Update datastore version.

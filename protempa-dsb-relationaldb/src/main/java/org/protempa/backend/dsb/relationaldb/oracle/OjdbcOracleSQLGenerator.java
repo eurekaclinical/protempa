@@ -39,7 +39,7 @@ import org.protempa.backend.dsb.relationaldb.SelectStatement;
  * 
  * @author Andrew Post
  */
-public class Ojdbc6OracleSQLGenerator extends AbstractSQLGeneratorWithCompatChecks {
+public class OjdbcOracleSQLGenerator extends AbstractSQLGeneratorWithCompatChecks {
     
     private static final String DRIVER_CLASS_NAME = "oracle.jdbc.OracleDriver";
     private static final String DRIVER_NAME = "Oracle JDBC driver";
@@ -49,7 +49,7 @@ public class Ojdbc6OracleSQLGenerator extends AbstractSQLGeneratorWithCompatChec
     private static final DatabaseVersion MIN_DATABASE_VERSION = new DatabaseVersion(10, 0);
     private static final DatabaseVersion MAX_DATABASE_VERSION = new DatabaseVersion(11, Integer.MAX_VALUE);
     
-    public Ojdbc6OracleSQLGenerator() {
+    public OjdbcOracleSQLGenerator() {
         super(DRIVER_CLASS_NAME,
                 DRIVER_NAME,
                 MIN_DRIVER_VERSION, MAX_DRIVER_VERSION,
