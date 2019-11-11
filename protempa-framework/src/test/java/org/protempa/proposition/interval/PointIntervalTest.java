@@ -20,6 +20,7 @@
 package org.protempa.proposition.interval;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
@@ -34,9 +35,10 @@ import org.protempa.proposition.value.AbsoluteTimeGranularityUtil;
  */
 public class PointIntervalTest extends TestCase {
 
-    private static final DateFormat DATE_FORMAT = 
-            DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT,
-            Locale.US);
+//    private static final DateFormat DATE_FORMAT = 
+//            DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT,
+//            Locale.US);
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy hh:mm a");
     private Interval interval;
 
     /**
@@ -50,7 +52,7 @@ public class PointIntervalTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Date d = DATE_FORMAT.parse("3/2/07 3:11 am");
+        Date d = DATE_FORMAT.parse("02-Mar-2007 3:11 am");
         this.interval = new SimpleInterval(
                 AbsoluteTimeGranularityUtil.asPosition(d),
                 AbsoluteTimeGranularity.MINUTE);
