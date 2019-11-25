@@ -43,7 +43,7 @@ import org.protempa.proposition.value.Value;
  */
 public class RelDbTabularWriter extends AbstractTabularWriter {
 
-    private final RecordHandler<ArrayList<?>> recordHandler;
+    private RecordHandler<ArrayList<?>> recordHandler;
     private final ArrayList<Object> row;
     private int colIndex;
     private String inStatement;
