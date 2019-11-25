@@ -99,7 +99,7 @@
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>datastore</artifactId>
-                <version>3.2</version>
+                <version>[3.2,)</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
