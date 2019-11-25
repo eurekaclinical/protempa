@@ -24,6 +24,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
+
 import org.arp.javautil.sql.ConnectionSpec;
 
 /**
@@ -31,24 +33,39 @@ import org.arp.javautil.sql.ConnectionSpec;
  * @author Andrew Post
  */
 class ListRecordHandler extends RecordHandler<ArrayList<?>> {
+	
+	Logger logger = Util.logger();
+	private String inStatement = null;
 
     ListRecordHandler(Connection connection, String statement) throws SQLException {
         super(connection, statement);
+        this.inStatement = statement;
     }
 
     ListRecordHandler(Connection connection, String statement, boolean commit) throws SQLException {
         super(connection, statement, commit);
+        this.inStatement = statement;
     }
 
     ListRecordHandler(ConnectionSpec connSpec, String statement) throws SQLException {
         super(connSpec, statement);
+        this.inStatement = statement;
     }
     
     @Override
     protected void setParameters(PreparedStatement statement, ArrayList<?> record) throws SQLException {
         for (int i = 0, n = record.size(); i < n; i++) {
-            statement.setObject(i, record.get(i));
+        	int pos = i+1;
+        	statement.setString(pos, (record.get(i) == null? "NULL" : record.get(i).toString()));
         }
     }
+    
+    public String getInStatement() {
+		return inStatement;
+	}
+
+	public void setInStatement(String inStatement) {
+		this.inStatement = inStatement;
+	}
     
 }
