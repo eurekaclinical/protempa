@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.eurekaclinical</groupId>
     <artifactId>protempa</artifactId>
-    <version>5.1-Beta-4-SNAPSHOT</version>
+    <version>5.2-Alpha-1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Protempa</name>
     <url>https://github.com/eurekaclinical/protempa.git</url>

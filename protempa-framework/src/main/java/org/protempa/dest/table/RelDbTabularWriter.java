@@ -22,6 +22,10 @@ package org.protempa.dest.table;
 import java.sql.SQLException;
 import java.text.Format;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import org.arp.javautil.sql.ConnectionSpec;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.Proposition;
@@ -39,21 +43,94 @@ import org.protempa.proposition.value.Value;
  */
 public class RelDbTabularWriter extends AbstractTabularWriter {
 
-    private final RecordHandler<ArrayList<?>> recordHandler;
+    private RecordHandler<ArrayList<?>> recordHandler;
     private final ArrayList<Object> row;
     private int colIndex;
+    private String inStatement;
+    private ConnectionSpec connectionSpec;
+    private Map<String, RecordHandler<ArrayList<?>>> handlerList;
+    private Map<String,String> statements;
+    private String tableName;
+    
+	
+	
 
+	Logger logger = Util.logger();
+    
     public RelDbTabularWriter(ConnectionSpec inConnectionSpec, String inStatement) throws SQLException {
+    	this.connectionSpec = inConnectionSpec;
         this.recordHandler = new ListRecordHandler(inConnectionSpec, inStatement);
         this.row = new ArrayList<>();
+        logger.info("Creating RelDbTabularWriter");
     }
+    
+    public RelDbTabularWriter(ConnectionSpec inConnectionSpec, Map<String,String> inStatements) throws SQLException {
+    	this.connectionSpec = inConnectionSpec;
+    	this.statements = inStatements;
+    	this.handlerList = new HashMap<String, RecordHandler<ArrayList<?>>>();
+    	for(String tableName : inStatements.keySet()) {
+    		logger.info("Creating Handler: " + tableName + "; SQL: " + inStatements.get(tableName));
+    		this.handlerList.put(tableName, new ListRecordHandler(inConnectionSpec, inStatements.get(tableName)));
+    	}
+        //this.recordHandler = new ListRecordHandler(inConnectionSpec, inStatement);
+        this.row = new ArrayList<>();
+        
+    }
+    
+    public RelDbTabularWriter(ConnectionSpec inConnectionSpec) throws SQLException {
+        this.recordHandler = new ListRecordHandler(inConnectionSpec, this.inStatement);
+        this.row = new ArrayList<>();
+        logger.info("Creating RelDbTabularWriter");
+    }
+    
+    public String getInStatement() {
+		return inStatement;
+	}
+
+	public void setInStatement(String inStatement) throws SQLException {
+		this.inStatement = inStatement;
+		this.recordHandler.close();
+		this.recordHandler = new ListRecordHandler(connectionSpec, inStatement);
+	}
+	
+	public ConnectionSpec getConnectionSpec() {
+		return connectionSpec;
+	}
+
+	public void setConnectionSpec(ConnectionSpec connectionSpec) {
+		this.connectionSpec = connectionSpec;
+	}
+
+	public Map<String, RecordHandler<ArrayList<?>>> getHandlerList() {
+		return handlerList;
+	}
+
+	public void setHandlerList(Map<String, RecordHandler<ArrayList<?>>> handlerList) {
+		this.handlerList = handlerList;
+	}
+	
+	public RecordHandler<ArrayList<?>> getRecordHandler() {
+		return recordHandler;
+	}
+
+	public void setRecordHandler(RecordHandler<ArrayList<?>> recordHandler) {
+		this.recordHandler = recordHandler;
+	}
+	
+	public String getTableName() {
+		return tableName;
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
 
     @Override
     public void writeNominal(NominalValue inValue, Format inFormat) {
         if (inFormat != null) {
             this.row.add(inValue.format(inFormat));
         } else {
-            this.row.add(inValue.getString());
+            this.row.add(inValue == null ? "NULL":inValue.getString());
         }
         incr();
     }
@@ -63,7 +140,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         if (inFormat != null) {
             this.row.add(inValue.format(inFormat));
         } else {
-            this.row.add(inValue.getNumber());
+            this.row.add(inValue == null ? "NULL":inValue.getNumber());
         }
         incr();
     }
@@ -73,7 +150,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         if (inFormat != null) {
             this.row.add(inFormat.format(inValue.getComparator()));
         } else {
-            this.row.add(inValue.getComparator().getComparatorString());
+            this.row.add(inValue == null ? "NULL":inValue.getComparator().getComparatorString());
         }
         incr();
     }
@@ -83,7 +160,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         if (inFormat != null) {
             this.row.add(inValue.format(inFormat));
         } else {
-            this.row.add(inValue.getNumber());
+            this.row.add(inValue == null ? "NULL":inValue.getNumber());
         }
         incr();
     }
@@ -93,7 +170,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         if (inFormat != null) {
             this.row.add(inValue.format(inFormat));
         } else {
-            this.row.add(inValue.getNumber());
+            this.row.add(inValue == null ? "NULL":inValue.getNumber());
         }
         
         incr();
@@ -104,7 +181,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         if (inFormat != null) {
             this.row.add(inValue.format(inFormat));
         } else {
-            this.row.add(inValue.getDate());
+            this.row.add(inValue == null ? "NULL":inValue.getDate());
         }
         incr();
     }
@@ -114,7 +191,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         if (inFormat != null) {
             this.row.add(inValue.format(inFormat));
         } else {
-            this.row.add(inValue.getBoolean());
+            this.row.add(inValue == null ? "NULL":inValue.getBoolean());
         }
         incr();
     }
@@ -190,14 +267,33 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
 
     @Override
     public final void writeNull() throws TabularWriterException {
-        writeValue(null, null);
+    	Value value = new NominalValue("NULL");
+        writeValue(value, null);
     }
 
     @Override
     public final void newRow() throws TabularWriterException {
         try {
-            this.recordHandler.insert(this.row);
-        } catch (SQLException ex) {
+        	this.recordHandler = this.handlerList.get(tableName);
+        	if(this.recordHandler != null) {
+        		this.recordHandler.insert(this.row);
+        	}
+        	else {
+        		logger.info("NULL RECORDHANDLER: Getting from statements map" + (statements == null? 0:statements.size()));
+        		this.recordHandler = new ListRecordHandler(this.connectionSpec, this.statements.get(this.tableName));
+        		if(this.handlerList.containsKey(tableName))
+        			this.handlerList.replace(tableName, this.recordHandler);
+        		else 
+        			this.handlerList.put(tableName, this.recordHandler);
+        		this.recordHandler.insert(this.row);
+        	}           
+        } catch (SQLException | NullPointerException ex) {
+        	logger.info("Statement:" + this.inStatement);
+        	StringBuilder sb = new StringBuilder();
+        	for(Object o: this.row) {
+            	sb.append(o.toString() + ":");
+        	}
+        	logger.info("Row error:" + sb.toString());
             throw new TabularWriterException(ex);
         }
         this.row.clear();
@@ -207,6 +303,9 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
     @Override
     public final void close() throws TabularWriterException {
         try {
+            for(String tableName: this.getHandlerList().keySet()) {
+            	this.handlerList.get(tableName).close();
+            }
             this.recordHandler.close();
         } catch (SQLException ex) {
             throw new TabularWriterException(ex);
