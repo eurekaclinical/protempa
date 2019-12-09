@@ -24,6 +24,10 @@
         <artifactId>eurekaclinical-parent-standard-deps</artifactId>
         <version>4-Alpha-4-SNAPSHOT</version>
     </parent>
+    
+    <properties>
+    	<maven.javadoc.skip>true</maven.javadoc.skip>
+    </properties>
 
     <scm>
         <connection>scm:git:https://github.com/eurekaclinical/protempa.git</connection>
