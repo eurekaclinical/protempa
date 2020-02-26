@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.eurekaclinical</groupId>
     <artifactId>protempa</artifactId>
-    <version>5.1-Beta-6-SNAPSHOT</version>
+    <version>5.2-Alpha-1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Protempa</name>
     <url>https://github.com/eurekaclinical/protempa.git</url>
@@ -22,8 +22,12 @@
     <parent>
         <groupId>org.eurekaclinical</groupId>
         <artifactId>eurekaclinical-parent-standard-deps</artifactId>
-        <version>4-Alpha-3</version>
+        <version>4-Alpha-4-SNAPSHOT</version>
     </parent>
+    
+    <properties>
+    	<maven.javadoc.skip>true</maven.javadoc.skip>
+    </properties>
 
     <scm>
         <connection>scm:git:https://github.com/eurekaclinical/protempa.git</connection>
@@ -94,12 +98,12 @@
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>javautil</artifactId>
-                <version>[4.4,)</version>
+                <version>4.5-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.eurekaclinical</groupId>
                 <artifactId>datastore</artifactId>
-                <version>[3.2,)</version>
+                <version>3.3-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

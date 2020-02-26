@@ -21,6 +21,7 @@ package org.protempa.proposition.interval;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
@@ -33,15 +34,16 @@ import junit.framework.TestCase;
 
 public class DefaultIntervalTest extends TestCase {
 
-	private static final DateFormat DATE_FORMAT = DateFormat
-			.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.US);
+//	private static final DateFormat DATE_FORMAT = DateFormat
+//			.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.US);
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy hh:mm a");
 
 	private Date d;
 	private DefaultInterval interval;
 
 	@Override
 	protected void setUp() throws Exception {
-		d = DATE_FORMAT.parse("1/1/07 1:00 am");
+		d = DATE_FORMAT.parse("01-Jan-2007 1:00 am");
 		this.interval = new DefaultInterval(asPosition(d),
 				AbsoluteTimeGranularity.MINUTE, asPosition(d),
 				AbsoluteTimeGranularity.MINUTE, Long.valueOf(0L), null);
@@ -70,7 +72,7 @@ public class DefaultIntervalTest extends TestCase {
 	}
 
 	public void testDefaultInterval12HoursMinDistance() throws ParseException {
-		Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
+		Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:00 pm");
 		Interval i2 = new DefaultInterval(asPosition(d),
 				AbsoluteTimeGranularity.MINUTE, asPosition(d2),
 				AbsoluteTimeGranularity.MINUTE, null, null);
@@ -78,7 +80,7 @@ public class DefaultIntervalTest extends TestCase {
 	}
 
 	public void testDefaultInterval12HoursMaxDistance() throws ParseException {
-		Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
+		Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:00 pm");
 		Interval i2 = new DefaultInterval(asPosition(d),
 				AbsoluteTimeGranularity.MINUTE, asPosition(d2),
 				AbsoluteTimeGranularity.MINUTE, null, null);
@@ -86,7 +88,7 @@ public class DefaultIntervalTest extends TestCase {
 	}
 
 	public void testDefaultInterval12HoursDistanceUnit() throws ParseException {
-		Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
+		Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:00 pm");
 		Interval i2 = new DefaultInterval(asPosition(d),
 				AbsoluteTimeGranularity.MINUTE, asPosition(d2),
 				AbsoluteTimeGranularity.MINUTE, null, null);
