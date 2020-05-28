@@ -21,6 +21,7 @@ package org.protempa.proposition.interval;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
@@ -33,13 +34,15 @@ import junit.framework.TestCase;
 
 public class SimpleIntervalTest extends TestCase {
 
-    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.US);
+//    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.US);
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy hh:mm a");
+	
     private Date d;
     private SimpleInterval interval;
 
     @Override
     protected void setUp() throws Exception {
-        d = DATE_FORMAT.parse("1/1/07 1:00 am");
+        d = DATE_FORMAT.parse("01-Jan-2007 1:00 am");
         this.interval = new SimpleInterval(asPosition(d),
                 AbsoluteTimeGranularity.MINUTE, asPosition(d),
                 AbsoluteTimeGranularity.MINUTE);
@@ -60,7 +63,7 @@ public class SimpleIntervalTest extends TestCase {
     }
 
     public void test12HoursMinDistance() throws ParseException {
-        Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
+        Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:00 pm");
         Interval i2 = new SimpleInterval(asPosition(d),
                 AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
@@ -68,7 +71,7 @@ public class SimpleIntervalTest extends TestCase {
     }
 
     public void test12HoursMaxDistance() throws ParseException {
-        Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
+        Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:00 pm");
         Interval i2 = new SimpleInterval(asPosition(d),
                 AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
@@ -76,7 +79,7 @@ public class SimpleIntervalTest extends TestCase {
     }
 
     public void test12HoursDistanceUnit() throws ParseException {
-        Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
+        Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:00 pm");
         Interval i2 = new SimpleInterval(asPosition(d),
                 AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
@@ -84,7 +87,7 @@ public class SimpleIntervalTest extends TestCase {
     }
 
     public void test12HoursReallyInHoursGranularity() throws ParseException {
-        Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
+        Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:00 pm");
         Interval i2 = new SimpleInterval(asPosition(d),
                 AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
@@ -94,7 +97,7 @@ public class SimpleIntervalTest extends TestCase {
     }
 
     public void test12HoursReallyInHoursInterval() throws ParseException {
-        Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
+        Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:00 pm");
         Interval i2 = new SimpleInterval(asPosition(d),
                 AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
@@ -103,7 +106,7 @@ public class SimpleIntervalTest extends TestCase {
     }
 
     public void test12HoursReallyInSecondsInterval() throws ParseException {
-        Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
+        Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:00 pm");
         Interval i2 = new SimpleInterval(asPosition(d),
                 AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
@@ -112,7 +115,7 @@ public class SimpleIntervalTest extends TestCase {
     }
 
     public void test12HoursMinimumDistance() throws ParseException {
-        Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
+        Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:00 pm");
         Interval i2 = new SimpleInterval(asPosition(d),
                 AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
@@ -120,7 +123,7 @@ public class SimpleIntervalTest extends TestCase {
     }
 
     public void test12HoursMaximumDistance() throws ParseException {
-        Date d2 = DATE_FORMAT.parse("1/1/07 1:00 pm");
+        Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:00 pm");
         Interval i2 = new SimpleInterval(asPosition(d),
                 AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
@@ -128,7 +131,7 @@ public class SimpleIntervalTest extends TestCase {
     }
 
     public void testOneMinuteMinimumDistance() throws ParseException {
-        Date d2 = DATE_FORMAT.parse("1/1/07 1:01 am");
+        Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:01 am");
         Interval i2 = new SimpleInterval(asPosition(d),
                 AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);
@@ -136,7 +139,7 @@ public class SimpleIntervalTest extends TestCase {
     }
 
     public void testOneMinuteMinDistance() throws ParseException {
-        Date d2 = DATE_FORMAT.parse("1/1/07 1:01 am");
+        Date d2 = DATE_FORMAT.parse("01-Jan-2007 1:01 am");
         Interval i2 = new SimpleInterval(asPosition(d),
                 AbsoluteTimeGranularity.MINUTE, asPosition(d2),
                 AbsoluteTimeGranularity.MINUTE);

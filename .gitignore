@@ -5,3 +5,5 @@ pom.xml.releaseBackup
 pom.xml.next
 release.properties
 /bin/
+/.classpath
+/.project
