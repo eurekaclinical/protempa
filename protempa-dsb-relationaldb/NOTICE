@@ -20,13 +20,9 @@ This project includes:
   Datastore under Apache License, Version 2.0
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
   Hamcrest Core under New BSD License
-  JavaBeans Activation Framework API jar under CDDL/GPLv2+CE
   JavaUtil under Apache License, Version 2.0
-  jaxb-api under CDDL 1.1 or GPL2 w/ CPE
   JUnit under Eclipse Public License 1.0
   mvel under The Apache Software License, Version 2.0
-  Old JAXB Core under CDDL+GPL License
-  Old JAXB Runtime under CDDL+GPL License
   opencsv under Apache 2
   Oracle NoSQL Database Server under Apache 2
   Protempa Framework under Apache License, Version 2.0
