@@ -24,6 +24,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.arp.javautil.sql.ConnectionSpec;
@@ -66,6 +67,11 @@ class ListRecordHandler extends RecordHandler<ArrayList<?>> {
 
 	public void setInStatement(String inStatement) {
 		this.inStatement = inStatement;
+	}
+	
+    public void close() throws SQLException {
+		logger.log(Level.FINER, "Closing by punting to super");
+		super.close();
 	}
     
 }

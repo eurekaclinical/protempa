@@ -83,8 +83,14 @@ final class RefDataStreamerProcessor
 
     void setPropositions(List<? extends Proposition> propositions) {
         assert propositions != null : "propositions cannot be null";
+        LOGGER.log(Level.FINEST, 
+                "Setting propositions for refs: {0}", 
+                new Object[]{propositions == null? 0: propositions.size()});
         for (Proposition proposition : propositions) {
             assert proposition != null : "proposition cannot be null";
+            LOGGER.log(Level.FINEST, 
+                    "Proposition: {0}", 
+                    new Object[]{proposition == null? "null": proposition.getId()});
             this.uniqueIdToPropositions.put(
                     proposition.getUniqueId(), proposition);
         }

@@ -113,16 +113,25 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
                     assert propIds.length == 1 :
                             "Don't know which proposition id to assign to";
                     propId = propIds[0];
+                	logger.log(Level.FINEST,
+                            "Primitive: Is Case NOT Present, got propId {0} NULL codeSpec", new Object[] {propId});
                 } else {
                     String code = resultSet.getString(i++);
                     propId = sqlCodeToPropositionId(codeSpec, code);
+                    logger.log(Level.FINEST,
+                            "Primitive: Is Case NOT Present, got propId {0} NOT NULL codeSpec, for code: {1}", new Object[] {propId, code});
                     if (propId == null) {
                         this.getReferenceIterator().addUniqueIds(kId, null);
                         return;
                     }
                 }
-            } else {
-                i++;
+            } 
+            else {
+            	String code = resultSet.getString(i++);
+                propId = sqlCodeToPropositionId(codeSpec, code);
+            	logger.log(Level.FINEST,
+                        "Primitive: Is Case Present, got from resultset position {0}, propId: {1} for code: {2}", new Object[] {i-1, propId, code});
+                //i++; //this skips the 3rd column, which is the code, and moves to 4th column, which is a date column
             }
 
             Long timestamp = null;
@@ -141,18 +150,25 @@ class PrimitiveParameterStreamingResultProcessor extends StreamingMainResultProc
 
             i = extractPropertyValues(resultSet, i,
                     propertyValues, columnTypes);
+            logger.log(Level.FINEST,
+                    "Primitive: Extracting reference uniqueId pairs for keyId {0} and propId {1}", new Object[] {kId, propId});
             i = extractReferenceUniqueIdPairs(resultSet, uniqueId,
                     refUniqueIds, i);
 
-            if (isCasePresent()) {
-                propId = resultSet.getString(i++);
-            }
+//            if (isCasePresent()) {
+//            	propId = resultSet.getString(i++);
+//            }
             
             if (!queryPropIds.contains(propId)) {
+            	logger.log(Level.FINEST,
+                        "Primitive: propId {0} not in queryPropIds", new Object[] {propId});
                 this.getReferenceIterator().addUniqueIds(kId, null);
                 return;
             }
             
+            logger.log(Level.FINEST,
+                    "Primitive: Adding UniqueId for kId {0} and propId {1}", new Object[] {kId, propId});
+        	
             this.getReferenceIterator().addUniqueIds(kId, refUniqueIds);
 
             PrimitiveParameter p = new PrimitiveParameter(propId, uniqueId);

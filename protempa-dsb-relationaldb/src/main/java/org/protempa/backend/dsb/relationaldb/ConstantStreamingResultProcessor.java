@@ -101,38 +101,58 @@ class ConstantStreamingResultProcessor extends StreamingMainResultProcessor<Cons
                 return;
             }
             UniqueId uniqueId = generateUniqueId(entitySpec.getName(), uniqueIds);
-
+            logger.log(Level.FINEST,
+                    "Generated UniqueId {0} for kId: {1}",
+                    new Object[] {(uniqueId == null ? "null": uniqueId.getStringRepresentation()), kId});
+            
             String propId = null;
             if (!isCasePresent()) {
                 if (codeSpec == null) {
                     assert propIds.length == 1 :
                             "Don't know which proposition id to assign to";
                     propId = propIds[0];
+                    logger.log(Level.FINEST,
+                            "Constant: Is Case NOT Present, got propId {0} NULL codeSpec", new Object[] {propId});
                 } else {
                     String code = resultSet.getString(i++);
                     propId = sqlCodeToPropositionId(codeSpec, code);
+                    logger.log(Level.FINEST,
+                            "Constant: Is Case NOT Present, got propId {0} NOT NULL codeSpec", new Object[] {propId});
                     if (propId == null) {
                         this.getReferenceIterator().addUniqueIds(kId, null);
                         return;
                     }
                 }
-            } else {
-                i++;
-            }
-
+            } 
+          //the 3rd col is starttime, so skip it to get to the other values
+//            else { 
+//                i++;
+//            }
+            logger.log(Level.FINEST,
+                    "Constant: Dealing with Property values, at position: {0}", new Object[] {i});
             i = extractPropertyValues(resultSet, i,
                     propertyValues, columnTypes);
             i = extractReferenceUniqueIdPairs(resultSet, uniqueId,
                     refUniqueIds, i);
 
             if (isCasePresent()) {
-                propId = resultSet.getString(i++);
+            	if(propId == null) {
+            		if ((propId = resultSet.getString(i++)) == null) {
+        				propId = entitySpec.getPropositionIds()[0];
+        				i--;
+                        logger.log(Level.FINEST,
+                                "Constant: Is Case Present, got propId was null, got {0}. Now in resultset position {1}", new Object[] {propId, i});
+            		}            		
+            	} 
             }
             
             if (!queryPropIds.contains(propId)) {
                 this.getReferenceIterator().addUniqueIds(kId, null);
                 return;
             }
+            
+            logger.log(Level.FINEST,
+                    "Constant: Adding UniqueId for kId {0} and propId {1}", new Object[] {kId, propId});
             
             this.getReferenceIterator().addUniqueIds(kId, refUniqueIds);
 

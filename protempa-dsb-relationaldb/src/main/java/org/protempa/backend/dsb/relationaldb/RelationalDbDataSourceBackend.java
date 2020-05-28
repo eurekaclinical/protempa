@@ -434,6 +434,10 @@ public abstract class RelationalDbDataSourceBackend
             try {
                 ConnectionSpec connectionSpecInstance
                         = getConnectionSpecInstance();
+                SQLGenUtil.logger().log(Level.FINEST, "ConnectionSpec Database: {0}", connectionSpecInstance.getDatabaseProduct().name());
+                SQLGenUtil.logger().log(Level.FINEST, "ConnectionSpec DB Version: {0}", connectionSpecInstance.getDatabaseVersion().getVersionString());
+                SQLGenUtil.logger().log(Level.FINEST, "ConnectionSpec DB Driver: {0}", connectionSpecInstance.getDriver().name());
+                SQLGenUtil.logger().log(Level.FINEST, "ConnectionSpec DB Version: {0}", connectionSpecInstance.getDriverVersion().getVersionString());
                 this.sqlGenerator = new SQLGeneratorFactory(
                         connectionSpecInstance,
                         this.relationalDatabaseSpecBuilder.build(queryResultsHandler),
@@ -733,6 +737,8 @@ public abstract class RelationalDbDataSourceBackend
         }
 
         RelationalDatabaseSpec build(QueryResultsHandler queryResultsHandler) {
+        	SQLGenUtil.logger().log(Level.FINEST, "QRH Name: {0}", queryResultsHandler.getDisplayName());
+        	SQLGenUtil.logger().log(Level.FINEST, "QRH ID: {0}", queryResultsHandler.getId());
             if (queryResultsHandler instanceof KeyLoaderQueryResultsHandler) {
                 this.keyIdSchema = getSchemaName();
                 this.keyIdTable = getDefaultKeyIdTable();

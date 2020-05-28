@@ -78,6 +78,8 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     private UnitFactory units;
     private RelationalDbDataSourceBackend backend;
     private int queryThreadCount;
+    private static Logger logger = SQLGenUtil.logger();
+    List<Connection> connections = new ArrayList<>();
 
     protected AbstractSQLGenerator() {
         this.primitiveParameterSpecs = new HashMap<>();
@@ -133,7 +135,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Class.forName(className);
             return true;
         } catch (ClassNotFoundException ex) {
-            Logger logger = SQLGenUtil.logger();
+            
             if (logger.isLoggable(Level.FINE)) {
                 logger.log(Level.FINE,
                         "{0} when trying to load {1}.",
@@ -178,6 +180,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Connection conn;
             try {
                 conn = connectionSpec.getOrCreate();
+                connections.add(conn);
             } catch (SQLException ex) {
                 throw new DataSourceReadException(ex);
             }
@@ -206,7 +209,6 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
         final List<StreamingIteratorPair> itrs = new ArrayList<>();
         ExecutorService executor = Executors.newFixedThreadPool(this.queryThreadCount);
         List<Future<List<StreamingIteratorPair>>> list = new ArrayList<>();
-        List<Connection> connections = new ArrayList<>();
         for (EntitySpec entitySpec : entitySpecToPropIds.keySet()) {
             list.add(executor.submit(new SQLExecutorCallable(entitySpec, allEntitySpecToResultProcessor, allEntitySpecs, filters, propIds, keyIds)));
         }
@@ -273,7 +275,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             StreamingSQLExecutor executor)
             throws DataSourceReadException {
         List<StreamingIteratorPair> result = new ArrayList<>();
-        Logger logger = SQLGenUtil.logger();
+        
         logProcessingEntitySpec(logger, entitySpec);
 
         SQLGenResultProcessorFactory<Proposition> factory
@@ -422,7 +424,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
     }
 
     private static void logApplicableEntitySpecs(List<EntitySpec> allEntitySpecsCopy) {
-        Logger logger = SQLGenUtil.logger();
+        
         if (logger.isLoggable(Level.FINER)) {
             String[] allEntitySpecsCopyNames = new String[allEntitySpecsCopy.size()];
             int i = 0;
@@ -534,7 +536,7 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             SQLOrderBy order, StreamingResultProcessor<P> resultProcessor,
             StreamingSQLExecutor executor,
             boolean wrapKeyId) throws DataSourceReadException {
-        Logger logger = SQLGenUtil.logger();
+        
         String backendNameForMessages = backendNameForMessages();
         String entitySpecName = entitySpec.getName();
 
@@ -549,13 +551,13 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
                 keyIds, order,
                 resultProcessor, wrapKeyId).generateStatement();
 
-        if (logger.isLoggable(Level.FINE)) {
+        
             logger.log(
-                    Level.FINE,
+                    Level.INFO,
                     "Data source backend {0} generated the following query for {1}: {2}",
                     new Object[]{backendNameForMessages, entitySpecName,
                         query});
-        }
+
         executor.executeSelect(entitySpecName, query, resultProcessor);
     }
 
@@ -692,12 +694,13 @@ public abstract class AbstractSQLGenerator implements SQLGenerator {
             Set<String> propIds) throws AssertionError {
         Map<EntitySpec, List<String>> result = new HashMap<>();
         for (String propId : propIds) {
+        	logger.log(Level.FINE,"Processing Proposition {0}",
+                        new Object[]{propId});
             boolean inDataSource = populateEntitySpecToPropIdMap(
                     new String[]{propId}, result);
-            Logger logger = SQLGenUtil.logger();
-            if (!inDataSource && logger.isLoggable(Level.FINER)) {
+            if (!inDataSource) {
                 logger.log(
-                        Level.FINER,
+                        Level.FINE,
                         "Data source backend {0} does not know about proposition {1}",
                         new Object[]{backendNameForMessages(), propId});
             }

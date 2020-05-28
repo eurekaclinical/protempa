@@ -107,13 +107,18 @@ class RetrieveDataThread extends AbstractThread {
         log(Level.INFO, "Retrieving data");
         Query query = getQuery();
         Set<String> inDataSourcePropIds = new HashSet<>();
+        //all query propositions and those retrieved from the knowledgesource for each query proposition is
+        //contained in the cache
+        //doing this merge to make sure the query prop Ids are also in the cache
         for (PropositionDefinition pd : this.propositionDefinitionCache.getAll()) {
             if (pd.getInDataSource()) {
                 inDataSourcePropIds.add(pd.getId());
             }
         }
+        //adding missed Query prop Ids. 
+        inDataSourcePropIds.addAll(Arrays.asSet(query.getPropositionIds()));
         if (isLoggable(Level.FINER)) {
-            log(Level.FINER, "Asking data source for {0}", StringUtils.join(inDataSourcePropIds, ", "));
+            log(Level.FINER, "Asking data source for keys:{1}::props {0}", new Object[] {StringUtils.join(inDataSourcePropIds, ", "), StringUtils.join(query.getKeyIds(),", ")});
         }
         return this.dataSource.readPropositions(
                 Arrays.asSet(query.getKeyIds()), inDataSourcePropIds, 

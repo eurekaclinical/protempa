@@ -16,7 +16,10 @@ This project includes:
   Apache Commons CLI under Apache License, Version 2.0
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons Collections under Apache License, Version 2.0
+  Apache Commons DBCP under The Apache Software License, Version 2.0
   Apache Commons Lang under Apache License, Version 2.0
+  Apache Commons Pool under The Apache Software License, Version 2.0
+  Commons Logging under The Apache Software License, Version 2.0
   Core Protege under Mozilla Public License
   Datastore under Apache License, Version 2.0
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
