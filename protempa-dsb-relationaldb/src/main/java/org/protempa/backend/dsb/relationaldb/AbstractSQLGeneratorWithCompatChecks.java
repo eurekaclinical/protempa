@@ -23,6 +23,9 @@ package org.protempa.backend.dsb.relationaldb;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.arp.javautil.sql.DatabaseMetaDataWrapper;
 import org.arp.javautil.sql.DatabaseVersion;
 import org.arp.javautil.sql.DriverVersion;
@@ -83,8 +86,18 @@ public abstract class AbstractSQLGeneratorWithCompatChecks extends AbstractSQLGe
     }
     
     @Override
-    public final boolean checkCompatibility(Connection connection) throws SQLException {
+    public boolean checkCompatibility(Connection connection) throws SQLException {
         DatabaseMetaDataWrapper metaDataWrapper = new DatabaseMetaDataWrapper(connection.getMetaData());
+        Logger logger = SQLGenUtil.logger();
+        
+        logger.log(Level.FINE, "DB specs: {0}", connection.getMetaData().getDatabaseProductName()+
+        		":"+ connection.getMetaData().getDatabaseMinorVersion() + ":"+ connection.getMetaData().getDatabaseMajorVersion());
+        logger.log(Level.FINE, "My Specs: {0}", this.databaseProductName + ":" + this.minDatabaseVersion + ":" + this.maxDatabaseVersion);
+
+        logger.log(Level.FINE, "Driver specs: {0}", connection.getMetaData().getDriverName() +
+        		":"+ connection.getMetaData().getDriverMinorVersion() + ":"+ connection.getMetaData().getDriverMajorVersion());
+        logger.log(Level.FINE, "My Specs: {0}", this.driverName + ":" + this.minDriverVersion + ":" + this.maxDriverVersion);
+        
         return metaDataWrapper.isDatabaseCompatible(this.databaseProductName, this.minDatabaseVersion, this.maxDatabaseVersion) && 
                 metaDataWrapper.isDriverCompatible(this.driverName, this.minDriverVersion, this.maxDriverVersion);
     }

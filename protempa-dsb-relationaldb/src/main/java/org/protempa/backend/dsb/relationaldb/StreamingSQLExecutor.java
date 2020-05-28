@@ -68,6 +68,9 @@ public class StreamingSQLExecutor {
             try {
                 Statement stmt = connection.createStatement();
                 stmt.setFetchSize(AbstractSQLGenerator.FETCH_SIZE);
+                //this is for connection to DWS and DWP
+                if (this.connection.getMetaData().getDatabaseProductName().equalsIgnoreCase("ORACLE")) 
+                	stmt.execute("SET ROLE ALL");  
                 ResultSet resultSet = stmt.executeQuery(query);
                 logger.log(Level.FINE, "Database query execution for {0} has returned", entitySpecName);
                 resultProcessor.setStatement(stmt);

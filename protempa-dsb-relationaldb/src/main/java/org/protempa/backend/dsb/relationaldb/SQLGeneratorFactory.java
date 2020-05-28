@@ -119,8 +119,8 @@ public final class SQLGeneratorFactory {
                      * We get a new connection for each compatibility check so that
                      * no state (or a closed connection!) is carried over.
                      */
-                    Connection con = this.connectionSpec.getOrCreate();
-                    try {
+                    
+                    try (Connection con = this.connectionSpec.getOrCreate()){
                         if (candidateInstance.checkCompatibility(con)) {
                             DatabaseMetaData metaData = con.getMetaData();
                             logCompatibility(logger, candidateInstance,
@@ -133,15 +133,8 @@ public final class SQLGeneratorFactory {
                                     candidateInstance.getClass().getName());
                             return candidateInstance;
                         }
-                        con.close();
-                        con = null;
-                    } finally {
-                        if (con != null) {
-                            try {
-                                con.close();
-                            } catch (SQLException ex) {
-                            }
-                        }
+                    } catch (SQLException ex) {
+                    	throw ex;
                     }
                     logger.log(Level.FINER,
                             "SQL generator {0} is not compatible",

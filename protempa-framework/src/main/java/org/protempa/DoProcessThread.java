@@ -119,7 +119,8 @@ abstract class DoProcessThread<E extends ExecutionStrategy> extends AbstractThre
             }
             this.hqrQueue.put(new QueueObject(keyId, filteredPropositions,
                     forwardDerivations, backwardDerivations, refs));
-            log(Level.FINER, "Results put on query result handler queue");
+            log(Level.FINER, "Results put on query result handler queue: keyId:{0}", 
+            		new Object[] {keyId});
         } catch (ExecutionStrategyExecutionException ex) {
             this.exceptions.add(new QueryException(query.getName(), ex));
         } finally {

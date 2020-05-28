@@ -22,6 +22,9 @@ package org.protempa.backend.dsb.relationaldb;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.protempa.*;
 import org.protempa.proposition.Proposition;
 
@@ -36,6 +39,7 @@ public class RelationalDbDataReadIterator
         extends DataSourceBackendMultiplexingDataStreamingEventIterator {
 
     private final List<Connection> connections;
+    private Logger logger = SQLGenUtil.logger();
 
     RelationalDbDataReadIterator(
             List<? extends DataStreamingEventIterator<UniqueIdPair>> refs,
@@ -43,18 +47,28 @@ public class RelationalDbDataReadIterator
             List<Connection> connections) {
         super(itrs, refs);
         this.connections = connections;
+        logger.log(Level.FINEST,
+                "Starting with connections List of size: {0}", (this.connections == null? 0:this.connections.size()));
     }
 
     @Override
     public void close() throws DataSourceReadException {
+    	logger.log(Level.FINEST,
+                "Trying to close connection");
         try {
             super.close();
+            logger.log(Level.FINEST,
+                    "Closed SUPER");
         } finally {
+        	logger.log(Level.FINEST,
+                    "Checking connections in List of size: {0}", (this.connections == null? 0:this.connections.size()));
             for (Connection connection : this.connections) {
                 if (connection != null) {
                     try {
                         connection.close();
                         connection = null;
+                        logger.log(Level.FINEST,
+                                "Closed connection");
                     } catch (SQLException sqle) {
                         throw new DataSourceReadException("Error retrieving data", sqle);
                     } finally {
@@ -66,6 +80,8 @@ public class RelationalDbDataReadIterator
                         }
                     }
                 }
+                logger.log(Level.FINEST,
+                        "No Open connections");
             }
         }
     }

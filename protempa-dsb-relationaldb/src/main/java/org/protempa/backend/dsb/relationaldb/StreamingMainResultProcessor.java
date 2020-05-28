@@ -32,6 +32,8 @@ import java.sql.Statement;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 abstract class StreamingMainResultProcessor<P extends Proposition>
         extends AbstractResultProcessor implements StreamingResultProcessor<P> {
@@ -40,6 +42,7 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
     private final LinkedHashMap<String, ReferenceSpec> inboundRefSpecs;
     private final Map<String, ReferenceSpec> bidirectionalRefSpecs;
     private Statement statement;
+    private Logger logger = Logger.getLogger(StreamingMainResultProcessor.class.getName());
     
     protected StreamingMainResultProcessor(
             RelationalDbDataSourceBackend backend,
@@ -84,6 +87,8 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
                 value = valueType.parse(valAsString);
             }
             i++;
+            logger.log(Level.FINEST, "Property: {0} :: Value: {1}", 
+            		new Object[] {this.propertySpecs[j].getName(),value});
             propertyValues[j] = value;
         }
         return i;
@@ -93,10 +98,14 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
             ResultSet resultSet, UniqueId referredToUniqueId,
             UniqueIdPair[] uniqueIdPairs, int i) throws SQLException {
         int j = 0;
+        logger.log(Level.FINEST, "inboundRefSpecs size: {0}", 
+        		new Object[] {inboundRefSpecs == null? 0:inboundRefSpecs.size()});
         for (Map.Entry<String, ReferenceSpec> entry : inboundRefSpecs
                 .entrySet()) {
             String referringEntityName = entry.getKey();
             ReferenceSpec refSpec = entry.getValue();
+            logger.log(Level.FINEST, "Referring entity: {0}; reference: {1}", 
+            		new Object[] {referringEntityName, refSpec.getEntityName()});
             String[] referringUniqueIds = new String[refSpec.getReferringEntitySpec()
                     .getUniqueIdSpecs().length];
             i = readUniqueIds(referringUniqueIds, resultSet, i);
@@ -104,11 +113,20 @@ abstract class StreamingMainResultProcessor<P extends Proposition>
                     referringUniqueIds);
             UniqueIdPair pair = new UniqueIdPair(refSpec.getReferenceName(),
                     referringUniqueId, referredToUniqueId);
+            
+            logger.log(Level.FINEST, "uniqueIdPairs: referring: {0}:: referred to:{1}", 
+            		new Object[] {referringUniqueId.getStringRepresentation(), 
+            				referredToUniqueId.getStringRepresentation()});
             uniqueIdPairs[j] = pair;
-
+            
+            logger.log(Level.FINEST, "bidirectionalRefSpecs size: {0}", 
+            		new Object[] {bidirectionalRefSpecs == null? 0:bidirectionalRefSpecs.size()});
             for (Map.Entry<String, ReferenceSpec> bidirRefSpec :
                     bidirectionalRefSpecs.entrySet()) {
+            	logger.log(Level.FINE, "Reverse - Referring entity: {0}; reference: {1}", 
+                		new Object[] {refSpec.getEntityName(), referringEntityName});
                 if (bidirRefSpec.getKey().equals(referringEntityName)) {
+                	logger.log(Level.FINEST, "Adding the reverse pair");
                     UniqueIdPair reversePair = new UniqueIdPair(bidirRefSpec
                             .getValue().getReferenceName(),
                             referredToUniqueId, referringUniqueId);

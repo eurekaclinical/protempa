@@ -24,6 +24,7 @@ import java.text.Format;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.arp.javautil.sql.ConnectionSpec;
@@ -59,6 +60,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
     
     public RelDbTabularWriter(ConnectionSpec inConnectionSpec, String inStatement) throws SQLException {
     	this.connectionSpec = inConnectionSpec;
+    	this.inStatement = inStatement;
         this.recordHandler = new ListRecordHandler(inConnectionSpec, inStatement);
         this.row = new ArrayList<>();
         logger.info("Creating RelDbTabularWriter");
@@ -273,19 +275,33 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
 
     @Override
     public final void newRow() throws TabularWriterException {
+    	if (logger.isLoggable(Level.FINEST)) {
+        	logger.finest("Statement:" + this.inStatement);
+    		StringBuilder sb = new StringBuilder();
+        	for(Object o: this.row) {
+            	sb.append(o.toString() + ":");
+        	}
+        	logger.finest("Row:" + sb.toString());
+    	}    	
         try {
-        	this.recordHandler = this.handlerList.get(tableName);
         	if(this.recordHandler != null) {
         		this.recordHandler.insert(this.row);
         	}
         	else {
-        		logger.info("NULL RECORDHANDLER: Getting from statements map" + (statements == null? 0:statements.size()));
-        		this.recordHandler = new ListRecordHandler(this.connectionSpec, this.statements.get(this.tableName));
-        		if(this.handlerList.containsKey(tableName))
-        			this.handlerList.replace(tableName, this.recordHandler);
-        		else 
-        			this.handlerList.put(tableName, this.recordHandler);
-        		this.recordHandler.insert(this.row);
+        		logger.finest("Getting RECORDHANDLER for table:  " + tableName);
+        		this.recordHandler = this.handlerList.get(tableName);
+        		if(this.recordHandler != null) {
+            		this.recordHandler.insert(this.row);
+            	}
+        		else {
+        			logger.finest("NULL RECORDHANDLER for table:" + tableName + "; Getting from statements map " + (statements == null? 0:statements.size()));
+        			this.recordHandler = new ListRecordHandler(this.connectionSpec, this.statements.get(this.tableName));
+        			if(this.handlerList.containsKey(tableName))
+        				this.handlerList.replace(tableName, this.recordHandler);
+        			else 
+        				this.handlerList.put(tableName, this.recordHandler);
+        			this.recordHandler.insert(this.row);
+        		}
         	}           
         } catch (SQLException | NullPointerException ex) {
         	logger.info("Statement:" + this.inStatement);
@@ -293,20 +309,28 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         	for(Object o: this.row) {
             	sb.append(o.toString() + ":");
         	}
-        	logger.info("Row error:" + sb.toString());
-            throw new TabularWriterException(ex);
+        	logger.finest("Row error for table:" + tableName + "::" + sb.toString());
+            //throw new TabularWriterException(ex); 
+        	//can't just throw and exit, so clearing the row and continuing below
         }
-        this.row.clear();
-        this.colIndex = 0;
+        finally {
+        	this.row.clear();
+            this.colIndex = 0;
+        }
     }
 
     @Override
     public final void close() throws TabularWriterException {
         try {
-            for(String tableName: this.getHandlerList().keySet()) {
-            	this.handlerList.get(tableName).close();
-            }
-            this.recordHandler.close();
+        	logger.log(Level.FINEST, "CLOSING recordHandler: {0}", this.recordHandler.getClass().getName());
+        	if(this.recordHandler != null)
+        		this.recordHandler.close();
+        	if(this.handlerList != null && this.handlerList.size() > 0) {
+        		logger.log(Level.FINEST, "Dealing with handlers in list: {0}", this.handlerList.size());
+        		for(String tableName: this.getHandlerList().keySet()) {
+                	this.handlerList.get(tableName).close();
+                }
+        	}
         } catch (SQLException ex) {
             throw new TabularWriterException(ex);
         }

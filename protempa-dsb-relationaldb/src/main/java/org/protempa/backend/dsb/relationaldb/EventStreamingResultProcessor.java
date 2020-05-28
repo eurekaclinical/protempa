@@ -114,23 +114,34 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
             UniqueId uniqueId = generateUniqueId(entitySpec.getName(), uniqueIds);
 
             String propId = null;
-            if (!isCasePresent()) {
+            //if (!isCasePresent()) {
                 if (codeSpec == null) {
                     assert propIds.length == 1 :
                             "Don't know which proposition id to assign to";
-                    propId = propIds[0];
+                    //propId = propIds[0];
+                    propId = entitySpec.getPropositionIds()[0];
+                    logger.log(Level.FINEST,
+                            "Event: Is Case NOT Present, got propId {0} NULL codeSpec", new Object[] {propId});
                 } else {
                     String code = resultSet.getString(i++);
                     propId = sqlCodeToPropositionId(codeSpec, code);
+                    logger.log(Level.FINEST,
+                            "Event: Is Case NOT Present, got propId {0} NOT NULL codeSpec", new Object[] {propId});
                     if (propId == null) {
                         this.getReferenceIterator().addUniqueIds(kId, null);
                         return;
                     }
                 }
-            } else {
-                i++;
-            }
-
+            //} 
+//            else {
+//                i++;
+//            }
+//            logger.log(
+//                    Level.INFO,
+//                    "Going to parse timestamp at ResultSet Pos: {0} with columnType: {1}",
+//                    new Object[] {i, columnTypes[i - 1]});
+            logger.log(Level.FINEST,
+                    "Event: Dealing with start and finish times, at position: {0} ", new Object[] {i});
             ColumnSpec finishTimeSpec = entitySpec.getFinishTimeSpec();
             Granularity gran = entitySpec.getGranularity();
             Interval interval = null;
@@ -142,8 +153,8 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
                 } catch (SQLException e) {
                     logger.log(
                             Level.WARNING,
-                            "Could not parse timestamp. Leaving the start time/timestamp unset.",
-                            e);
+                            "Could not parse finish timestamp for val {0} at pos {1}. Leaving the start time/timestamp unset.",
+                            new Object[] {resultSet.getObject(i).toString(), i});
                 }
                 interval = intervalFactory.getInstance(d, gran);
             } else {
@@ -184,17 +195,23 @@ class EventStreamingResultProcessor extends StreamingMainResultProcessor<Event> 
 
             i = extractPropertyValues(resultSet, i, propertyValues,
                     columnTypes);
+            logger.log(Level.FINEST,
+                    "Event: Extracting reference uniqueId pairs for keyId {0} and propId {1}", new Object[] {kId, propId});
             i = extractReferenceUniqueIdPairs(resultSet, uniqueId,
                     refUniqueIds, i);
 
-            if (isCasePresent()) {
-                propId = resultSet.getString(i++);
-            }
+//            if (isCasePresent()) { //not required as this case is covered through changes above
+//            	propId = resultSet.getString(i++);                 
+//            }
             
             if (!queryPropIds.contains(propId)) {
+            	logger.log(Level.FINEST,
+                        "Event: propId {0} not in queryPropIds", new Object[] {propId});
                 this.getReferenceIterator().addUniqueIds(kId, null);
                 return;
             }
+            logger.log(Level.FINEST,
+                    "Event: Adding UniqueId for kId {0} and propId {1}", new Object[] {kId, propId});
             
             this.getReferenceIterator().addUniqueIds(kId, refUniqueIds);
 

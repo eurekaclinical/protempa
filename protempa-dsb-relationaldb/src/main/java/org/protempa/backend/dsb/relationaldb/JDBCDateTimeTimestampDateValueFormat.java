@@ -50,7 +50,12 @@ public class JDBCDateTimeTimestampDateValueFormat implements JDBCValueFormat {
                  * types. For the latter, we'll let the JDBC driver try to 
                  * parse a date.
                  */
-                date = resultSet.getTimestamp(columnIndex);
+            	try {
+                    date = resultSet.getTimestamp(columnIndex);
+            	}
+            	catch (Exception ne){
+            		return null;
+            	}
         }
         if (date != null) {
             return DateValue.getInstance(date);
