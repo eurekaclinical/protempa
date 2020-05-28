@@ -16,27 +16,23 @@ This project includes:
   Apache Commons CLI under Apache License, Version 2.0
   Apache Commons Codec under Apache License, Version 2.0
   Apache Commons Collections under Apache License, Version 2.0
-  Apache Commons DBCP under Apache License, Version 2.0
-  Apache Commons IO under Apache License, Version 2.0
+  Apache Commons DBCP under The Apache Software License, Version 2.0
   Apache Commons Lang under Apache License, Version 2.0
-  Apache Commons Logging under The Apache Software License, Version 2.0
-  Apache Commons Pool under Apache License, Version 2.0
+  Apache Commons Pool under The Apache Software License, Version 2.0
   Apache POI under The Apache Software License, Version 2.0
+  Commons IO under The Apache Software License, Version 2.0
+  Commons Logging under The Apache Software License, Version 2.0
   Core Protege under Mozilla Public License
   Datastore under Apache License, Version 2.0
   Drools :: Rete-OO Core under The Apache Software License, Version 2.0
   H2 Database Engine under MPL 2.0 or EPL 1.0
   Hamcrest Core under New BSD License
   ini4j under Apache 2
-  JavaBeans Activation Framework API jar under CDDL/GPLv2+CE
   JavaUtil under Apache License, Version 2.0
-  jaxb-api under CDDL 1.1 or GPL2 w/ CPE
   JGoodies Common under The BSD License
   JGoodies Looks under The BSD License
   JUnit under Eclipse Public License 1.0
   mvel under The Apache Software License, Version 2.0
-  Old JAXB Core under CDDL+GPL License
-  Old JAXB Runtime under CDDL+GPL License
   opencsv under Apache 2
   Oracle NoSQL Database Server under Apache 2
   Protempa under Apache License, Version 2.0
@@ -50,3 +46,4 @@ This project includes:
   Protempa Test Suite under Apache License, Version 2.0
   StAX API under The Apache Software License, Version 2.0
   XmlBeans under The Apache Software License, Version 2.0
+
