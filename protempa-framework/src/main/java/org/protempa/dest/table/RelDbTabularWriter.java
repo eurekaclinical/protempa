@@ -28,6 +28,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.arp.javautil.sql.ConnectionSpec;
+import org.protempa.dest.table.AbstractTabularWriter;
+import org.protempa.dest.table.TabularWriterException;
 import org.protempa.proposition.Parameter;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.TemporalProposition;
@@ -37,6 +39,8 @@ import org.protempa.proposition.value.InequalityNumberValue;
 import org.protempa.proposition.value.NominalValue;
 import org.protempa.proposition.value.NumberValue;
 import org.protempa.proposition.value.Value;
+
+import java.util.logging.Logger;
 
 /**
  *
@@ -51,12 +55,13 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
     private ConnectionSpec connectionSpec;
     private Map<String, RecordHandler<ArrayList<?>>> handlerList;
     private Map<String,String> statements;
+    private Map<String,Integer> colCounts;
     private String tableName;
     
 	
 	
 
-	Logger logger = Util.logger();
+	Logger logger = Logger.getLogger(RelDbTabularWriter.class.getName());
     
     public RelDbTabularWriter(ConnectionSpec inConnectionSpec, String inStatement) throws SQLException {
     	this.connectionSpec = inConnectionSpec;
@@ -79,6 +84,20 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         
     }
     
+    public RelDbTabularWriter(ConnectionSpec inConnectionSpec, Map<String,String> inStatements, Map<String,Integer> colCounts) throws SQLException {
+    	this.connectionSpec = inConnectionSpec;
+    	this.statements = inStatements;
+    	this.colCounts = colCounts;
+    	this.handlerList = new HashMap<String, RecordHandler<ArrayList<?>>>();
+    	for(String tableName : inStatements.keySet()) {
+    		logger.info("Creating Handler: " + tableName + "; SQL: " + inStatements.get(tableName));
+    		this.handlerList.put(tableName, new ListRecordHandler(inConnectionSpec, inStatements.get(tableName), colCounts.get(tableName)));
+    	}
+        //this.recordHandler = new ListRecordHandler(inConnectionSpec, inStatement);
+        this.row = new ArrayList<>();
+        
+    }
+    
     public RelDbTabularWriter(ConnectionSpec inConnectionSpec) throws SQLException {
         this.recordHandler = new ListRecordHandler(inConnectionSpec, this.inStatement);
         this.row = new ArrayList<>();
@@ -93,6 +112,22 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
 		this.inStatement = inStatement;
 		this.recordHandler.close();
 		this.recordHandler = new ListRecordHandler(connectionSpec, inStatement);
+	}
+	
+	public Map<String, String> getStatements() {
+		return statements;
+	}
+
+	public void setStatements(Map<String, String> statements) {
+		this.statements = statements;
+	}
+
+	public Map<String, Integer> getColCounts() {
+		return colCounts;
+	}
+
+	public void setColCounts(Map<String, Integer> colCounts) {
+		this.colCounts = colCounts;
 	}
 	
 	public ConnectionSpec getConnectionSpec() {
@@ -285,17 +320,18 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
     	}    	
         try {
         	if(this.recordHandler != null) {
+        		logger.info("Have RECORDHANDLER for table:  " + tableName);        		
         		this.recordHandler.insert(this.row);
         	}
         	else {
-        		logger.finest("Getting RECORDHANDLER for table:  " + tableName);
+        		logger.info("Getting RECORDHANDLER for table:  " + tableName);
         		this.recordHandler = this.handlerList.get(tableName);
         		if(this.recordHandler != null) {
             		this.recordHandler.insert(this.row);
             	}
         		else {
-        			logger.finest("NULL RECORDHANDLER for table:" + tableName + "; Getting from statements map " + (statements == null? 0:statements.size()));
-        			this.recordHandler = new ListRecordHandler(this.connectionSpec, this.statements.get(this.tableName));
+        			logger.info("NULL RECORDHANDLER for table:" + tableName + "; Getting from statements map " + (statements == null? 0:statements.size()));
+        			this.recordHandler = new ListRecordHandler(this.connectionSpec, this.statements.get(this.tableName), this.colCounts.get(this.tableName));
         			if(this.handlerList.containsKey(tableName))
         				this.handlerList.replace(tableName, this.recordHandler);
         			else 
@@ -309,7 +345,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         	for(Object o: this.row) {
             	sb.append(o.toString() + ":");
         	}
-        	logger.finest("Row error for table:" + tableName + "::" + sb.toString());
+        	logger.info("Row error for table:" + tableName + "::" + sb.toString());
             //throw new TabularWriterException(ex); 
         	//can't just throw and exit, so clearing the row and continuing below
         }
@@ -341,7 +377,7 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
     }
     
     private void writeString(String inValue) throws TabularWriterException {
-        this.row.add(inValue);
+    	this.row.add(inValue == null ? "NULL":inValue);
         incr();
     }
 
