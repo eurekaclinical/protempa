@@ -111,11 +111,13 @@ public abstract class RelationalDbDataSourceBackend
     private String defaultKeyIdTable;
     private String defaultKeyIdColumn;
     private String defaultKeyIdJoinKey;
+    private String defaultKeyLoaderFromDateYYYYMMDD;
     private String keyLoaderKeyIdSchema;
     private String keyLoaderKeyIdTable;
     private String keyLoaderKeyIdColumn;
     private String keyLoaderKeyIdJoinKey;
     private String keyFile;
+    private String keyLoaderFromDateYYYYMMDD;
     private FromBackendRelationalDatabaseSpecBuilder relationalDatabaseSpecBuilder;
     private MappingsFactory mappingsFactory;
     private Integer queryThreadCount;
@@ -192,6 +194,15 @@ public abstract class RelationalDbDataSourceBackend
     public final String getDefaultKeyIdJoinKey() {
         return defaultKeyIdJoinKey;
     }
+    
+    @BackendProperty
+    public final void setDefaultKeyLoaderFromDateYYYYMMDD(String defaultKeyLoaderFromDateYYYYMMDD) {
+        this.defaultKeyLoaderFromDateYYYYMMDD = defaultKeyLoaderFromDateYYYYMMDD;
+    }
+
+    public final String getDefaultKeyLoaderFromDateYYYYMMDD() {
+        return defaultKeyLoaderFromDateYYYYMMDD;
+    }
 
     public Integer getQueryThreadCount() {
         return queryThreadCount;
@@ -214,6 +225,20 @@ public abstract class RelationalDbDataSourceBackend
     public void setKeyLoaderKeyIdTable(String keyLoaderKeyIdTable) {
         this.keyLoaderKeyIdTable = keyLoaderKeyIdTable;
     }
+    
+    public String getKeyLoaderFromDateYYYYMMDD() {
+        if (this.keyLoaderFromDateYYYYMMDD != null) {
+            return this.keyLoaderFromDateYYYYMMDD;
+        } else {
+            return this.defaultKeyLoaderFromDateYYYYMMDD;
+        }
+    }
+
+    @BackendProperty
+    public void setKeyLoaderFromDateYYYYMMDD(String keyLoaderFromDateYYYYMMDD) {
+        this.keyLoaderFromDateYYYYMMDD = keyLoaderFromDateYYYYMMDD;
+    }
+    
 
     public String getKeyLoaderKeyIdColumn() {
         if (this.keyLoaderKeyIdColumn != null) {
@@ -708,6 +733,7 @@ public abstract class RelationalDbDataSourceBackend
         private String keyIdTable;
         private String keyIdColumn;
         private String keyIdJoinKey;
+        private String keyLoaderFromDateYYYYMMDD;
 
         @Override
         public EntitySpec[] getPrimitiveParameterSpecs() {
@@ -744,11 +770,13 @@ public abstract class RelationalDbDataSourceBackend
                 this.keyIdTable = getDefaultKeyIdTable();
                 this.keyIdColumn = getDefaultKeyIdColumn();
                 this.keyIdJoinKey = getDefaultKeyIdJoinKey();
+                this.keyLoaderFromDateYYYYMMDD = getDefaultKeyLoaderFromDateYYYYMMDD();
             } else {
                 this.keyIdSchema = getKeyLoaderKeyIdSchema();
                 this.keyIdTable = getKeyLoaderKeyIdTable();
                 this.keyIdColumn = getKeyLoaderKeyIdColumn();
                 this.keyIdJoinKey = getKeyLoaderKeyIdJoinKey();
+                this.keyLoaderFromDateYYYYMMDD = getKeyLoaderFromDateYYYYMMDD();
             }
 
             return super.build();

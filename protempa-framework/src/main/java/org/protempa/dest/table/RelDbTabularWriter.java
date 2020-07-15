@@ -320,18 +320,20 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
     	}    	
         try {
         	if(this.recordHandler != null) {
-        		logger.info("Have RECORDHANDLER for table:  " + tableName);        		
+        		logger.finest("Have RECORDHANDLER for table:  " + tableName);        		
         		this.recordHandler.insert(this.row);
         	}
         	else {
-        		logger.info("Getting RECORDHANDLER for table:  " + tableName);
+        		logger.finest("Getting RECORDHANDLER for table:  " + tableName);
         		this.recordHandler = this.handlerList.get(tableName);
         		if(this.recordHandler != null) {
             		this.recordHandler.insert(this.row);
             	}
         		else {
-        			logger.info("NULL RECORDHANDLER for table:" + tableName + "; Getting from statements map " + (statements == null? 0:statements.size()));
-        			this.recordHandler = new ListRecordHandler(this.connectionSpec, this.statements.get(this.tableName), this.colCounts.get(this.tableName));
+        			logger.finest("NULL RECORDHANDLER for table:" + tableName + "; Getting from statements map " + (statements == null? 0:statements.size()));
+        			this.inStatement = this.statements.get(this.tableName);
+                	logger.finest("Got Statement:" + this.inStatement);
+        			this.recordHandler = new ListRecordHandler(this.connectionSpec, this.inStatement);
         			if(this.handlerList.containsKey(tableName))
         				this.handlerList.replace(tableName, this.recordHandler);
         			else 
@@ -339,16 +341,23 @@ public class RelDbTabularWriter extends AbstractTabularWriter {
         			this.recordHandler.insert(this.row);
         		}
         	}           
-        } catch (SQLException | NullPointerException ex) {
-        	logger.info("Statement:" + this.inStatement);
+        } catch (SQLException e) {
         	StringBuilder sb = new StringBuilder();
         	for(Object o: this.row) {
             	sb.append(o.toString() + ":");
         	}
-        	logger.info("Row error for table:" + tableName + "::" + sb.toString());
+        	logger.warning("SQLException table:" + tableName + "::" + sb.toString());
             //throw new TabularWriterException(ex); 
         	//can't just throw and exit, so clearing the row and continuing below
-        }
+        } catch ( NullPointerException ex) {
+        	StringBuilder sb = new StringBuilder();
+        	for(Object o: this.row) {
+            	sb.append(o.toString() + ":");
+        	}
+        	logger.warning("NullPointerException for table:" + tableName + "::" + sb.toString());
+            //throw new TabularWriterException(ex); 
+        	//can't just throw and exit, so clearing the row and continuing below
+        } 
         finally {
         	this.row.clear();
             this.colIndex = 0;
