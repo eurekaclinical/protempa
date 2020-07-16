@@ -66,12 +66,12 @@ class ListRecordHandler extends RecordHandler<ArrayList<?>> {
     @Override
     protected void setParameters(PreparedStatement statement, ArrayList<?> record) throws SQLException {
       int recSize = 0;
-      logger.log(Level.INFO, "Calculating Record Size");
+      logger.log(Level.FINEST, "Calculating Record Size");
       	if(record instanceof List) {
       		recSize = ((List) record).size();
       	}
-      	logger.log(Level.INFO, "Record Size:{0}", recSize);
-      	logger.log(Level.INFO, "Number of Parameters:{0}", statement.getParameterMetaData().getParameterCount());
+      	logger.log(Level.FINEST, "Record Size:{0}", recSize);
+      	logger.log(Level.FINEST, "Number of Parameters:{0}", statement.getParameterMetaData().getParameterCount());
       	if (statement.getParameterMetaData().getParameterCount() == recSize) {
 	    	for (int i = 0, n = record.size(); i < n; i++) {
 	            int pos = i+1;
