@@ -1,5 +1,15 @@
 package org.protempa.dest.table;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.arp.javautil.sql.ConnectionSpec;
+
 /*
  * #%L
  * AIW i2b2 ETL
@@ -19,15 +29,6 @@ package org.protempa.dest.table;
  * limitations under the License.
  * #L%
  */
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.arp.javautil.sql.ConnectionSpec;
 
 /**
  * Inserts a record into a database using prepared statements in batch mode. The
@@ -54,6 +55,8 @@ public abstract class RecordHandler<E> implements AutoCloseable {
     private final List<E> records;
     private final int maxTries;
     private ConnectionSpec connSpec;
+    private Integer colCount;
+    private boolean isParametersSet;
 
     public RecordHandler(Connection connection, String statement) throws SQLException {
         this(connection, statement, true);
@@ -76,7 +79,7 @@ public abstract class RecordHandler<E> implements AutoCloseable {
         this.commitCounter = 0;
         init();
     }
-
+    
     public RecordHandler(ConnectionSpec connSpec, String statement) throws SQLException {
         if (connSpec == null) {
             throw new IllegalArgumentException("connection cannot be null");
@@ -94,21 +97,46 @@ public abstract class RecordHandler<E> implements AutoCloseable {
         this.commitCounter = 0;
         init();
     }
-
+    
+    public RecordHandler(ConnectionSpec connSpec, String statement, Integer colCount) throws SQLException {
+        if (connSpec == null) {
+            throw new IllegalArgumentException("connection cannot be null");
+        }
+        if (statement == null) {
+            throw new IllegalArgumentException("statement cannot be null");
+        }
+        this.connSpec = connSpec;
+        this.statement = statement;
+        this.colCount = colCount;
+        this.importTimestamp = new Timestamp(System.currentTimeMillis());
+        this.commit = true;
+        this.records = new ArrayList<>();
+        this.maxTries = 3;
+        this.counter = 0;
+        this.commitCounter = 0;
+        init();
+    }
     public void insert(E record) throws SQLException {
         if (record != null) {
+        	setParametersSet(true);
             try {
                 this.records.add(record);
-                this.counter++;
-                this.commitCounter++;
                 setParameters(this.ps, record);
-                this.ps.addBatch();
-                if (this.counter >= this.batchSize) {
-                    executeBatch();
+                if(isParametersSet()) {
+                	this.counter++;
+                    this.commitCounter++;
+                	this.ps.addBatch();
+                    if (this.counter >= this.batchSize) {
+                        executeBatch();
+                    }
+                    if (this.commitCounter >= this.commitSize) {
+                        commit();
+                    }
                 }
-                if (this.commitCounter >= this.commitSize) {
-                    commit();
+                else {
+                	this.records.remove(record);
                 }
+                
             } catch (SQLException e) {
                 rollback(e);
                 if (this.ps != null) {
@@ -125,11 +153,67 @@ public abstract class RecordHandler<E> implements AutoCloseable {
         }
     }
 
+//    public void insert(E record) throws SQLException {
+//        int recSize = 0;
+//        LOGGER.log(Level.INFO, "Calculating Record Size");
+//    	if (record != null) {
+//    		LOGGER.log(Level.INFO, "Record Not Null");
+//        	if(record instanceof List) {
+//        		recSize = ((List) record).size();
+//        	}
+//        	LOGGER.log(Level.INFO, "Record Size:{0}", recSize);
+//        	LOGGER.log(Level.INFO, "Number of Parameters:{0}", this.ps.getParameterMetaData().getParameterCount());
+//            try {
+//                if (this.ps.getParameterMetaData().getParameterCount() == recSize) {
+//                	LOGGER.log(Level.INFO, "Enough Parameters Supplied");
+//                	this.records.add(record);
+//                    this.counter++;
+//                    this.commitCounter++;
+//            		setParameters(this.ps, record);
+//            		this.ps.addBatch();
+//            		if (this.counter >= this.batchSize) {
+//            			executeBatch();
+//            		}
+//            		if (this.commitCounter >= this.commitSize) {
+//            			commit();
+//            		}
+//                }
+//                else {
+//                	LOGGER.log(Level.INFO, "Not Enough Parameters Supplied, ignoring record");
+//                }
+//            } catch (SQLException e) {
+//                rollback(e);
+//                if (this.ps != null) {
+//                    try {
+//                        this.ps.close();
+//                    } catch (SQLException sqle) {
+//                        e.addSuppressed(sqle);
+//                    }
+//                }
+//                if (!this.records.isEmpty() && this.connSpec != null) {
+//                	//Dont retry
+//                    //retry(e, false);
+//                	this.records.clear();
+//                	LOGGER.log(Level.FINE, "Not Inserting this record");
+//                }
+//            }
+//        }
+//    }
+
     protected abstract void setParameters(PreparedStatement statement, E record) throws SQLException;
 
-    protected Connection getConnection() {
+    public boolean isParametersSet() {
+		return isParametersSet;
+	}
+
+	public void setParametersSet(boolean isParametersSet) {
+		this.isParametersSet = isParametersSet;
+	}
+
+	protected Connection getConnection() {
         return this.cn;
     }
+
 
     @Override
     public void close() throws SQLException {
@@ -177,10 +261,54 @@ public abstract class RecordHandler<E> implements AutoCloseable {
             throw exceptionThrown;
         }
     }
-
-    protected Timestamp importTimestamp() {
-        return this.importTimestamp;
-    }
+//    @Override
+//    public void close() throws SQLException {
+//        SQLException exceptionThrown = null;
+//        if (this.ps != null) {
+//            try {
+//                try {
+//                    executeBatch();
+//                    commit();
+//                } catch (SQLException ex) {
+//                    rollback(ex);
+//                    exceptionThrown = ex;
+//                    if (!this.records.isEmpty() && this.connSpec != null) {
+////                        retry(exceptionThrown, true);
+//                        this.records.clear();
+//                    	LOGGER.log(Level.FINE, "Not Inserting this record");
+//                    }
+//                }
+//                this.ps.close();
+//                this.ps = null;
+//            } finally {
+//                if (this.ps != null) {
+//                    try {
+//                        this.ps.close();
+//                    } catch (SQLException ignore) {
+//                        if (exceptionThrown != null) {
+//                            exceptionThrown.addSuppressed(ignore);
+//                        } else {
+//                            exceptionThrown = ignore;
+//                        }
+//                    }
+//                }
+//                if (this.connSpec != null && this.cn != null) {
+//                    try {
+//                        this.cn.close();
+//                    } catch (SQLException ignore) {
+//                        if (exceptionThrown != null) {
+//                            exceptionThrown.addSuppressed(ignore);
+//                        } else {
+//                            exceptionThrown = ignore;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        if (exceptionThrown != null) {
+//            throw exceptionThrown;
+//        }
+//    }
 
     private void init() throws SQLException {
         if (this.connSpec != null) {
@@ -190,6 +318,19 @@ public abstract class RecordHandler<E> implements AutoCloseable {
         this.counter = 0;
         this.commitCounter = 0;
     }
+
+//    private void init() throws SQLException {
+//        if (this.connSpec != null) {
+//        	if (this.cn == null || this.cn.isClosed()) {
+//        		this.cn = this.connSpec.getOrCreate();
+//        		//this.connections.add(this.cn);
+//        	}
+//        }
+//        LOGGER.log(Level.INFO, "Preparing Statement for SQL:{0}", this.statement);
+//        this.ps = this.cn.prepareStatement(this.statement);
+//        this.counter = 0;
+//        this.commitCounter = 0;
+//    }
 
     private void executeBatch() throws SQLException {
         if (counter > 0) {
@@ -230,7 +371,6 @@ public abstract class RecordHandler<E> implements AutoCloseable {
             }
         }
     }
-
     private void reconnectAndReplay(boolean inClose) throws SQLException {
         init();
         for (E record : this.records) {
@@ -259,6 +399,56 @@ public abstract class RecordHandler<E> implements AutoCloseable {
         }
     }
 
+
+//    private void reconnectAndReplay(boolean inClose) throws SQLException {
+//        init();
+//        Throwable throwable = new Throwable();
+//        int recSize = 0;
+//        for (E record : this.records) {
+//        	if(record instanceof List) {
+//        		recSize = ((List) record).size();
+//        	}
+//        	if (this.ps.getParameterMetaData().getParameterCount() == recSize) {
+//        		setParameters(this.ps, record);
+//        		this.ps.addBatch();
+//        		this.counter++;
+//        		this.commitCounter++;
+//        	}
+//        	else {
+//        		this.records.remove(record);
+//        	}
+//        }
+////        if (!this.records.isEmpty()) {
+//            try {
+//                if (inClose) {
+//                    executeBatch();
+//                    commit();
+//                } else {
+//                    if (this.counter >= this.batchSize) {
+//                        executeBatch();
+//                    }
+//                    if (this.commitCounter >= this.commitSize) {
+//                        commit();
+//                    }
+//                }
+//            } catch (SQLException ex) {
+//            	throwable = ex;
+//                rollback(ex);
+//                throw(ex);
+//            } finally {
+//            	try {
+//            		LOGGER.log(Level.SEVERE, "Closing Connection After Failed Retry");
+//            		this.cn.close();
+//            	}
+//            	catch (SQLException ignore) {
+//            		throwable.addSuppressed(ignore);
+//            		throw (SQLException)throwable;
+//            	}
+//            }
+////        }
+//    }
+
+    
     private void rollback(Throwable throwable) {
         if (commit) {
             try {
@@ -268,4 +458,13 @@ public abstract class RecordHandler<E> implements AutoCloseable {
             }
         }
     }
+    
+
+
+    public Timestamp importTimestamp() {
+        return this.importTimestamp;
+    }
+
+
 }
+

@@ -24,10 +24,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.arp.javautil.sql.ConnectionSpec;
+import java.util.logging.Logger;
 
 /**
  *
@@ -35,8 +37,10 @@ import org.arp.javautil.sql.ConnectionSpec;
  */
 class ListRecordHandler extends RecordHandler<ArrayList<?>> {
 	
-	Logger logger = Util.logger();
+	Logger logger = Logger.getLogger(ListRecordHandler.class.getName());
 	private String inStatement = null;
+	private Integer colCount = null;
+	private boolean isParametersSet = true;
 
     ListRecordHandler(Connection connection, String statement) throws SQLException {
         super(connection, statement);
@@ -53,12 +57,30 @@ class ListRecordHandler extends RecordHandler<ArrayList<?>> {
         this.inStatement = statement;
     }
     
+    ListRecordHandler(ConnectionSpec connSpec, String statement, Integer colCount) throws SQLException {
+        super(connSpec, statement, colCount);
+        this.inStatement = statement;
+        this.colCount = colCount;
+    }
+    
     @Override
     protected void setParameters(PreparedStatement statement, ArrayList<?> record) throws SQLException {
-        for (int i = 0, n = record.size(); i < n; i++) {
-        	int pos = i+1;
-        	statement.setString(pos, (record.get(i) == null? "NULL" : record.get(i).toString()));
-        }
+      int recSize = 0;
+      logger.log(Level.FINEST, "Calculating Record Size");
+      	if(record instanceof List) {
+      		recSize = ((List) record).size();
+      	}
+      	logger.log(Level.FINEST, "Record Size:{0}", recSize);
+      	logger.log(Level.FINEST, "Number of Parameters:{0}", statement.getParameterMetaData().getParameterCount());
+      	if (statement.getParameterMetaData().getParameterCount() == recSize) {
+	    	for (int i = 0, n = record.size(); i < n; i++) {
+	            int pos = i+1;
+	            statement.setString(pos, (record.get(i) == null? "NULL" : record.get(i).toString()));
+	        }
+	    	setParametersSet(true);
+      	}
+      	else
+      		setParametersSet(false);
     }
     
     public String getInStatement() {
